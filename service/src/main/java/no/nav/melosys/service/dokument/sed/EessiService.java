@@ -47,20 +47,17 @@ public class EessiService {
     private final EessiConsumer eessiConsumer;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final SedGrunnlagMapper sedGrunnlagMapper;
 
     public EessiService(SedDataBygger sedDataBygger,
                         SedDataGrunnlagFactory dataGrunnlagFactory,
                         EessiConsumer eessiConsumer,
                         BehandlingService behandlingService,
-                        BehandlingsresultatService behandlingsresultatService,
-                        SedGrunnlagMapper sedGrunnlagMapper) {
+                        BehandlingsresultatService behandlingsresultatService) {
         this.sedDataBygger = sedDataBygger;
         this.dataGrunnlagFactory = dataGrunnlagFactory;
         this.eessiConsumer = eessiConsumer;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
-        this.sedGrunnlagMapper = sedGrunnlagMapper;
     }
 
     public void opprettOgSendSed(long behandlingID, List<String> mottakerInstitusjoner, BucType bucType, Vedlegg vedlegg, String ytterligereInformasjon) throws MelosysException {
@@ -103,7 +100,7 @@ public class EessiService {
 
     public boolean landErEessiReady(String bucType, Collection<Landkoder> landkoder) throws MelosysException {
         for (Landkoder landkode : landkoder) {
-            if (!landErEessiReady(bucType, landkode.getKode())){
+            if (!landErEessiReady(bucType, landkode.getKode())) {
                 return false;
             }
         }
@@ -210,7 +207,7 @@ public class EessiService {
         MedlemsperiodeType medlemsperiodeType;
         if (sedType == SedType.A001) {
             medlemsperiodeType = MedlemsperiodeType.ANMODNINGSPERIODE;
-        } else if (sedType == SedType.A003 && behandlingsresultat.finnValidertUtpekingsperiode().isPresent()){
+        } else if (sedType == SedType.A003 && behandlingsresultat.finnValidertUtpekingsperiode().isPresent()) {
             medlemsperiodeType = MedlemsperiodeType.UTPEKINGSPERIODE;
         } else {
             medlemsperiodeType = MedlemsperiodeType.LOVVALGSPERIODE;
@@ -291,6 +288,6 @@ public class EessiService {
     }
 
     public SedGrunnlag hentSedGrunnlag(String rinaSaksnummer, String rinaDokumentID) throws MelosysException {
-        return sedGrunnlagMapper.tilSedGrunnlag(eessiConsumer.hentSedGrunnlag(rinaSaksnummer, rinaDokumentID));
+        return SedGrunnlagMapper.tilSedGrunnlag(eessiConsumer.hentSedGrunnlag(rinaSaksnummer, rinaDokumentID));
     }
 }
