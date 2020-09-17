@@ -23,13 +23,11 @@ import static org.springframework.ldap.query.LdapQueryBuilder.query;
 
 @Component
 public class LdapService {
-    private static final String MELOSYS_BRUKERNAVN = "MELOSYS";
-
     private static final Logger log = LoggerFactory.getLogger(LdapService.class);
 
     private final LdapTemplate ldapTemplate;
 
-    private static final Pattern IDENT_PATTERN = Pattern.compile("^\\w\\d{6}$");
+    private static final Pattern IDENT_PATTERN = Pattern.compile("^[a-åA-Å]\\d{6}$");
 
     @Autowired
     public LdapService(LdapTemplate ldapTemplate) {
@@ -37,18 +35,18 @@ public class LdapService {
     }
 
     public Optional<LdapBruker> finnBrukerinformasjon(String ident) throws TekniskException {
-        return validerIdent(ident).or(() ->
-            ldapTemplate.search(query().where("cn").is(ident), new LdapBrukerMapper()).stream().findFirst());
-    }
-
-    private Optional<LdapBruker> validerIdent(String ident) throws TekniskException {
         if (ident == null || ident.isEmpty()) {
             throw new TekniskException("Kan ikke slå opp brukernavn uten å ha ident");
         }
 
+        return defaultHvisUgyldig(ident, ident).or(() ->
+            ldapTemplate.search(query().where("cn").is(ident), new LdapBrukerMapper()).stream().findFirst());
+    }
+
+    private Optional<LdapBruker> defaultHvisUgyldig(String ident, String defaultIdent) {
         Matcher matcher = IDENT_PATTERN.matcher(ident);
         if (!matcher.matches()) {
-            return Optional.of(new LdapBruker(MELOSYS_BRUKERNAVN, Collections.emptyList()));
+            return Optional.of(new LdapBruker(defaultIdent, Collections.emptyList()));
         }
 
         return Optional.empty();

@@ -86,7 +86,7 @@ class LdapServiceTest {
         assertThat(bruker)
             .isPresent().get()
             .extracting(LdapBruker::getDisplayName)
-            .isEqualTo("MELOSYS");
+            .isEqualTo("Ugyldig ident");
 
         verify(ldapTemplate, never()).search(any(LdapQuery.class), any(AttributesMapper.class));
     }
