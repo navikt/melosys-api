@@ -1,5 +1,9 @@
 package no.nav.melosys.service.ldap;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 import no.nav.melosys.domain.Saksbehandler;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -8,12 +12,9 @@ import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
 @Service
 public class SaksbehandlerService {
+    private static final String MELOSYS_BRUKERNAVN = "MELOSYS";
 
     private final LdapService ldapService;
     private final String melosysAdGruppe;
@@ -48,6 +49,10 @@ public class SaksbehandlerService {
     }
 
     public Optional<String> finnNavnForIdent(String ident) throws TekniskException {
+        if (MELOSYS_BRUKERNAVN.equalsIgnoreCase(ident)) {
+            return Optional.of(MELOSYS_BRUKERNAVN);
+        }
+
         if (identTilNavnCache.containsKey(ident)) {
             return Optional.of(identTilNavnCache.get(ident));
         }
