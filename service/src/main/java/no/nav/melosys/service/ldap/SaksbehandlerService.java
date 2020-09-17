@@ -14,8 +14,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class SaksbehandlerService {
-    private static final String MELOSYS_BRUKERNAVN = "MELOSYS";
-
     private final LdapService ldapService;
     private final String melosysAdGruppe;
 
@@ -49,10 +47,6 @@ public class SaksbehandlerService {
     }
 
     public Optional<String> finnNavnForIdent(String ident) throws TekniskException {
-        if (MELOSYS_BRUKERNAVN.equalsIgnoreCase(ident)) {
-            return Optional.of(MELOSYS_BRUKERNAVN);
-        }
-
         if (identTilNavnCache.containsKey(ident)) {
             return Optional.of(identTilNavnCache.get(ident));
         }

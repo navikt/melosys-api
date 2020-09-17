@@ -23,12 +23,13 @@ import static org.springframework.ldap.query.LdapQueryBuilder.query;
 
 @Component
 public class LdapService {
+    private static final String MELOSYS_BRUKERNAVN = "MELOSYS";
 
     private static final Logger log = LoggerFactory.getLogger(LdapService.class);
 
     private final LdapTemplate ldapTemplate;
 
-    private static final Pattern IDENT_PATTERN = Pattern.compile("^\\p{LD}+$");
+    private static final Pattern IDENT_PATTERN = Pattern.compile("^\\w\\d{6}$");
 
     @Autowired
     public LdapService(LdapTemplate ldapTemplate) {
@@ -36,18 +37,21 @@ public class LdapService {
     }
 
     public Optional<LdapBruker> finnBrukerinformasjon(String ident) throws TekniskException {
-        validerIdent(ident);
-        return ldapTemplate.search(query().where("cn").is(ident), new LdapBrukerMapper()).stream().findFirst();
+        return validerIdent(ident).or(() ->
+            ldapTemplate.search(query().where("cn").is(ident), new LdapBrukerMapper()).stream().findFirst());
     }
 
-    private void validerIdent(String ident) throws TekniskException {
+    private Optional<LdapBruker> validerIdent(String ident) throws TekniskException {
         if (ident == null || ident.isEmpty()) {
             throw new TekniskException("Kan ikke slå opp brukernavn uten å ha ident");
         }
+
         Matcher matcher = IDENT_PATTERN.matcher(ident);
         if (!matcher.matches()) {
-            throw new TekniskException("Mulig LDAP-injection forsøk. Søkte med ugyldig ident '" + ident + "'");
+            return Optional.of(new LdapBruker(MELOSYS_BRUKERNAVN, Collections.emptyList()));
         }
+
+        return Optional.empty();
     }
 
     static class LdapBrukerMapper implements AttributesMapper<LdapBruker> {
@@ -81,7 +85,7 @@ public class LdapService {
         }
 
         private String filterDNtoCNvalue(String value) {
-            if(value.toLowerCase(Locale.ROOT).contains("cn=")) {
+            if (value.toLowerCase(Locale.ROOT).contains("cn=")) {
                 try {
                     LdapName ldapname = new LdapName(value); //NOSONAR, only used locally
                     for (Rdn rdn : ldapname.getRdns()) {

@@ -18,7 +18,7 @@ import org.springframework.ldap.query.LdapQuery;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class LdapServiceTest {
@@ -49,13 +49,6 @@ class LdapServiceTest {
     }
 
     @Test
-    void hentBrukerinformasjon_ugyldigIdent_kasterException() throws TekniskException {
-        assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(() -> ldapService.finnBrukerinformasjon("cn=killLDAP"))
-            .withMessageContaining("Mulig LDAP-injection forsøk.");
-    }
-
-    @Test
     void mapFromContext_inneholderBrukerMedGrupper_verifiserNavnOgBrukerBlirParset() throws Exception {
         final String navnBruker = "Lars Saksbehandler";
         final List<String> grupper = List.of("CN=myGroup,OU=ApplGroups", "CN=ourGroup,OU=ApplGroups");
@@ -72,6 +65,30 @@ class LdapServiceTest {
         LdapBruker ldapBruker = mapper.mapFromAttributes(attributes);
         assertThat(ldapBruker.getDisplayName()).isEqualTo(navnBruker);
         assertThat(ldapBruker.getGroups()).isEqualTo(List.of("myGroup", "ourGroup"));
+    }
+
+    @Test
+    void finnNavnForIdent_medMelosysSomBruker_returnererMelosysBrukernavn() throws TekniskException {
+        Optional<LdapBruker> bruker = ldapService.finnBrukerinformasjon("MELOSYS");
+
+        assertThat(bruker)
+            .isPresent().get()
+            .extracting(LdapBruker::getDisplayName)
+            .isEqualTo("MELOSYS");
+
+        verify(ldapTemplate, never()).search(any(LdapQuery.class), any(AttributesMapper.class));
+    }
+
+    @Test
+    void finnNavnForIdent_medUgyldigIdent_returnererMelosysBrukernavn() throws TekniskException {
+        Optional<LdapBruker> bruker = ldapService.finnBrukerinformasjon("Ugyldig ident");
+
+        assertThat(bruker)
+            .isPresent().get()
+            .extracting(LdapBruker::getDisplayName)
+            .isEqualTo("MELOSYS");
+
+        verify(ldapTemplate, never()).search(any(LdapQuery.class), any(AttributesMapper.class));
     }
 }
 

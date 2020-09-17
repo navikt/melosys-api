@@ -60,15 +60,4 @@ class SaksbehandlerServiceTest {
 
         verify(brukeroppslag, times(1)).finnBrukerinformasjon(eq(ident));
     }
-
-    @Test
-    void finnNavnForIdent_medMelosysSomBruker_returnererMelosysBrukernavn() throws TekniskException {
-        Optional<String> bruker = saksbehandlerService.finnNavnForIdent("MELOSYS");
-
-        assertThat(bruker)
-            .isPresent().get()
-            .isEqualTo("MELOSYS");
-
-        verify(brukeroppslag, never()).finnBrukerinformasjon(anyString());
-    }
 }
