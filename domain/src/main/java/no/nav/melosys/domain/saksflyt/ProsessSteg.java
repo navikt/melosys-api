@@ -75,7 +75,6 @@ public enum ProsessSteg implements Kodeverk {
     VS_DISTRIBUER_JOURNALPOST("VS_DISTRIBUER_JOURNALPOST", "Distribuerer (sender) journalposten dersom den ble opprettet"),
 
     //Mottak av SED
-    SED_MOTTAK_OPPRETT_JFR_OPPG("SED_MOTTAK_OPPRETT_JFR_OPPG", "Oppretter journalføringsoppgave for SED som ikke skal behandles automatisk"),
     SED_MOTTAK_HENT_EESSI_MELDING("SED_MOTTAK_HENT_EESSI_MELDING", "Henter saksopplysninger fra mottatt SED"),
     SED_MOTTAK_RUTING("SED_MOTTAK_RUTING", "Bestemmer videre behandling for innkommende SED"),
     SED_MOTTAK_OPPRETT_NY_BEHANDLING("SED_MOTTAK_OPPRETT_NY_BEHANDLING", "Oppretter ny behandling for oppdatert SED"),
