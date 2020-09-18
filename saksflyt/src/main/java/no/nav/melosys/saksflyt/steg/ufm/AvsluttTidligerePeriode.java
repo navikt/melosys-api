@@ -37,6 +37,6 @@ public class AvsluttTidligerePeriode implements StegBehandler {
             medlPeriodeService.avsluttTidligerMedlPeriode(prosessinstans.getBehandling().getFagsak());
         }
 
-        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_OPPRETT_SEDDOKUMENT);
+        prosessinstans.setSteg(ProsessSteg.OPPRETT_SEDDOKUMENT);
     }
 }

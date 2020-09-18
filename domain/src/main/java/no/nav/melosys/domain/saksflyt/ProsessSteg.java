@@ -104,7 +104,7 @@ public enum ProsessSteg implements Kodeverk {
 
     //Unntak medlemskap
     REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE("REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE", "Avslutter tidligere periode i Medl hvis SED er endring"),
-    REG_UNNTAK_OPPRETT_SEDDOKUMENT("REG_UNNTAK_OPPRETT_SEDDOKUMENT", "Oppretter sedinfo dokument"),
+    OPPRETT_SEDDOKUMENT("OPPRETT_SEDDOKUMENT", "Oppretter saksopplysning fra SED"),
     REG_UNNTAK_HENT_REGISTEROPPLYSNINGER("REG_UNNTAK_HENT_REGISTEROPPLYSNINGER", "Henter saksopplysninger fra registre"),
     REG_UNNTAK_REGISTERKONTROLL("REG_UNNTAK_REGISTERKONTROLL", "Validerer informasjon om en unntaksperiode"),
     REG_UNNTAK_BESTEM_BEHANDLINGSMAATE("REG_UNNTAK_BESTEM_BEHANDLINGSMAATE", "Bestem om søknad skal registreres automatisk eller behandles manuelt"),

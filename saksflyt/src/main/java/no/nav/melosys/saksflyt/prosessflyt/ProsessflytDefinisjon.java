@@ -164,7 +164,7 @@ public final class ProsessflytDefinisjon {
                 OPPDATER_SAKSRELASJON,
                 SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
                 SOB_BEHANDLING_OPPRETTET,
-                REG_UNNTAK_OPPRETT_SEDDOKUMENT, //TODO: bør gjøres gjenbrukbart
+                OPPRETT_SEDDOKUMENT,
                 REG_UNNTAK_HENT_REGISTEROPPLYSNINGER, //TODO: HENT_REGISTER_OPPL
                 REG_UNNTAK_REGISTERKONTROLL, //TODO: gjør gjenbrukbart
                 REG_UNNTAK_BESTEM_BEHANDLINGSMAATE
@@ -177,7 +177,7 @@ public final class ProsessflytDefinisjon {
                 SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
                 SOB_BEHANDLING_OPPRETTET,
                 REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE,
-                REG_UNNTAK_OPPRETT_SEDDOKUMENT,
+                OPPRETT_SEDDOKUMENT,
                 REG_UNNTAK_HENT_REGISTEROPPLYSNINGER,
                 REG_UNNTAK_REGISTERKONTROLL,
                 REG_UNNTAK_BESTEM_BEHANDLINGSMAATE

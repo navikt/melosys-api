@@ -7,7 +7,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.junit.Before;
@@ -16,7 +15,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
@@ -45,7 +43,6 @@ public class AvsluttTidligerePeriodeTest {
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, "12312322");
 
         avsluttTidligerePeriode.utfør(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_OPPRETT_SEDDOKUMENT);
     }
 
     @Test
@@ -58,7 +55,6 @@ public class AvsluttTidligerePeriodeTest {
         Prosessinstans prosessinstans = hentProsessinstans(behandling, true);
         avsluttTidligerePeriode.utfør(prosessinstans);
         verify(medlPeriodeService).avsluttTidligerMedlPeriode(any(Fagsak.class));
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_OPPRETT_SEDDOKUMENT);
     }
 
     private Fagsak hentFagsak() {

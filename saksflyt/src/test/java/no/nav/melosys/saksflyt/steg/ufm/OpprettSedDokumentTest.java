@@ -12,34 +12,32 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.felles.OpprettSedDokumentFelles;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.class)
-public class OpprettSedDokumentTest {
+@ExtendWith(MockitoExtension.class)
+class OpprettSedDokumentTest {
 
     @Mock
     private OpprettSedDokumentFelles opprettSedDokumentFelles;
 
     private OpprettSedDokument opprettSedDokument;
 
-    @Before
+    @BeforeEach
     public void setup() {
         opprettSedDokument = new OpprettSedDokument(opprettSedDokumentFelles);
     }
 
     @Test
-    public void utfoerSteg() throws Exception {
+    void utfoerSteg() throws Exception {
 
         SedDokument sedDokument = new SedDokument();
         sedDokument.setLovvalgBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
@@ -53,7 +51,6 @@ public class OpprettSedDokumentTest {
         opprettSedDokument.utfør(prosessinstans);
 
         verify(opprettSedDokumentFelles).opprettSedSaksopplysning(any(MelosysEessiMelding.class), any(Behandling.class));
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_HENT_REGISTEROPPLYSNINGER);
     }
 
     private MelosysEessiMelding hentMelosysEessiMelding() {
