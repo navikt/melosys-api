@@ -436,6 +436,7 @@ public class ProsessinstansService {
 
     public void opprettProsessinstansNySakMottattAnmodningOmUnntak(MelosysEessiMelding eessiMelding, String aktørID) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_NY_SAK)
             .medEessiMelding(eessiMelding)
             .build();
 
@@ -446,6 +447,7 @@ public class ProsessinstansService {
 
     public void opprettProsessinstansNyBehandlingMottattAnmodningUnntak(MelosysEessiMelding melosysEessiMelding, Long arkivsakID) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_NY_BEHANDLING)
             .medEessiMelding(melosysEessiMelding)
             .build();
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);

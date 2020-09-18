@@ -220,8 +220,35 @@ public final class ProsessflytDefinisjon {
             )
         );
 
+        PROSESS_FLYT_MAP.put(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_NY_SAK,
+            new ProsessFlyt(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_NY_SAK,
+                SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH,
+                OPPRETT_ARKIVSAK,
+                OPPDATER_SAKSRELASJON,
+                SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
+                AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE,
+                AOU_MOTTAK_SAK_OG_BEHANDLING_OPPRETTET,
+                AOU_MOTTAK_AVSLUTT_TIDLIGERE_PERIODE,
+                AOU_MOTTAK_HENT_REGISTEROPPLYSNINGER,
+                AOU_MOTTAK_REGISTERKONTROLL,
+                AOU_MOTTAK_OPPRETT_PERIODE_MEDL,
+                AOU_MOTTAK_OPPRETT_OPPGAVE
+            )
+        );
 
-
+        PROSESS_FLYT_MAP.put(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_NY_BEHANDLING,
+            new ProsessFlyt(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_NY_BEHANDLING,
+                SED_MOTTAK_OPPRETT_NY_BEHANDLING,
+                SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
+                AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE,
+                AOU_MOTTAK_SAK_OG_BEHANDLING_OPPRETTET,
+                AOU_MOTTAK_AVSLUTT_TIDLIGERE_PERIODE,
+                AOU_MOTTAK_HENT_REGISTEROPPLYSNINGER,
+                AOU_MOTTAK_REGISTERKONTROLL,
+                AOU_MOTTAK_OPPRETT_PERIODE_MEDL,
+                AOU_MOTTAK_OPPRETT_OPPGAVE
+            )
+        );
     }
 
     public static Optional<ProsessFlyt> finnFlytForProsessType(ProsessType prosessType) {
