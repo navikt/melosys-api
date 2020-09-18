@@ -163,8 +163,7 @@ public final class ProsessflytDefinisjon {
                 OPPRETT_ARKIVSAK,
                 OPPDATER_SAKSRELASJON,
                 SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
-                REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET, //TODO: gjebruk steg
-                REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE, //TODO: trengs nok ikke når vi oppretter ny sak
+                SOB_BEHANDLING_OPPRETTET,
                 REG_UNNTAK_OPPRETT_SEDDOKUMENT, //TODO: bør gjøres gjenbrukbart
                 REG_UNNTAK_HENT_REGISTEROPPLYSNINGER, //TODO: HENT_REGISTER_OPPL
                 REG_UNNTAK_REGISTERKONTROLL, //TODO: gjør gjenbrukbart
@@ -176,7 +175,7 @@ public final class ProsessflytDefinisjon {
             new ProsessFlyt(ProsessType.REGISTRERING_UNNTAK_NY_BEHANDLING,
                 SED_MOTTAK_OPPRETT_NY_BEHANDLING,
                 SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
-                REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET,
+                SOB_BEHANDLING_OPPRETTET,
                 REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE,
                 REG_UNNTAK_OPPRETT_SEDDOKUMENT,
                 REG_UNNTAK_HENT_REGISTEROPPLYSNINGER,
@@ -191,7 +190,7 @@ public final class ProsessflytDefinisjon {
                 OPPRETT_ARKIVSAK,
                 OPPDATER_SAKSRELASJON,
                 SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
-                AFL_SAK_OG_BEHANDLING_OPPRETTET,
+                SOB_BEHANDLING_OPPRETTET,
                 AFL_AVSLUTT_TIDLIGERE_PERIODE,
                 AFL_HENT_REGISTEROPPLYSNINGER,
                 AFL_OPPRETT_BEHANDLINGSGRUNNLAG,
@@ -204,7 +203,7 @@ public final class ProsessflytDefinisjon {
             new ProsessFlyt(ProsessType.ARBEID_FLERE_LAND_NY_BEHANDLING,
                 SED_MOTTAK_OPPRETT_NY_BEHANDLING,
                 SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
-                AFL_SAK_OG_BEHANDLING_OPPRETTET,
+                SOB_BEHANDLING_OPPRETTET,
                 AFL_AVSLUTT_TIDLIGERE_PERIODE,
                 AFL_HENT_REGISTEROPPLYSNINGER,
                 AFL_OPPRETT_BEHANDLINGSGRUNNLAG,

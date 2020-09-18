@@ -91,7 +91,6 @@ public enum ProsessSteg implements Kodeverk {
     JFR_AOU_BREV_OPPRETT_SEDDOKUMENT("JFR_AOU_BREV_OPPRETT_SEDDOKUMENT", "Oppretter sed-dokument"),
 
     //Arbeid i flere land, mottak av A003
-    AFL_SAK_OG_BEHANDLING_OPPRETTET("AFL_SAK_OG_BEHANDLING_OPPRETTET","Oppdaterer status på sak i sob til opprettet"),
     AFL_AVSLUTT_TIDLIGERE_PERIODE("AFL_AVSLUTT_TIDLIGERE_PERIODE","Avslutter tidligere periode hvis oppdatert SED"),
     AFL_HENT_REGISTEROPPLYSNINGER("AFL_HENT_REGISTEROPPLYSNINGER","Innhenter registeropplysninger"),
     AFL_VURDER_INNGANGSVILKÅR("AFL_VURDER_INNGANGSVILKÅR","Vurderer inngangsvilkår når Norge er utpekt"),
@@ -104,7 +103,6 @@ public enum ProsessSteg implements Kodeverk {
     AFL_SVAR_AVSLUTT_BEHANDLING("AFL_SVAR_AVSLUTT_BEHANDLING", "Avslutter behandling etter utpeking er avslått"),
 
     //Unntak medlemskap
-    REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET("REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET", "Oppdaterer status på sak i sob til opprettet"),
     REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE("REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE", "Avslutter tidligere periode i Medl hvis SED er endring"),
     REG_UNNTAK_OPPRETT_SEDDOKUMENT("REG_UNNTAK_OPPRETT_SEDDOKUMENT", "Oppretter sedinfo dokument"),
     REG_UNNTAK_HENT_REGISTEROPPLYSNINGER("REG_UNNTAK_HENT_REGISTEROPPLYSNINGER", "Henter saksopplysninger fra registre"),
@@ -150,7 +148,7 @@ public enum ProsessSteg implements Kodeverk {
     public static ProsessSteg hentFørsteProsessStegForType(final ProsessType prosessType) throws TekniskException {
         switch (prosessType)  {
             case REGISTRERING_UNNTAK:
-                return REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET;
+                //return REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET;
             case ANMODNING_OM_UNNTAK_SVAR:
                 return AOU_SVAR_OPPRETT_ANMODNINGSPERIODESVAR;
             case ANMODNING_OM_UNNTAK_MOTTAK:
@@ -158,7 +156,7 @@ public enum ProsessSteg implements Kodeverk {
             case SED_GENERELL_SAK:
                 return SED_GENERELL_SAK_HENT_PERSON;
             case ARBEID_FLERE_LAND:
-                return AFL_SAK_OG_BEHANDLING_OPPRETTET;
+                //return AFL_SAK_OG_BEHANDLING_OPPRETTET;
 
             default:
                 throw new TekniskException("Første steg for prosesstype" + prosessType + " er ukjent");
