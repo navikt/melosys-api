@@ -64,7 +64,7 @@ public final class ProsessflytDefinisjon {
                 JFR_OPPRETT_SØKNAD,
                 OPPRETT_ARKIVSAK,
                 STATUS_BEH_OPPR,
-                JFR_OPPDATER_SAKSRELASJON,
+                OPPDATER_SAKSRELASJON,
                 OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
                 HENT_REGISTER_OPPL,
                 JFR_VURDER_INNGANGSVILKÅR,
@@ -167,7 +167,7 @@ public final class ProsessflytDefinisjon {
             new ProsessFlyt(ProsessType.REGISTRERING_UNNTAK_NY_SAK,
                 SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH,
                 OPPRETT_ARKIVSAK,
-                SED_MOTTAK_OPPDATER_SAKSRELASJON, //TODO: bør refaktoreres slik at vi kun trenger ett steg
+                OPPDATER_SAKSRELASJON,
                 SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
                 REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET, //TODO: gjebruk steg
                 REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE, //TODO: trengs nok ikke når vi oppretter ny sak
@@ -195,7 +195,7 @@ public final class ProsessflytDefinisjon {
             new ProsessFlyt(ProsessType.ARBEID_FLERE_LAND_NY_SAK,
                 SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH,
                 OPPRETT_ARKIVSAK,
-                SED_MOTTAK_OPPDATER_SAKSRELASJON, //TODO: bør refaktoreres slik at vi kun trenger ett steg
+                OPPDATER_SAKSRELASJON,
                 SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
                 AFL_SAK_OG_BEHANDLING_OPPRETTET,
                 AFL_AVSLUTT_TIDLIGERE_PERIODE,

@@ -27,7 +27,7 @@ public class OppdaterSaksrelasjon implements StegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return ProsessSteg.JFR_OPPDATER_SAKSRELASJON;
+        return ProsessSteg.OPPDATER_SAKSRELASJON;
     }
 
     @Override
