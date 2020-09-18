@@ -65,7 +65,7 @@ class OppdaterSaksrelasjonTest {
     }
 
     @Test
-    public void utfør_journalpostIkkeFraEessi_verifiserOppdatererIkkeSaksrelasjon() throws MelosysException {
+    void utfør_journalpostIkkeFraEessi_verifiserOppdatererIkkeSaksrelasjon() throws MelosysException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID);
 
@@ -75,5 +75,27 @@ class OppdaterSaksrelasjonTest {
 
         oppdaterSaksrelasjon.utfør(prosessinstans);
         verify(eessiService, never()).lagreSaksrelasjon(any(), any(), any());
+    }
+
+    @Test
+    void utfør_eessiMeldingFinnesIData_verifiserOppdatererSaksrelasjon() throws MelosysException {
+        MelosysEessiMelding eessiMelding = new MelosysEessiMelding();
+        eessiMelding.setRinaSaksnummer("12312");
+        eessiMelding.setBucType("LA_BUC_06");
+
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setGsakSaksnummer(123L);
+
+        Behandling behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        prosessinstans.setBehandling(behandling);
+
+        oppdaterSaksrelasjon.utfør(prosessinstans);
+        verify(eessiService).lagreSaksrelasjon(
+            eq(fagsak.getGsakSaksnummer()), eq(eessiMelding.getRinaSaksnummer()), eq(eessiMelding.getBucType())
+        );
     }
 }

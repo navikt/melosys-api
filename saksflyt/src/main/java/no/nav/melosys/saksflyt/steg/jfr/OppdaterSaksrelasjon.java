@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -30,12 +32,33 @@ public class OppdaterSaksrelasjon implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
+
+        Optional<MelosysEessiMelding> eessiMelding = finnEessiMelding(prosessinstans);
+        if (eessiMelding.isPresent()) {
+            Long arkivsakID = prosessinstans.getBehandling() != null
+                ? prosessinstans.getBehandling().getFagsak().getGsakSaksnummer()
+                : prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class);
+
+            eessiService.lagreSaksrelasjon(
+                arkivsakID, eessiMelding.get().getRinaSaksnummer(), eessiMelding.get().getBucType()
+            );
+        }
+    }
+
+    private Optional<MelosysEessiMelding> finnEessiMelding(Prosessinstans prosessinstans) throws MelosysException {
+        Optional<MelosysEessiMelding> eessiMelding = Optional.ofNullable(
+            prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class));
+
+        if (eessiMelding.isPresent()) {
+            return eessiMelding;
+        }
+
         String journalpostID = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
         Journalpost journalpost = joarkFasade.hentJournalpost(journalpostID);
         if (journalpost.mottaksKanalErEessi()) {
-            Long arkivsakID = prosessinstans.getBehandling().getFagsak().getGsakSaksnummer();
-            MelosysEessiMelding melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(journalpostID);
-            eessiService.lagreSaksrelasjon(arkivsakID, melosysEessiMelding.getRinaSaksnummer(), melosysEessiMelding.getBucType());
+            return Optional.of(eessiService.hentSedTilknyttetJournalpost(journalpostID));
         }
+
+        return Optional.empty();
     }
 }
