@@ -11,10 +11,10 @@ import java.util.List;
 
 public abstract class AdresseUtlandKontroller {
 
-    static final String ARBEID_UTLAND_NAVN = "arbeidUtland[%d].foretakNavn";
-    static final String ARBEID_UTLAND_LAND = "arbeidUtland[%d].adresse.landkode";
-    static final String FORETAK_UTLAND_NAVN = "foretakUtland[%d].navn";
-    static final String FORETAK_UTLAND_LAND = "foretakUtland[%d].adresse.landkode";
+    static final String ARBEID_UTLAND_NAVN = "behandlingsgrunnlag.arbeidUtland[%d].foretakNavn";
+    static final String ARBEID_UTLAND_LAND = "behandlingsgrunnlag.arbeidUtland[%d].adresse.landkode";
+    static final String FORETAK_UTLAND_NAVN = "behandlingsgrunnlag.foretakUtland[%d].navn";
+    static final String FORETAK_UTLAND_LAND = "behandlingsgrunnlag.foretakUtland[%d].adresse.landkode";
 
     public static Kontrollfeil arbeidsstedManglerFelter(BehandlingsgrunnlagData behandlingsgrunnlagData) {
         List<ArbeidUtland> arbeidUtlandListe = behandlingsgrunnlagData.arbeidUtland;

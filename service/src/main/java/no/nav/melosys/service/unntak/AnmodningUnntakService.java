@@ -17,8 +17,7 @@ import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.kontroll.PersonKontroller;
-import no.nav.melosys.service.kontroll.AnmodningUnntakKontrollService;
+import no.nav.melosys.service.kontroll.unntak.AnmodningUnntakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.validering.Kontrollfeil;
@@ -66,21 +65,10 @@ public class AnmodningUnntakService {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         log.info("Anmodning om unntak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
-        anmodningsperiodeService.validerAnmodningsperiodeForBehandling(behandlingID);
-        validerHarBostedsadresse(behandling);
         kontrollerAnmodningOmUnntak(behandlingID);
 
         prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, mottakerinstitusjoner, ytterligereInformasjonSed);
         oppgaveService.leggTilbakeOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
-    }
-
-    private void validerHarBostedsadresse(Behandling behandling) throws FunksjonellException, TekniskException {
-        boolean harBostedsAdresse = PersonKontroller.harRegistrertBostedsadresse(
-            behandling.hentPersonDokument(), behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata());
-
-        if (!harBostedsAdresse) {
-            throw new FunksjonellException("Søknad mangler bostedsadresse!");
-        }
     }
 
     private Set<String> validerMottakerInstitusjon(long behandlingID, String mottakerinstitusjon) throws MelosysException {
