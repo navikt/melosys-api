@@ -19,16 +19,16 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AvsluttTidligerePeriodeTest {
+public class AvsluttTidligereMedlPeriodeTest {
 
     @Mock
     private MedlPeriodeService medlPeriodeService;
 
-    private AvsluttTidligerePeriode avsluttTidligerePeriode;
+    private AvsluttTidligereMedlPeriode avsluttTidligereMedlPeriode;
 
     @Before
     public void setUp() {
-        avsluttTidligerePeriode = new AvsluttTidligerePeriode(medlPeriodeService);
+        avsluttTidligereMedlPeriode = new AvsluttTidligereMedlPeriode(medlPeriodeService);
     }
 
     @Test
@@ -42,7 +42,7 @@ public class AvsluttTidligerePeriodeTest {
         prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, false);
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, "12312322");
 
-        avsluttTidligerePeriode.utfør(prosessinstans);
+        avsluttTidligereMedlPeriode.utfør(prosessinstans);
     }
 
     @Test
@@ -53,7 +53,7 @@ public class AvsluttTidligerePeriodeTest {
         behandling.setFagsak(hentFagsak());
 
         Prosessinstans prosessinstans = hentProsessinstans(behandling, true);
-        avsluttTidligerePeriode.utfør(prosessinstans);
+        avsluttTidligereMedlPeriode.utfør(prosessinstans);
         verify(medlPeriodeService).avsluttTidligerMedlPeriode(any(Fagsak.class));
     }
 

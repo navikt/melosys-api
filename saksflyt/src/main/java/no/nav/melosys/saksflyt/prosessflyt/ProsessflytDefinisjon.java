@@ -176,7 +176,7 @@ public final class ProsessflytDefinisjon {
                 SED_MOTTAK_OPPRETT_NY_BEHANDLING,
                 SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
                 SOB_BEHANDLING_OPPRETTET,
-                REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE,
+                AVSLUTT_TIDLIGERE_MEDL_PERIODE,
                 OPPRETT_SEDDOKUMENT,
                 REG_UNNTAK_HENT_REGISTEROPPLYSNINGER,
                 REG_UNNTAK_REGISTERKONTROLL,
@@ -191,7 +191,7 @@ public final class ProsessflytDefinisjon {
                 OPPDATER_SAKSRELASJON,
                 SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
                 SOB_BEHANDLING_OPPRETTET,
-                AFL_AVSLUTT_TIDLIGERE_PERIODE,
+                AVSLUTT_TIDLIGERE_MEDL_PERIODE,
                 AFL_HENT_REGISTEROPPLYSNINGER,
                 AFL_OPPRETT_BEHANDLINGSGRUNNLAG,
                 AFL_VURDER_INNGANGSVILKÅR, //FIXME: skal ikke vurderes når Norge IKKE er utpekt
@@ -204,7 +204,7 @@ public final class ProsessflytDefinisjon {
                 SED_MOTTAK_OPPRETT_NY_BEHANDLING,
                 SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
                 SOB_BEHANDLING_OPPRETTET,
-                AFL_AVSLUTT_TIDLIGERE_PERIODE,
+                AVSLUTT_TIDLIGERE_MEDL_PERIODE,
                 AFL_HENT_REGISTEROPPLYSNINGER,
                 AFL_OPPRETT_BEHANDLINGSGRUNNLAG,
                 AFL_VURDER_INNGANGSVILKÅR, //FIXME: skal ikke vurderes når Norge IKKE er utpekt

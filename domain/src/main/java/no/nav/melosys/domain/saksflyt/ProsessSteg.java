@@ -91,7 +91,6 @@ public enum ProsessSteg implements Kodeverk {
     JFR_AOU_BREV_OPPRETT_SEDDOKUMENT("JFR_AOU_BREV_OPPRETT_SEDDOKUMENT", "Oppretter sed-dokument"),
 
     //Arbeid i flere land, mottak av A003
-    AFL_AVSLUTT_TIDLIGERE_PERIODE("AFL_AVSLUTT_TIDLIGERE_PERIODE","Avslutter tidligere periode hvis oppdatert SED"),
     AFL_HENT_REGISTEROPPLYSNINGER("AFL_HENT_REGISTEROPPLYSNINGER","Innhenter registeropplysninger"),
     AFL_VURDER_INNGANGSVILKÅR("AFL_VURDER_INNGANGSVILKÅR","Vurderer inngangsvilkår når Norge er utpekt"),
     AFL_OPPRETT_BEHANDLINGSGRUNNLAG("AFL_OPPRETT_BEHANDLINGSGRUNNLAG","Oppretter behandlingsgrunnlag"),
@@ -103,7 +102,7 @@ public enum ProsessSteg implements Kodeverk {
     AFL_SVAR_AVSLUTT_BEHANDLING("AFL_SVAR_AVSLUTT_BEHANDLING", "Avslutter behandling etter utpeking er avslått"),
 
     //Unntak medlemskap
-    REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE("REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE", "Avslutter tidligere periode i Medl hvis SED er endring"),
+    AVSLUTT_TIDLIGERE_MEDL_PERIODE("AVSLUTT_TIDLIGERE_MEDL_PERIODE", "Avslutter tidligere periode i Medl"),
     OPPRETT_SEDDOKUMENT("OPPRETT_SEDDOKUMENT", "Oppretter saksopplysning fra SED"),
     REG_UNNTAK_HENT_REGISTEROPPLYSNINGER("REG_UNNTAK_HENT_REGISTEROPPLYSNINGER", "Henter saksopplysninger fra registre"),
     REG_UNNTAK_REGISTERKONTROLL("REG_UNNTAK_REGISTERKONTROLL", "Validerer informasjon om en unntaksperiode"),

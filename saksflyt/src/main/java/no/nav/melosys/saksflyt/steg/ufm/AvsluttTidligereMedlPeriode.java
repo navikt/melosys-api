@@ -13,30 +13,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AvsluttTidligerePeriode implements StegBehandler {
+public class AvsluttTidligereMedlPeriode implements StegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(AvsluttTidligerePeriode.class);
+    private static final Logger log = LoggerFactory.getLogger(AvsluttTidligereMedlPeriode.class);
 
     private final MedlPeriodeService medlPeriodeService;
 
     @Autowired
-    public AvsluttTidligerePeriode(MedlPeriodeService medlPeriodeService) {
+    public AvsluttTidligereMedlPeriode(MedlPeriodeService medlPeriodeService) {
         this.medlPeriodeService = medlPeriodeService;
     }
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return ProsessSteg.REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE;
+        return ProsessSteg.AVSLUTT_TIDLIGERE_MEDL_PERIODE;
     }
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
-        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
-
         if (Boolean.TRUE.equals(prosessinstans.getData(ProsessDataKey.ER_OPPDATERT_SED, Boolean.class))) {
             medlPeriodeService.avsluttTidligerMedlPeriode(prosessinstans.getBehandling().getFagsak());
+            log.info("Avsluttet tidligere medl-periode for behandling {}", prosessinstans.getBehandling().getId());
         }
-
-        prosessinstans.setSteg(ProsessSteg.OPPRETT_SEDDOKUMENT);
     }
 }
