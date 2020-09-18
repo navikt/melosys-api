@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.stream.Collectors.toList;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.metrics.MetrikkerNavn.*;
 
 @Service
@@ -84,21 +85,18 @@ public class BehandlingService {
         behandlingRepository.save(behandling);
     }
 
-    /**
-     * Oppdaterer status for en behandling med ID {@code behandlingID}.
-     * Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas,
-     *  eller for å avslutte behandling ved behandlingstype VURDER_TRYGDETID
-     */
-    public void oppdaterStatus(long behandlingID, Behandlingsstatus status) throws FunksjonellException, TekniskException {
+    public void oppdaterStatus(long behandlingID, Behandlingsstatus status)
+        throws FunksjonellException, TekniskException {
         Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
+        oppdaterStatus(behandling, status);
+    }
 
+    private void oppdaterStatus(Behandling behandling, Behandlingsstatus status) throws FunksjonellException, TekniskException {
         if (behandling.getStatus() == status) {
             return;
         }
 
-        if (behandling.getStatus() == Behandlingsstatus.VURDER_DOKUMENT && !erLovligNesteStatusEtterDokumentVurdering(status)) {
-            throw new FunksjonellException("Må ikke sette behandlingsstatus til " + status);
-        } else if (!behandling.erAktiv()) {
+        if (!behandling.erAktiv()) {
             throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres. Status var: " + behandling.getStatus());
         }
         behandling.setStatus(status);
@@ -113,18 +111,24 @@ public class BehandlingService {
         }
     }
 
-    private boolean erLovligNesteStatusEtterDokumentVurdering(Behandlingsstatus behandlingsstatus) {
-        return (behandlingsstatus == Behandlingsstatus.UNDER_BEHANDLING)
-            || (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_PART)
-            || (behandlingsstatus == Behandlingsstatus.AVVENT_DOK_UTL)
-            || (behandlingsstatus == Behandlingsstatus.ANMODNING_UNNTAK_SENDT)
-            || (behandlingsstatus == Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
+    /**
+     * Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas,
+     *  eller for å avslutte behandling ved behandlingstype VURDER_TRYGDETID
+     */
+    public void brukerOppdaterStatus(long behandlingID, Behandlingsstatus status)
+        throws FunksjonellException, TekniskException {
+        Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
+        if (behandling.getStatus() == Behandlingsstatus.VURDER_DOKUMENT
+            && erNesteStatusEtterDokumentVurderingUlovlig(status)) {
+            throw new FunksjonellException("Ulovlig behandlingsstatus " + status);
+        }
+        oppdaterStatus(behandling, status);
     }
 
-    /**
-     * - Oppretter en ny behandling.
-     * - Oppretter tom behandlingsresultat.
-     */
+    private boolean erNesteStatusEtterDokumentVurderingUlovlig(Behandlingsstatus status) {
+        return !Set.of(UNDER_BEHANDLING, AVVENT_DOK_PART, AVVENT_DOK_UTL, ANMODNING_UNNTAK_SENDT).contains(status);
+    }
+
     @Transactional
     public Behandling nyBehandling(Fagsak fagsak,
                                    Behandlingsstatus behandlingsstatus,
@@ -238,7 +242,7 @@ public class BehandlingService {
 
     public void endreBehandlingsstatusFraOpprettetTilUnderBehandling(Behandling aktivBehandling) {
         if (aktivBehandling.getStatus() == Behandlingsstatus.OPPRETTET) {
-            aktivBehandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+            aktivBehandling.setStatus(UNDER_BEHANDLING);
             behandlingRepository.save(aktivBehandling);
         }
     }

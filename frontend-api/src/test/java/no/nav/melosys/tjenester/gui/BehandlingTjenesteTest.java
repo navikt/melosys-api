@@ -21,11 +21,11 @@ import no.nav.melosys.tjenester.gui.dto.tildto.SaksopplysningerTilDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -34,8 +34,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.jeasy.random.FieldPredicates.*;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BehandlingTjenesteTest extends JsonSchemaTestParent {
+@ExtendWith(MockitoExtension.class)
+class BehandlingTjenesteTest extends JsonSchemaTestParent {
     private static final Logger log = LoggerFactory.getLogger(BehandlingTjenesteTest.class);
     private static final String TIDLIGERE_MEDLEMSPERIODER_SCHEMA = "behandlinger-tidligeremedlemsperioder-post-schema.json";
     private static final String BEHANDLINGER_SCHEMA = "behandlinger-behandling-schema.json";
@@ -48,8 +48,8 @@ public class BehandlingTjenesteTest extends JsonSchemaTestParent {
     private SaksopplysningerTilDto saksopplysningerTilDto;
     private EasyRandom random;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         behandlingTjeneste = new BehandlingTjeneste(behandlingService, saksopplysningerTilDto, mock(TilgangService.class));
 
         random = new EasyRandom(new EasyRandomParameters()
@@ -68,14 +68,14 @@ public class BehandlingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void behandlingerPerioderValidering() throws IOException {
+    void behandlingerPerioderValidering() throws IOException {
         TidligereMedlemsperioderDto tidligereMedlemsperioderDto = new TidligereMedlemsperioderDto();
         tidligereMedlemsperioderDto.periodeIder = Arrays.asList(2L, 3L, 5L);
         valider(tidligereMedlemsperioderDto, TIDLIGERE_MEDLEMSPERIODER_SCHEMA, log);
     }
 
     @Test
-    public void hentBehandling_erSchemaValidert() throws IOException {
+    void hentBehandling_erSchemaValidert() throws IOException {
         BehandlingDto behandlingDto = random.nextObject(BehandlingDto.class);
         behandlingDto.getSaksopplysninger().setSed(null);
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(behandlingDto);
@@ -83,30 +83,29 @@ public class BehandlingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void knyttMedlemsperioder() throws Exception {
+    void knyttMedlemsperioder() throws Exception {
         long behandlingID = 11L;
         List<Long> periodeIder = Arrays.asList(2L, 3L, 5L);
         TidligereMedlemsperioderDto tidligereMedlemsperioderDto = new TidligereMedlemsperioderDto();
         tidligereMedlemsperioderDto.periodeIder = periodeIder;
 
         behandlingTjeneste.knyttMedlemsperioder(behandlingID, tidligereMedlemsperioderDto);
-        verify(behandlingService, times(1)).knyttMedlemsperioder(behandlingID, periodeIder);
+        verify(behandlingService).knyttMedlemsperioder(behandlingID, periodeIder);
     }
 
     @Test
-    public void hentMedlemsperioder() throws Exception {
+    void hentMedlemsperioder() throws Exception {
         long behandlingID = 11L;
         List<Long> periodeIder = Arrays.asList(2L, 3L, 5L);
         when(behandlingService.hentMedlemsperioder(behandlingID)).thenReturn(periodeIder);
 
-        ResponseEntity response = behandlingTjeneste.hentMedlemsperioder(behandlingID);
+        ResponseEntity<TidligereMedlemsperioderDto> response = behandlingTjeneste.hentMedlemsperioder(behandlingID);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody()).isInstanceOf(TidligereMedlemsperioderDto.class);
 
-        TidligereMedlemsperioderDto tidligereMedlemsperioderDto = (TidligereMedlemsperioderDto) response.getBody();
+        TidligereMedlemsperioderDto tidligereMedlemsperioderDto = response.getBody();
         assertThat(tidligereMedlemsperioderDto.periodeIder).containsAll(periodeIder);
 
-        verify(behandlingService, times(1)).hentMedlemsperioder(behandlingID);
-
+        verify(behandlingService).hentMedlemsperioder(behandlingID);
     }
 }
