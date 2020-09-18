@@ -8,10 +8,8 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
 import org.junit.Before;
@@ -23,7 +21,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -52,7 +49,6 @@ public class OpprettFagsakOgBehandlingFraSedTest {
         opprettFagsakOgBehandlingFraSed.utfør(prosessinstans);
         verify(fagsakService).nyFagsakOgBehandling(opprettSakRequestArgumentCaptor.capture());
         assertThat(opprettSakRequestArgumentCaptor.getValue().getSakstype()).isEqualTo(Sakstyper.EU_EOS);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_OPPRETT_SAK);
     }
 
     @Test
@@ -62,16 +58,6 @@ public class OpprettFagsakOgBehandlingFraSedTest {
         opprettFagsakOgBehandlingFraSed.utfør(prosessinstans);
         verify(fagsakService).nyFagsakOgBehandling(opprettSakRequestArgumentCaptor.capture());
         assertThat(opprettSakRequestArgumentCaptor.getValue().getSakstype()).isEqualTo(Sakstyper.UKJENT);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_OPPRETT_SAK);
-    }
-
-    @Test
-    public void utfør_ikkeProsessTypeMottakSed_kasterException() {
-        Prosessinstans prosessinstans = hentProsessinstans(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE);
-        prosessinstans.setType(ProsessType.MOTTAK_SED);
-        assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(() -> opprettFagsakOgBehandlingFraSed.utfør(prosessinstans))
-            .withMessageContaining("Prosessinstans er av type");
     }
 
     private Prosessinstans hentProsessinstans(Behandlingstema behandlingstema) {

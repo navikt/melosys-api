@@ -7,10 +7,8 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
@@ -42,10 +40,6 @@ public class OpprettFagsakOgBehandlingFraSed implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(EESSI_MELDING, MelosysEessiMelding.class);
 
-        if (prosessinstans.getType() == ProsessType.MOTTAK_SED || prosessinstans.getType() == ProsessType.MOTTAK_SED_JOURNALFØRING) {
-            throw new TekniskException("Prosessinstans er av type " + prosessinstans.getType());
-        }
-
         Behandlingstema behandlingstema = prosessinstans.getData(BEHANDLINGSTEMA, Behandlingstema.class);
         Sakstyper sakstype = behandlingstema == Behandlingstema.BESLUTNING_LOVVALG_NORGE ? Sakstyper.UKJENT : Sakstyper.EU_EOS;
 
@@ -66,7 +60,5 @@ public class OpprettFagsakOgBehandlingFraSed implements StegBehandler {
 
         log.info("Fagsak {} opprettet med behandling {} for RINA-sak {}",
             fagsak.getSaksnummer(), behandling.getId(), melosysEessiMelding.getRinaSaksnummer());
-
-        prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_OPPRETT_SAK);
     }
 }
