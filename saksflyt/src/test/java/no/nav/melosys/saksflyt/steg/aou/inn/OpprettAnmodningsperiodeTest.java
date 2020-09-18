@@ -12,7 +12,6 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -25,7 +24,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -63,7 +61,6 @@ public class OpprettAnmodningsperiodeTest {
 
         verify(behandlingService).hentBehandling(anyLong());
         verify(anmodningsperiodeService).lagreAnmodningsperioder(eq(1L), any());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_SAK_OG_BEHANDLING_OPPRETTET);
     }
 
     @Test
@@ -85,7 +82,6 @@ public class OpprettAnmodningsperiodeTest {
         verify(behandlingService).hentBehandling(anyLong());
         verify(opprettSedDokumentFelles).opprettSedSaksopplysning(any(MelosysEessiMelding.class), any(Behandling.class));
         verify(anmodningsperiodeService).lagreAnmodningsperioder(eq(1L), any());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_SAK_OG_BEHANDLING_OPPRETTET);
     }
 
     @Test(expected = FunksjonellException.class)

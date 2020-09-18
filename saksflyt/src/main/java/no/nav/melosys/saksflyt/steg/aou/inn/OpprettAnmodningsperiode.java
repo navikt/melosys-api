@@ -57,7 +57,7 @@ public class OpprettAnmodningsperiode implements StegBehandler {
         anmodningsperiodeService.lagreAnmodningsperioder(prosessinstans.getBehandling().getId(), Collections.singletonList(anmodningsperiode));
         log.info("Opprettet anmodningsperiode for prosessinstans {}", prosessinstans.getId());
 
-        prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_SAK_OG_BEHANDLING_OPPRETTET);
+        prosessinstans.setSteg(ProsessSteg.SOB_BEHANDLING_OPPRETTET);
     }
 
     private SedDokument hentEllerOpprettSedDokument(Prosessinstans prosessinstans) throws IkkeFunnetException {
