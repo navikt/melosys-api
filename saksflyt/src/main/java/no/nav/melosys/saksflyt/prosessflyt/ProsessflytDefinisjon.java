@@ -63,7 +63,7 @@ public final class ProsessflytDefinisjon {
                 JFR_OPPRETT_SAK_OG_BEH,
                 JFR_OPPRETT_SØKNAD,
                 OPPRETT_ARKIVSAK,
-                STATUS_BEH_OPPR,
+                SOB_BEHANDLING_OPPRETTET,
                 OPPDATER_SAKSRELASJON,
                 OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
                 HENT_REGISTER_OPPL,
@@ -109,7 +109,7 @@ public final class ProsessflytDefinisjon {
                 JFR_OPPRETT_SAK_OG_BEH,
                 JFR_OPPRETT_SØKNAD,
                 OPPRETT_ARKIVSAK,
-                STATUS_BEH_OPPR,
+                SOB_BEHANDLING_OPPRETTET,
                 HENT_REGISTER_OPPL,
                 JFR_VURDER_INNGANGSVILKÅR,
                 GJENBRUK_OPPGAVE
@@ -154,12 +154,6 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(ProsessType.MOTTAK_SED_JOURNALFØRING,
             new ProsessFlyt(ProsessType.MOTTAK_SED_JOURNALFØRING,
                 SED_MOTTAK_FERDIGSTILL_JOURNALPOST
-            )
-        );
-
-        PROSESS_FLYT_MAP.put(ProsessType.ANMODNING_OM_UNNTAK_SVAR,
-            new ProsessFlyt(ProsessType.ANMODNING_OM_UNNTAK_SVAR
-                //TODO
             )
         );
 

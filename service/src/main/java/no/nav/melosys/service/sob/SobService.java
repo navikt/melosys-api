@@ -43,6 +43,15 @@ public class SobService {
         return sakOgBehandlingFasade.finnSakOgBehandlingskjedeListe(aktørID);
     }
 
+    public void sakOgBehandlingOpprettet(long behandlingID) throws TekniskException, FunksjonellException {
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        Fagsak fagsak = behandling.getFagsak();
+        sakOgBehandlingFasade.sendBehandlingOpprettet(
+            lagBehandlingStatusMapper(fagsak.getSaksnummer(), behandling, fagsak.hentBruker().getAktørId())
+        );
+    }
+
+    @Deprecated(forRemoval = true)
     public void sakOgBehandlingOpprettet(String saksnummer, Long behandlingId, String aktørID) throws IntegrasjonException, FunksjonellException {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingId);
         sakOgBehandlingFasade.sendBehandlingOpprettet(lagBehandlingStatusMapper(saksnummer, behandling, aktørID));

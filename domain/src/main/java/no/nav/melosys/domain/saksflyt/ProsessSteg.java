@@ -10,7 +10,6 @@ public enum ProsessSteg implements Kodeverk {
     REPLIKER_BEHANDLING("REPLIKER_BEHANDLING", "Replikerer den første, avsluttede behandlingen i Melosys og setter den til OPPRETTET"),
     JFR_OPPRETT_SØKNAD("JFR_OPPRETT_SØKNAD", "Oppretter ny søknad i Melosys"),
     OPPRETT_ARKIVSAK("OPPRETT_ARKIVSAK", "Oppretter arkivsak"),
-    STATUS_BEH_OPPR("STATUS_BEH_OPPR", "Oppdater Sak og Behandling ved oppretting av behandling"),
     OPPDATER_OG_FERDIGSTILL_JOURNALPOST("OPPDATER_OG_FERDIGSTILL_JOURNALPOST", "Oppdaterer og ferdigstiller journalposten i Joark"),
     JFR_SETT_VURDER_DOKUMENT("JFR_SETT_VURDER_DOKUMENT", "Setter status til VURDER_DOKUMENT"),
     JFR_TILDEL_BEHANDLINGSOPPGAVE("JFR_TILDEL_BEHANDLINGSOPPGAVE", "Tildeler behandlingsoppgave for gjeldende fagsak til en saksbehandler"),
@@ -61,6 +60,8 @@ public enum ProsessSteg implements Kodeverk {
     SEND_VEDTAK_UTLAND("SEND_VEDTAK_UTLAND","Sender vedtaket til utland"),
     OPPRETT_AVGIFTSOPPGAVE("OPPRETT_AVGIFTSOPPGAVE", "Oppretter en vurderingsoppgave for innregistrering i avgiftsystemet"),
     AVSLUTT_SAK_OG_BEHANDLING("AVSLUTT_SAK_OG_BEHANDLING", "Avslutt fagsak og aktiv behandling"),
+
+    SOB_BEHANDLING_OPPRETTET("SOB_BEHANDLING_OPPRETTET", "Oppdaterer SOB (Sak Og Behandling) om opprettet behandling"),
     SOB_BEHANDLING_AVSLUTTET("SOB_BEHANDLING_AVSLUTTET", "Oppdaterer SOB (Sak Og Behandling) om avsluttet behandling"),
 
     DISTRIBUER_JOURNALPOST_UTLAND("DISTRIBUER_JOURNALPOST_UTLAND", "Distribuerer (sender) en journalpost til utlanlandsk myndighet"),

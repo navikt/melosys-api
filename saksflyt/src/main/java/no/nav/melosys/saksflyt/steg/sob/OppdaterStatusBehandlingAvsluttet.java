@@ -30,7 +30,8 @@ public class OppdaterStatusBehandlingAvsluttet implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
-        sobService.sakOgBehandlingAvsluttet(prosessinstans.getBehandling().getId());
-        log.info("Oppdatert sob-status til avsluttet for prosessinstans {}", prosessinstans.getId());
+        final long behandlingID = prosessinstans.getBehandling().getId();
+        sobService.sakOgBehandlingAvsluttet(behandlingID);
+        log.info("Oppdatert sob-status til avsluttet for behandling {}", behandlingID);
     }
 }
