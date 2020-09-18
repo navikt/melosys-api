@@ -120,21 +120,23 @@ public class EessiConsumerTest {
 
     @Test
     public void hentMottakerinstitusjoner_forventInstitusjoner() throws MelosysException {
-        server.expect(requestTo("/buc/LA_BUC_01/institusjoner?land=DE"))
+        server.expect(requestTo("/buc/LA_BUC_01/institusjoner"))
+            .andExpect(content().string("[\"DE\"]"))
             .andRespond(withSuccess("[{\"id\":\"NO:NAVT002\",\"navn\":\"NAVT002\",\"landkode\":\"NO\"}]",
                 MediaType.APPLICATION_JSON));
 
-        List<Institusjon> institusjoner = eessiConsumer.hentMottakerinstitusjoner("LA_BUC_01", "DE");
+        List<Institusjon> institusjoner = eessiConsumer.hentMottakerinstitusjoner("LA_BUC_01", List.of("DE"));
         assertThat(institusjoner).extracting(Institusjon::getId, Institusjon::getNavn, Institusjon::getLandkode)
             .contains(tuple("NO:NAVT002", "NAVT002", "NO"));
     }
 
     @Test(expected = MelosysException.class)
     public void hentMottakerinstitusjoner_forventException() throws MelosysException {
-        server.expect(requestTo("/buc/LA_BUC_01/institusjoner?land=SE"))
+        server.expect(requestTo("/buc/LA_BUC_01/institusjoner"))
+            .andExpect(content().string("[\"SE\"]"))
             .andRespond(withBadRequest());
 
-        eessiConsumer.hentMottakerinstitusjoner("LA_BUC_01", "SE");
+        eessiConsumer.hentMottakerinstitusjoner("LA_BUC_01", List.of("SE"));
     }
 
     @Test

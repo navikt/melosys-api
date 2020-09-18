@@ -90,12 +90,12 @@ public class EessiService {
         return eessiConsumer.opprettBucOgSed(sedDataDto, vedlegg, bucType, false).getRinaUrl();
     }
 
-    public List<Institusjon> hentEessiMottakerinstitusjoner(String bucType, String landkode) throws MelosysException {
-        return eessiConsumer.hentMottakerinstitusjoner(bucType, landkode);
+    public List<Institusjon> hentEessiMottakerinstitusjoner(String bucType, Collection<String> landkoder) throws MelosysException {
+        return eessiConsumer.hentMottakerinstitusjoner(bucType, landkoder);
     }
 
     private boolean landErEessiReady(String bucType, String landkode) throws MelosysException {
-        return !hentEessiMottakerinstitusjoner(bucType, landkode).isEmpty();
+        return !hentEessiMottakerinstitusjoner(bucType, List.of(landkode)).isEmpty();
     }
 
     public boolean landErEessiReady(String bucType, Collection<Landkoder> landkoder) throws MelosysException {
@@ -246,7 +246,7 @@ public class EessiService {
         Map<Landkoder, Collection<String>> institusjonerPerLand = new EnumMap<>(Landkoder.class);
 
         for (var land : mottakerland) {
-            Collection<String> alleInstitusjonerForLand = hentEessiMottakerinstitusjoner(bucType.name(), land.getKode())
+            Collection<String> alleInstitusjonerForLand = hentEessiMottakerinstitusjoner(bucType.name(), List.of(land.getKode()))
                 .stream().map(Institusjon::getId).collect(Collectors.toSet());
             if (alleInstitusjonerForLand.isEmpty()) {
                 log.info("{} er ikke EESSI-ready, skal ikke sendes SED", land.getBeskrivelse());
