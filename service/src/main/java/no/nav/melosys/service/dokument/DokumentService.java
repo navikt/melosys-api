@@ -86,9 +86,14 @@ public class DokumentService {
         List<Aktoer> avklarteMottakere =
             brevmottakerService.avklarMottakere(produserbartDokument, Mottaker.av(mottakerRolle), behandling, true);
 
-        if (mottakerRolle != Aktoersroller.ARBEIDSGIVER && avklarteMottakere.isEmpty()) {
-            log.info("Ingen mottaker funnet for {}, {}", produserbartDokument, brevbestillingDto);
-            throw new FunksjonellException("Ingen mottaker funnet for sak " + behandling.getFagsak().getSaksnummer());
+        if (avklarteMottakere.isEmpty()) {
+            final var saksnummer = behandling.getFagsak().getSaksnummer();
+            log.info("Ingen mottaker funnet for {}, {}", saksnummer, produserbartDokument);
+            if (mottakerRolle == Aktoersroller.ARBEIDSGIVER) {
+                throw new FunksjonellException("Melosys sender ikke brev til utenlandske arbeidsgivere uten orgnr."
+                    + System.lineSeparator() + "Ingen orgn funnet for sak " + saksnummer);
+            }
+            throw new FunksjonellException("Ingen mottaker funnet for sak " + saksnummer);
         } else {
             return dokSysFasade.produserDokumentutkast(lagDokumentbestilling(produserbartDokument, avklarteMottakere.get(0), behandling, brevData));
         }
