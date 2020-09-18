@@ -43,6 +43,6 @@ public class OppdaterSakOgBehandlingOpprettet implements StegBehandler {
         String saksnummer = prosessinstans.getBehandling().getFagsak().getSaksnummer();
         sobService.sakOgBehandlingOpprettet(saksnummer, behandlingId, aktørId);
 
-        prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_AVSLUTT_TIDLIGERE_PERIODE);
+        prosessinstans.setSteg(ProsessSteg.AVSLUTT_TIDLIGERE_MEDL_PERIODE);
     }
 }
