@@ -50,11 +50,11 @@ public class OpprettFagsakOgBehandlingFraSed implements StegBehandler {
         Sakstyper sakstype = behandlingstema == Behandlingstema.BESLUTNING_LOVVALG_NORGE ? Sakstyper.UKJENT : Sakstyper.EU_EOS;
 
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
-            .medAktørID(prosessinstans.getData(AKTØR_ID))
+            .medAktørID(prosessinstans.hentAktørIDFraDataEllerSED())
             .medBehandlingstype(Behandlingstyper.SED)
             .medBehandlingstema(behandlingstema)
-            .medInitierendeJournalpostId(prosessinstans.getData(JOURNALPOST_ID))
-            .medInitierendeDokumentId(prosessinstans.getData(DOKUMENT_ID))
+            .medInitierendeJournalpostId(melosysEessiMelding.getJournalpostId())
+            .medInitierendeDokumentId(melosysEessiMelding.getDokumentId())
             .medSakstype(sakstype)
             .build();
 
