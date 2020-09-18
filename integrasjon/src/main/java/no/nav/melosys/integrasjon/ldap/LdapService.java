@@ -39,14 +39,14 @@ public class LdapService {
             throw new TekniskException("Kan ikke slå opp brukernavn uten å ha ident");
         }
 
-        return defaultHvisUgyldig(ident, ident).or(() ->
+        return defaultHvisUgyldig(ident).or(() ->
             ldapTemplate.search(query().where("cn").is(ident), new LdapBrukerMapper()).stream().findFirst());
     }
 
-    private Optional<LdapBruker> defaultHvisUgyldig(String ident, String defaultIdent) {
+    private Optional<LdapBruker> defaultHvisUgyldig(String ident) {
         Matcher matcher = IDENT_PATTERN.matcher(ident);
         if (!matcher.matches()) {
-            return Optional.of(new LdapBruker(defaultIdent, Collections.emptyList()));
+            return Optional.of(new LdapBruker(ident, Collections.emptyList()));
         }
 
         return Optional.empty();
