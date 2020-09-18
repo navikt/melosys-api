@@ -28,17 +28,17 @@ import static no.nav.melosys.domain.saksflyt.ProsessDataKey.DOKUMENT_ID;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.JOURNALPOST_ID;
 
 @Component
-public class OpprettNyBehandling implements StegBehandler {
+public class OpprettNyBehandlingFraSed implements StegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(OpprettNyBehandling.class);
+    private static final Logger log = LoggerFactory.getLogger(OpprettNyBehandlingFraSed.class);
 
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
 
-    public OpprettNyBehandling(FagsakService fagsakService,
-                               BehandlingService behandlingService,
-                               @Qualifier("system") OppgaveService oppgaveService) {
+    public OpprettNyBehandlingFraSed(FagsakService fagsakService,
+                                     BehandlingService behandlingService,
+                                     @Qualifier("system") OppgaveService oppgaveService) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.oppgaveService = oppgaveService;
@@ -52,19 +52,17 @@ public class OpprettNyBehandling implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
 
-        Long gsakSaksnummer = prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class);
+        Long arkivsakID = prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class);
         Behandlingstema behandlingstema = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class);
         prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, true);
 
-        if (gsakSaksnummer == null) {
-            throw new TekniskException("Gsaksaksnummer kan ikke være null");
+        if (arkivsakID == null) {
+            throw new TekniskException("ArkivsakID kan ikke være null");
         } else if (behandlingstema == null) {
-            throw new TekniskException("Behandlingstype kan ikke være null");
+            throw new TekniskException("Behandlingstema kan ikke være null");
         }
 
-        Fagsak fagsak = fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer)
-            .orElseThrow(() -> new TekniskException("Finnes en kobling til gsakSaksnummer " +
-                gsakSaksnummer + ", men finner ingen fagsak!"));
+        Fagsak fagsak = fagsakService.hentFagsakFraGsakSaksnummer(arkivsakID);
 
         avsluttTidligereBehandling(fagsak);
         Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.SED, behandlingstema,
@@ -75,9 +73,8 @@ public class OpprettNyBehandling implements StegBehandler {
         fagsakService.lagre(fagsak);
 
         ferdigstillOppgave(fagsak.getSaksnummer());
-        log.info("Opprettet ny behandling for fagsak {}", gsakSaksnummer);
+        log.info("Opprettet ny behandling for fagsak {}", arkivsakID);
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
     }
 
     private void avsluttTidligereBehandling(Fagsak fagsak) throws TekniskException, FunksjonellException {

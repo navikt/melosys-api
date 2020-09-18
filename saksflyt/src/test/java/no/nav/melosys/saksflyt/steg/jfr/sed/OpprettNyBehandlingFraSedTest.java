@@ -10,29 +10,29 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class OpprettNyBehandlingTest {
+@ExtendWith(MockitoExtension.class)
+class OpprettNyBehandlingFraSedTest {
 
     @Mock
     private FagsakService fagsakService;
@@ -41,40 +41,37 @@ public class OpprettNyBehandlingTest {
     @Mock
     private OppgaveService oppgaveFasade;
 
-    private OpprettNyBehandling opprettNyBehandling;
+    private OpprettNyBehandlingFraSed opprettNyBehandlingFraSed;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    @Before
+    @BeforeEach
     public void setup() {
-        opprettNyBehandling = new OpprettNyBehandling(fagsakService, behandlingService, oppgaveFasade);
+        opprettNyBehandlingFraSed = new OpprettNyBehandlingFraSed(fagsakService, behandlingService, oppgaveFasade);
     }
 
     @Test
-    public void utfør_gsakSaksnummerIkkeSatt_forventException() throws MelosysException {
+    void utfør_gsakSaksnummerIkkeSatt_forventException() {
         Prosessinstans prosessinstans = new Prosessinstans();
-
-        expectedException.expect(TekniskException.class);
-        expectedException.expectMessage("Gsaksaksnummer kan ikke være null");
-
-        opprettNyBehandling.utfør(prosessinstans);
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(() -> opprettNyBehandlingFraSed.utfør(prosessinstans))
+            .withMessageContaining("ArkivsakID kan ikke være null");
     }
 
     @Test
-    public void utfør_behandlingstypeIkkeSatt_forventException() throws MelosysException {
+    void utfør_behandlingstypeIkkeSatt_forventException() {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, 123L);
 
-        expectedException.expect(TekniskException.class);
-        expectedException.expectMessage("Behandlingstype kan ikke være null");
-
-        opprettNyBehandling.utfør(prosessinstans);
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(() -> opprettNyBehandlingFraSed.utfør(prosessinstans))
+            .withMessageContaining("Behandlingstema kan ikke være null");
     }
 
 
     @Test
-    public void utfør_harTidligereBehandlingOgOppgave_nyBehandlingOpprettet() throws MelosysException {
+    void utfør_harTidligereBehandlingOgOppgave_nyBehandlingOpprettet() throws MelosysException {
         final long gsakSaksnummer = 123L;
         final Behandlingstema behandlingstema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
         final String journalpostID = "jp123";
@@ -97,24 +94,18 @@ public class OpprettNyBehandlingTest {
             .setOppgaveId("123oppg")
             .build();
 
-        when(fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer))
-            .thenReturn(Optional.of(fagsak));
-        when(behandlingService.nyBehandling(any(), any(), any(), any(), any(),any())).thenReturn(new Behandling());
+        when(fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer)).thenReturn(fagsak);
+        when(behandlingService.nyBehandling(any(), any(), any(), any(), any(), any())).thenReturn(new Behandling());
         when(oppgaveFasade.finnOppgaveMedFagsaksnummer(eq(fagsak.getSaksnummer())))
             .thenReturn(Optional.of(oppgave));
 
-        opprettNyBehandling.utfør(prosessinstans);
+        opprettNyBehandlingFraSed.utfør(prosessinstans);
 
         verify(oppgaveFasade).ferdigstillOppgave(eq(oppgave.getOppgaveId()));
         verify(behandlingService).avsluttBehandling(eq(behandling.getId()));
         verify(behandlingService).nyBehandling(
-            eq(fagsak), eq(Behandlingsstatus.UNDER_BEHANDLING), eq(Behandlingstyper.SED) ,eq(behandlingstema), eq(journalpostID), eq(dokumentID)
+            eq(fagsak), eq(Behandlingsstatus.UNDER_BEHANDLING), eq(Behandlingstyper.SED), eq(behandlingstema), eq(journalpostID), eq(dokumentID)
         );
         assertThat(prosessinstans.getBehandling()).isNotNull();
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
-
-
     }
-
-
 }
