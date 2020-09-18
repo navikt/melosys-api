@@ -66,7 +66,7 @@ public final class ProsessflytDefinisjon {
                 SOB_BEHANDLING_OPPRETTET,
                 OPPDATER_SAKSRELASJON,
                 OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
-                HENT_REGISTER_OPPL,
+                HENT_REGISTEROPPLYSNINGER,
                 JFR_VURDER_INNGANGSVILKÅR,
                 OPPRETT_OPPGAVE,
                 SEND_FORVALTNINGSMELDING
@@ -110,7 +110,7 @@ public final class ProsessflytDefinisjon {
                 JFR_OPPRETT_SØKNAD,
                 OPPRETT_ARKIVSAK,
                 SOB_BEHANDLING_OPPRETTET,
-                HENT_REGISTER_OPPL,
+                HENT_REGISTEROPPLYSNINGER,
                 JFR_VURDER_INNGANGSVILKÅR,
                 GJENBRUK_OPPGAVE
             )
@@ -165,7 +165,7 @@ public final class ProsessflytDefinisjon {
                 SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
                 SOB_BEHANDLING_OPPRETTET,
                 OPPRETT_SEDDOKUMENT,
-                REG_UNNTAK_HENT_REGISTEROPPLYSNINGER, //TODO: HENT_REGISTER_OPPL
+                HENT_REGISTEROPPLYSNINGER,
                 REG_UNNTAK_REGISTERKONTROLL, //TODO: gjør gjenbrukbart
                 REG_UNNTAK_BESTEM_BEHANDLINGSMAATE
             )
@@ -178,7 +178,7 @@ public final class ProsessflytDefinisjon {
                 SOB_BEHANDLING_OPPRETTET,
                 AVSLUTT_TIDLIGERE_MEDL_PERIODE,
                 OPPRETT_SEDDOKUMENT,
-                REG_UNNTAK_HENT_REGISTEROPPLYSNINGER,
+                HENT_REGISTEROPPLYSNINGER,
                 REG_UNNTAK_REGISTERKONTROLL,
                 REG_UNNTAK_BESTEM_BEHANDLINGSMAATE
             )
@@ -192,7 +192,7 @@ public final class ProsessflytDefinisjon {
                 SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
                 SOB_BEHANDLING_OPPRETTET,
                 AVSLUTT_TIDLIGERE_MEDL_PERIODE,
-                AFL_HENT_REGISTEROPPLYSNINGER,
+                HENT_REGISTEROPPLYSNINGER,
                 AFL_OPPRETT_BEHANDLINGSGRUNNLAG,
                 AFL_VURDER_INNGANGSVILKÅR, //FIXME: skal ikke vurderes når Norge IKKE er utpekt
                 AFL_REGISTERKONTROLL //TODO: etter dette må det opprettes en ny flyt om Norge ikke er utpekt og ingen treff i kontroll
@@ -205,7 +205,7 @@ public final class ProsessflytDefinisjon {
                 SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
                 SOB_BEHANDLING_OPPRETTET,
                 AVSLUTT_TIDLIGERE_MEDL_PERIODE,
-                AFL_HENT_REGISTEROPPLYSNINGER,
+                HENT_REGISTEROPPLYSNINGER,
                 AFL_OPPRETT_BEHANDLINGSGRUNNLAG,
                 AFL_VURDER_INNGANGSVILKÅR, //FIXME: skal ikke vurderes når Norge IKKE er utpekt
                 AFL_REGISTERKONTROLL //TODO: etter dette må det opprettes en ny flyt om Norge ikke er utpekt og ingen treff i kontroll
@@ -229,7 +229,7 @@ public final class ProsessflytDefinisjon {
                 AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE,
                 SOB_BEHANDLING_OPPRETTET,
                 AVSLUTT_TIDLIGERE_MEDL_PERIODE,
-                AOU_MOTTAK_HENT_REGISTEROPPLYSNINGER,
+                HENT_REGISTEROPPLYSNINGER,
                 AOU_MOTTAK_REGISTERKONTROLL,
                 AOU_MOTTAK_OPPRETT_PERIODE_MEDL,
                 AOU_MOTTAK_OPPRETT_OPPGAVE
@@ -243,7 +243,7 @@ public final class ProsessflytDefinisjon {
                 AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE,
                 SOB_BEHANDLING_OPPRETTET,
                 AVSLUTT_TIDLIGERE_MEDL_PERIODE,
-                AOU_MOTTAK_HENT_REGISTEROPPLYSNINGER,
+                HENT_REGISTEROPPLYSNINGER,
                 AOU_MOTTAK_REGISTERKONTROLL,
                 AOU_MOTTAK_OPPRETT_PERIODE_MEDL,
                 AOU_MOTTAK_OPPRETT_OPPGAVE
