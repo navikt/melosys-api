@@ -21,15 +21,15 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 
-@Component("RegistreringUnntakOpprettFagsakOgBehandling")
-public class OpprettFagsakOgBehandling implements StegBehandler {
+@Component
+public class OpprettFagsakOgBehandlingFraSed implements StegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(OpprettFagsakOgBehandling.class);
+    private static final Logger log = LoggerFactory.getLogger(OpprettFagsakOgBehandlingFraSed.class);
 
     private final FagsakService fagsakService;
 
     @Autowired
-    public OpprettFagsakOgBehandling(FagsakService fagsakService) {
+    public OpprettFagsakOgBehandlingFraSed(FagsakService fagsakService) {
         this.fagsakService = fagsakService;
     }
 
@@ -40,7 +40,6 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
-        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(EESSI_MELDING, MelosysEessiMelding.class);
 
         if (prosessinstans.getType() == ProsessType.MOTTAK_SED || prosessinstans.getType() == ProsessType.MOTTAK_SED_JOURNALFØRING) {

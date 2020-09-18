@@ -1,4 +1,4 @@
-package no.nav.melosys.service.eessi;
+package no.nav.melosys.service.eessi.ruting;
 
 import java.util.Optional;
 
@@ -10,7 +10,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -18,6 +17,7 @@ import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +27,11 @@ import org.springframework.stereotype.Service;
 
 //A002,A011
 @Service
-public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandlingInitialiserer {
+public class SvarAnmodningUnntakSedRuter implements SedRuterForSedType {
 
-    private static final Logger log = LoggerFactory.getLogger(SvarAnmodningUnntakInitialiserer.class);
+    private static final Logger log = LoggerFactory.getLogger(SvarAnmodningUnntakSedRuter.class);
 
+    private final ProsessinstansService prosessinstansService;
     private final FagsakService fagsakService;
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final OppgaveService oppgaveService;
@@ -38,16 +39,17 @@ public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandling
     private static final String MOTTATT_SED_BESKRIVELSE = "Mottatt svar på A001: SED %s";
 
     @Autowired
-    public SvarAnmodningUnntakInitialiserer(FagsakService fagsakService,
-                                            AnmodningsperiodeService anmodningsperiodeService,
-                                            @Qualifier("system") OppgaveService oppgaveService) {
+    public SvarAnmodningUnntakSedRuter(ProsessinstansService prosessinstansService, FagsakService fagsakService,
+                                       AnmodningsperiodeService anmodningsperiodeService,
+                                       @Qualifier("system") OppgaveService oppgaveService) {
+        this.prosessinstansService = prosessinstansService;
         this.fagsakService = fagsakService;
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.oppgaveService = oppgaveService;
     }
 
     @Override
-    public RutingResultat finnSakOgBestemRuting(Prosessinstans prosessinstans, Long gsakSaksnummer) throws TekniskException, FunksjonellException {
+    public void rutSedTilBehandling(Prosessinstans prosessinstans, Long gsakSaksnummer) throws TekniskException, FunksjonellException {
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
         Behandling behandling = hentBehandling(gsakSaksnummer);
         prosessinstans.setBehandling(behandling);
@@ -60,11 +62,19 @@ public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandling
                 melosysEessiMelding.getSedType(), melosysEessiMelding.getBucType(), behandling.getId(), melosysEessiMelding.getRinaSaksnummer()));
         } else if (behandling.getTema() == Behandlingstema.IKKE_YRKESAKTIV) {
             oppdaterBehandlingOgOppgave(behandling, melosysEessiMelding.getSedType());
-            return RutingResultat.INGEN_BEHANDLING;
+            opprettJournalføringProsess(melosysEessiMelding, behandling);
+        } else if (anmodningsperiode.map(Anmodningsperiode::getAnmodningsperiodeSvar).isPresent()) {
+            opprettJournalføringProsess(melosysEessiMelding, behandling);
+        } else {
+            prosessinstansService.opprettProsessinstansMottattSvarAnmodningUnntak(behandling, melosysEessiMelding);
         }
+    }
 
-        return anmodningsperiode.map(Anmodningsperiode::getAnmodningsperiodeSvar).isPresent() ?
-            RutingResultat.INGEN_BEHANDLING : RutingResultat.OPPDATER_BEHANDLING;
+    private void opprettJournalføringProsess(MelosysEessiMelding melosysEessiMelding, Behandling sistAktiveBehandling) {
+        prosessinstansService.opprettProsessinstansSedJournalføring(
+            sistAktiveBehandling,
+            melosysEessiMelding
+        );
     }
 
     private Behandling hentBehandling(Long gsakSaksnummer) throws FunksjonellException, TekniskException {
@@ -104,10 +114,5 @@ public class SvarAnmodningUnntakInitialiserer implements AutomatiskSedBehandling
     public boolean gjelderSedType(SedType sedType) {
         return sedType == SedType.A011
             || sedType == SedType.A002;
-    }
-
-    @Override
-    public ProsessType hentAktuellProsessType() {
-        return ProsessType.ANMODNING_OM_UNNTAK_SVAR;
     }
 }

@@ -14,43 +14,53 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.eessi.ruting.UnntaksperiodeSedRuter;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class UnntaksperiodeMottakInitialisererTest {
+public class UnntaksperiodeSedRuterTest {
 
+    @Mock
+    private ProsessinstansService prosessinstansService;
     @Mock
     private FagsakService fagsakService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
 
-    private UnntaksperiodeMottakInitialiserer unntaksperiodeMottakInitialiserer;
+    private UnntaksperiodeSedRuter unntaksperiodeSedRuter;
+
+    private final String aktørID = "143455432";
 
     @Before
     public void setup() {
-        unntaksperiodeMottakInitialiserer = new UnntaksperiodeMottakInitialiserer(fagsakService, behandlingsresultatService);
+        unntaksperiodeSedRuter = new UnntaksperiodeSedRuter(prosessinstansService, fagsakService, behandlingsresultatService);
     }
 
     @Test
     public void finnSakOgBestemRuting_nySak_verifiserResultatNySak() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = hentProsessinstans(LocalDate.now(), LocalDate.now().plusYears(1));
 
-        RutingResultat resultat = unntaksperiodeMottakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
-        assertThat(resultat).isEqualTo(RutingResultat.NY_SAK);
+        unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, 1L);
+
+        verify(prosessinstansService).opprettProsessinstansNySakUnntaksregistrering(
+            any(MelosysEessiMelding.class), eq(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING), eq(aktørID)
+        );
     }
 
     @Test
@@ -67,16 +77,19 @@ public class UnntaksperiodeMottakInitialisererTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
 
+        Fagsak fagsak = hentFagsak();
+
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-        when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak()));
+        when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(fagsak));
 
-        RutingResultat resultat = unntaksperiodeMottakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
+        unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, 1L);
 
-        assertThat(resultat).isEqualTo(RutingResultat.INGEN_BEHANDLING);
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(eq(fagsak.hentSistAktiveBehandling()), any(MelosysEessiMelding.class));
     }
 
     @Test
     public void finnSakOgBestemRuting_oppdatertSedPåEksisterendeSakErEndretPeriode_skalBehandles() throws Exception {
+        final long arkivsakID = 12321L;
         LocalDate fom = LocalDate.now();
         LocalDate tom = null;
         Prosessinstans prosessinstans = hentProsessinstans(fom, tom);
@@ -87,12 +100,16 @@ public class UnntaksperiodeMottakInitialisererTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
 
+        Fagsak fagsak = hentFagsak();
+
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-        when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(hentFagsak()));
+        when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(fagsak));
 
-        RutingResultat resultat = unntaksperiodeMottakInitialiserer.finnSakOgBestemRuting(prosessinstans, 1L);
+        unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
 
-        assertThat(resultat).isEqualTo(RutingResultat.NY_BEHANDLING);
+        verify(prosessinstansService).opprettProsessinstansNyBehandlingUnntaksregistrering(
+            any(MelosysEessiMelding.class), eq(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING), eq(arkivsakID)
+        );
     }
 
     private Fagsak hentFagsak() {
@@ -116,7 +133,7 @@ public class UnntaksperiodeMottakInitialisererTest {
 
     private MelosysEessiMelding hentMelosysEessiMelding(LocalDate fom, LocalDate tom) {
         MelosysEessiMelding melding = new MelosysEessiMelding();
-        melding.setAktoerId("123");
+        melding.setAktoerId(aktørID);
         melding.setArtikkel("12_1");
         melding.setDokumentId("123321");
         melding.setJournalpostId("j123");

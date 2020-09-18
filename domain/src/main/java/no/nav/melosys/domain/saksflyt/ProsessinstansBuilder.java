@@ -3,6 +3,7 @@ package no.nav.melosys.domain.saksflyt;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -14,6 +15,7 @@ public class ProsessinstansBuilder {
     private String begrunnelseFritekst;
     private String ytterligereInformasjonSed;
     private Set<String> eessiMottakere;
+    private MelosysEessiMelding eessiMelding;
 
     public ProsessinstansBuilder medType(ProsessType type) {
         this.type = type;
@@ -48,6 +50,11 @@ public class ProsessinstansBuilder {
 
     public ProsessinstansBuilder medEessiMottakere(Set<String> eessiMottakere) {
         this.eessiMottakere = eessiMottakere;
+        return this;
+    }
+
+    public ProsessinstansBuilder medEessiMelding(MelosysEessiMelding eessiMelding) {
+        this.eessiMelding = eessiMelding;
         return this;
     }
 

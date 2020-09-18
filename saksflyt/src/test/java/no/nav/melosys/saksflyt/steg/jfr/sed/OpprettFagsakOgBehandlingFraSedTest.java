@@ -29,19 +29,19 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OpprettFagsakOgBehandlingTest {
+public class OpprettFagsakOgBehandlingFraSedTest {
 
     @Mock
     private FagsakService fagsakService;
 
-    private OpprettFagsakOgBehandling opprettFagsakOgBehandling;
+    private OpprettFagsakOgBehandlingFraSed opprettFagsakOgBehandlingFraSed;
 
     @Captor
     private ArgumentCaptor<OpprettSakRequest> opprettSakRequestArgumentCaptor;
 
     @Before
-    public void setUp() throws Exception {
-        opprettFagsakOgBehandling = new OpprettFagsakOgBehandling(fagsakService);
+    public void setUp() {
+        opprettFagsakOgBehandlingFraSed = new OpprettFagsakOgBehandlingFraSed(fagsakService);
         when(fagsakService.nyFagsakOgBehandling(any())).thenReturn(hentFagsak());
     }
 
@@ -49,7 +49,7 @@ public class OpprettFagsakOgBehandlingTest {
     public void utfør_prosessTypeAnmodningsUnntak_verifiserNyFagsakOgBehandlingBlirOpprettet() throws Exception {
         Prosessinstans prosessinstans = hentProsessinstans(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
-        opprettFagsakOgBehandling.utfør(prosessinstans);
+        opprettFagsakOgBehandlingFraSed.utfør(prosessinstans);
         verify(fagsakService).nyFagsakOgBehandling(opprettSakRequestArgumentCaptor.capture());
         assertThat(opprettSakRequestArgumentCaptor.getValue().getSakstype()).isEqualTo(Sakstyper.EU_EOS);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_OPPRETT_SAK);
@@ -59,7 +59,7 @@ public class OpprettFagsakOgBehandlingTest {
     public void utfør__verifiserNyFagsakOgBehandlingBlirOpprettet() throws Exception {
         Prosessinstans prosessinstans = hentProsessinstans(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
-        opprettFagsakOgBehandling.utfør(prosessinstans);
+        opprettFagsakOgBehandlingFraSed.utfør(prosessinstans);
         verify(fagsakService).nyFagsakOgBehandling(opprettSakRequestArgumentCaptor.capture());
         assertThat(opprettSakRequestArgumentCaptor.getValue().getSakstype()).isEqualTo(Sakstyper.UKJENT);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_OPPRETT_SAK);
@@ -70,7 +70,7 @@ public class OpprettFagsakOgBehandlingTest {
         Prosessinstans prosessinstans = hentProsessinstans(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE);
         prosessinstans.setType(ProsessType.MOTTAK_SED);
         assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(() -> opprettFagsakOgBehandling.utfør(prosessinstans))
+            .isThrownBy(() -> opprettFagsakOgBehandlingFraSed.utfør(prosessinstans))
             .withMessageContaining("Prosessinstans er av type");
     }
 

@@ -19,15 +19,16 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.eessi.ruting.ArbeidFlereLandSedRuter;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -35,8 +36,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ArbeidFlereLandMottakInitialisererTest {
+public class ArbeidFlereLandSedRuterTest {
 
+    @Mock
+    private ProsessinstansService prosessinstansService;
     @Mock
     private FagsakService fagsakService;
     @Mock
@@ -46,7 +49,7 @@ public class ArbeidFlereLandMottakInitialisererTest {
     @Mock
     private OppgaveService oppgaveService;
 
-    private ArbeidFlereLandMottakInitialiserer arbeidFlereLandMottakInitialiserer;
+    private ArbeidFlereLandSedRuter arbeidFlereLandSedRuter;
 
     private final long behandlingID = 123;
     private final Long gsakSaksnummer = 1111L;
@@ -59,12 +62,13 @@ public class ArbeidFlereLandMottakInitialisererTest {
 
     @Before
     public void setup() throws IkkeFunnetException {
-        arbeidFlereLandMottakInitialiserer = new ArbeidFlereLandMottakInitialiserer(fagsakService, behandlingService, behandlingsresultatService, oppgaveService);
+        arbeidFlereLandSedRuter = new ArbeidFlereLandSedRuter(prosessinstansService, fagsakService, behandlingService, behandlingsresultatService, oppgaveService);
 
         behandling = new Behandling();
         behandling.setId(behandlingID);
         fagsak = new Fagsak();
         fagsak.setBehandlinger(List.of(behandling));
+        behandling.setFagsak(fagsak);
 
         melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setBucType(BucType.LA_BUC_02.name());
@@ -80,16 +84,19 @@ public class ArbeidFlereLandMottakInitialisererTest {
 
     @Test
     public void finnsakOgBestemRuting_utenArkivsaknummer_forventNySakRuting() throws MelosysException {
-        RutingResultat rutingResultat = arbeidFlereLandMottakInitialiserer.finnSakOgBestemRuting(new Prosessinstans(), null);
-        assertThat(rutingResultat).isEqualTo(RutingResultat.NY_SAK);
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
+
+        arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, null);
+        verify(prosessinstansService).opprettProsessinstansNySakArbeidFlereLand(
+            eq(melosysEessiMelding), eq(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND), eq(melosysEessiMelding.getAktoerId())
+        );
     }
 
     @Test
     public void finnsakOgBestemRuting_fagsakEksistererIkke_kasterException() {
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> arbeidFlereLandMottakInitialiserer.finnSakOgBestemRuting(new Prosessinstans(), 0L))
+            .isThrownBy(() -> arbeidFlereLandSedRuter.rutSedTilBehandling(new Prosessinstans(), 0L))
             .withMessageContaining("Finner ingen sak tilknyttet");
-
     }
 
     @Test
@@ -98,7 +105,11 @@ public class ArbeidFlereLandMottakInitialisererTest {
         melosysEessiMelding.setLovvalgsland(Landkoder.SE.getKode());
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
-        assertThat(arbeidFlereLandMottakInitialiserer.finnSakOgBestemRuting(prosessinstans, gsakSaksnummer)).isEqualTo(RutingResultat.NY_BEHANDLING);
+        arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer);
+
+        verify(prosessinstansService).opprettProsessinstansNyBehandlingArbeidFlereLand(
+            eq(melosysEessiMelding), eq(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND), eq(gsakSaksnummer)
+        );
     }
 
     @Test
@@ -109,7 +120,7 @@ public class ArbeidFlereLandMottakInitialisererTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> arbeidFlereLandMottakInitialiserer.finnSakOgBestemRuting(prosessinstans, gsakSaksnummer))
+            .isThrownBy(() -> arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer))
             .withMessageContaining("Det er allerede fattet vedtak på behandling");
     }
 
@@ -119,19 +130,24 @@ public class ArbeidFlereLandMottakInitialisererTest {
         melosysEessiMelding.setLovvalgsland(Landkoder.NO.getKode());
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
-        assertThat(arbeidFlereLandMottakInitialiserer.finnSakOgBestemRuting(prosessinstans, gsakSaksnummer)).isEqualTo(RutingResultat.NY_BEHANDLING);
+        arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer);
+
+        verify(prosessinstansService).opprettProsessinstansNyBehandlingArbeidFlereLand(
+            eq(melosysEessiMelding), eq(Behandlingstema.BESLUTNING_LOVVALG_NORGE), eq(gsakSaksnummer)
+        );
     }
 
     @Test
-    public void finnSakOgBestemRuting_norgeUtpektNyttTemaNorgeUtpektBehandlingInaktiv_forventIngenBehandlingOpprettOppgave() throws MelosysException {
+    public void finnSakOgBestemRuting_norgeUtpektNyttTemaNorgeUtpektBehandlingInaktiv_forventOppgaveOpprettetOgProsessinstansJfr() throws MelosysException {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         melosysEessiMelding.setLovvalgsland(Landkoder.NO.getKode());
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
-        assertThat(arbeidFlereLandMottakInitialiserer.finnSakOgBestemRuting(prosessinstans, gsakSaksnummer)).isEqualTo(RutingResultat.INGEN_BEHANDLING);
-        assertThat(prosessinstans.getBehandling()).isEqualTo(behandling);
+        arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer);
+
         verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), any(), any(), any());
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(eq(behandling), eq(melosysEessiMelding));
     }
 
     @Test
@@ -140,9 +156,10 @@ public class ArbeidFlereLandMottakInitialisererTest {
         melosysEessiMelding.setLovvalgsland(Landkoder.NO.getKode());
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
-        assertThat(arbeidFlereLandMottakInitialiserer.finnSakOgBestemRuting(prosessinstans, gsakSaksnummer)).isEqualTo(RutingResultat.INGEN_BEHANDLING);
-        assertThat(prosessinstans.getBehandling()).isEqualTo(behandling);
+        arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer);
+
         verify(behandlingService).oppdaterStatus(eq(behandlingID), eq(Behandlingsstatus.VURDER_DOKUMENT));
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(eq(behandling), eq(melosysEessiMelding));
     }
 
     @Test
@@ -159,8 +176,9 @@ public class ArbeidFlereLandMottakInitialisererTest {
         melosysEessiMelding.setPeriode(new Periode(lovvalgsperiode.getFom(), lovvalgsperiode.getTom()));
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
-        assertThat(arbeidFlereLandMottakInitialiserer.finnSakOgBestemRuting(prosessinstans, gsakSaksnummer)).isEqualTo(RutingResultat.INGEN_BEHANDLING);
-        assertThat(prosessinstans.getBehandling()).isEqualTo(behandling);
+        arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer);
+
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(eq(behandling), eq(melosysEessiMelding));
     }
 
     @Test
@@ -177,6 +195,10 @@ public class ArbeidFlereLandMottakInitialisererTest {
         melosysEessiMelding.setPeriode(new Periode(lovvalgsperiode.getFom(), lovvalgsperiode.getTom().plusDays(1)));
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
-        assertThat(arbeidFlereLandMottakInitialiserer.finnSakOgBestemRuting(prosessinstans, gsakSaksnummer)).isEqualTo(RutingResultat.NY_BEHANDLING);
+        arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer);
+
+        verify(prosessinstansService).opprettProsessinstansNyBehandlingArbeidFlereLand(
+            eq(melosysEessiMelding), eq(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND), eq(gsakSaksnummer)
+        );
     }
 }

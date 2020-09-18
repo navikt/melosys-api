@@ -145,6 +145,90 @@ public final class ProsessflytDefinisjon {
             )
         );
 
+        PROSESS_FLYT_MAP.put(ProsessType.MOTTAK_SED,
+            new ProsessFlyt(ProsessType.MOTTAK_SED,
+                SED_MOTTAK_RUTING
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.MOTTAK_SED_JOURNALFØRING,
+            new ProsessFlyt(ProsessType.MOTTAK_SED_JOURNALFØRING,
+                SED_MOTTAK_FERDIGSTILL_JOURNALPOST
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.ANMODNING_OM_UNNTAK_SVAR,
+            new ProsessFlyt(ProsessType.ANMODNING_OM_UNNTAK_SVAR
+                //TODO
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.REGISTRERING_UNNTAK_NY_SAK,
+            new ProsessFlyt(ProsessType.REGISTRERING_UNNTAK_NY_SAK,
+                SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH,
+                OPPRETT_ARKIVSAK,
+                SED_MOTTAK_OPPDATER_SAKSRELASJON, //TODO: bør refaktoreres slik at vi kun trenger ett steg
+                SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
+                REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET, //TODO: gjebruk steg
+                REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE, //TODO: trengs nok ikke når vi oppretter ny sak
+                REG_UNNTAK_OPPRETT_SEDDOKUMENT, //TODO: bør gjøres gjenbrukbart
+                REG_UNNTAK_HENT_REGISTEROPPLYSNINGER, //TODO: HENT_REGISTER_OPPL
+                REG_UNNTAK_REGISTERKONTROLL, //TODO: gjør gjenbrukbart
+                REG_UNNTAK_BESTEM_BEHANDLINGSMAATE
+            )
+        ); //TODO: flyter for godkjenning/avvisning
+
+        PROSESS_FLYT_MAP.put(ProsessType.REGISTRERING_UNNTAK_NY_BEHANDLING,
+            new ProsessFlyt(ProsessType.REGISTRERING_UNNTAK_NY_BEHANDLING,
+                SED_MOTTAK_OPPRETT_NY_BEHANDLING,
+                SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
+                REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET,
+                REG_UNNTAK_AVSLUTT_TIDLIGERE_PERIODE,
+                REG_UNNTAK_OPPRETT_SEDDOKUMENT,
+                REG_UNNTAK_HENT_REGISTEROPPLYSNINGER,
+                REG_UNNTAK_REGISTERKONTROLL,
+                REG_UNNTAK_BESTEM_BEHANDLINGSMAATE
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.ARBEID_FLERE_LAND_NY_SAK,
+            new ProsessFlyt(ProsessType.ARBEID_FLERE_LAND_NY_SAK,
+                SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH,
+                OPPRETT_ARKIVSAK,
+                SED_MOTTAK_OPPDATER_SAKSRELASJON, //TODO: bør refaktoreres slik at vi kun trenger ett steg
+                SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
+                AFL_SAK_OG_BEHANDLING_OPPRETTET,
+                AFL_AVSLUTT_TIDLIGERE_PERIODE,
+                AFL_HENT_REGISTEROPPLYSNINGER,
+                AFL_OPPRETT_BEHANDLINGSGRUNNLAG,
+                AFL_VURDER_INNGANGSVILKÅR, //FIXME: skal ikke vurderes når Norge IKKE er utpekt
+                AFL_REGISTERKONTROLL //TODO: etter dette må det opprettes en ny flyt om Norge ikke er utpekt og ingen treff i kontroll
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.ARBEID_FLERE_LAND_NY_BEHANDLING,
+            new ProsessFlyt(ProsessType.ARBEID_FLERE_LAND_NY_BEHANDLING,
+                SED_MOTTAK_OPPRETT_NY_BEHANDLING,
+                SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
+                AFL_SAK_OG_BEHANDLING_OPPRETTET,
+                AFL_AVSLUTT_TIDLIGERE_PERIODE,
+                AFL_HENT_REGISTEROPPLYSNINGER,
+                AFL_OPPRETT_BEHANDLINGSGRUNNLAG,
+                AFL_VURDER_INNGANGSVILKÅR, //FIXME: skal ikke vurderes når Norge IKKE er utpekt
+                AFL_REGISTERKONTROLL //TODO: etter dette må det opprettes en ny flyt om Norge ikke er utpekt og ingen treff i kontroll
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.ANMODNING_OM_UNNTAK_SVAR,
+            new ProsessFlyt(ProsessType.ANMODNING_OM_UNNTAK_SVAR,
+                SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
+                AOU_SVAR_OPPRETT_ANMODNINGSPERIODESVAR,
+                AOU_SVAR_OPPDATER_BEHANDLING
+            )
+        );
+
+
+
     }
 
     public static Optional<ProsessFlyt> finnFlytForProsessType(ProsessType prosessType) {

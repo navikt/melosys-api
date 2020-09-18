@@ -1,4 +1,4 @@
-package no.nav.melosys.service.eessi;
+package no.nav.melosys.service.eessi.ruting;
 
 import java.util.Optional;
 
@@ -10,16 +10,16 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,18 +27,20 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ManuellSedBehandlingInitialiserer {
+public class DefaultSedRuter implements SedRuter {
 
-    private static final Logger log = LoggerFactory.getLogger(ManuellSedBehandlingInitialiserer.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultSedRuter.class);
 
+    private final ProsessinstansService prosessinstansService;
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
 
     @Autowired
-    public ManuellSedBehandlingInitialiserer(FagsakService fagsakService,
-                                             BehandlingService behandlingService,
-                                             @Qualifier("system") OppgaveService oppgaveService) {
+    public DefaultSedRuter(ProsessinstansService prosessinstansService, FagsakService fagsakService,
+                           BehandlingService behandlingService,
+                           @Qualifier("system") OppgaveService oppgaveService) {
+        this.prosessinstansService = prosessinstansService;
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.oppgaveService = oppgaveService;
@@ -48,16 +50,15 @@ public class ManuellSedBehandlingInitialiserer {
      * Hvis SED'en er tilknyttet en sak går den til ferdigstilling av journalpost
      * Ellers opprettes det en journalføringsoppgave
      */
-    public void bestemManuellBehandling(Prosessinstans prosessinstans, MelosysEessiMelding melosysEessiMelding) throws TekniskException, FunksjonellException {
+    public void rutSedTilBehandling(Prosessinstans prosessinstans, Long gsakSaksnummer) throws MelosysException {
+        final MelosysEessiMelding eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
+        SedType sedType = SedType.valueOf(eessiMelding.getSedType());
 
-        Optional<Long> gsakSaksnummer = Optional.ofNullable(prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class));
-
-        SedType sedType = SedType.valueOf(melosysEessiMelding.getSedType());
-        if (gsakSaksnummer.isEmpty()) {
-            prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_OPPRETT_JFR_OPPG);
-
+        if (gsakSaksnummer == null) {
+            log.info("Oppretter oppgave sed {} i rinasak {}", eessiMelding.getSedId(), eessiMelding.getRinaSaksnummer());
+            oppgaveService.opprettJournalføringsoppgave(eessiMelding.getJournalpostId(), prosessinstans.hentAktørIDFraDataEllerSED());
         } else {
-            Fagsak fagsak = fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer.get());
+            Fagsak fagsak = fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer);
             Behandling behandling = fagsak.hentSistAktiveBehandling();
 
             if (behandling.erAktiv()) {
@@ -69,9 +70,15 @@ public class ManuellSedBehandlingInitialiserer {
             }
 
             prosessinstans.setBehandling(behandling);
-            prosessinstans.setType(ProsessType.MOTTAK_SED_JOURNALFØRING);
-            prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
+            opprettJournalføringProsess(eessiMelding, behandling);
         }
+    }
+
+    private void opprettJournalføringProsess(MelosysEessiMelding melosysEessiMelding, Behandling sistAktiveBehandling) {
+        prosessinstansService.opprettProsessinstansSedJournalføring(
+            sistAktiveBehandling,
+            melosysEessiMelding
+        );
     }
 
     private boolean skalOppdatereOppgaveForSedType(SedType sedType) {

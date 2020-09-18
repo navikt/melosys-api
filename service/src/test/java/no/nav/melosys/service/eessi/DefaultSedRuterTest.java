@@ -14,12 +14,13 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.eessi.ruting.DefaultSedRuter;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,8 +34,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ManuellSedBehandlingInitialisererTest {
+public class DefaultSedRuterTest {
 
+    @Mock
+    private ProsessinstansService prosessinstansService;
     @Mock
     private FagsakService fagsakService;
     @Mock
@@ -42,32 +45,37 @@ public class ManuellSedBehandlingInitialisererTest {
     @Mock
     private OppgaveService oppgaveService;
 
-    private ManuellSedBehandlingInitialiserer manuellSedBehandlingInitialiserer;
+    private DefaultSedRuter defaultSedRuter;
 
     private static final String SAKSNUMMER = "MEL-!!!";
     private static final Long GSAK_SAKSNUMMER = 123L;
 
     @Before
     public void setup() {
-        manuellSedBehandlingInitialiserer = new ManuellSedBehandlingInitialiserer(fagsakService, behandlingService, oppgaveService);
+        defaultSedRuter = new DefaultSedRuter(prosessinstansService, fagsakService, behandlingService, oppgaveService);
     }
 
     @Test
-    public void bestemManuellBehandling_saksnummerFinnesIkkeErNySedINyBehandling_nesteStegOppretJfrOppg() throws FunksjonellException, TekniskException {
+    public void bestemManuellBehandling_saksnummerFinnesIkkeErNySedINyBehandling_nesteStegOppretJfrOppg() throws MelosysException {
         Prosessinstans prosessinstans = new Prosessinstans();
         MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(SedType.A005);
-        manuellSedBehandlingInitialiserer.bestemManuellBehandling(prosessinstans, melosysEessiMelding);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_OPPRETT_JFR_OPPG);
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
+
+        defaultSedRuter.rutSedTilBehandling(prosessinstans, null);
+
+        verify(oppgaveService).opprettJournalføringsoppgave(eq(melosysEessiMelding.getJournalpostId()), eq(melosysEessiMelding.getAktoerId()));
     }
 
     @Test
-    public void bestemManuellBehandling_saksnummerOgFagsakEksisterer_nesteStegFerdigstillJournalpost() throws FunksjonellException, TekniskException {
+    public void bestemManuellBehandling_saksnummerOgFagsakEksisterer_nesteStegFerdigstillJournalpost() throws MelosysException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER);
         MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(SedType.H002);
-
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
         when(fagsakService.hentFagsakFraGsakSaksnummer(GSAK_SAKSNUMMER)).thenReturn(hentFagsak());
-        manuellSedBehandlingInitialiserer.bestemManuellBehandling(prosessinstans, melosysEessiMelding);
+
+        defaultSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER);
+
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.MOTTAK_SED_JOURNALFØRING);
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
         assertThat(prosessinstans.getBehandling()).isNotNull();
@@ -75,60 +83,64 @@ public class ManuellSedBehandlingInitialisererTest {
     }
 
     @Test
-    public void bestemManuellBehandling_X009PurringSaksnummerOgFagsakEksisterer_oppdatererPrioritet() throws FunksjonellException, TekniskException {
+    public void bestemManuellBehandling_X009PurringSaksnummerOgFagsakEksisterer_oppdatererPrioritet() throws MelosysException {
 
         final String oppgaveId = "333";
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER);
         MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(SedType.X009);
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
         Oppgave oppgave = new Oppgave.Builder().setOppgaveId(oppgaveId).build();
+        Fagsak fagsak = hentFagsak();
 
-        when(fagsakService.hentFagsakFraGsakSaksnummer(GSAK_SAKSNUMMER)).thenReturn(hentFagsak());
+        when(fagsakService.hentFagsakFraGsakSaksnummer(GSAK_SAKSNUMMER)).thenReturn(fagsak);
         when(oppgaveService.finnOppgaveMedFagsaksnummer(eq(SAKSNUMMER))).thenReturn(Optional.of(oppgave));
-        manuellSedBehandlingInitialiserer.bestemManuellBehandling(prosessinstans, melosysEessiMelding);
-        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.MOTTAK_SED_JOURNALFØRING);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
+
+        defaultSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER);
+
         assertThat(prosessinstans.getBehandling()).isNotNull();
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(eq(fagsak.hentAktivBehandling()), eq(melosysEessiMelding));
         verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.VURDER_DOKUMENT));
         verify(oppgaveService).finnOppgaveMedFagsaksnummer(eq(SAKSNUMMER));
         verify(oppgaveService).oppdaterOppgave(eq(oppgaveId), any(OppgaveOppdatering.class));
     }
 
     @Test
-    public void bestemManuellBehandling_A012SaksnummerOgFagsakEksistererStatusMidlertidigLovvalgsbeslutning_ikkeOppdaterStatusEllerOppgave() throws FunksjonellException, TekniskException {
+    public void bestemManuellBehandling_A012SaksnummerOgFagsakEksistererStatusMidlertidigLovvalgsbeslutning_ikkeOppdaterStatusEllerOppgave() throws MelosysException {
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER);
         MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(SedType.A012);
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         Fagsak fagsak = hentFagsak();
         fagsak.getSistOppdaterteBehandling().setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
 
         when(fagsakService.hentFagsakFraGsakSaksnummer(GSAK_SAKSNUMMER)).thenReturn(fagsak);
-        manuellSedBehandlingInitialiserer.bestemManuellBehandling(prosessinstans, melosysEessiMelding);
-        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.MOTTAK_SED_JOURNALFØRING);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
+        defaultSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER);
         assertThat(prosessinstans.getBehandling()).isNotNull();
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(eq(fagsak.hentSistAktiveBehandling()), eq(melosysEessiMelding));
         verify(behandlingService, never()).oppdaterStatus(anyLong(), any());
         verify(oppgaveService, never()).finnOppgaveMedFagsaksnummer(any());
         verify(oppgaveService, never()).oppdaterOppgave(any(), any());
     }
 
     @Test
-    public void bestemManuellBehandling_behandlingAvsluttetOgSkalBehandleSED_opprettOppgave() throws FunksjonellException, TekniskException {
+    public void bestemManuellBehandling_behandlingAvsluttetOgSkalBehandleSED_opprettOppgave() throws MelosysException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER);
         MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(SedType.A004);
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         Fagsak fagsak = hentFagsak();
         fagsak.hentAktivBehandling().setStatus(Behandlingsstatus.AVSLUTTET);
         when(fagsakService.hentFagsakFraGsakSaksnummer(GSAK_SAKSNUMMER)).thenReturn(fagsak);
 
-        manuellSedBehandlingInitialiserer.bestemManuellBehandling(prosessinstans, melosysEessiMelding);
+        defaultSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER);
 
         ArgumentCaptor<Oppgave> oppgaveCaptor = ArgumentCaptor.forClass(Oppgave.class);
         verify(behandlingService, never()).oppdaterStatus(anyLong(), any());
         verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(eq(fagsak.hentSistAktiveBehandling()), eq(melosysEessiMelding));
         assertThat(oppgaveCaptor.getValue())
             .hasFieldOrPropertyWithValue("saksnummer", SAKSNUMMER)
             .hasFieldOrPropertyWithValue("beskrivelse", "Mottatt SED A004");
@@ -137,6 +149,7 @@ public class ManuellSedBehandlingInitialisererTest {
     private MelosysEessiMelding hentMelosysEessiMelding(SedType sedType) {
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setSedType(sedType.name());
+        melosysEessiMelding.setAktoerId("12321321");
         return melosysEessiMelding;
     }
 
