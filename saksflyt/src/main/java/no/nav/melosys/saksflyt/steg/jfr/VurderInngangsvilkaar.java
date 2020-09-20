@@ -33,19 +33,24 @@ public class VurderInngangsvilkaar implements StegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return ProsessSteg.JFR_VURDER_INNGANGSVILKÅR;
+        return ProsessSteg.VURDER_INNGANGSVILKÅR;
     }
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
-        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
+        final long behandlingID = prosessinstans.getBehandling().getId();
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
-        var søknadsland = behandling.finnSøknadsLand();
-        var periode = behandling.finnPeriode()
-            .orElseThrow(() -> new IkkeFunnetException("Finner ingen periode for inngangsvilkårsvurdering for behandling " + behandling.getId()));
+        if (behandling.kanResultereIVedtak()) {
+            var søknadsland = behandling.finnSøknadsLand();
+            var periode = behandling.finnPeriode()
+                .orElseThrow(() -> new IkkeFunnetException("Finner ingen periode for inngangsvilkårsvurdering for behandling " + behandlingID));
 
-        boolean kvalifisererForEF_883_2004  = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandling.getId(), søknadsland, periode);
-        fagsakService.oppdaterType(prosessinstans.getBehandling().getFagsak(), kvalifisererForEF_883_2004);
-        log.info("Inngangsvilkår vurdert for behandling {}. kvalifisererForEF_883_2004: {}", behandling.getId(), kvalifisererForEF_883_2004);
+            boolean kvalifisererForEF_883_2004  = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, periode);
+            fagsakService.oppdaterType(prosessinstans.getBehandling().getFagsak(), kvalifisererForEF_883_2004);
+            log.info("Inngangsvilkår vurdert for behandling {}. kvalifisererForEF_883_2004: {}", behandlingID, kvalifisererForEF_883_2004);
+        } else {
+            log.info("Inngangsvilkår ikke vurdert for behandling {}", behandlingID);
+        }
     }
 }

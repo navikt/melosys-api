@@ -40,7 +40,7 @@ public class OpprettBehandlingsgrunnlag implements StegBehandler {
         behandlingsgrunnlagService.opprettSedGrunnlag(prosessinstans.getBehandling().getId(), sedGrunnlag);
 
         if (prosessinstans.getBehandling().erNorgeUtpekt()) {
-            prosessinstans.setSteg(ProsessSteg.AFL_VURDER_INNGANGSVILKÅR);
+            prosessinstans.setSteg(ProsessSteg.VURDER_INNGANGSVILKÅR);
         } else  {
             prosessinstans.setSteg(ProsessSteg.REGISTERKONTROLL);
         }
