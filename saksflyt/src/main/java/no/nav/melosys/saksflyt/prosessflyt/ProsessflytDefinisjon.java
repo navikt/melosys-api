@@ -234,7 +234,7 @@ public final class ProsessflytDefinisjon {
                 HENT_REGISTEROPPLYSNINGER,
                 REGISTERKONTROLL,
                 AOU_MOTTAK_OPPRETT_PERIODE_MEDL,
-                AOU_MOTTAK_OPPRETT_OPPGAVE
+                BESTEM_BEHANDLINGMÅTE_SED
             )
         );
 
@@ -248,7 +248,7 @@ public final class ProsessflytDefinisjon {
                 HENT_REGISTEROPPLYSNINGER,
                 REGISTERKONTROLL,
                 AOU_MOTTAK_OPPRETT_PERIODE_MEDL,
-                AOU_MOTTAK_OPPRETT_OPPGAVE
+                BESTEM_BEHANDLINGMÅTE_SED
             )
         );
     }

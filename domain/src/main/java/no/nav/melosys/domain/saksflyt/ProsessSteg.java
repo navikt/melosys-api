@@ -18,7 +18,7 @@ public enum ProsessSteg implements Kodeverk {
 
     // Oppgave
     GJENBRUK_OPPGAVE("GJENBRUK_OPPGAVE", "Gjenbruker eksisterende oppgave"),
-    OPPRETT_OPPGAVE("GSAK_OPPRETT_OPPGAVE", "Oppretter behandlingsoppgave"),
+    OPPRETT_OPPGAVE("OPPRETT_OPPGAVE", "Oppretter behandlingsoppgave"),
 
     SEND_FORVALTNINGSMELDING("SEND_FORVALTNINGSMELDING", "Send forvaltningsmelding til søker"),
     MANGELBREV("MANGELBREV", "Opprett mangelbrev"),
@@ -38,7 +38,6 @@ public enum ProsessSteg implements Kodeverk {
     //Mottak anmodning om unntak
     AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE("AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE", "Opprett anmodningsperiode"),
     AOU_MOTTAK_OPPRETT_PERIODE_MEDL("AOU_MOTTAK_OPPRETT_PERIODE_MEDL", "Opprett periode under avklaring i Medl"),
-    AOU_MOTTAK_OPPRETT_OPPGAVE("AOU_MOTTAK_OPPRETT_OPPGAVE", "Opprett oppgave for manuell behandling"),
 
     //Svar på mottatt anmodning om unntak
     AOU_MOTTAK_SVAR_OPPDATER_MEDL("AOU_MOTTAK_SVAR_OPPDATER_MEDL", "Oppdater periode i Medl"),
@@ -89,7 +88,6 @@ public enum ProsessSteg implements Kodeverk {
 
     //Arbeid i flere land, mottak av A003
     AFL_OPPRETT_BEHANDLINGSGRUNNLAG("AFL_OPPRETT_BEHANDLINGSGRUNNLAG","Oppretter behandlingsgrunnlag"),
-    AFL_OPPRETT_OPPGAVE("AFL_OPPRETT_OPPGAVE","Oppretter oppgave til manuell behandling"),
 
     // Svar på A003
     AFL_SVAR_SEND_AVSLAG("AFL_SVAR_SEND_AVSLAG", "Send SED A004 til alle arbeidsland"),
@@ -101,7 +99,6 @@ public enum ProsessSteg implements Kodeverk {
     BESTEM_BEHANDLINGMÅTE_SED("BESTEM_BEHANDLINGMÅTE_SED", "Bestemmer videre behandlingsmåte for en mottatt SED etter registerkontroll"),
     REG_UNNTAK_OPPDATER_MEDL("REG_UNNTAK_OPPDATER_MEDL", "Sett periode endelig i MEDL"),
     REG_UNNTAK_VARSLE_UTLAND("REG_UNNTAK_VARSLE_UTLAND", "Varsler utland om godkjent unntaksperiode"),
-    REG_UNNTAK_OPPRETT_OPPGAVE("REG_UNNTAK_OPPRETT_OPPGAVE","Opprett oppgave for manuell behandling"),
     REG_UNNTAK_AVSLUTT_BEHANDLING("REG_UNNTAK_AVSLUTT_BEHANDLING", "Avslutt behandling"),
     REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET("REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET", "Oppdaterer status på sak i sob til avsluttet"),
     REG_UNNTAK_PERIODE_IKKE_GODKJENT("REG_UNNTAK_PERIODE_IKKE_GODKJENT", "Unntaksperiode avvist av saksbehandler"),

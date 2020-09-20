@@ -39,6 +39,6 @@ public class OpprettPeriodeIMedl implements StegBehandler {
         Anmodningsperiode anmodningsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingID).hentValidertAnmodningsperiode();
         medlPeriodeService.opprettPeriodeUnderAvklaring(anmodningsperiode, behandlingID, true);
 
-        prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_OPPRETT_OPPGAVE);
+        //prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_OPPRETT_OPPGAVE);
     }
 }
