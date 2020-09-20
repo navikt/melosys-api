@@ -42,7 +42,7 @@ public class OpprettBehandlingsgrunnlag implements StegBehandler {
         if (prosessinstans.getBehandling().erNorgeUtpekt()) {
             prosessinstans.setSteg(ProsessSteg.AFL_VURDER_INNGANGSVILKÅR);
         } else  {
-            prosessinstans.setSteg(ProsessSteg.AFL_REGISTERKONTROLL);
+            prosessinstans.setSteg(ProsessSteg.REGISTERKONTROLL);
         }
     }
 }

@@ -11,8 +11,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
@@ -64,22 +62,6 @@ public class DefaultSedRuterTest {
         defaultSedRuter.rutSedTilBehandling(prosessinstans, null);
 
         verify(oppgaveService).opprettJournalføringsoppgave(eq(melosysEessiMelding.getJournalpostId()), eq(melosysEessiMelding.getAktoerId()));
-    }
-
-    @Test
-    public void bestemManuellBehandling_saksnummerOgFagsakEksisterer_nesteStegFerdigstillJournalpost() throws MelosysException {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER);
-        MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(SedType.H002);
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
-        when(fagsakService.hentFagsakFraGsakSaksnummer(GSAK_SAKSNUMMER)).thenReturn(hentFagsak());
-
-        defaultSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER);
-
-        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.MOTTAK_SED_JOURNALFØRING);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
-        assertThat(prosessinstans.getBehandling()).isNotNull();
-        verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.VURDER_DOKUMENT));
     }
 
     @Test

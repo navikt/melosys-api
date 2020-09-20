@@ -37,7 +37,6 @@ public enum ProsessSteg implements Kodeverk {
 
     //Mottak anmodning om unntak
     AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE("AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE", "Opprett anmodningsperiode"),
-    AOU_MOTTAK_REGISTERKONTROLL("AOU_MOTTAK_REGISTERKONTROLL", "Validerer informasjon om en unntaksperiode"),
     AOU_MOTTAK_OPPRETT_PERIODE_MEDL("AOU_MOTTAK_OPPRETT_PERIODE_MEDL", "Opprett periode under avklaring i Medl"),
     AOU_MOTTAK_OPPRETT_OPPGAVE("AOU_MOTTAK_OPPRETT_OPPGAVE", "Opprett oppgave for manuell behandling"),
 
@@ -78,6 +77,7 @@ public enum ProsessSteg implements Kodeverk {
     SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH("SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH","Opprett fagsak og behandling"),
     OPPDATER_SAKSRELASJON("OPPDATER_SAKSRELASJON", "Oppdaterer saksrelasjon mellom melosys-sak og rina-sak"),
     SED_MOTTAK_FERDIGSTILL_JOURNALPOST("SED_MOTTAK_FERDIGSTILL_JOURNALPOST", "Journalføring av innkommende SED"),
+    REGISTERKONTROLL("REGISTERKONTROLL", "Utfører registerkontroll for en behandling"),
 
     SED_GENERELL_SAK_HENT_PERSON("SED_GENERELL_SAK_HENT_PERSON", "Henter person tilknyttet behandling"),
     SED_GENERELL_SAK_OPPRETT_OPPGAVE("SED_GENERELL_SAK_OPPRETT_OPPGAVE", "Oppretter oppgave for behandling"),
@@ -90,7 +90,6 @@ public enum ProsessSteg implements Kodeverk {
     //Arbeid i flere land, mottak av A003
     AFL_VURDER_INNGANGSVILKÅR("AFL_VURDER_INNGANGSVILKÅR","Vurderer inngangsvilkår når Norge er utpekt"),
     AFL_OPPRETT_BEHANDLINGSGRUNNLAG("AFL_OPPRETT_BEHANDLINGSGRUNNLAG","Oppretter behandlingsgrunnlag"),
-    AFL_REGISTERKONTROLL("AFL_REGISTERKONTROLL","Utfører registerkontroll"),
     AFL_OPPRETT_OPPGAVE("AFL_OPPRETT_OPPGAVE","Oppretter oppgave til manuell behandling"),
 
     // Svar på A003
@@ -100,8 +99,7 @@ public enum ProsessSteg implements Kodeverk {
     //Unntak medlemskap
     AVSLUTT_TIDLIGERE_MEDL_PERIODE("AVSLUTT_TIDLIGERE_MEDL_PERIODE", "Avslutter tidligere periode i Medl"),
     OPPRETT_SEDDOKUMENT("OPPRETT_SEDDOKUMENT", "Oppretter saksopplysning fra SED"),
-    REG_UNNTAK_REGISTERKONTROLL("REG_UNNTAK_REGISTERKONTROLL", "Validerer informasjon om en unntaksperiode"),
-    REG_UNNTAK_BESTEM_BEHANDLINGSMAATE("REG_UNNTAK_BESTEM_BEHANDLINGSMAATE", "Bestem om søknad skal registreres automatisk eller behandles manuelt"),
+    BESTEM_BEHANDLINGMÅTE_SED("BESTEM_BEHANDLINGMÅTE_SED", "Bestemmer videre behandlingsmåte for en mottatt SED etter registerkontroll"),
     REG_UNNTAK_OPPDATER_MEDL("REG_UNNTAK_OPPDATER_MEDL", "Sett periode endelig i MEDL"),
     REG_UNNTAK_VARSLE_UTLAND("REG_UNNTAK_VARSLE_UTLAND", "Varsler utland om godkjent unntaksperiode"),
     REG_UNNTAK_OPPRETT_OPPGAVE("REG_UNNTAK_OPPRETT_OPPGAVE","Opprett oppgave for manuell behandling"),

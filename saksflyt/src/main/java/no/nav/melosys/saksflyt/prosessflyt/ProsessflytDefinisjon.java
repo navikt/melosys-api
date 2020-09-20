@@ -166,8 +166,8 @@ public final class ProsessflytDefinisjon {
                 SOB_BEHANDLING_OPPRETTET,
                 OPPRETT_SEDDOKUMENT,
                 HENT_REGISTEROPPLYSNINGER,
-                REG_UNNTAK_REGISTERKONTROLL, //TODO: gjør gjenbrukbart
-                REG_UNNTAK_BESTEM_BEHANDLINGSMAATE
+                REGISTERKONTROLL,
+                BESTEM_BEHANDLINGMÅTE_SED
             )
         ); //TODO: flyter for godkjenning/avvisning
 
@@ -179,8 +179,8 @@ public final class ProsessflytDefinisjon {
                 AVSLUTT_TIDLIGERE_MEDL_PERIODE,
                 OPPRETT_SEDDOKUMENT,
                 HENT_REGISTEROPPLYSNINGER,
-                REG_UNNTAK_REGISTERKONTROLL,
-                REG_UNNTAK_BESTEM_BEHANDLINGSMAATE
+                REGISTERKONTROLL,
+                BESTEM_BEHANDLINGMÅTE_SED
             )
         );
 
@@ -195,7 +195,8 @@ public final class ProsessflytDefinisjon {
                 HENT_REGISTEROPPLYSNINGER,
                 AFL_OPPRETT_BEHANDLINGSGRUNNLAG,
                 AFL_VURDER_INNGANGSVILKÅR, //FIXME: skal ikke vurderes når Norge IKKE er utpekt
-                AFL_REGISTERKONTROLL //TODO: etter dette må det opprettes en ny flyt om Norge ikke er utpekt og ingen treff i kontroll
+                REGISTERKONTROLL,
+                BESTEM_BEHANDLINGMÅTE_SED
             )
         );
 
@@ -208,7 +209,8 @@ public final class ProsessflytDefinisjon {
                 HENT_REGISTEROPPLYSNINGER,
                 AFL_OPPRETT_BEHANDLINGSGRUNNLAG,
                 AFL_VURDER_INNGANGSVILKÅR, //FIXME: skal ikke vurderes når Norge IKKE er utpekt
-                AFL_REGISTERKONTROLL //TODO: etter dette må det opprettes en ny flyt om Norge ikke er utpekt og ingen treff i kontroll
+                REGISTERKONTROLL,
+                BESTEM_BEHANDLINGMÅTE_SED
             )
         );
 
@@ -230,7 +232,7 @@ public final class ProsessflytDefinisjon {
                 SOB_BEHANDLING_OPPRETTET,
                 AVSLUTT_TIDLIGERE_MEDL_PERIODE,
                 HENT_REGISTEROPPLYSNINGER,
-                AOU_MOTTAK_REGISTERKONTROLL,
+                REGISTERKONTROLL,
                 AOU_MOTTAK_OPPRETT_PERIODE_MEDL,
                 AOU_MOTTAK_OPPRETT_OPPGAVE
             )
@@ -244,7 +246,7 @@ public final class ProsessflytDefinisjon {
                 SOB_BEHANDLING_OPPRETTET,
                 AVSLUTT_TIDLIGERE_MEDL_PERIODE,
                 HENT_REGISTEROPPLYSNINGER,
-                AOU_MOTTAK_REGISTERKONTROLL,
+                REGISTERKONTROLL,
                 AOU_MOTTAK_OPPRETT_PERIODE_MEDL,
                 AOU_MOTTAK_OPPRETT_OPPGAVE
             )

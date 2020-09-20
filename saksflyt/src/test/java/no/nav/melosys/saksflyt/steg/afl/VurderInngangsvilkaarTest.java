@@ -46,7 +46,7 @@ public class VurderInngangsvilkaarTest {
     private SedGrunnlag sedGrunnlag = new SedGrunnlag();
 
     @Before
-    public void setup() throws FunksjonellException, TekniskException {
+    public void setup() throws FunksjonellException {
         vurderInngangsvilkaar = new VurderInngangsvilkaar(inngangsvilkaarService, fagsakService, behandlingsgrunnlagService);
 
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
@@ -72,7 +72,7 @@ public class VurderInngangsvilkaarTest {
         vurderInngangsvilkaar.utfør(prosessinstans);
 
         verify(inngangsvilkaarService).vurderOgLagreInngangsvilkår(anyLong(), eq(List.of("SE")), any());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AFL_REGISTERKONTROLL);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REGISTERKONTROLL);
     }
 
     @Test
@@ -80,7 +80,7 @@ public class VurderInngangsvilkaarTest {
         vurderInngangsvilkaar.utfør(prosessinstans);
 
         verify(inngangsvilkaarService).vurderOgLagreInngangsvilkår(anyLong(), eq(List.of("NO")), any());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AFL_REGISTERKONTROLL);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REGISTERKONTROLL);
     }
 
     @Test

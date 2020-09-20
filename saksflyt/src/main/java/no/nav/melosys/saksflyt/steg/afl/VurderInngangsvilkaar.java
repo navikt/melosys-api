@@ -55,6 +55,6 @@ public class VurderInngangsvilkaar implements StegBehandler {
 
         fagsakService.oppdaterType(prosessinstans.getBehandling().getFagsak(), kvalifisererForEF_883_2004);
 
-        prosessinstans.setSteg(ProsessSteg.AFL_REGISTERKONTROLL);
+        prosessinstans.setSteg(ProsessSteg.REGISTERKONTROLL);
     }
 }
