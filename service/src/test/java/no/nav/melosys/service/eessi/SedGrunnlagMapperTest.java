@@ -9,6 +9,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
+import no.nav.melosys.domain.eessi.SedOrganisasjon;
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto;
 import no.nav.melosys.exception.MelosysException;
 import org.junit.jupiter.api.Test;
@@ -48,12 +49,12 @@ class SedGrunnlagMapperTest {
                 tuple("Testarbeidsstednavn2", null)
             );
 
-        assertThat(sedGrunnlag.juridiskArbeidsgiverNorge).isNotNull();
-        assertThat(sedGrunnlag.juridiskArbeidsgiverNorge.hentManueltRegistrerteArbeidsgiverOrgnumre())
-            .containsExactly(
-                "115511",
-                "226622",
-                null
+        assertThat(sedGrunnlag.norskeArbeidsgivere)
+            .extracting(SedOrganisasjon::getNavn, SedOrganisasjon::getOrgnummer)
+            .containsExactlyInAnyOrder(
+                tuple("norsk", "115511"),
+                tuple("annen norsk", "226622"),
+                tuple("finner ikke orgnummer så vi sender uten", null)
             );
 
         assertThat(sedGrunnlag.foretakUtland)
