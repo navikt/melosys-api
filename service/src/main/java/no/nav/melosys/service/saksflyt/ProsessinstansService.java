@@ -290,25 +290,25 @@ public class ProsessinstansService {
 
     @Transactional
     public void opprettProsessinstansSedMottak(MelosysEessiMelding melosysEessiMelding) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.MOTTAK_SED);
-        prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_RUTING);
-        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, melosysEessiMelding.getJournalpostId());
-        prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, melosysEessiMelding.getDokumentId());
-        prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, melosysEessiMelding.getErEndring());
-        prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, melosysEessiMelding.getGsakSaksnummer());
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
+        Prosessinstans prosessinstans = prosessinstansForSedMottak(melosysEessiMelding);
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, melosysEessiMelding.getAktoerId());
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansSedMottak(String journalpostID, String brukerID) {
+    public void opprettProsessinstansSedMottak(MelosysEessiMelding eessiMelding, String aktørID) {
+        Prosessinstans prosessinstans = prosessinstansForSedMottak(eessiMelding);
+        prosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørID);
+        lagre(prosessinstans);
+    }
+
+    private Prosessinstans prosessinstansForSedMottak(MelosysEessiMelding melosysEessiMelding) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.MOTTAK_SED);
-        prosessinstans.setSteg(ProsessSteg.SED_MOTTAK_HENT_EESSI_MELDING);
-        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
-        prosessinstans.setData(ProsessDataKey.BRUKER_ID, brukerID);
-        lagre(prosessinstans);
+        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, melosysEessiMelding.getJournalpostId());
+        prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, melosysEessiMelding.getErEndring());
+        prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, melosysEessiMelding.getGsakSaksnummer());
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
+        return prosessinstans;
     }
 
     public void opprettProsessinstansGenerellSedBehandling(JournalfoeringOpprettDto journalfoeringOpprettDto) {

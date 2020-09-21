@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.jfr.sed;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -42,13 +43,16 @@ public class FerdigstillJournalpost implements StegBehandler {
 
         Long arkivSakID = behandling.getFagsak().getGsakSaksnummer();
         String brukerID = hentBrukerID(prosessinstans);
-        String journalpostId = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
-        String dokumentID = prosessinstans.getData(ProsessDataKey.DOKUMENT_ID);
+        MelosysEessiMelding eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
         String tittel = prosessinstans.getData(ProsessDataKey.HOVEDDOKUMENT_TITTEL);
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
-            .medBrukerID(brukerID).medArkivSakID(arkivSakID).medHovedDokumentID(dokumentID).medTittel(tittel).build();
-        joarkFasade.oppdaterJournalpost(journalpostId, journalpostOppdatering, true);
-        log.info("Journalpost {} ferdigstilt for behandling {}", journalpostId, behandling.getId());
+            .medBrukerID(brukerID)
+            .medArkivSakID(arkivSakID)
+            .medTittel(tittel)
+            .build();
+
+        joarkFasade.oppdaterJournalpost(eessiMelding.getJournalpostId(), journalpostOppdatering, true);
+        log.info("Journalpost {} ferdigstilt for behandling {}", eessiMelding.getJournalpostId(), behandling.getId());
     }
 
     private String hentBrukerID(Prosessinstans prosessinstans) throws IkkeFunnetException, TekniskException {

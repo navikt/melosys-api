@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.jfr.sed;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -48,7 +49,7 @@ public class FerdigstillJournalpostTest {
         ferdigstillJournalpost.utfør(prosessinstans);
 
         JournalpostOppdatering forventetOppdatering = new JournalpostOppdatering.Builder()
-            .medBrukerID(BRUKER_ID).medArkivSakID(GSAK_SAKSNUMMER).medHovedDokumentID(DOKUMENT_ID).medTittel(TITTEL).build();
+            .medBrukerID(BRUKER_ID).medArkivSakID(GSAK_SAKSNUMMER).medTittel(TITTEL).build();
         verify(joarkFasade).oppdaterJournalpost(eq(JOURNALPOST_ID), eq(forventetOppdatering), eq(true));
     }
 
@@ -66,10 +67,12 @@ public class FerdigstillJournalpostTest {
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
 
+        MelosysEessiMelding eessiMelding = new MelosysEessiMelding();
+        eessiMelding.setJournalpostId(JOURNALPOST_ID);
+
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID);
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
         prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, TITTEL);
-        prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, DOKUMENT_ID);
         prosessinstans.setBehandling(behandling);
 
         return prosessinstans;
