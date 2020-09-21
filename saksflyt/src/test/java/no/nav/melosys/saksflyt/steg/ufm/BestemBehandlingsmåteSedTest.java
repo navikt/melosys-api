@@ -21,14 +21,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class BestemBehandlingsMåteSedTest {
+public class BestemBehandlingsmåteSedTest {
 
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private OppgaveService oppgaveService;
 
-    private BestemBehandlingsMåteSed bestemBehandlingsMåteSed;
+    private BestemBehandlingsmåteSed bestemBehandlingsmåteSed;
 
     private final Behandling behandling = new Behandling();
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
@@ -36,7 +36,7 @@ public class BestemBehandlingsMåteSedTest {
 
     @Before
     public void setUp() throws IkkeFunnetException {
-        bestemBehandlingsMåteSed = new BestemBehandlingsMåteSed(behandlingsresultatService, oppgaveService);
+        bestemBehandlingsmåteSed = new BestemBehandlingsmåteSed(behandlingsresultatService, oppgaveService);
         prosessinstans.setBehandling(behandling);
         behandling.setId(234L);
 
@@ -52,7 +52,7 @@ public class BestemBehandlingsMåteSedTest {
     @Test
     public void utfør_temaRegistreringUnntakIngenTreffIRegister_prosessOpprettes() throws Exception {
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
-        bestemBehandlingsMåteSed.utfør(prosessinstans);
+        bestemBehandlingsmåteSed.utfør(prosessinstans);
         //TODO verify prosessinstansService......
     }
 
@@ -65,7 +65,7 @@ public class BestemBehandlingsMåteSedTest {
 
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        bestemBehandlingsMåteSed.utfør(prosessinstans);
+        bestemBehandlingsmåteSed.utfør(prosessinstans);
 
         verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), any(), any(), any());
     }

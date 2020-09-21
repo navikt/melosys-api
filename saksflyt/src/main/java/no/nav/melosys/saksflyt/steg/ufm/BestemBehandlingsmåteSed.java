@@ -24,9 +24,9 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.ANMODN
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.BESLUTNING_LOVVALG_NORGE;
 
 @Component
-public class BestemBehandlingsMåteSed implements StegBehandler {
+public class BestemBehandlingsmåteSed implements StegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(BestemBehandlingsMåteSed.class);
+    private static final Logger log = LoggerFactory.getLogger(BestemBehandlingsmåteSed.class);
 
     private static final Collection<Behandlingstema> MANUELLE_BEHANDLINGSTEMA = Set.of(ANMODNING_OM_UNNTAK_HOVEDREGEL, BESLUTNING_LOVVALG_NORGE);
 
@@ -34,7 +34,7 @@ public class BestemBehandlingsMåteSed implements StegBehandler {
     private final OppgaveService oppgaveService;
 
     @Autowired
-    public BestemBehandlingsMåteSed(BehandlingsresultatService behandlingsresultatService,
+    public BestemBehandlingsmåteSed(BehandlingsresultatService behandlingsresultatService,
                                     @Qualifier("system") OppgaveService oppgaveService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
@@ -42,7 +42,7 @@ public class BestemBehandlingsMåteSed implements StegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return ProsessSteg.REGISTERKONTROLL;
+        return ProsessSteg.BESTEM_BEHANDLINGMÅTE_SED;
     }
 
     @Override
