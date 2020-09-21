@@ -51,10 +51,10 @@ public final class ProsessflytDefinisjon {
             ProsessType.ANMODNING_OM_UNNTAK,
             new ProsessFlyt(ProsessType.ANMODNING_OM_UNNTAK,
                 AVKLAR_MYNDIGHET,
-                AOU_OPPDATER_MEDL,
-                AOU_SEND_BREV,
-                AOU_SEND_SED,
-                AOU_OPPDATER_OPPGAVE
+                OPPDATER_MEDL_ANMODNING_UNNTAK,
+                SEND_ORIENTERING_ANMODNING_UNNTAK,
+                SEND_ANMODNING_OM_UNNTAK,
+                OPPDATER_OPPGAVE_ANMODNING_UNNTAK_SENDT
             )
         );
 
