@@ -51,7 +51,7 @@ public final class ProsessflytDefinisjon {
             ProsessType.ANMODNING_OM_UNNTAK,
             new ProsessFlyt(ProsessType.ANMODNING_OM_UNNTAK,
                 AVKLAR_MYNDIGHET,
-                OPPDATER_MEDL_ANMODNING_UNNTAK,
+                LAGRE_ANMODNINGSPERIODE_MEDL,
                 SEND_ORIENTERING_ANMODNING_UNNTAK,
                 SEND_ANMODNING_OM_UNNTAK,
                 OPPDATER_OPPGAVE_ANMODNING_UNNTAK_SENDT
@@ -231,7 +231,7 @@ public final class ProsessflytDefinisjon {
                 SOB_BEHANDLING_OPPRETTET,
                 HENT_REGISTEROPPLYSNINGER,
                 REGISTERKONTROLL,
-                AOU_MOTTAK_OPPRETT_PERIODE_MEDL,
+                LAGRE_ANMODNINGSPERIODE_MEDL,
                 BESTEM_BEHANDLINGMÅTE_SED
             )
         );
@@ -245,7 +245,7 @@ public final class ProsessflytDefinisjon {
                 AVSLUTT_TIDLIGERE_MEDL_PERIODE,
                 HENT_REGISTEROPPLYSNINGER,
                 REGISTERKONTROLL,
-                AOU_MOTTAK_OPPRETT_PERIODE_MEDL,
+                LAGRE_ANMODNINGSPERIODE_MEDL,
                 BESTEM_BEHANDLINGMÅTE_SED
             )
         );

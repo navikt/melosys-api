@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.aou.ut;
 
 import no.nav.melosys.domain.Anmodningsperiode;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -11,29 +12,30 @@ import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPDATER_MEDL_ANMODNING_UNNTAK;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.LAGRE_ANMODNINGSPERIODE_MEDL;
 
 @Component
-public class OppdaterMedlAnmodningUnntak implements StegBehandler {
+public class LagreAnmodningsperiodeIMedl implements StegBehandler {
 
     private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
 
     @Autowired
-    public OppdaterMedlAnmodningUnntak(BehandlingsresultatService behandlingsresultatService, MedlPeriodeService medlPeriodeService) {
+    public LagreAnmodningsperiodeIMedl(BehandlingsresultatService behandlingsresultatService, MedlPeriodeService medlPeriodeService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
     }
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return OPPDATER_MEDL_ANMODNING_UNNTAK;
+        return LAGRE_ANMODNINGSPERIODE_MEDL;
     }
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
-        Long behandlingID = prosessinstans.getBehandling().getId();
+        final Behandling behandling = prosessinstans.getBehandling();
+        final long behandlingID = behandling.getId();
         Anmodningsperiode anmodningsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingID).hentValidertAnmodningsperiode();
-        medlPeriodeService.opprettPeriodeUnderAvklaring(anmodningsperiode, behandlingID, false);
+        medlPeriodeService.opprettPeriodeUnderAvklaring(anmodningsperiode, behandlingID, behandling.erBehandlingAvSed());
     }
 }

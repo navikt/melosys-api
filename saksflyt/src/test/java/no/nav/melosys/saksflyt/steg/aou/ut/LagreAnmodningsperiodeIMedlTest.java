@@ -28,8 +28,8 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OppdaterMedlAnmodningUnntakTest {
-    private OppdaterMedlAnmodningUnntak oppdaterMedlAnmodningUnntak;
+public class LagreAnmodningsperiodeIMedlTest {
+    private LagreAnmodningsperiodeIMedl lagreAnmodningsperiodeIMedl;
 
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
@@ -41,7 +41,7 @@ public class OppdaterMedlAnmodningUnntakTest {
 
     @Before
     public void setUp() throws IkkeFunnetException {
-        oppdaterMedlAnmodningUnntak = new OppdaterMedlAnmodningUnntak(behandlingsresultatService, medlPeriodeService);
+        lagreAnmodningsperiodeIMedl = new LagreAnmodningsperiodeIMedl(behandlingsresultatService, medlPeriodeService);
 
         prosessinstans = new Prosessinstans();
         Fagsak fagsak = new Fagsak();
@@ -77,7 +77,7 @@ public class OppdaterMedlAnmodningUnntakTest {
     public void utførNårBehandlingsresultatTypeErAnmodning_om_unntak() throws FunksjonellException, TekniskException {
         behandlingsresultat.setType(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
 
-        oppdaterMedlAnmodningUnntak.utfør(prosessinstans);
+        lagreAnmodningsperiodeIMedl.utfør(prosessinstans);
         verify(medlPeriodeService).opprettPeriodeUnderAvklaring(any(Anmodningsperiode.class), anyLong(), eq(false));
     }
 
@@ -86,7 +86,7 @@ public class OppdaterMedlAnmodningUnntakTest {
         behandlingsresultat.setAnmodningsperioder(new HashSet<>());
 
         assertThatExceptionOfType(NoSuchElementException.class)
-            .isThrownBy(() -> oppdaterMedlAnmodningUnntak.utfør(prosessinstans))
+            .isThrownBy(() -> lagreAnmodningsperiodeIMedl.utfør(prosessinstans))
             .withMessageContaining("Ingen anmodningsperioder finnes");
     }
 }

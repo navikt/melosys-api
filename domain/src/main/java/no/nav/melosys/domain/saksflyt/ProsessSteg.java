@@ -25,7 +25,7 @@ public enum ProsessSteg implements Kodeverk {
     FEILET_MASKINELT("FEILET_MASKINELT", "Feilet maskinelt"),
 
     //Anmodning om unntak
-    OPPDATER_MEDL_ANMODNING_UNNTAK("OPPDATER_MEDL_ANMODNING_UNNTAK", "Setter periode til under avklaring i MEDL ved anmodning om unntak"),
+    LAGRE_ANMODNINGSPERIODE_MEDL("LAGRE_ANMODNINGSPERIODE_MEDL", "Lagrer en anmodningsperiode som under avklaring i MEDL"),
     SEND_ORIENTERING_ANMODNING_UNNTAK("SEND_ORIENTERING_ANMODNING_UNNTAK", "Send orienteringsbrev til bruker ved anmodning om unntak"),
     SEND_ANMODNING_OM_UNNTAK("SEND_ANMODNING_OM_UNNTAK", "Sender anmodning om unntak til utenlandsk trygdemyndighet"),
     OPPDATER_OPPGAVE_ANMODNING_UNNTAK_SENDT("OPPDATER_OPPGAVE_ANMODNING_UNNTAK_SENDT", "Oppdaterer oppgave med frist og beskrivelse"),
@@ -36,7 +36,6 @@ public enum ProsessSteg implements Kodeverk {
 
     //Mottak anmodning om unntak
     AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE("AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE", "Opprett anmodningsperiode"),
-    AOU_MOTTAK_OPPRETT_PERIODE_MEDL("AOU_MOTTAK_OPPRETT_PERIODE_MEDL", "Opprett periode under avklaring i Medl"),
 
     //Svar på mottatt anmodning om unntak
     AOU_MOTTAK_SVAR_OPPDATER_MEDL("AOU_MOTTAK_SVAR_OPPDATER_MEDL", "Oppdater periode i Medl"),
