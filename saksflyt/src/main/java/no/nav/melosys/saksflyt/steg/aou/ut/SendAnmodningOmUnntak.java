@@ -28,15 +28,8 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
 
-/**
- * Sender elektronisk sed til mottakerinstitusjon
- * <p>
- * Transisjoner:
- * ProsessType.ANMODNING_OM_UNNTAK
- *  AOU_SEND_SED -> FERDIG eller FEILET_MASKINELT hvis feil
- */
 @Component
-public class SendUtland extends AbstraktSendUtland {
+public class SendAnmodningOmUnntak extends AbstraktSendUtland {
     private final BrevBestiller brevBestiller;
     private final BehandlingService behandlingService;
     private final AnmodningsperiodeService anmodningsperiodeService;
@@ -45,11 +38,11 @@ public class SendUtland extends AbstraktSendUtland {
     private static final int SVARFRIST_MÅNEDER = 2;
 
     @Autowired
-    public SendUtland(@Qualifier("system") EessiService eessiService,
-                      BrevBestiller brevBestiller,
-                      BehandlingService behandlingService,
-                      BehandlingsresultatService behandlingsresultatService,
-                      AnmodningsperiodeService anmodningsperiodeService) {
+    public SendAnmodningOmUnntak(@Qualifier("system") EessiService eessiService,
+                                 BrevBestiller brevBestiller,
+                                 BehandlingService behandlingService,
+                                 BehandlingsresultatService behandlingsresultatService,
+                                 AnmodningsperiodeService anmodningsperiodeService) {
         super(eessiService, behandlingsresultatService);
         this.brevBestiller = brevBestiller;
         this.behandlingService = behandlingService;
@@ -58,7 +51,7 @@ public class SendUtland extends AbstraktSendUtland {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return ProsessSteg.AOU_SEND_SED;
+        return ProsessSteg.SEND_ANMODNING_OM_UNNTAK;
     }
 
     @Override

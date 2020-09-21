@@ -25,10 +25,10 @@ public enum ProsessSteg implements Kodeverk {
     FEILET_MASKINELT("FEILET_MASKINELT", "Feilet maskinelt"),
 
     //Anmodning om unntak
-    AOU_OPPDATER_MEDL("AOU_OPPDATER_MEDL", "Oppdatering av medlemskap med anmodning om unntak"),
-    AOU_SEND_BREV("AOU_SEND_BREV", "Send orienteringsbrev og A001 for anmodning om unntak"),
-    AOU_SEND_SED("AOU_SEND_SED","Send elektronisk SED A001"),
-    AOU_OPPDATER_OPPGAVE("AOU_OPPDATER_OPPGAVE", "Oppdatering av oppgave med frist og beskrivelse"),
+    OPPDATER_MEDL_ANMODNING_UNNTAK("OPPDATER_MEDL_ANMODNING_UNNTAK", "Setter periode til under avklaring i MEDL ved anmodning om unntak"),
+    SEND_ORIENTERING_ANMODNING_UNNTAK("SEND_ORIENTERING_ANMODNING_UNNTAK", "Send orienteringsbrev til bruker ved anmodning om unntak"),
+    SEND_ANMODNING_OM_UNNTAK("SEND_ANMODNING_OM_UNNTAK", "Sender anmodning om unntak til utenlandsk trygdemyndighet"),
+    OPPDATER_OPPGAVE_ANMODNING_UNNTAK_SENDT("OPPDATER_OPPGAVE_ANMODNING_UNNTAK_SENDT", "Oppdaterer oppgave med frist og beskrivelse"),
 
     //Svar anmodning om unntak
     AOU_SVAR_OPPRETT_ANMODNINGSPERIODESVAR("AOU_OPPRETT_ANMODNINGSPERIODESVAR","Oppretter svar for en anmodningsperiode"),
@@ -49,7 +49,7 @@ public enum ProsessSteg implements Kodeverk {
     HENT_MOTTAKERINSTITUSJON_FORKORTET_PERIODE("HENT_MOTTAKERINSTITUSJON_FORKORTET_PERIODE", "Henter mottakerinstitusjon fra tidligere sendt BUC ved forkortet periode"),
     AVKLAR_MYNDIGHET("AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
     AVKLAR_ARBEIDSGIVER("AVKLAR_ARBEIDSGIVER", "Avklaring av norsk arbeidsgiver"),
-    OPPDATER_MEDL_VEDTAK("OPPDATER_MEDL_VEDTAK","Oppdaterer MEDL etter vedtak"),
+    OPPDATER_MEDL_VED_VEDTAK("OPPDATER_MEDL_VED_VEDTAK","Oppdaterer MEDL ved vedtak"),
     SEND_VEDTAKSBREV_INNLAND("SEND_VEDTAKSBREV_INNLAND", "Sender vedtaksbrev innland"),
     SEND_VEDTAK_UTLAND("SEND_VEDTAK_UTLAND","Sender vedtaket til utland"),
     OPPRETT_AVGIFTSOPPGAVE("OPPRETT_AVGIFTSOPPGAVE", "Oppretter en vurderingsoppgave for innregistrering i avgiftsystemet"),

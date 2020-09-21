@@ -51,10 +51,10 @@ public final class ProsessflytDefinisjon {
             ProsessType.ANMODNING_OM_UNNTAK,
             new ProsessFlyt(ProsessType.ANMODNING_OM_UNNTAK,
                 AVKLAR_MYNDIGHET,
-                AOU_OPPDATER_MEDL,
-                AOU_SEND_BREV,
-                AOU_SEND_SED,
-                AOU_OPPDATER_OPPGAVE
+                OPPDATER_MEDL_ANMODNING_UNNTAK,
+                SEND_ORIENTERING_ANMODNING_UNNTAK,
+                SEND_ANMODNING_OM_UNNTAK,
+                OPPDATER_OPPGAVE_ANMODNING_UNNTAK_SENDT
             )
         );
 
@@ -120,7 +120,7 @@ public final class ProsessflytDefinisjon {
             new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK,
                 AVKLAR_MYNDIGHET,
                 AVKLAR_ARBEIDSGIVER,
-                OPPDATER_MEDL_VEDTAK,
+                OPPDATER_MEDL_VED_VEDTAK,
                 SEND_VEDTAKSBREV_INNLAND,
                 SEND_VEDTAK_UTLAND,
                 DISTRIBUER_JOURNALPOST_UTLAND,
@@ -133,9 +133,7 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE,
             new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE,
                 HENT_MOTTAKERINSTITUSJON_FORKORTET_PERIODE,
-                AVKLAR_MYNDIGHET,
-                AVKLAR_ARBEIDSGIVER,
-                OPPDATER_MEDL_VEDTAK,
+                OPPDATER_MEDL_VED_VEDTAK,
                 SEND_VEDTAKSBREV_INNLAND,
                 SEND_VEDTAK_UTLAND,
                 DISTRIBUER_JOURNALPOST_UTLAND,

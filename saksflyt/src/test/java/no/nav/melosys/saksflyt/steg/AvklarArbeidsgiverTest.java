@@ -42,8 +42,8 @@ class AvklarArbeidsgiverTest {
     @Mock
     AvklarteVirksomheterSystemService avklarteVirksomheterService;
 
-    private AvklarArbeidsgiver steg;
-    private Prosessinstans p;
+    private AvklarArbeidsgiver avklarArbeidsgiver;
+    private Prosessinstans prosessinstans;
     private AvklartVirksomhet avklartVirksomhet;
     private Fagsak fagsak;
     private Behandlingsresultat behandlingsresultat;
@@ -52,11 +52,11 @@ class AvklarArbeidsgiverTest {
     @BeforeEach
     public void setUp() throws IkkeFunnetException {
         aktoerService = mock(AktoerService.class);
-        steg = new AvklarArbeidsgiver(aktoerService, avklarteVirksomheterService, behandlingService, behandlingsresultatService);
+        avklarArbeidsgiver = new AvklarArbeidsgiver(aktoerService, avklarteVirksomheterService, behandlingService, behandlingsresultatService);
 
-        p = new Prosessinstans();
-        p.setBehandling(behandling);
-        p.setType(ProsessType.IVERKSETT_VEDTAK);
+        prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+        prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK);
 
         fagsak = new Fagsak();
         fagsak.setSaksnummer("saksnr");
@@ -85,7 +85,7 @@ class AvklarArbeidsgiverTest {
         when(avklarteVirksomheterService.hentNorskeArbeidsgivere(any(), any())).thenReturn(avklarteVirksomheter);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
-        steg.utfør(p);
+        steg.utfør(prosessinstans);
 
         verify(aktoerRepository).deleteAllByFagsakAndRolle(eq(fagsak), eq(Aktoersroller.ARBEIDSGIVER));
 
@@ -103,7 +103,7 @@ class AvklarArbeidsgiverTest {
             behandlingService, behandlingsresultatService);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
-        steg.utfør(p);
+        steg.utfør(prosessinstans);
         verify(aktoerRepository).deleteAllByFagsakAndRolle(eq(fagsak), eq(Aktoersroller.ARBEIDSGIVER));
         verify(aktoerRepository, never()).save(any());
     }
@@ -112,14 +112,14 @@ class AvklarArbeidsgiverTest {
     void utfør_iverksettVedtakArt12_arbeidsgiverAktoererSkalOpprettes() throws FunksjonellException, TekniskException {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        steg.utfør(p);
+        avklarArbeidsgiver.utfør(prosessinstans);
         verify(aktoerService).erstattEksisterendeArbeidsgiveraktører(any(), any());
     }
 
     @Test
     void utfør_iverksettVedtakArt13_arbeidsgiverAktoererSkalIkkeOpprettes() throws FunksjonellException, TekniskException {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
-        steg.utfør(p);
+        avklarArbeidsgiver.utfør(prosessinstans);
         verify(aktoerService, never()).erstattEksisterendeArbeidsgiveraktører(any(), any());
     }
 
@@ -129,24 +129,7 @@ class AvklarArbeidsgiverTest {
         behandlingsresultat.setLovvalgsperioder(new HashSet<>());
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
-        steg.utfør(p);
+        avklarArbeidsgiver.utfør(prosessinstans);
         verify(aktoerService).erstattEksisterendeArbeidsgiveraktører(any(), any());
-    }
-
-    @Test
-    void utfør_iverksettVedtakForkortPeriodeArt13_arbeidsgiverAktoererSkalIkkeOpprettes() throws FunksjonellException, TekniskException {
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
-        p.setType(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE);
-        steg.utfør(p);
-        verify(aktoerService, never()).erstattEksisterendeArbeidsgiveraktører(any(), any());
-    }
-
-    @Test
-    void utfør_iverksettVedtakForkortPeriodeArt12_arbeidsgiverAktoererSkalIkkeOpprettes() throws FunksjonellException, TekniskException {
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        p.setType(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE);
-
-        steg.utfør(p);
-        verify(aktoerService, never()).erstattEksisterendeArbeidsgiveraktører(any(), any());
     }
 }
