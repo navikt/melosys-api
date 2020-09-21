@@ -6,7 +6,6 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.saksflyt.felles.OpprettSedDokumentFelles;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.junit.Before;
@@ -20,20 +19,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OpprettBehandlingsgrunnlagTest {
+public class OpprettSedGrunnlagTest {
 
-    private OpprettBehandlingsgrunnlag opprettBehandlingsgrunnlag;
+    private OpprettSedGrunnlag opprettSedGrunnlag;
 
     @Mock
     private BehandlingsgrunnlagService behandlingsgrunnlagService;
-    @Mock
-    private OpprettSedDokumentFelles opprettSedDokumentFelles;
     @Mock
     private EessiService eessiService;
 
     @Before
     public void setup() {
-        opprettBehandlingsgrunnlag = new OpprettBehandlingsgrunnlag(behandlingsgrunnlagService, opprettSedDokumentFelles, eessiService);
+        opprettSedGrunnlag = new OpprettSedGrunnlag(behandlingsgrunnlagService, eessiService);
     }
 
     @Test
@@ -52,10 +49,9 @@ public class OpprettBehandlingsgrunnlagTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
         when(eessiService.hentSedGrunnlag(anyString(), anyString())).thenReturn(new SedGrunnlag());
 
-        opprettBehandlingsgrunnlag.utfør(prosessinstans);
+        opprettSedGrunnlag.utfør(prosessinstans);
 
         verify(behandlingsgrunnlagService).opprettSedGrunnlag(eq(behandling.getId()), any(SedGrunnlag.class));
-        verify(opprettSedDokumentFelles).opprettSedSaksopplysning(any(MelosysEessiMelding.class), eq(behandling));
         verify(eessiService).hentSedGrunnlag(eq("123"), eq("abc"));
     }
 }
