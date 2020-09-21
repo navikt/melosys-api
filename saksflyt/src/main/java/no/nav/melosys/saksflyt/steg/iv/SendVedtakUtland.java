@@ -69,17 +69,16 @@ public class SendVedtakUtland extends AbstraktSendUtland {
         final var behandling = prosessinstans.getBehandling();
         final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
 
-        if (!behandlingsresultat.erAvslag()) {
-            if (behandling.erNorgeUtpekt()) {
-                sendSedA012(behandling.getId(), prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
-            } else if (behandlingsresultat.erUtpeking()) {
-                utpekingService.oppdaterSendtUtland(behandlingsresultat.hentValidertUtpekingsperiode());
-                SendUtlandStatus status = sendSedA003(prosessinstans);
-                log.info("SendUtlandStatus for behandling {}: {}", behandling.getId(), status);
-            } else {
-                super.sendUtland(avklarBucType(behandling), prosessinstans);
-            }
+        if (behandling.erNorgeUtpekt()) {
+            sendSedA012(behandling.getId(), prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
+        } else if (behandlingsresultat.erUtpeking()) {
+            utpekingService.oppdaterSendtUtland(behandlingsresultat.hentValidertUtpekingsperiode());
+            SendUtlandStatus status = sendSedA003(prosessinstans);
+            log.info("SendUtlandStatus for behandling {}: {}", behandling.getId(), status);
+        } else {
+            super.sendUtland(avklarBucType(behandling), prosessinstans);
         }
+
     }
 
     private SendUtlandStatus sendSedA003(Prosessinstans prosessinstans) throws MelosysException {

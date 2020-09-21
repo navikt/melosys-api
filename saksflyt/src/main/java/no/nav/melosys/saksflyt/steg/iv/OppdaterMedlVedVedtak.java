@@ -16,25 +16,25 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPDATER_MEDL_VEDTAK;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPDATER_MEDL_VED_VEDTAK;
 
 @Component
-public class OppdaterMedlVedtak implements StegBehandler {
+public class OppdaterMedlVedVedtak implements StegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(OppdaterMedlVedtak.class);
+    private static final Logger log = LoggerFactory.getLogger(OppdaterMedlVedVedtak.class);
 
     private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
 
     @Autowired
-    public OppdaterMedlVedtak(BehandlingsresultatService behandlingsresultatService, MedlPeriodeService medlPeriodeService) {
+    public OppdaterMedlVedVedtak(BehandlingsresultatService behandlingsresultatService, MedlPeriodeService medlPeriodeService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
     }
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return OPPDATER_MEDL_VEDTAK;
+        return OPPDATER_MEDL_VED_VEDTAK;
     }
 
     @Override

@@ -31,8 +31,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class OppdaterMedlVedtakTest {
-    private OppdaterMedlVedtak oppdaterMedlVedtak;
+class OppdaterMedlVedVedtakTest {
+    private OppdaterMedlVedVedtak oppdaterMedlVedVedtak;
 
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
@@ -45,7 +45,7 @@ class OppdaterMedlVedtakTest {
 
     @BeforeEach
     public void setUp() throws IkkeFunnetException {
-        oppdaterMedlVedtak = new OppdaterMedlVedtak(behandlingsresultatService, medlPeriodeService);
+        oppdaterMedlVedVedtak = new OppdaterMedlVedVedtak(behandlingsresultatService, medlPeriodeService);
 
         prosessinstans = new Prosessinstans();
         Fagsak fagsak = new Fagsak();
@@ -83,7 +83,7 @@ class OppdaterMedlVedtakTest {
 
     @Test
     void utfør_behandlingsresultatTypeErFastsattLovvalgslandOgInnvilgelsesResultat_Innvilget() throws FunksjonellException, TekniskException {
-        oppdaterMedlVedtak.utfør(prosessinstans);
+        oppdaterMedlVedVedtak.utfør(prosessinstans);
         verify(medlPeriodeService).opprettPeriodeEndelig(eq(lovvalgsperiode), eq(1L), eq(false));
     }
 
@@ -93,7 +93,7 @@ class OppdaterMedlVedtakTest {
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         assertThatExceptionOfType(NoSuchElementException.class)
-            .isThrownBy(() -> oppdaterMedlVedtak.utfør(prosessinstans))
+            .isThrownBy(() -> oppdaterMedlVedVedtak.utfør(prosessinstans))
             .withMessageContaining("Ingen lovvalgsperiode finnes");
     }
 
@@ -101,7 +101,7 @@ class OppdaterMedlVedtakTest {
     void utfør_avslagManglendeOpplysningerUtenPeriode_oppdaterIkkeMedl() throws Exception {
         behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
-        oppdaterMedlVedtak.utfør(prosessinstans);
+        oppdaterMedlVedVedtak.utfør(prosessinstans);
         verifyNoInteractions(medlPeriodeService);
     }
 
@@ -110,7 +110,7 @@ class OppdaterMedlVedtakTest {
         behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
         lovvalgsperiode.setMedlPeriodeID(123L);
-        oppdaterMedlVedtak.utfør(prosessinstans);
+        oppdaterMedlVedVedtak.utfør(prosessinstans);
         verify(medlPeriodeService).avvisPeriode(123L);
     }
 
@@ -118,7 +118,7 @@ class OppdaterMedlVedtakTest {
     void medlperiodeIDFinnesLovvalgsperiodeInnvilget_oppdaterPeriodeEndelig() throws FunksjonellException, TekniskException {
         lovvalgsperiode.setMedlPeriodeID(123L);
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
-        oppdaterMedlVedtak.utfør(prosessinstans);
+        oppdaterMedlVedVedtak.utfør(prosessinstans);
 
         verify(medlPeriodeService).oppdaterPeriodeEndelig(eq(lovvalgsperiode), eq(false));
     }
@@ -127,7 +127,7 @@ class OppdaterMedlVedtakTest {
     void medlperiodeIDFinnesLovvalgsperiodeAvslått_avvisPeriode() throws FunksjonellException, TekniskException {
         lovvalgsperiode.setMedlPeriodeID(123L);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
-        oppdaterMedlVedtak.utfør(prosessinstans);
+        oppdaterMedlVedVedtak.utfør(prosessinstans);
 
         verify(medlPeriodeService).avvisPeriode(eq(lovvalgsperiode.getMedlPeriodeID()));
     }
@@ -142,7 +142,7 @@ class OppdaterMedlVedtakTest {
         behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        oppdaterMedlVedtak.utfør(prosessinstans);
+        oppdaterMedlVedVedtak.utfør(prosessinstans);
 
         verify(medlPeriodeService).opprettPeriodeForeløpig(eq(lovvalgsperiode), eq(1L), eq(true));
     }

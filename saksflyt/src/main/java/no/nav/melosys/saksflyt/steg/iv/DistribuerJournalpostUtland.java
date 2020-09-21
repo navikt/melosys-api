@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.steg.iv;
 import java.util.Optional;
 
 import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -46,7 +45,7 @@ public class DistribuerJournalpostUtland implements StegBehandler {
             Landkoder mottakerLand = Optional.ofNullable(prosessinstans.getData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, Landkoder.class))
                 .orElseThrow(() -> new IkkeFunnetException("Kan ikke distribuere journalpost da mottakerland ikke er satt"));
             UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(mottakerLand);
-            log.info("Bestiller distribuering av journalpost {} til land {} for å sende A003 som brev i behandling {}",
+            log.info("Bestiller distribuering av journalpost {} til land {} i behandling {}",
                 distribuerbarJournalpost, mottakerLand, prosessinstans.getBehandling().getId());
 
             bestillDistribuering(distribuerbarJournalpost, utenlandskMyndighet);
@@ -54,16 +53,7 @@ public class DistribuerJournalpostUtland implements StegBehandler {
     }
 
     private void bestillDistribuering(String journalpostId, UtenlandskMyndighet utenlandskMyndighet) {
-        String bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, tilStrukturertAdresse(utenlandskMyndighet));
+        String bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, utenlandskMyndighet.getAdresse());
         log.info("Distribuering av journalpost {} bestilt med bestillingsId {}", journalpostId, bestillingsId);
-    }
-
-    private static StrukturertAdresse tilStrukturertAdresse(UtenlandskMyndighet utenlandskMyndighet) {
-        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.poststed = utenlandskMyndighet.poststed;
-        strukturertAdresse.postnummer = utenlandskMyndighet.postnummer;
-        strukturertAdresse.gatenavn = utenlandskMyndighet.gateadresse;
-        strukturertAdresse.landkode = utenlandskMyndighet.landkode.getKode();
-        return strukturertAdresse;
     }
 }

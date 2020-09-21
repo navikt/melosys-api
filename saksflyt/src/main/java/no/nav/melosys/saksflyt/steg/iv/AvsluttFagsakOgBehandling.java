@@ -45,7 +45,6 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 
         if (behandlingsresultat.erInnvilgelse() && behandlingsresultat.hentValidertLovvalgsperiode().erArtikkel13()) {
-            log.info("Setter behanlidng {} til status {}", behandlingID, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
             behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         } else {
             log.info("Avslutter behandling {}", behandlingID);
