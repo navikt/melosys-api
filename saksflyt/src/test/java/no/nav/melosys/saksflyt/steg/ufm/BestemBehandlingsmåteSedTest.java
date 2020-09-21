@@ -10,6 +10,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,6 +28,8 @@ public class BestemBehandlingsmåteSedTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private OppgaveService oppgaveService;
+    @Mock
+    private UnntaksperiodeService unntaksperiodeService;
 
     private BestemBehandlingsmåteSed bestemBehandlingsmåteSed;
 
@@ -36,7 +39,7 @@ public class BestemBehandlingsmåteSedTest {
 
     @Before
     public void setUp() throws IkkeFunnetException {
-        bestemBehandlingsmåteSed = new BestemBehandlingsmåteSed(behandlingsresultatService, oppgaveService);
+        bestemBehandlingsmåteSed = new BestemBehandlingsmåteSed(behandlingsresultatService, oppgaveService, unntaksperiodeService);
         prosessinstans.setBehandling(behandling);
         behandling.setId(234L);
 
@@ -53,7 +56,7 @@ public class BestemBehandlingsmåteSedTest {
     public void utfør_temaRegistreringUnntakIngenTreffIRegister_prosessOpprettes() throws Exception {
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         bestemBehandlingsmåteSed.utfør(prosessinstans);
-        //TODO verify prosessinstansService......
+        verify(unntaksperiodeService).godkjennPeriode(eq(behandling.getId()), eq(false));
     }
 
     @Test

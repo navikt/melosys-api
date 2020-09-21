@@ -263,6 +263,8 @@ public final class ProsessflytDefinisjon {
                 OPPRETT_OPPGAVE
             )
         );
+
+
     }
 
     public static Optional<ProsessFlyt> finnFlytForProsessType(ProsessType prosessType) {
