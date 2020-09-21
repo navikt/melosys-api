@@ -104,7 +104,7 @@ public class BrevDataByggerVelgerTest {
     }
 
     private void testHent(Produserbaredokumenter type, Class<? extends BrevDataBygger> forventetKlasse) {
-        BrevDataBygger resultat = brevDataByggerVelger.hent(type);
+        BrevDataBygger resultat = brevDataByggerVelger.hent(type, new BrevbestillingDto());
         assertThat(resultat).isInstanceOf(forventetKlasse);
     }
 }

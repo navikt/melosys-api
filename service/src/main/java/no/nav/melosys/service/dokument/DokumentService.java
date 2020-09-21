@@ -74,12 +74,12 @@ public class DokumentService {
     // være påkrevd for Hibernate å finne en sesjon via Spring-transaksjonen
     // for å kunne laste lazy collections i objektgrafen.
     @Transactional(readOnly = true)
-    public byte[] produserUtkast(long behandlingID, Produserbaredokumenter produserbartDokument, BrevbestillingDto brevbestillingDto)
+    public byte[] produserUtkast(Produserbaredokumenter produserbartDokument,
+                                 long behandlingID,
+                                 BrevbestillingDto brevbestillingDto)
         throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        BrevDataGrunnlag brevdataRessurser = brevdataGrunnlagFactory.av(behandling);
-        BrevDataBygger bygger = brevDataByggerVelger.hent(produserbartDokument, brevbestillingDto);
-        BrevData brevData = bygger.lag(brevdataRessurser, SubjectHandler.getInstance().getUserID());
+        BrevData brevData = lagBrevData(produserbartDokument, brevbestillingDto, behandling, SubjectHandler.getInstance().getUserID());
 
         Aktoersroller mottakerRolle = brevbestillingDto.mottaker == null ?
             brevmottakerService.avklarMottakerRolleFraDokument(produserbartDokument) : brevbestillingDto.mottaker;
@@ -102,12 +102,13 @@ public class DokumentService {
     /**
      * Produserer et dokument i Doksys
      */
-    public void produserDokument(Produserbaredokumenter produserbartDokument, Mottaker mottaker, long behandlingID, Brevbestilling brevbestilling)
+    public void produserDokument(Produserbaredokumenter produserbartDokument,
+                                 Mottaker mottaker,
+                                 long behandlingID,
+                                 Brevbestilling brevbestilling)
         throws TekniskException, FunksjonellException {
-        Assert.notNull(produserbartDokument, "Ingen gyldig produserbartDokument.");
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(brevbestilling.getDokumentType());
-        BrevData brevData = brevDataBygger.lag(brevdataGrunnlagFactory.av(behandling), brevbestilling.getAvsender());
+        BrevData brevData = lagBrevData(produserbartDokument, new BrevbestillingDto(), behandling, brevbestilling.getAvsender());
         brevData.begrunnelseKode = brevbestilling.getBegrunnelseKode();
         brevData.fritekst = brevbestilling.getFritekst();
 
@@ -115,6 +116,16 @@ public class DokumentService {
         for (Aktoer aktør : mottakere) {
             produserIkkeredigerbartDokument(produserbartDokument, aktør, behandling, brevData);
         }
+    }
+
+    private BrevData lagBrevData(Produserbaredokumenter produserbartDokument,
+                                 BrevbestillingDto brevbestillingDto,
+                                 Behandling behandling,
+                                 String avsenderID) throws TekniskException, FunksjonellException {
+        Assert.notNull(produserbartDokument, "Ingen gyldig produserbartDokument.");
+        BrevDataGrunnlag brevDataGrunnlag = brevdataGrunnlagFactory.av(behandling);
+        BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(produserbartDokument, brevbestillingDto);
+        return brevDataBygger.lag(brevDataGrunnlag, avsenderID);
     }
 
     private void produserIkkeredigerbartDokument(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Behandling behandling, BrevData brevData)

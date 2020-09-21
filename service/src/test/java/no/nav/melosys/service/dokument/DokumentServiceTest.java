@@ -121,7 +121,7 @@ public final class DokumentServiceTest {
         BrevbestillingDto brevbestilling = lagBrevBestillingDto(BRUKER);
 
         DokumentService dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock(brevbestilling));
-        byte[] resultat = dokumentServiceMedMockVelger.produserUtkast(BEHANDLINGSID, INNVILGELSE_YRKESAKTIV, brevbestilling);
+        byte[] resultat = dokumentServiceMedMockVelger.produserUtkast(INNVILGELSE_YRKESAKTIV, BEHANDLINGSID, brevbestilling);
         assertThat(resultat).isNull();
         verify(dokSysFasade).produserDokumentutkast(any(Dokumentbestilling.class));
     }
@@ -133,7 +133,7 @@ public final class DokumentServiceTest {
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any(Behandling.class))).thenReturn(arbeidsgivendeOrgnumre);
 
         DokumentService dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock(brevbestilling));
-        byte[] resultat = dokumentServiceMedMockVelger.produserUtkast(BEHANDLINGSID, AVSLAG_ARBEIDSGIVER, brevbestilling);
+        byte[] resultat = dokumentServiceMedMockVelger.produserUtkast(AVSLAG_ARBEIDSGIVER, BEHANDLINGSID, brevbestilling);
         assertThat(resultat).isNull();
         verify(dokSysFasade).produserDokumentutkast(any(Dokumentbestilling.class));
     }
@@ -375,9 +375,9 @@ public final class DokumentServiceTest {
                 when(brevdatabyggervelger.hent(any(), eq(bestillingDto))).thenReturn(brevDataByggerAvslagArbeidsgiver);
                 when(brevDataByggerAvslagArbeidsgiver.lag(any(), any())).thenReturn(lagBrevDataAvslagArbeidsgiver());
             } else {
-                when(brevdatabyggervelger.hent(eq(INNVILGELSE_YRKESAKTIV))).thenReturn(brevDataByggerInnvilgelse);
+                when(brevdatabyggervelger.hent(eq(INNVILGELSE_YRKESAKTIV), any())).thenReturn(brevDataByggerInnvilgelse);
                 when(brevDataByggerInnvilgelse.lag(any(), any())).thenReturn(lagBrevDataInnvilgelse());
-                when(brevdatabyggervelger.hent(eq(AVSLAG_ARBEIDSGIVER))).thenReturn(brevDataByggerAvslagArbeidsgiver);
+                when(brevdatabyggervelger.hent(eq(AVSLAG_ARBEIDSGIVER), any())).thenReturn(brevDataByggerAvslagArbeidsgiver);
                 when(brevDataByggerAvslagArbeidsgiver.lag(any(), any())).thenReturn(lagBrevDataAvslagArbeidsgiver());
                 when(brevdatabyggervelger.hent(any(), eq(bestillingDto))).thenReturn(brevDataByggerVedlegg);
                 when(brevDataByggerVedlegg.lag(any(), any())).thenReturn(lagBrevDataInnvilgelse());
