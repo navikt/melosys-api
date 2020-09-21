@@ -8,45 +8,40 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.felles.OpprettSedDokumentFelles;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class OpprettAnmodningsperiodeTest {
+@ExtendWith(MockitoExtension.class)
+class OpprettAnmodningsperiodeFraSedTest {
 
     @Mock
     private AnmodningsperiodeService anmodningsperiodeService;
     @Mock
-    private OpprettSedDokumentFelles opprettSedDokumentFelles;
-    @Mock
     private BehandlingService behandlingService;
 
-    private OpprettAnmodningsperiode opprettAnmodningsperiode;
+    private OpprettAnmodningsperiodeFraSed opprettAnmodningsperiodeFraSed;
 
-    @Before
+    @BeforeEach
     public void setup() {
-        opprettAnmodningsperiode = new OpprettAnmodningsperiode(anmodningsperiodeService, opprettSedDokumentFelles, behandlingService);
+        opprettAnmodningsperiodeFraSed = new OpprettAnmodningsperiodeFraSed(anmodningsperiodeService, behandlingService);
     }
 
     @Test
-    public void utfør_medEksisterendeSedDokument_forventKall() throws FunksjonellException, TekniskException {
+    void utfør_medEksisterendeSedDokument_forventKall() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         Behandling behandling = new Behandling();
         behandling.setId(1L);
@@ -57,36 +52,10 @@ public class OpprettAnmodningsperiodeTest {
         prosessinstans.setBehandling(behandling);
 
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        opprettAnmodningsperiode.utfør(prosessinstans);
+        opprettAnmodningsperiodeFraSed.utfør(prosessinstans);
 
         verify(behandlingService).hentBehandling(anyLong());
         verify(anmodningsperiodeService).lagreAnmodningsperioder(eq(1L), any());
-    }
-
-    @Test
-    public void utfør_utenEksisterendeSedDokument_forventOpprettSedDokument() throws FunksjonellException, TekniskException {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, new MelosysEessiMelding());
-
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.SEDOPPL);
-        saksopplysning.setDokument(lagSedDokument());
-        when(opprettSedDokumentFelles.opprettSedSaksopplysning(any(MelosysEessiMelding.class), any(Behandling.class))).thenReturn(saksopplysning);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-
-        opprettAnmodningsperiode.utfør(prosessinstans);
-
-        verify(behandlingService).hentBehandling(anyLong());
-        verify(opprettSedDokumentFelles).opprettSedSaksopplysning(any(MelosysEessiMelding.class), any(Behandling.class));
-        verify(anmodningsperiodeService).lagreAnmodningsperioder(eq(1L), any());
-    }
-
-    @Test(expected = FunksjonellException.class)
-    public void utfør_ingenBehandling_forventException() throws FunksjonellException, TekniskException {
-        opprettAnmodningsperiode.utfør(new Prosessinstans());
     }
 
     private SedDokument lagSedDokument() {
