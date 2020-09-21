@@ -49,9 +49,9 @@ public class SvarAnmodningUnntakSedRuter implements SedRuterForSedType {
     }
 
     @Override
-    public void rutSedTilBehandling(Prosessinstans prosessinstans, Long gsakSaksnummer) throws TekniskException, FunksjonellException {
+    public void rutSedTilBehandling(Prosessinstans prosessinstans, Long arkivsakID) throws TekniskException, FunksjonellException {
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
-        Behandling behandling = hentBehandling(gsakSaksnummer);
+        Behandling behandling = hentBehandling(arkivsakID);
         prosessinstans.setBehandling(behandling);
         Optional<Anmodningsperiode> anmodningsperiode = anmodningsperiodeService.hentAnmodningsperioder(behandling.getId())
             .stream().findFirst();

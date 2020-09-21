@@ -47,9 +47,9 @@ public class SedMottakRuting implements StegBehandler {
         MelosysEessiMelding eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
         log.info("Forsøker å rute sed {} i RINA-sak {}", eessiMelding.getSedId(), eessiMelding.getRinaSaksnummer());
 
-        Long gsakSaksnummer = eessiService.finnSakForRinasaksnummer(eessiMelding.getRinaSaksnummer()).orElse(null);
+        Long arkivsakID = eessiService.finnSakForRinasaksnummer(eessiMelding.getRinaSaksnummer()).orElse(null);
         SedType sedType = SedType.valueOf(eessiMelding.getSedType());
-        hentSedRuterForSedType(sedType).rutSedTilBehandling(prosessinstans, gsakSaksnummer);
+        hentSedRuterForSedType(sedType).rutSedTilBehandling(prosessinstans, arkivsakID);
     }
 
     private SedRuter hentSedRuterForSedType(SedType sedType) {

@@ -50,15 +50,15 @@ public class DefaultSedRuter implements SedRuter {
      * Hvis SED'en er tilknyttet en sak går den til ferdigstilling av journalpost
      * Ellers opprettes det en journalføringsoppgave
      */
-    public void rutSedTilBehandling(Prosessinstans prosessinstans, Long gsakSaksnummer) throws MelosysException {
+    public void rutSedTilBehandling(Prosessinstans prosessinstans, Long arkivsakID) throws MelosysException {
         final MelosysEessiMelding eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
         SedType sedType = SedType.valueOf(eessiMelding.getSedType());
 
-        if (gsakSaksnummer == null) {
+        if (arkivsakID == null) {
             log.info("Oppretter oppgave sed {} i rinasak {}", eessiMelding.getSedId(), eessiMelding.getRinaSaksnummer());
             oppgaveService.opprettJournalføringsoppgave(eessiMelding.getJournalpostId(), prosessinstans.hentAktørIDFraDataEllerSED());
         } else {
-            Fagsak fagsak = fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer);
+            Fagsak fagsak = fagsakService.hentFagsakFraGsakSaksnummer(arkivsakID);
             Behandling behandling = fagsak.hentSistAktiveBehandling();
 
             if (behandling.erAktiv()) {

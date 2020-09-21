@@ -38,22 +38,22 @@ public class UnntaksperiodeSedRuter implements SedRuterForSedType {
     }
 
     @Override
-    public void rutSedTilBehandling(Prosessinstans prosessinstans, Long gsakSaksnummer) throws FunksjonellException, TekniskException {
+    public void rutSedTilBehandling(Prosessinstans prosessinstans, Long arkivsakID) throws FunksjonellException, TekniskException {
 
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
 
-        if (gsakSaksnummer == null) {
+        if (arkivsakID == null) {
             opprettNySak(prosessinstans, melosysEessiMelding);
         }
 
-        Optional<Fagsak> fagsak = fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer);
+        Optional<Fagsak> fagsak = fagsakService.finnFagsakFraGsakSaksnummer(arkivsakID);
         if (fagsak.isPresent()) {
             Behandling behandling = fagsak.get().hentSistAktiveBehandling();
             Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
             if (periodeErEndret(melosysEessiMelding, behandlingsresultat)) {
                 log.info("Mottatt ny {} i {} hvor periode er endret. Oppretter ny behandling",
                     melosysEessiMelding.getSedType(), fagsak.get().getSaksnummer());
-                opprettNyBehandling(melosysEessiMelding, gsakSaksnummer);
+                opprettNyBehandling(melosysEessiMelding, arkivsakID);
             } else {
                 log.info("Mottatt ny {} i {} periode er ikke endret. Oppretter ikke ny behandling",
                     melosysEessiMelding.getSedType(), fagsak.get().getSaksnummer());

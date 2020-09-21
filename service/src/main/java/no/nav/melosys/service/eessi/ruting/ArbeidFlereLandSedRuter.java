@@ -48,19 +48,19 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedType {
     }
 
     @Override
-    public void rutSedTilBehandling(Prosessinstans prosessinstans, Long gsakSaksnummer) throws MelosysException {
+    public void rutSedTilBehandling(Prosessinstans prosessinstans, Long arkivsakID) throws MelosysException {
 
         final MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
 
-        if (gsakSaksnummer == null) {
+        if (arkivsakID == null) {
             opprettNySak(prosessinstans, melosysEessiMelding);
             return;
         }
 
-        Optional<Fagsak> fagsak = fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer);
+        Optional<Fagsak> fagsak = fagsakService.finnFagsakFraGsakSaksnummer(arkivsakID);
 
         if (fagsak.isEmpty()) {
-            throw new FunksjonellException("Finner ingen sak tilknyttet gsaksaksnummer " + gsakSaksnummer);
+            throw new FunksjonellException("Finner ingen sak tilknyttet arkivsak " + arkivsakID);
         }
 
         final Behandling eksisterendeBehandling = fagsak.get().hentSistAktiveBehandling();
@@ -71,12 +71,12 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedType {
 
             validerNorgeIkkeUtpektOgVedtakIkkeFattet(eksisterendeBehandling, behandlingsresultat);
             log.info("Ny A003 resulterer i nytt behandlingstema {}", nyttBehandlingstema);
-            opprettNyBehandling(melosysEessiMelding, gsakSaksnummer);
+            opprettNyBehandling(melosysEessiMelding, arkivsakID);
         } else if (eksisterendeBehandling.erBeslutningLovvalgAnnetLand() && periodeErEndret(melosysEessiMelding, behandlingsresultat)) {
 
             log.info("Mottatt oppdatert A003 i {}, rinasak {} hvor et annet land er utpekt",
                 fagsak.get().getSaksnummer(), melosysEessiMelding.getRinaSaksnummer());
-            opprettNyBehandling(melosysEessiMelding, gsakSaksnummer);
+            opprettNyBehandling(melosysEessiMelding, arkivsakID);
         } else if (eksisterendeBehandling.erNorgeUtpekt()) {
 
             if (eksisterendeBehandling.erAktiv()) {

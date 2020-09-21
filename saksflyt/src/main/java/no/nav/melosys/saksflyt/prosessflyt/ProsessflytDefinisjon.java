@@ -255,7 +255,6 @@ public final class ProsessflytDefinisjon {
                 SED_MOTTAK_HENT_EESSI_MELDING,
                 SED_MOTTAK_RUTING,
                 SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH,
-                SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH,
                 OPPRETT_ARKIVSAK,
                 OPPDATER_SAKSRELASJON,
                 HENT_REGISTEROPPLYSNINGER,
