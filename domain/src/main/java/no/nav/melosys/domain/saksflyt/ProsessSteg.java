@@ -31,7 +31,7 @@ public enum ProsessSteg implements Kodeverk {
     AOU_AVKLAR_MYNDIGHET("AOU_AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
     OPPDATER_MEDL_ANMODNING_UNNTAK("OPPDATER_MEDL_ANMODNING_UNNTAK", "Setter periode til under avklaring i MEDL ved anmodning om unntak"),
     SEND_ORIENTERING_ANMODNING_UNNTAK("SEND_ORIENTERING_ANMODNING_UNNTAK", "Send orienteringsbrev til bruker ved anmodning om unntak"),
-    SEND_A001("SEND_A001", "Sender A001"),
+    SEND_ANMODNING_OM_UNNTAK("SEND_ANMODNING_OM_UNNTAK", "Sender anmodning om unntak til utenlandsk trygdemyndighet"),
     OPPDATER_OPPGAVE_ANMODNING_UNNTAK_SENDT("OPPDATER_OPPGAVE_ANMODNING_UNNTAK_SENDT", "Oppdaterer oppgave med frist og beskrivelse"),
 
     //Svar anmodning om unntak

@@ -53,7 +53,7 @@ public final class ProsessflytDefinisjon {
                 AOU_AVKLAR_MYNDIGHET,
                 OPPDATER_MEDL_ANMODNING_UNNTAK,
                 SEND_ORIENTERING_ANMODNING_UNNTAK,
-                SEND_A001,
+                SEND_ANMODNING_OM_UNNTAK,
                 OPPDATER_OPPGAVE_ANMODNING_UNNTAK_SENDT
             )
         );

@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
 
 @Component
-public class SendA001 extends AbstraktSendUtland {
+public class SendAnmodningOmUnntak extends AbstraktSendUtland {
     private final BrevBestiller brevBestiller;
     private final BehandlingService behandlingService;
     private final AnmodningsperiodeService anmodningsperiodeService;
@@ -38,11 +38,11 @@ public class SendA001 extends AbstraktSendUtland {
     private static final int SVARFRIST_MÅNEDER = 2;
 
     @Autowired
-    public SendA001(@Qualifier("system") EessiService eessiService,
-                    BrevBestiller brevBestiller,
-                    BehandlingService behandlingService,
-                    BehandlingsresultatService behandlingsresultatService,
-                    AnmodningsperiodeService anmodningsperiodeService) {
+    public SendAnmodningOmUnntak(@Qualifier("system") EessiService eessiService,
+                                 BrevBestiller brevBestiller,
+                                 BehandlingService behandlingService,
+                                 BehandlingsresultatService behandlingsresultatService,
+                                 AnmodningsperiodeService anmodningsperiodeService) {
         super(eessiService, behandlingsresultatService);
         this.brevBestiller = brevBestiller;
         this.behandlingService = behandlingService;
@@ -51,7 +51,7 @@ public class SendA001 extends AbstraktSendUtland {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return ProsessSteg.SEND_A001;
+        return ProsessSteg.SEND_ANMODNING_OM_UNNTAK;
     }
 
     @Override
