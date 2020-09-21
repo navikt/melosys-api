@@ -104,17 +104,28 @@ class DataByggerStubs {
         return behandling;
     }
 
-    static Behandling hentBehandlingMedManglendeAdressefelterStub() {
+    static Behandling hentBehandlingMedManglendeAdressefelterStub(boolean arbeidUtlandHarLandkode,
+                                                                  boolean arbeidsgivendeForetakUtlandHarLandkode,
+                                                                  boolean selvstendigForetakUtlandHarLandkode) {
         Behandling behandling = hentBehandlingStub();
         BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
 
         ArbeidUtland arbeidUtland = behandlingsgrunnlagData.arbeidUtland.remove(0);
         arbeidUtland.adresse.poststed = null;
+        if (!arbeidUtlandHarLandkode) {
+            arbeidUtland.adresse.landkode = null;
+        }
         behandlingsgrunnlagData.arbeidUtland.add(arbeidUtland);
 
         ForetakUtland foretakUtland = behandlingsgrunnlagData.foretakUtland.remove(0);
         foretakUtland.adresse.postnummer = null;
         foretakUtland.adresse.poststed = null;
+        if (!arbeidsgivendeForetakUtlandHarLandkode || !selvstendigForetakUtlandHarLandkode) {
+            foretakUtland.adresse.landkode = null;
+        }
+        if (!selvstendigForetakUtlandHarLandkode) {
+            foretakUtland.selvstendigNæringsvirksomhet = true;
+        }
         behandlingsgrunnlagData.foretakUtland.add(foretakUtland);
 
         return behandling;
