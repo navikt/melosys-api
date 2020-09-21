@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SendUtlandTest {
+public class SendAnmodningOmUnntakTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
@@ -50,7 +50,7 @@ public class SendUtlandTest {
     @Mock
     private AnmodningsperiodeService anmodningsperiodeService;
 
-    private SendUtland sendUtland;
+    private SendAnmodningOmUnntak sendAnmodningOmUnntak;
 
     private Prosessinstans prosessinstans;
     @Captor
@@ -66,7 +66,7 @@ public class SendUtlandTest {
         prosessinstans.getBehandling().setId(BEHANDLING_ID);
         prosessinstans.getBehandling().setDokumentasjonSvarfristDato(Instant.now());
 
-        sendUtland = new SendUtland(eessiService, brevBestiller, behandlingService, behandlingsresultatService, anmodningsperiodeService);
+        sendAnmodningOmUnntak = new SendAnmodningOmUnntak(eessiService, brevBestiller, behandlingService, behandlingsresultatService, anmodningsperiodeService);
     }
 
     @Test
@@ -75,7 +75,7 @@ public class SendUtlandTest {
         when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(behandlingsresultat);
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITSJON));
 
-        sendUtland.utfør(prosessinstans);
+        sendAnmodningOmUnntak.utfør(prosessinstans);
 
         verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITSJON)), eq(BucType.LA_BUC_01), isNull(), isNull());
         verify(anmodningsperiodeService).oppdaterAnmodningsperiodeSendtForBehandling(eq(BEHANDLING_ID));
@@ -86,7 +86,7 @@ public class SendUtlandTest {
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(behandlingsresultat);
 
-        sendUtland.utfør(prosessinstans);
+        sendAnmodningOmUnntak.utfør(prosessinstans);
 
         verify(brevBestiller).bestill(brevbestillingArgumentCaptor.capture());
         assertThat(brevbestillingArgumentCaptor.getValue().getMottakere()).contains(Mottaker.av(Aktoersroller.MYNDIGHET));
@@ -104,7 +104,7 @@ public class SendUtlandTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITSJON));
         prosessinstans.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, "fritekst");
 
-        sendUtland.utfør(prosessinstans);
+        sendAnmodningOmUnntak.utfør(prosessinstans);
 
         assertThat(nå).isBefore(prosessinstans.getBehandling().getDokumentasjonSvarfristDato());
         verify(eessiService, never()).opprettOgSendSed(anyLong(), anyList(), eq(BucType.LA_BUC_01), isNull(), eq("fritekst"));

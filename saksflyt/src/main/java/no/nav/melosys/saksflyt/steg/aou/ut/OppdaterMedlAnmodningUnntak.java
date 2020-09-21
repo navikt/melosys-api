@@ -11,24 +11,23 @@ import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.AOU_OPPDATER_MEDL;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPDATER_MEDL_ANMODNING_UNNTAK;
 
-
-@Component("AnmodningOmUnntakOppdaterMedl")
-public class OppdaterMedl implements StegBehandler {
+@Component
+public class OppdaterMedlAnmodningUnntak implements StegBehandler {
 
     private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
 
     @Autowired
-    public OppdaterMedl(BehandlingsresultatService behandlingsresultatService, MedlPeriodeService medlPeriodeService) {
+    public OppdaterMedlAnmodningUnntak(BehandlingsresultatService behandlingsresultatService, MedlPeriodeService medlPeriodeService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
     }
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return AOU_OPPDATER_MEDL;
+        return OPPDATER_MEDL_ANMODNING_UNNTAK;
     }
 
     @Override

@@ -17,21 +17,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-@Component("AnmodningOmUnntakOppdaterOppgave")
-public class OppdaterOppgave implements StegBehandler {
-    private static final Logger log = LoggerFactory.getLogger(OppdaterOppgave.class);
+@Component
+public class OppdaterOppgaveAnmodningUnntakSendt implements StegBehandler {
+    private static final Logger log = LoggerFactory.getLogger(OppdaterOppgaveAnmodningUnntakSendt.class);
     private static final String ANMODNING_OM_UNNTAK_SENDT = "Anmodning om unntak er sendt utenlandsk trygdemyndighet.";
 
     private final OppgaveService oppgaveService;
 
     @Autowired
-    public OppdaterOppgave(@Qualifier("system") OppgaveService oppgaveService) {
+    public OppdaterOppgaveAnmodningUnntakSendt(@Qualifier("system") OppgaveService oppgaveService) {
         this.oppgaveService = oppgaveService;
     }
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return ProsessSteg.AOU_OPPDATER_OPPGAVE;
+        return ProsessSteg.OPPDATER_OPPGAVE_ANMODNING_UNNTAK_SENDT;
     }
 
     @Override
