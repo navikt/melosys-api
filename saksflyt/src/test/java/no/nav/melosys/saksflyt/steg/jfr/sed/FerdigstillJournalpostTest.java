@@ -1,12 +1,12 @@
 package no.nav.melosys.saksflyt.steg.jfr.sed;
 
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -16,9 +16,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FerdigstillJournalpostTest {
@@ -37,61 +37,41 @@ public class FerdigstillJournalpostTest {
     private static final String DOKUMENT_ID = "dokID123";
 
     @Before
-    public void setUp() {
+    public void setUp() throws IkkeFunnetException {
         ferdigstillJournalpost = new FerdigstillJournalpost(joarkFasade, tpsFasade);
+        when(tpsFasade.hentIdentForAktørId(eq(AKTØR_ID))).thenReturn(BRUKER_ID);
     }
 
     @Test
-    public void utfør_ikkeProsesstypeJournalfør_skalBehandlesVidere() throws Exception {
-
+    public void utfør() throws Exception {
         Prosessinstans prosessinstans = hentProsessinstans();
-        prosessinstans.setType(ProsessType.REGISTRERING_UNNTAK);
-        when(tpsFasade.hentIdentForAktørId(eq(AKTØR_ID))).thenReturn(BRUKER_ID);
         ferdigstillJournalpost.utfør(prosessinstans);
 
         JournalpostOppdatering forventetOppdatering = new JournalpostOppdatering.Builder()
             .medBrukerID(BRUKER_ID).medArkivSakID(GSAK_SAKSNUMMER).medHovedDokumentID(DOKUMENT_ID).medTittel(TITTEL).build();
         verify(joarkFasade).oppdaterJournalpost(eq(JOURNALPOST_ID), eq(forventetOppdatering), eq(true));
-        verify(tpsFasade).hentIdentForAktørId(eq(AKTØR_ID));
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.hentFørsteProsessStegForType(prosessinstans.getType()));
     }
 
-    @Test
-    public void utfør_ikkeProsesstypeJournalfør_skalIkkeBehandlesVidere() throws Exception {
-
-        Prosessinstans prosessinstans = hentProsessinstans();
-        prosessinstans.setType(ProsessType.MOTTAK_SED_JOURNALFØRING);
-
-        when(tpsFasade.hentIdentForAktørId(eq(AKTØR_ID))).thenReturn(BRUKER_ID);
-        ferdigstillJournalpost.utfør(prosessinstans);
-
-        JournalpostOppdatering forventetOppdatering = new JournalpostOppdatering.Builder()
-            .medBrukerID(BRUKER_ID).medArkivSakID(GSAK_SAKSNUMMER).medHovedDokumentID(DOKUMENT_ID).medTittel(TITTEL).build();
-        verify(joarkFasade).oppdaterJournalpost(eq(JOURNALPOST_ID), eq(forventetOppdatering), eq(true));
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
-    }
-
-    @Test
-    public void utfør_prosesstypeOpprettNySakSedForespørsel_skalIkkeFerdigstilleJournalpost() throws FunksjonellException, TekniskException {
-        Prosessinstans prosessinstans = hentProsessinstans();
-        prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_SED_FORESPØRSEL);
-
-        ferdigstillJournalpost.utfør(prosessinstans);
-
-        verify(tpsFasade, never()).hentIdentForAktørId(anyString());
-        verify(joarkFasade, never()).oppdaterJournalpost(anyString(), any(JournalpostOppdatering.class), anyBoolean());
-    }
 
     private static Prosessinstans hentProsessinstans() {
+
+        Aktoer bruker = new Aktoer();
+        bruker.setRolle(Aktoersroller.BRUKER);
+        bruker.setAktørId(AKTØR_ID);
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setGsakSaksnummer(123L);
+        fagsak.getAktører().add(bruker);
+
+        Behandling behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID);
-        prosessinstans.setData(ProsessDataKey.AKTØR_ID, AKTØR_ID);
-        prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER);
         prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, TITTEL);
         prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, DOKUMENT_ID);
-        prosessinstans.setBehandling(new Behandling());
+        prosessinstans.setBehandling(behandling);
+
         return prosessinstans;
     }
-
-
 }

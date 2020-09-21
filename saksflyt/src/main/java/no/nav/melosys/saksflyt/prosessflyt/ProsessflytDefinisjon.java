@@ -251,6 +251,19 @@ public final class ProsessflytDefinisjon {
                 BESTEM_BEHANDLINGMÅTE_SED
             )
         );
+
+        PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_NY_SAK_SED_FORESPØRSEL,
+            new ProsessFlyt(ProsessType.OPPRETT_NY_SAK_SED_FORESPØRSEL,
+                SED_MOTTAK_HENT_EESSI_MELDING,
+                SED_MOTTAK_RUTING,
+                SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH,
+                SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH,
+                OPPRETT_ARKIVSAK,
+                OPPDATER_SAKSRELASJON,
+                HENT_REGISTEROPPLYSNINGER,
+                OPPRETT_OPPGAVE
+            )
+        );
     }
 
     public static Optional<ProsessFlyt> finnFlytForProsessType(ProsessType prosessType) {

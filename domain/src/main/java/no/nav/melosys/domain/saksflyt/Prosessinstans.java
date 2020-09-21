@@ -207,7 +207,7 @@ public class Prosessinstans {
 
     public String hentAktørIDFraDataEllerSED() {
         return Optional.ofNullable(getData(ProsessDataKey.AKTØR_ID))
-            .orElse(getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class).getAktoerId());
+            .orElse(getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class, new MelosysEessiMelding()).getAktoerId());
     }
 
     private void leggTilHendelse(ProsessinstansHendelse prosessinstansHendelse) {

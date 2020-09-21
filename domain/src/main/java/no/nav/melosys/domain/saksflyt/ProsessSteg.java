@@ -1,7 +1,6 @@
 package no.nav.melosys.domain.saksflyt;
 
 import no.nav.melosys.domain.kodeverk.Kodeverk;
-import no.nav.melosys.exception.TekniskException;
 
 public enum ProsessSteg implements Kodeverk {
 
@@ -78,9 +77,6 @@ public enum ProsessSteg implements Kodeverk {
     SED_MOTTAK_FERDIGSTILL_JOURNALPOST("SED_MOTTAK_FERDIGSTILL_JOURNALPOST", "Journalføring av innkommende SED"),
     REGISTERKONTROLL("REGISTERKONTROLL", "Utfører registerkontroll for en behandling"),
 
-    SED_GENERELL_SAK_HENT_PERSON("SED_GENERELL_SAK_HENT_PERSON", "Henter person tilknyttet behandling"),
-    SED_GENERELL_SAK_OPPRETT_OPPGAVE("SED_GENERELL_SAK_OPPRETT_OPPGAVE", "Oppretter oppgave for behandling"),
-
     // Journalføring av mottatt anmodning om unntak (brev)
     JFR_AOU_BREV_OPPRETT_FAGSAK_OG_BEHANDLING("JFR_AOU_BREV_OPPRETT_FAGSAK_OG_BEHANDLING", "Opprett fagsak og behandling"),
     JFR_AOU_BREV_FERDIGSTILL_JOURNALPOST("JFR_AOU_BREV_FERDIGSTILL_JOURNALPOST", "Journalføring av anmodning om unntak brev"),
@@ -131,23 +127,5 @@ public enum ProsessSteg implements Kodeverk {
     @Override
     public String getBeskrivelse() {
         return beskrivelse;
-    }
-
-    public static ProsessSteg hentFørsteProsessStegForType(final ProsessType prosessType) throws TekniskException {
-        switch (prosessType)  {
-            case REGISTRERING_UNNTAK:
-                //return REG_UNNTAK_SAK_OG_BEHANDLING_OPPRETTET;
-            case ANMODNING_OM_UNNTAK_SVAR:
-                return AOU_SVAR_OPPRETT_ANMODNINGSPERIODESVAR;
-            case ANMODNING_OM_UNNTAK_MOTTAK:
-                return AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE;
-            case SED_GENERELL_SAK:
-                return SED_GENERELL_SAK_HENT_PERSON;
-            case ARBEID_FLERE_LAND:
-                //return AFL_SAK_OG_BEHANDLING_OPPRETTET;
-
-            default:
-                throw new TekniskException("Første steg for prosesstype" + prosessType + " er ukjent");
-        }
     }
 }
