@@ -13,7 +13,6 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -21,7 +20,6 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.junit.Before;
@@ -32,18 +30,15 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_VALIDERING;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ForkortPeriodeTest {
+public class HentMottakerinstitusjonerForkortetPeriodeTest {
 
-    private ForkortPeriode forkortPeriode;
-    @Mock
-    private AvklartefaktaService avklartefaktaService;
+    private HentMottakerinstitusjonerForkortetPeriode hentMottakerinstitusjonerForkortetPeriode;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
@@ -58,8 +53,7 @@ public class ForkortPeriodeTest {
 
     @Before
     public void setUp() throws MelosysException {
-        avklartefaktaService = mock(AvklartefaktaService.class);
-        forkortPeriode = new ForkortPeriode(avklartefaktaService, behandlingsresultatService, eessiService, landvelgerService);
+        hentMottakerinstitusjonerForkortetPeriode = new HentMottakerinstitusjonerForkortetPeriode(behandlingsresultatService, eessiService, landvelgerService);
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(behandlingId);
@@ -84,11 +78,9 @@ public class ForkortPeriodeTest {
             new BucInformasjon("123", BucType.LA_BUC_04.name(), LocalDate.now(), mottakerInstitusjoner, Collections.emptyList())
         ));
 
-        forkortPeriode.utfør(p);
+        hentMottakerinstitusjonerForkortetPeriode.utfør(p);
 
-        verify(avklartefaktaService).leggTilBegrunnelse(behandlingId, Avklartefaktatyper.AARSAK_ENDRING_PERIODE, endretperiodeKode.getKode());
         assertThat(p.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<Set<String>>(){})).isEqualTo(mottakerInstitusjoner);
-        assertThat(p.getSteg()).isEqualTo(IV_VALIDERING);
     }
 
     @Test
@@ -106,11 +98,9 @@ public class ForkortPeriodeTest {
             new BucInformasjon("123", BucType.LA_BUC_04.name(), LocalDate.now(), mottakerInstitusjoner, Collections.emptyList())
         ));
 
-        forkortPeriode.utfør(p);
+        hentMottakerinstitusjonerForkortetPeriode.utfør(p);
 
-        verify(avklartefaktaService).leggTilBegrunnelse(behandlingId, Avklartefaktatyper.AARSAK_ENDRING_PERIODE, endretperiodeKode.getKode());
         assertThat(p.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<Set<String>>(){})).isEqualTo(mottakerInstitusjoner);
-        assertThat(p.getSteg()).isEqualTo(IV_VALIDERING);
     }
 
     @Test
@@ -126,7 +116,7 @@ public class ForkortPeriodeTest {
 
         expectedException.expect(TekniskException.class);
         expectedException.expectMessage("er EESSI-ready, men har ingen tidligere buc tilknyttet seg");
-        forkortPeriode.utfør(p);
+        hentMottakerinstitusjonerForkortetPeriode.utfør(p);
     }
 
     private Behandling lagBehandling() {

@@ -18,20 +18,18 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.sak.FagsakService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_STATUS_BEH_AVSL;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AvsluttFagsakOgBehandlingTest {
+@ExtendWith(MockitoExtension.class)
+class AvsluttFagsakOgBehandlingTest {
 
     private AvsluttFagsakOgBehandling avsluttFagsakOgBehandling;
 
@@ -49,7 +47,7 @@ public class AvsluttFagsakOgBehandlingTest {
 
     private final String saksnummer = "MEL-123";
 
-    @Before
+    @BeforeEach
     public void setUp() throws IkkeFunnetException {
         avsluttFagsakOgBehandling = new AvsluttFagsakOgBehandling(fagsakService, behandlingService, behandlingsresultatService);
 
@@ -75,28 +73,22 @@ public class AvsluttFagsakOgBehandlingTest {
         behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
 
-        when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsak);
         when(behandlingsresultatService.hentBehandlingsresultat(eq(behandling.getId())))
             .thenReturn(behandlingsresultat);
     }
 
     @Test
-    public void utfør_erArtikkel12_behandlingOgFagsakAvsluttet() throws FunksjonellException, TekniskException {
+    void utfør_erArtikkel12_behandlingOgFagsakAvsluttet() throws FunksjonellException, TekniskException {
+        when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsak);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-
         avsluttFagsakOgBehandling.utfør(prosessinstans);
-
         verify(fagsakService).avsluttFagsakOgBehandling(eq(fagsak), eq(Saksstatuser.LOVVALG_AVKLART));
-        assertThat(prosessinstans.getSteg()).isEqualTo(IV_STATUS_BEH_AVSL);
     }
 
     @Test
-    public void utfør_erArtikkel13_behandlingsstatusMidlertidigLovvalgsbeslutning() throws FunksjonellException, TekniskException {
+    void utfør_erArtikkel13_behandlingsstatusMidlertidigLovvalgsbeslutning() throws FunksjonellException, TekniskException {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
-
         avsluttFagsakOgBehandling.utfør(prosessinstans);
-
         verify(behandlingService).oppdaterStatus(eq(behandling.getId()), eq(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING));
-        assertThat(prosessinstans.getSteg()).isEqualTo(IV_STATUS_BEH_AVSL);
     }
 }

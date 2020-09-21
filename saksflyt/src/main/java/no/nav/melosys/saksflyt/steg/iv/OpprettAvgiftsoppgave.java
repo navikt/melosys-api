@@ -10,7 +10,6 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
-import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,21 +22,18 @@ public class OpprettAvgiftsoppgave implements StegBehandler {
     static final String AVGIFTSVURDERING_BESKRIVELSE = "Vurderes for innregistrering i Avgiftssystemet";
 
     private final BehandlingsresultatService behandlingsresultatService;
-    private final LovvalgsperiodeService lovvalgsperiodeService;
     private final OppgaveService oppgaveService;
 
     @Autowired
     public OpprettAvgiftsoppgave(BehandlingsresultatService behandlingsresultatService,
-                                 LovvalgsperiodeService lovvalgsperiodeService,
                                  @Qualifier("system") OppgaveService oppgaveService) {
         this.behandlingsresultatService = behandlingsresultatService;
-        this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.oppgaveService = oppgaveService;
     }
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE;
+        return ProsessSteg.OPPRETT_AVGIFTSOPPGAVE;
     }
 
     @Override
@@ -47,13 +43,11 @@ public class OpprettAvgiftsoppgave implements StegBehandler {
         final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 
         if (!behandlingsresultat.erAvslag()) {
-            Lovvalgsperiode lovvalgsperiode = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID);
+            Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
             if (!lovvalgsperiode.erArtikkel11() && !lovvalgsperiode.erArtikkel13()) {
                 oppgaveService.opprettOppgave(lagOppgaveTilTrygdeavgift(behandling));
             }
         }
-
-        prosessinstans.setSteg(ProsessSteg.IV_AVSLUTT_BEHANDLING);
     }
 
     private static Oppgave lagOppgaveTilTrygdeavgift(Behandling behandling) throws TekniskException {

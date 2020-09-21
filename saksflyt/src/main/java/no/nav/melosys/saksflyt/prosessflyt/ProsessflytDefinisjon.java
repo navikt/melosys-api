@@ -33,31 +33,30 @@ public final class ProsessflytDefinisjon {
             ProsessType.HENLEGG_SAK,
             new ProsessFlyt(ProsessType.HENLEGG_SAK,
                 HS_SEND_BREV,
-                IV_STATUS_BEH_AVSL
+                SOB_BEHANDLING_AVSLUTTET
             )
         );
 
         PROSESS_FLYT_MAP.put(ProsessType.VIDERESEND_SOKNAD,
             new ProsessFlyt(ProsessType.VIDERESEND_SOKNAD,
-                VS_AVKLAR_MYNDIGHET,
+                AVKLAR_MYNDIGHET,
                 VS_SEND_ORIENTERINGSBREV,
                 VS_SEND_SOKNAD,
-                VS_DISTRIBUER_JOURNALPOST,
-                IV_STATUS_BEH_AVSL
+                DISTRIBUER_JOURNALPOST_UTLAND,
+                SOB_BEHANDLING_AVSLUTTET
             )
         );
 
         PROSESS_FLYT_MAP.put(
             ProsessType.ANMODNING_OM_UNNTAK,
             new ProsessFlyt(ProsessType.ANMODNING_OM_UNNTAK,
-                AOU_AVKLAR_MYNDIGHET,
+                AVKLAR_MYNDIGHET,
                 OPPDATER_MEDL_ANMODNING_UNNTAK,
                 SEND_ORIENTERING_ANMODNING_UNNTAK,
                 SEND_ANMODNING_OM_UNNTAK,
                 OPPDATER_OPPGAVE_ANMODNING_UNNTAK_SENDT
             )
         );
-
 
         PROSESS_FLYT_MAP.put(ProsessType.JFR_NY_SAK,
             new ProsessFlyt(ProsessType.JFR_NY_SAK,
@@ -116,6 +115,34 @@ public final class ProsessflytDefinisjon {
                 GJENBRUK_OPPGAVE
             )
         );
+
+        PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK,
+            new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK,
+                AVKLAR_MYNDIGHET,
+                AVKLAR_ARBEIDSGIVER,
+                OPPDATER_MEDL_VED_VEDTAK,
+                SEND_VEDTAKSBREV_INNLAND,
+                SEND_VEDTAK_UTLAND,
+                DISTRIBUER_JOURNALPOST_UTLAND,
+                OPPRETT_AVGIFTSOPPGAVE,
+                AVSLUTT_SAK_OG_BEHANDLING,
+                SOB_BEHANDLING_AVSLUTTET
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE,
+            new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE,
+                HENT_MOTTAKERINSTITUSJON_FORKORTET_PERIODE,
+                OPPDATER_MEDL_VED_VEDTAK,
+                SEND_VEDTAKSBREV_INNLAND,
+                SEND_VEDTAK_UTLAND,
+                DISTRIBUER_JOURNALPOST_UTLAND,
+                OPPRETT_AVGIFTSOPPGAVE,
+                AVSLUTT_SAK_OG_BEHANDLING,
+                SOB_BEHANDLING_AVSLUTTET
+            )
+        );
+
     }
 
     public static Optional<ProsessFlyt> finnFlytForProsessType(ProsessType prosessType) {

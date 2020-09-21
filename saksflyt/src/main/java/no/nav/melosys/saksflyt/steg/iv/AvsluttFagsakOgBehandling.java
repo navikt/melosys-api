@@ -16,16 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_AVSLUTT_BEHANDLING;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_STATUS_BEH_AVSL;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.AVSLUTT_SAK_OG_BEHANDLING;
 
-/**
- * Avslutter en fagsak og Behandling i Melosys.
- *
- * Transisjoner:
- * ProsessType.IVERKSETT_VEDTAK
- *  IV_AVSLUTT_BEHANDLING -> IV_STATUS_BEH_AVSL eller FEILET_MASKINELT hvis feil
- */
 @Component
 public class AvsluttFagsakOgBehandling implements StegBehandler {
 
@@ -44,26 +36,21 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return IV_AVSLUTT_BEHANDLING;
+        return AVSLUTT_SAK_OG_BEHANDLING;
     }
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
-        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
+        final long behandlingID = prosessinstans.getBehandling().getId();
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService
-            .hentBehandlingsresultat(prosessinstans.getBehandling().getId());
-
-        if (behandlingsresultat.erInnvilgelse() && behandlingsresultat.hentValidertLovvalgsperiode().erArtikkel13()
-            || behandlingsresultat.erUtpeking()) {
-            long behandlingID = prosessinstans.getBehandling().getId();
+        if (behandlingsresultat.erInnvilgelse() && behandlingsresultat.hentValidertLovvalgsperiode().erArtikkel13()) {
             behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         } else {
+            log.info("Avslutter behandling {}", behandlingID);
             fagsakService.avsluttFagsakOgBehandling(
                 fagsakService.hentFagsak(prosessinstans.getBehandling().getFagsak().getSaksnummer()), Saksstatuser.LOVVALG_AVKLART
             );
         }
-
-        prosessinstans.setSteg(IV_STATUS_BEH_AVSL);
     }
 }

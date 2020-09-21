@@ -31,13 +31,10 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.SEND_VEDTAKSBREV_INNLAND;
 import static no.nav.melosys.saksflyt.brev.FastMottaker.*;
 
 
-/**
- * Sender ulike brev basert på behandlingsresultat og lovvalgsbestemmelse.
- */
 @Component
 public class SendVedtaksbrevInnland implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(SendVedtaksbrevInnland.class);
@@ -60,13 +57,11 @@ public class SendVedtaksbrevInnland implements StegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return IV_SEND_BREV;
+        return SEND_VEDTAKSBREV_INNLAND;
     }
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
-        log.info("Starter behandling av prosessinstans {}", prosessinstans.getId());
-        // Henter ut behandling med saksopplysninger
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         Behandlingsresultattyper behandlingsresultatType = resultat.getType();
@@ -77,17 +72,14 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         if (resultat.erAvslag()) {
             sendAvslagsbrev(behandling, behandlingsresultatType, saksbehandler, fritekst);
             log.info("Sendt avslagsbrev for prosessinstans {}", prosessinstans.getId());
-            prosessinstans.setSteg(IV_OPPDATER_RESULTAT);
         } else if (resultat.erUtpeking()) {
             sendUtpekingsbrev(behandling, saksbehandler, fritekst);
             log.info("Sendt utpekingsbrev for prosessinstans {}", prosessinstans.getId());
-            prosessinstans.setSteg(IV_SEND_SED);
         } else if (resultat.erInnvilgelse()) {
             sendInnvilgelsesbrev(behandling, resultat, saksbehandler, begrunnelseKode, fritekst);
             sendOrienteringTilArbeidsgiver(behandling, resultat, saksbehandler);
             sendA1tilSkattOppkreverUtland(behandling, resultat, begrunnelseKode, saksbehandler);
             log.info("Sendt innvilgelsesbrev for prosessinstans {}", prosessinstans.getId());
-            prosessinstans.setSteg(IV_SEND_SED);
         } else {
             throw new FunksjonellException("Vedtaksbrev kan ikke sendes for behandling " + behandling.getId());
         }

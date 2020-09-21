@@ -15,7 +15,6 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -177,7 +176,6 @@ public class ProsessinstansService {
                                                      Vedtakstyper vedtakstype, String revurderBegrunnelse) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK)
-            .medSteg(ProsessSteg.IV_VALIDERING)
             .medBehandling(behandling)
             .medBegrunnelseFritekst(fritekst)
             .medEessiMottakere(mottakerinstitusjoner)
@@ -248,17 +246,15 @@ public class ProsessinstansService {
         return prosessinstans;
     }
 
-    public void opprettProsessinstansForkortPeriode(Behandling behandling, Endretperiode endretperiode, String fritekst, String fritekstSed) {
+    public void opprettProsessinstansForkortPeriode(Behandling behandling, String fritekst, String fritekstSed) {
         Prosessinstans nyprosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
             .medType(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE)
-            .medSteg(ProsessSteg.IV_FORKORT_PERIODE)
             .medBegrunnelseFritekst(fritekst)
             .medYtterligereinformasjonSed(fritekstSed)
             .build();
 
         nyprosessinstans.setData(ProsessDataKey.VEDTAKSTYPE, Vedtakstyper.ENDRINGSVEDTAK.getKode());
-        nyprosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, endretperiode);
         lagre(nyprosessinstans);
     }
 
@@ -342,7 +338,6 @@ public class ProsessinstansService {
                                                     String fritekstBrev) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK)
-            .medSteg(ProsessSteg.IV_VALIDERING)
             .medBehandling(behandling)
             .medEessiMottakere(mottakerinstitusjoner)
             .medYtterligereinformasjonSed(ytterligereInformasjonSed)

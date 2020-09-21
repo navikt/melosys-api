@@ -28,7 +28,6 @@ public enum ProsessSteg implements Kodeverk {
     FEILET_MASKINELT("FEILET_MASKINELT", "Feilet maskinelt"),
 
     //Anmodning om unntak
-    AOU_AVKLAR_MYNDIGHET("AOU_AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
     OPPDATER_MEDL_ANMODNING_UNNTAK("OPPDATER_MEDL_ANMODNING_UNNTAK", "Setter periode til under avklaring i MEDL ved anmodning om unntak"),
     SEND_ORIENTERING_ANMODNING_UNNTAK("SEND_ORIENTERING_ANMODNING_UNNTAK", "Send orienteringsbrev til bruker ved anmodning om unntak"),
     SEND_ANMODNING_OM_UNNTAK("SEND_ANMODNING_OM_UNNTAK", "Sender anmodning om unntak til utenlandsk trygdemyndighet"),
@@ -55,26 +54,22 @@ public enum ProsessSteg implements Kodeverk {
     AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET("AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET","Oppdaterer status på sak i sob til avsluttet"),
 
     //Iverksett Vedtak
-    IV_FORKORT_PERIODE("IV_FORKORT_PERIODE", "Legger til endringsgrunn i AVKLARTEFAKTA for hvorfor perioden er forkortet"),
-    IV_VALIDERING("IV_VALIDERING", "Validere iverksett vedtak"),
-    IV_OPPDATER_RESULTAT("IV_OPPDATER_RESULTAT", "Oppdatering av behandlingsresultat"),
-    IV_AVKLAR_MYNDIGHET("IV_AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
-    IV_AVKLAR_ARBEIDSGIVER("IV_AVKLAR_ARBEIDSGIVER", "Avklaring av norsk arbeidsgiver"),
-    IV_OPPDATER_MEDL("IV_OPPDATER_MEDL", "Oppdatering av medlemskap"),
-    IV_SEND_BREV("IV_SEND_BREV", "Send brev etter iverksett vedtak"),
-    IV_SEND_SED("IV_SEND_SED", "Send SED etter iverksett vedtak"),
-    IV_OPPRETT_AVGIFTSOPPGAVE("IV_OPPRETT_AVGIFTSOPPGAVE", "Oppretter en vurderingsoppgave for innregistrering i avgiftsystemet"),
-    IV_AVSLUTT_BEHANDLING("IV_AVSLUTT_BEHANDLING", "Avslutt fagsak og aktiv behandling"),
-    IV_STATUS_BEH_AVSL("IV_STATUS_BEH_AVSL", "Oppdater Sak og Behandling ved lukking av behandling"),
+    HENT_MOTTAKERINSTITUSJON_FORKORTET_PERIODE("HENT_MOTTAKERINSTITUSJON_FORKORTET_PERIODE", "Henter mottakerinstitusjon fra tidligere sendt BUC ved forkortet periode"),
+    AVKLAR_MYNDIGHET("AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
+    AVKLAR_ARBEIDSGIVER("AVKLAR_ARBEIDSGIVER", "Avklaring av norsk arbeidsgiver"),
+    OPPDATER_MEDL_VED_VEDTAK("OPPDATER_MEDL_VED_VEDTAK","Oppdaterer MEDL ved vedtak"),
+    SEND_VEDTAKSBREV_INNLAND("SEND_VEDTAKSBREV_INNLAND", "Sender vedtaksbrev innland"),
+    SEND_VEDTAK_UTLAND("SEND_VEDTAK_UTLAND","Sender vedtaket til utland"),
+    OPPRETT_AVGIFTSOPPGAVE("OPPRETT_AVGIFTSOPPGAVE", "Oppretter en vurderingsoppgave for innregistrering i avgiftsystemet"),
+    AVSLUTT_SAK_OG_BEHANDLING("AVSLUTT_SAK_OG_BEHANDLING", "Avslutt fagsak og aktiv behandling"),
+    SOB_BEHANDLING_AVSLUTTET("SOB_BEHANDLING_AVSLUTTET", "Oppdaterer SOB (Sak Og Behandling) om avsluttet behandling"),
 
-    //Utpek annet land
-    UL_DISTRIBUER_JOURNALPOST("UL_DISTRIBUER_JOURNALPOST", "Distribuerer (sender) journalposten dersom den ble opprettet"),
+    DISTRIBUER_JOURNALPOST_UTLAND("DISTRIBUER_JOURNALPOST_UTLAND", "Distribuerer (sender) en journalpost til utlanlandsk myndighet"),
 
     //Henlegg sak
     HS_SEND_BREV("HS_SEND_BREV", "Opprett henleggelsesbrev"),
 
     // Videresend søknad
-    VS_AVKLAR_MYNDIGHET("VS_AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
     VS_SEND_ORIENTERINGSBREV("VS_SEND_ORIENTERINGSBREV", "Opprett orienteringsbrev og brev med vedlagt søknad"),
     VS_SEND_SOKNAD("VS_SEND_SOKNAD", "Opprett journalpost eller SED med søknad som vedlegg"),
     VS_DISTRIBUER_JOURNALPOST("VS_DISTRIBUER_JOURNALPOST", "Distribuerer (sender) journalposten dersom den ble opprettet"),

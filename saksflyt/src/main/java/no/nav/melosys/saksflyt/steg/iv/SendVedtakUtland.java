@@ -23,6 +23,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.SedSomBrevService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.utpeking.UtpekingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,6 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ATTEST_A1;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_OPPDATER_RESULTAT;
 
 
 @Component
@@ -42,6 +42,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     private final BrevBestiller brevBestiller;
     private final SaksopplysningerService saksopplysningerService;
     private final SedSomBrevService sedSomBrevService;
+    private final UtpekingService utpekingService;
 
     @Autowired
     public SendVedtakUtland(@Qualifier("system") EessiService eessiService,
@@ -49,17 +50,18 @@ public class SendVedtakUtland extends AbstraktSendUtland {
                             BehandlingsresultatService behandlingsresultatService,
                             BrevBestiller brevBestiller,
                             SaksopplysningerService saksopplysningerService,
-                            SedSomBrevService sedSomBrevService) {
+                            SedSomBrevService sedSomBrevService, UtpekingService utpekingService) {
         super(eessiService, behandlingsresultatService);
         this.behandlingService = behandlingService;
         this.brevBestiller = brevBestiller;
         this.saksopplysningerService = saksopplysningerService;
         this.sedSomBrevService = sedSomBrevService;
+        this.utpekingService = utpekingService;
     }
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return ProsessSteg.IV_SEND_SED;
+        return ProsessSteg.SEND_VEDTAK_UTLAND;
     }
 
     @Override
@@ -70,16 +72,13 @@ public class SendVedtakUtland extends AbstraktSendUtland {
         if (behandling.erNorgeUtpekt()) {
             sendSedA012(behandling.getId(), prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
         } else if (behandlingsresultat.erUtpeking()) {
+            utpekingService.oppdaterSendtUtland(behandlingsresultat.hentValidertUtpekingsperiode());
             SendUtlandStatus status = sendSedA003(prosessinstans);
-            if (status == SendUtlandStatus.BREV_SENDT) {
-                prosessinstans.setSteg(ProsessSteg.UL_DISTRIBUER_JOURNALPOST);
-                return;
-            }
+            log.info("SendUtlandStatus for behandling {}: {}", behandling.getId(), status);
         } else {
             super.sendUtland(avklarBucType(behandling), prosessinstans);
         }
 
-        prosessinstans.setSteg(IV_OPPDATER_RESULTAT);
     }
 
     private SendUtlandStatus sendSedA003(Prosessinstans prosessinstans) throws MelosysException {
@@ -115,7 +114,8 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             Landkoder utpektLand = prosessinstans.getData(ProsessDataKey.UTPEKT_LAND, Landkoder.class);
             String journalpostID = sedSomBrevService
                 .lagJournalpostForSendingAvSedSomBrev(SedType.A003, utpektLand, behandling);
-            prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
+            prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, journalpostID);
+            prosessinstans.setData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, utpektLand);
         } else {
             brevBestiller.bestill(lagBrevBestilling(prosessinstans));
         }

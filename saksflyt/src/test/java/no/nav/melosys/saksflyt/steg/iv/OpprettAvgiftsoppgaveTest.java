@@ -11,29 +11,25 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_AVSLUTT_BEHANDLING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class OpprettAvgiftsoppgaveTest {
+@ExtendWith(MockitoExtension.class)
+class OpprettAvgiftsoppgaveTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
     private OppgaveService oppgaveService;
     @Captor
@@ -44,20 +40,17 @@ public class OpprettAvgiftsoppgaveTest {
     private static final String DUMM_ID = "DUMM_ID";
     private Behandlingsresultat behandlingsresultat;
 
-    @Before
+    @BeforeEach
     public void setUp() throws FunksjonellException {
-        opprettAvgiftsoppgave = new OpprettAvgiftsoppgave(behandlingsresultatService,
-            lovvalgsperiodeService, oppgaveService);
-        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2);
-        when(lovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
+        opprettAvgiftsoppgave = new OpprettAvgiftsoppgave(behandlingsresultatService, oppgaveService);
         behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
-        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
     }
 
     @Test
-    public void utfør_oppretterRiktigOppgave() throws FunksjonellException, TekniskException {
+    void utfør_oppretterRiktigOppgave() throws FunksjonellException, TekniskException {
+        behandlingsresultat.getLovvalgsperioder().add(lagLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2));
         opprettAvgiftsoppgave.utfør(lagProsessinstans());
 
         verify(oppgaveService).opprettOppgave(oppgave.capture());
@@ -70,14 +63,7 @@ public class OpprettAvgiftsoppgaveTest {
     }
 
     @Test
-    public void utfør_tilAvslutBehandling() throws FunksjonellException, TekniskException {
-        Prosessinstans p = lagProsessinstans();
-        opprettAvgiftsoppgave.utfør(p);
-        assertThat(p.getSteg()).isEqualTo(IV_AVSLUTT_BEHANDLING);
-    }
-
-    @Test
-    public void utfør_avslag_oppretterIkkeOppgave() throws FunksjonellException, TekniskException {
+    void utfør_avslag_oppretterIkkeOppgave() throws FunksjonellException, TekniskException {
         Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
         behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
@@ -88,9 +74,8 @@ public class OpprettAvgiftsoppgaveTest {
     }
 
     @Test
-    public void utfør_art13_oppretterIkkeOppgave() throws FunksjonellException, TekniskException {
-        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
-        when(lovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
+    void utfør_art13_oppretterIkkeOppgave() throws FunksjonellException, TekniskException {
+        behandlingsresultat.getLovvalgsperioder().add(lagLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A));
         opprettAvgiftsoppgave.utfør(lagProsessinstans());
 
         verify(oppgaveService, never()).opprettOppgave(any());

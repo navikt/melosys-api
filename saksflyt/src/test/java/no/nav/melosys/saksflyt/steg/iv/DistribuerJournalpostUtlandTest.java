@@ -1,0 +1,74 @@
+package no.nav.melosys.saksflyt.steg.iv;
+
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.integrasjon.doksys.DoksysFasade;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static no.nav.melosys.saksflyt.SaksflytTestUtils.lagUtenlandskMyndighet;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class DistribuerJournalpostUtlandTest {
+
+    @Mock
+    private DoksysFasade doksysFasade;
+    @Mock
+    private UtenlandskMyndighetService utenlandskMyndighetService;
+    private DistribuerJournalpostUtland distribuerJournalpostUtland;
+
+    @BeforeEach
+    public void settOpp() {
+        distribuerJournalpostUtland = new DistribuerJournalpostUtland(doksysFasade, utenlandskMyndighetService);
+    }
+
+    @Test
+    void utfør_distribuerbarJournalpostOgMottakerSatt_distribuererJournalpost() throws MelosysException {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, "12345");
+        prosessinstans.setData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, Landkoder.SE);
+        prosessinstans.setBehandling(new Behandling());
+        when(utenlandskMyndighetService.hentUtenlandskMyndighet(eq(Landkoder.SE))).thenReturn(lagUtenlandskMyndighet());
+
+        distribuerJournalpostUtland.utfør(prosessinstans);
+
+        ArgumentCaptor<StrukturertAdresse> captor = ArgumentCaptor.forClass(StrukturertAdresse.class);
+        verify(doksysFasade).distribuerJournalpost(eq("12345"), captor.capture());
+
+        StrukturertAdresse strukturertAdresse = captor.getValue();
+        assertThat(strukturertAdresse).isNotNull();
+        assertThat(strukturertAdresse.gatenavn).isEqualTo("Svenskegatan 38");
+        assertThat(strukturertAdresse.postnummer).isEqualTo("8080");
+        assertThat(strukturertAdresse.landkode).isEqualTo(Landkoder.SE.getKode());
+    }
+
+    @Test
+    void utfør_distribuerJournalpostSattMottakerIkkeSatt_kasterFeil() {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, "123");
+        assertThatExceptionOfType(IkkeFunnetException.class)
+            .isThrownBy(() -> distribuerJournalpostUtland.utfør(prosessinstans))
+            .withMessageContaining("mottakerland ikke er satt");
+    }
+
+    @Test
+    void utfør_distribuerJournalpostIkkeSatt_distribuererIkkeJournalpost() throws MelosysException {
+        distribuerJournalpostUtland.utfør(new Prosessinstans());
+        verify(doksysFasade, never()).distribuerJournalpost(any(), any());
+    }
+}

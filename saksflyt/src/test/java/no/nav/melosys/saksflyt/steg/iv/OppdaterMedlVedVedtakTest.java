@@ -12,7 +12,6 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -20,22 +19,20 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.IV_SEND_BREV;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class OppdaterMedlTest {
-    private OppdaterMedl oppdaterMedl;
+@ExtendWith(MockitoExtension.class)
+class OppdaterMedlVedVedtakTest {
+    private OppdaterMedlVedVedtak oppdaterMedlVedVedtak;
 
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
@@ -46,9 +43,9 @@ public class OppdaterMedlTest {
     private Behandlingsresultat behandlingsresultat;
     private Lovvalgsperiode lovvalgsperiode;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IkkeFunnetException {
-        oppdaterMedl = new OppdaterMedl(behandlingsresultatService, medlPeriodeService);
+        oppdaterMedlVedVedtak = new OppdaterMedlVedVedtak(behandlingsresultatService, medlPeriodeService);
 
         prosessinstans = new Prosessinstans();
         Fagsak fagsak = new Fagsak();
@@ -85,68 +82,58 @@ public class OppdaterMedlTest {
     }
 
     @Test
-    public void sjekkNestSteg() throws FunksjonellException, TekniskException {
-        oppdaterMedl.utfør(prosessinstans);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_BREV);
-    }
-
-    @Test
-    public void utfør_behandlingsresultatTypeErFastsattLovvalgslandOgInnvilgelsesResultat_Innvilget() throws FunksjonellException, TekniskException {
-        oppdaterMedl.utfør(prosessinstans);
+    void utfør_behandlingsresultatTypeErFastsattLovvalgslandOgInnvilgelsesResultat_Innvilget() throws FunksjonellException, TekniskException {
+        oppdaterMedlVedVedtak.utfør(prosessinstans);
         verify(medlPeriodeService).opprettPeriodeEndelig(eq(lovvalgsperiode), eq(1L), eq(false));
     }
 
     @Test
-    public void utfør_behandlingsresultatHarIngenLovvalgPeriode_feiler() throws FunksjonellException {
+    void utfør_behandlingsresultatHarIngenLovvalgPeriode_feiler() throws FunksjonellException {
         behandlingsresultat.setLovvalgsperioder(new HashSet<>());
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         assertThatExceptionOfType(NoSuchElementException.class)
-            .isThrownBy(() -> oppdaterMedl.utfør(prosessinstans))
+            .isThrownBy(() -> oppdaterMedlVedVedtak.utfør(prosessinstans))
             .withMessageContaining("Ingen lovvalgsperiode finnes");
     }
 
     @Test
-    public void utfør_avslagManglendeOpplysningerUtenPeriode_oppdaterIkkeMedl() throws Exception {
+    void utfør_avslagManglendeOpplysningerUtenPeriode_oppdaterIkkeMedl() throws Exception {
         behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
-        oppdaterMedl.utfør(prosessinstans);
+        oppdaterMedlVedVedtak.utfør(prosessinstans);
         verifyNoInteractions(medlPeriodeService);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_BREV);
     }
 
     @Test
-    public void utfør_avslagManglendeOpplysningerMedPeriode_oppdaterMedl() throws Exception {
+    void utfør_avslagManglendeOpplysningerMedPeriode_oppdaterMedl() throws Exception {
         behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
         lovvalgsperiode.setMedlPeriodeID(123L);
-        oppdaterMedl.utfør(prosessinstans);
+        oppdaterMedlVedVedtak.utfør(prosessinstans);
         verify(medlPeriodeService).avvisPeriode(123L);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.IV_SEND_BREV);
     }
 
     @Test
-    public void medlperiodeIDFinnesLovvalgsperiodeInnvilget_oppdaterPeriodeEndelig() throws FunksjonellException, TekniskException {
+    void medlperiodeIDFinnesLovvalgsperiodeInnvilget_oppdaterPeriodeEndelig() throws FunksjonellException, TekniskException {
         lovvalgsperiode.setMedlPeriodeID(123L);
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
-        oppdaterMedl.utfør(prosessinstans);
+        oppdaterMedlVedVedtak.utfør(prosessinstans);
 
         verify(medlPeriodeService).oppdaterPeriodeEndelig(eq(lovvalgsperiode), eq(false));
-        assertThat(prosessinstans.getSteg()).isEqualTo(IV_SEND_BREV);
     }
 
     @Test
-    public void medlperiodeIDFinnesLovvalgsperiodeAvslått_avvisPeriode() throws FunksjonellException, TekniskException {
+    void medlperiodeIDFinnesLovvalgsperiodeAvslått_avvisPeriode() throws FunksjonellException, TekniskException {
         lovvalgsperiode.setMedlPeriodeID(123L);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
-        oppdaterMedl.utfør(prosessinstans);
+        oppdaterMedlVedVedtak.utfør(prosessinstans);
 
         verify(medlPeriodeService).avvisPeriode(eq(lovvalgsperiode.getMedlPeriodeID()));
-        assertThat(prosessinstans.getSteg()).isEqualTo(IV_SEND_BREV);
     }
 
     @Test
-    public void utfør_erArtikkel13_opprettForeløpigPeriode() throws FunksjonellException, TekniskException {
+    void utfør_erArtikkel13_opprettForeløpigPeriode() throws FunksjonellException, TekniskException {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
@@ -155,9 +142,8 @@ public class OppdaterMedlTest {
         behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        oppdaterMedl.utfør(prosessinstans);
+        oppdaterMedlVedVedtak.utfør(prosessinstans);
 
         verify(medlPeriodeService).opprettPeriodeForeløpig(eq(lovvalgsperiode), eq(1L), eq(true));
-        assertThat(prosessinstans.getSteg()).isEqualTo(IV_SEND_BREV);
     }
 }

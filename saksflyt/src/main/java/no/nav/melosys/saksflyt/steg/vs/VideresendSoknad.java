@@ -105,11 +105,12 @@ public class VideresendSoknad extends AbstraktSendUtland {
         Fagsak fagsak = fagsakService.hentFagsak(behandling.getFagsak().getSaksnummer());
         behandling.setFagsak(fagsak);
 
-        Landkoder landkode = fagsak.hentMyndighetLandkode();
+        Landkoder mottakerLandkode = fagsak.hentMyndighetLandkode();
         String journalpostID = sedSomBrevService
-            .lagJournalpostForSendingAvSedSomBrev(SedType.A008, landkode, behandling, lagSøknadVedlegg(behandling));
+            .lagJournalpostForSendingAvSedSomBrev(SedType.A008, mottakerLandkode, behandling, lagSøknadVedlegg(behandling));
 
         prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, journalpostID);
+        prosessinstans.setData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, mottakerLandkode);
     }
 
     private List<FysiskDokument> lagSøknadVedlegg(Behandling behandling) throws FunksjonellException, IntegrasjonException {

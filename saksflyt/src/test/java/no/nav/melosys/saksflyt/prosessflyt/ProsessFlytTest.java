@@ -10,7 +10,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOf
 
 class ProsessFlytTest {
 
-    private final ProsessSteg førsteSteg = ProsessSteg.IV_OPPRETT_AVGIFTSOPPGAVE;
+    private final ProsessSteg førsteSteg = ProsessSteg.OPPRETT_AVGIFTSOPPGAVE;
     private final ProsessSteg andreSteg = ProsessSteg.MSA_OPPRETT_ARKIVSAK;
     private final ProsessSteg sisteSteg = ProsessSteg.VS_SEND_SOKNAD;
 
