@@ -347,6 +347,11 @@ public class Behandlingsresultat extends RegistreringsInfo {
             || behandlingsmåte == Behandlingsmaate.DELVIS_AUTOMATISERT;
     }
 
+    public boolean erGodkjenningRegistreringUnntak() {
+        return type == Behandlingsresultattyper.REGISTRERT_UNNTAK
+            && utfallRegistreringUnntak == Utfallregistreringunntak.GODKJENT;
+    }
+
     public void settVedtakMetadata(Vedtakstyper vedtakstype,
                                    String revurderBegrunnelse,
                                    LocalDate klagefrist) {
