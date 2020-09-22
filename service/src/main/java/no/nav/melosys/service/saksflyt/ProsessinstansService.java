@@ -262,7 +262,6 @@ public class ProsessinstansService {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
             .medType(ProsessType.REGISTRERING_UNNTAK_GODKJENN)
-            .medSteg(ProsessSteg.REG_UNNTAK_OPPDATER_MEDL)
             .build();
 
         prosessinstans.setData(ProsessDataKey.VARSLE_UTLAND, varsleUtland);
