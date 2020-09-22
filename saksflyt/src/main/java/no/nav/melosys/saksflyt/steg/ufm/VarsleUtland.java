@@ -41,7 +41,5 @@ public class VarsleUtland implements StegBehandler {
                 throw new UnsupportedOperationException("Sending av brev-A012 er ikke implementert");
             }
         }
-
-        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
     }
 }

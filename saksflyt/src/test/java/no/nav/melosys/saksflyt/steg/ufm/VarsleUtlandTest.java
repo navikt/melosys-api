@@ -4,7 +4,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.SaksopplysningerService;
@@ -15,7 +14,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
@@ -43,7 +41,6 @@ public class VarsleUtlandTest {
 
         verify(saksopplysningerService).hentSedOpplysninger(anyLong());
         verify(eessiService).sendGodkjenningArbeidFlereLand(anyLong(), isNull());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
     }
 
     @Test(expected = UnsupportedOperationException.class)
@@ -64,7 +61,6 @@ public class VarsleUtlandTest {
 
         verify(saksopplysningerService, never()).hentSedOpplysninger(anyLong());
         verify(eessiService, never()).sendGodkjenningArbeidFlereLand(anyLong(), isNull());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
     }
 
     @Test
@@ -76,7 +72,6 @@ public class VarsleUtlandTest {
 
         verify(saksopplysningerService, never()).hentSedOpplysninger(anyLong());
         verify(eessiService, never()).sendGodkjenningArbeidFlereLand(anyLong(), isNull());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_AVSLUTT_BEHANDLING);
     }
 
     private static Prosessinstans lagProsessinstans() {
