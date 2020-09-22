@@ -3,29 +3,37 @@ package no.nav.melosys.saksflyt.steg.ufm;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.dokument.medlemskap.Periode;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BestemBehandlingsmåteSedTest {
+@ExtendWith(MockitoExtension.class)
+class BestemBehandlingsmåteSedTest {
 
     @Mock
+    private BehandlingService behandlingService;
+    @Mock
     private BehandlingsresultatService behandlingsresultatService;
+    @Mock
+    private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
     private OppgaveService oppgaveService;
     @Mock
@@ -37,11 +45,12 @@ public class BestemBehandlingsmåteSedTest {
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
     private final Prosessinstans prosessinstans = new Prosessinstans();
 
-    @Before
+    @BeforeEach
     public void setUp() throws IkkeFunnetException {
-        bestemBehandlingsmåteSed = new BestemBehandlingsmåteSed(behandlingsresultatService, oppgaveService, unntaksperiodeService);
+        bestemBehandlingsmåteSed = new BestemBehandlingsmåteSed(behandlingService, behandlingsresultatService, lovvalgsperiodeService, oppgaveService, unntaksperiodeService);
         prosessinstans.setBehandling(behandling);
         behandling.setId(234L);
+        behandling.getSaksopplysninger().add(sedSaksopplysning());
 
         Aktoer bruker = new Aktoer();
         bruker.setRolle(Aktoersroller.BRUKER);
@@ -49,18 +58,19 @@ public class BestemBehandlingsmåteSedTest {
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().getAktører().add(bruker);
 
+        when(behandlingService.hentBehandling(eq(behandling.getId()))).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
     }
 
     @Test
-    public void utfør_temaRegistreringUnntakIngenTreffIRegister_prosessOpprettes() throws Exception {
+    void utfør_temaRegistreringUnntakIngenTreffIRegister_prosessOpprettes() throws Exception {
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         bestemBehandlingsmåteSed.utfør(prosessinstans);
         verify(unntaksperiodeService).godkjennPeriode(eq(behandling.getId()), eq(false));
     }
 
     @Test
-    public void utfør_temaRegistreringUnntakMedTreffIRegister_oppgaveOpprettes() throws Exception {
+    void utfør_temaRegistreringUnntakMedTreffIRegister_oppgaveOpprettes() throws Exception {
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         Kontrollresultat kontrollresultat = new Kontrollresultat();
         kontrollresultat.setBegrunnelse(Kontroll_begrunnelser.FEIL_I_PERIODEN);
@@ -71,5 +81,16 @@ public class BestemBehandlingsmåteSedTest {
         bestemBehandlingsmåteSed.utfør(prosessinstans);
 
         verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), any(), any(), any());
+    }
+
+    private Saksopplysning sedSaksopplysning() {
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(SaksopplysningType.SEDOPPL);
+
+        SedDokument sedDokument = new SedDokument();
+        sedDokument.setLovvalgsperiode(new Periode());
+
+        saksopplysning.setDokument(sedDokument);
+        return saksopplysning;
     }
 }
