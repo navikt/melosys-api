@@ -269,7 +269,7 @@ public final class ProsessflytDefinisjon {
                 LAGRE_LOVVALGSPERIODE_MEDL,
                 REG_UNNTAK_VARSLE_UTLAND,
                 AVSLUTT_SAK_OG_BEHANDLING,
-                REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET
+                SOB_BEHANDLING_AVSLUTTET
             )
         );
 
@@ -277,7 +277,7 @@ public final class ProsessflytDefinisjon {
             new ProsessFlyt(ProsessType.REGISTRERING_UNNTAK_AVVIS,
                 REG_UNNTAK_VARSLE_UTLAND,
                 AVSLUTT_SAK_OG_BEHANDLING,
-                REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET
+                SOB_BEHANDLING_AVSLUTTET
             )
         );
 
