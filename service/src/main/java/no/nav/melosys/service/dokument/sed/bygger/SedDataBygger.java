@@ -63,8 +63,8 @@ public class SedDataBygger {
                                      MedlemsperiodeType medlemsperiodeType,
                                      boolean erUtkast) throws FunksjonellException, TekniskException {
         SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
+        validerArbeidsstederOgVirksomheter(sedDataDto);
         if (erUtkast) {
-            validerArbeidsstederOgVirksomheter(sedDataDto);
             sedDataDto.setBostedsadresse(finnAdresse(dataGrunnlag.getBostedGrunnlag()).orElse(null));
             sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
         } else {

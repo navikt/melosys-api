@@ -104,15 +104,15 @@ class DataByggerStubs {
         return behandling;
     }
 
-    static Behandling hentBehandlingMedManglendeAdressefelterStub(boolean arbeidUtlandHarLandkode,
-                                                                  boolean arbeidsgivendeForetakUtlandHarLandkode,
-                                                                  boolean selvstendigForetakUtlandHarLandkode) {
+    static Behandling hentBehandlingMedManglendeAdressefelterStub(boolean arbeidUtlandManglerLandkode,
+                                                                  boolean arbeidsgivendeForetakUtlandManglerLandkode,
+                                                                  boolean selvstendigForetakUtlandManglerLandkode) {
         Behandling behandling = hentBehandlingStub();
         BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
 
         ArbeidUtland arbeidUtland = behandlingsgrunnlagData.arbeidUtland.remove(0);
         arbeidUtland.adresse.poststed = null;
-        if (!arbeidUtlandHarLandkode) {
+        if (arbeidUtlandManglerLandkode) {
             arbeidUtland.adresse.landkode = null;
         }
         behandlingsgrunnlagData.arbeidUtland.add(arbeidUtland);
@@ -120,12 +120,10 @@ class DataByggerStubs {
         ForetakUtland foretakUtland = behandlingsgrunnlagData.foretakUtland.remove(0);
         foretakUtland.adresse.postnummer = null;
         foretakUtland.adresse.poststed = null;
-        if (!arbeidsgivendeForetakUtlandHarLandkode || !selvstendigForetakUtlandHarLandkode) {
+        if (arbeidsgivendeForetakUtlandManglerLandkode || selvstendigForetakUtlandManglerLandkode) {
             foretakUtland.adresse.landkode = null;
         }
-        if (!selvstendigForetakUtlandHarLandkode) {
-            foretakUtland.selvstendigNæringsvirksomhet = true;
-        }
+        foretakUtland.selvstendigNæringsvirksomhet = selvstendigForetakUtlandManglerLandkode;
         behandlingsgrunnlagData.foretakUtland.add(foretakUtland);
 
         return behandling;

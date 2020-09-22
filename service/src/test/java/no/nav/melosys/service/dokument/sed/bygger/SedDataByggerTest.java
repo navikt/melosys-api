@@ -115,12 +115,12 @@ public class SedDataByggerTest {
         return new SedDataGrunnlagUtenSoknad(behandling, kodeverkService);
     }
 
-    private SedDataGrunnlagMedSoknad lagDokumentressurserMedManglendeAdressefelter(boolean arbeidUtlandHarLandkode,
-                                                                                   boolean arbeidsgivendeForetakUtlandHarLandkode,
-                                                                                   boolean selvstendigForetakUtlandHarLandkode) throws TekniskException {
+    private SedDataGrunnlagMedSoknad lagDokumentressurserMedManglendeAdressefelter(boolean arbeidUtlandManglerLandkode,
+                                                                                   boolean arbeidsgivendeForetakUtlandManglerLandkode,
+                                                                                   boolean selvstendigForetakUtlandManglerLandkode) throws TekniskException {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
         return new SedDataGrunnlagMedSoknad(DataByggerStubs.hentBehandlingMedManglendeAdressefelterStub(
-            arbeidUtlandHarLandkode, arbeidsgivendeForetakUtlandHarLandkode, selvstendigForetakUtlandHarLandkode),
+            arbeidUtlandManglerLandkode, arbeidsgivendeForetakUtlandManglerLandkode, selvstendigForetakUtlandManglerLandkode),
             kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 
@@ -402,34 +402,34 @@ public class SedDataByggerTest {
     }
 
     @Test
-    public void lagUtkast_arbeidsstedManglerLandkode_kasterFeil() throws TekniskException, FunksjonellException {
+    public void lag_arbeidsstedManglerLandkode_kasterFeil() throws TekniskException, FunksjonellException {
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("land ikke oppgitt for arbeidssted");
-        dataBygger.lagUtkast(lagDokumentressurserMedManglendeAdressefelter(false, true, true),
+        dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(true, false, false),
             behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
     }
 
     @Test
-    public void lagUtkast_arbeidsgivendeVirksomhetManglerLandkode_kasterFeil() throws TekniskException, FunksjonellException {
+    public void lag_arbeidsgivendeVirksomhetManglerLandkode_kasterFeil() throws TekniskException, FunksjonellException {
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of("uuid"));
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("land ikke oppgitt for arbeidsgivende virksomhet");
-        dataBygger.lagUtkast(lagDokumentressurserMedManglendeAdressefelter(true, false, true),
+        dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(false, true, false),
             behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
     }
 
     @Test
-    public void lagUtkast_selvstendigVirksomhetManglerLandkode_kasterFeil() throws TekniskException, FunksjonellException {
+    public void lag_selvstendigVirksomhetManglerLandkode_kasterFeil() throws TekniskException, FunksjonellException {
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of("uuid"));
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("land ikke oppgitt for selvstendig virksomhet");
-        dataBygger.lagUtkast(lagDokumentressurserMedManglendeAdressefelter(true, true, false),
+        dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(false, false, true),
             behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
     }
 
     @Test
     public void lagArbeidssted_manglerObligatoriskeFelter_blirUnknown() throws TekniskException, FunksjonellException {
-        SedDataDto sedData = dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(true, true, true),
+        SedDataDto sedData = dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(false, false, false),
             behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
 
         assertThat(sedData.getArbeidssteder())
@@ -441,7 +441,7 @@ public class SedDataByggerTest {
     @Test
     public void lagVirksomhet_manglerObligatoriskeFelter_blirUnknown() throws TekniskException, FunksjonellException {
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of("uuid"));
-        SedDataDto sedData = dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(true, true, true),
+        SedDataDto sedData = dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(false, false, false),
             behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
 
         assertThat(sedData.getArbeidsgivendeVirksomheter())
