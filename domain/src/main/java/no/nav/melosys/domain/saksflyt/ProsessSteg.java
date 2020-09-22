@@ -95,7 +95,6 @@ public enum ProsessSteg implements Kodeverk {
     REG_UNNTAK_VARSLE_UTLAND("REG_UNNTAK_VARSLE_UTLAND", "Varsler utland om godkjent unntaksperiode"),
     REG_UNNTAK_AVSLUTT_BEHANDLING("REG_UNNTAK_AVSLUTT_BEHANDLING", "Avslutt behandling"),
     REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET("REG_UNNTAK_SAK_OG_BEHANDLING_AVSLUTTET", "Oppdaterer status på sak i sob til avsluttet"),
-    REG_UNNTAK_PERIODE_IKKE_GODKJENT("REG_UNNTAK_PERIODE_IKKE_GODKJENT", "Unntaksperiode avvist av saksbehandler"),
 
     // Mottak av søknad
     MSA_OPPRETT_SAK_OG_BEHANDLING("MSA_OPPRETT_SAK_OG_BEHANDLING", "Opprett sak og behandling fra søknad fra Altinn"),

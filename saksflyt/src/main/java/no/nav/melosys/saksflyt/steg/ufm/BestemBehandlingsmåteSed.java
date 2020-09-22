@@ -1,17 +1,13 @@
 package no.nav.melosys.saksflyt.steg.ufm;
 
-import java.util.Collections;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsmaate;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
-import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -29,16 +25,14 @@ public class BestemBehandlingsmåteSed implements StegBehandler {
 
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final LovvalgsperiodeService lovvalgsperiodeService;
     private final OppgaveService oppgaveService;
     private final UnntaksperiodeService unntaksperiodeService;
 
     @Autowired
     public BestemBehandlingsmåteSed(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
-                                    LovvalgsperiodeService lovvalgsperiodeService, @Qualifier("system") OppgaveService oppgaveService, UnntaksperiodeService unntaksperiodeService) {
+                                    @Qualifier("system") OppgaveService oppgaveService, UnntaksperiodeService unntaksperiodeService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
-        this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.oppgaveService = oppgaveService;
         this.unntaksperiodeService = unntaksperiodeService;
     }
@@ -58,7 +52,6 @@ public class BestemBehandlingsmåteSed implements StegBehandler {
         if (skalGodkjenneUnntaksperiode(behandling, behandlingsresultat)) {
             log.info("Behandling {} tema {} behandles automatisk", behandlingID, behandling.getTema());
             behandlingsresultatService.oppdaterBehandlingsMaate(behandlingID, Behandlingsmaate.AUTOMATISERT);
-            opprettLovvalgsperiode(behandlingID, behandling.hentSedDokument());
             unntaksperiodeService.godkjennPeriode(behandling.getId(), false);
         } else {
             log.info("Oppretter oppgave for behandling {}", behandlingID);
@@ -70,13 +63,6 @@ public class BestemBehandlingsmåteSed implements StegBehandler {
                 prosessinstans.hentSaksbehandlerHvisTilordnes()
             );
         }
-    }
-
-    private void opprettLovvalgsperiode(long behandlingID, SedDokument sedDokument) {
-        lovvalgsperiodeService.lagreLovvalgsperioder(
-            behandlingID,
-            Collections.singleton(sedDokument.opprettInnvilgetLovvalgsperiode())
-        );
     }
 
     private boolean skalGodkjenneUnntaksperiode(Behandling behandling, Behandlingsresultat behandlingsresultat) {

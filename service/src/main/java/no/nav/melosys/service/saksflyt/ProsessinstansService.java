@@ -261,7 +261,7 @@ public class ProsessinstansService {
     public void opprettProsessinstansGodkjennUnntaksperiode(Behandling behandling, boolean varsleUtland) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
-            .medType(ProsessType.REGISTRERING_UNNTAK)
+            .medType(ProsessType.REGISTRERING_UNNTAK_GODKJENN)
             .medSteg(ProsessSteg.REG_UNNTAK_OPPDATER_MEDL)
             .build();
 
@@ -272,7 +272,6 @@ public class ProsessinstansService {
     public void opprettProsessinstansUnntaksperiodeAvvist(Behandling behandling, Collection<Ikke_godkjent_begrunnelser> begrunnelser, String begrunnelseFritekst) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.REGISTRERING_UNNTAK)
-            .medSteg(ProsessSteg.REG_UNNTAK_PERIODE_IKKE_GODKJENT)
             .medBehandling(behandling)
             .medBegrunnelser(begrunnelser)
             .medBegrunnelseFritekst(begrunnelseFritekst)

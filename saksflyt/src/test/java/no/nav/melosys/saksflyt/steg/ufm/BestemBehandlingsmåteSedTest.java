@@ -3,14 +3,11 @@ package no.nav.melosys.saksflyt.steg.ufm;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.dokument.medlemskap.Periode;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -33,8 +30,6 @@ class BestemBehandlingsmåteSedTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
-    private LovvalgsperiodeService lovvalgsperiodeService;
-    @Mock
     private OppgaveService oppgaveService;
     @Mock
     private UnntaksperiodeService unntaksperiodeService;
@@ -47,10 +42,9 @@ class BestemBehandlingsmåteSedTest {
 
     @BeforeEach
     public void setUp() throws IkkeFunnetException {
-        bestemBehandlingsmåteSed = new BestemBehandlingsmåteSed(behandlingService, behandlingsresultatService, lovvalgsperiodeService, oppgaveService, unntaksperiodeService);
+        bestemBehandlingsmåteSed = new BestemBehandlingsmåteSed(behandlingService, behandlingsresultatService, oppgaveService, unntaksperiodeService);
         prosessinstans.setBehandling(behandling);
         behandling.setId(234L);
-        behandling.getSaksopplysninger().add(sedSaksopplysning());
 
         Aktoer bruker = new Aktoer();
         bruker.setRolle(Aktoersroller.BRUKER);
@@ -81,16 +75,5 @@ class BestemBehandlingsmåteSedTest {
         bestemBehandlingsmåteSed.utfør(prosessinstans);
 
         verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), any(), any(), any());
-    }
-
-    private Saksopplysning sedSaksopplysning() {
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.SEDOPPL);
-
-        SedDokument sedDokument = new SedDokument();
-        sedDokument.setLovvalgsperiode(new Periode());
-
-        saksopplysning.setDokument(sedDokument);
-        return saksopplysning;
     }
 }

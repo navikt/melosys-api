@@ -29,6 +29,8 @@ public enum ProsessType implements Kodeverk {
     OPPRETT_NY_SAK("OPPRETT_NY_SAK", "Oppretter ny sak (fra journalført dokument)"),
     OPPRETT_NY_SAK_SED_FORESPØRSEL("OPPRETT_NY_SAK_SED_FORESPØRSEL", "Oppretter ny sak for behandling av SED-forespørsel"),
     REGISTRERING_UNNTAK("REGISTRERING_UNNTAK", "Registrering av unntak"),
+    REGISTRERING_UNNTAK_GODKJENN("REGISTRERING_UNNTAK_GODKJENN", "Godkjenner en untaksperiode og avslutter behandling"),
+    REGISTRERING_UNNTAK_AVVIS("REGISTRERING_UNNTAK_AVVIS", "Avviser en untaksperiode og avslutter behandling"),
     REGISTRERING_UNNTAK_NY_SAK("REGISTRERING_UNNTAK_NY_SAK", "Registrering av unntak - ny sak"),
     REGISTRERING_UNNTAK_NY_BEHANDLING("REGISTRERING_UNNTAK_NY_BEHANDLING", "Registrering av unntak - ny behandling"),
     SED_GENERELL_SAK("SED_OPPRETT_SAK", "Oppretter sak for SED for generell behandling"),
