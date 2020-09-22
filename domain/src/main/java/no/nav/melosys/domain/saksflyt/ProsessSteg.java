@@ -107,6 +107,8 @@ public enum ProsessSteg implements Kodeverk {
     MSA_OPPRETT_OPPGAVE("MSA_OPPRETT_OPPGAVE","Opprett oppgave for saksbehandling"),
     MSA_SEND_FORVALTNINGSMELDING("MSA_SEND_FORVALTNINGSMELDING","Send forvaltningsmelding"),
 
+    LAGRE_LOVVALGSPERIODE_MEDL("LAGRE_LOVVALGSPERIODE_MEDL", "Lagrer en lovvalgsperiode i MEDL som foreløpig eller endelig"),
+
     FERDIG("FERDIG", "Prosessen er ferdig");
 
 
