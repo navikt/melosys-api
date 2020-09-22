@@ -79,10 +79,17 @@ public class DokumentService {
                                  BrevbestillingDto brevbestillingDto)
         throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        BrevData brevData = lagBrevData(produserbartDokument, brevbestillingDto, behandling, SubjectHandler.getInstance().getUserID());
-
         Aktoersroller mottakerRolle = brevbestillingDto.mottaker == null ?
             brevmottakerService.avklarMottakerRolleFraDokument(produserbartDokument) : brevbestillingDto.mottaker;
+        Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(produserbartDokument)
+            .medAvsender(SubjectHandler.getInstance().getUserID())
+            .medMottakerRolle(mottakerRolle)
+            .medBehandling(behandling)
+            .medBegrunnelseKode(brevbestillingDto.begrunnelseKode)
+            .medFritekst(brevbestillingDto.fritekst)
+            .build();
+        BrevData brevData = lagBrevData(brevbestilling);
+
         List<Aktoer> avklarteMottakere =
             brevmottakerService.avklarMottakere(produserbartDokument, Mottaker.av(mottakerRolle), behandling, true);
 
@@ -108,9 +115,7 @@ public class DokumentService {
                                  Brevbestilling brevbestilling)
         throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        BrevData brevData = lagBrevData(produserbartDokument, new BrevbestillingDto(), behandling, brevbestilling.getAvsender());
-        brevData.begrunnelseKode = brevbestilling.getBegrunnelseKode();
-        brevData.fritekst = brevbestilling.getFritekst();
+        BrevData brevData = lagBrevData(brevbestilling);
 
         List<Aktoer> mottakere = brevmottakerService.avklarMottakere(produserbartDokument, mottaker, behandling);
         for (Aktoer aktør : mottakere) {
@@ -118,14 +123,16 @@ public class DokumentService {
         }
     }
 
-    private BrevData lagBrevData(Produserbaredokumenter produserbartDokument,
-                                 BrevbestillingDto brevbestillingDto,
-                                 Behandling behandling,
-                                 String avsenderID) throws TekniskException, FunksjonellException {
-        Assert.notNull(produserbartDokument, "Ingen gyldig produserbartDokument.");
-        BrevDataGrunnlag brevDataGrunnlag = brevdataGrunnlagFactory.av(behandling);
-        BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(produserbartDokument, brevbestillingDto);
-        return brevDataBygger.lag(brevDataGrunnlag, avsenderID);
+    private BrevData lagBrevData(Brevbestilling brevbestilling) throws FunksjonellException, TekniskException {
+        final var dokumentType = brevbestilling.getDokumentType();
+        Assert.notNull(dokumentType, "Ingen gyldig dokumentType.");
+        BrevDataGrunnlag brevDataGrunnlag = brevdataGrunnlagFactory.av(brevbestilling.getBehandling());
+        final BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.mottaker = brevbestilling.getMottakerRolle();
+        brevbestillingDto.begrunnelseKode = brevbestilling.getBegrunnelseKode();
+        brevbestillingDto.fritekst = brevbestilling.getFritekst();
+        BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(dokumentType, brevbestillingDto);
+        return brevDataBygger.lag(brevDataGrunnlag, brevbestilling.getAvsender());
     }
 
     private void produserIkkeredigerbartDokument(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Behandling behandling, BrevData brevData)

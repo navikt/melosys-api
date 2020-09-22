@@ -73,8 +73,7 @@ import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagAnmodningsperiodeSvarInnvilgelse;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagBostedsadresse;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.Mockito.*;
 
@@ -375,11 +374,11 @@ public final class DokumentServiceTest {
                 when(brevdatabyggervelger.hent(any(), eq(bestillingDto))).thenReturn(brevDataByggerAvslagArbeidsgiver);
                 when(brevDataByggerAvslagArbeidsgiver.lag(any(), any())).thenReturn(lagBrevDataAvslagArbeidsgiver());
             } else {
+                when(brevdatabyggervelger.hent(any(), any())).thenReturn(brevDataByggerVedlegg);
                 when(brevdatabyggervelger.hent(eq(INNVILGELSE_YRKESAKTIV), any())).thenReturn(brevDataByggerInnvilgelse);
-                when(brevDataByggerInnvilgelse.lag(any(), any())).thenReturn(lagBrevDataInnvilgelse());
                 when(brevdatabyggervelger.hent(eq(AVSLAG_ARBEIDSGIVER), any())).thenReturn(brevDataByggerAvslagArbeidsgiver);
+                when(brevDataByggerInnvilgelse.lag(any(), any())).thenReturn(lagBrevDataInnvilgelse());
                 when(brevDataByggerAvslagArbeidsgiver.lag(any(), any())).thenReturn(lagBrevDataAvslagArbeidsgiver());
-                when(brevdatabyggervelger.hent(any(), eq(bestillingDto))).thenReturn(brevDataByggerVedlegg);
                 when(brevDataByggerVedlegg.lag(any(), any())).thenReturn(lagBrevDataInnvilgelse());
             }
         } else {
