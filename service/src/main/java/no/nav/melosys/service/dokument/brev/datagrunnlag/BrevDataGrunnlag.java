@@ -42,6 +42,10 @@ public class BrevDataGrunnlag implements DataGrunnlag {
         return brevbestilling.getBehandling();
     }
 
+    public Brevbestilling getBrevbestilling() {
+        return brevbestilling;
+    }
+
     public BehandlingsgrunnlagData getBehandlingsgrunnlagData() {
         return behandlingsgrunnlagData;
     }

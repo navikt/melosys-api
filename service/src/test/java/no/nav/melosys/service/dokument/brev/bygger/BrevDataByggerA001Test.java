@@ -31,7 +31,6 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -67,7 +66,6 @@ public class BrevDataByggerA001Test {
     private UtenlandskMyndighetService myndighetsService;
     @Mock
     private VilkaarsresultatService vilkaarsresultatService;
-
     @Mock
     private EregFasade ereg;
 
@@ -80,8 +78,9 @@ public class BrevDataByggerA001Test {
 
     private BrevDataByggerA001 brevDataByggerA001;
 
-    private String orgnr1 = "12345678910";
-    private String orgnr2 = "10987654321";
+    private final String SAKSBEHANDLER_ID = "Z12345";
+    private final String orgnr1 = "12345678910";
+    private final String orgnr2 = "10987654321";
 
     @Before
     public void setUp() throws IkkeFunnetException, TekniskException {
@@ -155,12 +154,15 @@ public class BrevDataByggerA001Test {
         when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(vilkaarType))).thenReturn(Optional.of(vilkaarsresultat));
     }
 
-    private BrevDataGrunnlag lagDokumentressurs() throws TekniskException {
+    private BrevDataGrunnlag lagBrevDataGrunnlag() throws TekniskException {
+        return lagBrevDataGrunnlag(new Brevbestilling.Builder().medBehandling(behandling).build());
+    }
+
+    private BrevDataGrunnlag lagBrevDataGrunnlag(Brevbestilling brevbestilling) throws TekniskException {
         RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(ereg, mock(TpsFasade.class));
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
         KodeverkService kodeverkService = mock(KodeverkService.class);
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
-        Brevbestilling brevbestilling = new Brevbestilling.Builder().medBehandling(behandling).build();
         return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 
@@ -196,8 +198,8 @@ public class BrevDataByggerA001Test {
         foretak2.orgnr = "10987654321";
         søknad.selvstendigArbeid.selvstendigForetak.add(foretak2);
 
-        BrevDataA001 brevDataDto = (BrevDataA001) brevDataByggerA001.lag(lagDokumentressurs(),"Z12345");
-        assertThat(brevDataDto.selvstendigeVirksomheter.stream()
+        BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
+        assertThat(brevDataA001.selvstendigeVirksomheter.stream()
                 .map(nv -> nv.orgnr)).containsOnly(foretak.orgnr);
     }
 
@@ -211,10 +213,10 @@ public class BrevDataByggerA001Test {
 
         søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.add(orgnr1);
 
-        BrevDataA001 brevDataDto = (BrevDataA001) brevDataByggerA001.lag(lagDokumentressurs(),"Z12345");
-        assertThat(brevDataDto.selvstendigeVirksomheter.stream()
+        BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
+        assertThat(brevDataA001.selvstendigeVirksomheter.stream()
                 .map(nv -> nv.orgnr)).containsOnly(orgnr1);
-        assertThat(brevDataDto.arbeidsgivendeVirksomheter.stream()
+        assertThat(brevDataA001.arbeidsgivendeVirksomheter.stream()
                 .map(nv -> nv.orgnr)).containsOnly(orgnr1);
     }
 
@@ -224,8 +226,8 @@ public class BrevDataByggerA001Test {
         foretak.orgnr = orgnr1;
         søknad.selvstendigArbeid.selvstendigForetak.add(foretak);
 
-        BrevDataA001 brevDataDto = (BrevDataA001) brevDataByggerA001.lag(lagDokumentressurs(), "Z12345");
-        assertThat(brevDataDto.ansettelsesperiode).isEmpty();
+        BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
+        assertThat(brevDataA001.ansettelsesperiode).isEmpty();
     }
 
     @Test
@@ -233,11 +235,11 @@ public class BrevDataByggerA001Test {
         lagVilkårResultat(Vilkaar.FO_883_2004_ART12_1, false, UTSENDELSE_OVER_24_MN);
         lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
 
-        BrevDataA001 brevDataDto = (BrevDataA001) brevDataByggerA001.lag(lagDokumentressurs(), "Z12345");
-        assertThat(brevDataDto.anmodningUtenArt12Begrunnelser).isEmpty();
+        BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
+        assertThat(brevDataA001.anmodningUtenArt12Begrunnelser).isEmpty();
 
-        assertThat(brevDataDto.anmodningBegrunnelser).hasSize(1);
-        assertThat(brevDataDto.anmodningBegrunnelser.stream().map(VilkaarBegrunnelse::getKode))
+        assertThat(brevDataA001.anmodningBegrunnelser).hasSize(1);
+        assertThat(brevDataA001.anmodningBegrunnelser.stream().map(VilkaarBegrunnelse::getKode))
             .containsExactly(ERSTATTER_EN_ANNEN_UNDER_5_AAR.getKode());
     }
 
@@ -246,11 +248,11 @@ public class BrevDataByggerA001Test {
         lagVilkårResultat(Vilkaar.FO_883_2004_ART12_2, false, NORMALT_IKKE_DRIFT_NORGE);
         lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
 
-        BrevDataA001 brevDataDto = (BrevDataA001) brevDataByggerA001.lag(lagDokumentressurs(), "Z12345");
-        assertThat(brevDataDto.anmodningUtenArt12Begrunnelser).isEmpty();
+        BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
+        assertThat(brevDataA001.anmodningUtenArt12Begrunnelser).isEmpty();
 
-        assertThat(brevDataDto.anmodningBegrunnelser).hasSize(1);
-        assertThat(brevDataDto.anmodningBegrunnelser.stream().map(VilkaarBegrunnelse::getKode))
+        assertThat(brevDataA001.anmodningBegrunnelser).hasSize(1);
+        assertThat(brevDataA001.anmodningBegrunnelser.stream().map(VilkaarBegrunnelse::getKode))
             .containsExactly(ERSTATTER_EN_ANNEN_UNDER_5_AAR.getKode());
     }
 
@@ -258,11 +260,11 @@ public class BrevDataByggerA001Test {
     public void lag_art16UtenArt12_harKunArt16UtenArt12Begrunnelser() throws MelosysException {
         lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, SJOEMANNSKIRKEN);
 
-        BrevDataA001 brevDataDto = (BrevDataA001) brevDataByggerA001.lag(lagDokumentressurs(), "Z12345");
-        assertThat(brevDataDto.anmodningBegrunnelser).isEmpty();
+        BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
+        assertThat(brevDataA001.anmodningBegrunnelser).isEmpty();
 
-        assertThat(brevDataDto.anmodningUtenArt12Begrunnelser).hasSize(1);
-        assertThat(brevDataDto.anmodningUtenArt12Begrunnelser.stream().map(VilkaarBegrunnelse::getKode))
+        assertThat(brevDataA001.anmodningUtenArt12Begrunnelser).hasSize(1);
+        assertThat(brevDataA001.anmodningUtenArt12Begrunnelser.stream().map(VilkaarBegrunnelse::getKode))
             .containsExactly(SJOEMANNSKIRKEN.getKode());
     }
 
@@ -284,15 +286,27 @@ public class BrevDataByggerA001Test {
                 LocalDate.of(2010, 10, 23),
                 LocalDate.of(2017, 10, 23));
 
-        BrevData brevDataA001 = brevDataByggerA001.lag(lagDokumentressurs(), "Z12345");
-        assertThat(((BrevDataA001)brevDataA001).ansettelsesperiode).contains(forventet.ansettelsesPeriode);
+        BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
+        assertThat((brevDataA001).ansettelsesperiode).contains(forventet.ansettelsesPeriode);
     }
 
     @Test
     public void testIngenAnsettelsePeriode() throws MelosysException {
         avklarteOrganisasjoner.add(orgnr1);
 
-        BrevData brevDataA001 = brevDataByggerA001.lag(lagDokumentressurs(), "Z12345");
-        assertThat(((BrevDataA001)brevDataA001).ansettelsesperiode).isNotPresent();
+        BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
+        assertThat(brevDataA001.ansettelsesperiode).isNotPresent();
+    }
+
+    @Test
+    public void lagBrevdata_ytterligereInfoFraBestilling_infoFinnes() throws MelosysException {
+        final String forventetInfo = "By the way...";
+        Brevbestilling brevbestilling = new Brevbestilling.Builder()
+            .medBehandling(behandling)
+            .medYtterligereInformasjon(forventetInfo).build();
+        BrevDataGrunnlag brevdataGrunnlag =  lagBrevDataGrunnlag(brevbestilling);
+
+        BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(brevdataGrunnlag, SAKSBEHANDLER_ID);
+        assertThat(brevDataA001.ytterligereInformasjon).isEqualTo(forventetInfo);
     }
 }

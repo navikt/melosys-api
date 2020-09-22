@@ -15,6 +15,7 @@ public final class Brevbestilling {
     private final Behandling behandling;
     private final String begrunnelseKode;
     private final String fritekst;
+    private final String ytterligereInformasjon;
 
     private Brevbestilling(Produserbaredokumenter dokumentType,
                            String avsender,
@@ -22,7 +23,8 @@ public final class Brevbestilling {
                            Collection<Mottaker> mottaker,
                            Behandling behandling,
                            String begrunnelseKode,
-                           String fritekst) {
+                           String fritekst,
+                           String ytterligereInformasjon) {
         this.dokumentType = dokumentType;
         this.avsender = avsender;
         this.mottakerRolle = mottakerRolle;
@@ -30,6 +32,7 @@ public final class Brevbestilling {
         this.behandling = behandling;
         this.begrunnelseKode = begrunnelseKode;
         this.fritekst = fritekst;
+        this.ytterligereInformasjon = ytterligereInformasjon;
     }
 
     public static class Builder {
@@ -40,6 +43,7 @@ public final class Brevbestilling {
         private Behandling behandling;
         private String begrunnelseKode;
         private String fritekst;
+        private String ytterligereInformasjon;
 
         public Builder medDokumentType(Produserbaredokumenter dokumentType) {
             this.dokumentType = dokumentType;
@@ -82,6 +86,11 @@ public final class Brevbestilling {
             return this;
         }
 
+        public Builder medYtterligereInformasjon(String ytterligereInformasjon) {
+            this.ytterligereInformasjon = ytterligereInformasjon;
+            return this;
+        }
+
         public Brevbestilling build() {
             return new Brevbestilling(
                 dokumentType,
@@ -90,7 +99,8 @@ public final class Brevbestilling {
                 mottakere,
                 behandling,
                 begrunnelseKode,
-                fritekst
+                fritekst,
+                ytterligereInformasjon
             );
         }
     }
@@ -121,5 +131,9 @@ public final class Brevbestilling {
 
     public String getFritekst() {
         return fritekst;
+    }
+
+    public String getYtterligereInformasjon() {
+        return ytterligereInformasjon;
     }
 }
