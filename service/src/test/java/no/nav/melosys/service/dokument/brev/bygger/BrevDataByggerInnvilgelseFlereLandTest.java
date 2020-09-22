@@ -7,6 +7,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
@@ -88,7 +89,8 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     }
 
     private BrevDataGrunnlag lagBrevressurser() throws TekniskException {
-        return new BrevDataGrunnlag(behandling, null, avklarteVirksomheterService, avklartefaktaService);
+        Brevbestilling brevbestilling = new Brevbestilling.Builder().medBehandling(behandling).build();
+        return new BrevDataGrunnlag(brevbestilling, null, avklarteVirksomheterService, avklartefaktaService);
     }
 
     private static Saksopplysning lagPersonsopplysning() {

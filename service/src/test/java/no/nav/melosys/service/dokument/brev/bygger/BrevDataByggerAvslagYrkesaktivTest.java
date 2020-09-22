@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -103,7 +104,7 @@ public class BrevDataByggerAvslagYrkesaktivTest {
         BrevDataAvslagYrkesaktiv brevData = (BrevDataAvslagYrkesaktiv) brevDataByggerAvslagYrkesaktiv.lag(lagBrevressurser(behandling), saksbehandler);
 
         assertThat(brevData.hovedvirksomhet.orgnr).isEqualTo("999");
-        assertThat(brevData.hovedvirksomhet.erSelvstendigForetak()).isEqualTo(true);
+        assertThat(brevData.hovedvirksomhet.erSelvstendigForetak()).isTrue();
         assertThat(brevData.arbeidsland).isEqualTo(Landkoder.DE.getBeskrivelse());
         assertThat(brevData.anmodningsperiodeSvar.get()).isEqualToComparingFieldByField(anmodningsperiodeSvar);
         assertThat(brevData.erArt16UtenArt12).isTrue();
@@ -118,6 +119,7 @@ public class BrevDataByggerAvslagYrkesaktivTest {
 
     public BrevDataGrunnlag lagBrevressurser(Behandling behandling) throws TekniskException {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        return new BrevDataGrunnlag(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+        Brevbestilling brevbestilling = new Brevbestilling.Builder().medBehandling(behandling).build();
+        return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 }

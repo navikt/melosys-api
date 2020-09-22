@@ -126,7 +126,7 @@ public class DokumentService {
     private BrevData lagBrevData(Brevbestilling brevbestilling) throws FunksjonellException, TekniskException {
         final var dokumentType = brevbestilling.getDokumentType();
         Assert.notNull(dokumentType, "Ingen gyldig dokumentType.");
-        BrevDataGrunnlag brevDataGrunnlag = brevdataGrunnlagFactory.av(brevbestilling.getBehandling());
+        BrevDataGrunnlag brevDataGrunnlag = brevdataGrunnlagFactory.av(brevbestilling);
         final BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.mottaker = brevbestilling.getMottakerRolle();
         brevbestillingDto.begrunnelseKode = brevbestilling.getBegrunnelseKode();

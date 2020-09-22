@@ -5,6 +5,7 @@ import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
@@ -159,7 +160,8 @@ public class BrevDataByggerA001Test {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
         KodeverkService kodeverkService = mock(KodeverkService.class);
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
-        return new BrevDataGrunnlag(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+        Brevbestilling brevbestilling = new Brevbestilling.Builder().medBehandling(behandling).build();
+        return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 
     private void leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) throws IkkeFunnetException, IntegrasjonException {
@@ -283,7 +285,7 @@ public class BrevDataByggerA001Test {
                 LocalDate.of(2017, 10, 23));
 
         BrevData brevDataA001 = brevDataByggerA001.lag(lagDokumentressurs(), "Z12345");
-        assertThat(((BrevDataA001)brevDataA001).ansettelsesperiode.get()).isEqualTo(forventet.ansettelsesPeriode);
+        assertThat(((BrevDataA001)brevDataA001).ansettelsesperiode).contains(forventet.ansettelsesPeriode);
     }
 
     @Test
@@ -291,6 +293,6 @@ public class BrevDataByggerA001Test {
         avklarteOrganisasjoner.add(orgnr1);
 
         BrevData brevDataA001 = brevDataByggerA001.lag(lagDokumentressurs(), "Z12345");
-        assertThat(((BrevDataA001)brevDataA001).ansettelsesperiode.isPresent()).isFalse();
+        assertThat(((BrevDataA001)brevDataA001).ansettelsesperiode).isNotPresent();
     }
 }

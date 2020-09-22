@@ -2,27 +2,30 @@ package no.nav.melosys.service.dokument.brev.datagrunnlag;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.dokument.ArbeidsstedGrunnlag;
 import no.nav.melosys.service.dokument.BostedGrunnlag;
 import no.nav.melosys.service.dokument.DataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public class BrevDataGrunnlag implements DataGrunnlag {
-    private final Behandling behandling;
+    private final Brevbestilling brevbestilling;
     private final BehandlingsgrunnlagData behandlingsgrunnlagData;
     private final PersonDokument person;
     private final AvklarteVirksomheterGrunnlag avklarteVirksomheterGrunnlag;
     private final BostedGrunnlag bostedGrunnlag;
     private final ArbeidsstedGrunnlag arbeidsstedGrunnlag;
 
-    public BrevDataGrunnlag(Behandling behandling,
+    public BrevDataGrunnlag(Brevbestilling brevbestilling,
                             KodeverkService kodeverkService,
                             AvklarteVirksomheterService avklarteVirksomheterService,
                             AvklartefaktaService avklartefaktaService) throws TekniskException {
-        this.behandling = behandling;
+        this.brevbestilling = brevbestilling;
+        final Behandling behandling = brevbestilling.getBehandling();
         this.behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         this.person = behandling.hentPersonDokument();
         this.avklarteVirksomheterGrunnlag = new AvklarteVirksomheterGrunnlag(behandling, avklarteVirksomheterService, kodeverkService);
@@ -36,7 +39,7 @@ public class BrevDataGrunnlag implements DataGrunnlag {
 
     @Override
     public Behandling getBehandling() {
-        return behandling;
+        return brevbestilling.getBehandling();
     }
 
     public BehandlingsgrunnlagData getBehandlingsgrunnlagData() {
