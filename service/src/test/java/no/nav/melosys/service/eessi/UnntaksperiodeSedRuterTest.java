@@ -80,7 +80,7 @@ public class UnntaksperiodeSedRuterTest {
         Fagsak fagsak = hentFagsak();
 
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-        when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(fagsak));
+        when(fagsakService.finnFagsakFraArkivsakID(anyLong())).thenReturn(Optional.of(fagsak));
 
         unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, 1L);
 
@@ -103,7 +103,7 @@ public class UnntaksperiodeSedRuterTest {
         Fagsak fagsak = hentFagsak();
 
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-        when(fagsakService.finnFagsakFraGsakSaksnummer(anyLong())).thenReturn(Optional.of(fagsak));
+        when(fagsakService.finnFagsakFraArkivsakID(anyLong())).thenReturn(Optional.of(fagsak));
 
         unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
 

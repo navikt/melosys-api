@@ -56,7 +56,7 @@ class SvarAnmodningUnntakSedRuterTest {
     void finnSakOgBestemRuting_anmodningsperiodeUtenSvarFinnes_verifiserKorrektResultat() throws Exception {
 
         Fagsak fagsak = hentFagsak(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
-        when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(fagsak);
+        when(fagsakService.hentFagsakFraArkivsakID(anyLong())).thenReturn(fagsak);
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singleton(new Anmodningsperiode()));
         Prosessinstans prosessinstans = new Prosessinstans();
         MelosysEessiMelding eessiMelding = melosysEessiMelding();
@@ -74,7 +74,7 @@ class SvarAnmodningUnntakSedRuterTest {
 
         Fagsak fagsak = hentFagsak(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
 
-        when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(fagsak);
+        when(fagsakService.hentFagsakFraArkivsakID(anyLong())).thenReturn(fagsak);
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singleton(anmodningsperiode));
         Prosessinstans prosessinstans = new Prosessinstans();
         MelosysEessiMelding eessiMelding = melosysEessiMelding();
@@ -90,7 +90,7 @@ class SvarAnmodningUnntakSedRuterTest {
     @Test
     void finnSakOgBestemRuting_behandlingstypeSøknadIkkeYrkesaktiv_oppgaveOppdateres() throws Exception {
         Fagsak fagsak = hentFagsak(Behandlingstema.IKKE_YRKESAKTIV, Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
-        when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(fagsak);
+        when(fagsakService.hentFagsakFraArkivsakID(anyLong())).thenReturn(fagsak);
         Prosessinstans prosessinstans = new Prosessinstans();
         MelosysEessiMelding eessiMelding = melosysEessiMelding();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
@@ -113,7 +113,7 @@ class SvarAnmodningUnntakSedRuterTest {
         MelosysEessiMelding eessiMelding = melosysEessiMelding();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
 
-        when(fagsakService.hentFagsakFraGsakSaksnummer(anyLong())).thenReturn(hentFagsak(Behandlingstema.UTSENDT_SELVSTENDIG, Behandlingsstatus.FORELOEPIG_LOVVALG));
+        when(fagsakService.hentFagsakFraArkivsakID(anyLong())).thenReturn(hentFagsak(Behandlingstema.UTSENDT_SELVSTENDIG, Behandlingsstatus.FORELOEPIG_LOVVALG));
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.emptyList());
 
         assertThatExceptionOfType(FunksjonellException.class)

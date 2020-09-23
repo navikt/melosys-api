@@ -1,14 +1,16 @@
 package no.nav.melosys.service.eessi.ruting;
 
+import java.util.Collection;
+
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
 
-public interface SedRuterForSedType extends SedRuter {
+public interface SedRuterForSedTyper extends SedRuter {
 
-    boolean gjelderSedType(SedType sedType);
+    Collection<SedType> gjelderSedTyper();
 
     default boolean periodeErEndret(MelosysEessiMelding melosysEessiMelding, Behandlingsresultat behandlingsresultat) {
         Periode periode = tilPeriode(melosysEessiMelding.getPeriode());

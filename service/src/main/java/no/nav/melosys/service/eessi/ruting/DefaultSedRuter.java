@@ -58,7 +58,7 @@ public class DefaultSedRuter implements SedRuter {
             log.info("Oppretter oppgave sed {} i rinasak {}", eessiMelding.getSedId(), eessiMelding.getRinaSaksnummer());
             oppgaveService.opprettJournalføringsoppgave(eessiMelding.getJournalpostId(), prosessinstans.hentAktørIDFraDataEllerSED());
         } else {
-            Fagsak fagsak = fagsakService.hentFagsakFraGsakSaksnummer(arkivsakID);
+            Fagsak fagsak = fagsakService.hentFagsakFraArkivsakID(arkivsakID);
             Behandling behandling = fagsak.hentSistAktiveBehandling();
 
             if (behandling.erAktiv()) {

@@ -1,6 +1,8 @@
 package no.nav.melosys.service.eessi.ruting;
 
+import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
@@ -27,7 +29,7 @@ import org.springframework.stereotype.Service;
 
 //A002,A011
 @Service
-public class SvarAnmodningUnntakSedRuter implements SedRuterForSedType {
+public class SvarAnmodningUnntakSedRuter implements SedRuterForSedTyper {
 
     private static final Logger log = LoggerFactory.getLogger(SvarAnmodningUnntakSedRuter.class);
 
@@ -79,7 +81,7 @@ public class SvarAnmodningUnntakSedRuter implements SedRuterForSedType {
 
     private Behandling hentBehandling(Long gsakSaksnummer) throws FunksjonellException, TekniskException {
         return fagsakService
-            .hentFagsakFraGsakSaksnummer(gsakSaksnummer)
+            .hentFagsakFraArkivsakID(gsakSaksnummer)
             .hentSistAktiveBehandling();
     }
 
@@ -111,8 +113,7 @@ public class SvarAnmodningUnntakSedRuter implements SedRuterForSedType {
     }
 
     @Override
-    public boolean gjelderSedType(SedType sedType) {
-        return sedType == SedType.A011
-            || sedType == SedType.A002;
+    public Collection<SedType> gjelderSedTyper() {
+        return Set.of(SedType.A011, SedType.A002);
     }
 }

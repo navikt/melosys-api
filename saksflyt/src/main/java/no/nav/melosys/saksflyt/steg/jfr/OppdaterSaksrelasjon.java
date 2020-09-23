@@ -46,11 +46,10 @@ public class OppdaterSaksrelasjon implements StegBehandler {
     }
 
     private Optional<MelosysEessiMelding> finnEessiMelding(Prosessinstans prosessinstans) throws MelosysException {
-        Optional<MelosysEessiMelding> eessiMelding = Optional.ofNullable(
-            prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class));
+        MelosysEessiMelding eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
 
-        if (eessiMelding.isPresent()) {
-            return eessiMelding;
+        if (eessiMelding != null) {
+            return Optional.of(eessiMelding);
         }
 
         String journalpostID = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);

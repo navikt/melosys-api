@@ -4,7 +4,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -43,14 +42,13 @@ public class VurderInngangsvilkaar implements StegBehandler {
 
         if (behandling.kanResultereIVedtak()) {
             var søknadsland = behandling.finnSøknadsLand();
-            var periode = behandling.finnPeriode()
-                .orElseThrow(() -> new IkkeFunnetException("Finner ingen periode for inngangsvilkårsvurdering for behandling " + behandlingID));
+            var periode = behandling.hentPeriode();
 
             boolean kvalifisererForEF_883_2004  = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, periode);
             fagsakService.oppdaterType(prosessinstans.getBehandling().getFagsak(), kvalifisererForEF_883_2004);
             log.info("Inngangsvilkår vurdert for behandling {}. kvalifisererForEF_883_2004: {}", behandlingID, kvalifisererForEF_883_2004);
         } else {
-            log.info("Inngangsvilkår ikke vurdert for behandling {}", behandlingID);
+            log.info("Inngangsvilkår ikke vurdert for behandling {} med tema {}", behandlingID, behandling.getTema());
         }
     }
 }

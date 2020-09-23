@@ -4,8 +4,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.NoSuchElementException;
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.Anmodningsperiode;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -18,53 +19,41 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class LagreAnmodningsperiodeIMedlTest {
-    private LagreAnmodningsperiodeIMedl lagreAnmodningsperiodeIMedl;
+@ExtendWith(MockitoExtension.class)
+class LagreAnmodningsperiodeIMedlTest {
 
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private MedlPeriodeService medlPeriodeService;
 
+    private LagreAnmodningsperiodeIMedl lagreAnmodningsperiodeIMedl;
+
     private Prosessinstans prosessinstans;
     private Behandlingsresultat behandlingsresultat;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IkkeFunnetException {
         lagreAnmodningsperiodeIMedl = new LagreAnmodningsperiodeIMedl(behandlingsresultatService, medlPeriodeService);
 
         prosessinstans = new Prosessinstans();
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("TEST-MEDL");
-        HashSet<Aktoer> aktører = new HashSet<>();
-        fagsak.setAktører(aktører);
-
-        Aktoer aktør = new Aktoer();
-        String aktørID = "12345678912";
-        aktør.setAktørId(aktørID);
-        aktør.setFagsak(fagsak);
-        aktør.setRolle(Aktoersroller.BRUKER);
-        aktører.add(aktør);
 
         Behandling behandling = new Behandling();
         behandling.setId(1L);
-        behandling.setFagsak(fagsak);
 
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(null, null, Landkoder.CH,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, null, null, null, Trygdedekninger.FULL_DEKNING_EOSFO);
 
         behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         behandlingsresultat.setAnmodningsperioder(Collections.singleton(anmodningsperiode));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
@@ -74,7 +63,7 @@ public class LagreAnmodningsperiodeIMedlTest {
     }
 
     @Test
-    public void utførNårBehandlingsresultatTypeErAnmodning_om_unntak() throws FunksjonellException, TekniskException {
+    void utførNårBehandlingsresultatTypeErAnmodning_om_unntak() throws FunksjonellException, TekniskException {
         behandlingsresultat.setType(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
 
         lagreAnmodningsperiodeIMedl.utfør(prosessinstans);
@@ -82,7 +71,7 @@ public class LagreAnmodningsperiodeIMedlTest {
     }
 
     @Test
-    public void utførNårBehandlingsresultatHarIngenLovvalgPeriode() {
+    void utførNårBehandlingsresultatHarIngenLovvalgPeriode() {
         behandlingsresultat.setAnmodningsperioder(new HashSet<>());
 
         assertThatExceptionOfType(NoSuchElementException.class)

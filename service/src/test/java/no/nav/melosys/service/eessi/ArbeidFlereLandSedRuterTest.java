@@ -79,7 +79,7 @@ public class ArbeidFlereLandSedRuterTest {
         behandlingsresultat.setBehandling(behandling);
 
         when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingID))).thenReturn(behandlingsresultat);
-        when(fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer)).thenReturn(Optional.of(fagsak));
+        when(fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer)).thenReturn(Optional.of(fagsak));
     }
 
     @Test

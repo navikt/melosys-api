@@ -1,6 +1,8 @@
 package no.nav.melosys.service.eessi.ruting;
 
+import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -22,7 +24,7 @@ import org.springframework.stereotype.Service;
 
 //A009,A010
 @Service
-public class UnntaksperiodeSedRuter implements SedRuterForSedType {
+public class UnntaksperiodeSedRuter implements SedRuterForSedTyper {
 
     private static final Logger log = LoggerFactory.getLogger(UnntaksperiodeSedRuter.class);
 
@@ -46,7 +48,7 @@ public class UnntaksperiodeSedRuter implements SedRuterForSedType {
             opprettNySak(prosessinstans, melosysEessiMelding);
         }
 
-        Optional<Fagsak> fagsak = fagsakService.finnFagsakFraGsakSaksnummer(arkivsakID);
+        Optional<Fagsak> fagsak = fagsakService.finnFagsakFraArkivsakID(arkivsakID);
         if (fagsak.isPresent()) {
             Behandling behandling = fagsak.get().hentSistAktiveBehandling();
             Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
@@ -89,9 +91,8 @@ public class UnntaksperiodeSedRuter implements SedRuterForSedType {
     }
 
     @Override
-    public boolean gjelderSedType(SedType sedType) {
-        return sedType == SedType.A009
-            || sedType == SedType.A010;
+    public Collection<SedType> gjelderSedTyper() {
+        return Set.of(SedType.A009, SedType.A010);
     }
 
     public Behandlingstema hentBehandlingstema(MelosysEessiMelding melosysEessiMelding) {
