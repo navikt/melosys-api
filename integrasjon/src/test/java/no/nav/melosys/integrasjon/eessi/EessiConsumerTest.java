@@ -3,6 +3,8 @@ package no.nav.melosys.integrasjon.eessi;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -120,20 +122,18 @@ public class EessiConsumerTest {
 
     @Test
     public void hentMottakerinstitusjoner_forventInstitusjoner() throws MelosysException {
-        server.expect(requestTo("/buc/LA_BUC_01/institusjoner"))
-            .andExpect(content().string("[\"DE\"]"))
+        server.expect(requestTo("/buc/LA_BUC_01/institusjoner?land=DE,PL"))
             .andRespond(withSuccess("[{\"id\":\"NO:NAVT002\",\"navn\":\"NAVT002\",\"landkode\":\"NO\"}]",
                 MediaType.APPLICATION_JSON));
 
-        List<Institusjon> institusjoner = eessiConsumer.hentMottakerinstitusjoner("LA_BUC_01", List.of("DE"));
+        List<Institusjon> institusjoner = eessiConsumer.hentMottakerinstitusjoner("LA_BUC_01", List.of("DE", "PL"));
         assertThat(institusjoner).extracting(Institusjon::getId, Institusjon::getNavn, Institusjon::getLandkode)
             .contains(tuple("NO:NAVT002", "NAVT002", "NO"));
     }
 
     @Test(expected = MelosysException.class)
     public void hentMottakerinstitusjoner_forventException() throws MelosysException {
-        server.expect(requestTo("/buc/LA_BUC_01/institusjoner"))
-            .andExpect(content().string("[\"SE\"]"))
+        server.expect(requestTo("/buc/LA_BUC_01/institusjoner?land=SE"))
             .andRespond(withBadRequest());
 
         eessiConsumer.hentMottakerinstitusjoner("LA_BUC_01", List.of("SE"));

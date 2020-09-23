@@ -47,14 +47,14 @@ public class EessiTjeneste {
         this.dokumentHentingService = dokumentHentingService;
     }
 
-    @PostMapping("/mottakerinstitusjoner/{bucType}")
+    @GetMapping("/mottakerinstitusjoner/{bucType}")
     @ApiOperation(
         value = "Henter mottakerinstitusjoner for alle land for den oppgitte BUC-typen.",
         response = Institusjon.class,
         responseContainer = "List"
     )
     public ResponseEntity<List<Institusjon>> hentMottakerinstitusjoner(@PathVariable("bucType") String bucType,
-                                                                       @RequestBody(required = false) Collection<String> landkoder)
+                                                                       @RequestParam(value = "landkode", required = false) Collection<String> landkoder)
         throws MelosysException {
         log.info("Henter mottakerinstitusjoner for BUC {}", bucType);
         return ResponseEntity.ok(eessiService.hentEessiMottakerinstitusjoner(bucType, landkoder));
