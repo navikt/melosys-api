@@ -288,6 +288,14 @@ public final class ProsessflytDefinisjon {
             )
         );
 
+        PROSESS_FLYT_MAP.put(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_SVAR,
+            new ProsessFlyt(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_SVAR,
+                AOU_MOTTAK_SVAR_OPPDATER_MEDL,
+                AOU_MOTTAK_SVAR_SEND_SED,
+                AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET
+
+            )
+        );
     }
 
     public static Optional<ProsessFlyt> finnFlytForProsessType(ProsessType prosessType) {
