@@ -89,21 +89,6 @@ public final class ProsessflytDefinisjon {
             )
         );
 
-        /*PROSESS_FLYT_MAP.put(ProsessType.JFR_AOU_BREV, TODO
-            new ProsessFlyt(ProsessType.JFR_AOU_BREV,
-                JFR_AOU_BREV_OPPRETT_FAGSAK_OG_BEHANDLING,
-                JFR_AOU_BREV_FERDIGSTILL_JOURNALPOST,
-                JFR_AOU_BREV_OPPRETT_SEDDOKUMENT,
-                AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE,
-                AOU_MOTTAK_SAK_OG_BEHANDLING_OPPRETTET,
-                AOU_MOTTAK_AVSLUTT_TIDLIGERE_PERIODE,
-                AOU_MOTTAK_HENT_REGISTEROPPLYSNINGER,
-                AOU_MOTTAK_REGISTERKONTROLL,
-                AOU_MOTTAK_OPPRETT_PERIODE_MEDL,
-                AOU_MOTTAK_OPPRETT_OPPGAVE
-            )
-        );*/
-
         PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_NY_SAK,
             new ProsessFlyt(ProsessType.OPPRETT_NY_SAK,
                 JFR_OPPRETT_SAK_OG_BEH,
