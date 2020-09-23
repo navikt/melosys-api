@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.YTTERLIGERE_INFO_SED;
 
 /**
  * Sender elektronisk sed til mottakerinstitusjon
@@ -73,17 +74,19 @@ public class SendUtland extends AbstraktSendUtland {
         prosessinstans.setSteg(ProsessSteg.AOU_OPPDATER_OPPGAVE);
     }
 
+    @Override
+    protected void sendBrev(Prosessinstans prosessinstans) throws MelosysException {
+        brevBestiller.bestill(lagBrevBestilling(prosessinstans));
+    }
+
     private Brevbestilling lagBrevBestilling(Prosessinstans prosessinstans) throws IkkeFunnetException {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         return new Brevbestilling.Builder().medDokumentType(Produserbaredokumenter.ANMODNING_UNNTAK)
             .medAvsender(hentSaksbehandler(prosessinstans))
             .medMottakere(Mottaker.av(MYNDIGHET))
-            .medBehandling(behandling).build();
-    }
-
-    @Override
-    protected void sendBrev(Prosessinstans prosessinstans) throws MelosysException {
-        brevBestiller.bestill(lagBrevBestilling(prosessinstans));
+            .medBehandling(behandling)
+            .medYtterligereInformasjon(prosessinstans.getData(YTTERLIGERE_INFO_SED))
+            .build();
     }
 
     @Override

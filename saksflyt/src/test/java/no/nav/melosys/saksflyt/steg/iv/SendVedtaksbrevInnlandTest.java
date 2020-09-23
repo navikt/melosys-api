@@ -90,15 +90,15 @@ class SendVedtaksbrevInnlandTest {
         when(brevDataByggerStandard.lag(any(), any())).thenReturn(standardBrevData);
 
         BrevDataByggerVelger byggerVelger = mock(BrevDataByggerVelger.class);
-        when(byggerVelger.hent(eq(ANMODNING_UNNTAK))).thenReturn(brevDataByggerVedlegg);
-        when(byggerVelger.hent(eq(ATTEST_A1))).thenReturn(brevDataByggerVedlegg);
-        when(byggerVelger.hent(eq(INNVILGELSE_YRKESAKTIV))).thenReturn(brevDataByggerVedlegg);
-        when(byggerVelger.hent(eq(INNVILGELSE_YRKESAKTIV_FLERE_LAND))).thenReturn(brevDataByggerVedlegg);
-        when(byggerVelger.hent(eq(AVSLAG_YRKESAKTIV))).thenReturn(brevDataByggerAvslagYrkesaktiv);
-        when(byggerVelger.hent(eq(AVSLAG_ARBEIDSGIVER))).thenReturn(brevDataByggerAvslagArbeidsgiver);
-        when(byggerVelger.hent(eq(INNVILGELSE_ARBEIDSGIVER))).thenReturn(brevDataByggerStandard);
-        when(byggerVelger.hent(eq(AVSLAG_MANGLENDE_OPPLYSNINGER))).thenReturn(brevDataByggerStandard);
-        when(byggerVelger.hent(eq(ORIENTERING_UTPEKING_UTLAND))).thenReturn(brevDataByggerUtpekingAnnetLand);
+        when(byggerVelger.hent(eq(ANMODNING_UNNTAK), any())).thenReturn(brevDataByggerVedlegg);
+        when(byggerVelger.hent(eq(ATTEST_A1), any())).thenReturn(brevDataByggerVedlegg);
+        when(byggerVelger.hent(eq(INNVILGELSE_YRKESAKTIV), any())).thenReturn(brevDataByggerVedlegg);
+        when(byggerVelger.hent(eq(INNVILGELSE_YRKESAKTIV_FLERE_LAND), any())).thenReturn(brevDataByggerVedlegg);
+        when(byggerVelger.hent(eq(AVSLAG_YRKESAKTIV), any())).thenReturn(brevDataByggerAvslagYrkesaktiv);
+        when(byggerVelger.hent(eq(AVSLAG_ARBEIDSGIVER), any())).thenReturn(brevDataByggerAvslagArbeidsgiver);
+        when(byggerVelger.hent(eq(INNVILGELSE_ARBEIDSGIVER), any())).thenReturn(brevDataByggerStandard);
+        when(byggerVelger.hent(eq(AVSLAG_MANGLENDE_OPPLYSNINGER), any())).thenReturn(brevDataByggerStandard);
+        when(byggerVelger.hent(eq(ORIENTERING_UTPEKING_UTLAND), any())).thenReturn(brevDataByggerUtpekingAnnetLand);
 
         dokService = spy(lagDokumentService(byggerVelger));
         BrevBestiller brevBestiller = new BrevBestiller(dokService);

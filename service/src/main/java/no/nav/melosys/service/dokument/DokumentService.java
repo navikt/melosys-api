@@ -74,15 +74,22 @@ public class DokumentService {
     // være påkrevd for Hibernate å finne en sesjon via Spring-transaksjonen
     // for å kunne laste lazy collections i objektgrafen.
     @Transactional(readOnly = true)
-    public byte[] produserUtkast(long behandlingID, Produserbaredokumenter produserbartDokument, BrevbestillingDto brevbestillingDto)
+    public byte[] produserUtkast(Produserbaredokumenter produserbartDokument,
+                                 long behandlingID,
+                                 BrevbestillingDto brevbestillingDto)
         throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        BrevDataGrunnlag brevdataRessurser = brevdataGrunnlagFactory.av(behandling);
-        BrevDataBygger bygger = brevDataByggerVelger.hent(produserbartDokument, brevbestillingDto);
-        BrevData brevData = bygger.lag(brevdataRessurser, SubjectHandler.getInstance().getUserID());
-
         Aktoersroller mottakerRolle = brevbestillingDto.mottaker == null ?
             brevmottakerService.avklarMottakerRolleFraDokument(produserbartDokument) : brevbestillingDto.mottaker;
+        Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(produserbartDokument)
+            .medAvsender(SubjectHandler.getInstance().getUserID())
+            .medMottakerRolle(mottakerRolle)
+            .medBehandling(behandling)
+            .medBegrunnelseKode(brevbestillingDto.begrunnelseKode)
+            .medFritekst(brevbestillingDto.fritekst)
+            .build();
+        BrevData brevData = lagBrevData(brevbestilling);
+
         List<Aktoer> avklarteMottakere =
             brevmottakerService.avklarMottakere(produserbartDokument, Mottaker.av(mottakerRolle), behandling, true);
 
@@ -102,19 +109,36 @@ public class DokumentService {
     /**
      * Produserer et dokument i Doksys
      */
-    public void produserDokument(Produserbaredokumenter produserbartDokument, Mottaker mottaker, long behandlingID, Brevbestilling brevbestilling)
+    public void produserDokument(Produserbaredokumenter produserbartDokument,
+                                 Mottaker mottaker,
+                                 long behandlingID,
+                                 Brevbestilling brevbestilling)
         throws TekniskException, FunksjonellException {
-        Assert.notNull(produserbartDokument, "Ingen gyldig produserbartDokument.");
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(brevbestilling.getDokumentType());
-        BrevData brevData = brevDataBygger.lag(brevdataGrunnlagFactory.av(behandling), brevbestilling.getAvsender());
-        brevData.begrunnelseKode = brevbestilling.getBegrunnelseKode();
-        brevData.fritekst = brevbestilling.getFritekst();
+        BrevData brevData = lagBrevData(brevbestilling);
 
         List<Aktoer> mottakere = brevmottakerService.avklarMottakere(produserbartDokument, mottaker, behandling);
         for (Aktoer aktør : mottakere) {
             produserIkkeredigerbartDokument(produserbartDokument, aktør, behandling, brevData);
         }
+    }
+
+    private BrevData lagBrevData(Brevbestilling brevbestilling) throws FunksjonellException, TekniskException {
+        final var dokumentType = brevbestilling.getDokumentType();
+        Assert.notNull(dokumentType, "Ingen gyldig dokumentType.");
+
+        BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(dokumentType, lagBrevbestillingDto(brevbestilling));
+        BrevDataGrunnlag brevDataGrunnlag = brevdataGrunnlagFactory.av(brevbestilling);
+
+        return brevDataBygger.lag(brevDataGrunnlag, brevbestilling.getAvsender());
+    }
+
+    private static BrevbestillingDto lagBrevbestillingDto(Brevbestilling brevbestilling) {
+        final BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.mottaker = brevbestilling.getMottakerRolle();
+        brevbestillingDto.begrunnelseKode = brevbestilling.getBegrunnelseKode();
+        brevbestillingDto.fritekst = brevbestilling.getFritekst();
+        return brevbestillingDto;
     }
 
     private void produserIkkeredigerbartDokument(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Behandling behandling, BrevData brevData)
