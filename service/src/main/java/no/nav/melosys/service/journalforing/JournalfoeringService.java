@@ -99,7 +99,7 @@ public class JournalfoeringService {
 
     private Optional<Fagsak> finnSakTilknyttetSed(MelosysEessiMelding melosysEessiMelding) throws MelosysException {
         final Optional<Long> tilknyttetArkivsak = eessiService.finnSakForRinasaksnummer(melosysEessiMelding.getRinaSaksnummer());
-        return tilknyttetArkivsak.flatMap(fagsakService::finnFagsakFraGsakSaksnummer);
+        return tilknyttetArkivsak.flatMap(fagsakService::finnFagsakFraArkivsakID);
     }
 
     private void validerSkalIkkeBehandlesAutomatisk(MelosysEessiMelding melosysEessiMelding) throws FunksjonellException {

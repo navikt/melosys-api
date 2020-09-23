@@ -94,7 +94,7 @@ class OpprettNyBehandlingFraSedTest {
             .setOppgaveId("123oppg")
             .build();
 
-        when(fagsakService.hentFagsakFraGsakSaksnummer(gsakSaksnummer)).thenReturn(fagsak);
+        when(fagsakService.hentFagsakFraArkivsakID(gsakSaksnummer)).thenReturn(fagsak);
         when(behandlingService.nyBehandling(any(), any(), any(), any(), any(), any())).thenReturn(new Behandling());
         when(oppgaveFasade.finnOppgaveMedFagsaksnummer(eq(fagsak.getSaksnummer())))
             .thenReturn(Optional.of(oppgave));

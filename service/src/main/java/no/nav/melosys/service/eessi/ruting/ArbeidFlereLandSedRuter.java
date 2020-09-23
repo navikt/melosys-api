@@ -57,7 +57,7 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedType {
             return;
         }
 
-        Optional<Fagsak> fagsak = fagsakService.finnFagsakFraGsakSaksnummer(arkivsakID);
+        Optional<Fagsak> fagsak = fagsakService.finnFagsakFraArkivsakID(arkivsakID);
 
         if (fagsak.isEmpty()) {
             throw new FunksjonellException("Finner ingen sak tilknyttet arkivsak " + arkivsakID);

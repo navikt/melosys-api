@@ -1,18 +1,14 @@
 package no.nav.melosys.service.oppgave;
 
 
-import java.time.LocalDate;
 import java.util.*;
 import javax.annotation.Nullable;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -142,16 +138,7 @@ public class OppgaveService {
     }
 
     public void opprettJournalføringsoppgave(String journalpostID, String aktørID) throws FunksjonellException, TekniskException {
-        final Oppgave oppgave = new Oppgave.Builder()
-            .setOppgavetype(Oppgavetyper.JFR)
-            .setTema(Tema.MED)
-            .setAktørId(aktørID)
-            .setPrioritet(PrioritetType.NORM)
-            .setJournalpostId(journalpostID)
-            .setFristFerdigstillelse(LocalDate.now().plusDays(7))
-            .build();
-
-        final String oppgaveID = opprettOppgave(oppgave);
+        final String oppgaveID = opprettOppgave(OppgaveFactory.lagJournalføringsoppgave(journalpostID).setAktørId(aktørID).build());
         log.info("Journalføringsoppgave {} opprettet for journalpost {}", oppgaveID, journalpostID);
     }
 

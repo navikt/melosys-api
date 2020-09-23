@@ -188,7 +188,7 @@ public class JournalfoeringServiceTest {
         journalpost.setMottaksKanal("EESSI");
         when(eessiService.støtterAutomatiskBehandling(any(MelosysEessiMelding.class))).thenReturn(Boolean.FALSE);
         when(eessiService.finnSakForRinasaksnummer(eq(rinaSaksnummer))).thenReturn(Optional.of(arkivsakID));
-        when(fagsakService.finnFagsakFraGsakSaksnummer(eq(arkivsakID))).thenReturn(Optional.of(fagsak));
+        when(fagsakService.finnFagsakFraArkivsakID(eq(arkivsakID))).thenReturn(Optional.of(fagsak));
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
@@ -294,7 +294,7 @@ public class JournalfoeringServiceTest {
         journalpost.setMottaksKanal("EESSI");
 
         when(eessiService.finnSakForRinasaksnummer(eq(rinaSaksnummer))).thenReturn(Optional.of(arkivsakID));
-        when(fagsakService.finnFagsakFraGsakSaksnummer(eq(arkivsakID))).thenReturn(Optional.of(fagsak));
+        when(fagsakService.finnFagsakFraArkivsakID(eq(arkivsakID))).thenReturn(Optional.of(fagsak));
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.tilordneSakOgJournalfør(tilordneDto))

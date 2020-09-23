@@ -46,7 +46,7 @@ public class UnntaksperiodeSedRuter implements SedRuterForSedType {
             opprettNySak(prosessinstans, melosysEessiMelding);
         }
 
-        Optional<Fagsak> fagsak = fagsakService.finnFagsakFraGsakSaksnummer(arkivsakID);
+        Optional<Fagsak> fagsak = fagsakService.finnFagsakFraArkivsakID(arkivsakID);
         if (fagsak.isPresent()) {
             Behandling behandling = fagsak.get().hentSistAktiveBehandling();
             Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());

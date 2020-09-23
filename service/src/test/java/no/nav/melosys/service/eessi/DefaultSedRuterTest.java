@@ -74,7 +74,7 @@ public class DefaultSedRuterTest {
         Oppgave oppgave = new Oppgave.Builder().setOppgaveId(oppgaveId).build();
         Fagsak fagsak = hentFagsak();
 
-        when(fagsakService.hentFagsakFraGsakSaksnummer(GSAK_SAKSNUMMER)).thenReturn(fagsak);
+        when(fagsakService.hentFagsakFraArkivsakID(GSAK_SAKSNUMMER)).thenReturn(fagsak);
         when(oppgaveService.finnOppgaveMedFagsaksnummer(eq(SAKSNUMMER))).thenReturn(Optional.of(oppgave));
 
         defaultSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER);
@@ -97,7 +97,7 @@ public class DefaultSedRuterTest {
         Fagsak fagsak = hentFagsak();
         fagsak.getSistOppdaterteBehandling().setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
 
-        when(fagsakService.hentFagsakFraGsakSaksnummer(GSAK_SAKSNUMMER)).thenReturn(fagsak);
+        when(fagsakService.hentFagsakFraArkivsakID(GSAK_SAKSNUMMER)).thenReturn(fagsak);
         defaultSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER);
         assertThat(prosessinstans.getBehandling()).isNotNull();
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(eq(fagsak.hentSistAktiveBehandling()), eq(melosysEessiMelding));
@@ -115,7 +115,7 @@ public class DefaultSedRuterTest {
 
         Fagsak fagsak = hentFagsak();
         fagsak.hentAktivBehandling().setStatus(Behandlingsstatus.AVSLUTTET);
-        when(fagsakService.hentFagsakFraGsakSaksnummer(GSAK_SAKSNUMMER)).thenReturn(fagsak);
+        when(fagsakService.hentFagsakFraArkivsakID(GSAK_SAKSNUMMER)).thenReturn(fagsak);
 
         defaultSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER);
 

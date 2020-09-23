@@ -60,7 +60,7 @@ public class AnmodningOmUnntakSedRuterTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setStatus(Saksstatuser.OPPRETTET);
         fagsak.setBehandlinger(List.of(new Behandling()));
-        when(fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer)).thenReturn(Optional.of(fagsak));
+        when(fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer)).thenReturn(Optional.of(fagsak));
         anmodningOmUnntakSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer);
         verify(prosessinstansService).opprettProsessinstansNyBehandlingMottattAnmodningUnntak(eq(melosysEessiMelding), eq(gsakSaksnummer));
     }
@@ -78,7 +78,7 @@ public class AnmodningOmUnntakSedRuterTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setBehandlinger(List.of(behandling));
         fagsak.setStatus(Saksstatuser.LOVVALG_AVKLART);
-        when(fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer)).thenReturn(Optional.of(fagsak));
+        when(fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer)).thenReturn(Optional.of(fagsak));
         anmodningOmUnntakSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer);
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(eq(behandling), eq(melosysEessiMelding));
     }
@@ -92,7 +92,7 @@ public class AnmodningOmUnntakSedRuterTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørID);
 
-        when(fagsakService.finnFagsakFraGsakSaksnummer(gsakSaksnummer)).thenReturn(Optional.empty());
+        when(fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer)).thenReturn(Optional.empty());
         anmodningOmUnntakSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer);
         verify(prosessinstansService).opprettProsessinstansNySakMottattAnmodningOmUnntak(eq(melosysEessiMelding), eq(aktørID));
     }

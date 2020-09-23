@@ -79,7 +79,7 @@ public class SvarAnmodningUnntakSedRuter implements SedRuterForSedType {
 
     private Behandling hentBehandling(Long gsakSaksnummer) throws FunksjonellException, TekniskException {
         return fagsakService
-            .hentFagsakFraGsakSaksnummer(gsakSaksnummer)
+            .hentFagsakFraArkivsakID(gsakSaksnummer)
             .hentSistAktiveBehandling();
     }
 

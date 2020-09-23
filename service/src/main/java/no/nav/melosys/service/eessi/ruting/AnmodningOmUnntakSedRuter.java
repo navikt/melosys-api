@@ -37,7 +37,7 @@ public class AnmodningOmUnntakSedRuter implements SedRuterForSedType {
         }
 
         // TODO: Avklares hva som skal gjøres ved oppdatert SED
-        Optional<Fagsak> fagsak = fagsakService.finnFagsakFraGsakSaksnummer(arkivsakID);
+        Optional<Fagsak> fagsak = fagsakService.finnFagsakFraArkivsakID(arkivsakID);
         if (fagsak.isPresent()) {
             Behandling behandling = fagsak.get().getSistOppdaterteBehandling();
             prosessinstans.setBehandling(behandling);

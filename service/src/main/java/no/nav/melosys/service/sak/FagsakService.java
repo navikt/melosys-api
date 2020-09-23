@@ -84,13 +84,13 @@ public class FagsakService {
         return fagsakRepository.findBySaksnummer(saksnummer);
     }
 
-    public Fagsak hentFagsakFraGsakSaksnummer(Long gsakSaksnummer) throws IkkeFunnetException {
-        return finnFagsakFraGsakSaksnummer(gsakSaksnummer)
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke fagsak for gsakSaksnummer " + gsakSaksnummer));
+    public Fagsak hentFagsakFraArkivsakID(Long arkivsakID) throws IkkeFunnetException {
+        return finnFagsakFraArkivsakID(arkivsakID)
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke fagsak for arkivsakID " + arkivsakID));
     }
 
-    public Optional<Fagsak> finnFagsakFraGsakSaksnummer(Long gsakSaksnummer) {
-        return fagsakRepository.findByGsakSaksnummer(gsakSaksnummer);
+    public Optional<Fagsak> finnFagsakFraArkivsakID(Long arkivsakID) {
+        return fagsakRepository.findByGsakSaksnummer(arkivsakID);
     }
 
     public List<Fagsak> hentFagsakerMedAktør(Aktoersroller rolleType, String ident) throws IkkeFunnetException {

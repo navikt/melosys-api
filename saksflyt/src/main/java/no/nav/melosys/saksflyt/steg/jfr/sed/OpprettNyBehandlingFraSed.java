@@ -62,7 +62,7 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
             throw new TekniskException("Behandlingstema kan ikke være null");
         }
 
-        Fagsak fagsak = fagsakService.hentFagsakFraGsakSaksnummer(arkivsakID);
+        Fagsak fagsak = fagsakService.hentFagsakFraArkivsakID(arkivsakID);
 
         avsluttTidligereBehandling(fagsak);
         Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.SED, behandlingstema,
