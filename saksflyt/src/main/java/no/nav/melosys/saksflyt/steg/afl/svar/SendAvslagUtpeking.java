@@ -12,12 +12,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SemdAvslagUtpeking implements StegBehandler {
+public class SendAvslagUtpeking implements StegBehandler {
 
     private final EessiService eessiService;
 
     @Autowired
-    public SemdAvslagUtpeking(@Qualifier("system") EessiService eessiService) {
+    public SendAvslagUtpeking(@Qualifier("system") EessiService eessiService) {
         this.eessiService = eessiService;
     }
 

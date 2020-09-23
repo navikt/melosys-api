@@ -33,7 +33,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SemdAvslagUtpekingTest {
+public class SendAvslagUtpekingTest {
 
     @Mock
     private SedDataBygger sedDataBygger;
@@ -48,7 +48,7 @@ public class SemdAvslagUtpekingTest {
     @Mock
     private SedGrunnlagMapper sedGrunnlagMapper;
 
-    private SemdAvslagUtpeking semdAvslagUtpeking;
+    private SendAvslagUtpeking sendAvslagUtpeking;
     private EessiService eessiService;
     private Behandling behandling;
 
@@ -58,7 +58,7 @@ public class SemdAvslagUtpekingTest {
             sedDataBygger, sedDataGrunnlagFactory,
             eessiConsumer, behandlingService, behandlingsresultatService, sedGrunnlagMapper
         );
-        semdAvslagUtpeking = new SemdAvslagUtpeking(eessiService);
+        sendAvslagUtpeking = new SendAvslagUtpeking(eessiService);
 
         SedDokument sedDokument = new SedDokument();
         sedDokument.setLovvalgsperiode(new Periode(LocalDate.now(), LocalDate.now()));
@@ -85,7 +85,7 @@ public class SemdAvslagUtpekingTest {
             "DK", "fritekst"
         ));
 
-        semdAvslagUtpeking.utfør(prosessinstans);
+        sendAvslagUtpeking.utfør(prosessinstans);
 
         verify(eessiConsumer).sendSedPåEksisterendeBuc(any(), any(), any());
     }
