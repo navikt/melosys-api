@@ -155,7 +155,6 @@ public class ProsessinstansService {
     public void opprettProsessinstansAnmodningOmUnntakMottakSvar(Behandling behandling) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_SVAR)
-            .medSteg(ProsessSteg.AOU_MOTTAK_SVAR_OPPDATER_MEDL)
             .medBehandling(behandling)
             .build();
 

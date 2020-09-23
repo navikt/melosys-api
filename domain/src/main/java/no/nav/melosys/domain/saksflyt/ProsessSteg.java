@@ -38,7 +38,6 @@ public enum ProsessSteg implements Kodeverk {
     OPPRETT_ANMODNINGSPERIODE_FRA_SED("OPPRETT_ANMODNINGSPERIODE_FRA_SED", "Oppretter anmodningsperiode fra SED"),
 
     //Svar på mottatt anmodning om unntak
-    AOU_MOTTAK_SVAR_OPPDATER_MEDL("AOU_MOTTAK_SVAR_OPPDATER_MEDL", "Oppdater periode i Medl"),
     AOU_MOTTAK_SVAR_SEND_SED("AOU_MOTTAK_SVAR_SEND_SED","Send svar-sed"),
     AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET("AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET","Oppdaterer status på sak i sob til avsluttet"),
 
