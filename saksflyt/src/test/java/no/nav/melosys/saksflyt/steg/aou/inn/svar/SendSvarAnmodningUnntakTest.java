@@ -16,16 +16,16 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SendSedTest {
+public class SendSvarAnmodningUnntakTest {
 
     @Mock
     private EessiService eessiService;
 
-    private SendSed sendSed;
+    private SendSvarAnmodningUnntak sendSvarAnmodningUnntak;
 
     @Before
     public void setup() {
-        sendSed = new SendSed(eessiService);
+        sendSvarAnmodningUnntak = new SendSvarAnmodningUnntak(eessiService);
     }
 
     @Test
@@ -35,7 +35,7 @@ public class SendSedTest {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
-        sendSed.utfør(prosessinstans);
+        sendSvarAnmodningUnntak.utfør(prosessinstans);
 
         verify(eessiService).sendAnmodningUnntakSvar(anyLong());
         assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET);
