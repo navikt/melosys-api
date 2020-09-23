@@ -7,7 +7,6 @@ import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -20,7 +19,6 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
-import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.SedSomBrevService;
@@ -47,8 +45,6 @@ class SendVedtakUtlandTest {
     private EessiService eessiService;
     @Mock
     private BrevBestiller brevBestiller;
-    @Mock
-    private SaksopplysningerService saksopplysningerService;
     @Mock
     private SedSomBrevService sedSomBrevService;
     @Mock
@@ -84,8 +80,7 @@ class SendVedtakUtlandTest {
         behandlingsresultat.setBehandling(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingService, behandlingsresultatService,
-            brevBestiller, saksopplysningerService, sedSomBrevService, utpekingService);
+        sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingService, behandlingsresultatService, brevBestiller, sedSomBrevService, utpekingService);
     }
 
     @Test
@@ -158,10 +153,6 @@ class SendVedtakUtlandTest {
     void utfør_norgeErUtpektElektronisk_senderA012() throws MelosysException {
         prosessinstans.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, "Hei");
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
-        SedDokument sedDokument = new SedDokument();
-        sedDokument.setErElektronisk(true);
-        when(saksopplysningerService.hentSedOpplysninger(eq(behandling.getId()))).thenReturn(sedDokument);
-
         sendVedtakUtland.utfør(prosessinstans);
 
         verify(eessiService).sendGodkjenningArbeidFlereLand(eq(behandling.getId()), eq("Hei"));

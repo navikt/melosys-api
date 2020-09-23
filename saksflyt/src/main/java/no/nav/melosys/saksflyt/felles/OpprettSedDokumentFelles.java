@@ -78,7 +78,6 @@ public class OpprettSedDokumentFelles {
         sedDokument.setErEndring(melosysEessiMelding.getErEndring());
         sedDokument.setSedType(SedType.valueOf(melosysEessiMelding.getSedType()));
         sedDokument.setBucType(BucType.valueOf(melosysEessiMelding.getBucType()));
-        sedDokument.setErElektronisk(true);
 
         return sedDokument;
     }

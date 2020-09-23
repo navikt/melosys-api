@@ -5,7 +5,6 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -18,7 +17,6 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.AbstraktSendUtland;
-import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.SedSomBrevService;
@@ -40,7 +38,6 @@ public class SendVedtakUtland extends AbstraktSendUtland {
 
     private final BehandlingService behandlingService;
     private final BrevBestiller brevBestiller;
-    private final SaksopplysningerService saksopplysningerService;
     private final SedSomBrevService sedSomBrevService;
     private final UtpekingService utpekingService;
 
@@ -49,12 +46,10 @@ public class SendVedtakUtland extends AbstraktSendUtland {
                             BehandlingService behandlingService,
                             BehandlingsresultatService behandlingsresultatService,
                             BrevBestiller brevBestiller,
-                            SaksopplysningerService saksopplysningerService,
                             SedSomBrevService sedSomBrevService, UtpekingService utpekingService) {
         super(eessiService, behandlingsresultatService);
         this.behandlingService = behandlingService;
         this.brevBestiller = brevBestiller;
-        this.saksopplysningerService = saksopplysningerService;
         this.sedSomBrevService = sedSomBrevService;
         this.utpekingService = utpekingService;
     }
@@ -70,7 +65,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
         final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
 
         if (behandling.erNorgeUtpekt()) {
-            sendSedA012(behandling.getId(), prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
+            eessiService.sendGodkjenningArbeidFlereLand(behandling.getId(), prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
         } else if (behandlingsresultat.erUtpeking()) {
             utpekingService.oppdaterSendtUtland(behandlingsresultat.hentValidertUtpekingsperiode());
             SendUtlandStatus status = sendSedA003(prosessinstans);
@@ -85,16 +80,6 @@ public class SendVedtakUtland extends AbstraktSendUtland {
         log.info("Sender A003 for utpeking til {}, i prosessinstans {}",
             prosessinstans.getData(ProsessDataKey.UTPEKT_LAND), prosessinstans.getId());
         return sendUtland(BucType.LA_BUC_02, prosessinstans);
-    }
-
-    private void sendSedA012(long behandlingID, String ytterligereInformasjon) throws MelosysException {
-        SedDokument sedDokument = saksopplysningerService.hentSedOpplysninger(behandlingID);
-
-        if (sedDokument.getErElektronisk()) {
-            eessiService.sendGodkjenningArbeidFlereLand(behandlingID, ytterligereInformasjon);
-        } else {
-            throw new UnsupportedOperationException("Sending av brev-A012 er ikke implementert");
-        }
     }
 
     private Brevbestilling lagBrevBestilling(Prosessinstans prosessinstans) throws IkkeFunnetException {
