@@ -36,8 +36,8 @@ import static no.nav.melosys.metrics.MetrikkerNavn.SVAR_AOU;
 import static no.nav.melosys.metrics.MetrikkerNavn.TAG_RESULTAT;
 
 @Component
-public class FattVedtakEllerOppdaterBehandling implements StegBehandler {
-    private static final Logger log = LoggerFactory.getLogger(FattVedtakEllerOppdaterBehandling.class);
+public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler {
+    private static final Logger log = LoggerFactory.getLogger(BestemBehandlingsmåteSvarAnmodningUnntak.class);
 
     private static final String INNVILGELSE = "godkjent";
     private static final String INNVILGELSE_YTTERLIGEREINFO = "godkjentmedinfo";
@@ -51,11 +51,11 @@ public class FattVedtakEllerOppdaterBehandling implements StegBehandler {
     private final LovvalgsperiodeService lovvalgsperiodeService;
 
     @Autowired
-    public FattVedtakEllerOppdaterBehandling(AnmodningsperiodeService anmodningsperiodeService,
-                                             BehandlingService behandlingService,
-                                             BehandlingsresultatService behandlingsresultatService,
-                                             @Qualifier("system") VedtakService vedtakService,
-                                             LovvalgsperiodeService lovvalgsperiodeService) {
+    public BestemBehandlingsmåteSvarAnmodningUnntak(AnmodningsperiodeService anmodningsperiodeService,
+                                                    BehandlingService behandlingService,
+                                                    BehandlingsresultatService behandlingsresultatService,
+                                                    @Qualifier("system") VedtakService vedtakService,
+                                                    LovvalgsperiodeService lovvalgsperiodeService) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -69,13 +69,11 @@ public class FattVedtakEllerOppdaterBehandling implements StegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return ProsessSteg.AOU_SVAR_OPPDATER_BEHANDLING;
+        return ProsessSteg.BESTEM_BEHANDLINGSMÅTE_SVAR_ANMODNING_UNNTAK;
     }
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
-        log.info("Starter behandling av prosessinstans {}", prosessinstans.getId());
-
         final long behandlingID = prosessinstans.getBehandling().getId();
         Anmodningsperiode anmodningsperiode = anmodningsperiodeService.hentAnmodningsperioder(behandlingID)
             .stream().findFirst()
@@ -98,7 +96,6 @@ public class FattVedtakEllerOppdaterBehandling implements StegBehandler {
             behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
         }
         registrerMetrikk(melosysEessiMelding);
-        prosessinstans.setSteg(ProsessSteg.FERDIG);
     }
 
     private void fattVedtak(long behandlingID) throws MelosysException {

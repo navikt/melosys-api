@@ -12,7 +12,6 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.ValideringException;
@@ -34,9 +33,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class FattVedtakEllerOppdaterBehandlingTest {
-    private FattVedtakEllerOppdaterBehandling fattVedtakEllerOppdaterBehandling;
-
+public class BestemBehandlingsmåteSvarAnmodningUnntakTest {
     @Mock
     private AnmodningsperiodeService anmodningsperiodeService;
     @Mock
@@ -48,6 +45,8 @@ public class FattVedtakEllerOppdaterBehandlingTest {
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
 
+    private BestemBehandlingsmåteSvarAnmodningUnntak bestemBehandlingsmåteSvarAnmodningUnntak;
+
     @Captor
     private ArgumentCaptor<Collection<Lovvalgsperiode>> captor;
 
@@ -58,7 +57,7 @@ public class FattVedtakEllerOppdaterBehandlingTest {
         AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
         anmodningsperiodeSvar.setAnmodningsperiode(anmodningsperiode);
         anmodningsperiode.setAnmodningsperiodeSvar(anmodningsperiodeSvar);
-        fattVedtakEllerOppdaterBehandling = new FattVedtakEllerOppdaterBehandling(anmodningsperiodeService, behandlingService, behandlingsresultatService, vedtakService, lovvalgsperiodeService);
+        bestemBehandlingsmåteSvarAnmodningUnntak = new BestemBehandlingsmåteSvarAnmodningUnntak(anmodningsperiodeService, behandlingService, behandlingsresultatService, vedtakService, lovvalgsperiodeService);
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singleton(anmodningsperiode));
     }
 
@@ -78,11 +77,10 @@ public class FattVedtakEllerOppdaterBehandlingTest {
 
         prosessinstans.setBehandling(behandling);
 
-        fattVedtakEllerOppdaterBehandling.utfør(prosessinstans);
+        bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
 
         verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(anyLong(), captor.capture());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
 
         Collection<Lovvalgsperiode> lagredeLovvalgsperioder = captor.getValue();
         assertThat(lagredeLovvalgsperioder).hasSize(1);
@@ -106,12 +104,11 @@ public class FattVedtakEllerOppdaterBehandlingTest {
 
         prosessinstans.setBehandling(behandling);
 
-        fattVedtakEllerOppdaterBehandling.utfør(prosessinstans);
+        bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
 
         verify(vedtakService).fattVedtak(eq(behandling.getId()), eq(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND));
         verify(behandlingsresultatService).oppdaterBehandlingsMaate(anyLong(), any());
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(anyLong(), captor.capture());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
 
         Collection<Lovvalgsperiode> lagredeLovvalgsperioder = captor.getValue();
         assertThat(lagredeLovvalgsperioder).hasSize(1);
@@ -136,11 +133,10 @@ public class FattVedtakEllerOppdaterBehandlingTest {
 
         prosessinstans.setBehandling(behandling);
 
-        fattVedtakEllerOppdaterBehandling.utfør(prosessinstans);
+        bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
 
         verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(anyLong(), captor.capture());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
 
         Collection<Lovvalgsperiode> lagredeLovvalgsperioder = captor.getValue();
         assertThat(lagredeLovvalgsperioder).hasSize(1);
@@ -169,13 +165,12 @@ public class FattVedtakEllerOppdaterBehandlingTest {
 
         prosessinstans.setBehandling(behandling);
 
-        fattVedtakEllerOppdaterBehandling.utfør(prosessinstans);
+        bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
 
         verify(vedtakService).fattVedtak(eq(123L), eq(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND));
         verify(behandlingsresultatService, never()).oppdaterBehandlingsMaate(eq(123L), eq(Behandlingsmaate.DELVIS_AUTOMATISERT));
         verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(anyLong(), captor.capture());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.FERDIG);
 
         Collection<Lovvalgsperiode> lagredeLovvalgsperioder = captor.getValue();
         assertThat(lagredeLovvalgsperioder).hasSize(1);

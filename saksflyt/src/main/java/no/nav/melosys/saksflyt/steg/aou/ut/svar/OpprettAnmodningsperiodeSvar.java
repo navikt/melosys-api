@@ -49,7 +49,7 @@ public class OpprettAnmodningsperiodeSvar implements StegBehandler {
 
         anmodningsperiodeService.lagreAnmodningsperiodeSvarForBehandling(prosessinstans.getBehandling().getId(), anmodningsperiodeSvar);
 
-        prosessinstans.setSteg(ProsessSteg.AOU_SVAR_OPPDATER_BEHANDLING);
+        prosessinstans.setSteg(ProsessSteg.BESTEM_BEHANDLINGMÅTE_SED);
     }
 
     private AnmodningsperiodeSvar opprettAnmodningsperiodeSvar(SvarAnmodningUnntak svar) {

@@ -32,7 +32,7 @@ public enum ProsessSteg implements Kodeverk {
 
     //Svar anmodning om unntak
     AOU_SVAR_OPPRETT_ANMODNINGSPERIODESVAR("AOU_OPPRETT_ANMODNINGSPERIODESVAR","Oppretter svar for en anmodningsperiode"),
-    AOU_SVAR_OPPDATER_BEHANDLING("AOU_OPPDATER_BEHANDLING","Oppdater behandling"),
+    BESTEM_BEHANDLINGSMÅTE_SVAR_ANMODNING_UNNTAK("BESTEM_BEHANDLINGSMÅTE_SVAR_ANMODNING_UNNTAK","Oppdaterer behandling eller fatter vedtak etter mottak av svar på anmodning om unntak"),
 
     //Mottak anmodning om unntak
     OPPRETT_ANMODNINGSPERIODE_FRA_SED("OPPRETT_ANMODNINGSPERIODE_FRA_SED", "Oppretter anmodningsperiode fra SED"),
