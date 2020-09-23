@@ -1,7 +1,6 @@
 package no.nav.melosys.saksflyt.steg.aou.inn.svar;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -11,7 +10,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 
@@ -38,6 +36,5 @@ public class SendSvarAnmodningUnntakTest {
         sendSvarAnmodningUnntak.utfør(prosessinstans);
 
         verify(eessiService).sendAnmodningUnntakSvar(anyLong());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET);
     }
 }

@@ -39,7 +39,6 @@ public enum ProsessSteg implements Kodeverk {
 
     //Svar på mottatt anmodning om unntak
     SEND_SVAR_ANMODNING_UNNTAK("SEND_SVAR_ANMODNING_UNNTAK","Sender svar på anmodning om unntak"),
-    AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET("AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET","Oppdaterer status på sak i sob til avsluttet"),
 
     //Iverksett Vedtak
     HENT_MOTTAKERINSTITUSJON_FORKORTET_PERIODE("HENT_MOTTAKERINSTITUSJON_FORKORTET_PERIODE", "Henter mottakerinstitusjon fra tidligere sendt BUC ved forkortet periode"),

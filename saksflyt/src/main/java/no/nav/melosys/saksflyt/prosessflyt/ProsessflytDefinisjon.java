@@ -292,8 +292,8 @@ public final class ProsessflytDefinisjon {
             new ProsessFlyt(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_SVAR,
                 LAGRE_LOVVALGSPERIODE_MEDL,
                 SEND_SVAR_ANMODNING_UNNTAK,
-                AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET
-
+                AVSLUTT_SAK_OG_BEHANDLING,
+                SOB_BEHANDLING_AVSLUTTET
             )
         );
     }
