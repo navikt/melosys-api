@@ -38,12 +38,17 @@ public class OpprettSoeknad implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException {
         long behandlingID = prosessinstans.getBehandling().getId();
 
-        Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
-        SoeknadDokument soeknadDokument = new SoeknadDokument();
-        soeknadDokument.periode = periode;
-        soeknadDokument.soeknadsland.landkoder = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, List.class);
+        if (prosessinstans.getBehandling().erBehandlingAvSøknad()) {
 
-        behandlingsgrunnlagService.opprettSøknadGrunnlag(prosessinstans.getBehandling().getId(), soeknadDokument);
-        log.info("Prosessinstans {} har opprettet søknad for behandling {}.", prosessinstans.getId(), behandlingID);
+            Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
+            SoeknadDokument soeknadDokument = new SoeknadDokument();
+            soeknadDokument.periode = periode;
+            soeknadDokument.soeknadsland.landkoder = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, List.class);
+
+            behandlingsgrunnlagService.opprettSøknadGrunnlag(prosessinstans.getBehandling().getId(), soeknadDokument);
+            log.info("Opprettet søknad for behandling {}.", prosessinstans.getId(), behandlingID);
+        } else {
+            log.info("Ikke opprettet søknad for behandling {} med tema {}", behandlingID, prosessinstans.getBehandling().getTema());
+        }
     }
 }
