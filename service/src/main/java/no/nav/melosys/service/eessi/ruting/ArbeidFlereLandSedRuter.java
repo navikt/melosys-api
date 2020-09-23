@@ -1,5 +1,7 @@
 package no.nav.melosys.service.eessi.ruting;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
@@ -26,7 +28,7 @@ import org.springframework.stereotype.Service;
 
 //A003
 @Service
-public class ArbeidFlereLandSedRuter implements SedRuterForSedType {
+public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
 
     private static final Logger log = LoggerFactory.getLogger(ArbeidFlereLandSedRuter.class);
 
@@ -123,8 +125,8 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedType {
     }
 
     @Override
-    public boolean gjelderSedType(SedType sedType) {
-        return sedType == SedType.A003;
+    public Collection<SedType> gjelderSedTyper() {
+        return Collections.singleton(SedType.A003);
     }
 
     public Behandlingstema hentBehandlingstema(MelosysEessiMelding melosysEessiMelding) {

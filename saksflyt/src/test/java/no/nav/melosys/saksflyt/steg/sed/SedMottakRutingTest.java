@@ -10,7 +10,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.eessi.ruting.DefaultSedRuter;
-import no.nav.melosys.service.eessi.ruting.SedRuterForSedType;
+import no.nav.melosys.service.eessi.ruting.SedRuterForSedTyper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 class SedMottakRutingTest {
 
     @Mock
-    private SedRuterForSedType sedRuterForSedType;
+    private SedRuterForSedTyper sedRuterForSedTyper;
     @Mock
     private DefaultSedRuter defaultSedRuter;
     @Mock
@@ -36,41 +36,38 @@ class SedMottakRutingTest {
 
     @BeforeEach
     public void setUp() throws MelosysException {
-        sedMottakRuting = new SedMottakRuting(Collections.singleton(sedRuterForSedType), defaultSedRuter, eessiService);
+        when(sedRuterForSedTyper.gjelderSedTyper()).thenReturn(Collections.singleton(SedType.A009));
+        sedMottakRuting = new SedMottakRuting(Collections.singleton(sedRuterForSedTyper), defaultSedRuter, eessiService);
         when(eessiService.finnSakForRinasaksnummer(anyString())).thenReturn(Optional.of(arkivsakID));
     }
 
     @Test
     void utfør_sedTypeA009_sedRuterForSedTypeBlirKalt() throws MelosysException {
-        MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding();
+        MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(SedType.A009);
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
-        when(sedRuterForSedType.gjelderSedType(eq(SedType.valueOf(melosysEessiMelding.getSedType())))).thenReturn(true);
-
         sedMottakRuting.utfør(prosessinstans);
 
-        verify(sedRuterForSedType).rutSedTilBehandling(eq(prosessinstans), eq(arkivsakID));
+        verify(sedRuterForSedTyper).rutSedTilBehandling(eq(prosessinstans), eq(arkivsakID));
         verify(defaultSedRuter, never()).rutSedTilBehandling(any(), any());
     }
 
     @Test
     void utfør_sedTypeX009_manuellBehandlerBlirKalt() throws MelosysException {
-        MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding();
+        MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(SedType.X009);
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
-        when(sedRuterForSedType.gjelderSedType(eq(SedType.valueOf(melosysEessiMelding.getSedType())))).thenReturn(false);
-
         sedMottakRuting.utfør(prosessinstans);
 
-        verify(sedRuterForSedType, never()).rutSedTilBehandling(any(), any());
+        verify(sedRuterForSedTyper, never()).rutSedTilBehandling(any(), any());
         verify(defaultSedRuter).rutSedTilBehandling(eq(prosessinstans), eq(arkivsakID));
     }
 
-    private MelosysEessiMelding hentMelosysEessiMelding() {
+    private MelosysEessiMelding hentMelosysEessiMelding(SedType sedType) {
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
-        melosysEessiMelding.setSedType(SedType.A009.name());
+        melosysEessiMelding.setSedType(sedType.name());
         melosysEessiMelding.setRinaSaksnummer("57483697");
         return melosysEessiMelding;
     }

@@ -1,5 +1,7 @@
 package no.nav.melosys.service.eessi.ruting;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
@@ -17,7 +19,7 @@ import org.springframework.stereotype.Service;
 
 //A001
 @Service
-public class AnmodningOmUnntakSedRuter implements SedRuterForSedType {
+public class AnmodningOmUnntakSedRuter implements SedRuterForSedTyper {
 
     private final ProsessinstansService prosessinstansService;
     private final FagsakService fagsakService;
@@ -74,7 +76,7 @@ public class AnmodningOmUnntakSedRuter implements SedRuterForSedType {
     }
 
     @Override
-    public boolean gjelderSedType(SedType sedType) {
-        return sedType == SedType.A001;
+    public Collection<SedType> gjelderSedTyper() {
+        return Collections.singleton(SedType.A001);
     }
 }
