@@ -322,17 +322,17 @@ public class SedDataBygger {
     private static void validerArbeidsstederOgVirksomheter(SedDataDto dataGrunnlag) throws FunksjonellException {
         for (Arbeidssted arbeidssted : dataGrunnlag.getArbeidssteder()) {
             if (StringUtils.isEmpty(arbeidssted.getAdresse().getLand())) {
-                throw new FunksjonellException("Feltet land ikke oppgitt for arbeidssted");
+                throw new FunksjonellException("Feltet land ikke oppgitt for arbeidssted " + arbeidssted.getNavn());
             }
         }
         for (Virksomhet virksomhet : dataGrunnlag.getSelvstendigeVirksomheter()) {
             if (StringUtils.isEmpty(virksomhet.getAdresse().getLand())) {
-                throw new FunksjonellException("Feltet land ikke oppgitt for selvstendig virksomhet");
+                throw new FunksjonellException("Feltet land ikke oppgitt for selvstendig virksomhet " + virksomhet.getNavn());
             }
         }
         for (Virksomhet virksomhet : dataGrunnlag.getArbeidsgivendeVirksomheter()) {
             if (StringUtils.isEmpty(virksomhet.getAdresse().getLand())) {
-                throw new FunksjonellException("Feltet land ikke oppgitt for arbeidsgivende virksomhet");
+                throw new FunksjonellException("Feltet land ikke oppgitt for arbeidsgivende virksomhet " + virksomhet.getNavn());
             }
         }
     }
