@@ -96,7 +96,6 @@ public class OppdaterMedlTest {
         oppdaterMedl.utfør(prosessinstans);
 
         verify(medlPeriodeService).avvisPeriode(eq(1L));
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_SVAR_OPPRETT_JOURNALPOST);
     }
 
     private Behandling lagBehandling() {
