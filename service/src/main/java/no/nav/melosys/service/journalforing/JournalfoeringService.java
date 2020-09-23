@@ -10,7 +10,6 @@ import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -73,8 +72,6 @@ public class JournalfoeringService {
 
         if (journalfoeringDto.behandlingstypeErSøknad()){
             opprettSakOgJournalfør(journalfoeringDto);
-        } else if (Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL.getKode().equalsIgnoreCase(journalfoeringDto.getBehandlingstemaKode())) {
-            opprettProsessinstansBrevAouMottak(journalfoeringDto);
         } else if (journalpost.mottaksKanalErEessi()) {
             opprettSakForSed(journalfoeringDto);
         } else {
@@ -136,25 +133,6 @@ public class JournalfoeringService {
             prosessinstans.setData(ProsessDataKey.REPRESENTANT_REPRESENTERER, representantRepresenterer);
         }
 
-        prosessinstansService.lagre(prosessinstans);
-    }
-
-    private void opprettProsessinstansBrevAouMottak(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
-        validerBrukerIDFinnes(journalfoeringDto);
-        validerOpprettSakFelter(journalfoeringDto);
-        validerBehandleAnmodningOmUnntakFelter(journalfoeringDto);
-
-        FagsakDto fagsakDto = journalfoeringDto.getFagsak();
-        AnmodningOmUnntakDto anmodningOmUnntakDto = journalfoeringDto.getAnmodningOmUnntak();
-
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_AOU_BREV, journalfoeringDto);
-        prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, fagsakDto.getSoknadsperiode());
-        prosessinstans.setData(ProsessDataKey.LOVVALGSLAND, fagsakDto.getLand());
-        prosessinstans.setData(ProsessDataKey.LOVVALGSBESTEMMELSE, anmodningOmUnntakDto.getLovvalgsbestemmelse());
-        prosessinstans.setData(ProsessDataKey.UNNTAK_FRA_LOVVALGSLAND, anmodningOmUnntakDto.getUnntakFraLovvalgsland());
-        prosessinstans.setData(ProsessDataKey.UNNTAK_FRA_LOVVALGSBESTEMMELSE, anmodningOmUnntakDto.getUnntakFraLovvalgsbestemmelse());
-
-        prosessinstans.setSteg(ProsessSteg.JFR_AOU_BREV_OPPRETT_FAGSAK_OG_BEHANDLING);
         prosessinstansService.lagre(prosessinstans);
     }
 
@@ -296,21 +274,6 @@ public class JournalfoeringService {
             throw new FunksjonellException("Kun ett søknadsland er tillatt for behandlingstema " + behandlingstemaKode);
         }
 
-    }
-
-    private void validerBehandleAnmodningOmUnntakFelter(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
-        if (journalfoeringDto.getAnmodningOmUnntak() == null) {
-            throw new FunksjonellException("Opplysninger for å opprette behandling av anmodning om unntak mangler");
-        }
-        if (StringUtils.isEmpty(journalfoeringDto.getAnmodningOmUnntak().getLovvalgsbestemmelse())) {
-            throw new FunksjonellException("Lovvalgsbestemmelse mangler");
-        }
-        if (StringUtils.isEmpty(journalfoeringDto.getAnmodningOmUnntak().getUnntakFraLovvalgsbestemmelse())) {
-            throw new FunksjonellException("Unntak fra lovvalgsbestemmelse mangler");
-        }
-        if (StringUtils.isEmpty(journalfoeringDto.getAnmodningOmUnntak().getUnntakFraLovvalgsland())) {
-            throw new FunksjonellException("Unntak fra lovvalgsland mangler");
-        }
     }
 
     @Transactional(rollbackFor = MelosysException.class)
