@@ -267,7 +267,7 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(ProsessType.REGISTRERING_UNNTAK_GODKJENN,
             new ProsessFlyt(ProsessType.REGISTRERING_UNNTAK_GODKJENN,
                 LAGRE_LOVVALGSPERIODE_MEDL,
-                REG_UNNTAK_VARSLE_UTLAND,
+                SEND_GODKJENNING_REGISTRERING_UNNTAK,
                 AVSLUTT_SAK_OG_BEHANDLING,
                 SOB_BEHANDLING_AVSLUTTET
             )
@@ -275,7 +275,6 @@ public final class ProsessflytDefinisjon {
 
         PROSESS_FLYT_MAP.put(ProsessType.REGISTRERING_UNNTAK_AVVIS,
             new ProsessFlyt(ProsessType.REGISTRERING_UNNTAK_AVVIS,
-                REG_UNNTAK_VARSLE_UTLAND,
                 AVSLUTT_SAK_OG_BEHANDLING,
                 SOB_BEHANDLING_AVSLUTTET
             )
