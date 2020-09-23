@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
+import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
 
 @Service
 public class JournalfoeringService {
@@ -70,10 +71,8 @@ public class JournalfoeringService {
             validerKanOppretteSakFraSed(journalpost);
         }
 
-        if (journalfoeringDto.behandlingstypeErSøknad()){
+        if (erBehandlingAvSedForespørsler(journalfoeringDto.getBehandlingstemaKode()) || erBehandlingAvSøknad(journalfoeringDto.getBehandlingstemaKode())){
             opprettSakOgJournalfør(journalfoeringDto);
-        } else if (journalpost.mottaksKanalErEessi()) {
-            opprettSakForSed(journalfoeringDto);
         } else {
             throw new FunksjonellException(
                 String.format("Manuell journalføring av behandlingstema %s støttes ikke", journalfoeringDto.getBehandlingstemaKode())
@@ -109,13 +108,17 @@ public class JournalfoeringService {
         log.info("{} oppretter ny sak etter journalføring av journalpost {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID());
 
         valider(journalfoeringDto);
-        validerOpprettSakFelter(journalfoeringDto);
+        if (erBehandlingAvSøknad(journalfoeringDto.getBehandlingstemaKode())) {
+            validerOpprettSakForSøknadBehandlingFelter(journalfoeringDto);
+        }
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
-
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode()));
-        prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringDto.getFagsak().getLand());
-        prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringDto.getFagsak().getSoknadsperiode());
+
+        if (erBehandlingAvSøknad(journalfoeringDto.getBehandlingstemaKode())){
+            prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringDto.getFagsak().getLand());
+            prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringDto.getFagsak().getSoknadsperiode());
+        }
         if (StringUtils.isNotEmpty(journalfoeringDto.getArbeidsgiverID())) {
             prosessinstans.setData(ProsessDataKey.ARBEIDSGIVER, journalfoeringDto.getArbeidsgiverID());
         }
@@ -134,24 +137,6 @@ public class JournalfoeringService {
         }
 
         prosessinstansService.lagre(prosessinstans);
-    }
-
-    private void opprettSakForSed(JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
-        validerBrukerIDFinnes(journalfoeringDto);
-        validerBehandlingstemaForSed(journalfoeringDto.getBehandlingstemaKode());
-        prosessinstansService.opprettProsessinstansGenerellSedBehandling(journalfoeringDto);
-    }
-
-    private void validerBehandlingstemaForSed(String behandlingstypeKode) throws FunksjonellException {
-        if (!erBehandlingAvSedForespørsler(behandlingstypeKode)) {
-            throw new FunksjonellException(String.format("Opprettelse av behandling med tema %s støttes ikke", behandlingstypeKode));
-        }
-    }
-
-    private void validerBrukerIDFinnes(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
-        if (StringUtils.isEmpty(journalfoeringDto.getBrukerID())) {
-            throw new FunksjonellException("BrukerID er påkrevd!");
-        }
     }
 
     @Transactional(rollbackFor = MelosysException.class)
@@ -241,7 +226,7 @@ public class JournalfoeringService {
         }
     }
 
-    private void validerOpprettSakFelter(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
+    private void validerOpprettSakForSøknadBehandlingFelter(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
         if (journalfoeringDto.getFagsak() == null) {
             throw new FunksjonellException("Opplysninger for å opprette en søknad mangler");
         }

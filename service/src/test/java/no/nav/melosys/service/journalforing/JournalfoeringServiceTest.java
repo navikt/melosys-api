@@ -152,15 +152,6 @@ public class JournalfoeringServiceTest {
             .withMessageContaining("skal ikke journalføres manuelt");
     }
 
-    @Test
-    public void opprettOgJournalfør_støtterIkkeAutomatiskBehandling_korrektBehandlingstype() throws MelosysException {
-        opprettDto.setBehandlingstemaKode(Behandlingstema.TRYGDETID.getKode());
-        journalpost.setMottaksKanal("EESSI");
-        when(eessiService.støtterAutomatiskBehandling(any(MelosysEessiMelding.class))).thenReturn(Boolean.FALSE);
-
-        journalfoeringService.opprettOgJournalfør(opprettDto);
-        verify(prosessinstansService).opprettProsessinstansGenerellSedBehandling(any(JournalfoeringOpprettDto.class));
-    }
 
     @Test
     public void opprettOgJournalfør_støtterIkkeAutomatiskBehandling_feilBehandlingstype() {
@@ -170,7 +161,7 @@ public class JournalfoeringServiceTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
-            .withMessageContaining("Opprettelse av behandling med tema");
+            .withMessageContaining("Manuell journalføring");
     }
 
     @Test
@@ -188,15 +179,6 @@ public class JournalfoeringServiceTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
             .withMessageContaining("er allerede tilknyttet");
-    }
-
-    @Test
-    public void opprettOgJournalfør_erVurderTrygdetid_prosessinstansOpprettet() throws MelosysException {
-        opprettDto.setBehandlingstemaKode(Behandlingstema.TRYGDETID.getKode());
-        journalpost.setMottaksKanal("EESSI");
-
-        journalfoeringService.opprettOgJournalfør(opprettDto);
-        verify(prosessinstansService).opprettProsessinstansGenerellSedBehandling(opprettDto);
     }
 
     @Test

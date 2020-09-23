@@ -291,19 +291,6 @@ public class ProsessinstansServiceTest {
     }
 
     @Test
-    public void opprettProsessinstansGenerellSedBehandling() {
-        JournalfoeringOpprettDto journalfoeringDto = lagJournalfoeringOpprettDto();
-        journalfoeringDto.setBehandlingstemaKode(Behandlingstema.TRYGDETID.getKode());
-        prosessinstansService.opprettProsessinstansGenerellSedBehandling(journalfoeringDto);
-
-        verify(prosessinstansRepo).save(piCaptor.capture());
-        Prosessinstans prosessinstans = piCaptor.getValue();
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_HENT_EESSI_MELDING);
-        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.SED_GENERELL_SAK);
-        assertThat(prosessinstans.getData(ProsessDataKey.DOKUMENT_ID)).isEqualTo(journalfoeringDto.getHoveddokument().getDokumentID());
-    }
-
-    @Test
     public void opprettProsessinstansNySak_behandlingstypeIkkeStøttet_feiler() throws FunksjonellException {
         OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
         opprettSakDto.setBehandlingstema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
