@@ -216,7 +216,7 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(ProsessType.ANMODNING_OM_UNNTAK_SVAR,
             new ProsessFlyt(ProsessType.ANMODNING_OM_UNNTAK_SVAR,
                 SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
-                AOU_SVAR_OPPRETT_ANMODNINGSPERIODESVAR,
+                OPPRETT_ANMODNINGSPERIODESVAR,
                 BESTEM_BEHANDLINGSMÅTE_SVAR_ANMODNING_UNNTAK
             )
         );
