@@ -281,6 +281,14 @@ public final class ProsessflytDefinisjon {
             )
         );
 
+        PROSESS_FLYT_MAP.put(ProsessType.UTPEKING_AVVIS,
+            new ProsessFlyt(ProsessType.UTPEKING_AVVIS,
+                UTPEKING_SEND_AVSLAG,
+                AVSLUTT_SAK_OG_BEHANDLING,
+                SOB_BEHANDLING_AVSLUTTET
+            )
+        );
+
     }
 
     public static Optional<ProsessFlyt> finnFlytForProsessType(ProsessType prosessType) {

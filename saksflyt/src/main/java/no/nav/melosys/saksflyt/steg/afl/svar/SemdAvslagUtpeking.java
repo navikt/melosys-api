@@ -13,19 +13,19 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.AFL_SVAR_AVSLUTT_BEHANDLING;
 
-@Component("AFLSvarSendAvslag")
-public class SendAvslag implements StegBehandler {
+@Component
+public class SemdAvslagUtpeking implements StegBehandler {
 
     private final EessiService eessiService;
 
     @Autowired
-    public SendAvslag(@Qualifier("system") EessiService eessiService) {
+    public SemdAvslagUtpeking(@Qualifier("system") EessiService eessiService) {
         this.eessiService = eessiService;
     }
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return ProsessSteg.AFL_SVAR_SEND_AVSLAG;
+        return ProsessSteg.UTPEKING_SEND_AVSLAG;
     }
 
     @Override

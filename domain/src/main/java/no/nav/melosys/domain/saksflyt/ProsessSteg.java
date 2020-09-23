@@ -84,7 +84,7 @@ public enum ProsessSteg implements Kodeverk {
     OPPRETT_SED_GRUNNLAG("OPPRETT_SED_GRUNNLAG", "Oppretter behandlingsgrunnlag fra SED"),
 
     // Svar på A003
-    AFL_SVAR_SEND_AVSLAG("AFL_SVAR_SEND_AVSLAG", "Send SED A004 til alle arbeidsland"),
+    UTPEKING_SEND_AVSLAG("UTPEKING_SEND_AVSLAG", "Send SED A004 til alle arbeidsland"),
     AFL_SVAR_AVSLUTT_BEHANDLING("AFL_SVAR_AVSLUTT_BEHANDLING", "Avslutter behandling etter utpeking er avslått"),
 
     //Unntak medlemskap
