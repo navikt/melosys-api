@@ -25,13 +25,13 @@ public class RegisterKontroll implements StegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return ProsessSteg.REG_UNNTAK_REGISTERKONTROLL;
+        return ProsessSteg.REGISTERKONTROLL;
     }
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
-        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
-        kontrollresultatService.utførKontrollerOgRegistrerFeil(prosessinstans.getBehandling().getId());
-        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_BESTEM_BEHANDLINGSMAATE);
+        final long behandlingID = prosessinstans.getBehandling().getId();
+        log.info("Utfører registerkontroll for behandling {}", behandlingID);
+        kontrollresultatService.utførKontrollerOgRegistrerFeil(behandlingID);
     }
 }

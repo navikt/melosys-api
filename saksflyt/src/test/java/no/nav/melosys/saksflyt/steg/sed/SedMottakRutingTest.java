@@ -3,129 +3,71 @@ package no.nav.melosys.saksflyt.steg.sed;
 import java.util.Collections;
 import java.util.Optional;
 
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.eessi.AutomatiskSedBehandlingInitialiserer;
-import no.nav.melosys.service.eessi.ManuellSedBehandlingInitialiserer;
-import no.nav.melosys.service.eessi.RutingResultat;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import no.nav.melosys.service.eessi.ruting.DefaultSedRuter;
+import no.nav.melosys.service.eessi.ruting.SedRuterForSedTyper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SedMottakRutingTest {
+@ExtendWith(MockitoExtension.class)
+class SedMottakRutingTest {
 
     @Mock
-    private AutomatiskSedBehandlingInitialiserer automatiskSedBehandlingInitialiserer;
+    private SedRuterForSedTyper sedRuterForSedTyper;
     @Mock
-    private ManuellSedBehandlingInitialiserer manuellSedBehandlingInitialiserer;
+    private DefaultSedRuter defaultSedRuter;
     @Mock
     private EessiService eessiService;
 
     private SedMottakRuting sedMottakRuting;
 
-    @Before
+    private final long arkivsakID = 11L;
+
+    @BeforeEach
     public void setUp() throws MelosysException {
-        sedMottakRuting = new SedMottakRuting(Collections.singleton(automatiskSedBehandlingInitialiserer), manuellSedBehandlingInitialiserer, eessiService);
-        when(automatiskSedBehandlingInitialiserer.gjelderSedType(any())).thenReturn(true);
-        when(eessiService.finnSakForRinasaksnummer(anyString())).thenReturn(Optional.of(1L));
+        when(sedRuterForSedTyper.gjelderSedTyper()).thenReturn(Collections.singleton(SedType.A009));
+        sedMottakRuting = new SedMottakRuting(Collections.singleton(sedRuterForSedTyper), defaultSedRuter, eessiService);
+        when(eessiService.finnSakForRinasaksnummer(anyString())).thenReturn(Optional.of(arkivsakID));
     }
 
     @Test
-    public void utfør_resultatIngenBehandling_verifiserProsessStegJournalpost() throws Exception {
-        doAnswer(invocationOnMock -> {
-            Prosessinstans prosessinstans = invocationOnMock.getArgument(0);
-            prosessinstans.setBehandling(new Behandling());
-            return RutingResultat.INGEN_BEHANDLING;
-        }).when(automatiskSedBehandlingInitialiserer).finnSakOgBestemRuting(any(Prosessinstans.class), anyLong());
-
+    void utfør_sedTypeA009_sedRuterForSedTypeBlirKalt() throws MelosysException {
+        MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(SedType.A009);
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setSteg(sedMottakRuting.inngangsSteg());
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding());
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         sedMottakRuting.utfør(prosessinstans);
 
-        verify(automatiskSedBehandlingInitialiserer).finnSakOgBestemRuting(any(), anyLong());
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
+        verify(sedRuterForSedTyper).rutSedTilBehandling(eq(prosessinstans), eq(arkivsakID));
+        verify(defaultSedRuter, never()).rutSedTilBehandling(any(), any());
     }
 
     @Test
-    public void utfør_resultatOppdaterBehandling_verifiserProsessStegJournalpost() throws Exception {
-        doAnswer(invocationOnMock -> {
-            Prosessinstans prosessinstans = invocationOnMock.getArgument(0);
-            prosessinstans.setBehandling(new Behandling());
-            return RutingResultat.OPPDATER_BEHANDLING;
-        }).when(automatiskSedBehandlingInitialiserer).finnSakOgBestemRuting(any(Prosessinstans.class), anyLong());
-
-        doAnswer(invocationOnMock -> ProsessType.ANMODNING_OM_UNNTAK_SVAR)
-            .when(automatiskSedBehandlingInitialiserer).hentAktuellProsessType();
-
+    void utfør_sedTypeX009_manuellBehandlerBlirKalt() throws MelosysException {
+        MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(SedType.X009);
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setSteg(sedMottakRuting.inngangsSteg());
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding());
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         sedMottakRuting.utfør(prosessinstans);
 
-        verify(automatiskSedBehandlingInitialiserer).finnSakOgBestemRuting(any(), anyLong());
-        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.ANMODNING_OM_UNNTAK_SVAR);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_FERDIGSTILL_JOURNALPOST);
+        verify(sedRuterForSedTyper, never()).rutSedTilBehandling(any(), any());
+        verify(defaultSedRuter).rutSedTilBehandling(eq(prosessinstans), eq(arkivsakID));
     }
 
-    @Test
-    public void utfør_resultatNyBehandling_verifiserProsessStegNyBehandling() throws Exception {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setSteg(sedMottakRuting.inngangsSteg());
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding());
-
-        when(automatiskSedBehandlingInitialiserer.finnSakOgBestemRuting(any(), anyLong())).thenReturn(RutingResultat.NY_BEHANDLING);
-        when(automatiskSedBehandlingInitialiserer.hentAktuellProsessType()).thenReturn(ProsessType.REGISTRERING_UNNTAK);
-
-        sedMottakRuting.utfør(prosessinstans);
-
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_OPPRETT_NY_BEHANDLING);
-    }
-
-    @Test
-    public void utfør_resultatNySak_verifiserProsessStegNyFagsakOgBehandling() throws Exception {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setSteg(sedMottakRuting.inngangsSteg());
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding());
-
-        when(automatiskSedBehandlingInitialiserer.finnSakOgBestemRuting(any(), anyLong())).thenReturn(RutingResultat.NY_SAK);
-        when(automatiskSedBehandlingInitialiserer.hentAktuellProsessType()).thenReturn(ProsessType.REGISTRERING_UNNTAK);
-
-        sedMottakRuting.utfør(prosessinstans);
-
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH);
-    }
-
-    @Test(expected = TekniskException.class)
-    public void utfør_resultatNullVerdi_verifiserKasterException() throws Exception {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setSteg(sedMottakRuting.inngangsSteg());
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding());
-
-        when(automatiskSedBehandlingInitialiserer.finnSakOgBestemRuting(any(), anyLong())).thenReturn(null);
-
-        sedMottakRuting.utfør(prosessinstans);
-    }
-
-    private MelosysEessiMelding hentMelosysEessiMelding() {
+    private MelosysEessiMelding hentMelosysEessiMelding(SedType sedType) {
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
-        melosysEessiMelding.setSedType("A009");
+        melosysEessiMelding.setSedType(sedType.name());
         melosysEessiMelding.setRinaSaksnummer("57483697");
         return melosysEessiMelding;
     }

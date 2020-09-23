@@ -26,13 +26,14 @@ public class OpprettSedDokument implements StegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return ProsessSteg.REG_UNNTAK_OPPRETT_SEDDOKUMENT;
+        return ProsessSteg.OPPRETT_SEDDOKUMENT;
     }
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
-        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
-        opprettSedDokumentFelles.opprettSedSaksopplysning(prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class), prosessinstans.getBehandling());
-        prosessinstans.setSteg(ProsessSteg.REG_UNNTAK_HENT_REGISTEROPPLYSNINGER);
+        opprettSedDokumentFelles.opprettSedSaksopplysning(
+            prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class), prosessinstans.getBehandling()
+        );
+        log.info("Opprettet SedDokument for behandling {}", prosessinstans.getBehandling().getId());
     }
 }

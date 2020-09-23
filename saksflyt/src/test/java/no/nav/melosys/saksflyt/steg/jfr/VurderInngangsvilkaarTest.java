@@ -12,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -37,10 +38,16 @@ public class VurderInngangsvilkaarTest {
 
     private final long behandlingID = 143;
     private final String saksnummer = "MEL-432";
+    private final Behandling behandling = new Behandling();
 
     @Before
-    public void setUp() {
+    public void setUp() throws IkkeFunnetException {
         vurderInngangsvilkaar = new VurderInngangsvilkaar(inngangsvilkaarService, fagsakService, behandlingService);
+
+        behandling.setId(behandlingID);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
     }
 
     @Test
@@ -49,10 +56,7 @@ public class VurderInngangsvilkaarTest {
         behandlingsgrunnlagData.periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(1L));
         behandlingsgrunnlagData.soeknadsland.landkoder = List.of(Landkoder.NO.getKode(), Landkoder.SE.getKode());
 
-        Behandling behandling = new Behandling();
-        behandling.setId(behandlingID);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
 
         Fagsak fagsak = new Fagsak();
@@ -62,7 +66,6 @@ public class VurderInngangsvilkaarTest {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
-        when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
         when(inngangsvilkaarService.vurderOgLagreInngangsvilkår(
             eq(behandlingID),
             eq(behandlingsgrunnlagData.soeknadsland.landkoder),
@@ -72,5 +75,15 @@ public class VurderInngangsvilkaarTest {
         vurderInngangsvilkaar.utfør(prosessinstans);
 
         verify(fagsakService).oppdaterType(eq(prosessinstans.getBehandling().getFagsak()), eq(true));
+    }
+
+    @Test
+    public void utfør_behandlingstemaBeslutningLovvalgAnnetLand_vurdererIkkeInngangsvilkår() throws FunksjonellException, TekniskException {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+        behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
+
+        vurderInngangsvilkaar.utfør(prosessinstans);
+        verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), any());
     }
 }

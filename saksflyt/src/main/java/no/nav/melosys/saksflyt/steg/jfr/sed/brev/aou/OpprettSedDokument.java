@@ -65,7 +65,7 @@ public class OpprettSedDokument implements StegBehandler {
         saksopplysningRepository.save(saksopplysning);
         log.info("Saksopplysning: SedDokument opprettet for behandling {}", prosessinstans.getBehandling().getId());
 
-        prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE);
+        prosessinstans.setSteg(ProsessSteg.OPPRETT_ANMODNINGSPERIODE_FRA_SED);
         prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK);
     }
 

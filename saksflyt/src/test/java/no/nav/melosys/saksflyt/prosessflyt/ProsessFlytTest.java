@@ -36,7 +36,7 @@ class ProsessFlytTest {
     void nesteSteg_forrigeStegIkkeEnDelAvFlyt_kasterException() {
         ProsessFlyt prosessFlyt = lagProsessFlyt();
         assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(() -> prosessFlyt.nesteSteg(ProsessSteg.AFL_AVSLUTT_TIDLIGERE_PERIODE))
+            .isThrownBy(() -> prosessFlyt.nesteSteg(ProsessSteg.AVSLUTT_TIDLIGERE_MEDL_PERIODE))
             .withMessageContaining("ikke gyldig for prosesstype");
     }
 

@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.eessi.melding;
 
 import java.util.List;
+import java.util.Objects;
 
 import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
@@ -197,5 +198,36 @@ public class MelosysEessiMelding {
             ", bucType='" + bucType + '\'' +
             ", sedType='" + sedType + '\'' +
             '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MelosysEessiMelding that = (MelosysEessiMelding) o;
+        return erEndring == that.erEndring &&
+            midlertidigBestemmelse == that.midlertidigBestemmelse &&
+            Objects.equals(sedId, that.sedId) &&
+            Objects.equals(rinaSaksnummer, that.rinaSaksnummer) &&
+            Objects.equals(avsender, that.avsender) &&
+            Objects.equals(journalpostId, that.journalpostId) &&
+            Objects.equals(dokumentId, that.dokumentId) &&
+            Objects.equals(gsakSaksnummer, that.gsakSaksnummer) &&
+            Objects.equals(aktoerId, that.aktoerId) &&
+            Objects.equals(statsborgerskap, that.statsborgerskap) &&
+            Objects.equals(arbeidssteder, that.arbeidssteder) &&
+            Objects.equals(periode, that.periode) &&
+            Objects.equals(lovvalgsland, that.lovvalgsland) &&
+            Objects.equals(artikkel, that.artikkel) &&
+            Objects.equals(ytterligereInformasjon, that.ytterligereInformasjon) &&
+            Objects.equals(bucType, that.bucType) &&
+            Objects.equals(sedType, that.sedType) &&
+            Objects.equals(svarAnmodningUnntak, that.svarAnmodningUnntak) &&
+            Objects.equals(anmodningUnntak, that.anmodningUnntak);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(sedId, rinaSaksnummer, avsender, journalpostId, dokumentId, gsakSaksnummer, aktoerId, statsborgerskap, arbeidssteder, periode, lovvalgsland, artikkel, erEndring, midlertidigBestemmelse, ytterligereInformasjon, bucType, sedType, svarAnmodningUnntak, anmodningUnntak);
     }
 }

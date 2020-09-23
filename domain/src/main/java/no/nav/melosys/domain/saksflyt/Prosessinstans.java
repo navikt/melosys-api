@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.jpa.PropertiesConverter;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.serializer.LovvalgBestemmelseDeserializer;
@@ -202,6 +203,11 @@ public class Prosessinstans {
     public String hentSaksbehandlerHvisTilordnes() {
         return Optional.ofNullable(getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class))
             .orElse(Boolean.FALSE) ? getData(ProsessDataKey.SAKSBEHANDLER) : null;
+    }
+
+    public String hentAktørIDFraDataEllerSED() {
+        return Optional.ofNullable(getData(ProsessDataKey.AKTØR_ID))
+            .orElse(getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class, new MelosysEessiMelding()).getAktoerId());
     }
 
     private void leggTilHendelse(ProsessinstansHendelse prosessinstansHendelse) {

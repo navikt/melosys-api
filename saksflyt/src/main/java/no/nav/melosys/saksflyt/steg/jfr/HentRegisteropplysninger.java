@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.HENT_REGISTER_OPPL;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.HENT_REGISTEROPPLYSNINGER;
 import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory.utledSaksopplysningTyper;
 
 @Component
@@ -35,7 +35,7 @@ public class HentRegisteropplysninger implements StegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return HENT_REGISTER_OPPL;
+        return HENT_REGISTEROPPLYSNINGER;
     }
 
     @Override

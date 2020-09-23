@@ -74,7 +74,7 @@ public class OpprettSedDokumentTest {
         assertThat(sedDokument.getLovvalgslandKode()).isEqualTo(Landkoder.DE);
         assertThat(sedDokument.getUnntakFraLovvalgslandKode()).isEqualTo(Landkoder.NO);
 
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE);
+        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.OPPRETT_ANMODNINGSPERIODE_FRA_SED);
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK);
     }
 }

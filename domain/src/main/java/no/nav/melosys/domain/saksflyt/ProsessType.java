@@ -7,9 +7,13 @@ public enum ProsessType implements Kodeverk {
     //alfabetisk rekkefølge
     ANMODNING_OM_UNNTAK("ANMODNING_OM_UNNTAK", "Anmodning om unntak"),
     ANMODNING_OM_UNNTAK_MOTTAK("ANMODNING_OM_UNNTAK_MOTTAK", "Mottar anmodning om unntak"),
+    ANMODNING_OM_UNNTAK_MOTTAK_NY_SAK("ANMODNING_OM_UNNTAK_MOTTAK_NY_SAK", "Mottar anmodning om unntak - ny sak"),
+    ANMODNING_OM_UNNTAK_MOTTAK_NY_BEHANDLING("ANMODNING_OM_UNNTAK_MOTTAK_NY_BEHANDLING", "Mottar anmodning om unntak - ny behandling"),
     ANMODNING_OM_UNNTAK_MOTTAK_SVAR("ANMODNING_OM_UNNTAK_MOTTAK_SVAR", "Svar på mottatt anmodning om unntak"),
     ANMODNING_OM_UNNTAK_SVAR("ANMODNING_OM_UNNTAK_SVAR", "Mottar svar på anmodning om unntak"),
     ARBEID_FLERE_LAND("ARBEID_FLERE_LAND","Mottak av A003"),
+    ARBEID_FLERE_LAND_NY_SAK("ARBEID_FLERE_LAND_NY_SAK","Mottak av A003 - ny sak"),
+    ARBEID_FLERE_LAND_NY_BEHANDLING("ARBEID_FLERE_LAND_NY_BEHANDLING","Mottak av A003 - ny behandling"),
     FORVALTNINGSMELDING_SEND("FORVALTNINGSMELDING_SEND", "Sender forvaltningsmelding"),
     HENLEGG_SAK("HENLEGG_SAK", "Henlegg en sak"),
     IVERKSETT_VEDTAK("IVERKSETT_VEDTAK", "Iverksett vedtak"),
@@ -25,6 +29,8 @@ public enum ProsessType implements Kodeverk {
     OPPRETT_NY_SAK("OPPRETT_NY_SAK", "Oppretter ny sak (fra journalført dokument)"),
     OPPRETT_NY_SAK_SED_FORESPØRSEL("OPPRETT_NY_SAK_SED_FORESPØRSEL", "Oppretter ny sak for behandling av SED-forespørsel"),
     REGISTRERING_UNNTAK("REGISTRERING_UNNTAK", "Registrering av unntak"),
+    REGISTRERING_UNNTAK_NY_SAK("REGISTRERING_UNNTAK_NY_SAK", "Registrering av unntak - ny sak"),
+    REGISTRERING_UNNTAK_NY_BEHANDLING("REGISTRERING_UNNTAK_NY_BEHANDLING", "Registrering av unntak - ny behandling"),
     SED_GENERELL_SAK("SED_OPPRETT_SAK", "Oppretter sak for SED for generell behandling"),
     VIDERESEND_SOKNAD("VIDERESEND_SOKNAD", "Videresend søknad");
 

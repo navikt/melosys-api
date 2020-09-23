@@ -51,7 +51,7 @@ public final class ProsessflytDefinisjon {
             ProsessType.ANMODNING_OM_UNNTAK,
             new ProsessFlyt(ProsessType.ANMODNING_OM_UNNTAK,
                 AVKLAR_MYNDIGHET,
-                OPPDATER_MEDL_ANMODNING_UNNTAK,
+                LAGRE_ANMODNINGSPERIODE_MEDL,
                 SEND_ORIENTERING_ANMODNING_UNNTAK,
                 SEND_ANMODNING_OM_UNNTAK,
                 OPPDATER_OPPGAVE_ANMODNING_UNNTAK_SENDT
@@ -63,11 +63,11 @@ public final class ProsessflytDefinisjon {
                 JFR_OPPRETT_SAK_OG_BEH,
                 JFR_OPPRETT_SØKNAD,
                 OPPRETT_ARKIVSAK,
-                STATUS_BEH_OPPR,
-                JFR_OPPDATER_SAKSRELASJON,
+                SOB_BEHANDLING_OPPRETTET,
+                OPPDATER_SAKSRELASJON,
                 OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
-                HENT_REGISTER_OPPL,
-                JFR_VURDER_INNGANGSVILKÅR,
+                HENT_REGISTEROPPLYSNINGER,
+                VURDER_INNGANGSVILKÅR,
                 OPPRETT_OPPGAVE,
                 SEND_FORVALTNINGSMELDING
             )
@@ -109,9 +109,9 @@ public final class ProsessflytDefinisjon {
                 JFR_OPPRETT_SAK_OG_BEH,
                 JFR_OPPRETT_SØKNAD,
                 OPPRETT_ARKIVSAK,
-                STATUS_BEH_OPPR,
-                HENT_REGISTER_OPPL,
-                JFR_VURDER_INNGANGSVILKÅR,
+                SOB_BEHANDLING_OPPRETTET,
+                HENT_REGISTEROPPLYSNINGER,
+                VURDER_INNGANGSVILKÅR,
                 GJENBRUK_OPPGAVE
             )
         );
@@ -142,6 +142,128 @@ public final class ProsessflytDefinisjon {
                 SOB_BEHANDLING_AVSLUTTET
             )
         );
+
+        PROSESS_FLYT_MAP.put(ProsessType.MOTTAK_SED,
+            new ProsessFlyt(ProsessType.MOTTAK_SED,
+                SED_MOTTAK_RUTING
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.MOTTAK_SED_JOURNALFØRING,
+            new ProsessFlyt(ProsessType.MOTTAK_SED_JOURNALFØRING,
+                SED_MOTTAK_FERDIGSTILL_JOURNALPOST
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.REGISTRERING_UNNTAK_NY_SAK,
+            new ProsessFlyt(ProsessType.REGISTRERING_UNNTAK_NY_SAK,
+                SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH,
+                OPPRETT_ARKIVSAK,
+                OPPDATER_SAKSRELASJON,
+                SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
+                SOB_BEHANDLING_OPPRETTET,
+                OPPRETT_SEDDOKUMENT,
+                HENT_REGISTEROPPLYSNINGER,
+                REGISTERKONTROLL,
+                BESTEM_BEHANDLINGMÅTE_SED
+            )
+        ); //TODO: flyter for godkjenning/avvisning
+
+        PROSESS_FLYT_MAP.put(ProsessType.REGISTRERING_UNNTAK_NY_BEHANDLING,
+            new ProsessFlyt(ProsessType.REGISTRERING_UNNTAK_NY_BEHANDLING,
+                SED_MOTTAK_OPPRETT_NY_BEHANDLING,
+                SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
+                SOB_BEHANDLING_OPPRETTET,
+                AVSLUTT_TIDLIGERE_MEDL_PERIODE,
+                OPPRETT_SEDDOKUMENT,
+                HENT_REGISTEROPPLYSNINGER,
+                REGISTERKONTROLL,
+                BESTEM_BEHANDLINGMÅTE_SED
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.ARBEID_FLERE_LAND_NY_SAK,
+            new ProsessFlyt(ProsessType.ARBEID_FLERE_LAND_NY_SAK,
+                SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH,
+                OPPRETT_ARKIVSAK,
+                OPPDATER_SAKSRELASJON,
+                SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
+                SOB_BEHANDLING_OPPRETTET,
+                HENT_REGISTEROPPLYSNINGER,
+                OPPRETT_SEDDOKUMENT,
+                OPPRETT_SED_GRUNNLAG,
+                VURDER_INNGANGSVILKÅR,
+                REGISTERKONTROLL,
+                BESTEM_BEHANDLINGMÅTE_SED
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.ARBEID_FLERE_LAND_NY_BEHANDLING,
+            new ProsessFlyt(ProsessType.ARBEID_FLERE_LAND_NY_BEHANDLING,
+                SED_MOTTAK_OPPRETT_NY_BEHANDLING,
+                SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
+                SOB_BEHANDLING_OPPRETTET,
+                AVSLUTT_TIDLIGERE_MEDL_PERIODE,
+                HENT_REGISTEROPPLYSNINGER,
+                OPPRETT_SEDDOKUMENT,
+                OPPRETT_SED_GRUNNLAG,
+                VURDER_INNGANGSVILKÅR,
+                REGISTERKONTROLL,
+                BESTEM_BEHANDLINGMÅTE_SED
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.ANMODNING_OM_UNNTAK_SVAR,
+            new ProsessFlyt(ProsessType.ANMODNING_OM_UNNTAK_SVAR,
+                SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
+                AOU_SVAR_OPPRETT_ANMODNINGSPERIODESVAR,
+                AOU_SVAR_OPPDATER_BEHANDLING
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_NY_SAK,
+            new ProsessFlyt(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_NY_SAK,
+                SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH,
+                OPPRETT_ARKIVSAK,
+                OPPDATER_SAKSRELASJON,
+                SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
+                OPPRETT_SEDDOKUMENT,
+                OPPRETT_ANMODNINGSPERIODE_FRA_SED,
+                SOB_BEHANDLING_OPPRETTET,
+                HENT_REGISTEROPPLYSNINGER,
+                REGISTERKONTROLL,
+                LAGRE_ANMODNINGSPERIODE_MEDL,
+                BESTEM_BEHANDLINGMÅTE_SED
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_NY_BEHANDLING,
+            new ProsessFlyt(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_NY_BEHANDLING,
+                SED_MOTTAK_OPPRETT_NY_BEHANDLING,
+                SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
+                OPPRETT_SEDDOKUMENT,
+                OPPRETT_ANMODNINGSPERIODE_FRA_SED,
+                SOB_BEHANDLING_OPPRETTET,
+                AVSLUTT_TIDLIGERE_MEDL_PERIODE,
+                HENT_REGISTEROPPLYSNINGER,
+                REGISTERKONTROLL,
+                LAGRE_ANMODNINGSPERIODE_MEDL,
+                BESTEM_BEHANDLINGMÅTE_SED
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_NY_SAK_SED_FORESPØRSEL,
+            new ProsessFlyt(ProsessType.OPPRETT_NY_SAK_SED_FORESPØRSEL,
+                SED_MOTTAK_HENT_EESSI_MELDING,
+                SED_MOTTAK_RUTING,
+                SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH,
+                OPPRETT_ARKIVSAK,
+                OPPDATER_SAKSRELASJON,
+                HENT_REGISTEROPPLYSNINGER,
+                OPPRETT_OPPGAVE
+            )
+        );
+
 
     }
 

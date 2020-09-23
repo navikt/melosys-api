@@ -11,7 +11,18 @@ import no.nav.melosys.domain.oppgave.PrioritetType;
 
 public final class OppgaveFactory {
 
+    private static final long FRIST_FERDIGSTILLELSE_JFR_OPPG = 7;
+
     private OppgaveFactory() {}
+
+    public static Oppgave.Builder lagJournalføringsoppgave(String journalpostID) {
+        return new Oppgave.Builder()
+            .setOppgavetype(Oppgavetyper.JFR)
+            .setTema(Tema.MED)
+            .setPrioritet(PrioritetType.NORM)
+            .setJournalpostId(journalpostID)
+            .setFristFerdigstillelse(LocalDate.now().plusDays(FRIST_FERDIGSTILLELSE_JFR_OPPG));
+    }
 
     public static Oppgave.Builder lagBehandlingsOppgaveForType(Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         OppgaveParametere parametere = hentOppgaveParametere(behandlingstema);
