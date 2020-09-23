@@ -126,13 +126,19 @@ public class DokumentService {
     private BrevData lagBrevData(Brevbestilling brevbestilling) throws FunksjonellException, TekniskException {
         final var dokumentType = brevbestilling.getDokumentType();
         Assert.notNull(dokumentType, "Ingen gyldig dokumentType.");
+
+        BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(dokumentType, lagBrevbestillingDto(brevbestilling));
         BrevDataGrunnlag brevDataGrunnlag = brevdataGrunnlagFactory.av(brevbestilling);
+
+        return brevDataBygger.lag(brevDataGrunnlag, brevbestilling.getAvsender());
+    }
+
+    private static BrevbestillingDto lagBrevbestillingDto(Brevbestilling brevbestilling) {
         final BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.mottaker = brevbestilling.getMottakerRolle();
         brevbestillingDto.begrunnelseKode = brevbestilling.getBegrunnelseKode();
         brevbestillingDto.fritekst = brevbestilling.getFritekst();
-        BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(dokumentType, brevbestillingDto);
-        return brevDataBygger.lag(brevDataGrunnlag, brevbestilling.getAvsender());
+        return brevbestillingDto;
     }
 
     private void produserIkkeredigerbartDokument(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Behandling behandling, BrevData brevData)
