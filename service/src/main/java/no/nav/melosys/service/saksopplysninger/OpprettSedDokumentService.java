@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.felles;
+package no.nav.melosys.service.saksopplysninger;
 
 import java.time.Instant;
 import java.util.stream.Collectors;
@@ -25,15 +25,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OpprettSedDokumentFelles {
-    private static final Logger log = LoggerFactory.getLogger(OpprettSedDokumentFelles.class);
+public class OpprettSedDokumentService {
+    private static final Logger log = LoggerFactory.getLogger(OpprettSedDokumentService.class);
     private static final String SED_DOKUMENT_VERSJON = "1.0";
 
     private final DokumentFactory dokumentFactory;
     private final SaksopplysningRepository saksopplysningRepository;
 
     @Autowired
-    public OpprettSedDokumentFelles(DokumentFactory dokumentFactory, SaksopplysningRepository saksopplysningRepository) {
+    public OpprettSedDokumentService(DokumentFactory dokumentFactory, SaksopplysningRepository saksopplysningRepository) {
         this.dokumentFactory = dokumentFactory;
         this.saksopplysningRepository = saksopplysningRepository;
     }

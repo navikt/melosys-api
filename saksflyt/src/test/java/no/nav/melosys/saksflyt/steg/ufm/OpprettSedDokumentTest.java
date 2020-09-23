@@ -13,7 +13,7 @@ import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.saksflyt.felles.OpprettSedDokumentFelles;
+import no.nav.melosys.service.saksopplysninger.OpprettSedDokumentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,13 +27,13 @@ import static org.mockito.Mockito.verify;
 class OpprettSedDokumentTest {
 
     @Mock
-    private OpprettSedDokumentFelles opprettSedDokumentFelles;
+    private OpprettSedDokumentService opprettSedDokumentService;
 
     private OpprettSedDokument opprettSedDokument;
 
     @BeforeEach
     public void setup() {
-        opprettSedDokument = new OpprettSedDokument(opprettSedDokumentFelles);
+        opprettSedDokument = new OpprettSedDokument(opprettSedDokumentService);
     }
 
     @Test
@@ -50,7 +50,7 @@ class OpprettSedDokumentTest {
 
         opprettSedDokument.utfør(prosessinstans);
 
-        verify(opprettSedDokumentFelles).opprettSedSaksopplysning(any(MelosysEessiMelding.class), any(Behandling.class));
+        verify(opprettSedDokumentService).opprettSedSaksopplysning(any(MelosysEessiMelding.class), any(Behandling.class));
     }
 
     private MelosysEessiMelding hentMelosysEessiMelding() {
