@@ -28,8 +28,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.AFL_SVAR_AVSLUTT_BEHANDLING;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -90,7 +88,5 @@ public class SemdAvslagUtpekingTest {
         semdAvslagUtpeking.utfør(prosessinstans);
 
         verify(eessiConsumer).sendSedPåEksisterendeBuc(any(), any(), any());
-
-        assertThat(prosessinstans.getSteg()).isEqualTo(AFL_SVAR_AVSLUTT_BEHANDLING);
     }
 }

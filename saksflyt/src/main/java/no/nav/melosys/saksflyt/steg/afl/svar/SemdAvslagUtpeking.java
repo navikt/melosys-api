@@ -11,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.AFL_SVAR_AVSLUTT_BEHANDLING;
-
 @Component
 public class SemdAvslagUtpeking implements StegBehandler {
 
@@ -32,9 +30,6 @@ public class SemdAvslagUtpeking implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         long behandlingId = prosessinstans.getBehandling().getId();
         UtpekingAvvis utpekingAvvis = prosessinstans.getData(ProsessDataKey.UTPEKING_AVVIS, UtpekingAvvis.class);
-
         eessiService.sendAvslagUtpekingSvar(behandlingId, utpekingAvvis);
-
-        prosessinstans.setSteg(AFL_SVAR_AVSLUTT_BEHANDLING);
     }
 }

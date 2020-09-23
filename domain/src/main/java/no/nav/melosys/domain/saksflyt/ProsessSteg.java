@@ -85,7 +85,6 @@ public enum ProsessSteg implements Kodeverk {
 
     // Svar på A003
     UTPEKING_SEND_AVSLAG("UTPEKING_SEND_AVSLAG", "Send SED A004 til alle arbeidsland"),
-    AFL_SVAR_AVSLUTT_BEHANDLING("AFL_SVAR_AVSLUTT_BEHANDLING", "Avslutter behandling etter utpeking er avslått"),
 
     //Unntak medlemskap
     AVSLUTT_TIDLIGERE_MEDL_PERIODE("AVSLUTT_TIDLIGERE_MEDL_PERIODE", "Avslutter tidligere periode i Medl"),
