@@ -270,6 +270,18 @@ public final class ProsessflytDefinisjon {
                 SOB_BEHANDLING_AVSLUTTET
             )
         );
+
+        PROSESS_FLYT_MAP.put(ProsessType.MOTTAK_SOKNAD_ALTINN,
+            new ProsessFlyt(ProsessType.MOTTAK_SOKNAD_ALTINN,
+                OPPRETT_SAK_OG_BEHANDLING_FRA_ALTINN_SØKNAD,
+                OPPRETT_ARKIVSAK,
+                OPPRETT_OG_FERDIGSTILL_JOURNALPOST_FRA_ALTINN,
+                HENT_REGISTEROPPLYSNINGER,
+                VURDER_INNGANGSVILKÅR,
+                OPPRETT_OPPGAVE,
+                SEND_FORVALTNINGSMELDING
+            )
+        );
     }
 
     public static Optional<ProsessFlyt> finnFlytForProsessType(ProsessType prosessType) {

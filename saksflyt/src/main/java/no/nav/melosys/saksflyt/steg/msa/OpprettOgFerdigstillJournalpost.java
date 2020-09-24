@@ -61,7 +61,5 @@ public class OpprettOgFerdigstillJournalpost implements StegBehandler {
 
         behandling.setInitierendeJournalpostId(journalpostID);
         behandlingService.lagre(behandling);
-
-        prosessinstans.setSteg(ProsessSteg.MSA_HENT_REGISTEROPPLYSNINGER);
     }
 }

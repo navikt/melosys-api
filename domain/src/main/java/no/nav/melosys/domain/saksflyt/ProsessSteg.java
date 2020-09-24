@@ -84,10 +84,6 @@ public enum ProsessSteg implements Kodeverk {
     // Mottak av søknad
     OPPRETT_SAK_OG_BEHANDLING_FRA_ALTINN_SØKNAD("OPPRETT_SAK_OG_BEHANDLING_FRA_ALTINN_SØKNAD", "Oppretter fagsak og behandling fra mottatt Altinn-søknad"),
     OPPRETT_OG_FERDIGSTILL_JOURNALPOST_FRA_ALTINN("OPPRETT_OG_FERDIGSTILL_JOURNALPOST_FRA_ALTINN", "Oppretter og ferdigstiller journalpost fra Altinn"),
-    MSA_HENT_REGISTEROPPLYSNINGER("MSA_HENT_REGISTEROPPLYSNINGER","Innhent registeropplysnigner"),
-    MSA_VURDER_INNGANGSVILKÅR("MSA_VURDER_INNGANGSVILKÅR","Vurder inngangsvilkår"),
-    MSA_OPPRETT_OPPGAVE("MSA_OPPRETT_OPPGAVE","Opprett oppgave for saksbehandling"),
-    MSA_SEND_FORVALTNINGSMELDING("MSA_SEND_FORVALTNINGSMELDING","Send forvaltningsmelding"),
 
     LAGRE_LOVVALGSPERIODE_MEDL("LAGRE_LOVVALGSPERIODE_MEDL", "Lagrer en lovvalgsperiode i MEDL som foreløpig eller endelig"),
 
