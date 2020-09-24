@@ -6,6 +6,7 @@ import java.util.List;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
@@ -19,7 +20,6 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.brev.FastMottaker;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.apache.commons.lang3.StringUtils;
@@ -46,17 +46,14 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     private final BrevBestiller brevBestiller;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final AvklarteVirksomheterService avklarteVirksomheterService;
 
     @Autowired
     public SendVedtaksbrevInnland(BrevBestiller brevBestiller,
                                   BehandlingService behandlingService,
-                                  BehandlingsresultatService behandlingsresultatService,
-                                  AvklarteVirksomheterService avklarteVirksomheterService) {
+                                  BehandlingsresultatService behandlingsresultatService) {
         this.brevBestiller = brevBestiller;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
-        this.avklarteVirksomheterService = avklarteVirksomheterService;
     }
 
     @Override
@@ -141,7 +138,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             ? INNVILGELSE_YRKESAKTIV_FLERE_LAND : INNVILGELSE_YRKESAKTIV;
 
         List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.av(BRUKER), FastMottaker.av(SKATT)));
-        if (skalSendesTilSkatteoppkreverUtland(behandling, resultat)) {
+        if (skalSendesTilSkatteoppkreverUtland(behandling.getBehandlingsgrunnlag())) {
             mottakerListe.add(FastMottaker.av(SKATTEOPPKREVER_UTLAND));
         }
 
@@ -177,16 +174,8 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         }
     }
 
-    private boolean harValgteUtenlandskeVirksomheter(Behandling behandling) {
-        return !avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling).isEmpty();
-    }
-
-    private boolean skalSendesTilSkatteoppkreverUtland(Behandling behandling, Behandlingsresultat resultat) {
-        if (resultat.hentValidertLovvalgsperiode().erArtikkel13()) {
-            return !behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.isEmpty();
-        } else {
-            return harValgteUtenlandskeVirksomheter(behandling);
-        }
+    private boolean skalSendesTilSkatteoppkreverUtland(Behandlingsgrunnlag behandlingsgrunnlag) {
+        return !behandlingsgrunnlag.getBehandlingsgrunnlagdata().foretakUtland.isEmpty();
     }
 
     private String hentBegrunnelseKode(Prosessinstans prosessinstans) {

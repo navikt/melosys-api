@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
@@ -64,7 +63,6 @@ class SendVedtaksbrevInnlandTest {
     private static final long ART13_1B1_UTPEKING_BEHANDLINGSID = 53L;
 
     private static DokumentSystemService dokService;
-    private static AvklarteVirksomheterService avklarteVirksomheterService;
 
     private static SendVedtaksbrevInnland lagStegbehandler(Behandling behandling) throws Exception {
         String saksbehandler = "Z123456";
@@ -106,9 +104,7 @@ class SendVedtaksbrevInnlandTest {
         BehandlingService behandlingService = mock(BehandlingService.class);
         when(behandlingService.hentBehandling(eq(behandling.getId()))).thenReturn(behandling);
 
-        avklarteVirksomheterService = mock(AvklarteVirksomheterService.class);
-
-        return new SendVedtaksbrevInnland(brevBestiller, behandlingService, mockBehandlingsresultatService(), avklarteVirksomheterService);
+        return new SendVedtaksbrevInnland(brevBestiller, behandlingService, mockBehandlingsresultatService());
     }
 
     private static BehandlingService mockBehandlingService() throws IkkeFunnetException {
@@ -409,10 +405,10 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    void utfør_innvilgelses161MedUtenlandskVirksomhet_senderInnvilgelseTilSkatteoppkreverUtland() throws Exception {
+    void utfør_innvilgelsesMedForetakUtland_senderInnvilgelseTilSkatteoppkreverUtland() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_UTENLANDSK_VIRKSOMHET_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(List.of(new AvklartVirksomhet(new ForetakUtland())));
+        prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(new ForetakUtland());
         instans.utfør(prosessinstans);
 
         verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV), eq(FastMottaker.av(SKATTEOPPKREVER_UTLAND)), anyLong(), any());
