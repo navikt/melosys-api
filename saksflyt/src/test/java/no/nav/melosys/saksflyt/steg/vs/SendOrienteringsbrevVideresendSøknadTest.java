@@ -25,14 +25,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SendOrienteringsbrevTest {
+public class SendOrienteringsbrevVideresendSøknadTest {
 
     @Mock
     private BehandlingService behandlingService;
     @Mock
     private BrevBestiller brevBestiller;
 
-    private SendOrienteringsbrev steg;
+    private SendOrienteringsbrevVideresendSøknad steg;
     private Behandling behandling;
     private Prosessinstans prosessinstans;
 
@@ -42,7 +42,7 @@ public class SendOrienteringsbrevTest {
 
     @Before
     public void setup() throws IkkeFunnetException {
-        steg = new SendOrienteringsbrev(behandlingService , brevBestiller);
+        steg = new SendOrienteringsbrevVideresendSøknad(behandlingService , brevBestiller);
 
         behandling = new Behandling();
         behandling.setId(1L);

@@ -12,7 +12,7 @@ class ProsessFlytTest {
 
     private final ProsessSteg førsteSteg = ProsessSteg.OPPRETT_AVGIFTSOPPGAVE;
     private final ProsessSteg andreSteg = ProsessSteg.OPPRETT_ARKIVSAK;
-    private final ProsessSteg sisteSteg = ProsessSteg.VS_SEND_SOKNAD;
+    private final ProsessSteg sisteSteg = ProsessSteg.VIDERESEND_SØKNAD;
 
     @Test
     void nesteSteg_forrigeStegErNull_forventFørsteElement() {

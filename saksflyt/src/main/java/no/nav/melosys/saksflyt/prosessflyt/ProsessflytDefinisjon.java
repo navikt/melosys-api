@@ -32,7 +32,7 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(
             ProsessType.HENLEGG_SAK,
             new ProsessFlyt(ProsessType.HENLEGG_SAK,
-                HS_SEND_BREV,
+                SEND_HENLEGGELSESBREV,
                 SOB_BEHANDLING_AVSLUTTET
             )
         );
@@ -40,8 +40,8 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(ProsessType.VIDERESEND_SOKNAD,
             new ProsessFlyt(ProsessType.VIDERESEND_SOKNAD,
                 AVKLAR_MYNDIGHET,
-                VS_SEND_ORIENTERINGSBREV,
-                VS_SEND_SOKNAD,
+                SEND_ORIENTERINGSBREV_VIDERESENDING_SØKNAD,
+                VIDERESEND_SØKNAD,
                 DISTRIBUER_JOURNALPOST_UTLAND,
                 SOB_BEHANDLING_AVSLUTTET
             )

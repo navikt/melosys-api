@@ -55,11 +55,11 @@ public enum ProsessSteg implements Kodeverk {
     DISTRIBUER_JOURNALPOST_UTLAND("DISTRIBUER_JOURNALPOST_UTLAND", "Distribuerer (sender) en journalpost til utlanlandsk myndighet"),
 
     //Henlegg sak
-    HS_SEND_BREV("HS_SEND_BREV", "Opprett henleggelsesbrev"),
+    SEND_HENLEGGELSESBREV("SEND_HENLEGGELSESBREV", "Send henleggelsesbrev"),
 
     // Videresend søknad
-    VS_SEND_ORIENTERINGSBREV("VS_SEND_ORIENTERINGSBREV", "Opprett orienteringsbrev og brev med vedlagt søknad"),
-    VS_SEND_SOKNAD("VS_SEND_SOKNAD", "Opprett journalpost eller SED med søknad som vedlegg"),
+    SEND_ORIENTERINGSBREV_VIDERESENDING_SØKNAD("SEND_ORIENTERINGSBREV_VIDERESENDING_SØKNAD", "Sender orienteringsbrev til bruker ved videresending av søknad"),
+    VIDERESEND_SØKNAD("VIDERESEND_SØKNAD", "Oppretter journalpost eller sender SED med søknad som vedlegg"),
 
     //Mottak av SED
     SED_MOTTAK_RUTING("SED_MOTTAK_RUTING", "Bestemmer videre behandling for innkommende SED"),

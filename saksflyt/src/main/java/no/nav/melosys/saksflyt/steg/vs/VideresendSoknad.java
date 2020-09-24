@@ -33,7 +33,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.arkiv.DokumentVariant.lagArkivVariant;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.VS_SEND_SOKNAD;
 
 /**
  * Sender et brev med søknad som vedlegg til utenlandsk myndighet
@@ -63,7 +62,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return VS_SEND_SOKNAD;
+        return ProsessSteg.VIDERESEND_SØKNAD;
     }
 
     @Override
