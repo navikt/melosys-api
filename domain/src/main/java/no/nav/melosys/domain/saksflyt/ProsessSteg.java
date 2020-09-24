@@ -71,11 +71,6 @@ public enum ProsessSteg implements Kodeverk {
     SED_MOTTAK_FERDIGSTILL_JOURNALPOST("SED_MOTTAK_FERDIGSTILL_JOURNALPOST", "Journalføring av innkommende SED"),
     REGISTERKONTROLL("REGISTERKONTROLL", "Utfører registerkontroll for en behandling"),
 
-    // Journalføring av mottatt anmodning om unntak (brev)
-    JFR_AOU_BREV_OPPRETT_FAGSAK_OG_BEHANDLING("JFR_AOU_BREV_OPPRETT_FAGSAK_OG_BEHANDLING", "Opprett fagsak og behandling"),
-    JFR_AOU_BREV_FERDIGSTILL_JOURNALPOST("JFR_AOU_BREV_FERDIGSTILL_JOURNALPOST", "Journalføring av anmodning om unntak brev"),
-    JFR_AOU_BREV_OPPRETT_SEDDOKUMENT("JFR_AOU_BREV_OPPRETT_SEDDOKUMENT", "Oppretter sed-dokument"),
-
     //Arbeid i flere land, mottak av A003
     OPPRETT_SED_GRUNNLAG("OPPRETT_SED_GRUNNLAG", "Oppretter behandlingsgrunnlag fra SED"),
 

@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.felles;
+package no.nav.melosys.service.saksopplysninger;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -26,18 +26,18 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OpprettSedDokumentFellesTest {
+public class OpprettSedDokumentServiceTest {
 
     @Mock
     private DokumentFactory dokumentFactory;
     @Mock
     private SaksopplysningRepository saksopplysningRepository;
 
-    private OpprettSedDokumentFelles opprettSedDokumentFelles;
+    private OpprettSedDokumentService opprettSedDokumentService;
 
     @Before
     public void setup() {
-        opprettSedDokumentFelles = new OpprettSedDokumentFelles(dokumentFactory, saksopplysningRepository);
+        opprettSedDokumentService = new OpprettSedDokumentService(dokumentFactory, saksopplysningRepository);
     }
 
     @Test
@@ -49,7 +49,7 @@ public class OpprettSedDokumentFellesTest {
 
         Behandling behandling = new Behandling();
 
-        opprettSedDokumentFelles.opprettSedSaksopplysning(hentMelosysEessiMelding(), behandling);
+        opprettSedDokumentService.opprettSedSaksopplysning(hentMelosysEessiMelding(), behandling);
 
         verify(dokumentFactory).lagInternXml(any(Saksopplysning.class));
         verify(saksopplysningRepository).save(any(Saksopplysning.class));
