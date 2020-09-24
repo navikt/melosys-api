@@ -72,7 +72,7 @@ public class EessiTjeneste {
         Collection<Vedlegg> vedlegg = lagVedlegg(behandling.getFagsak().getSaksnummer(), nyBucDto.getVedlegg());
 
         OpprettBucSvarDto opprettBucSvarDto = new OpprettBucSvarDto(
-            eessiService.opprettBucOgSed(behandling, nyBucDto.getBucType(), nyBucDto.getMottakerIder(), vedlegg)
+            eessiService.opprettBucOgSed(behandling, nyBucDto.getBucType(), nyBucDto.getMottakerLand(), nyBucDto.getMottakerInstitusjoner(), vedlegg)
         );
 
         return ResponseEntity.ok(opprettBucSvarDto);

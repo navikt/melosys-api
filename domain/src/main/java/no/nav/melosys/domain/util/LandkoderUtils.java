@@ -1,12 +1,14 @@
 package no.nav.melosys.domain.util;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 
 public final class LandkoderUtils {
     private static final BiMap<String, String> map = HashBiMap.create();
@@ -30,5 +32,9 @@ public final class LandkoderUtils {
 
     public static String tilIso2(String iso3Kode) {
         return map.inverse().get(iso3Kode);
+    }
+
+    public static Collection<Landkoder> iso2KoderTilLandkoder(Collection<String> iso2Koder) {
+        return iso2Koder.stream().map(Landkoder::valueOf).collect(Collectors.toSet());
     }
 }

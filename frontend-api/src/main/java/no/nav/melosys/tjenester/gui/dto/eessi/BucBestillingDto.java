@@ -10,13 +10,13 @@ public class BucBestillingDto {
 
     private BucType bucType;
     private List<String> mottakerLand;
-    private List<String> mottakerIder;
+    private List<String> mottakerInstitusjoner;
     private Collection<VedleggDto> vedlegg;
 
-    public BucBestillingDto(BucType bucType, List<String> mottakerLand, List<String> mottakerIder, Collection<VedleggDto> vedlegg) {
+    public BucBestillingDto(BucType bucType, List<String> mottakerLand, List<String> mottakerInstitusjoner, Collection<VedleggDto> vedlegg) {
         this.bucType = bucType;
         this.mottakerLand = mottakerLand;
-        this.mottakerIder = mottakerIder;
+        this.mottakerInstitusjoner = mottakerInstitusjoner;
         this.vedlegg = vedlegg;
     }
 
@@ -36,12 +36,12 @@ public class BucBestillingDto {
         this.mottakerLand = mottakerLand;
     }
 
-    public List<String> getMottakerIder() {
-        return mottakerIder;
+    public List<String> getMottakerInstitusjoner() {
+        return mottakerInstitusjoner;
     }
 
-    public void setMottakerIder(List<String> mottakerIder) {
-        this.mottakerIder = mottakerIder;
+    public void setMottakerInstitusjoner(List<String> mottakerInstitusjoner) {
+        this.mottakerInstitusjoner = mottakerInstitusjoner;
     }
 
     public Collection<VedleggDto> getVedlegg() {

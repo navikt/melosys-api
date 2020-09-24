@@ -18,6 +18,7 @@ import no.nav.melosys.domain.eessi.sed.UtpekingAvvisDto;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
@@ -81,11 +82,12 @@ public class EessiService {
     }
 
     @Transactional(readOnly = true)
-    public String opprettBucOgSed(Behandling behandling, BucType bucType, List<String> mottakerId, Collection<Vedlegg> vedlegg) throws MelosysException {
+    public String opprettBucOgSed(Behandling behandling, BucType bucType, List<String> mottakerLand, List<String> mottakerInstitusjoner, Collection<Vedlegg> vedlegg) throws MelosysException {
+        validerOgAvklarMottakerInstitusjonerForBuc(new HashSet<>(mottakerInstitusjoner), LandkoderUtils.iso2KoderTilLandkoder(mottakerLand), bucType);
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType, behandlingsresultat));
-        sedDataDto.setMottakerIder(mottakerId);
+        sedDataDto.setMottakerIder(mottakerInstitusjoner);
         sedDataDto.setGsakSaksnummer(behandling.getFagsak().getGsakSaksnummer());
 
         log.info("Oppretter buc og sed for behandling {} med bucType {}", behandling.getId(), bucType);
@@ -246,11 +248,7 @@ public class EessiService {
     public Set<String> validerOgAvklarMottakerInstitusjonerForBuc(final Set<String> valgteMottakerinstitusjoner, final Collection<Landkoder> mottakerland, BucType bucType) throws MelosysException {
 
         Set<String> landkoder = mottakerland.stream().map(Landkoder::getKode).collect(Collectors.toSet());
-
-        Map<Landkoder, Set<String>> institusjonerPerLand = hentEessiMottakerinstitusjoner(bucType.name(), landkoder).stream()
-            .collect(Collectors.groupingBy(
-                institusjon -> Landkoder.valueOf(institusjon.getLandkode()),
-                Collectors.mapping(Institusjon::getId, Collectors.toSet())));
+        Map<Landkoder, Set<String>> institusjonerPerLand = hentEessiMottakerinstitusjonerPerLand(bucType, landkoder);
 
         if (institusjonerPerLand.keySet().size() < mottakerland.size()) {
             log.info("{} er ikke EESSI-ready, skal ikke sendes SED", mottakerland.stream()
@@ -262,6 +260,13 @@ public class EessiService {
 
         validerMottakerInstitusjonerForLand(mottakerland, valgteMottakerinstitusjoner, institusjonerPerLand);
         return valgteMottakerinstitusjoner;
+    }
+
+    private Map<Landkoder, Set<String>> hentEessiMottakerinstitusjonerPerLand(BucType bucType, Set<String> landkoder) throws MelosysException {
+        return hentEessiMottakerinstitusjoner(bucType.name(), landkoder).stream()
+            .collect(Collectors.groupingBy(
+                institusjon -> Landkoder.valueOf(institusjon.getLandkode()),
+                Collectors.mapping(Institusjon::getId, Collectors.toSet())));
     }
 
     private void validerMottakerInstitusjonerForLand(Collection<Landkoder> mottakerland,

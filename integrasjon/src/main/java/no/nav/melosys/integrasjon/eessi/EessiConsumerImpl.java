@@ -62,7 +62,7 @@ public class EessiConsumerImpl implements EessiConsumer {
 
         List<InstitusjonDto> institusjonDtoList = exchange("/buc/{bucType}/institusjoner?land={landkoder}", HttpMethod.GET,
             new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<InstitusjonDto>>() {
-            }, bucType, String.join(",", landkoder));
+            }, bucType, landkoder.toArray());
 
         return institusjonDtoList.stream()
             .map(institusjonDto -> new Institusjon(
