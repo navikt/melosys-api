@@ -235,7 +235,7 @@ public class ProsessinstansService {
 
     public void opprettProsessinstansUnntaksperiodeAvvist(Behandling behandling, Collection<Ikke_godkjent_begrunnelser> begrunnelser, String begrunnelseFritekst) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(ProsessType.REGISTRERING_UNNTAK)
+            .medType(ProsessType.REGISTRERING_UNNTAK_AVVIS)
             .medBehandling(behandling)
             .medBegrunnelser(begrunnelser)
             .medBegrunnelseFritekst(begrunnelseFritekst)
@@ -318,7 +318,7 @@ public class ProsessinstansService {
 
     public void opprettProsessinstansAvvisUtpeking(Behandling behandling, UtpekingAvvis utpekingAvvis) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(ProsessType.ARBEID_FLERE_LAND)
+            .medType(ProsessType.UTPEKING_AVVIS)
             .medBehandling(behandling)
             .build();
         prosessinstans.setData(ProsessDataKey.UTPEKING_AVVIS, utpekingAvvis);
@@ -359,6 +359,7 @@ public class ProsessinstansService {
 
     public void opprettProsessinstansNyBehandlingUnntaksregistrering(MelosysEessiMelding melosysEessiMelding, Behandlingstema behandlingstema, Long arkivsakID) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.REGISTRERING_UNNTAK_NY_BEHANDLING)
             .medEessiMelding(melosysEessiMelding)
             .build();
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);

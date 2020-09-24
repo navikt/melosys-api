@@ -6,12 +6,12 @@ public enum ProsessType implements Kodeverk {
 
     //alfabetisk rekkefølge
     ANMODNING_OM_UNNTAK("ANMODNING_OM_UNNTAK", "Anmodning om unntak"),
-    ANMODNING_OM_UNNTAK_MOTTAK("ANMODNING_OM_UNNTAK_MOTTAK", "Mottar anmodning om unntak"),
+    @Deprecated(forRemoval = true) ANMODNING_OM_UNNTAK_MOTTAK("ANMODNING_OM_UNNTAK_MOTTAK", "Mottar anmodning om unntak"),
     ANMODNING_OM_UNNTAK_MOTTAK_NY_SAK("ANMODNING_OM_UNNTAK_MOTTAK_NY_SAK", "Mottar anmodning om unntak - ny sak"),
     ANMODNING_OM_UNNTAK_MOTTAK_NY_BEHANDLING("ANMODNING_OM_UNNTAK_MOTTAK_NY_BEHANDLING", "Mottar anmodning om unntak - ny behandling"),
     ANMODNING_OM_UNNTAK_MOTTAK_SVAR("ANMODNING_OM_UNNTAK_MOTTAK_SVAR", "Svar på mottatt anmodning om unntak"),
     ANMODNING_OM_UNNTAK_SVAR("ANMODNING_OM_UNNTAK_SVAR", "Mottar svar på anmodning om unntak"),
-    ARBEID_FLERE_LAND("ARBEID_FLERE_LAND","Mottak av A003"),
+    @Deprecated(forRemoval = true) ARBEID_FLERE_LAND("ARBEID_FLERE_LAND","Mottak av A003"),
     ARBEID_FLERE_LAND_NY_SAK("ARBEID_FLERE_LAND_NY_SAK","Mottak av A003 - ny sak"),
     ARBEID_FLERE_LAND_NY_BEHANDLING("ARBEID_FLERE_LAND_NY_BEHANDLING","Mottak av A003 - ny behandling"),
     FORVALTNINGSMELDING_SEND("FORVALTNINGSMELDING_SEND", "Sender forvaltningsmelding"),
@@ -28,7 +28,7 @@ public enum ProsessType implements Kodeverk {
     MOTTAK_SOKNAD_ALTINN("MOTTAK_SOKNAD_ALTINN", "Mottak av elektronisk søknad fra altinn"),
     OPPRETT_NY_SAK("OPPRETT_NY_SAK", "Oppretter ny sak (fra journalført dokument)"),
     @Deprecated(forRemoval = true) OPPRETT_NY_SAK_SED_FORESPØRSEL("OPPRETT_NY_SAK_SED_FORESPØRSEL", "Oppretter ny sak for behandling av SED-forespørsel"),
-    REGISTRERING_UNNTAK("REGISTRERING_UNNTAK", "Registrering av unntak"),
+    @Deprecated(forRemoval = true) REGISTRERING_UNNTAK("REGISTRERING_UNNTAK", "Registrering av unntak"),
     REGISTRERING_UNNTAK_GODKJENN("REGISTRERING_UNNTAK_GODKJENN", "Godkjenner en untaksperiode og avslutter behandling"),
     REGISTRERING_UNNTAK_AVVIS("REGISTRERING_UNNTAK_AVVIS", "Avviser en untaksperiode og avslutter behandling"),
     REGISTRERING_UNNTAK_NY_SAK("REGISTRERING_UNNTAK_NY_SAK", "Registrering av unntak - ny sak"),
