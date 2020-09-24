@@ -405,7 +405,7 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    void utfør_innvilgelses161MedUtenlandskVirksomhet_senderInnvilgelseTilSkatteoppkreverUtland() throws Exception {
+    void utfør_innvilgelsesMedForetakUtland_senderInnvilgelseTilSkatteoppkreverUtland() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_UTENLANDSK_VIRKSOMHET_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(new ForetakUtland());
