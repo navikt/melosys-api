@@ -114,6 +114,7 @@ public class JournalfoeringService {
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode()));
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, erBehandlingAvSøknad(journalfoeringDto.getBehandlingstemaKode()) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED);
 
         if (erBehandlingAvSøknad(journalfoeringDto.getBehandlingstemaKode())){
             prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringDto.getFagsak().getLand());
