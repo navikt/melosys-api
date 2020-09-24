@@ -1,6 +1,5 @@
 package no.nav.melosys.service.unntaksperiode;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -34,7 +33,11 @@ public class UnntaksperiodeService {
     private final ProsessinstansService prosessinstansService;
 
     @Autowired
-    public UnntaksperiodeService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService, LovvalgsperiodeService lovvalgsperiodeService, OppgaveService oppgaveService, ProsessinstansService prosessinstansService) {
+    public UnntaksperiodeService(BehandlingService behandlingService,
+                                 BehandlingsresultatService behandlingsresultatService,
+                                 LovvalgsperiodeService lovvalgsperiodeService,
+                                 OppgaveService oppgaveService,
+                                 ProsessinstansService prosessinstansService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
@@ -68,7 +71,10 @@ public class UnntaksperiodeService {
         Set<Ikke_godkjent_begrunnelser> ikkeGodkjentBegrunnelser = tilIkkeGodkjentBegrunnelser(begrunnelser);
         validerBegrunnelser(ikkeGodkjentBegrunnelser, fritekst);
         behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
-        behandlingsresultatService.oppdaterBegrunnelser(behandlingID, lagBegrunnelser(begrunnelser), fritekst);
+        behandlingsresultatService.oppdaterBegrunnelser(
+            behandlingID, begrunnelser.stream().map(BehandlingsresultatBegrunnelse::lag).collect(Collectors.toSet()), fritekst
+        );
+
         prosessinstansService.opprettProsessinstansUnntaksperiodeAvvist(behandling, ikkeGodkjentBegrunnelser, fritekst);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
@@ -79,14 +85,6 @@ public class UnntaksperiodeService {
             ikkeGodkjentBegrunnelser.add(Ikke_godkjent_begrunnelser.valueOf(b));
         }
         return ikkeGodkjentBegrunnelser;
-    }
-
-    private Set<BehandlingsresultatBegrunnelse> lagBegrunnelser(Collection<String> begrunnelser) {
-        return begrunnelser.stream().map(begrunnelse -> {
-            BehandlingsresultatBegrunnelse behandlingsresultatBegrunnelse = new BehandlingsresultatBegrunnelse();
-            behandlingsresultatBegrunnelse.setKode(begrunnelse);
-            return behandlingsresultatBegrunnelse;
-        }).collect(Collectors.toSet());
     }
 
     private Behandling hentOgValiderBehandling(long behandlingID) throws FunksjonellException {

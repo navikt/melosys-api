@@ -44,7 +44,7 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
         final long behandlingID = prosessinstans.getBehandling().getId();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 
-        if (midlertidigLovvalgsbeslutningSkalSettes(behandlingsresultat)) {
+        if (behandlingsresultat.erGodkjenningEllerInnvilgelseArt13()) {
             behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         } else {
             log.info("Avslutter behandling {}", behandlingID);
@@ -52,10 +52,5 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
                 fagsakService.hentFagsak(prosessinstans.getBehandling().getFagsak().getSaksnummer()), Saksstatuser.LOVVALG_AVKLART
             );
         }
-    }
-
-    private boolean midlertidigLovvalgsbeslutningSkalSettes(Behandlingsresultat behandlingsresultat) {
-        return (behandlingsresultat.erInnvilgelse() || behandlingsresultat.erGodkjenningRegistreringUnntak())
-            && behandlingsresultat.hentValidertLovvalgsperiode().erArtikkel13();
     }
 }

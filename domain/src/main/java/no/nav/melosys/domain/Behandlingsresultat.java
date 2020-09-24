@@ -274,6 +274,11 @@ public class Behandlingsresultat extends RegistreringsInfo {
             && anmodningsperiode.getAnmodningsperiodeSvar().getAnmodningsperiodeSvarType() != null;
     }
 
+    public boolean erGodkjenningEllerInnvilgelseArt13() {
+        return (erInnvilgelse() || erGodkjenningRegistreringUnntak())
+            && finnValidertLovvalgsperiode().stream().anyMatch(Medlemskapsperiode::erArtikkel13);
+    }
+
     // Medl skal ikke oppdateres ved avslag.
     public boolean medlOppdateres() {
         return harMedlPeriode() || !erAvslag();
