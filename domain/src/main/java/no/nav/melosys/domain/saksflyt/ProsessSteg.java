@@ -82,9 +82,8 @@ public enum ProsessSteg implements Kodeverk {
     SEND_GODKJENNING_REGISTRERING_UNNTAK("SEND_GODKJENNING_REGISTRERING_UNNTAK", "Varsler utland om godkjent unntaksperiode"),
 
     // Mottak av søknad
-    MSA_OPPRETT_SAK_OG_BEHANDLING("MSA_OPPRETT_SAK_OG_BEHANDLING", "Opprett sak og behandling fra søknad fra Altinn"),
-    MSA_OPPRETT_ARKIVSAK("MSA_OPPRETT_ARKIVSAK","Opprett arkivsak"),
-    MSA_OPPRETT_OG_FERDIGSTILL_JOURNALPOST("MSA_OPPRETT_OG_FERDIGSTILL_JOURNALPOST", "Opprett og journalfør søknad fra Altinn"),
+    OPPRETT_SAK_OG_BEHANDLING_FRA_ALTINN_SØKNAD("OPPRETT_SAK_OG_BEHANDLING_FRA_ALTINN_SØKNAD", "Oppretter fagsak og behandling fra mottatt Altinn-søknad"),
+    OPPRETT_OG_FERDIGSTILL_JOURNALPOST_FRA_ALTINN("OPPRETT_OG_FERDIGSTILL_JOURNALPOST_FRA_ALTINN", "Oppretter og ferdigstiller journalpost fra Altinn"),
     MSA_HENT_REGISTEROPPLYSNINGER("MSA_HENT_REGISTEROPPLYSNINGER","Innhent registeropplysnigner"),
     MSA_VURDER_INNGANGSVILKÅR("MSA_VURDER_INNGANGSVILKÅR","Vurder inngangsvilkår"),
     MSA_OPPRETT_OPPGAVE("MSA_OPPRETT_OPPGAVE","Opprett oppgave for saksbehandling"),

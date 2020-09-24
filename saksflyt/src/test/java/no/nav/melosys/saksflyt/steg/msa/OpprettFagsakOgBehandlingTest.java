@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.msa;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
@@ -45,6 +44,5 @@ public class OpprettFagsakOgBehandlingTest {
         opprettFagsakOgBehandling.utfør(prosessinstans);
         verify(altinnSoeknadService).opprettFagsakOgBehandlingFraAltinnSøknad(eq(soeknadID));
         assertThat(prosessinstans.getBehandling()).isEqualTo(behandling);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.MSA_OPPRETT_ARKIVSAK);
     }
 }

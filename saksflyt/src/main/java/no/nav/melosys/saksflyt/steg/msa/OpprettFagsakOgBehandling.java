@@ -25,7 +25,7 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return ProsessSteg.MSA_OPPRETT_SAK_OG_BEHANDLING;
+        return ProsessSteg.OPPRETT_SAK_OG_BEHANDLING_FRA_ALTINN_SØKNAD;
     }
 
     @Override
@@ -36,7 +36,5 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
 
         Behandling behandling = altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID);
         prosessinstans.setBehandling(behandling);
-
-        prosessinstans.setSteg(ProsessSteg.MSA_OPPRETT_ARKIVSAK);
     }
 }

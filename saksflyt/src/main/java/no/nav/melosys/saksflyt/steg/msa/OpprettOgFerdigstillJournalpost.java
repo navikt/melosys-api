@@ -38,7 +38,7 @@ public class OpprettOgFerdigstillJournalpost implements StegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return ProsessSteg.MSA_OPPRETT_OG_FERDIGSTILL_JOURNALPOST;
+        return ProsessSteg.OPPRETT_OG_FERDIGSTILL_JOURNALPOST_FRA_ALTINN;
     }
 
     @Override
