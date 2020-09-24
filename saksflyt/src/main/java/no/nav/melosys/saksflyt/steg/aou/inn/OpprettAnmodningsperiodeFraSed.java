@@ -44,8 +44,6 @@ public class OpprettAnmodningsperiodeFraSed implements StegBehandler {
         Anmodningsperiode anmodningsperiode = lagAnmodningsperiode(sedDokument);
         anmodningsperiodeService.lagreAnmodningsperioder(prosessinstans.getBehandling().getId(), Collections.singletonList(anmodningsperiode));
         log.info("Opprettet anmodningsperiode for prosessinstans {}", prosessinstans.getId());
-
-        prosessinstans.setSteg(ProsessSteg.SOB_BEHANDLING_OPPRETTET);
     }
 
     private static Anmodningsperiode lagAnmodningsperiode(SedDokument sedDokument) {
