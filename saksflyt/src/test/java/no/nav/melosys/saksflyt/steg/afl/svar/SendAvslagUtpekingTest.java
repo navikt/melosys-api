@@ -28,14 +28,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.AFL_SVAR_AVSLUTT_BEHANDLING;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SendAvslagTest {
+public class SendAvslagUtpekingTest {
 
     @Mock
     private SedDataBygger sedDataBygger;
@@ -50,7 +48,7 @@ public class SendAvslagTest {
     @Mock
     private SedGrunnlagMapper sedGrunnlagMapper;
 
-    private SendAvslag sendAvslag;
+    private SendAvslagUtpeking sendAvslagUtpeking;
     private EessiService eessiService;
     private Behandling behandling;
 
@@ -60,7 +58,7 @@ public class SendAvslagTest {
             sedDataBygger, sedDataGrunnlagFactory,
             eessiConsumer, behandlingService, behandlingsresultatService, sedGrunnlagMapper
         );
-        sendAvslag = new SendAvslag(eessiService);
+        sendAvslagUtpeking = new SendAvslagUtpeking(eessiService);
 
         SedDokument sedDokument = new SedDokument();
         sedDokument.setLovvalgsperiode(new Periode(LocalDate.now(), LocalDate.now()));
@@ -87,10 +85,8 @@ public class SendAvslagTest {
             "DK", "fritekst"
         ));
 
-        sendAvslag.utfør(prosessinstans);
+        sendAvslagUtpeking.utfør(prosessinstans);
 
         verify(eessiConsumer).sendSedPåEksisterendeBuc(any(), any(), any());
-
-        assertThat(prosessinstans.getSteg()).isEqualTo(AFL_SVAR_AVSLUTT_BEHANDLING);
     }
 }

@@ -8,6 +8,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
@@ -22,13 +23,15 @@ public class BestemBehandlingsmåteSed implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(BestemBehandlingsmåteSed.class);
 
+    private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final OppgaveService oppgaveService;
     private final UnntaksperiodeService unntaksperiodeService;
 
     @Autowired
-    public BestemBehandlingsmåteSed(BehandlingsresultatService behandlingsresultatService,
+    public BestemBehandlingsmåteSed(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
                                     @Qualifier("system") OppgaveService oppgaveService, UnntaksperiodeService unntaksperiodeService) {
+        this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
         this.unntaksperiodeService = unntaksperiodeService;
@@ -42,7 +45,7 @@ public class BestemBehandlingsmåteSed implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
 
-        Behandling behandling = prosessinstans.getBehandling();
+        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         final long behandlingID = behandling.getId();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 

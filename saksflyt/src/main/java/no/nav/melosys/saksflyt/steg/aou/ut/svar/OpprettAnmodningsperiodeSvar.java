@@ -33,7 +33,7 @@ public class OpprettAnmodningsperiodeSvar implements StegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return ProsessSteg.AOU_SVAR_OPPRETT_ANMODNINGSPERIODESVAR;
+        return ProsessSteg.OPPRETT_ANMODNINGSPERIODESVAR;
     }
 
     @Override
@@ -48,8 +48,6 @@ public class OpprettAnmodningsperiodeSvar implements StegBehandler {
         AnmodningsperiodeSvar anmodningsperiodeSvar = opprettAnmodningsperiodeSvar(melosysEessiMelding.getSvarAnmodningUnntak());
 
         anmodningsperiodeService.lagreAnmodningsperiodeSvarForBehandling(prosessinstans.getBehandling().getId(), anmodningsperiodeSvar);
-
-        prosessinstans.setSteg(ProsessSteg.AOU_SVAR_OPPDATER_BEHANDLING);
     }
 
     private AnmodningsperiodeSvar opprettAnmodningsperiodeSvar(SvarAnmodningUnntak svar) {

@@ -11,30 +11,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-@Component("AnmodningUnntakMottakSvarSendSed")
-public class SendSed implements StegBehandler {
-    private static final Logger log = LoggerFactory.getLogger(SendSed.class);
+@Component
+public class SendSvarAnmodningUnntak implements StegBehandler {
+    private static final Logger log = LoggerFactory.getLogger(SendSvarAnmodningUnntak.class);
 
     private final EessiService eessiService;
 
     @Autowired
-    public SendSed(@Qualifier("system") EessiService eessiService) {
+    public SendSvarAnmodningUnntak(@Qualifier("system") EessiService eessiService) {
         this.eessiService = eessiService;
     }
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return ProsessSteg.AOU_MOTTAK_SVAR_SEND_SED;
+        return ProsessSteg.SEND_SVAR_ANMODNING_UNNTAK;
     }
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
-        log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
-
         long behandlingId = prosessinstans.getBehandling().getId();
         eessiService.sendAnmodningUnntakSvar(behandlingId);
-
         log.info("Svar på anmodning om unntak sendt for behandling {}", behandlingId);
-        prosessinstans.setSteg(ProsessSteg.AOU_MOTTAK_SVAR_SAK_OG_BEHANDLING_AVSLUTTET);
     }
 }

@@ -376,8 +376,12 @@ public class Behandling extends RegistreringsInfo {
 
     private static boolean erBehandlingAvSed(String behandlingstemaKode) {
         return erRegistreringAvUnntak(behandlingstemaKode)
-            || Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL.getKode().equalsIgnoreCase(behandlingstemaKode)
+            || erAnmodningOmUnntak(behandlingstemaKode)
             || Behandlingstema.BESLUTNING_LOVVALG_NORGE.getKode().equalsIgnoreCase(behandlingstemaKode);
+    }
+
+    private static boolean erAnmodningOmUnntak(String behandlingstemaKode) {
+        return Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL.getKode().equalsIgnoreCase(behandlingstemaKode);
     }
 
     public static boolean erBehandlingAvSedForespørsler(String behandlingstemaKode) {

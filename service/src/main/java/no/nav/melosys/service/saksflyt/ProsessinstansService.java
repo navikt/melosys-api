@@ -155,7 +155,6 @@ public class ProsessinstansService {
     public void opprettProsessinstansAnmodningOmUnntakMottakSvar(Behandling behandling) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_SVAR)
-            .medSteg(ProsessSteg.AOU_MOTTAK_SVAR_OPPDATER_MEDL)
             .medBehandling(behandling)
             .build();
 
@@ -261,8 +260,7 @@ public class ProsessinstansService {
     public void opprettProsessinstansGodkjennUnntaksperiode(Behandling behandling, boolean varsleUtland) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
-            .medType(ProsessType.REGISTRERING_UNNTAK)
-            .medSteg(ProsessSteg.REG_UNNTAK_OPPDATER_MEDL)
+            .medType(ProsessType.REGISTRERING_UNNTAK_GODKJENN)
             .build();
 
         prosessinstans.setData(ProsessDataKey.VARSLE_UTLAND, varsleUtland);
@@ -272,7 +270,6 @@ public class ProsessinstansService {
     public void opprettProsessinstansUnntaksperiodeAvvist(Behandling behandling, Collection<Ikke_godkjent_begrunnelser> begrunnelser, String begrunnelseFritekst) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.REGISTRERING_UNNTAK)
-            .medSteg(ProsessSteg.REG_UNNTAK_PERIODE_IKKE_GODKJENT)
             .medBehandling(behandling)
             .medBegrunnelser(begrunnelser)
             .medBegrunnelseFritekst(begrunnelseFritekst)
@@ -363,7 +360,6 @@ public class ProsessinstansService {
     public void opprettProsessinstansAvvisUtpeking(Behandling behandling, UtpekingAvvis utpekingAvvis) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.ARBEID_FLERE_LAND)
-            .medSteg(ProsessSteg.AFL_SVAR_SEND_AVSLAG)
             .medBehandling(behandling)
             .build();
         prosessinstans.setData(ProsessDataKey.UTPEKING_AVVIS, utpekingAvvis);

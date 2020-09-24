@@ -13,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -28,13 +27,9 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1;
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
@@ -193,29 +188,6 @@ public class JournalfoeringServiceTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
             .withMessageContaining("er allerede tilknyttet");
-    }
-
-    @Test
-    public void opprettOgJournalfør_erAnmodningUnntakHovedregel_prosessinstansOpprettet() throws MelosysException {
-        AnmodningOmUnntakDto anmodningOmUnntakDto = new AnmodningOmUnntakDto();
-        anmodningOmUnntakDto.setLovvalgsbestemmelse(FO_883_2004_ART16_1.getKode());
-        anmodningOmUnntakDto.setUnntakFraLovvalgsbestemmelse(FO_883_2004_ART12_1.getKode());
-        anmodningOmUnntakDto.setUnntakFraLovvalgsland("DE");
-        opprettDto.setAnmodningOmUnntak(anmodningOmUnntakDto);
-
-        FagsakDto fagsakDto = lagFagsakDto(LocalDate.now(), LocalDate.now().plusYears(1), "NO");
-        opprettDto.setFagsak(fagsakDto);
-        opprettDto.setBehandlingstemaKode(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL.getKode());
-
-        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_AOU_BREV), any()))
-            .thenReturn(new Prosessinstans());
-        journalfoeringService.opprettOgJournalfør(opprettDto);
-
-        ArgumentCaptor<Prosessinstans> captor = ArgumentCaptor.forClass(Prosessinstans.class);
-        verify(prosessinstansService).lagre(captor.capture());
-
-        Prosessinstans prosessinstans = captor.getValue();
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.JFR_AOU_BREV_OPPRETT_FAGSAK_OG_BEHANDLING);
     }
 
     @Test

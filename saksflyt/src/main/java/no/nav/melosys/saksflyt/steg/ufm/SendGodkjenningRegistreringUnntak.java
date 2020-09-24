@@ -1,6 +1,6 @@
-package no.nav.melosys.saksflyt.steg.afl.svar;
+package no.nav.melosys.saksflyt.steg.ufm;
 
-import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -11,30 +11,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.AFL_SVAR_AVSLUTT_BEHANDLING;
-
-@Component("AFLSvarSendAvslag")
-public class SendAvslag implements StegBehandler {
+@Component
+public class SendGodkjenningRegistreringUnntak implements StegBehandler {
 
     private final EessiService eessiService;
 
     @Autowired
-    public SendAvslag(@Qualifier("system") EessiService eessiService) {
+    public SendGodkjenningRegistreringUnntak(@Qualifier("system") EessiService eessiService) {
         this.eessiService = eessiService;
     }
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return ProsessSteg.AFL_SVAR_SEND_AVSLAG;
+        return ProsessSteg.SEND_GODKJENNING_REGISTRERING_UNNTAK;
     }
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
-        long behandlingId = prosessinstans.getBehandling().getId();
-        UtpekingAvvis utpekingAvvis = prosessinstans.getData(ProsessDataKey.UTPEKING_AVVIS, UtpekingAvvis.class);
+        Behandling behandling = prosessinstans.getBehandling();
+        Boolean varsleUtland = prosessinstans.getData(ProsessDataKey.VARSLE_UTLAND, Boolean.class);
 
-        eessiService.sendAvslagUtpekingSvar(behandlingId, utpekingAvvis);
-
-        prosessinstans.setSteg(AFL_SVAR_AVSLUTT_BEHANDLING);
+        if (behandling.erBeslutningLovvalgAnnetLand() && Boolean.TRUE.equals(varsleUtland)) {
+            eessiService.sendGodkjenningArbeidFlereLand(behandling.getId(), null);
+        }
     }
 }

@@ -89,21 +89,6 @@ public final class ProsessflytDefinisjon {
             )
         );
 
-        /*PROSESS_FLYT_MAP.put(ProsessType.JFR_AOU_BREV, TODO
-            new ProsessFlyt(ProsessType.JFR_AOU_BREV,
-                JFR_AOU_BREV_OPPRETT_FAGSAK_OG_BEHANDLING,
-                JFR_AOU_BREV_FERDIGSTILL_JOURNALPOST,
-                JFR_AOU_BREV_OPPRETT_SEDDOKUMENT,
-                AOU_MOTTAK_OPPRETT_ANMODNINGSPERIODE,
-                AOU_MOTTAK_SAK_OG_BEHANDLING_OPPRETTET,
-                AOU_MOTTAK_AVSLUTT_TIDLIGERE_PERIODE,
-                AOU_MOTTAK_HENT_REGISTEROPPLYSNINGER,
-                AOU_MOTTAK_REGISTERKONTROLL,
-                AOU_MOTTAK_OPPRETT_PERIODE_MEDL,
-                AOU_MOTTAK_OPPRETT_OPPGAVE
-            )
-        );*/
-
         PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_NY_SAK,
             new ProsessFlyt(ProsessType.OPPRETT_NY_SAK,
                 JFR_OPPRETT_SAK_OG_BEH,
@@ -120,7 +105,7 @@ public final class ProsessflytDefinisjon {
             new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK,
                 AVKLAR_MYNDIGHET,
                 AVKLAR_ARBEIDSGIVER,
-                OPPDATER_MEDL_VED_VEDTAK,
+                LAGRE_LOVVALGSPERIODE_MEDL,
                 SEND_VEDTAKSBREV_INNLAND,
                 SEND_VEDTAK_UTLAND,
                 DISTRIBUER_JOURNALPOST_UTLAND,
@@ -133,7 +118,7 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE,
             new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE,
                 HENT_MOTTAKERINSTITUSJON_FORKORTET_PERIODE,
-                OPPDATER_MEDL_VED_VEDTAK,
+                LAGRE_LOVVALGSPERIODE_MEDL,
                 SEND_VEDTAKSBREV_INNLAND,
                 SEND_VEDTAK_UTLAND,
                 DISTRIBUER_JOURNALPOST_UTLAND,
@@ -216,8 +201,8 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(ProsessType.ANMODNING_OM_UNNTAK_SVAR,
             new ProsessFlyt(ProsessType.ANMODNING_OM_UNNTAK_SVAR,
                 SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
-                AOU_SVAR_OPPRETT_ANMODNINGSPERIODESVAR,
-                AOU_SVAR_OPPDATER_BEHANDLING
+                OPPRETT_ANMODNINGSPERIODESVAR,
+                BESTEM_BEHANDLINGSMÅTE_SVAR_ANMODNING_UNNTAK
             )
         );
 
@@ -264,7 +249,38 @@ public final class ProsessflytDefinisjon {
             )
         );
 
+        PROSESS_FLYT_MAP.put(ProsessType.REGISTRERING_UNNTAK_GODKJENN,
+            new ProsessFlyt(ProsessType.REGISTRERING_UNNTAK_GODKJENN,
+                LAGRE_LOVVALGSPERIODE_MEDL,
+                SEND_GODKJENNING_REGISTRERING_UNNTAK,
+                AVSLUTT_SAK_OG_BEHANDLING,
+                SOB_BEHANDLING_AVSLUTTET
+            )
+        );
 
+        PROSESS_FLYT_MAP.put(ProsessType.REGISTRERING_UNNTAK_AVVIS,
+            new ProsessFlyt(ProsessType.REGISTRERING_UNNTAK_AVVIS,
+                AVSLUTT_SAK_OG_BEHANDLING,
+                SOB_BEHANDLING_AVSLUTTET
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.UTPEKING_AVVIS,
+            new ProsessFlyt(ProsessType.UTPEKING_AVVIS,
+                UTPEKING_SEND_AVSLAG,
+                AVSLUTT_SAK_OG_BEHANDLING,
+                SOB_BEHANDLING_AVSLUTTET
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_SVAR,
+            new ProsessFlyt(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_SVAR,
+                LAGRE_LOVVALGSPERIODE_MEDL,
+                SEND_SVAR_ANMODNING_UNNTAK,
+                AVSLUTT_SAK_OG_BEHANDLING,
+                SOB_BEHANDLING_AVSLUTTET
+            )
+        );
     }
 
     public static Optional<ProsessFlyt> finnFlytForProsessType(ProsessType prosessType) {

@@ -274,6 +274,11 @@ public class Behandlingsresultat extends RegistreringsInfo {
             && anmodningsperiode.getAnmodningsperiodeSvar().getAnmodningsperiodeSvarType() != null;
     }
 
+    public boolean erGodkjenningEllerInnvilgelseArt13() {
+        return (erInnvilgelse() || erGodkjenningRegistreringUnntak())
+            && finnValidertLovvalgsperiode().stream().anyMatch(Medlemskapsperiode::erArtikkel13);
+    }
+
     // Medl skal ikke oppdateres ved avslag.
     public boolean medlOppdateres() {
         return harMedlPeriode() || !erAvslag();
@@ -345,6 +350,11 @@ public class Behandlingsresultat extends RegistreringsInfo {
     public boolean erAutomatisert() {
         return behandlingsmåte == Behandlingsmaate.AUTOMATISERT
             || behandlingsmåte == Behandlingsmaate.DELVIS_AUTOMATISERT;
+    }
+
+    public boolean erGodkjenningRegistreringUnntak() {
+        return type == Behandlingsresultattyper.REGISTRERT_UNNTAK
+            && utfallRegistreringUnntak == Utfallregistreringunntak.GODKJENT;
     }
 
     public void settVedtakMetadata(Vedtakstyper vedtakstype,
