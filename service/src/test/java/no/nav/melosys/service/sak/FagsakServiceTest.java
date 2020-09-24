@@ -101,10 +101,11 @@ public class FagsakServiceTest {
     @Test
     public void bestillNySakOgBehandling_oppretterProsess() throws FunksjonellException, TekniskException {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setBehandlingstema(Behandlingstema.ØVRIGE_SED_MED);
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
         when(oppgaveService.hentOppgaveMedOppgaveID(eq(opprettSakDto.getOppgaveID()))).thenReturn(oppgave);
         fagsakService.bestillNySakOgBehandling(opprettSakDto);
-        verify(prosessinstansService).opprettProsessinstansNySak(eq(oppgave.getJournalpostId()), eq(opprettSakDto));
+        verify(prosessinstansService).opprettProsessinstansNySak(eq(oppgave.getJournalpostId()), eq(opprettSakDto), eq(Behandlingstyper.SED));
     }
 
     @Test
@@ -118,15 +119,18 @@ public class FagsakServiceTest {
     @Test
     public void bestillNySakOgBehandling_utenJournalpostID_feiler() throws FunksjonellException, TekniskException {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId(null).build();
         when(oppgaveService.hentOppgaveMedOppgaveID(eq(opprettSakDto.getOppgaveID()))).thenReturn(oppgave);
         expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("");
         fagsakService.bestillNySakOgBehandling(opprettSakDto);
     }
 
     @Test
     public void bestillNySakOgBehandling_oppgaveTypeUgyldig_feiler() throws FunksjonellException, TekniskException {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SED).build();
         when(oppgaveService.hentOppgaveMedOppgaveID(eq(opprettSakDto.getOppgaveID()))).thenReturn(oppgave);
         expectedException.expect(FunksjonellException.class);
@@ -134,11 +138,11 @@ public class FagsakServiceTest {
     }
 
     @Test
-    public void validerOpprettSakDto_manglerBehandlingstype_feiler() throws FunksjonellException {
+    public void validerOpprettSakDto_manglerBehandlingstema_feiler() throws FunksjonellException {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setBehandlingstema(null);
         expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("behandlingstema");
+        expectedException.expectMessage("Behandlingstema");
         fagsakService.validerOpprettSakDto(opprettSakDto);
     }
 

@@ -94,6 +94,7 @@ public final class ProsessflytDefinisjon {
                 JFR_OPPRETT_SAK_OG_BEH,
                 JFR_OPPRETT_SØKNAD,
                 OPPRETT_ARKIVSAK,
+                OPPDATER_SAKSRELASJON,
                 SOB_BEHANDLING_OPPRETTET,
                 HENT_REGISTEROPPLYSNINGER,
                 VURDER_INNGANGSVILKÅR,
@@ -152,7 +153,7 @@ public final class ProsessflytDefinisjon {
                 REGISTERKONTROLL,
                 BESTEM_BEHANDLINGMÅTE_SED
             )
-        ); //TODO: flyter for godkjenning/avvisning
+        );
 
         PROSESS_FLYT_MAP.put(ProsessType.REGISTRERING_UNNTAK_NY_BEHANDLING,
             new ProsessFlyt(ProsessType.REGISTRERING_UNNTAK_NY_BEHANDLING,
@@ -234,18 +235,6 @@ public final class ProsessflytDefinisjon {
                 REGISTERKONTROLL,
                 LAGRE_ANMODNINGSPERIODE_MEDL,
                 BESTEM_BEHANDLINGMÅTE_SED
-            )
-        );
-
-        PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_NY_SAK_SED_FORESPØRSEL,
-            new ProsessFlyt(ProsessType.OPPRETT_NY_SAK_SED_FORESPØRSEL,
-                SED_MOTTAK_HENT_EESSI_MELDING,
-                SED_MOTTAK_RUTING,
-                SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH,
-                OPPRETT_ARKIVSAK,
-                OPPDATER_SAKSRELASJON,
-                HENT_REGISTEROPPLYSNINGER,
-                OPPRETT_OPPGAVE
             )
         );
 
