@@ -276,6 +276,26 @@ class ProsessinstansServiceTest {
     }
 
     @Test
+    void opprettProsessinstansJournalføring_medFysiskeVedlegg_setterVedleggOgTitler() {
+        JournalfoeringDto journalfoeringDto = lagJournalfoeringOpprettDto();
+        journalfoeringDto.getHoveddokument().setDokumentID("hovedDokumentID");
+        List<DokumentDto> vedlegg = new ArrayList<>();
+        DokumentDto fysiskVedlegg = new DokumentDto("dokID1", "tittel1");
+        vedlegg.add(fysiskVedlegg);
+        DokumentDto fysiskVedlegg2 = new DokumentDto("hovedDokumentID", "Logisk ??");
+        vedlegg.add(fysiskVedlegg2);
+        journalfoeringDto.setVedlegg(vedlegg);
+
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
+
+        var fysiskeVedleggTypeReference = new TypeReference<Map<String, String>>() {
+        };
+        assertThat(prosessinstans.getData(ProsessDataKey.FYSISKE_VEDLEGG, fysiskeVedleggTypeReference))
+            .containsKeys(fysiskVedlegg.getDokumentID(), fysiskVedlegg2.getDokumentID())
+            .containsValues(fysiskVedlegg.getTittel(), fysiskVedlegg2.getTittel());
+    }
+
+    @Test
     void opprettProsessinstansGodkjennUnntaksperiode() {
         prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(new Behandling(), false);
         verify(prosessinstansRepo).save(piCaptor.capture());
