@@ -22,7 +22,6 @@ import no.nav.melosys.tjenester.gui.dto.eessi.BucerTilknyttetBehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.OpprettBucSvarDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.VedleggDto;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -39,7 +38,7 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EessiTjenesteTest extends JsonSchemaTestParent {
-    private static final Logger log = LoggerFactory.getLogger(OppgaveTjenesteTest.class);
+    private static final Logger log = LoggerFactory.getLogger(EessiTjenesteTest.class);
 
     private static final String MOTTAKERINSTITUSJONER_SCHEMA = "eessi-mottakerinstitusjoner-schema.json";
     private static final String OPPRETT_BUC_SCHEMA = "eessi-bucer-post-schema.json";
@@ -91,12 +90,11 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
         validerArray(institusjoner, MOTTAKERINSTITUSJONER_SCHEMA, log);
     }
 
-    @Ignore // FIXME: Endre mottakerId til mottakerInstitusjoner i JSON-schema
     @Test
     public void opprettBuc() throws IOException, MelosysException {
-        when(eessiService.opprettBucOgSed(any(), any(BucType.class), anyList(), anyList(), anyCollection())).thenReturn(MOCK_RINA_URL);
+        when(eessiService.opprettBucOgSed(any(), any(BucType.class), anyList(), anyCollection())).thenReturn(MOCK_RINA_URL);
 
-        BucBestillingDto nyBucDto = new BucBestillingDto(BucType.LA_BUC_01, List.of("NO"), List.of("NAVT002"), Collections.emptyList());
+        BucBestillingDto nyBucDto = new BucBestillingDto(BucType.LA_BUC_01, List.of("NAVT002"), Collections.emptyList());
         ResponseEntity<OpprettBucSvarDto> response = eessiTjeneste.opprettBuc(nyBucDto, 123L);
         OpprettBucSvarDto opprettBucSvarDto = response.getBody();
 
@@ -107,7 +105,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void opprettBuc_medVedlegg_validerVedlegg() throws MelosysException {
-        when(eessiService.opprettBucOgSed(any(), any(BucType.class), anyList(), anyList(), anyCollection())).thenReturn(MOCK_RINA_URL);
+        when(eessiService.opprettBucOgSed(any(), any(BucType.class), anyList(), anyCollection())).thenReturn(MOCK_RINA_URL);
 
         List<Journalpost> journalposter = List.of(
             lagJournalpost("1",
@@ -135,7 +133,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
             new VedleggDto("3", "1")
         );
 
-        BucBestillingDto nyBucDto = new BucBestillingDto(BucType.LA_BUC_01, List.of("NO"), List.of("NAVT002"), vedleggDtoList);
+        BucBestillingDto nyBucDto = new BucBestillingDto(BucType.LA_BUC_01, List.of("NAVT002"), vedleggDtoList);
         ResponseEntity<OpprettBucSvarDto> response = eessiTjeneste.opprettBuc(nyBucDto, 123L);
         OpprettBucSvarDto opprettBucSvarDto = response.getBody();
 
@@ -146,7 +144,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
         verify(dokumentHentingService).hentDokument(eq("2"), anyString());
         verify(dokumentHentingService).hentDokument(eq("3"), anyString());
 
-        verify(eessiService).opprettBucOgSed(any(), eq(BucType.LA_BUC_01), anyList(), anyList(), vedleggCaptor.capture());
+        verify(eessiService).opprettBucOgSed(any(), eq(BucType.LA_BUC_01), anyList(), vedleggCaptor.capture());
 
         assertThat(vedleggCaptor.getValue()).extracting(Vedlegg::getTittel)
             .containsExactlyInAnyOrder("1", "1", "1", "2", "3");

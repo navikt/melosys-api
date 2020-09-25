@@ -191,45 +191,12 @@ class EessiServiceTest {
         when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(MedlemsperiodeType.class))).thenReturn(new SedDataDto());
         mockBehandlingsresultat();
 
-        eessiService.opprettBucOgSed(lagBehandling(), BucType.LA_BUC_01, List.of("BE"), List.of(mottakerBelgia1), Collections.emptyList());
+        eessiService.opprettBucOgSed(lagBehandling(), BucType.LA_BUC_01, List.of(mottakerBelgia1), Collections.emptyList());
         verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), anyCollection(), eq(BucType.LA_BUC_01), eq(false));
     }
 
     @Test
-    void opprettBucOgSed_valgtFlereMottakerinstitusjonerFraEttLand_kasterException() throws Exception {
-        when(eessiConsumer.hentMottakerinstitusjoner(BucType.LA_BUC_01.name(), Set.of(Landkoder.BE.getKode(), Landkoder.DE.getKode())))
-            .thenReturn(List.of(institusjonBelgia1, institusjonBelgia2, institusjonTyskland1, institusjonTyskland2));
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> eessiService.opprettBucOgSed(lagBehandling(), BucType.LA_BUC_01, List.of("BE", "DE"),
-                List.of(mottakerBelgia1, mottakerBelgia2), Collections.emptyList()))
-            .withMessageContaining("Finner ingen gyldig mottakerinstitusjon for arbeidsland Tyskland");
-    }
-
-    @Test
-    void opprettBucOgSed_valgtFærreMottakerinstitusjonerEnnLand_kasterException() throws Exception {
-        when(eessiConsumer.hentMottakerinstitusjoner(BucType.LA_BUC_01.name(), Set.of(Landkoder.BE.getKode(), Landkoder.DE.getKode())))
-            .thenReturn(List.of(institusjonBelgia1, institusjonBelgia2, institusjonTyskland1, institusjonTyskland2));
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> eessiService.opprettBucOgSed(lagBehandling(), BucType.LA_BUC_01, List.of("BE", "DE"),
-                List.of(mottakerBelgia1), Collections.emptyList()))
-            .withMessageContaining("Finner ingen gyldig mottakerinstitusjon for arbeidsland Tyskland");
-    }
-
-    @Test
-    void opprettBucOgSed_valgtFlereMottakerinstitusjonerEnnLand_kasterException() throws Exception {
-        when(eessiConsumer.hentMottakerinstitusjoner(BucType.LA_BUC_01.name(), Set.of(Landkoder.BE.getKode())))
-            .thenReturn(List.of(institusjonBelgia1, institusjonBelgia2));
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> eessiService.opprettBucOgSed(lagBehandling(), BucType.LA_BUC_01, List.of("BE"),
-                List.of(mottakerBelgia1, mottakerBelgia2), Collections.emptyList()))
-            .withMessageContaining("Kan kun velge en mottakerinstitusjon per land");
-    }
-
-    @Test
-    void hentMottakerinstitusjoner_forventListeMedRettType() throws MelosysException {
+    public void hentMottakerinstitusjoner_forventListeMedRettType() throws MelosysException {
         when(eessiConsumer.hentMottakerinstitusjoner(anyString(), anyList())).thenReturn(Arrays.asList(
             easyRandom.nextObject(Institusjon.class),
             easyRandom.nextObject(Institusjon.class)
@@ -507,7 +474,7 @@ class EessiServiceTest {
             .thenReturn(List.of(institusjonBelgia1, institusjonBelgia2, institusjonTyskland1, institusjonTyskland2));
 
         Set<String> avklarteMottakerInstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType);
-        verify(eessiConsumer, times(1)).hentMottakerinstitusjoner(eq(bucType.name()), anySet());
+        verify(eessiConsumer).hentMottakerinstitusjoner(eq(bucType.name()), anySet());
         assertThat(avklarteMottakerInstitusjoner).isEqualTo(valgteMottakerInstitusjoner);
     }
 
@@ -522,7 +489,7 @@ class EessiServiceTest {
             .thenReturn(List.of(institusjonBelgia1, institusjonBelgia2));
 
         Set<String> avklarteMottakerInstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType);
-        verify(eessiConsumer, times(1)).hentMottakerinstitusjoner(eq(bucType.name()), anySet());
+        verify(eessiConsumer).hentMottakerinstitusjoner(eq(bucType.name()), anySet());
         assertThat(avklarteMottakerInstitusjoner).isEmpty();
     }
 

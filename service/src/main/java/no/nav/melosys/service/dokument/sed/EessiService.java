@@ -18,7 +18,6 @@ import no.nav.melosys.domain.eessi.sed.UtpekingAvvisDto;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
@@ -82,8 +81,7 @@ public class EessiService {
     }
 
     @Transactional(readOnly = true)
-    public String opprettBucOgSed(Behandling behandling, BucType bucType, List<String> mottakerLand, List<String> mottakerInstitusjoner, Collection<Vedlegg> vedlegg) throws MelosysException {
-        validerOgAvklarMottakerInstitusjonerForBuc(new HashSet<>(mottakerInstitusjoner), LandkoderUtils.iso2KoderTilLandkoder(mottakerLand), bucType);
+    public String opprettBucOgSed(Behandling behandling, BucType bucType, List<String> mottakerInstitusjoner, Collection<Vedlegg> vedlegg) throws MelosysException {
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType, behandlingsresultat));

@@ -9,13 +9,11 @@ import java.util.List;
 public class BucBestillingDto {
 
     private BucType bucType;
-    private List<String> mottakerLand;
     private List<String> mottakerInstitusjoner;
     private Collection<VedleggDto> vedlegg;
 
-    public BucBestillingDto(BucType bucType, List<String> mottakerLand, List<String> mottakerInstitusjoner, Collection<VedleggDto> vedlegg) {
+    public BucBestillingDto(BucType bucType, List<String> mottakerInstitusjoner, Collection<VedleggDto> vedlegg) {
         this.bucType = bucType;
-        this.mottakerLand = mottakerLand;
         this.mottakerInstitusjoner = mottakerInstitusjoner;
         this.vedlegg = vedlegg;
     }
@@ -26,14 +24,6 @@ public class BucBestillingDto {
 
     public void setBucType(BucType bucType) {
         this.bucType = bucType;
-    }
-
-    public List<String> getMottakerLand() {
-        return mottakerLand;
-    }
-
-    public void setMottakerLand(List<String> mottakerLand) {
-        this.mottakerLand = mottakerLand;
     }
 
     public List<String> getMottakerInstitusjoner() {
