@@ -9,7 +9,6 @@ import org.springframework.util.CollectionUtils;
 
 public class ProsessinstansBuilder {
     private ProsessType type;
-    private ProsessSteg steg;
     private Behandling behandling;
     private Object begrunnelser;
     private String begrunnelseFritekst;
@@ -19,12 +18,6 @@ public class ProsessinstansBuilder {
 
     public ProsessinstansBuilder medType(ProsessType type) {
         this.type = type;
-        return this;
-    }
-
-    @Deprecated(forRemoval = true)
-    public ProsessinstansBuilder medSteg(ProsessSteg steg) {
-        this.steg = steg;
         return this;
     }
 
@@ -62,7 +55,6 @@ public class ProsessinstansBuilder {
         Prosessinstans prosessinstans =  new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setType(type);
-        prosessinstans.setSteg(steg);
 
         if (begrunnelser != null) {
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSER, begrunnelser);

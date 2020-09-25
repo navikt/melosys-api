@@ -48,12 +48,8 @@ public class Prosessinstans {
     private final Properties data = new Properties();
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "steg", nullable = false)
-    private ProsessSteg steg; //TODO: erstattes av sistFullførteSteg
-
-    @Enumerated(EnumType.STRING)
     @Column(name = "sist_fullfort_steg")
-    private ProsessSteg sistFullførtSteg; //todo
+    private ProsessSteg sistFullførtSteg;
 
     @Column(name = "registrert_dato", nullable = false, updatable = false)
     private LocalDateTime registrertDato;
@@ -159,14 +155,6 @@ public class Prosessinstans {
         this.data.putAll(data);
     }
 
-    public ProsessSteg getSteg() {
-        return steg;
-    }
-
-    public void setSteg(ProsessSteg steg) {
-        this.steg = steg;
-    }
-
     public ProsessSteg getSistFullførtSteg() {
         return sistFullførtSteg;
     }
@@ -210,31 +198,16 @@ public class Prosessinstans {
             .orElse(getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class, new MelosysEessiMelding()).getAktoerId());
     }
 
-    private void leggTilHendelse(ProsessinstansHendelse prosessinstansHendelse) {
-        if (!this.equals(prosessinstansHendelse.getProsessinstans())) {
-            throw new IllegalArgumentException("Forsøk på å legge til ProsessinstansHendelse på feil Prosessinstans");
-        }
-        if (hendelser == null) {
-            hendelser = new ArrayList<>();
-        }
-        hendelser.add(prosessinstansHendelse);
-    }
-
     public void leggTilHendelse(ProsessSteg steg, Throwable t) {
-        this.hendelser.add(new ProsessinstansHendelse(this, LocalDateTime.now(), steg, t.getClass().getSimpleName(), ExceptionUtils.getStackTrace(t)));
-    }
-
-    public void leggTilHendelse(String type, String melding) {
-        ProsessinstansHendelse pih = new ProsessinstansHendelse(this, LocalDateTime.now(), steg, type, melding);
-        leggTilHendelse(pih);
-    }
-
-    public void leggTilHendelse(String type, String melding, Throwable t) {
-        if (t != null) {
-            leggTilHendelse(type, melding + " - " + ExceptionUtils.getStackTrace(t));
-        } else {
-            leggTilHendelse(type, melding);
-        }
+        this.hendelser.add(
+            new ProsessinstansHendelse(
+                this,
+                LocalDateTime.now(),
+                steg,
+                t.getClass().getSimpleName(),
+                ExceptionUtils.getStackTrace(t)
+            )
+        );
     }
 
     public boolean statusErKlar() {
@@ -265,7 +238,7 @@ public class Prosessinstans {
             ", type=" + type +
             ", behandling=" + behandling +
             ", data=" + data +
-            ", steg=" + steg +
+            ", sistFullførtSteg=" + sistFullførtSteg +
             ", registrertDato=" + registrertDato +
             ", sistForsøkt=" + sistForsøkt +
             ", endretDato=" + endretDato +
