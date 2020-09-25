@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.joark;
 
 import java.time.LocalDate;
 import java.util.*;
-import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.dok.tjenester.journalfoerinngaaende.Bruker;
 import no.nav.dok.tjenester.journalfoerinngaaende.Dokument;
@@ -11,8 +10,6 @@ import no.nav.dok.tjenester.journalfoerinngaaende.*;
 import no.nav.melosys.domain.arkiv.DokumentVariant;
 import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
@@ -24,33 +21,27 @@ import no.nav.melosys.integrasjon.joark.journalpostapi.dto.*;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.DokumentInformasjonMangler;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.Journalfoeringsbehov;
 import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.JournalpostMangler;
-import no.nav.tjeneste.virksomhet.journal.v3.HentKjerneJournalpostListeSikkerhetsbegrensning;
-import no.nav.tjeneste.virksomhet.journal.v3.HentKjerneJournalpostListeUgyldigInput;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.Journalposttyper;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.ArkivSak;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.DetaljertDokumentinformasjon;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.KorrespendansePart;
 import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentKjerneJournalpostListeResponse;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class JoarkServiceTest {
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
+@ExtendWith(MockitoExtension.class)
+class JoarkServiceTest {
     private JoarkService joarkService;
 
     @Mock
@@ -68,13 +59,13 @@ public class JoarkServiceTest {
     @Captor
     private ArgumentCaptor<String> logiskVedleggTittelCaptor;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         this.joarkService = new JoarkService(inngaaendeJournalConsumer, journalConsumer, journalfoerInngaaendeConsumer, journalpostapiConsumer);
     }
 
     @Test
-    public void hentKjerneJournalpostListe() throws SikkerhetsbegrensningException, IntegrasjonException, HentKjerneJournalpostListeUgyldigInput, HentKjerneJournalpostListeSikkerhetsbegrensning, DatatypeConfigurationException {
+    void hentKjerneJournalpostListe() throws Exception {
         Long arkivSakID = 1L;
         HentKjerneJournalpostListeResponse response = new HentKjerneJournalpostListeResponse();
         no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.Journalpost journalpost = new no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.Journalpost();
@@ -117,7 +108,7 @@ public class JoarkServiceTest {
 
 
     @Test
-    public void konverterTilJournalfoeringmangler() {
+    void konverterTilJournalfoeringmangler() {
         JournalpostMangler input = new JournalpostMangler();
         input.setArkivSak(Journalfoeringsbehov.MANGLER);
         input.setAvsenderId(Journalfoeringsbehov.MANGLER_IKKE);
@@ -133,21 +124,21 @@ public class JoarkServiceTest {
 
         List<JournalfoeringMangel> journalfoeringMangler = joarkService.konverterTilJournalfoeringmangler(input);
 
-        assertThat(journalfoeringMangler).isNotNull();
-        assertThat(journalfoeringMangler).isNotEmpty();
-        assertThat(journalfoeringMangler).contains(JournalfoeringMangel.ARKIVSAK);
-        assertThat(journalfoeringMangler).doesNotContain(JournalfoeringMangel.AVSENDERID);
-        assertThat(journalfoeringMangler).contains(JournalfoeringMangel.AVSENDERNAVN);
-        assertThat(journalfoeringMangler).contains(JournalfoeringMangel.BRUKER);
-        assertThat(journalfoeringMangler).doesNotContain(JournalfoeringMangel.FORSENDELSEINNSENDT);
-        assertThat(journalfoeringMangler).contains(JournalfoeringMangel.HOVEDDOKUMENT_KATEGORI);
-        assertThat(journalfoeringMangler).doesNotContain(JournalfoeringMangel.HOVEDDOKUMENT_TITTEL);
-        assertThat(journalfoeringMangler).contains(JournalfoeringMangel.INNHOLD);
-        assertThat(journalfoeringMangler).contains(JournalfoeringMangel.TEMA);
+        assertThat(journalfoeringMangler).isNotNull()
+            .isNotEmpty()
+            .contains(JournalfoeringMangel.ARKIVSAK)
+            .doesNotContain(JournalfoeringMangel.AVSENDERID)
+            .contains(JournalfoeringMangel.AVSENDERNAVN)
+            .contains(JournalfoeringMangel.BRUKER)
+            .doesNotContain(JournalfoeringMangel.FORSENDELSEINNSENDT)
+            .contains(JournalfoeringMangel.HOVEDDOKUMENT_KATEGORI)
+            .doesNotContain(JournalfoeringMangel.HOVEDDOKUMENT_TITTEL)
+            .contains(JournalfoeringMangel.INNHOLD)
+            .contains(JournalfoeringMangel.TEMA);
     }
 
     @Test
-    public void oppdaterJournalpost_påkrevdeVerdierUtfylt() throws Exception {
+    void oppdaterJournalpost_påkrevdeVerdierUtfylt() throws Exception {
         String tittel = "tittel";
         String hovedDokumentID = "1234";
         Map<String, String> vedleggMedTitler = new HashMap<>();
@@ -170,7 +161,7 @@ public class JoarkServiceTest {
         );
 
         when(journalfoerInngaaendeConsumer.hentJournalpost(anyString())).thenReturn(eksisterendeJournalpost);
-        joarkService.oppdaterJournalpost("123",journalpostOppdatering, false);
+        joarkService.oppdaterJournalpost("123", journalpostOppdatering, false);
 
         verify(journalpostapiConsumer, times(2)).fjernLogiskeVedlegg(anyString(), anyString());
         verify(journalpostapiConsumer).oppdaterJournalpost(oppdaterJournalpostRequestCaptor.capture(), anyString());
@@ -205,7 +196,7 @@ public class JoarkServiceTest {
     }
 
     @Test
-    public void oppdaterJournalpost_utenVedlegg_fungerer() throws Exception {
+    void oppdaterJournalpost_utenVedlegg_fungerer() throws Exception {
         String tittel = "tittel";
         String hovedDokumentID = "1234";
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medArkivSakID(1L)
@@ -242,7 +233,7 @@ public class JoarkServiceTest {
     }
 
     @Test
-    public void oppdaterJournalpost_skalFerdigstilles_ferdigstillJournalpostBlirKalt() throws Exception {
+    void oppdaterJournalpost_skalFerdigstilles_ferdigstillJournalpostBlirKalt() throws Exception {
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medArkivSakID(1L)
             .medBrukerID("12345").build();
 
@@ -255,7 +246,7 @@ public class JoarkServiceTest {
     }
 
     @Test
-    public void hentJournalpost_forventJournalpost() throws Exception {
+    void hentJournalpost_forventJournalpost() throws Exception {
         String arkivsakId = "123arkivsak";
         GetJournalpostResponse getJournalpostResponse = new GetJournalpostResponse();
         getJournalpostResponse.setArkivSak(new ArkivSakNoArkivsakSystemEnum());
@@ -318,7 +309,7 @@ public class JoarkServiceTest {
     }
 
     @Test
-    public void ferdigstillJournalpost_journalpostBlirJournalført_ingenException() throws Exception {
+    void ferdigstillJournalpost_journalpostBlirJournalført_ingenException() throws Exception {
         String journalpostId = "123";
         PutJournalpostResponse putJournalpostResponse = new PutJournalpostResponse();
         putJournalpostResponse.setHarEndeligJF(true);
@@ -334,7 +325,7 @@ public class JoarkServiceTest {
     }
 
     @Test
-    public void opprettJournalpost_ikkeValider_forventMetodekall() throws TekniskException {
+    void opprettJournalpost_ikkeValider_forventMetodekall() throws TekniskException {
         when(journalpostapiConsumer.opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean()))
             .thenReturn(OpprettJournalpostResponse.builder().journalpostId("1234").build());
 
@@ -345,7 +336,7 @@ public class JoarkServiceTest {
     }
 
     @Test
-    public void opprettJournalpost_validerFelt_forventValidert() throws TekniskException {
+    void opprettJournalpost_validerFelt_forventValidert() throws TekniskException {
         when(journalpostapiConsumer.opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean()))
             .thenReturn(OpprettJournalpostResponse.builder().journalpostId("1234").build());
 
@@ -355,14 +346,15 @@ public class JoarkServiceTest {
         assertThat(journalpostId).isNotEmpty();
     }
 
-    @Test(expected = TekniskException.class)
-    public void opprettJournalpost_validerFelt_forventException() throws TekniskException {
+    @Test
+    void opprettJournalpost_validerFelt_forventException() {
         OpprettJournalpost opprettJournalpost = lagOpprettJournalpost();
         opprettJournalpost.setArkivSakId(null);
-        String journalpostId = joarkService.opprettJournalpost(opprettJournalpost, true);
+
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(() -> joarkService.opprettJournalpost(opprettJournalpost, true));
 
         verify(journalpostapiConsumer, never()).opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean());
-        assertThat(journalpostId).isNotEmpty();
     }
 
     private OpprettJournalpost lagOpprettJournalpost() {
