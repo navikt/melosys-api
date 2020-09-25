@@ -5,7 +5,6 @@ import java.io.IOException;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringSedDto;
@@ -13,12 +12,11 @@ import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
 import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
-import org.json.JSONException;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -26,9 +24,9 @@ import org.springframework.http.ResponseEntity;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 @SuppressWarnings("resource")
-public class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
+class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     private static final Logger log = LoggerFactory.getLogger(JournalfoeringTjenesteTest.class);
     private static final String JOURNALFOERING_SCHEMA = "journalforing-schema.json";
     private static final String JOURNALFOERING_TILORDNE_SCHEMA = "journalforing-tilordne-post-schema.json";
@@ -43,7 +41,7 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     @Mock
     private JournalfoeringService journalføringService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         tjeneste = new JournalfoeringTjeneste(journalføringService);
 
@@ -51,20 +49,20 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void hentJournalpostValidering() throws IOException, MelosysException, JSONException {
+    void hentJournalpostValidering() throws Exception {
         Journalpost journalpost = random.nextObject(Journalpost.class);
         journalpost.setBrukerId(SAMPLE_FNR);
         journalpost.setAvsenderId(SAMPLE_ORGNR);
         when(journalføringService.hentJournalpost(anyString())).thenReturn(journalpost);
 
-        ResponseEntity response = tjeneste.hentJournalpostOpplysninger(anyString());
-        JournalpostDto journalpostDto = (JournalpostDto) response.getBody();
+        ResponseEntity<JournalpostDto> response = tjeneste.hentJournalpostOpplysninger(anyString());
+        JournalpostDto journalpostDto = response.getBody();
 
         valider(journalpostDto, JOURNALFOERING_SCHEMA, log);
     }
 
     @Test
-    public void journalføringTilordneSchemaValidering() throws IOException, JSONException {
+    void journalføringTilordneSchemaValidering() throws Exception {
         JournalfoeringTilordneDto journalfoeringDto = random.nextObject(JournalfoeringTilordneDto.class);
         journalfoeringDto.setBrukerID(SAMPLE_FNR);
         journalfoeringDto.setBehandlingstypeKode(Behandlingstyper.ENDRET_PERIODE.getKode());
@@ -72,7 +70,7 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void journalføringOpprettSchemaValidering() throws IOException, JSONException {
+    void journalføringOpprettSchemaValidering() throws Exception {
         JournalfoeringOpprettDto journalfoeringDto = random.nextObject(JournalfoeringOpprettDto.class);
         journalfoeringDto.setBrukerID(SAMPLE_FNR);
         journalfoeringDto.setBehandlingstemaKode(Behandlingstema.ARBEID_FLERE_LAND.getKode());
@@ -82,7 +80,7 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void journalføringOpprettSchemaValideringMedRepresentantIDNull() throws IOException, JSONException {
+    void journalføringOpprettSchemaValideringMedRepresentantIDNull() throws Exception {
         JournalfoeringOpprettDto journalfoeringDto = random.nextObject(JournalfoeringOpprettDto.class);
         journalfoeringDto.setBrukerID(SAMPLE_FNR);
         journalfoeringDto.setBehandlingstemaKode(Behandlingstema.ARBEID_FLERE_LAND.getKode());
@@ -92,7 +90,7 @@ public class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void journalførSedSchemaValidering() throws IOException {
+    void journalførSedSchemaValidering() throws IOException {
         JournalfoeringSedDto journalfoeringSedDto = new JournalfoeringSedDto();
         journalfoeringSedDto.setOppgaveID("123123");
         journalfoeringSedDto.setBrukerID(SAMPLE_FNR);
