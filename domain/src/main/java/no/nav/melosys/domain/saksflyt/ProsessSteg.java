@@ -22,8 +22,6 @@ public enum ProsessSteg implements Kodeverk {
     SEND_FORVALTNINGSMELDING("SEND_FORVALTNINGSMELDING", "Send forvaltningsmelding til søker"),
     MANGELBREV("MANGELBREV", "Opprett mangelbrev"),
 
-    FEILET_MASKINELT("FEILET_MASKINELT", "Feilet maskinelt"),
-
     //Anmodning om unntak
     LAGRE_ANMODNINGSPERIODE_MEDL("LAGRE_ANMODNINGSPERIODE_MEDL", "Lagrer en anmodningsperiode som under avklaring i MEDL"),
     SEND_ORIENTERING_ANMODNING_UNNTAK("SEND_ORIENTERING_ANMODNING_UNNTAK", "Send orienteringsbrev til bruker ved anmodning om unntak"),
@@ -87,7 +85,7 @@ public enum ProsessSteg implements Kodeverk {
 
     LAGRE_LOVVALGSPERIODE_MEDL("LAGRE_LOVVALGSPERIODE_MEDL", "Lagrer en lovvalgsperiode i MEDL som foreløpig eller endelig"),
 
-    FERDIG("FERDIG", "Prosessen er ferdig");
+    UKJENT("UKJENT", "Ukjent steg");
 
 
     private final String kode;
