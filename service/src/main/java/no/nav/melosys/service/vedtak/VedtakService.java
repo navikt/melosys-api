@@ -88,7 +88,6 @@ public class VedtakService {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         validerKanFattesVedtakAvTema(behandling);
 
-        oppdaterBehandlingsresultat(behandling, behandlingsresultatType, vedtakstype, fritekst, revurderBegrunnelse);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         log.info("Fatter vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
@@ -96,6 +95,7 @@ public class VedtakService {
             validerInnvilgelse(vedtakstype, behandling, behandlingsresultat);
         }
 
+        oppdaterBehandlingsresultat(behandling, behandlingsresultatType, vedtakstype, fritekst, revurderBegrunnelse);
         mottakerinstitusjoner = validerOgAvklarMottakerInstitusjoner(behandling, mottakerinstitusjoner, behandlingsresultat);
 
         if (prosessinstansService.harVedtakInstans(behandlingID)) {
