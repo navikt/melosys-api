@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -33,7 +34,7 @@ public class ProsessinstansBehandlerImplTest {
     @Before
     public void setup() {
         when(mangelBrevStebehandler.inngangsSteg()).thenReturn(ProsessSteg.MANGELBREV);
-        when(prosessinstansRepository.save(any(Prosessinstans.class))).thenAnswer(a -> a.getArgument(0));
+        when(prosessinstansRepository.save(any(Prosessinstans.class))).thenAnswer(returnsFirstArg());
         prosessinstansBehandler = new ProsessinstansBehandlerImpl(Collections.singleton(mangelBrevStebehandler), prosessinstansRepository);
 
         prosessinstans.setType(ProsessType.MANGELBREV);
