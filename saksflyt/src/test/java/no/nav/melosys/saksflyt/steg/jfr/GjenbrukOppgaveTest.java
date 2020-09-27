@@ -1,6 +1,10 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Fagsystem;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -58,14 +62,25 @@ class GjenbrukOppgaveTest {
     }
 
     private static Prosessinstans lagProsessinstans(String oppgaveID, String saksnummer) {
+
+        Aktoer bruker = new Aktoer();
+        bruker.setAktørId("123321");
+        bruker.setRolle(Aktoersroller.BRUKER);
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer(saksnummer);
+        fagsak.getAktører().add(bruker);
+
+        Behandling behandling = new Behandling();
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setFagsak(fagsak);
+
         Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, oppgaveID);
-        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.UTSENDT_ARBEIDSTAKER);
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, true);
         prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, "Deg321");
-        prosessinstans.setData(ProsessDataKey.AKTØR_ID, "123321");
         return prosessinstans;
     }
 }
