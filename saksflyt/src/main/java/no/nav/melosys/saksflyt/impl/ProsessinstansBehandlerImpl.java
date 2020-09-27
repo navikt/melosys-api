@@ -18,8 +18,6 @@ import no.nav.melosys.sikkerhet.context.SaksflytSubjektHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
@@ -34,7 +32,6 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
         this.prosessinstansRepository = prosessinstansRepository;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void behandleProsessinstans(@NotNull Prosessinstans prosessinstans) {
         log.info("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
@@ -55,7 +52,7 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
         try {
             SaksflytSubjektHolder.set(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
             while ((nesteSteg = prosessFlyt.nesteSteg(prosessinstans.getSistFullførtSteg())) != null) {
-                utførSteg(hentStegBehandler(nesteSteg), prosessinstans);
+                prosessinstans = utførSteg(hentStegBehandler(nesteSteg), prosessinstans);
             }
 
             settTilFerdig(prosessinstans);
@@ -72,11 +69,11 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
         lagreProsessinstans(prosessinstans);
     }
 
-    private void utførSteg(StegBehandler stegBehandler, Prosessinstans prosessinstans) throws MelosysException {
+    private Prosessinstans utførSteg(StegBehandler stegBehandler, Prosessinstans prosessinstans) throws MelosysException {
         log.info("Utfører steg {} for prosessinstans {}", stegBehandler.inngangsSteg(), prosessinstans.getId());
         stegBehandler.utfør(prosessinstans);
         prosessinstans.setSistFullførtSteg(stegBehandler.inngangsSteg());
-        lagreProsessinstans(prosessinstans);
+        return lagreProsessinstans(prosessinstans);
     }
 
     private void settTilFerdig(Prosessinstans prosessinstans) {
@@ -92,9 +89,9 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
         lagreProsessinstans(prosessinstans);
     }
 
-    private void lagreProsessinstans(Prosessinstans prosessinstans) {
+    private Prosessinstans lagreProsessinstans(Prosessinstans prosessinstans) {
         prosessinstans.setEndretDato(LocalDateTime.now());
-        prosessinstansRepository.save(prosessinstans);
+        return prosessinstansRepository.save(prosessinstans);
     }
 
     private StegBehandler hentStegBehandler(ProsessSteg prosessSteg) {

@@ -33,6 +33,7 @@ public class ProsessinstansBehandlerImplTest {
     @Before
     public void setup() {
         when(mangelBrevStebehandler.inngangsSteg()).thenReturn(ProsessSteg.MANGELBREV);
+        when(prosessinstansRepository.save(any(Prosessinstans.class))).thenAnswer(a -> a.getArgument(0));
         prosessinstansBehandler = new ProsessinstansBehandlerImpl(Collections.singleton(mangelBrevStebehandler), prosessinstansRepository);
 
         prosessinstans.setType(ProsessType.MANGELBREV);
