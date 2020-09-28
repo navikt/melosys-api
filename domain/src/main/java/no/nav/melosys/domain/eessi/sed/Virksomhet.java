@@ -2,20 +2,21 @@ package no.nav.melosys.domain.eessi.sed;
 
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.eessi.SedOrganisasjon;
+import org.apache.commons.lang3.StringUtils;
 
 public class Virksomhet {
+    private static final String UKJENT = "Unknown";
 
     private String navn;
     private Adresse adresse;
     private String orgnr;
-    private String type; //Trenger kanskje ikke denne?
 
     public Virksomhet() {
     }
 
     public Virksomhet(String navn, String orgnr, Adresse adresse) {
         this.navn = navn;
-        this.orgnr = orgnr;
+        this.orgnr = StringUtils.isBlank(orgnr) ? UKJENT : orgnr;
         this.adresse = adresse;
     }
 
@@ -75,13 +76,5 @@ public class Virksomhet {
 
     public void setOrgnr(String orgnr) {
         this.orgnr = orgnr;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 }

@@ -63,6 +63,7 @@ public class SedDataBygger {
                                      MedlemsperiodeType medlemsperiodeType,
                                      boolean erUtkast) throws FunksjonellException, TekniskException {
         SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
+        validerArbeidsstederOgVirksomheter(sedDataDto);
         if (erUtkast) {
             sedDataDto.setBostedsadresse(finnAdresse(dataGrunnlag.getBostedGrunnlag()).orElse(null));
             sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDtoHvisFinnes(behandlingsresultat, medlemsperiodeType));
@@ -316,5 +317,23 @@ public class SedDataBygger {
         familieMedlem.setEtternavn(navn[1]);
         familieMedlem.setRelasjon(f.familierelasjon == Familierelasjon.FARA ? "FAR" : "MOR");
         return familieMedlem;
+    }
+
+    private static void validerArbeidsstederOgVirksomheter(SedDataDto dataGrunnlag) throws FunksjonellException {
+        for (Arbeidssted arbeidssted : dataGrunnlag.getArbeidssteder()) {
+            if (StringUtils.isEmpty(arbeidssted.getAdresse().getLand())) {
+                throw new FunksjonellException("Feltet land ikke oppgitt for arbeidssted " + arbeidssted.getNavn());
+            }
+        }
+        for (Virksomhet virksomhet : dataGrunnlag.getSelvstendigeVirksomheter()) {
+            if (StringUtils.isEmpty(virksomhet.getAdresse().getLand())) {
+                throw new FunksjonellException("Feltet land ikke oppgitt for selvstendig virksomhet " + virksomhet.getNavn());
+            }
+        }
+        for (Virksomhet virksomhet : dataGrunnlag.getArbeidsgivendeVirksomheter()) {
+            if (StringUtils.isEmpty(virksomhet.getAdresse().getLand())) {
+                throw new FunksjonellException("Feltet land ikke oppgitt for arbeidsgivende virksomhet " + virksomhet.getNavn());
+            }
+        }
     }
 }

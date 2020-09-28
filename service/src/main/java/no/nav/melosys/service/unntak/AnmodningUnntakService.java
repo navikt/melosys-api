@@ -1,9 +1,7 @@
 package no.nav.melosys.service.unntak;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
@@ -15,14 +13,16 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.kontroll.PersonKontroller;
+import no.nav.melosys.service.kontroll.unntak.AnmodningUnntakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import no.nav.melosys.service.validering.Kontrollfeil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,12 +41,16 @@ public class AnmodningUnntakService {
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final LandvelgerService landvelgerService;
     private final EessiService eessiService;
+    private final AnmodningUnntakKontrollService anmodningUnntakKontrollService;
 
     public AnmodningUnntakService(BehandlingService behandlingService,
                                   BehandlingsresultatService behandlingsresultatService, OppgaveService oppgaveService,
                                   ProsessinstansService prosessinstansService,
                                   AnmodningsperiodeService anmodningsperiodeService,
-                                  LovvalgsperiodeService lovvalgsperiodeService, LandvelgerService landvelgerService, EessiService eessiService) {
+                                  LovvalgsperiodeService lovvalgsperiodeService,
+                                  LandvelgerService landvelgerService,
+                                  EessiService eessiService,
+                                  AnmodningUnntakKontrollService anmodningUnntakKontrollService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
@@ -55,6 +59,7 @@ public class AnmodningUnntakService {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.landvelgerService = landvelgerService;
         this.eessiService = eessiService;
+        this.anmodningUnntakKontrollService = anmodningUnntakKontrollService;
     }
 
     @Transactional(rollbackFor = MelosysException.class)
@@ -64,21 +69,11 @@ public class AnmodningUnntakService {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         log.info("Anmodning om unntak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
-        anmodningsperiodeService.validerAnmodningsperiodeForBehandling(behandlingID);
-        validerHarBostedsadresse(behandling);
+        kontrollerAnmodningOmUnntak(behandlingID);
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
 
         prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, mottakerinstitusjoner, ytterligereInformasjonSed);
         oppgaveService.leggTilbakeOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
-    }
-
-    private void validerHarBostedsadresse(Behandling behandling) throws FunksjonellException, TekniskException {
-        boolean harBostedsAdresse = PersonKontroller.harRegistrertBostedsadresse(
-            behandling.hentPersonDokument(), behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata());
-
-        if (!harBostedsAdresse) {
-            throw new FunksjonellException("Søknad mangler bostedsadresse!");
-        }
     }
 
     private Set<String> validerMottakerInstitusjon(long behandlingID, String mottakerinstitusjon) throws MelosysException {
@@ -126,6 +121,14 @@ public class AnmodningUnntakService {
     private void validerFritekstLengde(AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
         if (anmodningsperiodeSvar.getBegrunnelseFritekst() != null && anmodningsperiodeSvar.getBegrunnelseFritekst().length() > 255) {
             throw new FunksjonellException("Kan ikke ha fritekst lengre enn 255 for avslag på anmodning om unntak");
+        }
+    }
+
+    private void kontrollerAnmodningOmUnntak(long behandlingID) throws MelosysException {
+        Collection<Kontrollfeil> feilValideringer = anmodningUnntakKontrollService.utførKontroller(behandlingID);
+        if (!feilValideringer.isEmpty()) {
+            throw new ValideringException("Feil i validering. Kan ikke sende anmodning om unntak.",
+                feilValideringer.stream().map(Kontrollfeil::tilDto).collect(Collectors.toList()));
         }
     }
 }

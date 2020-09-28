@@ -172,7 +172,7 @@ public class AltinnSoeknadServiceTest {
         innhold.setMidlertidigUtsendt(new MidlertidigUtsendt());
         innhold.getMidlertidigUtsendt().setArbeidsland("PL");
         innhold.getMidlertidigUtsendt().setUtenlandsoppdraget(new Utenlandsoppdraget());
-        innhold.getMidlertidigUtsendt().getUtenlandsoppdraget().setSamletUtsendingsperiode(new Tidsrom());
+        innhold.getMidlertidigUtsendt().getUtenlandsoppdraget().setPeriodeUtland(new Tidsrom());
         return medlemskapArbeidEOSM;
     }
 

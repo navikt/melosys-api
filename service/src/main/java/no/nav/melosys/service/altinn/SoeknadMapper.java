@@ -33,7 +33,7 @@ public final class SoeknadMapper {
 
     private static Periode lagPeriode(Innhold innhold) {
         Tidsrom utsendingsperiode = innhold.getMidlertidigUtsendt().getUtenlandsoppdraget()
-            .getSamletUtsendingsperiode();
+            .getPeriodeUtland();
         LocalDate periodeFra = xmlCalTilLocalDate(utsendingsperiode.getPeriodeFra());
         LocalDate periodeTil = xmlCalTilLocalDate(utsendingsperiode.getPeriodeTil());
         return new Periode(periodeFra, periodeTil);

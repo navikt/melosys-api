@@ -53,7 +53,7 @@ public class ExceptionMapper {
     private ResponseEntity<Map<String, Object>> håndter(Exception e,
                                                         HttpStatus httpStatus,
                                                         Level loggnivå,
-                                                        Collection<String> begrunnelser) {
+                                                        Collection begrunnelser) {
         if (loggnivå.equals(Level.ERROR)) {
             log.error(FEIL_OPPSTÅTT, e);
         } else if (loggnivå.equals(Level.WARN)) {

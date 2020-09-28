@@ -3,8 +3,10 @@ package no.nav.melosys.domain.arkiv;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
+import no.nav.melosys.exception.IkkeFunnetException;
 
 /**
  * Journalpostopplysninger fra Joark. Transient for Melosys.
@@ -30,6 +32,21 @@ public class Journalpost {
     public Journalpost(String journalpostId) {
         this.journalpostId = journalpostId;
         this.vedleggListe = new ArrayList<>();
+    }
+
+    public Optional<ArkivDokument> finnArkivDokument(String dokumentID) {
+        if (hoveddokument.getDokumentId().equals(dokumentID)) {
+            return Optional.of(hoveddokument);
+        }
+
+        return vedleggListe.stream()
+            .filter(arkivDokument -> arkivDokument.getDokumentId().equals(dokumentID))
+            .findFirst();
+    }
+
+    public ArkivDokument hentArkivDokument(String dokumentID) throws IkkeFunnetException {
+        return finnArkivDokument(dokumentID).orElseThrow(() ->
+            new IkkeFunnetException(String.format("Finner ikke dokument %s i journalpost %s", dokumentID, journalpostId)));
     }
 
     public String getJournalpostId() {

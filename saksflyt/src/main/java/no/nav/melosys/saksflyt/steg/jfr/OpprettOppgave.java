@@ -14,7 +14,6 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_OPPGAVE;
 
 @Component
 public class OpprettOppgave implements StegBehandler {
-
     private final OppgaveService oppgaveService;
 
     @Autowired

@@ -18,10 +18,8 @@ import org.springframework.stereotype.Service;
 @Primary
 @Service
 public class RegisterOppslagService {
-
-    private EregFasade eregFasade;
-
-    private TpsFasade tpsFasade;
+    private final EregFasade eregFasade;
+    private final TpsFasade tpsFasade;
 
     @Autowired
     public  RegisterOppslagService(EregFasade eregFasade, TpsFasade tpsFasade) {
@@ -49,20 +47,6 @@ public class RegisterOppslagService {
     public OrganisasjonDokument hentOrganisasjon(String orgnummer) throws IkkeFunnetException, IntegrasjonException {
         Saksopplysning saksopplysning = eregFasade.hentOrganisasjon(orgnummer);
         return (OrganisasjonDokument) saksopplysning.getDokument();
-    }
-
-    /**
-     *  Henter et sett med personssopplysninger
-     */
-    public Set<PersonDokument> hentPersoner(Set<String> personnumre) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        Set<PersonDokument> personer = new HashSet<>();
-        for (String personnummer : personnumre) {
-            PersonDokument person = hentPerson(personnummer);
-            if (person != null) {
-                personer.add(person);
-            }
-        }
-        return personer;
     }
 
     /**

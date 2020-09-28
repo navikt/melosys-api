@@ -82,7 +82,7 @@ public class EessiService {
     }
 
     @Transactional(readOnly = true)
-    public String opprettBucOgSed(Behandling behandling, BucType bucType, List<String> mottakerId) throws MelosysException {
+    public String opprettBucOgSed(Behandling behandling, BucType bucType, List<String> mottakerId, Collection<Vedlegg> vedlegg) throws MelosysException {
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType, behandlingsresultat));
@@ -90,7 +90,7 @@ public class EessiService {
         sedDataDto.setGsakSaksnummer(behandling.getFagsak().getGsakSaksnummer());
 
         log.info("Oppretter buc og sed for behandling {} med bucType {}", behandling.getId(), bucType);
-        return eessiConsumer.opprettBucOgSed(sedDataDto, Collections.emptyList(), bucType, false).getRinaUrl();
+        return eessiConsumer.opprettBucOgSed(sedDataDto, vedlegg, bucType, false).getRinaUrl();
     }
 
     public List<Institusjon> hentEessiMottakerinstitusjoner(String bucType, String landkode) throws MelosysException {
