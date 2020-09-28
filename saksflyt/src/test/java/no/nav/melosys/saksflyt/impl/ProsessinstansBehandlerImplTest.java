@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.impl;
 
 import java.util.Collections;
+import java.util.UUID;
 
 import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.exception.FunksjonellException;
@@ -29,7 +30,7 @@ public class ProsessinstansBehandlerImplTest {
 
     private ProsessinstansBehandler prosessinstansBehandler;
 
-    private final Prosessinstans prosessinstans = new Prosessinstans();
+    private final Prosessinstans prosessinstans = spy(new Prosessinstans());
 
     @Before
     public void setup() {
@@ -37,6 +38,7 @@ public class ProsessinstansBehandlerImplTest {
         when(prosessinstansRepository.save(any(Prosessinstans.class))).thenAnswer(returnsFirstArg());
         prosessinstansBehandler = new ProsessinstansBehandlerImpl(Collections.singleton(mangelBrevStebehandler), prosessinstansRepository);
 
+        when(prosessinstans.getId()).thenReturn(UUID.randomUUID());
         prosessinstans.setType(ProsessType.MANGELBREV);
         prosessinstans.setStatus(ProsessStatus.KLAR);
     }

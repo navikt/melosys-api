@@ -17,6 +17,7 @@ import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.sikkerhet.context.SaksflytSubjektHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -50,6 +51,7 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
         ProsessSteg nesteSteg = null;
 
         try {
+            MDC.put("pid", prosessinstans.getId().toString());
             SaksflytSubjektHolder.set(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER));
             while ((nesteSteg = prosessFlyt.nesteSteg(prosessinstans.getSistFullførtSteg())) != null) {
                 prosessinstans = utførSteg(hentStegBehandler(nesteSteg), prosessinstans);
@@ -59,6 +61,7 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
         } catch (Exception e) {
             behandleFeil(prosessinstans, nesteSteg, e);
         } finally {
+            MDC.remove("pid");
             SaksflytSubjektHolder.reset();
         }
     }

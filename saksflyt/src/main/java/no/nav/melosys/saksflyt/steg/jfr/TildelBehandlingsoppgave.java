@@ -46,8 +46,7 @@ public class TildelBehandlingsoppgave implements StegBehandler {
             if (oppgave.isPresent()) {
                 String behandlingsoppgaveId = oppgave.get().getOppgaveId();
                 oppgaveService.tildelOppgave(behandlingsoppgaveId, saksbehandler);
-                log.info("Prosessinstans {} har tildelt behandlingsoppgave {} for fagsak {}",
-                    prosessinstans.getId(), behandlingsoppgaveId, saksnummer);
+                log.info("Tildelt behandlingsoppgave {} for fagsak {}", behandlingsoppgaveId, saksnummer);
             } else {
                 log.warn("Behandlingsoppgave for saksnummer {} finnes ikke og kan ikke tildeles.", saksnummer);
             }
