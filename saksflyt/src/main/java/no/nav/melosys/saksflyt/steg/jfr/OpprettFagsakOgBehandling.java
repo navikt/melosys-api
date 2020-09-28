@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.jfr;
 import java.util.Collections;
 import java.util.List;
 
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Fullmektig;
 import no.nav.melosys.domain.Kontaktopplysning;
@@ -70,8 +71,9 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
             .medInitierendeDokumentId(initierendeDokumentId)
             .build();
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
-        prosessinstans.setBehandling(fagsak.hentAktivBehandling());
-        log.info("Opprettet fagsak {} for prosessinstans {}", fagsak.getSaksnummer(), prosessinstans.getId());
+        Behandling behandling = fagsak.hentAktivBehandling();
+        prosessinstans.setBehandling(behandling);
+        log.info("Opprettet fagsak {} med behandling {}", fagsak.getSaksnummer(), behandling.getId());
     }
 
     private String hentAktørID(Prosessinstans prosessinstans) throws IkkeFunnetException {

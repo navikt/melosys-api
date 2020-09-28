@@ -42,6 +42,6 @@ public class SendOrienteringAnmodningUnntak implements StegBehandler {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
         brevBestiller.bestill(ORIENTERING_ANMODNING_UNNTAK, saksbehandler, Mottaker.av(BRUKER), behandling);
-        log.info("Sendt alle brev for anmodning om unntak. Prosessinstans {}", prosessinstans.getId());
+        log.info("Sendt alle brev for anmodning om unntak i behandling {}", behandling.getId());
     }
 }

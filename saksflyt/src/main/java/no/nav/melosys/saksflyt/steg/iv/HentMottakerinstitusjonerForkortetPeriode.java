@@ -51,7 +51,7 @@ public class HentMottakerinstitusjonerForkortetPeriode implements StegBehandler 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         avklarMottakerInstitusjoner(prosessinstans, prosessinstans.getBehandling());
-        log.info("Avklarte mottakerinstitusjoner for prosessinstans {}.", prosessinstans.getId());
+        log.info("Avklart mottakerinstitusjoner for behandling {}.", prosessinstans.getBehandling().getId());
     }
 
     private void avklarMottakerInstitusjoner(Prosessinstans prosessinstans, Behandling behandling) throws MelosysException {

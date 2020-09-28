@@ -54,6 +54,6 @@ public class SendOrienteringsbrevVideresendSøknad implements StegBehandler {
             .build();
         brevBestiller.bestill(brevbestilling);
 
-        log.info("Sendt orienteringsbrev om videresending av søknad for prosessinstans {}", prosessinstans.getId());
+        log.info("Sendt orienteringsbrev om videresending av søknad for behandling {}", behandling.getId());
     }
 }

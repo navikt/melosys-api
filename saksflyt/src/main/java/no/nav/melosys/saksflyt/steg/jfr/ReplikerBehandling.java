@@ -45,23 +45,23 @@ public class ReplikerBehandling implements StegBehandler {
         String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
 
-        Behandling behandling;
-
         if (fagsak.getTidligsteInaktiveBehandling() == null) {
             throw new FunksjonellException("Finner ingen avsluttet behandling på fagsak " + fagsak.getSaksnummer());
         }
 
-        behandling = behandlingService.replikerBehandlingOgBehandlingsresultat(
-            fagsak.getTidligsteInaktiveBehandling(),
+        Behandling tidligstInaktiveBehandling = fagsak.getTidligsteInaktiveBehandling();
+        Behandling nyBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(
+            tidligstInaktiveBehandling,
             Behandlingsstatus.OPPRETTET,
             prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class)
         );
 
-        prosessinstans.setBehandling(behandling);
+        prosessinstans.setBehandling(nyBehandling);
 
         fagsak.setStatus(Saksstatuser.OPPRETTET);
         fagsakService.lagre(fagsak);
 
-        log.info("Prosessinstans {} har replikert behandling for {}", prosessinstans.getId(), saksnummer);
+        log.info("Behandling {} replikert og behandling {} har blitt opprettet for {}",
+            tidligstInaktiveBehandling.getId(), nyBehandling.getId(), saksnummer);
     }
 }

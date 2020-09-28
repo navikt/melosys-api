@@ -67,6 +67,6 @@ public class SendMangelbrev implements StegBehandler {
         behandling.setDokumentasjonSvarfristDato(Instant.now().plus(Period.ofWeeks(DOKUMENTASJON_SVARFRIST_UKER)));
         behandlingRepo.save(behandling);
 
-        log.info("Sendt mangelbrev for prosessinstans {}", prosessinstans.getId());
+        log.info("Sendt mangelbrev for behandling {}", behandling.getId());
     }
 }

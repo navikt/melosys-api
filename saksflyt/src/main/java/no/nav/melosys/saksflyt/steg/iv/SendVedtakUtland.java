@@ -77,8 +77,8 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     }
 
     private SendUtlandStatus sendSedA003(Prosessinstans prosessinstans) throws MelosysException {
-        log.info("Sender A003 for utpeking til {}, i prosessinstans {}",
-            prosessinstans.getData(ProsessDataKey.UTPEKT_LAND), prosessinstans.getId());
+        log.info("Sender A003 for utpeking til {}, i behandling {}",
+            prosessinstans.getData(ProsessDataKey.UTPEKT_LAND), prosessinstans.getBehandling().getId());
         return sendUtland(BucType.LA_BUC_02, prosessinstans);
     }
 
