@@ -68,7 +68,7 @@ public class JournalfoeringOpprettDto extends JournalfoeringDto {
         this.representererKode = representererKode;
     }
 
-    public boolean behandlingstypeErSøknad() {
+    public boolean erBehandlingAvSøknad() {
         return Behandling.erBehandlingAvSøknad(getBehandlingstemaKode());
     }
 }

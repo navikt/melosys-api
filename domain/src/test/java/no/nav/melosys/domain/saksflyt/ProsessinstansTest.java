@@ -6,12 +6,10 @@ import java.util.List;
 
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.jpa.PropertiesConverter;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class ProsessinstansTest {
 
@@ -45,22 +43,5 @@ public class ProsessinstansTest {
 
         Assert.assertEquals(1, pi2.getData(OPPHOLDSLAND, List.class).size());
         Assert.assertEquals(pi1.getData(OPPHOLDSLAND, List.class).get(0), pi2.getData(OPPHOLDSLAND, List.class).get(0));
-    }
-
-    @Test
-    public void leggTilHendelse() {
-        final ProsessSteg steg = ProsessSteg.JFR_OPPRETT_SØKNAD;
-        final String type = "Teknisk feil";
-        final String melding = "Feilmelding";
-        final Throwable t = new Throwable();
-        Prosessinstans pi = new Prosessinstans();
-        pi.setSteg(steg);
-        pi.leggTilHendelse(type, melding, t);
-
-        assertThat(pi.getHendelser()).isNotEmpty();
-        ProsessinstansHendelse hendelse = pi.getHendelser().get(0);
-        String forventetMelding = melding + " - " + ExceptionUtils.getStackTrace(t);
-        ProsessinstansHendelse forventetHendelse = new ProsessinstansHendelse(pi, hendelse.getDato(), steg, type, forventetMelding);
-        assertThat(hendelse).isEqualTo(forventetHendelse);
     }
 }

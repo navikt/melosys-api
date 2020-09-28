@@ -8,7 +8,6 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -38,15 +37,8 @@ public class OpprettAnmodningsperiodeSvar implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
-        log.info("Starter behandling av prosessinstans {}", prosessinstans.getId());
-
-        if (prosessinstans.getType() != ProsessType.ANMODNING_OM_UNNTAK_SVAR) {
-            throw new TekniskException("Prosessinstans ikke av type" + ProsessType.ANMODNING_OM_UNNTAK_SVAR);
-        }
-
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
         AnmodningsperiodeSvar anmodningsperiodeSvar = opprettAnmodningsperiodeSvar(melosysEessiMelding.getSvarAnmodningUnntak());
-
         anmodningsperiodeService.lagreAnmodningsperiodeSvarForBehandling(prosessinstans.getBehandling().getId(), anmodningsperiodeSvar);
     }
 

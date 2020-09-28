@@ -15,7 +15,6 @@ import no.nav.melosys.domain.eessi.Vedlegg;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -142,7 +141,6 @@ public class VideresendSoknadTest {
         behandling.setFagsak(lagFagsak());
 
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setSteg(ProsessSteg.VS_SEND_SOKNAD);
         prosessinstans.setBehandling(behandling);
 
         return prosessinstans;

@@ -27,7 +27,7 @@ public class SaksflytArbeider implements Runnable {
         this.prosessinstansBehandler = prosessinstansBehandler;
     }
 
-    @SuppressWarnings({"java:S2189", "InfiniteLoopStatement", "BusyWait"})
+    @SuppressWarnings({"java:S2189", "BusyWait"})
     @Override
     public void run() {
         while (true) {
@@ -36,8 +36,9 @@ public class SaksflytArbeider implements Runnable {
                 plukketProsessinstans.ifPresent(prosessinstansBehandler::behandleProsessinstans);
                 Thread.sleep(PAUSE_MELLOM_OPPGAVER_MS);
             } catch (InterruptedException e) {
-                log.error("Arbeidertråd avbrutt", e);
+                log.warn("Arbeidertråd avbrutt", e);
                 Thread.currentThread().interrupt();
+                break;
             } catch (RuntimeException e) {
                 String feilmelding = plukketProsessinstans.map(p -> "Plukket prosessinstans " + p.getId()).orElse("");
                 log.error("Ubehandlet exception. {}", feilmelding, e);

@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -42,7 +41,6 @@ public class TildelBehandlingsoppgaveTest {
         tildelBehandlingsoppgave = new TildelBehandlingsoppgave(oppgaveService);
 
         prosessinstans = new Prosessinstans();
-        prosessinstans.setSteg(ProsessSteg.JFR_TILDEL_BEHANDLINGSOPPGAVE);
         prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER);
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER);
 

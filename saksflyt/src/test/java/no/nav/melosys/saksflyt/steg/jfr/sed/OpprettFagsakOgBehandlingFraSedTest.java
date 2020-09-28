@@ -62,7 +62,6 @@ public class OpprettFagsakOgBehandlingFraSedTest {
 
     private Prosessinstans hentProsessinstans(Behandlingstema behandlingstema) {
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.REGISTRERING_UNNTAK);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, "123");
         prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, "321");
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, 123);

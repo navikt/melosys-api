@@ -19,31 +19,24 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.VS_SEND_ORIENTERINGSBREV;
 
-/**
- * Sender orienteringsbrev til bruker
- *
- * Transisjoner:
- * VS_SEND_ORIENTERINGSBREV -> VS_SEND_SOKNAD eller FEILET_MASKINELT hvis feil
- */
-@Component("VideresendSoknadOrienteringsbrev")
-public class SendOrienteringsbrev implements StegBehandler {
+@Component
+public class SendOrienteringsbrevVideresendSøknad implements StegBehandler {
 
-    private static final Logger log = LoggerFactory.getLogger(SendOrienteringsbrev.class);
+    private static final Logger log = LoggerFactory.getLogger(SendOrienteringsbrevVideresendSøknad.class);
 
     private final BehandlingService behandlingService;
     private final BrevBestiller brevBestiller;
 
     @Autowired
-    public SendOrienteringsbrev(BehandlingService behandlingService, BrevBestiller brevBestiller) {
+    public SendOrienteringsbrevVideresendSøknad(BehandlingService behandlingService, BrevBestiller brevBestiller) {
         this.behandlingService = behandlingService;
         this.brevBestiller = brevBestiller;
     }
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return VS_SEND_ORIENTERINGSBREV;
+        return ProsessSteg.SEND_ORIENTERINGSBREV_VIDERESENDING_SØKNAD;
     }
 
     @Override

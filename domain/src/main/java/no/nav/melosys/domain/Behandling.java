@@ -384,6 +384,10 @@ public class Behandling extends RegistreringsInfo {
         return Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL.getKode().equalsIgnoreCase(behandlingstemaKode);
     }
 
+    public static boolean erBehandlingAvSedForespørsler(Behandlingstema behandlingstema) {
+        return erBehandlingAvSedForespørsler(behandlingstema.getKode());
+    }
+
     public static boolean erBehandlingAvSedForespørsler(String behandlingstemaKode) {
         return Behandlingstema.ØVRIGE_SED_MED.getKode().equalsIgnoreCase(behandlingstemaKode)
             || Behandlingstema.ØVRIGE_SED_UFM.getKode().equalsIgnoreCase(behandlingstemaKode)

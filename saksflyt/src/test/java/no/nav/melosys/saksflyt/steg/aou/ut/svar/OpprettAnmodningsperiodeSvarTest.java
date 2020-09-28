@@ -10,7 +10,6 @@ import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.junit.Before;
@@ -72,7 +71,6 @@ public class OpprettAnmodningsperiodeSvarTest {
 
     private Prosessinstans hentProsessinstans(boolean innvilgelse) {
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK_SVAR);
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, hentMelosysEessiMelding(innvilgelse));
 
         Behandling behandling = new Behandling();

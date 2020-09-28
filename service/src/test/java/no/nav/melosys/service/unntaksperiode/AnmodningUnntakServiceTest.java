@@ -143,6 +143,7 @@ class AnmodningUnntakServiceTest {
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(eq(1L));
         verify(anmodningsperiodeService).hentAnmodningsperiodeSvarForBehandling(eq(1L));
         verify(lovvalgsperiodeService).hentLovvalgsperioder(eq(1L));
+        verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntakMottakSvar(eq(behandling));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq("MEL-111"));
     }
 

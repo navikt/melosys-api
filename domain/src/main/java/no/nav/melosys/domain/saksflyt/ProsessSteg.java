@@ -22,8 +22,6 @@ public enum ProsessSteg implements Kodeverk {
     SEND_FORVALTNINGSMELDING("SEND_FORVALTNINGSMELDING", "Send forvaltningsmelding til søker"),
     MANGELBREV("MANGELBREV", "Opprett mangelbrev"),
 
-    FEILET_MASKINELT("FEILET_MASKINELT", "Feilet maskinelt"),
-
     //Anmodning om unntak
     LAGRE_ANMODNINGSPERIODE_MEDL("LAGRE_ANMODNINGSPERIODE_MEDL", "Lagrer en anmodningsperiode som under avklaring i MEDL"),
     SEND_ORIENTERING_ANMODNING_UNNTAK("SEND_ORIENTERING_ANMODNING_UNNTAK", "Send orienteringsbrev til bruker ved anmodning om unntak"),
@@ -55,15 +53,13 @@ public enum ProsessSteg implements Kodeverk {
     DISTRIBUER_JOURNALPOST_UTLAND("DISTRIBUER_JOURNALPOST_UTLAND", "Distribuerer (sender) en journalpost til utlanlandsk myndighet"),
 
     //Henlegg sak
-    HS_SEND_BREV("HS_SEND_BREV", "Opprett henleggelsesbrev"),
+    SEND_HENLEGGELSESBREV("SEND_HENLEGGELSESBREV", "Send henleggelsesbrev"),
 
     // Videresend søknad
-    VS_SEND_ORIENTERINGSBREV("VS_SEND_ORIENTERINGSBREV", "Opprett orienteringsbrev og brev med vedlagt søknad"),
-    VS_SEND_SOKNAD("VS_SEND_SOKNAD", "Opprett journalpost eller SED med søknad som vedlegg"),
-    VS_DISTRIBUER_JOURNALPOST("VS_DISTRIBUER_JOURNALPOST", "Distribuerer (sender) journalposten dersom den ble opprettet"),
+    SEND_ORIENTERINGSBREV_VIDERESENDING_SØKNAD("SEND_ORIENTERINGSBREV_VIDERESENDING_SØKNAD", "Sender orienteringsbrev til bruker ved videresending av søknad"),
+    VIDERESEND_SØKNAD("VIDERESEND_SØKNAD", "Oppretter journalpost eller sender SED med søknad som vedlegg"),
 
     //Mottak av SED
-    SED_MOTTAK_HENT_EESSI_MELDING("SED_MOTTAK_HENT_EESSI_MELDING", "Henter saksopplysninger fra mottatt SED"),
     SED_MOTTAK_RUTING("SED_MOTTAK_RUTING", "Bestemmer videre behandling for innkommende SED"),
     SED_MOTTAK_OPPRETT_NY_BEHANDLING("SED_MOTTAK_OPPRETT_NY_BEHANDLING", "Oppretter ny behandling for oppdatert SED"),
     SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH("SED_MOTTAK_OPPRETT_FAGSAK_OG_BEH","Opprett fagsak og behandling"),
@@ -84,17 +80,12 @@ public enum ProsessSteg implements Kodeverk {
     SEND_GODKJENNING_REGISTRERING_UNNTAK("SEND_GODKJENNING_REGISTRERING_UNNTAK", "Varsler utland om godkjent unntaksperiode"),
 
     // Mottak av søknad
-    MSA_OPPRETT_SAK_OG_BEHANDLING("MSA_OPPRETT_SAK_OG_BEHANDLING", "Opprett sak og behandling fra søknad fra Altinn"),
-    MSA_OPPRETT_ARKIVSAK("MSA_OPPRETT_ARKIVSAK","Opprett arkivsak"),
-    MSA_OPPRETT_OG_FERDIGSTILL_JOURNALPOST("MSA_OPPRETT_OG_FERDIGSTILL_JOURNALPOST", "Opprett og journalfør søknad fra Altinn"),
-    MSA_HENT_REGISTEROPPLYSNINGER("MSA_HENT_REGISTEROPPLYSNINGER","Innhent registeropplysnigner"),
-    MSA_VURDER_INNGANGSVILKÅR("MSA_VURDER_INNGANGSVILKÅR","Vurder inngangsvilkår"),
-    MSA_OPPRETT_OPPGAVE("MSA_OPPRETT_OPPGAVE","Opprett oppgave for saksbehandling"),
-    MSA_SEND_FORVALTNINGSMELDING("MSA_SEND_FORVALTNINGSMELDING","Send forvaltningsmelding"),
+    OPPRETT_SAK_OG_BEHANDLING_FRA_ALTINN_SØKNAD("OPPRETT_SAK_OG_BEHANDLING_FRA_ALTINN_SØKNAD", "Oppretter fagsak og behandling fra mottatt Altinn-søknad"),
+    OPPRETT_OG_FERDIGSTILL_JOURNALPOST_FRA_ALTINN("OPPRETT_OG_FERDIGSTILL_JOURNALPOST_FRA_ALTINN", "Oppretter og ferdigstiller journalpost fra Altinn"),
 
     LAGRE_LOVVALGSPERIODE_MEDL("LAGRE_LOVVALGSPERIODE_MEDL", "Lagrer en lovvalgsperiode i MEDL som foreløpig eller endelig"),
 
-    FERDIG("FERDIG", "Prosessen er ferdig");
+    UKJENT("UKJENT", "Ukjent steg");
 
 
     private final String kode;
