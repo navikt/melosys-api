@@ -177,9 +177,9 @@ public final class ProsessflytDefinisjon {
                 OPPDATER_SAKSRELASJON,
                 SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
                 SOB_BEHANDLING_OPPRETTET,
-                HENT_REGISTEROPPLYSNINGER,
                 OPPRETT_SEDDOKUMENT,
                 OPPRETT_SED_GRUNNLAG,
+                HENT_REGISTEROPPLYSNINGER,
                 VURDER_INNGANGSVILKÅR,
                 REGISTERKONTROLL,
                 BESTEM_BEHANDLINGMÅTE_SED
@@ -192,9 +192,9 @@ public final class ProsessflytDefinisjon {
                 SED_MOTTAK_FERDIGSTILL_JOURNALPOST,
                 SOB_BEHANDLING_OPPRETTET,
                 AVSLUTT_TIDLIGERE_MEDL_PERIODE,
-                HENT_REGISTEROPPLYSNINGER,
                 OPPRETT_SEDDOKUMENT,
                 OPPRETT_SED_GRUNNLAG,
+                HENT_REGISTEROPPLYSNINGER,
                 VURDER_INNGANGSVILKÅR,
                 REGISTERKONTROLL,
                 BESTEM_BEHANDLINGMÅTE_SED
