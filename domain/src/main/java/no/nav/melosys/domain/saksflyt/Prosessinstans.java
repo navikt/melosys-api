@@ -54,9 +54,6 @@ public class Prosessinstans {
     @Column(name = "registrert_dato", nullable = false, updatable = false)
     private LocalDateTime registrertDato;
 
-    @Column(name = "sist_forsoekt")
-    private LocalDateTime sistForsøkt;
-
     @Column(name = "endret_dato", nullable = false)
     private LocalDateTime endretDato;
 
@@ -171,10 +168,6 @@ public class Prosessinstans {
         this.registrertDato = registrertDato;
     }
 
-    public void setSistForsøkt(LocalDateTime sistForsøkt) {
-        this.sistForsøkt = sistForsøkt;
-    }
-
     public void setEndretDato(LocalDateTime endretDato) {
         this.endretDato = endretDato;
     }
@@ -240,7 +233,6 @@ public class Prosessinstans {
             ", data=" + data +
             ", sistFullførtSteg=" + sistFullførtSteg +
             ", registrertDato=" + registrertDato +
-            ", sistForsøkt=" + sistForsøkt +
             ", endretDato=" + endretDato +
             ", hendelser=" + hendelser +
             '}';
