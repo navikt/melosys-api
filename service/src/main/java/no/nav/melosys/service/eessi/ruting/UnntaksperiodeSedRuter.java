@@ -46,6 +46,7 @@ public class UnntaksperiodeSedRuter implements SedRuterForSedTyper {
 
         if (arkivsakID == null) {
             opprettNySak(prosessinstans, melosysEessiMelding);
+            return;
         }
 
         Optional<Fagsak> fagsak = fagsakService.finnFagsakFraArkivsakID(arkivsakID);
