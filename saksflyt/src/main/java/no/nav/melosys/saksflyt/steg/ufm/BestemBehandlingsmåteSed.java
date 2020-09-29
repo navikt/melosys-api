@@ -29,8 +29,10 @@ public class BestemBehandlingsmåteSed implements StegBehandler {
     private final UnntaksperiodeService unntaksperiodeService;
 
     @Autowired
-    public BestemBehandlingsmåteSed(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
-                                    @Qualifier("system") OppgaveService oppgaveService, UnntaksperiodeService unntaksperiodeService) {
+    public BestemBehandlingsmåteSed(BehandlingService behandlingService,
+                                    BehandlingsresultatService behandlingsresultatService,
+                                    @Qualifier("system") OppgaveService oppgaveService,
+                                    @Qualifier("system") UnntaksperiodeService unntaksperiodeService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
