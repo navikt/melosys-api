@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt.steg;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -32,12 +34,15 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         final long behandlingID = prosessinstans.getBehandling().getId();
         final Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        final Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
+        final Optional<Lovvalgsperiode> lovvalgsperiode = behandlingsresultat.finnValidertLovvalgsperiode();
 
-        if (lovvalgsperiode.erInnvilget()) {
+        if (behandlingsresultat.erAvslag()) {
+            final Optional<Long> medlPeriode = lovvalgsperiode.map(Lovvalgsperiode::getMedlPeriodeID);
+            if (medlPeriode.isPresent()) {
+                medlPeriodeService.avvisPeriode(medlPeriode.get());
+            }
+        } else if (lovvalgsperiode.stream().anyMatch(Lovvalgsperiode::erInnvilget)) {
             opprettEllerOppdaterMedlPeriode(prosessinstans.getBehandling(), behandlingsresultat.hentValidertLovvalgsperiode());
-        } else if (lovvalgsperiode.erAvslått() && lovvalgsperiode.getMedlPeriodeID() != null) {
-            medlPeriodeService.avvisPeriode(behandlingsresultat.hentValidertLovvalgsperiode().getMedlPeriodeID());
         } else {
             throw new FunksjonellException("Lovvalgsperioden er hverken innvilget eller avslått i behandling " + behandlingID);
         }
