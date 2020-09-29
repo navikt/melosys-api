@@ -55,7 +55,7 @@ public class BehandlingTjeneste {
         log.info("Saksbehandler {} ber om å endre status for behandling {} til {}.", SubjectHandler.getInstance().getUserID(),
             behandlingID, status.getBehandlingsstatus().getKode());
         tilgangService.sjekkTilgang(behandlingID);
-        behandlingService.oppdaterStatus(behandlingID, status.getBehandlingsstatus());
+        behandlingService.brukerOppdaterStatus(behandlingID, status.getBehandlingsstatus());
         return ResponseEntity.noContent().build();
     }
 

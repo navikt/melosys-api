@@ -21,12 +21,11 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.dokument.sed.SedDataGrunnlagFactory;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
-import no.nav.melosys.service.eessi.SedGrunnlagMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.AFL_SVAR_AVSLUTT_BEHANDLING;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,8 +33,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SendAvslagTest {
+@ExtendWith(MockitoExtension.class)
+class SendAvslagTest {
 
     @Mock
     private SedDataBygger sedDataBygger;
@@ -47,18 +46,16 @@ public class SendAvslagTest {
     private BehandlingService behandlingService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private SedGrunnlagMapper sedGrunnlagMapper;
 
     private SendAvslag sendAvslag;
     private EessiService eessiService;
     private Behandling behandling;
 
-    @Before
+    @BeforeEach
     public void settOpp() throws FunksjonellException, TekniskException {
         eessiService = new EessiService(
             sedDataBygger, sedDataGrunnlagFactory,
-            eessiConsumer, behandlingService, behandlingsresultatService, sedGrunnlagMapper
+            eessiConsumer, behandlingService, behandlingsresultatService
         );
         sendAvslag = new SendAvslag(eessiService);
 
@@ -79,7 +76,7 @@ public class SendAvslagTest {
     }
 
     @Test
-    public void utfør() throws MelosysException {
+    void utfør() throws MelosysException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.UTPEKING_AVVIS, new UtpekingAvvis(

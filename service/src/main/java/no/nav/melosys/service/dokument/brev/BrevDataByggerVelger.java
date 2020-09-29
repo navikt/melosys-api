@@ -51,11 +51,6 @@ public class BrevDataByggerVelger {
         this.vilkaarsresultatService = vilkaarsresultatService;
     }
 
-    // For brevbygging i saksflyt
-    public BrevDataBygger hent(Produserbaredokumenter produserbartDokument) {
-        return hent(produserbartDokument, new BrevbestillingDto());
-    }
-
     public BrevDataBygger hent(Produserbaredokumenter produserbartDokument, BrevbestillingDto brevbestillingDto) {
         switch (produserbartDokument) {
             case ATTEST_A1:

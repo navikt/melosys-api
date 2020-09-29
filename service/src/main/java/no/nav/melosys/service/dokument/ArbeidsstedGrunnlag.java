@@ -1,26 +1,27 @@
-package no.nav.melosys.service.dokument.brev.datagrunnlag;
-
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
-import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FlyvendeArbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
+package no.nav.melosys.service.dokument;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
+import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.AvklarteVirksomheterGrunnlag;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FlyvendeArbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
+import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
+
 public class ArbeidsstedGrunnlag {
     private final Map<String, AvklartMaritimtArbeid> avklarteMaritimeArbeidEtterSubjekt;
     private final AvklarteVirksomheterGrunnlag avklarteVirksomheterGrunnlag;
     private final BehandlingsgrunnlagData grunnlagData;
 
-    ArbeidsstedGrunnlag(Map<String, AvklartMaritimtArbeid> avklarteMaritimeArbeid,
+    public ArbeidsstedGrunnlag(Map<String, AvklartMaritimtArbeid> avklarteMaritimeArbeid,
                         AvklarteVirksomheterGrunnlag avklarteVirksomheterGrunnlag,
                         BehandlingsgrunnlagData grunnlagData) {
         this.avklarteMaritimeArbeidEtterSubjekt = avklarteMaritimeArbeid;

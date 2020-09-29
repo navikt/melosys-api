@@ -3,10 +3,12 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
 import no.nav.dok.melosysbrev._000067.A1;
+import no.nav.dok.melosysbrev._000067.AdresseType;
 import no.nav.dok.melosysbrev._000116.BrevdataType;
 import no.nav.dok.melosysbrev._000116.Fag;
 import no.nav.dok.melosysbrev._000116.ObjectFactory;
@@ -37,6 +39,7 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FlyvendeArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
+import org.apache.commons.lang3.StringUtils;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Rule;
@@ -44,9 +47,11 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.xml.sax.SAXException;
 
+import static java.util.function.Predicate.not;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
+import static no.nav.melosys.service.dokument.brev.mapper.A1Mapper.MAKS_ANTALL_TEGN_PER_LINJE_5_2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -64,6 +69,8 @@ public class A1MapperTest {
     private Behandling behandling;
 
     private BrevDataA1 brevData;
+    private FellesType fellesType;
+    private MelosysNAVFelles navFelles;
 
     @Before
     public void setUp() {
@@ -121,9 +128,17 @@ public class A1MapperTest {
         brevData.person = lagPersonDokument();
         brevData.hovedvirksomhet = virksomhet;
         brevData.bivirksomheter = new ArrayList<>(Collections.singletonList(utenlandskVirksomhet));
+
+        fellesType = new FellesType();
+        fellesType.setFagsaksnummer("MELTEST-4");
+
+        navFelles = easyRandom.nextObject(MelosysNAVFelles.class);
+        navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
+        navFelles.setKontaktinformasjon(lagKontaktInformasjon());
+
     }
 
-    protected static PersonDokument lagPersonDokument() {
+    static PersonDokument lagPersonDokument() {
         PersonDokument person = new PersonDokument();
         person.kjønn = new KjoennsType();
         person.kjønn.setKode("K");
@@ -137,13 +152,6 @@ public class A1MapperTest {
 
     @Test
     public void mapTilBrevXML() throws Exception {
-        FellesType fellesType = new FellesType();
-        fellesType.setFagsaksnummer("MELTEST-4");
-
-        MelosysNAVFelles navFelles = easyRandom.nextObject(MelosysNAVFelles.class);
-        navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
-        navFelles.setKontaktinformasjon(lagKontaktInformasjon());
-
         String xml = mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData);
 
         assertThat(xml).isNotNull();
@@ -151,13 +159,6 @@ public class A1MapperTest {
 
     @Test
     public void mapTilBrevXML_hovedVirksomhetUtenOrgnr_fyll4_2MedMellomrom() throws Exception {
-        FellesType fellesType = new FellesType();
-        fellesType.setFagsaksnummer("MELTEST-4");
-
-        MelosysNAVFelles navFelles = easyRandom.nextObject(MelosysNAVFelles.class);
-        navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
-        navFelles.setKontaktinformasjon(lagKontaktInformasjon());
-
         ForetakUtland utenlandskForetak = lagForetakUtland(false);
         utenlandskForetak.orgnr = null;
         brevData.hovedvirksomhet = new AvklartVirksomhet(utenlandskForetak);
@@ -171,13 +172,6 @@ public class A1MapperTest {
 
     @Test
     public void mapTilBrevXML_bostedsAdresseIkkeGyldig_settBostedsadresseSinGateAdresseTom() throws Exception {
-        FellesType fellesType = new FellesType();
-        fellesType.setFagsaksnummer("MELTEST-4");
-
-        MelosysNAVFelles navFelles = easyRandom.nextObject(MelosysNAVFelles.class);
-        navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
-        navFelles.setKontaktinformasjon(lagKontaktInformasjon());
-
         brevData.bostedsadresse.gatenavn = null;
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
         assertThat(a1.getPerson().getBostedsadresse().getGatenavn()).isEqualTo(" ");
@@ -189,13 +183,6 @@ public class A1MapperTest {
 
     @Test
     public void mapBrevTilXML_arbeidslandUtenFysiskArbeidssted_fyllerPåMedArbeidsland() throws TekniskException, JAXBException, SAXException {
-        FellesType fellesType = new FellesType();
-        fellesType.setFagsaksnummer("MELTEST-4");
-
-        MelosysNAVFelles navFelles = easyRandom.nextObject(MelosysNAVFelles.class);
-        navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
-        navFelles.setKontaktinformasjon(lagKontaktInformasjon());
-
         brevData.arbeidsland = List.of(Landkoder.SE, Landkoder.DK, Landkoder.GB);
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
 
@@ -210,13 +197,6 @@ public class A1MapperTest {
 
     @Test
     public void mapBrevTilXML_harFlyvendeArbeidssted_fyllerUtHjemmebaseNavnOgLand() throws TekniskException {
-        FellesType fellesType = new FellesType();
-        fellesType.setFagsaksnummer("MELTEST-4");
-
-        MelosysNAVFelles navFelles = easyRandom.nextObject(MelosysNAVFelles.class);
-        navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
-        navFelles.setKontaktinformasjon(lagKontaktInformasjon());
-
         Landkoder landkode = Landkoder.FI;
         LuftfartBase luftfartBase = new LuftfartBase();
         luftfartBase.hjemmebaseNavn = "hjemmebaseNavn";
@@ -231,6 +211,46 @@ public class A1MapperTest {
         assertThat(a1.getFysiskArbeidsstedAdresseListe().getAdresse())
             .extracting("adresselinje1")
             .contains(landkode.getBeskrivelse());
+    }
+
+    @Test
+    public void mapTilBrevXML_harKortAdressePåArbeidssted_brekkerIkkeAdresseOverFlereLinjer() throws TekniskException {
+        StrukturertAdresse adresse = lagStrukturertAdresse();
+        Arbeidssted fysiskArbeidssted = new FysiskArbeidssted("", "", adresse);
+
+        assertThat(fysiskArbeidssted.lagAdresselinje().length()).isLessThan(MAKS_ANTALL_TEGN_PER_LINJE_5_2);
+
+        brevData.arbeidssteder = List.of(fysiskArbeidssted);
+        brevData.arbeidsland = Collections.emptyList();
+
+        A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
+        List<String> utfylteAdresselinjer = a1.getFysiskArbeidsstedAdresseListe().getAdresse().stream()
+            .map(AdresseType::getAdresselinje1)
+            .filter(not(StringUtils::isEmpty))
+            .collect(Collectors.toList());
+
+        assertThat(utfylteAdresselinjer.size()).isEqualTo(1);
+    }
+
+    @Test
+    public void mapTilBrevXML_harLangAdressePåArbeidssted_brekkerAdresseOverFlereLinjer() throws TekniskException {
+        StrukturertAdresse adresse = lagStrukturertAdresse();
+        adresse.gatenavn = "Lorem ipsumdolorsitamet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua-veien";
+        adresse.husnummer = "47";
+        Arbeidssted fysiskArbeidssted = new FysiskArbeidssted("", "", adresse);
+
+        assertThat(fysiskArbeidssted.lagAdresselinje().length()).isGreaterThan(MAKS_ANTALL_TEGN_PER_LINJE_5_2);
+
+        brevData.arbeidssteder = List.of(fysiskArbeidssted);
+        brevData.arbeidsland = Collections.emptyList();
+
+        A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
+        List<String> utfylteAdresselinjer = a1.getFysiskArbeidsstedAdresseListe().getAdresse().stream()
+            .map(AdresseType::getAdresselinje1)
+            .filter(not(StringUtils::isEmpty))
+            .collect(Collectors.toList());
+
+        assertThat(utfylteAdresselinjer.size()).isGreaterThan(1);
     }
 
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException, TekniskException {
