@@ -4,6 +4,7 @@ import java.util.Collections;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -30,39 +31,40 @@ class OpprettFagsakOgBehandlingTest {
     @Mock
     private TpsFasade tpsFasade;
 
-    private OpprettFagsakOgBehandling agent;
+    private OpprettFagsakOgBehandling opprettFagsakOgBehandling;
 
     @Captor
     private ArgumentCaptor<OpprettSakRequest> opprettSakRequestArgumentCaptor;
 
     @BeforeEach
     public void setUp() {
-        agent = new OpprettFagsakOgBehandling(fagsakService, tpsFasade);
+        opprettFagsakOgBehandling = new OpprettFagsakOgBehandling(fagsakService, tpsFasade);
     }
 
     @Test
     void utfør_typeJfrNySak_fagsakBliropprettet() throws FunksjonellException, TekniskException {
-        Prosessinstans p = new Prosessinstans();
-        p.setType(ProsessType.JFR_NY_SAK);
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(ProsessType.JFR_NY_SAK);
         String aktørId = "1000104568393";
         String journalpostId = "44553";
         String dokumentId = "222221";
         String arbeidsgiver = "104568393";
         String representant = "rep";
         String representantKontaktperson = "kontaktperson";
-        p.setData(ProsessDataKey.AKTØR_ID, aktørId);
-        p.setData(ProsessDataKey.ARBEIDSGIVER, arbeidsgiver);
-        p.setData(ProsessDataKey.JOURNALPOST_ID, journalpostId);
-        p.setData(ProsessDataKey.DOKUMENT_ID, dokumentId);
-        p.setData(ProsessDataKey.REPRESENTANT, representant);
-        p.setData(ProsessDataKey.REPRESENTANT_KONTAKTPERSON, representantKontaktperson);
+        prosessinstans.setData(ProsessDataKey.AKTØR_ID, aktørId);
+        prosessinstans.setData(ProsessDataKey.ARBEIDSGIVER, arbeidsgiver);
+        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostId);
+        prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, dokumentId);
+        prosessinstans.setData(ProsessDataKey.REPRESENTANT, representant);
+        prosessinstans.setData(ProsessDataKey.REPRESENTANT_KONTAKTPERSON, representantKontaktperson);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MELTEST-333");
         fagsak.setBehandlinger(Collections.singletonList(new Behandling()));
         when(fagsakService.nyFagsakOgBehandling(any(OpprettSakRequest.class))).thenReturn(fagsak);
 
-        agent.utfør(p);
+        opprettFagsakOgBehandling.utfør(prosessinstans);
 
         verify(fagsakService).nyFagsakOgBehandling(opprettSakRequestArgumentCaptor.capture());
         assertThat(opprettSakRequestArgumentCaptor.getValue().getAktørID()).isEqualTo(aktørId);

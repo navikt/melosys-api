@@ -8,6 +8,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Fullmektig;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_OPPRETT_SAK_OG_BEH;
 
@@ -59,12 +61,14 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
         String initierendeDokumentId = prosessinstans.getData(DOKUMENT_ID);
         Behandlingstyper behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class);
         Behandlingstema behandlingstema = prosessinstans.getData(BEHANDLINGSTEMA, Behandlingstema.class);
+        Sakstyper sakstype = erBehandlingAvSøknad(behandlingstema) ? Sakstyper.UKJENT : Sakstyper.EU_EOS;
 
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medAktørID(aktørID)
             .medArbeidsgiver(arbeidsgiver)
             .medFullmektig(representant != null ? new Fullmektig(representant, representantRepresenterer) : null)
             .medKontaktopplysninger(lagKontaktopplysningerForRepresentant(representant, representantKontakperson))
+            .medSakstype(sakstype)
             .medBehandlingstema(behandlingstema)
             .medBehandlingstype(behandlingstype)
             .medInitierendeJournalpostId(initierendeJournalpostId)
