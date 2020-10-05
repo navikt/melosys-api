@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import com.google.common.collect.Comparators;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.SedType;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
@@ -15,6 +16,7 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.dokument.DokumentService;
 import no.nav.melosys.service.dokument.DokumentVisningService;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.SedPdfData;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.tjenester.gui.dto.dokument.JournalpostInfoDto;
@@ -64,6 +66,17 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
         assertThat(inOrder).isTrue();
 
         validerArray(dtos, "dokumenter-oversikt-schema.json", log);
+    }
+
+    @Test
+    public void hentBrevForhåndsvisning() throws MelosysException, IOException {
+        final byte[] MOCK_PDF = "bytes fra et brev".getBytes();
+        when(dokumentService.produserUtkast(any(), any(), any())).thenReturn(MOCK_PDF);
+        BrevbestillingDto brevBestillingDto = new BrevbestillingDto();
+
+        ResponseEntity response = dokumentTjeneste.produserUtkastBrev(1L, Produserbaredokumenter.ATTEST_A1, brevBestillingDto);
+        assertThat(response.getBody()).isEqualTo(MOCK_PDF);
+        valider(brevBestillingDto, "dokumenter-pdf-utkast-brev-post-schema.json");
     }
 
     @Test
