@@ -6,7 +6,6 @@ import java.util.stream.Stream;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
 import no.nav.melosys.domain.dokument.soeknad.*;
-import no.nav.melosys.domain.eessi.SedOrganisasjon;
 import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser;
 import no.nav.melosys.exception.FunksjonellException;
@@ -32,14 +31,14 @@ public class SedGrunnlagMapper {
         if (sedGrunnlagDto.erA003()) {
             SedGrunnlagA003Dto sedGrunnlagA003Dto = (SedGrunnlagA003Dto) sedGrunnlagDto;
             sedGrunnlag.overgangsregelbestemmelser = mapOvergangsregelbestemmelser(sedGrunnlagA003Dto.getOvergangsregelbestemmelser());
-            sedGrunnlag.norskeArbeidsgivere = tilSedOrganisasjoner(sedGrunnlagA003Dto.getNorskeArbeidsgivendeVirksomheter());
+            sedGrunnlag.juridiskArbeidsgiverNorge.ekstraArbeidsgivere = sedGrunnlagA003Dto
+                .getNorskeArbeidsgivendeVirksomheter()
+                .stream()
+                .map(Virksomhet::hentOrgnrEllerNavn)
+                .collect(Collectors.toList());
         }
 
         return sedGrunnlag;
-    }
-
-    private static List<SedOrganisasjon> tilSedOrganisasjoner(List<Virksomhet> norskeArbeidsgivendeVirksomheter) {
-        return norskeArbeidsgivendeVirksomheter.stream().map(Virksomhet::tilOrganisasjon).collect(Collectors.toList());
     }
 
     private static List<Overgangsregelbestemmelser> mapOvergangsregelbestemmelser(List<Bestemmelse> overgangsregelbestemmelser) {

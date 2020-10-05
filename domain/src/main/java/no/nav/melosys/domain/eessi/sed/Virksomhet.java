@@ -77,4 +77,8 @@ public class Virksomhet {
     public void setOrgnr(String orgnr) {
         this.orgnr = orgnr;
     }
+
+    public String hentOrgnrEllerNavn() {
+        return StringUtils.isNotEmpty(orgnr) ? orgnr : navn;
+    }
 }
