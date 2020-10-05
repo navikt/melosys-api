@@ -433,7 +433,7 @@ public class SedDataByggerTest {
     @Test
     public void lag_arbeidsstedManglerLandkode_kasterFeil() throws TekniskException, FunksjonellException {
         expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("land ikke oppgitt for arbeidssted");
+        expectedException.expectMessage("land er ikke utfylt for arbeidssted");
         dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(true, false, false),
             behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
     }
@@ -442,7 +442,7 @@ public class SedDataByggerTest {
     public void lag_arbeidsgivendeVirksomhetManglerLandkode_kasterFeil() throws TekniskException, FunksjonellException {
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of("uuid"));
         expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("land ikke oppgitt for arbeidsgivende virksomhet");
+        expectedException.expectMessage("land er ikke utfylt for virksomhet");
         dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(false, true, false),
             behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
     }
@@ -451,7 +451,7 @@ public class SedDataByggerTest {
     public void lag_selvstendigVirksomhetManglerLandkode_kasterFeil() throws TekniskException, FunksjonellException {
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of("uuid"));
         expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("land ikke oppgitt for selvstendig virksomhet");
+        expectedException.expectMessage("land er ikke utfylt for selvstendig virksomhet");
         dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(false, false, true),
             behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
     }
