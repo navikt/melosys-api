@@ -12,7 +12,7 @@ public interface TpsFasade {
 
     Saksopplysning hentPerson(String ident) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException;
 
-    Saksopplysning hentPersonMedAdresse(String ident) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException;
+    Saksopplysning hentPersonMedTilleggsinformasjon(String ident) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException;
 
     /**
      * Henter all historikk fram til angitt dato (start av søknadsperioden).

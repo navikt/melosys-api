@@ -2,8 +2,8 @@ package no.nav.melosys.integrasjon.tps;
 
 import java.io.StringWriter;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -158,11 +158,8 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    public Saksopplysning hentPersonMedAdresse(String ident) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        Collection<Informasjonsbehov> behov = new ArrayList<>();
-        behov.add(Informasjonsbehov.ADRESSE);
-
-        return hentPerson(ident, behov);
+    public Saksopplysning hentPersonMedTilleggsinformasjon(String ident) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+        return hentPerson(ident, Set.of(Informasjonsbehov.ADRESSE, Informasjonsbehov.FAMILIERELASJONER));
     }
 
     @Override

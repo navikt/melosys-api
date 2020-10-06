@@ -70,7 +70,7 @@ public class RegisteropplysningerServiceTest {
         when(tpsFasade.hentAktørIdForIdent(anyString())).thenReturn(AKTØR_ID);
 
         when(aaregFasade.finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.ARBFORH));
-        when(tpsFasade.hentPersonMedAdresse(anyString())).thenReturn(lagSaksopplysning(SaksopplysningType.PERSOPL));
+        when(tpsFasade.hentPersonMedTilleggsinformasjon(anyString())).thenReturn(lagSaksopplysning(SaksopplysningType.PERSOPL));
         when(medlPeriodeService.hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.MEDL));
         when(inntektService.hentInntektListe(anyString(), anyYearMonth(), anyYearMonth())).thenReturn(lagSaksopplysning(SaksopplysningType.INNTK));
         when(utbetaldataService.hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.UTBETAL));
@@ -115,7 +115,7 @@ public class RegisteropplysningerServiceTest {
         verify(medlPeriodeService).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
         verify(eregFasade).hentOrganisasjon(anyString());
         verify(tpsFasade).hentPersonhistorikk(anyString(), anyLocalDate());
-        verify(tpsFasade).hentPersonMedAdresse(anyString());
+        verify(tpsFasade).hentPersonMedTilleggsinformasjon(anyString());
         verify(sobService).finnSakOgBehandlingskjedeListe(eq(AKTØR_ID));
         verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
     }
@@ -164,7 +164,7 @@ public class RegisteropplysningerServiceTest {
 
         verify(medlPeriodeService).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
         verify(tpsFasade).hentPersonhistorikk(anyString(), anyLocalDate());
-        verify(tpsFasade).hentPersonMedAdresse(anyString());
+        verify(tpsFasade).hentPersonMedTilleggsinformasjon(anyString());
         verify(sobService).finnSakOgBehandlingskjedeListe(eq(AKTØR_ID));
         verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
     }
@@ -195,7 +195,7 @@ public class RegisteropplysningerServiceTest {
             .saksopplysningTyper(saksopplysningstyper().personopplysninger().build())
             .build());
 
-        verify(tpsFasade).hentPersonMedAdresse(FNR);
+        verify(tpsFasade).hentPersonMedTilleggsinformasjon(FNR);
         verify(behandlingService).lagre(any(Behandling.class));
     }
 

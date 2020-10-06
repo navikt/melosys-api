@@ -143,7 +143,7 @@ public class RegisteropplysningerService {
     }
 
     private List<Saksopplysning> hentPersonopplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        Saksopplysning saksopplysning = tpsFasade.hentPersonMedAdresse(registeropplysningerRequest.getFnr());
+        Saksopplysning saksopplysning = tpsFasade.hentPersonMedTilleggsinformasjon(registeropplysningerRequest.getFnr());
         return List.of(saksopplysning);
     }
 
