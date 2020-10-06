@@ -3,10 +3,12 @@ package no.nav.melosys.integrasjon.altinn;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.Collections;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.msm.AltinnDokument;
 import no.nav.melosys.soknad_altinn.Innhold;
@@ -21,6 +23,7 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -58,9 +61,11 @@ public class SoknadMottakConsumerImplTest {
     @Test
     public void hentDokumenter_mottarListeAvDokumenter_blirMappet() throws JsonProcessingException {
         AltinnDokument altinnDokument = new AltinnDokument(
-            søknadID, "dokID123", "tittel", "Fullmakt", "Base64EncodedPdf");
+            søknadID, "dokID123", "tittel", "Fullmakt", "Base64EncodedPdf", Instant.MIN);
 
-        String json = new ObjectMapper().writeValueAsString(Collections.singleton(altinnDokument));
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        String json = objectMapper.writeValueAsString(Collections.singleton(altinnDokument));
 
         server.expect(requestTo("http://melosys-soknad-mottak/soknader/" + søknadID + "/dokumenter"))
             .andExpect(method(HttpMethod.GET))
@@ -69,7 +74,7 @@ public class SoknadMottakConsumerImplTest {
         assertThat(soknadMottakConsumer.hentDokumenter(søknadID))
             .isNotNull()
             .hasSize(1)
-            .extracting(AltinnDokument::getTittel)
-            .containsExactly(altinnDokument.getTittel());
+            .extracting(AltinnDokument::getTittel, AltinnDokument::getInnsendtTidspunkt)
+            .containsExactly(tuple(altinnDokument.getTittel(), altinnDokument.getInnsendtTidspunkt()));
     }
 }

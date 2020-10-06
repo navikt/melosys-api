@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -65,8 +66,10 @@ public class OpprettOgFerdigstillJournalpostTest {
         opprettOgFerdigstillJournalpost = new OpprettOgFerdigstillJournalpost(
             altinnSoeknadService, behandlingService, eregFasade, joarkFasade, tpsFasade);
 
-        AltinnDokument søknadDokument = new AltinnDokument(søknadID, "dokumentid1", "tittel1", AltinnDokument.AltinnDokumentType.SOKNAD.name(), "pdf");
-        AltinnDokument fullmaktDokument = new AltinnDokument(søknadID, "dokumentid2", "tittel2", AltinnDokument.AltinnDokumentType.FULLMAKT.name(), "pdf");
+        AltinnDokument søknadDokument = new AltinnDokument(søknadID, "dokumentid1", "tittel1",
+            AltinnDokument.AltinnDokumentType.SOKNAD.name(), "pdf", Instant.now());
+        AltinnDokument fullmaktDokument = new AltinnDokument(søknadID, "dokumentid2", "tittel2",
+            AltinnDokument.AltinnDokumentType.FULLMAKT.name(), "pdf", Instant.now());
 
         Aktoer bruker = new Aktoer();
         bruker.setRolle(Aktoersroller.BRUKER);
