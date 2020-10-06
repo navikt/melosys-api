@@ -8,7 +8,6 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
-import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.BehandlingsgrunnlagGetDto;
 import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.BehandlingsgrunnlagPostDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -22,12 +21,10 @@ import org.springframework.web.bind.annotation.*;
 public class BehandlingsgrunnlagTjeneste {
 
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
-    private final RegisterOppslagService registerOppslagService;
     private final TilgangService tilgangService;
 
-    public BehandlingsgrunnlagTjeneste(BehandlingsgrunnlagService behandlingsgrunnlagService, RegisterOppslagService registerOppslagService, TilgangService tilgangService) {
+    public BehandlingsgrunnlagTjeneste(BehandlingsgrunnlagService behandlingsgrunnlagService, TilgangService tilgangService) {
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
-        this.registerOppslagService = registerOppslagService;
         this.tilgangService = tilgangService;
     }
 
