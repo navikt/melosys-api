@@ -153,13 +153,8 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    public Saksopplysning hentPerson(String ident) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        return hentPerson(ident, null);
-    }
-
-    @Override
-    public Saksopplysning hentPersonMedTilleggsinformasjon(String ident) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        return hentPerson(ident, Set.of(Informasjonsbehov.ADRESSE, Informasjonsbehov.FAMILIERELASJONER));
+    public Saksopplysning hentPerson(String ident, Informasjonsbehov... behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+        return hentPerson(ident, Set.of(behov));
     }
 
     @Override
