@@ -71,7 +71,7 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void hentBrevForhåndsvisning() throws MelosysException, IOException {
         final byte[] MOCK_PDF = "bytes fra et brev".getBytes();
-        when(dokumentService.produserUtkast(any(), any(), any())).thenReturn(MOCK_PDF);
+        when(dokumentService.produserUtkast(any(), anyLong(), any())).thenReturn(MOCK_PDF);
         BrevbestillingDto brevBestillingDto = new BrevbestillingDto();
 
         ResponseEntity response = dokumentTjeneste.produserUtkastBrev(1L, Produserbaredokumenter.ATTEST_A1, brevBestillingDto);
