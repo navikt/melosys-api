@@ -44,8 +44,7 @@ public class SaksflytArbeider implements Runnable {
                 Thread.currentThread().interrupt();
                 break;
             } catch (Throwable t) {
-                String feilmelding = plukketProsessinstans.map(p -> "Plukket prosessinstans " + p.getId()).orElse("");
-                log.error("Ubehandlet exception. {}", feilmelding, t);
+                log.error("Ubehandlet exception. {}", plukketProsessinstans.map(p -> "Plukket prosessinstans " + p.getId()).orElse(""), t);
 
                 plukketProsessinstans.ifPresent(p -> {
                     p.setStatus(ProsessStatus.FEILET);
