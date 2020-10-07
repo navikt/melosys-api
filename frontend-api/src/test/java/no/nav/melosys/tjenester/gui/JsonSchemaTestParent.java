@@ -108,6 +108,11 @@ public class JsonSchemaTestParent {
         valider(new JSONObject(json), hentSchema(schemaNavn), logger);
     }
 
+    protected void valider(Object o, String schemaNavn, ObjectMapper objectMapper) throws IOException {
+        String jsonString = objectMapper.writeValueAsString(o);
+        valider(jsonString, schemaNavn, log);
+    }
+
     protected void validerArray(Collection liste, String schemaNavn) throws IOException {
         validerArray(liste, schemaNavn, log);
     }

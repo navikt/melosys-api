@@ -5,9 +5,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Comparators;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.SedType;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -73,10 +75,14 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
         final byte[] MOCK_PDF = "bytes fra et brev".getBytes();
         when(dokumentService.produserUtkast(any(), anyLong(), any())).thenReturn(MOCK_PDF);
         BrevbestillingDto brevBestillingDto = new BrevbestillingDto();
+        brevBestillingDto.begrunnelseKode = "KODE";
+        brevBestillingDto.fritekst = "Fritekst.";
+        brevBestillingDto.mottaker = Aktoersroller.MYNDIGHET;
+        brevBestillingDto.ytterligereInformasjon = "Ytterligere informasjon";
 
         ResponseEntity response = dokumentTjeneste.produserUtkastBrev(1L, Produserbaredokumenter.ATTEST_A1, brevBestillingDto);
         assertThat(response.getBody()).isEqualTo(MOCK_PDF);
-        valider(brevBestillingDto, "dokumenter-pdf-utkast-brev-post-schema.json");
+        valider(brevBestillingDto, "dokumenter-pdf-utkast-brev-post-schema.json", new ObjectMapper());
     }
 
     @Test
