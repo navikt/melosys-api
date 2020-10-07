@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.exception.*;
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov;
+import no.nav.melosys.integrasjon.tps.person.Informasjonsbehov;
 
 public interface TpsFasade {
     String hentAktørIdForIdent(String fnr) throws IkkeFunnetException;
