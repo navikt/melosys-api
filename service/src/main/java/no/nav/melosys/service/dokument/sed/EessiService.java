@@ -37,6 +37,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import static java.util.function.Predicate.not;
+
 @Primary
 @Service
 public class EessiService {
@@ -79,23 +81,23 @@ public class EessiService {
     }
 
     @Transactional(readOnly = true)
-    public String opprettBucOgSed(Behandling behandling, BucType bucType, List<String> mottakerId, Collection<Vedlegg> vedlegg) throws MelosysException {
+    public String opprettBucOgSed(Behandling behandling, BucType bucType, List<String> mottakerInstitusjoner, Collection<Vedlegg> vedlegg) throws MelosysException {
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType, behandlingsresultat));
-        sedDataDto.setMottakerIder(mottakerId);
+        sedDataDto.setMottakerIder(mottakerInstitusjoner);
         sedDataDto.setGsakSaksnummer(behandling.getFagsak().getGsakSaksnummer());
 
         log.info("Oppretter buc og sed for behandling {} med bucType {}", behandling.getId(), bucType);
         return eessiConsumer.opprettBucOgSed(sedDataDto, vedlegg, bucType, false).getRinaUrl();
     }
 
-    public List<Institusjon> hentEessiMottakerinstitusjoner(String bucType, String landkode) throws MelosysException {
-        return eessiConsumer.hentMottakerinstitusjoner(bucType, landkode);
+    public List<Institusjon> hentEessiMottakerinstitusjoner(String bucType, Collection<String> landkoder) throws MelosysException {
+        return eessiConsumer.hentMottakerinstitusjoner(bucType, landkoder);
     }
 
     private boolean landErEessiReady(String bucType, String landkode) throws MelosysException {
-        return !hentEessiMottakerinstitusjoner(bucType, landkode).isEmpty();
+        return !hentEessiMottakerinstitusjoner(bucType, Set.of(landkode)).isEmpty();
     }
 
     public boolean landErEessiReady(String bucType, Collection<Landkoder> landkoder) throws MelosysException {
@@ -243,32 +245,37 @@ public class EessiService {
      */
     public Set<String> validerOgAvklarMottakerInstitusjonerForBuc(final Set<String> valgteMottakerinstitusjoner, final Collection<Landkoder> mottakerland, BucType bucType) throws MelosysException {
 
-        Map<Landkoder, Collection<String>> institusjonerPerLand = new EnumMap<>(Landkoder.class);
+        Set<String> landkoder = mottakerland.stream().map(Landkoder::getKode).collect(Collectors.toSet());
+        Map<Landkoder, Set<String>> institusjonerPerLand = hentEessiMottakerinstitusjonerPerLand(bucType, landkoder);
 
-        for (var land : mottakerland) {
-            Collection<String> alleInstitusjonerForLand = hentEessiMottakerinstitusjoner(bucType.name(), land.getKode())
-                .stream().map(Institusjon::getId).collect(Collectors.toSet());
-            if (alleInstitusjonerForLand.isEmpty()) {
-                log.info("{} er ikke EESSI-ready, skal ikke sendes SED", land.getBeskrivelse());
-                return Collections.emptySet();
-            }
-
-            institusjonerPerLand.put(land, alleInstitusjonerForLand);
+        if (institusjonerPerLand.keySet().size() < mottakerland.size()) {
+            log.info("{} er ikke EESSI-ready, skal ikke sendes SED", mottakerland.stream()
+                .filter(not(institusjonerPerLand::containsKey))
+                .map(Landkoder::getBeskrivelse)
+                .collect(Collectors.joining(", ")));
+            return Collections.emptySet();
         }
 
         validerMottakerInstitusjonerForLand(mottakerland, valgteMottakerinstitusjoner, institusjonerPerLand);
         return valgteMottakerinstitusjoner;
     }
 
+    private Map<Landkoder, Set<String>> hentEessiMottakerinstitusjonerPerLand(BucType bucType, Set<String> landkoder) throws MelosysException {
+        return hentEessiMottakerinstitusjoner(bucType.name(), landkoder).stream()
+            .collect(Collectors.groupingBy(
+                institusjon -> Landkoder.valueOf(institusjon.getLandkode()),
+                Collectors.mapping(Institusjon::getId, Collectors.toSet())));
+    }
+
     private void validerMottakerInstitusjonerForLand(Collection<Landkoder> mottakerland,
                                                      Collection<String> valgteMottakerinstitusjoner,
-                                                     Map<Landkoder, Collection<String>> institusjonerPerLand) throws FunksjonellException {
+                                                     Map<Landkoder, Set<String>> institusjonerPerLand) throws FunksjonellException {
 
         List<String> validerteMottakerinstitusjoner = new ArrayList<>();
         StringBuilder feilmelding = new StringBuilder();
         for (var land : mottakerland) {
 
-            Collection<String> alleInstitusjonerForLand = institusjonerPerLand.get(land);
+            Set<String> alleInstitusjonerForLand = institusjonerPerLand.get(land);
             String validertInstitusjon = CollectionUtils.findFirstMatch(alleInstitusjonerForLand, valgteMottakerinstitusjoner);
 
             if (validertInstitusjon == null) {
