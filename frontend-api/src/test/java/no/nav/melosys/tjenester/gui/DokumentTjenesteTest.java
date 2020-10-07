@@ -14,8 +14,8 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.abac.TilgangService;
+import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.DokumentService;
-import no.nav.melosys.service.dokument.DokumentVisningService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.SedPdfData;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -43,7 +43,7 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
     @Mock
     private DokumentService dokumentService;
     @Mock
-    private DokumentVisningService dokumentVisningService;
+    private DokumentHentingService dokumentHentingService;
     @Mock
     private EessiService eessiService;
     @Mock
@@ -51,13 +51,13 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
 
     @Before
     public void setUp() {
-        dokumentTjeneste = new DokumentTjeneste(dokumentService, dokumentVisningService, eessiService, tilgangService);
+        dokumentTjeneste = new DokumentTjeneste(dokumentService, dokumentHentingService, eessiService, tilgangService);
     }
 
     @Test
     public void hentDokumenter() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException, IOException {
         List<Journalpost> journalposter = defaultEasyRandom().objects(Journalpost.class, 3).collect(Collectors.toList());
-        given(dokumentVisningService.hentDokumenter(anyString())).willReturn(journalposter);
+        given(dokumentHentingService.hentDokumenter(anyString())).willReturn(journalposter);
 
         ResponseEntity response = dokumentTjeneste.hentDokumenter("MEL-1873");
         @SuppressWarnings("unchecked")

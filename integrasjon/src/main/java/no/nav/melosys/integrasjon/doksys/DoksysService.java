@@ -35,16 +35,16 @@ import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 @Service
 @Primary
 public class DoksysService implements DoksysFasade {
-
     private static final Logger log = LoggerFactory.getLogger(DoksysService.class);
 
     private static final String FALSK_MOTTAKER_ID = "11111111111";
     private static final String LINE_SEPARATOR = System.lineSeparator();
+    private static final String SYS_AVSENDER = "Melosys";
 
     private final DokumentproduksjonConsumer dokumentproduksjonConsumer;
     private final DistribuerJournalpostConsumer distribuerJournalpostConsumer;
 
-    private ObjectFactory objectFactory;
+    private final ObjectFactory objectFactory;
 
     @Autowired
     public DoksysService(DokumentproduksjonConsumer dokumentproduksjonConsumer, DistribuerJournalpostConsumer distribuerJournalpostConsumer) {
@@ -113,7 +113,7 @@ public class DoksysService implements DoksysFasade {
         info.setDokumenttilhoerendeFagomraade(fagområde);
 
         info.setJournalfoerendeEnhet(Integer.toString(MELOSYS_ENHET_ID));
-        info.setSaksbehandlernavn(metadata.saksbehandler);
+        info.setSaksbehandlernavn(metadata.saksbehandler !=null ? metadata.saksbehandler : SYS_AVSENDER);
 
         if (metadata.mottaker.erUtenlandskMyndighet()) {
             info.setAdresse(lagUtenlandskAdresse(metadata.utenlandskMyndighet.getAdresse()));

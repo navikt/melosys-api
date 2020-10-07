@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.arkiv;
 
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,7 +30,8 @@ public class FysiskDokument extends ArkivDokument {
         FysiskDokument fysiskDokument = new FysiskDokument();
         fysiskDokument.setDokumentKategori(DOKUMENT_KATEGORI_SOKNAD);
         fysiskDokument.setTittel(hentTittelForAltinnDokument(altinnDokument.getDokumentType()));
-        fysiskDokument.setDokumentVarianter(Collections.singletonList(lagArkivVariant(altinnDokument.getInnhold().getBytes())));
+        byte[] innhold = Base64.getDecoder().decode(altinnDokument.getInnhold());
+        fysiskDokument.setDokumentVarianter(Collections.singletonList(lagArkivVariant(innhold)));
         return fysiskDokument;
     }
 

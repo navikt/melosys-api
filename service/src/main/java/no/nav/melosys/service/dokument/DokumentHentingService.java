@@ -13,13 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DokumentVisningService {
+public class DokumentHentingService {
 
     private final FagsakService fagsakService;
     private final JoarkFasade joarkFasade;
 
     @Autowired
-    public DokumentVisningService(FagsakService fagsakService, JoarkFasade joarkFasade) {
+    public DokumentHentingService(FagsakService fagsakService, JoarkFasade joarkFasade) {
         this.fagsakService = fagsakService;
         this.joarkFasade = joarkFasade;
     }

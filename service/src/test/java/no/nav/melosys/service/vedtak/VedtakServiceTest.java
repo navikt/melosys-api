@@ -25,11 +25,13 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
+import no.nav.melosys.exception.validering.KontrollfeilDto;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.validering.Kontrollfeil;
 import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
@@ -132,7 +134,7 @@ public class VedtakServiceTest {
         behandlingsresultat.setType(resultatType);
 
         when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(anySet(), anyCollection(), any(BucType.class))).thenCallRealMethod();
-        when(eessiService.hentEessiMottakerinstitusjoner(eq(BucType.LA_BUC_04.name()), eq(Landkoder.SE.getKode())))
+        when(eessiService.hentEessiMottakerinstitusjoner(eq(BucType.LA_BUC_04.name()), eq(Set.of(Landkoder.SE.getKode()))))
             .thenReturn(List.of(new Institusjon("AB:CDEF123", "inst", Landkoder.SE.getKode())));
 
         Vedtakstyper vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK;
@@ -233,13 +235,13 @@ public class VedtakServiceTest {
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
         behandlingsresultat.setType(resultatType);
         when(vedtakKontrollService.utførKontroller(anyLong(), any(Vedtakstyper.class)))
-            .thenReturn(Collections.singletonList(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER));
+            .thenReturn(Collections.singletonList(new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)));
 
         Throwable forventetException = catchThrowable(() ->
             vedtakService.fattVedtak(behandlingID, resultatType, null, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null)
         );
 
-        Consumer<ValideringException> medFeilkode = v -> assertThat(v.getFeilkoder()).containsExactly(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER.getKode());
+        Consumer<ValideringException> medFeilkode = v -> assertThat(v.getFeilkoder()).extracting(KontrollfeilDto::getKode).containsExactly(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER.getKode());
         assertThat(forventetException).isInstanceOfSatisfying(ValideringException.class, medFeilkode);
     }
 

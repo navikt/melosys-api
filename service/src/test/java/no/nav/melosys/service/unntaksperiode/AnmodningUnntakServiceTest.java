@@ -5,7 +5,6 @@ import java.util.Collections;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -17,6 +16,7 @@ import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.kontroll.unntak.AnmodningUnntakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
@@ -53,12 +53,16 @@ public class AnmodningUnntakServiceTest {
     private LandvelgerService landvelgerService;
     @Mock
     private EessiService eessiService;
+    @Mock
+    private AnmodningUnntakKontrollService anmodningUnntakKontrollService;
 
     private AnmodningUnntakService anmodningUnntakService;
 
     @Before
     public void setUp() {
-        anmodningUnntakService = new AnmodningUnntakService(behandlingService, oppgaveService, prosessinstansService, anmodningsperiodeService, lovvalgsperiodeService, landvelgerService, eessiService);
+        anmodningUnntakService = new AnmodningUnntakService(
+            behandlingService, oppgaveService, prosessinstansService, anmodningsperiodeService,
+            lovvalgsperiodeService, landvelgerService, eessiService, anmodningUnntakKontrollService);
     }
 
     @Test
@@ -77,7 +81,7 @@ public class AnmodningUnntakServiceTest {
 
         anmodningUnntakService.anmodningOmUnntak(behandlingID, mottakerInstitusjon, fritekstSed);
 
-        verify(anmodningsperiodeService).validerAnmodningsperiodeForBehandling(behandlingID);
+        verify(anmodningUnntakKontrollService).utførKontroller(behandlingID);
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), anySet(), eq(fritekstSed));
         verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
     }
@@ -97,30 +101,9 @@ public class AnmodningUnntakServiceTest {
 
         anmodningUnntakService.anmodningOmUnntak(behandlingID, null, fritekstSed);
 
-        verify(anmodningsperiodeService).validerAnmodningsperiodeForBehandling(behandlingID);
+        verify(anmodningUnntakKontrollService).utførKontroller(behandlingID);
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), anySet(), eq(fritekstSed));
         verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
-    }
-
-    @Test
-    public void anmodningOmUnntak_ikkeBostedsadresse_kasterException() throws MelosysException {
-        final long behandlingID = 1L;
-        final String fritekstSed = "friteksssst";
-        Behandling behandling = new Behandling();
-        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-111");
-        behandling.setFagsak(fagsak);
-        behandling.getSaksopplysninger().add(lagPersonSaksopplysning(false));
-        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new SoeknadDokument());
-        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID))).thenReturn(Collections.singletonList(Landkoder.SE));
-
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("Bostedsadresse");
-
-        anmodningUnntakService.anmodningOmUnntak(behandlingID, null, fritekstSed);
     }
 
     @Test

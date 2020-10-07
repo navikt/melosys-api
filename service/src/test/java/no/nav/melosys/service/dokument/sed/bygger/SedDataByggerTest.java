@@ -32,13 +32,14 @@ import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagUtenSokna
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.eessi.sed.Adresse.IKKE_TILGJENGELIG;
-import static no.nav.melosys.domain.eessi.sed.Adresse.INGEN_FAST_ADRESSE;
+import static no.nav.melosys.domain.eessi.sed.Adresse.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
@@ -57,6 +58,9 @@ public class SedDataByggerTest {
     private AvklartefaktaService avklartefaktaService;
     @Mock
     private LandvelgerService landvelgerService;
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     private SedDataBygger dataBygger;
     private Behandling behandling;
@@ -113,6 +117,15 @@ public class SedDataByggerTest {
 
     private SedDataGrunnlagUtenSoknad lagDokumentressurserUtenSøknad() throws TekniskException {
         return new SedDataGrunnlagUtenSoknad(behandling, kodeverkService);
+    }
+
+    private SedDataGrunnlagMedSoknad lagDokumentressurserMedManglendeAdressefelter(boolean arbeidUtlandManglerLandkode,
+                                                                                   boolean arbeidsgivendeForetakUtlandManglerLandkode,
+                                                                                   boolean selvstendigForetakUtlandManglerLandkode) throws TekniskException {
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
+        return new SedDataGrunnlagMedSoknad(DataByggerStubs.hentBehandlingMedManglendeAdressefelterStub(
+            arbeidUtlandManglerLandkode, arbeidsgivendeForetakUtlandManglerLandkode, selvstendigForetakUtlandManglerLandkode),
+            kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 
     @Test
@@ -396,6 +409,7 @@ public class SedDataByggerTest {
     public void lagUtkast_medUtenlandskSelvstendigForetak_forventAtUtenlandskSelvstendigForetakIkkeSendesSomArbeidsgivendeVirksomhet() throws TekniskException, FunksjonellException {
         ForetakUtland utenlandskSelvstendigForetak = new ForetakUtland();
         utenlandskSelvstendigForetak.adresse = new StrukturertAdresse();
+        utenlandskSelvstendigForetak.adresse.landkode = Landkoder.DE.getKode();
         utenlandskSelvstendigForetak.selvstendigNæringsvirksomhet = true;
         utenlandskSelvstendigForetak.navn = "selvstendig";
         utenlandskSelvstendigForetak.uuid = "123";
@@ -414,6 +428,65 @@ public class SedDataByggerTest {
         assertThat(sedData.getArbeidsgivendeVirksomheter())
             .extracting(Virksomhet::getNavn)
             .doesNotContain("selvstendig");
+    }
+
+    @Test
+    public void lag_arbeidsstedManglerLandkode_kasterFeil() throws TekniskException, FunksjonellException {
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("land er ikke utfylt for arbeidssted");
+        dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(true, false, false),
+            behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
+    }
+
+    @Test
+    public void lag_arbeidsgivendeVirksomhetManglerLandkode_kasterFeil() throws TekniskException, FunksjonellException {
+        when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of("uuid"));
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("land er ikke utfylt for virksomhet");
+        dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(false, true, false),
+            behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
+    }
+
+    @Test
+    public void lag_selvstendigVirksomhetManglerLandkode_kasterFeil() throws TekniskException, FunksjonellException {
+        when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of("uuid"));
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("land er ikke utfylt for selvstendig virksomhet");
+        dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(false, false, true),
+            behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
+    }
+
+    @Test
+    public void lagArbeidssted_manglerObligatoriskeFelter_blirUnknown() throws TekniskException, FunksjonellException {
+        SedDataDto sedData = dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(false, false, false),
+            behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
+
+        assertThat(sedData.getArbeidssteder())
+            .extracting(Arbeidssted::getAdresse)
+            .extracting(Adresse::getPoststed)
+            .contains(UKJENT);
+    }
+
+    @Test
+    public void lagVirksomhet_manglerObligatoriskeFelter_blirUnknown() throws TekniskException, FunksjonellException {
+        when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of("uuid"));
+        SedDataDto sedData = dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(false, false, false),
+            behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
+
+        assertThat(sedData.getArbeidsgivendeVirksomheter())
+            .filteredOn(virksomhet -> UKJENT.equals(virksomhet.getOrgnr()))
+            .extracting(Virksomhet::getAdresse)
+            .extracting(Adresse::getPoststed)
+            .contains(UKJENT);
+    }
+
+    @Test
+    public void lagVirksomhet_harObligatoriskeFelter_blirSatt() throws TekniskException, FunksjonellException {
+        SedDataDto sedData = dataBygger.lag(lagDokumentressurser(), behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
+
+        assertThat(sedData.getArbeidsgivendeVirksomheter())
+            .extracting(Virksomhet::getOrgnr)
+            .contains("orgnr");
     }
 
     private void lagUtkastAssertions(SedDataDto sedData, boolean forventAdresse) {

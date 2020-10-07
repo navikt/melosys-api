@@ -19,7 +19,7 @@ public interface EessiConsumer {
 
     List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, List<String> statuser) throws MelosysException;
 
-    List<Institusjon> hentMottakerinstitusjoner(String bucType, String landkode) throws MelosysException;
+    List<Institusjon> hentMottakerinstitusjoner(String bucType, Collection<String> landkode) throws MelosysException;
 
     MelosysEessiMelding hentMelosysEessiMeldingFraJournalpostID(String journalpostID) throws MelosysException;
 

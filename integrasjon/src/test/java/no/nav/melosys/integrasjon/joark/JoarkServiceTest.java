@@ -10,7 +10,7 @@ import no.nav.dok.tjenester.journalfoerinngaaende.*;
 import no.nav.melosys.domain.arkiv.DokumentVariant;
 import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.joark.inngaaendejournal.InngaaendeJournalConsumer;
@@ -325,7 +325,7 @@ class JoarkServiceTest {
     }
 
     @Test
-    void opprettJournalpost_ikkeValider_forventMetodekall() throws TekniskException {
+    void opprettJournalpost_ikkeValider_forventMetodekall() throws FunksjonellException {
         when(journalpostapiConsumer.opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean()))
             .thenReturn(OpprettJournalpostResponse.builder().journalpostId("1234").build());
 
@@ -336,7 +336,7 @@ class JoarkServiceTest {
     }
 
     @Test
-    void opprettJournalpost_validerFelt_forventValidert() throws TekniskException {
+    void opprettJournalpost_validerFelt_forventValidert() throws FunksjonellException {
         when(journalpostapiConsumer.opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean()))
             .thenReturn(OpprettJournalpostResponse.builder().journalpostId("1234").build());
 
@@ -351,7 +351,7 @@ class JoarkServiceTest {
         OpprettJournalpost opprettJournalpost = lagOpprettJournalpost();
         opprettJournalpost.setArkivSakId(null);
 
-        assertThatExceptionOfType(TekniskException.class)
+        assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> joarkService.opprettJournalpost(opprettJournalpost, true));
 
         verify(journalpostapiConsumer, never()).opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean());

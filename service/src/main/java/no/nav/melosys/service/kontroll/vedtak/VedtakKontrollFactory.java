@@ -4,14 +4,14 @@ import java.util.Set;
 import java.util.function.Function;
 
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
+import no.nav.melosys.service.validering.Kontrollfeil;
 
 class VedtakKontrollFactory {
 
     private VedtakKontrollFactory() {
     }
 
-    static Set<Function<VedtakKontrollData, Kontroll_begrunnelser>> hentKontrollerForVedtakstype(Vedtakstyper vedtakstype) {
+    static Set<Function<VedtakKontrollData, Kontrollfeil>> hentKontrollerForVedtakstype(Vedtakstyper vedtakstype) {
         switch (vedtakstype) {
             case FØRSTEGANGSVEDTAK:
             case OMGJØRINGSVEDTAK:
@@ -22,12 +22,14 @@ class VedtakKontrollFactory {
         }
     }
 
-    private static Set<Function<VedtakKontrollData, Kontroll_begrunnelser>> vedtakKontroller() {
+    private static Set<Function<VedtakKontrollData, Kontrollfeil>> vedtakKontroller() {
         return Set.of(
             VedtakKontroller::bostedsadresseForA1,
             VedtakKontroller::overlappendeMedlemsperiode,
             VedtakKontroller::periodeOver24Mnd,
-            VedtakKontroller::periodeManglerSluttdato
+            VedtakKontroller::periodeManglerSluttdato,
+            VedtakKontroller::arbeidsstedManglerFelter,
+            VedtakKontroller::foretakUtlandManglerFelter
         );
     }
 }

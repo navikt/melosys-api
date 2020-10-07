@@ -91,11 +91,14 @@ public class AnmodningsperiodeService {
         anmodningsperiodeRepository.save(anmodningsperiode);
     }
 
-    public void validerAnmodningsperiodeForBehandling(long behandlingID) throws FunksjonellException {
-        Anmodningsperiode anmodningsperiode = hentFørsteAnmodningsperiode(behandlingID);
-        if (anmodningsperiode.getTom() == null) {
-            throw new FunksjonellException("Anmodningsperioden mangler sluttdato");
+    public Anmodningsperiode hentFørsteAnmodningsperiode(Long behandlingID) throws FunksjonellException {
+        Collection<Anmodningsperiode> anmodningsperioder = hentAnmodningsperioder(behandlingID);
+
+        if (anmodningsperioder.size() != 1) {
+            throw new FunksjonellException("Forventet én anmodningsperiode på behandling" + behandlingID + ", fant " + anmodningsperioder.size());
         }
+
+        return anmodningsperioder.iterator().next();
     }
 
     private AnmodningsperiodeSvar lagreAnmodningsperiodeSvar(Anmodningsperiode anmodningsperiode, AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
@@ -108,16 +111,6 @@ public class AnmodningsperiodeService {
         anmodningsperiodeSvar.setAnmodningsperiode(anmodningsperiode);
         anmodningsperiode.setAnmodningsperiodeSvar(anmodningsperiodeSvar);
         return anmodningsperiodeSvarRepository.save(anmodningsperiodeSvar);
-    }
-
-    private Anmodningsperiode hentFørsteAnmodningsperiode(Long behandlingID) throws FunksjonellException {
-        Collection<Anmodningsperiode> anmodningsperioder = hentAnmodningsperioder(behandlingID);
-
-        if (anmodningsperioder.size() != 1) {
-            throw new FunksjonellException("Forventet èn anmodningsperiode på behandling" + behandlingID + ", fant " + anmodningsperioder.size());
-        }
-
-        return anmodningsperioder.iterator().next();
     }
 
     private AnmodningsperiodeSvar oppdaterOpprinneligSvar(AnmodningsperiodeSvar opprinnelig, AnmodningsperiodeSvar oppdatert) {

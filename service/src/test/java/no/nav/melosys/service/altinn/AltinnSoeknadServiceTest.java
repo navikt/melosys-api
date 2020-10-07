@@ -168,12 +168,18 @@ public class AltinnSoeknadServiceTest {
 
         innhold.setArbeidstaker(new Arbeidstaker());
         innhold.getArbeidstaker().setFoedselsnummer("12345612345");
+
+        innhold.setMidlertidigUtsendt(new MidlertidigUtsendt());
+        innhold.getMidlertidigUtsendt().setArbeidsland("PL");
+        innhold.getMidlertidigUtsendt().setUtenlandsoppdraget(new Utenlandsoppdraget());
+        innhold.getMidlertidigUtsendt().getUtenlandsoppdraget().setPeriodeUtland(new Tidsrom());
         return medlemskapArbeidEOSM;
     }
 
     private Fagsak lagFagsak() {
         Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
+        behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
         fagsak.setBehandlinger(List.of(behandling));
 

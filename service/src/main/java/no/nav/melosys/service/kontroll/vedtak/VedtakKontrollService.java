@@ -12,11 +12,11 @@ import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.validering.Kontrollfeil;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -30,7 +30,7 @@ public class VedtakKontrollService {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
     }
 
-    public Collection<Kontroll_begrunnelser> utførKontroller(long behandlingID, Vedtakstyper vedtakstype) throws FunksjonellException, TekniskException {
+    public Collection<Kontrollfeil> utførKontroller(long behandlingID, Vedtakstyper vedtakstype) throws FunksjonellException, TekniskException {
         return utførKontroller(
             behandlingService.hentBehandling(behandlingID),
             lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID),
@@ -38,10 +38,10 @@ public class VedtakKontrollService {
         );
     }
 
-    private Collection<Kontroll_begrunnelser> utførKontroller(
+    private Collection<Kontrollfeil> utførKontroller(
         Behandling behandling,
         Lovvalgsperiode lovvalgsperiode,
-        Set<Function<VedtakKontrollData, Kontroll_begrunnelser>> kontroller
+        Set<Function<VedtakKontrollData, Kontrollfeil>> kontroller
     ) throws TekniskException {
         BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();

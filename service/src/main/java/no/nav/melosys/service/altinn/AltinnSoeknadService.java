@@ -4,8 +4,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Fullmektig;
+import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -54,9 +56,10 @@ public class AltinnSoeknadService {
             .build();
 
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
-        behandlingsgrunnlagService.opprettBehandlingsgrunnlag(1L, new BehandlingsgrunnlagData()); //TODO: MELSOYS-3527
+        Behandling behandling = fagsak.hentAktivBehandling();
+        behandlingsgrunnlagService.opprettSøknadGrunnlag(behandling.getId(), SoeknadMapper.lagSoeknadDokument(søknad));
 
-        return fagsak.hentAktivBehandling();
+        return behandling;
     }
 
     private static Behandlingstema avklarBehandlingstema(MedlemskapArbeidEOSM søknad) {

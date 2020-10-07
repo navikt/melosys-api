@@ -1,19 +1,24 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.arkiv.ArkivDokument;
+import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.Institusjon;
+import no.nav.melosys.domain.eessi.Vedlegg;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.tjenester.gui.dto.eessi.BucBestillingDto;
-import no.nav.melosys.tjenester.gui.dto.eessi.BucInformasjonDto;
-import no.nav.melosys.tjenester.gui.dto.eessi.BucerTilknyttetBehandlingDto;
-import no.nav.melosys.tjenester.gui.dto.eessi.OpprettBucSvarDto;
+import no.nav.melosys.tjenester.gui.dto.eessi.*;
 import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,11 +38,13 @@ public class EessiTjeneste {
 
     private final EessiService eessiService;
     private final BehandlingService behandlingService;
+    private final DokumentHentingService dokumentHentingService;
 
     @Autowired
-    public EessiTjeneste(EessiService eessiService, BehandlingService behandlingService) {
+    public EessiTjeneste(EessiService eessiService, BehandlingService behandlingService, DokumentHentingService dokumentHentingService) {
         this.eessiService = eessiService;
         this.behandlingService = behandlingService;
+        this.dokumentHentingService = dokumentHentingService;
     }
 
     @GetMapping("/mottakerinstitusjoner/{bucType}")
@@ -47,10 +54,10 @@ public class EessiTjeneste {
         responseContainer = "List"
     )
     public ResponseEntity<List<Institusjon>> hentMottakerinstitusjoner(@PathVariable("bucType") String bucType,
-                                                    @RequestParam(value = "landkode", required = false) String landkode)
+                                                                       @RequestParam(value = "landkoder", required = false) Collection<String> landkoder)
         throws MelosysException {
         log.info("Henter mottakerinstitusjoner for BUC {}", bucType);
-        return ResponseEntity.ok(eessiService.hentEessiMottakerinstitusjoner(bucType, landkode));
+        return ResponseEntity.ok(eessiService.hentEessiMottakerinstitusjoner(bucType, landkoder));
     }
 
     @PostMapping("/bucer/{behandlingID}/opprett")
@@ -62,11 +69,40 @@ public class EessiTjeneste {
                                                         @PathVariable("behandlingID") long behandlingID)
         throws MelosysException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Collection<Vedlegg> vedlegg = lagVedlegg(behandling.getFagsak().getSaksnummer(), nyBucDto.getVedlegg());
+
         OpprettBucSvarDto opprettBucSvarDto = new OpprettBucSvarDto(
-            eessiService.opprettBucOgSed(behandling, nyBucDto.getBucType(), List.of(nyBucDto.getMottakerId()))
+            eessiService.opprettBucOgSed(behandling, nyBucDto.getBucType(), nyBucDto.getMottakerInstitusjoner(), vedlegg)
         );
 
         return ResponseEntity.ok(opprettBucSvarDto);
+    }
+
+    private Collection<Vedlegg> lagVedlegg(String saksnummer, Collection<VedleggDto> vedleggDto) throws FunksjonellException, IntegrasjonException {
+        Collection<Journalpost> journalposter = dokumentHentingService.hentDokumenter(saksnummer);
+
+        Collection<Vedlegg> vedlegg = new ArrayList<>();
+        for (VedleggDto dto : vedleggDto) {
+            Journalpost journalpost = hentJournalpostForVedleggDto(dto, journalposter, saksnummer);
+            vedlegg.add(lagVedlegg(journalpost, dto.getDokumentID()));
+        }
+
+        return vedlegg;
+    }
+
+    private Journalpost hentJournalpostForVedleggDto(VedleggDto vedleggDto, Collection<Journalpost> journalposter, String saksnummer) throws FunksjonellException {
+        return journalposter.stream()
+            .filter(journalpost -> journalpost.getJournalpostId().equals(vedleggDto.getJournalpostID()))
+            .findFirst().orElseThrow(() ->
+                new FunksjonellException(String.format(
+                    "Journalpost %s er ikke knyttet til fagsak %s", vedleggDto.getJournalpostID(), saksnummer)));
+    }
+
+    private Vedlegg lagVedlegg(Journalpost journalpost, String dokumentID) throws FunksjonellException {
+        final ArkivDokument arkivDokument = journalpost.hentArkivDokument(dokumentID);
+        final byte[] pdf = dokumentHentingService.hentDokument(journalpost.getJournalpostId(), dokumentID);
+
+        return new Vedlegg(pdf, arkivDokument.getTittel());
     }
 
     @GetMapping("/bucer/{behandlingID}")

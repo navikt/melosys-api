@@ -13,6 +13,7 @@ public class BehandlingOppsummeringDto {
     private Behandlingstema behandlingstema;
     private Instant registrertDato;
     private Instant endretDato;
+    private String endretAvNavn;
     private Instant sisteOpplysningerHentetDato;
 
     public Behandlingsstatus getBehandlingsstatus() {
@@ -53,6 +54,14 @@ public class BehandlingOppsummeringDto {
 
     public void setEndretDato(Instant endretDato) {
         this.endretDato = endretDato;
+    }
+
+    public String getEndretAvNavn() {
+        return endretAvNavn;
+    }
+
+    public void setEndretAvNavn(String endretAvNavn) {
+        this.endretAvNavn = endretAvNavn;
     }
 
     public Instant getSisteOpplysningerHentetDato() {

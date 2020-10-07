@@ -6,14 +6,14 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component("MottakSoknadAltinnOpprettOppgave")
 public class OpprettOppgave implements StegBehandler {
-
     private final OppgaveService oppgaveService;
 
-    public OpprettOppgave(OppgaveService oppgaveService) {
+    public OpprettOppgave(@Qualifier("system") OppgaveService oppgaveService) {
         this.oppgaveService = oppgaveService;
     }
 
