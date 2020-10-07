@@ -65,8 +65,20 @@ class EessiServiceTest {
 
     private final EasyRandom easyRandom = new EasyRandom();
 
+    private final String mottakerBelgia1 = "BE:12222";
+    private final String mottakerBelgia2 = "BE:9999";
+    private final String mottakerBelgia3 = "BE:123131";
+    private final String mottakerTyskland1 = "DE:4444";
+    private final String mottakerTyskland2 = "DE:9999";
+
+    private final Institusjon institusjonBelgia1 = new Institusjon(mottakerBelgia1, null, Landkoder.BE.getKode());
+    private final Institusjon institusjonBelgia2 = new Institusjon(mottakerBelgia2, null, Landkoder.BE.getKode());
+    private final Institusjon institusjonBelgia3 = new Institusjon(mottakerBelgia3, null, Landkoder.BE.getKode());
+    private final Institusjon institusjonTyskland1 = new Institusjon(mottakerTyskland1, null, Landkoder.DE.getKode());
+    private final Institusjon institusjonTyskland2 = new Institusjon(mottakerTyskland2, null, Landkoder.DE.getKode());
+
     @BeforeEach
-    public void setup() throws Exception {
+    void setup() throws Exception {
         eessiService = new EessiService(sedDataBygger, dokumentdataGrunnlagFactory,
             eessiConsumer, behandlingService, behandlingsresultatService);
     }
@@ -179,20 +191,20 @@ class EessiServiceTest {
         when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(MedlemsperiodeType.class))).thenReturn(new SedDataDto());
         mockBehandlingsresultat();
 
-        eessiService.opprettBucOgSed(lagBehandling(), BucType.LA_BUC_01, List.of("SE:001"), Collections.emptyList());
+        eessiService.opprettBucOgSed(lagBehandling(), BucType.LA_BUC_01, List.of(mottakerBelgia1), Collections.emptyList());
         verify(eessiConsumer).opprettBucOgSed(any(SedDataDto.class), anyCollection(), eq(BucType.LA_BUC_01), eq(false));
     }
 
     @Test
-    void hentMottakerinstitusjoner_forventListeMedRettType() throws MelosysException {
-        when(eessiConsumer.hentMottakerinstitusjoner(anyString(), anyString())).thenReturn(Arrays.asList(
+    public void hentMottakerinstitusjoner_forventListeMedRettType() throws MelosysException {
+        when(eessiConsumer.hentMottakerinstitusjoner(anyString(), anyList())).thenReturn(Arrays.asList(
             easyRandom.nextObject(Institusjon.class),
             easyRandom.nextObject(Institusjon.class)
         ));
 
-        List<Institusjon> mottakerinstitusjoner = eessiService.hentEessiMottakerinstitusjoner("LA_BUC_01", "FR");
+        List<Institusjon> mottakerinstitusjoner = eessiService.hentEessiMottakerinstitusjoner("LA_BUC_01", List.of("FR"));
 
-        verify(eessiConsumer).hentMottakerinstitusjoner(anyString(), anyString());
+        verify(eessiConsumer).hentMottakerinstitusjoner(anyString(), anyList());
         assertThat(mottakerinstitusjoner).hasSize(2).hasOnlyElementsOfType(Institusjon.class);
     }
 
@@ -456,23 +468,13 @@ class EessiServiceTest {
         final BucType bucType = BucType.LA_BUC_02;
         final List<Landkoder> mottakerLand = List.of(Landkoder.BE, Landkoder.DE);
 
-        final String mottakerBelgia = "BE:12222";
-        final String mottakerTyskland = "DE:4444";
-        final Set<String> valgteMottakerInstitusjoner = Set.of(mottakerBelgia, mottakerTyskland);
+        final Set<String> valgteMottakerInstitusjoner = Set.of(mottakerBelgia1, mottakerTyskland1);
 
-        final Institusjon institusjonBelgia1 = new Institusjon(mottakerBelgia, null, Landkoder.BE.getKode());
-        final Institusjon institusjonBelgia2 = new Institusjon("BE:9999", null, Landkoder.BE.getKode());
-        final Institusjon institusjonTyskland1 = new Institusjon(mottakerTyskland, null, Landkoder.DE.getKode());
-        final Institusjon institusjonTyskland2 = new Institusjon("DE:9999", null, Landkoder.DE.getKode());
-
-
-        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Landkoder.BE.getKode()))
-            .thenReturn(List.of(institusjonBelgia1, institusjonBelgia2));
-        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Landkoder.DE.getKode()))
-            .thenReturn(List.of(institusjonTyskland1, institusjonTyskland2));
+        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Set.of(Landkoder.BE.getKode(), Landkoder.DE.getKode())))
+            .thenReturn(List.of(institusjonBelgia1, institusjonBelgia2, institusjonTyskland1, institusjonTyskland2));
 
         Set<String> avklarteMottakerInstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType);
-        verify(eessiConsumer, times(2)).hentMottakerinstitusjoner(eq(bucType.name()), anyString());
+        verify(eessiConsumer).hentMottakerinstitusjoner(eq(bucType.name()), anySet());
         assertThat(avklarteMottakerInstitusjoner).isEqualTo(valgteMottakerInstitusjoner);
     }
 
@@ -481,20 +483,13 @@ class EessiServiceTest {
         final BucType bucType = BucType.LA_BUC_02;
         final List<Landkoder> mottakerLand = List.of(Landkoder.BE, Landkoder.DE);
 
-        final String mottakerBelgia = "BE:12222";
-        final String mottakerTyskland = "DE:4444";
-        final Set<String> valgteMottakerInstitusjoner = Set.of(mottakerBelgia, mottakerTyskland);
+        final Set<String> valgteMottakerInstitusjoner = Set.of(mottakerBelgia1, mottakerTyskland1);
 
-        final Institusjon institusjonBelgia1 = new Institusjon(mottakerBelgia, null, Landkoder.BE.getKode());
-        final Institusjon institusjonBelgia2 = new Institusjon("BE:9999", null, Landkoder.BE.getKode());
-
-        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Landkoder.BE.getKode()))
+        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Set.of(Landkoder.BE.getKode(), Landkoder.DE.getKode())))
             .thenReturn(List.of(institusjonBelgia1, institusjonBelgia2));
-        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Landkoder.DE.getKode()))
-            .thenReturn(Collections.emptyList());
 
         Set<String> avklarteMottakerInstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType);
-        verify(eessiConsumer, times(2)).hentMottakerinstitusjoner(eq(bucType.name()), anyString());
+        verify(eessiConsumer).hentMottakerinstitusjoner(eq(bucType.name()), anySet());
         assertThat(avklarteMottakerInstitusjoner).isEmpty();
     }
 
@@ -503,20 +498,10 @@ class EessiServiceTest {
         final BucType bucType = BucType.LA_BUC_02;
         final List<Landkoder> mottakerLand = List.of(Landkoder.BE, Landkoder.DE);
 
-        final String mottakerBelgia = "BE:12222";
-        final String mottakerTyskland = "DE:4444";
-        final Set<String> valgteMottakerInstitusjoner = Set.of(mottakerBelgia);
+        final Set<String> valgteMottakerInstitusjoner = Set.of(mottakerBelgia1);
 
-        final Institusjon institusjonBelgia1 = new Institusjon(mottakerBelgia, null, Landkoder.BE.getKode());
-        final Institusjon institusjonBelgia2 = new Institusjon("BE:9999", null, Landkoder.BE.getKode());
-        final Institusjon institusjonTyskland1 = new Institusjon(mottakerTyskland, null, Landkoder.DE.getKode());
-        final Institusjon institusjonTyskland2 = new Institusjon("DE:9999", null, Landkoder.DE.getKode());
-
-
-        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Landkoder.BE.getKode()))
-            .thenReturn(List.of(institusjonBelgia1, institusjonBelgia2));
-        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Landkoder.DE.getKode()))
-            .thenReturn(List.of(institusjonTyskland1, institusjonTyskland2));
+        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Set.of(Landkoder.BE.getKode(), Landkoder.DE.getKode())))
+            .thenReturn(List.of(institusjonBelgia1, institusjonBelgia2, institusjonTyskland1, institusjonTyskland2));
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() ->
@@ -529,21 +514,10 @@ class EessiServiceTest {
         final BucType bucType = BucType.LA_BUC_02;
         final List<Landkoder> mottakerLand = List.of(Landkoder.BE, Landkoder.DE);
 
-        final String mottakerBelgia = "BE:12222";
-        final String mottakerBelgia2 = "BE:123131";
-        final String mottakerTyskland = "DE:4444";
-        final Set<String> valgteMottakerInstitusjoner = Set.of(mottakerBelgia, mottakerBelgia2, mottakerTyskland);
+        final Set<String> valgteMottakerInstitusjoner = Set.of(mottakerBelgia1, mottakerBelgia3, mottakerTyskland1);
 
-        final Institusjon institusjonBelgia1 = new Institusjon(mottakerBelgia, null, Landkoder.BE.getKode());
-        final Institusjon institusjonBelgia2 = new Institusjon(mottakerBelgia2, null, Landkoder.BE.getKode());
-        final Institusjon institusjonBelgia3 = new Institusjon("BE:9999", null, Landkoder.BE.getKode());
-        final Institusjon institusjonTyskland1 = new Institusjon(mottakerTyskland, null, Landkoder.DE.getKode());
-        final Institusjon institusjonTyskland2 = new Institusjon("DE:9999", null, Landkoder.DE.getKode());
-
-        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Landkoder.BE.getKode()))
-            .thenReturn(List.of(institusjonBelgia1, institusjonBelgia2, institusjonBelgia3));
-        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Landkoder.DE.getKode()))
-            .thenReturn(List.of(institusjonTyskland1, institusjonTyskland2));
+        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Set.of(Landkoder.BE.getKode(), Landkoder.DE.getKode())))
+            .thenReturn(List.of(institusjonBelgia1, institusjonBelgia3, institusjonBelgia2, institusjonTyskland1, institusjonTyskland2));
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType))
@@ -557,13 +531,8 @@ class EessiServiceTest {
 
         final Set<String> valgteMottakerInstitusjoner = Collections.emptySet();
 
-        final Institusjon institusjonBelgia = new Institusjon("BE:9999", null, Landkoder.BE.getKode());
-        final Institusjon institusjonTyskland = new Institusjon("DE:9999", null, Landkoder.DE.getKode());
-
-        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Landkoder.BE.getKode()))
-            .thenReturn(List.of(institusjonBelgia));
-        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Landkoder.DE.getKode()))
-            .thenReturn(List.of(institusjonTyskland));
+        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Set.of(Landkoder.BE.getKode(), Landkoder.DE.getKode())))
+            .thenReturn(List.of(institusjonBelgia2, institusjonTyskland2));
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() ->
@@ -582,10 +551,8 @@ class EessiServiceTest {
 
         final Institusjon institusjonBelgia = new Institusjon("BE:44444", null, Landkoder.BE.getKode());
 
-        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Landkoder.BE.getKode()))
+        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Set.of(Landkoder.BE.getKode(), Landkoder.DE.getKode())))
             .thenReturn(List.of(institusjonBelgia));
-        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Landkoder.DE.getKode()))
-            .thenReturn(Collections.emptyList());
 
         Set<String> avklarteMottakere = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(valgteMottakerInstitusjoner, mottakerLand, bucType);
         assertThat(avklarteMottakere).isEmpty();
@@ -596,7 +563,7 @@ class EessiServiceTest {
         final BucType bucType = BucType.LA_BUC_01;
         final List<Landkoder> land = List.of(Landkoder.SE, Landkoder.DK);
 
-        when(eessiConsumer.hentMottakerinstitusjoner(eq(bucType.name()), eq(Landkoder.SE.getKode())))
+        when(eessiConsumer.hentMottakerinstitusjoner(eq(bucType.name()), eq(Set.of(Landkoder.SE.getKode()))))
             .thenReturn(List.of(new Institusjon("2", "", "")));
 
         assertThat(eessiService.landErEessiReady(bucType.name(), land)).isFalse();
