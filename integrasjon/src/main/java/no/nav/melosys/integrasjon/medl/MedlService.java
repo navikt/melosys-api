@@ -109,15 +109,27 @@ public class MedlService implements MedlFasade {
 
     @Override
     public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException, FunksjonellException {
+        oppdaterPeriode(lovvalgsperiode, PeriodestatusMedl.GYLD, LovvalgMedl.ENDL, kildedokumenttypeMedl);
+    }
+
+    @Override
+    public void oppdaterPeriodeForeløpig(Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws FunksjonellException, TekniskException {
+        oppdaterPeriode(lovvalgsperiode, PeriodestatusMedl.UAVK, LovvalgMedl.FORL, kildedokumenttypeMedl);
+    }
+
+    private void oppdaterPeriode(Lovvalgsperiode lovvalgsperiode,
+                                 PeriodestatusMedl periodestatusMedl,
+                                 LovvalgMedl lovvalgMedl,
+                                 KildedokumenttypeMedl kildedokumenttypeMedl) throws FunksjonellException, TekniskException {
         try {
-            long medlPeriodeID = lovvalgsperiode.getMedlPeriodeID();
-            if (medlPeriodeID == 0) {
+            Long medlPeriodeID = lovvalgsperiode.getMedlPeriodeID();
+            if (medlPeriodeID == null) {
                 throw new TekniskException("Det er ikke lagret noen medlPeriodeID på lovvalgsperiode som skal oppdateres i MEDL");
             }
             HentPeriodeResponse hentPeriodeResponse = medlemskapConsumer.hentPeriode(lagHentPeriodeRequest(medlPeriodeID));
             Medlemsperiode periode = Optional.ofNullable(hentPeriodeResponse.getPeriode())
                 .orElseThrow(() -> new TekniskException("Fant ingen eksisterende medlPeriode med id " + medlPeriodeID));
-            OppdaterPeriodeRequest request = MedlPeriodeKonverter.konverterTilOppdaterPeriodeRequest(lovvalgsperiode, PeriodestatusMedl.GYLD, LovvalgMedl.ENDL, kildedokumenttypeMedl, periode.getVersjon());
+            OppdaterPeriodeRequest request = MedlPeriodeKonverter.konverterTilOppdaterPeriodeRequest(lovvalgsperiode, periodestatusMedl, lovvalgMedl, kildedokumenttypeMedl, periode.getVersjon());
             behandleMedlemskapConsumer.oppdaterPeriode(request);
         } catch (no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.Sikkerhetsbegrensning | Sikkerhetsbegrensning e) {
             throw new SikkerhetsbegrensningException(e);
@@ -128,7 +140,6 @@ public class MedlService implements MedlFasade {
         } catch (PeriodeIkkeFunnet e) {
             throw new IkkeFunnetException(e);
         }
-
     }
 
     @Override

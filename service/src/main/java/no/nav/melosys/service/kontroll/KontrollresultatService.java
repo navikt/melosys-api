@@ -46,7 +46,7 @@ public class KontrollresultatService {
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         List<Kontroll_begrunnelser> registrerteTreff = ufmKontrollService.utførKontroller(behandling);
 
-        log.info("Treff ved validering av periode for behandling {}. Treffbegrunnelse: {}", behandlingId, registrerteTreff);
+        log.info("Treff ved validering av periode for behandling {}: {}", behandlingId, registrerteTreff);
         lagreKontrollresultater(behandlingId, registrerteTreff);
     }
 

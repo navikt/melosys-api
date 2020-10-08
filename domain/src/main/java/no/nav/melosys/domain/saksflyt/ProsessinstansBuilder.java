@@ -3,25 +3,21 @@ package no.nav.melosys.domain.saksflyt;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
 public class ProsessinstansBuilder {
     private ProsessType type;
-    private ProsessSteg steg;
     private Behandling behandling;
     private Object begrunnelser;
     private String begrunnelseFritekst;
     private String ytterligereInformasjonSed;
     private Set<String> eessiMottakere;
+    private MelosysEessiMelding eessiMelding;
 
     public ProsessinstansBuilder medType(ProsessType type) {
         this.type = type;
-        return this;
-    }
-
-    public ProsessinstansBuilder medSteg(ProsessSteg steg) {
-        this.steg = steg;
         return this;
     }
 
@@ -50,24 +46,31 @@ public class ProsessinstansBuilder {
         return this;
     }
 
+    public ProsessinstansBuilder medEessiMelding(MelosysEessiMelding eessiMelding) {
+        this.eessiMelding = eessiMelding;
+        return this;
+    }
+
     public Prosessinstans build() {
-        Prosessinstans pi =  new Prosessinstans();
-        pi.setBehandling(behandling);
-        pi.setType(type);
-        pi.setSteg(steg);
+        Prosessinstans prosessinstans =  new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+        prosessinstans.setType(type);
 
         if (begrunnelser != null) {
-            pi.setData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSER, begrunnelser);
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSER, begrunnelser);
         }
         if (StringUtils.isNotEmpty(begrunnelseFritekst)) {
-            pi.setData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST, begrunnelseFritekst);
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST, begrunnelseFritekst);
         }
         if (StringUtils.isNotEmpty(ytterligereInformasjonSed)) {
-            pi.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, ytterligereInformasjonSed);
+            prosessinstans.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, ytterligereInformasjonSed);
         }
         if (!CollectionUtils.isEmpty(eessiMottakere)) {
-            pi.setData(ProsessDataKey.EESSI_MOTTAKERE, eessiMottakere);
+            prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, eessiMottakere);
         }
-        return pi;
+        if (eessiMelding != null) {
+            prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
+        }
+        return prosessinstans;
     }
 }

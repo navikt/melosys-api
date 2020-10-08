@@ -137,6 +137,11 @@ public class OppgaveService {
         }
     }
 
+    public void opprettJournalføringsoppgave(String journalpostID, String aktørID) throws FunksjonellException, TekniskException {
+        final String oppgaveID = opprettOppgave(OppgaveFactory.lagJournalføringsoppgave(journalpostID).setAktørId(aktørID).build());
+        log.info("Journalføringsoppgave {} opprettet for journalpost {}", oppgaveID, journalpostID);
+    }
+
     public String opprettOppgave(Oppgave oppgave) throws FunksjonellException, TekniskException {
         return oppgaveFasade.opprettOppgave(oppgave);
     }

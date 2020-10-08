@@ -15,17 +15,14 @@ import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
@@ -67,8 +64,8 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    void harAktivProsessinstans() {
-        when(prosessinstansRepo.findByBehandling_IdAndStegIsNotAndStegIsNot(anyLong(), eq(ProsessSteg.FEILET_MASKINELT), eq(ProsessSteg.FERDIG)))
+    public void harAktivProsessinstans() {
+        when(prosessinstansRepo.findByBehandling_IdAndStatusIs(anyLong(), eq(ProsessStatus.KLAR)))
             .thenReturn(Optional.of(new Prosessinstans()));
         assertThat(prosessinstansService.harAktivProsessinstans(1L)).isTrue();
     }
@@ -79,6 +76,7 @@ class ProsessinstansServiceTest {
         String saksbehandler = "Z123456";
         prosessinstansService.lagre(prosessinstans, saksbehandler);
 
+        verify(prosessinstans).setStatus(eq(ProsessStatus.KLAR));
         verify(prosessinstans).setEndretDato(any());
         verify(prosessinstans).setRegistrertDato(any());
         verify(prosessinstans).setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
@@ -106,7 +104,6 @@ class ProsessinstansServiceTest {
 
         Prosessinstans lagretInstans = piCaptor.getValue();
         assertThat(lagretInstans.getType()).isEqualTo(ProsessType.ANMODNING_OM_UNNTAK);
-        assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.AOU_VALIDERING);
         assertThat(lagretInstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED)).isEqualTo("FRITEKST_SED");
         assertThat(lagretInstans.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<List<String>>() {
         }).get(0)).isEqualTo(mottakerInstitusjon);
@@ -125,7 +122,6 @@ class ProsessinstansServiceTest {
 
         Prosessinstans lagretInstans = piCaptor.getValue();
         assertThat(lagretInstans.getType()).isEqualTo(ProsessType.IVERKSETT_VEDTAK);
-        assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.IV_VALIDERING);
         assertThat(lagretInstans.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<List<String>>() {
         }).get(0)).isEqualTo(mottakerInstitusjon);
         assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
@@ -136,17 +132,16 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    void opprettProsessinstansHenleggeSak() {
+    void opprettProsessinstansFagsakHenlagt() {
         settInnloggetSaksbehandler();
 
         Behandling behandling = new Behandling();
-        prosessinstansService.opprettProsessinstansHenleggSak(behandling, Henleggelsesgrunner.ANNET, "");
+        prosessinstansService.opprettProsessinstansFagsakHenlagt(behandling);
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
         Prosessinstans lagretInstans = piCaptor.getValue();
         assertThat(lagretInstans.getType()).isEqualTo(ProsessType.HENLEGG_SAK);
-        assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.HS_OPPDATER_RESULTAT);
         assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
     }
 
@@ -161,7 +156,6 @@ class ProsessinstansServiceTest {
 
         Prosessinstans lagretInstans = piCaptor.getValue();
         assertThat(lagretInstans.getType()).isEqualTo(ProsessType.VIDERESEND_SOKNAD);
-        assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.VS_OPPDATER_RESULTAT);
         assertThat(lagretInstans.getData(ProsessDataKey.EESSI_MOTTAKERE, List.class)).isNull();
         assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
         assertThat(lagretInstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST)).isNotBlank();
@@ -182,15 +176,13 @@ class ProsessinstansServiceTest {
         String saksbehandler = settInnloggetSaksbehandler();
 
         Behandling behandling = lagBehandling();
-        prosessinstansService.opprettProsessinstansForkortPeriode(behandling, Endretperiode.RETURNERT_NORGE, null, null);
+        prosessinstansService.opprettProsessinstansForkortPeriode(behandling, null, null);
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
         Prosessinstans lagretInstans = piCaptor.getValue();
         assertThat(lagretInstans.getType()).isEqualTo(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE);
-        assertThat(lagretInstans.getSteg()).isEqualTo(ProsessSteg.IV_FORKORT_PERIODE);
         assertThat(lagretInstans.getData(ProsessDataKey.SAKSBEHANDLER)).isEqualTo(saksbehandler);
-        assertThat(lagretInstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperiode.class)).isEqualTo(Endretperiode.RETURNERT_NORGE);
     }
 
     @Test
@@ -301,8 +293,7 @@ class ProsessinstansServiceTest {
         verify(prosessinstansRepo).save(piCaptor.capture());
 
         Prosessinstans prosessinstans = piCaptor.getValue();
-        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.REGISTRERING_UNNTAK);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_OPPDATER_MEDL);
+        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.REGISTRERING_UNNTAK_GODKJENN);
     }
 
     @Test
@@ -312,45 +303,21 @@ class ProsessinstansServiceTest {
         verify(prosessinstansRepo).save(piCaptor.capture());
 
         Prosessinstans prosessinstans = piCaptor.getValue();
-        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.REGISTRERING_UNNTAK);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.REG_UNNTAK_PERIODE_IKKE_GODKJENT);
+        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.REGISTRERING_UNNTAK_AVVIS);
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSER, new TypeReference<List<String>>() {
         })).contains(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.name());
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST)).isEqualTo("fritekst");
     }
 
     @Test
-    void opprettProsessinstansGenerellSedBehandling() {
-        JournalfoeringOpprettDto journalfoeringDto = lagJournalfoeringOpprettDto();
-        journalfoeringDto.setBehandlingstemaKode(Behandlingstema.TRYGDETID.getKode());
-        prosessinstansService.opprettProsessinstansGenerellSedBehandling(journalfoeringDto);
-
-        verify(prosessinstansRepo).save(piCaptor.capture());
-        Prosessinstans prosessinstans = piCaptor.getValue();
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_HENT_EESSI_MELDING);
-        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.SED_GENERELL_SAK);
-        assertThat(prosessinstans.getData(ProsessDataKey.DOKUMENT_ID)).isEqualTo(journalfoeringDto.getHoveddokument().getDokumentID());
-    }
-
-    @Test
-    void opprettProsessinstansNySak_behandlingstypeIkkeStøttet_feiler() throws FunksjonellException {
-        OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
-        opprettSakDto.setBehandlingstema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> prosessinstansService.opprettProsessinstansNySak("journalpostID", opprettSakDto));
-    }
-
-    @Test
-    void opprettProsessinstansNySak_behandlingstypeSøknadTemaIkkeYrkesaktiv() throws FunksjonellException {
+    public void opprettProsessinstansNySak_behandlingstypeSøknadTemaIkkeYrkesaktiv() {
         OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
         opprettSakDto.setBehandlingstema(Behandlingstema.IKKE_YRKESAKTIV);
         String journalpostID = "journalpostID";
-        prosessinstansService.opprettProsessinstansNySak(journalpostID, opprettSakDto);
+        prosessinstansService.opprettProsessinstansNySak(journalpostID, opprettSakDto, Behandlingstyper.SOEKNAD);
         verify(prosessinstansRepo).save(piCaptor.capture());
         Prosessinstans prosessinstans = piCaptor.getValue();
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.OPPRETT_NY_SAK);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.JFR_AKTØR_ID);
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class)).isEqualTo(Behandlingstyper.SOEKNAD);
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class)).isEqualTo(Behandlingstema.IKKE_YRKESAKTIV);
         assertThat(prosessinstans.getData(ProsessDataKey.BRUKER_ID)).isEqualTo(opprettSakDto.getBrukerID());
@@ -362,15 +329,14 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    void opprettProsessinstansNySak_behandlingstypeSedTemaTrygdetid() throws FunksjonellException {
+    void opprettProsessinstansNySak_behandlingstypeSedTemaTrygdetid() {
         OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
         opprettSakDto.setBehandlingstema(Behandlingstema.TRYGDETID);
         String journalpostID = "journalpostID";
-        prosessinstansService.opprettProsessinstansNySak(journalpostID, opprettSakDto);
+        prosessinstansService.opprettProsessinstansNySak(journalpostID, opprettSakDto, Behandlingstyper.SED);
         verify(prosessinstansRepo).save(piCaptor.capture());
         Prosessinstans prosessinstans = piCaptor.getValue();
-        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.OPPRETT_NY_SAK_SED_FORESPØRSEL);
-        assertThat(prosessinstans.getSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_HENT_EESSI_MELDING);
+        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.OPPRETT_NY_SAK);
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class)).isEqualTo(Behandlingstyper.SED);
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class)).isEqualTo(Behandlingstema.TRYGDETID);
         assertThat(prosessinstans.getData(ProsessDataKey.BRUKER_ID)).isEqualTo(opprettSakDto.getBrukerID());

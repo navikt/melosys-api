@@ -23,6 +23,8 @@ import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.apache.commons.beanutils.BeanUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,9 @@ import static no.nav.melosys.metrics.MetrikkerNavn.*;
 
 @Service
 public class BehandlingService {
+
+    private static final Logger log = LoggerFactory.getLogger(BehandlingService.class);
+
     private final BehandlingRepository behandlingRepository;
     private final BehandlingsresultatRepository behandlingsresultatRepository;
     private final TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository;
@@ -99,6 +104,8 @@ public class BehandlingService {
         if (!behandling.erAktiv()) {
             throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres. Status var: " + behandling.getStatus());
         }
+
+        log.info("Oppdaterer status for behandling {} fra {} til {}", behandling, behandling.getStatus(), status);
         behandling.setStatus(status);
         if (behandling.erVenterForDokumentasjon()) {
             behandling.setDokumentasjonSvarfristDato(Instant.now().plus(Period.ofWeeks(2)));

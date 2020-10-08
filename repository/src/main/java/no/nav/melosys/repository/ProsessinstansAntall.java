@@ -1,16 +1,16 @@
 package no.nav.melosys.repository;
 
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 
 public class ProsessinstansAntall {
     private ProsessType prosessType;
-    private ProsessSteg prosessSteg;
+    private ProsessStatus prosessStatus;
     private long antall;
 
-    public ProsessinstansAntall(ProsessType prosessType, ProsessSteg prosessSteg, long antall) {
+    public ProsessinstansAntall(ProsessType prosessType, ProsessStatus prosessStatus, long antall) {
         this.prosessType = prosessType;
-        this.prosessSteg = prosessSteg;
+        this.prosessStatus = prosessStatus;
         this.antall = antall;
     }
 
@@ -18,8 +18,8 @@ public class ProsessinstansAntall {
         return prosessType;
     }
 
-    public ProsessSteg getProsessSteg() {
-        return prosessSteg;
+    public ProsessStatus getProsessStatus() {
+        return prosessStatus;
     }
 
     public long getAntall() {

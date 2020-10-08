@@ -5,6 +5,7 @@ import no.nav.melosys.domain.Behandling;
 public class JournalfoeringOpprettDto extends JournalfoeringDto {
     private String behandlingstemaKode;
     private FagsakDto fagsak;
+    @Deprecated(forRemoval = true) //TODO: må fjernes fra schema
     private AnmodningOmUnntakDto anmodningOmUnntak;
     private String arbeidsgiverID;
     private String representantID;
@@ -67,7 +68,7 @@ public class JournalfoeringOpprettDto extends JournalfoeringDto {
         this.representererKode = representererKode;
     }
 
-    public boolean behandlingstypeErSøknad() {
+    public boolean erBehandlingAvSøknad() {
         return Behandling.erBehandlingAvSøknad(getBehandlingstemaKode());
     }
 }
