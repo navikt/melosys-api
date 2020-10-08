@@ -34,6 +34,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.YTTERLIGERE_INFO_SED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -85,12 +86,14 @@ public class SendAnmodningOmUnntakTest {
     public void utfør_ingenInstitusjonEessiKlar_senderBrev() throws Exception {
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(behandlingsresultat);
+        prosessinstans.setData(YTTERLIGERE_INFO_SED, "Mer info");
 
         sendAnmodningOmUnntak.utfør(prosessinstans);
 
         verify(brevBestiller).bestill(brevbestillingArgumentCaptor.capture());
         assertThat(brevbestillingArgumentCaptor.getValue().getMottakere()).contains(Mottaker.av(Aktoersroller.MYNDIGHET));
         assertThat(brevbestillingArgumentCaptor.getValue().getDokumentType()).isEqualTo(Produserbaredokumenter.ANMODNING_UNNTAK);
+        assertThat(brevbestillingArgumentCaptor.getValue().getYtterligereInformasjon()).isEqualTo("Mer info");
         verify(anmodningsperiodeService).oppdaterAnmodningsperiodeSendtForBehandling(eq(BEHANDLING_ID));
     }
 

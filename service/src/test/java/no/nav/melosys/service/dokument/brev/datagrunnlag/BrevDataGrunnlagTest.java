@@ -6,6 +6,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
@@ -41,6 +42,7 @@ public class BrevDataGrunnlagTest {
     @Mock
     private AvklartefaktaService avklartefaktaService;
 
+    private Brevbestilling brevbestilling;
     private Behandling behandling;
     private PersonDokument person;
     private SoeknadDokument søknad;
@@ -66,7 +68,8 @@ public class BrevDataGrunnlagTest {
         søknad = new SoeknadDokument();
         behandling = lagBehandling(søknad, person);
 
-        dataGrunnlag = new BrevDataGrunnlag(behandling, kodeverkService, mock(AvklarteVirksomheterService.class), avklartefaktaService);
+        brevbestilling = new Brevbestilling.Builder().medBehandling(behandling).build();
+        dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, mock(AvklarteVirksomheterService.class), avklartefaktaService);
     }
 
     private Behandling lagBehandling(SoeknadDokument søknad, PersonDokument person) {
@@ -154,9 +157,14 @@ public class BrevDataGrunnlagTest {
         this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
 
         when(avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(anyLong())).thenReturn(Collections.emptyMap());
-        dataGrunnlag = new BrevDataGrunnlag(behandling, kodeverkService, mock(AvklarteVirksomheterService.class), avklartefaktaService);
+        final BrevDataGrunnlag dataGrunnlagUtenAvklartMaritimtArbeid = new BrevDataGrunnlag(
+            brevbestilling,
+            kodeverkService,
+            mock(AvklarteVirksomheterService.class),
+            avklartefaktaService
+        );
 
-        Collection<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder();
+        Collection<Arbeidssted> arbeidssteder = dataGrunnlagUtenAvklartMaritimtArbeid.getArbeidsstedGrunnlag().hentArbeidssteder();
         assertThat(arbeidssteder).isEmpty();
     }
 }

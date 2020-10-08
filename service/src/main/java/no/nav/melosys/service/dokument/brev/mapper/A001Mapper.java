@@ -75,7 +75,8 @@ class A001Mapper {
         mapAnmodningUtenArt12Begrunnelser(brevData.anmodningUtenArt12Begrunnelser).map(A001Mapper::mapArt161AnmodningUtenArt12)
             .ifPresent(seda001::setVilkårBegrunnelseUtenArt12);
 
-        seda001.setFritekst(brevData.anmodningFritekst);
+        seda001.setFritekst(brevData.anmodningFritekstBegrunnelse);
+        seda001.setYtterligereInformasjon(brevData.ytterligereInformasjon);
 
         brevData.ansettelsesperiode.ifPresent(periode -> seda001.setAnsettelsesPeriode(mapAnsettelsesperiode(periode)));
 

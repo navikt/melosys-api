@@ -80,7 +80,7 @@ public class DokumentTjeneste {
         throws TekniskException, FunksjonellException {
         byte[] dokument;
         tilgangService.sjekkTilgang(behandlingID);
-        dokument = dokumentService.produserUtkast(behandlingID, produserbartDokument, brevBestillingDto);
+        dokument = dokumentService.produserUtkast(produserbartDokument, behandlingID, brevBestillingDto);
         return lagResponseAvDokument(dokument, produserbartDokument.getKode() + "_utkast.pdf");
     }
 
@@ -104,7 +104,7 @@ public class DokumentTjeneste {
         }
         tilgangService.sjekkTilgang(behandlingID);
         // Produserer utkast for å få eventuelle feil før bestilling i saksflyt.
-        dokumentService.produserUtkast(behandlingID, produserbartDokument, brevBestillingDto);
+        dokumentService.produserUtkast(produserbartDokument, behandlingID, brevBestillingDto);
         dokumentService.produserDokumentISaksflyt(produserbartDokument, brevBestillingDto.mottaker, behandlingID, new BrevData(brevBestillingDto));
         return ResponseEntity.noContent().build();
     }

@@ -21,19 +21,18 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.dokument.sed.SedDataGrunnlagFactory;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
-import no.nav.melosys.service.eessi.SedGrunnlagMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SendAvslagUtpekingTest {
+@ExtendWith(MockitoExtension.class)
+class SendAvslagUtpekingTest {
 
     @Mock
     private SedDataBygger sedDataBygger;
@@ -45,18 +44,16 @@ public class SendAvslagUtpekingTest {
     private BehandlingService behandlingService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private SedGrunnlagMapper sedGrunnlagMapper;
 
     private SendAvslagUtpeking sendAvslagUtpeking;
     private EessiService eessiService;
     private Behandling behandling;
 
-    @Before
+    @BeforeEach
     public void settOpp() throws FunksjonellException, TekniskException {
         eessiService = new EessiService(
             sedDataBygger, sedDataGrunnlagFactory,
-            eessiConsumer, behandlingService, behandlingsresultatService, sedGrunnlagMapper
+            eessiConsumer, behandlingService, behandlingsresultatService
         );
         sendAvslagUtpeking = new SendAvslagUtpeking(eessiService);
 
@@ -77,7 +74,7 @@ public class SendAvslagUtpekingTest {
     }
 
     @Test
-    public void utfør() throws MelosysException {
+    void utfør() throws MelosysException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.UTPEKING_AVVIS, new UtpekingAvvis(

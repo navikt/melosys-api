@@ -38,9 +38,9 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- Melosys -->
-        <melosys.jsonschema.version>1.35.56-134</melosys.jsonschema.version>
-        <melosys.internt.kodeverk.version>5.15.33</melosys.internt.kodeverk.version>
-        <melosys.brev.version>1.2.55</melosys.brev.version>
+        <melosys.jsonschema.version>1.35.60-138</melosys.jsonschema.version>
+        <melosys.internt.kodeverk.version>5.15.35</melosys.internt.kodeverk.version>
+        <melosys.brev.version>1.2.57</melosys.brev.version>
 
         <!-- NAV -->
         <nav.tjenestespesifikasjoner.version>1.2020.01.09-12.44-3713b7c04e1c</nav.tjenestespesifikasjoner.version>

@@ -73,8 +73,7 @@ import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagAnmodningsperiodeSvarInnvilgelse;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagBostedsadresse;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.Mockito.*;
 
@@ -121,7 +120,7 @@ public final class DokumentServiceTest {
         BrevbestillingDto brevbestilling = lagBrevBestillingDto(BRUKER);
 
         DokumentService dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock(brevbestilling));
-        byte[] resultat = dokumentServiceMedMockVelger.produserUtkast(BEHANDLINGSID, INNVILGELSE_YRKESAKTIV, brevbestilling);
+        byte[] resultat = dokumentServiceMedMockVelger.produserUtkast(INNVILGELSE_YRKESAKTIV, BEHANDLINGSID, brevbestilling);
         assertThat(resultat).isNull();
         verify(dokSysFasade).produserDokumentutkast(any(Dokumentbestilling.class));
     }
@@ -133,7 +132,7 @@ public final class DokumentServiceTest {
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any(Behandling.class))).thenReturn(arbeidsgivendeOrgnumre);
 
         DokumentService dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock(brevbestilling));
-        byte[] resultat = dokumentServiceMedMockVelger.produserUtkast(BEHANDLINGSID, AVSLAG_ARBEIDSGIVER, brevbestilling);
+        byte[] resultat = dokumentServiceMedMockVelger.produserUtkast(AVSLAG_ARBEIDSGIVER, BEHANDLINGSID, brevbestilling);
         assertThat(resultat).isNull();
         verify(dokSysFasade).produserDokumentutkast(any(Dokumentbestilling.class));
     }
@@ -279,7 +278,8 @@ public final class DokumentServiceTest {
         EregFasade eregFasade = mockEregFasade();
         RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(eregFasade, tpsFasade);
         AvklarteVirksomheterSystemService avklarteVirksomheterSystemService = new AvklarteVirksomheterSystemService(avklartefaktaService, registerOppslagService);
-        BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(lagBehandling(), kodeverkService,avklarteVirksomheterSystemService, avklartefaktaService);
+        Brevbestilling brevbestilling = new Brevbestilling.Builder().medBehandling(lagBehandling()).build();
+        BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService,avklarteVirksomheterSystemService, avklartefaktaService);
         BrevdataGrunnlagFactory brevdataGrunnlagFactory = mock(BrevdataGrunnlagFactory.class);
         when(brevdataGrunnlagFactory.av(any())).thenReturn(dataGrunnlag);
         return brevdataGrunnlagFactory;
@@ -375,11 +375,11 @@ public final class DokumentServiceTest {
                 when(brevdatabyggervelger.hent(any(), eq(bestillingDto))).thenReturn(brevDataByggerAvslagArbeidsgiver);
                 when(brevDataByggerAvslagArbeidsgiver.lag(any(), any())).thenReturn(lagBrevDataAvslagArbeidsgiver());
             } else {
-                when(brevdatabyggervelger.hent(eq(INNVILGELSE_YRKESAKTIV))).thenReturn(brevDataByggerInnvilgelse);
+                when(brevdatabyggervelger.hent(any(), any())).thenReturn(brevDataByggerVedlegg);
+                when(brevdatabyggervelger.hent(eq(INNVILGELSE_YRKESAKTIV), any())).thenReturn(brevDataByggerInnvilgelse);
+                when(brevdatabyggervelger.hent(eq(AVSLAG_ARBEIDSGIVER), any())).thenReturn(brevDataByggerAvslagArbeidsgiver);
                 when(brevDataByggerInnvilgelse.lag(any(), any())).thenReturn(lagBrevDataInnvilgelse());
-                when(brevdatabyggervelger.hent(eq(AVSLAG_ARBEIDSGIVER))).thenReturn(brevDataByggerAvslagArbeidsgiver);
                 when(brevDataByggerAvslagArbeidsgiver.lag(any(), any())).thenReturn(lagBrevDataAvslagArbeidsgiver());
-                when(brevdatabyggervelger.hent(any(), eq(bestillingDto))).thenReturn(brevDataByggerVedlegg);
                 when(brevDataByggerVedlegg.lag(any(), any())).thenReturn(lagBrevDataInnvilgelse());
             }
         } else {

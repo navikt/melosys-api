@@ -4,37 +4,46 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
 public final class Brevbestilling {
     private final Produserbaredokumenter dokumentType;
     private final String avsender;
+    private final Aktoersroller mottakerRolle;
     private final Collection<Mottaker> mottaker;
     private final Behandling behandling;
     private final String begrunnelseKode;
     private final String fritekst;
+    private final String ytterligereInformasjon;
 
     private Brevbestilling(Produserbaredokumenter dokumentType,
                            String avsender,
+                           Aktoersroller mottakerRolle,
                            Collection<Mottaker> mottaker,
                            Behandling behandling,
                            String begrunnelseKode,
-                           String fritekst) {
+                           String fritekst,
+                           String ytterligereInformasjon) {
         this.dokumentType = dokumentType;
         this.avsender = avsender;
+        this.mottakerRolle = mottakerRolle;
         this.mottaker = mottaker;
         this.behandling = behandling;
         this.begrunnelseKode = begrunnelseKode;
         this.fritekst = fritekst;
+        this.ytterligereInformasjon = ytterligereInformasjon;
     }
 
     public static class Builder {
         private Produserbaredokumenter dokumentType;
         private String avsender;
+        private Aktoersroller mottakerRolle;
         private Collection<Mottaker> mottakere;
         private Behandling behandling;
         private String begrunnelseKode;
         private String fritekst;
+        private String ytterligereInformasjon;
 
         public Builder medDokumentType(Produserbaredokumenter dokumentType) {
             this.dokumentType = dokumentType;
@@ -45,6 +54,12 @@ public final class Brevbestilling {
             this.avsender = avsender;
             return this;
         }
+
+        public Builder medMottakerRolle(Aktoersroller mottakerRolle) {
+            this.mottakerRolle = mottakerRolle;
+            return this;
+        }
+
 
         public Builder medMottakere(Mottaker... mottakere) {
             this.mottakere = Arrays.asList(mottakere);
@@ -71,8 +86,22 @@ public final class Brevbestilling {
             return this;
         }
 
+        public Builder medYtterligereInformasjon(String ytterligereInformasjon) {
+            this.ytterligereInformasjon = ytterligereInformasjon;
+            return this;
+        }
+
         public Brevbestilling build() {
-            return new Brevbestilling(dokumentType, avsender, mottakere, behandling, begrunnelseKode, fritekst);
+            return new Brevbestilling(
+                dokumentType,
+                avsender,
+                mottakerRolle,
+                mottakere,
+                behandling,
+                begrunnelseKode,
+                fritekst,
+                ytterligereInformasjon
+            );
         }
     }
 
@@ -82,6 +111,10 @@ public final class Brevbestilling {
 
     public String getAvsender() {
         return avsender;
+    }
+
+    public Aktoersroller getMottakerRolle() {
+        return mottakerRolle;
     }
 
     public Collection<Mottaker> getMottakere() {
@@ -98,5 +131,9 @@ public final class Brevbestilling {
 
     public String getFritekst() {
         return fritekst;
+    }
+
+    public String getYtterligereInformasjon() {
+        return ytterligereInformasjon;
     }
 }
