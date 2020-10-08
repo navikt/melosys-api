@@ -16,6 +16,7 @@ import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
+import no.nav.melosys.service.behandling.EndreBehandlingstemaService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.TidligereMedlemsperioderDto;
 import no.nav.melosys.tjenester.gui.dto.tildto.SaksopplysningerTilDto;
@@ -54,7 +55,7 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
 
     @BeforeEach
     void setUp() {
-        behandlingTjeneste = new BehandlingTjeneste(behandlingService, saksopplysningerTilDto, mock(TilgangService.class), saksbehandlerService);
+        behandlingTjeneste = new BehandlingTjeneste(behandlingService, saksopplysningerTilDto, mock(TilgangService.class), saksbehandlerService, mock(EndreBehandlingstemaService.class));
 
         random = new EasyRandom(new EasyRandomParameters()
             .overrideDefaultInitialization(true)
