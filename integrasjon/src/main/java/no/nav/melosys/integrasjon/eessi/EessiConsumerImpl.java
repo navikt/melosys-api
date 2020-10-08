@@ -58,11 +58,11 @@ public class EessiConsumerImpl implements EessiConsumer {
     }
 
     @Override
-    public List<Institusjon> hentMottakerinstitusjoner(String bucType, String landkode) throws MelosysException {
+    public List<Institusjon> hentMottakerinstitusjoner(String bucType, Collection<String> landkoder) throws MelosysException {
 
-        List<InstitusjonDto> institusjonDtoList = exchange("/buc/{bucType}/institusjoner?land={landKode}", HttpMethod.GET,
+        List<InstitusjonDto> institusjonDtoList = exchange("/buc/{bucType}/institusjoner?land={landkoder}", HttpMethod.GET,
             new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<InstitusjonDto>>() {
-            }, bucType, landkode);
+            }, bucType, landkoder.toArray());
 
         return institusjonDtoList.stream()
             .map(institusjonDto -> new Institusjon(

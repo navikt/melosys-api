@@ -200,10 +200,11 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public String opprettJournalpost(OpprettJournalpost opprettJournalpost, boolean forsøkEndeligJfr) throws TekniskException {
+    public String opprettJournalpost(OpprettJournalpost opprettJournalpost, boolean forsøkEndeligJfr)
+        throws FunksjonellException {
         OpprettJournalpostRequest request = OpprettJournalpostRequest.av(opprettJournalpost);
-        if (forsøkEndeligJfr && !ValiderJournalpostUtil.validerJournalpostForEndeligJfr(request)) {
-            throw new TekniskException("Opprettelse av journalpost kan ikke ferdigstilles");
+        if (forsøkEndeligJfr) {
+            JournalpostRequestValidator.validerJournalpostForEndeligJfr(request);
         }
 
         return journalpostapiConsumer.opprettJournalpost(request, forsøkEndeligJfr).getJournalpostId();

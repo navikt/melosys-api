@@ -18,14 +18,13 @@ import static no.nav.melosys.service.dokument.brev.BrevDataService.*;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
 public final class BrevDataUtils {
-
     private BrevDataUtils() {
-        throw new IllegalStateException("Utility");
+        throw new UnsupportedOperationException("Utility");
     }
 
     static NavAnsatt lagNavAnsatt(String ansattId, String navn) {
         NavAnsatt navAnsatt = new NavAnsatt();
-        navAnsatt.setAnsattId(ansattId);
+        navAnsatt.setAnsattId(ansattId != null ? ansattId : "N/A");
         navAnsatt.setNavn(navn);
         return navAnsatt;
     }

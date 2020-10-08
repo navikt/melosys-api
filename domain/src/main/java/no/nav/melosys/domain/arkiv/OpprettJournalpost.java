@@ -14,7 +14,6 @@ import static no.nav.melosys.domain.arkiv.FysiskDokument.lagFysiskDokumentAltinn
 import static no.nav.melosys.domain.arkiv.FysiskDokument.lagFysiskDokumentSed;
 
 public class OpprettJournalpost extends Journalpost {
-
     private static final String SENTRAL_UTSKRIFT = "S";
     private static final String MEDLEMSKAP_OG_AVGIFT = "4530";
     private static final String UNNTAK_FRA_MEDLEMSKAP = "UFM";
@@ -59,14 +58,16 @@ public class OpprettJournalpost extends Journalpost {
     }
 
     public static OpprettJournalpost lagJournalpostForMottakAltinnSøknad(Fagsak fagsak,
-                                                                          Collection<AltinnDokument> dokumenter,
-                                                                          String brukerID) {
-
-        AltinnDokument hovedDokument = dokumenter.stream().filter(AltinnDokument::erSøknad).collect(MoreCollectors.onlyElement());
+                                                                         Collection<AltinnDokument> dokumenter,
+                                                                         String brukerID,
+                                                                         String avsenderNavn) {
+        AltinnDokument hovedDokument = dokumenter.stream().filter(AltinnDokument::erSøknad)
+            .collect(MoreCollectors.onlyElement());
         dokumenter.remove(hovedDokument);
 
         OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
         opprettJournalpost.setHoveddokument(lagFysiskDokumentAltinn(hovedDokument));
+        opprettJournalpost.setInnhold(opprettJournalpost.getHoveddokument().getTittel());
         opprettJournalpost.setVedlegg(dokumenter.stream().map(FysiskDokument::lagFysiskDokumentAltinn).collect(Collectors.toList()));
         opprettJournalpost.setArkivSakId(fagsak.getGsakSaksnummer().toString());
         opprettJournalpost.setMottaksKanal(ALTINN);
@@ -78,10 +79,12 @@ public class OpprettJournalpost extends Journalpost {
         fagsak.hentRepresentant(Representerer.BRUKER).ifPresentOrElse(
             r -> {
                 opprettJournalpost.setKorrespondansepartId(r.getOrgnr());
+                opprettJournalpost.setKorrespondansepartNavn(avsenderNavn);
                 opprettJournalpost.setKorrespondansepartIdType(ORGNR);
             },
             () -> {
                 opprettJournalpost.setKorrespondansepartId(brukerID);
+                opprettJournalpost.setKorrespondansepartNavn(avsenderNavn);
                 opprettJournalpost.setKorrespondansepartIdType(FNR);
             }
         );

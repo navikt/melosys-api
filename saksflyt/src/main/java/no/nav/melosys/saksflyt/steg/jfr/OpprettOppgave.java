@@ -17,12 +17,8 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.GSAK_OPPRETT_OPPGAVE;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.SEND_FORVALTNINGSMELDING;
 
-/**
- * Oppretter en oppgave i GSAK.
- */
 @Component
 public class OpprettOppgave implements StegBehandler {
-
     private static final String STØTTES_IKKE = " er ikke støttet";
 
     private final OppgaveService oppgaveService;

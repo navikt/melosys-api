@@ -261,7 +261,7 @@ public class BrevDataService {
     private Saksbehandler lagSaksbehandler(String ident) throws IkkeFunnetException, TekniskException {
         Saksbehandler saksbehandler = new Saksbehandler();
         saksbehandler.setNavEnhet(lagNavEnhet());
-        var saksbehandlerNavn = saksbehandlerService.hentNavnForIdent(ident);
+        var saksbehandlerNavn = ident != null ? saksbehandlerService.hentNavnForIdent(ident) : "N/A";
         saksbehandler.setNavAnsatt(lagNavAnsatt(ident, saksbehandlerNavn));
         return saksbehandler;
     }

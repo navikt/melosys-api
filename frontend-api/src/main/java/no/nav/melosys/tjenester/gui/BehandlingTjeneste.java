@@ -3,9 +3,12 @@ package no.nav.melosys.tjenester.gui;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.tildto.SaksopplysningerTilDto;
@@ -30,14 +33,17 @@ public class BehandlingTjeneste {
     private final BehandlingService behandlingService;
     private final SaksopplysningerTilDto saksopplysningerTilDto;
     private final TilgangService tilgangService;
+    private final SaksbehandlerService saksbehandlerService;
 
     @Autowired
     public BehandlingTjeneste(BehandlingService behandlingService,
                               SaksopplysningerTilDto saksopplysningerTilDto,
-                              TilgangService tilgangService) {
+                              TilgangService tilgangService,
+                              SaksbehandlerService saksbehandlerService) {
         this.behandlingService = behandlingService;
         this.saksopplysningerTilDto = saksopplysningerTilDto;
         this.tilgangService = tilgangService;
+        this.saksbehandlerService = saksbehandlerService;
     }
 
     @PostMapping("{behandlingID}/status")
@@ -103,12 +109,13 @@ public class BehandlingTjeneste {
         return behandlingDto;
     }
 
-    private BehandlingOppsummeringDto tilOppsummeringDto(Behandling behandling) {
+    private BehandlingOppsummeringDto tilOppsummeringDto(Behandling behandling) throws TekniskException, IkkeFunnetException {
         BehandlingOppsummeringDto behandlingOppsummeringDto = new BehandlingOppsummeringDto();
         behandlingOppsummeringDto.setBehandlingsstatus(behandling.getStatus());
         behandlingOppsummeringDto.setBehandlingstype(behandling.getType());
         behandlingOppsummeringDto.setBehandlingstema(behandling.getTema());
         behandlingOppsummeringDto.setEndretDato(behandling.getEndretDato());
+        behandlingOppsummeringDto.setEndretAvNavn(saksbehandlerService.hentNavnForIdent(behandling.getEndretAv()));
         behandlingOppsummeringDto.setRegistrertDato(behandling.getRegistrertDato());
         behandlingOppsummeringDto.setSisteOpplysningerHentetDato(behandling.getSistOpplysningerHentetDato());
         return behandlingOppsummeringDto;

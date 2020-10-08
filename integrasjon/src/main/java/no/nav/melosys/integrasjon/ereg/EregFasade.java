@@ -12,5 +12,7 @@ public interface EregFasade {
 
     Saksopplysning hentOrganisasjon(String orgnummer) throws IkkeFunnetException, IntegrasjonException;
 
+    String hentOrganisasjonNavn(String orgnummer) throws IkkeFunnetException, IntegrasjonException;
+
     boolean organisasjonFinnes(String orgnummer) throws IntegrasjonException;
 }

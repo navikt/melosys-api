@@ -14,9 +14,10 @@ import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.msm.AltinnDokument;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.altinn.AltinnSoeknadService;
@@ -36,19 +37,19 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OpprettOgFerdigstillJournalpostTest {
-
     @Mock
     private AltinnSoeknadService altinnSoeknadService;
     @Mock
-    private TpsFasade tpsFasade;
+    private BehandlingService behandlingService;
+    @Mock
+    private EregFasade eregFasade;
     @Mock
     private JoarkFasade joarkFasade;
     @Mock
-    private BehandlingService behandlingService;
+    private TpsFasade tpsFasade;
 
     private OpprettOgFerdigstillJournalpost opprettOgFerdigstillJournalpost;
 
-    private final String søknadID = "soknadid1";
     private final Prosessinstans prosessinstans = new Prosessinstans();
     private final Behandling behandling = new Behandling();
     private final String ident = "00000000000";
@@ -57,11 +58,12 @@ public class OpprettOgFerdigstillJournalpostTest {
     private ArgumentCaptor<OpprettJournalpost> captor;
 
     @Before
-    public void setup() throws IkkeFunnetException, TekniskException {
+    public void setup() throws FunksjonellException, IntegrasjonException {
+        final String søknadID = "soknadid1";
         prosessinstans.setData(ProsessDataKey.MOTTATT_SOKNAD_ID, søknadID);
 
         opprettOgFerdigstillJournalpost = new OpprettOgFerdigstillJournalpost(
-            altinnSoeknadService, tpsFasade, joarkFasade, behandlingService);
+            altinnSoeknadService, behandlingService, eregFasade, joarkFasade, tpsFasade);
 
         AltinnDokument søknadDokument = new AltinnDokument(søknadID, "dokumentid1", "tittel1", AltinnDokument.AltinnDokumentType.SOKNAD.name(), "pdf");
         AltinnDokument fullmaktDokument = new AltinnDokument(søknadID, "dokumentid2", "tittel2", AltinnDokument.AltinnDokumentType.FULLMAKT.name(), "pdf");
@@ -72,6 +74,7 @@ public class OpprettOgFerdigstillJournalpostTest {
 
         Aktoer representant = new Aktoer();
         representant.setRolle(Aktoersroller.REPRESENTANT);
+        representant.setOrgnr("repOrgnr");
         representant.setRepresenterer(Representerer.BEGGE);
 
         Fagsak fagsak = new Fagsak();
@@ -85,6 +88,7 @@ public class OpprettOgFerdigstillJournalpostTest {
         dokumenter.add(fullmaktDokument);
         when(altinnSoeknadService.hentDokumenterTilknyttetSoknad(eq(søknadID))).thenReturn(dokumenter);
         when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn(ident);
+        when(eregFasade.hentOrganisasjonNavn(anyString())).thenReturn("Fullmektig Avsender");
         when(joarkFasade.opprettJournalpost(any(OpprettJournalpost.class), anyBoolean())).thenReturn("journalpostid123");
     }
 
@@ -100,6 +104,7 @@ public class OpprettOgFerdigstillJournalpostTest {
         assertThat(opprettJournalpost)
             .extracting(Journalpost::getTema, Journalpost::getMottaksKanal, Journalpost::getArkivSakId, Journalpost::getBrukerId)
             .containsExactly("MED", "ALTINN", "123", ident);
+        assertThat(opprettJournalpost.getInnhold()).isNotEmpty();
         assertThat(opprettJournalpost.getHoveddokument())
             .extracting(ArkivDokument::getDokumentId, ArkivDokument::getTittel)
             .containsExactly(null, "Søknad om A1 for utsendte arbeidstakere i EØS/Sveits");
@@ -107,6 +112,7 @@ public class OpprettOgFerdigstillJournalpostTest {
             .hasSize(1)
             .flatExtracting(ArkivDokument::getTittel)
             .containsExactly("Fullmakt");
+        assertThat(opprettJournalpost.getKorrespondansepartNavn()).isNotBlank();
     }
 
 
