@@ -12,6 +12,8 @@ public class BrevbestillingDto {
 
     public String begrunnelseKode;
 
+    public String ytterligereInformasjon;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -19,12 +21,13 @@ public class BrevbestillingDto {
         BrevbestillingDto that = (BrevbestillingDto) o;
         return mottaker == that.mottaker &&
             Objects.equals(fritekst, that.fritekst) &&
-            Objects.equals(begrunnelseKode, that.begrunnelseKode);
+            Objects.equals(begrunnelseKode, that.begrunnelseKode) &&
+            Objects.equals(ytterligereInformasjon, that.ytterligereInformasjon);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mottaker, fritekst, begrunnelseKode);
+        return Objects.hash(mottaker, fritekst, begrunnelseKode, ytterligereInformasjon);
     }
 
     @Override
@@ -33,6 +36,7 @@ public class BrevbestillingDto {
             "mottaker=" + mottaker +
             ", fritekst='" + fritekst + '\'' +
             ", begrunnelseKode='" + begrunnelseKode + '\'' +
+            ", ytterligereInformasjon='" + ytterligereInformasjon + '\'' +
             '}';
     }
 }
