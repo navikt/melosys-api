@@ -13,9 +13,9 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,14 +36,14 @@ public class SendMangelbrev implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(SendMangelbrev.class);
 
-    private final BehandlingRepository behandlingRepo;
+    private final BehandlingService behandlingService;
 
     private static final int DOKUMENTASJON_SVARFRIST_UKER = 4;
 
     private final BrevBestiller brevBestiller;
     @Autowired
-    public SendMangelbrev(BehandlingRepository behandlingRepo, BrevBestiller brevBestiller) {
-        this.behandlingRepo = behandlingRepo;
+    public SendMangelbrev(BehandlingService behandlingService, BrevBestiller brevBestiller) {
+        this.behandlingService = behandlingService;
         this.brevBestiller = brevBestiller;
     }
 
@@ -56,7 +56,8 @@ public class SendMangelbrev implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
         log.debug("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        Behandling behandling = prosessinstans.getBehandling();
+        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
+
         Aktoersroller mottaker = prosessinstans.getData(ProsessDataKey.MOTTAKER, Aktoersroller.class);
         BrevData brevData = prosessinstans.getData(ProsessDataKey.BREVDATA, BrevData.class);
 
@@ -72,7 +73,7 @@ public class SendMangelbrev implements StegBehandler {
 
         behandling.setStatus(Behandlingsstatus.AVVENT_DOK_PART);
         behandling.setDokumentasjonSvarfristDato(Instant.now().plus(Period.ofWeeks(DOKUMENTASJON_SVARFRIST_UKER)));
-        behandlingRepo.save(behandling);
+        behandlingService.lagre(behandling);
 
         prosessinstans.setSteg(ProsessSteg.FERDIG);
         log.info("Sendt mangelbrev for prosessinstans {}", prosessinstans.getId());
