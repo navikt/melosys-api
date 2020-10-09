@@ -122,7 +122,7 @@ public class BehandlingTjeneste {
     @ApiOperation(value = "Endre behandlingstema for en gitt behandling")
     public ResponseEntity<Void> endreBehandlingstema(@PathVariable("behandlingID") long behandlingsID, @RequestBody Behandlingstema nyttTema)
         throws MelosysException{
-        log.debug("Saksbehandler {} ber om å hente mulige nye behandlingstema for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingsID);
+        log.debug("Saksbehandler {} ber om å sette behandlingstema for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingsID, nyttTema);
         tilgangService.sjekkTilgang(behandlingsID);
 
         Behandling behandling = behandlingService.hentBehandling(behandlingsID);
