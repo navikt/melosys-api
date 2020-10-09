@@ -1,0 +1,149 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "description": "Skjema for melding om A1 utstedt fra Melosys",
+  "examples": [
+    {
+      "saksnummer": "MEL-123",
+      "behandlingId": 123,
+      "aktorId": "1234567891234",
+      "artikkel": "12.1",
+      "avkryssingA1": "3.1",
+      "periode": {
+        "fom": "2020-10-09",
+        "tom": "2020-11-09"
+      },
+      "mottakerland": "SE",
+      "datoUtstedelse": "2020-10-09",
+      "typeUtstedelse": "FØRSTEGANG",
+      "meldingOpprettetTidspunkt": "2020-10-09T10:15:24.064758"
+    }
+  ],
+  "required": [
+    "saksnummer",
+    "behandlingId",
+    "aktorId",
+    "artikkel",
+    "avkryssingA1",
+    "periode",
+    "mottakerland",
+    "datoUtstedelse",
+    "typeUtstedelse",
+    "meldingOpprettetTidspunkt"
+  ],
+  "properties": {
+    "saksnummer": {
+      "$id": "#/properties/saksnummer",
+      "type": "string",
+      "maxLength": 99,
+      "description": "Saksnummer i Melosys",
+      "examples": [
+        "MEL-1234"
+      ]
+    },
+    "behandlingId": {
+      "$id": "#/properties/behandlingId",
+      "type": "integer",
+      "description": "Behandling-id i Melosys",
+      "examples": [
+        1234
+      ]
+    },
+    "aktorId": {
+      "$id": "#/properties/aktorId",
+      "type": "string",
+      "maxLength": 13,
+      "description": "Aktør-id til personen A1 utstedes for"
+    },
+    "artikkel": {
+      "$id": "#/properties/artikkel",
+      "type": "string",
+      "description": "",
+      "enum": [
+        "12.1",
+        "12.2",
+        "13.1",
+        "13.2",
+        "13.3",
+        "13.4",
+        "11.3a",
+        "11.3b",
+        "11.4",
+        "11.5",
+        "16"
+      ]
+    },
+    "avkryssingA1": {
+      "$id": "#/properties/avkryssingA1",
+      "type": "string",
+      "description": "Hvilket felt i A1 som er krysset av for artikkel",
+      "enum": [
+        "3.1",
+        "3.2",
+        "3.3",
+        "3.4",
+        "3.5",
+        "3.6",
+        "3.7",
+        "3.8",
+        "3.9",
+        "3.10",
+        "3.11",
+        "3.12"
+      ]
+    },
+    "periode": {
+      "$id": "#/properties/periode",
+      "type": "object",
+      "description": "Perioden hvor A1 gjelder",
+      "required": [
+        "fom",
+        "tom"
+      ],
+      "properties": {
+        "fom": {
+          "$id": "#/properties/periode/properties/fom",
+          "type": "string",
+          "format": "date",
+          "description": "Periodens startdato (fra og med)"
+        },
+        "tom": {
+          "$id": "#/properties/periode/properties/tom",
+          "type": "string",
+          "format": "date",
+          "description": "Periodens sluttdato (til og med)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "mottakerland": {
+      "$id": "#/properties/mottakerland",
+      "type": "string",
+      "maxLength": 2,
+      "description": "Land hvor A1 er gyldig"
+    },
+    "datoUtstedelse": {
+      "$id": "#/properties/datoUtstedelse",
+      "type": "string",
+      "format": "date",
+      "description": "Dato A1 er utstedt"
+    },
+    "typeUtstedelse": {
+      "$id": "#/properties/typeUtstedelse",
+      "type": "string",
+      "description": "Hvilken type utstedelse av A1",
+      "enum": [
+        "FØRSTEGANG",
+        "ENDRING",
+        "ANNULLERING"
+      ]
+    },
+    "meldingOpprettetTidspunkt": {
+      "$id": "#/properties/meldingOpprettetTidspunkt",
+      "type": "string",
+      "format": "date-time",
+      "description": "Tidspunkt da meldingen ble opprettet og lagt på kø"
+    }
+  },
+  "additionalProperties": false
+}
