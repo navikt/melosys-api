@@ -142,8 +142,9 @@ public class EessiService {
             .findFirst().map(SaksrelasjonDto::getGsakSaksnummer);
     }
 
-    public void lagreSaksrelasjon(Long gsakSaksnummer, String rinaSaksnummer, String bucType) throws MelosysException {
-        eessiConsumer.lagreSaksrelasjon(new SaksrelasjonDto(gsakSaksnummer, rinaSaksnummer, bucType));
+    public void lagreSaksrelasjon(Long arkivsakID, String rinaSaksnummer, String bucType) throws MelosysException {
+        log.info("Lagrer saksrelasjon mellom arkivsak {} og rinasak {}", arkivsakID, rinaSaksnummer);
+        eessiConsumer.lagreSaksrelasjon(new SaksrelasjonDto(arkivsakID, rinaSaksnummer, bucType));
     }
 
     public void sendAnmodningUnntakSvar(long behandlingId) throws MelosysException {

@@ -1,33 +1,48 @@
 package no.nav.melosys.service.unntaksperiode;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
+import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
-
 @Service
+@Primary
 public class UnntaksperiodeService {
     private final BehandlingService behandlingService;
+    private final BehandlingsresultatService behandlingsresultatService;
+    private final LovvalgsperiodeService lovvalgsperiodeService;
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
 
     @Autowired
-    public UnntaksperiodeService(BehandlingService behandlingService, OppgaveService oppgaveService, ProsessinstansService prosessinstansService) {
+    public UnntaksperiodeService(BehandlingService behandlingService,
+                                 BehandlingsresultatService behandlingsresultatService,
+                                 LovvalgsperiodeService lovvalgsperiodeService,
+                                 OppgaveService oppgaveService,
+                                 ProsessinstansService prosessinstansService) {
         this.behandlingService = behandlingService;
+        this.behandlingsresultatService = behandlingsresultatService;
+        this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
     }
@@ -35,8 +50,21 @@ public class UnntaksperiodeService {
     @Transactional(rollbackFor = MelosysException.class)
     public void godkjennPeriode(long behandlingID, boolean varsleUtland) throws FunksjonellException, TekniskException {
         Behandling behandling = hentOgValiderBehandling(behandlingID);
+        opprettLovvalgsperiodeHvisIkkeEksisterer(behandling);
+        behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.GODKJENT);
         prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(behandling, varsleUtland);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+    }
+
+    //Lovvalgsperiode finnes ikke om automatisk behandlet, eller om saksbehandler godkjenner periode fra SED uten å endre den
+    private void opprettLovvalgsperiodeHvisIkkeEksisterer(Behandling behandling) throws IkkeFunnetException, TekniskException {
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+        if (behandlingsresultat.finnValidertLovvalgsperiode().isEmpty()) {
+            lovvalgsperiodeService.lagreLovvalgsperioder(
+                behandling.getId(),
+                Collections.singleton(behandling.hentSedDokument().opprettInnvilgetLovvalgsperiode())
+            );
+        }
     }
 
     @Transactional(rollbackFor = MelosysException.class)
@@ -44,6 +72,11 @@ public class UnntaksperiodeService {
         Behandling behandling = hentOgValiderBehandling(behandlingID);
         Set<Ikke_godkjent_begrunnelser> ikkeGodkjentBegrunnelser = tilIkkeGodkjentBegrunnelser(begrunnelser);
         validerBegrunnelser(ikkeGodkjentBegrunnelser, fritekst);
+        behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
+        behandlingsresultatService.oppdaterBegrunnelser(
+            behandlingID, begrunnelser.stream().map(BehandlingsresultatBegrunnelse::lag).collect(Collectors.toSet()), fritekst
+        );
+
         prosessinstansService.opprettProsessinstansUnntaksperiodeAvvist(behandling, ikkeGodkjentBegrunnelser, fritekst);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
@@ -63,17 +96,12 @@ public class UnntaksperiodeService {
     }
 
     private void validerBehandling(Behandling behandling) throws FunksjonellException {
-        Behandlingstema behandlingstype = behandling.getTema();
-
-        if (behandlingstype != REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
-            && behandlingstype != REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
-            && behandlingstype != BESLUTNING_LOVVALG_ANNET_LAND) {
+        if (!behandling.erRegisteringAvUnntak()) {
             throw new FunksjonellException(
-                String.format("Behandling er ikke av type %s, %s eller %s", REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
-                    REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, BESLUTNING_LOVVALG_ANNET_LAND)
+                String.format("Behandling %s er ikke av tema registrering-unntak, men %s", behandling.getId(), behandling.getTema())
             );
         } else if (behandling.erInaktiv()) {
-            throw new FunksjonellException("Behandlingen er inaktiv");
+            throw new FunksjonellException(String.format("Behandling %s er inaktiv", behandling.getId()));
         }
     }
 

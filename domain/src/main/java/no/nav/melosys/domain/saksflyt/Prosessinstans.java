@@ -1,7 +1,6 @@
 package no.nav.melosys.domain.saksflyt;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 import javax.persistence.*;
@@ -12,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.jpa.PropertiesConverter;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.serializer.LovvalgBestemmelseDeserializer;
@@ -35,6 +35,10 @@ public class Prosessinstans {
     @Column(name = "prosess_type", nullable = false)
     private ProsessType type;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private ProsessStatus status;
+
     @ManyToOne()
     @JoinColumn(name = "behandling_id")
     private Behandling behandling;
@@ -44,26 +48,17 @@ public class Prosessinstans {
     private final Properties data = new Properties();
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "steg", nullable = false)
-    private ProsessSteg steg;
+    @Column(name = "sist_fullfort_steg")
+    private ProsessSteg sistFullførtSteg;
 
     @Column(name = "registrert_dato", nullable = false, updatable = false)
     private LocalDateTime registrertDato;
-
-    @Column(name = "antall_retry", nullable = false)
-    private int antallRetry;
-
-    @Column(name = "sist_forsoekt")
-    private LocalDateTime sistForsøkt;
-
-    @Column(name = "sover_til")
-    private Instant soverTil;
 
     @Column(name = "endret_dato", nullable = false)
     private LocalDateTime endretDato;
 
     @OneToMany(mappedBy = "prosessinstans", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<ProsessinstansHendelse> hendelser;
+    private List<ProsessinstansHendelse> hendelser = new ArrayList<>();
 
     private static final ObjectMapper dataMapper = new ObjectMapper().registerModule(new JavaTimeModule())
         .registerModule(new SimpleModule().addDeserializer(LovvalgBestemmelse.class, new LovvalgBestemmelseDeserializer()));
@@ -78,6 +73,14 @@ public class Prosessinstans {
 
     public void setType(ProsessType type) {
         this.type = type;
+    }
+
+    public ProsessStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ProsessStatus status) {
+        this.status = status;
     }
 
     public Behandling getBehandling() {
@@ -125,6 +128,10 @@ public class Prosessinstans {
         }
     }
 
+    public <T> T getData(ProsessDataKey key, Class<T> type, T defaultVerdi) {
+        return Optional.ofNullable(getData(key, type)).orElse(defaultVerdi);
+    }
+
     public void setData(ProsessDataKey key, String value) {
         this.data.setProperty(key.getKode(), value);
     }
@@ -137,7 +144,6 @@ public class Prosessinstans {
             String dataString = dataMapper.writeValueAsString(value);
             setData(key, dataString);
         } catch (JsonProcessingException e) {
-            // Holder med RTE, siden det skal mye til for at en slik feil kommer ut i prod
             throw new IllegalStateException("Feil ved serialisering", e);
         }
     }
@@ -146,12 +152,12 @@ public class Prosessinstans {
         this.data.putAll(data);
     }
 
-    public ProsessSteg getSteg() {
-        return steg;
+    public ProsessSteg getSistFullførtSteg() {
+        return sistFullførtSteg;
     }
 
-    public void setSteg(ProsessSteg steg) {
-        this.steg = steg;
+    public void setSistFullførtSteg(ProsessSteg sistFullførteSteg) {
+        this.sistFullførtSteg = sistFullførteSteg;
     }
 
     public LocalDateTime getRegistrertDato() {
@@ -160,26 +166,6 @@ public class Prosessinstans {
 
     public void setRegistrertDato(LocalDateTime registrertDato) {
         this.registrertDato = registrertDato;
-    }
-
-    public int getAntallRetry() {
-        return antallRetry;
-    }
-
-    public void setAntallRetry(int antallRetry) {
-        this.antallRetry = antallRetry;
-    }
-
-    public void setSistForsøkt(LocalDateTime sistForsøkt) {
-        this.sistForsøkt = sistForsøkt;
-    }
-
-    public Instant getSoverTil() {
-        return soverTil;
-    }
-
-    public void setSoverTil(Instant soverTil) {
-        this.soverTil = soverTil;
     }
 
     public void setEndretDato(LocalDateTime endretDato) {
@@ -200,28 +186,25 @@ public class Prosessinstans {
             .orElse(Boolean.FALSE) ? getData(ProsessDataKey.SAKSBEHANDLER) : null;
     }
 
-    private void leggTilHendelse(ProsessinstansHendelse piHend) {
-        if (!this.equals(piHend.getProsessinstans())) {
-            // Holder med RTE, siden det skal mye til for at en slik feil kommer ut i prod
-            throw new IllegalArgumentException("Forsøk på å legge til ProsessinstansHendelse på feil Prosessinstans");
-        }
-        if (hendelser == null) {
-            hendelser = new ArrayList<>();
-        }
-        hendelser.add(piHend);
+    public String hentAktørIDFraDataEllerSED() {
+        return Optional.ofNullable(getData(ProsessDataKey.AKTØR_ID))
+            .orElse(getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class, new MelosysEessiMelding()).getAktoerId());
     }
 
-    public void leggTilHendelse(String type, String melding) {
-        ProsessinstansHendelse pih = new ProsessinstansHendelse(this, LocalDateTime.now(), steg, type, melding);
-        leggTilHendelse(pih);
+    public void leggTilHendelse(ProsessSteg steg, Throwable t) {
+        this.hendelser.add(
+            new ProsessinstansHendelse(
+                this,
+                LocalDateTime.now(),
+                steg,
+                t.getClass().getSimpleName(),
+                ExceptionUtils.getStackTrace(t)
+            )
+        );
     }
 
-    public void leggTilHendelse(String type, String melding, Throwable t) {
-        if (t != null) {
-            leggTilHendelse(type, melding + " - " + ExceptionUtils.getStackTrace(t));
-        } else {
-            leggTilHendelse(type, melding);
-        }
+    public boolean statusErKlar() {
+        return status == ProsessStatus.KLAR;
     }
 
     @Override
@@ -248,11 +231,8 @@ public class Prosessinstans {
             ", type=" + type +
             ", behandling=" + behandling +
             ", data=" + data +
-            ", steg=" + steg +
+            ", sistFullførtSteg=" + sistFullførtSteg +
             ", registrertDato=" + registrertDato +
-            ", antallRetry=" + antallRetry +
-            ", sistForsøkt=" + sistForsøkt +
-            ", soverTil=" + soverTil +
             ", endretDato=" + endretDato +
             ", hendelser=" + hendelser +
             '}';
