@@ -1,12 +1,11 @@
 package no.nav.melosys.service.avklartefakta;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
-import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
+import no.nav.melosys.domain.avklartefakta.*;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
@@ -19,6 +18,8 @@ import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static java.util.function.Predicate.not;
 
 @Service
 public class AvklartefaktaService {
@@ -121,6 +122,20 @@ public class AvklartefaktaService {
         Map<String, List<Avklartefakta>> maritimtArbeidGruppert = grupperForSubjekt(maritimeAvklartefakta);
         return maritimtArbeidGruppert.entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey, AvklartMaritimtArbeid::av));
+    }
+
+    public AvklarteMedfolgendeFamiliemedlemmer hentAvklarteMedfølgendeFamiliemedlemmer(long behandlingID) {
+        Predicate<Avklartefakta> erAvklartFamiliemedlem = avklartefakta -> avklartefakta.getSubjekt() != null;
+        Set<Avklartefakta> avklartefakta
+            = avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingID, Avklartefaktatyper.VURDERING_LOVVALG_BARN);
+        List<AvklartFamiliemedlem> avklarteFamiliemedlemmer = avklartefakta.stream()
+            .filter(erAvklartFamiliemedlem)
+            .map(af -> new AvklartFamiliemedlem(af.getSubjekt(), af.getFakta()))
+            .collect(Collectors.toList());
+        Optional<String> begrunnelseFritekst = avklartefakta.stream()
+            .filter(not(erAvklartFamiliemedlem)).findAny()
+            .map(Avklartefakta::getBegrunnelseFritekst);
+        return new AvklarteMedfolgendeFamiliemedlemmer(avklarteFamiliemedlemmer, begrunnelseFritekst.orElse(null));
     }
 
     private Map<String, List<Avklartefakta>> grupperForSubjekt(Collection<Avklartefakta> avklartefakta) {
