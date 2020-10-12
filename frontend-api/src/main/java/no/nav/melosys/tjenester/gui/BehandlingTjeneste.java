@@ -106,27 +106,25 @@ public class BehandlingTjeneste {
         return ResponseEntity.ok(behandlingDto);
     }
 
-    @GetMapping("{behandlingID}/endreBehandlingstema")
+    @GetMapping("{behandlingID}/muligeBehandlingstema")
     @ApiOperation(value = "Hent mulige nye behandlingstema for en behandling")
     public ResponseEntity<List<Behandlingstema>> hentEndreBehandlingstema(@PathVariable("behandlingID") long behandlingsID)
         throws MelosysException{
         log.debug("Saksbehandler {} ber om å hente mulige nye behandlingstema for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingsID);
         tilgangService.sjekkTilgang(behandlingsID);
 
-        Behandling behandling = behandlingService.hentBehandling(behandlingsID);
-        List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(behandling);
+        List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(behandlingsID);
         return ResponseEntity.ok(muligeBehandlingstema);
     }
 
     @PostMapping("{behandlingID}/endreBehandlingstema")
     @ApiOperation(value = "Endre behandlingstema for en gitt behandling")
-    public ResponseEntity<Void> endreBehandlingstema(@PathVariable("behandlingID") long behandlingsID, @RequestBody Behandlingstema nyttTema)
+    public ResponseEntity<Void> endreBehandlingstema(@PathVariable("behandlingID") long behandlingsID, @RequestBody EndreBehandlingstemaDto nyttTema)
         throws MelosysException{
         log.debug("Saksbehandler {} ber om å sette behandlingstema for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingsID, nyttTema);
         tilgangService.sjekkTilgang(behandlingsID);
 
-        Behandling behandling = behandlingService.hentBehandling(behandlingsID);
-        endreBehandlingstemaService.endreBehandlingstemaTilBehandling(behandling, nyttTema);
+        endreBehandlingstemaService.endreBehandlingstemaTilBehandling(behandlingsID, nyttTema.getBehandlingstema());
         return ResponseEntity.noContent().build();
     }
 

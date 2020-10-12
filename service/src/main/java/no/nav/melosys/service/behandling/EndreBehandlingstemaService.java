@@ -2,50 +2,56 @@ package no.nav.melosys.service.behandling;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
+import static no.nav.melosys.domain.Behandling.MULIGE_BEHANDLINGSTEMA_SED;
+import static no.nav.melosys.domain.Behandling.MULIGE_BEHANDLINGSTEMA_SOKNAD;
+import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
+import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
+
+import javax.transaction.Transactional;
 
 @Service
 public class EndreBehandlingstemaService {
-    private final BehandlingRepository behandlingRepository;
 
-    private static final List<Behandlingstema> muligeBehandlingstemaForSoknad = Arrays.asList(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_ETT_LAND_ØVRIG, IKKE_YRKESAKTIV, ARBEID_FLERE_LAND,
-        ARBEID_NORGE_BOSATT_ANNET_LAND);
-    private static final List<Behandlingstema> muligeBehandlingstemaForSED = Arrays.asList(ØVRIGE_SED_MED, ØVRIGE_SED_UFM, TRYGDETID);
+    private final BehandlingService behandlingService;
+    private final BehandlingsresultatService behandlingsresultatService;
 
-    public EndreBehandlingstemaService(BehandlingRepository behandlingRepository) {
-        this.behandlingRepository = behandlingRepository;
+    public EndreBehandlingstemaService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService) {
+        this.behandlingService = behandlingService;
+        this.behandlingsresultatService = behandlingsresultatService;
     }
 
-
-    public List<Behandlingstema> hentMuligeBehandlingstema(Behandling behandling) {
-        if (muligeBehandlingstemaForSoknad.contains(behandling.getTema())) {
-            return muligeBehandlingstemaForSoknad;
-        } else if (muligeBehandlingstemaForSED.contains(behandling.getTema())) {
-            return muligeBehandlingstemaForSED;
+    public List<Behandlingstema> hentMuligeBehandlingstema(long behandlingsID) throws IkkeFunnetException{
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsID);
+        if (erBehandlingAvSøknad(behandling.getTema()) && validerBehandling(behandling)) {
+            return MULIGE_BEHANDLINGSTEMA_SOKNAD;
+        } else if (erBehandlingAvSedForespørsler(behandling.getTema()) && validerBehandling(behandling)) {
+            return MULIGE_BEHANDLINGSTEMA_SED;
         } else {
             return Collections.emptyList();
         }
     }
 
-    public Behandling endreBehandlingstemaTilBehandling(Behandling behandling, Behandlingstema nyttTema) {
-        if (muligeBehandlingstemaForSoknad.contains(behandling.getTema()) && muligeBehandlingstemaForSoknad.contains(nyttTema)) {
+    @Transactional
+    public void endreBehandlingstemaTilBehandling(long behandlingsID, Behandlingstema nyttTema) throws FunksjonellException {
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsID);
+        if (hentMuligeBehandlingstema(behandlingsID).contains(nyttTema)) {
             behandling.setTema(nyttTema);
-            return behandlingRepository.save(behandling);
-
-        } else if (muligeBehandlingstemaForSED.contains(behandling.getTema()) && muligeBehandlingstemaForSED.contains(nyttTema)) {
-            behandling.setTema(nyttTema);
-            return behandlingRepository.save(behandling);
+            behandlingService.lagre(behandling);
+            behandlingsresultatService.tømBehandlingsresultat(behandlingsID);
 
         } else {
-            return null;
+            throw new FunksjonellException("Ikke mulig å endre behandlingstema");
         }
     }
 
+    private boolean validerBehandling(Behandling behandling) throws IkkeFunnetException{
+        return behandling.erAktiv() && !behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).erArtikkel16MedSendtAnmodningOmUnntak();
+    }
 }
