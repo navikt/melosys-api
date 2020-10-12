@@ -31,9 +31,9 @@ public class ProsessinstansAdminTjeneste {
     }
 
     @GetMapping("/feilede")
-    public ResponseEntity<List<HentProsessinstansDto>> kontrollerProsessinstanser() {
+    public ResponseEntity<List<HentProsessinstansDto>> hentFeiledeProsessinstanser() {
         return ResponseEntity.ok(
-            prosessinstansRepository.findAllByStatus(ProsessStatus.RESTARTET).stream()
+            prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET).stream()
             .map(HentProsessinstansDto::new)
             .collect(Collectors.toList())
         );
