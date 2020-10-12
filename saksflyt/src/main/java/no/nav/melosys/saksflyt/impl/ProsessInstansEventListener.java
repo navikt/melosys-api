@@ -16,6 +16,6 @@ public class ProsessInstansEventListener {
     @TransactionalEventListener
     @SuppressWarnings("unused")
     public void behandleProsessinstansAsynkront(ProsessinstansOpprettetEvent event) {
-        saksflytAsyncDelegate.behandleProsessinstans(event.getProsessInstans());
+        saksflytAsyncDelegate.behandleProsessinstans(event.hentProsessinstans());
     }
 }

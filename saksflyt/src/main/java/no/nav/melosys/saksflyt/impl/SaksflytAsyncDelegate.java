@@ -18,11 +18,12 @@ public class SaksflytAsyncDelegate {
         this.prosessinstansBehandler = prosessinstansBehandler;
     }
 
+    @SuppressWarnings("java:S1181")
     @Async("saksflytThreadPoolTaskExecutor")
     public void behandleProsessinstans(Prosessinstans prosessinstans) {
         try {
             prosessinstansBehandler.behandleProsessinstans(prosessinstans);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("Uventet feil ved behandling av prosessinstans {}", prosessinstans.getId(), e);
         }
     }
