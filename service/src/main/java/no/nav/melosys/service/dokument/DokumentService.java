@@ -116,7 +116,18 @@ public class DokumentService {
                                  Brevbestilling brevbestilling)
         throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        BrevData brevData = lagBrevData(brevbestilling);
+        // FIXME: Behandling i brevbestilling byttes ut med behandlingId for å samle ansvar for henting av saksopplysninger
+        Brevbestilling nyBrevbestilling = new Brevbestilling.Builder()
+            .medDokumentType(brevbestilling.getDokumentType())
+            .medAvsender(brevbestilling.getAvsender())
+            .medMottakerRolle(brevbestilling.getMottakerRolle())
+            .medMottakere(brevbestilling.getMottakere())
+            .medBehandling(behandling)
+            .medBegrunnelseKode(brevbestilling.getBegrunnelseKode())
+            .medFritekst(brevbestilling.getFritekst())
+            .medYtterligereInformasjon(brevbestilling.getYtterligereInformasjon())
+            .build();
+        BrevData brevData = lagBrevData(nyBrevbestilling);
 
         List<Aktoer> mottakere = brevmottakerService.avklarMottakere(produserbartDokument, mottaker, behandling);
         for (Aktoer aktør : mottakere) {
