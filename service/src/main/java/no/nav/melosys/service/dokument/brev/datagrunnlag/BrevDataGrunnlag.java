@@ -10,6 +10,7 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.ArbeidsstedGrunnlag;
 import no.nav.melosys.service.dokument.BostedGrunnlag;
 import no.nav.melosys.service.dokument.DataGrunnlag;
+import no.nav.melosys.service.dokument.MedfolgendeFamilieGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public class BrevDataGrunnlag implements DataGrunnlag {
@@ -19,6 +20,7 @@ public class BrevDataGrunnlag implements DataGrunnlag {
     private final AvklarteVirksomheterGrunnlag avklarteVirksomheterGrunnlag;
     private final BostedGrunnlag bostedGrunnlag;
     private final ArbeidsstedGrunnlag arbeidsstedGrunnlag;
+    private final MedfolgendeFamilieGrunnlag medfolgendeFamilieGrunnlag;
 
     public BrevDataGrunnlag(Brevbestilling brevbestilling,
                             KodeverkService kodeverkService,
@@ -34,6 +36,10 @@ public class BrevDataGrunnlag implements DataGrunnlag {
             avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(behandling.getId()),
             getAvklarteVirksomheterGrunnlag(),
             behandlingsgrunnlagData
+        );
+        this.medfolgendeFamilieGrunnlag = new MedfolgendeFamilieGrunnlag(
+            avklartefaktaService.hentAvklarteMedfølgendeFamiliemedlemmer(behandling.getId()),
+            person
         );
     }
 
@@ -65,5 +71,9 @@ public class BrevDataGrunnlag implements DataGrunnlag {
 
     public ArbeidsstedGrunnlag getArbeidsstedGrunnlag() {
         return arbeidsstedGrunnlag;
+    }
+
+    public MedfolgendeFamilieGrunnlag getMedfolgendeFamilieGrunnlag() {
+        return medfolgendeFamilieGrunnlag;
     }
 }
