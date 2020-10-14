@@ -4,15 +4,14 @@ import java.time.LocalDate;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.exception.*;
+import no.nav.melosys.integrasjon.tps.person.Informasjonsbehov;
 
 public interface TpsFasade {
     String hentAktørIdForIdent(String fnr) throws IkkeFunnetException;
 
     String hentIdentForAktørId(String aktørID) throws IkkeFunnetException;
 
-    Saksopplysning hentPerson(String ident) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException;
-
-    Saksopplysning hentPersonMedAdresse(String ident) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException;
+    Saksopplysning hentPerson(String ident, Informasjonsbehov... behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException;
 
     /**
      * Henter all historikk fram til angitt dato (start av søknadsperioden).
