@@ -38,6 +38,13 @@ public final class KonverteringsUtils {
         return xmlGregorianCalendar.toGregorianCalendar().toZonedDateTime().withZoneSameLocal(ZoneId.systemDefault()).toInstant();
     }
 
+    public static LocalDate xmlGregorianCalendarToLocalDate(XMLGregorianCalendar xmlGregorianCalendar) {
+        if (xmlGregorianCalendar == null) {
+            return null;
+        }
+        return LocalDate.of(xmlGregorianCalendar.getYear(), xmlGregorianCalendar.getMonth(), xmlGregorianCalendar.getDay());
+    }
+
     /*
         Default datoformat er definert som:
         - "uuuu-MM-dd" for java.util.LocalDate.toString()/.parse()

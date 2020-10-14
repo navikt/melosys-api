@@ -10,6 +10,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import no.nav.melosys.domain.person.Informasjonsbehov;
+import no.nav.melosys.domain.Personopplysning;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
@@ -22,6 +23,7 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.tps.aktoer.AktoerIdCache;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
+import no.nav.melosys.integrasjon.tps.mapper.PersonopplysningMapper;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
 import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentAktoerIdForIdentPersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentIdentForAktoerIdPersonIkkeFunnet;
@@ -154,6 +156,29 @@ public class TpsService implements TpsFasade {
     @Override
     public Saksopplysning hentPerson(String ident, Informasjonsbehov behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
         return hentPerson(ident, mapInformasjonsbehovTilTps(behov));
+    }
+
+    @Override
+    public Personopplysning hentPersonopplysning(String ident) throws SikkerhetsbegrensningException, IkkeFunnetException {
+        HentPersonRequest request = new HentPersonRequest();
+        NorskIdent norskIdent = new NorskIdent();
+        norskIdent.setIdent(ident);
+
+        PersonIdent personIdent = new PersonIdent();
+        personIdent.setIdent(norskIdent);
+
+        request.setAktoer(personIdent);
+
+        // Kall til TPS
+        HentPersonResponse response;
+        try {
+            response = personConsumer.hentPerson(request);
+        } catch (HentPersonSikkerhetsbegrensning hentPersonSikkerhetsbegrensning) {
+            throw new SikkerhetsbegrensningException(hentPersonSikkerhetsbegrensning);
+        } catch (HentPersonPersonIkkeFunnet hentPersonPersonIkkeFunnet) {
+            throw new IkkeFunnetException(hentPersonPersonIkkeFunnet);
+        }
+        return PersonopplysningMapper.mapTilPersonopplysning(response.getPerson());
     }
 
     @Override
