@@ -12,6 +12,8 @@ import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -345,6 +347,13 @@ public class Behandlingsresultat extends RegistreringsInfo {
     public boolean erAutomatisert() {
         return behandlingsmåte == Behandlingsmaate.AUTOMATISERT
             || behandlingsmåte == Behandlingsmaate.DELVIS_AUTOMATISERT;
+    }
+
+    public boolean erInnvilgetArbeidPåSkipOmfattetAvArbeidsland() {
+        return finnValidertLovvalgsperiode().stream()
+            .anyMatch(l -> l.erInnvilget()
+                &&  l.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
+                && l.getTilleggsbestemmelse() == Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
     }
 
     public void settVedtakMetadata(Vedtakstyper vedtakstype,

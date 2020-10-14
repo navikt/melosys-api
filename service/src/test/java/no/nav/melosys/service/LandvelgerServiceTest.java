@@ -11,13 +11,11 @@ import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
@@ -40,8 +38,6 @@ public class LandvelgerServiceTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private BehandlingsgrunnlagService behandlingsgrunnlagService;
-    @Mock
-    private VilkaarsresultatRepository vilkaarsresultatRepository;
 
     private static final long behandlingID = 1;
 
@@ -49,7 +45,6 @@ public class LandvelgerServiceTest {
     private Lovvalgsperiode lovvalgsperiode;
     private Anmodningsperiode anmodningsperiode;
     private LandvelgerService landvelgerService;
-    private final List<Vilkaarsresultat> vilkaar = new ArrayList<>();
 
     private final Landkoder søknadsland = Landkoder.DE;
     private final Landkoder avklartArbeidsland = Landkoder.DK;
@@ -67,14 +62,6 @@ public class LandvelgerServiceTest {
         søknad.maritimtArbeid.add(maritimtArbeid);
 
         lovvalgsperiode = new Lovvalgsperiode();
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
-        behandlingsresultat.setId(behandlingID);
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-
-        when(vilkaarsresultatRepository.findByBehandlingsresultatId(anyLong())).thenReturn(vilkaar);
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
 
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknad);
@@ -84,8 +71,9 @@ public class LandvelgerServiceTest {
         anmodningsperiode.setUnntakFraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
 
         lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        landvelgerService = new LandvelgerService(avklartefaktaService, behandlingsresultatService, behandlingsgrunnlagService, vilkaarsresultatRepository);
+        landvelgerService = new LandvelgerService(avklartefaktaService, behandlingsresultatService, behandlingsgrunnlagService);
     }
 
     private Behandlingsresultat lagBehandlingsresultat(Medlemskapsperiode periode) throws IkkeFunnetException {
@@ -104,13 +92,6 @@ public class LandvelgerServiceTest {
 
         when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingID))).thenReturn(behandlingsresultat);
         return behandlingsresultat;
-    }
-
-    private void oppfyll(Vilkaar vilkaarType) {
-        Vilkaarsresultat resultat = new Vilkaarsresultat();
-        resultat.setVilkaar(vilkaarType);
-        resultat.setOppfylt(true);
-        vilkaar.add(resultat);
     }
 
     private void leggTilAlleAvklartArbeidsland(Collection<Landkoder> landkoder) {
@@ -161,6 +142,7 @@ public class LandvelgerServiceTest {
 
     @Test
     public void hentAlleArbeidsland_medArtikkel11_4_2AvklartArbeidslandOgSøknadsland_girKunArbeidsland() throws FunksjonellException {
+        lagBehandlingsresultat(lovvalgsperiode);
         when(avklartefaktaService.hentAlleAvklarteArbeidsland(anyLong())).thenReturn(new HashSet<>(Arrays.asList(Landkoder.DK, Landkoder.NO)));
         søknad.soeknadsland.landkoder = Arrays.asList(Landkoder.DK.getKode(), Landkoder.SE.getKode());
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2);
@@ -174,7 +156,6 @@ public class LandvelgerServiceTest {
         Behandlingsresultat resultat = lagBehandlingsresultat(anmodningsperiode);
         resultat.setType(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
 
-        oppfyll(Vilkaar.FO_883_2004_ART16_1);
         søknad.soeknadsland.landkoder.add(søknadsland.getKode());
         Collection<Landkoder> land = landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(behandlingID);
         assertThat(land).containsExactly(søknadsland);
@@ -183,7 +164,6 @@ public class LandvelgerServiceTest {
     @Test
     public void hentUtenlandskTrygdemyndighetsland_medArt121_girSøknadsland() throws FunksjonellException {
         lagBehandlingsresultat(lovvalgsperiode);
-        oppfyll(Vilkaar.FO_883_2004_ART12_1);
         søknad.soeknadsland.landkoder.add(søknadsland.getKode());
         Collection<Landkoder> land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
         assertThat(land).containsExactly(søknadsland);
@@ -192,7 +172,6 @@ public class LandvelgerServiceTest {
     @Test
     public void hentUtenlandskTrygdemyndighetsland_medArt121AvklartArbeidsland_girAvklartArbeidsland() throws FunksjonellException {
         lagBehandlingsresultat(lovvalgsperiode);
-        oppfyll(Vilkaar.FO_883_2004_ART12_1);
         leggTilAlleAvklartArbeidsland(Collections.singletonList(avklartArbeidsland));
         Collection<Landkoder> land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
         assertThat(land).containsExactly(avklartArbeidsland);
@@ -201,7 +180,6 @@ public class LandvelgerServiceTest {
     @Test
     public void hentUtenlandskTrygdemyndighetsland_medArt122_girSøknadsland() throws FunksjonellException {
         lagBehandlingsresultat(lovvalgsperiode);
-        oppfyll(Vilkaar.FO_883_2004_ART12_2);
         søknad.soeknadsland.landkoder.add(søknadsland.getKode());
 
         Collection<Landkoder> land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
@@ -213,7 +191,6 @@ public class LandvelgerServiceTest {
         Behandlingsresultat resultat = lagBehandlingsresultat(anmodningsperiode);
         resultat.setType(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
 
-        oppfyll(Vilkaar.FO_883_2004_ART16_1);
         søknad.soeknadsland.landkoder.add(søknadsland.getKode());
         Collection<Landkoder> land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
         assertThat(land).containsExactly(søknadsland);
@@ -222,7 +199,6 @@ public class LandvelgerServiceTest {
     @Test
     public void hentUtenlandskTrygdemyndighetsland_medArt1142_girSøknadsland() throws FunksjonellException {
         lagBehandlingsresultat(lovvalgsperiode);
-        oppfyll(Vilkaar.FO_883_2004_ART11_4_2);
         søknad.soeknadsland.landkoder.add(søknadsland.getKode());
 
         Collection<Landkoder> land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
@@ -232,8 +208,8 @@ public class LandvelgerServiceTest {
     @Test
     public void hentUtenlandskTrygdemyndighetsland_medArt113A_girOppgittBostedsland() throws FunksjonellException {
         lagBehandlingsresultat(lovvalgsperiode);
-        oppfyll(Vilkaar.FO_883_2004_ART11_3A);
-        oppfyll(Vilkaar.FO_883_2004_ART11_4_1);
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A);
+        lovvalgsperiode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
 
         Collection<Landkoder> land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
         assertThat(land).containsExactly(oppgittbostedsland);
@@ -242,8 +218,8 @@ public class LandvelgerServiceTest {
     @Test
     public void hentUtenlandskTrygdemyndighetsland_medArt113AOgAvklartBosted_overstyrerOppgittBosted() throws FunksjonellException {
         lagBehandlingsresultat(lovvalgsperiode);
-        oppfyll(Vilkaar.FO_883_2004_ART11_3A);
-        oppfyll(Vilkaar.FO_883_2004_ART11_4_1);
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A);
+        lovvalgsperiode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
         when(avklartefaktaService.hentBostedland(anyLong())).thenReturn(Optional.of(avklartBostedsland));
 
         Collection<Landkoder> land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
@@ -253,8 +229,8 @@ public class LandvelgerServiceTest {
     @Test
     public void hentUtenlandskTrygdemyndighetsland_medArt113AUtenOppgittEllerAvkartBostedsland_girTomListe() throws FunksjonellException {
         lagBehandlingsresultat(lovvalgsperiode);
-        oppfyll(Vilkaar.FO_883_2004_ART11_3A);
-        oppfyll(Vilkaar.FO_883_2004_ART11_4_1);
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A);
+        lovvalgsperiode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
 
         søknad.bosted.oppgittAdresse.landkode = null;
 

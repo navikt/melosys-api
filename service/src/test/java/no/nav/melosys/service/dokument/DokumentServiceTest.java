@@ -73,7 +73,8 @@ import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagAnmodningsperiodeSvarInnvilgelse;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagBostedsadresse;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.Mockito.*;
 
@@ -349,7 +350,7 @@ public final class DokumentServiceTest {
         JoarkService joarkService = mock(JoarkService.class);
         VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
         LandvelgerService landvelgerService = new LandvelgerService(avklartefaktaService, behandlingsresultatService,
-            behandlingsgrunnlagService, vilkaarsresultatRepository);
+            behandlingsgrunnlagService);
         LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
         SaksopplysningerService saksopplysningerService = mock(SaksopplysningerService.class);
         UtenlandskMyndighetService utenlandskMyndighetService = mock(UtenlandskMyndighetService.class);
