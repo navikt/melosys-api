@@ -174,8 +174,17 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         }
     }
 
-    private boolean skalSendesTilSkatteoppkreverUtland(Behandlingsgrunnlag behandlingsgrunnlag) {
+    private static boolean skalSendesTilSkatteoppkreverUtland(Behandlingsgrunnlag behandlingsgrunnlag) {
+        return finnesForetakUtland(behandlingsgrunnlag)
+            && !finnesSelvstendigForetak(behandlingsgrunnlag);
+    }
+
+    private static boolean finnesForetakUtland(Behandlingsgrunnlag behandlingsgrunnlag) {
         return !behandlingsgrunnlag.getBehandlingsgrunnlagdata().foretakUtland.isEmpty();
+    }
+
+    private static boolean finnesSelvstendigForetak(Behandlingsgrunnlag behandlingsgrunnlag) {
+        return !behandlingsgrunnlag.getBehandlingsgrunnlagdata().selvstendigArbeid.selvstendigForetak.isEmpty();
     }
 
     private String hentBegrunnelseKode(Prosessinstans prosessinstans) {
