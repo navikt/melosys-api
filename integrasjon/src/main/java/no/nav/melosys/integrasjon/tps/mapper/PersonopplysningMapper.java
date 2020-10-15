@@ -36,10 +36,11 @@ public class PersonopplysningMapper {
         if (person instanceof Bruker) {
             p.midlertidigPostadresse = AdresseMapper.mapTilMidlertidigPostadresse(((Bruker) person).getMidlertidigPostadresse());
         }
+        p.familiemedlemmer = FamiliemedlemMapper.mapTilFamiliemedlemmer(person.getHarFraRolleI());
         return p;
     }
 
-    private static String mapFnr(Aktoer aktoer) {
+    static String mapFnr(Aktoer aktoer) {
         return ((PersonIdent) aktoer).getIdent().getIdent();
     }
 
