@@ -33,6 +33,9 @@ public class PersonopplysningMapper {
         p.personstatus = mapPersonstatus(person.getPersonstatus());
         p.bostedsadresse = AdresseMapper.mapTilBostedsadresse(person.getBostedsadresse());
         p.postadresse = AdresseMapper.mapTilPostadresse(person.getPostadresse());
+        if (person instanceof Bruker) {
+            p.midlertidigPostadresse = AdresseMapper.mapTilMidlertidigPostadresse(((Bruker) person).getMidlertidigPostadresse());
+        }
         return p;
     }
 
