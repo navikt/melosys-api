@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,53 +24,51 @@ import org.mockito.junit.MockitoJUnitRunner;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
+import no.nav.melosys.service.oppgave.OppgaveService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EndreBehandlingstemaServiceTest {
 
-    @Mock
-    private BehandlingService behandlingService;
+    private static final long id = 11L;
 
     @Mock
+    private BehandlingService behandlingService;
+    @Mock
     private BehandlingsresultatService behandlingsresultatService;
+    @Mock
+    private OppgaveService oppgaveService;
+    @Captor
+    private ArgumentCaptor<Behandling> behandlingArgumentCaptor;
+    @Captor
+    private ArgumentCaptor<OppgaveOppdatering> oppgaveOppdateringArgumentCaptor;
+
 
     private EndreBehandlingstemaService endreBehandlingstemaService;
 
-    @Captor
-    private ArgumentCaptor<Behandling> behandlingArgumentCaptor;
-
     @Before
     public void setUp(){
-        endreBehandlingstemaService = new EndreBehandlingstemaService(behandlingService, behandlingsresultatService);
+        endreBehandlingstemaService = new EndreBehandlingstemaService(behandlingService, behandlingsresultatService, oppgaveService);
     }
 
     @Test
-    public void hentMuligeBehandlingstemaForSoknad() throws IkkeFunnetException {
-        long id = 11L;
-        Behandling behandling = new Behandling();
-        behandling.setId(id);
-        behandling.setTema(ARBEID_FLERE_LAND);
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(id)).thenReturn(behandling);
-        when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
+    public void hentMuligeBehandlingstemaForSoknad() throws MelosysException {
+        preTestEndreBehandlingstema(ARBEID_FLERE_LAND, new Behandlingsresultat());
 
         List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(id);
         assertThat(MULIGE_BEHANDLINGSTEMA_SOKNAD).isEqualTo(muligeBehandlingstema);
     }
 
     @Test
-    public void hentMuligeBehandlingstemaForSED() throws IkkeFunnetException{
-        long id = 11L;
-        Behandling behandling = new Behandling();
-        behandling.setId(id);
-        behandling.setTema(ØVRIGE_SED_MED);
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(id)).thenReturn(behandling);
-        when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
+    public void hentMuligeBehandlingstemaForSED() throws MelosysException{
+        preTestEndreBehandlingstema(ØVRIGE_SED_MED, new Behandlingsresultat());
 
         List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(id);
         assertThat(MULIGE_BEHANDLINGSTEMA_SED).isEqualTo(muligeBehandlingstema);
@@ -101,31 +100,20 @@ public class EndreBehandlingstemaServiceTest {
     }
 
     @Test
-    public void hentMuligeBehandlingstemaErArtikkel16MedSendtAnmodningOmUnntak() throws IkkeFunnetException{
-        long id = 11L;
-        Behandling behandling = new Behandling();
-        behandling.setId(id);
-        behandling.setTema(ARBEID_FLERE_LAND);
+    public void hentMuligeBehandlingstemaErArtikkel16MedSendtAnmodningOmUnntak() throws MelosysException{
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
         anmodningsperiode.setSendtUtland(true);
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setAnmodningsperioder(Set.of(anmodningsperiode));
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(id)).thenReturn(behandling);
-        when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
+        preTestEndreBehandlingstema(ARBEID_FLERE_LAND, behandlingsresultat);
 
         List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(id);
         assertThat(muligeBehandlingstema.size()).isZero();
     }
 
     @Test
-    public void endreBehandlingstemaSoknad() throws FunksjonellException {
-        long id = 11L;
-        Behandling behandling = new Behandling();
-        behandling.setId(id);
-        behandling.setTema(ARBEID_FLERE_LAND);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(id)).thenReturn(behandling);
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
+    public void endreBehandlingstemaSoknad() throws MelosysException {
+        preTestEndreBehandlingstema(ARBEID_FLERE_LAND, new Behandlingsresultat());
 
         endreBehandlingstemaService.endreBehandlingstemaTilBehandling(id, UTSENDT_ARBEIDSTAKER);
         verify(behandlingService).lagre(behandlingArgumentCaptor.capture());
@@ -135,14 +123,8 @@ public class EndreBehandlingstemaServiceTest {
     }
 
     @Test
-    public void endreBehandlingstemaSED() throws FunksjonellException{
-        long id = 11L;
-        Behandling behandling = new Behandling();
-        behandling.setId(id);
-        behandling.setTema(TRYGDETID);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(id)).thenReturn(behandling);
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
+    public void endreBehandlingstemaSED() throws MelosysException {
+        preTestEndreBehandlingstema(TRYGDETID, new Behandlingsresultat());
 
         endreBehandlingstemaService.endreBehandlingstemaTilBehandling(id, ØVRIGE_SED_MED);
         verify(behandlingService).lagre(behandlingArgumentCaptor.capture());
@@ -152,17 +134,36 @@ public class EndreBehandlingstemaServiceTest {
     }
 
     @Test
-    public void endreBehandlingstemaUgyldig()  throws FunksjonellException{
-        long id = 11L;
-        Behandling behandling = new Behandling();
-        behandling.setId(id);
-        behandling.setTema(ARBEID_FLERE_LAND);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(id)).thenReturn(behandling);
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
+    public void endreBehandlingstemaUgyldig()  throws MelosysException{
+        preTestEndreBehandlingstema(ARBEID_FLERE_LAND, new Behandlingsresultat());
 
         assertThrows(FunksjonellException.class, () -> endreBehandlingstemaService.endreBehandlingstemaTilBehandling(id, ØVRIGE_SED_MED));
         verify(behandlingService, never()).lagre(any(Behandling.class));
         verify(behandlingsresultatService, never()).tømBehandlingsresultat(id);
+    }
+    @Test
+    public void endreBehandlingstemaGosysOppgaveOppdateres() throws MelosysException{
+        preTestEndreBehandlingstema(ARBEID_FLERE_LAND, new Behandlingsresultat());
+
+        endreBehandlingstemaService.endreBehandlingstemaTilBehandling(id, UTSENDT_ARBEIDSTAKER);
+        verify(oppgaveService).oppdaterOppgave(any(String.class), oppgaveOppdateringArgumentCaptor.capture());
+        assertThat(oppgaveOppdateringArgumentCaptor.getValue().getBehandlingstema()).isEqualTo(UTSENDT_ARBEIDSTAKER);
+    }
+
+    private void preTestEndreBehandlingstema(Behandlingstema behandlingstema, Behandlingsresultat behandlingsresultat) throws MelosysException{
+        Behandling behandling = new Behandling();
+        behandling.setId(id);
+        behandling.setTema(behandlingstema);
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("saksnummer");
+        behandling.setFagsak(fagsak);
+        Oppgave oppgave = new Oppgave.Builder()
+            .setOppgaveId("oppgaveID")
+            .setSaksnummer(behandling.getFagsak().getSaksnummer())
+            .build();
+
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(id)).thenReturn(behandling);
+        when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
+        when(oppgaveService.finnOppgaveMedFagsaksnummer(fagsak.getSaksnummer())).thenReturn(Optional.of(oppgave));
     }
 }
