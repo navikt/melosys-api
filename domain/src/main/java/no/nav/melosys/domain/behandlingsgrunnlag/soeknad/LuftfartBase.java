@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.dokument.soeknad;
+package no.nav.melosys.domain.behandlingsgrunnlag.soeknad;
 
 public class LuftfartBase {
     public String hjemmebaseNavn;

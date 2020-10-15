@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import java.util.List;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import no.nav.melosys.domain.dokument.soeknad.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;

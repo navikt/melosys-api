@@ -6,9 +6,9 @@ import java.util.List;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsGrunnlagType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
-import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
-import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ArbeidUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ForetakUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.SelvstendigForetak;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 
 public final class BehandlingsgrunnlagStub {

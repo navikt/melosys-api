@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 
-import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.SelvstendigForetak;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

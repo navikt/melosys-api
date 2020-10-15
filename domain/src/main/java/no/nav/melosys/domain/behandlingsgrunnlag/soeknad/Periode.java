@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.dokument.soeknad;
+package no.nav.melosys.domain.behandlingsgrunnlag.soeknad;
 
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;

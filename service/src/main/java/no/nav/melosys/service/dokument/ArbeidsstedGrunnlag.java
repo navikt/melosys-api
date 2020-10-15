@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MaritimtArbeid;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.AvklarteVirksomheterGrunnlag;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;

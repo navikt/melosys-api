@@ -1,6 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper.arbeidssted;
 
-import no.nav.melosys.domain.dokument.soeknad.LuftfartBase;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.LuftfartBase;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 
