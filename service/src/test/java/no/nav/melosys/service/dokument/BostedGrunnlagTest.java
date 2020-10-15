@@ -7,7 +7,7 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.Bosted;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadDokument;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.Before;
@@ -54,7 +54,7 @@ public class BostedGrunnlagTest {
 
         Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnBostedsadresse();
 
-        assertThat(strukturertAdresse.isPresent()).isTrue();
+        assertThat(strukturertAdresse).isPresent();
         assertThat(strukturertAdresse.get().gatenavn).isEqualTo("gate");
         assertThat(strukturertAdresse.get().landkode).isEqualTo("SE");
     }
@@ -68,7 +68,7 @@ public class BostedGrunnlagTest {
 
         Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnBostedsadresse();
 
-        assertThat(strukturertAdresse.isPresent()).isTrue();
+        assertThat(strukturertAdresse).isPresent();
         assertThat(strukturertAdresse.get().gatenavn).isEqualTo("gate");
         assertThat(strukturertAdresse.get().landkode).isEqualTo("SE");
     }
@@ -76,6 +76,6 @@ public class BostedGrunnlagTest {
     @Test
     public void finnBostedsadresse_ingenAdresse_forventTomOptional() {
         Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnBostedsadresse();
-        assertThat(strukturertAdresse.isPresent()).isFalse();
+        assertThat(strukturertAdresse).isEmpty();
     }
 }

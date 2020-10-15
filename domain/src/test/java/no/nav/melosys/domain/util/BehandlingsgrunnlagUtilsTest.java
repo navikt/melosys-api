@@ -9,7 +9,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import org.junit.Test;
 
@@ -39,8 +39,7 @@ public class BehandlingsgrunnlagUtilsTest {
     @Test
     public void hentOppgittAdresse_somErTom_ErNull() {
         SoeknadDokument søknad = new SoeknadDokument();
-        StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
-        søknad.bosted.oppgittAdresse = oppgittAdresse;
+        søknad.bosted.oppgittAdresse = new StrukturertAdresse();
         assertThat(BehandlingsgrunnlagUtils.hentBostedsadresse(søknad)).isNull();
     }
 
@@ -62,8 +61,8 @@ public class BehandlingsgrunnlagUtilsTest {
         soeknad.bosted.oppgittAdresse.landkode = "SE";
 
         Optional<Landkoder> landkoder = BehandlingsgrunnlagUtils.hentOppgittBostedsland(soeknad);
-        assertThat(landkoder).isPresent();
-        assertThat(landkoder.get()).isEqualTo(Landkoder.SE);
+        assertThat(landkoder).isPresent()
+            .contains(Landkoder.SE);
     }
 
     @Test
@@ -71,7 +70,7 @@ public class BehandlingsgrunnlagUtilsTest {
         SoeknadDokument soeknad = new SoeknadDokument();
 
         Optional<Landkoder> landkoder = BehandlingsgrunnlagUtils.hentOppgittBostedsland(soeknad);
-        assertThat(landkoder.isPresent()).isFalse();
+        assertThat(landkoder).isEmpty();
     }
 
     private void leggTilArbeidUtland(SoeknadDokument soeknad) {

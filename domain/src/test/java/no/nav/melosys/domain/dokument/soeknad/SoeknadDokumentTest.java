@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.dokument.soeknad;
 
+import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadDokument;
 import org.junit.Test;
 
 import java.util.Arrays;

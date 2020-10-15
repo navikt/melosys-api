@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;

@@ -16,7 +16,7 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -66,8 +66,8 @@ public class AnmodningUnntakMapperTest {
 
         String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
 
-        assertThat(xml).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
-        assertThat(":yrkesaktivitet>SELVSTENDIG</ns").isSubstringOf(xml);
+        assertThat(xml).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*")
+            .contains(":yrkesaktivitet>SELVSTENDIG</ns");
         assertThat(Landkoder.AT.getBeskrivelse()).isSubstringOf(xml);
         assertThat(xml).doesNotContain(Landkoder.DK.getKode());
     }

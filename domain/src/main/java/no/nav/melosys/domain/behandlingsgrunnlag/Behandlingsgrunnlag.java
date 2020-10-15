@@ -4,7 +4,6 @@ import java.time.Instant;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 import no.nav.melosys.domain.jpa.BehandlingsgrunnlagListener;
 
 @Entity

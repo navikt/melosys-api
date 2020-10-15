@@ -6,7 +6,7 @@ import java.util.List;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import no.nav.melosys.domain.dokument.soeknad.Periode;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadDokument;
 import no.nav.melosys.domain.dokument.soeknad.Soeknadsland;
 import no.nav.melosys.soknad_altinn.Innhold;
 import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM;
