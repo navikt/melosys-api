@@ -98,7 +98,7 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     @Test
     void hentMuligeBehandlinstemaValidering() throws IOException, MelosysException {
         when(endreBehandlingstemaService.hentMuligeBehandlingstema(11L)).thenReturn(MULIGE_BEHANDLINGSTEMA_SOKNAD);
-        List<String> muligeBehandlingstema = behandlingTjeneste.hentEndreBehandlingstema(11L).getBody();
+        List<Behandlingstema> muligeBehandlingstema = behandlingTjeneste.hentEndreBehandlingstema(11L).getBody();
         validerArray(muligeBehandlingstema, ENDRE_BEHANDLINGSTEMA_SCHEMA, log);
     }
 

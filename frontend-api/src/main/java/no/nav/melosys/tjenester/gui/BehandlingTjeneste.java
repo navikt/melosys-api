@@ -109,13 +109,13 @@ public class BehandlingTjeneste {
 
     @GetMapping("{behandlingID}/muligeBehandlingstema")
     @ApiOperation(value = "Hent mulige nye behandlingstema for en behandling")
-    public ResponseEntity<List<String>> hentEndreBehandlingstema(@PathVariable("behandlingID") long behandlingsID)
+    public ResponseEntity<List<Behandlingstema>> hentEndreBehandlingstema(@PathVariable("behandlingID") long behandlingsID)
         throws MelosysException{
         log.debug("Saksbehandler {} ber om å hente mulige nye behandlingstema for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingsID);
         tilgangService.sjekkTilgang(behandlingsID);
 
         List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(behandlingsID);
-        return ResponseEntity.ok(muligeBehandlingstema.stream().map(Behandlingstema::getKode).collect(Collectors.toList()));
+        return ResponseEntity.ok(muligeBehandlingstema);
     }
 
     @PostMapping("{behandlingID}/endreBehandlingstema")
