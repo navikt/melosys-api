@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -67,7 +67,7 @@ class AvklarMyndighetTest {
         behandling.setId(1L);
         behandling.setFagsak(fagsak);
         behandling.setType(Behandlingstyper.SOEKNAD);
-        SoeknadDokument søknadDokument = new SoeknadDokument();
+        Soeknad søknadDokument = new Soeknad();
         søknadDokument.soeknadsland.landkoder.add("BE");
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse.landkode = "HR";

@@ -8,7 +8,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
@@ -201,7 +201,7 @@ class SendVedtaksbrevInnlandTest {
         behandling.setId(behandlingsid);
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new SoeknadDokument());
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new Soeknad());
         behandling.setFagsak(fagsak != null ? fagsak : lagFagsak());
         return behandling;
     }

@@ -16,7 +16,7 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -159,12 +159,12 @@ public class AnmodningUnntakMapperTest {
         arbeidUtland.adresse = new StrukturertAdresse();
         arbeidUtland.adresse.landkode = "NO";
 
-        SoeknadDokument soeknadDokument = new SoeknadDokument();
-        soeknadDokument.arbeidUtland = new ArrayList<>();
-        soeknadDokument.arbeidUtland.add(arbeidUtland);
+        Soeknad soeknad = new Soeknad();
+        soeknad.arbeidUtland = new ArrayList<>();
+        soeknad.arbeidUtland.add(arbeidUtland);
 
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(soeknadDokument);
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(soeknad);
         behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
 
         return behandling;

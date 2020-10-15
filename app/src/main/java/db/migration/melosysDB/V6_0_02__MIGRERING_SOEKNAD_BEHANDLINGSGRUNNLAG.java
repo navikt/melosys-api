@@ -21,7 +21,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import oracle.jdbc.OracleConnection;
 import oracle.jdbc.OraclePreparedStatement;
 import oracle.jdbc.OracleResultSet;
@@ -83,8 +83,8 @@ public class V6_0_02__MIGRERING_SOEKNAD_BEHANDLINGSGRUNNLAG extends BaseJavaMigr
 
     private String lagSøknadDokumentJson(String søknadXml, String versjon) throws JsonProcessingException, TransformerException {
         StringReader stringReader = new StringReader(transformer(søknadXml, versjon));
-        SoeknadDokument soeknadDokument = (SoeknadDokument) jaxb2Marshaller.unmarshal(new StreamSource(stringReader));
-        return objectMapper.writeValueAsString(soeknadDokument);
+        Soeknad soeknad = (Soeknad) jaxb2Marshaller.unmarshal(new StreamSource(stringReader));
+        return objectMapper.writeValueAsString(soeknad);
     }
 
     private String transformer(String søknadXml, String versjon) throws TransformerException {

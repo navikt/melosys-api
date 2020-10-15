@@ -13,7 +13,7 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -219,16 +219,16 @@ public class OppgaveServiceTest {
         return behandlingsgrunnlag;
     }
 
-    private static SoeknadDokument lagSoeknadDokument() {
-        SoeknadDokument soeknadDokument = new SoeknadDokument();
+    private static Soeknad lagSoeknadDokument() {
+        Soeknad soeknad = new Soeknad();
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse.landkode = new Land(Land.NORGE).getKode();
-        soeknadDokument.arbeidUtland = Collections.singletonList(arbeidUtland);
+        soeknad.arbeidUtland = Collections.singletonList(arbeidUtland);
 
-        soeknadDokument.oppholdUtland.oppholdslandkoder = Collections.singletonList(Landkoder.NO.getKode());
-        soeknadDokument.oppholdUtland.oppholdsPeriode = new Periode(LocalDate.now(), LocalDate.of(2018, 12, 12));
+        soeknad.oppholdUtland.oppholdslandkoder = Collections.singletonList(Landkoder.NO.getKode());
+        soeknad.oppholdUtland.oppholdsPeriode = new Periode(LocalDate.now(), LocalDate.of(2018, 12, 12));
 
-        soeknadDokument.soeknadsland.landkoder.add(Landkoder.BE.getKode());
-        return soeknadDokument;
+        soeknad.soeknadsland.landkoder.add(Landkoder.BE.getKode());
+        return soeknad;
     }
 }

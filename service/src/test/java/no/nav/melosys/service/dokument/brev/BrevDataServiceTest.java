@@ -12,7 +12,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
@@ -441,8 +441,8 @@ public class BrevDataServiceTest {
         return aktørArbRep;
     }
 
-    private SoeknadDokument lagSøknadDokument() {
-        SoeknadDokument søknad = new SoeknadDokument();
+    private Soeknad lagSøknadDokument() {
+        Soeknad søknad = new Soeknad();
         søknad.bosted.oppgittAdresse = lagStrukturertAdresse();
         return søknad;
     }

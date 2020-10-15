@@ -9,7 +9,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
 import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 
 public final class BehandlingsgrunnlagStub {
 
@@ -22,7 +22,7 @@ public final class BehandlingsgrunnlagStub {
     }
 
     private static BehandlingsgrunnlagData lagBehandlingsgrunnlagdata(List<String> selvstendigeForetak, List<ForetakUtland> foretakUtland, List<String> ekstraArbeidsgivere) {
-        SoeknadDokument søknad = new SoeknadDokument();
+        Soeknad søknad = new Soeknad();
         for (String orgnr : selvstendigeForetak) {
             SelvstendigForetak selvstendigForetak = new SelvstendigForetak();
             selvstendigForetak.orgnr = orgnr;

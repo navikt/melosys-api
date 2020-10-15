@@ -9,7 +9,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import org.junit.Test;
 
@@ -19,7 +19,7 @@ public class BehandlingsgrunnlagUtilsTest {
 
     @Test
     public void hentSoeknadsland() {
-        SoeknadDokument soeknad = new SoeknadDokument();
+        Soeknad soeknad = new Soeknad();
         soeknad.soeknadsland.landkoder = Arrays.asList(Landkoder.BE.getKode(), Landkoder.BG.getKode());
 
         List<String> strings = BehandlingsgrunnlagUtils.hentSøknadsland(soeknad);
@@ -28,7 +28,7 @@ public class BehandlingsgrunnlagUtilsTest {
 
     @Test
     public void hentOppgittAdresse_medGatenavnOgLand_ErIkkeNull() {
-        SoeknadDokument søknad = new SoeknadDokument();
+        Soeknad søknad = new Soeknad();
         StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
         oppgittAdresse.gatenavn = "HjemGata";
         oppgittAdresse.landkode = "NO";
@@ -38,14 +38,14 @@ public class BehandlingsgrunnlagUtilsTest {
 
     @Test
     public void hentOppgittAdresse_somErTom_ErNull() {
-        SoeknadDokument søknad = new SoeknadDokument();
+        Soeknad søknad = new Soeknad();
         søknad.bosted.oppgittAdresse = new StrukturertAdresse();
         assertThat(BehandlingsgrunnlagUtils.hentBostedsadresse(søknad)).isNull();
     }
 
     @Test
     public void hentPeriode_opphold() {
-        SoeknadDokument soeknad = new SoeknadDokument();
+        Soeknad soeknad = new Soeknad();
         leggTilArbeidUtland(soeknad);
 
         Periode periode_2 = new Periode(LocalDate.MIN.plusYears(1), LocalDate.MAX);
@@ -57,7 +57,7 @@ public class BehandlingsgrunnlagUtilsTest {
 
     @Test
     public void hentOppgittBostedsland_landkodeSverige_girLandkode() {
-        SoeknadDokument soeknad = new SoeknadDokument();
+        Soeknad soeknad = new Soeknad();
         soeknad.bosted.oppgittAdresse.landkode = "SE";
 
         Optional<Landkoder> landkoder = BehandlingsgrunnlagUtils.hentOppgittBostedsland(soeknad);
@@ -67,13 +67,13 @@ public class BehandlingsgrunnlagUtilsTest {
 
     @Test
     public void hentOppgittBostedsland_eksistererIkke_girEmpty() {
-        SoeknadDokument soeknad = new SoeknadDokument();
+        Soeknad soeknad = new Soeknad();
 
         Optional<Landkoder> landkoder = BehandlingsgrunnlagUtils.hentOppgittBostedsland(soeknad);
         assertThat(landkoder).isEmpty();
     }
 
-    private void leggTilArbeidUtland(SoeknadDokument soeknad) {
+    private void leggTilArbeidUtland(Soeknad soeknad) {
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse = new StrukturertAdresse();
         arbeidUtland.adresse.landkode = Landkoder.BE.getKode();

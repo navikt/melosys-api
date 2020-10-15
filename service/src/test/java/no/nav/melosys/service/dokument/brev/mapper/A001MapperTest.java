@@ -19,7 +19,7 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
@@ -100,7 +100,7 @@ public class A001MapperTest {
 
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse = strukturertAdresse;
-        SoeknadDokument søknad = new SoeknadDokument();
+        Soeknad søknad = new Soeknad();
         søknad.arbeidUtland = Arrays.asList(arbeidUtland);
 
         AvklartVirksomhet virksomhet = new AvklartVirksomhet("JARLSBERG AS",

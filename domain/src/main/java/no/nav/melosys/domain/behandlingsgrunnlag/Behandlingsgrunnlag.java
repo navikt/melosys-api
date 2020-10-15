@@ -116,7 +116,7 @@ public class Behandlingsgrunnlag {
     }
 
     public boolean erSøknad() {
-        return this.type == BehandlingsGrunnlagType.SØKNAD && behandlingsgrunnlagdata instanceof SoeknadDokument;
+        return this.type == BehandlingsGrunnlagType.SØKNAD && behandlingsgrunnlagdata instanceof Soeknad;
     }
 
     public boolean erSed() {

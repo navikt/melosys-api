@@ -16,7 +16,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
@@ -139,8 +139,8 @@ public class InnvilgelsesbrevMapperTest {
         return lagBehandling(fagsak, lagSoeknadDokument());
     }
 
-    private static SoeknadDokument lagSoeknadDokument() {
-        SoeknadDokument dokument = new SoeknadDokument();
+    private static Soeknad lagSoeknadDokument() {
+        Soeknad dokument = new Soeknad();
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse = new StrukturertAdresse();
         arbeidUtland.adresse.landkode = Landkoder.AT.getKode();

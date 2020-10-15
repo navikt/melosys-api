@@ -14,7 +14,7 @@ public final class BehandlingsgrunnlagKonverterer {
 
     static {
         mapper.put(BehandlingsGrunnlagType.GENERELT, BehandlingsgrunnlagData.class);
-        mapper.put(BehandlingsGrunnlagType.SØKNAD, SoeknadDokument.class);
+        mapper.put(BehandlingsGrunnlagType.SØKNAD, Soeknad.class);
         mapper.put(BehandlingsGrunnlagType.SED, SedGrunnlag.class);
         objectMapper.registerModule(new JavaTimeModule());
     }

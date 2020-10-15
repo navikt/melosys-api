@@ -7,7 +7,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -73,7 +73,7 @@ class HentRegisteropplysningerTest {
 
         Periode periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(new SoeknadDokument());
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(new Soeknad());
         behandlingsgrunnlag.getBehandlingsgrunnlagdata().periode = periode;
         behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
 

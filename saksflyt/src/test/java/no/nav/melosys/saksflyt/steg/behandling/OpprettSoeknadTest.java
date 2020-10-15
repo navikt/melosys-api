@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -33,13 +33,13 @@ class OpprettSoeknadTest {
     @Test
     void utfør_behandlingstemaUtsendtArbeidstaker_oppretterSøknad() throws FunksjonellException {
         opprettSoeknad.utfør(lagProsessinstans(Behandlingstema.UTSENDT_ARBEIDSTAKER));
-        verify(behandlingsgrunnlagService).opprettSøknadGrunnlag(eq(behandlingID), any(SoeknadDokument.class));
+        verify(behandlingsgrunnlagService).opprettSøknadGrunnlag(eq(behandlingID), any(Soeknad.class));
     }
 
     @Test
     void utfør_behandlingsTemaØvrigeSed_oppretterIkkeSøknad() throws FunksjonellException {
         opprettSoeknad.utfør(lagProsessinstans(Behandlingstema.ØVRIGE_SED_MED));
-        verify(behandlingsgrunnlagService, never()).opprettSøknadGrunnlag(eq(behandlingID), any(SoeknadDokument.class));
+        verify(behandlingsgrunnlagService, never()).opprettSøknadGrunnlag(eq(behandlingID), any(Soeknad.class));
     }
 
     private Prosessinstans lagProsessinstans(Behandlingstema behandlingstema) {

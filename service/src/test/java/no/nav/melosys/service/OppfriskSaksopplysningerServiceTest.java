@@ -10,7 +10,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.dokument.soeknad.Periode;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.dokument.soeknad.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -149,17 +149,17 @@ public class OppfriskSaksopplysningerServiceTest {
         saksopplysningPerson.setType(SaksopplysningType.PERSOPL);
         saksopplysninger.add(saksopplysningPerson);
 
-        SoeknadDokument soeknadDokument = new SoeknadDokument();
+        Soeknad soeknad = new Soeknad();
 
         ArbeidUtland arbeidUtland = new ArbeidUtland();
-        soeknadDokument.arbeidUtland = new ArrayList<>();
-        soeknadDokument.arbeidUtland.add(arbeidUtland);
+        soeknad.arbeidUtland = new ArrayList<>();
+        soeknad.arbeidUtland.add(arbeidUtland);
 
-        soeknadDokument.periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
-        soeknadDokument.soeknadsland = Soeknadsland.av(List.of("SE"));
+        soeknad.periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
+        soeknad.soeknadsland = Soeknadsland.av(List.of("SE"));
 
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(soeknadDokument);
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(soeknad);
         behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
 
         behandling.setSaksopplysninger(saksopplysninger);
