@@ -13,11 +13,14 @@ import no.nav.melosys.domain.dokument.person.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.behandling.EndreBehandlingstemaService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
+import no.nav.melosys.tjenester.gui.dto.EndreBehandlingstemaDto;
 import no.nav.melosys.tjenester.gui.dto.TidligereMedlemsperioderDto;
 import no.nav.melosys.tjenester.gui.dto.tildto.SaksopplysningerTilDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
@@ -32,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 
+import static no.nav.melosys.domain.Behandling.MULIGE_BEHANDLINGSTEMA_SOKNAD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jeasy.random.FieldPredicates.*;
 import static org.mockito.Mockito.*;
@@ -41,6 +45,8 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     private static final Logger log = LoggerFactory.getLogger(BehandlingTjenesteTest.class);
     private static final String TIDLIGERE_MEDLEMSPERIODER_SCHEMA = "behandlinger-tidligeremedlemsperioder-post-schema.json";
     private static final String BEHANDLINGER_SCHEMA = "behandlinger-behandling-schema.json";
+    private static final String ENDRE_BEHANDLINGSTEMA_SCHEMA = "behandlinger-endrebehandlingstema-schema.json";
+    private static final String ENDRE_BEHANDLINGSTEMA_POST_SCHEMA = "behandlinger-endrebehandlingstema-schema-post.json";
 
     private BehandlingTjeneste behandlingTjeneste;
 
@@ -50,12 +56,14 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     private SaksopplysningerTilDto saksopplysningerTilDto;
     @Mock
     private SaksbehandlerService saksbehandlerService;
+    @Mock
+    private EndreBehandlingstemaService endreBehandlingstemaService;
 
     private EasyRandom random;
 
     @BeforeEach
     void setUp() {
-        behandlingTjeneste = new BehandlingTjeneste(behandlingService, saksopplysningerTilDto, mock(TilgangService.class), saksbehandlerService, mock(EndreBehandlingstemaService.class));
+        behandlingTjeneste = new BehandlingTjeneste(behandlingService, saksopplysningerTilDto, mock(TilgangService.class), saksbehandlerService, endreBehandlingstemaService);
 
         random = new EasyRandom(new EasyRandomParameters()
             .overrideDefaultInitialization(true)
@@ -85,6 +93,20 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
         behandlingDto.getSaksopplysninger().setSed(null);
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(behandlingDto);
         valider(jsonString, BEHANDLINGER_SCHEMA, log);
+    }
+
+    @Test
+    void hentMuligeBehandlinstemaValidering() throws IOException, MelosysException {
+        when(endreBehandlingstemaService.hentMuligeBehandlingstema(11L)).thenReturn(MULIGE_BEHANDLINGSTEMA_SOKNAD);
+        List<String> muligeBehandlingstema = behandlingTjeneste.hentEndreBehandlingstema(11L).getBody();
+        validerArray(muligeBehandlingstema, ENDRE_BEHANDLINGSTEMA_SCHEMA, log);
+    }
+
+    @Test
+    void endreBehandlinstemaValidering() throws IOException {
+        EndreBehandlingstemaDto endreBehandlingstemaDto = new EndreBehandlingstemaDto();
+        endreBehandlingstemaDto.setBehandlingstema(Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND.getKode());
+        valider(endreBehandlingstemaDto, ENDRE_BEHANDLINGSTEMA_POST_SCHEMA, log);
     }
 
     @Test

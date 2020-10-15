@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Protected
 @RestController
@@ -108,13 +109,13 @@ public class BehandlingTjeneste {
 
     @GetMapping("{behandlingID}/muligeBehandlingstema")
     @ApiOperation(value = "Hent mulige nye behandlingstema for en behandling")
-    public ResponseEntity<List<Behandlingstema>> hentEndreBehandlingstema(@PathVariable("behandlingID") long behandlingsID)
+    public ResponseEntity<List<String>> hentEndreBehandlingstema(@PathVariable("behandlingID") long behandlingsID)
         throws MelosysException{
         log.debug("Saksbehandler {} ber om å hente mulige nye behandlingstema for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingsID);
         tilgangService.sjekkTilgang(behandlingsID);
 
         List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(behandlingsID);
-        return ResponseEntity.ok(muligeBehandlingstema);
+        return ResponseEntity.ok(muligeBehandlingstema.stream().map(Behandlingstema::getKode).collect(Collectors.toList()));
     }
 
     @PostMapping("{behandlingID}/endreBehandlingstema")
@@ -124,7 +125,7 @@ public class BehandlingTjeneste {
         log.debug("Saksbehandler {} ber om å sette behandlingstema for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingsID, nyttTema);
         tilgangService.sjekkTilgang(behandlingsID);
 
-        endreBehandlingstemaService.endreBehandlingstemaTilBehandling(behandlingsID, nyttTema.getBehandlingstema());
+        endreBehandlingstemaService.endreBehandlingstemaTilBehandling(behandlingsID, Behandlingstema.valueOf(nyttTema.getBehandlingstema()));
         return ResponseEntity.noContent().build();
     }
 

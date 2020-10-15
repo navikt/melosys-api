@@ -1,16 +1,14 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-
 public class EndreBehandlingstemaDto {
 
-    private Behandlingstema behandlingstema;
+    private String behandlingstema;
 
-    public Behandlingstema getBehandlingstema() {
+    public String getBehandlingstema() {
         return behandlingstema;
     }
 
-    public void setBehandlingstema(Behandlingstema behandlingstema) {
+    public void setBehandlingstema(String behandlingstema) {
         this.behandlingstema = behandlingstema;
     }
 }
