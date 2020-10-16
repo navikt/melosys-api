@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 
-import static no.nav.melosys.domain.Behandling.MULIGE_BEHANDLINGSTEMA_SOKNAD;
+import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SØKNAD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jeasy.random.FieldPredicates.*;
 import static org.mockito.Mockito.*;
@@ -97,7 +97,7 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void hentMuligeBehandlinstemaValidering() throws IOException, MelosysException {
-        when(endreBehandlingstemaService.hentMuligeBehandlingstema(11L)).thenReturn(MULIGE_BEHANDLINGSTEMA_SOKNAD);
+        when(endreBehandlingstemaService.hentMuligeBehandlingstema(11L)).thenReturn(BEHANDLINGSTEMA_SØKNAD);
         List<Behandlingstema> muligeBehandlingstema = behandlingTjeneste.hentEndreBehandlingstema(11L).getBody();
         validerArray(muligeBehandlingstema, ENDRE_BEHANDLINGSTEMA_SCHEMA, log);
     }

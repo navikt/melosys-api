@@ -120,12 +120,12 @@ public class BehandlingTjeneste {
 
     @PostMapping("{behandlingID}/endreBehandlingstema")
     @ApiOperation(value = "Endre behandlingstema for en gitt behandling")
-    public ResponseEntity<Void> endreBehandlingstema(@PathVariable("behandlingID") long behandlingsID, @RequestBody EndreBehandlingstemaDto nyttTema)
+    public ResponseEntity<Void> endreBehandlingstema(@PathVariable("behandlingID") long behandlingsID, @RequestBody EndreBehandlingstemaDto endreBehandlingstemaDto)
         throws MelosysException{
-        log.debug("Saksbehandler {} ber om å sette behandlingstema for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingsID, nyttTema);
+        log.debug("Saksbehandler {} ber om å sette behandlingstema for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingsID, endreBehandlingstemaDto);
         tilgangService.sjekkTilgang(behandlingsID);
 
-        endreBehandlingstemaService.endreBehandlingstemaTilBehandling(behandlingsID, Behandlingstema.valueOf(nyttTema.getBehandlingstema()));
+        endreBehandlingstemaService.endreBehandlingstemaTilBehandling(behandlingsID, Behandlingstema.valueOf(endreBehandlingstemaDto.getBehandlingstema()));
         return ResponseEntity.noContent().build();
     }
 

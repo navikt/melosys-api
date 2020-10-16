@@ -27,10 +27,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 public class Behandling extends RegistreringsInfo {
 
-    public static final List<Behandlingstema> MULIGE_BEHANDLINGSTEMA_SOKNAD = Arrays.asList(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_ETT_LAND_ØVRIG, IKKE_YRKESAKTIV, ARBEID_FLERE_LAND,
+    public static final List<Behandlingstema> BEHANDLINGSTEMA_SØKNAD = List.of(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_ETT_LAND_ØVRIG, IKKE_YRKESAKTIV, ARBEID_FLERE_LAND,
         ARBEID_NORGE_BOSATT_ANNET_LAND);
 
-    public static final List<Behandlingstema> MULIGE_BEHANDLINGSTEMA_SED = Arrays.asList(ØVRIGE_SED_MED, ØVRIGE_SED_UFM, TRYGDETID);
+    public static final List<Behandlingstema> BEHANDLINGSTEMA_SED_FORESPØRSEL = List.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM, TRYGDETID);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -361,7 +361,7 @@ public class Behandling extends RegistreringsInfo {
     }
 
     public static boolean erBehandlingAvSøknad(Behandlingstema behandlingstema) {
-        return MULIGE_BEHANDLINGSTEMA_SOKNAD.contains(behandlingstema);
+        return BEHANDLINGSTEMA_SØKNAD.contains(behandlingstema);
     }
 
     public static boolean erBehandlingAvSøknad(String behandlingstemaKode) {
@@ -388,7 +388,7 @@ public class Behandling extends RegistreringsInfo {
     }
 
     public static boolean erBehandlingAvSedForespørsler(Behandlingstema behandlingstema) {
-        return MULIGE_BEHANDLINGSTEMA_SED.contains(behandlingstema);
+        return BEHANDLINGSTEMA_SED_FORESPØRSEL.contains(behandlingstema);
     }
 
     public static boolean erBehandlingAvSedForespørsler(String behandlingstemaKode) {

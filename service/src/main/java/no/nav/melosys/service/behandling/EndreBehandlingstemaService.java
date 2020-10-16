@@ -15,8 +15,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static no.nav.melosys.domain.Behandling.MULIGE_BEHANDLINGSTEMA_SED;
-import static no.nav.melosys.domain.Behandling.MULIGE_BEHANDLINGSTEMA_SOKNAD;
+import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SED_FORESPØRSEL;
+import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SØKNAD;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
 
@@ -37,10 +37,11 @@ public class EndreBehandlingstemaService {
 
     public List<Behandlingstema> hentMuligeBehandlingstema(long behandlingsID) throws IkkeFunnetException{
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsID);
-        if (erBehandlingAvSøknad(behandling.getTema()) && validerBehandling(behandling)) {
-            return MULIGE_BEHANDLINGSTEMA_SOKNAD;
-        } else if (erBehandlingAvSedForespørsler(behandling.getTema()) && validerBehandling(behandling)) {
-            return MULIGE_BEHANDLINGSTEMA_SED;
+        boolean kanOppdatereBehandlingstema = kanOppdatereBehandlingstema(behandling);
+        if (kanOppdatereBehandlingstema && erBehandlingAvSøknad(behandling.getTema())) {
+            return BEHANDLINGSTEMA_SØKNAD;
+        } else if (kanOppdatereBehandlingstema && erBehandlingAvSedForespørsler(behandling.getTema())) {
+            return BEHANDLINGSTEMA_SED_FORESPØRSEL;
         } else {
             return Collections.emptyList();
         }
@@ -53,13 +54,13 @@ public class EndreBehandlingstemaService {
             behandling.setTema(nyttTema);
             behandlingService.lagre(behandling);
             behandlingsresultatService.tømBehandlingsresultat(behandlingsID);
-            oppdaterGosysOppgave(behandling);
+            oppdaterOppgave(behandling);
         } else {
             throw new FunksjonellException("Ikke mulig å endre behandlingstema");
         }
     }
 
-    private void oppdaterGosysOppgave(Behandling behandling) throws FunksjonellException, TekniskException {
+    private void oppdaterOppgave(Behandling behandling) throws FunksjonellException, TekniskException {
         Optional<Oppgave> oppgave = oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         if (oppgave.isEmpty()){
@@ -71,7 +72,7 @@ public class EndreBehandlingstemaService {
                 .build());
     }
 
-    private boolean validerBehandling(Behandling behandling) throws IkkeFunnetException{
+    private boolean kanOppdatereBehandlingstema(Behandling behandling) throws IkkeFunnetException{
         return behandling.erAktiv() && !behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).erArtikkel16MedSendtAnmodningOmUnntak();
     }
 }
