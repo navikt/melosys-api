@@ -46,7 +46,7 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     private static final String TIDLIGERE_MEDLEMSPERIODER_SCHEMA = "behandlinger-tidligeremedlemsperioder-post-schema.json";
     private static final String BEHANDLINGER_SCHEMA = "behandlinger-behandling-schema.json";
     private static final String ENDRE_BEHANDLINGSTEMA_SCHEMA = "behandlinger-endrebehandlingstema-schema.json";
-    private static final String ENDRE_BEHANDLINGSTEMA_POST_SCHEMA = "behandlinger-endrebehandlingstema-schema-post.json";
+    private static final String ENDRE_BEHANDLINGSTEMA_POST_SCHEMA = "behandlinger-endrebehandlingstema-post-schema.json";
 
     private BehandlingTjeneste behandlingTjeneste;
 

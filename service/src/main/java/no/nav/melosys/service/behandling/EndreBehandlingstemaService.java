@@ -37,6 +37,10 @@ public class EndreBehandlingstemaService {
 
     public List<Behandlingstema> hentMuligeBehandlingstema(long behandlingsID) throws IkkeFunnetException{
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsID);
+        return hentMuligeBehandlingstema(behandling);
+    }
+
+    public List<Behandlingstema> hentMuligeBehandlingstema(Behandling behandling) throws IkkeFunnetException{
         boolean kanOppdatereBehandlingstema = kanOppdatereBehandlingstema(behandling);
         if (kanOppdatereBehandlingstema && erBehandlingAvSøknad(behandling.getTema())) {
             return BEHANDLINGSTEMA_SØKNAD;
@@ -50,7 +54,7 @@ public class EndreBehandlingstemaService {
     @Transactional
     public void endreBehandlingstemaTilBehandling(long behandlingsID, Behandlingstema nyttTema) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsID);
-        if (hentMuligeBehandlingstema(behandlingsID).contains(nyttTema)) {
+        if (hentMuligeBehandlingstema(behandling).contains(nyttTema)) {
             behandling.setTema(nyttTema);
             behandlingService.lagre(behandling);
             behandlingsresultatService.tømBehandlingsresultat(behandlingsID);

@@ -6,7 +6,6 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -61,30 +60,22 @@ public class EndreBehandlingstemaServiceTest {
         endreBehandlingstemaService = new EndreBehandlingstemaService(behandlingService, behandlingsresultatService, oppgaveService);
 
         behandling.setId(id);
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("saksnummer");
-        behandling.setFagsak(fagsak);
-        Oppgave oppgave = new Oppgave.Builder()
-            .setOppgaveId("oppgaveID")
-            .setSaksnummer(behandling.getFagsak().getSaksnummer())
-            .build();
-
         when(behandlingService.hentBehandlingUtenSaksopplysninger(id)).thenReturn(behandling);
-        lenient().when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
-        lenient().when(oppgaveService.finnOppgaveMedFagsaksnummer(fagsak.getSaksnummer())).thenReturn(Optional.of(oppgave));
     }
 
     @Test
-    public void hentMuligeBehandlingstema_gyldigSøknadBehandlingstema_returnererSøknadBehandlinstema() throws MelosysException {
+    public void hentMuligeBehandlingstema_gyldigSøknadBehandlingstema_returnererSøknadBehandlinstema() throws IkkeFunnetException {
         behandling.setTema(ARBEID_FLERE_LAND);
+        when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
 
         List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(id);
         assertThat(BEHANDLINGSTEMA_SØKNAD).isEqualTo(muligeBehandlingstema);
     }
 
     @Test
-    public void hentMuligeBehandlingstema_gyldigSEDForespørselBehandlingstema_returnererSEDForespørselBehandlingstema() throws MelosysException{
+    public void hentMuligeBehandlingstema_gyldigSEDForespørselBehandlingstema_returnererSEDForespørselBehandlingstema() throws IkkeFunnetException{
         behandling.setTema(ØVRIGE_SED_MED);
+        when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
 
         List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(id);
         assertThat(BEHANDLINGSTEMA_SED_FORESPØRSEL).isEqualTo(muligeBehandlingstema);
@@ -93,9 +84,10 @@ public class EndreBehandlingstemaServiceTest {
     @Test
     public void hentMuligeBehandlingstema_ugyldigBehandlingstema_returnererTomListe() throws IkkeFunnetException{
         behandling.setTema(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
+        when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
 
         List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(id);
-        assertThat(muligeBehandlingstema.size()).isZero();
+        assertThat(muligeBehandlingstema).isEmpty();
     }
 
     @Test
@@ -104,23 +96,25 @@ public class EndreBehandlingstemaServiceTest {
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
 
         List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(id);
-        assertThat(muligeBehandlingstema.size()).isZero();
+        assertThat(muligeBehandlingstema).isEmpty();
     }
 
     @Test
-    public void hentMuligeBehandlingstema_erArtikkel16MedSendtAnmodningOmUnntak_returnererTomListe() throws MelosysException{
+    public void hentMuligeBehandlingstema_erArtikkel16MedSendtAnmodningOmUnntak_returnererTomListe() throws IkkeFunnetException{
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
         anmodningsperiode.setSendtUtland(true);
         behandlingsresultat.setAnmodningsperioder(Set.of(anmodningsperiode));
         behandling.setTema(ARBEID_FLERE_LAND);
+        when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
 
         List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(id);
-        assertThat(muligeBehandlingstema.size()).isZero();
+        assertThat(muligeBehandlingstema).isEmpty();
     }
 
     @Test
     public void endreBehandlingstema_gyldigEndringForSøknad_behandlingLagresBehandlingsresultatTømmesOgOppgaveOppdateres() throws MelosysException {
         behandling.setTema(ARBEID_FLERE_LAND);
+        setup_endreBehandlingstemaTester();
 
         endreBehandlingstemaService.endreBehandlingstemaTilBehandling(id, UTSENDT_ARBEIDSTAKER);
         verify(behandlingService).lagre(behandlingArgumentCaptor.capture());
@@ -134,6 +128,7 @@ public class EndreBehandlingstemaServiceTest {
     @Test
     public void endreBehandlingstema_gyldigEndringForSED_behandlingLagresBehandlingsresultatTømmesOgOppgaveOppdateres() throws MelosysException {
         behandling.setTema(TRYGDETID);
+        setup_endreBehandlingstemaTester();
 
         endreBehandlingstemaService.endreBehandlingstemaTilBehandling(id, ØVRIGE_SED_MED);
         verify(behandlingService).lagre(behandlingArgumentCaptor.capture());
@@ -147,6 +142,7 @@ public class EndreBehandlingstemaServiceTest {
     @Test
     public void endreBehandlingstema_ugyldigNyttTemaForSøknad_exceptionKastes()  throws MelosysException{
         behandling.setTema(ARBEID_FLERE_LAND);
+        when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> endreBehandlingstemaService.endreBehandlingstemaTilBehandling(id, ØVRIGE_SED_MED))
@@ -154,6 +150,18 @@ public class EndreBehandlingstemaServiceTest {
         verify(behandlingService, never()).lagre(any(Behandling.class));
         verify(behandlingsresultatService, never()).tømBehandlingsresultat(id);
         verify(oppgaveService, never()).oppdaterOppgave(any(), any());
+    }
+
+    private void setup_endreBehandlingstemaTester() throws MelosysException{
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("saksnummer");
+        behandling.setFagsak(fagsak);
+        Oppgave oppgave = new Oppgave.Builder()
+            .setOppgaveId("oppgaveID")
+            .setSaksnummer(behandling.getFagsak().getSaksnummer())
+            .build();
+        when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
+        when(oppgaveService.finnOppgaveMedFagsaksnummer(fagsak.getSaksnummer())).thenReturn(Optional.of(oppgave));
     }
 
 }
