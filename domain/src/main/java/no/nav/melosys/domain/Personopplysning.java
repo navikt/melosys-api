@@ -8,23 +8,40 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.persistence.*;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.*;
 
+@Entity
+@Table(name = "personopplysning")
 public class Personopplysning {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public Long id;
+
+    @OneToOne
+    @JoinColumn(name = "behandling_id")
+    public Behandling behandling;
+
+    @Column(nullable = false)
     public String fnr;
 
+    @Transient // FIXME
     public Sivilstand sivilstand;
 
+    @Transient
     public LocalDate sivilstandGyldighetsperiodeFom;
 
     /** Kodeverk: Landkoder */
+    @Transient // FIXME
     public Land statsborgerskap;
 
     /** Kodeverk: Kjønnstyper */
+    @Transient // FIXME
     @JsonProperty("kjoenn")
     public KjoennsType kjønn;
 
@@ -37,30 +54,40 @@ public class Personopplysning {
     @JsonIgnore
     public String etternavn;
 
+    @Column(name = "sammensatt_navn")
     public String sammensattNavn;
 
+    @Transient // FIXME
     public List<Familiemedlem> familiemedlemmer = new ArrayList<>();
 
+    @Column(name = "foedselsdato")
     @JsonProperty("foedselsdato")
     public LocalDate fødselsdato;
 
+    @Column(name = "doedsdato")
     @JsonIgnore
     public LocalDate dødsdato;
 
+    @Transient // FIXME
     @JsonIgnore
     public Diskresjonskode diskresjonskode;
 
+    @Enumerated(EnumType.STRING)
     @JsonProperty("personStatus")
     public Personstatus personstatus;
 
+    @Transient
     public LocalDate statsborgerskapDato;
 
+    @Transient
     @JsonIgnore
     public Bostedsadresse bostedsadresse = new Bostedsadresse();
 
+    @Transient
     @JsonIgnore
     public UstrukturertAdresse postadresse = new UstrukturertAdresse();
 
+    @Transient
     @JsonIgnore
     public MidlertidigPostadresse midlertidigPostadresse = new MidlertidigPostadresse();
 
