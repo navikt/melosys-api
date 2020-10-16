@@ -4,10 +4,10 @@ import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ArbeidsgiversBekreftels
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Arbeidsinntekt;
 
 public class Soeknad extends BehandlingsgrunnlagData {
-    // Opplysninger om arbeidsinntekt
+
     public Arbeidsinntekt arbeidsinntekt = new Arbeidsinntekt();
 
-    // Bekreftelser fra arbeidsgiveren
+
     public ArbeidsgiversBekreftelse arbeidsgiversBekreftelse = new ArbeidsgiversBekreftelse();
 
 }
