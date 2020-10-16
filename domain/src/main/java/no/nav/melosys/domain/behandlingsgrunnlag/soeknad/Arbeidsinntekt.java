@@ -1,8 +1,5 @@
-package no.nav.melosys.domain.dokument.soeknad;
+package no.nav.melosys.domain.behandlingsgrunnlag.soeknad;
 
-/**
- * Opplysninger om arbeidsinntekt
- */
 public class Arbeidsinntekt {
     public Integer inntektNorskIPerioden;
     public Integer inntektUtenlandskIPerioden;

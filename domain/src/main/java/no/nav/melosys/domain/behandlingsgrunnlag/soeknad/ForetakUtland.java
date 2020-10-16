@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.dokument.soeknad;
+package no.nav.melosys.domain.behandlingsgrunnlag.soeknad;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;

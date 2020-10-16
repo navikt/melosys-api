@@ -1,7 +1,7 @@
 package no.nav.melosys.domain.eessi.sed;
 
 
-import no.nav.melosys.domain.dokument.soeknad.UtenlandskIdent;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.UtenlandskIdent;
 
 public class Ident {
     private String ident;

@@ -56,7 +56,7 @@ public class InngangsvilkaarServiceTest {
     @Test
     public void vurderOgLagreInngangsvilkår() throws TekniskException, FunksjonellException {
         final List<String> landkoder = List.of("FR", "DK", "NO");
-        final var periode = new no.nav.melosys.domain.dokument.soeknad.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
+        final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
         PersonDokument personDokument = new PersonDokument();
         personDokument.statsborgerskap = Land.av(FINLAND);
         when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(personDokument);
@@ -74,7 +74,7 @@ public class InngangsvilkaarServiceTest {
     @Test
     public void vurderOgLagreInngangsvilkår_manglerStatsborgerskap_girBegrunnelse() throws TekniskException, FunksjonellException {
         final List<String> landkoder = List.of("FR", "DK", "NO");
-        final var periode = new no.nav.melosys.domain.dokument.soeknad.Periode(LocalDate.now().minusYears(2), LocalDate.now().minusYears(1));
+        final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode(LocalDate.now().minusYears(2), LocalDate.now().minusYears(1));
         final var personhistorikkDokument = new PersonhistorikkDokument();
         personhistorikkDokument.statsborgerskapListe = Collections.emptyList();
         when(saksopplysningerService.hentPersonhistorikk(anyLong())).thenReturn(personhistorikkDokument);
@@ -87,10 +87,10 @@ public class InngangsvilkaarServiceTest {
 
     @Test
     public void vurderOgLagreInngangsvilkår_tomDatoErNull_tomDatoSettesTilEttÅrEtterFomDato() throws FunksjonellException, TekniskException {
-        ArgumentCaptor<no.nav.melosys.domain.dokument.soeknad.Periode> søknadsperiodeCaptor = ArgumentCaptor.forClass(no.nav.melosys.domain.dokument.soeknad.Periode.class);
+        ArgumentCaptor<no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode> søknadsperiodeCaptor = ArgumentCaptor.forClass(no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode.class);
 
         final List<String> landkoder = List.of("FR", "DK", "NO");
-        final var periode = new no.nav.melosys.domain.dokument.soeknad.Periode(LocalDate.now().plusYears(1), null);
+        final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode(LocalDate.now().plusYears(1), null);
         PersonDokument personDokument = new PersonDokument();
         personDokument.statsborgerskap = Land.av(FINLAND);
         when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(personDokument);
@@ -101,14 +101,14 @@ public class InngangsvilkaarServiceTest {
 
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, periode);
 
-        no.nav.melosys.domain.dokument.soeknad.Periode søknadsperiode = søknadsperiodeCaptor.getValue();
+        no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode søknadsperiode = søknadsperiodeCaptor.getValue();
         assertThat(søknadsperiode.getTom()).isEqualTo(LocalDate.now().plusYears(2));
     }
 
     @Test
     public void vurderOgLagreInngangsvilkår_feil_girBegrunnelse() throws TekniskException, FunksjonellException {
         final List<String> landkoder = List.of("FR", "DK", "NO");
-        final var periode = new no.nav.melosys.domain.dokument.soeknad.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
+        final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
         PersonDokument personDokument = new PersonDokument();
         personDokument.statsborgerskap = Land.av(FINLAND);
         when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(personDokument);

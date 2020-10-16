@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsGrunnlagType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -40,10 +40,9 @@ public class BehandlingsgrunnlagListenerTest {
         behandlingsgrunnlagListener.lastBehandlingsgrunnlag(behandlingsgrunnlag);
 
         BehandlingsgrunnlagData data = behandlingsgrunnlag.getBehandlingsgrunnlagdata();
-        assertThat(data).isNotNull();
-        assertThat(data).isInstanceOf(SoeknadDokument.class);
+        assertThat(data).isNotNull().isInstanceOf(Soeknad.class);
 
-        SoeknadDokument søknad = (SoeknadDokument) data;
+        Soeknad søknad = (Soeknad) data;
         JsonNode jsonNode = objectMapper.readTree(json);
         assertKonvertering(jsonNode, søknad);
         assertThat(søknad.arbeidsgiversBekreftelse.arbeidsgiverBekrefterUtsendelse)
