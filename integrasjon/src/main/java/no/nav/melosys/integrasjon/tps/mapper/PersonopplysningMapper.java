@@ -21,6 +21,7 @@ public class PersonopplysningMapper {
         Personopplysning p = new Personopplysning();
         p.fnr = mapFnr(person.getAktoer());
         p.sivilstand = mapSivilstand(person.getSivilstand());
+        p.sivilstandGyldighetsperiodeFom = KonverteringsUtils.xmlGregorianCalendarToLocalDate(person.getSivilstand().getFomGyldighetsperiode());
         p.statsborgerskap = Land.av(person.getStatsborgerskap().getLand().getValue());
         p.kjønn = mapKjønn(person.getKjoenn());
         p.fornavn = person.getPersonnavn().getFornavn();

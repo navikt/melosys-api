@@ -8,10 +8,12 @@ import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Personopplysning;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
+import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
@@ -85,6 +87,27 @@ public class RegisteropplysningerService {
         this.utbetaldataService = utbetaldataService;
         this.saksopplysningerService = saksopplysningerService;
         this.registeropplysningerPeriodeFactory = registeropplysningerPeriodeFactory;
+    }
+
+    // TODO Lagre personopplysninger
+    public Personopplysning hentPersonopplysninger(String fnr, Set<Informasjonsbehov> informasjonsbehov) throws SikkerhetsbegrensningException, IkkeFunnetException {
+        Personopplysning personopplysning = tpsFasade.hentPersonopplysning(fnr, informasjonsbehov);
+        if (informasjonsbehov.contains(Informasjonsbehov.FAMILIERELASJONER)) {
+            personopplysning.hentEktefelleSamboerPartner().ifPresent(familiemedlem -> {
+                familiemedlem.sivilstand = personopplysning.sivilstand;
+                familiemedlem.sivilstandGyldighetsperiodeFom = personopplysning.sivilstandGyldighetsperiodeFom;
+            });
+            for (Familiemedlem familiemedlem : personopplysning.hentBarn()) {
+                Personopplysning barn = tpsFasade.hentPersonopplysning(familiemedlem.fnr, Set.of(Informasjonsbehov.FAMILIERELASJONER));
+                familiemedlem.fødselsdato = barn.fødselsdato;
+                barn.hentForeldre().stream()
+                    .filter(forelder -> !fnr.equals(forelder.fnr))
+                    .findAny().ifPresent(forelder -> {
+                    familiemedlem.fnrAnnenForelder = forelder.fnr;
+                });
+            }
+        }
+        return personopplysning;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = MelosysException.class)

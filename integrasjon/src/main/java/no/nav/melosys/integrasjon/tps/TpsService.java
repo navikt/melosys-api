@@ -159,7 +159,7 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    public Personopplysning hentPersonopplysning(String ident) throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public Personopplysning hentPersonopplysning(String ident, Set<Informasjonsbehov> behov) throws SikkerhetsbegrensningException, IkkeFunnetException {
         HentPersonRequest request = new HentPersonRequest();
         NorskIdent norskIdent = new NorskIdent();
         norskIdent.setIdent(ident);
@@ -168,6 +168,10 @@ public class TpsService implements TpsFasade {
         personIdent.setIdent(norskIdent);
 
         request.setAktoer(personIdent);
+
+        if (behov != null) {
+            behov.forEach(informasjonsbehov -> request.getInformasjonsbehov().add(informasjonsbehov.getKode()));
+        }
 
         // Kall til TPS
         HentPersonResponse response;

@@ -24,6 +24,7 @@ public class FamiliemedlemMapper {
                 familiemedlem.fnr = PersonopplysningMapper.mapFnr(familierelasjon.getTilPerson().getAktoer());
                 familiemedlem.navn = familierelasjon.getTilPerson().getPersonnavn().getSammensattNavn();
                 familiemedlem.familierelasjon = mapFamilierelasjon(familierelasjon.getTilRolle());
+                familiemedlem.borMedBruker = familierelasjon.isHarSammeBosted();
                 return familiemedlem;
             }).collect(Collectors.toList());
     }
