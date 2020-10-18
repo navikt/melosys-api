@@ -39,7 +39,8 @@ import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplys
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagPersonsaksopplysning;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -63,7 +64,6 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
     @Before
     public void setUp() throws FunksjonellException, TekniskException {
         when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Landkoder.AT);
-        when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
 
         brevDataByggerAvslagArbeidsgiver = new BrevDataByggerAvslagArbeidsgiver(landvelgerService,
                                                                                 lovvalgsperiodeService,

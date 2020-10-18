@@ -33,7 +33,8 @@ import static no.nav.melosys.service.BehandlingsgrunnlagStub.lagBehandlingsgrunn
 import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysninger;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -66,7 +67,6 @@ public class BrevDataByggerAvslagYrkesaktivTest {
         when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART16_1)))
             .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, KORT_OPPDRAG_RETUR_NORSK_AG)));
 
-        when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
         brevDataByggerAvslagYrkesaktiv = new BrevDataByggerAvslagYrkesaktiv(landvelgerService, anmodningsperiodeService, new BrevbestillingDto(), vilkaarsresultatService);
     }
 

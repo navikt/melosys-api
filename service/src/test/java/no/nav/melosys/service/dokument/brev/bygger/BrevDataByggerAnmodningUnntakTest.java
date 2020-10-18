@@ -35,7 +35,8 @@ import static no.nav.melosys.service.BehandlingsgrunnlagStub.lagBehandlingsgrunn
 import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysninger;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -58,7 +59,6 @@ public class BrevDataByggerAnmodningUnntakTest {
 
     @Before
     public void setUp() {
-        when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
         brevDataByggerAnmodningUnntak = new BrevDataByggerAnmodningUnntak(landvelgerService, vilkaarsresultatService);
 
         when(vilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenCallRealMethod();

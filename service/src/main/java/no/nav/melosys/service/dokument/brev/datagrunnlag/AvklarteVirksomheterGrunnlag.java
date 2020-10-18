@@ -12,6 +12,7 @@ import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -111,7 +112,9 @@ public class AvklarteVirksomheterGrunnlag {
         if (StringUtils.isEmpty(adresse.gatenavn)) {
             adresse.gatenavn = " ";
         }
-        adresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
+        if (Landkoder.NO.getKode().equals(adresse.landkode)) {
+            adresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
+        }
         return adresse;
     }
 }
