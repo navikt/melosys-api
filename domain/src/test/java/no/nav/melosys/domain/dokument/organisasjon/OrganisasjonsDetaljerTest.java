@@ -102,8 +102,6 @@ public class OrganisasjonsDetaljerTest {
         StrukturertAdresse resultatAdresse = orgDetaljer.hentStrukturertForretningsadresse();
         assertThat(resultatAdresse.gatenavn).isEqualTo(linje1.trim() + " " + linje2 + " " + linje3);
         assertThat(resultatAdresse.landkode).isEqualTo(landkode);
-
-        // Har ikke utenlandsk postnummer, kun poststed
         assertThat(resultatAdresse.postnummer).isEqualTo(postnr);
         assertThat(resultatAdresse.poststed).isEqualTo(poststedUtland);
     }
