@@ -21,7 +21,7 @@ public class FamiliemedlemMapper {
         return harFraRolleI.stream()
             .map(familierelasjon -> {
                 Familiemedlem familiemedlem = new Familiemedlem();
-                familiemedlem.fnr = PersonopplysningMapper.mapFnr(familierelasjon.getTilPerson().getAktoer());
+                familiemedlem.fnr = PersonMapper.mapFnr(familierelasjon.getTilPerson().getAktoer());
                 familiemedlem.navn = familierelasjon.getTilPerson().getPersonnavn().getSammensattNavn();
                 familiemedlem.familierelasjon = mapFamilierelasjon(familierelasjon.getTilRolle());
                 familiemedlem.borMedBruker = familierelasjon.isHarSammeBosted();

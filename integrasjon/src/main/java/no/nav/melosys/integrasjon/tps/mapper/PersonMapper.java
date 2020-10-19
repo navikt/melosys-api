@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.tps.mapper;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.Personopplysning;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Diskresjonskode;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
@@ -11,14 +10,14 @@ import no.nav.melosys.domain.dokument.person.Sivilstand;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.*;
 
-public class PersonopplysningMapper {
+public class PersonMapper {
 
-    private PersonopplysningMapper() {
+    private PersonMapper() {
         throw new IllegalStateException("Utility");
     }
 
-    public static Personopplysning mapTilPersonopplysning(Person person) {
-        Personopplysning p = new Personopplysning();
+    public static no.nav.melosys.domain.dokument.person.Person mapTilPerson(no.nav.tjeneste.virksomhet.person.v3.informasjon.Person person) {
+        no.nav.melosys.domain.dokument.person.Person p = new no.nav.melosys.domain.dokument.person.Person();
         p.fnr = mapFnr(person.getAktoer());
         p.sivilstand = mapSivilstand(person.getSivilstand());
         p.sivilstandGyldighetsperiodeFom = KonverteringsUtils.xmlGregorianCalendarToLocalDate(person.getSivilstand().getFomGyldighetsperiode());

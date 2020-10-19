@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Personopplysning;
+import no.nav.melosys.domain.dokument.person.Person;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
@@ -89,28 +90,25 @@ public class RegisteropplysningerService {
         this.registeropplysningerPeriodeFactory = registeropplysningerPeriodeFactory;
     }
 
-    public Personopplysning hentOgLagrePersonopplysninger(RegisteropplysningerRequest request, Behandling behandling, Set<Informasjonsbehov> informasjonsbehov) throws SikkerhetsbegrensningException, IkkeFunnetException {
-        Personopplysning personopplysning = tpsFasade.hentPersonopplysning(request.getFnr(), informasjonsbehov);
-        if (informasjonsbehov.contains(Informasjonsbehov.FAMILIERELASJONER)) {
-            personopplysning.hentEktefelleSamboerPartner().ifPresent(familiemedlem -> {
-                familiemedlem.sivilstand = personopplysning.sivilstand;
-                familiemedlem.sivilstandGyldighetsperiodeFom = personopplysning.sivilstandGyldighetsperiodeFom;
-                familiemedlem.personopplysning = personopplysning;
+    public Person hentOgLagrePersonopplysninger(RegisteropplysningerRequest request, Behandling behandling, Informasjonsbehov informasjonsbehov) throws SikkerhetsbegrensningException, IkkeFunnetException {
+        Person person = tpsFasade.hentPersonopplysning(request.getFnr(), informasjonsbehov);
+        if (informasjonsbehov == Informasjonsbehov.MED_FAMILIERELASJONER) {
+            person.hentEktefelleSamboerPartner().ifPresent(familiemedlem -> {
+                familiemedlem.sivilstand = person.sivilstand;
+                familiemedlem.sivilstandGyldighetsperiodeFom = person.sivilstandGyldighetsperiodeFom;
             });
-            for (Familiemedlem familiemedlem : personopplysning.hentBarn()) {
-                Personopplysning barn = tpsFasade.hentPersonopplysning(familiemedlem.fnr, Set.of(Informasjonsbehov.FAMILIERELASJONER));
+            for (Familiemedlem familiemedlem : person.hentBarn()) {
+                Person barn = tpsFasade.hentPersonopplysning(familiemedlem.fnr, Informasjonsbehov.MED_FAMILIERELASJONER);
                 familiemedlem.fødselsdato = barn.fødselsdato;
-                familiemedlem.personopplysning = personopplysning;
                 barn.hentForeldre().stream()
                     .filter(forelder -> !request.getFnr().equals(forelder.fnr))
                     .findAny()
                     .ifPresent(forelder -> familiemedlem.fnrAnnenForelder = forelder.fnr);
             }
         }
-        personopplysning.behandling = behandling;
-        behandling.setPersonopplysning(personopplysning);
+        behandling.setPersonopplysning(new Personopplysning(behandling, person));
         behandlingService.lagre(behandling);
-        return personopplysning;
+        return person;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = MelosysException.class)

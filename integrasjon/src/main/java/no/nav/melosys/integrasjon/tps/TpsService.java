@@ -10,7 +10,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import no.nav.melosys.domain.person.Informasjonsbehov;
-import no.nav.melosys.domain.Personopplysning;
+import no.nav.melosys.domain.dokument.person.Person;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
@@ -23,7 +23,7 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.tps.aktoer.AktoerIdCache;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
-import no.nav.melosys.integrasjon.tps.mapper.PersonopplysningMapper;
+import no.nav.melosys.integrasjon.tps.mapper.PersonMapper;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
 import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentAktoerIdForIdentPersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentIdentForAktoerIdPersonIkkeFunnet;
@@ -159,7 +159,7 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    public Personopplysning hentPersonopplysning(String ident, Set<Informasjonsbehov> behov) throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public Person hentPersonopplysning(String ident, Informasjonsbehov behov) throws SikkerhetsbegrensningException, IkkeFunnetException {
         HentPersonRequest request = new HentPersonRequest();
         NorskIdent norskIdent = new NorskIdent();
         norskIdent.setIdent(ident);
@@ -168,10 +168,7 @@ public class TpsService implements TpsFasade {
         personIdent.setIdent(norskIdent);
 
         request.setAktoer(personIdent);
-
-        if (behov != null) {
-            behov.forEach(informasjonsbehov -> request.getInformasjonsbehov().add(informasjonsbehov.getKode()));
-        }
+        request.getInformasjonsbehov().addAll(mapInformasjonsbehovTilTps(behov));
 
         // Kall til TPS
         HentPersonResponse response;
@@ -182,7 +179,7 @@ public class TpsService implements TpsFasade {
         } catch (HentPersonPersonIkkeFunnet hentPersonPersonIkkeFunnet) {
             throw new IkkeFunnetException(hentPersonPersonIkkeFunnet);
         }
-        return PersonopplysningMapper.mapTilPersonopplysning(response.getPerson());
+        return PersonMapper.mapTilPerson(response.getPerson());
     }
 
     @Override

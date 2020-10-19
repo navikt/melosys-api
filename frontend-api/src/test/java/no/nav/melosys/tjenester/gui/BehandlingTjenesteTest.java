@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
-import no.nav.melosys.domain.Personopplysning;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
@@ -73,7 +72,6 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
             .dateRange(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1))
             .excludeField(named("tilleggsinformasjonDetaljer").and(ofType(TilleggsinformasjonDetaljer.class)).and(inClass(Tilleggsinformasjon.class)))
             .excludeField(named("sed").and(ofType(SedDokument.class)))
-            .excludeField(named("personopplysning").and(ofType(Personopplysning.class)))
             .stringLengthRange(2, 10)
             .randomize(GeografiskAdresse.class, () -> random.nextObject(SemistrukturertAdresse.class))
             .randomize(MidlertidigPostadresse.class, () -> Math.random() > 0.5 ? random.nextObject(MidlertidigPostadresseNorge.class) : random.nextObject(MidlertidigPostadresseUtland.class))
