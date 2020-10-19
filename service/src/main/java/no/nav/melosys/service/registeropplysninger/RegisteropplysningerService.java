@@ -89,24 +89,27 @@ public class RegisteropplysningerService {
         this.registeropplysningerPeriodeFactory = registeropplysningerPeriodeFactory;
     }
 
-    // TODO Lagre personopplysninger
-    public Personopplysning hentPersonopplysninger(String fnr, Set<Informasjonsbehov> informasjonsbehov) throws SikkerhetsbegrensningException, IkkeFunnetException {
-        Personopplysning personopplysning = tpsFasade.hentPersonopplysning(fnr, informasjonsbehov);
+    public Personopplysning hentOgLagrePersonopplysninger(RegisteropplysningerRequest request, Behandling behandling, Set<Informasjonsbehov> informasjonsbehov) throws SikkerhetsbegrensningException, IkkeFunnetException {
+        Personopplysning personopplysning = tpsFasade.hentPersonopplysning(request.getFnr(), informasjonsbehov);
         if (informasjonsbehov.contains(Informasjonsbehov.FAMILIERELASJONER)) {
             personopplysning.hentEktefelleSamboerPartner().ifPresent(familiemedlem -> {
                 familiemedlem.sivilstand = personopplysning.sivilstand;
                 familiemedlem.sivilstandGyldighetsperiodeFom = personopplysning.sivilstandGyldighetsperiodeFom;
+                familiemedlem.personopplysning = personopplysning;
             });
             for (Familiemedlem familiemedlem : personopplysning.hentBarn()) {
                 Personopplysning barn = tpsFasade.hentPersonopplysning(familiemedlem.fnr, Set.of(Informasjonsbehov.FAMILIERELASJONER));
                 familiemedlem.fødselsdato = barn.fødselsdato;
+                familiemedlem.personopplysning = personopplysning;
                 barn.hentForeldre().stream()
-                    .filter(forelder -> !fnr.equals(forelder.fnr))
-                    .findAny().ifPresent(forelder -> {
-                    familiemedlem.fnrAnnenForelder = forelder.fnr;
-                });
+                    .filter(forelder -> !request.getFnr().equals(forelder.fnr))
+                    .findAny()
+                    .ifPresent(forelder -> familiemedlem.fnrAnnenForelder = forelder.fnr);
             }
         }
+        personopplysning.behandling = behandling;
+        behandling.setPersonopplysning(personopplysning);
+        behandlingService.lagre(behandling);
         return personopplysning;
     }
 

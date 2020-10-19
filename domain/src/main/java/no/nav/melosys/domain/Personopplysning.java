@@ -57,7 +57,7 @@ public class Personopplysning {
     @Column(name = "sammensatt_navn")
     public String sammensattNavn;
 
-    @Transient // FIXME
+    @OneToMany(mappedBy = "personopplysning", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     public List<Familiemedlem> familiemedlemmer = new ArrayList<>();
 
     @Column(name = "foedselsdato")
