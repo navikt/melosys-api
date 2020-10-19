@@ -14,6 +14,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.*;
+import no.nav.melosys.domain.jpa.kodeverk.DiskresjonskodeConverter;
+import no.nav.melosys.domain.jpa.kodeverk.KjoennsTypeConverter;
+import no.nav.melosys.domain.jpa.kodeverk.SivilstandConverter;
 
 @Entity
 @Table(name = "personopplysning")
@@ -30,7 +33,7 @@ public class Personopplysning {
     @Column(nullable = false)
     public String fnr;
 
-    @Transient // FIXME
+    @Convert(converter = SivilstandConverter.class)
     public Sivilstand sivilstand;
 
     @Transient
@@ -41,7 +44,8 @@ public class Personopplysning {
     public Land statsborgerskap;
 
     /** Kodeverk: Kjønnstyper */
-    @Transient // FIXME
+    @Column(name = "kjoenn")
+    @Convert(converter = KjoennsTypeConverter.class)
     @JsonProperty("kjoenn")
     public KjoennsType kjønn;
 
@@ -68,7 +72,7 @@ public class Personopplysning {
     @JsonIgnore
     public LocalDate dødsdato;
 
-    @Transient // FIXME
+    @Convert(converter = DiskresjonskodeConverter.class)
     @JsonIgnore
     public Diskresjonskode diskresjonskode;
 

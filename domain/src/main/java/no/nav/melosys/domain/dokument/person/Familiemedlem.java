@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.Personopplysning;
+import no.nav.melosys.domain.jpa.kodeverk.SivilstandConverter;
 
 @Entity
 @Table(name = "familiemedlem")
@@ -42,7 +43,7 @@ public class Familiemedlem {
     public boolean borMedBruker;
 
     @JsonIgnore
-    @Transient // FIXME
+    @Convert(converter = SivilstandConverter.class)
     public Sivilstand sivilstand;
 
     @JsonIgnore

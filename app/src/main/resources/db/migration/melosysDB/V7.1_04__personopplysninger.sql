@@ -2,15 +2,16 @@ CREATE TABLE personopplysning (
     id              NUMBER(19) GENERATED ALWAYS AS IDENTITY,
     behandling_id   NUMBER(19)      NOT NULL,
     fnr             VARCHAR2(99)    NOT NULL,
-    sivilstand      VARCHAR2(99)    NULL, -- FIXME: NOT NULL
-    kjoenn          VARCHAR2(99)    NULL, -- FIXME: NOT NULL
+    sivilstand      VARCHAR2(99)    NOT NULL,
+    kjoenn          VARCHAR2(99)    NOT NULL,
     fornavn         VARCHAR2(99)    NULL,
     mellomnavn      VARCHAR2(99)    NULL,
     etternavn       VARCHAR2(99)    NULL,
     sammensatt_navn VARCHAR2(99)    NOT NULL,
     foedselsdato    TIMESTAMP       NOT NULL,
     doedsdato       TIMESTAMP       NULL,
-    personstatus    VARCHAR2(99)    NULL, -- FIXME: NOT NULL
+    diskresjonskode VARCHAR2(99)    NULL,
+    personstatus    VARCHAR2(99)    NOT NULL,
     CONSTRAINT pk_personopplysning PRIMARY KEY (id)
 );
 
@@ -19,7 +20,7 @@ CREATE TABLE familiemedlem (
     personopplysning_id NUMBER(19)      NOT NULL,
     fnr                 VARCHAR2(99)    NOT NULL,
     navn                VARCHAR2(99)    NOT NULL,
-    familierelasjon     VARCHAR2(99)    NULL, -- FIXME: NOT NULL
+    familierelasjon     VARCHAR2(99)    NOT NULL,
     foedselsdato        TIMESTAMP       NULL, -- lagrer bare for barn
     bor_med_bruker      NUMBER(1)       NOT NULL,
     sivilstand          VARCHAR2(99)    NULL,
