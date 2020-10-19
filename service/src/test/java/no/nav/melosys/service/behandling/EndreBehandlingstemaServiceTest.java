@@ -35,7 +35,7 @@ import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.oppgave.OppgaveService;
 
 @ExtendWith(MockitoExtension.class)
-public class EndreBehandlingstemaServiceTest {
+class EndreBehandlingstemaServiceTest {
 
     private static final long id = 11L;
     private final Behandling behandling = new Behandling();
@@ -56,7 +56,7 @@ public class EndreBehandlingstemaServiceTest {
     private EndreBehandlingstemaService endreBehandlingstemaService;
 
     @BeforeEach
-    public void setUp() throws MelosysException {
+    void setUp() throws MelosysException {
         endreBehandlingstemaService = new EndreBehandlingstemaService(behandlingService, behandlingsresultatService, oppgaveService);
 
         behandling.setId(id);
@@ -64,7 +64,7 @@ public class EndreBehandlingstemaServiceTest {
     }
 
     @Test
-    public void hentMuligeBehandlingstema_gyldigSøknadBehandlingstema_returnererSøknadBehandlinstema() throws IkkeFunnetException {
+    void hentMuligeBehandlingstema_gyldigSøknadBehandlingstema_returnererSøknadBehandlinstema() throws IkkeFunnetException {
         behandling.setTema(ARBEID_FLERE_LAND);
         when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
 
@@ -73,7 +73,7 @@ public class EndreBehandlingstemaServiceTest {
     }
 
     @Test
-    public void hentMuligeBehandlingstema_gyldigSEDForespørselBehandlingstema_returnererSEDForespørselBehandlingstema() throws IkkeFunnetException{
+    void hentMuligeBehandlingstema_gyldigSEDForespørselBehandlingstema_returnererSEDForespørselBehandlingstema() throws IkkeFunnetException{
         behandling.setTema(ØVRIGE_SED_MED);
         when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
 
@@ -82,7 +82,7 @@ public class EndreBehandlingstemaServiceTest {
     }
 
     @Test
-    public void hentMuligeBehandlingstema_ugyldigBehandlingstema_returnererTomListe() throws IkkeFunnetException{
+    void hentMuligeBehandlingstema_ugyldigBehandlingstema_returnererTomListe() throws IkkeFunnetException{
         behandling.setTema(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
 
@@ -91,7 +91,7 @@ public class EndreBehandlingstemaServiceTest {
     }
 
     @Test
-    public void hentMuligeBehandlingstema_inaktivBehandling_returnererTomListe() throws IkkeFunnetException{
+    void hentMuligeBehandlingstema_inaktivBehandling_returnererTomListe() throws IkkeFunnetException{
         behandling.setTema(ARBEID_FLERE_LAND);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
 
@@ -100,7 +100,7 @@ public class EndreBehandlingstemaServiceTest {
     }
 
     @Test
-    public void hentMuligeBehandlingstema_erArtikkel16MedSendtAnmodningOmUnntak_returnererTomListe() throws IkkeFunnetException{
+    void hentMuligeBehandlingstema_erArtikkel16MedSendtAnmodningOmUnntak_returnererTomListe() throws IkkeFunnetException{
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
         anmodningsperiode.setSendtUtland(true);
         behandlingsresultat.setAnmodningsperioder(Set.of(anmodningsperiode));
@@ -112,7 +112,7 @@ public class EndreBehandlingstemaServiceTest {
     }
 
     @Test
-    public void endreBehandlingstema_gyldigEndringForSøknad_behandlingLagresBehandlingsresultatTømmesOgOppgaveOppdateres() throws MelosysException {
+    void endreBehandlingstema_gyldigEndringForSøknad_behandlingLagresBehandlingsresultatTømmesOgOppgaveOppdateres() throws MelosysException {
         behandling.setTema(ARBEID_FLERE_LAND);
         setup_endreBehandlingstemaTester();
 
@@ -126,7 +126,7 @@ public class EndreBehandlingstemaServiceTest {
     }
 
     @Test
-    public void endreBehandlingstema_gyldigEndringForSED_behandlingLagresBehandlingsresultatTømmesOgOppgaveOppdateres() throws MelosysException {
+    void endreBehandlingstema_gyldigEndringForSED_behandlingLagresBehandlingsresultatTømmesOgOppgaveOppdateres() throws MelosysException {
         behandling.setTema(TRYGDETID);
         setup_endreBehandlingstemaTester();
 
@@ -140,7 +140,7 @@ public class EndreBehandlingstemaServiceTest {
     }
 
     @Test
-    public void endreBehandlingstema_ugyldigNyttTemaForSøknad_exceptionKastes()  throws MelosysException{
+    void endreBehandlingstema_ugyldigNyttTemaForSøknad_exceptionKastes()  throws MelosysException{
         behandling.setTema(ARBEID_FLERE_LAND);
         when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
 
@@ -152,7 +152,7 @@ public class EndreBehandlingstemaServiceTest {
         verify(oppgaveService, never()).oppdaterOppgave(any(), any());
     }
 
-    private void setup_endreBehandlingstemaTester() throws MelosysException{
+    void setup_endreBehandlingstemaTester() throws MelosysException{
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("saksnummer");
         behandling.setFagsak(fagsak);

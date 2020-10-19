@@ -5,11 +5,13 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.oppgave.OppgaveService;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,8 +21,6 @@ import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SED_FORESPØRSEL;
 import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SØKNAD;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
-
-import javax.transaction.Transactional;
 
 @Service
 public class EndreBehandlingstemaService {
@@ -35,12 +35,13 @@ public class EndreBehandlingstemaService {
         this.oppgaveService = oppgaveService;
     }
 
+    @Transactional(readOnly = true)
     public List<Behandlingstema> hentMuligeBehandlingstema(long behandlingsID) throws IkkeFunnetException{
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsID);
         return hentMuligeBehandlingstema(behandling);
     }
 
-    public List<Behandlingstema> hentMuligeBehandlingstema(Behandling behandling) throws IkkeFunnetException{
+    private List<Behandlingstema> hentMuligeBehandlingstema(Behandling behandling) throws IkkeFunnetException{
         boolean kanOppdatereBehandlingstema = kanOppdatereBehandlingstema(behandling);
         if (kanOppdatereBehandlingstema && erBehandlingAvSøknad(behandling.getTema())) {
             return BEHANDLINGSTEMA_SØKNAD;
@@ -51,7 +52,7 @@ public class EndreBehandlingstemaService {
         }
     }
 
-    @Transactional
+    @Transactional(rollbackFor = MelosysException.class)
     public void endreBehandlingstemaTilBehandling(long behandlingsID, Behandlingstema nyttTema) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsID);
         if (hentMuligeBehandlingstema(behandling).contains(nyttTema)) {
