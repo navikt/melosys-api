@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import no.nav.melosys.domain.dokument.soeknad.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.*;
 import org.apache.commons.lang3.StringUtils;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

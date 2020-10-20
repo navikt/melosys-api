@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
@@ -55,25 +56,25 @@ public class InngangsvilkaarServiceTest {
     @Test
     public void vurderOgLagreInngangsvilkår() throws TekniskException, FunksjonellException {
         final List<String> landkoder = List.of("FR", "DK", "NO");
-        final var periode = new no.nav.melosys.domain.dokument.soeknad.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
+        final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
         PersonDokument personDokument = new PersonDokument();
         personDokument.statsborgerskap = Land.av(FINLAND);
         when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(personDokument);
         InngangsvilkarResponse res = new InngangsvilkarResponse();
         res.setFeilmeldinger(Collections.emptyList());
         res.setKvalifisererForEf883_2004(Boolean.TRUE);
-        when(inngangsvilkaarConsumer.vurderInngangsvilkår(any(), anyList(), any())).thenReturn(res);
+        when(inngangsvilkaarConsumer.vurderInngangsvilkår(any(), anySet(), any())).thenReturn(res);
 
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, periode);
 
-        verify(inngangsvilkaarConsumer).vurderInngangsvilkår(eq(personDokument.statsborgerskap), eq(tilIso3(landkoder)), eq(periode));
+        verify(inngangsvilkaarConsumer).vurderInngangsvilkår(eq(personDokument.statsborgerskap), eq(Set.copyOf(tilIso3(landkoder))), eq(periode));
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR, true, null);
     }
 
     @Test
     public void vurderOgLagreInngangsvilkår_manglerStatsborgerskap_girBegrunnelse() throws TekniskException, FunksjonellException {
         final List<String> landkoder = List.of("FR", "DK", "NO");
-        final var periode = new no.nav.melosys.domain.dokument.soeknad.Periode(LocalDate.now().minusYears(2), LocalDate.now().minusYears(1));
+        final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode(LocalDate.now().minusYears(2), LocalDate.now().minusYears(1));
         final var personhistorikkDokument = new PersonhistorikkDokument();
         personhistorikkDokument.statsborgerskapListe = Collections.emptyList();
         when(saksopplysningerService.hentPersonhistorikk(anyLong())).thenReturn(personhistorikkDokument);
@@ -86,28 +87,28 @@ public class InngangsvilkaarServiceTest {
 
     @Test
     public void vurderOgLagreInngangsvilkår_tomDatoErNull_tomDatoSettesTilEttÅrEtterFomDato() throws FunksjonellException, TekniskException {
-        ArgumentCaptor<no.nav.melosys.domain.dokument.soeknad.Periode> søknadsperiodeCaptor = ArgumentCaptor.forClass(no.nav.melosys.domain.dokument.soeknad.Periode.class);
+        ArgumentCaptor<no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode> søknadsperiodeCaptor = ArgumentCaptor.forClass(no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode.class);
 
         final List<String> landkoder = List.of("FR", "DK", "NO");
-        final var periode = new no.nav.melosys.domain.dokument.soeknad.Periode(LocalDate.now().plusYears(1), null);
+        final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode(LocalDate.now().plusYears(1), null);
         PersonDokument personDokument = new PersonDokument();
         personDokument.statsborgerskap = Land.av(FINLAND);
         when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(personDokument);
         InngangsvilkarResponse res = new InngangsvilkarResponse();
         res.setFeilmeldinger(Collections.emptyList());
         res.setKvalifisererForEf883_2004(Boolean.TRUE);
-        when(inngangsvilkaarConsumer.vurderInngangsvilkår(any(), anyList(), søknadsperiodeCaptor.capture())).thenReturn(res);
+        when(inngangsvilkaarConsumer.vurderInngangsvilkår(any(), anySet(), søknadsperiodeCaptor.capture())).thenReturn(res);
 
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, periode);
 
-        no.nav.melosys.domain.dokument.soeknad.Periode søknadsperiode = søknadsperiodeCaptor.getValue();
+        no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode søknadsperiode = søknadsperiodeCaptor.getValue();
         assertThat(søknadsperiode.getTom()).isEqualTo(LocalDate.now().plusYears(2));
     }
 
     @Test
     public void vurderOgLagreInngangsvilkår_feil_girBegrunnelse() throws TekniskException, FunksjonellException {
         final List<String> landkoder = List.of("FR", "DK", "NO");
-        final var periode = new no.nav.melosys.domain.dokument.soeknad.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
+        final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
         PersonDokument personDokument = new PersonDokument();
         personDokument.statsborgerskap = Land.av(FINLAND);
         when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(personDokument);
@@ -117,11 +118,11 @@ public class InngangsvilkaarServiceTest {
         feilmelding.setMelding("FEIL!!!");
         res.setFeilmeldinger(Collections.singletonList(feilmelding));
         res.setKvalifisererForEf883_2004(Boolean.FALSE);
-        when(inngangsvilkaarConsumer.vurderInngangsvilkår(any(), anyList(), any())).thenReturn(res);
+        when(inngangsvilkaarConsumer.vurderInngangsvilkår(any(), anySet(), any())).thenReturn(res);
 
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, periode);
 
-        verify(inngangsvilkaarConsumer).vurderInngangsvilkår(eq(personDokument.statsborgerskap), eq(tilIso3(landkoder)), eq(periode));
+        verify(inngangsvilkaarConsumer).vurderInngangsvilkår(eq(personDokument.statsborgerskap), eq(Set.copyOf(tilIso3(landkoder))), eq(periode));
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR,
             false, Inngangsvilkaar.TEKNISK_FEIL);
     }

@@ -10,7 +10,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsGrunnlagType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
@@ -74,14 +74,14 @@ public class BehandlingsgrunnlagServiceTest {
         Behandling behandling = new Behandling();
         behandling.setId(behandlingID);
         when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
-        SoeknadDokument soeknadDokument = new SoeknadDokument();
-        behandlingsgrunnlagService.opprettSøknadGrunnlag(behandlingID, soeknadDokument);
+        Soeknad soeknad = new Soeknad();
+        behandlingsgrunnlagService.opprettSøknadGrunnlag(behandlingID, soeknad);
 
         verify(behandlingsgrunnlagRepository).save(behandlingsgrunnlagArgumentCaptor.capture());
         Behandlingsgrunnlag opprettet = behandlingsgrunnlagArgumentCaptor.getValue();
 
         assertThat(opprettet).isNotNull();
-        assertThat(opprettet.getBehandlingsgrunnlagdata()).isInstanceOf(SoeknadDokument.class);
+        assertThat(opprettet.getBehandlingsgrunnlagdata()).isInstanceOf(Soeknad.class);
         assertThat(opprettet.getType()).isEqualTo(BehandlingsGrunnlagType.SØKNAD);
         assertThat(opprettet.getBehandling()).isEqualTo(behandling);
     }
@@ -97,7 +97,7 @@ public class BehandlingsgrunnlagServiceTest {
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
         when(behandlingsgrunnlagRepository.findByBehandling_Id(behandlingID)).thenReturn(Optional.of(behandlingsgrunnlag));
 
-        BehandlingsgrunnlagData nyData = new SoeknadDokument();
+        BehandlingsgrunnlagData nyData = new Soeknad();
         JsonNode jsonNode = objectMapper.readTree(objectMapper.writeValueAsString(nyData));
 
         behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandlingID, jsonNode);

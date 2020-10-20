@@ -9,6 +9,7 @@ import java.util.Set;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -25,6 +26,7 @@ import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import no.nav.melosys.service.vedtak.VedtakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -106,19 +108,26 @@ public class UtpekingService {
             BucType.LA_BUC_02
         );
 
-        Utpekingsperiode utpekingsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
-            .hentValidertUtpekingsperiode();
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+
+        Utpekingsperiode utpekingsperiode = behandlingsresultat.hentValidertUtpekingsperiode();
         validerUtpekingsperiode(utpekingsperiode);
 
-        behandlingsresultatService.oppdaterBehandlingsresultattype(
-            behandlingID, Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
-        );
         opprettLovvalgsperiode(behandlingID, utpekingsperiode);
         vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
+        oppdaterBehandlingsresultat(behandlingsresultat);
+        oppdaterSendtUtland(utpekingsperiode);
         prosessinstansService.opprettProsessinstansUtpekAnnetLand(
             behandling, utpekingsperiode.getLovvalgsland(), mottakerinstitusjoner, ytterligereInformasjonSed, fritekstBrev
         );
         oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
+    }
+
+    private void oppdaterBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
+        behandlingsresultat.setType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
+        behandlingsresultat.setFastsattAvLand(Landkoder.NO);
+        behandlingsresultat.settVedtakMetadata(Vedtakstyper.FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(VedtakService.FRIST_KLAGE_UKER));
+        behandlingsresultatService.lagre(behandlingsresultat);
     }
 
     private void opprettLovvalgsperiode(long behandlingID, Utpekingsperiode utpekingsperiode) {

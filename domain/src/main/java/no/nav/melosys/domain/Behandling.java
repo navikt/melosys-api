@@ -1,10 +1,9 @@
 package no.nav.melosys.domain;
 
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
+
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -15,9 +14,11 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -25,6 +26,11 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(name = "behandling")
 @EntityListeners(AuditingEntityListener.class)
 public class Behandling extends RegistreringsInfo {
+
+    public static final List<Behandlingstema> BEHANDLINGSTEMA_SØKNAD = List.of(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_ETT_LAND_ØVRIG, IKKE_YRKESAKTIV, ARBEID_FLERE_LAND,
+        ARBEID_NORGE_BOSATT_ANNET_LAND);
+
+    public static final List<Behandlingstema> BEHANDLINGSTEMA_SED_FORESPØRSEL = List.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM, TRYGDETID);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -226,6 +232,38 @@ public class Behandling extends RegistreringsInfo {
             .findFirst().map(Saksopplysning::getDokument);
     }
 
+    public ErPeriode hentPeriode() throws IkkeFunnetException {
+        return finnPeriode()
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke periode for behandling " + id));
+    }
+
+    public Optional<ErPeriode> finnPeriode() {
+        if (kanResultereIVedtak()) {
+            return Optional.of(behandlingsgrunnlag.getBehandlingsgrunnlagdata().periode);
+        } else if (erBehandlingAvSed()) {
+            return finnSedDokument().map(SedDokument::getLovvalgsperiode);
+        }
+
+        return Optional.empty();
+    }
+
+    public Collection<String> finnSøknadsLand() {
+        if (!kanResultereIVedtak()) {
+            return Collections.emptyList();
+        }
+
+        Collection<String> søknadsland;
+        if (erNorgeUtpekt()) {
+            søknadsland = behandlingsgrunnlag.getBehandlingsgrunnlagdata().hentUtenlandskeArbeidsstederLandkode();
+            if (søknadsland.isEmpty()){
+                søknadsland.add(Landkoder.NO.getKode());
+            }
+        } else {
+            søknadsland = behandlingsgrunnlag.getBehandlingsgrunnlagdata().soeknadsland.landkoder;
+        }
+        return søknadsland;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -318,16 +356,16 @@ public class Behandling extends RegistreringsInfo {
         return tema == Behandlingstema.UTSENDT_ARBEIDSTAKER || tema == Behandlingstema.UTSENDT_SELVSTENDIG;
     }
 
+    public boolean erRegisteringAvUnntak() {
+        return erRegistreringAvUnntak(tema.getKode());
+    }
+
     public static boolean erBehandlingAvSøknad(Behandlingstema behandlingstema) {
-        return erBehandlingAvSøknad(behandlingstema.getKode());
+        return BEHANDLINGSTEMA_SØKNAD.contains(behandlingstema);
     }
 
     public static boolean erBehandlingAvSøknad(String behandlingstemaKode) {
-        return erBehandlingAvSøknadUtsendtArbeidstaker(behandlingstemaKode)
-            || erBehandlingAvSøknadArbeidIFlereLand(behandlingstemaKode)
-            || Behandlingstema.ARBEID_ETT_LAND_ØVRIG.getKode().equalsIgnoreCase(behandlingstemaKode)
-            || Behandlingstema.IKKE_YRKESAKTIV.getKode().equalsIgnoreCase(behandlingstemaKode)
-            || Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND.getKode().equalsIgnoreCase(behandlingstemaKode);
+        return erBehandlingAvSøknad(Behandlingstema.valueOf(behandlingstemaKode));
     }
 
     public static boolean erBehandlingAvSøknadUtsendtArbeidstaker(String behandlingstemaKode) {
@@ -340,17 +378,27 @@ public class Behandling extends RegistreringsInfo {
     }
 
     private static boolean erBehandlingAvSed(String behandlingstemaKode) {
-        return Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING.getKode().equalsIgnoreCase(behandlingstemaKode)
-            || Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE.getKode().equalsIgnoreCase(behandlingstemaKode)
-            || Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL.getKode().equalsIgnoreCase(behandlingstemaKode)
-            || Behandlingstema.BESLUTNING_LOVVALG_NORGE.getKode().equalsIgnoreCase(behandlingstemaKode)
-            || Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND.getKode().equalsIgnoreCase(behandlingstemaKode);
+        return erRegistreringAvUnntak(behandlingstemaKode)
+            || erAnmodningOmUnntak(behandlingstemaKode)
+            || Behandlingstema.BESLUTNING_LOVVALG_NORGE.getKode().equalsIgnoreCase(behandlingstemaKode);
+    }
+
+    private static boolean erAnmodningOmUnntak(String behandlingstemaKode) {
+        return Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL.getKode().equalsIgnoreCase(behandlingstemaKode);
+    }
+
+    public static boolean erBehandlingAvSedForespørsler(Behandlingstema behandlingstema) {
+        return BEHANDLINGSTEMA_SED_FORESPØRSEL.contains(behandlingstema);
     }
 
     public static boolean erBehandlingAvSedForespørsler(String behandlingstemaKode) {
-        return Behandlingstema.ØVRIGE_SED_MED.getKode().equalsIgnoreCase(behandlingstemaKode)
-            || Behandlingstema.ØVRIGE_SED_UFM.getKode().equalsIgnoreCase(behandlingstemaKode)
-            || Behandlingstema.TRYGDETID.getKode().equalsIgnoreCase(behandlingstemaKode);
+        return erBehandlingAvSedForespørsler(Behandlingstema.valueOf(behandlingstemaKode));
+    }
+
+    private static boolean erRegistreringAvUnntak(String behandlingstemaKode) {
+        return Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING.getKode().equalsIgnoreCase(behandlingstemaKode)
+            || Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE.getKode().equalsIgnoreCase(behandlingstemaKode)
+            || Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND.getKode().equalsIgnoreCase(behandlingstemaKode);
     }
 
     @Override

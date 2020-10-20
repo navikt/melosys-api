@@ -1,103 +1,29 @@
 package no.nav.melosys.saksflyt.steg.sob;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.sob.SobService;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.never;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.class)
-public class OppdaterStatusBehandlingAvsluttetTest {
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
-
-    @Mock
-    private SobService sobService;
-
-    private OppdaterStatusBehandlingAvsluttet oppdaterStatusBehandlingAvsluttet;
-
-    @Before
-    public void setUp() {
-        oppdaterStatusBehandlingAvsluttet = new OppdaterStatusBehandlingAvsluttet(sobService);
-    }
+class OppdaterStatusBehandlingAvsluttetTest {
 
     @Test
-    public void utfør_aktørIdFinnes_kallerSakOgBehandling() throws FunksjonellException, TekniskException {
-        Prosessinstans p = new Prosessinstans();
-        Behandling b = lagBehandling();
-        p.setBehandling(b);
-        oppdaterStatusBehandlingAvsluttet.utfør(p);
+    void utfør() throws FunksjonellException, TekniskException {
+        SobService sobService = mock(SobService.class);
+        OppdaterStatusBehandlingAvsluttet oppdaterStatusBehandlingAvsluttet = new OppdaterStatusBehandlingAvsluttet(sobService);
 
-        verify(sobService).sakOgBehandlingAvsluttet(eq("123"), eq(123L), eq("123"));
-    }
-
-    @Test
-    public void utfør_aktørFinnesIkke_feiler() throws FunksjonellException, TekniskException {
-        Prosessinstans p = new Prosessinstans();
-        Behandling b = lagBehandling();
-        b.getFagsak().getAktører().clear();
-        p.setBehandling(b);
-
-        expectedException.expect(FunksjonellException.class);
-        oppdaterStatusBehandlingAvsluttet.utfør(p);
-
-        verify(sobService, never()).sakOgBehandlingAvsluttet(anyString(), anyLong(), anyString());
-    }
-
-    @Test
-    public void utfør_ingenAktørID_feiler() throws FunksjonellException, TekniskException {
-        Prosessinstans p = new Prosessinstans();
-        Behandling b = lagBehandling();
-        b.getFagsak().hentBruker().setAktørId(null);
-        p.setBehandling(b);
-
-        expectedException.expect(FunksjonellException.class);
-        oppdaterStatusBehandlingAvsluttet.utfør(p);
-
-        verify(sobService, never()).sakOgBehandlingAvsluttet(anyString(), anyLong(), anyString());
-    }
-
-    private static Behandling lagBehandling() {
         Behandling behandling = new Behandling();
-        Fagsak fagsak = new Fagsak();
-        Set<Aktoer> aktører = new HashSet<>(Collections.singleton(lagAktørBruker()));
-        fagsak.setAktører(aktører);
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setSaksnummer("123");
-        behandling.setFagsak(fagsak);
-        behandling.setType(Behandlingstyper.KLAGE);
-        behandling.setId(123L);
+        behandling.setId(123321L);
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
 
-        return behandling;
-    }
-
-    private static Aktoer lagAktørBruker() {
-        Aktoersroller type = Aktoersroller.BRUKER;
-        Aktoer aktør = new Aktoer();
-        aktør.setAktørId(type.name());
-        aktør.setAktørId("123");
-        aktør.setRolle(type);
-        return aktør;
+        oppdaterStatusBehandlingAvsluttet.utfør(prosessinstans);
+        verify(sobService).sakOgBehandlingAvsluttet(eq(behandling.getId()));
     }
 }

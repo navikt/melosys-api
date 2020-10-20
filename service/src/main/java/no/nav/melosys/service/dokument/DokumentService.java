@@ -87,6 +87,7 @@ public class DokumentService {
             .medBehandling(behandling)
             .medBegrunnelseKode(brevbestillingDto.begrunnelseKode)
             .medFritekst(brevbestillingDto.fritekst)
+            .medYtterligereInformasjon(brevbestillingDto.ytterligereInformasjon)
             .build();
         BrevData brevData = lagBrevData(brevbestilling);
 

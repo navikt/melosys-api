@@ -17,12 +17,6 @@ public class PersonConsumerImpl implements PersonConsumer {
     }
 
     @Override
-    public HentPersonerMedSammeAdresseResponse hentPersonerMedSammeAdresse(HentPersonerMedSammeAdresseRequest request)
-            throws HentPersonerMedSammeAdresseSikkerhetsbegrensning, HentPersonerMedSammeAdresseIkkeFunnet {
-        return port.hentPersonerMedSammeAdresse(request);
-    }
-
-    @Override
     public HentPersonhistorikkResponse hentPersonhistorikk(HentPersonhistorikkRequest request) throws HentPersonhistorikkPersonIkkeFunnet, HentPersonhistorikkSikkerhetsbegrensning {
         return port.hentPersonhistorikk(request);
     }

@@ -1,5 +1,6 @@
 package no.nav.melosys.service.journalforing.dto;
 
+@Deprecated(forRemoval = true)
 public class AnmodningOmUnntakDto {
     private String lovvalgsbestemmelse;
     private String unntakFraLovvalgsland;

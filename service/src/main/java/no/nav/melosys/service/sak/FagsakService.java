@@ -12,7 +12,6 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -38,6 +37,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
 import static no.nav.melosys.metrics.MetrikkerNavn.SAKER_OPPRETTET;
 
@@ -76,25 +76,6 @@ public class FagsakService {
         this.medlPeriodeService = medlPeriodeService;
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void henleggFagsak(String saksnummer, String begrunnelseKodeString, String fritekst) throws TekniskException, FunksjonellException {
-        Fagsak fagsak = hentFagsak(saksnummer);
-        if (fagsak.getBehandlinger().isEmpty()) {
-            throw new TekniskException("Fagsak med saksnummer " + saksnummer + " har ingen tilknyttede behandlinger.");
-        }
-
-        Henleggelsesgrunner begrunnelseKode;
-        try {
-            begrunnelseKode = Henleggelsesgrunner.valueOf(begrunnelseKodeString.toUpperCase());
-        } catch (java.lang.IllegalArgumentException iae) {
-            throw new TekniskException(begrunnelseKodeString.toUpperCase() + " er ingen gyldig henleggelsesgrunn");
-        }
-
-        Behandling sisteIkkeAvsluttedeBehandling = getSisteIkkeAvsluttedeBehandling(fagsak);
-        prosessinstansService.opprettProsessinstansHenleggSak(sisteIkkeAvsluttedeBehandling, begrunnelseKode, fritekst);
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(sisteIkkeAvsluttedeBehandling.getFagsak().getSaksnummer());
-    }
-
     public Fagsak hentFagsak(String saksnummer) throws IkkeFunnetException {
         return finnFagsakFraSaksnummer(saksnummer)
             .orElseThrow(() -> new IkkeFunnetException("Det finnes ingen fagsak med saksnummer: " + saksnummer));
@@ -104,13 +85,13 @@ public class FagsakService {
         return fagsakRepository.findBySaksnummer(saksnummer);
     }
 
-    public Fagsak hentFagsakFraGsakSaksnummer(Long gsakSaksnummer) throws IkkeFunnetException {
-        return finnFagsakFraGsakSaksnummer(gsakSaksnummer)
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke fagsak for gsakSaksnummer " + gsakSaksnummer));
+    public Fagsak hentFagsakFraArkivsakID(Long arkivsakID) throws IkkeFunnetException {
+        return finnFagsakFraArkivsakID(arkivsakID)
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke fagsak for arkivsakID " + arkivsakID));
     }
 
-    public Optional<Fagsak> finnFagsakFraGsakSaksnummer(Long gsakSaksnummer) {
-        return fagsakRepository.findByGsakSaksnummer(gsakSaksnummer);
+    public Optional<Fagsak> finnFagsakFraArkivsakID(Long arkivsakID) {
+        return fagsakRepository.findByGsakSaksnummer(arkivsakID);
     }
 
     public List<Fagsak> hentFagsakerMedAktør(Aktoersroller rolleType, String ident) throws IkkeFunnetException {
@@ -130,20 +111,25 @@ public class FagsakService {
     public void bestillNySakOgBehandling(OpprettSakDto opprettSakDto) throws FunksjonellException, TekniskException {
         validerOpprettSakDto(opprettSakDto);
         final Oppgave oppgave = validerOppgave(opprettSakDto.getOppgaveID());
-        prosessinstansService.opprettProsessinstansNySak(oppgave.getJournalpostId(), opprettSakDto);
+        prosessinstansService.opprettProsessinstansNySak(
+            oppgave.getJournalpostId(),
+            opprettSakDto,
+            erBehandlingAvSøknad(opprettSakDto.getBehandlingstema()) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED
+        );
     }
 
     void validerOpprettSakDto(OpprettSakDto opprettSakDto) throws FunksjonellException {
+        if (opprettSakDto.getBehandlingstema() == null) {
+            throw new FunksjonellException("Behandlingstema mangler for å opprette ny sak");
+        } else if (!erBehandlingAvSøknad(opprettSakDto.getBehandlingstema())
+            && !erBehandlingAvSedForespørsler(opprettSakDto.getBehandlingstema())) {
+            throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + opprettSakDto.getBehandlingstema());
+        }
+
         boolean feilet = false;
         StringBuilder feilmeldingBuilder = new StringBuilder();
-        if (opprettSakDto.getBehandlingstema() == null) {
-            feilet = true;
-            feilmeldingBuilder.append("behandlingstema, ");
-        }
-        if (feilet) {
-            throw new FunksjonellException(feilmeldingBuilder.append("mangler for å opprette en ny sak.").toString());
-        }
-        if (erBehandlingAvSøknad(opprettSakDto.getBehandlingstema().getKode())) {
+
+        if (erBehandlingAvSøknad(opprettSakDto.getBehandlingstema())) {
             final SøknadDto soknadDto = opprettSakDto.getSoknadDto();
             if (soknadDto == null) {
                 throw new FunksjonellException("SoknadDto må ikke være null for å opprette en søknadbehandling.");
@@ -302,14 +288,6 @@ public class FagsakService {
 
     private String hentNesteSaksnummer() {
         return FAGSAKID_PREFIX + fagsakRepository.hentNesteSekvensVerdi();
-    }
-
-    private Behandling getSisteIkkeAvsluttedeBehandling(Fagsak fagsak) {
-        return fagsak.getBehandlinger()
-            .stream()
-            .filter(behandling -> behandling.getStatus() != Behandlingsstatus.AVSLUTTET)
-            .max(Comparator.comparing(RegistreringsInfo::getRegistrertDato))
-            .orElseThrow(() -> new IllegalStateException("Sak " + fagsak.getSaksnummer() + " har ingen behandlinger eller bare avsluttede behandlinger."));
     }
 
     @Transactional(rollbackFor = MelosysException.class)

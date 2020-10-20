@@ -10,13 +10,13 @@ import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.journalforing.dto.*;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
+import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
 
 @Service
 public class JournalfoeringService {
@@ -41,16 +42,21 @@ public class JournalfoeringService {
     private final ProsessinstansService prosessinstansService;
     private final EessiService eessiService;
     private final FagsakService fagsakService;
+    private final TpsFasade tpsFasade;
 
     @Autowired
     public JournalfoeringService(JoarkFasade joarkFasade,
                                  OppgaveService oppgaveService,
-                                 ProsessinstansService prosessinstansService, EessiService eessiService, FagsakService fagsakService) {
+                                 ProsessinstansService prosessinstansService,
+                                 EessiService eessiService,
+                                 FagsakService fagsakService,
+                                 TpsFasade tpsFasade) {
         this.joarkFasade = joarkFasade;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.eessiService = eessiService;
         this.fagsakService = fagsakService;
+        this.tpsFasade = tpsFasade;
     }
 
     public Journalpost hentJournalpost(String journalpostID) throws FunksjonellException, IntegrasjonException {
@@ -65,12 +71,8 @@ public class JournalfoeringService {
             validerKanOppretteSakFraSed(journalpost);
         }
 
-        if (journalfoeringDto.behandlingstypeErSøknad()){
+        if (erBehandlingAvSedForespørsler(journalfoeringDto.getBehandlingstemaKode()) || erBehandlingAvSøknad(journalfoeringDto.getBehandlingstemaKode())){
             opprettSakOgJournalfør(journalfoeringDto);
-        } else if (Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL.getKode().equalsIgnoreCase(journalfoeringDto.getBehandlingstemaKode())) {
-            opprettProsessinstansBrevAouMottak(journalfoeringDto);
-        } else if (journalpost.mottaksKanalErEessi()) {
-            opprettSakForSed(journalfoeringDto);
         } else {
             throw new FunksjonellException(
                 String.format("Manuell journalføring av behandlingstema %s støttes ikke", journalfoeringDto.getBehandlingstemaKode())
@@ -93,7 +95,7 @@ public class JournalfoeringService {
 
     private Optional<Fagsak> finnSakTilknyttetSed(MelosysEessiMelding melosysEessiMelding) throws MelosysException {
         final Optional<Long> tilknyttetArkivsak = eessiService.finnSakForRinasaksnummer(melosysEessiMelding.getRinaSaksnummer());
-        return tilknyttetArkivsak.flatMap(fagsakService::finnFagsakFraGsakSaksnummer);
+        return tilknyttetArkivsak.flatMap(fagsakService::finnFagsakFraArkivsakID);
     }
 
     private void validerSkalIkkeBehandlesAutomatisk(MelosysEessiMelding melosysEessiMelding) throws FunksjonellException {
@@ -106,13 +108,18 @@ public class JournalfoeringService {
         log.info("{} oppretter ny sak etter journalføring av journalpost {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID());
 
         valider(journalfoeringDto);
-        validerOpprettSakFelter(journalfoeringDto);
+        if (erBehandlingAvSøknad(journalfoeringDto.getBehandlingstemaKode())) {
+            validerOpprettSakForSøknadBehandlingFelter(journalfoeringDto);
+        }
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
-
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode()));
-        prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringDto.getFagsak().getLand());
-        prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringDto.getFagsak().getSoknadsperiode());
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, erBehandlingAvSøknad(journalfoeringDto.getBehandlingstemaKode()) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED);
+
+        if (erBehandlingAvSøknad(journalfoeringDto.getBehandlingstemaKode())){
+            prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringDto.getFagsak().getLand());
+            prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringDto.getFagsak().getSoknadsperiode());
+        }
         if (StringUtils.isNotEmpty(journalfoeringDto.getArbeidsgiverID())) {
             prosessinstans.setData(ProsessDataKey.ARBEIDSGIVER, journalfoeringDto.getArbeidsgiverID());
         }
@@ -133,48 +140,12 @@ public class JournalfoeringService {
         prosessinstansService.lagre(prosessinstans);
     }
 
-    private void opprettProsessinstansBrevAouMottak(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
-        validerBrukerIDFinnes(journalfoeringDto);
-        validerOpprettSakFelter(journalfoeringDto);
-        validerBehandleAnmodningOmUnntakFelter(journalfoeringDto);
-
-        FagsakDto fagsakDto = journalfoeringDto.getFagsak();
-        AnmodningOmUnntakDto anmodningOmUnntakDto = journalfoeringDto.getAnmodningOmUnntak();
-
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_AOU_BREV, journalfoeringDto);
-        prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, fagsakDto.getSoknadsperiode());
-        prosessinstans.setData(ProsessDataKey.LOVVALGSLAND, fagsakDto.getLand());
-        prosessinstans.setData(ProsessDataKey.LOVVALGSBESTEMMELSE, anmodningOmUnntakDto.getLovvalgsbestemmelse());
-        prosessinstans.setData(ProsessDataKey.UNNTAK_FRA_LOVVALGSLAND, anmodningOmUnntakDto.getUnntakFraLovvalgsland());
-        prosessinstans.setData(ProsessDataKey.UNNTAK_FRA_LOVVALGSBESTEMMELSE, anmodningOmUnntakDto.getUnntakFraLovvalgsbestemmelse());
-
-        prosessinstans.setSteg(ProsessSteg.JFR_AOU_BREV_OPPRETT_FAGSAK_OG_BEHANDLING);
-        prosessinstansService.lagre(prosessinstans);
-    }
-
-    private void opprettSakForSed(JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
-        validerBrukerIDFinnes(journalfoeringDto);
-        validerBehandlingstemaForSed(journalfoeringDto.getBehandlingstemaKode());
-        prosessinstansService.opprettProsessinstansGenerellSedBehandling(journalfoeringDto);
-    }
-
-    private void validerBehandlingstemaForSed(String behandlingstypeKode) throws FunksjonellException {
-        if (!erBehandlingAvSedForespørsler(behandlingstypeKode)) {
-            throw new FunksjonellException(String.format("Opprettelse av behandling med tema %s støttes ikke", behandlingstypeKode));
-        }
-    }
-
-    private void validerBrukerIDFinnes(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
-        if (StringUtils.isEmpty(journalfoeringDto.getBrukerID())) {
-            throw new FunksjonellException("BrukerID er påkrevd!");
-        }
-    }
-
     @Transactional(rollbackFor = MelosysException.class)
     public void tilordneSakOgJournalfør(JournalfoeringTilordneDto journalfoeringDto) throws MelosysException {
 
         final Journalpost journalpost = joarkFasade.hentJournalpost(journalfoeringDto.getJournalpostID());
         final String saksnummer = journalfoeringDto.getSaksnummer();
+        final Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
 
         if (journalpost.mottaksKanalErEessi()) {
             validerKanTilknytteJournalpostForSedTilSak(journalpost, saksnummer);
@@ -188,11 +159,22 @@ public class JournalfoeringService {
         valider(journalfoeringDto);
         if (StringUtils.isEmpty(journalfoeringDto.getSaksnummer())) {
             throw new FunksjonellException("Saksnummer mangler");
-        } else if (behandlingstype != null && behandlingstype != Behandlingstyper.ENDRET_PERIODE) {
-            throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype ved knytting av dokument til sak");
+        } else if (behandlingstype != null) {
+            if (behandlingstype != Behandlingstyper.ENDRET_PERIODE) {
+                throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype ved knytting av dokument til sak");
+            } else if (fagsak.hentAktivBehandling() != null) {
+                throw new FunksjonellException("Det finnes allerede en aktiv behandling på fagsak " + saksnummer);
+            }
         }
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_KNYTT, journalfoeringDto);
+        ProsessType prosessType;
+        if (behandlingstype != null) {
+            prosessType = ProsessType.JFR_NY_BEHANDLING;
+        } else {
+            prosessType = ProsessType.JFR_KNYTT;
+        }
+
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessType, journalfoeringDto);
 
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
@@ -245,7 +227,7 @@ public class JournalfoeringService {
         }
     }
 
-    private void validerOpprettSakFelter(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
+    private void validerOpprettSakForSøknadBehandlingFelter(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
         if (journalfoeringDto.getFagsak() == null) {
             throw new FunksjonellException("Opplysninger for å opprette en søknad mangler");
         }
@@ -280,25 +262,11 @@ public class JournalfoeringService {
 
     }
 
-    private void validerBehandleAnmodningOmUnntakFelter(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
-        if (journalfoeringDto.getAnmodningOmUnntak() == null) {
-            throw new FunksjonellException("Opplysninger for å opprette behandling av anmodning om unntak mangler");
-        }
-        if (StringUtils.isEmpty(journalfoeringDto.getAnmodningOmUnntak().getLovvalgsbestemmelse())) {
-            throw new FunksjonellException("Lovvalgsbestemmelse mangler");
-        }
-        if (StringUtils.isEmpty(journalfoeringDto.getAnmodningOmUnntak().getUnntakFraLovvalgsbestemmelse())) {
-            throw new FunksjonellException("Unntak fra lovvalgsbestemmelse mangler");
-        }
-        if (StringUtils.isEmpty(journalfoeringDto.getAnmodningOmUnntak().getUnntakFraLovvalgsland())) {
-            throw new FunksjonellException("Unntak fra lovvalgsland mangler");
-        }
-    }
-
     @Transactional(rollbackFor = MelosysException.class)
     public void journalførSed(JournalfoeringSedDto journalfoeringSedDto) throws MelosysException {
         validerJournalfoerSed(journalfoeringSedDto);
-        prosessinstansService.opprettProsessinstansSedMottak(journalfoeringSedDto.getJournalpostID(), journalfoeringSedDto.getBrukerID());
+        MelosysEessiMelding eessiMelding = eessiService.hentSedTilknyttetJournalpost(journalfoeringSedDto.getJournalpostID());
+        prosessinstansService.opprettProsessinstansSedMottak(eessiMelding, tpsFasade.hentAktørIdForIdent(journalfoeringSedDto.getBrukerID()));
         oppgaveService.ferdigstillOppgave(journalfoeringSedDto.getOppgaveID());
     }
 

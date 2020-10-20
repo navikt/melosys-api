@@ -2,6 +2,7 @@ package no.nav.melosys.service.vedtak;
 
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.LandvelgerService;
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -24,8 +25,9 @@ public class VedtakSystemService extends VedtakService {
                                LandvelgerService landvelgerService,
                                TpsFasade tpsFasade,
                                RegisteropplysningerService registeropplysningerService,
-                               VedtakKontrollService vedtakKontrollService) {
+                               VedtakKontrollService vedtakKontrollService,
+                               AvklartefaktaService avklartefaktaService) {
         super(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService,
-            eessiService, landvelgerService, tpsFasade, registeropplysningerService, vedtakKontrollService);
+            eessiService, landvelgerService, tpsFasade, registeropplysningerService, vedtakKontrollService, avklartefaktaService);
     }
 }

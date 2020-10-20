@@ -58,4 +58,10 @@ public class BehandlingsresultatBegrunnelse {
     public int hashCode() {
         return Objects.hash(kode);
     }
+
+    public static BehandlingsresultatBegrunnelse lag(String begrunnelseKode) {
+        BehandlingsresultatBegrunnelse begrunnelse = new BehandlingsresultatBegrunnelse();
+        begrunnelse.setKode(begrunnelseKode);
+        return begrunnelse;
+    }
 }
