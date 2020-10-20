@@ -2,10 +2,10 @@ package no.nav.melosys.integrasjon.tps;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.dokument.person.Person;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.exception.*;
+import no.nav.melosys.integrasjon.tps.mapper.PersonDto;
 
 public interface TpsFasade {
     String hentAktørIdForIdent(String fnr) throws IkkeFunnetException;
@@ -14,7 +14,8 @@ public interface TpsFasade {
 
     Saksopplysning hentPerson(String ident, Informasjonsbehov behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException;
 
-    Person hentPersonopplysning(String ident, Informasjonsbehov behov) throws SikkerhetsbegrensningException, IkkeFunnetException;
+    PersonDto hentPersonopplysning(String ident, Informasjonsbehov behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException;
+
     /**
      * Henter all historikk fram til angitt dato (start av søknadsperioden).
      */

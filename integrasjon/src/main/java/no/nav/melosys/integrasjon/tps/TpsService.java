@@ -9,8 +9,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.person.Informasjonsbehov;
-import no.nav.melosys.domain.dokument.person.Person;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
@@ -23,6 +23,7 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.tps.aktoer.AktoerIdCache;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
+import no.nav.melosys.integrasjon.tps.mapper.PersonDto;
 import no.nav.melosys.integrasjon.tps.mapper.PersonMapper;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
 import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentAktoerIdForIdentPersonIkkeFunnet;
@@ -159,7 +160,15 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    public Person hentPersonopplysning(String ident, Informasjonsbehov behov) throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public PersonDto hentPersonopplysning(String ident, Informasjonsbehov behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+        PersonDto personDto = hentPersonopplysning(ident, mapInformasjonsbehovTilTps(behov));
+        for (Familiemedlem familiemedlem : personDto.person.hentBarn()) {
+            personDto.leggTilFamiliemedlem(hentPersonopplysning(familiemedlem.fnr, Informasjonsbehov.MED_FAMILIERELASJONER));
+        }
+        return personDto;
+    }
+
+    private PersonDto hentPersonopplysning(String ident, Set<no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov> behov) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
         HentPersonRequest request = new HentPersonRequest();
         NorskIdent norskIdent = new NorskIdent();
         norskIdent.setIdent(ident);
@@ -168,7 +177,7 @@ public class TpsService implements TpsFasade {
         personIdent.setIdent(norskIdent);
 
         request.setAktoer(personIdent);
-        request.getInformasjonsbehov().addAll(mapInformasjonsbehovTilTps(behov));
+        request.getInformasjonsbehov().addAll(behov);
 
         // Kall til TPS
         HentPersonResponse response;
@@ -179,7 +188,17 @@ public class TpsService implements TpsFasade {
         } catch (HentPersonPersonIkkeFunnet hentPersonPersonIkkeFunnet) {
             throw new IkkeFunnetException(hentPersonPersonIkkeFunnet);
         }
-        return PersonMapper.mapTilPerson(response.getPerson());
+
+        // Response -> xml
+        StringWriter xmlWriter = new StringWriter();
+        try {
+            no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse xmlRoot = new no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse();
+            xmlRoot.setResponse(response);
+            dokumentFactory.createMarshaller().marshal(xmlRoot, xmlWriter);
+        } catch (JAXBException e) {
+            throw new IntegrasjonException(e);
+        }
+        return new PersonDto(PersonMapper.mapTilPerson(response.getPerson()), xmlWriter.toString());
     }
 
     @Override

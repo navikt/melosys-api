@@ -67,6 +67,12 @@ public class Person {
         return hentFamiliemedlemmerMedFilter(Familiemedlem::erEktefellePartnerSamboer).findAny();
     }
 
+    public Optional<Familiemedlem> hentAnnenForelder(String fnrGjeldendeForelder) {
+        return hentForeldre().stream()
+            .filter(forelder -> !fnrGjeldendeForelder.equals(forelder.fnr))
+            .findAny();
+    }
+
     private Stream<Familiemedlem> hentFamiliemedlemmerMedFilter(Predicate<Familiemedlem> filter) {
         return familiemedlemmer.stream().filter(filter);
     }
