@@ -111,7 +111,9 @@ public class AvklarteVirksomheterGrunnlag {
         if (StringUtils.isEmpty(adresse.gatenavn)) {
             adresse.gatenavn = " ";
         }
-        adresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
+        if (adresse.erNorsk()) {
+            adresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
+        }
         return adresse;
     }
 }
