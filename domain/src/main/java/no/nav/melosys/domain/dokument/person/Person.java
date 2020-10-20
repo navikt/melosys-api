@@ -8,10 +8,10 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.dokument.felles.Land;
 
+// FIXME: Lag PersonDto for frontend (denne brukes til lagring)
 public class Person {
 
     public String fnr;
@@ -27,13 +27,10 @@ public class Person {
     @JsonProperty("kjoenn")
     public KjoennsType kjønn;
 
-    @JsonIgnore
     public String fornavn;
 
-    @JsonIgnore
     public String mellomnavn;
 
-    @JsonIgnore
     public String etternavn;
 
     public String sammensattNavn;
@@ -43,24 +40,19 @@ public class Person {
     @JsonProperty("foedselsdato")
     public LocalDate fødselsdato;
 
-    @JsonIgnore
+    @JsonProperty("doedsdato")
     public LocalDate dødsdato;
 
-    @JsonIgnore
     public Diskresjonskode diskresjonskode;
 
-    @JsonProperty("personStatus")
     public Personstatus personstatus;
 
     public LocalDate statsborgerskapDato;
 
-    @JsonIgnore
     public Bostedsadresse bostedsadresse = new Bostedsadresse();
 
-    @JsonIgnore
     public UstrukturertAdresse postadresse = new UstrukturertAdresse();
 
-    @JsonIgnore
     public MidlertidigPostadresse midlertidigPostadresse = new MidlertidigPostadresse();
 
     public List<Familiemedlem> hentBarn() {
