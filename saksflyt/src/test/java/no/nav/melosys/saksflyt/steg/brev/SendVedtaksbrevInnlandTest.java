@@ -418,6 +418,34 @@ class SendVedtaksbrevInnlandTest {
         verify(dokService, never()).produserDokument(any(), eq(FastMottaker.av(SKATTEOPPKREVER_UTLAND)), anyLong(), any());
     }
 
+    @Test
+    void utfør_innvilgelse161MedUtenlandskSelvstendigArbeid_senderIkkeBrevTilSkatteoppkreverUtland() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_BEHANDLINGSID);
+        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
+
+        ForetakUtland utenlandskSelvstendigArbeid = new ForetakUtland();
+        utenlandskSelvstendigArbeid.selvstendigNæringsvirksomhet = Boolean.TRUE;
+        prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(utenlandskSelvstendigArbeid);
+
+        instans.utfør(prosessinstans);
+
+        verify(dokService, never()).produserDokument(any(), eq(FastMottaker.av(SKATTEOPPKREVER_UTLAND)), anyLong(), any());
+    }
+
+    @Test
+    void utfør_innvilgelse161MedForetakUtlandOgUtenlandskSelvstendigArbeid_senderIkkeBrevTilSkatteoppkreverUtland() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_BEHANDLINGSID);
+        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
+
+        ForetakUtland utenlandskSelvstendigArbeid = new ForetakUtland();
+        utenlandskSelvstendigArbeid.selvstendigNæringsvirksomhet = Boolean.TRUE;
+        prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(utenlandskSelvstendigArbeid);
+        prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(new ForetakUtland());
+
+        instans.utfør(prosessinstans);
+
+        verify(dokService, never()).produserDokument(any(), eq(FastMottaker.av(SKATTEOPPKREVER_UTLAND)), anyLong(), any());
+    }
 
     @Test
     void utfør_innvilgelses12_senderInnvilgelseTilArbeidsgiver() throws Exception {
