@@ -41,7 +41,7 @@ public class ProsessinstansAdminTjeneste {
 
     @PostMapping("/restart")
     public ResponseEntity<Void> restartProsessinstans(@RequestBody RestartProsessinstanserRequest request) throws FunksjonellException {
-        log.info("Restarter prosessinstanser {}", request.getUuids());
+        log.info("Forsøker å restarte prosessinstanser {}", request.getUuids());
         Collection<Prosessinstans> prosessinstanser = prosessinstansRepository.findAllById(request.getUuids());
 
         for (var prosessinstans : prosessinstanser) {

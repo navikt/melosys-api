@@ -25,7 +25,7 @@ public class SaksflytStatusTjeneste {
     public ResponseEntity<Void> sjekkSaksflyt() {
         ThreadPoolExecutor executor = saksflytThreadPoolTaskExecutor.getThreadPoolExecutor();
         return (executor.isShutdown() || executor.isTerminated() || executor.isTerminating())
-            ? ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+            ? ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build()
             : ResponseEntity.ok().build();
     }
 }
