@@ -79,6 +79,7 @@
         <oxmlparserv2.version>11.2.0.1.nojaxpservice</oxmlparserv2.version>
         <easy-random.version>4.0.0</easy-random.version>
         <restFixture.version>4.4</restFixture.version>
+        <shedlock.version>4.15.0</shedlock.version>
         <slf4j.version>1.7.25</slf4j.version>
         <spring-boot.version>2.2.0.RELEASE</spring-boot.version>
         <springfox.version>2.9.2</springfox.version>
@@ -390,6 +391,11 @@
                 <groupId>org.ow2.asm</groupId>
                 <artifactId>asm</artifactId>
                 <version>${asm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.javacrumbs.shedlock</groupId>
+                <artifactId>shedlock-spring</artifactId>
+                <version>${shedlock.version}</version>
             </dependency>
 
             <!-- NAV felleskomponenter -->

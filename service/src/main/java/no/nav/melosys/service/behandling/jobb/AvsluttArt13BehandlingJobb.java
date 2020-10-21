@@ -1,5 +1,6 @@
 package no.nav.melosys.service.behandling.jobb;
 
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -22,6 +23,7 @@ public class AvsluttArt13BehandlingJobb {
     }
 
     @Scheduled(cron = "0 0 0 * * *")
+    @SchedulerLock(name = "avsluttBehandlingArt13Jobb", lockAtLeastFor = "30m", lockAtMostFor = "30m")
     public void avsluttBehandlingArt13() {
         behandlingService.hentBehandlingerMedstatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING)
             .stream()
