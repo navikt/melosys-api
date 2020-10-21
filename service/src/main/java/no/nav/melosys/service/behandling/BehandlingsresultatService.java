@@ -188,7 +188,7 @@ public class BehandlingsresultatService {
 
     public void oppdaterBehandlingsMaate(Long id, Behandlingsmaate behandlingsmaate) throws FunksjonellException {
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(id);
-        if (behandlingsresultat.getBehandlingsmåte() != null && behandlingsresultat.getBehandlingsmåte() != Behandlingsmaate.UDEFINERT) {
+        if (behandlingsresultat.getBehandlingsmåte() != Behandlingsmaate.UDEFINERT) {
             throw new FunksjonellException("Behandlingsmaate kan ikke oppdateres etter det er definert!");
         }
 

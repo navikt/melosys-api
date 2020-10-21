@@ -11,8 +11,8 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ArbeidUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -70,16 +70,16 @@ public class FagsakBehandlingFactory {
         return saksopplysningPerson;
     }
 
-    public static SoeknadDokument lagSøknadDokument() {
-        SoeknadDokument soeknadDokument = new SoeknadDokument();
+    public static Soeknad lagSøknadDokument() {
+        Soeknad soeknad = new Soeknad();
         ArbeidUtland arbeidUtland = new ArbeidUtland();
         arbeidUtland.adresse.landkode = "SE";
-        soeknadDokument.soeknadsland.landkoder.add(Landkoder.DK.getKode());
-        soeknadDokument.arbeidUtland = new ArrayList<>();
-        soeknadDokument.arbeidUtland.add(arbeidUtland);
-        soeknadDokument.oppholdUtland.oppholdslandkoder.add("FI");
-        soeknadDokument.periode = new no.nav.melosys.domain.dokument.soeknad.Periode(
+        soeknad.soeknadsland.landkoder.add(Landkoder.DK.getKode());
+        soeknad.arbeidUtland = new ArrayList<>();
+        soeknad.arbeidUtland.add(arbeidUtland);
+        soeknad.oppholdUtland.oppholdslandkoder.add("FI");
+        soeknad.periode = new no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode(
             LocalDate.of(2019,1,1), LocalDate.of(2019,2,1));
-        return soeknadDokument;
+        return soeknad;
     }
 }

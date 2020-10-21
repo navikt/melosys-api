@@ -75,6 +75,7 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setJournalførendeEnhet(MEDLEMSKAP_OG_AVGIFT);
         opprettJournalpost.setTema(MEDLEMSKAP);
         opprettJournalpost.setBrukerId(brukerID);
+        opprettJournalpost.setForsendelseMottatt(hovedDokument.getInnsendtTidspunkt());
 
         fagsak.hentRepresentant(Representerer.BRUKER).ifPresentOrElse(
             r -> {

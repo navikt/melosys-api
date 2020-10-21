@@ -1,6 +1,7 @@
 package no.nav.melosys.service.sob;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.TemaFactory;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -42,11 +43,29 @@ public class SobService {
         return sakOgBehandlingFasade.finnSakOgBehandlingskjedeListe(aktørID);
     }
 
+    public void sakOgBehandlingOpprettet(long behandlingID) throws TekniskException, FunksjonellException {
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        Fagsak fagsak = behandling.getFagsak();
+        sakOgBehandlingFasade.sendBehandlingOpprettet(
+            lagBehandlingStatusMapper(fagsak.getSaksnummer(), behandling, fagsak.hentBruker().getAktørId())
+        );
+    }
+
+    @Deprecated(forRemoval = true)
     public void sakOgBehandlingOpprettet(String saksnummer, Long behandlingId, String aktørID) throws IntegrasjonException, FunksjonellException {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingId);
         sakOgBehandlingFasade.sendBehandlingOpprettet(lagBehandlingStatusMapper(saksnummer, behandling, aktørID));
     }
 
+    public void sakOgBehandlingAvsluttet(long behandlingID) throws FunksjonellException, TekniskException {
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        Fagsak fagsak = behandling.getFagsak();
+        sakOgBehandlingFasade.sendBehandlingAvsluttet(
+            lagBehandlingStatusMapper(fagsak.getSaksnummer(), behandling, fagsak.hentBruker().getAktørId())
+        );
+    }
+
+    @Deprecated(forRemoval = true)
     public void sakOgBehandlingAvsluttet(String saksnummer, Long behandlingId, String aktørID) throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         if (aktørID == null) {

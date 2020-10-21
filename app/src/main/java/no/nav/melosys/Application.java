@@ -10,7 +10,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @ServletComponentScan("no.nav.melosys.integrasjon.felles")
-@PropertySource(value = "classpath:saksflyt.properties", encoding = "utf-8")
 @PropertySource(value = "classpath:service.properties", encoding = "utf-8")
 @SpringBootApplication
 @Controller

@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.eessi.sed;
 
-import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ArbeidUtland;
 import org.apache.commons.lang3.StringUtils;
 
 public class Arbeidssted {

@@ -276,6 +276,11 @@ public class Behandlingsresultat extends RegistreringsInfo {
             && anmodningsperiode.getAnmodningsperiodeSvar().getAnmodningsperiodeSvarType() != null;
     }
 
+    public boolean erGodkjenningEllerInnvilgelseArt13() {
+        return (erInnvilgelse() || erGodkjenningRegistreringUnntak())
+            && finnValidertLovvalgsperiode().stream().anyMatch(Medlemskapsperiode::erArtikkel13);
+    }
+
     // Medl skal ikke oppdateres ved avslag.
     public boolean medlOppdateres() {
         return harMedlPeriode() || !erAvslag();
@@ -355,6 +360,12 @@ public class Behandlingsresultat extends RegistreringsInfo {
                 &&  l.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
                 && l.getTilleggsbestemmelse() == Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
     }
+
+    public boolean erGodkjenningRegistreringUnntak() {
+        return type == Behandlingsresultattyper.REGISTRERT_UNNTAK
+            && utfallRegistreringUnntak == Utfallregistreringunntak.GODKJENT;
+    }
+
 
     public void settVedtakMetadata(Vedtakstyper vedtakstype,
                                    String revurderBegrunnelse,

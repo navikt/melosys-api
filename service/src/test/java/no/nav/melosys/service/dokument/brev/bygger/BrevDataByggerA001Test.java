@@ -14,9 +14,9 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
-import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ForetakUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.SelvstendigForetak;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
@@ -73,7 +73,7 @@ public class BrevDataByggerA001Test {
 
     private Set<String> avklarteOrganisasjoner;
 
-    private SoeknadDokument søknad;
+    private Soeknad søknad;
     private ArbeidsforholdDokument arbDokument;
 
     private BrevDataByggerA001 brevDataByggerA001;
@@ -108,7 +108,7 @@ public class BrevDataByggerA001Test {
         oppgittAdresse.poststed = "Oslo";
         oppgittAdresse.landkode = Landkoder.NO.getKode();
 
-        søknad = new SoeknadDokument();
+        søknad = new Soeknad();
         søknad.bosted.oppgittAdresse = oppgittAdresse;
 
         ForetakUtland foretakUtland = new ForetakUtland();
@@ -161,9 +161,7 @@ public class BrevDataByggerA001Test {
     private BrevDataGrunnlag lagBrevDataGrunnlag(Brevbestilling brevbestilling) throws TekniskException {
         RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(ereg, mock(TpsFasade.class));
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        KodeverkService kodeverkService = mock(KodeverkService.class);
-        when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
-        return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+        return new BrevDataGrunnlag(brevbestilling, mock(KodeverkService.class), avklarteVirksomheterService, avklartefaktaService);
     }
 
     private void leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) throws IkkeFunnetException, IntegrasjonException {

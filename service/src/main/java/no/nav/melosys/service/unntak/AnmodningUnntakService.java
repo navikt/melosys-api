@@ -7,6 +7,7 @@ import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
@@ -16,6 +17,7 @@ import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.unntak.AnmodningUnntakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -32,6 +34,7 @@ public class AnmodningUnntakService {
     private static final Logger log = LoggerFactory.getLogger(AnmodningUnntakService.class);
 
     private final BehandlingService behandlingService;
+    private final BehandlingsresultatService behandlingsresultatService;
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
     private final AnmodningsperiodeService anmodningsperiodeService;
@@ -41,7 +44,7 @@ public class AnmodningUnntakService {
     private final AnmodningUnntakKontrollService anmodningUnntakKontrollService;
 
     public AnmodningUnntakService(BehandlingService behandlingService,
-                                  OppgaveService oppgaveService,
+                                  BehandlingsresultatService behandlingsresultatService, OppgaveService oppgaveService,
                                   ProsessinstansService prosessinstansService,
                                   AnmodningsperiodeService anmodningsperiodeService,
                                   LovvalgsperiodeService lovvalgsperiodeService,
@@ -49,6 +52,7 @@ public class AnmodningUnntakService {
                                   EessiService eessiService,
                                   AnmodningUnntakKontrollService anmodningUnntakKontrollService) {
         this.behandlingService = behandlingService;
+        this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.anmodningsperiodeService = anmodningsperiodeService;
@@ -66,6 +70,7 @@ public class AnmodningUnntakService {
         log.info("Anmodning om unntak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
         kontrollerAnmodningOmUnntak(behandlingID);
+        behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
 
         prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, mottakerinstitusjoner, ytterligereInformasjonSed);
         oppgaveService.leggTilbakeOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());

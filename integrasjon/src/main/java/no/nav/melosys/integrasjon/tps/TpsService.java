@@ -2,8 +2,8 @@ package no.nav.melosys.integrasjon.tps;
 
 import java.io.StringWriter;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -20,6 +20,7 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.tps.aktoer.AktoerIdCache;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
+import no.nav.melosys.integrasjon.tps.person.Informasjonsbehov;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
 import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentAktoerIdForIdentPersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentIdentForAktoerIdPersonIkkeFunnet;
@@ -31,7 +32,6 @@ import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonPersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonSikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonhistorikkPersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonhistorikkSikkerhetsbegrensning;
-import no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.NorskIdent;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.Periode;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.PersonIdent;
@@ -117,7 +117,7 @@ public class TpsService implements TpsFasade {
 
         request.setAktoer(personIdent);
         if (behov != null) {
-            request.getInformasjonsbehov().addAll(behov);
+            behov.forEach(informasjonsbehov -> request.getInformasjonsbehov().add(informasjonsbehov.getKode()));
         }
 
         // Kall til TPS
@@ -153,16 +153,8 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    public Saksopplysning hentPerson(String ident) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        return hentPerson(ident, null);
-    }
-
-    @Override
-    public Saksopplysning hentPersonMedAdresse(String ident) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        Collection<Informasjonsbehov> behov = new ArrayList<>();
-        behov.add(Informasjonsbehov.ADRESSE);
-
-        return hentPerson(ident, behov);
+    public Saksopplysning hentPerson(String ident, Informasjonsbehov... behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+        return hentPerson(ident, Set.of(behov));
     }
 
     @Override

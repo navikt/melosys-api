@@ -2,9 +2,9 @@ package no.nav.melosys.domain.dokument.organisasjon;
 
 import java.util.Arrays;
 
-import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.adresse.UstrukturertAdresse;
+import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import org.junit.Before;
 import org.junit.Test;
@@ -102,9 +102,7 @@ public class OrganisasjonsDetaljerTest {
         StrukturertAdresse resultatAdresse = orgDetaljer.hentStrukturertForretningsadresse();
         assertThat(resultatAdresse.gatenavn).isEqualTo(linje1.trim() + " " + linje2 + " " + linje3);
         assertThat(resultatAdresse.landkode).isEqualTo(landkode);
-
-        // Har ikke utenlandsk postnummer, kun poststed
-        assertThat(resultatAdresse.postnummer).isEmpty();
+        assertThat(resultatAdresse.postnummer).isEqualTo(postnr);
         assertThat(resultatAdresse.poststed).isEqualTo(poststedUtland);
     }
 

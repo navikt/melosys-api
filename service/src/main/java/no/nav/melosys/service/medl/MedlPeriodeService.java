@@ -82,6 +82,11 @@ public class MedlPeriodeService {
         medlFasade.oppdaterPeriodeEndelig(lovvalgsperiode, hentKildedokumenttype(erSed));
     }
 
+    public void oppdaterPeriodeForeløpig(Lovvalgsperiode lovvalgsperiode, boolean erSed) throws FunksjonellException, TekniskException {
+        log.info("Oppdaterer MEDL-periode {} til status foreløpig", lovvalgsperiode.getMedlPeriodeID());
+        medlFasade.oppdaterPeriodeForeløpig(lovvalgsperiode, hentKildedokumenttype(erSed));
+    }
+
     public void avvisPeriode(Long medlPeriodeID) throws SikkerhetsbegrensningException, IkkeFunnetException {
         log.info("Avviser MEDL-periode {} med status avvist", medlPeriodeID);
         medlFasade.avvisPeriode(medlPeriodeID, StatusaarsakMedl.AVVIST);

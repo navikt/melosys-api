@@ -5,10 +5,10 @@ import java.util.*;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
-import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
-import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ArbeidUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ForetakUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MaritimtArbeid;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -41,7 +41,7 @@ public class LandvelgerServiceTest {
 
     private static final long behandlingID = 1;
 
-    private SoeknadDokument søknad;
+    private Soeknad søknad;
     private Lovvalgsperiode lovvalgsperiode;
     private Anmodningsperiode anmodningsperiode;
     private LandvelgerService landvelgerService;
@@ -54,7 +54,7 @@ public class LandvelgerServiceTest {
 
     @Before
     public void setUp() throws IkkeFunnetException {
-        søknad = new SoeknadDokument();
+        søknad = new Soeknad();
         søknad.oppholdUtland.oppholdslandkoder.add("NO");
         søknad.bosted.oppgittAdresse.landkode = oppgittbostedsland.getKode();
         MaritimtArbeid maritimtArbeid = new MaritimtArbeid();

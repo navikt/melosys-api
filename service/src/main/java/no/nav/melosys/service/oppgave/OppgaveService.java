@@ -6,8 +6,8 @@ import javax.annotation.Nullable;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.dokument.soeknad.Periode;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -137,6 +137,11 @@ public class OppgaveService {
         }
     }
 
+    public void opprettJournalføringsoppgave(String journalpostID, String aktørID) throws FunksjonellException, TekniskException {
+        final String oppgaveID = opprettOppgave(OppgaveFactory.lagJournalføringsoppgave(journalpostID).setAktørId(aktørID).build());
+        log.info("Journalføringsoppgave {} opprettet for journalpost {}", oppgaveID, journalpostID);
+    }
+
     public String opprettOppgave(Oppgave oppgave) throws FunksjonellException, TekniskException {
         return oppgaveFasade.opprettOppgave(oppgave);
     }
@@ -185,7 +190,7 @@ public class OppgaveService {
             behOppgaveDto.setBehandling(mapBehandling(behandling));
 
             if (behandling.erBehandlingAvSøknad()) {
-                SoeknadDokument søknadDokument = (SoeknadDokument) behandlingsgrunnlagService
+                Soeknad søknadDokument = (Soeknad) behandlingsgrunnlagService
                     .hentBehandlingsgrunnlag(behandling.getId()).getBehandlingsgrunnlagdata();
                 behOppgaveDto.setLand(hentSøknadsland(søknadDokument));
                 behOppgaveDto.setPeriode(mapPeriode(søknadDokument));
@@ -234,8 +239,8 @@ public class OppgaveService {
         return behandlingDto;
     }
 
-    private static PeriodeDto mapPeriode(SoeknadDokument soeknadDokument) {
-        Periode periode = hentPeriode(soeknadDokument);
+    private static PeriodeDto mapPeriode(Soeknad soeknad) {
+        Periode periode = hentPeriode(soeknad);
         return new PeriodeDto(periode.getFom(), periode.getTom());
     }
 }
