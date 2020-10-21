@@ -6,6 +6,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -34,7 +35,8 @@ import static no.nav.melosys.service.BehandlingsgrunnlagStub.lagBehandlingsgrunn
 import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysninger;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -57,7 +59,6 @@ public class BrevDataByggerAnmodningUnntakTest {
 
     @Before
     public void setUp() {
-        when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
         brevDataByggerAnmodningUnntak = new BrevDataByggerAnmodningUnntak(landvelgerService, vilkaarsresultatService);
 
         when(vilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenCallRealMethod();
@@ -71,7 +72,7 @@ public class BrevDataByggerAnmodningUnntakTest {
 
         BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);
         assertThat(brevData.hovedvirksomhet.orgnr).isEqualTo("999");
-        assertThat(brevData.hovedvirksomhet.erSelvstendigForetak()).isEqualTo(true);
+        assertThat(brevData.hovedvirksomhet.erSelvstendigForetak()).isTrue();
         assertThat(brevData.arbeidsland).isEqualTo(Landkoder.DE.getBeskrivelse());
     }
 
@@ -108,8 +109,8 @@ public class BrevDataByggerAnmodningUnntakTest {
         organisasjonDokument.organisasjonDetaljer = organisasjonsDetaljer;
 
         when(registerOppslagService.hentOrganisasjoner(orgSet)).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
-
-        return new BrevDataGrunnlag(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+        Brevbestilling brevbestilling = new Brevbestilling.Builder().medBehandling(behandling).build();
+        return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 
     @Test

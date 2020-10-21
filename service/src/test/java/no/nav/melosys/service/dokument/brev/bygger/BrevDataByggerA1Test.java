@@ -6,14 +6,15 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
-import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
-import no.nav.melosys.domain.dokument.soeknad.SelvstendigForetak;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ArbeidUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ForetakUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.SelvstendigForetak;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.service.LandvelgerService;
@@ -53,7 +54,7 @@ public class BrevDataByggerA1Test {
     @Mock
     RegisterOppslagSystemService registerOppslagService;
 
-    private SoeknadDokument søknad;
+    private Soeknad søknad;
     private BrevDataGrunnlag dataGrunnlag;
 
     private BrevDataByggerA1 brevDataByggerA1;
@@ -79,7 +80,7 @@ public class BrevDataByggerA1Test {
         oppgittAdresse.poststed = "Oslo";
         oppgittAdresse.landkode = Landkoder.NO.getKode();
 
-        søknad = new SoeknadDokument();
+        søknad = new Soeknad();
         søknad.bosted.oppgittAdresse = oppgittAdresse;
 
         ForetakUtland foretakUtland = new ForetakUtland();
@@ -102,7 +103,8 @@ public class BrevDataByggerA1Test {
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
 
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        dataGrunnlag = new BrevDataGrunnlag(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+        Brevbestilling brevbestilling = new Brevbestilling.Builder().medBehandling(behandling).build();
+        dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
         brevDataByggerA1 = new BrevDataByggerA1(avklartefaktaService, landvelgerService);
     }
 

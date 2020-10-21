@@ -281,8 +281,7 @@ public final class ProsessflytDefinisjon {
                 SOB_BEHANDLING_OPPRETTET,
                 HENT_REGISTEROPPLYSNINGER,
                 VURDER_INNGANGSVILKÅR,
-                OPPRETT_OPPGAVE,
-                SEND_FORVALTNINGSMELDING
+                OPPRETT_OPPGAVE
             )
         );
     }

@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -38,7 +39,8 @@ import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplys
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagPersonsaksopplysning;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -46,19 +48,14 @@ import static org.mockito.Mockito.when;
 public class BrevDataByggerAvslagArbeidsgiverTest {
     @Mock
     AvklartefaktaService avklartefaktaService;
-
     @Mock
     LandvelgerService landvelgerService;
-
     @Mock
     RegisterOppslagService registerOppslagService;
-
     @Mock
     KodeverkService kodeverkService;
-
     @Mock
     VilkaarsresultatRepository vilkaarsresultatRepository;
-
     @Mock
     LovvalgsperiodeService lovvalgsperiodeService;
 
@@ -67,7 +64,6 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
     @Before
     public void setUp() throws FunksjonellException, TekniskException {
         when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Landkoder.AT);
-        when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
 
         brevDataByggerAvslagArbeidsgiver = new BrevDataByggerAvslagArbeidsgiver(landvelgerService,
                                                                                 lovvalgsperiodeService,
@@ -119,7 +115,8 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
         when(vilkaarsresultatRepository.findByBehandlingsresultatIdAndVilkaar(anyLong(), eq(ART12_1_VESENTLIG_VIRKSOMHET))).thenReturn(Optional.of(vesentligVirksomhet));
 
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
-        BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+        Brevbestilling brevbestilling = new Brevbestilling.Builder().medBehandling(behandling).build();
+        BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
         String saksbehandler = "saksbehandler";
         BrevDataAvslagArbeidsgiver brevData = (BrevDataAvslagArbeidsgiver) brevDataByggerAvslagArbeidsgiver.lag(dataGrunnlag, saksbehandler);
         assertThat(brevData.hovedvirksomhet.orgnr).isEqualTo("987654321");

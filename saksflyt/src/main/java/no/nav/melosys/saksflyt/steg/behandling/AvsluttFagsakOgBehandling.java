@@ -1,0 +1,56 @@
+package no.nav.melosys.saksflyt.steg.behandling;
+
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.saksflyt.ProsessSteg;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.sak.FagsakService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.AVSLUTT_SAK_OG_BEHANDLING;
+
+@Component
+public class AvsluttFagsakOgBehandling implements StegBehandler {
+
+    private static final Logger log = LoggerFactory.getLogger(AvsluttFagsakOgBehandling.class);
+
+    private final FagsakService fagsakService;
+    private final BehandlingService behandlingService;
+    private final BehandlingsresultatService behandlingsresultatService;
+
+    @Autowired
+    public AvsluttFagsakOgBehandling(FagsakService fagsakService, BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService) {
+        this.fagsakService = fagsakService;
+        this.behandlingService = behandlingService;
+        this.behandlingsresultatService = behandlingsresultatService;
+    }
+
+    @Override
+    public ProsessSteg inngangsSteg() {
+        return AVSLUTT_SAK_OG_BEHANDLING;
+    }
+
+    @Override
+    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+        final long behandlingID = prosessinstans.getBehandling().getId();
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+
+        if (behandlingsresultat.erGodkjenningEllerInnvilgelseArt13()) {
+            behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+        } else {
+            log.info("Avslutter behandling {}", behandlingID);
+            fagsakService.avsluttFagsakOgBehandling(
+                fagsakService.hentFagsak(prosessinstans.getBehandling().getFagsak().getSaksnummer()), Saksstatuser.LOVVALG_AVKLART
+            );
+        }
+    }
+}

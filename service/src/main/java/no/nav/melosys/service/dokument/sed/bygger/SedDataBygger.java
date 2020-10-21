@@ -10,7 +10,7 @@ import no.nav.melosys.domain.dokument.person.Diskresjonskode;
 import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.dokument.person.Familierelasjon;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.UtenlandskIdent;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.UtenlandskIdent;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -142,7 +142,7 @@ public class SedDataBygger {
         throws IkkeFunnetException, TekniskException {
         Collection<AvklartVirksomhet> avklarteVirksomheter = new ArrayList<>();
         avklarteVirksomheter.addAll(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere());
-        avklarteVirksomheter.addAll(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeVirksomheter());
+        avklarteVirksomheter.addAll(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeArbeidsgivere());
 
         return avklarteVirksomheter.stream()
             .map(SedDataBygger::lagVirksomhet)
@@ -322,17 +322,17 @@ public class SedDataBygger {
     private static void validerArbeidsstederOgVirksomheter(SedDataDto dataGrunnlag) throws FunksjonellException {
         for (Arbeidssted arbeidssted : dataGrunnlag.getArbeidssteder()) {
             if (StringUtils.isEmpty(arbeidssted.getAdresse().getLand())) {
-                throw new FunksjonellException("Feltet land ikke oppgitt for arbeidssted " + arbeidssted.getNavn());
+                throw new FunksjonellException("Feltet land er ikke utfylt for arbeidssted " + arbeidssted.getNavn());
             }
         }
         for (Virksomhet virksomhet : dataGrunnlag.getSelvstendigeVirksomheter()) {
             if (StringUtils.isEmpty(virksomhet.getAdresse().getLand())) {
-                throw new FunksjonellException("Feltet land ikke oppgitt for selvstendig virksomhet " + virksomhet.getNavn());
+                throw new FunksjonellException("Feltet land er ikke utfylt for selvstendig virksomhet " + virksomhet.getNavn());
             }
         }
         for (Virksomhet virksomhet : dataGrunnlag.getArbeidsgivendeVirksomheter()) {
             if (StringUtils.isEmpty(virksomhet.getAdresse().getLand())) {
-                throw new FunksjonellException("Feltet land ikke oppgitt for arbeidsgivende virksomhet " + virksomhet.getNavn());
+                throw new FunksjonellException("Feltet land er ikke utfylt for virksomhet " + virksomhet.getNavn());
             }
         }
     }

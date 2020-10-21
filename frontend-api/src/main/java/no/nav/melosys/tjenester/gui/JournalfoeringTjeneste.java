@@ -26,9 +26,9 @@ import org.springframework.web.context.WebApplicationContext;
 @Api(tags = {"journalforing"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class JournalfoeringTjeneste {
-    private static Logger log = LoggerFactory.getLogger(JournalfoeringTjeneste.class);
+    private static final Logger log = LoggerFactory.getLogger(JournalfoeringTjeneste.class);
 
-    private JournalfoeringService journalføringService;
+    private final JournalfoeringService journalføringService;
 
     @Autowired
     public JournalfoeringTjeneste(JournalfoeringService journalføringService) {
@@ -37,7 +37,7 @@ public class JournalfoeringTjeneste {
 
     @GetMapping("{journalpostID}")
     @ApiOperation(value = "Hent journalpost opplysninger.", response = JournalpostDto.class)
-    public ResponseEntity hentJournalpostOpplysninger(@PathVariable("journalpostID") String journalpostID) throws MelosysException {
+    public ResponseEntity<JournalpostDto> hentJournalpostOpplysninger(@PathVariable("journalpostID") String journalpostID) throws MelosysException {
         log.debug("Journalpost med ID {} hentes.", journalpostID);
         Journalpost journalpost = journalføringService.hentJournalpost(journalpostID);
         JournalpostDto journalpostDto = JournalpostDto.av(journalpost);
@@ -51,21 +51,21 @@ public class JournalfoeringTjeneste {
 
     @PostMapping("opprett")
     @ApiOperation(value = "Opprett sak og journalfør.")
-    public ResponseEntity opprettSakOgJournalfør(@RequestBody JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
+    public ResponseEntity<Void> opprettSakOgJournalfør(@RequestBody JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
         journalføringService.opprettOgJournalfør(journalfoeringDto);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("sed")
     @ApiOperation(value = "Opprett sak og journalfør.")
-    public ResponseEntity journalførSed(@RequestBody JournalfoeringSedDto journalfoeringSedDto) throws MelosysException {
+    public ResponseEntity<Void> journalførSed(@RequestBody JournalfoeringSedDto journalfoeringSedDto) throws MelosysException {
         journalføringService.journalførSed(journalfoeringSedDto);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("tilordne")
     @ApiOperation(value = "Tilordne sak og journalfør.")
-    public ResponseEntity tilordneSakOgJournalfør(@RequestBody JournalfoeringTilordneDto journalfoeringDto) throws MelosysException {
+    public ResponseEntity<Void> tilordneSakOgJournalfør(@RequestBody JournalfoeringTilordneDto journalfoeringDto) throws MelosysException {
         journalføringService.tilordneSakOgJournalfør(journalfoeringDto);
         return ResponseEntity.noContent().build();
     }

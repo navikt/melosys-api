@@ -1,8 +1,8 @@
 package no.nav.melosys.service.kontroll;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.dokument.soeknad.ArbeidUtland;
-import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ArbeidUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ForetakUtland;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.service.validering.Kontrollfeil;
 
@@ -29,7 +29,7 @@ public abstract class AdresseUtlandKontroller {
                 felter.add(String.format(ARBEID_UTLAND_LAND, i));
             }
         }
-        return felter.size() == 0 ? null
+        return felter.isEmpty() ? null
             : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSSTED, felter);
     }
 
@@ -46,7 +46,7 @@ public abstract class AdresseUtlandKontroller {
                 felter.add(String.format(FORETAK_UTLAND_LAND, i));
             }
         }
-        return felter.size() == 0 ? null
+        return felter.isEmpty() ? null
             : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_ANDRE_ARBEIDSFORHOLD_UTL, felter);
     }
 }

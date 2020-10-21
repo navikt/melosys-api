@@ -7,8 +7,9 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
@@ -71,7 +72,7 @@ public class BrevDataByggerInnvilgelseTest {
         behandling.setId(1L);
         behandling.setFagsak(new Fagsak());
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new SoeknadDokument());
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new Soeknad());
 
         brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.mottaker = Aktoersroller.BRUKER;
@@ -104,7 +105,8 @@ public class BrevDataByggerInnvilgelseTest {
     }
 
     public BrevDataGrunnlag lagBrevdataGrunnlag() throws TekniskException {
-        return new BrevDataGrunnlag(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+        Brevbestilling brevbestilling = new Brevbestilling.Builder().medBehandling(behandling).build();
+        return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 
     @Test
@@ -157,7 +159,7 @@ public class BrevDataByggerInnvilgelseTest {
     public void lag_utenAnmodningsperiode_erMulig() throws FunksjonellException, TekniskException {
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.emptyList());
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.getAnmodningsperiodesvar().isPresent()).isFalse();
+        assertThat(brevData.getAnmodningsperiodesvar()).isNotPresent();
     }
 
     @Test

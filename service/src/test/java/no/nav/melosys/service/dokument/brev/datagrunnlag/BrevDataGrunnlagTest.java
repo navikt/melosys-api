@@ -6,12 +6,13 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MaritimtArbeid;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.exception.FunksjonellException;
@@ -41,9 +42,10 @@ public class BrevDataGrunnlagTest {
     @Mock
     private AvklartefaktaService avklartefaktaService;
 
+    private Brevbestilling brevbestilling;
     private Behandling behandling;
     private PersonDokument person;
-    private SoeknadDokument søknad;
+    private Soeknad søknad;
     private BrevDataGrunnlag dataGrunnlag;
 
     @Before
@@ -63,13 +65,14 @@ public class BrevDataGrunnlagTest {
         person = new PersonDokument();
         person.bostedsadresse = boAdresseFraRegister;
 
-        søknad = new SoeknadDokument();
+        søknad = new Soeknad();
         behandling = lagBehandling(søknad, person);
 
-        dataGrunnlag = new BrevDataGrunnlag(behandling, kodeverkService, mock(AvklarteVirksomheterService.class), avklartefaktaService);
+        brevbestilling = new Brevbestilling.Builder().medBehandling(behandling).build();
+        dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, mock(AvklarteVirksomheterService.class), avklartefaktaService);
     }
 
-    private Behandling lagBehandling(SoeknadDokument søknad, PersonDokument person) {
+    private Behandling lagBehandling(Soeknad søknad, PersonDokument person) {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.getSaksopplysninger().add(lagPersonsaksopplysning(person));
@@ -154,9 +157,14 @@ public class BrevDataGrunnlagTest {
         this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
 
         when(avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(anyLong())).thenReturn(Collections.emptyMap());
-        dataGrunnlag = new BrevDataGrunnlag(behandling, kodeverkService, mock(AvklarteVirksomheterService.class), avklartefaktaService);
+        final BrevDataGrunnlag dataGrunnlagUtenAvklartMaritimtArbeid = new BrevDataGrunnlag(
+            brevbestilling,
+            kodeverkService,
+            mock(AvklarteVirksomheterService.class),
+            avklartefaktaService
+        );
 
-        Collection<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder();
+        Collection<Arbeidssted> arbeidssteder = dataGrunnlagUtenAvklartMaritimtArbeid.getArbeidsstedGrunnlag().hentArbeidssteder();
         assertThat(arbeidssteder).isEmpty();
     }
 }

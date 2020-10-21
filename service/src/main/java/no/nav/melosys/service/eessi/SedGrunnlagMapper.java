@@ -1,33 +1,23 @@
 package no.nav.melosys.service.eessi;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
-import no.nav.melosys.domain.dokument.soeknad.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.*;
 import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.integrasjon.ereg.EregFasade;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-@Component
 public class SedGrunnlagMapper {
 
-    private final EregFasade eregFasade;
-
-    @Autowired
-    public SedGrunnlagMapper(@Qualifier("system") EregFasade eregFasade) {
-        this.eregFasade = eregFasade;
+    private SedGrunnlagMapper() {
+        throw new IllegalStateException("Utility");
     }
 
-    public SedGrunnlag tilSedGrunnlag(SedGrunnlagDto sedGrunnlagDto) throws IntegrasjonException, FunksjonellException {
+    public static SedGrunnlag tilSedGrunnlag(SedGrunnlagDto sedGrunnlagDto) throws FunksjonellException {
         SedGrunnlag sedGrunnlag = new SedGrunnlag();
 
         sedGrunnlag.personOpplysninger = tilPersonopplysninger(sedGrunnlagDto.getUtenlandskIdent());
@@ -41,36 +31,14 @@ public class SedGrunnlagMapper {
         if (sedGrunnlagDto.erA003()) {
             SedGrunnlagA003Dto sedGrunnlagA003Dto = (SedGrunnlagA003Dto) sedGrunnlagDto;
             sedGrunnlag.overgangsregelbestemmelser = mapOvergangsregelbestemmelser(sedGrunnlagA003Dto.getOvergangsregelbestemmelser());
-
-            List<Virksomhet> gyldigeVirksomheter = hentGyldigeVirksomheter(sedGrunnlagA003Dto.getNorskeArbeidsgivendeVirksomheter());
-            List<ForetakUtland> foretakUtland = sedGrunnlagA003Dto.getNorskeArbeidsgivendeVirksomheter().stream()
-                .filter(virksomhet -> !gyldigeVirksomheter.contains(virksomhet))
-                .map(Virksomhet::tilForetakUtland).collect(Collectors.toList());
-
-            sedGrunnlag.juridiskArbeidsgiverNorge = tilJuridiskArbeidsgiver(gyldigeVirksomheter);
-            sedGrunnlag.foretakUtland.addAll(foretakUtland);
+            sedGrunnlag.juridiskArbeidsgiverNorge.ekstraArbeidsgivere = sedGrunnlagA003Dto
+                .getNorskeArbeidsgivendeVirksomheter()
+                .stream()
+                .map(Virksomhet::hentOrgnrEllerNavn)
+                .collect(Collectors.toList());
         }
 
         return sedGrunnlag;
-    }
-
-    private JuridiskArbeidsgiverNorge tilJuridiskArbeidsgiver(List<Virksomhet> norskeArbeidsgivendeVirksomheter) {
-        JuridiskArbeidsgiverNorge juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
-        juridiskArbeidsgiverNorge.ekstraArbeidsgivere = norskeArbeidsgivendeVirksomheter.stream()
-            .map(Virksomhet::getOrgnr).collect(Collectors.toList());
-
-        return juridiskArbeidsgiverNorge;
-    }
-
-    private List<Virksomhet> hentGyldigeVirksomheter(List<Virksomhet> norskeArbeidsgivendeVirksomheter) throws IntegrasjonException {
-        List<Virksomhet> virksomheterMedGyldigeOrgnummer = new ArrayList<>();
-        for (var virksomhet : norskeArbeidsgivendeVirksomheter) {
-            if (virksomhet.getOrgnr() != null && eregFasade.organisasjonFinnes(virksomhet.getOrgnr())) {
-                virksomheterMedGyldigeOrgnummer.add(virksomhet);
-            }
-        }
-
-        return virksomheterMedGyldigeOrgnummer;
     }
 
     private static List<Overgangsregelbestemmelser> mapOvergangsregelbestemmelser(List<Bestemmelse> overgangsregelbestemmelser) {

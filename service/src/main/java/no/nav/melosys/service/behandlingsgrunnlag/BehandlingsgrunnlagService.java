@@ -9,7 +9,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsGrunnlagType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
@@ -44,8 +44,8 @@ public class BehandlingsgrunnlagService {
     }
 
     public Behandlingsgrunnlag opprettSøknadGrunnlag(long behandlingID,
-                                                     SoeknadDokument soeknadDokument) throws FunksjonellException {
-        return opprettBehandlingsgrunnlag(behandlingID, soeknadDokument, BehandlingsGrunnlagType.SØKNAD, VERSJON_SOEKNAD_GRUNNLAG);
+                                                     Soeknad soeknad) throws FunksjonellException {
+        return opprettBehandlingsgrunnlag(behandlingID, soeknad, BehandlingsGrunnlagType.SØKNAD, VERSJON_SOEKNAD_GRUNNLAG);
     }
 
     public Behandlingsgrunnlag opprettBehandlingsgrunnlag(long behandlingID,

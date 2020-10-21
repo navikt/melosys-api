@@ -24,6 +24,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeidssted;
+import org.apache.commons.lang3.StringUtils;
 
 import static no.nav.melosys.domain.dokument.adresse.Adresse.sammenslå;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
@@ -75,7 +76,8 @@ class A001Mapper {
         mapAnmodningUtenArt12Begrunnelser(brevData.anmodningUtenArt12Begrunnelser).map(A001Mapper::mapArt161AnmodningUtenArt12)
             .ifPresent(seda001::setVilkårBegrunnelseUtenArt12);
 
-        seda001.setFritekst(brevData.anmodningFritekst);
+        seda001.setFritekst(brevData.anmodningFritekstBegrunnelse);
+        seda001.setYtterligereInformasjon(brevData.ytterligereInformasjon);
 
         brevData.ansettelsesperiode.ifPresent(periode -> seda001.setAnsettelsesPeriode(mapAnsettelsesperiode(periode)));
 
@@ -250,7 +252,7 @@ class A001Mapper {
             AdresseType adresseBrev = new AdresseType();
             adresseBrev.setAdresselinje1(sammenslå(adresse.gatenavn, adresse.husnummer));
             adresseBrev.setAdresselinje2(adresse.poststed);
-            adresseBrev.setAdresselinje3(adresse.postnummer);
+            adresseBrev.setAdresselinje3(StringUtils.isEmpty(adresse.postnummer) ? " " : adresse.postnummer);
             adresseBrev.setAdresselinje4(adresse.region);
             adresseBrev.setLand(hentIso3Landkode(adresse.landkode));
             foretak.setAdresse(adresseBrev);

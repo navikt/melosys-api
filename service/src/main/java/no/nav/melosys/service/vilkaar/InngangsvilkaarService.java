@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.StatsborgerskapPeriode;
-import no.nav.melosys.domain.dokument.soeknad.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode;
 import no.nav.melosys.domain.inngangsvilkar.Feilmelding;
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Inngangsvilkaar;

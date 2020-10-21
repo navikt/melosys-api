@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.eessi.sed;
 
-import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ForetakUtland;
 import no.nav.melosys.domain.eessi.SedOrganisasjon;
 import org.apache.commons.lang3.StringUtils;
 
@@ -76,5 +76,9 @@ public class Virksomhet {
 
     public void setOrgnr(String orgnr) {
         this.orgnr = orgnr;
+    }
+
+    public String hentOrgnrEllerNavn() {
+        return StringUtils.isNotEmpty(orgnr) ? orgnr : navn;
     }
 }

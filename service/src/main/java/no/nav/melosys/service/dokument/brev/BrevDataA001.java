@@ -15,7 +15,6 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
  * Det er derfor brukt Optional på felter som kan være tomme
  */
 public class BrevDataA001 extends BrevData {
-
     public UtenlandskMyndighet utenlandskMyndighet;
 
     public PersonDokument personDokument;
@@ -38,5 +37,6 @@ public class BrevDataA001 extends BrevData {
 
     public Set<VilkaarBegrunnelse> anmodningUtenArt12Begrunnelser;
     public Set<VilkaarBegrunnelse> anmodningBegrunnelser;
-    public String anmodningFritekst;
+    public String anmodningFritekstBegrunnelse;
+    public String ytterligereInformasjon;
 }

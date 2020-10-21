@@ -38,7 +38,7 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EessiTjenesteTest extends JsonSchemaTestParent {
-    private static final Logger log = LoggerFactory.getLogger(OppgaveTjenesteTest.class);
+    private static final Logger log = LoggerFactory.getLogger(EessiTjenesteTest.class);
 
     private static final String MOTTAKERINSTITUSJONER_SCHEMA = "eessi-mottakerinstitusjoner-schema.json";
     private static final String OPPRETT_BUC_SCHEMA = "eessi-bucer-post-schema.json";
@@ -75,14 +75,14 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void hentMottakerInstitusjoner() throws IOException, MelosysException {
-        when(eessiService.hentEessiMottakerinstitusjoner(anyString(), anyString()))
+        when(eessiService.hentEessiMottakerinstitusjoner(anyString(), anyList()))
             .thenReturn(Arrays.asList(
                 defaultEasyRandom().nextObject(Institusjon.class),
                 defaultEasyRandom().nextObject(Institusjon.class),
                 defaultEasyRandom().nextObject(Institusjon.class)
             ));
 
-        ResponseEntity<List<Institusjon>> response = eessiTjeneste.hentMottakerinstitusjoner("LA_BUC_01", "SE");
+        ResponseEntity<List<Institusjon>> response = eessiTjeneste.hentMottakerinstitusjoner("LA_BUC_01", List.of("SE"));
         assertThat(response.getBody()).hasOnlyElementsOfType(Institusjon.class);
 
         List<Institusjon> institusjoner = response.getBody();
@@ -94,7 +94,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
     public void opprettBuc() throws IOException, MelosysException {
         when(eessiService.opprettBucOgSed(any(), any(BucType.class), anyList(), anyCollection())).thenReturn(MOCK_RINA_URL);
 
-        BucBestillingDto nyBucDto = new BucBestillingDto(BucType.LA_BUC_01, "NAVT002", "NO", Collections.emptyList());
+        BucBestillingDto nyBucDto = new BucBestillingDto(BucType.LA_BUC_01, List.of("NAVT002"), Collections.emptyList());
         ResponseEntity<OpprettBucSvarDto> response = eessiTjeneste.opprettBuc(nyBucDto, 123L);
         OpprettBucSvarDto opprettBucSvarDto = response.getBody();
 
@@ -133,7 +133,7 @@ public class EessiTjenesteTest extends JsonSchemaTestParent {
             new VedleggDto("3", "1")
         );
 
-        BucBestillingDto nyBucDto = new BucBestillingDto(BucType.LA_BUC_01, "NAVT002", "NO", vedleggDtoList);
+        BucBestillingDto nyBucDto = new BucBestillingDto(BucType.LA_BUC_01, List.of("NAVT002"), vedleggDtoList);
         ResponseEntity<OpprettBucSvarDto> response = eessiTjeneste.opprettBuc(nyBucDto, 123L);
         OpprettBucSvarDto opprettBucSvarDto = response.getBody();
 

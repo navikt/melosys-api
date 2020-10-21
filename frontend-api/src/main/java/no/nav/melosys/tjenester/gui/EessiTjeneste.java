@@ -54,10 +54,10 @@ public class EessiTjeneste {
         responseContainer = "List"
     )
     public ResponseEntity<List<Institusjon>> hentMottakerinstitusjoner(@PathVariable("bucType") String bucType,
-                                                                       @RequestParam(value = "landkode", required = false) String landkode)
+                                                                       @RequestParam(value = "landkoder", required = false) Collection<String> landkoder)
         throws MelosysException {
         log.info("Henter mottakerinstitusjoner for BUC {}", bucType);
-        return ResponseEntity.ok(eessiService.hentEessiMottakerinstitusjoner(bucType, landkode));
+        return ResponseEntity.ok(eessiService.hentEessiMottakerinstitusjoner(bucType, landkoder));
     }
 
     @PostMapping("/bucer/{behandlingID}/opprett")
@@ -72,7 +72,7 @@ public class EessiTjeneste {
         Collection<Vedlegg> vedlegg = lagVedlegg(behandling.getFagsak().getSaksnummer(), nyBucDto.getVedlegg());
 
         OpprettBucSvarDto opprettBucSvarDto = new OpprettBucSvarDto(
-            eessiService.opprettBucOgSed(behandling, nyBucDto.getBucType(), List.of(nyBucDto.getMottakerId()), vedlegg)
+            eessiService.opprettBucOgSed(behandling, nyBucDto.getBucType(), nyBucDto.getMottakerInstitusjoner(), vedlegg)
         );
 
         return ResponseEntity.ok(opprettBucSvarDto);
