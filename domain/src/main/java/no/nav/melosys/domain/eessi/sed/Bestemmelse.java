@@ -105,9 +105,8 @@ public enum Bestemmelse {
     public static Bestemmelse fraMelosysBestemmelse(LovvalgBestemmelse lovvalgBestemmelse) {
         Assert.notNull(lovvalgBestemmelse, "LovvalgBestemmelse er null.");
 
-        if (lovvalgBestemmelse == Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1) {
-            return Bestemmelse.ART_11_3_a;
-        } else if (lovvalgBestemmelse == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2) {
+        if (lovvalgBestemmelse == Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
+            || lovvalgBestemmelse == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2) {
             return Bestemmelse.ART_11_4;
         }
 

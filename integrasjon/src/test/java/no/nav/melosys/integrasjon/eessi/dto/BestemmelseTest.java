@@ -15,7 +15,7 @@ public class BestemmelseTest {
         assertThat(Bestemmelse.fraMelosysBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1))
             .isEqualTo(Bestemmelse.ART_12_1);
         assertThat(Bestemmelse.fraMelosysBestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1))
-            .isEqualTo(Bestemmelse.ART_11_3_a);
+            .isEqualTo(Bestemmelse.ART_11_4);
         assertThat(Bestemmelse.fraMelosysBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2))
             .isEqualTo(Bestemmelse.ART_12_2);
         assertThat(Bestemmelse.fraMelosysBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B4))
