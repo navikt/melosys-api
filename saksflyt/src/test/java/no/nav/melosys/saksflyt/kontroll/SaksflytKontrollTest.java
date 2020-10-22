@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.kontroll;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -24,7 +25,7 @@ public class SaksflytKontrollTest {
     @Mock
     private ProsessinstansRepository prosessinstansRepository;
     @Spy
-    private ProsessinstansKøImpl binge;
+    private ProsessinstansKøImpl kø;
 
     private SaksflytKontroll saksflytKontroll;
 
@@ -34,30 +35,33 @@ public class SaksflytKontrollTest {
 
     @Before
     public void setup() {
-        saksflytKontroll = new SaksflytKontroll(binge, prosessinstansRepository);
+        saksflytKontroll = new SaksflytKontroll(kø, prosessinstansRepository);
         prosessinstanser = lagProsessInstanser();
         when(prosessinstansRepository.findAllByStatus(eq(ProsessStatus.KLAR))).thenReturn(prosessinstanser);
     }
 
     @Test
-    public void sjekkProsessinstansFinnesISaksFlyt_leggTilProsessinstanserSomIkkeFinnes() {
+    public void sjekkProsessinstansFinnesISaksFlyt_1ProsessinstansIKø1Endret1MinSiden_8ProsessinstanserBlirLagtTil() {
 
-        for (int i = 0; i < 5; i++) {
-            binge.leggTil(prosessinstanser.get(i));
+        kø.leggTil(prosessinstanser.get(0));
+        when(prosessinstanser.get(1).getEndretDato()).thenReturn(LocalDateTime.now());
+
+        for (int i = 2; i < TOTAL_PROSESSINSTANSER; i++) {
+            when(prosessinstanser.get(i).getEndretDato()).thenReturn(LocalDateTime.now().minusMinutes(16));
         }
-        clearInvocations(binge);
 
+        clearInvocations(kø);
         saksflytKontroll.sjekkProsessinstansFinnesISaksflyt();
-        verify(binge, times(5)).leggTil(any(Prosessinstans.class));
+        verify(kø, times(8)).leggTil(any(Prosessinstans.class));
     }
 
     @Test
     public void sjekkProsessinstansFinnesISaksFlyt_ingenSkalLeggesTil_bingeSinStørrelseIkkeEndret() {
-        prosessinstanser.forEach(binge::leggTil);
-        clearInvocations(binge);
+        prosessinstanser.forEach(kø::leggTil);
+        clearInvocations(kø);
 
         saksflytKontroll.sjekkProsessinstansFinnesISaksflyt();
-        verify(binge, times(0)).leggTil(any(Prosessinstans.class));
+        verify(kø, times(0)).leggTil(any(Prosessinstans.class));
     }
 
     private List<Prosessinstans> lagProsessInstanser() {

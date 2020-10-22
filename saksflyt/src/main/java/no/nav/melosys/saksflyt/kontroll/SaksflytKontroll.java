@@ -1,7 +1,9 @@
 package no.nav.melosys.saksflyt.kontroll;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
@@ -40,9 +42,13 @@ public class SaksflytKontroll {
 
         prosessinstansKø.hentProsessinstanser().forEach(p -> prosessinstanser.remove(p.getId()));
 
-        prosessinstanser.values().forEach(prosessinstans -> {
-            log.info("Prosessinstans {} lagt inn i binge etter kontroll", prosessinstans.getId());
-            prosessinstansKø.leggTil(prosessinstans);
-        });
+        prosessinstanser.values().stream()
+            .filter(ikkeEndretSiste15Min) //midlertidig fiks inntil MELOSYS-3984
+            .forEach(prosessinstans -> {
+                log.info("Prosessinstans {} lagt inn i binge etter kontroll", prosessinstans.getId());
+                prosessinstansKø.leggTil(prosessinstans);
+            });
     }
+
+    private static final Predicate<Prosessinstans> ikkeEndretSiste15Min = p -> p.getEndretDato().isBefore(LocalDateTime.now().minusMinutes(15L));
 }
