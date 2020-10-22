@@ -8,14 +8,19 @@ import no.nav.freg.abac.core.service.AbacService;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.sikkerhet.abac.Pep;
 import no.nav.melosys.sikkerhet.abac.PepImpl;
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,6 +30,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import java.util.Optional;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TilgangServiceTest {
@@ -36,6 +43,8 @@ public class TilgangServiceTest {
     private FagsakService fagsakService;
     @Mock
     private BehandlingService behandlingService;
+    @Mock
+    private OppgaveService oppgaveService;
 
     private XacmlResponse abacResponse;
 
@@ -62,7 +71,7 @@ public class TilgangServiceTest {
         when(fagsakMocked.hentBruker()).thenReturn(new Aktoer());
         when(behandlingMocked.getFagsak()).thenReturn(fagsakMocked);
 
-        tilgangService = new TilgangService(fagsakService, behandlingService, pep);
+        tilgangService = new TilgangService(fagsakService, behandlingService, oppgaveService, pep);
     }
 
     @Test(expected = SikkerhetsbegrensningException.class)
@@ -99,6 +108,37 @@ public class TilgangServiceTest {
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandlingMocked);
 
         tilgangService.sjekkRedigerbarOgTilgang(123123123);
+    }
+
+    @Test
+    public void sjekkTilordnet_behandlingErTilordnetSaksbehandler_Ok() throws FunksjonellException, TekniskException {
+        when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
+
+        String saksbehandler = "Z123456";
+        SubjectHandler subjectHandler = mock(SpringSubjectHandler.class);
+        SubjectHandler.set(subjectHandler);
+        when(subjectHandler.getUserID()).thenReturn(saksbehandler);
+        Oppgave oppgave = new Oppgave.Builder().setTilordnetRessurs(saksbehandler).build();
+
+        when(behandlingMocked.erRedigerbar()).thenReturn(true);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandlingMocked);
+        when(oppgaveService.finnOppgaveMedFagsaksnummer(any())).thenReturn(Optional.of(oppgave));
+
+        tilgangService.sjekkRedigerbarOgTilordnetSaksbehandlerOgTilgang(123123123);
+    }
+
+    @Test(expected = FunksjonellException.class)
+    public void sjekkTilordnet_behandlingErIkkeTilordnetSaksbehandler_girFeil() throws FunksjonellException, TekniskException {
+        String saksbehandler = "Z123456";
+        SubjectHandler subjectHandler = mock(SpringSubjectHandler.class);
+        SubjectHandler.set(subjectHandler);
+        when(subjectHandler.getUserID()).thenReturn(saksbehandler);
+        Oppgave oppgave = new Oppgave.Builder().setTilordnetRessurs("Z000000").build();
+
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandlingMocked);
+        when(oppgaveService.finnOppgaveMedFagsaksnummer(any())).thenReturn(Optional.of(oppgave));
+
+        tilgangService.sjekkRedigerbarOgTilordnetSaksbehandlerOgTilgang(123123123);
     }
 
     @Test
