@@ -23,7 +23,7 @@ public class AvsluttArt13BehandlingJobb {
     }
 
     @Scheduled(cron = "0 0 0 * * *")
-    @SchedulerLock(name = "avsluttBehandlingArt13Jobb", lockAtLeastFor = "30m", lockAtMostFor = "30m")
+    @SchedulerLock(name = "avsluttBehandlingArt13Jobb", lockAtLeastFor = "10m")
     public void avsluttBehandlingArt13() {
         behandlingService.hentBehandlingerMedstatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING)
             .stream()
