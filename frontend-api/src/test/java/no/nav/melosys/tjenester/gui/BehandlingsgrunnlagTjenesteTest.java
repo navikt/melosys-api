@@ -10,7 +10,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Flyvningstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -69,10 +69,10 @@ public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void hentBehandlingsgrunnlag_erSoeknad_validerSchema() throws Exception{
-        SoeknadDokument soeknadDokument = random.nextObject(SoeknadDokument.class);
+        Soeknad soeknad = random.nextObject(Soeknad.class);
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setType(BehandlingsGrunnlagType.SØKNAD);
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(soeknadDokument);
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(soeknad);
         when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
 
         ResponseEntity<BehandlingsgrunnlagGetDto> responseEntity = behandlingsgrunnlagTjeneste.hentBehandlingsgrunnlag(123);

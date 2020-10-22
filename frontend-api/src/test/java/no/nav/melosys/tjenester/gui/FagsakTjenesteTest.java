@@ -21,7 +21,7 @@ import no.nav.melosys.domain.dokument.person.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -310,7 +310,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
         BehandlingsgrunnlagService behandlingsgrunnlagService = mock(BehandlingsgrunnlagService.class);
         PersonDokument personDokument = (PersonDokument)FagsakBehandlingFactory.lagPersonSaksopplysning().getDokument();
         when(saksopplysningerService.finnPersonOpplysninger(eq(1L))).thenReturn(Optional.ofNullable(personDokument));
-        SoeknadDokument søknadDokument = FagsakBehandlingFactory.lagSøknadDokument();
+        Soeknad søknadDokument = FagsakBehandlingFactory.lagSøknadDokument();
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknadDokument);
         when(behandlingsgrunnlagService.finnBehandlingsgrunnlag(eq(1L))).thenReturn(Optional.of(behandlingsgrunnlag));

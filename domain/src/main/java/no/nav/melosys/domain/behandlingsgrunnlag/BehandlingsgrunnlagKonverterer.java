@@ -5,7 +5,6 @@ import java.util.EnumMap;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
 
 public final class BehandlingsgrunnlagKonverterer {
 
@@ -15,7 +14,7 @@ public final class BehandlingsgrunnlagKonverterer {
 
     static {
         mapper.put(BehandlingsGrunnlagType.GENERELT, BehandlingsgrunnlagData.class);
-        mapper.put(BehandlingsGrunnlagType.SØKNAD, SoeknadDokument.class);
+        mapper.put(BehandlingsGrunnlagType.SØKNAD, Soeknad.class);
         mapper.put(BehandlingsGrunnlagType.SED, SedGrunnlag.class);
         objectMapper.registerModule(new JavaTimeModule());
     }

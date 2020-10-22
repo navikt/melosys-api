@@ -6,13 +6,14 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
-import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.adresse.UstrukturertAdresse;
+import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Epost;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Telefonnummer;
+import org.springframework.util.StringUtils;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class OrganisasjonsDetaljer {
@@ -135,12 +136,11 @@ public class OrganisasjonsDetaljer {
 
             strukturertAdresse.gatenavn = adresseLinje.replaceAll("\\s+", " ");
             strukturertAdresse.landkode = sAdresse.getLandkode();
+            strukturertAdresse.postnummer = sAdresse.getPostnr();
 
             if (sAdresse.erUtenlandsk()) {
-                strukturertAdresse.postnummer = "";
-                strukturertAdresse.poststed = sAdresse.getPoststedUtland();
+                strukturertAdresse.poststed = StringUtils.isEmpty(sAdresse.getPoststedUtland()) ? sAdresse.getPoststed() : sAdresse.getPoststedUtland();
             } else {
-                strukturertAdresse.postnummer = sAdresse.getPostnr();
                 strukturertAdresse.poststed = sAdresse.getPoststed() == null ? "" : sAdresse.getPoststed();
             }
         }

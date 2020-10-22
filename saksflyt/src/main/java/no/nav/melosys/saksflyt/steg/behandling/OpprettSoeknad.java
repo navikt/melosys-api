@@ -3,8 +3,8 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import java.util.List;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import no.nav.melosys.domain.dokument.soeknad.Periode;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -42,11 +42,11 @@ public class OpprettSoeknad implements StegBehandler {
         if (prosessinstans.getBehandling().erBehandlingAvSøknad()) {
 
             Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
-            SoeknadDokument soeknadDokument = new SoeknadDokument();
-            soeknadDokument.periode = periode;
-            soeknadDokument.soeknadsland.landkoder = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, new TypeReference<List<String>>() {});
+            Soeknad soeknad = new Soeknad();
+            soeknad.periode = periode;
+            soeknad.soeknadsland.landkoder = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, new TypeReference<List<String>>() {});
 
-            behandlingsgrunnlagService.opprettSøknadGrunnlag(behandlingID, soeknadDokument);
+            behandlingsgrunnlagService.opprettSøknadGrunnlag(behandlingID, soeknad);
             log.info("Opprettet søknad for behandling {}.", behandlingID);
         } else {
             log.info("Ikke opprettet søknad for behandling {} med tema {}", behandlingID, prosessinstans.getBehandling().getTema());

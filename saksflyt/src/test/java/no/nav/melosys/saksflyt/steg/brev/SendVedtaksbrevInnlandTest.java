@@ -7,8 +7,8 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.dokument.soeknad.ForetakUtland;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ForetakUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
@@ -201,7 +201,7 @@ class SendVedtaksbrevInnlandTest {
         behandling.setId(behandlingsid);
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new SoeknadDokument());
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new Soeknad());
         behandling.setFagsak(fagsak != null ? fagsak : lagFagsak());
         return behandling;
     }
@@ -418,6 +418,34 @@ class SendVedtaksbrevInnlandTest {
         verify(dokService, never()).produserDokument(any(), eq(FastMottaker.av(SKATTEOPPKREVER_UTLAND)), anyLong(), any());
     }
 
+    @Test
+    void utfør_innvilgelse161MedUtenlandskSelvstendigArbeid_senderIkkeBrevTilSkatteoppkreverUtland() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_BEHANDLINGSID);
+        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
+
+        ForetakUtland utenlandskSelvstendigArbeid = new ForetakUtland();
+        utenlandskSelvstendigArbeid.selvstendigNæringsvirksomhet = Boolean.TRUE;
+        prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(utenlandskSelvstendigArbeid);
+
+        instans.utfør(prosessinstans);
+
+        verify(dokService, never()).produserDokument(any(), eq(FastMottaker.av(SKATTEOPPKREVER_UTLAND)), anyLong(), any());
+    }
+
+    @Test
+    void utfør_innvilgelse161MedForetakUtlandOgUtenlandskSelvstendigArbeid_senderIkkeBrevTilSkatteoppkreverUtland() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_BEHANDLINGSID);
+        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
+
+        ForetakUtland utenlandskSelvstendigArbeid = new ForetakUtland();
+        utenlandskSelvstendigArbeid.selvstendigNæringsvirksomhet = Boolean.TRUE;
+        prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(utenlandskSelvstendigArbeid);
+        prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(new ForetakUtland());
+
+        instans.utfør(prosessinstans);
+
+        verify(dokService, never()).produserDokument(any(), eq(FastMottaker.av(SKATTEOPPKREVER_UTLAND)), anyLong(), any());
+    }
 
     @Test
     void utfør_innvilgelses12_senderInnvilgelseTilArbeidsgiver() throws Exception {

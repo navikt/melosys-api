@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.dokument.soeknad;
+package no.nav.melosys.domain.behandlingsgrunnlag.soeknad;
 
 import java.util.ArrayList;
 import java.util.List;

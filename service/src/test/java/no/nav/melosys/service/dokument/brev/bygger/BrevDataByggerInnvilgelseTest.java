@@ -9,7 +9,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
@@ -72,7 +72,7 @@ public class BrevDataByggerInnvilgelseTest {
         behandling.setId(1L);
         behandling.setFagsak(new Fagsak());
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new SoeknadDokument());
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new Soeknad());
 
         brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.mottaker = Aktoersroller.BRUKER;

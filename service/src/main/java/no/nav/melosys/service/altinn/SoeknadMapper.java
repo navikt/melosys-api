@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.List;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import no.nav.melosys.domain.dokument.soeknad.Periode;
-import no.nav.melosys.domain.dokument.soeknad.SoeknadDokument;
-import no.nav.melosys.domain.dokument.soeknad.Soeknadsland;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Soeknadsland;
 import no.nav.melosys.soknad_altinn.Innhold;
 import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM;
 import no.nav.melosys.soknad_altinn.Tidsrom;
@@ -18,12 +18,12 @@ public final class SoeknadMapper {
     }
 
     //TODO: MELSOYS-3527
-    static SoeknadDokument lagSoeknadDokument(MedlemskapArbeidEOSM søknad) {
-        final SoeknadDokument soeknadDokument = new SoeknadDokument();
+    static Soeknad lagSoeknadDokument(MedlemskapArbeidEOSM søknad) {
+        final Soeknad soeknad = new Soeknad();
         final Innhold innhold = søknad.getInnhold();
-        soeknadDokument.soeknadsland = hentsoeknadsland(innhold);
-        soeknadDokument.periode = lagPeriode(innhold);
-        return soeknadDokument;
+        soeknad.soeknadsland = hentsoeknadsland(innhold);
+        soeknad.periode = lagPeriode(innhold);
+        return soeknad;
     }
 
     private static Soeknadsland hentsoeknadsland(Innhold innhold) {

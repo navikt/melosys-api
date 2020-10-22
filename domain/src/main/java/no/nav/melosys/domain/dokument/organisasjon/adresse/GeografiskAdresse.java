@@ -5,6 +5,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlSeeAlso;
 
 import no.nav.melosys.domain.dokument.felles.Periode;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlSeeAlso({
@@ -15,7 +16,7 @@ public class GeografiskAdresse {
     protected Periode bruksperiode;
 
     protected Periode gyldighetsperiode;
-    
+
     private String landkode;
 
     public Periode getBruksperiode() {
@@ -42,4 +43,11 @@ public class GeografiskAdresse {
         this.landkode = value;
     }
 
+    private boolean erNorsk() {
+        return Landkoder.NO.getKode().equals(getLandkode());
+    }
+
+    public boolean erUtenlandsk() {
+        return !erNorsk();
+    }
 }

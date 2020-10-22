@@ -13,7 +13,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Fartsomraade;
-import no.nav.melosys.domain.dokument.soeknad.MaritimtArbeid;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;

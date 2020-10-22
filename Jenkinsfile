@@ -115,7 +115,7 @@ def prepareNaisYaml(naiseratorFile, imageVersion, namespace, cluster) {
     if (cluster == "prod-fss") {
         domain = ".nais.adeo.no"
     } else {
-        domain = ".nais.preprod.local"
+        domain = ".dev.adeo.no"
     }
 
     if (namespace == "default") {
