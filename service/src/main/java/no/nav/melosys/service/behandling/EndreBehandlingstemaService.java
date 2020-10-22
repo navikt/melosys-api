@@ -36,13 +36,13 @@ public class EndreBehandlingstemaService {
     }
 
     @Transactional(readOnly = true)
-    public List<Behandlingstema> hentMuligeBehandlingstema(long behandlingsID) throws IkkeFunnetException{
+    public List<Behandlingstema> hentMuligeBehandlingstema(long behandlingsID, String saksbehandler) throws MelosysException{
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsID);
-        return hentMuligeBehandlingstema(behandling);
+        return hentMuligeBehandlingstema(behandling, saksbehandler);
     }
 
-    private List<Behandlingstema> hentMuligeBehandlingstema(Behandling behandling) throws IkkeFunnetException{
-        boolean kanOppdatereBehandlingstema = kanOppdatereBehandlingstema(behandling);
+    private List<Behandlingstema> hentMuligeBehandlingstema(Behandling behandling, String saksbehandler) throws MelosysException{
+        boolean kanOppdatereBehandlingstema = kanOppdatereBehandlingstema(behandling, saksbehandler);
         if (kanOppdatereBehandlingstema && erBehandlingAvSøknad(behandling.getTema())) {
             return BEHANDLINGSTEMA_SØKNAD;
         } else if (kanOppdatereBehandlingstema && erBehandlingAvSedForespørsler(behandling.getTema())) {
@@ -53,9 +53,9 @@ public class EndreBehandlingstemaService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void endreBehandlingstemaTilBehandling(long behandlingsID, Behandlingstema nyttTema) throws FunksjonellException, TekniskException {
+    public void endreBehandlingstemaTilBehandling(long behandlingsID, Behandlingstema nyttTema, String saksbehandler) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsID);
-        if (hentMuligeBehandlingstema(behandling).contains(nyttTema)) {
+        if (hentMuligeBehandlingstema(behandling, saksbehandler).contains(nyttTema)) {
             behandling.setTema(nyttTema);
             behandlingService.lagre(behandling);
             behandlingsresultatService.tømBehandlingsresultat(behandlingsID);
@@ -65,7 +65,7 @@ public class EndreBehandlingstemaService {
         }
     }
 
-    private void oppdaterOppgave(Behandling behandling) throws FunksjonellException, TekniskException {
+    private void oppdaterOppgave(Behandling behandling) throws MelosysException {
         Optional<Oppgave> oppgave = oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         if (oppgave.isEmpty()){
@@ -77,7 +77,9 @@ public class EndreBehandlingstemaService {
                 .build());
     }
 
-    private boolean kanOppdatereBehandlingstema(Behandling behandling) throws IkkeFunnetException{
-        return behandling.erAktiv() && !behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).erArtikkel16MedSendtAnmodningOmUnntak();
+    private boolean kanOppdatereBehandlingstema(Behandling behandling, String saksbehandler) throws MelosysException{
+        return behandling.erAktiv()
+            && behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, saksbehandler)
+            && !behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).erArtikkel16MedSendtAnmodningOmUnntak();
     }
 }

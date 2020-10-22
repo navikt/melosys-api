@@ -19,6 +19,8 @@ import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.behandling.EndreBehandlingstemaService;
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.EndreBehandlingstemaDto;
 import no.nav.melosys.tjenester.gui.dto.TidligereMedlemsperioderDto;
@@ -97,7 +99,11 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void hentMuligeBehandlinstemaValidering() throws IOException, MelosysException {
-        when(endreBehandlingstemaService.hentMuligeBehandlingstema(11L)).thenReturn(BEHANDLINGSTEMA_SØKNAD);
+        String saksbehandler = "Z000000";
+        SubjectHandler subjectHandler = mock(SpringSubjectHandler.class);
+        SubjectHandler.set(subjectHandler);
+        when(subjectHandler.getUserID()).thenReturn(saksbehandler);
+        when(endreBehandlingstemaService.hentMuligeBehandlingstema(11L, "Z000000")).thenReturn(BEHANDLINGSTEMA_SØKNAD);
         List<Behandlingstema> muligeBehandlingstema = behandlingTjeneste.hentEndreBehandlingstema(11L).getBody();
         validerArray(muligeBehandlingstema, ENDRE_BEHANDLINGSTEMA_SCHEMA, log);
     }

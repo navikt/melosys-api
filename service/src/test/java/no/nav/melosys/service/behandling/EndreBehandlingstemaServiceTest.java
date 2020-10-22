@@ -29,7 +29,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -38,6 +37,7 @@ import no.nav.melosys.service.oppgave.OppgaveService;
 class EndreBehandlingstemaServiceTest {
 
     private static final long id = 11L;
+    private static final String saksbehandler = "Z000000";
     private final Behandling behandling = new Behandling();
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
 
@@ -64,50 +64,63 @@ class EndreBehandlingstemaServiceTest {
     }
 
     @Test
-    void hentMuligeBehandlingstema_gyldigSøknadBehandlingstema_returnererSøknadBehandlinstema() throws IkkeFunnetException {
+    void hentMuligeBehandlingstema_gyldigSøknadBehandlingstema_returnererSøknadBehandlinstema() throws MelosysException {
         behandling.setTema(ARBEID_FLERE_LAND);
         when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
+        when(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, saksbehandler)).thenReturn(true);
 
-        List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(id);
+        List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(id,saksbehandler);
         assertThat(BEHANDLINGSTEMA_SØKNAD).isEqualTo(muligeBehandlingstema);
     }
 
     @Test
-    void hentMuligeBehandlingstema_gyldigSEDForespørselBehandlingstema_returnererSEDForespørselBehandlingstema() throws IkkeFunnetException{
+    void hentMuligeBehandlingstema_gyldigSEDForespørselBehandlingstema_returnererSEDForespørselBehandlingstema() throws MelosysException{
         behandling.setTema(ØVRIGE_SED_MED);
         when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
+        when(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, saksbehandler)).thenReturn(true);
 
-        List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(id);
+        List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(id, saksbehandler);
         assertThat(BEHANDLINGSTEMA_SED_FORESPØRSEL).isEqualTo(muligeBehandlingstema);
     }
 
     @Test
-    void hentMuligeBehandlingstema_ugyldigBehandlingstema_returnererTomListe() throws IkkeFunnetException{
+    void hentMuligeBehandlingstema_ugyldigBehandlingstema_returnererTomListe() throws MelosysException{
         behandling.setTema(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
+        when(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, saksbehandler)).thenReturn(true);
 
-        List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(id);
+        List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(id,saksbehandler);
         assertThat(muligeBehandlingstema).isEmpty();
     }
 
     @Test
-    void hentMuligeBehandlingstema_inaktivBehandling_returnererTomListe() throws IkkeFunnetException{
+    void hentMuligeBehandlingstema_inaktivBehandling_returnererTomListe() throws MelosysException{
         behandling.setTema(ARBEID_FLERE_LAND);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
 
-        List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(id);
+        List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(id, saksbehandler);
         assertThat(muligeBehandlingstema).isEmpty();
     }
 
     @Test
-    void hentMuligeBehandlingstema_erArtikkel16MedSendtAnmodningOmUnntak_returnererTomListe() throws IkkeFunnetException{
+    void hentMuligeBehandlingstema_ikkeBehandlingRedigerbarOgTilordnetSaksbehandler_returnererTomListe() throws MelosysException{
+        behandling.setTema(ARBEID_FLERE_LAND);
+        when(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, saksbehandler)).thenReturn(false);
+
+        List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(id, saksbehandler);
+        assertThat(muligeBehandlingstema).isEmpty();
+    }
+
+    @Test
+    void hentMuligeBehandlingstema_erArtikkel16MedSendtAnmodningOmUnntak_returnererTomListe() throws MelosysException{
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
         anmodningsperiode.setSendtUtland(true);
         behandlingsresultat.setAnmodningsperioder(Set.of(anmodningsperiode));
         behandling.setTema(ARBEID_FLERE_LAND);
         when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
+        when(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, saksbehandler)).thenReturn(true);
 
-        List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(id);
+        List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(id, saksbehandler);
         assertThat(muligeBehandlingstema).isEmpty();
     }
 
@@ -116,7 +129,7 @@ class EndreBehandlingstemaServiceTest {
         behandling.setTema(ARBEID_FLERE_LAND);
         setup_endreBehandlingstemaTester();
 
-        endreBehandlingstemaService.endreBehandlingstemaTilBehandling(id, UTSENDT_ARBEIDSTAKER);
+        endreBehandlingstemaService.endreBehandlingstemaTilBehandling(id, UTSENDT_ARBEIDSTAKER, saksbehandler);
         verify(behandlingService).lagre(behandlingArgumentCaptor.capture());
         verify(behandlingsresultatService).tømBehandlingsresultat(id);
         verify(oppgaveService).oppdaterOppgave(any(String.class), oppgaveOppdateringArgumentCaptor.capture());
@@ -130,7 +143,7 @@ class EndreBehandlingstemaServiceTest {
         behandling.setTema(TRYGDETID);
         setup_endreBehandlingstemaTester();
 
-        endreBehandlingstemaService.endreBehandlingstemaTilBehandling(id, ØVRIGE_SED_MED);
+        endreBehandlingstemaService.endreBehandlingstemaTilBehandling(id, ØVRIGE_SED_MED, saksbehandler);
         verify(behandlingService).lagre(behandlingArgumentCaptor.capture());
         verify(behandlingsresultatService).tømBehandlingsresultat(id);
         verify(oppgaveService).oppdaterOppgave(any(String.class), oppgaveOppdateringArgumentCaptor.capture());
@@ -142,10 +155,11 @@ class EndreBehandlingstemaServiceTest {
     @Test
     void endreBehandlingstema_ugyldigNyttTemaForSøknad_exceptionKastes()  throws MelosysException{
         behandling.setTema(ARBEID_FLERE_LAND);
+        when(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, saksbehandler)).thenReturn(true);
         when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> endreBehandlingstemaService.endreBehandlingstemaTilBehandling(id, ØVRIGE_SED_MED))
+            .isThrownBy(() -> endreBehandlingstemaService.endreBehandlingstemaTilBehandling(id, ØVRIGE_SED_MED, saksbehandler))
             .withMessage("Ikke mulig å endre behandlingstema");
         verify(behandlingService, never()).lagre(any(Behandling.class));
         verify(behandlingsresultatService, never()).tømBehandlingsresultat(id);
@@ -162,6 +176,7 @@ class EndreBehandlingstemaServiceTest {
             .build();
         when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
         when(oppgaveService.finnOppgaveMedFagsaksnummer(fagsak.getSaksnummer())).thenReturn(Optional.of(oppgave));
+        when(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, saksbehandler)).thenReturn(true);
     }
 
 }

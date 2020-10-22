@@ -111,10 +111,11 @@ public class BehandlingTjeneste {
     @ApiOperation(value = "Hent mulige nye behandlingstema for en behandling")
     public ResponseEntity<List<Behandlingstema>> hentEndreBehandlingstema(@PathVariable("behandlingID") long behandlingsID)
         throws MelosysException{
-        log.debug("Saksbehandler {} ber om å hente mulige nye behandlingstema for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingsID);
+        String saksbehandler = SubjectHandler.getInstance().getUserID();
+        log.debug("Saksbehandler {} ber om å hente mulige nye behandlingstema for behandling {}.", saksbehandler, behandlingsID);
         tilgangService.sjekkTilgang(behandlingsID);
 
-        List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(behandlingsID);
+        List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(behandlingsID, saksbehandler);
         return ResponseEntity.ok(muligeBehandlingstema);
     }
 
@@ -122,10 +123,11 @@ public class BehandlingTjeneste {
     @ApiOperation(value = "Endre behandlingstema for en gitt behandling")
     public ResponseEntity<Void> endreBehandlingstema(@PathVariable("behandlingID") long behandlingsID, @RequestBody EndreBehandlingstemaDto endreBehandlingstemaDto)
         throws MelosysException{
-        log.debug("Saksbehandler {} ber om å sette behandlingstema for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingsID, endreBehandlingstemaDto);
+        String saksbehandler = SubjectHandler.getInstance().getUserID();
+        log.debug("Saksbehandler {} ber om å sette behandlingstema for behandling {} til {}.", saksbehandler, behandlingsID, endreBehandlingstemaDto);
         tilgangService.sjekkTilgang(behandlingsID);
 
-        endreBehandlingstemaService.endreBehandlingstemaTilBehandling(behandlingsID, Behandlingstema.valueOf(endreBehandlingstemaDto.getBehandlingstema()));
+        endreBehandlingstemaService.endreBehandlingstemaTilBehandling(behandlingsID, Behandlingstema.valueOf(endreBehandlingstemaDto.getBehandlingstema()), saksbehandler);
         return ResponseEntity.noContent().build();
     }
 
