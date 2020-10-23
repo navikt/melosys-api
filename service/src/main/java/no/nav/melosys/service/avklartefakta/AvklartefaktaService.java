@@ -1,11 +1,12 @@
 package no.nav.melosys.service.avklartefakta;
 
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.avklartefakta.*;
+import no.nav.melosys.domain.familie.AvklartIkkeMedfolgendeBarn;
+import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
@@ -18,8 +19,6 @@ import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static java.util.function.Predicate.not;
 
 @Service
 public class AvklartefaktaService {
@@ -124,18 +123,19 @@ public class AvklartefaktaService {
             .collect(Collectors.toMap(Map.Entry::getKey, AvklartMaritimtArbeid::av));
     }
 
-    public AvklarteMedfolgendeFamiliemedlemmer hentAvklarteMedfølgendeFamiliemedlemmer(long behandlingID) {
-        Predicate<Avklartefakta> erAvklartFamiliemedlem = avklartefakta -> avklartefakta.getSubjekt() != null;
-        Set<Avklartefakta> avklartefakta
-            = avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingID, Avklartefaktatyper.VURDERING_LOVVALG_BARN);
-        List<AvklartFamiliemedlem> avklarteFamiliemedlemmer = avklartefakta.stream()
-            .filter(erAvklartFamiliemedlem)
-            .map(af -> new AvklartFamiliemedlem(af.getSubjekt(), af.getFakta()))
-            .collect(Collectors.toList());
-        Optional<String> begrunnelseFritekst = avklartefakta.stream()
-            .filter(not(erAvklartFamiliemedlem)).findAny()
-            .map(Avklartefakta::getBegrunnelseFritekst);
-        return new AvklarteMedfolgendeFamiliemedlemmer(avklarteFamiliemedlemmer, begrunnelseFritekst.orElse(null));
+    public AvklarteMedfolgendeBarn hentAvklarteMedfølgendeBarn(long behandlingID) {
+        Set<String> medfølgendeBarn = new HashSet<>();
+        Set<AvklartIkkeMedfolgendeBarn> ikkeMedfølgendeBarn = new HashSet<>();
+        for (Avklartefakta avklartefakta : avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingID, Avklartefaktatyper.VURDERING_LOVVALG_BARN)) {
+            if (avklartefakta.getFakta().equals(VALGT_FAKTA)) {
+                medfølgendeBarn.add(avklartefakta.getSubjekt());
+            } else {
+                String begrunnelse = avklartefakta.getRegistreringer().iterator().next().getBegrunnelseKode();
+                ikkeMedfølgendeBarn.add(
+                    new AvklartIkkeMedfolgendeBarn(avklartefakta.getSubjekt(), begrunnelse, avklartefakta.getBegrunnelseFritekst()));
+            }
+        }
+        return new AvklarteMedfolgendeBarn(medfølgendeBarn, ikkeMedfølgendeBarn);
     }
 
     private Map<String, List<Avklartefakta>> grupperForSubjekt(Collection<Avklartefakta> avklartefakta) {

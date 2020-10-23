@@ -4,8 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.avklartefakta.AvklartFamiliemedlem;
-import no.nav.melosys.domain.avklartefakta.AvklarteMedfolgendeFamiliemedlemmer;
+import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
@@ -25,7 +24,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.assertj.core.api.Assertions.tuple;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
@@ -266,29 +264,43 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void hentAvklarteFamiliemedlemmer_medOgUtenOmfattetBarn_girForventedeVerdier() {
+    public void hentAvklarteMedfølgendeBarn_medOgUtenMedfølgendeBarn_girForventedeVerdier() {
         Avklartefakta barnOmfattet = lagAvklartefakta(Avklartefaktatyper.VURDERING_LOVVALG_BARN,
-            "omfattet", null);
-        Avklartefakta barnIkkeOmfattet = lagAvklartefakta(Avklartefaktatyper.VURDERING_LOVVALG_BARN,
-            "ikkeOmfattet", Medfolgende_barn_begrunnelser.OVER_18_AR.getKode());
-        Avklartefakta fellesBegrunnelse = new Avklartefakta();
-        fellesBegrunnelse.setBegrunnelseFritekst("Begrunnelse");
+            "omfattet", "TRUE");
+        Avklartefakta barnIkkeOmfattet1 = lagAvklartIkkeMedfølgendeBarn(
+            "ikkeOmfattet1", Medfolgende_barn_begrunnelser.OVER_18_AR, "begrunnelseFritekst");
+        Avklartefakta barnIkkeOmfattet2 = lagAvklartIkkeMedfølgendeBarn(
+            "ikkeOmfattet2", Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER, null);
 
-        when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(anyLong(), any(Avklartefaktatyper.class)))
-            .thenReturn(Set.of(barnOmfattet, barnIkkeOmfattet, fellesBegrunnelse));
+         when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(anyLong(), any(Avklartefaktatyper.class)))
+            .thenReturn(Set.of(barnOmfattet, barnIkkeOmfattet1, barnIkkeOmfattet2));
 
-        AvklarteMedfolgendeFamiliemedlemmer avklarteMedfølgendeFamiliemedlemmer
-            = avklartefaktaService.hentAvklarteMedfølgendeFamiliemedlemmer(1L);
+        AvklarteMedfolgendeBarn avklarteMedfølgendeBarn
+            = avklartefaktaService.hentAvklarteMedfølgendeBarn(1L);
 
-        assertThat(avklarteMedfølgendeFamiliemedlemmer.avklarteFamiliemedlemmer)
-            .filteredOn(af -> "omfattet".equals(af.fnr))
-            .extracting(AvklartFamiliemedlem::erOmfattet, af -> af.begrunnelse)
-            .contains(tuple(true, null));
-        assertThat(avklarteMedfølgendeFamiliemedlemmer.avklarteFamiliemedlemmer)
-            .filteredOn(af -> "ikkeOmfattet".equals(af.fnr))
-            .extracting(AvklartFamiliemedlem::erOmfattet, af -> af.begrunnelse)
-            .contains(tuple(false, Medfolgende_barn_begrunnelser.OVER_18_AR));
-        assertThat(avklarteMedfølgendeFamiliemedlemmer.begrunnelseFritekst).isEqualTo("Begrunnelse");
+        assertThat(avklarteMedfølgendeBarn.medfølgendeBarn).containsExactly("omfattet");
+        assertThat(avklarteMedfølgendeBarn.ikkeMedfølgendeBarn)
+            .extracting("fnr")
+            .containsExactlyInAnyOrder("ikkeOmfattet1", "ikkeOmfattet2");
+        assertThat(avklarteMedfølgendeBarn.ikkeMedfølgendeBarn)
+            .filteredOn(ikkeMedfølgendeBarn -> ikkeMedfølgendeBarn.fnr.equals("ikkeOmfattet1"))
+            .extracting("begrunnelse")
+            .isEqualTo(List.of(Medfolgende_barn_begrunnelser.OVER_18_AR));
+        assertThat(avklarteMedfølgendeBarn.ikkeMedfølgendeBarn)
+            .filteredOn(ikkeMedfølgendeBarn -> ikkeMedfølgendeBarn.fnr.equals("ikkeOmfattet2"))
+            .extracting("begrunnelse")
+            .isEqualTo(List.of(Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER));
+        assertThat(avklarteMedfølgendeBarn.begrunnelseFritekst().orElse("")).isEqualTo("begrunnelseFritekst");
+    }
+
+    private static Avklartefakta lagAvklartIkkeMedfølgendeBarn(String subjectID, Medfolgende_barn_begrunnelser begrunnelse, String begrunnelseFritekst) {
+        Avklartefakta avklartefakta = lagAvklartefakta(Avklartefaktatyper.VURDERING_LOVVALG_BARN, subjectID, "FALSE");
+        avklartefakta.setBegrunnelseFritekst(begrunnelseFritekst);
+
+        AvklartefaktaRegistrering avklartefaktaRegistrering = new AvklartefaktaRegistrering();
+        avklartefaktaRegistrering.setBegrunnelseKode(begrunnelse.getKode());
+        avklartefakta.setRegistreringer(Set.of(avklartefaktaRegistrering));
+        return avklartefakta;
     }
 
     private static Avklartefakta lagAvklartefakta(Avklartefaktatyper type, String subjektID, String fakta) {
