@@ -5,20 +5,15 @@ import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.avklartefakta.AvklartFamiliemedlem;
-import no.nav.melosys.domain.avklartefakta.AvklarteMedfolgendeFamiliemedlemmer;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
-import no.nav.melosys.domain.dokument.person.Familiemedlem;
-import no.nav.melosys.domain.dokument.person.Familierelasjon;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -27,7 +22,6 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.brev.IkkeOmfattetBarn;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -39,7 +33,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -173,43 +166,5 @@ public class BrevDataGrunnlagTest {
 
         Collection<Arbeidssted> arbeidssteder = dataGrunnlagUtenAvklartMaritimtArbeid.getArbeidsstedGrunnlag().hentArbeidssteder();
         assertThat(arbeidssteder).isEmpty();
-    }
-
-    @Test
-    public void hentMedfølgendeFamilie() throws TekniskException {
-        final Familiemedlem omfattet1 = lagBarn("123", "Per R. Omfattet");
-        final Familiemedlem omfattet2 = lagBarn("456", "Pål R. Omfattet");
-        final Familiemedlem utelatt = lagBarn("789", "Espen R. Utelatt");
-
-        PersonDokument personMedFamilie = new PersonDokument();
-        personMedFamilie.familiemedlemmer = List.of(omfattet1, omfattet2, utelatt);
-
-        when(avklartefaktaService.hentAvklarteMedfølgendeFamiliemedlemmer(anyLong())).thenReturn(
-            new AvklarteMedfolgendeFamiliemedlemmer(
-                List.of(
-                    new AvklartFamiliemedlem(omfattet1.fnr, null),
-                    new AvklartFamiliemedlem(omfattet2.fnr, null),
-                    new AvklartFamiliemedlem(utelatt.fnr, Medfolgende_barn_begrunnelser.OVER_18_AR.getKode())
-                ),
-                "Begrunnelse"
-            )
-        );
-
-        Brevbestilling brevbestilling = new Brevbestilling.Builder().medBehandling(lagBehandling(søknad, personMedFamilie)).build();
-        BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, mock(AvklarteVirksomheterService.class), avklartefaktaService);
-
-        assertThat(dataGrunnlag.getMedfolgendeFamilieGrunnlag().hentOmfattedeBarn()).containsExactly(omfattet1.navn, omfattet2.navn);
-        assertThat(dataGrunnlag.getMedfolgendeFamilieGrunnlag().hentIkkeOmfattedeBarn())
-            .extracting(IkkeOmfattetBarn::getNavn, IkkeOmfattetBarn::getBegrunnelse)
-            .containsExactly(tuple(utelatt.navn, Medfolgende_barn_begrunnelser.OVER_18_AR));
-        assertThat(dataGrunnlag.getMedfolgendeFamilieGrunnlag().hentBegrunnelse()).isEqualTo("Begrunnelse");
-    }
-
-    private Familiemedlem lagBarn(String fnr, String navn) {
-        Familiemedlem familiemedlem = new Familiemedlem();
-        familiemedlem.fnr = fnr;
-        familiemedlem.navn = navn;
-        familiemedlem.familierelasjon = Familierelasjon.BARN;
-        return familiemedlem;
     }
 }
