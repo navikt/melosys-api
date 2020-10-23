@@ -37,12 +37,10 @@ public class TilgangService {
     public void sjekkRedigerbarOgTilordnetSaksbehandlerOgTilgang(long behandlingsId) throws FunksjonellException, TekniskException{
         String saksbehandler = SubjectHandler.getInstance().getUserID();
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsId);
-        Optional<Oppgave> oppgaveOptional = oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
+        Oppgave oppgave = oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())
+            .orElseThrow(() -> new FunksjonellException(String.format("Finner ikke tilhørende oppgave til behandling %s", behandlingsId)));
 
-        if (oppgaveOptional.isEmpty()) {
-            throw new FunksjonellException(String.format("Forsøk på å endre behandling med id %s som ikke er tilordnet %s", behandlingsId, saksbehandler));
-        }
-        String tilordnetRessurs = oppgaveOptional.get().getTilordnetRessurs();
+        String tilordnetRessurs = oppgave.getTilordnetRessurs();
         if (!(tilordnetRessurs != null && tilordnetRessurs.equalsIgnoreCase(saksbehandler))){
             throw new FunksjonellException(String.format("Forsøk på å endre behandling med id %s som ikke er tilordnet %s", behandlingsId, saksbehandler));
         }
