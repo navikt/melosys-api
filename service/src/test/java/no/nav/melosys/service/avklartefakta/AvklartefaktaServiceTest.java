@@ -267,9 +267,9 @@ public class AvklartefaktaServiceTest {
     public void hentAvklarteMedfølgendeBarn_medOgUtenMedfølgendeBarn_girForventedeVerdier() {
         Avklartefakta barnOmfattet = lagAvklartefakta(Avklartefaktatyper.VURDERING_LOVVALG_BARN,
             "omfattet", "TRUE");
-        Avklartefakta barnIkkeOmfattet1 = lagAvklartIkkeMedfølgendeBarn(
+        Avklartefakta barnIkkeOmfattet1 = lagAvklartIkkeOmfattetBarn(
             "ikkeOmfattet1", Medfolgende_barn_begrunnelser.OVER_18_AR, "begrunnelseFritekst");
-        Avklartefakta barnIkkeOmfattet2 = lagAvklartIkkeMedfølgendeBarn(
+        Avklartefakta barnIkkeOmfattet2 = lagAvklartIkkeOmfattetBarn(
             "ikkeOmfattet2", Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER, null);
 
          when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(anyLong(), any(Avklartefaktatyper.class)))
@@ -278,22 +278,22 @@ public class AvklartefaktaServiceTest {
         AvklarteMedfolgendeBarn avklarteMedfølgendeBarn
             = avklartefaktaService.hentAvklarteMedfølgendeBarn(1L);
 
-        assertThat(avklarteMedfølgendeBarn.medfølgendeBarn).containsExactly("omfattet");
-        assertThat(avklarteMedfølgendeBarn.ikkeMedfølgendeBarn)
+        assertThat(avklarteMedfølgendeBarn.barnOmfattetAvNorskTrygd).containsExactly("omfattet");
+        assertThat(avklarteMedfølgendeBarn.barnIkkeOmfattetAvNorskTrygd)
             .extracting("fnr")
             .containsExactlyInAnyOrder("ikkeOmfattet1", "ikkeOmfattet2");
-        assertThat(avklarteMedfølgendeBarn.ikkeMedfølgendeBarn)
-            .filteredOn(ikkeMedfølgendeBarn -> ikkeMedfølgendeBarn.fnr.equals("ikkeOmfattet1"))
+        assertThat(avklarteMedfølgendeBarn.barnIkkeOmfattetAvNorskTrygd)
+            .filteredOn(barnIkkeOmfattet -> barnIkkeOmfattet.fnr.equals("ikkeOmfattet1"))
             .extracting("begrunnelse")
             .isEqualTo(List.of(Medfolgende_barn_begrunnelser.OVER_18_AR));
-        assertThat(avklarteMedfølgendeBarn.ikkeMedfølgendeBarn)
-            .filteredOn(ikkeMedfølgendeBarn -> ikkeMedfølgendeBarn.fnr.equals("ikkeOmfattet2"))
+        assertThat(avklarteMedfølgendeBarn.barnIkkeOmfattetAvNorskTrygd)
+            .filteredOn(barnIkkeOmfattet -> barnIkkeOmfattet.fnr.equals("ikkeOmfattet2"))
             .extracting("begrunnelse")
             .isEqualTo(List.of(Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER));
-        assertThat(avklarteMedfølgendeBarn.begrunnelseFritekst().orElse("")).isEqualTo("begrunnelseFritekst");
+        assertThat(avklarteMedfølgendeBarn.hentBegrunnelseFritekst().orElse("")).isEqualTo("begrunnelseFritekst");
     }
 
-    private static Avklartefakta lagAvklartIkkeMedfølgendeBarn(String subjectID, Medfolgende_barn_begrunnelser begrunnelse, String begrunnelseFritekst) {
+    private static Avklartefakta lagAvklartIkkeOmfattetBarn(String subjectID, Medfolgende_barn_begrunnelser begrunnelse, String begrunnelseFritekst) {
         Avklartefakta avklartefakta = lagAvklartefakta(Avklartefaktatyper.VURDERING_LOVVALG_BARN, subjectID, "FALSE");
         avklartefakta.setBegrunnelseFritekst(begrunnelseFritekst);
 
