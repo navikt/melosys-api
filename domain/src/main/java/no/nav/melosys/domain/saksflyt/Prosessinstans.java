@@ -67,6 +67,10 @@ public class Prosessinstans {
         return id;
     }
 
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
     public ProsessType getType() {
         return type;
     }
@@ -168,6 +172,10 @@ public class Prosessinstans {
         this.registrertDato = registrertDato;
     }
 
+    public LocalDateTime getEndretDato() {
+        return endretDato;
+    }
+
     public void setEndretDato(LocalDateTime endretDato) {
         this.endretDato = endretDato;
     }
@@ -203,8 +211,8 @@ public class Prosessinstans {
         );
     }
 
-    public boolean statusErKlar() {
-        return status == ProsessStatus.KLAR;
+    public boolean statusErKlarEllerRestartet() {
+        return status == ProsessStatus.KLAR || status == ProsessStatus.RESTARTET;
     }
 
     @Override
