@@ -57,7 +57,7 @@
     "artikkel": {
       "$id": "#/properties/artikkel",
       "type": "string",
-      "description": "",
+      "description": "Artikkel fra (EF) nr. 883/2004",
       "enum": [
         "11.3a",
         "11.3b",
@@ -100,7 +100,7 @@
       "$id": "#/properties/utstasjoneringTilLand",
       "type": ["string", "null"],
       "maxLength": 2,
-      "description": "Land hvor aktør er utstasjonert (art. 12)"
+      "description": "Landkode hvor aktør er utstasjonert (art. 12)"
     },
     "datoUtstedelse": {
       "$id": "#/properties/datoUtstedelse",
@@ -122,7 +122,7 @@
       "$id": "#/properties/meldingOpprettetTidspunkt",
       "type": "string",
       "format": "date-time",
-      "description": "Tidspunkt da meldingen ble opprettet og lagt på kø"
+      "description": "Tidspunkt da kafka-meldingen ble opprettet og lagt på kø"
     }
   },
   "additionalProperties": false
