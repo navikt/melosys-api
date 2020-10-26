@@ -1,15 +1,13 @@
-CREATE TABLE personopplysning (
-    id              NUMBER(19)  GENERATED ALWAYS AS IDENTITY,
-    behandling_id   NUMBER(19)  NOT NULL,
-    person          CLOB        NOT NULL,
-    CONSTRAINT pk_personopplysning PRIMARY KEY (id),
-    CONSTRAINT fk_personopplysning_behandling FOREIGN KEY (behandling_id) REFERENCES behandling
-);
+-- FIXME: NOT NULL og nytt navn etter migrering
+ALTER TABLE SAKSOPPLYSNING ADD INTERN_JSON CLOB;
 
-CREATE TABLE personopplysning_kilde (
-    id                  NUMBER(19)  GENERATED ALWAYS AS IDENTITY,
-    personopplysning_id NUMBER(19)  NOT NULL,
-    dokument_xml        XMLTYPE     NOT NULL,
+-- FIXME: Fjern dokument_xml (+ kilde?) fra saksopplysning
+CREATE TABLE saksopplysning_dokument_kilde (
+    id                  NUMBER(19)      GENERATED ALWAYS AS IDENTITY,
+    saksopplysning_id   NUMBER(19)      NOT NULL,
+    kilde               VARCHAR2(99)    NOT NULL,
+    dokument_xml        XMLTYPE         NOT NULL,
     CONSTRAINT pk_personopplysning_kilde PRIMARY KEY (id),
-    CONSTRAINT fk_personopplysning_kilde_personopplysning FOREIGN KEY (personopplysning_id) REFERENCES personopplysning
+    CONSTRAINT fk_saksopplysning_dokument_kilde_saksopplysning FOREIGN KEY (saksopplysning_id) REFERENCES saksopplysning,
+    CONSTRAINT fk_saksopplysning_dokument_kilde_kilde FOREIGN KEY (kilde) REFERENCES saksopplysning_kilde
 );

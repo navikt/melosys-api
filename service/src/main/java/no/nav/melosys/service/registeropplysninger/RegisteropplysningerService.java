@@ -8,20 +8,16 @@ import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Personopplysning;
-import no.nav.melosys.domain.dokument.person.Person;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
-import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.inntk.InntektService;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.integrasjon.tps.mapper.PersonDto;
 import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -89,25 +85,6 @@ public class RegisteropplysningerService {
         this.utbetaldataService = utbetaldataService;
         this.saksopplysningerService = saksopplysningerService;
         this.registeropplysningerPeriodeFactory = registeropplysningerPeriodeFactory;
-    }
-
-    public Person hentOgLagrePersonopplysninger(RegisteropplysningerRequest request, Behandling behandling, Informasjonsbehov informasjonsbehov) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
-        PersonDto personDto = tpsFasade.hentPersonopplysning(request.getFnr(), informasjonsbehov);
-        if (informasjonsbehov == Informasjonsbehov.MED_FAMILIERELASJONER) {
-            personDto.person.hentEktefelleSamboerPartner().ifPresent(familiemedlem -> {
-                familiemedlem.sivilstand = personDto.person.sivilstand;
-                familiemedlem.sivilstandGyldighetsperiodeFom = personDto.person.sivilstandGyldighetsperiodeFom;
-            });
-            for (Familiemedlem familiemedlem : personDto.person.hentBarn()) {
-                Person barn = personDto.familiemedlemmer.get(familiemedlem.fnr);
-                familiemedlem.fødselsdato = barn.fødselsdato;
-                barn.hentAnnenForelder(request.getFnr())
-                    .ifPresent(forelder -> familiemedlem.fnrAnnenForelder = forelder.fnr);
-            }
-        }
-        behandling.setPersonopplysning(new Personopplysning(behandling, personDto.person, personDto.kilder));
-        behandlingService.lagre(behandling);
-        return personDto.person;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = MelosysException.class)

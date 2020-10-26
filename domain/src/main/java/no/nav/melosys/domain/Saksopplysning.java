@@ -1,7 +1,9 @@
 package no.nav.melosys.domain;
 
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
@@ -37,6 +39,10 @@ public class Saksopplysning {
     @Column(name = "kilde", nullable = false, updatable = false)
     private SaksopplysningKilde kilde;
 
+    // FIXME Migrering fra kilde og fjerne felt(er)
+    @OneToMany(mappedBy = "saksopplysning", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private Set<SaksopplysningDokumentKilde> kilder = new HashSet<>(1);
+
     @Column(name = "registrert_dato", nullable = false, updatable = false)
     private Instant registrertDato;
 
@@ -50,6 +56,11 @@ public class Saksopplysning {
     @Type(type = XMLTYPE)
     @Column(name = "intern_xml")
     private String internXml;
+
+    // FIXME Migrere internXml + internJson til samme felt i DB
+    @Lob
+    @Column(name = "intern_json")
+    private String internJson;
 
     @Transient
     private SaksopplysningDokument dokument;
@@ -94,6 +105,14 @@ public class Saksopplysning {
         this.kilde = kilde;
     }
 
+    public Set<SaksopplysningDokumentKilde> getKilder() {
+        return kilder;
+    }
+
+    public void setKilder(Set<SaksopplysningDokumentKilde> kilder) {
+        this.kilder = kilder;
+    }
+
     public Instant getRegistrertDato() {
         return registrertDato;
     }
@@ -124,6 +143,14 @@ public class Saksopplysning {
 
     public void setInternXml(String internXml) {
         this.internXml = internXml;
+    }
+
+    public String getInternJson() {
+        return internJson;
+    }
+
+    public void setInternJson(String internJson) {
+        this.internJson = internJson;
     }
 
     public SaksopplysningDokument getDokument() {

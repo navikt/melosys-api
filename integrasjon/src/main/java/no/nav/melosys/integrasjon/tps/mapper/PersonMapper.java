@@ -3,8 +3,7 @@ package no.nav.melosys.integrasjon.tps.mapper;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.Diskresjonskode;
-import no.nav.melosys.domain.dokument.person.KjoennsType;
+import no.nav.melosys.domain.dokument.person.*;
 import no.nav.melosys.domain.dokument.person.Personstatus;
 import no.nav.melosys.domain.dokument.person.Sivilstand;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
@@ -16,28 +15,38 @@ public class PersonMapper {
         throw new IllegalStateException("Utility");
     }
 
-    public static no.nav.melosys.domain.dokument.person.Person mapTilPerson(no.nav.tjeneste.virksomhet.person.v3.informasjon.Person person) {
-        no.nav.melosys.domain.dokument.person.Person p = new no.nav.melosys.domain.dokument.person.Person();
-        p.fnr = mapFnr(person.getAktoer());
-        p.sivilstand = mapSivilstand(person.getSivilstand());
-        p.sivilstandGyldighetsperiodeFom = KonverteringsUtils.xmlGregorianCalendarToLocalDate(person.getSivilstand().getFomGyldighetsperiode());
-        p.statsborgerskap = Land.av(person.getStatsborgerskap().getLand().getValue());
-        p.kjønn = mapKjønn(person.getKjoenn());
-        p.fornavn = person.getPersonnavn().getFornavn();
-        p.mellomnavn = person.getPersonnavn().getMellomnavn();
-        p.etternavn = person.getPersonnavn().getEtternavn();
-        p.sammensattNavn = person.getPersonnavn().getSammensattNavn();
-        p.fødselsdato = mapFødselsdato(person.getFoedselsdato());
-        p.dødsdato = mapDødsdato(person.getDoedsdato());
-        p.diskresjonskode = mapDiskresjonskode(person.getDiskresjonskode());
-        p.personstatus = mapPersonstatus(person.getPersonstatus());
-        p.bostedsadresse = AdresseMapper.mapTilBostedsadresse(person.getBostedsadresse());
-        p.postadresse = AdresseMapper.mapTilPostadresse(person.getPostadresse());
+    public static PersonDokument mapTilPerson(no.nav.tjeneste.virksomhet.person.v3.informasjon.Person person) {
+        PersonDokument dokument = new PersonDokument();
+        dokument.fnr = mapFnr(person.getAktoer());
+        dokument.sivilstand = mapSivilstand(person.getSivilstand());
+        dokument.sivilstandGyldighetsperiodeFom = KonverteringsUtils.xmlGregorianCalendarToLocalDate(person.getSivilstand().getFomGyldighetsperiode());
+        dokument.statsborgerskap = Land.av(person.getStatsborgerskap().getLand().getValue());
+        dokument.kjønn = mapKjønn(person.getKjoenn());
+        dokument.fornavn = person.getPersonnavn().getFornavn();
+        dokument.mellomnavn = person.getPersonnavn().getMellomnavn();
+        dokument.etternavn = person.getPersonnavn().getEtternavn();
+        dokument.sammensattNavn = person.getPersonnavn().getSammensattNavn();
+        dokument.fødselsdato = mapFødselsdato(person.getFoedselsdato());
+        dokument.dødsdato = mapDødsdato(person.getDoedsdato());
+        dokument.diskresjonskode = mapDiskresjonskode(person.getDiskresjonskode());
+        dokument.personstatus = mapPersonstatus(person.getPersonstatus());
+        dokument.bostedsadresse = AdresseMapper.mapTilBostedsadresse(person.getBostedsadresse());
+        dokument.postadresse = AdresseMapper.mapTilPostadresse(person.getPostadresse());
         if (person instanceof Bruker) {
-            p.midlertidigPostadresse = AdresseMapper.mapTilMidlertidigPostadresse(((Bruker) person).getMidlertidigPostadresse());
+            dokument.midlertidigPostadresse = AdresseMapper.mapTilMidlertidigPostadresse(((Bruker) person).getMidlertidigPostadresse());
         }
-        p.familiemedlemmer = FamiliemedlemMapper.mapTilFamiliemedlemmer(person.getHarFraRolleI());
-        return p;
+        dokument.familiemedlemmer = FamiliemedlemMapper.mapTilFamiliemedlemmer(person.getHarFraRolleI());
+        return dokument;
+    }
+
+    public static void berikFamiliemedlemMedOpplysninger(Familiemedlem familiemedlem, PersonDokument dokument, String ident) {
+        if (familiemedlem.erBarn()) {
+            dokument.hentAnnenForelder(ident)
+                .ifPresent(forelder -> familiemedlem.fnrAnnenForelder = forelder.fnr);
+        } else if (familiemedlem.erEktefellePartnerSamboer()) {
+            familiemedlem.sivilstand = dokument.sivilstand;
+            familiemedlem.sivilstandGyldighetsperiodeFom = dokument.sivilstandGyldighetsperiodeFom;
+        }
     }
 
     static String mapFnr(Aktoer aktoer) {

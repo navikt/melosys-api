@@ -49,8 +49,12 @@ class AdresseMapper {
             } else if (midlertidigPostadresse instanceof no.nav.tjeneste.virksomhet.person.v3.informasjon.MidlertidigPostadresseUtland) {
                 mp = mapTilMidlertidigPostadresseUtland((no.nav.tjeneste.virksomhet.person.v3.informasjon.MidlertidigPostadresseUtland) midlertidigPostadresse);
             }
-            mp.endringstidspunkt = KonverteringsUtils.xmlGregorianCalendarToLocalDateTime(midlertidigPostadresse.getEndringstidspunkt());
-            mp.postleveringsPeriode = mapTilPeriode(midlertidigPostadresse.getPostleveringsPeriode());
+            if (midlertidigPostadresse.getEndringstidspunkt() != null) {
+                mp.endringstidspunkt = KonverteringsUtils.xmlGregorianCalendarToLocalDateTime(midlertidigPostadresse.getEndringstidspunkt());
+            }
+            if (midlertidigPostadresse.getPostleveringsPeriode() != null) {
+                mp.postleveringsPeriode = mapTilPeriode(midlertidigPostadresse.getPostleveringsPeriode());
+            }
         }
         return mp;
     }

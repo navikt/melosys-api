@@ -66,9 +66,6 @@ public class Behandling extends RegistreringsInfo {
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Saksopplysning> saksopplysninger = new HashSet<>(1);
 
-    @OneToOne(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private Personopplysning personopplysning;
-
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<BehandlingHistorikk> behandlingshistorikk = new HashSet<>(1);
 
@@ -130,14 +127,6 @@ public class Behandling extends RegistreringsInfo {
         this.saksopplysninger = saksopplysninger;
     }
 
-    public Personopplysning getPersonopplysning() {
-        return personopplysning;
-    }
-
-    public void setPersonopplysning(Personopplysning personopplysning) {
-        this.personopplysning = personopplysning;
-    }
-
     public Instant getSistOpplysningerHentetDato() {
         return sisteOpplysningerHentetDato;
     }
@@ -194,6 +183,7 @@ public class Behandling extends RegistreringsInfo {
         this.behandlingsgrunnlag = behandlingsgrunnlag;
     }
 
+    // FIXME feiler
     public PersonDokument hentPersonDokument() throws TekniskException {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.PERSOPL);
         return (PersonDokument) saksopplysning

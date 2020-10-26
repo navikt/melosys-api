@@ -3,6 +3,7 @@ package no.nav.melosys.domain.dokument.person;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -24,6 +25,8 @@ public class PersonDokument implements SaksopplysningDokument {
     public String fnr;
 
     public Sivilstand sivilstand;
+
+    public LocalDate sivilstandGyldighetsperiodeFom;
 
     /** Kodeverk: Landkoder */
     public Land statsborgerskap;
@@ -50,24 +53,24 @@ public class PersonDokument implements SaksopplysningDokument {
     public LocalDate fødselsdato;
 
     @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
-    @JsonIgnore
+    // @JsonIgnore // FIXME - Bruk PersonDto i BehandlingTjeneste
     public LocalDate dødsdato;
 
-    @JsonIgnore
+    // @JsonIgnore // FIXME - Bruk PersonDto i BehandlingTjeneste
     public Diskresjonskode diskresjonskode;
 
-    @JsonProperty("personStatus")
+    // @JsonProperty("personStatus") // FIXME - Bruk PersonDto i BehandlingTjeneste
     public Personstatus personstatus;
 
     public LocalDate statsborgerskapDato;
 
-    @JsonIgnore
+    // @JsonIgnore // FIXME - Bruk PersonDto i BehandlingTjeneste
     public Bostedsadresse bostedsadresse = new Bostedsadresse();
 
-    @JsonIgnore
+    // @JsonIgnore // FIXME - Bruk PersonDto i BehandlingTjeneste
     public UstrukturertAdresse postadresse = new UstrukturertAdresse();
 
-    @JsonIgnore
+    // @JsonIgnore // FIXME - Bruk PersonDto i BehandlingTjeneste
     public MidlertidigPostadresse midlertidigPostadresse = new MidlertidigPostadresse();
 
     @XmlTransient
@@ -82,5 +85,12 @@ public class PersonDokument implements SaksopplysningDokument {
 
     public boolean manglerBostedsadresse() {
         return bostedsadresse.erTom();
+    }
+
+    public Optional<Familiemedlem> hentAnnenForelder(String fnrGjeldendeForelder) {
+        return familiemedlemmer.stream()
+            .filter(Familiemedlem::erForelder)
+            .filter(forelder -> !fnrGjeldendeForelder.equals(forelder.fnr))
+            .findAny();
     }
 }

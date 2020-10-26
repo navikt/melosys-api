@@ -11,8 +11,13 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
@@ -31,11 +36,15 @@ public class DokumentFactory {
     // Spring JAXB 2 marshaller og unmarshaller
     private final Jaxb2Marshaller marshaller;
     private final XsltTemplatesFactory xsltTemplatesFactory;
+    private final ObjectMapper objectMapper;
 
     @Autowired
     public DokumentFactory(Jaxb2Marshaller marshaller, XsltTemplatesFactory xsltTemplatesFactory) {
         this.marshaller = marshaller;
         this.xsltTemplatesFactory = xsltTemplatesFactory;
+        this.objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
     }
 
     public Marshaller createMarshaller() {
@@ -49,6 +58,15 @@ public class DokumentFactory {
      */
     public String lagInternXml(Saksopplysning saksopplysning) {
         Assert.notNull(saksopplysning, "saksopplysning må ikke være null");
+
+        // FIXME
+        if (saksopplysning.getType() == SaksopplysningType.PERSOPL && saksopplysning.getDokument() != null) {
+            try {
+                saksopplysning.setInternJson(objectMapper.writeValueAsString(saksopplysning.getDokument()));
+            } catch (JsonProcessingException e) {
+            }
+            return null;
+        }
 
         String dokumentXml = saksopplysning.getDokumentXml();
         SaksopplysningDokument dokument = saksopplysning.getDokument();
@@ -96,6 +114,18 @@ public class DokumentFactory {
      */
     public SaksopplysningDokument lagDokument(Saksopplysning saksopplysning) {
         Assert.notNull(saksopplysning, "saksopplysning må ikke være null");
+
+        // FIXME: kun ved lesing fra database, bruke AttributeConverter/JsonSubTypes i stedet for?
+        if (saksopplysning.getType() == SaksopplysningType.PERSOPL && saksopplysning.getInternJson() != null) {
+            try {
+                SaksopplysningDokument dokument = objectMapper.readValue(saksopplysning.getInternJson(), PersonDokument.class);
+                saksopplysning.setDokument(dokument);
+                return dokument;
+            } catch (JsonProcessingException e) {
+                saksopplysning.setDokument(null);
+                return null;
+            }
+        }
 
         if (saksopplysning.getDokumentXml() == null) {
             saksopplysning.setDokument(null);

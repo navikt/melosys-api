@@ -2,13 +2,11 @@ package no.nav.melosys.integrasjon.tps;
 
 import java.io.StringWriter;
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
-
+import no.nav.melosys.domain.SaksopplysningDokumentKilde;
 import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.Saksopplysning;
@@ -111,64 +109,32 @@ public class TpsService implements TpsFasade {
         }
     }
 
-    private Saksopplysning hentPerson(String ident, Collection<no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov> behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        HentPersonRequest request = new HentPersonRequest();
-        NorskIdent norskIdent = new NorskIdent();
-        norskIdent.setIdent(ident);
-
-        PersonIdent personIdent = new PersonIdent();
-        personIdent.setIdent(norskIdent);
-
-        request.setAktoer(personIdent);
-        request.getInformasjonsbehov().addAll(behov);
-
-        // Kall til TPS
-        HentPersonResponse response;
-        try {
-            response = personConsumer.hentPerson(request);
-        } catch (HentPersonSikkerhetsbegrensning hentPersonSikkerhetsbegrensning) {
-            throw new SikkerhetsbegrensningException(hentPersonSikkerhetsbegrensning);
-        } catch (HentPersonPersonIkkeFunnet hentPersonPersonIkkeFunnet) {
-            throw new IkkeFunnetException(hentPersonPersonIkkeFunnet);
-        }
-
-        // Response -> xml
-        StringWriter xmlWriter = new StringWriter();
-        try {
-            no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse xmlRoot = new no.nav.tjeneste.virksomhet.person.v3.HentPersonResponse();
-            xmlRoot.setResponse(response);
-            dokumentFactory.createMarshaller().marshal(xmlRoot, xmlWriter);
-        } catch (JAXBException e) {
-            throw new IntegrasjonException(e);
-        }
-
+    @Override
+    public Saksopplysning hentPerson(String ident, Informasjonsbehov behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+        PersonDto personDto = hentPersonDto(ident, mapInformasjonsbehovTilTps(behov));
         Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokumentXml(xmlWriter.toString());
-        saksopplysning.setKilde(SaksopplysningKilde.TPS);
+        saksopplysning.getKilder().add(
+            new SaksopplysningDokumentKilde(saksopplysning, SaksopplysningKilde.TPS, personDto.dokumentXml)
+        );
+        saksopplysning.setKilde(SaksopplysningKilde.TPS); // FIXME fjernes
+        saksopplysning.setDokumentXml(personDto.dokumentXml); // FIXME fjernes
         saksopplysning.setType(SaksopplysningType.PERSOPL);
         saksopplysning.setVersjon(PERSON_VERSJON);
-
-        // xml -> java objekter
-        dokumentFactory.lagDokument(saksopplysning);
-
+        for (Familiemedlem familiemedlem : personDto.dokument.familiemedlemmer) {
+            PersonDto personIFamilie = hentPersonDto(familiemedlem.fnr, mapInformasjonsbehovTilTps(Informasjonsbehov.MED_FAMILIERELASJONER));
+            PersonMapper.berikFamiliemedlemMedOpplysninger(familiemedlem, personIFamilie.dokument, ident);
+            saksopplysning.getKilder().add(
+                new SaksopplysningDokumentKilde(saksopplysning, SaksopplysningKilde.TPS, personIFamilie.dokumentXml)
+            );
+        }
+        saksopplysning.setDokument(personDto.dokument);
+        // FIXME
+        saksopplysning.setInternXml(personDto.dokumentXml);
+        dokumentFactory.lagInternXml(saksopplysning);
         return saksopplysning;
     }
 
-    @Override
-    public Saksopplysning hentPerson(String ident, Informasjonsbehov behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        return hentPerson(ident, mapInformasjonsbehovTilTps(behov));
-    }
-
-    @Override
-    public PersonDto hentPersonopplysning(String ident, Informasjonsbehov behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        PersonDto personDto = hentPersonopplysning(ident, mapInformasjonsbehovTilTps(behov));
-        for (Familiemedlem familiemedlem : personDto.person.hentBarn()) {
-            personDto.leggTilFamiliemedlem(hentPersonopplysning(familiemedlem.fnr, Informasjonsbehov.MED_FAMILIERELASJONER));
-        }
-        return personDto;
-    }
-
-    private PersonDto hentPersonopplysning(String ident, Set<no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov> behov) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
+    private PersonDto hentPersonDto(String ident, Set<no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov> behov) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
         HentPersonRequest request = new HentPersonRequest();
         NorskIdent norskIdent = new NorskIdent();
         norskIdent.setIdent(ident);
@@ -198,7 +164,8 @@ public class TpsService implements TpsFasade {
         } catch (JAXBException e) {
             throw new IntegrasjonException(e);
         }
-        return new PersonDto(PersonMapper.mapTilPerson(response.getPerson()), xmlWriter.toString());
+        PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson());
+        return new PersonDto(dokument, xmlWriter.toString());
     }
 
     @Override
