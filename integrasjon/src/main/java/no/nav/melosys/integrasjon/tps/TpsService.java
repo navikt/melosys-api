@@ -130,7 +130,7 @@ public class TpsService implements TpsFasade {
         saksopplysning.setDokument(personDto.dokument);
         // FIXME
         saksopplysning.setInternXml(personDto.dokumentXml);
-        dokumentFactory.lagInternXml(saksopplysning);
+        //dokumentFactory.lagInternXml(saksopplysning);
         return saksopplysning;
     }
 

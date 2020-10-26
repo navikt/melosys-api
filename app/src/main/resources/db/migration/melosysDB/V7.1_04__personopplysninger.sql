@@ -1,5 +1,5 @@
--- FIXME: NOT NULL og nytt navn etter migrering
-ALTER TABLE SAKSOPPLYSNING ADD INTERN_JSON CLOB;
+-- FIXME: NOT NULL etter migrering
+ALTER TABLE SAKSOPPLYSNING ADD DOKUMENT CLOB;
 
 -- FIXME: Fjern dokument_xml (+ kilde?) fra saksopplysning
 CREATE TABLE saksopplysning_dokument_kilde (

@@ -8,6 +8,7 @@ import javax.persistence.*;
 
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.jpa.HibernateXmlType;
+import no.nav.melosys.domain.jpa.SaksopplysningDokumentConverter;
 import no.nav.melosys.domain.jpa.SaksopplysningListener;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -57,12 +58,8 @@ public class Saksopplysning {
     @Column(name = "intern_xml")
     private String internXml;
 
-    // FIXME Migrere internXml + internJson til samme felt i DB
-    @Lob
-    @Column(name = "intern_json")
-    private String internJson;
-
-    @Transient
+    // FIXME Konvertere + migrere internXml til samme felt i DB
+    @Convert(converter = SaksopplysningDokumentConverter.class)
     private SaksopplysningDokument dokument;
 
     public Long getId() {
@@ -143,14 +140,6 @@ public class Saksopplysning {
 
     public void setInternXml(String internXml) {
         this.internXml = internXml;
-    }
-
-    public String getInternJson() {
-        return internJson;
-    }
-
-    public void setInternJson(String internJson) {
-        this.internJson = internJson;
     }
 
     public SaksopplysningDokument getDokument() {
