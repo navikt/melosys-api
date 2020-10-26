@@ -355,6 +355,17 @@
                 <artifactId>spring-retry</artifactId>
                 <version>${spring-retry.version}</version>
             </dependency>
+            <dependency>
+                <groupId>net.javacrumbs.shedlock</groupId>
+                <artifactId>shedlock-spring</artifactId>
+                <version>${shedlock.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.javacrumbs.shedlock</groupId>
+                <artifactId>shedlock-provider-jdbc-template</artifactId>
+                <version>${shedlock.version}</version>
+            </dependency>
+
 
             <!-- Transitive avhengiheter med konflikter -->
             <dependency>
@@ -391,16 +402,6 @@
                 <groupId>org.ow2.asm</groupId>
                 <artifactId>asm</artifactId>
                 <version>${asm.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>net.javacrumbs.shedlock</groupId>
-                <artifactId>shedlock-spring</artifactId>
-                <version>${shedlock.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>net.javacrumbs.shedlock</groupId>
-                <artifactId>shedlock-provider-jdbc-template</artifactId>
-                <version>${shedlock.version}</version>
             </dependency>
 
             <!-- NAV felleskomponenter -->
