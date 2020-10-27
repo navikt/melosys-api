@@ -9,14 +9,12 @@ import javax.persistence.*;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.jpa.HibernateXmlType;
 import no.nav.melosys.domain.jpa.SaksopplysningDokumentConverter;
-import no.nav.melosys.domain.jpa.SaksopplysningListener;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
 @TypeDefs(@TypeDef(name = Saksopplysning.XMLTYPE, typeClass = HibernateXmlType.class))
 @Entity
-@EntityListeners({SaksopplysningListener.class})
 @Table(name = "saksopplysning")
 public class Saksopplysning {
     public static final String XMLTYPE = "xmltype";
@@ -60,6 +58,7 @@ public class Saksopplysning {
 
     // FIXME Konvertere + migrere internXml til samme felt i DB
     @Convert(converter = SaksopplysningDokumentConverter.class)
+    @Column(name = "dokument")
     private SaksopplysningDokument dokument;
 
     public Long getId() {

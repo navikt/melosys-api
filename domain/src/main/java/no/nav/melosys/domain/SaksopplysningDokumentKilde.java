@@ -3,7 +3,6 @@ package no.nav.melosys.domain;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.jpa.HibernateXmlType;
-import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
@@ -24,15 +23,15 @@ public class SaksopplysningDokumentKilde {
     @Column(name = "kilde", nullable = false, updatable = false)
     private SaksopplysningKilde kilde;
 
-    @Type(type = Saksopplysning.XMLTYPE)
-    @Column(name = "dokument_xml", nullable = false)
-    public String dokumentXml;
+    @Lob
+    @Column(name = "mottatt_dokument", nullable = false)
+    public String mottattDokument;
 
     public SaksopplysningDokumentKilde() {}
 
-    public SaksopplysningDokumentKilde(Saksopplysning saksopplysning, SaksopplysningKilde kilde, String dokumentXml) {
+    public SaksopplysningDokumentKilde(Saksopplysning saksopplysning, SaksopplysningKilde kilde, String mottattDokument) {
         this.saksopplysning = saksopplysning;
         this.kilde = kilde;
-        this.dokumentXml = dokumentXml;
+        this.mottattDokument = mottattDokument;
     }
 }
