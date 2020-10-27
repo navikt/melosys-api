@@ -8,13 +8,11 @@ import no.nav.freg.abac.core.service.AbacService;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.sikkerhet.abac.Pep;
 import no.nav.melosys.sikkerhet.abac.PepImpl;
@@ -32,8 +30,6 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
-
 @ExtendWith(MockitoExtension.class)
 public class TilgangServiceTest {
     private TilgangService tilgangService;
@@ -44,8 +40,6 @@ public class TilgangServiceTest {
     private FagsakService fagsakService;
     @Mock
     private BehandlingService behandlingService;
-    @Mock
-    private OppgaveService oppgaveService;
 
     private XacmlResponse abacResponse;
     private AbacContext abacContext;
@@ -68,7 +62,7 @@ public class TilgangServiceTest {
         fagsakMocked = mock(Fagsak.class);
         behandlingMocked = mock(Behandling.class);
 
-        tilgangService = new TilgangService(fagsakService, behandlingService, oppgaveService, pep);
+        tilgangService = new TilgangService(fagsakService, behandlingService, pep);
     }
 
     @Test
@@ -125,7 +119,6 @@ public class TilgangServiceTest {
         String saksbehandler = "Z123456";
         SubjectHandler subjectHandler = mock(SpringSubjectHandler.class);
         SubjectHandler.set(subjectHandler);
-        Oppgave oppgave = new Oppgave.Builder().setTilordnetRessurs(saksbehandler).build();
 
         when(abacContext.getRequest()).thenReturn(new XacmlRequest());
         when(abacService.evaluate(any())).thenReturn(abacResponse);
@@ -133,9 +126,8 @@ public class TilgangServiceTest {
         when(fagsakMocked.hentBruker()).thenReturn(new Aktoer());
         when(behandlingMocked.getFagsak()).thenReturn(fagsakMocked);
         when(subjectHandler.getUserID()).thenReturn(saksbehandler);
-        when(behandlingMocked.erRedigerbar()).thenReturn(true);
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandlingMocked);
-        when(oppgaveService.finnOppgaveMedFagsaksnummer(any())).thenReturn(Optional.of(oppgave));
+        when(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandlingMocked, saksbehandler)).thenReturn(true);
 
         tilgangService.sjekkRedigerbarOgTilordnetSaksbehandlerOgTilgang(123123123);
     }
@@ -145,16 +137,13 @@ public class TilgangServiceTest {
         String saksbehandler = "Z123456";
         SubjectHandler subjectHandler = mock(SpringSubjectHandler.class);
         SubjectHandler.set(subjectHandler);
-        Oppgave oppgave = new Oppgave.Builder().setTilordnetRessurs("Z000000").build();
 
         when(subjectHandler.getUserID()).thenReturn(saksbehandler);
-        when(behandlingMocked.getFagsak()).thenReturn(fagsakMocked);
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandlingMocked);
-        when(oppgaveService.finnOppgaveMedFagsaksnummer(any())).thenReturn(Optional.of(oppgave));
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> tilgangService.sjekkRedigerbarOgTilordnetSaksbehandlerOgTilgang(123123123))
-            .withMessage("Forsøk på å endre behandling med id 123123123 som ikke er tilordnet Z123456");
+            .withMessage("Forsøk på å endre behandling med id 123123123 som er ikke-redigerbar eller ikke er tilordnet Z123456");
     }
 
     @Test
