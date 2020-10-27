@@ -4,12 +4,15 @@ import java.time.LocalDate;
 import java.util.List;
 import javax.xml.bind.annotation.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.AbstraktOrganisasjon;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
+@JsonIgnoreProperties(value = {"postadresse", "forretningsadresse"}, allowGetters = true)
 public class OrganisasjonDokument  extends AbstraktOrganisasjon implements SaksopplysningDokument {
     @XmlElementWrapper(name="navn")
     @XmlElement(name="navnelinje")
@@ -49,6 +52,12 @@ public class OrganisasjonDokument  extends AbstraktOrganisasjon implements Sakso
 
     public void setNavn(List<String> navn) {
         this.navn = navn;
+    }
+
+    // Brukes til å deserialisere objektet fra databasen
+    @JsonProperty("navn")
+    public void setNavn(String navn) {
+        this.navn = List.of(navn);
     }
 
     public OrganisasjonsDetaljer getOrganisasjonDetaljer() {

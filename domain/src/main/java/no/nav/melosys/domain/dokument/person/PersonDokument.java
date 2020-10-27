@@ -71,7 +71,6 @@ public class PersonDokument implements SaksopplysningDokument {
     public UstrukturertAdresse postadresse = new UstrukturertAdresse();
 
     // @JsonIgnore // FIXME - Bruk PersonDto i BehandlingTjeneste
-    @JsonIgnore // FIXME Trenger JsonTypeInfo her også
     public MidlertidigPostadresse midlertidigPostadresse = new MidlertidigPostadresse();
 
     @XmlTransient

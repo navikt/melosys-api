@@ -5,14 +5,19 @@ import javax.persistence.AttributeConverter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.domain.serializer.LovvalgBestemmelseDeserializer;
 
 public class SaksopplysningDokumentConverter implements AttributeConverter<SaksopplysningDokument, String> {
 
     private final static ObjectMapper objectMapper = new ObjectMapper()
         .registerModule(new JavaTimeModule())
-        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        .registerModule(new SimpleModule()
+            .addDeserializer(LovvalgBestemmelse.class, new LovvalgBestemmelseDeserializer()))
+        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true);
 
     @Override
     public String convertToDatabaseColumn(SaksopplysningDokument saksopplysningDokument) {

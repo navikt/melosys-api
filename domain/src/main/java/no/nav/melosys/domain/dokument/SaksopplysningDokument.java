@@ -1,6 +1,5 @@
 package no.nav.melosys.domain.dokument;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
@@ -29,7 +28,6 @@ import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
     @JsonSubTypes.Type(value = SobSakDokument.class),
     @JsonSubTypes.Type(value = UtbetalingDokument.class)
 })
-@JsonIgnoreProperties(ignoreUnknown = true)
 public interface SaksopplysningDokument extends Dokument {
 
 }
