@@ -31,7 +31,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class TilgangServiceTest {
+class TilgangServiceTest {
     private TilgangService tilgangService;
 
     @Mock
@@ -50,7 +50,7 @@ public class TilgangServiceTest {
     private final String saksnummer = "MEL-111";
 
     @BeforeEach
-    public void setUp() throws TekniskException, IkkeFunnetException {
+    void setUp() {
         abacContext = mock(AbacContext.class);
 
         abacResponse = mock(XacmlResponse.class);
@@ -66,7 +66,7 @@ public class TilgangServiceTest {
     }
 
     @Test
-    public void testBehandlingsIdIkketilgang() throws Exception {
+    void testBehandlingsIdIkketilgang() throws Exception {
         when(abacContext.getRequest()).thenReturn(new XacmlRequest());
         when(abacService.evaluate(any())).thenReturn(abacResponse);
         when(abacResponse.getDecision()).thenReturn(Decision.DENY);
@@ -80,7 +80,7 @@ public class TilgangServiceTest {
     }
 
     @Test
-    public void testBehandlingsIdOk() throws Exception {
+    void testBehandlingsIdOk() throws Exception {
         when(abacContext.getRequest()).thenReturn(new XacmlRequest());
         when(abacService.evaluate(any())).thenReturn(abacResponse);
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
@@ -92,7 +92,7 @@ public class TilgangServiceTest {
     }
 
     @Test
-    public void sjekkRedigerbar_behandlingErRedigerbar_Ok() throws FunksjonellException, TekniskException {
+    void sjekkRedigerbar_behandlingErRedigerbar_Ok() throws FunksjonellException, TekniskException {
         when(abacContext.getRequest()).thenReturn(new XacmlRequest());
         when(abacService.evaluate(any())).thenReturn(abacResponse);
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
@@ -105,7 +105,7 @@ public class TilgangServiceTest {
     }
 
     @Test
-    public void sjekkRedigerbar_behandlingIkkeRedigerbar_girFeil() throws FunksjonellException, TekniskException {
+    void sjekkRedigerbar_behandlingIkkeRedigerbar_girFeil() throws FunksjonellException {
         when(behandlingMocked.erRedigerbar()).thenReturn(false);
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandlingMocked);
 
@@ -115,7 +115,7 @@ public class TilgangServiceTest {
     }
 
     @Test
-    public void sjekkTilordnet_behandlingErTilordnetSaksbehandler_Ok() throws FunksjonellException, TekniskException {
+    void sjekkTilordnet_behandlingErTilordnetSaksbehandler_Ok() throws FunksjonellException, TekniskException {
         String saksbehandler = "Z123456";
         SubjectHandler subjectHandler = mock(SpringSubjectHandler.class);
         SubjectHandler.set(subjectHandler);
@@ -133,7 +133,7 @@ public class TilgangServiceTest {
     }
 
     @Test
-    public void sjekkTilordnet_behandlingErIkkeTilordnetSaksbehandler_girFeil() throws FunksjonellException, TekniskException {
+    public void sjekkTilordnet_behandlingErIkkeTilordnetSaksbehandler_girFeil() throws FunksjonellException {
         String saksbehandler = "Z123456";
         SubjectHandler subjectHandler = mock(SpringSubjectHandler.class);
         SubjectHandler.set(subjectHandler);
@@ -147,7 +147,7 @@ public class TilgangServiceTest {
     }
 
     @Test
-    public void testFagsakOk() throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
+    void testFagsakOk() throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
         when(abacContext.getRequest()).thenReturn(new XacmlRequest());
         when(abacService.evaluate(any())).thenReturn(abacResponse);
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
@@ -158,7 +158,7 @@ public class TilgangServiceTest {
     }
 
     @Test
-    public void testFagsakIkkeTilgang() throws TekniskException, IkkeFunnetException {
+    void testFagsakIkkeTilgang() throws TekniskException, IkkeFunnetException {
         when(abacContext.getRequest()).thenReturn(new XacmlRequest());
         when(abacService.evaluate(any())).thenReturn(abacResponse);
         when(abacResponse.getDecision()).thenReturn(Decision.DENY);
