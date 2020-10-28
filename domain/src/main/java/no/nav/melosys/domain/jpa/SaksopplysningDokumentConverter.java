@@ -7,7 +7,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
+import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
+import no.nav.melosys.domain.jpa.mixin.GeografiskAdresseMixIn;
+import no.nav.melosys.domain.jpa.mixin.SaksopplysningDokumentMixIn;
+import no.nav.melosys.domain.jpa.mixin.TilleggsinformasjonDetaljerMixIn;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.serializer.LovvalgBestemmelseDeserializer;
 
@@ -18,7 +24,9 @@ public class SaksopplysningDokumentConverter implements AttributeConverter<Sakso
         .registerModule(new SimpleModule()
             .addDeserializer(LovvalgBestemmelse.class, new LovvalgBestemmelseDeserializer()))
         .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true)
-        .addMixIn(SaksopplysningDokument.class, SaksopplysningDokumentMixIn.class);
+        .addMixIn(GeografiskAdresse.class, GeografiskAdresseMixIn.class)
+        .addMixIn(SaksopplysningDokument.class, SaksopplysningDokumentMixIn.class)
+        .addMixIn(TilleggsinformasjonDetaljer.class, TilleggsinformasjonDetaljerMixIn.class);
 
     @Override
     public String convertToDatabaseColumn(SaksopplysningDokument saksopplysningDokument) {
@@ -26,7 +34,8 @@ public class SaksopplysningDokumentConverter implements AttributeConverter<Sakso
             return null;
         }
         try {
-            return objectMapper.writeValueAsString(saksopplysningDokument);
+            return objectMapper.writerWithView(DokumentView.Database.class)
+                .writeValueAsString(saksopplysningDokument);
         } catch (JsonProcessingException e) {
             return null;
         }

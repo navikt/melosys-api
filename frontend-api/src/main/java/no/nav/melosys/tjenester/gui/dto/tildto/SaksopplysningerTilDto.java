@@ -23,6 +23,7 @@ import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.tjenester.gui.dto.PersonUtenAdresseDto;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
 import no.nav.melosys.tjenester.gui.dto.dokument.PersonhistorikkDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.SedDokumentDto;
@@ -61,7 +62,7 @@ public class SaksopplysningerTilDto {
 
             switch (type) {
                 case PERSOPL:
-                    dto.setPerson(new PersonTilDto((PersonDokument) dokument));
+                    dto.setPerson(new PersonUtenAdresseDto((PersonDokument) dokument));
                     break;
                 case ARBFORH:
                     ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) dokument;

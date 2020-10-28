@@ -1,6 +1,8 @@
 package no.nav.melosys.domain.dokument.person;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
+import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.dokument.felles.Land;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -28,7 +30,7 @@ public class Bostedsadresse {
         this.gateadresse = gateadresse;
     }
 
-    @JsonIgnore
+    @JsonView(DokumentView.Database.class)
     public String getTilleggsadresse() {
         return tilleggsadresse;
     }
@@ -37,7 +39,7 @@ public class Bostedsadresse {
         this.tilleggsadresse = tilleggsadresse;
     }
 
-    @JsonIgnore
+    @JsonView(DokumentView.Database.class)
     public String getTilleggsadresseType() {
         return tilleggsadresseType;
     }

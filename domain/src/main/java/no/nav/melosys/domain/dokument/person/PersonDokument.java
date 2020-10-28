@@ -8,7 +8,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
@@ -35,13 +34,10 @@ public class PersonDokument implements SaksopplysningDokument {
     @JsonProperty("kjoenn")
     public KjoennsType kjønn;
 
-    @JsonIgnore
     public String fornavn;
 
-    @JsonIgnore
     public String mellomnavn;
 
-    @JsonIgnore
     public String etternavn;
 
     public String sammensattNavn;

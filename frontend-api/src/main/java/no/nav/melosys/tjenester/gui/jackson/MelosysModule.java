@@ -13,7 +13,6 @@ public class MelosysModule extends SimpleModule {
     public MelosysModule(KodeverkService kodeverkService) {
         super();
 
-        addSerializer(new FamiliemedlemSerializer(kodeverkService));
         addSerializer(new FellesKodeverkSerializer(kodeverkService));
         addSerializer(new KodeSerializer());
         addSerializer(new MedlemsperiodeSerializer(kodeverkService));

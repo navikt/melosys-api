@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.HarPeriode;
@@ -34,6 +35,7 @@ public class PensjonOgUfoere extends TilleggsinformasjonDetaljer implements HarP
     public Integer uføreEllerPensjonsgrad;
 
     @Override
+    @JsonIgnore
     public ErPeriode getPeriode() {
         return tidsrom;
     }

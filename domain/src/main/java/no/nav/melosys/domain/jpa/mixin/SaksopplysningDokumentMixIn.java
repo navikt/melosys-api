@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.jpa;
+package no.nav.melosys.domain.jpa.mixin;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -24,5 +24,4 @@ import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
     @JsonSubTypes.Type(value = SobSakDokument.class),
     @JsonSubTypes.Type(value = UtbetalingDokument.class)
 })
-interface SaksopplysningDokumentMixIn {
-}
+public interface SaksopplysningDokumentMixIn {}

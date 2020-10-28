@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.tjenester.gui.dto.PersonDto;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,7 +32,9 @@ public class PersonTjenesteTest extends JsonSchemaTestParent {
     public void personSchemaValidering() throws Exception {
         ResponseEntity person = personTjeneste.getPerson("12345678910");
         ObjectMapper mapper = objectMapperMedKodeverkServiceStub();
-        String jsonInString = mapper.writeValueAsString(person.getBody());
+        String jsonInString = mapper
+            .writerWithView(DokumentView.FrontendApi.class)
+            .writeValueAsString(person.getBody());
         valider(jsonInString, "personer-schema.json", log);
     }
 }

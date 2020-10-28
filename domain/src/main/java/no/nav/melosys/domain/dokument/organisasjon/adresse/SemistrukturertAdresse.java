@@ -5,7 +5,9 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
+import no.nav.melosys.domain.dokument.DokumentView;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "SemistrukturertAdresse")
@@ -23,7 +25,7 @@ public class SemistrukturertAdresse extends GeografiskAdresse {
 
     private String kommunenr;
 
-    @JsonIgnore
+    @JsonView(DokumentView.Database.class)
     @XmlElement(name = "poststed_utenlandsk")
     private String poststedUtland;
 
