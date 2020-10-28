@@ -19,7 +19,6 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
 import org.junit.Before;
@@ -129,7 +128,7 @@ public class SaksopplysningerTilDtoTest {
 
         SaksopplysningerDto saksopplysningerDto = saksopplysningerTilDto.getSaksopplysningerDto(saksopplysninger, behandling);
 
-        PersonDokument person = saksopplysningerDto.getPerson();
+        PersonTilDto person = saksopplysningerDto.getPerson();
 
         assertThat(person).isNotNull();
         assertThat(person.statsborgerskap).isNotNull();

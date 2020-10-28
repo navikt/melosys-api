@@ -53,24 +53,18 @@ public class PersonDokument implements SaksopplysningDokument {
     public LocalDate fødselsdato;
 
     @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
-    // @JsonIgnore // FIXME - Bruk PersonDto i BehandlingTjeneste
     public LocalDate dødsdato;
 
-    // @JsonIgnore // FIXME - Bruk PersonDto i BehandlingTjeneste
     public Diskresjonskode diskresjonskode;
 
-    // @JsonProperty("personStatus") // FIXME - Bruk PersonDto i BehandlingTjeneste
     public Personstatus personstatus;
 
     public LocalDate statsborgerskapDato;
 
-    // @JsonIgnore // FIXME - Bruk PersonDto i BehandlingTjeneste
     public Bostedsadresse bostedsadresse = new Bostedsadresse();
 
-    // @JsonIgnore // FIXME - Bruk PersonDto i BehandlingTjeneste
     public UstrukturertAdresse postadresse = new UstrukturertAdresse();
 
-    // @JsonIgnore // FIXME - Bruk PersonDto i BehandlingTjeneste
     public MidlertidigPostadresse midlertidigPostadresse = new MidlertidigPostadresse();
 
     @XmlTransient

@@ -1,7 +1,5 @@
 package no.nav.melosys.integrasjon.tps.mapper;
 
-import java.time.LocalDate;
-
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.*;
 import no.nav.melosys.domain.dokument.person.Personstatus;
@@ -19,17 +17,22 @@ public class PersonMapper {
         PersonDokument dokument = new PersonDokument();
         dokument.fnr = mapFnr(person.getAktoer());
         dokument.sivilstand = mapSivilstand(person.getSivilstand());
-        dokument.sivilstandGyldighetsperiodeFom = KonverteringsUtils.xmlGregorianCalendarToLocalDate(person.getSivilstand().getFomGyldighetsperiode());
-        dokument.statsborgerskap = Land.av(person.getStatsborgerskap().getLand().getValue());
+        dokument.sivilstandGyldighetsperiodeFom = person.getSivilstand() == null ? null
+            : KonverteringsUtils.xmlGregorianCalendarToLocalDate(person.getSivilstand().getFomGyldighetsperiode());
+        dokument.statsborgerskap = person.getStatsborgerskap() == null ? null
+            : Land.av(person.getStatsborgerskap().getLand().getValue());
         dokument.kjønn = mapKjønn(person.getKjoenn());
-        dokument.fornavn = person.getPersonnavn().getFornavn();
-        dokument.mellomnavn = person.getPersonnavn().getMellomnavn();
-        dokument.etternavn = person.getPersonnavn().getEtternavn();
-        dokument.sammensattNavn = person.getPersonnavn().getSammensattNavn();
-        dokument.fødselsdato = mapFødselsdato(person.getFoedselsdato());
-        dokument.dødsdato = mapDødsdato(person.getDoedsdato());
+        dokument.fornavn = person.getPersonnavn() == null ? null : person.getPersonnavn().getFornavn();
+        dokument.mellomnavn = person.getPersonnavn() == null ? null : person.getPersonnavn().getMellomnavn();
+        dokument.etternavn = person.getPersonnavn() == null ? null : person.getPersonnavn().getEtternavn();
+        dokument.sammensattNavn = person.getPersonnavn() == null ? null : person.getPersonnavn().getSammensattNavn();
+        dokument.fødselsdato = person.getFoedselsdato() == null ? null
+            : KonverteringsUtils.xmlGregorianCalendarToLocalDate(person.getFoedselsdato().getFoedselsdato());
+        dokument.dødsdato = person.getDoedsdato() == null ? null
+            : KonverteringsUtils.xmlGregorianCalendarToLocalDate(person.getDoedsdato().getDoedsdato());
         dokument.diskresjonskode = mapDiskresjonskode(person.getDiskresjonskode());
-        dokument.personstatus = mapPersonstatus(person.getPersonstatus());
+        dokument.personstatus = person.getPersonstatus() == null ? null
+            : Personstatus.valueOf(person.getPersonstatus().getPersonstatus().getValue());
         dokument.bostedsadresse = AdresseMapper.mapTilBostedsadresse(person.getBostedsadresse());
         dokument.postadresse = AdresseMapper.mapTilPostadresse(person.getPostadresse());
         if (person instanceof Bruker) {
@@ -50,30 +53,28 @@ public class PersonMapper {
     }
 
     static String mapFnr(Aktoer aktoer) {
-        return ((PersonIdent) aktoer).getIdent().getIdent();
+        if (aktoer instanceof PersonIdent) {
+            return ((PersonIdent) aktoer).getIdent().getIdent();
+        }
+        return null;
     }
 
     private static Sivilstand mapSivilstand(no.nav.tjeneste.virksomhet.person.v3.informasjon.Sivilstand sivilstand) {
+        if (sivilstand == null) {
+            return null;
+        }
         Sivilstand s = new Sivilstand();
         s.setKode(sivilstand.getSivilstand().getValue());
         return s;
     }
 
     private static KjoennsType mapKjønn(Kjoenn kjoenn) {
+        if (kjoenn == null) {
+            return null;
+        }
         KjoennsType kt = new KjoennsType();
         kt.setKode(kjoenn.getKjoenn().getValue());
         return kt;
-    }
-
-    private static LocalDate mapFødselsdato(Foedselsdato foedselsdato) {
-        return KonverteringsUtils.xmlGregorianCalendarToLocalDate(foedselsdato.getFoedselsdato());
-    }
-
-    private static LocalDate mapDødsdato(Doedsdato doedsdato) {
-        if (doedsdato == null) {
-            return null;
-        }
-        return KonverteringsUtils.xmlGregorianCalendarToLocalDate(doedsdato.getDoedsdato());
     }
 
     private static Diskresjonskode mapDiskresjonskode(Diskresjonskoder diskresjonskode) {
@@ -83,9 +84,5 @@ public class PersonMapper {
         Diskresjonskode d = new Diskresjonskode();
         d.setKode(diskresjonskode.getValue());
         return d;
-    }
-
-    private static Personstatus mapPersonstatus(no.nav.tjeneste.virksomhet.person.v3.informasjon.Personstatus personstatus) {
-        return Personstatus.valueOf(personstatus.getPersonstatus().getValue());
     }
 }

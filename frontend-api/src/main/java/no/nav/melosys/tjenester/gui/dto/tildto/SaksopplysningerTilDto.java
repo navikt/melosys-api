@@ -61,7 +61,7 @@ public class SaksopplysningerTilDto {
 
             switch (type) {
                 case PERSOPL:
-                    dto.setPerson((PersonDokument) dokument);
+                    dto.setPerson(new PersonTilDto((PersonDokument) dokument));
                     break;
                 case ARBFORH:
                     ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) dokument;

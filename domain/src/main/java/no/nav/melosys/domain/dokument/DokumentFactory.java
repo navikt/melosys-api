@@ -50,11 +50,6 @@ public class DokumentFactory {
     public String lagInternXml(Saksopplysning saksopplysning) {
         Assert.notNull(saksopplysning, "saksopplysning må ikke være null");
 
-        // FIXME
-        if (saksopplysning.getType() == SaksopplysningType.PERSOPL) {
-            return null;
-        }
-
         String dokumentXml = saksopplysning.getDokumentXml();
         SaksopplysningDokument dokument = saksopplysning.getDokument();
         if (dokumentXml == null && dokument == null) {
@@ -101,11 +96,6 @@ public class DokumentFactory {
      */
     public SaksopplysningDokument lagDokument(Saksopplysning saksopplysning) {
         Assert.notNull(saksopplysning, "saksopplysning må ikke være null");
-
-        // FIXME
-        if (saksopplysning.getType() == SaksopplysningType.PERSOPL) {
-            return null;
-        }
 
         if (saksopplysning.getDokumentXml() == null) {
             saksopplysning.setDokument(null);

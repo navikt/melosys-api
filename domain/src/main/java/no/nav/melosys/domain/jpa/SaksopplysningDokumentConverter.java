@@ -17,7 +17,8 @@ public class SaksopplysningDokumentConverter implements AttributeConverter<Sakso
         .registerModule(new JavaTimeModule())
         .registerModule(new SimpleModule()
             .addDeserializer(LovvalgBestemmelse.class, new LovvalgBestemmelseDeserializer()))
-        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true);
+        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true)
+        .addMixIn(SaksopplysningDokument.class, SaksopplysningDokumentMixIn.class);
 
     @Override
     public String convertToDatabaseColumn(SaksopplysningDokument saksopplysningDokument) {
