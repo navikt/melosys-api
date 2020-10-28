@@ -15,7 +15,7 @@ public class UnleashConfig {
     @Bean
     public Unleash unleash(Environment environment) {
         var config = no.finn.unleash.util.UnleashConfig.builder()
-            .appName(environment.getProperty("melosys"))
+            .appName("melosys")
             .unleashAPI("https://unleash.nais.adeo.no/api/")
             .build();
 
