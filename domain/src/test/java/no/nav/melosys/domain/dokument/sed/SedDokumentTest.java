@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningKilde;
+import no.nav.melosys.domain.SaksopplysningKildesystem;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
@@ -35,7 +35,7 @@ public class SedDokumentTest {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(sedDokument);
         saksopplysning.setType(SaksopplysningType.SEDOPPL);
-        saksopplysning.setKilde(SaksopplysningKilde.EESSI);
+        saksopplysning.setKilde(SaksopplysningKildesystem.EESSI);
         Instant nå = Instant.now();
         saksopplysning.setEndretDato(nå);
         saksopplysning.setRegistrertDato(nå);

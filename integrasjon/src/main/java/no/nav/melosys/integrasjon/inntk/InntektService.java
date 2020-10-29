@@ -10,7 +10,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.ws.soap.SOAPFaultException;
 
 import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningKilde;
+import no.nav.melosys.domain.SaksopplysningKildesystem;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XmlFormaterer;
@@ -78,7 +78,7 @@ public class InntektService implements InntektFasade {
         } else {
             throw new IntegrasjonException("DokumentXML er null!");
         }
-        saksopplysning.setKilde(SaksopplysningKilde.INNTK);
+        saksopplysning.setKilde(SaksopplysningKildesystem.INNTK);
         saksopplysning.setType(SaksopplysningType.INNTK);
         saksopplysning.setVersjon(INNTEKT_VERSJON);
 

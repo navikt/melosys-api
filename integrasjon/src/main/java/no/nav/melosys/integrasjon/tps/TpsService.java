@@ -6,11 +6,12 @@ import java.util.*;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
-import no.nav.melosys.domain.SaksopplysningDokumentKilde;
+
+import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningKilde;
+import no.nav.melosys.domain.SaksopplysningKildesystem;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -21,7 +22,7 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.tps.aktoer.AktoerIdCache;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
-import no.nav.melosys.integrasjon.tps.mapper.PersonDto;
+import no.nav.melosys.integrasjon.tps.mapper.PersonMedKilde;
 import no.nav.melosys.integrasjon.tps.mapper.PersonMapper;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
 import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentAktoerIdForIdentPersonIkkeFunnet;
@@ -111,30 +112,31 @@ public class TpsService implements TpsFasade {
 
     @Override
     public Saksopplysning hentPerson(String ident, Informasjonsbehov behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        PersonDto personDto = hentPersonDto(ident, mapInformasjonsbehovTilTps(behov));
+        PersonMedKilde personMedKilde = hentPersonDto(ident, mapInformasjonsbehovTilTps(behov));
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.getKilder().add(
-            new SaksopplysningDokumentKilde(saksopplysning, SaksopplysningKilde.TPS, personDto.dokumentXml)
+            new SaksopplysningKilde(saksopplysning, SaksopplysningKildesystem.TPS, personMedKilde.dokumentXml)
         );
-        saksopplysning.setKilde(SaksopplysningKilde.TPS); // FIXME fjernes
-        saksopplysning.setDokumentXml(personDto.dokumentXml); // FIXME fjernes
+        saksopplysning.setKilde(SaksopplysningKildesystem.TPS); // FIXME fjernes
+        saksopplysning.setDokumentXml(personMedKilde.dokumentXml); // FIXME fjernes
         saksopplysning.setType(SaksopplysningType.PERSOPL);
         saksopplysning.setVersjon(PERSON_VERSJON);
-        for (Familiemedlem familiemedlem : personDto.dokument.familiemedlemmer) {
-            PersonDto personIFamilie = hentPersonDto(familiemedlem.fnr, mapInformasjonsbehovTilTps(Informasjonsbehov.MED_FAMILIERELASJONER));
+
+        for (Familiemedlem familiemedlem : personMedKilde.dokument.familiemedlemmer) {
+            PersonMedKilde personIFamilie = hentPersonDto(familiemedlem.fnr, mapInformasjonsbehovTilTps(Informasjonsbehov.MED_FAMILIERELASJONER));
             PersonMapper.berikFamiliemedlemMedOpplysninger(familiemedlem, personIFamilie.dokument, ident);
             saksopplysning.getKilder().add(
-                new SaksopplysningDokumentKilde(saksopplysning, SaksopplysningKilde.TPS, personIFamilie.dokumentXml)
+                new SaksopplysningKilde(saksopplysning, SaksopplysningKildesystem.TPS, personIFamilie.dokumentXml)
             );
         }
-        saksopplysning.setDokument(personDto.dokument);
+        saksopplysning.setDokument(personMedKilde.dokument);
         // FIXME
-        saksopplysning.setInternXml(personDto.dokumentXml);
+        saksopplysning.setInternXml(personMedKilde.dokumentXml);
         //dokumentFactory.lagInternXml(saksopplysning);
         return saksopplysning;
     }
 
-    private PersonDto hentPersonDto(String ident, Set<no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov> behov) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
+    private PersonMedKilde hentPersonDto(String ident, Set<no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov> behov) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
         HentPersonRequest request = new HentPersonRequest();
         NorskIdent norskIdent = new NorskIdent();
         norskIdent.setIdent(ident);
@@ -165,7 +167,7 @@ public class TpsService implements TpsFasade {
             throw new IntegrasjonException(e);
         }
         PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson());
-        return new PersonDto(dokument, xmlWriter.toString());
+        return new PersonMedKilde(dokument, xmlWriter.toString());
     }
 
     @Override
@@ -213,7 +215,7 @@ public class TpsService implements TpsFasade {
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokumentXml(xmlWriter.toString());
-        saksopplysning.setKilde(SaksopplysningKilde.TPS);
+        saksopplysning.setKilde(SaksopplysningKildesystem.TPS);
         saksopplysning.setType(SaksopplysningType.PERSHIST);
         saksopplysning.setVersjon(PERSONHISTORIKK_VERSJON);
 

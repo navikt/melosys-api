@@ -79,7 +79,7 @@ public class V7_1_05__SAKSOPPLYSNING_XML_TIL_DOKUMENT_JSON extends BaseJavaMigra
         long behandlingID = resultSet.getLong("behandling_id");
         String versjon = resultSet.getString("versjon");
         String opplysningType = resultSet.getString("opplysning_type");
-        String kilde = resultSet.getString("kilde");
+        String kildesystem = resultSet.getString("kilde");
         // FIXME: Bruk intern_xml for q/p-data
         String xmlString = resultSet.getString("dokument_xml");
         String dokumentJson = null;
@@ -126,7 +126,7 @@ public class V7_1_05__SAKSOPPLYSNING_XML_TIL_DOKUMENT_JSON extends BaseJavaMigra
         }
         if (dokumentJson != null) {
             oppdaterSaksopplysning(con, saksopplysningID, dokumentJson);
-            opprettSaksopplysningKilde(con, saksopplysningID, kilde, xmlString);
+            opprettSaksopplysningKilde(con, saksopplysningID, kildesystem, xmlString);
         }
     }
 
@@ -176,14 +176,14 @@ public class V7_1_05__SAKSOPPLYSNING_XML_TIL_DOKUMENT_JSON extends BaseJavaMigra
         }
     }
 
-    private void opprettSaksopplysningKilde(OracleConnection con, long saksopplysningID, String kilde, String mottattDokument) throws SQLException {
+    private void opprettSaksopplysningKilde(OracleConnection con, long saksopplysningID, String kildesystem, String mottattDokument) throws SQLException {
         try (OraclePreparedStatement ps = (OraclePreparedStatement) con.prepareStatement(
-            "INSERT INTO SAKSOPPLYSNING_DOKUMENT_KILDE(saksopplysning_id, kilde, mottatt_dokument) VALUES (?, ?, ?)")) {
+            "INSERT INTO SAKSOPPLYSNING_KILDE(saksopplysning_id, kildesystem, mottatt_dokument) VALUES (?, ?, ?)")) {
 
             Clob clob = con.createClob();
             clob.setString(1, mottattDokument);
             ps.setLong(1, saksopplysningID);
-            ps.setString(2, kilde);
+            ps.setString(2, kildesystem);
             ps.setClob(3, clob);
 
             ps.execute();

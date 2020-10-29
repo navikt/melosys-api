@@ -1,35 +1,32 @@
 package no.nav.melosys.domain;
 
-import no.nav.melosys.domain.kodeverk.Kodeverk;
+import javax.persistence.*;
 
-public enum SaksopplysningKilde implements Kodeverk {
+@Entity
+@Table(name = "saksopplysning_kilde")
+public class SaksopplysningKilde {
 
-    AAREG("AAREG", "Aa-registeret"),
-    EESSI("EESSI", "EESSI-prosjektet"),
-    EREG("EREG", "Enhetsregisteret"),
-    INNTK("INNTK", "Inntektskomponenten"),
-    MEDL("MEDL", "Medlemskapsunntak"),
-    SBH("SBH", "Saksbehandler"),
-    SOB("SOB", "Sak og behandling"),
-    TPS("TPS", "Folkeregisteret"),
-    UTBETALDATA("UTBETALDATA", "Utbetaldata");
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public Long id;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "saksopplysning_id", nullable = false, updatable = false)
+    public Saksopplysning saksopplysning;
 
-    private String kode;
-    private String beskrivelse;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "kildesystem", nullable = false, updatable = false)
+    private SaksopplysningKildesystem kilde;
 
-    SaksopplysningKilde(String kode, String beskrivelse) {
-        this.kode = kode;
-        this.beskrivelse = beskrivelse;
-    }
+    @Lob
+    @Column(name = "mottatt_dokument", nullable = false)
+    public String mottattDokument;
 
-    @Override
-    public String getKode() {
-        return kode;
-    }
+    public SaksopplysningKilde() {}
 
-    @Override
-    public String getBeskrivelse() {
-        return beskrivelse;
+    public SaksopplysningKilde(Saksopplysning saksopplysning, SaksopplysningKildesystem kilde, String mottattDokument) {
+        this.saksopplysning = saksopplysning;
+        this.kilde = kilde;
+        this.mottattDokument = mottattDokument;
     }
 }

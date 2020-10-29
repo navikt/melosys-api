@@ -68,7 +68,7 @@ public class MedlService implements MedlFasade {
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokumentXml(xmlWriter.toString());
-        saksopplysning.setKilde(SaksopplysningKilde.MEDL);
+        saksopplysning.setKilde(SaksopplysningKildesystem.MEDL);
         saksopplysning.setType(SaksopplysningType.MEDL);
         saksopplysning.setVersjon(MEDLEMSKAP_VERSJON);
 

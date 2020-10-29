@@ -7,7 +7,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningKilde;
+import no.nav.melosys.domain.SaksopplysningKildesystem;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -95,7 +95,7 @@ public class AaregService implements AaregFasade {
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokumentXml(xmlWriter.toString());
-        saksopplysning.setKilde(SaksopplysningKilde.AAREG);
+        saksopplysning.setKilde(SaksopplysningKildesystem.AAREG);
         saksopplysning.setType(SaksopplysningType.ARBFORH);
         saksopplysning.setVersjon(ARBEIDSFORHOLD_VERSJON);
 
@@ -132,7 +132,7 @@ public class AaregService implements AaregFasade {
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokumentXml(xmlWriter.toString());
-        saksopplysning.setKilde(SaksopplysningKilde.AAREG);
+        saksopplysning.setKilde(SaksopplysningKildesystem.AAREG);
         saksopplysning.setType(SaksopplysningType.ARBFORH);
         saksopplysning.setVersjon(ARBEIDSFORHOLD_VERSJON);
 

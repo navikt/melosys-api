@@ -36,11 +36,11 @@ public class Saksopplysning {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "kilde", nullable = false, updatable = false)
-    private SaksopplysningKilde kilde;
+    private SaksopplysningKildesystem kilde;
 
     // FIXME Migrering fra kilde og fjerne felt(er)
     @OneToMany(mappedBy = "saksopplysning", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private Set<SaksopplysningDokumentKilde> kilder = new HashSet<>(1);
+    private Set<SaksopplysningKilde> kilder = new HashSet<>(1);
 
     @Column(name = "registrert_dato", nullable = false, updatable = false)
     private Instant registrertDato;
@@ -93,19 +93,19 @@ public class Saksopplysning {
         this.versjon = versjon;
     }
 
-    public SaksopplysningKilde getKilde() {
+    public SaksopplysningKildesystem getKilde() {
         return kilde;
     }
 
-    public void setKilde(SaksopplysningKilde kilde) {
+    public void setKilde(SaksopplysningKildesystem kilde) {
         this.kilde = kilde;
     }
 
-    public Set<SaksopplysningDokumentKilde> getKilder() {
+    public Set<SaksopplysningKilde> getKilder() {
         return kilder;
     }
 
-    public void setKilder(Set<SaksopplysningDokumentKilde> kilder) {
+    public void setKilder(Set<SaksopplysningKilde> kilder) {
         this.kilder = kilder;
     }
 

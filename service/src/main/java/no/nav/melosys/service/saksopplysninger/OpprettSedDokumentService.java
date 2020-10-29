@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningKilde;
+import no.nav.melosys.domain.SaksopplysningKildesystem;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
@@ -44,7 +44,7 @@ public class OpprettSedDokumentService {
         saksopplysning.setDokument(opprettSedDokument(melosysEessiMelding));
         saksopplysning.setType(SaksopplysningType.SEDOPPL);
         saksopplysning.setBehandling(behandling);
-        saksopplysning.setKilde(SaksopplysningKilde.EESSI);
+        saksopplysning.setKilde(SaksopplysningKildesystem.EESSI);
         saksopplysning.setVersjon(SED_DOKUMENT_VERSJON);
         saksopplysning.setEndretDato(nå);
         saksopplysning.setRegistrertDato(nå);
