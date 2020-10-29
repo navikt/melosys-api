@@ -16,7 +16,7 @@ public class UnleashConfig {
     public Unleash unleash(Environment environment) {
         var config = no.finn.unleash.util.UnleashConfig.builder()
             .appName("melosys")
-            .unleashAPI("https://unleash.nais.adeo.no/api/")
+            .unleashAPI("https://unleash.nais.io/api/")
             .build();
 
         Strategy isNotProdStrategy = new IsNotProdStrategy(environment.getProperty("NAIS_NAMESPACE"));
