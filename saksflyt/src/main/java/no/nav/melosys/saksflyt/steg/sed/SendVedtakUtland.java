@@ -69,7 +69,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             utpekingService.oppdaterSendtUtland(behandlingsresultat.hentValidertUtpekingsperiode());
             SendUtlandStatus status = sendSedA003(prosessinstans);
             log.info("SendUtlandStatus for behandling {}: {}", behandling.getId(), status);
-        } else {
+        } else if (skalSendesUtland(behandlingsresultat)){
             super.sendUtland(avklarBucType(behandling), prosessinstans);
         }
 
