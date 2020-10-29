@@ -9,6 +9,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.sak.FagsakService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +26,8 @@ class OppdaterSaksrelasjonTest {
     private EessiService eessiService;
     @Mock
     private JoarkFasade joarkFasade;
+    @Mock
+    private FagsakService fagsakService;
 
     private OppdaterSaksrelasjon oppdaterSaksrelasjon;
 
@@ -32,7 +35,7 @@ class OppdaterSaksrelasjonTest {
 
     @BeforeEach
     public void setup() {
-        oppdaterSaksrelasjon = new OppdaterSaksrelasjon(joarkFasade, eessiService);
+        oppdaterSaksrelasjon = new OppdaterSaksrelasjon(joarkFasade, eessiService, fagsakService);
     }
 
     @Test
@@ -92,6 +95,29 @@ class OppdaterSaksrelasjonTest {
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
         prosessinstans.setBehandling(behandling);
+
+        oppdaterSaksrelasjon.utfør(prosessinstans);
+        verify(eessiService).lagreSaksrelasjon(
+            eq(fagsak.getGsakSaksnummer()), eq(eessiMelding.getRinaSaksnummer()), eq(eessiMelding.getBucType())
+        );
+    }
+
+    @Test
+    void utfør_ingenBehandlingIngenArkivsakIDIProsessinstnas_henterArkivsakIDFraSaksnummerIFagsakServiceOppdatererSaksrelasjon() throws MelosysException {
+        final Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("MEL-0");
+        fagsak.setGsakSaksnummer(123L);
+
+        MelosysEessiMelding eessiMelding = new MelosysEessiMelding();
+        eessiMelding.setRinaSaksnummer("12312");
+        eessiMelding.setBucType("LA_BUC_06");
+
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
+        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, fagsak.getSaksnummer());
+
+
+        when(fagsakService.hentFagsak(eq(fagsak.getSaksnummer()))).thenReturn(fagsak);
 
         oppdaterSaksrelasjon.utfør(prosessinstans);
         verify(eessiService).lagreSaksrelasjon(

@@ -7,10 +7,12 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.sak.FagsakService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -19,10 +21,12 @@ public class OppdaterSaksrelasjon implements StegBehandler {
 
     private final JoarkFasade joarkFasade;
     private final EessiService eessiService;
+    private final FagsakService fagsakService;
 
-    public OppdaterSaksrelasjon(JoarkFasade joarkFasade, @Qualifier("system") EessiService eessiService) {
+    public OppdaterSaksrelasjon(JoarkFasade joarkFasade, @Qualifier("system") EessiService eessiService, FagsakService fagsakService) {
         this.joarkFasade = joarkFasade;
         this.eessiService = eessiService;
+        this.fagsakService = fagsakService;
     }
 
     @Override
@@ -35,12 +39,10 @@ public class OppdaterSaksrelasjon implements StegBehandler {
 
         Optional<MelosysEessiMelding> eessiMelding = finnEessiMelding(prosessinstans);
         if (eessiMelding.isPresent()) {
-            Long arkivsakID = prosessinstans.getBehandling() != null
-                ? prosessinstans.getBehandling().getFagsak().getGsakSaksnummer()
-                : prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class);
-
             eessiService.lagreSaksrelasjon(
-                arkivsakID, eessiMelding.get().getRinaSaksnummer(), eessiMelding.get().getBucType()
+                hentArkivsakID(prosessinstans),
+                eessiMelding.get().getRinaSaksnummer(),
+                eessiMelding.get().getBucType()
             );
         }
     }
@@ -59,5 +61,18 @@ public class OppdaterSaksrelasjon implements StegBehandler {
         }
 
         return Optional.empty();
+    }
+
+    private long hentArkivsakID(Prosessinstans prosessinstans) throws IkkeFunnetException {
+        if (prosessinstans.getBehandling() != null) {
+            return prosessinstans.getBehandling().getFagsak().getGsakSaksnummer();
+        }
+
+        Long arkivsakID = prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class);
+        if (arkivsakID == null) {
+            arkivsakID = fagsakService.hentFagsak(prosessinstans.getData(ProsessDataKey.SAKSNUMMER)).getGsakSaksnummer();
+        }
+
+        return arkivsakID;
     }
 }
