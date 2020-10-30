@@ -14,17 +14,14 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART11_3A;
 import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentOppgittBostedsland;
 import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentSøknadslandkoder;
 
@@ -33,16 +30,14 @@ public class LandvelgerService {
     private final AvklartefaktaService avklartefaktaService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
-    private final VilkaarsresultatRepository vilkaarsresultatRepository;
 
     @Autowired
     public LandvelgerService(AvklartefaktaService avklartefaktaService,
                              BehandlingsresultatService behandlingsresultatService,
-                             BehandlingsgrunnlagService behandlingsgrunnlagService, VilkaarsresultatRepository vilkaarsresultatRepository) {
+                             BehandlingsgrunnlagService behandlingsgrunnlagService) {
         this.avklartefaktaService = avklartefaktaService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
-        this.vilkaarsresultatRepository = vilkaarsresultatRepository;
     }
 
     public Landkoder hentArbeidsland(long behandlingID) throws FunksjonellException {
@@ -132,25 +127,13 @@ public class LandvelgerService {
 
     private Collection<Landkoder> hentTrygdemyndighetsland(Behandlingsresultat behandlingsresultat) throws IkkeFunnetException {
         final long behandlingID = behandlingsresultat.getId();
-        Collection<Vilkaar> oppfylteVilkår = hentOppfylteVilkår(behandlingID);
         BehandlingsgrunnlagData grunnlagdata = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID).getBehandlingsgrunnlagdata();
-        if (oppfylteVilkår.contains(FO_883_2004_ART11_3A)) {
+
+        if (behandlingsresultat.erInnvilgetArbeidPåSkipOmfattetAvArbeidsland() || erVideresendt(behandlingsresultat)) {
             return Lists.newArrayList(hentBostedsland(behandlingID, grunnlagdata));
+        } else {
+            return new ArrayList<>(hentAlleArbeidslandUtenMarginaltArbeid(behandlingID));
         }
-
-        if (erVideresendt(behandlingsresultat)) {
-            return Lists.newArrayList(hentBostedsland(behandlingID, grunnlagdata));
-        }
-
-        Collection<Landkoder> alleArbeidsland = hentAlleArbeidslandUtenMarginaltArbeid(behandlingID);
-        return new ArrayList<>(alleArbeidsland);
-    }
-
-    private Collection<Vilkaar> hentOppfylteVilkår(long behandlingID) {
-        return vilkaarsresultatRepository.findByBehandlingsresultatId(behandlingID).stream()
-            .filter(Vilkaarsresultat::isOppfylt)
-            .map(Vilkaarsresultat::getVilkaar)
-            .collect(Collectors.toSet());
     }
 
     public Landkoder hentBostedsland(Behandling behandling) {

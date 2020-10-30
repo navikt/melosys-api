@@ -114,7 +114,6 @@ public class UtpekingServiceTest {
         verify(prosessinstansService).opprettProsessinstansUtpekAnnetLand(eq(behandling), eq(Landkoder.SE), eq(mottakerInstitusjoner), isNull(), isNull());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(fagsak.getSaksnummer()));
 
-        assertThat(utpekingsperiode.getSendtUtland()).isNotNull();
         assertThat(behandlingsresultat)
             .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst, Behandlingsresultat::getFastsattAvLand)
             .containsExactly(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND, null, Landkoder.NO);
@@ -167,7 +166,6 @@ public class UtpekingServiceTest {
 
         verify(eessiService).validerOgAvklarMottakerInstitusjonerForBuc(eq(mottakerInstitusjoner), landkoderCaptor.capture(), eq(BucType.LA_BUC_02));
         assertThat(landkoderCaptor.getValue()).containsExactlyInAnyOrder(Landkoder.SE, Landkoder.DK, Landkoder.FI);
-        assertThat(utpekingsperiode.getSendtUtland()).isNotNull();
         assertThat(behandlingsresultat)
             .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst, Behandlingsresultat::getFastsattAvLand)
             .containsExactly(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND, null, Landkoder.NO);

@@ -180,6 +180,10 @@ public class Prosessinstans {
         this.endretDato = endretDato;
     }
 
+    public LocalDateTime getEndretDato() {
+        return endretDato;
+    }
+
     public List<ProsessinstansHendelse> getHendelser() {
         return hendelser;
     }
