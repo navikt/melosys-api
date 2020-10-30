@@ -116,7 +116,6 @@ public class UtpekingService {
         opprettLovvalgsperiode(behandlingID, utpekingsperiode);
         vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
         oppdaterBehandlingsresultat(behandlingsresultat);
-        oppdaterSendtUtland(utpekingsperiode);
         prosessinstansService.opprettProsessinstansUtpekAnnetLand(
             behandling, utpekingsperiode.getLovvalgsland(), mottakerinstitusjoner, ytterligereInformasjonSed, fritekstBrev
         );
