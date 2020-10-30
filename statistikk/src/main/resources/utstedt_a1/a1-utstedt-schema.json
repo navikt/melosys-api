@@ -106,7 +106,7 @@
       "$id": "#/properties/datoUtstedelse",
       "type": "string",
       "format": "date",
-      "description": "Dato A1 er utstedt"
+      "description": "Dato A1 er utstedt eller annullert"
     },
     "typeUtstedelse": {
       "$id": "#/properties/typeUtstedelse",
