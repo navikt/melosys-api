@@ -1,7 +1,5 @@
 package no.nav.melosys.domain;
 
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
-
 import java.time.Instant;
 import java.util.*;
 import javax.persistence.*;
@@ -21,6 +19,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 
 @Entity
 @Table(name = "behandling")
@@ -49,7 +49,7 @@ public class Behandling extends RegistreringsInfo {
     private Behandlingstyper type;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "beh_tema", nullable = false, updatable = false)
+    @Column(name = "beh_tema", nullable = false)
     private Behandlingstema tema;
 
     @Column(name = "siste_opplysninger_hentet_dato")
