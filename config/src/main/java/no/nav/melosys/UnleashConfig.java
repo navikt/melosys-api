@@ -1,8 +1,10 @@
 package no.nav.melosys;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import no.finn.unleash.DefaultUnleash;
+import no.finn.unleash.FakeUnleash;
 import no.finn.unleash.Unleash;
 import no.finn.unleash.strategy.Strategy;
 import org.springframework.context.annotation.Bean;
@@ -14,14 +16,20 @@ public class UnleashConfig {
 
     @Bean
     public Unleash unleash(Environment environment) {
-        var config = no.finn.unleash.util.UnleashConfig.builder()
-            .appName("melosys")
-            .unleashAPI("https://unleash.nais.io/api/")
-            .build();
 
-        Strategy isNotProdStrategy = new IsNotProdStrategy(environment.getProperty("NAIS_NAMESPACE"));
+        if (Arrays.asList(environment.getActiveProfiles()).contains("local")) {
+            FakeUnleash fakeUnleash = new FakeUnleash();
+            fakeUnleash.enableAll();
+            return fakeUnleash;
+        } else {
+            var config = no.finn.unleash.util.UnleashConfig.builder()
+                .appName("melosys")
+                .unleashAPI("https://unleash.nais.io/api/")
+                .build();
 
-        return new DefaultUnleash(config, isNotProdStrategy);
+            Strategy isNotProdStrategy = new IsNotProdStrategy(environment.getProperty("NAIS_NAMESPACE"));
+            return new DefaultUnleash(config, isNotProdStrategy);
+        }
     }
 
     private static class IsNotProdStrategy implements Strategy {
