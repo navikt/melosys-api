@@ -7,28 +7,29 @@ import no.finn.unleash.DefaultUnleash;
 import no.finn.unleash.FakeUnleash;
 import no.finn.unleash.Unleash;
 import no.finn.unleash.strategy.Strategy;
+import no.finn.unleash.util.UnleashConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 @Configuration
-public class UnleashConfig {
+public class FeatureToggleConfig {
 
     @Bean
     public Unleash unleash(Environment environment) {
 
         if (Arrays.asList(environment.getActiveProfiles()).contains("local")) {
-            FakeUnleash fakeUnleash = new FakeUnleash();
+            var fakeUnleash = new FakeUnleash();
             fakeUnleash.enableAll();
             return fakeUnleash;
         } else {
-            var config = no.finn.unleash.util.UnleashConfig.builder()
+            var unleashConfig = UnleashConfig.builder()
                 .appName("melosys")
                 .unleashAPI("https://unleash.nais.io/api/")
                 .build();
 
             Strategy isNotProdStrategy = new IsNotProdStrategy(environment.getProperty("NAIS_NAMESPACE"));
-            return new DefaultUnleash(config, isNotProdStrategy);
+            return new DefaultUnleash(unleashConfig, isNotProdStrategy);
         }
     }
 
