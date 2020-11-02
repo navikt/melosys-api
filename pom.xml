@@ -85,6 +85,7 @@
         <spring-boot.version>2.2.0.RELEASE</spring-boot.version>
         <springfox.version>2.9.2</springfox.version>
         <swagger.version>1.5.21</swagger.version>
+        <unleash.version>3.3.3</unleash.version>
 
         <!-- Transitive avhengiheter -->
         <asm.version>7.1</asm.version>
@@ -168,6 +169,11 @@
             </dependency>
 
             <!-- Eksterne biblioteker -->
+            <dependency>
+                <groupId>no.finn.unleash</groupId>
+                <artifactId>unleash-client-java</artifactId>
+                <version>${unleash.version}</version>
+            </dependency>
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
