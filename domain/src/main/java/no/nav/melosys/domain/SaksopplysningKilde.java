@@ -1,5 +1,6 @@
 package no.nav.melosys.domain;
 
+import java.util.Objects;
 import javax.persistence.*;
 
 @Entity
@@ -8,11 +9,11 @@ public class SaksopplysningKilde {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long id;
+    private Long id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "saksopplysning_id", nullable = false, updatable = false)
-    public Saksopplysning saksopplysning;
+    private Saksopplysning saksopplysning;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "kildesystem", nullable = false, updatable = false)
@@ -20,7 +21,7 @@ public class SaksopplysningKilde {
 
     @Lob
     @Column(name = "mottatt_dokument", nullable = false)
-    public String mottattDokument;
+    private String mottattDokument;
 
     public SaksopplysningKilde() {}
 
@@ -28,5 +29,55 @@ public class SaksopplysningKilde {
         this.saksopplysning = saksopplysning;
         this.kilde = kilde;
         this.mottattDokument = mottattDokument;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Saksopplysning getSaksopplysning() {
+        return saksopplysning;
+    }
+
+    public void setSaksopplysning(Saksopplysning saksopplysning) {
+        this.saksopplysning = saksopplysning;
+    }
+
+    public SaksopplysningKildesystem getKilde() {
+        return kilde;
+    }
+
+    public void setKilde(SaksopplysningKildesystem kilde) {
+        this.kilde = kilde;
+    }
+
+    public String getMottattDokument() {
+        return mottattDokument;
+    }
+
+    public void setMottattDokument(String mottattDokument) {
+        this.mottattDokument = mottattDokument;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SaksopplysningKilde that = (SaksopplysningKilde) o;
+        return Objects.equals(this.kilde, that.kilde)
+            && Objects.equals(this.mottattDokument, that.mottattDokument);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(kilde, mottattDokument);
     }
 }

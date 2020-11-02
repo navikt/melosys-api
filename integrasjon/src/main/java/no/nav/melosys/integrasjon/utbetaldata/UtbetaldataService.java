@@ -81,8 +81,8 @@ public class UtbetaldataService implements UtbetaldataFasade {
 
     private static Saksopplysning lagSaksopplysning(StringWriter xmlWriter) {
         Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokumentXml(xmlWriter.toString());
-        saksopplysning.setKilde(SaksopplysningKildesystem.UTBETALDATA);
+        saksopplysning.leggTilKildesystemOgMottattDokument(
+            SaksopplysningKildesystem.UTBETALDATA, xmlWriter.toString());
         saksopplysning.setType(SaksopplysningType.UTBETAL);
         saksopplysning.setVersjon(UTBETAL_VERSJON);
         return saksopplysning;

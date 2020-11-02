@@ -44,13 +44,13 @@ public class OpprettSedDokumentService {
         saksopplysning.setDokument(opprettSedDokument(melosysEessiMelding));
         saksopplysning.setType(SaksopplysningType.SEDOPPL);
         saksopplysning.setBehandling(behandling);
-        saksopplysning.setKilde(SaksopplysningKildesystem.EESSI);
         saksopplysning.setVersjon(SED_DOKUMENT_VERSJON);
         saksopplysning.setEndretDato(nå);
         saksopplysning.setRegistrertDato(nå);
 
         String xml = dokumentFactory.lagInternXml(saksopplysning);
-        saksopplysning.setDokumentXml(xml);
+        saksopplysning.leggTilKildesystemOgMottattDokument(
+            SaksopplysningKildesystem.EESSI, xml);
 
         saksopplysningRepository.save(saksopplysning);
         log.info("Saksopplysning: SedDokument opprettet for behandling {}", behandling.getId());

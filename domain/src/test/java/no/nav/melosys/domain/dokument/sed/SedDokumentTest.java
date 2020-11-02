@@ -35,12 +35,12 @@ public class SedDokumentTest {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(sedDokument);
         saksopplysning.setType(SaksopplysningType.SEDOPPL);
-        saksopplysning.setKilde(SaksopplysningKildesystem.EESSI);
         Instant nå = Instant.now();
         saksopplysning.setEndretDato(nå);
         saksopplysning.setRegistrertDato(nå);
         String xml = dokumentFactory.lagInternXml(saksopplysning);
-        saksopplysning.setDokumentXml(xml);
+        saksopplysning.leggTilKildesystemOgMottattDokument(
+            SaksopplysningKildesystem.EESSI, xml);
 
         final SaksopplysningDokument saksopplysningDokument = dokumentFactory.lagDokument(saksopplysning);
         assertThat(saksopplysningDokument).isEqualToComparingFieldByField(sedDokument);

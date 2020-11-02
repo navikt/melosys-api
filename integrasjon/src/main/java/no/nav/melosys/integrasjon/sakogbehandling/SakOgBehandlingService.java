@@ -61,8 +61,8 @@ public class SakOgBehandlingService implements SakOgBehandlingFasade {
         }
 
         Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokumentXml(xmlWriter.toString());
-        saksopplysning.setKilde(SaksopplysningKildesystem.SOB);
+        saksopplysning.leggTilKildesystemOgMottattDokument(
+            SaksopplysningKildesystem.SOB, xmlWriter.toString());
         saksopplysning.setType(SaksopplysningType.SOB_SAK);
         saksopplysning.setVersjon(SOB_VERSJON);
 

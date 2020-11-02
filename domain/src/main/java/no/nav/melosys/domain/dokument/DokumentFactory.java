@@ -50,8 +50,11 @@ public class DokumentFactory {
     public String lagInternXml(Saksopplysning saksopplysning) {
         Assert.notNull(saksopplysning, "saksopplysning må ikke være null");
 
-        String dokumentXml = saksopplysning.getDokumentXml();
+        String dokumentXml = null;
         SaksopplysningDokument dokument = saksopplysning.getDokument();
+        if (saksopplysning.getKilder() != null && !saksopplysning.getKilder().isEmpty()) {
+            dokumentXml = saksopplysning.getKilder().iterator().next().getMottattDokument();
+        }
         if (dokumentXml == null && dokument == null) {
             saksopplysning.setInternXml(null);
             return null;
@@ -97,7 +100,11 @@ public class DokumentFactory {
     public SaksopplysningDokument lagDokument(Saksopplysning saksopplysning) {
         Assert.notNull(saksopplysning, "saksopplysning må ikke være null");
 
-        if (saksopplysning.getDokumentXml() == null) {
+        String dokumentXml = null;
+        if (saksopplysning.getKilder() != null && !saksopplysning.getKilder().isEmpty()) {
+            dokumentXml = saksopplysning.getKilder().iterator().next().getMottattDokument();
+        }
+        if (dokumentXml == null) {
             saksopplysning.setDokument(null);
             return null;
         }

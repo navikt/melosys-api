@@ -148,7 +148,7 @@ public class SaksopplysningerTilDtoTest {
 
             String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));
 
-            saksopplysning.setDokumentXml(xmlStr);
+            saksopplysning.leggTilKildesystemOgMottattDokument(null, xmlStr);
             saksopplysning.setType(type);
             saksopplysning.setVersjon(versjon);
 

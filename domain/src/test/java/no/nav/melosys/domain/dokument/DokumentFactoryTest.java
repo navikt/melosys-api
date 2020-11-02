@@ -53,7 +53,7 @@ public class DokumentFactoryTest {
                 stringBuilder.append((char) c);
             }
         }
-        test.setDokumentXml(stringBuilder.toString());
+        test.leggTilKildesystemOgMottattDokument(null, stringBuilder.toString());
 
         test.setType(SaksopplysningType.ARBFORH);
         test.setVersjon("3.0");
@@ -79,7 +79,7 @@ public class DokumentFactoryTest {
                 stringBuilder.append((char) c);
             }
         }
-        test.setDokumentXml(stringBuilder.toString());
+        test.leggTilKildesystemOgMottattDokument(null, stringBuilder.toString());
 
         test.setType(SaksopplysningType.ORG);
         test.setVersjon("4.0");
@@ -121,7 +121,7 @@ public class DokumentFactoryTest {
 
         String xml = factory.lagInternXml(saksopplysning);
 
-        saksopplysning.setDokumentXml(saksopplysning.getInternXml());
+        saksopplysning.leggTilKildesystemOgMottattDokument(null, saksopplysning.getInternXml());
         SaksopplysningDokument saksopplysningDokument = factory.lagDokument(saksopplysning);
 
         assertThat(xml).isNotNull();

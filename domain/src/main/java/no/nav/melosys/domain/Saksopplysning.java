@@ -34,11 +34,6 @@ public class Saksopplysning {
     @Column(name="versjon", nullable = false, updatable = false)
     private String versjon;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "kilde", nullable = false, updatable = false)
-    private SaksopplysningKildesystem kilde;
-
-    // FIXME Migrering fra kilde og fjerne felt(er)
     @OneToMany(mappedBy = "saksopplysning", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<SaksopplysningKilde> kilder = new HashSet<>(1);
 
@@ -48,10 +43,7 @@ public class Saksopplysning {
     @Column(name = "endret_dato", nullable = false)
     private Instant endretDato;
 
-    @Type(type = XMLTYPE)
-    @Column(name = "dokument_xml", nullable = false)
-    private String dokumentXml;
-
+    // FIXME Fjern
     @Type(type = XMLTYPE)
     @Column(name = "intern_xml")
     private String internXml;
@@ -93,14 +85,6 @@ public class Saksopplysning {
         this.versjon = versjon;
     }
 
-    public SaksopplysningKildesystem getKilde() {
-        return kilde;
-    }
-
-    public void setKilde(SaksopplysningKildesystem kilde) {
-        this.kilde = kilde;
-    }
-
     public Set<SaksopplysningKilde> getKilder() {
         return kilder;
     }
@@ -125,14 +109,6 @@ public class Saksopplysning {
         this.endretDato = endretDato;
     }
 
-    public String getDokumentXml() {
-        return dokumentXml;
-    }
-
-    public void setDokumentXml(String dokumentXml) {
-        this.dokumentXml = dokumentXml;
-    }
-
     public String getInternXml() {
         return internXml;
     }
@@ -148,7 +124,11 @@ public class Saksopplysning {
     public void setDokument(SaksopplysningDokument dokument) {
         this.dokument = dokument;
     }
-    
+
+    public void leggTilKildesystemOgMottattDokument(SaksopplysningKildesystem kildesystem, String mottattDokument) {
+        kilder.add(new SaksopplysningKilde(this, kildesystem, mottattDokument));
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -163,14 +143,12 @@ public class Saksopplysning {
         }
         return Objects.equals(this.behandling, that.behandling)
             && Objects.equals(this.registrertDato, that.registrertDato)
-            && Objects.equals(this.type, that.type)
-            && Objects.equals(this.kilde, that.kilde)
-            && Objects.equals(this.dokumentXml, that.dokumentXml);
+            && Objects.equals(this.type, that.type);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(behandling, registrertDato, type, kilde, dokumentXml);
+        return Objects.hash(behandling, registrertDato, type);
     }
 
 }

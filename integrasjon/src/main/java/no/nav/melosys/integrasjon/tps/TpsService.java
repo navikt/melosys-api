@@ -114,20 +114,16 @@ public class TpsService implements TpsFasade {
     public Saksopplysning hentPerson(String ident, Informasjonsbehov behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
         PersonMedKilde personMedKilde = hentPersonDto(ident, mapInformasjonsbehovTilTps(behov));
         Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.getKilder().add(
-            new SaksopplysningKilde(saksopplysning, SaksopplysningKildesystem.TPS, personMedKilde.dokumentXml)
-        );
-        saksopplysning.setKilde(SaksopplysningKildesystem.TPS); // FIXME fjernes
-        saksopplysning.setDokumentXml(personMedKilde.dokumentXml); // FIXME fjernes
+        saksopplysning.leggTilKildesystemOgMottattDokument(
+            SaksopplysningKildesystem.TPS, personMedKilde.dokumentXml);
         saksopplysning.setType(SaksopplysningType.PERSOPL);
         saksopplysning.setVersjon(PERSON_VERSJON);
 
         for (Familiemedlem familiemedlem : personMedKilde.dokument.familiemedlemmer) {
             PersonMedKilde personIFamilie = hentPersonDto(familiemedlem.fnr, mapInformasjonsbehovTilTps(Informasjonsbehov.MED_FAMILIERELASJONER));
             PersonMapper.berikFamiliemedlemMedOpplysninger(familiemedlem, personIFamilie.dokument, ident);
-            saksopplysning.getKilder().add(
-                new SaksopplysningKilde(saksopplysning, SaksopplysningKildesystem.TPS, personIFamilie.dokumentXml)
-            );
+            saksopplysning.leggTilKildesystemOgMottattDokument(
+                SaksopplysningKildesystem.TPS, personIFamilie.dokumentXml);
         }
         saksopplysning.setDokument(personMedKilde.dokument);
         // FIXME
@@ -214,8 +210,8 @@ public class TpsService implements TpsFasade {
         }
 
         Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokumentXml(xmlWriter.toString());
-        saksopplysning.setKilde(SaksopplysningKildesystem.TPS);
+        saksopplysning.leggTilKildesystemOgMottattDokument(
+            SaksopplysningKildesystem.TPS, xmlWriter.toString());
         saksopplysning.setType(SaksopplysningType.PERSHIST);
         saksopplysning.setVersjon(PERSONHISTORIKK_VERSJON);
 
