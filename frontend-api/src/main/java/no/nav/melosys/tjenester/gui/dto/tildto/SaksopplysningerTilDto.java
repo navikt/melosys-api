@@ -112,10 +112,10 @@ public class SaksopplysningerTilDto {
         LocalDate gjeldendeDato = hentGjeldendeDato(behandling);
 
         if (søknadsperiode != null && søknadsperiode.getFom() != null && søknadsperiode.getFom().isBefore(gjeldendeDato)) {
-            dto.getPerson().statsborgerskap = historiskStatsborgerskap;
-            dto.getPerson().statsborgerskapDato = søknadsperiode.getFom();
+            dto.getPerson().setStatsborgerskap(historiskStatsborgerskap);
+            dto.getPerson().setStatsborgerskapDato(søknadsperiode.getFom());
         } else {
-            dto.getPerson().statsborgerskapDato = gjeldendeDato;
+            dto.getPerson().setStatsborgerskapDato(gjeldendeDato);
         }
 
         return dto;

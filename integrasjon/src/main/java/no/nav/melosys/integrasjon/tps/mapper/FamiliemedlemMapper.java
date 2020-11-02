@@ -14,11 +14,11 @@ public class FamiliemedlemMapper {
         throw new IllegalStateException("Utility");
     }
 
-    static List<Familiemedlem> mapTilFamiliemedlemmer(List<no.nav.tjeneste.virksomhet.person.v3.informasjon.Familierelasjon> harFraRolleI) {
-        if (harFraRolleI == null) {
+    static List<Familiemedlem> mapTilFamiliemedlemmer(List<no.nav.tjeneste.virksomhet.person.v3.informasjon.Familierelasjon> familierelasjoner) {
+        if (familierelasjoner == null) {
             return new ArrayList<>();
         }
-        return harFraRolleI.stream()
+        return familierelasjoner.stream()
             .map(familierelasjon -> {
                 Familiemedlem familiemedlem = new Familiemedlem();
                 familiemedlem.fnr = PersonMapper.mapFnr(familierelasjon.getTilPerson().getAktoer());

@@ -22,10 +22,12 @@ public class PersonMapper {
         dokument.statsborgerskap = person.getStatsborgerskap() == null ? null
             : Land.av(person.getStatsborgerskap().getLand().getValue());
         dokument.kjønn = mapKjønn(person.getKjoenn());
-        dokument.fornavn = person.getPersonnavn() == null ? null : person.getPersonnavn().getFornavn();
-        dokument.mellomnavn = person.getPersonnavn() == null ? null : person.getPersonnavn().getMellomnavn();
-        dokument.etternavn = person.getPersonnavn() == null ? null : person.getPersonnavn().getEtternavn();
-        dokument.sammensattNavn = person.getPersonnavn() == null ? null : person.getPersonnavn().getSammensattNavn();
+        if (person.getPersonnavn() != null) {
+            dokument.fornavn = person.getPersonnavn().getFornavn();
+            dokument.mellomnavn = person.getPersonnavn().getMellomnavn();
+            dokument.etternavn = person.getPersonnavn().getEtternavn();
+            dokument.sammensattNavn = person.getPersonnavn().getSammensattNavn();
+        }
         dokument.fødselsdato = person.getFoedselsdato() == null ? null
             : KonverteringsUtils.xmlGregorianCalendarToLocalDate(person.getFoedselsdato().getFoedselsdato());
         dokument.dødsdato = person.getDoedsdato() == null ? null

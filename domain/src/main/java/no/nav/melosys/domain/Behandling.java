@@ -183,7 +183,6 @@ public class Behandling extends RegistreringsInfo {
         this.behandlingsgrunnlag = behandlingsgrunnlag;
     }
 
-    // FIXME feiler
     public PersonDokument hentPersonDokument() throws TekniskException {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.PERSOPL);
         return (PersonDokument) saksopplysning

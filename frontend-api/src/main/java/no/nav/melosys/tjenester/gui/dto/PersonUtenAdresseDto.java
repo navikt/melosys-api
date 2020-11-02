@@ -10,6 +10,18 @@ import no.nav.melosys.domain.dokument.person.*;
 
 public class PersonUtenAdresseDto {
 
+    private String fnr;
+    private Land statsborgerskap;
+    private LocalDate statsborgerskapDato;
+    private Sivilstand sivilstand;
+    private String sammensattNavn;
+    private List<FamiliemedlemDto> familiemedlemmer = new ArrayList<>();
+    private Personstatus personStatus;
+    private KjoennsType kjoenn;
+    private LocalDate foedselsdato;
+    @JsonProperty(defaultValue = "false" )
+    private boolean erEgenAnsatt; // MELOSYS-1580
+
     public PersonUtenAdresseDto() {}
 
     public PersonUtenAdresseDto(PersonDokument person) {
@@ -26,24 +38,51 @@ public class PersonUtenAdresseDto {
         foedselsdato = person.fødselsdato;
     }
 
-    public String fnr;
+    public String getFnr() {
+        return fnr;
+    }
 
-    public Land statsborgerskap;
+    public Land getStatsborgerskap() {
+        return statsborgerskap;
+    }
 
-    public LocalDate statsborgerskapDato;
+    public void setStatsborgerskap(Land statsborgerskap) {
+        this.statsborgerskap = statsborgerskap;
+    }
 
-    public Sivilstand sivilstand;
+    public LocalDate getStatsborgerskapDato() {
+        return statsborgerskapDato;
+    }
 
-    public String sammensattNavn;
+    public void setStatsborgerskapDato(LocalDate statsborgerskapDato) {
+        this.statsborgerskapDato = statsborgerskapDato;
+    }
 
-    public List<FamiliemedlemDto> familiemedlemmer = new ArrayList<>();
+    public Sivilstand getSivilstand() {
+        return sivilstand;
+    }
 
-    public Personstatus personStatus;
+    public String getSammensattNavn() {
+        return sammensattNavn;
+    }
 
-    public KjoennsType kjoenn;
+    public List<FamiliemedlemDto> getFamiliemedlemmer() {
+        return familiemedlemmer;
+    }
 
-    public LocalDate foedselsdato;
+    public Personstatus getPersonStatus() {
+        return personStatus;
+    }
 
-    @JsonProperty(defaultValue = "false" )
-    public boolean erEgenAnsatt; // MELOSYS-1580
+    public KjoennsType getKjoenn() {
+        return kjoenn;
+    }
+
+    public LocalDate getFoedselsdato() {
+        return foedselsdato;
+    }
+
+    public boolean isErEgenAnsatt() {
+        return erEgenAnsatt;
+    }
 }

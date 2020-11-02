@@ -132,8 +132,8 @@ public class SaksopplysningerTilDtoTest {
         PersonUtenAdresseDto person = saksopplysningerDto.getPerson();
 
         assertThat(person).isNotNull();
-        assertThat(person.statsborgerskap).isNotNull();
-        assertThat(person.statsborgerskapDato).isNotNull();
+        assertThat(person.getStatsborgerskap()).isNotNull();
+        assertThat(person.getStatsborgerskapDato()).isNotNull();
         assertThat(saksopplysningerDto.getPersonhistorikk().bostedsadressePerioder)
             .extracting("bostedsadresse")
             .extracting("poststed")
