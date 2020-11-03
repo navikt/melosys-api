@@ -12,8 +12,8 @@
     </root>
 
     <logger name="org.apache.cxf.services" level="WARN"/>
-    <logger name="org.apache.kafka" level="WARN"/>
-    <logger name="org.springframework.kafka" level="WARN"/>
+    <logger name="org.apache.kafka" level="INFO"/>
+    <logger name="org.springframework.kafka" level="INFO"/>
     <logger name="org.springframework.oxm.jaxb.Jaxb2Marshaller" level="WARN"/>
     <logger name="no.nav.melosys.frontendlogg" level="WARN"/>
     <logger name="no.nav.melosys.sikkerhet.abac" level="WARN"/>

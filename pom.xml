@@ -170,11 +170,6 @@
 
             <!-- Eksterne biblioteker -->
             <dependency>
-                <groupId>no.finn.unleash</groupId>
-                <artifactId>unleash-client-java</artifactId>
-                <version>${unleash.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
                 <version>${logback.version}</version>
@@ -281,6 +276,11 @@
                 <groupId>net.minidev</groupId>
                 <artifactId>json-smart</artifactId>
                 <version>${json-smart.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.finn.unleash</groupId>
+                <artifactId>unleash-client-java</artifactId>
+                <version>${unleash.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
