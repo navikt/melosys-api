@@ -27,6 +27,7 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import oracle.jdbc.OracleConnection;
 import oracle.jdbc.OraclePreparedStatement;
@@ -36,14 +37,14 @@ import org.flywaydb.core.api.migration.Context;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 @SuppressWarnings("unused")
-public class V7_1_05__SAKSOPPLYSNING_XML_TIL_DOKUMENT_JSON extends BaseJavaMigration {
+public class V7_1_06__SAKSOPPLYSNING_XML_TIL_DOKUMENT_JSON extends BaseJavaMigration {
 
     private final ObjectMapper objectMapper;
     private final Jaxb2Marshaller jaxb2Marshaller;
     private final TransformerFactory transformerFactory;
     private final Map<String, Transformer> transformerMap = new HashMap<>();
 
-    public V7_1_05__SAKSOPPLYSNING_XML_TIL_DOKUMENT_JSON() {
+    public V7_1_06__SAKSOPPLYSNING_XML_TIL_DOKUMENT_JSON() {
         this.objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
@@ -80,8 +81,7 @@ public class V7_1_05__SAKSOPPLYSNING_XML_TIL_DOKUMENT_JSON extends BaseJavaMigra
         String versjon = resultSet.getString("versjon");
         String opplysningType = resultSet.getString("opplysning_type");
         String kildesystem = resultSet.getString("kilde");
-        // FIXME: Bruk intern_xml for q/p-data
-        String xmlString = resultSet.getString("dokument_xml");
+        String xmlString = resultSet.getString("intern_xml");
         String dokumentJson = null;
 
         switch (opplysningType) {
@@ -111,7 +111,8 @@ public class V7_1_05__SAKSOPPLYSNING_XML_TIL_DOKUMENT_JSON extends BaseJavaMigra
                     PersonDokument.class, xmlString, "tps/person_"+ versjon + ".xslt", versjon);
                 break;
             case "SEDOPPL":
-                // FIXME ??
+                dokumentJson = lagDokumentJson(
+                    SedDokument.class, xmlString, null, null);
                 break;
             case "SOB_SAK":
                 dokumentJson = lagDokumentJson(
@@ -132,7 +133,9 @@ public class V7_1_05__SAKSOPPLYSNING_XML_TIL_DOKUMENT_JSON extends BaseJavaMigra
 
     @SuppressWarnings("unchecked")
     private <T extends SaksopplysningDokument> String lagDokumentJson(Class<T> clazz, String xml, String path, String versjon) throws TransformerException, JsonProcessingException {
-        StringReader stringReader = new StringReader(transformer(xml, path, versjon));
+        StringReader stringReader = clazz == SedDokument.class
+            ? new StringReader(xml)
+            : new StringReader(transformer(xml, path, versjon));
         T dokument = (T) jaxb2Marshaller.unmarshal(new StreamSource(stringReader));
         return objectMapper.writeValueAsString(dokument);
     }
