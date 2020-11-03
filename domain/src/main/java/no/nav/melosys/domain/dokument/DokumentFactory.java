@@ -56,7 +56,6 @@ public class DokumentFactory {
             dokumentXml = saksopplysning.getKilder().iterator().next().getMottattDokument();
         }
         if (dokumentXml == null && dokument == null) {
-            saksopplysning.setInternXml(null);
             return null;
         }
 
@@ -64,16 +63,12 @@ public class DokumentFactory {
         if (dokument != null) {
             StreamResult result = new StreamResult(new StringWriter());
             marshaller.marshal(dokument, result);
-            String xml = result.getWriter().toString();
-            saksopplysning.setInternXml(xml);
-            return xml;
+            return result.getWriter().toString();
         }
 
         SaksopplysningType type = saksopplysning.getType();
         String versjon = saksopplysning.getVersjon();
-        saksopplysning.setInternXml(transformer(dokumentXml, type, versjon));
-
-        return saksopplysning.getInternXml();
+        return transformer(dokumentXml, type, versjon);
     }
 
     // {@code dokumentXml} transformeres med en JAXP Transformer
@@ -125,10 +120,6 @@ public class DokumentFactory {
      *  hver gang de lastes fordi de er redigerbare og versjonerte
      */
     private String hentInternXml(Saksopplysning saksopplysning) {
-        if (saksopplysning.getInternXml() == null) {
-            return lagInternXml(saksopplysning);
-        }
-
-        return saksopplysning.getInternXml();
+        return lagInternXml(saksopplysning);
     }
 }

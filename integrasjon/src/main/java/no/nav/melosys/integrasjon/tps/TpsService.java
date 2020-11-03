@@ -126,9 +126,7 @@ public class TpsService implements TpsFasade {
                 SaksopplysningKildesystem.TPS, personIFamilie.dokumentXml);
         }
         saksopplysning.setDokument(personMedKilde.dokument);
-        // FIXME
-        saksopplysning.setInternXml(personMedKilde.dokumentXml);
-        //dokumentFactory.lagInternXml(saksopplysning);
+
         return saksopplysning;
     }
 

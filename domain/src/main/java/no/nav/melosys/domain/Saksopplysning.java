@@ -9,7 +9,6 @@ import javax.persistence.*;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.jpa.HibernateXmlType;
 import no.nav.melosys.domain.jpa.SaksopplysningDokumentConverter;
-import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
@@ -42,11 +41,6 @@ public class Saksopplysning {
 
     @Column(name = "endret_dato", nullable = false)
     private Instant endretDato;
-
-    // FIXME Fjern
-    @Type(type = XMLTYPE)
-    @Column(name = "intern_xml")
-    private String internXml;
 
     // FIXME Konvertere + migrere internXml til samme felt i DB
     @Convert(converter = SaksopplysningDokumentConverter.class)
@@ -107,14 +101,6 @@ public class Saksopplysning {
 
     public void setEndretDato(Instant endretDato) {
         this.endretDato = endretDato;
-    }
-
-    public String getInternXml() {
-        return internXml;
-    }
-
-    public void setInternXml(String internXml) {
-        this.internXml = internXml;
     }
 
     public SaksopplysningDokument getDokument() {

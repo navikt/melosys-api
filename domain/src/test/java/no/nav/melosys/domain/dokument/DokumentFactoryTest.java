@@ -121,7 +121,7 @@ public class DokumentFactoryTest {
 
         String xml = factory.lagInternXml(saksopplysning);
 
-        saksopplysning.leggTilKildesystemOgMottattDokument(null, saksopplysning.getInternXml());
+        saksopplysning.leggTilKildesystemOgMottattDokument(null, xml);
         SaksopplysningDokument saksopplysningDokument = factory.lagDokument(saksopplysning);
 
         assertThat(xml).isNotNull();
