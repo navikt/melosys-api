@@ -74,7 +74,6 @@ public class EndreBehandlingstemaService {
         oppgaveService.oppdaterOppgave(oppgave.getOppgaveId(),
             OppgaveOppdatering.builder()
                 .behandlingstema(behandling.getTema())
-                .oppgavetype(behandlingsOppgaveForType.getOppgavetype())
                 .tema(behandlingsOppgaveForType.getTema())
                 .build());
     }
