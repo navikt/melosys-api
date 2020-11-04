@@ -4,11 +4,15 @@ import java.util.List;
 
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon;
+import no.nav.melosys.domain.dokument.inntekt.Inntekt;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
+import no.nav.melosys.domain.dokument.inntekt.inntektstype.Loennsinntekt;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
+import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
@@ -28,7 +32,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.jeasy.random.FieldPredicates.*;
 
 @ExtendWith(MockitoExtension.class)
-public class SaksopplysningDokumentConverterTest {
+class SaksopplysningDokumentConverterTest {
 
     private static SaksopplysningDokumentConverter converter;
     private static EasyRandom random;
@@ -47,10 +51,12 @@ public class SaksopplysningDokumentConverterTest {
             .randomize(inClass(OrganisasjonsDetaljer.class).and(named("postadresse")),
                 () -> List.of(random.nextObject(SemistrukturertAdresse.class)))
             .randomize(ofType(LovvalgBestemmelse.class),
-                () -> new EnumRandomizer<>(Lovvalgbestemmelser_883_2004.class).getRandomValue()));
+                () -> new EnumRandomizer<>(Lovvalgbestemmelser_883_2004.class).getRandomValue())
+            .randomize(inClass(PersonDokument.class).and(named("midlertidigPostadresse")),
+                () -> random.nextObject(MidlertidigPostadresseNorge.class))
+            .randomize(inClass(ArbeidsInntektInformasjon.class).and(named("inntektListe")),
+                () -> List.of(random.nextObject(Inntekt.class), random.nextObject(Loennsinntekt.class))));
     }
-
-    // FIXME: Test at felter med tilknyttet forretningslogikk ikke forsvinner ved serialisering
 
     @Test
     void konverterTilOgFraDatabase_medArbeidsforholdDokument_erUendret() {

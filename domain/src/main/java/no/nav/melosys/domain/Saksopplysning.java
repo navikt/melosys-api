@@ -42,7 +42,6 @@ public class Saksopplysning {
     @Column(name = "endret_dato", nullable = false)
     private Instant endretDato;
 
-    // FIXME Konvertere + migrere internXml til samme felt i DB
     @Convert(converter = SaksopplysningDokumentConverter.class)
     @Column(name = "dokument")
     private SaksopplysningDokument dokument;
