@@ -20,7 +20,7 @@ import java.util.List;
 import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SED_FORESPØRSEL;
 import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SØKNAD;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
-import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
+import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknadAktive;
 
 @Service
 public class EndreBehandlingstemaService {
@@ -43,7 +43,7 @@ public class EndreBehandlingstemaService {
 
     private List<Behandlingstema> hentMuligeBehandlingstema(Behandling behandling) throws IkkeFunnetException{
         boolean kanOppdatereBehandlingstema = kanOppdatereBehandlingstema(behandling);
-        if (kanOppdatereBehandlingstema && erBehandlingAvSøknad(behandling.getTema())) {
+        if (kanOppdatereBehandlingstema && erBehandlingAvSøknadAktive(behandling.getTema())) {
             return BEHANDLINGSTEMA_SØKNAD;
         } else if (kanOppdatereBehandlingstema && erBehandlingAvSedForespørsler(behandling.getTema())) {
             return BEHANDLINGSTEMA_SED_FORESPØRSEL;
