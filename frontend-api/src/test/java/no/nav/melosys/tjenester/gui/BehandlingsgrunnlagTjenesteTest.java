@@ -61,6 +61,7 @@ public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
             .randomize(GeografiskAdresse.class, () -> new EasyRandom().nextObject(SemistrukturertAdresse.class))
             .stringLengthRange(2, 10)
             .randomize(named("fnr").and(ofType(String.class)), new NumericStringRandomizer(11))
+            .randomize(named("medfolgendeBarn"), () -> List.of(new NumericStringRandomizer(11).getRandomValue()))
             .randomize(named("orgnr").and(ofType(String.class)), new NumericStringRandomizer(9))
             .randomize(named("orgnummer").and(ofType(String.class)), new NumericStringRandomizer(9))
             .randomize(named("typeFlyvninger"), () -> new EnumRandomizer<>(Flyvningstyper.class).getRandomValue().getKode()));
