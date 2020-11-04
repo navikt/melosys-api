@@ -10,7 +10,7 @@ import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.inntk.InntektService;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.integrasjon.tps.person.Informasjonsbehov;
+import no.nav.melosys.integrasjon.tps.Informasjonsbehov;
 import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -71,7 +71,7 @@ public class RegisteropplysningerServiceTest {
         when(tpsFasade.hentAktørIdForIdent(anyString())).thenReturn(AKTØR_ID);
 
         when(aaregFasade.finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.ARBFORH));
-        when(tpsFasade.hentPerson(anyString(), eq(Informasjonsbehov.ADRESSE))).thenReturn(lagSaksopplysning(SaksopplysningType.PERSOPL));
+        when(tpsFasade.hentPerson(anyString(), eq(Informasjonsbehov.STANDARD))).thenReturn(lagSaksopplysning(SaksopplysningType.PERSOPL));
         when(medlPeriodeService.hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.MEDL));
         when(inntektService.hentInntektListe(anyString(), anyYearMonth(), anyYearMonth())).thenReturn(lagSaksopplysning(SaksopplysningType.INNTK));
         when(utbetaldataService.hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.UTBETAL));
@@ -116,7 +116,7 @@ public class RegisteropplysningerServiceTest {
         verify(medlPeriodeService).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
         verify(eregFasade).hentOrganisasjon(anyString());
         verify(tpsFasade).hentPersonhistorikk(anyString(), anyLocalDate());
-        verify(tpsFasade).hentPerson(anyString(), eq(Informasjonsbehov.ADRESSE));
+        verify(tpsFasade).hentPerson(anyString(), eq(Informasjonsbehov.STANDARD));
         verify(sobService).finnSakOgBehandlingskjedeListe(eq(AKTØR_ID));
         verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
     }
@@ -165,7 +165,7 @@ public class RegisteropplysningerServiceTest {
 
         verify(medlPeriodeService).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
         verify(tpsFasade).hentPersonhistorikk(anyString(), anyLocalDate());
-        verify(tpsFasade).hentPerson(anyString(), eq(Informasjonsbehov.ADRESSE));
+        verify(tpsFasade).hentPerson(anyString(), eq(Informasjonsbehov.STANDARD));
         verify(sobService).finnSakOgBehandlingskjedeListe(eq(AKTØR_ID));
         verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
     }
@@ -196,7 +196,7 @@ public class RegisteropplysningerServiceTest {
             .saksopplysningTyper(saksopplysningstyper().personopplysninger().build())
             .build());
 
-        verify(tpsFasade).hentPerson(FNR, Informasjonsbehov.ADRESSE);
+        verify(tpsFasade).hentPerson(FNR, Informasjonsbehov.STANDARD);
         verify(behandlingService).lagre(any(Behandling.class));
     }
 
