@@ -21,8 +21,8 @@ import no.nav.security.token.support.core.api.Protected;
 
 @Protected
 @RestController
-@RequestMapping("/kodeverk")
-@Api(tags = { "kodeverk"})
+@RequestMapping("/kodeverk/nav-felles")
+@Api(tags = { "kodeverk/nav-felles"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class KodeverkTjeneste {
 
@@ -36,8 +36,8 @@ public class KodeverkTjeneste {
 
     @GetMapping("{kodeverkNavn}")
     @ApiOperation("Henter kodeverk fra felles kodeverk")
-    public ResponseEntity<List<KodeDto>> hentKodeverk(@PathVariable("kodeverkNavn") String kodeverkNavn) {
+    public ResponseEntity<List<KodeDto>> hentKodeverk(@PathVariable("kodeverkNavn") FellesKodeverk kodeverkNavn) {
         log.info("Henter kodeverket {} fra felles kodeverk.", kodeverkNavn);
-        return ResponseEntity.ok().body(kodeverkService.hentGyldigeKoderForKodeverk(FellesKodeverk.valueOf(kodeverkNavn)));
+        return ResponseEntity.ok().body(kodeverkService.hentGyldigeKoderForKodeverk(kodeverkNavn));
     }
 }

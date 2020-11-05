@@ -79,10 +79,6 @@ public class KodeverkService {
         return UKJENT;
     }
 
-
-    /**
-     * Henter gyldige koder for kodeverk.
-     */
     public List<KodeDto> hentGyldigeKoderForKodeverk(FellesKodeverk kodeverk) {
         if (StringUtils.isEmpty(kodeverk)) {
             log.error("Metode hentGyldigeKoderForKodeverk kalt for kodeverk {}", kodeverk);
