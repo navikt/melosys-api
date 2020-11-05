@@ -11,6 +11,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.eessi.ruting.DefaultSedRuter;
@@ -30,16 +31,19 @@ public class SedMottakRuting implements StegBehandler {
     private final Map<SedType, SedRuterForSedTyper> sedRuterMap;
     private final DefaultSedRuter defaultSedRuter;
     private final EessiService eessiService;
+    private final JoarkFasade joarkFasade;
 
     @Autowired
     public SedMottakRuting(Collection<SedRuterForSedTyper> ruterForSedTyper,
                            DefaultSedRuter defaultSedRuter,
-                           @Qualifier("system") EessiService eessiService) {
+                           @Qualifier("system") EessiService eessiService,
+                           @Qualifier("system") JoarkFasade joarkFasade) {
         this.defaultSedRuter = defaultSedRuter;
         this.eessiService = eessiService;
         this.sedRuterMap = ruterForSedTyper.stream()
             .flatMap(ruter -> ruter.gjelderSedTyper().stream().map(sedType -> Map.entry(sedType, ruter)))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        this.joarkFasade = joarkFasade;
     }
 
     @Override
@@ -49,12 +53,19 @@ public class SedMottakRuting implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
-        MelosysEessiMelding eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
-        log.info("Forsøker å rute sed {} i RINA-sak {}", eessiMelding.getSedId(), eessiMelding.getRinaSaksnummer());
+        final MelosysEessiMelding eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
+        final String journalpostID = eessiMelding.getJournalpostId();
 
-        Long arkivsakID = eessiService.finnSakForRinasaksnummer(eessiMelding.getRinaSaksnummer()).orElse(null);
-        SedType sedType = SedType.valueOf(eessiMelding.getSedType());
-        hentSedRuterForSedType(sedType).rutSedTilBehandling(prosessinstans, arkivsakID);
+        if (joarkFasade.hentJournalpost(journalpostID).isErFerdigstilt()) {
+            log.info("Journalpost {} for sed {} i RINA-sak {} er allerede ferdigstilt. Behandler ikke videre",
+                journalpostID, eessiMelding.getSedId(), eessiMelding.getRinaSaksnummer());
+        } else {
+            log.info("Forsøker å rute sed {} i RINA-sak {}", eessiMelding.getSedId(), eessiMelding.getRinaSaksnummer());
+
+            Long arkivsakID = eessiService.finnSakForRinasaksnummer(eessiMelding.getRinaSaksnummer()).orElse(null);
+            SedType sedType = SedType.valueOf(eessiMelding.getSedType());
+            hentSedRuterForSedType(sedType).rutSedTilBehandling(prosessinstans, arkivsakID);
+        }
     }
 
     private SedRuter hentSedRuterForSedType(SedType sedType) {
