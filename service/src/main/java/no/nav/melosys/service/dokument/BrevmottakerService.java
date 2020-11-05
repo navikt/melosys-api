@@ -60,7 +60,7 @@ public class BrevmottakerService {
         return mottakerRolle;
     }
 
-    List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling) throws FunksjonellException, TekniskException {
+    public List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling) throws FunksjonellException, TekniskException {
         return avklarMottakere(produserbartDokument, mottaker, behandling, false);
     }
 
