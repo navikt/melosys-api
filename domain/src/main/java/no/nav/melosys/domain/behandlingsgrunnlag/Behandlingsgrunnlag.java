@@ -5,6 +5,7 @@ import javax.persistence.*;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.jpa.BehandlingsgrunnlagListener;
+import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 
 @Entity
 @EntityListeners(BehandlingsgrunnlagListener.class)
@@ -30,7 +31,7 @@ public class Behandlingsgrunnlag {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
-    private BehandlingsGrunnlagType type;
+    private Behandlingsgrunnlagtyper type;
 
     @Lob
     @Column(name = "original_data", updatable = false)
@@ -91,11 +92,11 @@ public class Behandlingsgrunnlag {
         this.originalData = originalData;
     }
 
-    public BehandlingsGrunnlagType getType() {
+    public Behandlingsgrunnlagtyper getType() {
         return type;
     }
 
-    public void setType(BehandlingsGrunnlagType type) {
+    public void setType(Behandlingsgrunnlagtyper type) {
         this.type = type;
     }
 
@@ -116,10 +117,12 @@ public class Behandlingsgrunnlag {
     }
 
     public boolean erSøknad() {
-        return this.type == BehandlingsGrunnlagType.SØKNAD && behandlingsgrunnlagdata instanceof Soeknad;
+        return (this.type == Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS
+            || this.type == Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS)
+            && behandlingsgrunnlagdata instanceof Soeknad;
     }
 
     public boolean erSed() {
-        return this.type == BehandlingsGrunnlagType.SED && behandlingsgrunnlagdata instanceof SedGrunnlag;
+        return this.type == Behandlingsgrunnlagtyper.SED && behandlingsgrunnlagdata instanceof SedGrunnlag;
     }
 }

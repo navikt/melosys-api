@@ -6,11 +6,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsGrunnlagType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
@@ -82,7 +82,7 @@ public class BehandlingsgrunnlagServiceTest {
 
         assertThat(opprettet).isNotNull();
         assertThat(opprettet.getBehandlingsgrunnlagdata()).isInstanceOf(Soeknad.class);
-        assertThat(opprettet.getType()).isEqualTo(BehandlingsGrunnlagType.SØKNAD);
+        assertThat(opprettet.getType()).isEqualTo(Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS);
         assertThat(opprettet.getBehandling()).isEqualTo(behandling);
     }
 
@@ -120,7 +120,7 @@ public class BehandlingsgrunnlagServiceTest {
 
         assertThat(opprettet).isNotNull();
         assertThat(opprettet.getBehandlingsgrunnlagdata()).isInstanceOf(SedGrunnlag.class);
-        assertThat(opprettet.getType()).isEqualTo(BehandlingsGrunnlagType.SED);
+        assertThat(opprettet.getType()).isEqualTo(Behandlingsgrunnlagtyper.SED);
         assertThat(opprettet.getBehandling()).isEqualTo(behandling);
     }
 }
