@@ -16,6 +16,7 @@ public final class BehandlingsgrunnlagKonverterer {
     static {
         mapper.put(Behandlingsgrunnlagtyper.SØKNAD_FOLKETRYGDEN, SoeknadFtrl.class);
         mapper.put(Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS, Soeknad.class);
+        mapper.put(Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS, Soeknad.class);
         mapper.put(Behandlingsgrunnlagtyper.SED, SedGrunnlag.class);
         objectMapper.registerModule(new JavaTimeModule());
     }

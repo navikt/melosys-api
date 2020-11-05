@@ -117,12 +117,19 @@ public class Behandlingsgrunnlag {
     }
 
     public boolean erSøknad() {
-        return (this.type == Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS
-            || this.type == Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS)
-            && behandlingsgrunnlagdata instanceof Soeknad;
+        return erSøknadOmA1() || erSøknadFtrl();
+    }
+
+    public boolean erSøknadOmA1() {
+        return type == Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS
+            || type == Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS;
+    }
+
+    public boolean erSøknadFtrl() {
+        return type == Behandlingsgrunnlagtyper.SØKNAD_FOLKETRYGDEN;
     }
 
     public boolean erSed() {
-        return this.type == Behandlingsgrunnlagtyper.SED && behandlingsgrunnlagdata instanceof SedGrunnlag;
+        return this.type == Behandlingsgrunnlagtyper.SED;
     }
 }
