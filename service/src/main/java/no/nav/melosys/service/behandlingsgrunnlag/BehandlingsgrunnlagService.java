@@ -5,10 +5,7 @@ import java.util.Optional;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.behandlingsgrunnlag.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -45,6 +42,17 @@ public class BehandlingsgrunnlagService {
     public Behandlingsgrunnlag opprettSøknadGrunnlag(long behandlingID,
                                                      Soeknad soeknad) throws FunksjonellException {
         return opprettBehandlingsgrunnlag(behandlingID, soeknad, Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS, VERSJON_SOEKNAD_GRUNNLAG);
+    }
+
+    //Altinn
+    public Behandlingsgrunnlag opprettSøknadUtsending(long behandlingID,
+                                                     Soeknad soeknad) throws FunksjonellException {
+        return opprettBehandlingsgrunnlag(behandlingID, soeknad, Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS, VERSJON_SOEKNAD_GRUNNLAG);
+    }
+
+    public Behandlingsgrunnlag opprettSøknadFolketrygden(long behandlingID,
+                                                     SoeknadFtrl soeknad) throws FunksjonellException {
+        return opprettBehandlingsgrunnlag(behandlingID, soeknad, Behandlingsgrunnlagtyper.SØKNAD_FOLKETRYGDEN, VERSJON_SOEKNAD_GRUNNLAG);
     }
 
     private Behandlingsgrunnlag opprettBehandlingsgrunnlag(long behandlingID, BehandlingsgrunnlagData behandlingsgrunnlagData,
