@@ -57,7 +57,7 @@ public class SedMottakRuting implements StegBehandler {
         final String journalpostID = eessiMelding.getJournalpostId();
 
         if (joarkFasade.hentJournalpost(journalpostID).isErFerdigstilt()) {
-            log.info("Journalpost {} for sed {} i RINA-sak {} er allerede ferdigstilt. Behandler ikke videre",
+            log.warn("Journalpost {} for sed {} i RINA-sak {} er allerede ferdigstilt. Behandler ikke videre",
                 journalpostID, eessiMelding.getSedId(), eessiMelding.getRinaSaksnummer());
         } else {
             log.info("Forsøker å rute sed {} i RINA-sak {}", eessiMelding.getSedId(), eessiMelding.getRinaSaksnummer());
