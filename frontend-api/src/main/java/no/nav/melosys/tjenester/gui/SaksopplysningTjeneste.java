@@ -37,7 +37,7 @@ public class SaksopplysningTjeneste {
         @ApiResponse(code = 404, message = "Behandling ikke funnet"),
         @ApiResponse(code = 500, message = "Uventet teknisk Feil")
     })
-    public ResponseEntity oppfriskSaksopplysning(@PathVariable("behandlingID") long behandlingID, @RequestParam(required = false) boolean medFamilierelasjoner) throws MelosysException {
+    public ResponseEntity<Void> oppfriskSaksopplysning(@PathVariable("behandlingID") long behandlingID, @RequestParam(required = false) boolean medFamilierelasjoner) throws MelosysException {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandlingID, medFamilierelasjoner);
         return ResponseEntity.noContent().build();

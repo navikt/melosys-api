@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.tps;
 
 import java.time.LocalDate;
 
+import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.exception.*;
 

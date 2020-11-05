@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.tps.Informasjonsbehov;
+import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import org.apache.commons.lang3.StringUtils;
 
