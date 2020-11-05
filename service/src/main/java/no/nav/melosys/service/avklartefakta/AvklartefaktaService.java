@@ -4,9 +4,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
-import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
+import no.nav.melosys.domain.avklartefakta.*;
+import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
+import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
@@ -121,6 +121,21 @@ public class AvklartefaktaService {
         Map<String, List<Avklartefakta>> maritimtArbeidGruppert = grupperForSubjekt(maritimeAvklartefakta);
         return maritimtArbeidGruppert.entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey, AvklartMaritimtArbeid::av));
+    }
+
+    public AvklarteMedfolgendeBarn hentAvklarteMedfølgendeBarn(long behandlingID) {
+        Set<String> barnOmfattetAvNorskTrygd = new HashSet<>();
+        Set<IkkeOmfattetBarn> barnIkkeOmfattetAvNorskTrygd = new HashSet<>();
+        for (Avklartefakta avklartefakta : avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingID, Avklartefaktatyper.VURDERING_LOVVALG_BARN)) {
+            if (avklartefakta.getFakta().equals(VALGT_FAKTA)) {
+                barnOmfattetAvNorskTrygd.add(avklartefakta.getSubjekt());
+            } else {
+                String begrunnelse = avklartefakta.getRegistreringer().iterator().next().getBegrunnelseKode();
+                barnIkkeOmfattetAvNorskTrygd.add(
+                    new IkkeOmfattetBarn(avklartefakta.getSubjekt(), begrunnelse, avklartefakta.getBegrunnelseFritekst()));
+            }
+        }
+        return new AvklarteMedfolgendeBarn(barnOmfattetAvNorskTrygd, barnIkkeOmfattetAvNorskTrygd);
     }
 
     private Map<String, List<Avklartefakta>> grupperForSubjekt(Collection<Avklartefakta> avklartefakta) {
