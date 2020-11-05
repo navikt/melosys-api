@@ -4,13 +4,12 @@ package no.nav.melosys.tjenester.gui;
 import java.io.IOException;
 import java.util.List;
 
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsGrunnlagType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.domain.kodeverk.Flyvningstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -71,24 +70,8 @@ public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
     public void hentBehandlingsgrunnlag_erSoeknad_validerSchema() throws Exception{
         Soeknad soeknad = random.nextObject(Soeknad.class);
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setType(BehandlingsGrunnlagType.SØKNAD);
+        behandlingsgrunnlag.setType(Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS);
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(soeknad);
-        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
-
-        ResponseEntity<BehandlingsgrunnlagGetDto> responseEntity = behandlingsgrunnlagTjeneste.hentBehandlingsgrunnlag(123);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isInstanceOf(BehandlingsgrunnlagGetDto.class);
-
-        String json = objectMapperMedKodeverkServiceStub().writeValueAsString(responseEntity.getBody());
-        valider(json, "behandlingsgrunnlag-schema.json", log);
-    }
-
-    @Test
-    public void hentBehandlingsgrunnlag_erGenereltBehandlingsgrunnlagData_validerSchema() throws Exception{
-        BehandlingsgrunnlagData soeknadDokument = random.nextObject(BehandlingsgrunnlagData.class);
-        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setType(BehandlingsGrunnlagType.GENERELT);
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(soeknadDokument);
         when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
 
         ResponseEntity<BehandlingsgrunnlagGetDto> responseEntity = behandlingsgrunnlagTjeneste.hentBehandlingsgrunnlag(123);
@@ -102,7 +85,7 @@ public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void hentBehandlingsgrunnlag_erSedGrunnlag_validerSchema() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, IOException {
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setType(BehandlingsGrunnlagType.SED);
+        behandlingsgrunnlag.setType(Behandlingsgrunnlagtyper.SED);
 
         SedGrunnlag sedGrunnlag = random.nextObject(SedGrunnlag.class);
         sedGrunnlag.overgangsregelbestemmelser = List.of(Overgangsregelbestemmelser.FO_1408_1971_ART14_2_A, Overgangsregelbestemmelser.FO_1408_1971_ART14_2_B);

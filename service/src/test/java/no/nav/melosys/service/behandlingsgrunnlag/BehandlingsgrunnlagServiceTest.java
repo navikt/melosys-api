@@ -6,33 +6,29 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsGrunnlagType;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.behandlingsgrunnlag.*;
+import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BehandlingsgrunnlagServiceTest {
+@ExtendWith(MockitoExtension.class)
+class BehandlingsgrunnlagServiceTest {
 
     @Mock
     private BehandlingsgrunnlagRepository behandlingsgrunnlagRepository;
@@ -43,33 +39,30 @@ public class BehandlingsgrunnlagServiceTest {
 
     private final long behandlingID = 123332211;
 
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
-
     @Captor
     private ArgumentCaptor<Behandlingsgrunnlag> behandlingsgrunnlagArgumentCaptor;
 
-    @Before
+    @BeforeEach
     public void setup() {
         behandlingsgrunnlagService = new BehandlingsgrunnlagService(behandlingsgrunnlagRepository, behandlingService);
     }
 
     @Test
-    public void hentBehandlingsgrunnlagForBehandlingID_finnes_returnerBehandlingsgrunnlag() throws IkkeFunnetException {
+    void hentBehandlingsgrunnlagForBehandlingID_finnes_returnerBehandlingsgrunnlag() throws IkkeFunnetException {
         when(behandlingsgrunnlagRepository.findByBehandling_Id(behandlingID))
             .thenReturn(Optional.of(new Behandlingsgrunnlag()));
         assertThat(behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID)).isNotNull();
     }
 
     @Test
-    public void hentBehandlingsgrunnlagForBehandlingID_finnesIkke_kastException() throws IkkeFunnetException {
-        expectedException.expect(IkkeFunnetException.class);
-        expectedException.expectMessage("Finner ikke behandlingsgrunnlag for behandling 1");
-        behandlingsgrunnlagService.hentBehandlingsgrunnlag(1);
+    void hentBehandlingsgrunnlagForBehandlingID_finnesIkke_kastException() {
+        assertThatExceptionOfType(IkkeFunnetException.class)
+            .isThrownBy(() -> behandlingsgrunnlagService.hentBehandlingsgrunnlag(1))
+            .withMessageContaining("Finner ikke behandlingsgrunnlag for behandling 1");
     }
 
     @Test
-    public void opprettSøknadGrunnlag_finnesIkkeFraFør_blirOpprettet() throws FunksjonellException {
+    void opprettSøknadGrunnlag_finnesIkkeFraFør_blirOpprettet() throws FunksjonellException {
         final long behandlingID = 1234L;
         Behandling behandling = new Behandling();
         behandling.setId(behandlingID);
@@ -82,12 +75,12 @@ public class BehandlingsgrunnlagServiceTest {
 
         assertThat(opprettet).isNotNull();
         assertThat(opprettet.getBehandlingsgrunnlagdata()).isInstanceOf(Soeknad.class);
-        assertThat(opprettet.getType()).isEqualTo(BehandlingsGrunnlagType.SØKNAD);
+        assertThat(opprettet.getType()).isEqualTo(Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS);
         assertThat(opprettet.getBehandling()).isEqualTo(behandling);
     }
 
     @Test
-    public void oppdaterBehandlingsgrunnlag_eksisterer_oppdatererBehandlingsgrunnlagData() throws IkkeFunnetException, JsonProcessingException {
+    void oppdaterBehandlingsgrunnlag_eksisterer_oppdatererBehandlingsgrunnlagData() throws IkkeFunnetException, JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
 
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
@@ -107,7 +100,7 @@ public class BehandlingsgrunnlagServiceTest {
     }
 
     @Test
-    public void opprettSedGrunnlag_harRettType() throws FunksjonellException {
+    void opprettSedGrunnlag_harRettType() throws FunksjonellException {
         final long behandlingID = 1234L;
         Behandling behandling = new Behandling();
         behandling.setId(behandlingID);
@@ -120,7 +113,25 @@ public class BehandlingsgrunnlagServiceTest {
 
         assertThat(opprettet).isNotNull();
         assertThat(opprettet.getBehandlingsgrunnlagdata()).isInstanceOf(SedGrunnlag.class);
-        assertThat(opprettet.getType()).isEqualTo(BehandlingsGrunnlagType.SED);
+        assertThat(opprettet.getType()).isEqualTo(Behandlingsgrunnlagtyper.SED);
+        assertThat(opprettet.getBehandling()).isEqualTo(behandling);
+    }
+
+    @Test
+    void opprettSøknadFolketrygden_harRettType() throws FunksjonellException {
+        final long behandlingID = 1234L;
+        Behandling behandling = new Behandling();
+        behandling.setId(behandlingID);
+        when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
+        SoeknadFtrl sedGrunnlag = new SoeknadFtrl();
+        behandlingsgrunnlagService.opprettSøknadFolketrygden(behandlingID, sedGrunnlag);
+
+        verify(behandlingsgrunnlagRepository).save(behandlingsgrunnlagArgumentCaptor.capture());
+        Behandlingsgrunnlag opprettet = behandlingsgrunnlagArgumentCaptor.getValue();
+
+        assertThat(opprettet).isNotNull();
+        assertThat(opprettet.getBehandlingsgrunnlagdata()).isInstanceOf(SoeknadFtrl.class);
+        assertThat(opprettet.getType()).isEqualTo(Behandlingsgrunnlagtyper.SØKNAD_FOLKETRYGDEN);
         assertThat(opprettet.getBehandling()).isEqualTo(behandling);
     }
 }
