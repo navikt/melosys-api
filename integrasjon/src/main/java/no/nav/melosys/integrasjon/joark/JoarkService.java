@@ -93,6 +93,7 @@ public class JoarkService implements JoarkFasade {
         GetJournalpostResponse response = journalfoerInngaaendeConsumer.hentJournalpost(journalpostID);
 
         Journalpost journalpost = new Journalpost(journalpostID);
+        journalpost.setErFerdigstilt(response.getJournalTilstand() == GetJournalpostResponse.JournalTilstand.ENDELIG);
         journalpost.setBrukerId(response.getBrukerListe().stream().map(Bruker::getIdentifikator).findFirst().orElse(null));
         journalpost.setForsendelseMottatt(response.getForsendelseMottatt().toInstant());
         journalpost.setMottaksKanal(response.getMottaksKanal());
