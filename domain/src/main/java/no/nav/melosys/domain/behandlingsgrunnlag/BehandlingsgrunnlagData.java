@@ -48,12 +48,6 @@ public class BehandlingsgrunnlagData {
             .collect(Collectors.toSet());
     }
 
-    public Set<String> hentAllePersonnumre() {
-        return personOpplysninger.hentAllePersonnummer()
-            .filter(StringUtils::isNotEmpty)
-            .collect(Collectors.toSet());
-    }
-
     public List<String> hentUtenlandskeArbeidsstederLandkode() {
         return arbeidUtland.stream()
             .map(a -> a.adresse != null ? a.adresse.landkode : null)

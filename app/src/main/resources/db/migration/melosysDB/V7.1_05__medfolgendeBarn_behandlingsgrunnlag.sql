@@ -1,0 +1,1 @@
+-- FIXME Fjern medfolgendeFamilie + medfolgendeAndre, legg til medfolgendeBarn
