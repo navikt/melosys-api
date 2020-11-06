@@ -8,9 +8,7 @@ BEGIN
         LOOP
             jsonData := TREAT (JSON_ELEMENT_T.parse(bg.data) AS JSON_OBJECT_T);
             personOpplysninger := TREAT (jsonData.get('personOpplysninger') AS JSON_OBJECT_T);
-            personOpplysninger.remove('medfolgendeFamilie');
             personOpplysninger.remove('medfolgendeAndre');
-            personOpplysninger.put('medfolgendeBarn', json_array_t());
             oppdatertJsonData := jsonData.stringify;
             UPDATE BEHANDLINGSGRUNNLAG SET DATA = oppdatertJsonData WHERE CURRENT OF bgs;
         END LOOP;

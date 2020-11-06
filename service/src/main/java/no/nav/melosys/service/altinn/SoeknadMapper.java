@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MedfolgendeBarn;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MedfolgendeFamilie;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Soeknadsland;
@@ -24,7 +24,7 @@ public final class SoeknadMapper {
         final Innhold innhold = søknad.getInnhold();
         soeknad.soeknadsland = hentsoeknadsland(innhold);
         soeknad.periode = lagPeriode(innhold);
-        soeknad.personOpplysninger.medfolgendeBarn = hentMedfølgendeBarn(innhold);
+        soeknad.personOpplysninger.medfolgendeFamilie = hentMedfølgendeBarn(innhold);
         return soeknad;
     }
 
@@ -41,14 +41,14 @@ public final class SoeknadMapper {
         return new Periode(periodeFra, periodeTil);
     }
 
-    private static List<MedfolgendeBarn> hentMedfølgendeBarn(Innhold innhold) {
+    private static List<MedfolgendeFamilie> hentMedfølgendeBarn(Innhold innhold) {
         Barn barn = innhold.getArbeidstaker().getBarn();
-        List<MedfolgendeBarn> medfølgendeBarn = new ArrayList<>();
+        List<MedfolgendeFamilie> medfølgendeBarn = new ArrayList<>();
 
         if (barn != null && barn.getBarnet() != null) {
             medfølgendeBarn = barn.getBarnet().stream()
                 .map(Barnet::getFoedselsnummer)
-                .map(MedfolgendeBarn::fraFnr)
+                .map(MedfolgendeFamilie::tilBarnFraFnr)
                 .collect(Collectors.toList());
         }
         return medfølgendeBarn;

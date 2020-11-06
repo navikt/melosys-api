@@ -6,5 +6,5 @@ import java.util.List;
 //Ekstra opplysning for bruker
 public class OpplysningerOmBrukeren {
     public List<UtenlandskIdent> utenlandskIdent = new ArrayList<>();
-    public List<MedfolgendeBarn> medfolgendeBarn = new ArrayList<>();
+    public List<MedfolgendeFamilie> medfolgendeFamilie = new ArrayList<>();
 }
