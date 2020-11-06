@@ -6,13 +6,11 @@ import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 
 public class OppgaveOppdatering {
     private final Oppgavetyper oppgavetype;
     private final Tema tema;
     private final Behandlingstema behandlingstema;
-    private final Behandlingstyper behandlingstype;
     private final Fagsystem behandlesAvApplikasjon;
     private final String saksnummer;
     private final String beskrivelse;
@@ -25,7 +23,6 @@ public class OppgaveOppdatering {
         this.oppgavetype = builder.oppgavetype;
         this.tema = builder.tema;
         this.behandlingstema = builder.behandlingstema;
-        this.behandlingstype = builder.behandlingstype;
         this.behandlesAvApplikasjon = builder.behandlesAvApplikasjon;
         this.saksnummer = builder.saksnummer;
         this.beskrivelse = builder.beskrivelse;
@@ -49,10 +46,6 @@ public class OppgaveOppdatering {
 
     public Behandlingstema getBehandlingstema() {
         return behandlingstema;
-    }
-
-    public Behandlingstyper getBehandlingstype() {
-        return behandlingstype;
     }
 
     public Fagsystem getBehandlesAvApplikasjon() {
@@ -87,7 +80,6 @@ public class OppgaveOppdatering {
         private Oppgavetyper oppgavetype;
         private Tema tema;
         private Behandlingstema behandlingstema;
-        private Behandlingstyper behandlingstype;
         private Fagsystem behandlesAvApplikasjon;
         private String saksnummer;
         private String beskrivelse;
@@ -111,11 +103,6 @@ public class OppgaveOppdatering {
 
         public OppgaveOppdateringBuilder behandlingstema(Behandlingstema behandlingstema) {
             this.behandlingstema = behandlingstema;
-            return this;
-        }
-
-        public OppgaveOppdateringBuilder behandlingstype(Behandlingstyper behandlingstype) {
-            this.behandlingstype = behandlingstype;
             return this;
         }
 

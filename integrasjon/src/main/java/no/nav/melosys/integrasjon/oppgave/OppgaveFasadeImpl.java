@@ -188,9 +188,6 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             oppgaveDto.setTema(oppgaveOppdatering.getTema().getKode());
         }
         if (oppgaveOppdatering.getBehandlingstema() != null) {
-            oppgaveDto.setBehandlingstema(oppgaveOppdatering.getBehandlingstema().getKode());
-        }
-        if (oppgaveOppdatering.getBehandlingstype() != null) {
             oppgaveDto.setBehandlingstype(hentFellesKode(oppgaveOppdatering.getBehandlingstema()));
         }
         if (oppgaveOppdatering.getBehandlesAvApplikasjon() != null && oppgaveOppdatering.getBehandlesAvApplikasjon() != Fagsystem.INTET) {

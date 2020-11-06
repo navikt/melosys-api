@@ -9,8 +9,8 @@ spec:
   image: repo.adeo.no:5443/melosys/melosys:@@IMAGE_VERSION@@
   port: 8080
   replicas:
-    min: 1
-    max: 1
+    min: 2
+    max: 2
     cpuThresholdPercentage: 80
   liveness:
     path: internal/isAlive
@@ -23,10 +23,10 @@ spec:
   resources:
     limits:
       cpu: 1000m
-      memory: 3072Mi
+      memory: 2048Mi
     requests:
       cpu: 200m
-      memory: 2048Mi
+      memory: 1024Mi
   vault:
     enabled: true
   prometheus:

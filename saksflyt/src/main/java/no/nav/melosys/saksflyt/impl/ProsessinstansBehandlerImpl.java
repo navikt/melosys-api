@@ -36,7 +36,7 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
     public void behandleProsessinstans(@NotNull Prosessinstans prosessinstans) {
         log.info("Starter behandling av prosessinstans {}", prosessinstans.getId());
 
-        if (!prosessinstans.statusErKlar()) {
+        if (!prosessinstans.statusErKlarEllerRestartet()) {
             log.warn("Prosessinstans {} har status {}. Skal ikke behandles", prosessinstans.getId(), prosessinstans.getStatus());
             return;
         }

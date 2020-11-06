@@ -1,7 +1,5 @@
 package no.nav.melosys.domain;
 
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
-
 import java.time.Instant;
 import java.util.*;
 import javax.persistence.*;
@@ -22,13 +20,14 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
+
 @Entity
 @Table(name = "behandling")
 @EntityListeners(AuditingEntityListener.class)
 public class Behandling extends RegistreringsInfo {
 
-    public static final List<Behandlingstema> BEHANDLINGSTEMA_SØKNAD = List.of(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_ETT_LAND_ØVRIG, IKKE_YRKESAKTIV, ARBEID_FLERE_LAND,
-        ARBEID_NORGE_BOSATT_ANNET_LAND);
+    public static final List<Behandlingstema> BEHANDLINGSTEMA_SØKNAD = List.of(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_ETT_LAND_ØVRIG, IKKE_YRKESAKTIV, ARBEID_FLERE_LAND);
 
     public static final List<Behandlingstema> BEHANDLINGSTEMA_SED_FORESPØRSEL = List.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM, TRYGDETID);
 
@@ -49,7 +48,7 @@ public class Behandling extends RegistreringsInfo {
     private Behandlingstyper type;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "beh_tema", nullable = false, updatable = false)
+    @Column(name = "beh_tema", nullable = false)
     private Behandlingstema tema;
 
     @Column(name = "siste_opplysninger_hentet_dato")
@@ -360,12 +359,20 @@ public class Behandling extends RegistreringsInfo {
         return erRegistreringAvUnntak(tema.getKode());
     }
 
-    public static boolean erBehandlingAvSøknad(Behandlingstema behandlingstema) {
+    public static boolean erGyldigBehandlingAvSøknad(Behandlingstema behandlingstema) {
         return BEHANDLINGSTEMA_SØKNAD.contains(behandlingstema);
     }
 
+    public static boolean erBehandlingAvSøknad(Behandlingstema behandlingstema) {
+        return erBehandlingAvSøknad(behandlingstema.getKode());
+    }
+
     public static boolean erBehandlingAvSøknad(String behandlingstemaKode) {
-        return erBehandlingAvSøknad(Behandlingstema.valueOf(behandlingstemaKode));
+        return erBehandlingAvSøknadUtsendtArbeidstaker(behandlingstemaKode)
+            || erBehandlingAvSøknadArbeidIFlereLand(behandlingstemaKode)
+            || Behandlingstema.ARBEID_ETT_LAND_ØVRIG.getKode().equalsIgnoreCase(behandlingstemaKode)
+            || Behandlingstema.IKKE_YRKESAKTIV.getKode().equalsIgnoreCase(behandlingstemaKode)
+            || Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND.getKode().equalsIgnoreCase(behandlingstemaKode);
     }
 
     public static boolean erBehandlingAvSøknadUtsendtArbeidstaker(String behandlingstemaKode) {
