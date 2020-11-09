@@ -43,7 +43,7 @@ public class Saksopplysning {
     private Instant endretDato;
 
     @Convert(converter = SaksopplysningDokumentConverter.class)
-    @Column(name = "dokument")
+    @Column(name = "dokument", nullable = false, updatable = false)
     private SaksopplysningDokument dokument;
 
     public Long getId() {

@@ -37,14 +37,14 @@ import org.flywaydb.core.api.migration.Context;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 @SuppressWarnings("unused")
-public class V7_1_06__SAKSOPPLYSNING_XML_TIL_DOKUMENT_JSON extends BaseJavaMigration {
+public class V7_1_08__SAKSOPPLYSNING_XML_TIL_DOKUMENT_JSON extends BaseJavaMigration {
 
     private final ObjectMapper objectMapper;
     private final Jaxb2Marshaller jaxb2Marshaller;
     private final TransformerFactory transformerFactory;
     private final Map<String, Transformer> transformerMap = new HashMap<>();
 
-    public V7_1_06__SAKSOPPLYSNING_XML_TIL_DOKUMENT_JSON() {
+    public V7_1_08__SAKSOPPLYSNING_XML_TIL_DOKUMENT_JSON() {
         this.objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
