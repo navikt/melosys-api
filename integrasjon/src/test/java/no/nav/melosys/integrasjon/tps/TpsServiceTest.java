@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
@@ -89,7 +90,7 @@ public class TpsServiceTest {
 
         when(personConsumer.hentPerson(any())).thenReturn(r1);
 
-        Saksopplysning saksopplysning = service.hentPerson(AKTØRID_1.toString());
+        Saksopplysning saksopplysning = service.hentPerson(AKTØRID_1.toString(), Informasjonsbehov.INGEN);
 
         PersonDokument dokument = (PersonDokument) saksopplysning.getDokument();
         assertThat(dokument.fnr).isEqualTo(AKTØRID_1.toString());
@@ -153,7 +154,7 @@ public class TpsServiceTest {
         personDokument.sammensattNavn = sammensattNavn;
 
         String fnr = "fnr";
-        doReturn(saksopplysning).when(service).hentPerson(fnr);
+        doReturn(saksopplysning).when(service).hentPerson(fnr, Informasjonsbehov.INGEN);
 
         assertThat(service.hentSammensattNavn(fnr)).isEqualTo(sammensattNavn);
     }

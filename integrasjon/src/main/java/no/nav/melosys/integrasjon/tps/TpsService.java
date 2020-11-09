@@ -3,11 +3,13 @@ package no.nav.melosys.integrasjon.tps;
 import java.io.StringWriter;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningType;
@@ -20,7 +22,6 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.tps.aktoer.AktoerIdCache;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
-import no.nav.melosys.integrasjon.tps.person.Informasjonsbehov;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
 import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentAktoerIdForIdentPersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentIdentForAktoerIdPersonIkkeFunnet;
@@ -107,7 +108,7 @@ public class TpsService implements TpsFasade {
         }
     }
 
-    private Saksopplysning hentPerson(String ident, Collection<Informasjonsbehov> behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    private Saksopplysning hentPerson(String ident, Collection<no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov> behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
         HentPersonRequest request = new HentPersonRequest();
         NorskIdent norskIdent = new NorskIdent();
         norskIdent.setIdent(ident);
@@ -116,9 +117,7 @@ public class TpsService implements TpsFasade {
         personIdent.setIdent(norskIdent);
 
         request.setAktoer(personIdent);
-        if (behov != null) {
-            behov.forEach(informasjonsbehov -> request.getInformasjonsbehov().add(informasjonsbehov.getKode()));
-        }
+        request.getInformasjonsbehov().addAll(behov);
 
         // Kall til TPS
         HentPersonResponse response;
@@ -153,8 +152,8 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    public Saksopplysning hentPerson(String ident, Informasjonsbehov... behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        return hentPerson(ident, Set.of(behov));
+    public Saksopplysning hentPerson(String ident, Informasjonsbehov behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+        return hentPerson(ident, mapInformasjonsbehovTilTps(behov));
     }
 
     @Override
@@ -214,8 +213,20 @@ public class TpsService implements TpsFasade {
 
     @Override
     public String hentSammensattNavn(String fnr) throws FunksjonellException, IntegrasjonException {
-        Saksopplysning tpsOpplysning = hentPerson(fnr);
+        Saksopplysning tpsOpplysning = hentPerson(fnr, Informasjonsbehov.INGEN);
         PersonDokument personDokument = (PersonDokument) tpsOpplysning.getDokument();
         return personDokument != null ? personDokument.sammensattNavn : null;
+    }
+
+    private Set<no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov> mapInformasjonsbehovTilTps(Informasjonsbehov behov) {
+        switch (behov) {
+            case STANDARD:
+                return Set.of(no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov.ADRESSE);
+            case MED_FAMILIERELASJONER:
+                return Set.of(no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov.ADRESSE,
+                    no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov.FAMILIERELASJONER);
+            default:
+                return Collections.emptySet();
+        }
     }
 }

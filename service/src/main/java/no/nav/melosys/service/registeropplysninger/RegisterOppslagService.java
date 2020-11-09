@@ -11,7 +11,7 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.integrasjon.tps.person.Informasjonsbehov;
+import no.nav.melosys.domain.person.Informasjonsbehov;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -54,7 +54,7 @@ public class RegisterOppslagService {
      * Henter personopplysninger.
      */
     public PersonDokument hentPerson(String personnummer) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        Saksopplysning saksopplysning = tpsFasade.hentPerson(personnummer, Informasjonsbehov.ADRESSE);
+        Saksopplysning saksopplysning = tpsFasade.hentPerson(personnummer, Informasjonsbehov.STANDARD);
         return (PersonDokument) saksopplysning.getDokument();
     }
 }
