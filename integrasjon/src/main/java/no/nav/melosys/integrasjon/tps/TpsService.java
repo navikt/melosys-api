@@ -7,7 +7,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.Saksopplysning;
@@ -112,7 +111,7 @@ public class TpsService implements TpsFasade {
 
     @Override
     public Saksopplysning hentPerson(String ident, Informasjonsbehov behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        PersonMedKilde personMedKilde = hentPersonDto(ident, mapInformasjonsbehovTilTps(behov));
+        PersonMedKilde personMedKilde = hentPersonMedKilde(ident, mapInformasjonsbehovTilTps(behov));
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.leggTilKildesystemOgMottattDokument(
             SaksopplysningKildesystem.TPS, personMedKilde.dokumentXml);
@@ -120,7 +119,7 @@ public class TpsService implements TpsFasade {
         saksopplysning.setVersjon(PERSON_VERSJON);
 
         for (Familiemedlem familiemedlem : personMedKilde.dokument.familiemedlemmer) {
-            PersonMedKilde personIFamilie = hentPersonDto(familiemedlem.fnr, mapInformasjonsbehovTilTps(Informasjonsbehov.MED_FAMILIERELASJONER));
+            PersonMedKilde personIFamilie = hentPersonMedKilde(familiemedlem.fnr, mapInformasjonsbehovTilTps(Informasjonsbehov.MED_FAMILIERELASJONER));
             PersonMapper.berikFamiliemedlemMedOpplysninger(familiemedlem, personIFamilie.dokument, ident);
             saksopplysning.leggTilKildesystemOgMottattDokument(
                 SaksopplysningKildesystem.TPS, personIFamilie.dokumentXml);
@@ -130,7 +129,7 @@ public class TpsService implements TpsFasade {
         return saksopplysning;
     }
 
-    private PersonMedKilde hentPersonDto(String ident, Set<no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov> behov) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
+    private PersonMedKilde hentPersonMedKilde(String ident, Set<no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov> behov) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
         HentPersonRequest request = new HentPersonRequest();
         NorskIdent norskIdent = new NorskIdent();
         norskIdent.setIdent(ident);
