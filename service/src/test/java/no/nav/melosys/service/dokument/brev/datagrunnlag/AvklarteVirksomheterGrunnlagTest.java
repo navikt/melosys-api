@@ -185,7 +185,7 @@ public class AvklarteVirksomheterGrunnlagTest {
     }
 
     @Test
-    public void utfyllManglendeAdressefelter_utenladsnkIngenForretningsadressePostadresseUtenPostnummer_postnummerTomString() {
+    public void utfyllManglendeAdressefelter_utenlandskIngenForretningsadressePostadresseUtenPostnummer_postnummerTomString() {
         var organisasjonDokument = lagOrganisasjonDokument(null, null, null, "DK");
         organisasjonDokument.organisasjonDetaljer.forretningsadresse = Collections.emptyList();
         organisasjonDokument.organisasjonDetaljer.postadresse.stream().findFirst().ifPresent(a -> ((SemistrukturertAdresse)a).setPostnr(null));
