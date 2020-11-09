@@ -113,6 +113,9 @@ public class AvklarteVirksomheterGrunnlag {
         }
         if (adresse.erNorsk()) {
             adresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
+        } else if (StringUtils.isEmpty(adresse.postnummer)) {
+            //Utenlandske adresser har ikke (alltid?) postnummer
+            adresse.postnummer = " ";
         }
         return adresse;
     }
