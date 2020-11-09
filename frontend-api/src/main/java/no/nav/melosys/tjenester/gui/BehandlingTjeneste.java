@@ -3,6 +3,7 @@ package no.nav.melosys.tjenester.gui;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.MelosysException;
@@ -23,8 +24,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Protected
 @RestController
@@ -112,7 +113,11 @@ public class BehandlingTjeneste {
     public ResponseEntity<List<Behandlingstema>> hentEndreBehandlingstema(@PathVariable("behandlingID") long behandlingsID)
         throws MelosysException{
         log.debug("Saksbehandler {} ber om å hente mulige nye behandlingstema for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingsID);
-        tilgangService.sjekkTilgang(behandlingsID);
+        try {
+            tilgangService.sjekkRedigerbarOgTilordnetSaksbehandlerOgTilgang(behandlingsID);
+        } catch (FunksjonellException e) {
+            return ResponseEntity.ok(Collections.emptyList());
+        }
 
         List<Behandlingstema> muligeBehandlingstema = endreBehandlingstemaService.hentMuligeBehandlingstema(behandlingsID);
         return ResponseEntity.ok(muligeBehandlingstema);
@@ -123,7 +128,7 @@ public class BehandlingTjeneste {
     public ResponseEntity<Void> endreBehandlingstema(@PathVariable("behandlingID") long behandlingsID, @RequestBody EndreBehandlingstemaDto endreBehandlingstemaDto)
         throws MelosysException{
         log.debug("Saksbehandler {} ber om å sette behandlingstema for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingsID, endreBehandlingstemaDto);
-        tilgangService.sjekkTilgang(behandlingsID);
+        tilgangService.sjekkRedigerbarOgTilordnetSaksbehandlerOgTilgang(behandlingsID);
 
         endreBehandlingstemaService.endreBehandlingstemaTilBehandling(behandlingsID, Behandlingstema.valueOf(endreBehandlingstemaDto.getBehandlingstema()));
         return ResponseEntity.noContent().build();

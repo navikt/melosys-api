@@ -4,11 +4,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -259,6 +261,46 @@ public class AvklartefaktaServiceTest {
 
         AvklartefaktaRegistrering registrering = capturedAvklarteFakta.getRegistreringer().iterator().next();
         assertThat(registrering.getBegrunnelseKode()).isEqualTo("kode");
+    }
+
+    @Test
+    public void hentAvklarteMedfølgendeBarn_medOgUtenMedfølgendeBarn_girForventedeVerdier() {
+        Avklartefakta barnOmfattet = lagAvklartefakta(Avklartefaktatyper.VURDERING_LOVVALG_BARN,
+            "omfattet", "TRUE");
+        Avklartefakta barnIkkeOmfattet1 = lagAvklartIkkeOmfattetBarn(
+            "ikkeOmfattet1", Medfolgende_barn_begrunnelser.OVER_18_AR, "begrunnelseFritekst");
+        Avklartefakta barnIkkeOmfattet2 = lagAvklartIkkeOmfattetBarn(
+            "ikkeOmfattet2", Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER, null);
+
+         when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(anyLong(), any(Avklartefaktatyper.class)))
+            .thenReturn(Set.of(barnOmfattet, barnIkkeOmfattet1, barnIkkeOmfattet2));
+
+        AvklarteMedfolgendeBarn avklarteMedfølgendeBarn
+            = avklartefaktaService.hentAvklarteMedfølgendeBarn(1L);
+
+        assertThat(avklarteMedfølgendeBarn.barnOmfattetAvNorskTrygd).containsExactly("omfattet");
+        assertThat(avklarteMedfølgendeBarn.barnIkkeOmfattetAvNorskTrygd)
+            .extracting("fnr")
+            .containsExactlyInAnyOrder("ikkeOmfattet1", "ikkeOmfattet2");
+        assertThat(avklarteMedfølgendeBarn.barnIkkeOmfattetAvNorskTrygd)
+            .filteredOn(barnIkkeOmfattet -> barnIkkeOmfattet.fnr.equals("ikkeOmfattet1"))
+            .extracting("begrunnelse")
+            .isEqualTo(List.of(Medfolgende_barn_begrunnelser.OVER_18_AR));
+        assertThat(avklarteMedfølgendeBarn.barnIkkeOmfattetAvNorskTrygd)
+            .filteredOn(barnIkkeOmfattet -> barnIkkeOmfattet.fnr.equals("ikkeOmfattet2"))
+            .extracting("begrunnelse")
+            .isEqualTo(List.of(Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER));
+        assertThat(avklarteMedfølgendeBarn.hentBegrunnelseFritekst().orElse("")).isEqualTo("begrunnelseFritekst");
+    }
+
+    private static Avklartefakta lagAvklartIkkeOmfattetBarn(String subjectID, Medfolgende_barn_begrunnelser begrunnelse, String begrunnelseFritekst) {
+        Avklartefakta avklartefakta = lagAvklartefakta(Avklartefaktatyper.VURDERING_LOVVALG_BARN, subjectID, "FALSE");
+        avklartefakta.setBegrunnelseFritekst(begrunnelseFritekst);
+
+        AvklartefaktaRegistrering avklartefaktaRegistrering = new AvklartefaktaRegistrering();
+        avklartefaktaRegistrering.setBegrunnelseKode(begrunnelse.getKode());
+        avklartefakta.setRegistreringer(Set.of(avklartefaktaRegistrering));
+        return avklartefakta;
     }
 
     private static Avklartefakta lagAvklartefakta(Avklartefaktatyper type, String subjektID, String fakta) {

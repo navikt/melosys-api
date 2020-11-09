@@ -8,7 +8,7 @@ public class ProsessinstansOpprettetEvent extends ApplicationEvent {
         super(prosessinstans);
     }
 
-    public Prosessinstans getProsessInstans() {
+    public Prosessinstans hentProsessinstans() {
         return (Prosessinstans) getSource();
     }
 }

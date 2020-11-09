@@ -5,17 +5,19 @@ import java.util.EnumMap;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 
 public final class BehandlingsgrunnlagKonverterer {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final EnumMap<BehandlingsGrunnlagType, Class<? extends BehandlingsgrunnlagData>> mapper = new EnumMap<>(BehandlingsGrunnlagType.class);
+    private static final EnumMap<Behandlingsgrunnlagtyper, Class<? extends BehandlingsgrunnlagData>> mapper = new EnumMap<>(Behandlingsgrunnlagtyper.class);
 
     static {
-        mapper.put(BehandlingsGrunnlagType.GENERELT, BehandlingsgrunnlagData.class);
-        mapper.put(BehandlingsGrunnlagType.SØKNAD, Soeknad.class);
-        mapper.put(BehandlingsGrunnlagType.SED, SedGrunnlag.class);
+        mapper.put(Behandlingsgrunnlagtyper.SØKNAD_FOLKETRYGDEN, SoeknadFtrl.class);
+        mapper.put(Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS, Soeknad.class);
+        mapper.put(Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS, Soeknad.class);
+        mapper.put(Behandlingsgrunnlagtyper.SED, SedGrunnlag.class);
         objectMapper.registerModule(new JavaTimeModule());
     }
 
@@ -41,7 +43,7 @@ public final class BehandlingsgrunnlagKonverterer {
         }
     }
 
-    public static Class<? extends BehandlingsgrunnlagData> klasseForType(BehandlingsGrunnlagType type) {
+    public static Class<? extends BehandlingsgrunnlagData> klasseForType(Behandlingsgrunnlagtyper type) {
         return mapper.get(type);
     }
 

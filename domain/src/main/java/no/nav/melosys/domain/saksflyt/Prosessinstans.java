@@ -67,6 +67,10 @@ public class Prosessinstans {
         return id;
     }
 
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
     public ProsessType getType() {
         return type;
     }
@@ -207,8 +211,8 @@ public class Prosessinstans {
         );
     }
 
-    public boolean statusErKlar() {
-        return status == ProsessStatus.KLAR;
+    public boolean statusErKlarEllerRestartet() {
+        return status == ProsessStatus.KLAR || status == ProsessStatus.RESTARTET;
     }
 
     @Override

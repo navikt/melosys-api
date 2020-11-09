@@ -8,35 +8,52 @@ import java.nio.file.Paths;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsGrunnlagType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import org.junit.Before;
-import org.junit.Test;
+import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
+import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class BehandlingsgrunnlagListenerTest {
+class BehandlingsgrunnlagListenerTest {
 
     private final BehandlingsgrunnlagListener behandlingsgrunnlagListener = new BehandlingsgrunnlagListener();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private Behandlingsgrunnlag behandlingsgrunnlag;
 
-    @Before
+    @BeforeEach
     public void setup() {
         behandlingsgrunnlag = new Behandlingsgrunnlag();
     }
 
     @Test
-    public void lastBehandlingsgrunnlag_erSøknad_forventTypeSoeknadDokument() throws URISyntaxException, IOException {
+    void lastBehandlingsgrunnlag_erSøknadFtrl_forventTypeSoeknadFtrl() throws URISyntaxException, IOException {
         URI søknadURI = (getClass().getClassLoader().getResource("soeknad/soeknad.json")).toURI();
         String json = new String(Files.readAllBytes(Paths.get(søknadURI)));
 
         behandlingsgrunnlag.setJsonData(json);
-        behandlingsgrunnlag.setType(BehandlingsGrunnlagType.SØKNAD);
+        behandlingsgrunnlag.setType(Behandlingsgrunnlagtyper.SØKNAD_FOLKETRYGDEN);
+        behandlingsgrunnlagListener.lastBehandlingsgrunnlag(behandlingsgrunnlag);
+
+        assertThat(behandlingsgrunnlag.getBehandlingsgrunnlagdata()).isNotNull();
+        assertThat(behandlingsgrunnlag.getBehandlingsgrunnlagdata()).isInstanceOf(SoeknadFtrl.class);
+
+        JsonNode jsonNode = objectMapper.readTree(json);
+        assertKonvertering(jsonNode, behandlingsgrunnlag.getBehandlingsgrunnlagdata());
+    }
+
+    @Test
+    void lastBehandlingsgrunnlag_erSøknad_forventTypeSoeknad() throws URISyntaxException, IOException {
+        URI søknadURI = (getClass().getClassLoader().getResource("soeknad/soeknad.json")).toURI();
+        String json = new String(Files.readAllBytes(Paths.get(søknadURI)));
+
+        behandlingsgrunnlag.setJsonData(json);
+        behandlingsgrunnlag.setType(Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS);
         behandlingsgrunnlagListener.lastBehandlingsgrunnlag(behandlingsgrunnlag);
 
         BehandlingsgrunnlagData data = behandlingsgrunnlag.getBehandlingsgrunnlagdata();
@@ -50,12 +67,12 @@ public class BehandlingsgrunnlagListenerTest {
     }
 
     @Test
-    public void lastBehandlingsgrunnlag_erGenerelt_forventBehGrunnlag() throws URISyntaxException, IOException {
+    void lastBehandlingsgrunnlag_erGenerelt_forventBehGrunnlag() throws URISyntaxException, IOException {
         URI søknadURI = (getClass().getClassLoader().getResource("soeknad/soeknad.json")).toURI();
         String json = new String(Files.readAllBytes(Paths.get(søknadURI)));
 
         behandlingsgrunnlag.setJsonData(json);
-        behandlingsgrunnlag.setType(BehandlingsGrunnlagType.GENERELT);
+        behandlingsgrunnlag.setType(Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS);
         behandlingsgrunnlagListener.lastBehandlingsgrunnlag(behandlingsgrunnlag);
 
         assertThat(behandlingsgrunnlag.getBehandlingsgrunnlagdata()).isNotNull();

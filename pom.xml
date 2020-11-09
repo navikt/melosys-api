@@ -29,6 +29,7 @@
         <module>saksflyt-api</module>
         <module>service</module>
         <module>sikkerhet</module>
+        <module>statistikk</module>
     </modules>
 
     <properties>
@@ -38,8 +39,8 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- Melosys -->
-        <melosys.jsonschema.version>1.35.64-143</melosys.jsonschema.version>
-        <melosys.internt.kodeverk.version>5.15.35</melosys.internt.kodeverk.version>
+        <melosys.jsonschema.version>1.35.68-147</melosys.jsonschema.version>
+        <melosys.internt.kodeverk.version>5.15.46</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.57</melosys.brev.version>
 
         <!-- NAV -->
@@ -79,6 +80,7 @@
         <oxmlparserv2.version>11.2.0.1.nojaxpservice</oxmlparserv2.version>
         <easy-random.version>4.0.0</easy-random.version>
         <restFixture.version>4.4</restFixture.version>
+        <shedlock.version>4.15.0</shedlock.version>
         <slf4j.version>1.7.25</slf4j.version>
         <spring-boot.version>2.2.0.RELEASE</spring-boot.version>
         <springfox.version>2.9.2</springfox.version>
@@ -360,6 +362,17 @@
                 <artifactId>spring-retry</artifactId>
                 <version>${spring-retry.version}</version>
             </dependency>
+            <dependency>
+                <groupId>net.javacrumbs.shedlock</groupId>
+                <artifactId>shedlock-spring</artifactId>
+                <version>${shedlock.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.javacrumbs.shedlock</groupId>
+                <artifactId>shedlock-provider-jdbc-template</artifactId>
+                <version>${shedlock.version}</version>
+            </dependency>
+
 
             <!-- Transitive avhengiheter med konflikter -->
             <dependency>

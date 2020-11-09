@@ -249,6 +249,7 @@ class JoarkServiceTest {
     void hentJournalpost_forventJournalpost() throws Exception {
         String arkivsakId = "123arkivsak";
         GetJournalpostResponse getJournalpostResponse = new GetJournalpostResponse();
+        getJournalpostResponse.setJournalTilstand(GetJournalpostResponse.JournalTilstand.ENDELIG);
         getJournalpostResponse.setArkivSak(new ArkivSakNoArkivsakSystemEnum());
         getJournalpostResponse.getArkivSak().setArkivSakId(arkivsakId);
 
@@ -297,6 +298,7 @@ class JoarkServiceTest {
         assertThat(journalpost).isNotNull();
         assertThat(journalpost.getBrukerId()).isEqualTo(brukerId);
         assertThat(journalpost.getAvsenderId()).isEqualTo(avsenderId);
+        assertThat(journalpost.isErFerdigstilt()).isTrue();
         assertThat(journalpost.getForsendelseMottatt()).isEqualTo(forsendelseMottatt.toInstant());
         assertThat(journalpost.getHoveddokument().getDokumentId()).isEqualTo(dokumentId);
         assertThat(journalpost.getHoveddokument().getTittel()).isEqualTo(dokumentTittel);

@@ -10,6 +10,8 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.sikkerhet.abac.Pep;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,17 @@ public class TilgangService {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.pep = pep;
+    }
+
+    public void sjekkRedigerbarOgTilordnetSaksbehandlerOgTilgang(long behandlingsId) throws FunksjonellException, TekniskException{
+        String saksbehandler = SubjectHandler.getInstance().getUserID();
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsId);
+
+        if ( !behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, saksbehandler)){
+            throw new FunksjonellException(String.format("Forsøk på å endre behandling med id %s som er ikke-redigerbar eller ikke er tilordnet %s", behandlingsId, saksbehandler));
+        }
+
+        sjekkTilgang(behandling);
     }
 
     public void sjekkRedigerbarOgTilgang(long behandlingsId) throws FunksjonellException, TekniskException {

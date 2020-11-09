@@ -13,6 +13,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
  */
 public class Journalpost {
     private final String journalpostId;
+    private boolean erFerdigstilt;
     private String arkivSakId;
     private String avsenderId;
     private String avsenderNavn;
@@ -51,6 +52,14 @@ public class Journalpost {
 
     public String getJournalpostId() {
         return journalpostId;
+    }
+
+    public void setErFerdigstilt(boolean erFerdigstilt) {
+        this.erFerdigstilt = erFerdigstilt;
+    }
+
+    public boolean isErFerdigstilt() {
+        return erFerdigstilt;
     }
 
     public String getArkivSakId() {
