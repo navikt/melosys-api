@@ -5,12 +5,12 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.UtenlandskIdent;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.Diskresjonskode;
 import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.dokument.person.Familierelasjon;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.UtenlandskIdent;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -257,14 +257,14 @@ public class SedDataBygger {
         return lovvalgsperiodeDto;
     }
 
-    private static no.nav.melosys.domain.eessi.sed.Lovvalgsperiode lagLovvalgsperiodeDto(Medlemskapsperiode medlemskapsperiode) {
+    private static no.nav.melosys.domain.eessi.sed.Lovvalgsperiode lagLovvalgsperiodeDto(PeriodeMedLovvalgsbestemmelse periodeMedLovvalgsbestemmelse) {
         no.nav.melosys.domain.eessi.sed.Lovvalgsperiode lovvalgsperiodeDto = new no.nav.melosys.domain.eessi.sed.Lovvalgsperiode();
-        lovvalgsperiodeDto.setFom(medlemskapsperiode.getFom());
-        lovvalgsperiodeDto.setTom(medlemskapsperiode.getTom());
-        lovvalgsperiodeDto.setLovvalgsland(medlemskapsperiode.getLovvalgsland() != null ? medlemskapsperiode.getLovvalgsland().getKode() : null);
-        lovvalgsperiodeDto.setBestemmelse(Bestemmelse.fraMelosysBestemmelse(medlemskapsperiode.getBestemmelse()));
-        lovvalgsperiodeDto.setTilleggsBestemmelse(medlemskapsperiode.getTilleggsbestemmelse() != null
-            ? Bestemmelse.fraMelosysBestemmelse(medlemskapsperiode.getTilleggsbestemmelse()) : null);
+        lovvalgsperiodeDto.setFom(periodeMedLovvalgsbestemmelse.getFom());
+        lovvalgsperiodeDto.setTom(periodeMedLovvalgsbestemmelse.getTom());
+        lovvalgsperiodeDto.setLovvalgsland(periodeMedLovvalgsbestemmelse.getLovvalgsland() != null ? periodeMedLovvalgsbestemmelse.getLovvalgsland().getKode() : null);
+        lovvalgsperiodeDto.setBestemmelse(Bestemmelse.fraMelosysBestemmelse(periodeMedLovvalgsbestemmelse.getBestemmelse()));
+        lovvalgsperiodeDto.setTilleggsBestemmelse(periodeMedLovvalgsbestemmelse.getTilleggsbestemmelse() != null
+            ? Bestemmelse.fraMelosysBestemmelse(periodeMedLovvalgsbestemmelse.getTilleggsbestemmelse()) : null);
         return lovvalgsperiodeDto;
     }
 

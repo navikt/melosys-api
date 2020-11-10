@@ -278,7 +278,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public boolean erGodkjenningEllerInnvilgelseArt13() {
         return (erInnvilgelse() || erGodkjenningRegistreringUnntak())
-            && finnValidertLovvalgsperiode().stream().anyMatch(Medlemskapsperiode::erArtikkel13);
+            && finnValidertLovvalgsperiode().stream().anyMatch(PeriodeMedLovvalgsbestemmelse::erArtikkel13);
     }
 
     // Medl skal ikke oppdateres ved avslag.
@@ -290,11 +290,11 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return lovvalgsperioder.stream().anyMatch(l -> l.getMedlPeriodeID() != null);
     }
 
-    public boolean harMedlemskapsperiode() {
+    public boolean harPeriodeMedLovvalgsbestemmelse() {
         return !lovvalgsperioder.isEmpty() || !anmodningsperioder.isEmpty() || !utpekingsperioder.isEmpty();
     }
 
-    public Medlemskapsperiode hentValidertMedlemskapsperiode() {
+    public PeriodeMedLovvalgsbestemmelse hentValidertPeriodeMedLovvalgsbestemmelse() {
         if (!lovvalgsperioder.isEmpty()) {
             return hentValidertLovvalgsperiode();
         } else if (!anmodningsperioder.isEmpty()){
@@ -303,7 +303,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
             return hentValidertUtpekingsperiode();
         }
 
-        throw new NoSuchElementException("Ingen medlemskapsperiode finnes for behandling " + id);
+        throw new NoSuchElementException("Ingen periode med lovvalgsbestemmelse finnes for behandling " + id);
     }
 
     public Lovvalgsperiode hentValidertLovvalgsperiode() {

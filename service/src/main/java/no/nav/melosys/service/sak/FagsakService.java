@@ -399,11 +399,11 @@ public class FagsakService {
     }
 
     private void avsluttTidligereMedlPeriode(Behandlingsresultat behandlingsresultat) throws IkkeFunnetException, SikkerhetsbegrensningException {
-        Collection<? extends Medlemskapsperiode> anmodningsperioder = behandlingsresultat.getAnmodningsperioder();
-        Collection<? extends Medlemskapsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
+        Collection<? extends PeriodeMedLovvalgsbestemmelse> anmodningsperioder = behandlingsresultat.getAnmodningsperioder();
+        Collection<? extends PeriodeMedLovvalgsbestemmelse> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
 
         Optional<Long> medlPeriodeID = Stream.concat(anmodningsperioder.stream(), lovvalgsperioder.stream())
-            .map(Medlemskapsperiode::getMedlPeriodeID)
+            .map(PeriodeMedLovvalgsbestemmelse::getMedlPeriodeID)
             .filter(Objects::nonNull)
             .findFirst();
 

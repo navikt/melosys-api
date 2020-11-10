@@ -71,9 +71,9 @@ public class LandvelgerService {
     }
 
     private boolean erArtikkel13(Behandlingsresultat behandlingsresultat) {
-        if (behandlingsresultat.harMedlemskapsperiode()) {
-            Medlemskapsperiode medlemskapsperiode = behandlingsresultat.hentValidertMedlemskapsperiode();
-            return medlemskapsperiode.erArtikkel13();
+        if (behandlingsresultat.harPeriodeMedLovvalgsbestemmelse()) {
+            PeriodeMedLovvalgsbestemmelse periodeMedLovvalgsbestemmelse = behandlingsresultat.hentValidertPeriodeMedLovvalgsbestemmelse();
+            return periodeMedLovvalgsbestemmelse.erArtikkel13();
         } else {
             return erVideresendt(behandlingsresultat);
         }
