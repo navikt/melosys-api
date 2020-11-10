@@ -30,10 +30,10 @@ public class MelosysInterntKodeverkTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(MelosysInterntKodeverkTjeneste.class);
 
-    @GetMapping("/hentTrygdedekningerForFTRL")
-    @ApiOperation(value = "Henter mulige trygdedekninger for folketrygdloven-søknader fra internt kodeverk")
+    @GetMapping("/folketrygden")
+    @ApiOperation(value = "Henter koder fra internt kodeverk til saksbehandling av folketrygden-saker")
     public ResponseEntity<List<Trygdedekninger>> hentTrygdedekningerForFTRL() {
-        log.info("Henter trygdedekninger for FTRL fra internt kodeverk.");
+        log.info("Henter oder fra internt kodeverk til saksbehandling av folketrygden-saker.");
         return ResponseEntity.ok().body(List.of(HELSEDEL, HELSEDEL_MED_SYKE_OG_FORELDREPENGER, PENSJONSDEL, HELSE_OG_PENSJONSDEL, HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER));
     }
 }
