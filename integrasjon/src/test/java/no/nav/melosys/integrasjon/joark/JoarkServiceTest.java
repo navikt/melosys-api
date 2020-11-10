@@ -375,7 +375,7 @@ class JoarkServiceTest {
 
         OpprettJournalpostRequest opprettJournalpostRequest = captor.getValue();
         assertThat(opprettJournalpostRequest).isNotNull();
-        assertThat(opprettJournalpostRequest.datoMottatt)
+        assertThat(opprettJournalpostRequest.getDatoMottatt())
             .isEqualTo(LocalDate.ofInstant(opprettJournalpost.getForsendelseMottatt(), ZoneId.systemDefault()));
     }
 

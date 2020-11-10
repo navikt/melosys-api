@@ -33,9 +33,9 @@ public class OpprettJournalpostRequest {
     private List<Dokument> dokumenter;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
-    public LocalDate datoMottatt;
+    private LocalDate datoMottatt;
 
-    public OpprettJournalpostRequest(JournalpostType journalpostType,
+    private OpprettJournalpostRequest(JournalpostType journalpostType,
                                      AvsenderMottaker avsenderMottaker,
                                      Bruker bruker,
                                      String tema,
@@ -61,9 +61,6 @@ public class OpprettJournalpostRequest {
         this.sak = sak;
         this.dokumenter = dokumenter;
         this.datoMottatt = datoMottatt;
-    }
-
-    public OpprettJournalpostRequest() {
     }
 
     public static OpprettJournalpostRequest av(OpprettJournalpost opprettJournalpost) {
@@ -188,6 +185,10 @@ public class OpprettJournalpostRequest {
 
     public List<Dokument> getDokumenter() {
         return this.dokumenter;
+    }
+
+    public LocalDate getDatoMottatt() {
+        return datoMottatt;
     }
 
     public enum JournalpostType {
