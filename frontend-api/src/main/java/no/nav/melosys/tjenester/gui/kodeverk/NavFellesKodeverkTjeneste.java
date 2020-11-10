@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui;
+package no.nav.melosys.tjenester.gui.kodeverk;
 
 import java.util.List;
 import org.slf4j.Logger;
@@ -24,13 +24,13 @@ import no.nav.security.token.support.core.api.Protected;
 @RequestMapping("/kodeverk/nav-felles")
 @Api(tags = { "kodeverk/nav-felles"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class KodeverkTjeneste {
+public class NavFellesKodeverkTjeneste {
 
-    private static final Logger log = LoggerFactory.getLogger(KodeverkTjeneste.class);
+    private static final Logger log = LoggerFactory.getLogger(NavFellesKodeverkTjeneste.class);
     private final KodeverkService kodeverkService;
 
     @Autowired
-    public KodeverkTjeneste(KodeverkService kodeverkService) {
+    public NavFellesKodeverkTjeneste(KodeverkService kodeverkService) {
         this.kodeverkService = kodeverkService;
     }
 
