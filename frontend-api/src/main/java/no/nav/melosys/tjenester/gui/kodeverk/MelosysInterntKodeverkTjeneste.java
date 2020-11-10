@@ -19,6 +19,7 @@ import org.springframework.web.context.WebApplicationContext;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.tjenester.gui.dto.FolketrygdenKoderDto;
 import no.nav.security.token.support.core.api.Protected;
 
 @Protected
@@ -32,8 +33,15 @@ public class MelosysInterntKodeverkTjeneste {
 
     @GetMapping("/folketrygden")
     @ApiOperation(value = "Henter koder fra internt kodeverk til saksbehandling av folketrygden-saker")
-    public ResponseEntity<List<Trygdedekninger>> hentTrygdedekningerForFTRL() {
-        log.info("Henter oder fra internt kodeverk til saksbehandling av folketrygden-saker.");
-        return ResponseEntity.ok().body(List.of(HELSEDEL, HELSEDEL_MED_SYKE_OG_FORELDREPENGER, PENSJONSDEL, HELSE_OG_PENSJONSDEL, HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER));
+    public ResponseEntity<FolketrygdenKoderDto> hentKoderTilFolketrygden() {
+        log.info("Henter koder fra internt kodeverk til saksbehandling av folketrygden-saker.");
+        List<Trygdedekninger> trygdedekninger = List.of(HELSEDEL, HELSEDEL_MED_SYKE_OG_FORELDREPENGER, PENSJONSDEL, HELSE_OG_PENSJONSDEL, HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER);
+        return ResponseEntity.ok().body(tilFolketrygdenKoderDto(trygdedekninger));
+    }
+
+    private FolketrygdenKoderDto tilFolketrygdenKoderDto(List<Trygdedekninger> trygdedekninger) {
+        FolketrygdenKoderDto folketrygdenKoderDto = new FolketrygdenKoderDto();
+        folketrygdenKoderDto.setTrygdedekninger(trygdedekninger);
+        return folketrygdenKoderDto;
     }
 }
