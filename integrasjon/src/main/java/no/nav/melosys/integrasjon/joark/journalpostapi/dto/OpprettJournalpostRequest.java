@@ -1,10 +1,13 @@
 package no.nav.melosys.integrasjon.joark.journalpostapi.dto;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import no.nav.melosys.domain.arkiv.FysiskDokument;
 import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
@@ -29,6 +32,9 @@ public class OpprettJournalpostRequest {
     //"Første dokument blir tilknyttet som hoveddokument på journalposten. Øvrige dokumenter tilknyttes som vedlegg. Rekkefølgen på vedlegg beholdes ikke ved uthenting av journalpost."
     private List<Dokument> dokumenter;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    public LocalDate datoMottatt;
+
     public OpprettJournalpostRequest(JournalpostType journalpostType,
                                      AvsenderMottaker avsenderMottaker,
                                      Bruker bruker,
@@ -40,7 +46,8 @@ public class OpprettJournalpostRequest {
                                      String eksternReferanseId,
                                      List<Tilleggsopplysning> tilleggsopplysninger,
                                      Sak sak,
-                                     List<Dokument> dokumenter) {
+                                     List<Dokument> dokumenter,
+                                     LocalDate datoMottatt) {
         this.journalpostType = journalpostType;
         this.avsenderMottaker = avsenderMottaker;
         this.bruker = bruker;
@@ -53,6 +60,7 @@ public class OpprettJournalpostRequest {
         this.tilleggsopplysninger = tilleggsopplysninger;
         this.sak = sak;
         this.dokumenter = dokumenter;
+        this.datoMottatt = datoMottatt;
     }
 
     public OpprettJournalpostRequest() {
@@ -74,6 +82,8 @@ public class OpprettJournalpostRequest {
             .tittel(opprettJournalpost.getInnhold())
             .dokumenter(dokumenter(opprettJournalpost))
             .tilleggsopplysninger(Collections.emptyList())
+            .datoMottatt(opprettJournalpost.getForsendelseMottatt() == null ? null
+                : LocalDate.ofInstant(opprettJournalpost.getForsendelseMottatt(), ZoneId.systemDefault()))
             .build();
     }
 
@@ -211,6 +221,7 @@ public class OpprettJournalpostRequest {
         private List<Tilleggsopplysning> tilleggsopplysninger;
         private Sak sak;
         private List<Dokument> dokumenter;
+        private LocalDate datoMottatt;
 
         public OpprettJournalpostRequestBuilder() {
         }
@@ -275,8 +286,14 @@ public class OpprettJournalpostRequest {
             return this;
         }
 
+        public OpprettJournalpostRequest.OpprettJournalpostRequestBuilder datoMottatt(LocalDate datoMottatt) {
+            this.datoMottatt = datoMottatt;
+            return this;
+        }
+
         public OpprettJournalpostRequest build() {
-            return new OpprettJournalpostRequest(journalpostType, avsenderMottaker, bruker, tema, behandlingstema, tittel, kanal, journalfoerendeEnhet, eksternReferanseId, tilleggsopplysninger, sak, dokumenter);
+            return new OpprettJournalpostRequest(journalpostType, avsenderMottaker, bruker, tema, behandlingstema, tittel,
+                kanal, journalfoerendeEnhet, eksternReferanseId, tilleggsopplysninger, sak, dokumenter, datoMottatt);
         }
     }
 }

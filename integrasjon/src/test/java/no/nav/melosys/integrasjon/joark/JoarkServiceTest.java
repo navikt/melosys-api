@@ -1,6 +1,8 @@
 package no.nav.melosys.integrasjon.joark;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 
 import no.nav.dok.tjenester.journalfoerinngaaende.Bruker;
@@ -357,6 +359,24 @@ class JoarkServiceTest {
             .isThrownBy(() -> joarkService.opprettJournalpost(opprettJournalpost, true));
 
         verify(journalpostapiConsumer, never()).opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean());
+    }
+
+    @Test
+    void opprettJournalpost_forsendelseMottattErSatt_forventDatoMottatt() throws FunksjonellException {
+        OpprettJournalpost opprettJournalpost = lagOpprettJournalpost();
+        opprettJournalpost.setForsendelseMottatt(Instant.now());
+
+        when(journalpostapiConsumer.opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean()))
+            .thenReturn(OpprettJournalpostResponse.builder().journalpostId("1234").build());
+        joarkService.opprettJournalpost(opprettJournalpost, false);
+
+        ArgumentCaptor<OpprettJournalpostRequest> captor = ArgumentCaptor.forClass(OpprettJournalpostRequest.class);
+        verify(journalpostapiConsumer).opprettJournalpost(captor.capture(), anyBoolean());
+
+        OpprettJournalpostRequest opprettJournalpostRequest = captor.getValue();
+        assertThat(opprettJournalpostRequest).isNotNull();
+        assertThat(opprettJournalpostRequest.datoMottatt)
+            .isEqualTo(LocalDate.ofInstant(opprettJournalpost.getForsendelseMottatt(), ZoneId.systemDefault()));
     }
 
     private OpprettJournalpost lagOpprettJournalpost() {
