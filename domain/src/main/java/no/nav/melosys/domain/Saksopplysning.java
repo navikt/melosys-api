@@ -7,12 +7,8 @@ import java.util.Set;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.jpa.HibernateXmlType;
 import no.nav.melosys.domain.jpa.SaksopplysningDokumentConverter;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
 
-@TypeDefs(@TypeDef(name = Saksopplysning.XMLTYPE, typeClass = HibernateXmlType.class))
 @Entity
 @Table(name = "saksopplysning")
 public class Saksopplysning {
