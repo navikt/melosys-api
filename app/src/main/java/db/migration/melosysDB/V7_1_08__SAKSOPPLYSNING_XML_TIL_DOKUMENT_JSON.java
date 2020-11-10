@@ -16,9 +16,6 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
@@ -29,6 +26,7 @@ import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
+import no.nav.melosys.domain.jpa.SaksopplysningDokumentConverter;
 import oracle.jdbc.OracleConnection;
 import oracle.jdbc.OraclePreparedStatement;
 import oracle.jdbc.OracleResultSet;
@@ -39,15 +37,13 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 @SuppressWarnings("unused")
 public class V7_1_08__SAKSOPPLYSNING_XML_TIL_DOKUMENT_JSON extends BaseJavaMigration {
 
-    private final ObjectMapper objectMapper;
+    private final SaksopplysningDokumentConverter converter;
     private final Jaxb2Marshaller jaxb2Marshaller;
     private final TransformerFactory transformerFactory;
     private final Map<String, Transformer> transformerMap = new HashMap<>();
 
     public V7_1_08__SAKSOPPLYSNING_XML_TIL_DOKUMENT_JSON() {
-        this.objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        converter = new SaksopplysningDokumentConverter();
 
         jaxb2Marshaller = new Jaxb2Marshaller();
         jaxb2Marshaller.setPackagesToScan("no.nav.melosys.domain.dokument");
@@ -137,7 +133,7 @@ public class V7_1_08__SAKSOPPLYSNING_XML_TIL_DOKUMENT_JSON extends BaseJavaMigra
             ? new StringReader(xml)
             : new StringReader(transformer(xml, path, versjon));
         T dokument = (T) jaxb2Marshaller.unmarshal(new StreamSource(stringReader));
-        return objectMapper.writeValueAsString(dokument);
+        return converter.convertToDatabaseColumn(dokument);
     }
 
     private String transformer(String xml, String path, String versjon) throws TransformerException {

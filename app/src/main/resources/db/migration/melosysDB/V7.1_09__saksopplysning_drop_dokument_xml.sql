@@ -1,6 +1,7 @@
 ALTER TABLE saksopplysning DROP (
     kilde,
-    dokument_xml
+    dokument_xml,
+    intern_xml
 );
 
 ALTER TABLE saksopplysning MODIFY (
