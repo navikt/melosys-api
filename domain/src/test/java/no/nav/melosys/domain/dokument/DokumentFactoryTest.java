@@ -119,7 +119,7 @@ public class DokumentFactoryTest {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(sedDokument);
 
-        String xml = factory.lagInternXml(saksopplysning);
+        String xml = factory.lagForenkletXml(saksopplysning);
 
         saksopplysning.leggTilKildesystemOgMottattDokument(null, xml);
         SaksopplysningDokument saksopplysningDokument = factory.lagDokument(saksopplysning);

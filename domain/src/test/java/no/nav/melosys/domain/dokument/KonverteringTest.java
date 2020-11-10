@@ -20,7 +20,7 @@ public interface KonverteringTest {
             saksopplysning.setType(type);
             saksopplysning.setVersjon(versjon);
 
-            // Setter internXml
+            // Oppretter dokument fra xml
             factory.lagDokument(saksopplysning);
 
             return saksopplysning;

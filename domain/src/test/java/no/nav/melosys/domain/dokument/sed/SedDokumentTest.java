@@ -38,7 +38,7 @@ public class SedDokumentTest {
         Instant nå = Instant.now();
         saksopplysning.setEndretDato(nå);
         saksopplysning.setRegistrertDato(nå);
-        String xml = dokumentFactory.lagInternXml(saksopplysning);
+        String xml = dokumentFactory.lagForenkletXml(saksopplysning);
         saksopplysning.leggTilKildesystemOgMottattDokument(
             SaksopplysningKildesystem.EESSI, xml);
 

@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 /**
- * SaksopplysningDokumentFactory konverterer et xml-resultat fra en ekstern tjeneste til et internt xml-dokument ved hejlp av XSLT med JAXP.
+ * SaksopplysningDokumentFactory konverterer et xml-resultat fra en ekstern tjeneste til et forenklet xml-dokument ved hejlp av XSLT med JAXP.
  * Xml-dokumentet blir deretter transformert med JAXB til et objekttre som tilhører et sentralt domene.
  * Klassen er ikke trådsikker.
  */
@@ -43,11 +43,11 @@ public class DokumentFactory {
     }
 
     /**
-     * Setter {@code internXml} på en {@link Saksopplysning} ut fra en predefinert xslt anvendt på feltet {@code dokumentXml}
+     * Lager {@code forenkletXml} på en {@link Saksopplysning} ut fra en predefinert xslt anvendt på feltet {@code dokumentXml}
      * eller fra feltet {@code dokument} hvis feltet er ikke null.
      * Det resulterende xml returneres.
      */
-    public String lagInternXml(Saksopplysning saksopplysning) {
+    public String lagForenkletXml(Saksopplysning saksopplysning) {
         Assert.notNull(saksopplysning, "saksopplysning må ikke være null");
 
         String dokumentXml = null;
@@ -59,7 +59,7 @@ public class DokumentFactory {
             return null;
         }
 
-        // Hvis saksopplysning.getDokument() eksisterer kan man serialisere direkte for å få intern xml.
+        // Hvis saksopplysning.getDokument() eksisterer kan man serialisere direkte for å få forenklet xml.
         if (dokument != null) {
             StreamResult result = new StreamResult(new StringWriter());
             marshaller.marshal(dokument, result);
@@ -89,7 +89,7 @@ public class DokumentFactory {
     }
 
     /**
-     * Setter et {@link SaksopplysningDokument} og {@code internXml} på en {@link Saksopplysning} ut fra feltet {@code dokumentXml}.
+     * Setter et {@link SaksopplysningDokument} på en {@link Saksopplysning} ut fra feltet {@code dokumentXml}.
      * SaksopplysningDokumentet returneres.
      */
     public SaksopplysningDokument lagDokument(Saksopplysning saksopplysning) {
@@ -104,22 +104,13 @@ public class DokumentFactory {
             return null;
         }
 
-        String internXml = hentInternXml(saksopplysning);
-        StringReader reader = new StringReader(internXml);
+        String forenkletXml = lagForenkletXml(saksopplysning);
+        StringReader reader = new StringReader(forenkletXml);
 
         // JAXB brukes til å opprette et SaksopplysningDokument
         SaksopplysningDokument dokument = (SaksopplysningDokument) marshaller.unmarshal(new StreamSource(reader));
         saksopplysning.setDokument(dokument);
 
         return dokument;
-    }
-
-    /**
-     *  InternXml lages hvis det ikke eksisterer fra før av. (eksterne saksopplysninger)
-     *  Interne saksopplysninger (saksopplysninger som lages av melosys) må generere internXml
-     *  hver gang de lastes fordi de er redigerbare og versjonerte
-     */
-    private String hentInternXml(Saksopplysning saksopplysning) {
-        return lagInternXml(saksopplysning);
     }
 }
