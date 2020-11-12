@@ -16,10 +16,10 @@ class ByUserIdStrategy implements Strategy {
     }
 
     @Override
-    public boolean isEnabled(Map<String, String> map) {
+    public boolean isEnabled(Map<String, String> parameters) {
         final String userID = SubjectHandler.getInstance().getUserID();
 
-        return StringUtils.isNotEmpty(userID) && Optional.ofNullable(map.get("user"))
+        return StringUtils.isNotEmpty(userID) && Optional.ofNullable(parameters.get("user"))
             .map(users -> Arrays.asList(users.split(",")))
             .stream().anyMatch(users -> users.contains(userID));
     }

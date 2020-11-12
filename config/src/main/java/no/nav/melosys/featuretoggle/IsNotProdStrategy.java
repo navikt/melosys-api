@@ -20,7 +20,7 @@ class IsNotProdStrategy implements Strategy {
     }
 
     @Override
-    public boolean isEnabled(Map<String, String> map) {
+    public boolean isEnabled(Map<String, String> parameters) {
         return NAMESPACE_Q2.equalsIgnoreCase(currentNamespace);
     }
 }
