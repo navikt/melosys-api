@@ -53,7 +53,7 @@ public class AvklarteVirksomheterGrunnlagTest {
     }
 
     @Test
-    public void hentAlleNorskeVirksomheter_foreventerEnVirksomhet() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void hentAlleNorskeVirksomheter_foreventerEnVirksomhet() throws IkkeFunnetException, TekniskException {
         Collection<AvklartVirksomhet> norskeVirksomheter = dataGrunnlag.hentAlleNorskeVirksomheterMedAdresse();
         assertThat(norskeVirksomheter).hasSize(1);
         dataGrunnlag.hentAlleNorskeVirksomheterMedAdresse();
@@ -61,7 +61,7 @@ public class AvklarteVirksomheterGrunnlagTest {
     }
 
     @Test
-    public void hentUtenlandskeArbeidsgivere_medUtenlandskArbeidsgiverOgSelvstendig_henterKunArbeidsgivere() throws TekniskException {
+    public void hentUtenlandskeArbeidsgivere_medUtenlandskArbeidsgiverOgSelvstendig_henterKunArbeidsgivere() {
         AvklartVirksomhet utenlandskSelvstendigForetak = new AvklartVirksomhet(lagForetakUtland(true));
         AvklartVirksomhet utenlandskArbeidsgiver = new AvklartVirksomhet(lagForetakUtland(false));
 
@@ -73,7 +73,7 @@ public class AvklarteVirksomheterGrunnlagTest {
     }
 
     @Test
-    public void hentUtenlandskeSelvstendige_medUtenlandskArbeidsgiverOgSelvstendig_henterKunSelvstendige() throws TekniskException {
+    public void hentUtenlandskeSelvstendige_medUtenlandskArbeidsgiverOgSelvstendig_henterKunSelvstendige() {
         AvklartVirksomhet utenlandskSelvstendigForetak = new AvklartVirksomhet(lagForetakUtland(true));
         AvklartVirksomhet utenlandskArbeidsgiver = new AvklartVirksomhet(lagForetakUtland(false));
 
@@ -85,7 +85,7 @@ public class AvklarteVirksomheterGrunnlagTest {
     }
 
     @Test
-    public void hentHovedvirksomhet_medEnNorskVirksomhet_girNorskHovedvirksomhet() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void hentHovedvirksomhet_medEnNorskVirksomhet_girNorskHovedvirksomhet() throws IkkeFunnetException, TekniskException {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.singletonList(norskVirksomhet));
 
@@ -94,7 +94,7 @@ public class AvklarteVirksomheterGrunnlagTest {
     }
 
     @Test
-    public void hentHovedvirksomhet_medNorskOgUtenlandskVirksomhet_girNorskHovedvirksomhet() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void hentHovedvirksomhet_medNorskOgUtenlandskVirksomhet_girNorskHovedvirksomhet() throws IkkeFunnetException, TekniskException {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.singletonList(norskVirksomhet));
 
@@ -107,7 +107,7 @@ public class AvklarteVirksomheterGrunnlagTest {
     }
 
     @Test
-    public void hentHovedvirksomhet_medKunUtenlandskVirksomhet_girUtenlandskVirksomhet() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void hentHovedvirksomhet_medKunUtenlandskVirksomhet_girUtenlandskVirksomhet() throws IkkeFunnetException, TekniskException {
         AvklartVirksomhet forventetUtenlandskVirksomhet = new AvklartVirksomhet(lagForetakUtland(false));
         when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(forventetUtenlandskVirksomhet));
 
@@ -118,7 +118,7 @@ public class AvklarteVirksomheterGrunnlagTest {
     }
 
     @Test
-    public void hentBivirksomheter_medEnNorskVirksomhet_girIngenBivirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void hentBivirksomheter_medEnNorskVirksomhet_girIngenBivirksomheter() throws IkkeFunnetException, TekniskException {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.singletonList(norskVirksomhet));
 
@@ -127,7 +127,7 @@ public class AvklarteVirksomheterGrunnlagTest {
     }
 
     @Test
-    public void hentBivirksomheter_medEnUtenlandskVirksomhet_girIngenBivirksomheter() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void hentBivirksomheter_medEnUtenlandskVirksomhet_girIngenBivirksomheter() throws IkkeFunnetException, TekniskException {
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.emptyList());
 
         AvklartVirksomhet forventetUtenlandskVirksomhet = new AvklartVirksomhet(lagForetakUtland(false));
@@ -138,7 +138,7 @@ public class AvklarteVirksomheterGrunnlagTest {
     }
 
     @Test
-    public void hentBivirksomheter_medToNorskeVirksomheter_girEnNorskBivirksomhet() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void hentBivirksomheter_medToNorskeVirksomheter_girEnNorskBivirksomhet() throws IkkeFunnetException, TekniskException {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Arrays.asList(norskVirksomhet, norskVirksomhet));
 
@@ -147,7 +147,7 @@ public class AvklarteVirksomheterGrunnlagTest {
     }
 
     @Test
-    public void hentHovedvirksomhet_medNorskOgUtenlandskVirksomhet_girUtenlandskBivirksomhet() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void hentHovedvirksomhet_medNorskOgUtenlandskVirksomhet_girUtenlandskBivirksomhet() throws IkkeFunnetException, TekniskException {
         AvklartVirksomhet forventetUtenlandskVirksomhet = new AvklartVirksomhet(lagForetakUtland(false));
 
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
@@ -185,6 +185,21 @@ public class AvklarteVirksomheterGrunnlagTest {
     }
 
     @Test
+    public void utfyllManglendeAdressefelter_utenlandskIngenForretningsadressePostadresseUtenPostnummer_postnummerTomString() {
+        var organisasjonDokument = lagOrganisasjonDokument(null, null, null, "DK");
+        organisasjonDokument.organisasjonDetaljer.forretningsadresse = Collections.emptyList();
+        organisasjonDokument.organisasjonDetaljer.postadresse.stream().findFirst().ifPresent(a -> ((SemistrukturertAdresse)a).setPostnr(null));
+        StrukturertAdresse adresse = dataGrunnlag.utfyllManglendeAdressefelter(organisasjonDokument);
+
+        assertThat(adresse.gatenavn).isEqualTo("Postgatenavn");
+        assertThat(adresse.postnummer).isEqualTo(" ");
+        assertThat(adresse.poststed).isEqualTo("Postpoststed");
+        assertThat(adresse.landkode).isEqualTo("DK");
+
+        verify(kodeverkService, never()).dekod(any(), any(), any());
+    }
+
+    @Test
     public void utfyllManglendeAdressefelter_forretningsadresseManglerPostnr_girPostadresse() {
         StrukturertAdresse adresse = dataGrunnlag.utfyllManglendeAdressefelter(lagOrganisasjonDokument(null, null));
 
@@ -197,6 +212,10 @@ public class AvklarteVirksomheterGrunnlagTest {
     }
 
     private OrganisasjonDokument lagOrganisasjonDokument(String forretningsPostnr, String forretningsGatenavn) {
+        return lagOrganisasjonDokument(forretningsPostnr, forretningsGatenavn, "6789", "NO");
+    }
+
+    private OrganisasjonDokument lagOrganisasjonDokument(String forretningsPostnr, String forretningsGatenavn, String postadressePostnr, String postadresseLand) {
         OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
         OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
         organisasjonDokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
@@ -210,9 +229,9 @@ public class AvklarteVirksomheterGrunnlagTest {
         SemistrukturertAdresse postadresse = new SemistrukturertAdresse();
         organisasjonsDetaljer.postadresse.add(postadresse);
         postadresse.setAdresselinje1("Postgatenavn");
-        postadresse.setPostnr("6789");
+        postadresse.setPostnr(postadressePostnr);
         postadresse.setPoststed("Postpoststed");
-        postadresse.setLandkode("NO");
+        postadresse.setLandkode(postadresseLand);
         postadresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1)));
 
         return organisasjonDokument;
