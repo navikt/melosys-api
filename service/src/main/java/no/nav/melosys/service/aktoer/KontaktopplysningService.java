@@ -21,7 +21,7 @@ public class KontaktopplysningService {
         return kontaktopplysningRepository.findById(new KontaktopplysningID(saksnummer, orgnr));
     }
 
-    public Kontaktopplysning lagEllerOppdaterKontaktopplysning(String saksnummer, String orgnr, String kontaktOrgnr, String kontaktNavn) {
+    public Kontaktopplysning lagEllerOppdaterKontaktopplysning(String saksnummer, String orgnr, String kontaktOrgnr, String kontaktNavn, String kontaktTelefon) {
         Kontaktopplysning kontaktopplysning = kontaktopplysningRepository.findById(new KontaktopplysningID(saksnummer, orgnr))
             .orElseGet(() -> {
                 Kontaktopplysning lokalKontaktopplysning = new Kontaktopplysning();
@@ -30,6 +30,7 @@ public class KontaktopplysningService {
             });
         kontaktopplysning.setKontaktOrgnr(kontaktOrgnr);
         kontaktopplysning.setKontaktNavn(kontaktNavn);
+        kontaktopplysning.setKontaktTelefon(kontaktTelefon);
         kontaktopplysningRepository.save(kontaktopplysning);
         return kontaktopplysning;
     }
