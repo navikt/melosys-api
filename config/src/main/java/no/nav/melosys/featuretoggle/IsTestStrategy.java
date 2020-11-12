@@ -4,19 +4,19 @@ import java.util.Map;
 
 import no.finn.unleash.strategy.Strategy;
 
-class IsNotProdStrategy implements Strategy {
+class IsTestStrategy implements Strategy {
 
     private static final String NAMESPACE_Q2 = "q2";
 
     private final String currentNamespace;
 
-    IsNotProdStrategy(String currentNamespace) {
+    IsTestStrategy(String currentNamespace) {
         this.currentNamespace = currentNamespace;
     }
 
     @Override
     public String getName() {
-        return "isNotProd";
+        return "isTest";
     }
 
     @Override
