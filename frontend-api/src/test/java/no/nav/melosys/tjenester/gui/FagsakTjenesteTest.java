@@ -15,13 +15,13 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -131,7 +131,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void fagsakSøkSchemaValidering() throws IOException, JSONException {
+    public void fagsakSøkSchemaValidering() throws Exception {
         valider(new FagsakSokDto("123", "MEL-123"), SOK_FAGSAKER_POST_SCHEMA);
 
         List<FagsakOppsummeringDto> fagsakOppsummeringDtoList = random.objects(FagsakOppsummeringDto.class, 1).collect(Collectors.toList());

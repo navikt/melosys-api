@@ -1,7 +1,11 @@
 package no.nav.melosys.service;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,6 +21,7 @@ import no.nav.melosys.exception.TekniskException;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.ValidationException;
 import org.everit.json.schema.loader.SchemaLoader;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -62,12 +67,24 @@ public class JsonSchemaValidator {
         valider(new JSONObject(json), hentSchema(schemaNavn));
     }
 
-    public void valider(String json, JSONObject schema) {
-        valider(json, byggSchema(schema));
+    public void valider(String json, InputStream schemaStream) {
+        valider(json, schemaStream, log);
     }
 
-    public void valider(Object object, JSONObject schema) throws TekniskException {
-        valider(objektTilString(object), byggSchema(schema));
+    public void valider(String json, InputStream schemaStream, Logger logger) {
+        valider(new JSONObject(json), hentSchema(schemaStream), logger);
+    }
+
+    public void valider(Object o, InputStream schemaStream) throws TekniskException {
+        valider(objektTilString(o), schemaStream, log);
+    }
+
+    public void valider(JSONArray jsonArray, InputStream schemaStream) {
+        valider(jsonArray, schemaStream, log);
+    }
+
+    public void valider(JSONArray jsonArray, InputStream schemaStream, Logger logger) {
+        valider(jsonArray, hentSchema(schemaStream), logger);
     }
 
     private String objektTilString(Object object) throws TekniskException {
@@ -91,6 +108,12 @@ public class JsonSchemaValidator {
         }
     }
 
+    private Schema hentSchema(InputStream schemaStream) {
+        return byggSchema(
+            new BufferedReader(new InputStreamReader(schemaStream, StandardCharsets.UTF_8))
+                .lines().collect(Collectors.joining("\n")));
+    }
+
     private Schema byggSchema(String schemaString) throws JSONException {
         return byggSchema(new JSONObject(schemaString));
     }
@@ -100,19 +123,31 @@ public class JsonSchemaValidator {
         return loader.load().build();
     }
 
-    private void valider(Object jsonObject, Schema schema) {
+    private void valider(JSONArray jsonArray, Schema schema, Logger logger) {
         try {
-            schema.validate(jsonObject);
+            schema.validate(jsonArray);
         } catch (ValidationException e) {
-            formaterFeil(e, schema);
+            formaterFeil(e, schema, logger);
         }
     }
 
-    private void formaterFeil(ValidationException e, Schema schema) {
-        log.error(FEILMELDING, schema.getTitle());
+    private void valider(JSONObject jsonObject, Schema schema) {
+        valider(jsonObject, schema, log);
+    }
+
+    private void valider(JSONObject jsonObject, Schema schema, Logger logger) {
+        try {
+            schema.validate(jsonObject);
+        } catch (ValidationException e) {
+            formaterFeil(e, schema, logger);
+        }
+    }
+
+    private void formaterFeil(ValidationException e, Schema schema, Logger logger) {
+        logger.error(FEILMELDING, schema.getTitle());
         e.getCausingExceptions().stream()
             .map(ValidationException::toJSON)
-            .forEach(jsonObject -> log.error(jsonObject.toString()));
+            .forEach(jsonObject -> logger.error(jsonObject.toString()));
         throw e;
     }
 }

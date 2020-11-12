@@ -8,22 +8,18 @@ import java.util.Collection;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.JsonSchemaValidator;
 import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.jackson.MelosysModule;
-import no.nav.melosys.tjenester.gui.util.JsonResourceLoader;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
-import org.everit.json.schema.Schema;
-import org.everit.json.schema.ValidationException;
 import org.everit.json.schema.loader.SchemaClient;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
 
@@ -34,12 +30,6 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
 public class JsonSchemaTestParent {
-    private static final Logger log = LoggerFactory.getLogger(JsonSchemaTestParent.class);
-
-    private static final String FEILMELDING = "Schemavalidering feilet for schema {}";
-
-    private static ObjectMapper objectMapper;
-    private static ObjectMapper objectMapperMedKodeverkServiceStub;
     private static EasyRandom easyRandom;
 
     protected static EasyRandomParameters defaultEasyRandomParameters() {
@@ -58,45 +48,31 @@ public class JsonSchemaTestParent {
         return easyRandom;
     }
 
-    protected Schema hentSchema(String schemaNavn) throws IOException, JSONException {
-        String schemaString = JsonResourceLoader.load(new DefaultResourceLoader(), schemaNavn);
-        return lastSchema(schemaString);
-    }
-
-    protected Schema lastSchema(String schemaString) throws JSONException {
-        JSONObject rawSchema = new JSONObject(schemaString);
-        SchemaLoader loader = SchemaLoader.builder().schemaJson(rawSchema).httpClient(new ClasspathSchemaClient()).draftV7Support().useDefaults(true).build();
-        return loader.load().build();
-    }
-
     protected ObjectMapper objectMapper() {
-        if (objectMapper == null) {
-            objectMapper = new ObjectMapper();
-            objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-            objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
-            objectMapper.registerModule(new JavaTimeModule());
-            objectMapper.registerModule(new MelosysModule(null));
-        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.registerModule(new MelosysModule(null));
+
         return objectMapper;
     }
 
     protected ObjectMapper objectMapperMedKodeverkServiceStub() {
-        if (objectMapperMedKodeverkServiceStub == null) {
-            objectMapperMedKodeverkServiceStub = new ObjectMapper();
-            objectMapperMedKodeverkServiceStub.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-            objectMapperMedKodeverkServiceStub.configure(SerializationFeature.INDENT_OUTPUT, true);
-            objectMapperMedKodeverkServiceStub.registerModule(new JavaTimeModule());
-            KodeverkService kodeverkService = mock(KodeverkService.class);
-            lenient().when(kodeverkService.dekod(any(), any(), any())).thenReturn("DUMMY");
-            lenient().when(kodeverkService.getKodeverdi(any(), any())).thenReturn(new KodeDto("DUMMY", "DUMMY"));
-            objectMapperMedKodeverkServiceStub.registerModule(new MelosysModule(kodeverkService));
-        }
+        ObjectMapper objectMapperMedKodeverkServiceStub = new ObjectMapper();
+        objectMapperMedKodeverkServiceStub.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        objectMapperMedKodeverkServiceStub.configure(SerializationFeature.INDENT_OUTPUT, true);
+        objectMapperMedKodeverkServiceStub.registerModule(new JavaTimeModule());
+        KodeverkService kodeverkService = mock(KodeverkService.class);
+        lenient().when(kodeverkService.dekod(any(), any(), any())).thenReturn("DUMMY");
+        lenient().when(kodeverkService.getKodeverdi(any(), any())).thenReturn(new KodeDto("DUMMY", "DUMMY"));
+        objectMapperMedKodeverkServiceStub.registerModule(new MelosysModule(kodeverkService));
+
         return objectMapperMedKodeverkServiceStub;
     }
 
-    protected void valider(Object o, String schemaNavn) throws IOException {
-        String jsonString = objectMapper().writeValueAsString(o);
-        valider(jsonString, schemaNavn, log);
+    protected void valider(Object o, String schemaNavn) throws IOException, TekniskException {
+        jsonSchemaValidator(objectMapper()).valider(o, hentSchemaStream(schemaNavn));
     }
 
     protected void valider(Object o, String schemaNavn, Logger logger) throws IOException {
@@ -105,40 +81,41 @@ public class JsonSchemaTestParent {
     }
 
     protected void valider(String json, String schemaNavn, Logger logger) throws IOException {
-        valider(new JSONObject(json), hentSchema(schemaNavn), logger);
+        jsonSchemaValidator(objectMapper()).valider(json, hentSchemaStream(schemaNavn), logger);
     }
 
-    protected void valider(Object o, String schemaNavn, ObjectMapper objectMapper) throws IOException {
-        String jsonString = objectMapper.writeValueAsString(o);
-        valider(jsonString, schemaNavn, log);
+    protected void valider(Object o, String schemaNavn, ObjectMapper objectMapper) throws IOException, TekniskException {
+        jsonSchemaValidator(objectMapper).valider(o, hentSchemaStream(schemaNavn));
     }
 
-    protected void validerArray(Collection liste, String schemaNavn) throws IOException {
-        validerArray(liste, schemaNavn, log);
-    }
-
-    protected void validerArray(Collection liste, String schemaNavn, Logger logger) throws IOException {
+    protected <T> void validerArray(Collection<T> liste, String schemaNavn) throws IOException, TekniskException {
         String json = objectMapper().writeValueAsString(liste);
-        valider(new JSONArray(json), hentSchema(schemaNavn), logger);
+        valider(new JSONArray(json), schemaNavn);
     }
 
-    private void valider(Object jsonObject, Schema schema, Logger logger) {
-        try {
-            schema.validate(jsonObject);
-        } catch (ValidationException e) {
-            formaterFeil(e, schema, logger);
-        }
+    protected <T> void validerArray(Collection<T> liste, String schemaNavn, Logger logger) throws IOException {
+        String json = objectMapper().writeValueAsString(liste);
+        valider(new JSONArray(json), schemaNavn, logger);
     }
 
-    private void formaterFeil(ValidationException e, Schema schema, Logger logger) {
-        logger.error(FEILMELDING, schema.getTitle());
-        e.getCausingExceptions().stream()
-            .map(ValidationException::toJSON)
-            .forEach(jsonObject -> logger.error(jsonObject.toString()));
-        throw e;
+    protected void valider(JSONArray json, String schemaNavn) throws IOException {
+        jsonSchemaValidator(objectMapper()).valider(json, hentSchemaStream(schemaNavn));
     }
 
-    private class ClasspathSchemaClient implements SchemaClient {
+    protected void valider(JSONArray json, String schemaNavn, Logger logger) throws IOException {
+        jsonSchemaValidator(objectMapper()).valider(json, hentSchemaStream(schemaNavn), logger);
+    }
+
+    private JsonSchemaValidator jsonSchemaValidator(ObjectMapper objectMapper) {
+        return new JsonSchemaValidator(objectMapper,
+            SchemaLoader.builder().httpClient(new ClasspathSchemaClient()).draftV7Support().useDefaults(true));
+    }
+
+    private InputStream hentSchemaStream(String schemanavn) throws IOException {
+        return new DefaultResourceLoader().getResource("classpath:" + schemanavn).getInputStream();
+    }
+
+    private static class ClasspathSchemaClient implements SchemaClient {
         public InputStream get(String url) {
             try {
                 url = url.replace("http://melosys.nav.no/schemas", "");
