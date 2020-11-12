@@ -6,14 +6,14 @@ import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1Producer;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.A1TypeUtstedelse;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse;
@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UtstedtA1ServiceTest {
@@ -39,7 +39,7 @@ class UtstedtA1ServiceTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
-    private BrevmottakerService brevmottakerService;
+    private LandvelgerService landvelgerService;
 
     private UtstedtA1Service utstedtA1Service;
 
@@ -47,11 +47,61 @@ class UtstedtA1ServiceTest {
 
     @BeforeEach
     void setUp() {
-        utstedtA1Service = new UtstedtA1Service(utstedtA1Producer, behandlingService, behandlingsresultatService, brevmottakerService);
+        utstedtA1Service = new UtstedtA1Service(utstedtA1Producer, behandlingService, behandlingsresultatService, landvelgerService);
     }
 
     @Test
     void sendMeldingOmUtstedtA1() throws Exception {
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(eq(BEHANDLING_ID))).thenReturn(lagBehandling());
+        when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(lagBehandlingsresultat());
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(BEHANDLING_ID))).thenReturn(List.of(Landkoder.SE));
+        when(utstedtA1Producer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());
+
+        UtstedtA1Melding melding = utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID);
+
+        verify(behandlingService).hentBehandlingUtenSaksopplysninger(eq(BEHANDLING_ID));
+        verify(behandlingsresultatService).hentBehandlingsresultat(eq(BEHANDLING_ID));
+        verify(landvelgerService).hentUtenlandskTrygdemyndighetsland(eq(BEHANDLING_ID));
+        verify(utstedtA1Producer).produserMelding(any(UtstedtA1Melding.class));
+
+        assertThat(melding).isNotNull();
+        assertThat(melding.getSerienummer()).isEqualTo("MEL-123123");
+        assertThat(melding.getUtsendtTilLand()).isEqualTo("SE");
+        assertThat(melding.getArtikkel()).isEqualTo(Lovvalgsbestemmelse.ART_12_1);
+        assertThat(melding.getTypeUtstedelse()).isEqualTo(A1TypeUtstedelse.FØRSTEGANG);
+    }
+
+    @Test
+    void sendMeldingOmUtstedtA1_avslag_forventIngenMelding() throws Exception {
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(eq(BEHANDLING_ID))).thenReturn(lagBehandling());
+        when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(lagBehandlingsresultat(true));
+
+        UtstedtA1Melding melding = utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID);
+
+        verify(behandlingService).hentBehandlingUtenSaksopplysninger(eq(BEHANDLING_ID));
+        verify(behandlingsresultatService).hentBehandlingsresultat(eq(BEHANDLING_ID));
+        verify(landvelgerService, never()).hentUtenlandskTrygdemyndighetsland(anyLong());
+        verify(utstedtA1Producer, never()).produserMelding(any(UtstedtA1Melding.class));
+
+        assertThat(melding).isNull();
+    }
+
+    @Test
+    void sendMeldingOmUtstedtA1_gittBehandlingOgBehandlingsresultat_forventIngenKallMotServicer() throws Exception {
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(BEHANDLING_ID))).thenReturn(List.of(Landkoder.SE));
+        when(utstedtA1Producer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());
+
+        UtstedtA1Melding melding = utstedtA1Service.sendMeldingOmUtstedtA1(lagBehandling(), lagBehandlingsresultat());
+
+        verify(behandlingService, never()).hentBehandlingUtenSaksopplysninger(anyLong());
+        verify(behandlingsresultatService, never()).hentBehandlingsresultat(anyLong());
+        verify(landvelgerService).hentUtenlandskTrygdemyndighetsland(eq(BEHANDLING_ID));
+        verify(utstedtA1Producer).produserMelding(any(UtstedtA1Melding.class));
+
+        assertThat(melding).isNotNull();
+    }
+
+    private static Behandling lagBehandling() {
         Aktoer bruker = new Aktoer();
         bruker.setAktørId("1234567891234");
         bruker.setRolle(Aktoersroller.BRUKER);
@@ -64,6 +114,14 @@ class UtstedtA1ServiceTest {
         behandling.setId(BEHANDLING_ID);
         behandling.setFagsak(fagsak);
 
+        return behandling;
+    }
+
+    private static Behandlingsresultat lagBehandlingsresultat() {
+        return lagBehandlingsresultat(false);
+    }
+
+    private static Behandlingsresultat lagBehandlingsresultat(boolean erAvslag) {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         lovvalgsperiode.setFom(LocalDate.now());
@@ -77,22 +135,10 @@ class UtstedtA1ServiceTest {
         behandlingsresultat.setId(BEHANDLING_ID);
         behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
         behandlingsresultat.setVedtakMetadata(vedtakMetadata);
+        behandlingsresultat.setType(erAvslag
+            ? Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL
+            : Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
 
-        Aktoer utenlandskMyndighet = new Aktoer();
-        utenlandskMyndighet.setRolle(Aktoersroller.MYNDIGHET);
-        utenlandskMyndighet.setInstitusjonId("SE:abc123");
-
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(eq(BEHANDLING_ID))).thenReturn(behandling);
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(behandlingsresultat);
-        when(brevmottakerService.avklarMottakere(eq(Produserbaredokumenter.ATTEST_A1), eq(Mottaker.av(Aktoersroller.MYNDIGHET)), eq(behandling))).thenReturn(List.of(utenlandskMyndighet));
-        when(utstedtA1Producer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());
-
-        UtstedtA1Melding melding = utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID);
-
-        assertThat(melding).isNotNull();
-        assertThat(melding.getSerienummer()).isEqualTo("MEL-123123");
-        assertThat(melding.getUtstasjoneringTilLand()).isEqualTo("SE");
-        assertThat(melding.getArtikkel()).isEqualTo(Lovvalgsbestemmelse.ART_12_1);
-        assertThat(melding.getTypeUtstedelse()).isEqualTo(A1TypeUtstedelse.FØRSTEGANG);
+        return behandlingsresultat;
     }
 }

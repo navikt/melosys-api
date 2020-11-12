@@ -10,7 +10,7 @@ public class UtstedtA1Melding {
     private final String aktorId;
     private final Lovvalgsbestemmelse artikkel;
     private final Periode periode;
-    private final String utstasjoneringTilLand;
+    private final String utsendtTilLand;
     private final LocalDate datoUtstedelse;
     private final A1TypeUtstedelse typeUtstedelse;
     private final ZonedDateTime meldingOpprettetTidspunkt = ZonedDateTime.now();
@@ -20,7 +20,7 @@ public class UtstedtA1Melding {
                             String aktorId,
                             Lovvalgsbestemmelse artikkel,
                             Periode periode,
-                            String utstasjoneringTilLand,
+                            String utsendtTilLand,
                             LocalDate datoUtstedelse,
                             A1TypeUtstedelse typeUtstedelse) {
         this.serienummer = saksnummer + behandlingId;
@@ -29,7 +29,7 @@ public class UtstedtA1Melding {
         this.aktorId = aktorId;
         this.artikkel = artikkel;
         this.periode = periode;
-        this.utstasjoneringTilLand = utstasjoneringTilLand;
+        this.utsendtTilLand = utsendtTilLand;
         this.datoUtstedelse = datoUtstedelse;
         this.typeUtstedelse = typeUtstedelse;
     }
@@ -58,8 +58,8 @@ public class UtstedtA1Melding {
         return periode;
     }
 
-    public String getUtstasjoneringTilLand() {
-        return utstasjoneringTilLand;
+    public String getUtsendtTilLand() {
+        return utsendtTilLand;
     }
 
     public LocalDate getDatoUtstedelse() {

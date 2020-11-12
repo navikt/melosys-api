@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.brev;
+package no.nav.melosys.saksflyt.steg.statistikk;
 
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;

@@ -27,7 +27,7 @@ public enum Lovvalgsbestemmelse {
         Maps.newHashMap(ImmutableMap.<LovvalgBestemmelse, Lovvalgsbestemmelse>builder()
             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A, Lovvalgsbestemmelse.ART_11_3_a)
             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B, Lovvalgsbestemmelse.ART_11_3_b)
-            .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4, Lovvalgsbestemmelse.ART_11_4)
+            .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2, Lovvalgsbestemmelse.ART_11_4)
             .put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5, Lovvalgsbestemmelse.ART_11_5)
             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Lovvalgsbestemmelse.ART_12_1)
             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2, Lovvalgsbestemmelse.ART_12_2)

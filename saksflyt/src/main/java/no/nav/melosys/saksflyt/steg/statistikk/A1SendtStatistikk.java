@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.brev;
+package no.nav.melosys.saksflyt.steg.statistikk;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
