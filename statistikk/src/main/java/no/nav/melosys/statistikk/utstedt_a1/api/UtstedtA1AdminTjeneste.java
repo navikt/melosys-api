@@ -4,37 +4,50 @@ import java.util.*;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.service.AdminTjeneste;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding;
 import no.nav.melosys.statistikk.utstedt_a1.service.UtstedtA1Service;
-import no.nav.security.token.support.core.api.Protected;
+import no.nav.security.token.support.core.api.Unprotected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
-@Protected
+@Unprotected
 @RestController
 @RequestMapping("/admin/utstedtA1")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
-public class UtstedtA1AdminTjeneste {
+public class UtstedtA1AdminTjeneste implements AdminTjeneste {
     private static final Logger log = LoggerFactory.getLogger(UtstedtA1AdminTjeneste.class);
 
     private final UtstedtA1Service utstedtA1Service;
     private final BehandlingRepository behandlingRepository;
+    private final String apiKey;
 
     @Autowired
-    public UtstedtA1AdminTjeneste(UtstedtA1Service utstedtA1Service, BehandlingRepository behandlingRepository) {
+    public UtstedtA1AdminTjeneste(
+        UtstedtA1Service utstedtA1Service,
+        BehandlingRepository behandlingRepository,
+        @Value("${Melosys-admin.apikey}") String apiKey
+    ) {
         this.utstedtA1Service = utstedtA1Service;
         this.behandlingRepository = behandlingRepository;
+        this.apiKey = apiKey;
     }
 
     @PostMapping("/{behandlingID}/publiserMelding")
-    public ResponseEntity<UtstedtA1Melding> publiser(@PathVariable long behandlingID) throws FunksjonellException, TekniskException {
+    public ResponseEntity<UtstedtA1Melding> publiser(
+        @RequestHeader(API_KEY_HEADER) String apiKey,
+        @PathVariable long behandlingID
+    ) throws FunksjonellException, TekniskException {
+        validerApikey(apiKey);
         UtstedtA1Melding utstedtA1Melding = utstedtA1Service.sendMeldingOmUtstedtA1(behandlingID);
         return ResponseEntity.ok(utstedtA1Melding);
     }
@@ -44,7 +57,12 @@ public class UtstedtA1AdminTjeneste {
     siden Melosys gikk i produksjon). Skal fjernes etter bruk. Løsning for MELOSYS-4180.
      */
     @PostMapping("/publiserMelding/eksirendeBehandlinger")
-    public ResponseEntity<Map<String, Set<Long>>> publiserEksisterendeBehandlinger(@RequestBody Set<Long> behandlinger) {
+    public ResponseEntity<Map<String, Set<Long>>> publiserEksisterendeBehandlinger(
+        @RequestHeader(API_KEY_HEADER) String apiKey,
+        @RequestBody Set<Long> behandlinger
+    ) throws SikkerhetsbegrensningException {
+        validerApikey(apiKey);
+
         List<Behandling> eksisterendeBehandlinger = new ArrayList<>();
         if (behandlinger == null || behandlinger.isEmpty()) {
             behandlingRepository.findAll().iterator().forEachRemaining(eksisterendeBehandlinger::add);
@@ -70,5 +88,10 @@ public class UtstedtA1AdminTjeneste {
         return ResponseEntity.ok(Map.of(
             "sendteBehandlinger", sendteBehandlinger,
             "feiledeBehandlinger", feiledeBehandlinger));
+    }
+
+    @Override
+    public String getApiKey() {
+        return apiKey;
     }
 }

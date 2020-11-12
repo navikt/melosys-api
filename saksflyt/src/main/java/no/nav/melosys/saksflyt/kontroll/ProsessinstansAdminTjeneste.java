@@ -12,6 +12,7 @@ import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.impl.SaksflytAsyncDelegate;
 import no.nav.melosys.saksflyt.kontroll.dto.HentProsessinstansDto;
 import no.nav.melosys.saksflyt.kontroll.dto.RestartProsessinstanserRequest;
+import no.nav.melosys.service.AdminTjeneste;
 import no.nav.security.token.support.core.api.Unprotected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,15 +23,13 @@ import org.springframework.web.bind.annotation.*;
 @Unprotected
 @RestController
 @RequestMapping("/admin/prosessinstanser")
-public class ProsessinstansAdminTjeneste {
+public class ProsessinstansAdminTjeneste implements AdminTjeneste {
 
     private final Logger log = LoggerFactory.getLogger(ProsessinstansAdminTjeneste.class);
 
     private final SaksflytAsyncDelegate saksflytAsyncDelegate;
     private final ProsessinstansRepository prosessinstansRepository;
     private final String apiKey;
-
-    private static final String API_KEY_HEADER = "X-MELOSYS-ADMIN-APIKEY";
 
     public ProsessinstansAdminTjeneste(SaksflytAsyncDelegate saksflytAsyncDelegate,
                                        ProsessinstansRepository prosessinstansRepository,
@@ -74,9 +73,8 @@ public class ProsessinstansAdminTjeneste {
         return ResponseEntity.ok().build();
     }
 
-    private void validerApikey(String value) throws SikkerhetsbegrensningException {
-        if (!apiKey.equals(value)) {
-            throw new SikkerhetsbegrensningException("Trenger gyldig apikey");
-        }
+    @Override
+    public String getApiKey() {
+        return apiKey;
     }
 }
