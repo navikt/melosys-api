@@ -5,6 +5,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
@@ -50,6 +51,11 @@ public class SaksopplysningerService {
     public Optional<InntektDokument> finnInntektsopplysninger(long behandlingID) {
         return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.INNTK)
             .map(s -> (InntektDokument) s.getDokument());
+    }
+
+    public Optional<OrganisasjonDokument> finnOrganisasjonsopplysninger(long behandlingID) {
+        return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.ORG)
+            .map(s -> (OrganisasjonDokument) s.getDokument());
     }
 
     public PersonhistorikkDokument hentPersonhistorikk(long behandlingID) throws IkkeFunnetException {
