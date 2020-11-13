@@ -189,7 +189,7 @@ public class VedtakService {
 
     private static BucType avklarBucType(Behandlingsresultat behandlingsresultat) {
         return BucType.fraBestemmelse(
-            behandlingsresultat.hentValidertPeriodeMedLovvalgsbestemmelse().getBestemmelse()
+            behandlingsresultat.hentValidertPeriodeOmLovvalg().getBestemmelse()
         );
     }
 

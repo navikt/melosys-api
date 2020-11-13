@@ -72,8 +72,8 @@ public class LandvelgerService {
 
     private boolean erArtikkel13(Behandlingsresultat behandlingsresultat) {
         if (behandlingsresultat.harPeriodeMedLovvalgsbestemmelse()) {
-            PeriodeMedLovvalgsbestemmelse periodeMedLovvalgsbestemmelse = behandlingsresultat.hentValidertPeriodeMedLovvalgsbestemmelse();
-            return periodeMedLovvalgsbestemmelse.erArtikkel13();
+            PeriodeOmLovvalg periodeOmLovvalg = behandlingsresultat.hentValidertPeriodeOmLovvalg();
+            return periodeOmLovvalg.erArtikkel13();
         } else {
             return erVideresendt(behandlingsresultat);
         }

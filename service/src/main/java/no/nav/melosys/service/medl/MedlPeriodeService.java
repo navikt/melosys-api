@@ -47,28 +47,28 @@ public class MedlPeriodeService {
         return medlFasade.hentPeriodeListe(fnr, fom, tom);
     }
 
-    public void opprettPeriodeForeløpig(PeriodeMedLovvalgsbestemmelse periodeMedLovvalgsbestemmelse, Long behandlingID, boolean erSed) throws TekniskException, FunksjonellException {
-        opprettPeriodeForeløpig(periodeMedLovvalgsbestemmelse, behandlingID, erSed, hentFnr(behandlingID));
+    public void opprettPeriodeForeløpig(PeriodeOmLovvalg periodeOmLovvalg, Long behandlingID, boolean erSed) throws TekniskException, FunksjonellException {
+        opprettPeriodeForeløpig(periodeOmLovvalg, behandlingID, erSed, hentFnr(behandlingID));
     }
 
-    public void opprettPeriodeUnderAvklaring(PeriodeMedLovvalgsbestemmelse periodeMedLovvalgsbestemmelse, Long behandlingID, boolean erSed) throws TekniskException, FunksjonellException {
-        opprettPeriodeUnderAvklaring(periodeMedLovvalgsbestemmelse, behandlingID, erSed, hentFnr(behandlingID));
+    public void opprettPeriodeUnderAvklaring(PeriodeOmLovvalg periodeOmLovvalg, Long behandlingID, boolean erSed) throws TekniskException, FunksjonellException {
+        opprettPeriodeUnderAvklaring(periodeOmLovvalg, behandlingID, erSed, hentFnr(behandlingID));
     }
 
     public void opprettPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, Long behandlingID, boolean erSed) throws TekniskException, FunksjonellException {
         opprettPeriodeEndelig(lovvalgsperiode, behandlingID, erSed, hentFnr(behandlingID));
     }
 
-    public void opprettPeriodeForeløpig(PeriodeMedLovvalgsbestemmelse periodeMedLovvalgsbestemmelse, Long behandlingID, boolean erSed, String fnr) throws TekniskException, FunksjonellException {
+    public void opprettPeriodeForeløpig(PeriodeOmLovvalg periodeOmLovvalg, Long behandlingID, boolean erSed, String fnr) throws TekniskException, FunksjonellException {
         log.info("Oppretter foreløpig periode i MEDL for behandling {}", behandlingID);
-        Long medlPeriodeID = medlFasade.opprettPeriodeForeløpig(fnr, periodeMedLovvalgsbestemmelse, hentKildedokumenttype(erSed));
-        lagreMedlPeriodeId(medlPeriodeID, periodeMedLovvalgsbestemmelse, behandlingID);
+        Long medlPeriodeID = medlFasade.opprettPeriodeForeløpig(fnr, periodeOmLovvalg, hentKildedokumenttype(erSed));
+        lagreMedlPeriodeId(medlPeriodeID, periodeOmLovvalg, behandlingID);
     }
 
-    public void opprettPeriodeUnderAvklaring(PeriodeMedLovvalgsbestemmelse periodeMedLovvalgsbestemmelse, Long behandlingID, boolean erSed, String fnr) throws TekniskException, FunksjonellException {
+    public void opprettPeriodeUnderAvklaring(PeriodeOmLovvalg periodeOmLovvalg, Long behandlingID, boolean erSed, String fnr) throws TekniskException, FunksjonellException {
         log.info("Oppretter periode under avklaring i MEDL for behandling {}", behandlingID);
-        Long medlPeriodeID = medlFasade.opprettPeriodeUnderAvklaring(fnr, periodeMedLovvalgsbestemmelse, hentKildedokumenttype(erSed));
-        lagreMedlPeriodeId(medlPeriodeID, periodeMedLovvalgsbestemmelse, behandlingID);
+        Long medlPeriodeID = medlFasade.opprettPeriodeUnderAvklaring(fnr, periodeOmLovvalg, hentKildedokumenttype(erSed));
+        lagreMedlPeriodeId(medlPeriodeID, periodeOmLovvalg, behandlingID);
     }
 
     public void opprettPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, Long behandlingID, boolean erSed, String fnr) throws TekniskException, FunksjonellException {
@@ -117,13 +117,13 @@ public class MedlPeriodeService {
         return behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
     }
 
-    private void lagreMedlPeriodeId(Long medlPeriodeID, PeriodeMedLovvalgsbestemmelse periodeMedLovvalgsbestemmelse, long behandlingID) throws FunksjonellException {
-        if (periodeMedLovvalgsbestemmelse instanceof Lovvalgsperiode) {
-            lagreMedlPeriodeId(medlPeriodeID, (Lovvalgsperiode) periodeMedLovvalgsbestemmelse, behandlingID);
-        } else if (periodeMedLovvalgsbestemmelse instanceof Anmodningsperiode) {
-            lagreMedlPeriodeId(medlPeriodeID, (Anmodningsperiode) periodeMedLovvalgsbestemmelse, behandlingID);
-        } else if (periodeMedLovvalgsbestemmelse instanceof Utpekingsperiode) {
-            lagreMedlPeriodeId(medlPeriodeID, (Utpekingsperiode) periodeMedLovvalgsbestemmelse, behandlingID);
+    private void lagreMedlPeriodeId(Long medlPeriodeID, PeriodeOmLovvalg periodeOmLovvalg, long behandlingID) throws FunksjonellException {
+        if (periodeOmLovvalg instanceof Lovvalgsperiode) {
+            lagreMedlPeriodeId(medlPeriodeID, (Lovvalgsperiode) periodeOmLovvalg, behandlingID);
+        } else if (periodeOmLovvalg instanceof Anmodningsperiode) {
+            lagreMedlPeriodeId(medlPeriodeID, (Anmodningsperiode) periodeOmLovvalg, behandlingID);
+        } else if (periodeOmLovvalg instanceof Utpekingsperiode) {
+            lagreMedlPeriodeId(medlPeriodeID, (Utpekingsperiode) periodeOmLovvalg, behandlingID);
         } else {
             throw new UnsupportedOperationException("Uventet periode med bestemmelse kan ikke lagres");
         }

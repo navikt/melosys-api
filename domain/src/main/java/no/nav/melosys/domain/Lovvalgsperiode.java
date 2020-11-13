@@ -10,7 +10,7 @@ import no.nav.melosys.exception.FunksjonellException;
 
 @Entity
 @Table(name = "lovvalg_periode")
-public class Lovvalgsperiode implements PeriodeMedLovvalgsbestemmelse {
+public class Lovvalgsperiode implements PeriodeOmLovvalg {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

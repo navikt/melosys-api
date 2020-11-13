@@ -6,7 +6,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.PeriodeMedLovvalgsbestemmelse;
+import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -92,7 +92,7 @@ public final class MedlPeriodeKonverter {
     }
 
     public static OpprettPeriodeRequest konverterTilOpprettPeriodRequest(String fnr,
-                                                                         PeriodeMedLovvalgsbestemmelse periodeMedBestemmelse,
+                                                                         PeriodeOmLovvalg periodeOmLovvalg,
                                                                          PeriodestatusMedl periodestatusMedl,
                                                                          LovvalgMedl lovvalgMedl,
                                                                          KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
@@ -102,7 +102,7 @@ public final class MedlPeriodeKonverter {
         no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Foedselsnummer ident = new no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Foedselsnummer();
         ident.setValue(fnr);
 
-        Medlemsperiode periode = opprettPeriode(periodeMedBestemmelse, periodestatusMedl, lovvalgMedl, kildedokumenttypeMedl);
+        Medlemsperiode periode = opprettPeriode(periodeOmLovvalg, periodestatusMedl, lovvalgMedl, kildedokumenttypeMedl);
 
         request.setIdent(ident);
         request.setPeriode(periode);
@@ -126,11 +126,11 @@ public final class MedlPeriodeKonverter {
         return request;
     }
 
-    private static Medlemsperiode opprettPeriode(PeriodeMedLovvalgsbestemmelse periodeMedBestemmelse, PeriodestatusMedl periodestatusMedl, LovvalgMedl lovvalgMedl, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
+    private static Medlemsperiode opprettPeriode(PeriodeOmLovvalg periodeOmLovvalg, PeriodestatusMedl periodestatusMedl, LovvalgMedl lovvalgMedl, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
         Medlemsperiode periode = new Medlemsperiode();
         try {
-            periode.setFraOgMed(KonverteringsUtils.localDateToXMLGregorianCalendar(periodeMedBestemmelse.getFom()));
-            periode.setTilOgMed(KonverteringsUtils.localDateToXMLGregorianCalendar(periodeMedBestemmelse.getTom()));
+            periode.setFraOgMed(KonverteringsUtils.localDateToXMLGregorianCalendar(periodeOmLovvalg.getFom()));
+            periode.setTilOgMed(KonverteringsUtils.localDateToXMLGregorianCalendar(periodeOmLovvalg.getTom()));
             periode.setDatoRegistrert(KonverteringsUtils.localDateToXMLGregorianCalendar(LocalDate.now()));
         } catch (DatatypeConfigurationException e) {
             throw new TekniskException(e);
@@ -143,17 +143,17 @@ public final class MedlPeriodeKonverter {
             periode.setLovvalg(new Lovvalg().withValue(lovvalgMedl.getKode()));
         }
 
-        if (periodeMedBestemmelse.getDekning() != null) {
-            DekningMedl dekningMedl = tilMedlTrygdeDekning(periodeMedBestemmelse.getDekning());
+        if (periodeOmLovvalg.getDekning() != null) {
+            DekningMedl dekningMedl = tilMedlTrygdeDekning(periodeOmLovvalg.getDekning());
             periode.setTrygdedekning(new Trygdedekning().withValue(dekningMedl.getKode()));
         }
 
-        if (periodeMedBestemmelse.getLovvalgsland() != null) {
-            String lovvalgLand = LandkoderUtils.tilIso3(periodeMedBestemmelse.getLovvalgsland().getKode());
+        if (periodeOmLovvalg.getLovvalgsland() != null) {
+            String lovvalgLand = LandkoderUtils.tilIso3(periodeOmLovvalg.getLovvalgsland().getKode());
             periode.setLand(new Landkode().withValue(lovvalgLand));
         }
 
-        LovvalgBestemmelse bestemmelse = hentLovvalgBestemmelse(periodeMedBestemmelse);
+        LovvalgBestemmelse bestemmelse = hentLovvalgBestemmelse(periodeOmLovvalg);
         if (bestemmelse != null) {
             GrunnlagMedl grunnlagMedl = tilGrunnlagMedltype(bestemmelse);
             periode.setGrunnlagstype(new Grunnlagstype().withValue(grunnlagMedl.getKode()));
@@ -165,7 +165,7 @@ public final class MedlPeriodeKonverter {
         return periode;
     }
 
-    private static LovvalgBestemmelse hentLovvalgBestemmelse(PeriodeMedLovvalgsbestemmelse lovvalgsperiode) {
+    private static LovvalgBestemmelse hentLovvalgBestemmelse(PeriodeOmLovvalg lovvalgsperiode) {
         final boolean harTilleggsbestemmelseART11_4_1 = lovvalgsperiode.getTilleggsbestemmelse() != null && lovvalgsperiode.getTilleggsbestemmelse().equals(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
 
         LovvalgBestemmelse bestemmelse;

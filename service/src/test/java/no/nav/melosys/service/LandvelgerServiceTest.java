@@ -76,7 +76,7 @@ public class LandvelgerServiceTest {
         landvelgerService = new LandvelgerService(avklartefaktaService, behandlingsresultatService, behandlingsgrunnlagService);
     }
 
-    private Behandlingsresultat lagBehandlingsresultat(PeriodeMedLovvalgsbestemmelse periode) throws IkkeFunnetException {
+    private Behandlingsresultat lagBehandlingsresultat(PeriodeOmLovvalg periode) throws IkkeFunnetException {
         Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
         behandling.setId(behandlingID);

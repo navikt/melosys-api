@@ -48,8 +48,8 @@ public class MedlPeriodeServiceTest {
     public void setUp() throws Exception {
         medlPeriodeService = new MedlPeriodeService(tpsFasade, medlFasade, behandlingsresultatService, lovvalgsperiodeRepository, anmodningsperiodeRepository, utpekingsperiodeRepository);
 
-        when(medlFasade.opprettPeriodeForeløpig(anyString(), any(PeriodeMedLovvalgsbestemmelse.class), any(KildedokumenttypeMedl.class))).thenReturn(MEDL_PERIODE_ID);
-        when(medlFasade.opprettPeriodeUnderAvklaring(anyString(), any(PeriodeMedLovvalgsbestemmelse.class), any(KildedokumenttypeMedl.class))).thenReturn(MEDL_PERIODE_ID);
+        when(medlFasade.opprettPeriodeForeløpig(anyString(), any(PeriodeOmLovvalg.class), any(KildedokumenttypeMedl.class))).thenReturn(MEDL_PERIODE_ID);
+        when(medlFasade.opprettPeriodeUnderAvklaring(anyString(), any(PeriodeOmLovvalg.class), any(KildedokumenttypeMedl.class))).thenReturn(MEDL_PERIODE_ID);
         when(medlFasade.opprettPeriodeEndelig(anyString(), any(Lovvalgsperiode.class), any(KildedokumenttypeMedl.class))).thenReturn(MEDL_PERIODE_ID);
     }
 

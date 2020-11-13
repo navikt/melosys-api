@@ -84,18 +84,18 @@ public class MedlService implements MedlFasade {
     }
 
     @Override
-    public Long opprettPeriodeUnderAvklaring(String fnr, PeriodeMedLovvalgsbestemmelse periodeMedBestemmelse, KildedokumenttypeMedl kildedokumenttypeMedl) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        return opprettPeriode(fnr, periodeMedBestemmelse, PeriodestatusMedl.UAVK, LovvalgMedl.UAVK, kildedokumenttypeMedl);
+    public Long opprettPeriodeUnderAvklaring(String fnr, PeriodeOmLovvalg periodeOmLovvalg, KildedokumenttypeMedl kildedokumenttypeMedl) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        return opprettPeriode(fnr, periodeOmLovvalg, PeriodestatusMedl.UAVK, LovvalgMedl.UAVK, kildedokumenttypeMedl);
     }
 
     @Override
-    public Long opprettPeriodeForeløpig(String fnr, PeriodeMedLovvalgsbestemmelse periodeMedBestemmelse, KildedokumenttypeMedl kildedokumenttypeMedl) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        return opprettPeriode(fnr, periodeMedBestemmelse, PeriodestatusMedl.UAVK, LovvalgMedl.FORL, kildedokumenttypeMedl);
+    public Long opprettPeriodeForeløpig(String fnr, PeriodeOmLovvalg periodeOmLovvalg, KildedokumenttypeMedl kildedokumenttypeMedl) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+        return opprettPeriode(fnr, periodeOmLovvalg, PeriodestatusMedl.UAVK, LovvalgMedl.FORL, kildedokumenttypeMedl);
     }
 
-    Long opprettPeriode(String fnr, PeriodeMedLovvalgsbestemmelse periodeMedBestemmelse, PeriodestatusMedl periodestatusMedl, LovvalgMedl lovvalgMedl, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+    Long opprettPeriode(String fnr, PeriodeOmLovvalg periodeOmLovvalg, PeriodestatusMedl periodestatusMedl, LovvalgMedl lovvalgMedl, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
         try {
-            OpprettPeriodeRequest request = MedlPeriodeKonverter.konverterTilOpprettPeriodRequest(fnr, periodeMedBestemmelse, periodestatusMedl, lovvalgMedl, kildedokumenttypeMedl);
+            OpprettPeriodeRequest request = MedlPeriodeKonverter.konverterTilOpprettPeriodRequest(fnr, periodeOmLovvalg, periodestatusMedl, lovvalgMedl, kildedokumenttypeMedl);
             OpprettPeriodeResponse response = behandleMedlemskapConsumer.opprettPeriode(request);
             return response.getPeriodeId();
         } catch (no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.PersonIkkeFunnet e) {

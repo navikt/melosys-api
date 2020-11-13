@@ -278,7 +278,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public boolean erGodkjenningEllerInnvilgelseArt13() {
         return (erInnvilgelse() || erGodkjenningRegistreringUnntak())
-            && finnValidertLovvalgsperiode().stream().anyMatch(PeriodeMedLovvalgsbestemmelse::erArtikkel13);
+            && finnValidertLovvalgsperiode().stream().anyMatch(PeriodeOmLovvalg::erArtikkel13);
     }
 
     // Medl skal ikke oppdateres ved avslag.
@@ -294,7 +294,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return !lovvalgsperioder.isEmpty() || !anmodningsperioder.isEmpty() || !utpekingsperioder.isEmpty();
     }
 
-    public PeriodeMedLovvalgsbestemmelse hentValidertPeriodeMedLovvalgsbestemmelse() {
+    public PeriodeOmLovvalg hentValidertPeriodeOmLovvalg() {
         if (!lovvalgsperioder.isEmpty()) {
             return hentValidertLovvalgsperiode();
         } else if (!anmodningsperioder.isEmpty()){
