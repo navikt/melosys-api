@@ -254,6 +254,13 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    public void opprettProsessinstansDistribuerForvaltningsmelding(Behandling behandling) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(ProsessType.OPPRETT_OG_DISTRIBUER_FORVALTNINGSMELDING);
+        prosessinstans.setBehandling(behandling);
+        lagre(prosessinstans);
+    }
+
     @Transactional
     public void opprettProsessinstansSedMottak(MelosysEessiMelding melosysEessiMelding) {
         Prosessinstans prosessinstans = prosessinstansForSedMottak(melosysEessiMelding);

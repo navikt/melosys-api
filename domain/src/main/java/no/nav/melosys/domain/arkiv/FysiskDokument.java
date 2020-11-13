@@ -35,6 +35,14 @@ public class FysiskDokument extends ArkivDokument {
         return fysiskDokument;
     }
 
+    static FysiskDokument lagFysiskDokumentPdf(String tittel, byte[] pdf) {
+        FysiskDokument fysiskDokument = new FysiskDokument();
+        fysiskDokument.setDokumentKategori(DOKUMENT_KATEGORI_SOKNAD);
+        fysiskDokument.setTittel(tittel);
+        fysiskDokument.setDokumentVarianter(Collections.singletonList(lagArkivVariant(pdf)));
+        return fysiskDokument;
+    }
+
     private static String hentTittelForSedType(SedType sedType) {
         switch (sedType) {
             case A002:

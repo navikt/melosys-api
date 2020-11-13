@@ -10,7 +10,8 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
 
 public final class ProsessflytDefinisjon {
 
-    private ProsessflytDefinisjon() {}
+    private ProsessflytDefinisjon() {
+    }
 
     private static final Map<ProsessType, ProsessFlyt> PROSESS_FLYT_MAP = new EnumMap<>(ProsessType.class);
 
@@ -26,6 +27,15 @@ public final class ProsessflytDefinisjon {
             ProsessType.FORVALTNINGSMELDING_SEND,
             new ProsessFlyt(ProsessType.FORVALTNINGSMELDING_SEND,
                 SEND_FORVALTNINGSMELDING
+            )
+        );
+
+
+        PROSESS_FLYT_MAP.put(
+            ProsessType.OPPRETT_OG_DISTRIBUER_FORVALTNINGSMELDING,
+            new ProsessFlyt(ProsessType.OPPRETT_OG_DISTRIBUER_FORVALTNINGSMELDING,
+                OPPRETT_FORVALTNINGSMELDING,
+                DISTRIBUER_JOURNALPOST
             )
         );
 

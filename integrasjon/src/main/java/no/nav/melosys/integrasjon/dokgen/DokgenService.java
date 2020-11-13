@@ -14,7 +14,8 @@ public class DokgenService {
         this.dokgenConsumer = dokgenConsumer;
     }
 
-    public byte[] lagPdf(String mal, Flettedata flettedata) {
+    public byte[] lagPdf(String mal,  Flettedata flettedata) {
         return dokgenConsumer.lagPdf(mal, flettedata);
     }
+
 }

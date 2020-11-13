@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -11,6 +12,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,7 +34,7 @@ class SendForvaltningsmeldingTest {
 
     @BeforeEach
     public void setUp() {
-        sendForvaltningsmelding = new SendForvaltningsmelding(brevBestiller, behandlingService);
+        sendForvaltningsmelding = new SendForvaltningsmelding(brevBestiller, behandlingService, mock(ProsessinstansService.class), mock(Unleash.class));
     }
 
     @Test
