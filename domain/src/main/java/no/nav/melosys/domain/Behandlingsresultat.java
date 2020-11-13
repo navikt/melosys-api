@@ -290,7 +290,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return lovvalgsperioder.stream().anyMatch(l -> l.getMedlPeriodeID() != null);
     }
 
-    public boolean harPeriodeMedLovvalgsbestemmelse() {
+    public boolean harPeriodeOmLovvalg() {
         return !lovvalgsperioder.isEmpty() || !anmodningsperioder.isEmpty() || !utpekingsperioder.isEmpty();
     }
 
@@ -303,7 +303,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
             return hentValidertUtpekingsperiode();
         }
 
-        throw new NoSuchElementException("Ingen periode med lovvalgsbestemmelse finnes for behandling " + id);
+        throw new NoSuchElementException("Ingen periode om lovvalg finnes for behandling " + id);
     }
 
     public Lovvalgsperiode hentValidertLovvalgsperiode() {
