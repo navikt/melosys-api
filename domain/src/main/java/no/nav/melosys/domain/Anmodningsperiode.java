@@ -11,7 +11,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
 @Entity
 @Table(name = "anmodningsperiode")
-public class Anmodningsperiode implements Medlemskapsperiode {
+public class Anmodningsperiode implements PeriodeOmLovvalg {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
