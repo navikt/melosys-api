@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.Objects;
 import javax.persistence.*;
 
-import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
@@ -26,12 +25,11 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
     @Column(name = "tom_dato")
     private LocalDate tom;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "arbeidsland", nullable = false)
     private String arbeidsland;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "bestemmelse", nullable = false)
-    @Convert(converter = LovvalgBestemmelsekonverterer.class)
     private Folketrygdloven_kap2_bestemmelser bestemmelse;
 
     @Enumerated(EnumType.STRING)
