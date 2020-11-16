@@ -15,6 +15,8 @@ import no.nav.melosys.repository.MedlemskapsperiodeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static no.nav.melosys.service.kontroll.PeriodeKontroller.feilIPeriode;
+
 @Service
 public class MedlemskapsperiodeService {
 
@@ -79,6 +81,8 @@ public class MedlemskapsperiodeService {
             throw new FunksjonellException("Fom-dato, innvilgelsesresultat og trygdedekning er påkrevd");
         } else if (!GYLDIGE_TRYGDEDEKNINGER.contains(trygdedekning)) {
             throw new FunksjonellException("Trygedekning " + trygdedekning + " støttes ikke for en medlemskapsperiode");
+        } else if (feilIPeriode(fom, tom)) {
+            throw new FunksjonellException("Tom-dato kan ikke være før fom-dato");
         }
 
         medlemskapsperiode.setTom(tom);
