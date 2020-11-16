@@ -135,7 +135,13 @@ public class AvklarteVirksomheterService {
     }
 
     private boolean erVirksomhetArbeidNorge(Long behandlingID, String orgnr) throws IkkeFunnetException, TekniskException {
-        return hentNorskeArbeidsgivendeOrgnumre(behandlingService.hentBehandling(behandlingID)).stream().anyMatch(orgnr::equals);
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        ArbeidsforholdDokument arbDok = behandling.hentArbeidsforholdDokument();
+        Set<String> arbeidsgivendeOrgnumre = arbDok.hentOrgnumre();
+        BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        arbeidsgivendeOrgnumre.addAll(grunnlagData.juridiskArbeidsgiverNorge.ekstraArbeidsgivere);
+
+        return arbeidsgivendeOrgnumre.stream().anyMatch(orgnr::equals);
     }
 
     public VirksomheterDto tilVirksomheterDto(Set<Avklartefakta> avklartefaktas) {
