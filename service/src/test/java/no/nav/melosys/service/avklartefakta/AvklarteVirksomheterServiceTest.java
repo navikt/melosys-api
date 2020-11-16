@@ -6,10 +6,18 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ArbeidUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.adresse.Adresse;
+import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
+import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ForetakUtland;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -27,6 +35,7 @@ import static no.nav.melosys.service.BehandlingsgrunnlagStub.lagBehandlingsgrunn
 import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysninger;
 import static no.nav.melosys.service.SaksopplysningStubs.lagOrganisasjonDokumenter;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -53,6 +62,7 @@ public class AvklarteVirksomheterServiceTest {
     private String orgnr1 = "111111111";
     private String orgnr2 = "222222222";
     private String orgnr3 = "333333333";
+    private String orgnr4 = "333333333";
     private String uuid1 = "a2k2jf-a3khs";
     private String uuid2 = "0dkf93-kj701";
 
@@ -168,6 +178,84 @@ public class AvklarteVirksomheterServiceTest {
         assertThat(avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, ingenAdresse).stream()
             .map(nv -> nv.orgnr)
             .collect(Collectors.toList())).contains(orgnr1);
+    }
+
+    @Test
+    public void erVirksomhetValid_virksomhetErForetakUtland_girTrue() throws FunksjonellException, TekniskException {
+        VirksomheterDto virksomheterDto = new VirksomheterDto();
+        virksomheterDto.setOrgnummer(List.of(uuid1));
+        forberedValidering();
+
+        boolean response = avklarteVirksomheterService.erVirksomhetValid(virksomheterDto, 1L);
+        assertTrue(response);
+    }
+
+    @Test
+    public void erVirksomhetValid_virksomhetErSelvstendigForetak_girTrue() throws FunksjonellException, TekniskException {
+        VirksomheterDto virksomheterDto = new VirksomheterDto();
+        virksomheterDto.setOrgnummer(List.of(orgnr1));
+        forberedValidering();
+
+        boolean response = avklarteVirksomheterService.erVirksomhetValid(virksomheterDto, 1L);
+        assertTrue(response);
+    }
+
+    @Test
+    public void erVirksomhetValid_virksomhetErArbeidUtland_girTrue() throws FunksjonellException, TekniskException {
+        VirksomheterDto virksomheterDto = new VirksomheterDto();
+        virksomheterDto.setOrgnummer(List.of(orgnr2));
+        forberedValidering();
+
+        boolean response = avklarteVirksomheterService.erVirksomhetValid(virksomheterDto, 1L);
+        assertTrue(response);
+    }
+
+    @Test
+    public void erVirksomhetValid_virksomhetErArbeidNorge_girTrue() throws FunksjonellException, TekniskException {
+        VirksomheterDto virksomheterDto = new VirksomheterDto();
+        virksomheterDto.setOrgnummer(List.of(orgnr3));
+        forberedValidering();
+
+        boolean response = avklarteVirksomheterService.erVirksomhetValid(virksomheterDto, 1L);
+        assertTrue(response);
+    }
+
+    @Test
+    public void erVirksomhetValid_ugyldig_girFalse() throws FunksjonellException, TekniskException {
+        VirksomheterDto virksomheterDto = new VirksomheterDto();
+        virksomheterDto.setOrgnummer(List.of(orgnr4));
+        forberedValidering();
+
+        boolean response = avklarteVirksomheterService.erVirksomhetValid(virksomheterDto, 1L);
+        assertTrue(response);
+    }
+
+    private void forberedValidering() throws FunksjonellException {
+        ForetakUtland foretakUtland = new ForetakUtland();
+        foretakUtland.uuid = uuid1;
+        SelvstendigForetak selvstendigForetak = new SelvstendigForetak();
+        selvstendigForetak.orgnr = orgnr1;
+        ArbeidUtland arbeidUtland = new ArbeidUtland();
+        arbeidUtland.foretakOrgnr = orgnr2;
+        Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
+        arbeidsforhold.arbeidsgiverID = orgnr3;
+        ArbeidsforholdDokument arbeidsforholdDokument = new ArbeidsforholdDokument();
+        arbeidsforholdDokument.arbeidsforhold.add(arbeidsforhold);
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(SaksopplysningType.ARBFORH);
+        saksopplysning.setDokument(arbeidsforholdDokument);
+        BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
+        behandlingsgrunnlagData.foretakUtland.add(foretakUtland);
+        behandlingsgrunnlagData.selvstendigArbeid.selvstendigForetak.add(selvstendigForetak);
+        behandlingsgrunnlagData.arbeidUtland.add(arbeidUtland);
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+        Behandling behandling = new Behandling();
+        behandling.setSaksopplysninger(Set.of(saksopplysning));
+        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
+
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
     }
 
     private void leggTilIRegisterOppslag(Collection<String> orgnumre) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
