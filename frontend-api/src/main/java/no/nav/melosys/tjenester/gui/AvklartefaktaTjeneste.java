@@ -10,11 +10,11 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaStrukturertDto;
-import no.nav.melosys.service.avklartefakta.FtrlVirksomheterDto;
-import no.nav.melosys.service.avklartefakta.FtrlVirksomheterService;
+import no.nav.melosys.service.avklartefakta.VirksomheterDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -29,15 +29,15 @@ import org.springframework.web.context.WebApplicationContext;
 public class AvklartefaktaTjeneste {
 
     private AvklartefaktaService avklartefaktaService;
-    private FtrlVirksomheterService ftrlVirksomheterService;
+    private AvklarteVirksomheterService avklarteVirksomheterService;
 
     private final TilgangService tilgangService;
 
     @Autowired
-    public AvklartefaktaTjeneste(AvklartefaktaService avklartefaktaService, TilgangService tilgangService, FtrlVirksomheterService ftrlVirksomheterService) {
+    public AvklartefaktaTjeneste(AvklartefaktaService avklartefaktaService, TilgangService tilgangService, AvklarteVirksomheterService avklarteVirksomheterService) {
         this.avklartefaktaService = avklartefaktaService;
         this.tilgangService = tilgangService;
-        this.ftrlVirksomheterService = ftrlVirksomheterService;
+        this.avklarteVirksomheterService = avklarteVirksomheterService;
     }
 
     @GetMapping("{behandlingID}")
@@ -72,11 +72,11 @@ public class AvklartefaktaTjeneste {
     @PostMapping("{behandlingID}/virksomhet")
     @ApiOperation(value = "Lagre virksomheter som avklartefakta")
     public AvklartefaktaStrukturertDto lagreVirksomheterSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
-                                                                   @RequestBody FtrlVirksomheterDto virksomheter) throws TekniskException, FunksjonellException {
+                                                                   @RequestBody VirksomheterDto virksomheter) throws TekniskException, FunksjonellException {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
 
-        ftrlVirksomheterService.erVirksomhetValid(virksomheter, behandlingID);
-        ftrlVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomheter, behandlingID);
+        avklarteVirksomheterService.erVirksomhetValid(virksomheter, behandlingID);
+        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomheter, behandlingID);
 
         return avklartefaktaService.hentAlleAvklarteFaktaStrukturert(behandlingID);
     }

@@ -3,13 +3,13 @@ package no.nav.melosys.service.avklartefakta;
 
 public class AvklartefaktaStrukturertDto {
 
-    private FtrlVirksomheterDto virksomheter;
+    private VirksomheterDto virksomheter;
 
-    public FtrlVirksomheterDto getVirksomheter() {
+    public VirksomheterDto getVirksomheter() {
         return virksomheter;
     }
 
-    public void setVirksomheter(FtrlVirksomheterDto virksomheter) {
+    public void setVirksomheter(VirksomheterDto virksomheter) {
         this.virksomheter = virksomheter;
     }
 }

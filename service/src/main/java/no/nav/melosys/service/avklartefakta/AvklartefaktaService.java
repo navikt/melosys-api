@@ -29,7 +29,7 @@ public class AvklartefaktaService {
 
     private final AvklartefaktaDtoKonverterer faktaKonverterer;
 
-    private final FtrlVirksomheterService ftrlVirksomheterService;
+    private final AvklarteVirksomheterService avklarteVirksomheterService;
 
     private static final String VALGT_FAKTA = "TRUE";
     private static final String FANT_IKKE_RESULTAT = "Fant ikke behandlingsresultat for behandlingsid: ";
@@ -39,11 +39,11 @@ public class AvklartefaktaService {
         Avklartefaktatyper.ARBEIDSLAND);
 
     @Autowired
-    public AvklartefaktaService(AvklarteFaktaRepository avklarteFaktaRepository, BehandlingsresultatRepository behandlingsresultatRepository, AvklartefaktaDtoKonverterer faktaKonverterer, FtrlVirksomheterService ftrlVirksomheterService) {
+    public AvklartefaktaService(AvklarteFaktaRepository avklarteFaktaRepository, BehandlingsresultatRepository behandlingsresultatRepository, AvklartefaktaDtoKonverterer faktaKonverterer, AvklarteVirksomheterService avklarteVirksomheterService) {
         this.avklarteFaktaRepository = avklarteFaktaRepository;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.faktaKonverterer = faktaKonverterer;
-        this.ftrlVirksomheterService = ftrlVirksomheterService;
+        this.avklarteVirksomheterService = avklarteVirksomheterService;
     }
 
     @Transactional
@@ -57,7 +57,7 @@ public class AvklartefaktaService {
     public AvklartefaktaStrukturertDto hentAlleAvklarteFaktaStrukturert(long behandlingsid) {
         Set<Avklartefakta> avklartefakta = avklarteFaktaRepository.findByBehandlingsresultatId(behandlingsid);
         AvklartefaktaStrukturertDto avklartefaktaStrukturertDto = new AvklartefaktaStrukturertDto();
-        avklartefaktaStrukturertDto.setVirksomheter(ftrlVirksomheterService.tilFtrlVirksomheterDto(avklartefakta));
+        avklartefaktaStrukturertDto.setVirksomheter(avklarteVirksomheterService.tilVirksomheterDto(avklartefakta));
         return avklartefaktaStrukturertDto;
     }
 

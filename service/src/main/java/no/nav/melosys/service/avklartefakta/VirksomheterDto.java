@@ -2,7 +2,7 @@ package no.nav.melosys.service.avklartefakta;
 
 import java.util.List;
 
-public class FtrlVirksomheterDto {
+public class VirksomheterDto {
 
     private List<String> orgnummer;
 
