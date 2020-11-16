@@ -1,6 +1,7 @@
 package no.nav.melosys.domain;
 
 import java.time.LocalDate;
+import java.util.Objects;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
@@ -124,5 +125,27 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
 
     public void setMedlPeriodeID(Long medlPeriodeID) {
         this.medlPeriodeID = medlPeriodeID;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Medlemskapsperiode that = (Medlemskapsperiode) o;
+        return Objects.equals(id, that.id) &&
+            Objects.equals(behandlingsresultat, that.behandlingsresultat) &&
+            Objects.equals(fom, that.fom) &&
+            Objects.equals(tom, that.tom) &&
+            Objects.equals(arbeidsland, that.arbeidsland) &&
+            bestemmelse == that.bestemmelse &&
+            innvilgelsesresultat == that.innvilgelsesresultat &&
+            medlemskapstype == that.medlemskapstype &&
+            trygdedekning == that.trygdedekning &&
+            Objects.equals(medlPeriodeID, that.medlPeriodeID);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, behandlingsresultat, fom, tom, arbeidsland, bestemmelse, innvilgelsesresultat, medlemskapstype, trygdedekning, medlPeriodeID);
     }
 }
