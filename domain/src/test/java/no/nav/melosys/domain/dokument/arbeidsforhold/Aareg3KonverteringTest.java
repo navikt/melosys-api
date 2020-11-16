@@ -77,7 +77,7 @@ public class Aareg3KonverteringTest {
 
             String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));
 
-            saksopplysning.setDokumentXml(xmlStr);
+            saksopplysning.leggTilKildesystemOgMottattDokument(null, xmlStr);
             saksopplysning.setType(SaksopplysningType.ARBFORH);
             saksopplysning.setVersjon("3.0");
 

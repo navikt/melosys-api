@@ -130,7 +130,8 @@ public class RegisteropplysningerServiceTest {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(arbeidsforholdDokument);
         saksopplysning.setType(SaksopplysningType.ARBFORH);
-        saksopplysning.setKilde(SaksopplysningKilde.AAREG);
+        saksopplysning.leggTilKildesystemOgMottattDokument(
+            SaksopplysningKildesystem.AAREG, null);
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(hentBehandling(saksopplysning));
 
         registeropplysningerService.hentOgLagreOpplysninger(
@@ -314,7 +315,8 @@ public class RegisteropplysningerServiceTest {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(arbeidsforholdDokument);
         saksopplysning.setType(SaksopplysningType.ARBFORH);
-        saksopplysning.setKilde(SaksopplysningKilde.AAREG);
+        saksopplysning.leggTilKildesystemOgMottattDokument(
+            SaksopplysningKildesystem.AAREG, null);
 
         return arbeidsforholdDokument;
     }

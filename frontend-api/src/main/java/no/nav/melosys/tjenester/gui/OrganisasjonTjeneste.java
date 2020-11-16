@@ -1,7 +1,9 @@
 package no.nav.melosys.tjenester.gui;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -31,6 +33,7 @@ public class OrganisasjonTjeneste {
     }
 
     @GetMapping("{orgnr}")
+    @JsonView(DokumentView.FrontendApi.class)
     @ApiOperation(value = "Henter en organisasjon fra Enhetsregisteret.", response = OrganisasjonDto.class)
     public ResponseEntity<OrganisasjonDokument> hentOrganisasjon(@PathVariable("orgnr") String orgnummer)
         throws IntegrasjonException, IkkeFunnetException {

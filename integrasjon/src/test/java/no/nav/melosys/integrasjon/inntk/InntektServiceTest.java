@@ -71,7 +71,8 @@ public class InntektServiceTest {
         Saksopplysning saksopplysning = inntektService.hentInntektListe("99999999992", YearMonth.of(2012, 1), YearMonth.of(2014, 12));
 
         verify(inntektMock, never()).hentInntektListeBolk(any());
-        assertThat(saksopplysning.getDokumentXml()).isNotEmpty();
+        assertThat(saksopplysning.getKilder()).isNotEmpty();
+        assertThat(saksopplysning.getKilder().iterator().next().getMottattDokument()).isNotNull();
         assertThat(saksopplysning.getDokument())
             .isInstanceOf(InntektDokument.class)
             .extracting(s -> ((InntektDokument) s).getArbeidsInntektMaanedListe())

@@ -12,12 +12,12 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
+import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.inntk.InntektService;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -144,7 +144,7 @@ public class RegisteropplysningerService {
     }
 
     private List<Saksopplysning> hentPersonopplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        Saksopplysning saksopplysning = tpsFasade.hentPerson(registeropplysningerRequest.getFnr(), Informasjonsbehov.STANDARD);
+        Saksopplysning saksopplysning = tpsFasade.hentPerson(registeropplysningerRequest.getFnr(), registeropplysningerRequest.getInformasjonsbehov());
         return List.of(saksopplysning);
     }
 

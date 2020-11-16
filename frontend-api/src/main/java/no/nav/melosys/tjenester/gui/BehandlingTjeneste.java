@@ -3,9 +3,11 @@ package no.nav.melosys.tjenester.gui;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
@@ -94,6 +96,7 @@ public class BehandlingTjeneste {
     }
 
     @GetMapping("{behandlingID}")
+    @JsonView(DokumentView.FrontendApi.class)
     @ApiOperation(value = "Hent en spesifikk behandling", response = BehandlingDto.class)
     public ResponseEntity<BehandlingDto> hentBehandling(@PathVariable("behandlingID") long behandlingID)
         throws MelosysException {

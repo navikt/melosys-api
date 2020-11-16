@@ -219,7 +219,7 @@ public class BehandlingServiceTest {
         assertThat(replikertBehandling.getSaksopplysninger().size()).isEqualTo(1);
         assertThat(replikertBehandling.getSaksopplysninger()).allMatch(saksopplysning -> saksopplysning.getId() == null);
         assertThat(replikertBehandling.getSaksopplysninger()).allMatch(saksopplysning -> saksopplysning.getBehandling().equals(replikertBehandling));
-        assertThat(replikertBehandling.getSaksopplysninger()).allMatch(saksopplysning -> saksopplysning.getDokumentXml().equals("dokxml"));
+        assertThat(replikertBehandling.getSaksopplysninger()).allMatch(saksopplysning -> saksopplysning.getKilder().iterator().next().getMottattDokument().equals("dokxml"));
         assertThat(replikertBehandling.getSaksopplysninger()).allMatch(saksopplysning -> saksopplysning.getType().equals(SaksopplysningType.INNTK));
         assertThat(replikertBehandling.getSaksopplysninger()).allMatch(saksopplysning -> saksopplysning.getEndretDato().toString().equals("2020-02-11T09:37:30Z"));
     }
@@ -334,7 +334,7 @@ public class BehandlingServiceTest {
     private Saksopplysning opprettSaksopplysning(String dokxml, SaksopplysningType saksopplysningType, String endretDato) {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setBehandling(opprettTomBehandlingMedId());
-        saksopplysning.setDokumentXml(dokxml);
+        saksopplysning.leggTilKildesystemOgMottattDokument(null, dokxml);
         saksopplysning.setType(saksopplysningType);
         saksopplysning.setEndretDato(Instant.parse(endretDato));
         return saksopplysning;

@@ -40,7 +40,7 @@ public class SobSakKonverteringTest {
 
             String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));
 
-            saksopplysning.setDokumentXml(xmlStr);
+            saksopplysning.leggTilKildesystemOgMottattDokument(null, xmlStr);
             saksopplysning.setType(SaksopplysningType.SOB_SAK);
             saksopplysning.setVersjon("1.0");
 
@@ -70,7 +70,7 @@ public class SobSakKonverteringTest {
 
             String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));
 
-            saksopplysning.setDokumentXml(xmlStr);
+            saksopplysning.leggTilKildesystemOgMottattDokument(null, xmlStr);
             saksopplysning.setType(SaksopplysningType.SOB_SAK);
             saksopplysning.setVersjon("1.0");
 

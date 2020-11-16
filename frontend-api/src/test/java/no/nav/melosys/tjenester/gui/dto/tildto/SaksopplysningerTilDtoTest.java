@@ -19,8 +19,8 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.tjenester.gui.dto.PersonUtenAdresseDto;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
 import org.junit.Before;
 import org.junit.Test;
@@ -129,11 +129,11 @@ public class SaksopplysningerTilDtoTest {
 
         SaksopplysningerDto saksopplysningerDto = saksopplysningerTilDto.getSaksopplysningerDto(saksopplysninger, behandling);
 
-        PersonDokument person = saksopplysningerDto.getPerson();
+        PersonUtenAdresseDto person = saksopplysningerDto.getPerson();
 
         assertThat(person).isNotNull();
-        assertThat(person.statsborgerskap).isNotNull();
-        assertThat(person.statsborgerskapDato).isNotNull();
+        assertThat(person.getStatsborgerskap()).isNotNull();
+        assertThat(person.getStatsborgerskapDato()).isNotNull();
         assertThat(saksopplysningerDto.getPersonhistorikk().bostedsadressePerioder)
             .extracting("bostedsadresse")
             .extracting("poststed")
@@ -148,7 +148,7 @@ public class SaksopplysningerTilDtoTest {
 
             String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));
 
-            saksopplysning.setDokumentXml(xmlStr);
+            saksopplysning.leggTilKildesystemOgMottattDokument(null, xmlStr);
             saksopplysning.setType(type);
             saksopplysning.setVersjon(versjon);
 
