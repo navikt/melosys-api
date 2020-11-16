@@ -36,6 +36,8 @@ public class AvklartefaktaServiceTest {
     private BehandlingsresultatRepository behandlingsresultatRepository;
     @Mock
     private AvklartefaktaDtoKonverterer avklartefaktaDtoKonverterer;
+    @Mock
+    private AvklarteVirksomheterService avklarteVirksomheterService;
 
     private AvklartefaktaService avklartefaktaService;
 
@@ -44,7 +46,7 @@ public class AvklartefaktaServiceTest {
 
     @Before
     public void setUp() {
-        avklartefaktaService = new AvklartefaktaService(avklarteFaktaRepository, behandlingsresultatRepository, avklartefaktaDtoKonverterer);
+        avklartefaktaService = new AvklartefaktaService(avklarteFaktaRepository, behandlingsresultatRepository, avklartefaktaDtoKonverterer, avklarteVirksomheterService);
     }
 
     @Test

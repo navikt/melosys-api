@@ -1,5 +1,7 @@
 package no.nav.melosys.service.avklartefakta;
 
+import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagSystemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -11,7 +13,9 @@ public class AvklarteVirksomheterSystemService extends AvklarteVirksomheterServi
 
     @Autowired
     public AvklarteVirksomheterSystemService(AvklartefaktaService avklartefaktaService,
-                                             RegisterOppslagSystemService registerOppslagService) {
-        super(avklartefaktaService, registerOppslagService);
+                                             RegisterOppslagSystemService registerOppslagService,
+                                             BehandlingsgrunnlagService behandlingsgrunnlagService,
+                                             BehandlingService behandlingService) {
+        super(avklartefaktaService, registerOppslagService, behandlingsgrunnlagService, behandlingService);
     }
 }

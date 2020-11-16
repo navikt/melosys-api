@@ -14,6 +14,8 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,6 +40,12 @@ public class AvklarteVirksomheterServiceTest {
     @Mock
     private RegisterOppslagService registerOppslagService;
 
+    @Mock
+    private BehandlingsgrunnlagService behandlingsgrunnlagService;
+
+    @Mock
+    private BehandlingService behandlingService;
+
     private Behandling behandling;
 
     private AvklarteVirksomheterService avklarteVirksomheterService;
@@ -56,7 +64,7 @@ public class AvklarteVirksomheterServiceTest {
         behandling.setId(1L);
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(new HashSet<>(Arrays.asList(orgnr1, uuid1)));
 
-        avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
+        avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, behandlingsgrunnlagService, behandlingService);
     }
 
     @Test
@@ -135,7 +143,7 @@ public class AvklarteVirksomheterServiceTest {
 
         leggTilIRegisterOppslag(Arrays.asList(orgnr2, orgnr3));
 
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, behandlingsgrunnlagService, behandlingService);
         assertThat(avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, ingenAdresse).stream()
             .map(nv -> nv.orgnr)
             .collect(Collectors.toList())).contains(orgnr2, orgnr3);
@@ -156,7 +164,7 @@ public class AvklarteVirksomheterServiceTest {
 
         leggTilIRegisterOppslag(selvstendigeForetak);
 
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, behandlingsgrunnlagService, behandlingService);
         assertThat(avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, ingenAdresse).stream()
             .map(nv -> nv.orgnr)
             .collect(Collectors.toList())).contains(orgnr1);
