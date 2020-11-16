@@ -8,28 +8,28 @@ import no.nav.melosys.domain.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
 public class MedlemskapsperiodeOppdatering {
-    private final LocalDate fom;
-    private final LocalDate tom;
+    private final LocalDate fomDato;
+    private final LocalDate tomDato;
     private final Trygdedekninger trygdedekning;
     private final InnvilgelsesResultat innvilgelsesResultat;
 
     @JsonCreator
-    public MedlemskapsperiodeOppdatering(@JsonProperty("fom") LocalDate fom,
-                                         @JsonProperty("tom") LocalDate tom,
+    public MedlemskapsperiodeOppdatering(@JsonProperty("fom") LocalDate fomDato,
+                                         @JsonProperty("tom") LocalDate tomDato,
                                          @JsonProperty("trygdedekning") Trygdedekninger trygdedekning,
                                          @JsonProperty("innvilgelsesResultat") InnvilgelsesResultat innvilgelsesResultat) {
-        this.fom = fom;
-        this.tom = tom;
+        this.fomDato = fomDato;
+        this.tomDato = tomDato;
         this.trygdedekning = trygdedekning;
         this.innvilgelsesResultat = innvilgelsesResultat;
     }
 
-    public LocalDate getFom() {
-        return fom;
+    public LocalDate getFomDato() {
+        return fomDato;
     }
 
-    public LocalDate getTom() {
-        return tom;
+    public LocalDate getTomDato() {
+        return tomDato;
     }
 
     public Trygdedekninger getTrygdedekning() {

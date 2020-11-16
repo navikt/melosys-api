@@ -52,8 +52,8 @@ public class MedlemskapsperiodeTjeneste {
             MedlemskapsperiodeDto.av(
                 medlemskapsperiodeService.opprettMedlemskapsperiode(
                     behandlingID,
-                    medlemskapsperiodeOppdatering.getFom(),
-                    medlemskapsperiodeOppdatering.getTom(),
+                    medlemskapsperiodeOppdatering.getFomDato(),
+                    medlemskapsperiodeOppdatering.getTomDato(),
                     medlemskapsperiodeOppdatering.getInnvilgelsesResultat(),
                     medlemskapsperiodeOppdatering.getTrygdedekning())
             )
@@ -70,8 +70,8 @@ public class MedlemskapsperiodeTjeneste {
                 medlemskapsperiodeService.oppdaterMedlemskapsperiode(
                     behandlingID,
                     medlemskapsperiodeID,
-                    medlemskapsperiodeOppdatering.getFom(),
-                    medlemskapsperiodeOppdatering.getTom(),
+                    medlemskapsperiodeOppdatering.getFomDato(),
+                    medlemskapsperiodeOppdatering.getTomDato(),
                     medlemskapsperiodeOppdatering.getInnvilgelsesResultat(),
                     medlemskapsperiodeOppdatering.getTrygdedekning()
                 )

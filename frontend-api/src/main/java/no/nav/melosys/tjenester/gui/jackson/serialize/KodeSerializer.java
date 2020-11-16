@@ -19,7 +19,7 @@ public class KodeSerializer extends StdSerializer<Kodeverk> {
 
     private static final Collection<Class<? extends Kodeverk>> IKKE_MAPPES_TIL_KODE_DTO = Set.of(
         Avsendertyper.class, Tema.class, Behandlingsgrunnlagtyper.class, InnvilgelsesResultat.class,
-        Folketrygdloven_kap2_bestemmelser.class, Medlemskapstyper.class
+        Folketrygdloven_kap2_bestemmelser.class, Medlemskapstyper.class, Trygdedekninger.class
     );
 
     public KodeSerializer() {
