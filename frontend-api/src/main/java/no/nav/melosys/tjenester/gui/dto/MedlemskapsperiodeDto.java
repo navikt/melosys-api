@@ -1,0 +1,74 @@
+package no.nav.melosys.tjenester.gui.dto;
+
+import java.time.LocalDate;
+
+import no.nav.melosys.domain.Medlemskapsperiode;
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+
+public class MedlemskapsperiodeDto {
+    private final long id;
+    private final String arbeidsland;
+    private final LocalDate fom;
+    private final LocalDate tom;
+    private final Folketrygdloven_kap2_bestemmelser bestemmelse;
+    private final Trygdedekninger trygdedekning;
+    private final Medlemskapstyper medlemskapstype;
+
+    public MedlemskapsperiodeDto(long id,
+                                 String arbeidsland,
+                                 LocalDate fom,
+                                 LocalDate tom,
+                                 Folketrygdloven_kap2_bestemmelser bestemmelse,
+                                 Trygdedekninger trygdedekning,
+                                 Medlemskapstyper medlemskapstype) {
+        this.id = id;
+        this.arbeidsland = arbeidsland;
+        this.fom = fom;
+        this.tom = tom;
+        this.bestemmelse = bestemmelse;
+        this.trygdedekning = trygdedekning;
+        this.medlemskapstype = medlemskapstype;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public String getArbeidsland() {
+        return arbeidsland;
+    }
+
+    public LocalDate getFom() {
+        return fom;
+    }
+
+    public LocalDate getTom() {
+        return tom;
+    }
+
+    public Folketrygdloven_kap2_bestemmelser getBestemmelse() {
+        return bestemmelse;
+    }
+
+    public Trygdedekninger getTrygdedekning() {
+        return trygdedekning;
+    }
+
+    public Medlemskapstyper getMedlemskapstype() {
+        return medlemskapstype;
+    }
+
+    public static MedlemskapsperiodeDto av(Medlemskapsperiode medlemskapsperiode) {
+        return new MedlemskapsperiodeDto(
+            medlemskapsperiode.getId(),
+            medlemskapsperiode.getArbeidsland(),
+            medlemskapsperiode.getFom(),
+            medlemskapsperiode.getTom(),
+            medlemskapsperiode.getBestemmelse(),
+            medlemskapsperiode.getTrygdedekning(),
+            medlemskapsperiode.getMedlemskapstype()
+        );
+    }
+}

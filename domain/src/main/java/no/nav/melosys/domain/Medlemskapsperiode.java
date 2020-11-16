@@ -9,6 +9,8 @@ import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
+@Entity
+@Table(name = "medlemskapsperiode")
 public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdloven_kap2_bestemmelser> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
