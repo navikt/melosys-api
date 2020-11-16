@@ -94,6 +94,19 @@ class MedlemskapsperiodeServiceTest {
     }
 
     @Test
+    void oppdaterMedlemskapsperiode_trygdedekningStøttesIkke_kasterException() {
+        final var medlemskapsperiode = lagMedlemskapsperiode();
+        when(medlemskapsperiodeRepository.findByBehandlingsresultatId(eq(behandlingID)))
+            .thenReturn(Collections.singleton(medlemskapsperiode));
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingID, medlemskapsperiodeID, LocalDate.now(),
+                LocalDate.now(), InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FULL_DEKNING_EOSFO))
+            .withMessageContaining("støttes ikke for en medlemskapsperiode");
+
+    }
+
+    @Test
     void oppdaterMedlemskapsperiode_utenTrygdedekning_oppdateres() {
         when(medlemskapsperiodeRepository.findByBehandlingsresultatId(eq(behandlingID)))
             .thenReturn(Collections.singleton(lagMedlemskapsperiode()));

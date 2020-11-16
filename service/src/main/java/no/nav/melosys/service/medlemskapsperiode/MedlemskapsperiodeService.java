@@ -2,6 +2,8 @@ package no.nav.melosys.service.medlemskapsperiode;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import no.nav.melosys.domain.InnvilgelsesResultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
@@ -15,6 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class MedlemskapsperiodeService {
+
+    private static final Collection<Trygdedekninger> GYLDIGE_TRYGDEDEKNINGER = Stream.of(Trygdedekninger.values())
+        .filter(trygdedekning -> trygdedekning != Trygdedekninger.FULL_DEKNING_EOSFO).collect(Collectors.toSet());
 
     private final MedlemskapsperiodeRepository medlemskapsperiodeRepository;
 
@@ -71,6 +76,8 @@ public class MedlemskapsperiodeService {
                                             Trygdedekninger trygdedekning) throws FunksjonellException {
         if (fom == null || innvilgelsesResultat == null || trygdedekning == null) {
             throw new FunksjonellException("Fom-dato, innvilgelsesresultat og trygdedekning er påkrevd");
+        } else if (!GYLDIGE_TRYGDEDEKNINGER.contains(trygdedekning)) {
+            throw new FunksjonellException("Trygedekning " + trygdedekning + " støttes ikke for en medlemskapsperiode");
         }
 
         medlemskapsperiode.setTom(tom);
