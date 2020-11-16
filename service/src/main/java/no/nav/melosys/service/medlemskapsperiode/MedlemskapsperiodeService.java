@@ -45,6 +45,7 @@ public class MedlemskapsperiodeService {
 
         var nyMedlemskapsperiode = new Medlemskapsperiode();
         oppdaterMedlemskapsperiode(nyMedlemskapsperiode, fom, tom, innvilgelsesResultat, trygdedekning);
+        nyMedlemskapsperiode.setBehandlingsresultat(eksisterendeMedlemsperiode.getBehandlingsresultat());
         nyMedlemskapsperiode.setArbeidsland(eksisterendeMedlemsperiode.getArbeidsland());
         nyMedlemskapsperiode.setBestemmelse(eksisterendeMedlemsperiode.getBestemmelse());
         nyMedlemskapsperiode.setMedlemskapstype(Medlemskapstyper.FRIVILLIG);

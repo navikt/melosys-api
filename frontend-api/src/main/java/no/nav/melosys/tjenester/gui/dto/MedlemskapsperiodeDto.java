@@ -2,6 +2,7 @@ package no.nav.melosys.tjenester.gui.dto;
 
 import java.time.LocalDate;
 
+import no.nav.melosys.domain.InnvilgelsesResultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
@@ -13,6 +14,7 @@ public class MedlemskapsperiodeDto {
     private final LocalDate fom;
     private final LocalDate tom;
     private final Folketrygdloven_kap2_bestemmelser bestemmelse;
+    private final InnvilgelsesResultat innvilgelsesResultat;
     private final Trygdedekninger trygdedekning;
     private final Medlemskapstyper medlemskapstype;
 
@@ -21,6 +23,7 @@ public class MedlemskapsperiodeDto {
                                  LocalDate fom,
                                  LocalDate tom,
                                  Folketrygdloven_kap2_bestemmelser bestemmelse,
+                                 InnvilgelsesResultat innvilgelsesResultat,
                                  Trygdedekninger trygdedekning,
                                  Medlemskapstyper medlemskapstype) {
         this.id = id;
@@ -28,6 +31,7 @@ public class MedlemskapsperiodeDto {
         this.fom = fom;
         this.tom = tom;
         this.bestemmelse = bestemmelse;
+        this.innvilgelsesResultat = innvilgelsesResultat;
         this.trygdedekning = trygdedekning;
         this.medlemskapstype = medlemskapstype;
     }
@@ -52,6 +56,10 @@ public class MedlemskapsperiodeDto {
         return bestemmelse;
     }
 
+    public InnvilgelsesResultat getInnvilgelsesResultat() {
+        return innvilgelsesResultat;
+    }
+
     public Trygdedekninger getTrygdedekning() {
         return trygdedekning;
     }
@@ -67,6 +75,7 @@ public class MedlemskapsperiodeDto {
             medlemskapsperiode.getFom(),
             medlemskapsperiode.getTom(),
             medlemskapsperiode.getBestemmelse(),
+            medlemskapsperiode.getInnvilgelsesresultat(),
             medlemskapsperiode.getTrygdedekning(),
             medlemskapsperiode.getMedlemskapstype()
         );

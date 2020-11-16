@@ -47,7 +47,7 @@ public class MedlemskapsperiodeTjeneste {
     @PostMapping
     public ResponseEntity<MedlemskapsperiodeDto> opprettMedlemskapsperiode(@PathVariable("behandlingID") long behandlingID,
                                                                            @RequestBody MedlemskapsperiodeOppdatering medlemskapsperiodeOppdatering) throws FunksjonellException, TekniskException {
-        tilgangService.sjekkTilgang(behandlingID);
+        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         return ResponseEntity.ok(
             MedlemskapsperiodeDto.av(
                 medlemskapsperiodeService.opprettMedlemskapsperiode(
@@ -64,7 +64,7 @@ public class MedlemskapsperiodeTjeneste {
     public ResponseEntity<MedlemskapsperiodeDto> oppdaterMedlemskapsperiode(@PathVariable("behandlingID") long behandlingID,
                                                                             @PathVariable("medlemskapsperiodeID") long medlemskapsperiodeID,
                                                                             @RequestBody MedlemskapsperiodeOppdatering medlemskapsperiodeOppdatering) throws FunksjonellException, TekniskException {
-        tilgangService.sjekkTilgang(behandlingID);
+        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         return ResponseEntity.ok(
             MedlemskapsperiodeDto.av(
                 medlemskapsperiodeService.oppdaterMedlemskapsperiode(
@@ -82,7 +82,7 @@ public class MedlemskapsperiodeTjeneste {
     @DeleteMapping("/{medlemskapsperiodeID}")
     public ResponseEntity<Void> slettMedlemskapsperiode(@PathVariable("behandlingID") long behandlingID,
                                                         @PathVariable("medlemskapsperiodeID") long medlemskapsperiodeID) throws FunksjonellException, TekniskException {
-        tilgangService.sjekkTilgang(behandlingID);
+        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         medlemskapsperiodeService.slettMedlemskapsperiode(behandlingID, medlemskapsperiodeID);
         return ResponseEntity.ok().build();
     }
