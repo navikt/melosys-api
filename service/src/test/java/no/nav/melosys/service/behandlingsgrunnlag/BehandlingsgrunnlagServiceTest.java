@@ -1,15 +1,19 @@
 package no.nav.melosys.service.behandlingsgrunnlag;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.behandlingsgrunnlag.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,17 +38,20 @@ class BehandlingsgrunnlagServiceTest {
     private BehandlingsgrunnlagRepository behandlingsgrunnlagRepository;
     @Mock
     private BehandlingService behandlingService;
+    @Mock
+    private JoarkFasade joarkFasade;
 
     private BehandlingsgrunnlagService behandlingsgrunnlagService;
-
-    private final long behandlingID = 123332211;
 
     @Captor
     private ArgumentCaptor<Behandlingsgrunnlag> behandlingsgrunnlagArgumentCaptor;
 
+    private final long behandlingID = 123332211;
+    private final String journalpostID = "123321";
+
     @BeforeEach
     public void setup() {
-        behandlingsgrunnlagService = new BehandlingsgrunnlagService(behandlingsgrunnlagRepository, behandlingService);
+        behandlingsgrunnlagService = new BehandlingsgrunnlagService(behandlingsgrunnlagRepository, behandlingService, joarkFasade);
     }
 
     @Test
@@ -62,11 +69,10 @@ class BehandlingsgrunnlagServiceTest {
     }
 
     @Test
-    void opprettSøknadGrunnlag_finnesIkkeFraFør_blirOpprettet() throws FunksjonellException {
-        final long behandlingID = 1234L;
-        Behandling behandling = new Behandling();
-        behandling.setId(behandlingID);
+    void opprettSøknadGrunnlag_finnesIkkeFraFør_blirOpprettet() throws FunksjonellException, IntegrasjonException {
+        Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
+        when(joarkFasade.hentJournalpost(eq(behandling.getInitierendeJournalpostId()))).thenReturn(lagJournalpost());
         Soeknad soeknad = new Soeknad();
         behandlingsgrunnlagService.opprettSøknadGrunnlag(behandlingID, soeknad);
 
@@ -100,11 +106,10 @@ class BehandlingsgrunnlagServiceTest {
     }
 
     @Test
-    void opprettSedGrunnlag_harRettType() throws FunksjonellException {
-        final long behandlingID = 1234L;
-        Behandling behandling = new Behandling();
-        behandling.setId(behandlingID);
+    void opprettSedGrunnlag_harRettType() throws FunksjonellException, IntegrasjonException {
+        Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
+        when(joarkFasade.hentJournalpost(eq(behandling.getInitierendeJournalpostId()))).thenReturn(lagJournalpost());
         SedGrunnlag sedGrunnlag = new SedGrunnlag();
         behandlingsgrunnlagService.opprettSedGrunnlag(behandlingID, sedGrunnlag);
 
@@ -118,11 +123,10 @@ class BehandlingsgrunnlagServiceTest {
     }
 
     @Test
-    void opprettSøknadFolketrygden_harRettType() throws FunksjonellException {
-        final long behandlingID = 1234L;
-        Behandling behandling = new Behandling();
-        behandling.setId(behandlingID);
+    void opprettSøknadFolketrygden_harRettType() throws FunksjonellException, IntegrasjonException {
+        Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
+        when(joarkFasade.hentJournalpost(eq(behandling.getInitierendeJournalpostId()))).thenReturn(lagJournalpost());
         SoeknadFtrl sedGrunnlag = new SoeknadFtrl();
         behandlingsgrunnlagService.opprettSøknadFolketrygden(behandlingID, sedGrunnlag);
 
@@ -133,5 +137,18 @@ class BehandlingsgrunnlagServiceTest {
         assertThat(opprettet.getBehandlingsgrunnlagdata()).isInstanceOf(SoeknadFtrl.class);
         assertThat(opprettet.getType()).isEqualTo(Behandlingsgrunnlagtyper.SØKNAD_FOLKETRYGDEN);
         assertThat(opprettet.getBehandling()).isEqualTo(behandling);
+    }
+
+    private Behandling lagBehandling() {
+        Behandling behandling = new Behandling();
+        behandling.setId(behandlingID);
+        behandling.setInitierendeJournalpostId(journalpostID);
+        return behandling;
+    }
+
+    private Journalpost lagJournalpost() {
+        var journalpost = new Journalpost(journalpostID);
+        journalpost.setForsendelseMottatt(Instant.now());
+        return journalpost;
     }
 }
