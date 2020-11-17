@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.dto;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import no.nav.melosys.domain.dokument.felles.Land;
@@ -17,7 +18,8 @@ public class PersonDto {
         kjoenn = person.kjønn;
         foedselsdato = person.fødselsdato;
         bostedsadresse = person.bostedsadresse;
-        familiemedlemmer = person.familiemedlemmer;
+        familiemedlemmer = person.familiemedlemmer == null ? new ArrayList<>()
+            : FamiliemedlemDto.avFamiliemedlemmer(person.familiemedlemmer);
     }
 
     public String fnr;
@@ -36,5 +38,5 @@ public class PersonDto {
 
     public Bostedsadresse bostedsadresse;
 
-    public List<Familiemedlem> familiemedlemmer;
+    public List<FamiliemedlemDto> familiemedlemmer;
 }
