@@ -36,7 +36,7 @@ class MedlemskapsperiodeServiceTest {
     @Captor
     private ArgumentCaptor<Medlemskapsperiode> medlemskapsperiodeCaptor;
 
-    private final long behandlingID = 14L;
+    private final long behandlingsresultatID = 14L;
     private final long medlemskapsperiodeID = 432L;
 
     @BeforeEach
@@ -54,7 +54,7 @@ class MedlemskapsperiodeServiceTest {
     void opprettMedlemskapsperiode_finnesIngenEksisterende_kasterException() {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> medlemskapsperiodeService.opprettMedlemskapsperiode(
-                    behandlingID, LocalDate.now(), LocalDate.now().plusYears(1),
+                behandlingsresultatID, LocalDate.now(), LocalDate.now().plusYears(1),
                     InnvilgelsesResultat.DELVIS_INNVILGET, Trygdedekninger.FULL_DEKNING_FTRL))
             .withMessageContaining("ingen medlemskapsperiode");
     }
@@ -62,10 +62,10 @@ class MedlemskapsperiodeServiceTest {
     @Test
     void opprettMedlemskapsperiode_finnesEksisterende_verifiserFårSammeArbeidslandOgBestemmelse() throws FunksjonellException {
         final var eksisterende = lagMedlemskapsperiode();
-        when(medlemskapsperiodeRepository.findByBehandlingsresultatId(eq(behandlingID)))
+        when(medlemskapsperiodeRepository.findByBehandlingsresultatId(eq(behandlingsresultatID)))
             .thenReturn(Collections.singleton(eksisterende));
 
-        medlemskapsperiodeService.opprettMedlemskapsperiode(behandlingID, LocalDate.now().minusYears(1), LocalDate.now(),
+        medlemskapsperiodeService.opprettMedlemskapsperiode(behandlingsresultatID, LocalDate.now().minusYears(1), LocalDate.now(),
             InnvilgelsesResultat.AVSLAATT, Trygdedekninger.UTEN_DEKNING);
 
         verify(medlemskapsperiodeRepository).save(medlemskapsperiodeCaptor.capture());
@@ -79,11 +79,11 @@ class MedlemskapsperiodeServiceTest {
     @Test
     void oppdaterMedlemskapsperiode_medlemskapsperoideFinnes_oppdateres() throws FunksjonellException {
         final var medlemskapsperiode = lagMedlemskapsperiode();
-        when(medlemskapsperiodeRepository.findByBehandlingsresultatId(eq(behandlingID)))
+        when(medlemskapsperiodeRepository.findByBehandlingsresultatId(eq(behandlingsresultatID)))
             .thenReturn(Collections.singleton(medlemskapsperiode));
 
         LocalDate nå = LocalDate.now();
-        medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingID, medlemskapsperiodeID, nå, nå,
+        medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID, nå, nå,
             InnvilgelsesResultat.AVSLAATT, Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER);
 
         verify(medlemskapsperiodeRepository).save(eq(medlemskapsperiode));
@@ -96,11 +96,11 @@ class MedlemskapsperiodeServiceTest {
     @Test
     void oppdaterMedlemskapsperiode_trygdedekningStøttesIkke_kasterException() {
         final var medlemskapsperiode = lagMedlemskapsperiode();
-        when(medlemskapsperiodeRepository.findByBehandlingsresultatId(eq(behandlingID)))
+        when(medlemskapsperiodeRepository.findByBehandlingsresultatId(eq(behandlingsresultatID)))
             .thenReturn(Collections.singleton(medlemskapsperiode));
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingID, medlemskapsperiodeID, LocalDate.now(),
+            .isThrownBy(() -> medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID, LocalDate.now(),
                 LocalDate.now(), InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FULL_DEKNING_EOSFO))
             .withMessageContaining("støttes ikke for en medlemskapsperiode");
     }
@@ -108,23 +108,23 @@ class MedlemskapsperiodeServiceTest {
     @Test
     void oppdaterMedlemskapsperiode_tomDatoErFørFomDato_kasterException() {
         final var medlemskapsperiode = lagMedlemskapsperiode();
-        when(medlemskapsperiodeRepository.findByBehandlingsresultatId(eq(behandlingID)))
+        when(medlemskapsperiodeRepository.findByBehandlingsresultatId(eq(behandlingsresultatID)))
             .thenReturn(Collections.singleton(medlemskapsperiode));
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingID, medlemskapsperiodeID, LocalDate.now(),
+            .isThrownBy(() -> medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID, LocalDate.now(),
                 LocalDate.now().minusDays(1), InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FULL_DEKNING_FTRL))
             .withMessageContaining("kan ikke være før");
     }
 
     @Test
     void oppdaterMedlemskapsperiode_utenTrygdedekning_oppdateres() {
-        when(medlemskapsperiodeRepository.findByBehandlingsresultatId(eq(behandlingID)))
+        when(medlemskapsperiodeRepository.findByBehandlingsresultatId(eq(behandlingsresultatID)))
             .thenReturn(Collections.singleton(lagMedlemskapsperiode()));
 
         LocalDate nå = LocalDate.now();
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingID, medlemskapsperiodeID, nå, nå,
+            .isThrownBy(() -> medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID, nå, nå,
                 InnvilgelsesResultat.AVSLAATT, null))
             .withMessageContaining("er påkrevd");
     }
@@ -139,18 +139,18 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     void slettMedlemskapsperiode_erEnesteMedlemskapsperiode_kasterException() {
-        when(medlemskapsperiodeRepository.findByBehandlingsresultatId(eq(behandlingID)))
+        when(medlemskapsperiodeRepository.findByBehandlingsresultatId(eq(behandlingsresultatID)))
             .thenReturn(Collections.singletonList(lagMedlemskapsperiode()));
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> medlemskapsperiodeService.slettMedlemskapsperiode(behandlingID, medlemskapsperiodeID))
+            .isThrownBy(() -> medlemskapsperiodeService.slettMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID))
             .withMessageContaining("minst en medlemskapsperiode");
     }
 
     @Test
     void slettMedlemskapsperiode_finnerIkkeMedlemskapsperiode_kasterException() {
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> medlemskapsperiodeService.slettMedlemskapsperiode(behandlingID, medlemskapsperiodeID))
+            .isThrownBy(() -> medlemskapsperiodeService.slettMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID))
             .withMessageContaining("ingen medlemskapsperiode med id");
     }
 
@@ -159,10 +159,10 @@ class MedlemskapsperiodeServiceTest {
         var medlemskapsperiode1 = lagMedlemskapsperiode();
         var medlemskapsperiode2 = lagMedlemskapsperiode();
         medlemskapsperiode2.setId(123321L);
-        when(medlemskapsperiodeRepository.findByBehandlingsresultatId(behandlingID))
+        when(medlemskapsperiodeRepository.findByBehandlingsresultatId(behandlingsresultatID))
             .thenReturn(List.of(lagMedlemskapsperiode(), lagMedlemskapsperiode()));
 
-        medlemskapsperiodeService.slettMedlemskapsperiode(behandlingID, medlemskapsperiodeID);
+        medlemskapsperiodeService.slettMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID);
         verify(medlemskapsperiodeRepository).delete(medlemskapsperiode1);
     }
 

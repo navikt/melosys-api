@@ -35,15 +35,15 @@ public class MedlemskapsperiodeService {
     }
 
     @Transactional
-    public Medlemskapsperiode opprettMedlemskapsperiode(long behandlingID,
+    public Medlemskapsperiode opprettMedlemskapsperiode(long behandlingsresultatID,
                                                         LocalDate fom,
                                                         LocalDate tom,
                                                         InnvilgelsesResultat innvilgelsesResultat,
                                                         Trygdedekninger trygdedekning) throws FunksjonellException {
-        var eksisterendeMedlemsperiode = hentMedlemskapsperioder(behandlingID)
+        var eksisterendeMedlemsperiode = hentMedlemskapsperioder(behandlingsresultatID)
             .stream()
             .findFirst()
-            .orElseThrow(() -> new FunksjonellException("Behandling " + behandlingID + " har ingen medlemskapsperiode"));
+            .orElseThrow(() -> new FunksjonellException("Behandling " + behandlingsresultatID + " har ingen medlemskapsperiode"));
 
         var nyMedlemskapsperiode = new Medlemskapsperiode();
         oppdaterMedlemskapsperiode(nyMedlemskapsperiode, fom, tom, innvilgelsesResultat, trygdedekning);
@@ -56,17 +56,17 @@ public class MedlemskapsperiodeService {
     }
 
     @Transactional
-    public Medlemskapsperiode oppdaterMedlemskapsperiode(long behandlingID,
+    public Medlemskapsperiode oppdaterMedlemskapsperiode(long behandlingsresultatID,
                                                          long medlemskapsperiodeID,
                                                          LocalDate fom,
                                                          LocalDate tom,
                                                          InnvilgelsesResultat innvilgelsesResultat,
                                                          Trygdedekninger trygdedekning) throws FunksjonellException {
-        var medlemskapsperiode = medlemskapsperiodeRepository.findByBehandlingsresultatId(behandlingID)
+        var medlemskapsperiode = medlemskapsperiodeRepository.findByBehandlingsresultatId(behandlingsresultatID)
             .stream()
             .filter(m -> m.getId() == medlemskapsperiodeID)
             .findFirst()
-            .orElseThrow(() -> new IkkeFunnetException("Behandling " + behandlingID + " har ingen medlemskapsperiode med id " + medlemskapsperiodeID));
+            .orElseThrow(() -> new IkkeFunnetException("Behandling " + behandlingsresultatID + " har ingen medlemskapsperiode med id " + medlemskapsperiodeID));
 
         oppdaterMedlemskapsperiode(medlemskapsperiode, fom, tom, innvilgelsesResultat, trygdedekning);
         return medlemskapsperiodeRepository.save(medlemskapsperiode);
@@ -92,8 +92,8 @@ public class MedlemskapsperiodeService {
     }
 
     @Transactional
-    public void slettMedlemskapsperiode(long behandlingID, long medlemskapsperiodeID) throws FunksjonellException {
-        Collection<Medlemskapsperiode> medlemskapsperioder = hentMedlemskapsperioder(behandlingID);
+    public void slettMedlemskapsperiode(long behandlingsresultatID, long medlemskapsperiodeID) throws FunksjonellException {
+        Collection<Medlemskapsperiode> medlemskapsperioder = hentMedlemskapsperioder(behandlingsresultatID);
 
         if (medlemskapsperioder.size() == 1) {
             throw new FunksjonellException("Behandlingen må ha minst en medlemskapsperiode");
@@ -102,7 +102,7 @@ public class MedlemskapsperiodeService {
         var medlemskapsperiode = medlemskapsperioder.stream()
             .filter(m -> m.getId() == medlemskapsperiodeID)
             .findFirst()
-            .orElseThrow(() -> new IkkeFunnetException("Finner ingen medlemskapsperiode med id " + medlemskapsperiodeID + " for behandling " + behandlingID));
+            .orElseThrow(() -> new IkkeFunnetException("Finner ingen medlemskapsperiode med id " + medlemskapsperiodeID + " for behandling " + behandlingsresultatID));
 
         medlemskapsperiodeRepository.delete(medlemskapsperiode);
     }
