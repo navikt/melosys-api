@@ -13,7 +13,7 @@ import no.nav.melosys.exception.TekniskException;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 
-public class SaksbehandlingstidSoknad extends Flettedata {
+public class SaksbehandlingstidSoknad extends DokgenDto {
     private final LocalDateTime datoMottatt;
     private final LocalDateTime datoBehandlingstid;
     private final Sakstyper typeSoknad;
@@ -22,13 +22,13 @@ public class SaksbehandlingstidSoknad extends Flettedata {
     private final String avsenderSoknad;
     private final String avsenderLand;
 
-    public SaksbehandlingstidSoknad(String fodselsnr, String saksnummer, LocalDateTime dagensDato,
+    public SaksbehandlingstidSoknad(String fnr, String saksnummer, LocalDateTime dagensDato,
                                     LocalDateTime datoMottatt, LocalDateTime datoBehandlingstid,
                                     String navnBruker, String navnMottaker, List<String> adresselinjer,
                                     String postnr, String poststed, Sakstyper typeSoknad,
                                     Aktoersroller avsenderTypeSoknad, boolean mottakerRepresentantForBruker,
                                     String avsenderSoknad, String avsenderLand) {
-        super(fodselsnr, saksnummer, dagensDato, navnBruker, navnMottaker, adresselinjer, postnr, poststed);
+        super(fnr, saksnummer, dagensDato, navnBruker, navnMottaker, adresselinjer, postnr, poststed);
         this.datoMottatt = datoMottatt;
         this.datoBehandlingstid = datoBehandlingstid;
         this.typeSoknad = typeSoknad;
@@ -38,7 +38,7 @@ public class SaksbehandlingstidSoknad extends Flettedata {
         this.avsenderLand = avsenderLand;
     }
 
-    public static SaksbehandlingstidSoknad map(Behandling behandling) throws TekniskException {
+    public static SaksbehandlingstidSoknad av(Behandling behandling) throws TekniskException {
         Fagsak fagsak = behandling.getFagsak();
         PersonDokument personDokument = behandling.hentPersonDokument();
         LocalDateTime datoMottatt = LocalDateTime.from(fagsak.getRegistrertDato());

@@ -34,7 +34,7 @@ public class OpprettForvaltningsmelding implements StegBehandler {
     private final JoarkFasade joarkFasade;
 
     @Autowired
-    public OpprettForvaltningsmelding(BehandlingService behandlingService, DokgenService dokgenService, JoarkFasade joarkFasade, DoksysFasade doksysFasade) {
+    public OpprettForvaltningsmelding(BehandlingService behandlingService, DokgenService dokgenService, JoarkFasade joarkFasade) {
         this.behandlingService = behandlingService;
         this.dokgenService = dokgenService;
         this.joarkFasade = joarkFasade;
@@ -58,10 +58,10 @@ public class OpprettForvaltningsmelding implements StegBehandler {
 
             switch (behandlingType) {
                 case SOEKNAD:
-                    pdf = dokgenService.lagPdf("saksbehandlingstid_soknad", SaksbehandlingstidSoknad.map(behandling));
+                    pdf = dokgenService.lagPdf("saksbehandlingstid_soknad", SaksbehandlingstidSoknad.av(behandling));
                     break;
                 case KLAGE:
-                    pdf = dokgenService.lagPdf("saksbehandlingstid_klage", SaksbehandlingstidKlage.map(behandling));
+                    pdf = dokgenService.lagPdf("saksbehandlingstid_klage", SaksbehandlingstidKlage.av(behandling));
                     break;
                 default:
                     throw new FunksjonellException(format("Behandlingsstype %s er ikke støttet for forvaltningsmelding", behandlingType.getKode()));

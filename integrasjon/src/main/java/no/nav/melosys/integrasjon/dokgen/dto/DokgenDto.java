@@ -3,12 +3,8 @@ package no.nav.melosys.integrasjon.dokgen.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.exception.TekniskException;
-import org.apache.commons.lang3.NotImplementedException;
-
-public abstract class Flettedata {
-    private final String fodselsnr;
+public abstract class DokgenDto {
+    private final String fnr;
     private final String saksnummer;
     private final LocalDateTime dagensDato;
     private final String navnBruker;
@@ -19,10 +15,10 @@ public abstract class Flettedata {
 
     protected static final int SAKSBEHANDLINGSTID_DAGER = 12 * 7;
 
-    public Flettedata(String fodselsnr, String saksnummer, LocalDateTime dagensDato,
-                      String navnBruker, String navnMottaker, List<String> adresselinjer,
-                      String postnr, String poststed) {
-        this.fodselsnr = fodselsnr;
+    protected DokgenDto(String fnr, String saksnummer, LocalDateTime dagensDato,
+                        String navnBruker, String navnMottaker, List<String> adresselinjer,
+                        String postnr, String poststed) {
+        this.fnr = fnr;
         this.saksnummer = saksnummer;
         this.dagensDato = dagensDato;
         this.navnBruker = navnBruker;
@@ -32,13 +28,8 @@ public abstract class Flettedata {
         this.poststed = poststed;
     }
 
-    // NOTE Kun tilstede for å fungere som en mal for klasser som arver fra denne
-    public static Flettedata map(Behandling behandling) throws TekniskException {
-        throw new NotImplementedException("Skal implementeres i subklasser");
-    }
-
-    public String getFodselsnr() {
-        return fodselsnr;
+    public String getFnr() {
+        return fnr;
     }
 
     public String getSaksnummer() {

@@ -9,25 +9,25 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.exception.TekniskException;
 
-public class SaksbehandlingstidKlage extends Flettedata {
+public class SaksbehandlingstidKlage extends DokgenDto {
     private final LocalDateTime datoMottatt;
     private final LocalDateTime datoBehandlingstid;
     private final LocalDateTime datoVedtak;
     private final boolean mottakerRepresentantForBruker;
 
-    public SaksbehandlingstidKlage(String fodselsnr, String saksnummer, LocalDateTime dagensDato,
+    public SaksbehandlingstidKlage(String fnr, String saksnummer, LocalDateTime dagensDato,
                                    LocalDateTime datoMottatt, LocalDateTime datoBehandlingstid,
                                    String navnBruker, String navnMottaker, List<String> adresselinjer,
                                    String postnr, String poststed, LocalDateTime datoVedtak,
                                    boolean mottakerRepresentantForBruker) {
-        super(fodselsnr, saksnummer, dagensDato, navnBruker, navnMottaker, adresselinjer, postnr, poststed);
+        super(fnr, saksnummer, dagensDato, navnBruker, navnMottaker, adresselinjer, postnr, poststed);
         this.datoMottatt = datoMottatt;
         this.datoBehandlingstid = datoBehandlingstid;
         this.datoVedtak = datoVedtak;
         this.mottakerRepresentantForBruker = mottakerRepresentantForBruker;
     }
 
-    public static SaksbehandlingstidKlage map(Behandling behandling) throws TekniskException {
+    public static SaksbehandlingstidKlage av(Behandling behandling) throws TekniskException {
         Fagsak fagsak = behandling.getFagsak();
         PersonDokument personDokument = behandling.hentPersonDokument();
         LocalDateTime datoMottatt = LocalDateTime.from(fagsak.getRegistrertDato());

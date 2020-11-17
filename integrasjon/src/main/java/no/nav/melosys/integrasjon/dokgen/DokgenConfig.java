@@ -6,7 +6,9 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.DefaultUriBuilderFactory;
+
 
 @Configuration
 public class DokgenConfig {
@@ -15,10 +17,7 @@ public class DokgenConfig {
     private String url;
 
     @Bean
-    public RestTemplate dokgenRestTemplate(SystemContextClientRequestInterceptor systemContextClientRequestInterceptor) {
-        return new RestTemplateBuilder()
-            .uriTemplateHandler(new DefaultUriBuilderFactory(url))
-            .interceptors(systemContextClientRequestInterceptor)
-            .build();
+    public WebClient dokgenWebClient() {
+        return WebClient.create(url);
     }
 }

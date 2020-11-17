@@ -97,7 +97,6 @@ public class OpprettJournalpost extends Journalpost {
     public static OpprettJournalpost lagJournalpostForPdf(String tittel, String brukerFnr, byte[] pdf) {
         OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
         opprettJournalpost.setHoveddokument(lagFysiskDokumentPdf(tittel, pdf));
-        opprettJournalpost.setMottaksKanal(SENTRAL_UTSKRIFT); //TODO Er dette riktig?
         opprettJournalpost.setJournalposttype(Journalposttype.UT);
         opprettJournalpost.setJournalførendeEnhet(MEDLEMSKAP_OG_AVGIFT);
         opprettJournalpost.setTema(MEDLEMSKAP);

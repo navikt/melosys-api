@@ -12,6 +12,7 @@ import static no.nav.melosys.domain.arkiv.DokumentVariant.lagArkivVariant;
 public class FysiskDokument extends ArkivDokument {
     private static final String DOKUMENT_KATEGORI_SED = "SED";
     private static final String DOKUMENT_KATEGORI_SOKNAD = "SOK";
+    private static final String DOKUMENT_KATEGORI_INFOBREV = "IB";
 
     private List<DokumentVariant> dokumentVarianter;
     private String brevkode;
@@ -37,7 +38,7 @@ public class FysiskDokument extends ArkivDokument {
 
     static FysiskDokument lagFysiskDokumentPdf(String tittel, byte[] pdf) {
         FysiskDokument fysiskDokument = new FysiskDokument();
-        fysiskDokument.setDokumentKategori(DOKUMENT_KATEGORI_SOKNAD);
+        fysiskDokument.setDokumentKategori(DOKUMENT_KATEGORI_INFOBREV);
         fysiskDokument.setTittel(tittel);
         fysiskDokument.setDokumentVarianter(Collections.singletonList(lagArkivVariant(pdf)));
         return fysiskDokument;
