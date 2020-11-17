@@ -3,16 +3,16 @@ package no.nav.melosys.domain.behandlingsgrunnlag.soeknad;
 public class MedfolgendeFamilie {
     public String fnr;
     public String navn;
-    public Relasjon relasjonsrolle;
+    public Relasjonsrolle relasjonsrolle;
 
-    public enum Relasjon {
+    public enum Relasjonsrolle {
         BARN
     }
 
     public static MedfolgendeFamilie tilBarnFraFnr(String fnr) {
         MedfolgendeFamilie medfolgendeFamilie = new MedfolgendeFamilie();
         medfolgendeFamilie.fnr = fnr;
-        medfolgendeFamilie.relasjonsrolle = Relasjon.BARN;
+        medfolgendeFamilie.relasjonsrolle = Relasjonsrolle.BARN;
         return medfolgendeFamilie;
     }
 }
