@@ -8,7 +8,7 @@ import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemm
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004.*;
 
 
-public interface PeriodeOmLovvalg extends ErPeriode {
+public interface PeriodeOmLovvalg extends ErPeriode, HarBestemmelse<LovvalgBestemmelse> {
     LovvalgBestemmelse getBestemmelse();
 
     Landkoder getLovvalgsland();
