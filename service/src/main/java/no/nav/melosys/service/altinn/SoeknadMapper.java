@@ -1,16 +1,17 @@
 package no.nav.melosys.service.altinn;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MedfolgendeFamilie;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Soeknadsland;
-import no.nav.melosys.soknad_altinn.Innhold;
-import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM;
-import no.nav.melosys.soknad_altinn.Tidsrom;
+import no.nav.melosys.soknad_altinn.*;
 
 public final class SoeknadMapper {
     private SoeknadMapper() {
@@ -23,6 +24,7 @@ public final class SoeknadMapper {
         final Innhold innhold = søknad.getInnhold();
         soeknad.soeknadsland = hentsoeknadsland(innhold);
         soeknad.periode = lagPeriode(innhold);
+        soeknad.personOpplysninger.medfolgendeFamilie = hentMedfølgendeBarn(innhold);
         return soeknad;
     }
 
@@ -37,6 +39,19 @@ public final class SoeknadMapper {
         LocalDate periodeFra = xmlCalTilLocalDate(utsendingsperiode.getPeriodeFra());
         LocalDate periodeTil = xmlCalTilLocalDate(utsendingsperiode.getPeriodeTil());
         return new Periode(periodeFra, periodeTil);
+    }
+
+    private static List<MedfolgendeFamilie> hentMedfølgendeBarn(Innhold innhold) {
+        Barn barn = innhold.getArbeidstaker().getBarn();
+        List<MedfolgendeFamilie> medfølgendeBarn = new ArrayList<>();
+
+        if (barn != null && barn.getBarnet() != null) {
+            medfølgendeBarn = barn.getBarnet().stream()
+                .map(Barnet::getFoedselsnummer)
+                .map(MedfolgendeFamilie::tilBarnFraFnr)
+                .collect(Collectors.toList());
+        }
+        return medfølgendeBarn;
     }
 
     private static LocalDate xmlCalTilLocalDate(XMLGregorianCalendar calendar) {

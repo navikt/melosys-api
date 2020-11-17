@@ -7,9 +7,12 @@
       }
     ],
     "medfolgendeFamilie": [
-      "30098000492"
-    ],
-    "medfolgendeAndre": "28106600300"
+      {
+        "fnr": "31031779459",
+        "navn": "BRÅKETE GYNGEHEST",
+        "relasjonsrolle": "BARN"
+      }
+    ]
   },
   "arbeidUtland": [
     {
