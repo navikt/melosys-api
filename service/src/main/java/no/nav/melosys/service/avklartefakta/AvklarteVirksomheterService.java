@@ -31,17 +31,14 @@ import org.springframework.stereotype.Service;
 public class AvklarteVirksomheterService {
     protected final AvklartefaktaService avklartefaktaService;
     protected final RegisterOppslagService registerOppslagService;
-    protected final BehandlingsgrunnlagService behandlingsgrunnlagService;
     protected final BehandlingService behandlingService;
 
     @Autowired
     public AvklarteVirksomheterService(AvklartefaktaService avklartefaktaService,
                                        RegisterOppslagService registerOppslagService,
-                                       BehandlingsgrunnlagService behandlingsgrunnlagService,
                                        BehandlingService behandlingService) {
         this.avklartefaktaService = avklartefaktaService;
         this.registerOppslagService = registerOppslagService;
-        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
         this.behandlingService = behandlingService;
     }
 
