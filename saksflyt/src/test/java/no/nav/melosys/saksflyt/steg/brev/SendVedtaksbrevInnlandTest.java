@@ -32,6 +32,9 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
+import no.nav.melosys.service.dokument.DokgenService;
+import no.nav.melosys.service.dokument.DokumentService;
+import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.dokument.DokumentSystemService;
 import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.bygger.*;
@@ -62,6 +65,7 @@ class SendVedtaksbrevInnlandTest {
     private static final long ART13_1B1_UTPEKING_BEHANDLINGSID = 53L;
 
     private static DokumentSystemService dokService;
+    private static DokumentServiceFasade dokumentServiceFasade;
 
     private static SendVedtaksbrevInnland lagStegbehandler(Behandling behandling) throws Exception {
         String saksbehandler = "Z123456";
@@ -98,7 +102,8 @@ class SendVedtaksbrevInnlandTest {
         when(byggerVelger.hent(eq(ORIENTERING_UTPEKING_UTLAND), any())).thenReturn(brevDataByggerUtpekingAnnetLand);
 
         dokService = spy(lagDokumentService(byggerVelger));
-        BrevBestiller brevBestiller = new BrevBestiller(dokService);
+        dokumentServiceFasade = new DokumentServiceFasade(mock(DokumentService.class), dokService, mock(DokgenService.class), mock(BehandlingService.class));
+        BrevBestiller brevBestiller = new BrevBestiller(dokumentServiceFasade);
 
         BehandlingService behandlingService = mock(BehandlingService.class);
         when(behandlingService.hentBehandling(eq(behandling.getId()))).thenReturn(behandling);

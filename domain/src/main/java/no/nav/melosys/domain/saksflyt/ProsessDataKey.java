@@ -40,6 +40,7 @@ public enum ProsessDataKey {
     MOTTATT_SOKNAD_ID("mottattSoknadID"),
     OPPGAVE_ID("oppgaveID"),
     OPPHOLDSLAND("oppholdsland"),
+    PRODUSERBART_BREV("produserbartBrev"),
     REPRESENTANT("representant"),
     REPRESENTANT_KONTAKTPERSON("representantKontakperson"),
     REPRESENTANT_REPRESENTERER("representantRepresenterer"),

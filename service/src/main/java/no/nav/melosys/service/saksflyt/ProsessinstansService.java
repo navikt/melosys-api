@@ -39,6 +39,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.SOEKNAD;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.PRODUSERBART_BREV;
+
 @Service
 public class ProsessinstansService {
     private static final Logger logger = LoggerFactory.getLogger(ProsessinstansService.class);
@@ -256,7 +262,9 @@ public class ProsessinstansService {
 
     public void opprettProsessinstansDistribuerForvaltningsmelding(Behandling behandling) {
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.OPPRETT_OG_DISTRIBUER_FORVALTNINGSMELDING);
+        prosessinstans.setType(ProsessType.OPPRETT_OG_JOURNALFØR_FORVALTNINGSMELDING);
+        prosessinstans.setData(PRODUSERBART_BREV, SOEKNAD.equals(behandling.getType()) ?
+            MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD : MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE);
         prosessinstans.setBehandling(behandling);
         lagre(prosessinstans);
     }
@@ -419,6 +427,15 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, arkivsakID);
 
+        lagre(prosessinstans);
+    }
+
+    public void opprettProsessinstansDistribuerJournalpost(String journalpostId) {
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.DISTRIBUER_JOURNALPOST)
+            .build();
+
+        prosessinstans.setData(DISTRIBUERBAR_JOURNALPOST_ID, journalpostId);
         lagre(prosessinstans);
     }
 }

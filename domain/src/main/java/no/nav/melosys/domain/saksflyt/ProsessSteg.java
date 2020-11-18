@@ -29,7 +29,7 @@ public enum ProsessSteg implements Kodeverk {
     OPPRETT_ANMODNINGSPERIODE_FRA_SED("OPPRETT_ANMODNINGSPERIODE_FRA_SED", "Oppretter anmodningsperiode fra SED"),
     OPPRETT_ARKIVSAK("OPPRETT_ARKIVSAK", "Oppretter arkivsak"),
     OPPRETT_AVGIFTSOPPGAVE("OPPRETT_AVGIFTSOPPGAVE", "Oppretter en vurderingsoppgave for innregistrering i avgiftsystemet"),
-    OPPRETT_FORVALTNINGSMELDING("OPPRETT_FORVALTNINGSMELDING", "Opprett forvaltningsmelding til søker"),
+    OPPRETT_OG_JOURNALFØR_BREV("OPPRETT_BREV", "Opprett nytt brev"),
     OPPRETT_OG_FERDIGSTILL_JOURNALPOST_FRA_ALTINN("OPPRETT_OG_FERDIGSTILL_JOURNALPOST_FRA_ALTINN", "Oppretter og ferdigstiller journalpost fra Altinn"),
     OPPRETT_OPPGAVE("OPPRETT_OPPGAVE", "Oppretter behandlingsoppgave"),
     OPPRETT_SAK_OG_BEHANDLING_FRA_ALTINN_SØKNAD("OPPRETT_SAK_OG_BEHANDLING_FRA_ALTINN_SØKNAD", "Oppretter fagsak og behandling fra mottatt Altinn-søknad"),
