@@ -186,7 +186,7 @@ public class AvklarteVirksomheterServiceTest {
         virksomheterDto.setOrgnummer(List.of(uuid1));
         forberedValidering();
 
-        boolean response = avklarteVirksomheterService.erVirksomhetValid(virksomheterDto, 1L);
+        boolean response = avklarteVirksomheterService.erVirksomheterGyldig(virksomheterDto, 1L);
         assertTrue(response);
     }
 
@@ -196,7 +196,7 @@ public class AvklarteVirksomheterServiceTest {
         virksomheterDto.setOrgnummer(List.of(orgnr1));
         forberedValidering();
 
-        boolean response = avklarteVirksomheterService.erVirksomhetValid(virksomheterDto, 1L);
+        boolean response = avklarteVirksomheterService.erVirksomheterGyldig(virksomheterDto, 1L);
         assertTrue(response);
     }
 
@@ -206,7 +206,7 @@ public class AvklarteVirksomheterServiceTest {
         virksomheterDto.setOrgnummer(List.of(orgnr2));
         forberedValidering();
 
-        boolean response = avklarteVirksomheterService.erVirksomhetValid(virksomheterDto, 1L);
+        boolean response = avklarteVirksomheterService.erVirksomheterGyldig(virksomheterDto, 1L);
         assertTrue(response);
     }
 
@@ -216,7 +216,7 @@ public class AvklarteVirksomheterServiceTest {
         virksomheterDto.setOrgnummer(List.of(orgnr3));
         forberedValidering();
 
-        boolean response = avklarteVirksomheterService.erVirksomhetValid(virksomheterDto, 1L);
+        boolean response = avklarteVirksomheterService.erVirksomheterGyldig(virksomheterDto, 1L);
         assertTrue(response);
     }
 
@@ -226,7 +226,7 @@ public class AvklarteVirksomheterServiceTest {
         virksomheterDto.setOrgnummer(List.of(orgnr4));
         forberedValidering();
 
-        boolean response = avklarteVirksomheterService.erVirksomhetValid(virksomheterDto, 1L);
+        boolean response = avklarteVirksomheterService.erVirksomheterGyldig(virksomheterDto, 1L);
         assertTrue(response);
     }
 

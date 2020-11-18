@@ -28,8 +28,8 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AvklartefaktaTjeneste {
 
-    private AvklartefaktaService avklartefaktaService;
-    private AvklarteVirksomheterService avklarteVirksomheterService;
+    private final AvklartefaktaService avklartefaktaService;
+    private final AvklarteVirksomheterService avklarteVirksomheterService;
 
     private final TilgangService tilgangService;
 
@@ -69,13 +69,12 @@ public class AvklartefaktaTjeneste {
         return avklartefaktaService.hentAlleAvklarteFaktaStrukturert(behandlingID);
     }
 
-    @PostMapping("{behandlingID}/virksomhet")
+    @PostMapping("{behandlingID}/virksomheter")
     @ApiOperation(value = "Lagre virksomheter som avklartefakta")
     public AvklartefaktaStrukturertDto lagreVirksomheterSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
                                                                    @RequestBody VirksomheterDto virksomheter) throws TekniskException, FunksjonellException {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
 
-        avklarteVirksomheterService.erVirksomhetValid(virksomheter, behandlingID);
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomheter, behandlingID);
 
         return avklartefaktaService.hentAlleAvklarteFaktaStrukturert(behandlingID);

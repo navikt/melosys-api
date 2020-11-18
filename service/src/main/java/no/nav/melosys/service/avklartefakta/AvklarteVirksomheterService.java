@@ -99,49 +99,40 @@ public class AvklarteVirksomheterService {
         return norskeVirksomheter;
     }
 
-    public void lagreVirksomheterSomAvklartefakta(VirksomheterDto virksomheter, Long behandlingID) throws IkkeFunnetException {
+    public void lagreVirksomheterSomAvklartefakta(VirksomheterDto virksomheter, Long behandlingID) throws FunksjonellException, TekniskException {
+        erVirksomheterGyldig(virksomheter, behandlingID);
         for (String orgnr : virksomheter.getOrgnummer()) {
             avklartefaktaService.leggTilAvklarteFakta(behandlingID, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr, "TRUE");
         }
     }
 
-    public boolean erVirksomhetValid(VirksomheterDto virksomheter, Long behandlingID) throws FunksjonellException, TekniskException {
+    private boolean erVirksomheterGyldig(VirksomheterDto virksomheter, Long behandlingID) throws FunksjonellException, TekniskException {
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
         for (String orgnr : virksomheter.getOrgnummer()) {
-            if (!erOrgnrValid(orgnr, behandlingID)) {
+            if (!erOrgIDGyldig(orgnr, behandling)) {
                 throw new FunksjonellException("Orgnr " + orgnr + " hører ikke til noen av arbeidsforholdene");
             }
         }
         return true;
     }
 
-    private boolean erOrgnrValid(String orgnr, Long behandlingID) throws IkkeFunnetException, TekniskException {
-        BehandlingsgrunnlagData behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID).getBehandlingsgrunnlagdata();
-        return erVirksomhetForetakUtland(behandlingsgrunnlag, orgnr)
-            || erVirksomhetSelvstendigForetak(behandlingsgrunnlag, orgnr)
-            || erVirksomhetArbeidUtland(behandlingsgrunnlag, orgnr)
-            || erVirksomhetArbeidNorge(behandlingID, orgnr);
+    private boolean erOrgIDGyldig(String orgID, Behandling behandling) throws TekniskException {
+        BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        return erVirksomhetForetakUtland(behandlingsgrunnlagData, orgID)
+            || erVirksomhetSelvstendigForetakEllerLagtInnManuelt(behandlingsgrunnlagData, orgID)
+            || erVirksomhetArbeidNorge(behandling, orgID);
     }
 
     private boolean erVirksomhetForetakUtland(BehandlingsgrunnlagData behandlingsgrunnlagData, String uuid) {
-        return behandlingsgrunnlagData.foretakUtland.stream().anyMatch(foretakUtland -> uuid.equals(foretakUtland.uuid));
+        return behandlingsgrunnlagData.hentUtenlandskeArbeidsgivereUuid().contains(uuid);
     }
 
-    private boolean erVirksomhetSelvstendigForetak(BehandlingsgrunnlagData behandlingsgrunnlagData, String orgnr) {
-        return behandlingsgrunnlagData.selvstendigArbeid.selvstendigForetak.stream().anyMatch(selvstendigForetak -> orgnr.equals(selvstendigForetak.orgnr));
+    private boolean erVirksomhetSelvstendigForetakEllerLagtInnManuelt(BehandlingsgrunnlagData behandlingsgrunnlagData, String orgnr) {
+        return behandlingsgrunnlagData.hentAlleOrganisasjonsnumre().contains(orgnr);
     }
 
-    private boolean erVirksomhetArbeidUtland(BehandlingsgrunnlagData behandlingsgrunnlagData, String orgnr) {
-        return behandlingsgrunnlagData.arbeidUtland.stream().anyMatch(arbeidUtland -> orgnr.equals(arbeidUtland.foretakOrgnr));
-    }
-
-    private boolean erVirksomhetArbeidNorge(Long behandlingID, String orgnr) throws IkkeFunnetException, TekniskException {
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        ArbeidsforholdDokument arbDok = behandling.hentArbeidsforholdDokument();
-        Set<String> arbeidsgivendeOrgnumre = arbDok.hentOrgnumre();
-        BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
-        arbeidsgivendeOrgnumre.addAll(grunnlagData.juridiskArbeidsgiverNorge.ekstraArbeidsgivere);
-
-        return arbeidsgivendeOrgnumre.stream().anyMatch(orgnr::equals);
+    private boolean erVirksomhetArbeidNorge(Behandling behandling, String orgnr) throws TekniskException {
+        return behandling.hentArbeidsforholdDokument().hentOrgnumre().contains(orgnr);
     }
 
     public VirksomheterDto tilVirksomheterDto(Set<Avklartefakta> avklartefaktas) {

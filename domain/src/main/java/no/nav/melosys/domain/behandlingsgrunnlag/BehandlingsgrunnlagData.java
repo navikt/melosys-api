@@ -64,6 +64,14 @@ public class BehandlingsgrunnlagData {
 
     public List<String> hentUtenlandskeArbeidsgivereLandkode() {
         return foretakUtland.stream()
+            .map(f -> f.uuid)
+            .filter(Objects::nonNull)
+            .distinct()
+            .collect(Collectors.toList());
+    }
+
+    public List<String> hentUtenlandskeArbeidsgivereUuid() {
+        return foretakUtland.stream()
             .map(f -> f.adresse != null ? f.adresse.landkode : null)
             .filter(Objects::nonNull)
             .distinct()
