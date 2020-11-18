@@ -13,7 +13,7 @@ import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.tjenester.gui.dto.AvklartefaktaStrukturertDto;
+import no.nav.melosys.tjenester.gui.dto.AvklartefaktaOppsummeringDto;
 import no.nav.melosys.tjenester.gui.dto.VirksomheterDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,22 +59,22 @@ public class AvklartefaktaTjeneste {
         return avklartefaktaService.hentAlleAvklarteFakta(behandlingID);
     }
 
-    @GetMapping("{behandlingID}/strukturert")
-    @ApiOperation(value = "Henter avklartefakta for en gitt behandling som strukturert objekt", response = AvklartefaktaStrukturertDto.class)
-    public AvklartefaktaStrukturertDto hentAvklarteFaktaStrukturert(@PathVariable("behandlingID") long behandlingID) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+    @GetMapping("{behandlingID}/oppsummering")
+    @ApiOperation(value = "Henter avklartefakta for en gitt behandling som strukturert objekt", response = AvklartefaktaOppsummeringDto.class)
+    public AvklartefaktaOppsummeringDto hentAvklarteFaktaStrukturert(@PathVariable("behandlingID") long behandlingID) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
         tilgangService.sjekkTilgang(behandlingID);
 
-        return AvklartefaktaStrukturertDto.tilAvklartefaktaStrukturertDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
+        return AvklartefaktaOppsummeringDto.tilAvklartefaktaStrukturertDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
 
     @PostMapping("{behandlingID}/virksomheter")
-    @ApiOperation(value = "Lagre virksomheter som avklartefakta", response = AvklartefaktaStrukturertDto.class)
-    public AvklartefaktaStrukturertDto lagreVirksomheterSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
+    @ApiOperation(value = "Lagre virksomheter som avklartefakta", response = AvklartefaktaOppsummeringDto.class)
+    public AvklartefaktaOppsummeringDto lagreVirksomheterSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
                                                                    @RequestBody VirksomheterDto virksomheter) throws TekniskException, FunksjonellException {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
 
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomheter.getOrgnummer(), behandlingID);
 
-        return AvklartefaktaStrukturertDto.tilAvklartefaktaStrukturertDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
+        return AvklartefaktaOppsummeringDto.tilAvklartefaktaStrukturertDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
 }
