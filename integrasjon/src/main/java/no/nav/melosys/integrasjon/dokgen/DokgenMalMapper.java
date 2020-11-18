@@ -1,5 +1,8 @@
 package no.nav.melosys.integrasjon.dokgen;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -24,5 +27,14 @@ public class DokgenMalMapper {
         } else {
             throw new TekniskException(format("Fant ikke malnavn for produserbartDokument %s", produserbartDokument));
         }
+    }
+
+    public static Set<Produserbaredokumenter> utledTilgjengeligeMaler () {
+        Set<Produserbaredokumenter> tilgjengeligeMaler = new HashSet<>();
+        for(Produserbaredokumenter key : DOKGEN_MALER.keySet()) {
+            //TODO Add feature-toggling
+            tilgjengeligeMaler.add(key);
+        }
+        return tilgjengeligeMaler;
     }
 }

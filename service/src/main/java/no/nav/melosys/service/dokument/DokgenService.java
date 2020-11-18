@@ -1,5 +1,7 @@
 package no.nav.melosys.service.dokument;
 
+import java.util.Set;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
@@ -42,6 +44,11 @@ public class DokgenService {
         String malnavn = DokgenMalMapper.hentMalnavn(produserbartDokument);
 
         return lagPdf(malnavn, mapBehandling(produserbartDokument, behandling));
+    }
+
+    public boolean erTilgjengeligDokgenmal(Produserbaredokumenter produserbartDokument) {
+        Set<Produserbaredokumenter> tilgjengeligeMaler = DokgenMalMapper.utledTilgjengeligeMaler();
+        return tilgjengeligeMaler.contains(produserbartDokument);
     }
 
     private DokgenDto mapBehandling(Produserbaredokumenter produserbartDokument, Behandling behandling) throws TekniskException, FunksjonellException {

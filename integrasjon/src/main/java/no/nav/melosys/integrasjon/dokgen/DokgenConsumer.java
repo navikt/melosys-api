@@ -24,9 +24,9 @@ public class DokgenConsumer {
 
     public byte[] lagPdf(String malNavn, DokgenDto dokgenDto) {
         log.info("Produserer PDF i melosys-dokgen. Mal: {}", malNavn);
-        String lagPdfUri = "/mal/%s/lag-pdf";
+        String lagPdfUri = "/mal/{malNavn}/lag-pdf";
 
-        return webClient.post().uri(format(lagPdfUri, malNavn))
+        return webClient.post().uri(lagPdfUri, malNavn)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(dokgenDto)
             .retrieve()

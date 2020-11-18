@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.brev;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -10,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static org.springframework.util.StringUtils.hasText;
+import static org.springframework.util.StringUtils.isEmpty;
 
 @Component
 public class DistribuerJournalpost implements StegBehandler {
@@ -32,10 +33,12 @@ public class DistribuerJournalpost implements StegBehandler {
 
         String journalpostId = prosessinstans.getData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID);
 
-        //TODO Mangler flagg for å overstyre mottaker
-        if (hasText(journalpostId)) {
-            String bestillingsId = doksysFasade.distribuerJournalpost(journalpostId);
-            log.info("Distribuering av journalpostId {} bestilt med bestillingsId {}", journalpostId, bestillingsId);
+        if (isEmpty(journalpostId)) {
+            throw new FunksjonellException("JournalpostId mangler, kan ikke distribuere");
         }
+
+        //TODO Mangler flagg for å overstyre mottaker
+        String bestillingsId = doksysFasade.distribuerJournalpost(journalpostId);
+        log.info("Distribuering av journalpostId {} bestilt med bestillingsId {}", journalpostId, bestillingsId);
     }
 }

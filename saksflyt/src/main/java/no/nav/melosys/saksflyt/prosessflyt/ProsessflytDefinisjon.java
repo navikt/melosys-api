@@ -34,13 +34,7 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(
             ProsessType.OPPRETT_OG_JOURNALFØR_FORVALTNINGSMELDING,
             new ProsessFlyt(ProsessType.OPPRETT_OG_JOURNALFØR_FORVALTNINGSMELDING,
-                OPPRETT_OG_JOURNALFØR_BREV
-            )
-        );
-
-        PROSESS_FLYT_MAP.put(
-            ProsessType.DISTRIBUER_JOURNALPOST,
-            new ProsessFlyt(ProsessType.DISTRIBUER_JOURNALPOST,
+                OPPRETT_OG_JOURNALFØR_BREV,
                 DISTRIBUER_JOURNALPOST
             )
         );

@@ -1,8 +1,5 @@
 package no.nav.melosys.service.dokument;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
@@ -19,17 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
 
 @Service
 public class DokumentServiceFasade {
-
-    private static final Set<Produserbaredokumenter> dokgenDokumenter = new HashSet<>(asList(
-        MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
-        MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE
-    ));
 
     private final DokumentService dokumentService;
     private final DokumentSystemService dokumentSystemService;
@@ -46,13 +35,13 @@ public class DokumentServiceFasade {
     }
 
     public byte[] produserUtkast(Produserbaredokumenter produserbartDokument, long behandlingId, BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
-        if (dokgenDokumenter.contains(produserbartDokument)) {
+        if (dokgenService.erTilgjengeligDokgenmal(produserbartDokument)) {
             return dokgenService.produserUtkast(produserbartDokument, behandlingId, new BrevData(brevbestillingDto));
         }
         return dokumentService.produserUtkast(produserbartDokument, behandlingId, brevbestillingDto);
     }
 
-    public void produserDokument(Produserbaredokumenter produserbartDokument, long behandlingId, BrevbestillingDto brevbestillingDto) throws MelosysException {
+    public void produserDokument(Produserbaredokumenter produserbartDokument, long behandlingId, BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
         String saksbehandler = SubjectHandler.getInstance().getUserID();
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(produserbartDokument)
@@ -66,7 +55,7 @@ public class DokumentServiceFasade {
     }
 
     public void produserDokument(Produserbaredokumenter produserbartDokument, Mottaker mottaker, long behandlingID, Brevbestilling brevbestilling) throws TekniskException, FunksjonellException {
-        if (dokgenDokumenter.contains(produserbartDokument)) {
+        if (dokgenService.erTilgjengeligDokgenmal(produserbartDokument)) {
             dokgenService.produserDokument(produserbartDokument, mottaker, brevbestilling);
         } else {
             dokumentSystemService.produserDokument(produserbartDokument, mottaker, behandlingID, brevbestilling);
@@ -74,7 +63,7 @@ public class DokumentServiceFasade {
     }
 
     public byte[] produserBrev(Produserbaredokumenter produserbartDokument, Behandling behandling) throws MelosysException {
-        if (dokgenDokumenter.contains(produserbartDokument)) {
+        if (dokgenService.erTilgjengeligDokgenmal(produserbartDokument)) {
             return dokgenService.produserBrev(produserbartDokument, behandling);
         }
 
