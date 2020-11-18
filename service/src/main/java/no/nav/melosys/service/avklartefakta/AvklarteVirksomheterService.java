@@ -99,18 +99,18 @@ public class AvklarteVirksomheterService {
         return norskeVirksomheter;
     }
 
-    public void lagreVirksomheterSomAvklartefakta(VirksomheterDto virksomheter, Long behandlingID) throws FunksjonellException, TekniskException {
-        erVirksomheterGyldig(virksomheter, behandlingID);
-        for (String orgnr : virksomheter.getOrgnummer()) {
-            avklartefaktaService.leggTilAvklarteFakta(behandlingID, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr, "TRUE");
+    public void lagreVirksomheterSomAvklartefakta(List<String> orgIDliste, Long behandlingID) throws FunksjonellException, TekniskException {
+        erOrgIDerGyldig(orgIDliste, behandlingID);
+        for (String orgID : orgIDliste) {
+            avklartefaktaService.leggTilAvklarteFakta(behandlingID, VIRKSOMHET, VIRKSOMHET.getKode(), orgID, "TRUE");
         }
     }
 
-    private boolean erVirksomheterGyldig(VirksomheterDto virksomheter, Long behandlingID) throws FunksjonellException, TekniskException {
+    private boolean erOrgIDerGyldig(List<String> orgIDliste, Long behandlingID) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        for (String orgnr : virksomheter.getOrgnummer()) {
-            if (!erOrgIDGyldig(orgnr, behandling)) {
-                throw new FunksjonellException("Orgnr " + orgnr + " hører ikke til noen av arbeidsforholdene");
+        for (String orgID : orgIDliste) {
+            if (!erOrgIDGyldig(orgID, behandling)) {
+                throw new FunksjonellException("Orgnr " + orgID + " hører ikke til noen av arbeidsforholdene");
             }
         }
         return true;
@@ -133,16 +133,5 @@ public class AvklarteVirksomheterService {
 
     private boolean erVirksomhetArbeidNorge(Behandling behandling, String orgnr) throws TekniskException {
         return behandling.hentArbeidsforholdDokument().hentOrgnumre().contains(orgnr);
-    }
-
-    public VirksomheterDto tilVirksomheterDto(Set<Avklartefakta> avklartefaktas) {
-        List<String> virksomheter = new ArrayList<>();
-        avklartefaktas.stream()
-            .filter(avklartefakta -> VIRKSOMHET.getKode().equals(avklartefakta.getReferanse()) && VIRKSOMHET.equals(avklartefakta.getType()))
-            .forEach(avklartefakta -> virksomheter.add(avklartefakta.getSubjekt()));
-
-        VirksomheterDto virksomheterDto = new VirksomheterDto();
-        virksomheterDto.setOrgnummer(virksomheter);
-        return virksomheterDto;
     }
 }

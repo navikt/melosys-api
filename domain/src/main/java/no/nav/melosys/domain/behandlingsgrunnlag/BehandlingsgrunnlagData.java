@@ -62,7 +62,7 @@ public class BehandlingsgrunnlagData {
             .collect(Collectors.toList());
     }
 
-    public List<String> hentUtenlandskeArbeidsgivereLandkode() {
+    public List<String> hentUtenlandskeArbeidsgivereUuid() {
         return foretakUtland.stream()
             .map(f -> f.uuid)
             .filter(Objects::nonNull)
@@ -70,7 +70,7 @@ public class BehandlingsgrunnlagData {
             .collect(Collectors.toList());
     }
 
-    public List<String> hentUtenlandskeArbeidsgivereUuid() {
+    public List<String> hentUtenlandskeArbeidsgivereLandkode() {
         return foretakUtland.stream()
             .map(f -> f.adresse != null ? f.adresse.landkode : null)
             .filter(Objects::nonNull)

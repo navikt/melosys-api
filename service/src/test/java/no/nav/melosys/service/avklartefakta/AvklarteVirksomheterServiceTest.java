@@ -10,13 +10,13 @@ import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.adresse.Adresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ForetakUtland;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -31,13 +31,19 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VIRKSOMHET;
 import static no.nav.melosys.service.BehandlingsgrunnlagStub.lagBehandlingsgrunnlag;
 import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysninger;
 import static no.nav.melosys.service.SaksopplysningStubs.lagOrganisasjonDokumenter;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -62,7 +68,7 @@ public class AvklarteVirksomheterServiceTest {
     private String orgnr1 = "111111111";
     private String orgnr2 = "222222222";
     private String orgnr3 = "333333333";
-    private String orgnr4 = "333333333";
+    private String orgnr4 = "444444444";
     private String uuid1 = "a2k2jf-a3khs";
     private String uuid2 = "0dkf93-kj701";
 
@@ -181,53 +187,50 @@ public class AvklarteVirksomheterServiceTest {
     }
 
     @Test
-    public void erVirksomhetValid_virksomhetErForetakUtland_girTrue() throws FunksjonellException, TekniskException {
-        VirksomheterDto virksomheterDto = new VirksomheterDto();
-        virksomheterDto.setOrgnummer(List.of(uuid1));
+    public void lagreVirksomheterSomAvklartefakta_virksomhetErForetakUtland_valideringOKOgVirksomhetLagret() throws FunksjonellException, TekniskException {
+        List<String> virksomheter = List.of(uuid1);
         forberedValidering();
 
-        boolean response = avklarteVirksomheterService.erVirksomheterGyldig(virksomheterDto, 1L);
-        assertTrue(response);
+        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomheter, 1L);
+        verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), uuid1, "TRUE");
     }
 
     @Test
-    public void erVirksomhetValid_virksomhetErSelvstendigForetak_girTrue() throws FunksjonellException, TekniskException {
-        VirksomheterDto virksomheterDto = new VirksomheterDto();
-        virksomheterDto.setOrgnummer(List.of(orgnr1));
+    public void lagreVirksomheterSomAvklartefakta_virksomhetErSelvstendigForetak_valideringOKOgVirksomhetLagret() throws FunksjonellException, TekniskException {
+        List<String> virksomheter = List.of(orgnr1);
         forberedValidering();
 
-        boolean response = avklarteVirksomheterService.erVirksomheterGyldig(virksomheterDto, 1L);
-        assertTrue(response);
+        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomheter, 1L);
+        verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr1, "TRUE");
     }
 
     @Test
-    public void erVirksomhetValid_virksomhetErArbeidUtland_girTrue() throws FunksjonellException, TekniskException {
-        VirksomheterDto virksomheterDto = new VirksomheterDto();
-        virksomheterDto.setOrgnummer(List.of(orgnr2));
+    public void lagreVirksomheterSomAvklartefakta_virksomhetErLagtInnManuelt_valideringOKOgVirksomhetLagret() throws FunksjonellException, TekniskException {
+        List<String> virksomheter = List.of(orgnr2);
         forberedValidering();
 
-        boolean response = avklarteVirksomheterService.erVirksomheterGyldig(virksomheterDto, 1L);
-        assertTrue(response);
+        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomheter, 1L);
+        verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr2, "TRUE");
     }
 
     @Test
-    public void erVirksomhetValid_virksomhetErArbeidNorge_girTrue() throws FunksjonellException, TekniskException {
-        VirksomheterDto virksomheterDto = new VirksomheterDto();
-        virksomheterDto.setOrgnummer(List.of(orgnr3));
+    public void lagreVirksomheterSomAvklartefakta_virksomhetErArbeidNorge_valideringOKOgVirksomhetLagret() throws FunksjonellException, TekniskException {
+        List<String> virksomheter = List.of(orgnr3);
         forberedValidering();
 
-        boolean response = avklarteVirksomheterService.erVirksomheterGyldig(virksomheterDto, 1L);
-        assertTrue(response);
+        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomheter, 1L);
+        verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr3, "TRUE");
     }
 
     @Test
-    public void erVirksomhetValid_ugyldig_girFalse() throws FunksjonellException, TekniskException {
-        VirksomheterDto virksomheterDto = new VirksomheterDto();
-        virksomheterDto.setOrgnummer(List.of(orgnr4));
+    public void lagreVirksomheterSomAvklartefakta_virksomhetErUgyldig_valideringFailerOgVirksomhetIkkeLagret() throws FunksjonellException, TekniskException {
+        List<String> virksomheter = List.of(orgnr4);
         forberedValidering();
 
-        boolean response = avklarteVirksomheterService.erVirksomheterGyldig(virksomheterDto, 1L);
-        assertTrue(response);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomheter, 1L))
+            .withMessage(String.format("Orgnr %s hører ikke til noen av arbeidsforholdene", orgnr4));
+        verify(avklartefaktaService, never()).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatyper.class), anyString(), anyString(), eq("TRUE"));
     }
 
     private void forberedValidering() throws FunksjonellException {
@@ -235,8 +238,6 @@ public class AvklarteVirksomheterServiceTest {
         foretakUtland.uuid = uuid1;
         SelvstendigForetak selvstendigForetak = new SelvstendigForetak();
         selvstendigForetak.orgnr = orgnr1;
-        ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.foretakOrgnr = orgnr2;
         Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
         arbeidsforhold.arbeidsgiverID = orgnr3;
         ArbeidsforholdDokument arbeidsforholdDokument = new ArbeidsforholdDokument();
@@ -247,7 +248,7 @@ public class AvklarteVirksomheterServiceTest {
         BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
         behandlingsgrunnlagData.foretakUtland.add(foretakUtland);
         behandlingsgrunnlagData.selvstendigArbeid.selvstendigForetak.add(selvstendigForetak);
-        behandlingsgrunnlagData.arbeidUtland.add(arbeidUtland);
+        behandlingsgrunnlagData.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.add(orgnr2);
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
         Behandling behandling = new Behandling();
@@ -255,7 +256,6 @@ public class AvklarteVirksomheterServiceTest {
         behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
 
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
     }
 
     private void leggTilIRegisterOppslag(Collection<String> orgnumre) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {

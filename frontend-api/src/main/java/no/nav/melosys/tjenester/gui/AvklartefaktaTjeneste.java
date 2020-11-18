@@ -13,8 +13,8 @@ import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaStrukturertDto;
-import no.nav.melosys.service.avklartefakta.VirksomheterDto;
+import no.nav.melosys.tjenester.gui.dto.AvklartefaktaStrukturertDto;
+import no.nav.melosys.tjenester.gui.dto.VirksomheterDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -60,23 +60,21 @@ public class AvklartefaktaTjeneste {
     }
 
     @GetMapping("{behandlingID}/strukturert")
-    @ApiOperation(value = "Henter avklartefakta for en gitt behandling som strukturert objekt",
-        response = Avklartefakta.class,
-        responseContainer = "Set")
+    @ApiOperation(value = "Henter avklartefakta for en gitt behandling som strukturert objekt", response = AvklartefaktaStrukturertDto.class)
     public AvklartefaktaStrukturertDto hentAvklarteFaktaStrukturert(@PathVariable("behandlingID") long behandlingID) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
         tilgangService.sjekkTilgang(behandlingID);
 
-        return avklartefaktaService.hentAlleAvklarteFaktaStrukturert(behandlingID);
+        return AvklartefaktaStrukturertDto.tilAvklartefaktaStrukturertDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
 
     @PostMapping("{behandlingID}/virksomheter")
-    @ApiOperation(value = "Lagre virksomheter som avklartefakta")
+    @ApiOperation(value = "Lagre virksomheter som avklartefakta", response = AvklartefaktaStrukturertDto.class)
     public AvklartefaktaStrukturertDto lagreVirksomheterSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
                                                                    @RequestBody VirksomheterDto virksomheter) throws TekniskException, FunksjonellException {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
 
-        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomheter, behandlingID);
+        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomheter.getOrgnummer(), behandlingID);
 
-        return avklartefaktaService.hentAlleAvklarteFaktaStrukturert(behandlingID);
+        return AvklartefaktaStrukturertDto.tilAvklartefaktaStrukturertDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
 }
