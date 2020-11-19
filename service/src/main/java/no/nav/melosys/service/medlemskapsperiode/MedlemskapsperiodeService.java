@@ -5,13 +5,20 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.InnvilgelsesResultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.MedlemskapsperiodeRepository;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,9 +31,11 @@ public class MedlemskapsperiodeService {
         .filter(trygdedekning -> trygdedekning != Trygdedekninger.FULL_DEKNING_EOSFO).collect(Collectors.toSet());
 
     private final MedlemskapsperiodeRepository medlemskapsperiodeRepository;
+    private final BehandlingsresultatService behandlingsresultatService;
 
-    public MedlemskapsperiodeService(MedlemskapsperiodeRepository medlemskapsperiodeRepository) {
+    public MedlemskapsperiodeService(MedlemskapsperiodeRepository medlemskapsperiodeRepository, BehandlingsresultatService behandlingsresultatService) {
         this.medlemskapsperiodeRepository = medlemskapsperiodeRepository;
+        this.behandlingsresultatService = behandlingsresultatService;
     }
 
     @Transactional(readOnly = true)
@@ -105,5 +114,26 @@ public class MedlemskapsperiodeService {
             .orElseThrow(() -> new IkkeFunnetException("Finner ingen medlemskapsperiode med id " + medlemskapsperiodeID + " for behandling " + behandlingsresultatID));
 
         medlemskapsperiodeRepository.delete(medlemskapsperiode);
+    }
+
+    @Transactional(rollbackFor = MelosysException.class)
+    public Collection<Medlemskapsperiode> utledMedlemskapsperioderFraSøknad(long behandlingID, Folketrygdloven_kap2_bestemmelser bestemmelse) throws IkkeFunnetException {
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        medlemskapsperiodeRepository.deleteByBehandlingsresultat(behandlingsresultat);
+
+        Behandling behandling = behandlingsresultat.getBehandling();
+        Behandlingsgrunnlag behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
+        SoeknadFtrl søknad = (SoeknadFtrl) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
+
+        var medlemskapsperioder = UtledMedlemskapsperioder.lagMedlemskapsperioder(
+            søknad.periode,
+            søknad.getTrygdedekning(),
+            LocalDate.now(), //FIXME: behandlingsgrunnlag.getMottaksdato(),
+            bestemmelse,
+            søknad.soeknadsland.landkoder.iterator().next()
+        );
+
+        medlemskapsperioder.forEach(m -> m.setBehandlingsresultat(behandlingsresultat));
+        return medlemskapsperiodeRepository.saveAll(medlemskapsperioder);
     }
 }

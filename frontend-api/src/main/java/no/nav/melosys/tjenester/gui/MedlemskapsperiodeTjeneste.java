@@ -12,6 +12,7 @@ import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.melosys.tjenester.gui.dto.MedlemskapsperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.MedlemskapsperiodeOppdatering;
+import no.nav.melosys.tjenester.gui.dto.UtledMedlemskapsperiodeRequest;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
@@ -85,5 +86,19 @@ public class MedlemskapsperiodeTjeneste {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         medlemskapsperiodeService.slettMedlemskapsperiode(behandlingID, medlemskapsperiodeID);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/opprettFraBestemmelse")
+    public ResponseEntity<Collection<MedlemskapsperiodeDto>> opprettMedlemskapsperioderFraBestemmelse(@PathVariable("behandlingID") long behandlingID,
+                                                                                                      @RequestBody UtledMedlemskapsperiodeRequest utledMedlemskapsperiodeRequest
+    ) throws FunksjonellException, TekniskException {
+
+        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
+        return ResponseEntity.ok(
+            medlemskapsperiodeService.utledMedlemskapsperioderFraSøknad(behandlingID, utledMedlemskapsperiodeRequest.getBestemmelse())
+                .stream()
+                .map(MedlemskapsperiodeDto::av)
+                .collect(Collectors.toSet())
+        );
     }
 }

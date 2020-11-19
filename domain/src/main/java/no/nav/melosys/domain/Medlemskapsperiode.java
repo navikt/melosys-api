@@ -47,6 +47,25 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
     @Column(name = "medlperiode_id")
     private Long medlPeriodeID;
 
+    public Medlemskapsperiode() {
+    }
+
+    public Medlemskapsperiode(LocalDate fom,
+                              LocalDate tom,
+                              String arbeidsland,
+                              Folketrygdloven_kap2_bestemmelser bestemmelse,
+                              InnvilgelsesResultat innvilgelsesresultat,
+                              Medlemskapstyper medlemskapstype,
+                              Trygdedekninger trygdedekning) {
+        this.fom = fom;
+        this.tom = tom;
+        this.arbeidsland = arbeidsland;
+        this.bestemmelse = bestemmelse;
+        this.innvilgelsesresultat = innvilgelsesresultat;
+        this.medlemskapstype = medlemskapstype;
+        this.trygdedekning = trygdedekning;
+    }
+
     public Long getId() {
         return id;
     }
@@ -147,5 +166,21 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
     @Override
     public int hashCode() {
         return Objects.hash(id, behandlingsresultat, fom, tom, arbeidsland, bestemmelse, innvilgelsesresultat, medlemskapstype, trygdedekning, medlPeriodeID);
+    }
+
+    @Override
+    public String toString() {
+        return "Medlemskapsperiode{" +
+            "id=" + id +
+            ", behandlingsresultat=" + behandlingsresultat +
+            ", fom=" + fom +
+            ", tom=" + tom +
+            ", arbeidsland='" + arbeidsland + '\'' +
+            ", bestemmelse=" + bestemmelse +
+            ", innvilgelsesresultat=" + innvilgelsesresultat +
+            ", medlemskapstype=" + medlemskapstype +
+            ", trygdedekning=" + trygdedekning +
+            ", medlPeriodeID=" + medlPeriodeID +
+            '}';
     }
 }

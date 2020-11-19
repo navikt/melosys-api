@@ -17,6 +17,7 @@ import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.melosys.tjenester.gui.dto.MedlemskapsperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.MedlemskapsperiodeOppdatering;
+import no.nav.melosys.tjenester.gui.dto.UtledMedlemskapsperiodeRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -95,6 +96,20 @@ class MedlemskapsperiodeTjenesteTest extends JsonSchemaTestParent{
 
         valider(oppdaterMedlemskapsperiodeRequest, MEDLEMSKAPSPERIODER_PUT_SCHEMA);
         medlemskapsperiodeTjeneste.oppdaterMedlemskapsperiode(behandlingID, 1, oppdaterMedlemskapsperiodeRequest);
+    }
+
+    @Test
+    void opprettMedlemskapsperioderFraBestemmelse() throws FunksjonellException, TekniskException, IOException {
+
+        when(medlemskapsperiodeService.utledMedlemskapsperioderFraSøknad(eq(behandlingID), any(Folketrygdloven_kap2_bestemmelser.class)))
+            .thenReturn(Collections.singleton(lagMedlemskapsperiode()));
+
+        var res = medlemskapsperiodeTjeneste.opprettMedlemskapsperioderFraBestemmelse(
+            behandlingID, new UtledMedlemskapsperiodeRequest(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD)
+        );
+
+        assertThat(res.getStatusCode()).isEqualTo(HttpStatus.OK);
+        validerArray(res.getBody(), MEDLEMSKAPSPERIODER_SCHEMA);
     }
 
     private Medlemskapsperiode lagMedlemskapsperiode() {
