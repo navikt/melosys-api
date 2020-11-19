@@ -14,8 +14,7 @@ public class AvklarteVirksomheterSystemService extends AvklarteVirksomheterServi
     @Autowired
     public AvklarteVirksomheterSystemService(AvklartefaktaService avklartefaktaService,
                                              RegisterOppslagSystemService registerOppslagService,
-                                             BehandlingsgrunnlagService behandlingsgrunnlagService,
                                              BehandlingService behandlingService) {
-        super(avklartefaktaService, registerOppslagService, behandlingsgrunnlagService, behandlingService);
+        super(avklartefaktaService, registerOppslagService, behandlingService);
     }
 }

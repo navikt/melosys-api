@@ -114,7 +114,7 @@ public class SedDataByggerTest {
     }
 
     private SedDataGrunnlagMedSoknad lagDokumentressurser() throws TekniskException {
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingsgrunnlagService.class), mock(BehandlingService.class));
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class));
         return new SedDataGrunnlagMedSoknad(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 
@@ -125,7 +125,7 @@ public class SedDataByggerTest {
     private SedDataGrunnlagMedSoknad lagDokumentressurserMedManglendeAdressefelter(boolean arbeidUtlandManglerLandkode,
                                                                                    boolean arbeidsgivendeForetakUtlandManglerLandkode,
                                                                                    boolean selvstendigForetakUtlandManglerLandkode) throws TekniskException {
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingsgrunnlagService.class), mock(BehandlingService.class));
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class));
         return new SedDataGrunnlagMedSoknad(DataByggerStubs.hentBehandlingMedManglendeAdressefelterStub(
             arbeidUtlandManglerLandkode, arbeidsgivendeForetakUtlandManglerLandkode, selvstendigForetakUtlandManglerLandkode),
             kodeverkService, avklarteVirksomheterService, avklartefaktaService);

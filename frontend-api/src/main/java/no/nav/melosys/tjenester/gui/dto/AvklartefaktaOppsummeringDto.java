@@ -16,7 +16,7 @@ public class AvklartefaktaOppsummeringDto {
         this.virksomheter = virksomheter;
     }
 
-    public static AvklartefaktaOppsummeringDto tilAvklartefaktaStrukturertDto(Set<AvklartefaktaDto> avklartefakta) {
+    public static AvklartefaktaOppsummeringDto av(Set<AvklartefaktaDto> avklartefakta) {
         AvklartefaktaOppsummeringDto avklartefaktaOppsummeringDto = new AvklartefaktaOppsummeringDto();
         avklartefaktaOppsummeringDto.setVirksomheter(VirksomheterDto.tilVirksomheterDto(avklartefakta));
         return avklartefaktaOppsummeringDto;

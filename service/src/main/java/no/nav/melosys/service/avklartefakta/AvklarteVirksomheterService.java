@@ -2,7 +2,6 @@ package no.nav.melosys.service.avklartefakta;
 
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VIRKSOMHET;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -10,7 +9,6 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.adresse.Adresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
@@ -20,7 +18,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -115,20 +112,20 @@ public class AvklarteVirksomheterService {
 
     private boolean erOrgIDGyldig(String orgID, Behandling behandling) throws TekniskException {
         BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
-        return erVirksomhetForetakUtland(behandlingsgrunnlagData, orgID)
-            || erVirksomhetSelvstendigForetakEllerLagtInnManuelt(behandlingsgrunnlagData, orgID)
-            || erVirksomhetArbeidNorge(behandling, orgID);
+        return erVirksomhetForetakUtland(orgID, behandlingsgrunnlagData)
+            || erVirksomhetSelvstendigForetakEllerLagtInnManuelt(orgID, behandlingsgrunnlagData)
+            || erVirksomhetArbeidNorge(orgID, behandling);
     }
 
-    private boolean erVirksomhetForetakUtland(BehandlingsgrunnlagData behandlingsgrunnlagData, String uuid) {
+    private boolean erVirksomhetForetakUtland(String uuid, BehandlingsgrunnlagData behandlingsgrunnlagData) {
         return behandlingsgrunnlagData.hentUtenlandskeArbeidsgivereUuid().contains(uuid);
     }
 
-    private boolean erVirksomhetSelvstendigForetakEllerLagtInnManuelt(BehandlingsgrunnlagData behandlingsgrunnlagData, String orgnr) {
+    private boolean erVirksomhetSelvstendigForetakEllerLagtInnManuelt(String orgnr, BehandlingsgrunnlagData behandlingsgrunnlagData) {
         return behandlingsgrunnlagData.hentAlleOrganisasjonsnumre().contains(orgnr);
     }
 
-    private boolean erVirksomhetArbeidNorge(Behandling behandling, String orgnr) throws TekniskException {
+    private boolean erVirksomhetArbeidNorge(String orgnr, Behandling behandling) throws TekniskException {
         return behandling.hentArbeidsforholdDokument().hentOrgnumre().contains(orgnr);
     }
 }

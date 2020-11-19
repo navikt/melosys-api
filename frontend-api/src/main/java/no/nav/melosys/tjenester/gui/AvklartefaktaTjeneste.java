@@ -64,7 +64,7 @@ public class AvklartefaktaTjeneste {
     public AvklartefaktaOppsummeringDto hentAvklarteFaktaStrukturert(@PathVariable("behandlingID") long behandlingID) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
         tilgangService.sjekkTilgang(behandlingID);
 
-        return AvklartefaktaOppsummeringDto.tilAvklartefaktaStrukturertDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
+        return AvklartefaktaOppsummeringDto.av(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
 
     @PostMapping("{behandlingID}/virksomheter")
@@ -75,6 +75,6 @@ public class AvklartefaktaTjeneste {
 
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomheter.getOrgnummer(), behandlingID);
 
-        return AvklartefaktaOppsummeringDto.tilAvklartefaktaStrukturertDto(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
+        return AvklartefaktaOppsummeringDto.av(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
 }

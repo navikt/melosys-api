@@ -80,7 +80,7 @@ public class AvklarteVirksomheterServiceTest {
         behandling.setId(1L);
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(new HashSet<>(Arrays.asList(orgnr1, uuid1)));
 
-        avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, behandlingsgrunnlagService, behandlingService);
+        avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, behandlingService);
     }
 
     @Test
@@ -159,7 +159,7 @@ public class AvklarteVirksomheterServiceTest {
 
         leggTilIRegisterOppslag(Arrays.asList(orgnr2, orgnr3));
 
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, behandlingsgrunnlagService, behandlingService);
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, behandlingService);
         assertThat(avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, ingenAdresse).stream()
             .map(nv -> nv.orgnr)
             .collect(Collectors.toList())).contains(orgnr2, orgnr3);
@@ -180,7 +180,7 @@ public class AvklarteVirksomheterServiceTest {
 
         leggTilIRegisterOppslag(selvstendigeForetak);
 
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, behandlingsgrunnlagService, behandlingService);
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, behandlingService);
         assertThat(avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, ingenAdresse).stream()
             .map(nv -> nv.orgnr)
             .collect(Collectors.toList())).contains(orgnr1);

@@ -278,7 +278,7 @@ public final class DokumentServiceTest {
         KodeverkService kodeverkService = new KodeverkService(kodeverkRegister);
         EregFasade eregFasade = mockEregFasade();
         RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(eregFasade, tpsFasade);
-        AvklarteVirksomheterSystemService avklarteVirksomheterSystemService = new AvklarteVirksomheterSystemService(avklartefaktaService, registerOppslagService, mock(BehandlingsgrunnlagService.class), mock(BehandlingService.class));
+        AvklarteVirksomheterSystemService avklarteVirksomheterSystemService = new AvklarteVirksomheterSystemService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class));
         Brevbestilling brevbestilling = new Brevbestilling.Builder().medBehandling(lagBehandling()).build();
         BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService,avklarteVirksomheterSystemService, avklartefaktaService);
         BrevdataGrunnlagFactory brevdataGrunnlagFactory = mock(BrevdataGrunnlagFactory.class);

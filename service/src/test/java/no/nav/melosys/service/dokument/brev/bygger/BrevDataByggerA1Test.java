@@ -104,7 +104,7 @@ public class BrevDataByggerA1Test {
         KodeverkService kodeverkService = mock(KodeverkService.class);
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
 
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingsgrunnlagService.class), mock(BehandlingService.class));
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class));
         Brevbestilling brevbestilling = new Brevbestilling.Builder().medBehandling(behandling).build();
         dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
         brevDataByggerA1 = new BrevDataByggerA1(avklartefaktaService, landvelgerService);

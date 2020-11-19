@@ -162,7 +162,7 @@ public class BrevDataByggerA001Test {
 
     private BrevDataGrunnlag lagBrevDataGrunnlag(Brevbestilling brevbestilling) throws TekniskException {
         RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(ereg, mock(TpsFasade.class));
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingsgrunnlagService.class), mock(BehandlingService.class));
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class));
         return new BrevDataGrunnlag(brevbestilling, mock(KodeverkService.class), avklarteVirksomheterService, avklartefaktaService);
     }
 
