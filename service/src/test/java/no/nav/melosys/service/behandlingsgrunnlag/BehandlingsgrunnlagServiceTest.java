@@ -1,13 +1,12 @@
 package no.nav.melosys.service.behandlingsgrunnlag;
 
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.behandlingsgrunnlag.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.exception.FunksjonellException;
@@ -72,7 +71,7 @@ class BehandlingsgrunnlagServiceTest {
     void opprettSøknadGrunnlag_finnesIkkeFraFør_blirOpprettet() throws FunksjonellException, IntegrasjonException {
         Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
-        when(joarkFasade.hentJournalpost(eq(behandling.getInitierendeJournalpostId()))).thenReturn(lagJournalpost());
+        when(joarkFasade.hentMottaksDatoForJournalpost(eq(behandling.getInitierendeJournalpostId()))).thenReturn(LocalDate.now());
         Soeknad soeknad = new Soeknad();
         behandlingsgrunnlagService.opprettSøknadGrunnlag(behandlingID, soeknad);
 
@@ -83,6 +82,7 @@ class BehandlingsgrunnlagServiceTest {
         assertThat(opprettet.getBehandlingsgrunnlagdata()).isInstanceOf(Soeknad.class);
         assertThat(opprettet.getType()).isEqualTo(Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS);
         assertThat(opprettet.getBehandling()).isEqualTo(behandling);
+        assertThat(opprettet.getMottaksdato()).isNotNull();
     }
 
     @Test
@@ -109,7 +109,7 @@ class BehandlingsgrunnlagServiceTest {
     void opprettSedGrunnlag_harRettType() throws FunksjonellException, IntegrasjonException {
         Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
-        when(joarkFasade.hentJournalpost(eq(behandling.getInitierendeJournalpostId()))).thenReturn(lagJournalpost());
+        when(joarkFasade.hentMottaksDatoForJournalpost(eq(behandling.getInitierendeJournalpostId()))).thenReturn(LocalDate.now());
         SedGrunnlag sedGrunnlag = new SedGrunnlag();
         behandlingsgrunnlagService.opprettSedGrunnlag(behandlingID, sedGrunnlag);
 
@@ -120,13 +120,14 @@ class BehandlingsgrunnlagServiceTest {
         assertThat(opprettet.getBehandlingsgrunnlagdata()).isInstanceOf(SedGrunnlag.class);
         assertThat(opprettet.getType()).isEqualTo(Behandlingsgrunnlagtyper.SED);
         assertThat(opprettet.getBehandling()).isEqualTo(behandling);
+        assertThat(opprettet.getMottaksdato()).isNotNull();
     }
 
     @Test
     void opprettSøknadFolketrygden_harRettType() throws FunksjonellException, IntegrasjonException {
         Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
-        when(joarkFasade.hentJournalpost(eq(behandling.getInitierendeJournalpostId()))).thenReturn(lagJournalpost());
+        when(joarkFasade.hentMottaksDatoForJournalpost(eq(behandling.getInitierendeJournalpostId()))).thenReturn(LocalDate.now());
         SoeknadFtrl sedGrunnlag = new SoeknadFtrl();
         behandlingsgrunnlagService.opprettSøknadFolketrygden(behandlingID, sedGrunnlag);
 
@@ -137,6 +138,7 @@ class BehandlingsgrunnlagServiceTest {
         assertThat(opprettet.getBehandlingsgrunnlagdata()).isInstanceOf(SoeknadFtrl.class);
         assertThat(opprettet.getType()).isEqualTo(Behandlingsgrunnlagtyper.SØKNAD_FOLKETRYGDEN);
         assertThat(opprettet.getBehandling()).isEqualTo(behandling);
+        assertThat(opprettet.getMottaksdato()).isNotNull();
     }
 
     private Behandling lagBehandling() {
@@ -144,11 +146,5 @@ class BehandlingsgrunnlagServiceTest {
         behandling.setId(behandlingID);
         behandling.setInitierendeJournalpostId(journalpostID);
         return behandling;
-    }
-
-    private Journalpost lagJournalpost() {
-        var journalpost = new Journalpost(journalpostID);
-        journalpost.setForsendelseMottatt(Instant.now());
-        return journalpost;
     }
 }

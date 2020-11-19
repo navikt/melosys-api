@@ -2,7 +2,6 @@ package no.nav.melosys.service.behandlingsgrunnlag;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Optional;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -86,11 +85,7 @@ public class BehandlingsgrunnlagService {
     }
 
     private LocalDate hentMottaksdato(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException {
-        if (journalpostID == null) {
-            return null;
-        }
-        Instant mottaksDato = joarkFasade.hentJournalpost(journalpostID).getForsendelseMottatt();
-        return LocalDate.ofInstant(mottaksDato, ZoneId.systemDefault());
+        return journalpostID != null ? joarkFasade.hentMottaksDatoForJournalpost(journalpostID) : null;
     }
 
     @Transactional
