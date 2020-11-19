@@ -77,6 +77,7 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
             .randomize(GeografiskAdresse.class, () -> random.nextObject(SemistrukturertAdresse.class))
             .randomize(MidlertidigPostadresse.class, () -> Math.random() > 0.5 ? random.nextObject(MidlertidigPostadresseNorge.class) : random.nextObject(MidlertidigPostadresseUtland.class))
             .randomize(named("fnr").and(ofType(String.class)), new NumericStringRandomizer(11))
+            .randomize(named("fnrAnnenForelder").and(ofType(String.class)), new NumericStringRandomizer(11))
             .randomize(named("orgnummer").and(ofType(String.class)), new NumericStringRandomizer(9))
         );
     }

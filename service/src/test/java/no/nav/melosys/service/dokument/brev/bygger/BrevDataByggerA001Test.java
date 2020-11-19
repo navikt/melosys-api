@@ -31,6 +31,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -160,7 +161,7 @@ public class BrevDataByggerA001Test {
 
     private BrevDataGrunnlag lagBrevDataGrunnlag(Brevbestilling brevbestilling) throws TekniskException {
         RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(ereg, mock(TpsFasade.class));
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService);
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class));
         return new BrevDataGrunnlag(brevbestilling, mock(KodeverkService.class), avklarteVirksomheterService, avklartefaktaService);
     }
 

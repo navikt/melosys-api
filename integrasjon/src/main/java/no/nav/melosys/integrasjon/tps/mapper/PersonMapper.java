@@ -48,6 +48,7 @@ public class PersonMapper {
         if (familiemedlem.erBarn()) {
             dokument.hentAnnenForelder(ident)
                 .ifPresent(forelder -> familiemedlem.fnrAnnenForelder = forelder.fnr);
+            familiemedlem.fødselsdato = dokument.fødselsdato;
         } else if (familiemedlem.erEktefellePartnerSamboer()) {
             familiemedlem.sivilstand = dokument.sivilstand;
             familiemedlem.sivilstandGyldighetsperiodeFom = dokument.sivilstandGyldighetsperiodeFom;

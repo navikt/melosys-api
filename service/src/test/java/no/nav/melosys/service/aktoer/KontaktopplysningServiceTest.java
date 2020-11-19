@@ -55,7 +55,9 @@ public class KontaktopplysningServiceTest {
 
         String kontaktorgnr = "nyttkontaktorgnr";
         String kontaktnavn = "nyttkontaktnavn";
-        Kontaktopplysning kontaktopplysning = kontaktopplysningService.lagEllerOppdaterKontaktopplysning(SAK_NUMMER, ORG_NUMMER, kontaktorgnr, kontaktnavn);
+        String kontakttelefon = "nyttkontakttelefonnummer";
+        Kontaktopplysning kontaktopplysning = kontaktopplysningService
+            .lagEllerOppdaterKontaktopplysning(SAK_NUMMER, ORG_NUMMER, kontaktorgnr, kontaktnavn, kontakttelefon);
 
         assertThat(kontaktopplysning).isNotSameAs(eksisterendeKontaktopplysning);
         verify(kontaktopplysningRepository).save(kontaktopplysning);
@@ -63,6 +65,7 @@ public class KontaktopplysningServiceTest {
         assertThat(kontaktopplysning.getKontaktopplysningID().getOrgnr()).isEqualTo(ORG_NUMMER);
         assertThat(kontaktopplysning.getKontaktNavn()).isEqualTo(kontaktnavn);
         assertThat(kontaktopplysning.getKontaktOrgnr()).isEqualTo(kontaktorgnr);
+        assertThat(kontaktopplysning.getKontaktTelefon()).isEqualTo(kontakttelefon);
     }
 
     @Test
@@ -70,7 +73,9 @@ public class KontaktopplysningServiceTest {
         when(kontaktopplysningRepository.findById(new KontaktopplysningID(SAK_NUMMER, ORG_NUMMER))).thenReturn(Optional.of(eksisterendeKontaktopplysning));
         String kontaktorgnr = "nyttkontaktorgnr";
         String kontaktnavn = "nyttkontaktnavn";
-        Kontaktopplysning kontaktopplysning = kontaktopplysningService.lagEllerOppdaterKontaktopplysning(SAK_NUMMER, ORG_NUMMER, kontaktorgnr, kontaktnavn);
+        String kontakttelefon = "nyttkontakttelefonnummer";
+        Kontaktopplysning kontaktopplysning = kontaktopplysningService
+            .lagEllerOppdaterKontaktopplysning(SAK_NUMMER, ORG_NUMMER, kontaktorgnr, kontaktnavn, kontakttelefon);
 
         assertThat(kontaktopplysning).isSameAs(eksisterendeKontaktopplysning);
         verify(kontaktopplysningRepository).save(kontaktopplysning);
@@ -78,6 +83,7 @@ public class KontaktopplysningServiceTest {
         assertThat(kontaktopplysning.getKontaktopplysningID().getOrgnr()).isEqualTo(ORG_NUMMER);
         assertThat(kontaktopplysning.getKontaktNavn()).isEqualTo(kontaktnavn);
         assertThat(kontaktopplysning.getKontaktOrgnr()).isEqualTo(kontaktorgnr);
+        assertThat(kontaktopplysning.getKontaktTelefon()).isEqualTo(kontakttelefon);
     }
 
     @Test

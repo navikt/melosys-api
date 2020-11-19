@@ -94,6 +94,6 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
         if (representant == null || kontaktperson == null) {
             return Collections.emptyList();
         }
-        return Collections.singletonList(Kontaktopplysning.av(representant, kontaktperson));
+        return Collections.singletonList(Kontaktopplysning.av(representant, kontaktperson, null));
     }
 }

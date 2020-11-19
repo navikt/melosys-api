@@ -2,8 +2,6 @@ package no.nav.melosys.domain.dokument.person;
 
 import java.time.LocalDate;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class Familiemedlem {
 
     public String fnr;
@@ -12,7 +10,6 @@ public class Familiemedlem {
 
     public Familierelasjon familierelasjon;
 
-    @JsonProperty("foedselsdato")
     public LocalDate fødselsdato;
 
     public boolean borMedBruker;

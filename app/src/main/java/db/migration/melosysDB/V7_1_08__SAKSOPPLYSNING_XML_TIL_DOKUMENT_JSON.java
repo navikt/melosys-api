@@ -1,18 +1,11 @@
 package db.migration.melosysDB;
 
-import java.io.InputStream;
 import java.io.StringReader;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
-import java.util.Map;
-import javax.xml.XMLConstants;
 import javax.xml.bind.helpers.DefaultValidationEventHandler;
 import javax.xml.transform.*;
-import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -39,8 +32,6 @@ public class V7_1_08__SAKSOPPLYSNING_XML_TIL_DOKUMENT_JSON extends BaseJavaMigra
 
     private final SaksopplysningDokumentConverter converter;
     private final Jaxb2Marshaller jaxb2Marshaller;
-    private final TransformerFactory transformerFactory;
-    private final Map<String, Transformer> transformerMap = new HashMap<>();
 
     public V7_1_08__SAKSOPPLYSNING_XML_TIL_DOKUMENT_JSON() {
         converter = new SaksopplysningDokumentConverter();
@@ -48,10 +39,6 @@ public class V7_1_08__SAKSOPPLYSNING_XML_TIL_DOKUMENT_JSON extends BaseJavaMigra
         jaxb2Marshaller = new Jaxb2Marshaller();
         jaxb2Marshaller.setPackagesToScan("no.nav.melosys.domain.dokument");
         jaxb2Marshaller.setValidationEventHandler(new DefaultValidationEventHandler());
-
-        this.transformerFactory = TransformerFactory.newInstance();
-        transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-        transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
     }
 
     @Override
@@ -73,7 +60,6 @@ public class V7_1_08__SAKSOPPLYSNING_XML_TIL_DOKUMENT_JSON extends BaseJavaMigra
 
     private void opprettMigrering(OracleResultSet resultSet, OracleConnection con) throws SQLException, TransformerException, JsonProcessingException {
         long saksopplysningID = resultSet.getLong("id");
-        long behandlingID = resultSet.getLong("behandling_id");
         String versjon = resultSet.getString("versjon");
         String opplysningType = resultSet.getString("opplysning_type");
         String kildesystem = resultSet.getString("kilde");
@@ -129,37 +115,9 @@ public class V7_1_08__SAKSOPPLYSNING_XML_TIL_DOKUMENT_JSON extends BaseJavaMigra
 
     @SuppressWarnings("unchecked")
     private <T extends SaksopplysningDokument> String lagDokumentJson(Class<T> clazz, String xml, String path, String versjon) throws TransformerException, JsonProcessingException {
-        StringReader stringReader = clazz == SedDokument.class
-            ? new StringReader(xml)
-            : new StringReader(transformer(xml, path, versjon));
+        StringReader stringReader = new StringReader(xml);
         T dokument = (T) jaxb2Marshaller.unmarshal(new StreamSource(stringReader));
         return converter.convertToDatabaseColumn(dokument);
-    }
-
-    private String transformer(String xml, String path, String versjon) throws TransformerException {
-        Transformer transformer;
-        if (transformerMap.containsKey(path)) {
-            transformer = transformerMap.get(path);
-        } else {
-            transformer = lagTransformer(path, versjon);
-            transformerMap.put(path, transformer);
-        }
-
-        StreamResult outputTarget = new StreamResult(new StringWriter());
-        StreamSource xmlSource = new StreamSource(new StringReader(xml));
-        transformer.transform(xmlSource, outputTarget);
-        return outputTarget.getWriter().toString();
-    }
-
-    private Transformer lagTransformer(String path, String versjon) throws TransformerConfigurationException {
-        Transformer transformer = lagTemplate(path, versjon).newTransformer();
-        transformer.setOutputProperty(OutputKeys.ENCODING, StandardCharsets.UTF_8.name());
-        return transformer;
-    }
-
-    private Templates lagTemplate(String path, String versjon) throws TransformerConfigurationException {
-        InputStream is = getClass().getClassLoader().getResourceAsStream(path);
-        return transformerFactory.newTemplates(new StreamSource(is));
     }
 
     private void oppdaterSaksopplysning(OracleConnection con, long saksopplysningID, String json) throws SQLException {
