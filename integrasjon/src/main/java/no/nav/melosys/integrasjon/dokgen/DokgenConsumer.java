@@ -3,22 +3,22 @@ package no.nav.melosys.integrasjon.dokgen;
 import no.nav.melosys.integrasjon.dokgen.dto.DokgenDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import static java.lang.String.format;
 
 @Component
 public class DokgenConsumer {
     private static final Logger log = LoggerFactory.getLogger(DokgenConsumer.class);
 
+    @Value("${melosysdokgen.v1.url}")
+    private String url;
+
     private final WebClient webClient;
 
-    @Autowired
-    public DokgenConsumer(WebClient webClient) {
-        this.webClient = webClient;
+    public DokgenConsumer() {
+        this.webClient = WebClient.create(url);
     }
 
 

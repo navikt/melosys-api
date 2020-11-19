@@ -1,14 +1,26 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.InnvilgelsesResultat;
+import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.UtenlandskMyndighet;
+import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ForetakUtland;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ForetakUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
@@ -36,18 +48,52 @@ import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.dokument.DokumentSystemService;
-import no.nav.melosys.service.dokument.brev.*;
-import no.nav.melosys.service.dokument.brev.bygger.*;
+import no.nav.melosys.service.dokument.brev.BrevData;
+import no.nav.melosys.service.dokument.brev.BrevDataA1;
+import no.nav.melosys.service.dokument.brev.BrevDataAvslagArbeidsgiver;
+import no.nav.melosys.service.dokument.brev.BrevDataAvslagYrkesaktiv;
+import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
+import no.nav.melosys.service.dokument.brev.BrevDataService;
+import no.nav.melosys.service.dokument.brev.BrevDataUtpekingAnnetLand;
+import no.nav.melosys.service.dokument.brev.BrevDataVedlegg;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAvslagArbeidsgiver;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAvslagYrkesaktiv;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerStandard;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerUtpekingAnnetLand;
+import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerVedlegg;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory;
+import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static no.nav.melosys.saksflyt.brev.FastMottaker.*;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ANMODNING_UNNTAK;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ATTEST_A1;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.AVSLAG_ARBEIDSGIVER;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.AVSLAG_YRKESAKTIV;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.INNVILGELSE_ARBEIDSGIVER;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.INNVILGELSE_YRKESAKTIV;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.INNVILGELSE_YRKESAKTIV_FLERE_LAND;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ORIENTERING_UTPEKING_UTLAND;
+import static no.nav.melosys.saksflyt.brev.FastMottaker.HELFO;
+import static no.nav.melosys.saksflyt.brev.FastMottaker.SKATT;
+import static no.nav.melosys.saksflyt.brev.FastMottaker.SKATTEOPPKREVER_UTLAND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.longThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class SendVedtaksbrevInnlandTest {
     private static final long BEHANDLINGSID = 42L;
@@ -102,7 +148,7 @@ class SendVedtaksbrevInnlandTest {
         when(byggerVelger.hent(eq(ORIENTERING_UTPEKING_UTLAND), any())).thenReturn(brevDataByggerUtpekingAnnetLand);
 
         dokService = spy(lagDokumentService(byggerVelger));
-        dokumentServiceFasade = new DokumentServiceFasade(mock(DokumentService.class), dokService, mock(DokgenService.class), mock(BehandlingService.class));
+        dokumentServiceFasade = new DokumentServiceFasade(mock(DokumentService.class), dokService, mock(DokgenService.class), mock(BehandlingService.class), mock(ProsessinstansService.class));
         BrevBestiller brevBestiller = new BrevBestiller(dokumentServiceFasade);
 
         BehandlingService behandlingService = mock(BehandlingService.class);

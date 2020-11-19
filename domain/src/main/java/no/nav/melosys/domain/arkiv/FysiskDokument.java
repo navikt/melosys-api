@@ -36,7 +36,7 @@ public class FysiskDokument extends ArkivDokument {
         return fysiskDokument;
     }
 
-    static FysiskDokument lagFysiskDokumentPdf(String tittel, byte[] pdf) {
+    static FysiskDokument lagInfoBrevPdf(String tittel, byte[] pdf) {
         FysiskDokument fysiskDokument = new FysiskDokument();
         fysiskDokument.setDokumentKategori(DOKUMENT_KATEGORI_INFOBREV);
         fysiskDokument.setTittel(tittel);

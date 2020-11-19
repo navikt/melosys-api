@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Ett kodeverk, internt representert som en av der kode gir en liste med en eller flere navn (en for hver gyldighetsperiode)
+ * Ett kodeverk, internt representert som en map der kode gir en liste med en eller flere navn (en for hver gyldighetsperiode)
  */
 public class Kodeverk {
     

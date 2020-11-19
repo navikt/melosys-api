@@ -23,6 +23,7 @@ public enum ProsessDataKey {
     BRUKER_ID("brukerID"),
     DISTRIBUERBAR_JOURNALPOST_ID("distribuerbarJournalpostID"),
     DISTRIBUER_MOTTAKER_LAND("distribuerMottakerLand"),
+    DISTRIBUER_OVERSTYR_MOTTAKER("distribuerOverstyrMottaker"),
     DOKUMENT_ID("dokumentID"),
     EESSI_MELDING("eessiMelding"),
     EESSI_MOTTAKERE("eessiMottakere"),

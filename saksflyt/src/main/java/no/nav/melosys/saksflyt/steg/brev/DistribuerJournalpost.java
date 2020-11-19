@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
+import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -11,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.DISTRIBUER_OVERSTYR_MOTTAKER;
 import static org.springframework.util.StringUtils.isEmpty;
 
 @Component
@@ -31,14 +35,21 @@ public class DistribuerJournalpost implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
 
-        String journalpostId = prosessinstans.getData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID);
+        String journalpostId = prosessinstans.getData(DISTRIBUERBAR_JOURNALPOST_ID);
+        Mottaker overstyrtMottaker = prosessinstans.getData(DISTRIBUER_OVERSTYR_MOTTAKER, Mottaker.class, null);
 
         if (isEmpty(journalpostId)) {
             throw new FunksjonellException("JournalpostId mangler, kan ikke distribuere");
         }
 
-        //TODO Mangler flagg for å overstyre mottaker
-        String bestillingsId = doksysFasade.distribuerJournalpost(journalpostId);
+        String bestillingsId;
+        if (overstyrtMottaker != null) {
+            //NOTE Implementer når nødvendig
+            StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
+            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, strukturertAdresse);
+        } else {
+            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId);
+        }
         log.info("Distribuering av journalpostId {} bestilt med bestillingsId {}", journalpostId, bestillingsId);
     }
 }

@@ -22,7 +22,7 @@ public class SaksbehandlingstidSoknad extends DokgenDto {
     private final String avsenderSoknad;
     private final String avsenderLand;
 
-    public SaksbehandlingstidSoknad(String fnr, String saksnummer, LocalDateTime dagensDato,
+    private SaksbehandlingstidSoknad(String fnr, String saksnummer, LocalDateTime dagensDato,
                                     LocalDateTime datoMottatt, LocalDateTime datoBehandlingstid,
                                     String navnBruker, String navnMottaker, List<String> adresselinjer,
                                     String postnr, String poststed, Sakstyper typeSoknad,

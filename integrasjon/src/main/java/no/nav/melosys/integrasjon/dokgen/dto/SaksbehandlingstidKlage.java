@@ -15,7 +15,7 @@ public class SaksbehandlingstidKlage extends DokgenDto {
     private final LocalDateTime datoVedtak;
     private final boolean mottakerRepresentantForBruker;
 
-    public SaksbehandlingstidKlage(String fnr, String saksnummer, LocalDateTime dagensDato,
+    private SaksbehandlingstidKlage(String fnr, String saksnummer, LocalDateTime dagensDato,
                                    LocalDateTime datoMottatt, LocalDateTime datoBehandlingstid,
                                    String navnBruker, String navnMottaker, List<String> adresselinjer,
                                    String postnr, String poststed, LocalDateTime datoVedtak,
@@ -49,6 +49,7 @@ public class SaksbehandlingstidKlage extends DokgenDto {
     public LocalDateTime getDatoVedtak() {
         return datoVedtak;
     }
+    
     public boolean isMottakerRepresentantForBruker() {
         return mottakerRepresentantForBruker;
     }

@@ -106,8 +106,7 @@ public class DokumentTjeneste {
         tilgangService.sjekkTilgang(behandlingID);
         // Produserer utkast for å få eventuelle feil før bestilling i saksflyt.
         dokumentServiceFasade.produserUtkast(produserbartDokument, behandlingID, brevBestillingDto);
-        //TODO Slett og gjør til synkront kall
-        dokumentServiceFasade.produserDokumentISaksflyt(produserbartDokument, brevBestillingDto.mottaker, behandlingID, new BrevData(brevBestillingDto));
+        dokumentServiceFasade.produserDokument(produserbartDokument, behandlingID, brevBestillingDto);
         return ResponseEntity.noContent().build();
     }
 

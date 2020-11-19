@@ -11,7 +11,6 @@ import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
@@ -19,6 +18,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.ProsessType;
@@ -28,7 +28,6 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.sak.OpprettSakDto;
@@ -197,16 +196,6 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansMangelbrev(Behandling behandling, Aktoersroller mottaker, BrevData brevData) {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(behandling);
-        prosessinstans.setType(ProsessType.MANGELBREV);
-        prosessinstans.setData(ProsessDataKey.MOTTAKER, mottaker);
-        prosessinstans.setData(ProsessDataKey.BREVDATA, brevData);
-
-        lagre(prosessinstans);
-    }
-
     public void opprettProsessinstansNySak(String journalpostID, OpprettSakDto opprettSakDto, Behandlingstyper behandlingstype) {
         Prosessinstans prosessinstans = new Prosessinstans();
 
@@ -265,9 +254,17 @@ public class ProsessinstansService {
 
     public void opprettProsessinstansDistribuerForvaltningsmelding(Behandling behandling) {
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.OPPRETT_OG_JOURNALFØR_FORVALTNINGSMELDING);
+        prosessinstans.setType(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
         prosessinstans.setData(PRODUSERBART_BREV, SOEKNAD.equals(behandling.getType()) ?
             MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD : MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE);
+        prosessinstans.setBehandling(behandling);
+        lagre(prosessinstans);
+    }
+
+    public void opprettProsessinstansOpprettOgDistribuerBrev(Produserbaredokumenter produserbartDokument, Behandling behandling) {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setType(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
+        prosessinstans.setData(PRODUSERBART_BREV, produserbartDokument);
         prosessinstans.setBehandling(behandling);
         lagre(prosessinstans);
     }

@@ -24,7 +24,7 @@ public enum ProsessType implements Kodeverk {
     MOTTAK_SED_JOURNALFØRING("MOTTAK_SED_JOURNALFØRING", "Mottak av SED som kun skal journalføres"),
     MOTTAK_SOKNAD_ALTINN("MOTTAK_SOKNAD_ALTINN", "Mottak av elektronisk søknad fra altinn"),
     OPPRETT_NY_SAK("OPPRETT_NY_SAK", "Oppretter ny sak (fra journalført dokument)"),
-    OPPRETT_OG_JOURNALFØR_FORVALTNINGSMELDING("OPPRETT_OG_DISTRIBUER_JOURNALPOST", "Opprett, journalfør og distribuer forvaltningsmelding"),
+    OPPRETT_OG_DISTRIBUER_BREV("OPPRETT_OG_DISTRIBUER_BREV", "Opprett, journalfør og distribuer brev"),
     REGISTRERING_UNNTAK_GODKJENN("REGISTRERING_UNNTAK_GODKJENN", "Godkjenner en untaksperiode og avslutter behandling"),
     REGISTRERING_UNNTAK_AVVIS("REGISTRERING_UNNTAK_AVVIS", "Avviser en untaksperiode og avslutter behandling"),
     REGISTRERING_UNNTAK_NY_SAK("REGISTRERING_UNNTAK_NY_SAK", "Registrering av unntak - ny sak"),

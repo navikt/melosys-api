@@ -165,19 +165,4 @@ public class DokumentService {
         Element brevinnhold = brevDataService.lagBrevXML(produserbartDokument, mottaker, kontaktopplysning, behandling, brevData);
         return new Dokumentbestilling(metadata, brevinnhold);
     }
-
-    @Transactional(rollbackFor = MelosysException.class)
-    public void produserDokumentISaksflyt(Produserbaredokumenter produserbartDokument, Aktoersroller mottaker, long behandlingID, BrevData brevdata)
-        throws FunksjonellException {
-        Assert.notNull(mottaker, "Dokument uten mottaker.");
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
-
-        if (produserbartDokument == MELDING_MANGLENDE_OPPLYSNINGER) {
-            prosessinstansService.opprettProsessinstansMangelbrev(behandling, mottaker, brevdata);
-        } else if (produserbartDokument == MELDING_FORVENTET_SAKSBEHANDLINGSTID) {
-            prosessinstansService.opprettProsessinstansForvaltningsmelding(behandling);
-        } else {
-            throw new FunksjonellException("Produserbaredokumenter " + produserbartDokument + " er ikke støttet.");
-        }
-    }
 }

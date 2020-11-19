@@ -1,6 +1,8 @@
 package no.nav.melosys.service.dokument;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
+import no.nav.melosys.integrasjon.dokgen.DokgenMalMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -30,7 +32,7 @@ class DokgenServiceTest {
                     .build())
             ).build();
 
-        dokgenService = new DokgenService(new DokgenConsumer(webClient));
+        dokgenService = new DokgenService(new DokgenConsumer(), new DokgenMalMapper(new FakeUnleash()));
     }
 
 //    @Test

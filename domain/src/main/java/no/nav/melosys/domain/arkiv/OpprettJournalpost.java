@@ -11,7 +11,7 @@ import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.msm.AltinnDokument;
 
 import static no.nav.melosys.domain.arkiv.FysiskDokument.lagFysiskDokumentAltinn;
-import static no.nav.melosys.domain.arkiv.FysiskDokument.lagFysiskDokumentPdf;
+import static no.nav.melosys.domain.arkiv.FysiskDokument.lagInfoBrevPdf;
 import static no.nav.melosys.domain.arkiv.FysiskDokument.lagFysiskDokumentSed;
 
 public class OpprettJournalpost extends Journalpost {
@@ -96,7 +96,7 @@ public class OpprettJournalpost extends Journalpost {
 
     public static OpprettJournalpost lagJournalpostForPdf(String tittel, String brukerFnr, byte[] pdf) {
         OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
-        opprettJournalpost.setHoveddokument(lagFysiskDokumentPdf(tittel, pdf));
+        opprettJournalpost.setHoveddokument(lagInfoBrevPdf(tittel, pdf));
         opprettJournalpost.setJournalposttype(Journalposttype.UT);
         opprettJournalpost.setJournalførendeEnhet(MEDLEMSKAP_OG_AVGIFT);
         opprettJournalpost.setTema(MEDLEMSKAP);
