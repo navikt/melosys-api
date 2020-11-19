@@ -79,14 +79,11 @@
     ]
   },
   "juridiskArbeidsgiverNorge": {
-    "utsendteNeste12Mnd": 10,
     "antallAdmAnsatte": 35,
     "antallAnsatte": 350,
     "andelOmsetningINorge": 78.5,
     "andelOppdragINorge": 50.5,
     "andelKontrakterINorge": 30.5,
-    "arbeidstakereRekruttertILand": "SE",
-    "oppdragsKontrakterIHovedsakInngaattILand": "NO",
     "ekstraArbeidsgivere": []
   },
   "arbeidsinntekt": {
