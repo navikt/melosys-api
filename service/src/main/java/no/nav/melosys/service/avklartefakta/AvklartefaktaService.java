@@ -50,7 +50,6 @@ public class AvklartefaktaService {
         return avklartefakta.stream().map(AvklartefaktaDto::new).collect(Collectors.toSet());
     }
 
-
     public Set<Landkoder> hentAlleAvklarteArbeidsland(long behandlingsid) {
         Set<Avklartefakta> avklarteArbeidsland =
             avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatyper.ARBEIDSLAND);
