@@ -1,5 +1,7 @@
 package no.nav.melosys.integrasjon.joark;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -126,6 +128,12 @@ public class JoarkService implements JoarkFasade {
 
         return journalpost;
     }
+
+    @Override
+    public LocalDate hentMottaksDatoForJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException {
+        return LocalDate.ofInstant(hentJournalpost(journalpostID).getForsendelseMottatt(), ZoneId.systemDefault());
+    }
+
 
     private ArkivDokument lagArkivDokument(Dokument dokument) {
         ArkivDokument arkivDokument = new ArkivDokument();

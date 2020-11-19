@@ -18,6 +18,9 @@ public class Kontaktopplysning {
     @Column(name = "kontakt_orgnr")
     private String kontaktOrgnr;
 
+    @Column(name = "kontakt_telefon")
+    private String kontaktTelefon;
+
     public KontaktopplysningID getKontaktopplysningID() {
         return kontaktopplysningID;
     }
@@ -42,12 +45,21 @@ public class Kontaktopplysning {
         this.kontaktOrgnr = kontaktOrgnr;
     }
 
-    public static Kontaktopplysning av(String orgnr, String kontaktNavn) {
+    public String getKontaktTelefon() {
+        return kontaktTelefon;
+    }
+
+    public void setKontaktTelefon(String kontaktTelefon) {
+        this.kontaktTelefon = kontaktTelefon;
+    }
+
+    public static Kontaktopplysning av(String orgnr, String kontaktNavn, String kontaktpersonTelefon) {
         Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
         KontaktopplysningID kontaktopplysningID = new KontaktopplysningID();
         kontaktopplysningID.setOrgnr(orgnr);
         kontaktopplysning.setKontaktopplysningID(kontaktopplysningID);
         kontaktopplysning.setKontaktNavn(kontaktNavn);
+        kontaktopplysning.setKontaktTelefon(kontaktpersonTelefon);
         return kontaktopplysning;
     }
 

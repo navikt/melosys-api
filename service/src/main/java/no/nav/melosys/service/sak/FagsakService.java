@@ -270,7 +270,7 @@ public class FagsakService {
         if (CollectionUtils.isNotEmpty(kontaktopplysninger)) {
             kontaktopplysninger.forEach(opplysning -> kontaktopplysningService
                 .lagEllerOppdaterKontaktopplysning(saksnummer, opplysning.getKontaktopplysningID().getOrgnr(),
-                    opplysning.getKontaktOrgnr(), opplysning.getKontaktNavn()));
+                    opplysning.getKontaktOrgnr(), opplysning.getKontaktNavn(), opplysning.getKontaktTelefon()));
         }
 
         Behandlingstyper behandlingstype = opprettSakRequest.getBehandlingstype();

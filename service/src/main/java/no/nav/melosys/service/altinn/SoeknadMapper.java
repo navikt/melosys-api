@@ -1,5 +1,6 @@
 package no.nav.melosys.service.altinn;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,10 +8,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MedfolgendeFamilie;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Soeknadsland;
 import no.nav.melosys.soknad_altinn.*;
 
 public final class SoeknadMapper {
@@ -22,10 +21,34 @@ public final class SoeknadMapper {
     static Soeknad lagSoeknadDokument(MedlemskapArbeidEOSM søknad) {
         final Soeknad soeknad = new Soeknad();
         final Innhold innhold = søknad.getInnhold();
+        soeknad.personOpplysninger.utenlandskIdent.add(lagUtenlandskIdent(innhold.getArbeidstaker()));
+        soeknad.juridiskArbeidsgiverNorge = lagJuridiskArbeidsgiverNorge(innhold.getArbeidsgiver());
         soeknad.soeknadsland = hentsoeknadsland(innhold);
         soeknad.periode = lagPeriode(innhold);
         soeknad.personOpplysninger.medfolgendeFamilie = hentMedfølgendeBarn(innhold);
         return soeknad;
+    }
+
+    private static UtenlandskIdent lagUtenlandskIdent(Arbeidstaker arbeidstaker) {
+        UtenlandskIdent utenlandskIdent = new UtenlandskIdent();
+        utenlandskIdent.ident = arbeidstaker.getUtenlandskIDnummer();
+        utenlandskIdent.landkode = arbeidstaker.getUtenlandskIDland();
+        return utenlandskIdent;
+    }
+
+    private static JuridiskArbeidsgiverNorge lagJuridiskArbeidsgiverNorge(Arbeidsgiver arbeidsgiver) {
+        JuridiskArbeidsgiverNorge juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
+        if (arbeidsgiver != null && arbeidsgiver.getSamletVirksomhetINorge() != null) {
+            SamletVirksomhetINorge samletVirksomhetINorge = arbeidsgiver.getSamletVirksomhetINorge();
+            juridiskArbeidsgiverNorge.antallAnsatte = samletVirksomhetINorge.getAntallAnsatte().intValue();
+            juridiskArbeidsgiverNorge.antallAdmAnsatte = samletVirksomhetINorge.getAntallAdministrativeAnsatteINorge().intValue();
+            juridiskArbeidsgiverNorge.antallUtsendte = samletVirksomhetINorge.getAntallUtsendte().intValue();
+            juridiskArbeidsgiverNorge.andelOmsetningINorge = new BigDecimal(samletVirksomhetINorge.getAndelOmsetningINorge());
+            juridiskArbeidsgiverNorge.andelOppdragINorge = new BigDecimal(samletVirksomhetINorge.getAndelOppdragINorge());
+            juridiskArbeidsgiverNorge.andelKontrakterINorge = new BigDecimal(samletVirksomhetINorge.getAndelKontrakterInngaasINorge());
+            juridiskArbeidsgiverNorge.andelRekruttertINorge = new BigDecimal(samletVirksomhetINorge.getAndelRekrutteresINorge());
+        }
+        return juridiskArbeidsgiverNorge;
     }
 
     private static Soeknadsland hentsoeknadsland(Innhold innhold) {
