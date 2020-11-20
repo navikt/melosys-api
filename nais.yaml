@@ -14,11 +14,11 @@ spec:
     cpuThresholdPercentage: 80
   liveness:
     path: internal/health
-    initialDelay: 1200
+    initialDelay: 240
     timeout: 10
   readiness:
     path: internal/health
-    initialDelay: 600
+    initialDelay: 120
     timeout: 10
   resources:
     limits:
