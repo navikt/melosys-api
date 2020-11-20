@@ -24,14 +24,6 @@ public final class ProsessflytDefinisjon {
         );
 
         PROSESS_FLYT_MAP.put(
-            ProsessType.FORVALTNINGSMELDING_SEND,
-            new ProsessFlyt(ProsessType.FORVALTNINGSMELDING_SEND,
-                SEND_FORVALTNINGSMELDING
-            )
-        );
-
-
-        PROSESS_FLYT_MAP.put(
             ProsessType.OPPRETT_OG_DISTRIBUER_BREV,
             new ProsessFlyt(ProsessType.OPPRETT_OG_DISTRIBUER_BREV,
                 OPPRETT_OG_JOURNALFØR_BREV,

@@ -94,7 +94,7 @@ public class OpprettJournalpost extends Journalpost {
         return opprettJournalpost;
     }
 
-    public static OpprettJournalpost lagJournalpostForPdf(String tittel, String brukerFnr, byte[] pdf) {
+    public static OpprettJournalpost lagJournalpostForBrev(String tittel, String brukerFnr, byte[] pdf) {
         OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
         opprettJournalpost.setHoveddokument(lagInfoBrevPdf(tittel, pdf));
         opprettJournalpost.setJournalposttype(Journalposttype.UT);

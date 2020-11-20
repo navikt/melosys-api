@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -12,15 +11,19 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SendForvaltningsmeldingTest {
@@ -34,7 +37,7 @@ class SendForvaltningsmeldingTest {
 
     @BeforeEach
     public void setUp() {
-        sendForvaltningsmelding = new SendForvaltningsmelding(brevBestiller, behandlingService, mock(ProsessinstansService.class), mock(Unleash.class));
+        sendForvaltningsmelding = new SendForvaltningsmelding(brevBestiller, behandlingService);
     }
 
     @Test

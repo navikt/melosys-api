@@ -10,6 +10,8 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.DokgenService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +21,7 @@ import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_OG_JOURNALFØR_
 
 @Component
 public class OpprettJournalforBrev implements StegBehandler {
+    private static final Logger log = LoggerFactory.getLogger(OpprettJournalforBrev.class);
 
     private final BehandlingService behandlingService;
     private final DokgenService dokgenService;
@@ -42,11 +45,13 @@ public class OpprettJournalforBrev implements StegBehandler {
         Produserbaredokumenter produserbartDokument = prosessinstans.getData(PRODUSERBART_BREV, Produserbaredokumenter.class);
 
         byte[] pdf = dokgenService.produserBrev(produserbartDokument, behandling);
+        log.info("Produserbartdokument {} for behandling {} produsert", produserbartDokument, behandling.getId());
 
         String journalpostId = joarkFasade.opprettJournalpost(
-            OpprettJournalpost.lagJournalpostForPdf(produserbartDokument.getBeskrivelse(),
+            OpprettJournalpost.lagJournalpostForBrev(produserbartDokument.getBeskrivelse(),
                 behandling.hentPersonDokument().fnr, pdf), true);
 
+        log.info("Brev for behandling {} er journalført, journalpostId {}", behandling.getId(), journalpostId);
         prosessinstans.setData(DISTRIBUERBAR_JOURNALPOST_ID, journalpostId);
     }
 }

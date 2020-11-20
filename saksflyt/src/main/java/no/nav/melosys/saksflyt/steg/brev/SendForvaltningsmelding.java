@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -10,7 +9,6 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,15 +27,11 @@ public class SendForvaltningsmelding implements StegBehandler {
 
     private final BrevBestiller brevBestiller;
     private final BehandlingService behandlingService;
-    private final ProsessinstansService prosessinstansService;
-    private final Unleash unleash;
 
     @Autowired
-    public SendForvaltningsmelding(BrevBestiller brevBestiller, BehandlingService behandlingService, ProsessinstansService prosessinstansService, Unleash unleash) {
+    public SendForvaltningsmelding(BrevBestiller brevBestiller, BehandlingService behandlingService) {
         this.brevBestiller = brevBestiller;
         this.behandlingService = behandlingService;
-        this.prosessinstansService = prosessinstansService;
-        this.unleash = unleash;
     }
 
     @Override
@@ -51,16 +45,10 @@ public class SendForvaltningsmelding implements StegBehandler {
         boolean skalSendesForvaltningsmelding = prosessinstans.getData(SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class, Boolean.FALSE);
 
         if (prosessinstans.getBehandling().erBehandlingAvSøknad() && skalSendesForvaltningsmelding) {
-            if (unleash.isEnabled("melosys.nyForvaltningsmelding")) {
-                prosessinstansService.opprettProsessinstansDistribuerForvaltningsmelding(prosessinstans.getBehandling());
-            } else {
-
-                Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
-                String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
-                brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID, saksbehandler, Mottaker.av(BRUKER), behandling);
-                log.info("Sendt forvaltningsmelding for behandling {}", prosessinstans.getBehandling().getId());
-
-            }
+            Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
+            String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
+            brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID, saksbehandler, Mottaker.av(BRUKER), behandling);
+            log.info("Sendt forvaltningsmelding for behandling {}", prosessinstans.getBehandling().getId());
         } else {
             log.info("Ikke sendt forvaltningsmelding for behandling {}", prosessinstans.getBehandling().getId());
         }

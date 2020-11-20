@@ -12,12 +12,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class DokgenConsumer {
     private static final Logger log = LoggerFactory.getLogger(DokgenConsumer.class);
 
-    @Value("${melosysdokgen.v1.url}")
-    private String url;
-
     private final WebClient webClient;
 
-    public DokgenConsumer() {
+    public DokgenConsumer(@Value("${melosysdokgen.v1.url}") String url) {
         this.webClient = WebClient.create(url);
     }
 
