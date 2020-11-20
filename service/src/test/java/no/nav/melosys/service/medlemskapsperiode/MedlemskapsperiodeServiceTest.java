@@ -197,7 +197,7 @@ class MedlemskapsperiodeServiceTest {
         søknad.soeknadsland.landkoder.add("BR");
         søknad.setTrygdedekning(Trygdedekninger.HELSEDEL_MED_SYKE_OG_FORELDREPENGER);
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknad);
-        //behandlingsgrunnlag.setMottaksDato(LocalDate.now());
+        behandlingsgrunnlag.setMottaksdato(LocalDate.now());
         behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
         behandlingsresultat.setBehandling(behandling);
 

@@ -22,42 +22,36 @@ final class UtledMedlemskapsperioder {
     private UtledMedlemskapsperioder() {
     }
 
-    static Collection<Medlemskapsperiode> lagMedlemskapsperioder(final ErPeriode søknadsperiode,
-                                                                 final Trygdedekninger søktTrygdedekning,
-                                                                 final LocalDate mottaksdatoSøknad,
-                                                                 final Folketrygdloven_kap2_bestemmelser bestemmelse,
-                                                                 final String arbeidsland) {
+    static Collection<Medlemskapsperiode> lagMedlemskapsperioder(UtledMedlemskapsperioderRequest request) {
 
-        final LocalDate enMånedFørMottaksdato = mottaksdatoSøknad.minusMonths(1);
+        final ErPeriode søknadsperiode = request.getSøknadsperiode();
+        final LocalDate enMånedFørMottaksdato = request.getMottaksdatoSøknad().minusMonths(1);
         if (søknadsperiode.getFom().equals(enMånedFørMottaksdato) || søknadsperiode.getFom().isAfter(enMånedFørMottaksdato)) {
-            return Collections.singleton(lagPeriode(søknadsperiode, søktTrygdedekning, bestemmelse, arbeidsland, INNVILGET));
+            return Collections.singleton(lagPeriode(søknadsperiode, request.getTrygdedekning(), request.getBestemmelse(), request.getArbeidsland(), INNVILGET));
         }
 
-        if (søknadsperiode.getFom().isBefore(mottaksdatoSøknad.minusYears(2))) {
-            return Collections.singleton(lagPeriode(søknadsperiode, søktTrygdedekning, bestemmelse, arbeidsland, AVSLAATT));
+        if (søknadsperiode.getFom().isBefore(request.getMottaksdatoSøknad().minusYears(2))) {
+            return Collections.singleton(lagPeriode(søknadsperiode, request.getTrygdedekning(), request.getBestemmelse(), request.getArbeidsland(), AVSLAATT));
         } else {
-            return lagMedlemskapsperioderPeriodeStarterMindreEnn2ÅrFørMottaksdato(søknadsperiode, søktTrygdedekning, mottaksdatoSøknad, bestemmelse, arbeidsland);
+            return lagMedlemskapsperioderPeriodeStarterMindreEnn2ÅrFørMottaksdato(request);
         }
     }
 
-    private static Collection<Medlemskapsperiode> lagMedlemskapsperioderPeriodeStarterMindreEnn2ÅrFørMottaksdato(final ErPeriode søknadsperiode,
-                                                                                                                 final Trygdedekninger søktTrygdedekning,
-                                                                                                                 final LocalDate mottaksdatoSøknad,
-                                                                                                                 final Folketrygdloven_kap2_bestemmelser bestemmelse,
-                                                                                                                 final String arbeidsland) {
-        if (erPensjonsdel(søktTrygdedekning)) {
-            return Collections.singleton(lagPeriode(søknadsperiode, søktTrygdedekning, bestemmelse, arbeidsland, INNVILGET));
+    private static Collection<Medlemskapsperiode> lagMedlemskapsperioderPeriodeStarterMindreEnn2ÅrFørMottaksdato(UtledMedlemskapsperioderRequest request) {
+        final ErPeriode søknadsperiode = request.getSøknadsperiode();
+        if (erPensjonsdel(request.getTrygdedekning())) {
+            return Collections.singleton(lagPeriode(søknadsperiode, request.getTrygdedekning(), request.getBestemmelse(), request.getArbeidsland(), INNVILGET));
         }
 
-        final Pair<Trygdedekninger, InnvilgelsesResultat> trygdeDekningOgresultat = utledDekningOgResultatPeriodeStarterFørMottaksdato(søktTrygdedekning);
-        if (søknadsperiode.getTom() != null && søknadsperiode.getTom().isBefore(mottaksdatoSøknad)) {
-            return Collections.singleton(lagPeriode(søknadsperiode, trygdeDekningOgresultat.getFirst(), bestemmelse, arbeidsland, trygdeDekningOgresultat.getSecond()));
+        final Pair<Trygdedekninger, InnvilgelsesResultat> trygdeDekningOgresultat = utledDekningOgResultatPeriodeStarterFørMottaksdato(request.getTrygdedekning());
+        if (søknadsperiode.getTom() != null && søknadsperiode.getTom().isBefore(request.getMottaksdatoSøknad())) {
+            return Collections.singleton(lagPeriode(søknadsperiode, trygdeDekningOgresultat.getFirst(), request.getBestemmelse(), request.getArbeidsland(), trygdeDekningOgresultat.getSecond()));
         }
 
-        final Pair<ErPeriode, ErPeriode> splittetPeriode = splitPeriode(søknadsperiode, mottaksdatoSøknad);
+        final Pair<ErPeriode, ErPeriode> splittetPeriode = splitPeriode(søknadsperiode, request.getMottaksdatoSøknad());
         return Set.of(
-            lagPeriode(splittetPeriode.getFirst(), trygdeDekningOgresultat.getFirst(), bestemmelse, arbeidsland, trygdeDekningOgresultat.getSecond()),
-            lagPeriode(splittetPeriode.getSecond(), søktTrygdedekning, bestemmelse, arbeidsland, INNVILGET)
+            lagPeriode(splittetPeriode.getFirst(), trygdeDekningOgresultat.getFirst(), request.getBestemmelse(), request.getArbeidsland(), trygdeDekningOgresultat.getSecond()),
+            lagPeriode(splittetPeriode.getSecond(), request.getTrygdedekning(), request.getBestemmelse(), request.getArbeidsland(), INNVILGET)
         );
     }
 

@@ -22,6 +22,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.google.common.collect.MoreCollectors.onlyElement;
 import static no.nav.melosys.service.kontroll.PeriodeKontroller.feilIPeriode;
 
 @Service
@@ -126,11 +127,13 @@ public class MedlemskapsperiodeService {
         SoeknadFtrl søknad = (SoeknadFtrl) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
 
         var medlemskapsperioder = UtledMedlemskapsperioder.lagMedlemskapsperioder(
-            søknad.periode,
-            søknad.getTrygdedekning(),
-            LocalDate.now(), //FIXME: behandlingsgrunnlag.getMottaksdato(),
-            bestemmelse,
-            søknad.soeknadsland.landkoder.iterator().next()
+            new UtledMedlemskapsperioderRequest(
+                søknad.periode,
+                søknad.getTrygdedekning(),
+                bestemmelse,
+                behandlingsgrunnlag.getMottaksdato(),
+                søknad.soeknadsland.landkoder.stream().collect(onlyElement())
+            )
         );
 
         medlemskapsperioder.forEach(m -> m.setBehandlingsresultat(behandlingsresultat));

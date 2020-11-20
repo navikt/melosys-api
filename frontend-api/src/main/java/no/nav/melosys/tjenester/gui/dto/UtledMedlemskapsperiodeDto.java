@@ -4,11 +4,11 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 
-public class UtledMedlemskapsperiodeRequest {
+public class UtledMedlemskapsperiodeDto {
     private final Folketrygdloven_kap2_bestemmelser bestemmelse;
 
     @JsonCreator
-    public UtledMedlemskapsperiodeRequest(@JsonProperty("bestemmelse") Folketrygdloven_kap2_bestemmelser bestemmelse) {
+    public UtledMedlemskapsperiodeDto(@JsonProperty("bestemmelse") Folketrygdloven_kap2_bestemmelser bestemmelse) {
         this.bestemmelse = bestemmelse;
     }
 
