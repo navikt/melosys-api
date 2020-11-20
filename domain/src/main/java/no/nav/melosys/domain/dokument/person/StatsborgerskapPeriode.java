@@ -28,7 +28,6 @@ public class StatsborgerskapPeriode implements HarPeriode {
     public Land statsborgerskap;
 
     @Override
-    @JsonIgnore
     public ErPeriode getPeriode() {
         return periode;
     }
