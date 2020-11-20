@@ -25,7 +25,9 @@ public class DokumentServiceFasade {
 
 
     @Autowired
-    public DokumentServiceFasade(DokumentService dokumentService, DokumentSystemService dokumentSystemService, DokgenService dokgenService, BehandlingService behandlingService, ProsessinstansService prosessinstansService) {
+    public DokumentServiceFasade(DokumentService dokumentService, DokumentSystemService dokumentSystemService,
+                                 DokgenService dokgenService, BehandlingService behandlingService,
+                                 ProsessinstansService prosessinstansService) {
         this.dokumentService = dokumentService;
         this.dokumentSystemService = dokumentSystemService;
         this.dokgenService = dokgenService;
@@ -33,14 +35,16 @@ public class DokumentServiceFasade {
         this.prosessinstansService = prosessinstansService;
     }
 
-    public byte[] produserUtkast(Produserbaredokumenter produserbartDokument, long behandlingId, BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
+    public byte[] produserUtkast(Produserbaredokumenter produserbartDokument, long behandlingId,
+                                 BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
         if (dokgenService.erTilgjengeligDokgenmal(produserbartDokument)) {
             return dokgenService.produserUtkast(produserbartDokument, behandlingId, new BrevData(brevbestillingDto));
         }
         return dokumentService.produserUtkast(produserbartDokument, behandlingId, brevbestillingDto);
     }
 
-    public void produserDokument(Produserbaredokumenter produserbartDokument, long behandlingId, BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
+    public void produserDokument(Produserbaredokumenter produserbartDokument, long behandlingId,
+                                 BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
         String saksbehandler = SubjectHandler.getInstance().getUserID();
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(produserbartDokument)
@@ -53,7 +57,8 @@ public class DokumentServiceFasade {
         produserDokument(produserbartDokument, Mottaker.av(brevbestillingDto.mottaker), behandlingId, brevbestilling);
     }
 
-    public void produserDokument(Produserbaredokumenter produserbartDokument, Mottaker mottaker, long behandlingID, Brevbestilling brevbestilling) throws TekniskException, FunksjonellException {
+    public void produserDokument(Produserbaredokumenter produserbartDokument, Mottaker mottaker,
+                                 long behandlingID, Brevbestilling brevbestilling) throws TekniskException, FunksjonellException {
         if (dokgenService.erTilgjengeligDokgenmal(produserbartDokument)) {
             Behandling behandling = behandlingService.hentBehandling(behandlingID);
             prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(produserbartDokument, behandling);
