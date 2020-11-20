@@ -232,7 +232,11 @@ public class FagsakService {
         HashSet<Aktoer> aktører = new HashSet<>();
 
         Aktoer aktør = new Aktoer();
-        aktør.setAktørId(opprettSakRequest.getAktørID());
+        if (opprettSakRequest.getAktørID() == null) {
+            aktør.setUtenlandskPersonId(opprettSakRequest.getUtenlandskPersonId());
+        } else {
+            aktør.setAktørId(opprettSakRequest.getAktørID());
+        }
         aktør.setFagsak(fagsak);
         aktør.setRolle(Aktoersroller.BRUKER);
         aktører.add(aktør);

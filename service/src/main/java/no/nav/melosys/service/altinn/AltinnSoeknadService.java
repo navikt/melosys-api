@@ -46,8 +46,10 @@ public class AltinnSoeknadService {
     public Behandling opprettFagsakOgBehandlingFraAltinnSøknad(String søknadReferanse) throws FunksjonellException, TekniskException {
         MedlemskapArbeidEOSM søknad = soknadMottakConsumer.hentSøknad(søknadReferanse);
 
+        // FIXME arbeidsgiver lagres som avklart virksomhet
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medAktørID(hentAktørID(søknad))
+            .medUtenlandskPersonId(hentUtenlandskPersonId(søknad))
             .medArbeidsgiver(hentArbeidsgiverID(søknad))
             .medFullmektig(hentFullmektig(søknad))
             .medKontaktopplysninger(hentKontaktopplysninger(søknad))
@@ -57,7 +59,7 @@ public class AltinnSoeknadService {
 
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
         Behandling behandling = fagsak.hentAktivBehandling();
-        behandlingsgrunnlagService.opprettSøknadGrunnlag(behandling.getId(), SoeknadMapper.lagSoeknadDokument(søknad));
+        behandlingsgrunnlagService.opprettSøknadEøs(behandling.getId(), SoeknadMapper.lagSoeknadDokument(søknad));
 
         return behandling;
     }
@@ -75,7 +77,14 @@ public class AltinnSoeknadService {
     }
 
     private String hentAktørID(MedlemskapArbeidEOSM søknad) throws IkkeFunnetException {
+        if (søknad.getInnhold().getArbeidstaker().getFoedselsnummer() == null) {
+            return null;
+        }
         return tpsFasade.hentAktørIdForIdent(søknad.getInnhold().getArbeidstaker().getFoedselsnummer());
+    }
+
+    private String hentUtenlandskPersonId(MedlemskapArbeidEOSM søknad) throws IkkeFunnetException {
+        return søknad.getInnhold().getArbeidstaker().getUtenlandskIDnummer();
     }
 
     private static String hentArbeidsgiverID(MedlemskapArbeidEOSM søknad) {

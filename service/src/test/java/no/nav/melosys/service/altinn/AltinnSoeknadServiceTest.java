@@ -28,7 +28,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AltinnSoeknadServiceTest {
@@ -150,6 +150,27 @@ public class AltinnSoeknadServiceTest {
         Kontaktopplysning kontaktopplysning = req.getKontaktopplysninger().iterator().next();
         assertThat(kontaktopplysning.getKontaktNavn())
             .isEqualTo(søknad.getInnhold().getArbeidsgiver().getKontaktperson().getKontaktpersonNavn());
+    }
+
+    @Test
+    public void opprettSakFraAltinnSøknad_arbeidstakerHarIkkeFødselsnummer_utenlandskPersonIdBlirSatt()
+        throws FunksjonellException, TekniskException {
+        final String utenlandskPersonId = "utenlandskPersonId";
+        final Fagsak fagsak = lagFagsak();
+        final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
+        søknad.getInnhold().getArbeidstaker().setFoedselsnummer(null);
+        søknad.getInnhold().getArbeidstaker().setUtenlandskIDnummer(utenlandskPersonId);
+
+        when(soknadMottakConsumer.hentSøknad(eq(soknadID))).thenReturn(søknad);
+        when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
+
+        altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(soknadID);
+
+        verify(tpsFasade, never()).hentAktørIdForIdent(anyString());
+
+        OpprettSakRequest req = captor.getValue();
+        assertThat(req.getAktørID()).isNull();
+        assertThat(req.getUtenlandskPersonId()).isEqualTo(utenlandskPersonId);
     }
 
     private MedlemskapArbeidEOSM lagMedlemskapArbeidEOSM() {

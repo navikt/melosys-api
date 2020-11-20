@@ -492,6 +492,19 @@ public class FagsakServiceTest {
         assertThat(behandlingID).isEqualTo(replikertBehandling.getId());
     }
 
+    @Test
+    public void nyFagsakOgBehandling_harIkkeAktørId_brukerMedUtenlandskPersonIdOpprettes() throws TekniskException {
+        final String utenlandskPersonId = "utenlandskPersonId";
+        OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
+            .medAktørID(null)
+            .medUtenlandskPersonId(utenlandskPersonId)
+            .medBehandlingstype(Behandlingstyper.SOEKNAD).build();
+
+        Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
+        assertThat(fagsak.hentBruker().getUtenlandskPersonId()).isEqualTo(utenlandskPersonId);
+    }
+
+
     private Fagsak lagFagsakMedAktørforMyndighet(String saksnummer, String id) {
         Fagsak fagsak = lagFagsak(saksnummer);
 

@@ -54,8 +54,8 @@ public class BehandlingsgrunnlagService {
     }
 
     //Altinn
-    public Behandlingsgrunnlag opprettSøknadUtsending(long behandlingID,
-                                                     Soeknad soeknad) throws FunksjonellException, IntegrasjonException {
+    public Behandlingsgrunnlag opprettSøknadEøs(long behandlingID,
+                                                Soeknad soeknad) throws FunksjonellException, IntegrasjonException {
         return opprettBehandlingsgrunnlag(behandlingID, soeknad, Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS, VERSJON_SOEKNAD_GRUNNLAG);
     }
 
