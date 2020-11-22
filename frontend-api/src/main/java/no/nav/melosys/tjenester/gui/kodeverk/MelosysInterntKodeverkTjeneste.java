@@ -1,12 +1,10 @@
 package no.nav.melosys.tjenester.gui.kodeverk;
 
-import static no.nav.melosys.domain.kodeverk.Trygdedekninger.HELSEDEL;
-import static no.nav.melosys.domain.kodeverk.Trygdedekninger.HELSEDEL_MED_SYKE_OG_FORELDREPENGER;
-import static no.nav.melosys.domain.kodeverk.Trygdedekninger.HELSE_OG_PENSJONSDEL;
-import static no.nav.melosys.domain.kodeverk.Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER;
-import static no.nav.melosys.domain.kodeverk.Trygdedekninger.PENSJONSDEL;
-
-import java.util.List;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
+import no.nav.melosys.tjenester.gui.dto.FolketrygdenKoderDto;
+import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -15,12 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.tjenester.gui.dto.FolketrygdenKoderDto;
-import no.nav.security.token.support.core.api.Protected;
 
 @Protected
 @RestController
@@ -31,17 +23,16 @@ public class MelosysInterntKodeverkTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(MelosysInterntKodeverkTjeneste.class);
 
+    private final MedlemskapsperiodeService medlemskapsperiodeService;
+
+    public MelosysInterntKodeverkTjeneste(MedlemskapsperiodeService medlemskapsperiodeService) {
+        this.medlemskapsperiodeService = medlemskapsperiodeService;
+    }
+
     @GetMapping("/folketrygden")
     @ApiOperation(value = "Henter koder fra internt kodeverk til saksbehandling av folketrygden-saker")
     public ResponseEntity<FolketrygdenKoderDto> hentKoderTilFolketrygden() {
         log.info("Henter koder fra internt kodeverk til saksbehandling av folketrygden-saker.");
-        List<Trygdedekninger> trygdedekninger = List.of(HELSEDEL, HELSEDEL_MED_SYKE_OG_FORELDREPENGER, PENSJONSDEL, HELSE_OG_PENSJONSDEL, HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER);
-        return ResponseEntity.ok().body(tilFolketrygdenKoderDto(trygdedekninger));
-    }
-
-    private FolketrygdenKoderDto tilFolketrygdenKoderDto(List<Trygdedekninger> trygdedekninger) {
-        FolketrygdenKoderDto folketrygdenKoderDto = new FolketrygdenKoderDto();
-        folketrygdenKoderDto.setTrygdedekninger(trygdedekninger);
-        return folketrygdenKoderDto;
+        return ResponseEntity.ok(new FolketrygdenKoderDto(medlemskapsperiodeService.hentGyldigeTrygdedekninger()));
     }
 }

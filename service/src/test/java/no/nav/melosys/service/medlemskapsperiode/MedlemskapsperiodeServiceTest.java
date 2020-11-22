@@ -5,18 +5,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.InnvilgelsesResultat;
-import no.nav.melosys.domain.Medlemskapsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode;
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.MedlemskapsperiodeRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.junit.jupiter.api.BeforeEach;
@@ -124,7 +118,7 @@ class MedlemskapsperiodeServiceTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID, LocalDate.now(),
-                LocalDate.now().minusDays(1), InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FULL_DEKNING_FTRL))
+                LocalDate.now().minusDays(1), InnvilgelsesResultat.AVSLAATT, Trygdedekninger.HELSE_OG_PENSJONSDEL))
             .withMessageContaining("kan ikke være før");
     }
 
@@ -178,18 +172,40 @@ class MedlemskapsperiodeServiceTest {
     }
 
     @Test
-    void utledMedlemskapsperioderFraSøknad_dataFraSøknadSatt_lagrerMedlemskapsperioder() throws IkkeFunnetException {
+    void utledMedlemskapsperioderFraSøknad_dataFraSøknadSatt_lagrerMedlemskapsperioder() throws FunksjonellException {
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
+        behandlingsresultat.getVilkaarsresultater().add(lagOppfyltVilkår(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID));
         when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingsresultatID))).thenReturn(behandlingsresultat);
         when(medlemskapsperiodeRepository.saveAll(anyCollection())).thenAnswer(a -> new ArrayList<>(a.getArgument(0)));
         assertThat(
-            medlemskapsperiodeService.utledMedlemskapsperioderFraSøknad(behandlingsresultatID, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD)
+            medlemskapsperiodeService.utledMedlemskapsperioderFraSøknad(behandlingsresultatID, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A)
         ).isNotEmpty();
+    }
+
+    @Test
+    void utledMedlemskapsperioderFraSøknad_oppfyllerIkkeVilkår_kasterFeil() throws FunksjonellException {
+        Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
+        when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingsresultatID))).thenReturn(behandlingsresultat);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> medlemskapsperiodeService.utledMedlemskapsperioderFraSøknad(
+                behandlingsresultatID, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A))
+            .withMessageContaining("er påkrevd for bestemmelse");
+    }
+
+    @Test
+    void utledMedlemskapsperioderFraSøknad_støtterIkkeBestemmelse_kasterFeil() {
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> medlemskapsperiodeService.utledMedlemskapsperioderFraSøknad(
+                behandlingsresultatID, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_D))
+            .withMessageContaining("Støtter ikke");
     }
 
     private Behandlingsresultat lagBehandlingsresultat() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         Behandling behandling = new Behandling();
+        Fagsak fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.FTRL);
+        behandling.setFagsak(fagsak);
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         SoeknadFtrl søknad = new SoeknadFtrl();
 
@@ -202,6 +218,13 @@ class MedlemskapsperiodeServiceTest {
         behandlingsresultat.setBehandling(behandling);
 
         return behandlingsresultat;
+    }
+
+    private Vilkaarsresultat lagOppfyltVilkår(Vilkaar vilkår) {
+        var vilkaarsresultat = new Vilkaarsresultat();
+        vilkaarsresultat.setVilkaar(vilkår);
+        vilkaarsresultat.setOppfylt(true);
+        return vilkaarsresultat;
     }
 
     private Medlemskapsperiode lagMedlemskapsperiode() {

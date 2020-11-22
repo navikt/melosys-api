@@ -1,18 +1,18 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-import java.util.List;
+import java.util.Collection;
 
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
 public class FolketrygdenKoderDto {
 
-    public List<Trygdedekninger> trygdedekninger;
+    private final Collection<Trygdedekninger> trygdedekninger;
 
-    public List<Trygdedekninger> getTrygdedekninger() {
-        return trygdedekninger;
+    public FolketrygdenKoderDto(Collection<Trygdedekninger> trygdedekninger) {
+        this.trygdedekninger = trygdedekninger;
     }
 
-    public void setTrygdedekninger(List<Trygdedekninger> trygdedekninger) {
-        this.trygdedekninger = trygdedekninger;
+    public Collection<Trygdedekninger> getTrygdedekninger() {
+        return trygdedekninger;
     }
 }

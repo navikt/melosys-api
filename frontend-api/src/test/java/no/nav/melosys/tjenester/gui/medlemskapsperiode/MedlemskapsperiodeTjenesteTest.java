@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui;
+package no.nav.melosys.tjenester.gui.medlemskapsperiode;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -15,6 +15,7 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
+import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
 import no.nav.melosys.tjenester.gui.dto.MedlemskapsperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.MedlemskapsperiodeOppdatering;
 import no.nav.melosys.tjenester.gui.dto.UtledMedlemskapsperiodeDto;
@@ -30,7 +31,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class MedlemskapsperiodeTjenesteTest extends JsonSchemaTestParent{
+class MedlemskapsperiodeTjenesteTest extends JsonSchemaTestParent {
 
     private static final String MEDLEMSKAPSPERIODER_SCHEMA = "medlemskapsperioder-schema.json";
     private static final String MEDLEMSKAPSPERIODER_POST_SCHEMA = "medlemskapsperioder-post-schema.json";

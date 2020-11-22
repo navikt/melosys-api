@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui;
+package no.nav.melosys.tjenester.gui.medlemskapsperiode;
 
 import java.util.Collection;
 import java.util.stream.Collectors;

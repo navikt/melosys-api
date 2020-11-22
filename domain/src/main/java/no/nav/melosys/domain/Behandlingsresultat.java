@@ -349,6 +349,15 @@ public class Behandlingsresultat extends RegistreringsInfo {
             .collect(Collectors.toSet());
     }
 
+    public boolean oppfyllerVilkår(Collection<Vilkaar> vilkår) {
+        return vilkår.stream().allMatch(this::oppfyllerVilkår);
+    }
+
+    public boolean oppfyllerVilkår(Vilkaar vilkår) {
+        return vilkaarsresultater.stream()
+            .anyMatch(v -> v.getVilkaar() == vilkår && v.isOppfylt());
+    }
+
     public boolean erAutomatisert() {
         return behandlingsmåte == Behandlingsmaate.AUTOMATISERT
             || behandlingsmåte == Behandlingsmaate.DELVIS_AUTOMATISERT;
