@@ -1,8 +1,6 @@
 package no.nav.melosys.integrasjon.dokgen;
 
-import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -40,18 +38,18 @@ public class DokgenMalResolver {
         this.unleash = unleash;
     }
 
-    public String hentMalnavn(Produserbaredokumenter produserbartDokument) throws TekniskException {
-        if (DOKGEN_MALER.containsKey(produserbartDokument)) {
-            return DOKGEN_MALER.get(produserbartDokument);
-        } else {
-            throw new TekniskException(format("Fant ikke malnavn for produserbartDokument %s", produserbartDokument));
-        }
-    }
-
     public Set<Produserbaredokumenter> utledTilgjengeligeMaler () {
         return DOKGEN_MALER.keySet().stream()
             .filter(key -> unleash.isEnabled("melosys.brev." + key.name()))
             .collect(toSet());
+    }
+
+    public String hentMalnavn(Produserbaredokumenter produserbartDokument) throws FunksjonellException {
+        if (DOKGEN_MALER.containsKey(produserbartDokument)) {
+            return DOKGEN_MALER.get(produserbartDokument);
+        } else {
+            throw new FunksjonellException(format("Fant ikke malnavn for produserbartDokument %s", produserbartDokument));
+        }
     }
 
     public DokgenDto mapBehandling(Produserbaredokumenter produserbartDokument, Behandling behandling) throws TekniskException, FunksjonellException {

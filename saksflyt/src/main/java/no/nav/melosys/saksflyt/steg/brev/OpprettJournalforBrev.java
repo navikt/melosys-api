@@ -5,6 +5,7 @@ import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -41,6 +42,9 @@ public class OpprettJournalforBrev implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
+        if (prosessinstans.getBehandling() == null) {
+            throw new FunksjonellException("Prosessinstans mangler behandling");
+        }
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         Produserbaredokumenter produserbartDokument = prosessinstans.getData(PRODUSERBART_BREV, Produserbaredokumenter.class);
 

@@ -36,7 +36,7 @@ public class DistribuerJournalpost implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
 
         String journalpostId = prosessinstans.getData(DISTRIBUERBAR_JOURNALPOST_ID);
-        Mottaker overstyrtMottaker = prosessinstans.getData(DISTRIBUER_OVERSTYR_MOTTAKER, Mottaker.class, null);
+        StrukturertAdresse overstyrtMottaker = prosessinstans.getData(DISTRIBUER_OVERSTYR_MOTTAKER, StrukturertAdresse.class, null);
 
         if (isEmpty(journalpostId)) {
             throw new FunksjonellException("JournalpostId mangler, kan ikke distribuere");
@@ -45,8 +45,7 @@ public class DistribuerJournalpost implements StegBehandler {
         String bestillingsId;
         if (overstyrtMottaker != null) {
             //NOTE Implementer når nødvendig
-            StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, strukturertAdresse);
+            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, overstyrtMottaker);
         } else {
             bestillingsId = doksysFasade.distribuerJournalpost(journalpostId);
         }

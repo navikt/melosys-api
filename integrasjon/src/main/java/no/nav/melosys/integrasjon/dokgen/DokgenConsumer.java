@@ -18,7 +18,6 @@ public class DokgenConsumer {
         this.webClient = WebClient.create(url);
     }
 
-
     public byte[] lagPdf(String malNavn, DokgenDto dokgenDto) {
         log.info("Produserer PDF i melosys-dokgen. Mal: {}", malNavn);
         String lagPdfUri = "/mal/{malNavn}/lag-pdf";

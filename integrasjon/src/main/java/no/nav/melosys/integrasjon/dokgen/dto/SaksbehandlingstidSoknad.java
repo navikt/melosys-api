@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.dokgen.dto;
 
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
@@ -41,7 +42,7 @@ public class SaksbehandlingstidSoknad extends DokgenDto {
     public static SaksbehandlingstidSoknad av(Behandling behandling) throws TekniskException {
         Fagsak fagsak = behandling.getFagsak();
         PersonDokument personDokument = behandling.hentPersonDokument();
-        LocalDateTime datoMottatt = LocalDateTime.from(fagsak.getRegistrertDato());
+        LocalDateTime datoMottatt = LocalDateTime.ofInstant(fagsak.getRegistrertDato(), ZoneId.systemDefault());
 
         return new SaksbehandlingstidSoknad(personDokument.fnr, fagsak.getSaksnummer(), LocalDateTime.now(), datoMottatt,
             datoMottatt.plusDays(SAKSBEHANDLINGSTID_DAGER), personDokument.sammensattNavn, personDokument.sammensattNavn,
