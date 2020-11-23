@@ -100,6 +100,12 @@ public class AvklarteVirksomheterService {
         }
     }
 
+    public void lagreVirksomhetSomAvklartfakta(String virksomhetID, Long behandlingID) throws FunksjonellException, TekniskException {
+        if (registerOppslagService.hentOrganisasjon(virksomhetID) != null) {
+            avklartefaktaService.leggTilAvklarteFakta(behandlingID, VIRKSOMHET, VIRKSOMHET.getKode(), virksomhetID, "TRUE");
+        }
+    }
+
     private boolean erVirksomhetIDerGyldig(List<String> virksomhetIDer, Long behandlingID) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         for (String virksomhetID : virksomhetIDer) {

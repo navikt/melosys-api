@@ -13,6 +13,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.altinn.SoknadMottakConsumer;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
@@ -40,6 +41,8 @@ public class AltinnSoeknadServiceTest {
     private BehandlingsgrunnlagService behandlingsgrunnlagService;
     @Mock
     private TpsFasade tpsFasade;
+    @Mock
+    private AvklarteVirksomheterService avklarteVirksomheterService;
 
     private AltinnSoeknadService altinnSoeknadService;
 
@@ -51,7 +54,8 @@ public class AltinnSoeknadServiceTest {
 
     @Before
     public void setup() {
-        altinnSoeknadService = new AltinnSoeknadService(soknadMottakConsumer, fagsakService, behandlingsgrunnlagService, tpsFasade);
+        altinnSoeknadService = new AltinnSoeknadService(soknadMottakConsumer, fagsakService,
+            behandlingsgrunnlagService, tpsFasade, avklarteVirksomheterService);
     }
 
     @Test
@@ -171,6 +175,21 @@ public class AltinnSoeknadServiceTest {
         OpprettSakRequest req = captor.getValue();
         assertThat(req.getAktørID()).isNull();
         assertThat(req.getUtenlandskPersonId()).isEqualTo(utenlandskPersonId);
+    }
+
+    @Test
+    public void opprettFagsakOgBehandlingFraAltinnSøknad_virksomhetLagresSomAvklartFakta()
+        throws FunksjonellException, TekniskException {
+        final Fagsak fagsak = lagFagsak();
+        final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
+
+        when(soknadMottakConsumer.hentSøknad(eq(soknadID))).thenReturn(søknad);
+        when(fagsakService.nyFagsakOgBehandling(any(OpprettSakRequest.class))).thenReturn(fagsak);
+
+        altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(soknadID);
+
+        verify(avklarteVirksomheterService).lagreVirksomhetSomAvklartfakta(
+            eq(søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer()), eq(fagsak.hentAktivBehandling().getId()));
     }
 
     private MedlemskapArbeidEOSM lagMedlemskapArbeidEOSM() {

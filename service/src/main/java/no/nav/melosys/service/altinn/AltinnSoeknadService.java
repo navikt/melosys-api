@@ -17,6 +17,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.altinn.SoknadMottakConsumer;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
@@ -32,21 +33,23 @@ public class AltinnSoeknadService {
     private final FagsakService fagsakService;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
     private final TpsFasade tpsFasade;
+    private final AvklarteVirksomheterService avklarteVirksomheterService;
 
     public AltinnSoeknadService(SoknadMottakConsumer soknadMottakConsumer,
                                 FagsakService fagsakService,
                                 BehandlingsgrunnlagService behandlingsgrunnlagService,
-                                @Qualifier("system") TpsFasade tpsFasade) {
+                                @Qualifier("system") TpsFasade tpsFasade,
+                                AvklarteVirksomheterService avklarteVirksomheterService) {
         this.soknadMottakConsumer = soknadMottakConsumer;
         this.fagsakService = fagsakService;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
         this.tpsFasade = tpsFasade;
+        this.avklarteVirksomheterService = avklarteVirksomheterService;
     }
 
     public Behandling opprettFagsakOgBehandlingFraAltinnSøknad(String søknadReferanse) throws FunksjonellException, TekniskException {
         MedlemskapArbeidEOSM søknad = soknadMottakConsumer.hentSøknad(søknadReferanse);
 
-        // FIXME arbeidsgiver lagres som avklart virksomhet
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medAktørID(hentAktørID(søknad))
             .medUtenlandskPersonId(hentUtenlandskPersonId(søknad))
@@ -60,6 +63,7 @@ public class AltinnSoeknadService {
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
         Behandling behandling = fagsak.hentAktivBehandling();
         behandlingsgrunnlagService.opprettSøknadEøs(behandling.getId(), SoeknadMapper.lagSoeknadDokument(søknad));
+        avklarteVirksomheterService.lagreVirksomhetSomAvklartfakta(hentArbeidsgiverID(søknad), behandling.getId());
 
         return behandling;
     }
