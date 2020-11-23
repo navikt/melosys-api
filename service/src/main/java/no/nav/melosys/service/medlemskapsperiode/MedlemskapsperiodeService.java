@@ -5,8 +5,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -22,15 +20,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static com.google.common.collect.MoreCollectors.onlyElement;
 import static java.lang.String.format;
-import static no.nav.melosys.domain.kodeverk.Trygdedekninger.FULL_DEKNING_EOSFO;
-import static no.nav.melosys.domain.kodeverk.Trygdedekninger.FULL_DEKNING_FTRL;
+import static no.nav.melosys.domain.kodeverk.Trygdedekninger.*;
 import static no.nav.melosys.service.kontroll.PeriodeKontroller.feilIPeriode;
 
 @Service
 public class MedlemskapsperiodeService {
 
-    private static final Collection<Trygdedekninger> GYLDIGE_TRYGDEDEKNINGER = Stream.of(Trygdedekninger.values())
-        .filter(trygdedekning -> trygdedekning != FULL_DEKNING_EOSFO && trygdedekning != FULL_DEKNING_FTRL).collect(Collectors.toSet());
+    private static final Collection<Trygdedekninger> GYLDIGE_TRYGDEDEKNINGER = Set.of(HELSEDEL, HELSEDEL_MED_SYKE_OG_FORELDREPENGER,
+        PENSJONSDEL, HELSE_OG_PENSJONSDEL, HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER);
+
 
     private final MedlemskapsperiodeRepository medlemskapsperiodeRepository;
     private final BehandlingsresultatService behandlingsresultatService;

@@ -71,14 +71,14 @@ class MedlemskapsperiodeServiceTest {
             .thenReturn(Collections.singleton(eksisterende));
 
         medlemskapsperiodeService.opprettMedlemskapsperiode(behandlingsresultatID, LocalDate.now().minusYears(1), LocalDate.now(),
-            InnvilgelsesResultat.AVSLAATT, Trygdedekninger.UTEN_DEKNING);
+            InnvilgelsesResultat.AVSLAATT, Trygdedekninger.HELSEDEL);
 
         verify(medlemskapsperiodeRepository).save(medlemskapsperiodeCaptor.capture());
         assertThat(medlemskapsperiodeCaptor.getValue()).isNotNull()
             .extracting(Medlemskapsperiode::getArbeidsland, Medlemskapsperiode::getBestemmelse,
                 Medlemskapsperiode::getInnvilgelsesresultat, Medlemskapsperiode::getTrygdedekning, Medlemskapsperiode::getMedlemskapstype)
             .containsExactly(eksisterende.getArbeidsland(), eksisterende.getBestemmelse(),
-                InnvilgelsesResultat.AVSLAATT, Trygdedekninger.UTEN_DEKNING, eksisterende.getMedlemskapstype());
+                InnvilgelsesResultat.AVSLAATT, Trygdedekninger.HELSEDEL, eksisterende.getMedlemskapstype());
     }
 
     @Test
