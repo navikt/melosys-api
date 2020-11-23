@@ -16,11 +16,11 @@ public interface KonverteringTest {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, Charset.forName(StandardCharsets.UTF_8.name())))) {
             Saksopplysning saksopplysning = new Saksopplysning();
             String xmlStr = reader.lines().collect(Collectors.joining(System.lineSeparator()));
-            saksopplysning.setDokumentXml(xmlStr);
+            saksopplysning.leggTilKildesystemOgMottattDokument(null, xmlStr);
             saksopplysning.setType(type);
             saksopplysning.setVersjon(versjon);
 
-            // Setter internXml
+            // Oppretter dokument fra xml
             factory.lagDokument(saksopplysning);
 
             return saksopplysning;

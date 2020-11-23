@@ -1,0 +1,88 @@
+package no.nav.melosys.tjenester.gui.dto;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import no.nav.melosys.domain.dokument.felles.Land;
+import no.nav.melosys.domain.dokument.person.*;
+
+public class PersonUtenAdresseDto {
+
+    private String fnr;
+    private Land statsborgerskap;
+    private LocalDate statsborgerskapDato;
+    private Sivilstand sivilstand;
+    private String sammensattNavn;
+    private List<FamiliemedlemDto> familiemedlemmer = new ArrayList<>();
+    private Personstatus personStatus;
+    private KjoennsType kjoenn;
+    private LocalDate foedselsdato;
+    @JsonProperty(defaultValue = "false" )
+    private boolean erEgenAnsatt; // MELOSYS-1580
+
+    public PersonUtenAdresseDto() {}
+
+    public PersonUtenAdresseDto(PersonDokument person) {
+        fnr = person.fnr;
+        sivilstand = person.sivilstand;
+        statsborgerskap = person.statsborgerskap;
+        statsborgerskapDato = person.statsborgerskapDato;
+        sammensattNavn = person.sammensattNavn;
+        if (person.familiemedlemmer != null) {
+            familiemedlemmer = FamiliemedlemDto.avFamiliemedlemmer(person.familiemedlemmer);
+        }
+        personStatus = person.personstatus;
+        kjoenn = person.kjønn;
+        foedselsdato = person.fødselsdato;
+    }
+
+    public String getFnr() {
+        return fnr;
+    }
+
+    public Land getStatsborgerskap() {
+        return statsborgerskap;
+    }
+
+    public void setStatsborgerskap(Land statsborgerskap) {
+        this.statsborgerskap = statsborgerskap;
+    }
+
+    public LocalDate getStatsborgerskapDato() {
+        return statsborgerskapDato;
+    }
+
+    public void setStatsborgerskapDato(LocalDate statsborgerskapDato) {
+        this.statsborgerskapDato = statsborgerskapDato;
+    }
+
+    public Sivilstand getSivilstand() {
+        return sivilstand;
+    }
+
+    public String getSammensattNavn() {
+        return sammensattNavn;
+    }
+
+    public List<FamiliemedlemDto> getFamiliemedlemmer() {
+        return familiemedlemmer;
+    }
+
+    public Personstatus getPersonStatus() {
+        return personStatus;
+    }
+
+    public KjoennsType getKjoenn() {
+        return kjoenn;
+    }
+
+    public LocalDate getFoedselsdato() {
+        return foedselsdato;
+    }
+
+    public boolean isErEgenAnsatt() {
+        return erEgenAnsatt;
+    }
+}

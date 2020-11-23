@@ -11,14 +11,13 @@ import java.util.stream.Stream;
  * De er bare relevant når det gjelder utsendt arbeidstaker og pre-utfyllingen fra informasjon innsendt tidligere (fra samme arbeidsgiver) er eldre enn 12 måneder.
  */
 public class JuridiskArbeidsgiverNorge {
-    public Integer utsendteNeste12Mnd;
     public Integer antallAdmAnsatte;
     public Integer antallAnsatte;
+    public Integer antallUtsendte;
     public BigDecimal andelOmsetningINorge;
     public BigDecimal andelOppdragINorge;
     public BigDecimal andelKontrakterINorge;
-    public String arbeidstakereRekruttertILand;
-    public String oppdragsKontrakterIHovedsakInngaattILand;
+    public BigDecimal andelRekruttertINorge;
     public List<String> ekstraArbeidsgivere = new ArrayList<>();
 
     public Stream<String> hentManueltRegistrerteArbeidsgiverOrgnumre() {

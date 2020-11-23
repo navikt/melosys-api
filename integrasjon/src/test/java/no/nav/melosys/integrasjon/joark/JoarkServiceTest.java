@@ -1,6 +1,8 @@
 package no.nav.melosys.integrasjon.joark;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 
 import no.nav.dok.tjenester.journalfoerinngaaende.Bruker;
@@ -11,6 +13,8 @@ import no.nav.melosys.domain.arkiv.DokumentVariant;
 import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.joark.inngaaendejournal.InngaaendeJournalConsumer;
@@ -311,6 +315,18 @@ class JoarkServiceTest {
     }
 
     @Test
+    void hentMottaksDatoForJournalpost_journalpostFinnes_returnererMottaksdato() throws SikkerhetsbegrensningException, IntegrasjonException {
+        final String journalpostID = "12421";
+        GetJournalpostResponse response = new GetJournalpostResponse();
+        response.getDokumentListe().add(new Dokument());
+        response.setForsendelseMottatt(new Date());
+        when(journalfoerInngaaendeConsumer.hentJournalpost(eq(journalpostID))).thenReturn(response);
+
+        assertThat(joarkService.hentMottaksDatoForJournalpost(journalpostID))
+            .isEqualTo(LocalDate.ofInstant(response.getForsendelseMottatt().toInstant(), ZoneId.systemDefault()));
+    }
+
+    @Test
     void ferdigstillJournalpost_journalpostBlirJournalført_ingenException() throws Exception {
         String journalpostId = "123";
         PutJournalpostResponse putJournalpostResponse = new PutJournalpostResponse();
@@ -357,6 +373,24 @@ class JoarkServiceTest {
             .isThrownBy(() -> joarkService.opprettJournalpost(opprettJournalpost, true));
 
         verify(journalpostapiConsumer, never()).opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean());
+    }
+
+    @Test
+    void opprettJournalpost_forsendelseMottattErSatt_forventDatoMottatt() throws FunksjonellException {
+        OpprettJournalpost opprettJournalpost = lagOpprettJournalpost();
+        opprettJournalpost.setForsendelseMottatt(Instant.now());
+
+        when(journalpostapiConsumer.opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean()))
+            .thenReturn(OpprettJournalpostResponse.builder().journalpostId("1234").build());
+        joarkService.opprettJournalpost(opprettJournalpost, false);
+
+        ArgumentCaptor<OpprettJournalpostRequest> captor = ArgumentCaptor.forClass(OpprettJournalpostRequest.class);
+        verify(journalpostapiConsumer).opprettJournalpost(captor.capture(), anyBoolean());
+
+        OpprettJournalpostRequest opprettJournalpostRequest = captor.getValue();
+        assertThat(opprettJournalpostRequest).isNotNull();
+        assertThat(opprettJournalpostRequest.getDatoMottatt())
+            .isEqualTo(LocalDate.ofInstant(opprettJournalpost.getForsendelseMottatt(), ZoneId.systemDefault()));
     }
 
     private OpprettJournalpost lagOpprettJournalpost() {

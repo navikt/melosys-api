@@ -3,6 +3,7 @@ package no.nav.melosys.service.registeropplysninger;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -55,7 +56,7 @@ public class RegisteropplysningerRequest {
     }
 
     public Informasjonsbehov getInformasjonsbehov() {
-        return informasjonsbehov;
+        return Objects.requireNonNullElse(informasjonsbehov, Informasjonsbehov.STANDARD);
     }
 
     public static class RegisteropplysningerRequestBuilder {

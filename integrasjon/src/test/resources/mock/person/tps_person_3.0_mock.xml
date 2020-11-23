@@ -1,0 +1,50 @@
+<b:hentPersonResponse xmlns:b="http://nav.no/tjeneste/virksomhet/person/v3" xmlns:a="http://nav.no/tjeneste/virksomhet/person/v3/informasjon">
+    <response>
+        <person c:type="a:Bruker" xmlns:c="http://www.w3.org/2001/XMLSchema-instance">
+            <bostedsadresse>
+                <strukturertAdresse c:type="a:Gateadresse">
+                    <landkode>NOR</landkode>
+                    <tilleggsadresse>C/O DONALD DUCK</tilleggsadresse>
+                    <tilleggsadresseType>Offisiell adresse</tilleggsadresseType>
+                    <poststed>5141</poststed>
+                    <kommunenummer>1201</kommunenummer>
+                    <gatenavn>XXXXXX</gatenavn>
+                    <husnummer>7</husnummer>
+                    <husbokstav>A</husbokstav>
+                </strukturertAdresse>
+            </bostedsadresse>
+            <sivilstand fomGyldighetsperiode="2010-08-09T00:00:00.000+02:00">
+                <sivilstand>UGIF</sivilstand>
+            </sivilstand>
+            <statsborgerskap>
+                <land>SWE</land>
+            </statsborgerskap>
+            <aktoer c:type="a:PersonIdent">
+                <ident>
+                    <ident>11111111111</ident>
+                    <type>FNR</type>
+                </ident>
+            </aktoer>
+            <kjoenn>
+                <kjoenn>K</kjoenn>
+            </kjoenn>
+            <personnavn>
+                <etternavn>TRYLL</etternavn>
+                <fornavn>MAGICA</fornavn>
+                <mellomnavn>FRA</mellomnavn>
+                <sammensattNavn>MAGICA FRA TRYLL</sammensattNavn>
+            </personnavn>
+            <personstatus>
+                <personstatus>BOSA</personstatus>
+            </personstatus>
+            <foedselsdato>
+                <foedselsdato>2011-11-11+02:00</foedselsdato>
+            </foedselsdato>
+            <gjeldendePostadressetype>BOSTEDSADRESSE</gjeldendePostadressetype>
+            <geografiskTilknytning c:type="a:Bydel">
+                <geografiskTilknytning>120104</geografiskTilknytning>
+            </geografiskTilknytning>
+            <diskresjonskode>SPFO</diskresjonskode>
+        </person>
+    </response>
+</b:hentPersonResponse>

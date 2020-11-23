@@ -60,7 +60,9 @@ public class MedlServiceTest {
     public void getPeriodeListe() throws MelosysException {
         Saksopplysning saksopplysning = medlService.hentPeriodeListe(fnr, null, null);
         assertNotNull(saksopplysning);
-        assertNotNull(saksopplysning.getDokumentXml());
+        assertNotNull(saksopplysning.getKilder());
+        assertFalse(saksopplysning.getKilder().isEmpty());
+        assertNotNull(saksopplysning.getKilder().iterator().next().getMottattDokument());
 
         MedlemskapDokument medlemskapDokument = (MedlemskapDokument) saksopplysning.getDokument();
 

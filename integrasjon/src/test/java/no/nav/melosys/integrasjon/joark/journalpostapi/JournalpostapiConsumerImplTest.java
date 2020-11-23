@@ -9,8 +9,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import java.time.LocalDate;
+
+import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 class JournalpostapiConsumerImplTest {
@@ -79,5 +81,20 @@ class JournalpostapiConsumerImplTest {
             .andRespond(withSuccess());
 
         journalpostapiConsumer.ferdigstillJournalpost(new FerdigstillJournalpostRequest(), journalpostID);
+    }
+
+    @Test
+    void opprettJournalpost_verifiserDatoMottatt() {
+        final String datoMottatt = "1970-01-01";
+        server.expect(jsonPath("$.datoMottatt", equalTo(datoMottatt)))
+            .andRespond(withSuccess());
+
+        OpprettJournalpostRequest req = new OpprettJournalpostRequest.
+            OpprettJournalpostRequestBuilder()
+            .datoMottatt(LocalDate.parse(datoMottatt))
+            .journalpostType(OpprettJournalpostRequest.JournalpostType.INNGAAENDE)
+            .build();
+
+        journalpostapiConsumer.opprettJournalpost(req, true);
     }
 }

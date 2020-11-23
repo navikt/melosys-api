@@ -5,6 +5,7 @@ import no.nav.melosys.domain.kodeverk.Kodeverk;
 public enum InnvilgelsesResultat implements Kodeverk {
 
     INNVILGET("INNVILGET", "Innvilget"),
+    DELVIS_INNVILGET("DELVIS_INNVILGET", "Delvis innvilget"),
     AVSLAATT("AVSLAATT", "Avslått");
 
     private String kode;

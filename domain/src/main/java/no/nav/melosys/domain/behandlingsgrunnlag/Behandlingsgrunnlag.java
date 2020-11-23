@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.behandlingsgrunnlag;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.Behandling;
@@ -28,6 +29,9 @@ public class Behandlingsgrunnlag {
 
     @Column(name = "endret_dato", nullable = false)
     private Instant endretDato;
+
+    @Column(name = "mottaksdato")
+    private LocalDate mottaksdato;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
@@ -74,6 +78,14 @@ public class Behandlingsgrunnlag {
 
     public void setEndretDato(Instant endretDato) {
         this.endretDato = endretDato;
+    }
+
+    public LocalDate getMottaksdato() {
+        return mottaksdato;
+    }
+
+    public void setMottaksdato(LocalDate mottaksdato) {
+        this.mottaksdato = mottaksdato;
     }
 
     public Behandling getBehandling() {

@@ -36,8 +36,6 @@ public class Ereg4KonverteringTest implements KonverteringTest {
     public void testAdresse() throws Exception {
         Saksopplysning test = getSaksopplysning(EREG_4_0_MOCK);
 
-        factory.lagDokument(test);
-
         // Test semistrukturert adresse...
         OrganisasjonDokument dokument = (OrganisasjonDokument) test.getDokument();
         SemistrukturertAdresse postadresse = (SemistrukturertAdresse) dokument.getOrganisasjonDetaljer().getPostadresse().get(0);

@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+// TODO: Fjernes sammen med xslt og testressurser
 public class Tps3PersonKonverteringTest implements KonverteringTest {
     private static final String TPS_PERSON_3_0_MOCK = "person/tps_person_3.0_mock.xml";
     private static final String TPS_PERSON_MED_FAMILIERELASJONER = "person/familierelasjoner.xml";
