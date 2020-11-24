@@ -233,19 +233,6 @@ public class AvklarteVirksomheterServiceTest {
         verify(avklartefaktaService, never()).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatyper.class), anyString(), anyString(), eq("TRUE"));
     }
 
-    @Test
-    public void lagreVirksomhetSomAvklartfakta_virksomhetErGyldig_valideringOKOgVirksomhetLagret() throws FunksjonellException, TekniskException {
-        when(registerOppslagService.hentOrganisasjon(orgnr1)).thenReturn(new OrganisasjonDokument());
-        avklarteVirksomheterService.lagreVirksomhetSomAvklartfakta(orgnr1, 1L);
-        verify(avklartefaktaService).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr1, "TRUE");
-    }
-
-   @Test
-    public void lagreVirksomhetSomAvklartfakta_virksomhetErUgyldig_valideringFailerOgVirksomhetIkkeLagret() throws FunksjonellException, TekniskException {
-        avklarteVirksomheterService.lagreVirksomhetSomAvklartfakta("ugyldig", 1L);
-        verify(avklartefaktaService, never()).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatyper.class), anyString(), anyString(), anyString());
-    }
-
     private void forberedValidering() throws FunksjonellException {
         ForetakUtland foretakUtland = new ForetakUtland();
         foretakUtland.uuid = uuid1;

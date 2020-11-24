@@ -62,7 +62,7 @@ public class AltinnSoeknadService {
 
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
         Behandling behandling = fagsak.hentAktivBehandling();
-        behandlingsgrunnlagService.opprettSøknadEøs(behandling.getId(), SoeknadMapper.lagSoeknadDokument(søknad));
+        behandlingsgrunnlagService.opprettSøknadUtsendteArbeidstakereEøs(behandling.getId(), SoeknadMapper.lagSoeknadDokument(søknad));
         avklarteVirksomheterService.lagreVirksomhetSomAvklartfakta(hentArbeidsgiverID(søknad), behandling.getId());
 
         return behandling;
@@ -87,7 +87,7 @@ public class AltinnSoeknadService {
         return tpsFasade.hentAktørIdForIdent(søknad.getInnhold().getArbeidstaker().getFoedselsnummer());
     }
 
-    private String hentUtenlandskPersonId(MedlemskapArbeidEOSM søknad) throws IkkeFunnetException {
+    private String hentUtenlandskPersonId(MedlemskapArbeidEOSM søknad) {
         return søknad.getInnhold().getArbeidstaker().getUtenlandskIDnummer();
     }
 

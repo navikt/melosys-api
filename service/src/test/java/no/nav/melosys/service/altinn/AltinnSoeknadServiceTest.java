@@ -157,12 +157,11 @@ public class AltinnSoeknadServiceTest {
     }
 
     @Test
-    public void opprettSakFraAltinnSøknad_arbeidstakerHarIkkeFødselsnummer_utenlandskPersonIdBlirSatt()
+    public void opprettSakFraAltinnSøknad_arbeidstakerHarUtenlandskIDnummer_utenlandskPersonIdBlirSatt()
         throws FunksjonellException, TekniskException {
         final String utenlandskPersonId = "utenlandskPersonId";
         final Fagsak fagsak = lagFagsak();
         final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
-        søknad.getInnhold().getArbeidstaker().setFoedselsnummer(null);
         søknad.getInnhold().getArbeidstaker().setUtenlandskIDnummer(utenlandskPersonId);
 
         when(soknadMottakConsumer.hentSøknad(eq(soknadID))).thenReturn(søknad);
@@ -170,10 +169,7 @@ public class AltinnSoeknadServiceTest {
 
         altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(soknadID);
 
-        verify(tpsFasade, never()).hentAktørIdForIdent(anyString());
-
         OpprettSakRequest req = captor.getValue();
-        assertThat(req.getAktørID()).isNull();
         assertThat(req.getUtenlandskPersonId()).isEqualTo(utenlandskPersonId);
     }
 

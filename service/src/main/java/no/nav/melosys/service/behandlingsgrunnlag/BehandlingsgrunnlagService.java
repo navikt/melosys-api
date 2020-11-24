@@ -48,14 +48,14 @@ public class BehandlingsgrunnlagService {
         return opprettBehandlingsgrunnlag(behandlingID, sedGrunnlag, Behandlingsgrunnlagtyper.SED, VERSJON_SED_GRUNNLAG);
     }
 
-    public Behandlingsgrunnlag opprettSøknadGrunnlag(long behandlingID,
-                                                     Soeknad soeknad) throws FunksjonellException, IntegrasjonException {
+    public Behandlingsgrunnlag opprettSøknadYrkesaktiveEøs(long behandlingID,
+                                                           Soeknad soeknad) throws FunksjonellException, IntegrasjonException {
         return opprettBehandlingsgrunnlag(behandlingID, soeknad, Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS, VERSJON_SOEKNAD_GRUNNLAG);
     }
 
     //Altinn
-    public Behandlingsgrunnlag opprettSøknadEøs(long behandlingID,
-                                                Soeknad soeknad) throws FunksjonellException, IntegrasjonException {
+    public Behandlingsgrunnlag opprettSøknadUtsendteArbeidstakereEøs(long behandlingID,
+                                                                     Soeknad soeknad) throws FunksjonellException, IntegrasjonException {
         return opprettBehandlingsgrunnlag(behandlingID, soeknad, Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS, VERSJON_SOEKNAD_GRUNNLAG);
     }
 

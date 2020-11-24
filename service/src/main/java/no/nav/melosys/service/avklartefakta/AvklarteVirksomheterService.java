@@ -94,29 +94,27 @@ public class AvklarteVirksomheterService {
     }
 
     public void lagreVirksomheterSomAvklartefakta(List<String> virksomhetIDer, Long behandlingID) throws FunksjonellException, TekniskException {
-        erVirksomhetIDerGyldig(virksomhetIDer, behandlingID);
+        erVirksomhetIDerGyldige(virksomhetIDer, behandlingID);
         for (String virksomhetID : virksomhetIDer) {
-            avklartefaktaService.leggTilAvklarteFakta(behandlingID, VIRKSOMHET, VIRKSOMHET.getKode(), virksomhetID, "TRUE");
+            lagreVirksomhetSomAvklartfakta(virksomhetID, behandlingID);
         }
     }
 
     public void lagreVirksomhetSomAvklartfakta(String virksomhetID, Long behandlingID) throws FunksjonellException, TekniskException {
-        if (registerOppslagService.hentOrganisasjon(virksomhetID) != null) {
-            avklartefaktaService.leggTilAvklarteFakta(behandlingID, VIRKSOMHET, VIRKSOMHET.getKode(), virksomhetID, "TRUE");
-        }
+        avklartefaktaService.leggTilAvklarteFakta(behandlingID, VIRKSOMHET, VIRKSOMHET.getKode(), virksomhetID, "TRUE");
     }
 
-    private boolean erVirksomhetIDerGyldig(List<String> virksomhetIDer, Long behandlingID) throws FunksjonellException, TekniskException {
+    private boolean erVirksomhetIDerGyldige(List<String> virksomhetIDer, Long behandlingID) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         for (String virksomhetID : virksomhetIDer) {
-            if (!erVirksomhetIDerGyldig(virksomhetID, behandling)) {
+            if (!erVirksomhetIDGyldig(virksomhetID, behandling)) {
                 throw new FunksjonellException("VirksomhetID " + virksomhetID + " hører ikke til noen av arbeidsforholdene");
             }
         }
         return true;
     }
 
-    private boolean erVirksomhetIDerGyldig(String virksomhetID, Behandling behandling) throws TekniskException {
+    private boolean erVirksomhetIDGyldig(String virksomhetID, Behandling behandling) throws TekniskException {
         BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         return erVirksomhetForetakUtland(virksomhetID, behandlingsgrunnlagData)
             || erVirksomhetSelvstendigForetakEllerLagtInnManuelt(virksomhetID, behandlingsgrunnlagData)
