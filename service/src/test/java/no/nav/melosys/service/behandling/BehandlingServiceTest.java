@@ -177,7 +177,6 @@ public class BehandlingServiceTest {
         when(tidligereMedlemsperiodeRepo.findById_BehandlingId(anyLong())).thenReturn(new ArrayList<>());
 
         List<Long> periodeIder = behandlingService.hentMedlemsperioder(behandlingID);
-        assertThat(periodeIder).isNotNull();
         assertThat(periodeIder).isEmpty();
     }
 
@@ -190,7 +189,6 @@ public class BehandlingServiceTest {
         when(tidligereMedlemsperiodeRepo.findById_BehandlingId(anyLong())).thenReturn(tidligereMedlemsperioder);
 
         List<Long> periodeIder = behandlingService.hentMedlemsperioder(behandlingID);
-        assertThat(periodeIder).isNotNull();
         assertThat(periodeIder).containsExactly(2L, 3L);
     }
 
@@ -222,6 +220,7 @@ public class BehandlingServiceTest {
         assertThat(replikertBehandling.getSaksopplysninger()).allMatch(saksopplysning -> saksopplysning.getKilder().iterator().next().getMottattDokument().equals("dokxml"));
         assertThat(replikertBehandling.getSaksopplysninger()).allMatch(saksopplysning -> saksopplysning.getType().equals(SaksopplysningType.INNTK));
         assertThat(replikertBehandling.getSaksopplysninger()).allMatch(saksopplysning -> saksopplysning.getEndretDato().toString().equals("2020-02-11T09:37:30Z"));
+        assertThat(replikertBehandling.getSaksopplysninger()).flatExtracting(Saksopplysning::getKilder).allMatch(saksopplysningKilde -> saksopplysningKilde.getId() == null);
     }
 
     @Test
@@ -271,36 +270,36 @@ public class BehandlingServiceTest {
         when(oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.of(oppgaveBuilder.build()));
 
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
-        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(true);
+        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isTrue();
 
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(true);
+        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isTrue();
 
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
-        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(false);
+        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isFalse();
 
         behandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
-        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(false);
+        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isFalse();
 
         behandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
-        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(true);
+        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isTrue();
         behandling.setType(null);
 
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(false);
+        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isFalse();
 
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         oppgaveBuilder.setTilordnetRessurs("noen andre");
         Oppgave oppgave2 = oppgaveBuilder.build();
         when(oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.ofNullable(oppgave2));
-        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(false);
+        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isFalse();
 
         oppgaveBuilder.setTilordnetRessurs(null);
         Oppgave oppgave3 = oppgaveBuilder.build();
         when(oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.ofNullable(oppgave3));
-        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isEqualTo(false);
+        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isFalse();
     }
 
     @Test
@@ -334,10 +333,18 @@ public class BehandlingServiceTest {
     private Saksopplysning opprettSaksopplysning(String dokxml, SaksopplysningType saksopplysningType, String endretDato) {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setBehandling(opprettTomBehandlingMedId());
-        saksopplysning.leggTilKildesystemOgMottattDokument(null, dokxml);
+        saksopplysning.setKilder(opprettSaksopplysningkildeMedID(dokxml));
         saksopplysning.setType(saksopplysningType);
         saksopplysning.setEndretDato(Instant.parse(endretDato));
         return saksopplysning;
+    }
+
+    private Set<SaksopplysningKilde> opprettSaksopplysningkildeMedID(String dokxml) {
+        var kilde = new SaksopplysningKilde();
+        kilde.setId(123321L);
+        kilde.setKilde(SaksopplysningKildesystem.EREG);
+        kilde.setMottattDokument(dokxml);
+        return Collections.singleton(kilde);
     }
 
     private Behandling opprettTomBehandlingMedId() {
