@@ -1,6 +1,10 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
@@ -14,9 +18,12 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Fartsomraade;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MaritimtArbeid;
+import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
+import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
@@ -124,6 +131,18 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             fag.setArt16UtenArt12(JA);
         }
 
+        fag.setAntallBarnOmfattetAvNorskTrygd(BigInteger.valueOf(brevdata.avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd.size()));
+        fag.setBarnIkkeOmfattetAvNorskTrygdListe(hentBarnIkkeOmfattetAvNorskTrygd(brevdata.avklarteMedfolgendeBarn));
+        fag.setBarnOmfattetAvNorskTrygdListe(hentBarnOmfattetAvNorskTrygd(brevdata.avklarteMedfolgendeBarn));
+
+        if (brevdata.avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd.size() == 1) {
+            fag.setBarnAvslagBegrunnelse(tilBarnAvslagBegrunnelseKode(
+                brevdata.avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd.iterator().next().begrunnelse));
+        }
+        if (brevdata.avklarteMedfolgendeBarn.hentBegrunnelseFritekst().isPresent()) {
+            fag.setMedfoelgendeBarnFritekst(brevdata.avklarteMedfolgendeBarn.hentBegrunnelseFritekst().get());
+        }
+
         return fag;
     }
 
@@ -143,6 +162,52 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
                 return null; //Brev har ikke koder for ENDRINGSVEDTAK
             default:
                 throw new TekniskException("Ukjent vedtakstype " + vedtakstype + " kan ikke mappes til VedtaksTypeKode");
+        }
+    }
+
+    private BarnOmfattetAvNorskTrygdListeType hentBarnOmfattetAvNorskTrygd(AvklarteMedfolgendeBarn avklarteMedfolgendeBarn) {
+        List<BarnInnvilgelseType> barnInnvilgelse = avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd.stream()
+            .map(InnvilgelsesbrevMapper::lagBarnInnvilgelseType)
+            .collect(Collectors.toList());
+        return BarnOmfattetAvNorskTrygdListeType.builder()
+            .withBarnInnvilgelse(barnInnvilgelse).build();
+    }
+
+    private BarnIkkeOmfattetAvNorskTrygdListeType hentBarnIkkeOmfattetAvNorskTrygd(AvklarteMedfolgendeBarn avklarteMedfolgendeBarn) throws TekniskException {
+        List<BarnAvslagType> barnAvslag = new ArrayList<>();
+        for (IkkeOmfattetBarn medfolgendeBarn : avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd) {
+            barnAvslag.add(lagBarnAvslagType(medfolgendeBarn));
+        }
+        return BarnIkkeOmfattetAvNorskTrygdListeType.builder()
+            .withBarnAvslag(barnAvslag).build();
+    }
+
+    private static BarnInnvilgelseType lagBarnInnvilgelseType(String fnr) {
+        return BarnInnvilgelseType.builder().withBarnOmfattetAvNorskTrygd(fnr).build();
+    }
+
+    private BarnAvslagType lagBarnAvslagType(IkkeOmfattetBarn ikkeOmfattetBarn) throws TekniskException {
+        return BarnAvslagType.builder()
+            .withBarnAvslagBegrunnelse(tilBarnAvslagBegrunnelseKode(ikkeOmfattetBarn.begrunnelse))
+            .withBarnIkkeOmfattetAvNorskTrygd(ikkeOmfattetBarn.fnr).build();
+    }
+
+    private BarnAvslagBegrunnelseKode tilBarnAvslagBegrunnelseKode(Medfolgende_barn_begrunnelser begrunnelse) throws TekniskException {
+        if (begrunnelse == null) {
+            return null;
+        }
+
+        switch (begrunnelse) {
+            case OVER_18_AR:
+                return BarnAvslagBegrunnelseKode.OVER_18_AAR;
+            case IKKE_SOEKERS_BARN:
+                return BarnAvslagBegrunnelseKode.IKKE_SOEKERS_BARN;
+            case IKKE_BOSATT_I_NORGE:
+                return BarnAvslagBegrunnelseKode.IKKE_BOSATT_I_NORGE;
+            case MANGLER_OPPLYSNINGER:
+                return BarnAvslagBegrunnelseKode.MANGLER_OPPLYSNINGER;
+            default:
+                throw new TekniskException("Ukjent begrunnelse " + begrunnelse + " kan ikke mappes til BarnAvslagBegrunnelseKode");
         }
     }
 

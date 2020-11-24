@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.brev;
 
 import java.util.HashSet;
+import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
@@ -12,12 +13,15 @@ import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ForetakUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MaritimtArbeid;
+import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
+import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
 
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser.OVER_18_AR;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -132,5 +136,12 @@ public class BrevDataTestUtils {
             vilkaarsresultat.getBegrunnelser().add(begrunnelse);
         }
         return vilkaarsresultat;
+    }
+
+    public static AvklarteMedfolgendeBarn lagAvklarteMedfølgendeBarn() {
+        return new AvklarteMedfolgendeBarn(
+            Set.of("fnrOmfattet"),
+            Set.of(new IkkeOmfattetBarn("fnrIkkeOmfattet", OVER_18_AR.getKode(), null))
+        );
     }
 }
