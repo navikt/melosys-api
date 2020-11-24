@@ -15,6 +15,7 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
+import no.nav.melosys.service.medlemskapsperiode.OpprettMedlemskapsperiodeService;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
 import no.nav.melosys.tjenester.gui.dto.MedlemskapsperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.MedlemskapsperiodeOppdatering;
@@ -41,6 +42,8 @@ class MedlemskapsperiodeTjenesteTest extends JsonSchemaTestParent {
     private MedlemskapsperiodeService medlemskapsperiodeService;
     @Mock
     private TilgangService tilgangService;
+    @Mock
+    private OpprettMedlemskapsperiodeService opprettMedlemskapsperiodeService;
 
     private MedlemskapsperiodeTjeneste medlemskapsperiodeTjeneste;
 
@@ -48,7 +51,7 @@ class MedlemskapsperiodeTjenesteTest extends JsonSchemaTestParent {
 
     @BeforeEach
     void setup() {
-        medlemskapsperiodeTjeneste = new MedlemskapsperiodeTjeneste(medlemskapsperiodeService, tilgangService);
+        medlemskapsperiodeTjeneste = new MedlemskapsperiodeTjeneste(medlemskapsperiodeService, opprettMedlemskapsperiodeService, tilgangService);
     }
 
     @Test
@@ -102,7 +105,7 @@ class MedlemskapsperiodeTjenesteTest extends JsonSchemaTestParent {
     @Test
     void opprettMedlemskapsperioderFraBestemmelse() throws FunksjonellException, TekniskException, IOException {
 
-        when(medlemskapsperiodeService.utledMedlemskapsperioderFraSøknad(eq(behandlingID), any(Folketrygdloven_kap2_bestemmelser.class)))
+        when(opprettMedlemskapsperiodeService.utledMedlemskapsperioderFraSøknad(eq(behandlingID), any(Folketrygdloven_kap2_bestemmelser.class)))
             .thenReturn(Collections.singleton(lagMedlemskapsperiode()));
 
         var res = medlemskapsperiodeTjeneste.opprettMedlemskapsperioderFraBestemmelse(

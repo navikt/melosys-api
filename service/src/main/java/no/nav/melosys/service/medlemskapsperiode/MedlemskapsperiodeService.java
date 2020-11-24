@@ -2,24 +2,18 @@ package no.nav.melosys.service.medlemskapsperiode;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
-import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.InnvilgelsesResultat;
+import no.nav.melosys.domain.Medlemskapsperiode;
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.MedlemskapsperiodeRepository;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.google.common.collect.MoreCollectors.onlyElement;
-import static java.lang.String.format;
 import static no.nav.melosys.domain.kodeverk.Trygdedekninger.*;
 import static no.nav.melosys.service.kontroll.PeriodeKontroller.feilIPeriode;
 
@@ -29,13 +23,10 @@ public class MedlemskapsperiodeService {
     private static final Collection<Trygdedekninger> GYLDIGE_TRYGDEDEKNINGER = Set.of(HELSEDEL, HELSEDEL_MED_SYKE_OG_FORELDREPENGER,
         PENSJONSDEL, HELSE_OG_PENSJONSDEL, HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER);
 
-
     private final MedlemskapsperiodeRepository medlemskapsperiodeRepository;
-    private final BehandlingsresultatService behandlingsresultatService;
 
-    public MedlemskapsperiodeService(MedlemskapsperiodeRepository medlemskapsperiodeRepository, BehandlingsresultatService behandlingsresultatService) {
+    public MedlemskapsperiodeService(MedlemskapsperiodeRepository medlemskapsperiodeRepository) {
         this.medlemskapsperiodeRepository = medlemskapsperiodeRepository;
-        this.behandlingsresultatService = behandlingsresultatService;
     }
 
     @Transactional(readOnly = true)
@@ -116,67 +107,8 @@ public class MedlemskapsperiodeService {
         medlemskapsperiodeRepository.delete(medlemskapsperiode);
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public Collection<Medlemskapsperiode> utledMedlemskapsperioderFraSøknad(long behandlingID, Folketrygdloven_kap2_bestemmelser bestemmelse) throws FunksjonellException {
-        if (!støtterBestemmelse(bestemmelse)) {
-            throw new FunksjonellException("Støtter ikke perioder med bestemmelse " + bestemmelse);
-        }
-
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        validerSakstype(behandlingsresultat.getBehandling().getFagsak());
-        validerVilkår(behandlingsresultat, bestemmelse);
-        medlemskapsperiodeRepository.deleteByBehandlingsresultat(behandlingsresultat);
-
-        Behandling behandling = behandlingsresultat.getBehandling();
-        Behandlingsgrunnlag behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
-        SoeknadFtrl søknad = (SoeknadFtrl) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
-
-        var medlemskapsperioder = UtledMedlemskapsperioder.lagMedlemskapsperioder(
-            new UtledMedlemskapsperioderRequest(
-                søknad.periode,
-                søknad.getTrygdedekning(),
-                bestemmelse,
-                behandlingsgrunnlag.getMottaksdato(),
-                søknad.soeknadsland.landkoder.stream().collect(onlyElement())
-            )
-        );
-
-        medlemskapsperioder.forEach(m -> m.setBehandlingsresultat(behandlingsresultat));
-        return medlemskapsperiodeRepository.saveAll(medlemskapsperioder);
-    }
-
-    private void validerVilkår(Behandlingsresultat behandlingsresultat, Folketrygdloven_kap2_bestemmelser bestemmelse) throws FunksjonellException {
-        var vilkårForBestemmelse = hentVilkårForBestemmelse(bestemmelse);
-        if (!behandlingsresultat.oppfyllerVilkår(vilkårForBestemmelse)) {
-            throw new FunksjonellException(format("Vilkår %s er påkrevd for bestemmelse %s", vilkårForBestemmelse, bestemmelse));
-        }
-    }
-
-    private void validerSakstype(Fagsak fagsak) throws FunksjonellException {
-        if (fagsak.getType() != Sakstyper.FTRL) {
-            throw new FunksjonellException("Kan ikke opprette medlemskapsperioder for sakstype " + fagsak.getType());
-        }
-    }
-
     public Collection<Trygdedekninger> hentGyldigeTrygdedekninger() {
         return GYLDIGE_TRYGDEDEKNINGER;
     }
 
-    public Map<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> hentBestemmelserMedVilkaar() {
-        return Map.of(
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A,
-            Set.of(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID),
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD,
-            Set.of(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID, Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE)
-        );
-    }
-
-    private Collection<Vilkaar> hentVilkårForBestemmelse(Folketrygdloven_kap2_bestemmelser bestemmelse) throws FunksjonellException {
-        return Optional.ofNullable(hentBestemmelserMedVilkaar().get(bestemmelse))
-            .orElseThrow(() -> new FunksjonellException("Finner ikke vilkår for bestemmelse " + bestemmelse));
-    }
-
-    private boolean støtterBestemmelse(Folketrygdloven_kap2_bestemmelser bestemmelse) {
-        return hentBestemmelserMedVilkaar().containsKey(bestemmelse);
-    }
 }
