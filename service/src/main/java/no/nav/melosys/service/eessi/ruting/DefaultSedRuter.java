@@ -111,7 +111,7 @@ public class DefaultSedRuter implements SedRuter {
     }
 
     private String opprettBehandlingsoppgave(Behandling behandling, String aktørID, SedType sedType) throws FunksjonellException, TekniskException {
-        Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType())
+        Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType(), null)
             .setAktørId(aktørID)
             .setSaksnummer(behandling.getFagsak().getSaksnummer())
             .setBeskrivelse("Mottatt SED " + sedType)

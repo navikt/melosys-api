@@ -24,8 +24,8 @@ public final class OppgaveFactory {
             .setFristFerdigstillelse(LocalDate.now().plusDays(FRIST_FERDIGSTILLELSE_JFR_OPPG));
     }
 
-    public static Oppgave.Builder lagBehandlingsOppgaveForType(Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
-        OppgaveParametere parametere = hentOppgaveParametere(behandlingstema);
+    public static Oppgave.Builder lagBehandlingsOppgaveForType(Behandlingstema behandlingstema, Behandlingstyper behandlingstype, LocalDate forsendelseMottatt) {
+        OppgaveParametere parametere = hentOppgaveParametere(behandlingstema, forsendelseMottatt);
 
         if (behandlingstype == Behandlingstyper.ENDRET_PERIODE) {
             parametere.fristFerdigstillelse = fristDager(1);
@@ -41,7 +41,7 @@ public final class OppgaveFactory {
             .setPrioritet(PrioritetType.NORM);
     }
 
-    private static OppgaveParametere hentOppgaveParametere(Behandlingstema behandlingstema) {
+    private static OppgaveParametere hentOppgaveParametere(Behandlingstema behandlingstema, LocalDate forsendelseMottatt) {
 
         OppgaveParametere oppgaveParametere;
 
@@ -52,11 +52,11 @@ public final class OppgaveFactory {
             case ARBEID_NORGE_BOSATT_ANNET_LAND:
             case ARBEID_ETT_LAND_ØVRIG:
             case IKKE_YRKESAKTIV:
-                oppgaveParametere = new OppgaveParametere(Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
+                oppgaveParametere = new OppgaveParametere(Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(forsendelseMottatt, 30));
                 break;
             case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING:
             case REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE:
-                oppgaveParametere = new OppgaveParametere(Tema.UFM, Oppgavetyper.BEH_SED, fristUker(2));
+                oppgaveParametere = new OppgaveParametere(Tema.UFM, Oppgavetyper.BEH_SED, fristUker(forsendelseMottatt, 2));
                 break;
             case BESLUTNING_LOVVALG_NORGE:
                 oppgaveParametere = new OppgaveParametere(Tema.MED, Oppgavetyper.BEH_SED, fristUker(4));
@@ -83,8 +83,16 @@ public final class OppgaveFactory {
         return LocalDate.now().plusWeeks(uker);
     }
 
+    private static LocalDate fristUker(LocalDate forsendelseMottatt, int uker) {
+        return forsendelseMottatt == null ? fristUker(uker) : forsendelseMottatt.plusWeeks(uker);
+    }
+
     private static LocalDate fristDager(int dager) {
         return LocalDate.now().plusDays(dager);
+    }
+
+    private static LocalDate fristDager(LocalDate forsendelseMottatt, int dager) {
+        return forsendelseMottatt == null ? fristDager(dager) : forsendelseMottatt.plusDays(dager);
     }
 
     public static class OppgaveParametere {

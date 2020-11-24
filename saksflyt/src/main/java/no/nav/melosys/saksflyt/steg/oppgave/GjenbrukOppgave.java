@@ -44,7 +44,7 @@ public class GjenbrukOppgave implements StegBehandler {
 
         final Oppgave gjenbruktOppgave = oppgaveService.hentOppgaveMedOppgaveID(oppgaveID);
 
-        final Oppgave nyOppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType())
+        final Oppgave nyOppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType(), null)
             .setSaksnummer(fagsak.getSaksnummer())
             .setTilordnetRessurs(prosessinstans.hentSaksbehandlerHvisTilordnes())
             .setAktørId(fagsak.hentBruker().getAktørId())

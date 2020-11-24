@@ -1,6 +1,7 @@
 package no.nav.melosys.service.oppgave;
 
 
+import java.time.LocalDate;
 import java.util.*;
 import javax.annotation.Nullable;
 
@@ -117,12 +118,14 @@ public class OppgaveService {
         return fagsakService.hentFagsak(saksnummer).hentSistAktiveBehandling();
     }
 
-    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) throws FunksjonellException, TekniskException {
+    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID,
+                                                       @Nullable String tilordnetRessurs, LocalDate forsendelseMottatt)
+        throws FunksjonellException, TekniskException {
 
         Optional<Oppgave> eksisterendeOppgave = finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         if (eksisterendeOppgave.isEmpty()) {
-            Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType())
+            Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType(), forsendelseMottatt)
                 .setTilordnetRessurs(tilordnetRessurs)
                 .setJournalpostId(journalpostID)
                 .setAktørId(aktørID)

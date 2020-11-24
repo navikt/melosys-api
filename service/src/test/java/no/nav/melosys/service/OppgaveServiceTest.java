@@ -153,7 +153,7 @@ public class OppgaveServiceTest {
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer("MEL-11111");
 
-        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999", null);
         verify(oppgaveFasade).opprettOppgave(any(Oppgave.class));
     }
 
@@ -165,7 +165,7 @@ public class OppgaveServiceTest {
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer(saksnummer);
 
-        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", oppgave.getTilordnetRessurs());
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", oppgave.getTilordnetRessurs(), null);
         verify(oppgaveFasade, never()).opprettOppgave(any());
         verify(oppgaveFasade, never()).oppdaterOppgave(any(), any());
     }
@@ -179,10 +179,27 @@ public class OppgaveServiceTest {
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer(saksnummer);
 
-        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", tilordnetRessurs);
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", tilordnetRessurs, null);
         verify(oppgaveFasade, never()).opprettOppgave(any());
         verify(oppgaveFasade).oppdaterOppgave(eq(oppgave.getOppgaveId()), oppgaveOppdateringCaptor.capture());
         assertThat(oppgaveOppdateringCaptor.getValue().getTilordnetRessurs()).isEqualTo(tilordnetRessurs);
+    }
+
+    @Test
+    public void opprettEllerGjenbrukBehandlingsoppgave_ingenEksisterendeOppgave_setterFristFraForsendelseMottatt() throws FunksjonellException, TekniskException {
+        Behandling behandling = new Behandling();
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setFagsak(new Fagsak());
+        behandling.getFagsak().setSaksnummer("MEL-11111");
+
+        LocalDate forsendelseMottatt = LocalDate.now().minusDays(15);
+        ArgumentCaptor<Oppgave> oppgaveCaptor = ArgumentCaptor.forClass(Oppgave.class);
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
+            behandling, "222", "333", "Z99999", forsendelseMottatt);
+        verify(oppgaveFasade).opprettOppgave(oppgaveCaptor.capture());
+        assertThat(oppgaveCaptor.getValue().getFristFerdigstillelse()).isEqualTo(forsendelseMottatt.plusDays(30));
     }
 
     private static Behandling lagBehandling() {

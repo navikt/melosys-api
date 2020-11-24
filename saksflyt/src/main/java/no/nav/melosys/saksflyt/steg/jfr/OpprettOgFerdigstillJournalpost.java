@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -70,6 +72,8 @@ public class OpprettOgFerdigstillJournalpost implements StegBehandler {
             prosessinstans.getBehandling().getFagsak(), dokumenter, ident, avsenderNavn
         );
 
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA,
+            LocalDate.ofInstant(opprettJournalpost.getForsendelseMottatt(), ZoneId.systemDefault()));
         String journalpostID = joarkFasade.opprettJournalpost(opprettJournalpost, true);
 
         behandling.setInitierendeJournalpostId(journalpostID);
