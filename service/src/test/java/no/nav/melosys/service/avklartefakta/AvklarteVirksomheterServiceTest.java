@@ -188,48 +188,48 @@ public class AvklarteVirksomheterServiceTest {
 
     @Test
     public void lagreVirksomheterSomAvklartefakta_virksomhetErForetakUtland_valideringOKOgVirksomhetLagret() throws FunksjonellException, TekniskException {
-        List<String> virksomheter = List.of(uuid1);
+        List<String> virksomhetIDer = List.of(uuid1);
         forberedValidering();
 
-        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomheter, 1L);
+        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomhetIDer, 1L);
         verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), uuid1, "TRUE");
     }
 
     @Test
     public void lagreVirksomheterSomAvklartefakta_virksomhetErSelvstendigForetak_valideringOKOgVirksomhetLagret() throws FunksjonellException, TekniskException {
-        List<String> virksomheter = List.of(orgnr1);
+        List<String> virksomhetIDer = List.of(orgnr1);
         forberedValidering();
 
-        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomheter, 1L);
+        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomhetIDer, 1L);
         verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr1, "TRUE");
     }
 
     @Test
     public void lagreVirksomheterSomAvklartefakta_virksomhetErLagtInnManuelt_valideringOKOgVirksomhetLagret() throws FunksjonellException, TekniskException {
-        List<String> virksomheter = List.of(orgnr2);
+        List<String> virksomhetIDer = List.of(orgnr2);
         forberedValidering();
 
-        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomheter, 1L);
+        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomhetIDer, 1L);
         verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr2, "TRUE");
     }
 
     @Test
     public void lagreVirksomheterSomAvklartefakta_virksomhetErArbeidNorge_valideringOKOgVirksomhetLagret() throws FunksjonellException, TekniskException {
-        List<String> virksomheter = List.of(orgnr3);
+        List<String> virksomhetIDer = List.of(orgnr3);
         forberedValidering();
 
-        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomheter, 1L);
+        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomhetIDer, 1L);
         verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr3, "TRUE");
     }
 
     @Test
     public void lagreVirksomheterSomAvklartefakta_virksomhetErUgyldig_valideringFailerOgVirksomhetIkkeLagret() throws FunksjonellException, TekniskException {
-        List<String> virksomheter = List.of(orgnr4);
+        List<String> virksomhetIDer = List.of(orgnr4);
         forberedValidering();
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomheter, 1L))
-            .withMessage(String.format("Orgnr %s hører ikke til noen av arbeidsforholdene", orgnr4));
+            .isThrownBy(() -> avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomhetIDer, 1L))
+            .withMessage(String.format("VirksomhetID %s hører ikke til noen av arbeidsforholdene", orgnr4));
         verify(avklartefaktaService, never()).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatyper.class), anyString(), anyString(), eq("TRUE"));
     }
 
