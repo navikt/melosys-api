@@ -74,6 +74,6 @@ class BestemBehandlingsmåteSedTest {
 
         bestemBehandlingsmåteSed.utfør(prosessinstans);
 
-        verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), any(), any(), any(), eq(null));
+        verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), any(), any(), any());
     }
 }

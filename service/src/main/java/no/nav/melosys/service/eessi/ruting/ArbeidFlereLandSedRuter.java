@@ -91,8 +91,7 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
                     eksisterendeBehandling,
                     prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID),
                     prosessinstans.getData(ProsessDataKey.AKTØR_ID),
-                    prosessinstans.hentSaksbehandlerHvisTilordnes(),
-                    null
+                    prosessinstans.hentSaksbehandlerHvisTilordnes()
                 );
             }
 

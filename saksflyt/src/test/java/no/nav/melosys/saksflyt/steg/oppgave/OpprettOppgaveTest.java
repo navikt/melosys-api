@@ -55,6 +55,6 @@ class OpprettOppgaveTest {
 
         opprettOppgave.utfør(prosessinstans);
 
-        verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), eq(journalpostID), eq(aktørID), eq(saksbehandler), eq(null));
+        verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), eq(journalpostID), eq(aktørID), eq(saksbehandler));
     }
 }

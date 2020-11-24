@@ -62,8 +62,7 @@ public class BestemBehandlingsmåteSed implements StegBehandler {
                 behandling,
                 prosessinstans.hentJournalpostID(),
                 behandling.getFagsak().hentBruker().getAktørId(),
-                prosessinstans.hentSaksbehandlerHvisTilordnes(),
-                null
+                prosessinstans.hentSaksbehandlerHvisTilordnes()
             );
         }
     }

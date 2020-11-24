@@ -152,8 +152,9 @@ public class OppgaveServiceTest {
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer("MEL-11111");
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
 
-        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999", null);
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
         verify(oppgaveFasade).opprettOppgave(any(Oppgave.class));
     }
 
@@ -165,7 +166,7 @@ public class OppgaveServiceTest {
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer(saksnummer);
 
-        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", oppgave.getTilordnetRessurs(), null);
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", oppgave.getTilordnetRessurs());
         verify(oppgaveFasade, never()).opprettOppgave(any());
         verify(oppgaveFasade, never()).oppdaterOppgave(any(), any());
     }
@@ -179,7 +180,7 @@ public class OppgaveServiceTest {
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer(saksnummer);
 
-        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", tilordnetRessurs, null);
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", tilordnetRessurs);
         verify(oppgaveFasade, never()).opprettOppgave(any());
         verify(oppgaveFasade).oppdaterOppgave(eq(oppgave.getOppgaveId()), oppgaveOppdateringCaptor.capture());
         assertThat(oppgaveOppdateringCaptor.getValue().getTilordnetRessurs()).isEqualTo(tilordnetRessurs);
@@ -192,14 +193,15 @@ public class OppgaveServiceTest {
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer("MEL-11111");
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        behandling.getBehandlingsgrunnlag().setMottaksdato(LocalDate.now().minusDays(15));
 
-        LocalDate forsendelseMottatt = LocalDate.now().minusDays(15);
         ArgumentCaptor<Oppgave> oppgaveCaptor = ArgumentCaptor.forClass(Oppgave.class);
 
-        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
-            behandling, "222", "333", "Z99999", forsendelseMottatt);
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
         verify(oppgaveFasade).opprettOppgave(oppgaveCaptor.capture());
-        assertThat(oppgaveCaptor.getValue().getFristFerdigstillelse()).isEqualTo(forsendelseMottatt.plusDays(30));
+        assertThat(oppgaveCaptor.getValue().getFristFerdigstillelse())
+            .isEqualTo(behandling.getBehandlingsgrunnlag().getMottaksdato().plusDays(30));
     }
 
     private static Behandling lagBehandling() {
