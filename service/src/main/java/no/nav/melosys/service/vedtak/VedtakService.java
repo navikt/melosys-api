@@ -95,7 +95,7 @@ public class VedtakService {
             validerInnvilgelse(vedtakstype, behandling, behandlingsresultat);
         }
 
-        oppdaterBehandlingsresultat(behandlingsresultat, behandlingsresultatType, vedtakstype, fritekst, revurderBegrunnelse);
+        oppdaterBehandlingsresultat(behandlingsresultat, vedtakstype, fritekst, revurderBegrunnelse);
         mottakerinstitusjoner = validerOgAvklarMottakerInstitusjoner(behandling, mottakerinstitusjoner, behandlingsresultat);
 
         if (prosessinstansService.harVedtakInstans(behandlingID)) {
@@ -109,7 +109,6 @@ public class VedtakService {
     }
 
     private void oppdaterBehandlingsresultat(Behandlingsresultat behandlingsresultat,
-                                             Behandlingsresultattyper behandlingsresultattype,
                                              Vedtakstyper vedtakstype,
                                              String behandlingresultatBegrunnelseFritekst,
                                              String revurderBegrunnelse) throws FunksjonellException {
@@ -118,7 +117,6 @@ public class VedtakService {
             behandlingsresultatService.oppdaterUtfallUtpeking(behandling.getId(), GODKJENT);
         }
 
-        behandlingsresultat.setType(behandlingsresultattype);
         behandlingsresultat.settVedtakMetadata(vedtakstype, revurderBegrunnelse, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
         behandlingsresultat.setBegrunnelseFritekst(behandlingresultatBegrunnelseFritekst);
         behandlingsresultat.setFastsattAvLand(Landkoder.NO);
