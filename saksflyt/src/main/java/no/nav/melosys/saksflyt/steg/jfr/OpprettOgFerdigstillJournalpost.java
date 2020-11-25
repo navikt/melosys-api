@@ -63,7 +63,7 @@ public class OpprettOgFerdigstillJournalpost implements StegBehandler {
         if (representant.isPresent()) {
             avsenderNavn = eregFasade.hentOrganisasjonNavn(representant.get().getOrgnr());
         } else {
-            avsenderNavn = tpsFasade.hentSammensattNavn(ident);
+            avsenderNavn = eregFasade.hentOrganisasjonNavn(fagsak.hentArbeidsgiver().getOrgnr());
         }
 
         OpprettJournalpost opprettJournalpost = OpprettJournalpost.lagJournalpostForMottakAltinnSøknad(
