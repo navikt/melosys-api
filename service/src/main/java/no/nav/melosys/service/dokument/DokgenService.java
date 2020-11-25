@@ -26,7 +26,7 @@ public class DokgenService {
         this.dokgenMalResolver = dokgenMalResolver;
     }
 
-    public byte[] produserUtkast(Produserbaredokumenter produserbartDokument, long behandlingId, BrevData brevData) {
+    byte[] produserUtkast(Produserbaredokumenter produserbartDokument, long behandlingId, BrevData brevData) {
         throw new NotImplementedException("Not implemented");
     }
 
@@ -36,7 +36,7 @@ public class DokgenService {
         return lagPdf(malnavn, dokgenMalResolver.mapBehandling(produserbartDokument, behandling));
     }
 
-    public boolean erTilgjengeligDokgenmal(Produserbaredokumenter produserbartDokument) {
+    boolean erTilgjengeligDokgenmal(Produserbaredokumenter produserbartDokument) {
         Set<Produserbaredokumenter> tilgjengeligeMaler = dokgenMalResolver.utledTilgjengeligeMaler();
         return tilgjengeligeMaler.contains(produserbartDokument);
     }

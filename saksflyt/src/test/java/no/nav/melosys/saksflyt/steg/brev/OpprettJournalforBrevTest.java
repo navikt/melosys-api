@@ -11,17 +11,15 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.DokgenService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,16 +27,20 @@ import static org.mockito.Mockito.when;
 class OpprettJournalforBrevTest {
 
     @Mock
-    private BehandlingService behandlingService;
+    private BehandlingService mockBehandlingService;
 
     @Mock
-    private DokgenService dokgenService;
+    private DokgenService mockDokgenService;
 
     @Mock
-    private JoarkFasade joarkFasade;
+    private JoarkFasade mockJoarkFasade;
 
-    @InjectMocks
     private OpprettJournalforBrev opprettJournalforBrev;
+
+    @BeforeEach
+    void init() {
+        opprettJournalforBrev = new OpprettJournalforBrev(mockBehandlingService, mockDokgenService, mockJoarkFasade);
+    }
 
     @Test
     void utførFeilerMedManglendeBehandling() {
@@ -48,9 +50,9 @@ class OpprettJournalforBrevTest {
 
     @Test
     void utførOpprettJournalforBrev() throws Exception {
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
-        when(dokgenService.produserBrev(any(), any())).thenReturn("pdf".getBytes());
-        when(joarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
+        when(mockDokgenService.produserBrev(any(), any())).thenReturn("pdf".getBytes());
+        when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
 
         Prosessinstans prosessinstans = new Prosessinstans();
         Behandling behandling = lagBehandling();
@@ -59,9 +61,9 @@ class OpprettJournalforBrevTest {
 
         opprettJournalforBrev.utfør(prosessinstans);
 
-        verify(behandlingService).hentBehandling(anyLong());
-        verify(dokgenService).produserBrev(any(), any());
-        verify(joarkFasade).opprettJournalpost(any(), anyBoolean());
+        verify(mockBehandlingService).hentBehandling(anyLong());
+        verify(mockDokgenService).produserBrev(any(), any());
+        verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 
     private Behandling lagBehandling() {

@@ -1,12 +1,7 @@
 package no.nav.melosys.service.saksflyt;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
@@ -29,21 +24,15 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.journalforing.dto.DokumentDto;
-import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
-import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
-import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
-import no.nav.melosys.service.journalforing.dto.PeriodeDto;
+import no.nav.melosys.service.journalforing.dto.*;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -52,18 +41,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProsessinstansServiceTest {
@@ -190,47 +171,6 @@ class ProsessinstansServiceTest {
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
         return behandling;
-    }
-
-    @Test
-    @DisplayName("Oppretting av prosessinstand for distribuering av forvaltningsmelding feiler når type behandling ikke er søknad eller klage")
-    void opprettProsessinstansDistribuerForvaltningsmelding_feiler() {
-        Behandling behandling = lagBehandling();
-
-        assertThrows(FunksjonellException.class, () ->
-            prosessinstansService.opprettProsessinstansDistribuerForvaltningsmelding(behandling));
-    }
-
-    @Test
-    void opprettProsessinstansDistribuerForvaltningsmelding_søknad() throws Exception {
-        String saksbehandler = settInnloggetSaksbehandler();
-
-        Behandling behandling = lagBehandling();
-        behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
-        prosessinstansService.opprettProsessinstansDistribuerForvaltningsmelding(behandling);
-
-        verify(prosessinstansRepo).save(piCaptor.capture());
-
-        Prosessinstans lagretInstans = piCaptor.getValue();
-        assertEquals(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, lagretInstans.getType());
-        assertEquals(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, lagretInstans.getData(ProsessDataKey.PRODUSERBART_BREV, Produserbaredokumenter.class));
-        assertEquals(saksbehandler, lagretInstans.getData(ProsessDataKey.SAKSBEHANDLER));
-    }
-
-    @Test
-    void opprettProsessinstansDistribuerForvaltningsmelding_klage() throws Exception {
-        String saksbehandler = settInnloggetSaksbehandler();
-
-        Behandling behandling = lagBehandling();
-        behandling.setType(Behandlingstyper.KLAGE);
-        prosessinstansService.opprettProsessinstansDistribuerForvaltningsmelding(behandling);
-
-        verify(prosessinstansRepo).save(piCaptor.capture());
-
-        Prosessinstans lagretInstans = piCaptor.getValue();
-        assertEquals(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, lagretInstans.getType());
-        assertEquals(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE, lagretInstans.getData(ProsessDataKey.PRODUSERBART_BREV, Produserbaredokumenter.class));
-        assertEquals(saksbehandler, lagretInstans.getData(ProsessDataKey.SAKSBEHANDLER));
     }
 
     @Test

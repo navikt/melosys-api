@@ -7,10 +7,10 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -18,9 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DokumentServiceFasadeTest {
@@ -36,11 +34,12 @@ class DokumentServiceFasadeTest {
     @Mock
     private ProsessinstansService mockProsessinstansService;
 
-    @InjectMocks
     private DokumentServiceFasade dokumentServiceFasade;
 
     @BeforeEach
     void init() {
+        dokumentServiceFasade = new DokumentServiceFasade(mockDokumentService, mockDokumentSystemService,
+            mockDokgenService, mockBehandlingService, mockProsessinstansService);
         Mockito.reset(
             mockDokgenService,
             mockDokumentService,

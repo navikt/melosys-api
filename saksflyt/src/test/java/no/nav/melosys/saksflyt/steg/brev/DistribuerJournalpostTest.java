@@ -5,9 +5,9 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -20,10 +20,14 @@ import static org.mockito.Mockito.verify;
 class DistribuerJournalpostTest {
 
     @Mock
-    private DoksysFasade doksysFasade;
+    private DoksysFasade mockDoksysFasade;
 
-    @InjectMocks
     private DistribuerJournalpost distribuerJournalpost;
+
+    @BeforeEach
+    void init() {
+        distribuerJournalpost = new DistribuerJournalpost(mockDoksysFasade);
+    }
 
     @Test
     void utførFeilerJournalpostIdMangler() {
@@ -39,7 +43,7 @@ class DistribuerJournalpostTest {
 
         distribuerJournalpost.utfør(prosessinstans);
 
-        verify(doksysFasade).distribuerJournalpost(eq(journalpostId));
+        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId));
     }
 
     @Test
@@ -52,7 +56,7 @@ class DistribuerJournalpostTest {
 
         distribuerJournalpost.utfør(prosessinstans);
 
-        verify(doksysFasade).distribuerJournalpost(eq(journalpostId), any(StrukturertAdresse.class));
+        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), any(StrukturertAdresse.class));
     }
 
 }

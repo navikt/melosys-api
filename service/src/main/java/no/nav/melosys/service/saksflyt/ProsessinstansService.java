@@ -19,12 +19,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessStatus;
-import no.nav.melosys.domain.saksflyt.ProsessType;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.saksflyt.ProsessinstansBuilder;
-import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.repository.ProsessinstansRepository;
@@ -43,10 +38,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import static java.lang.String.format;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.SOEKNAD;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.PRODUSERBART_BREV;
 
 @Service
@@ -247,20 +238,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansDistribuerForvaltningsmelding(Behandling behandling) throws FunksjonellException {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
-        if (behandling.erBehandlingAvSøknad()) {
-            prosessinstans.setData(PRODUSERBART_BREV, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-        } else if (behandling.erKlage()) {
-            prosessinstans.setData(PRODUSERBART_BREV, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE);
-        } else {
-            throw new FunksjonellException(format("BehandlingId %s er ikke registert som søknad eller klage", behandling.getId()));
-        }
-        prosessinstans.setBehandling(behandling);
-        lagre(prosessinstans);
-    }
-
+    @Transactional
     public void opprettProsessinstansOpprettOgDistribuerBrev(Produserbaredokumenter produserbartDokument, Behandling behandling) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
