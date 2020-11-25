@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.joark;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import no.nav.melosys.domain.arkiv.JournalfoeringMangel;
@@ -44,4 +45,6 @@ public interface JoarkFasade {
      * Returnerer en liste av mangler i journalposten med den oppgitte IDen
      */
     List<JournalfoeringMangel> utledJournalfoeringsbehov(String journalpostID) throws FunksjonellException;
+
+    LocalDate hentMottaksDatoForJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException;
 }

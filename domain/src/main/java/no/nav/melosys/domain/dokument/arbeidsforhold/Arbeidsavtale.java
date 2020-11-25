@@ -8,8 +8,10 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.HarPeriode;
+import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
 
@@ -28,7 +30,7 @@ public class Arbeidsavtale implements HarPeriode {
 
     public BigDecimal stillingsprosent;
 
-    @JsonIgnore
+    @JsonView(DokumentView.Database.class)
     @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
     public LocalDate sisteLoennsendringsdato;
 

@@ -7,7 +7,8 @@ import java.time.YearMonth;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
+import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.dokument.inntekt.inntektstype.Loennsinntekt;
 import no.nav.melosys.domain.dokument.inntekt.inntektstype.Naeringsinntekt;
 import no.nav.melosys.domain.dokument.inntekt.inntektstype.PensjonEllerTrygd;
@@ -46,7 +47,7 @@ import no.nav.melosys.domain.dokument.jaxb.YearMonthXmlAdapter;
 })
 public class Inntekt {
 
-    @JsonIgnore
+    @JsonView(DokumentView.Database.class)
     public String arbeidsforholdREF;
 
     @XmlElement(required = true)
@@ -71,7 +72,7 @@ public class Inntekt {
 
     public Periode opptjeningsperiode = new Periode();
 
-    @JsonIgnore
+    @JsonView(DokumentView.Database.class)
     public String skattemessigBosattLand;
 
     @XmlJavaTypeAdapter(YearMonthXmlAdapter.class)
@@ -80,12 +81,12 @@ public class Inntekt {
 
     public String opplysningspliktigID;
 
-    @JsonIgnore
+    @JsonView(DokumentView.Database.class)
     public String inntektsinnsenderID;
 
     public String virksomhetID;
 
-    @JsonIgnore
+    @JsonView(DokumentView.Database.class)
     public Tilleggsinformasjon tilleggsinformasjon;
 
     public String inntektsmottakerID;

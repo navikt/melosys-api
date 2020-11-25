@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-import no.nav.melosys.domain.SaksopplysningKilde;
+import no.nav.melosys.domain.SaksopplysningKildesystem;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.XsltConfig;
 import oracle.jdbc.OracleConnection;
@@ -68,29 +68,29 @@ public class V1_1_05__SAKSOPPLYSNING_data extends BaseJavaMigration {
 
         switch (Objects.requireNonNull(dirName)) {
             case XsltConfig.AAREG_MAPPE:
-                generateBatch(conn, dir, SaksopplysningType.ARBFORH, "3.0", SaksopplysningKilde.AAREG);
+                generateBatch(conn, dir, SaksopplysningType.ARBFORH, "3.0", SaksopplysningKildesystem.AAREG);
                 return;
             case XsltConfig.EREG_MAPPE:
-                generateBatch(conn, dir, SaksopplysningType.ORG, "4.0", SaksopplysningKilde.EREG);
+                generateBatch(conn, dir, SaksopplysningType.ORG, "4.0", SaksopplysningKildesystem.EREG);
                 return;
             case XsltConfig.INNTK_MAPPE:
-                generateBatch(conn, dir, SaksopplysningType.INNTK, "3.2", SaksopplysningKilde.INNTK);
+                generateBatch(conn, dir, SaksopplysningType.INNTK, "3.2", SaksopplysningKildesystem.INNTK);
                 return;
             case XsltConfig.TPS_MAPPE:
-                generateBatch(conn, dir, SaksopplysningType.PERSOPL, "3.0", SaksopplysningKilde.TPS);
+                generateBatch(conn, dir, SaksopplysningType.PERSOPL, "3.0", SaksopplysningKildesystem.TPS);
                 return;
             case "pershist":
-                generateBatch(conn, dir, SaksopplysningType.PERSHIST, "3.4", SaksopplysningKilde.TPS);
+                generateBatch(conn, dir, SaksopplysningType.PERSHIST, "3.4", SaksopplysningKildesystem.TPS);
                 return;
             case XsltConfig.MEDL_MAPPE:
-                generateBatch(conn, dir, SaksopplysningType.MEDL, "2.0", SaksopplysningKilde.MEDL);
+                generateBatch(conn, dir, SaksopplysningType.MEDL, "2.0", SaksopplysningKildesystem.MEDL);
                 return;
             default:
                 throw new IllegalStateException("Unknown xml data directory: " + dir.getFilename());
         }
     }
 
-    private void generateBatch(Connection connection, Resource dir, SaksopplysningType opplysning_type, String versjon, SaksopplysningKilde kilde) throws IOException {
+    private void generateBatch(Connection connection, Resource dir, SaksopplysningType opplysning_type, String versjon, SaksopplysningKildesystem kilde) throws IOException {
         log.info("Creating batch inserts for directory: {}", dir.getDescription());
         Resource[] resources = resourcePatternResolver.getResources(dir.getURL() + "*.xml");
         for (int i = 0; i < resources.length; i++) {
@@ -104,7 +104,7 @@ public class V1_1_05__SAKSOPPLYSNING_data extends BaseJavaMigration {
         return nameParts[0].split("_");
     }
 
-    private void insertXML(Resource file, Connection conn, SaksopplysningType opplysning_type, String versjon, SaksopplysningKilde kilde, int i) {
+    private void insertXML(Resource file, Connection conn, SaksopplysningType opplysning_type, String versjon, SaksopplysningKildesystem kilde, int i) {
         for (String behandlingsidText : getBehandlingsIder(file.getFilename())) {
             int behandlingsid = Integer.parseInt(behandlingsidText);
 

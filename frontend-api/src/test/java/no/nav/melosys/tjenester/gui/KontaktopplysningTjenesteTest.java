@@ -27,7 +27,7 @@ public class KontaktopplysningTjenesteTest {
 
     private static final String SAK_NUMMER = "MEL-1";
     private static final String ORG_NUMMER = "999";
-    private static final KontaktInfoDto KONTAKT_INFO = new KontaktInfoDto("kontaktnavn", "kontaktorgnr");
+    private static final KontaktInfoDto KONTAKT_INFO = new KontaktInfoDto("kontaktnavn", "kontaktorgnr", "kontakttelefon");
 
     @Before
     public void setUp() {
@@ -56,7 +56,8 @@ public class KontaktopplysningTjenesteTest {
     public void lagKontaktopplysning_kallerPåService() {
         ResponseEntity response = kontaktopplysningTjeneste.lagKontaktopplysning(SAK_NUMMER, ORG_NUMMER, KONTAKT_INFO);
 
-        verify(kontaktopplysningService).lagEllerOppdaterKontaktopplysning(SAK_NUMMER, ORG_NUMMER, KONTAKT_INFO.getKontaktorgnr(), KONTAKT_INFO.getKontaktnavn());
+        verify(kontaktopplysningService).lagEllerOppdaterKontaktopplysning(
+            SAK_NUMMER, ORG_NUMMER, KONTAKT_INFO.getKontaktorgnr(), KONTAKT_INFO.getKontaktnavn(), KONTAKT_INFO.getKontakttelefon());
         assertThat(response.getStatusCode().value()).isEqualTo(200);
     }
 

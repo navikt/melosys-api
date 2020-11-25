@@ -4,7 +4,7 @@ import java.io.StringWriter;
 import javax.xml.bind.JAXBException;
 
 import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningKilde;
+import no.nav.melosys.domain.SaksopplysningKildesystem;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -48,8 +48,8 @@ public class EregService implements EregFasade {
         }
 
         Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokumentXml(xmlWriter.toString());
-        saksopplysning.setKilde(SaksopplysningKilde.EREG);
+        saksopplysning.leggTilKildesystemOgMottattDokument(
+            SaksopplysningKildesystem.EREG, xmlWriter.toString());
         saksopplysning.setType(SaksopplysningType.ORG);
         saksopplysning.setVersjon(ORGANISASJON_VERSJON);
 

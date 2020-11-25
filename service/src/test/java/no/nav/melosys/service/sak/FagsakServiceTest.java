@@ -205,7 +205,7 @@ public class FagsakServiceTest {
 
     @Test
     public void nyFagsakOgBehandling_kontaktPersonFinnes_KontaktOpplysningOpprettes() {
-        Kontaktopplysning kontaktopplysning = Kontaktopplysning.av("RepresentantOrgnr", "Kontaktperson");
+        Kontaktopplysning kontaktopplysning = Kontaktopplysning.av("RepresentantOrgnr", "Kontaktperson", "Telefon");
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder().medAktørID("123456789")
             .medBehandlingstype(Behandlingstyper.SOEKNAD)
             .medKontaktopplysninger(List.of(kontaktopplysning)).build();
@@ -213,7 +213,7 @@ public class FagsakServiceTest {
         fagsakService.nyFagsakOgBehandling(opprettSakRequest);
 
         verify(kontaktopplysningService).lagEllerOppdaterKontaktopplysning(
-            any(), eq("RepresentantOrgnr"), eq(null), eq("Kontaktperson")
+            any(), eq("RepresentantOrgnr"), eq(null), eq("Kontaktperson"), eq("Telefon")
         );
     }
 

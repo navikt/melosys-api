@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.MedlemsperiodeType;
+import no.nav.melosys.domain.PeriodeType;
 import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
 import no.nav.melosys.domain.eessi.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -69,7 +69,7 @@ public class EessiService {
         Fagsak fagsak = behandling.getFagsak();
 
         SedDataGrunnlag datagrunnlag = dataGrunnlagFactory.av(behandling);
-        SedDataDto sedData = sedDataBygger.lag(datagrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType, behandlingsresultat));
+        SedDataDto sedData = sedDataBygger.lag(datagrunnlag, behandlingsresultat, PeriodeType.fraBucType(bucType, behandlingsresultat));
         sedData.setMottakerIder(mottakerInstitusjoner);
         sedData.setGsakSaksnummer(fagsak.getGsakSaksnummer());
         sedData.setYtterligereInformasjon(ytterligereInformasjon);
@@ -84,7 +84,7 @@ public class EessiService {
     public String opprettBucOgSed(Behandling behandling, BucType bucType, List<String> mottakerInstitusjoner, Collection<Vedlegg> vedlegg) throws MelosysException {
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.fraBucType(bucType, behandlingsresultat));
+        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, PeriodeType.fraBucType(bucType, behandlingsresultat));
         sedDataDto.setMottakerIder(mottakerInstitusjoner);
         sedDataDto.setGsakSaksnummer(behandling.getFagsak().getGsakSaksnummer());
 
@@ -149,29 +149,29 @@ public class EessiService {
 
     public void sendAnmodningUnntakSvar(long behandlingId) throws MelosysException {
         log.info("Sender svar på anmodning om unntak for behandling {}", behandlingId);
-        sendSedPåEksisterendeBehandling(behandlingId, MedlemsperiodeType.ANMODNINGSPERIODE, this::hentSedTypeForAnmodningUnntakSvar);
+        sendSedPåEksisterendeBehandling(behandlingId, PeriodeType.ANMODNINGSPERIODE, this::hentSedTypeForAnmodningUnntakSvar);
 
     }
 
     public void sendGodkjenningArbeidFlereLand(long behandlingID, String ytterligereInformasjon) throws MelosysException {
         log.info("Sender svar på A003 for behandling {}", behandlingID);
-        sendSedPåEksisterendeBehandling(behandlingID, MedlemsperiodeType.LOVVALGSPERIODE, br -> SedType.A012, ytterligereInformasjon);
+        sendSedPåEksisterendeBehandling(behandlingID, PeriodeType.LOVVALGSPERIODE, br -> SedType.A012, ytterligereInformasjon);
     }
 
     private void sendSedPåEksisterendeBehandling(long behandlingID,
-                                                 MedlemsperiodeType medlemsperiodeType,
+                                                 PeriodeType periodeType,
                                                  Function<Behandlingsresultat, SedType> sedTypeAvklarer) throws MelosysException {
-        sendSedPåEksisterendeBehandling(behandlingID, medlemsperiodeType, sedTypeAvklarer, null);
+        sendSedPåEksisterendeBehandling(behandlingID, periodeType, sedTypeAvklarer, null);
     }
 
     private void sendSedPåEksisterendeBehandling(long behandlingID,
-                                                 MedlemsperiodeType medlemsperiodeType,
+                                                 PeriodeType periodeType,
                                                  Function<Behandlingsresultat, SedType> sedTypeAvklarer, String ytterligereInformasjon) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
 
-        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, medlemsperiodeType);
+        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, periodeType);
         sedDataDto.setYtterligereInformasjon(ytterligereInformasjon);
         String rinaSaksnummer = behandling.hentSedDokument().getRinaSaksnummer();
 
@@ -186,7 +186,7 @@ public class EessiService {
 
         String rinaSaksnummer = behandling.hentSedDokument().getRinaSaksnummer();
 
-        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, MedlemsperiodeType.LOVVALGSPERIODE);
+        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
         sedDataDto.setYtterligereInformasjon(utpekingAvvis.getFritekst());
         sedDataDto.setUtpekingAvvis(new UtpekingAvvisDto(
             utpekingAvvis.getNyttLovvalgsland(),
@@ -207,16 +207,16 @@ public class EessiService {
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 
-        MedlemsperiodeType medlemsperiodeType;
+        PeriodeType periodeType;
         if (sedType == SedType.A001) {
-            medlemsperiodeType = MedlemsperiodeType.ANMODNINGSPERIODE;
+            periodeType = PeriodeType.ANMODNINGSPERIODE;
         } else if (sedType == SedType.A003 && behandlingsresultat.finnValidertUtpekingsperiode().isPresent()) {
-            medlemsperiodeType = MedlemsperiodeType.UTPEKINGSPERIODE;
+            periodeType = PeriodeType.UTPEKINGSPERIODE;
         } else {
-            medlemsperiodeType = MedlemsperiodeType.LOVVALGSPERIODE;
+            periodeType = PeriodeType.LOVVALGSPERIODE;
         }
 
-        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, medlemsperiodeType);
+        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, periodeType);
 
         if (sedPdfData != null) {
             sedPdfData.utfyllSedDataDto(sedDataDto);

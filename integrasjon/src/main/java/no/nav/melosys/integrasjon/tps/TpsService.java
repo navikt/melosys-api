@@ -2,16 +2,15 @@ package no.nav.melosys.integrasjon.tps;
 
 import java.io.StringWriter;
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningKilde;
+import no.nav.melosys.domain.SaksopplysningKildesystem;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -22,6 +21,8 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.tps.aktoer.AktoerIdCache;
 import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
+import no.nav.melosys.integrasjon.tps.mapper.PersonMedKilde;
+import no.nav.melosys.integrasjon.tps.mapper.PersonMapper;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
 import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentAktoerIdForIdentPersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentIdentForAktoerIdPersonIkkeFunnet;
@@ -108,7 +109,27 @@ public class TpsService implements TpsFasade {
         }
     }
 
-    private Saksopplysning hentPerson(String ident, Collection<no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov> behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    @Override
+    public Saksopplysning hentPerson(String ident, Informasjonsbehov behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+        PersonMedKilde personMedKilde = hentPersonMedKilde(ident, mapInformasjonsbehovTilTps(behov));
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.leggTilKildesystemOgMottattDokument(
+            SaksopplysningKildesystem.TPS, personMedKilde.dokumentXml);
+        saksopplysning.setType(SaksopplysningType.PERSOPL);
+        saksopplysning.setVersjon(PERSON_VERSJON);
+
+        for (Familiemedlem familiemedlem : personMedKilde.dokument.familiemedlemmer) {
+            PersonMedKilde personIFamilie = hentPersonMedKilde(familiemedlem.fnr, mapInformasjonsbehovTilTps(Informasjonsbehov.MED_FAMILIERELASJONER));
+            PersonMapper.berikFamiliemedlemMedOpplysninger(familiemedlem, personIFamilie.dokument, ident);
+            saksopplysning.leggTilKildesystemOgMottattDokument(
+                SaksopplysningKildesystem.TPS, personIFamilie.dokumentXml);
+        }
+        saksopplysning.setDokument(personMedKilde.dokument);
+
+        return saksopplysning;
+    }
+
+    private PersonMedKilde hentPersonMedKilde(String ident, Set<no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov> behov) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
         HentPersonRequest request = new HentPersonRequest();
         NorskIdent norskIdent = new NorskIdent();
         norskIdent.setIdent(ident);
@@ -138,22 +159,8 @@ public class TpsService implements TpsFasade {
         } catch (JAXBException e) {
             throw new IntegrasjonException(e);
         }
-
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokumentXml(xmlWriter.toString());
-        saksopplysning.setKilde(SaksopplysningKilde.TPS);
-        saksopplysning.setType(SaksopplysningType.PERSOPL);
-        saksopplysning.setVersjon(PERSON_VERSJON);
-
-        // xml -> java objekter
-        dokumentFactory.lagDokument(saksopplysning);
-
-        return saksopplysning;
-    }
-
-    @Override
-    public Saksopplysning hentPerson(String ident, Informasjonsbehov behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        return hentPerson(ident, mapInformasjonsbehovTilTps(behov));
+        PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson());
+        return new PersonMedKilde(dokument, xmlWriter.toString());
     }
 
     @Override
@@ -200,8 +207,8 @@ public class TpsService implements TpsFasade {
         }
 
         Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokumentXml(xmlWriter.toString());
-        saksopplysning.setKilde(SaksopplysningKilde.TPS);
+        saksopplysning.leggTilKildesystemOgMottattDokument(
+            SaksopplysningKildesystem.TPS, xmlWriter.toString());
         saksopplysning.setType(SaksopplysningType.PERSHIST);
         saksopplysning.setVersjon(PERSONHISTORIKK_VERSJON);
 

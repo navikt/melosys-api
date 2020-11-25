@@ -1,19 +1,15 @@
 package no.nav.melosys.domain;
 
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.jpa.HibernateXmlType;
-import no.nav.melosys.domain.jpa.SaksopplysningListener;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
+import no.nav.melosys.domain.jpa.SaksopplysningDokumentConverter;
 
-@TypeDefs(@TypeDef(name = Saksopplysning.XMLTYPE, typeClass = HibernateXmlType.class))
 @Entity
-@EntityListeners({SaksopplysningListener.class})
 @Table(name = "saksopplysning")
 public class Saksopplysning {
     public static final String XMLTYPE = "xmltype";
@@ -33,9 +29,8 @@ public class Saksopplysning {
     @Column(name="versjon", nullable = false, updatable = false)
     private String versjon;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "kilde", nullable = false, updatable = false)
-    private SaksopplysningKilde kilde;
+    @OneToMany(mappedBy = "saksopplysning", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private Set<SaksopplysningKilde> kilder = new HashSet<>(1);
 
     @Column(name = "registrert_dato", nullable = false, updatable = false)
     private Instant registrertDato;
@@ -43,15 +38,8 @@ public class Saksopplysning {
     @Column(name = "endret_dato", nullable = false)
     private Instant endretDato;
 
-    @Type(type = XMLTYPE)
-    @Column(name = "dokument_xml", nullable = false)
-    private String dokumentXml;
-
-    @Type(type = XMLTYPE)
-    @Column(name = "intern_xml")
-    private String internXml;
-
-    @Transient
+    @Convert(converter = SaksopplysningDokumentConverter.class)
+    @Column(name = "dokument", nullable = false, updatable = false)
     private SaksopplysningDokument dokument;
 
     public Long getId() {
@@ -86,12 +74,12 @@ public class Saksopplysning {
         this.versjon = versjon;
     }
 
-    public SaksopplysningKilde getKilde() {
-        return kilde;
+    public Set<SaksopplysningKilde> getKilder() {
+        return kilder;
     }
 
-    public void setKilde(SaksopplysningKilde kilde) {
-        this.kilde = kilde;
+    public void setKilder(Set<SaksopplysningKilde> kilder) {
+        this.kilder = kilder;
     }
 
     public Instant getRegistrertDato() {
@@ -110,22 +98,6 @@ public class Saksopplysning {
         this.endretDato = endretDato;
     }
 
-    public String getDokumentXml() {
-        return dokumentXml;
-    }
-
-    public void setDokumentXml(String dokumentXml) {
-        this.dokumentXml = dokumentXml;
-    }
-
-    public String getInternXml() {
-        return internXml;
-    }
-
-    public void setInternXml(String internXml) {
-        this.internXml = internXml;
-    }
-
     public SaksopplysningDokument getDokument() {
         return dokument;
     }
@@ -133,7 +105,11 @@ public class Saksopplysning {
     public void setDokument(SaksopplysningDokument dokument) {
         this.dokument = dokument;
     }
-    
+
+    public void leggTilKildesystemOgMottattDokument(SaksopplysningKildesystem kildesystem, String mottattDokument) {
+        kilder.add(new SaksopplysningKilde(this, kildesystem, mottattDokument));
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -148,14 +124,12 @@ public class Saksopplysning {
         }
         return Objects.equals(this.behandling, that.behandling)
             && Objects.equals(this.registrertDato, that.registrertDato)
-            && Objects.equals(this.type, that.type)
-            && Objects.equals(this.kilde, that.kilde)
-            && Objects.equals(this.dokumentXml, that.dokumentXml);
+            && Objects.equals(this.type, that.type);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(behandling, registrertDato, type, kilde, dokumentXml);
+        return Objects.hash(behandling, registrertDato, type);
     }
 
 }

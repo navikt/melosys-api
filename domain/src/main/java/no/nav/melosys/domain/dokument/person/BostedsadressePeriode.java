@@ -3,7 +3,6 @@ package no.nav.melosys.domain.dokument.person;
 import java.time.LocalDateTime;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.HarPeriode;
 import no.nav.melosys.domain.dokument.felles.Periode;
@@ -19,7 +18,6 @@ public class BostedsadressePeriode implements HarPeriode {
     public Bostedsadresse bostedsadresse;
 
     @Override
-    @JsonIgnore
     public ErPeriode getPeriode() {
         return periode;
     }
