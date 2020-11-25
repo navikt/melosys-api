@@ -28,11 +28,11 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.validering.Kontrollfeil;
 import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import no.nav.melosys.service.validering.Kontrollfeil;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.junit.Before;
@@ -77,7 +77,6 @@ public class VedtakServiceTest {
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
     private final Behandling behandling = new Behandling();
     private final Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-    private final Behandling replikertBehandling = new Behandling();
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -94,11 +93,7 @@ public class VedtakServiceTest {
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandlingsresultat.setId(behandlingID);
-
-        replikertBehandling.setId(2L);
-        replikertBehandling.setStatus(Behandlingsstatus.OPPRETTET);
-        replikertBehandling.setType(Behandlingstyper.NY_VURDERING);
-        replikertBehandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandlingsresultat.setBehandling(behandling);
 
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
@@ -223,7 +218,6 @@ public class VedtakServiceTest {
     public void fattVedtak_erAvslagLovvalgsperiodeIkkeInnvilget_fatterVedtak() throws MelosysException {
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
-        behandlingsresultat.setType(resultatType);
 
         vedtakService.fattVedtak(behandlingID, resultatType, null, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
         verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), isNull(), anySet(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull());
@@ -233,7 +227,6 @@ public class VedtakServiceTest {
     public void fattVedtak_prosessinstansFinnes_kasterException() {
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
-        behandlingsresultat.setType(resultatType);
         when(prosessinstansService.harVedtakInstans(eq(behandlingID))).thenReturn(true);
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -254,7 +247,6 @@ public class VedtakServiceTest {
         behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
 
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
-        behandlingsresultat.setType(resultatType);
         when(vedtakKontrollService.utførKontroller(anyLong(), any(Vedtakstyper.class)))
             .thenReturn(Collections.singletonList(new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)));
 

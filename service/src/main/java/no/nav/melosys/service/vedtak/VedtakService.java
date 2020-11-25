@@ -88,13 +88,14 @@ public class VedtakService {
         validerKanFattesVedtakAvTema(behandling);
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        behandlingsresultat.setType(behandlingsresultatType);
         log.info("Fatter vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
         if (behandlingsresultat.erInnvilgelse()) {
             validerInnvilgelse(vedtakstype, behandling, behandlingsresultat);
         }
 
-        oppdaterBehandlingsresultat(behandling, behandlingsresultatType, vedtakstype, fritekst, revurderBegrunnelse);
+        oppdaterBehandlingsresultat(behandlingsresultat, vedtakstype, fritekst, revurderBegrunnelse);
         mottakerinstitusjoner = validerOgAvklarMottakerInstitusjoner(behandling, mottakerinstitusjoner, behandlingsresultat);
 
         if (prosessinstansService.harVedtakInstans(behandlingID)) {
@@ -107,17 +108,15 @@ public class VedtakService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private void oppdaterBehandlingsresultat(Behandling behandling,
-                                             Behandlingsresultattyper behandlingsresultattype,
+    private void oppdaterBehandlingsresultat(Behandlingsresultat behandlingsresultat,
                                              Vedtakstyper vedtakstype,
                                              String behandlingresultatBegrunnelseFritekst,
                                              String revurderBegrunnelse) throws FunksjonellException {
+        final Behandling behandling = behandlingsresultat.getBehandling();
         if (behandling.erNorgeUtpekt()) {
             behandlingsresultatService.oppdaterUtfallUtpeking(behandling.getId(), GODKJENT);
         }
 
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        behandlingsresultat.setType(behandlingsresultattype);
         behandlingsresultat.settVedtakMetadata(vedtakstype, revurderBegrunnelse, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
         behandlingsresultat.setBegrunnelseFritekst(behandlingresultatBegrunnelseFritekst);
         behandlingsresultat.setFastsattAvLand(Landkoder.NO);
