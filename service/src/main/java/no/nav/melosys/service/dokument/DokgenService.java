@@ -9,8 +9,6 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
 import no.nav.melosys.integrasjon.dokgen.DokgenMalResolver;
 import no.nav.melosys.integrasjon.dokgen.dto.DokgenDto;
-import no.nav.melosys.service.dokument.brev.BrevData;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,10 +22,6 @@ public class DokgenService {
     public DokgenService(DokgenConsumer dokgenConsumer, DokgenMalResolver dokgenMalResolver) {
         this.dokgenConsumer = dokgenConsumer;
         this.dokgenMalResolver = dokgenMalResolver;
-    }
-
-    byte[] produserUtkast(Produserbaredokumenter produserbartDokument, long behandlingId, BrevData brevData) {
-        throw new NotImplementedException("Not implemented");
     }
 
     public byte[] produserBrev(Produserbaredokumenter produserbartDokument, Behandling behandling) throws TekniskException, FunksjonellException {

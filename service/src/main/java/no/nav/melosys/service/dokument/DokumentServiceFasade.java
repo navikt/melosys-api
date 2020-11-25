@@ -38,7 +38,8 @@ public class DokumentServiceFasade {
     public byte[] produserUtkast(Produserbaredokumenter produserbartDokument, long behandlingId,
                                  BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
         if (dokgenService.erTilgjengeligDokgenmal(produserbartDokument)) {
-            return dokgenService.produserUtkast(produserbartDokument, behandlingId, new BrevData(brevbestillingDto));
+            Behandling behandling = behandlingService.hentBehandling(behandlingId);
+            return dokgenService.produserBrev(produserbartDokument, behandling);
         }
         return dokumentService.produserUtkast(produserbartDokument, behandlingId, brevbestillingDto);
     }

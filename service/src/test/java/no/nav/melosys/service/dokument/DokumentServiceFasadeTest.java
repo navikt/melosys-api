@@ -7,7 +7,6 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,7 +54,7 @@ class DokumentServiceFasadeTest {
 
         dokumentServiceFasade.produserUtkast(MELDING_FORVENTET_SAKSBEHANDLINGSTID, 1, new BrevbestillingDto());
 
-        verify(mockDokgenService).produserUtkast(any(), anyLong(), any());
+        verify(mockDokgenService).produserBrev(any(), any());
         verifyNoInteractions(mockDokumentService);
     }
 
