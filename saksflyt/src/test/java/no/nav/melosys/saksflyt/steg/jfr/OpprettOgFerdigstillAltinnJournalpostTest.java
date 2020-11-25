@@ -37,7 +37,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OpprettOgFerdigstillJournalpostTest {
+public class OpprettOgFerdigstillAltinnJournalpostTest {
     @Mock
     private AltinnSoeknadService altinnSoeknadService;
     @Mock
@@ -49,10 +49,11 @@ public class OpprettOgFerdigstillJournalpostTest {
     @Mock
     private TpsFasade tpsFasade;
 
-    private OpprettOgFerdigstillJournalpost opprettOgFerdigstillJournalpost;
+    private OpprettOgFerdigstillAltinnJournalpost opprettOgFerdigstillAltinnJournalpost;
 
     private final Prosessinstans prosessinstans = new Prosessinstans();
     private final Behandling behandling = new Behandling();
+    private final Aktoer bruker = new Aktoer();
     private final String ident = "00000000000";
 
     @Captor
@@ -63,7 +64,7 @@ public class OpprettOgFerdigstillJournalpostTest {
         final String søknadID = "soknadid1";
         prosessinstans.setData(ProsessDataKey.MOTTATT_SOKNAD_ID, søknadID);
 
-        opprettOgFerdigstillJournalpost = new OpprettOgFerdigstillJournalpost(
+        opprettOgFerdigstillAltinnJournalpost = new OpprettOgFerdigstillAltinnJournalpost(
             altinnSoeknadService, behandlingService, eregFasade, joarkFasade, tpsFasade);
 
         AltinnDokument søknadDokument = new AltinnDokument(søknadID, "dokumentid1", "tittel1",
@@ -71,7 +72,6 @@ public class OpprettOgFerdigstillJournalpostTest {
         AltinnDokument fullmaktDokument = new AltinnDokument(søknadID, "dokumentid2", "tittel2",
             AltinnDokument.AltinnDokumentType.FULLMAKT.name(), "pdf", Instant.now());
 
-        Aktoer bruker = new Aktoer();
         bruker.setRolle(Aktoersroller.BRUKER);
         bruker.setAktørId("3321231");
 
@@ -97,7 +97,7 @@ public class OpprettOgFerdigstillJournalpostTest {
 
     @Test
     public void utfør_journalpostBlirOpprettet_verifiser() throws MelosysException {
-        opprettOgFerdigstillJournalpost.utfør(prosessinstans);
+        opprettOgFerdigstillAltinnJournalpost.utfør(prosessinstans);
 
         verify(tpsFasade).hentIdentForAktørId(anyString());
         verify(joarkFasade).opprettJournalpost(captor.capture(), eq(true));
@@ -115,8 +115,26 @@ public class OpprettOgFerdigstillJournalpostTest {
             .hasSize(1)
             .flatExtracting(ArkivDokument::getTittel)
             .containsExactly("Fullmakt");
-        assertThat(opprettJournalpost.getKorrespondansepartNavn()).isNotBlank();
+        assertThat(opprettJournalpost.getKorrespondansepartNavn()).isEqualTo("Fullmektig Avsender");
     }
 
+    @Test
+    public void utfør_ingenRepresentantForBruker_avsenderNavnErArbeidsgiverOrganisasjonNavn() throws MelosysException {
+        Aktoer arbeidsgiver = new Aktoer();
+        arbeidsgiver.setRolle(Aktoersroller.ARBEIDSGIVER);
+        arbeidsgiver.setOrgnr("arbOrgnr");
+        behandling.getFagsak().setAktører(Set.of(bruker, arbeidsgiver));
 
+        when(eregFasade.hentOrganisasjonNavn(eq(arbeidsgiver.getOrgnr()))).thenReturn("Arbeidsgiver");
+
+        opprettOgFerdigstillAltinnJournalpost.utfør(prosessinstans);
+
+        verify(tpsFasade).hentIdentForAktørId(anyString());
+        verify(joarkFasade).opprettJournalpost(captor.capture(), eq(true));
+        verify(behandlingService).lagre(eq(behandling));
+
+        OpprettJournalpost opprettJournalpost = captor.getValue();
+
+        assertThat(opprettJournalpost.getKorrespondansepartNavn()).isEqualTo("Arbeidsgiver");
+    }
 }

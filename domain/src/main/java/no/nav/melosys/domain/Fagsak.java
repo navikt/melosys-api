@@ -117,7 +117,10 @@ public class Fagsak extends RegistreringsInfo {
         return hentAktørerMedRolleType(MYNDIGHET);
     }
 
-    public Aktoer hentArbeidsgiver() throws TekniskException {
+    /**
+     * Henter arbeidsgiver i tilfeller hvor det er forventet at det kun finnes en eller ingen
+     */
+    public Aktoer hentUnikArbeidsgiver() throws TekniskException {
         return hentAktørMedRolleType(Aktoersroller.ARBEIDSGIVER);
     }
 

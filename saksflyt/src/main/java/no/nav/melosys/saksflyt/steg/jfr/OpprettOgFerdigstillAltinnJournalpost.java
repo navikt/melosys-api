@@ -23,18 +23,18 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OpprettOgFerdigstillJournalpost implements StegBehandler {
+public class OpprettOgFerdigstillAltinnJournalpost implements StegBehandler {
     private final AltinnSoeknadService altinnSoeknadService;
     private final BehandlingService behandlingService;
     private final EregFasade eregFasade;
     private final JoarkFasade joarkFasade;
     private final TpsFasade tpsFasade;
 
-    public OpprettOgFerdigstillJournalpost(AltinnSoeknadService altinnSoeknadService,
-                                           BehandlingService behandlingService,
-                                           @Qualifier("system") EregFasade eregFasade,
-                                           @Qualifier("system") JoarkFasade joarkFasade,
-                                           @Qualifier("system") TpsFasade tpsFasade) {
+    public OpprettOgFerdigstillAltinnJournalpost(AltinnSoeknadService altinnSoeknadService,
+                                                 BehandlingService behandlingService,
+                                                 @Qualifier("system") EregFasade eregFasade,
+                                                 @Qualifier("system") JoarkFasade joarkFasade,
+                                                 @Qualifier("system") TpsFasade tpsFasade) {
         this.altinnSoeknadService = altinnSoeknadService;
         this.behandlingService = behandlingService;
         this.eregFasade = eregFasade;
@@ -63,7 +63,7 @@ public class OpprettOgFerdigstillJournalpost implements StegBehandler {
         if (representant.isPresent()) {
             avsenderNavn = eregFasade.hentOrganisasjonNavn(representant.get().getOrgnr());
         } else {
-            avsenderNavn = eregFasade.hentOrganisasjonNavn(fagsak.hentArbeidsgiver().getOrgnr());
+            avsenderNavn = eregFasade.hentOrganisasjonNavn(fagsak.hentUnikArbeidsgiver().getOrgnr());
         }
 
         OpprettJournalpost opprettJournalpost = OpprettJournalpost.lagJournalpostForMottakAltinnSøknad(
