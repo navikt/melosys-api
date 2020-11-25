@@ -9,6 +9,7 @@ import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -37,6 +38,8 @@ class MedlemskapsperiodeTjenesteTest extends JsonSchemaTestParent {
     private static final String MEDLEMSKAPSPERIODER_SCHEMA = "medlemskapsperioder-schema.json";
     private static final String MEDLEMSKAPSPERIODER_POST_SCHEMA = "medlemskapsperioder-post-schema.json";
     private static final String MEDLEMSKAPSPERIODER_PUT_SCHEMA = "medlemskapsperioder-put-schema.json";
+    private static final String MEDLEMSKAPSPERIODER_BESTEMMELSE_SCHEMA = "medlemskapsperioder-bestemmelse-schema.json";
+    private static final String MEDLEMSKAPSPERIODER_BESTEMMELSE_POST_SCHEMA = "medlemskapsperioder-bestemmelse-post-schema.json";
 
     @Mock
     private MedlemskapsperiodeService medlemskapsperiodeService;
@@ -108,12 +111,20 @@ class MedlemskapsperiodeTjenesteTest extends JsonSchemaTestParent {
         when(opprettMedlemskapsperiodeService.utledMedlemskapsperioderFraSøknad(eq(behandlingID), any(Folketrygdloven_kap2_bestemmelser.class)))
             .thenReturn(Collections.singleton(lagMedlemskapsperiode()));
 
+        var request = new UtledMedlemskapsperiodeDto(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD);
+        valider(request, MEDLEMSKAPSPERIODER_BESTEMMELSE_POST_SCHEMA);
         var res = medlemskapsperiodeTjeneste.opprettMedlemskapsperioderFraBestemmelse(
-            behandlingID, new UtledMedlemskapsperiodeDto(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD)
-        );
+            behandlingID, request);
 
         assertThat(res.getStatusCode()).isEqualTo(HttpStatus.OK);
         validerArray(res.getBody(), MEDLEMSKAPSPERIODER_SCHEMA);
+    }
+
+    @Test
+    void hentBestemmelserMedVilkår_validerSchema() throws IOException {
+        when(opprettMedlemskapsperiodeService.hentBestemmelserMedVilkaar()).thenCallRealMethod();
+        when(opprettMedlemskapsperiodeService.hentMuligeBegrunnelser(any(Vilkaar.class))).thenCallRealMethod();
+        validerArray(medlemskapsperiodeTjeneste.hentBestemmelserMedVilkaar().getBody(), MEDLEMSKAPSPERIODER_BESTEMMELSE_SCHEMA);
     }
 
     private Medlemskapsperiode lagMedlemskapsperiode() {
