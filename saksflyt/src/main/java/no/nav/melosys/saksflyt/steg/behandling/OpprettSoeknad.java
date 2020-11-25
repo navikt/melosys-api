@@ -47,7 +47,7 @@ public class OpprettSoeknad implements StegBehandler {
             soeknad.periode = periode;
             soeknad.soeknadsland.landkoder = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, new TypeReference<List<String>>() {});
 
-            behandlingsgrunnlagService.opprettSøknadGrunnlag(behandlingID, soeknad);
+            behandlingsgrunnlagService.opprettSøknadYrkesaktiveEøs(behandlingID, soeknad);
             log.info("Opprettet søknad for behandling {}.", behandlingID);
         } else {
             log.info("Ikke opprettet søknad for behandling {} med tema {}", behandlingID, prosessinstans.getBehandling().getTema());

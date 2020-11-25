@@ -233,6 +233,7 @@ public class FagsakService {
 
         Aktoer aktør = new Aktoer();
         aktør.setAktørId(opprettSakRequest.getAktørID());
+        aktør.setUtenlandskPersonId(opprettSakRequest.getUtenlandskPersonId());
         aktør.setFagsak(fagsak);
         aktør.setRolle(Aktoersroller.BRUKER);
         aktører.add(aktør);
