@@ -10,7 +10,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.domain.kodeverk.VilkaarSpørsmål;
+import no.nav.melosys.domain.kodeverk.VilkårsvurderingSpørsmål;
 import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.security.token.support.core.api.Protected;
@@ -39,7 +39,7 @@ public class MelosysInterntKodeverkTjeneste {
     public ResponseEntity<Map<String, Collection<KodeDto>>> hentKoderTilFolketrygden() {
         Map<String, Collection<KodeDto>> kodeverdier = new HashMap<>();
         kodeverdier.put(Trygdedekninger.class.getSimpleName(), tilKodeDto(medlemskapsperiodeService.hentGyldigeTrygdedekninger()));
-        kodeverdier.put(VilkaarSpørsmål.class.getSimpleName(), tilKodeDto(VilkaarSpørsmål.values()));
+        kodeverdier.put(VilkårsvurderingSpørsmål.class.getSimpleName(), tilKodeDto(VilkårsvurderingSpørsmål.values()));
         return ResponseEntity.ok(kodeverdier);
     }
 
