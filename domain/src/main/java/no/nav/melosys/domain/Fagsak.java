@@ -110,11 +110,18 @@ public class Fagsak extends RegistreringsInfo {
     }
 
     public Aktoer hentBruker() throws TekniskException {
-        return hentAktørMedRolleTypeBruker();
+        return hentAktørMedRolleType(Aktoersroller.BRUKER);
     }
 
     public List<Aktoer> hentMyndigheter() {
         return hentAktørerMedRolleType(MYNDIGHET);
+    }
+
+    /**
+     * Henter arbeidsgiver i tilfeller hvor det er forventet at det kun finnes en eller ingen
+     */
+    public Aktoer hentUnikArbeidsgiver() throws TekniskException {
+        return hentAktørMedRolleType(Aktoersroller.ARBEIDSGIVER);
     }
 
     /**
@@ -126,10 +133,10 @@ public class Fagsak extends RegistreringsInfo {
             .orElseThrow(() -> new FunksjonellException("Finner ikke behandlinger for fagsak " + saksnummer));
     }
 
-    private Aktoer hentAktørMedRolleTypeBruker() throws TekniskException {
-        Collection<Aktoer> kandidater = hentAktørerMedRolleType(Aktoersroller.BRUKER);
+    private Aktoer hentAktørMedRolleType(Aktoersroller rolleType) throws TekniskException {
+        Collection<Aktoer> kandidater = hentAktørerMedRolleType(rolleType);
         if (kandidater.size() > 1) {
-            throw new TekniskException("Det finnes mer enn en aktør med rollen " + Aktoersroller.BRUKER.getBeskrivelse() + " for sak " + saksnummer);
+            throw new TekniskException("Det finnes mer enn en aktør med rollen " + rolleType.getBeskrivelse() + " for sak " + saksnummer);
         }
         return kandidater.stream().findFirst().orElse(null);
     }
