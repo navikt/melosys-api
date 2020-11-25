@@ -250,6 +250,7 @@ public class ProsessinstansService {
     public void opprettProsessinstansForvaltningsmelding(Behandling behandling) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.FORVALTNINGSMELDING_SEND);
+        prosessinstans.setData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, true);
         prosessinstans.setBehandling(behandling);
         lagre(prosessinstans);
     }
