@@ -73,7 +73,7 @@ class BehandlingsgrunnlagServiceTest {
         when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(eq(behandling.getInitierendeJournalpostId()))).thenReturn(LocalDate.now());
         Soeknad soeknad = new Soeknad();
-        behandlingsgrunnlagService.opprettSøknadGrunnlag(behandlingID, soeknad);
+        behandlingsgrunnlagService.opprettSøknadYrkesaktiveEøs(behandlingID, soeknad);
 
         verify(behandlingsgrunnlagRepository).save(behandlingsgrunnlagArgumentCaptor.capture());
         Behandlingsgrunnlag opprettet = behandlingsgrunnlagArgumentCaptor.getValue();

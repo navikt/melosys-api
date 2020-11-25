@@ -10,14 +10,14 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 
 public class VirksomheterDto {
 
-    private List<String> orgnummer;
+    private List<String> virksomhetIDer;
 
-    public List<String> getOrgnummer() {
-        return orgnummer;
+    public List<String> getVirksomhetIDer() {
+        return virksomhetIDer;
     }
 
-    public void setOrgnummer(List<String> orgnummer) {
-        this.orgnummer = orgnummer;
+    public void setVirksomhetIDer(List<String> virksomhetIDer) {
+        this.virksomhetIDer = virksomhetIDer;
     }
 
     public static VirksomheterDto tilVirksomheterDto(Set<AvklartefaktaDto> avklartefaktas) {
@@ -27,7 +27,7 @@ public class VirksomheterDto {
             .forEach(avklartefakta -> virksomheter.add(avklartefakta.getSubjektID()));
 
         VirksomheterDto virksomheterDto = new VirksomheterDto();
-        virksomheterDto.setOrgnummer(virksomheter);
+        virksomheterDto.setVirksomhetIDer(virksomheter);
         return virksomheterDto;
     }
 }
