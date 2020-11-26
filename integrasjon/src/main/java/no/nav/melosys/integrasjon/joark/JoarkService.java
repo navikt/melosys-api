@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.joark;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -16,7 +15,6 @@ import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
-import no.nav.melosys.integrasjon.joark.inngaaendejournal.InngaaendeJournalConsumer;
 import no.nav.melosys.integrasjon.joark.journal.JournalConsumer;
 import no.nav.melosys.integrasjon.joark.journalfoerinngaaende.JournalfoerInngaaendeConsumer;
 import no.nav.melosys.integrasjon.joark.journalpostapi.JournalpostapiConsumer;
@@ -24,11 +22,6 @@ import no.nav.melosys.integrasjon.joark.journalpostapi.dto.AvsenderMottaker;
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.FerdigstillJournalpostRequest;
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OppdaterJournalpostRequest;
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostRequest;
-import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.binding.*;
-import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.Journalfoeringsbehov;
-import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.JournalpostMangler;
-import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.meldinger.UtledJournalfoeringsbehovRequest;
-import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.meldinger.UtledJournalfoeringsbehovResponse;
 import no.nav.tjeneste.virksomhet.journal.v3.*;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.Variantformater;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.DetaljertDokumentinformasjon;
@@ -40,24 +33,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 
 import static no.nav.tjeneste.virksomhet.journal.v3.informasjon.Journaltilstand.UTGAAR;
 
 @Service
 @Primary
 public class JoarkService implements JoarkFasade {
-    private final InngaaendeJournalConsumer inngåendeJournalConsumer;
     private final JournalConsumer journalConsumer;
     private final JournalfoerInngaaendeConsumer journalfoerInngaaendeConsumer;
     private final JournalpostapiConsumer journalpostapiConsumer;
 
     @Autowired
-    public JoarkService(InngaaendeJournalConsumer inngåendeJournal,
-                        JournalConsumer journal,
+    public JoarkService(JournalConsumer journal,
                         JournalfoerInngaaendeConsumer journalfoerInngaaendeConsumer,
                         JournalpostapiConsumer journalpostapiConsumer) {
-        this.inngåendeJournalConsumer = inngåendeJournal;
         this.journalConsumer = journal;
         this.journalfoerInngaaendeConsumer = journalfoerInngaaendeConsumer;
         this.journalpostapiConsumer = journalpostapiConsumer;
@@ -272,62 +261,5 @@ public class JoarkService implements JoarkFasade {
                 journalpostapiConsumer.fjernLogiskeVedlegg(hoveddokument.getDokumentId(), logiskVedlegg.getLogiskVedleggId());
             }
         }
-    }
-
-    @Override
-    public List<JournalfoeringMangel> utledJournalfoeringsbehov(String journalpostID) throws FunksjonellException {
-        UtledJournalfoeringsbehovRequest request = new UtledJournalfoeringsbehovRequest();
-        request.setJournalpostId(journalpostID);
-
-        try {
-            UtledJournalfoeringsbehovResponse utledJournalfoeringsbehovResponse = inngåendeJournalConsumer.utledJournalfoeringsbehov(request);
-            JournalpostMangler journalfoeringsbehov = utledJournalfoeringsbehovResponse.getJournalfoeringsbehov();
-            return konverterTilJournalfoeringmangler(journalfoeringsbehov);
-        } catch (UtledJournalfoeringsbehovSikkerhetsbegrensning s) {
-            throw new SikkerhetsbegrensningException(s);
-        } catch (UtledJournalfoeringsbehovJournalpostIkkeFunnet e) {
-            throw new IkkeFunnetException(e.getMessage());
-        } catch (UtledJournalfoeringsbehovUgyldigInput | UtledJournalfoeringsbehovJournalpostKanIkkeBehandles
-            | UtledJournalfoeringsbehovJournalpostIkkeInngaaende e) {
-            throw new FunksjonellException(e);
-        }
-
-    }
-
-    List<JournalfoeringMangel> konverterTilJournalfoeringmangler(JournalpostMangler input) {
-        List<JournalfoeringMangel> mangler = new ArrayList<>();
-
-        if (input.getArkivSak() == Journalfoeringsbehov.MANGLER) {
-            mangler.add(JournalfoeringMangel.ARKIVSAK);
-        }
-        if (input.getAvsenderId() == Journalfoeringsbehov.MANGLER) {
-            mangler.add(JournalfoeringMangel.AVSENDERID);
-        }
-        if (input.getAvsenderNavn() == Journalfoeringsbehov.MANGLER) {
-            mangler.add(JournalfoeringMangel.AVSENDERNAVN);
-        }
-        if (input.getBruker() == Journalfoeringsbehov.MANGLER) {
-            mangler.add(JournalfoeringMangel.BRUKER);
-        }
-        if (input.getForsendelseInnsendt() == Journalfoeringsbehov.MANGLER) {
-            mangler.add(JournalfoeringMangel.FORSENDELSEINNSENDT);
-        }
-        if (input.getHoveddokument().getDokumentkategori() == Journalfoeringsbehov.MANGLER) {
-            mangler.add(JournalfoeringMangel.HOVEDDOKUMENT_KATEGORI);
-        }
-        if (input.getHoveddokument().getTittel() == Journalfoeringsbehov.MANGLER) {
-            mangler.add(JournalfoeringMangel.HOVEDDOKUMENT_TITTEL);
-        }
-        if (input.getInnhold() == Journalfoeringsbehov.MANGLER) {
-            mangler.add(JournalfoeringMangel.INNHOLD);
-        }
-        if (!CollectionUtils.isEmpty(input.getVedleggListe())) {
-            mangler.add(JournalfoeringMangel.VEDLEGG);
-        }
-        if (input.getTema() == Journalfoeringsbehov.MANGLER) {
-            mangler.add(JournalfoeringMangel.TEMA);
-        }
-
-        return mangler;
     }
 }
