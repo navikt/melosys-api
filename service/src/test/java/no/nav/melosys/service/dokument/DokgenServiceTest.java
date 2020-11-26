@@ -7,10 +7,12 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
 import no.nav.melosys.integrasjon.dokgen.DokgenMalResolver;
+import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +33,9 @@ class DokgenServiceTest {
     @Mock
     private DokgenConsumer mockDokgenConsumer;
 
+    @Mock
+    private JoarkFasade mockJoarkFasade;
+
     private final FakeUnleash unleash = new FakeUnleash();
 
     private DokgenService dokgenService;
@@ -39,7 +44,7 @@ class DokgenServiceTest {
 
     @BeforeEach
     void init() {
-        dokgenService = new DokgenService(mockDokgenConsumer, new DokgenMalResolver(unleash));
+        dokgenService = new DokgenService(mockDokgenConsumer, new DokgenMalResolver(unleash), mockJoarkFasade);
     }
 
     @Test
@@ -49,6 +54,10 @@ class DokgenServiceTest {
 
     @Test
     void produserBrevOk() throws Exception {
+        Journalpost journalpost = new Journalpost("123");
+        journalpost.setForsendelseMottatt(Instant.now());
+        when(mockJoarkFasade.hentJournalpost(any())).thenReturn(journalpost);
+
         when(mockDokgenConsumer.lagPdf(anyString(), any())).thenReturn(expectedPdf);
 
         byte[] pdfResponse = dokgenService.produserBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, lagBehandling());

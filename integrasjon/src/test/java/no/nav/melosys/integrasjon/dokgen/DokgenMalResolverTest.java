@@ -53,7 +53,7 @@ class DokgenMalResolverTest {
     @Test
     void feilerNårProduserbartDokumentIkkeErStøttet() {
         assertThrows(FunksjonellException.class, () ->
-            dokgenMalResolver.mapBehandling(ATTEST_A1, new Behandling())
+            dokgenMalResolver.mapBehandling(ATTEST_A1, new Behandling(), Instant.now())
         );
     }
 
@@ -63,7 +63,7 @@ class DokgenMalResolverTest {
         behandling.setId(1L);
         behandling.setSaksopplysninger(singleton(lagPersonopplysning()));
         behandling.setFagsak(lagFagsak());
-        DokgenDto dokgenDto = dokgenMalResolver.mapBehandling(MELDING_FORVENTET_SAKSBEHANDLINGSTID, behandling);
+        DokgenDto dokgenDto = dokgenMalResolver.mapBehandling(MELDING_FORVENTET_SAKSBEHANDLINGSTID, behandling, Instant.now());
 
         assertTrue(dokgenDto instanceof SaksbehandlingstidSoknad);
     }

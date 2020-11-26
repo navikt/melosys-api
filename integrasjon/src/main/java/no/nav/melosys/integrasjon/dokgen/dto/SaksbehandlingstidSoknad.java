@@ -49,13 +49,12 @@ public class SaksbehandlingstidSoknad extends DokgenDto {
         this.avsenderLand = avsenderLand;
     }
 
-    public static SaksbehandlingstidSoknad av(Behandling behandling) throws TekniskException {
+    public static SaksbehandlingstidSoknad av(Behandling behandling, Instant forsendelseMottatt) throws TekniskException {
         Fagsak fagsak = behandling.getFagsak();
         PersonDokument personDokument = behandling.hentPersonDokument();
-        Instant datoMottatt = fagsak.getRegistrertDato();
 
-        return new SaksbehandlingstidSoknad(personDokument.fnr, fagsak.getSaksnummer(), Instant.now(), datoMottatt,
-            datoMottatt.plus(SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS), personDokument.sammensattNavn, personDokument.sammensattNavn,
+        return new SaksbehandlingstidSoknad(personDokument.fnr, fagsak.getSaksnummer(), Instant.now(), forsendelseMottatt,
+            forsendelseMottatt.plus(SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS), personDokument.sammensattNavn, personDokument.sammensattNavn,
             personDokument.postadresse.adresselinjer(), personDokument.postadresse.postnr, personDokument.postadresse.poststed,
             fagsak.getType(), BRUKER, false, null, null);
     }

@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.dokgen;
 
+import java.time.Instant;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableMap;
@@ -17,9 +18,7 @@ import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toSet;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 
 @Component
 public class DokgenMalResolver {
@@ -52,13 +51,13 @@ public class DokgenMalResolver {
         }
     }
 
-    public DokgenDto mapBehandling(Produserbaredokumenter produserbartDokument, Behandling behandling) throws TekniskException, FunksjonellException {
+    public DokgenDto mapBehandling(Produserbaredokumenter produserbartDokument, Behandling behandling, Instant forsendelseMottatt) throws TekniskException, FunksjonellException {
         switch (produserbartDokument) {
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID:
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD:
-                return SaksbehandlingstidSoknad.av(behandling);
+                return SaksbehandlingstidSoknad.av(behandling, forsendelseMottatt);
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE:
-                return SaksbehandlingstidKlage.av(behandling);
+                return SaksbehandlingstidKlage.av(behandling, forsendelseMottatt);
             default:
                 throw new FunksjonellException(format("ProduserbartDokument %s er ikke støttet av melosys-dokgen", produserbartDokument));
         }

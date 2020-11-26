@@ -42,13 +42,12 @@ public class SaksbehandlingstidKlage extends DokgenDto {
         this.mottakerRepresentantForBruker = mottakerRepresentantForBruker;
     }
 
-    public static SaksbehandlingstidKlage av(Behandling behandling) throws TekniskException {
+    public static SaksbehandlingstidKlage av(Behandling behandling, Instant forsendelseMottatt) throws TekniskException {
         Fagsak fagsak = behandling.getFagsak();
         PersonDokument personDokument = behandling.hentPersonDokument();
-        Instant datoMottatt = fagsak.getRegistrertDato();
 
-        return new SaksbehandlingstidKlage(personDokument.fnr, fagsak.getSaksnummer(), Instant.now(), datoMottatt,
-            datoMottatt.plus(SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS), personDokument.sammensattNavn, personDokument.sammensattNavn,
+        return new SaksbehandlingstidKlage(personDokument.fnr, fagsak.getSaksnummer(), Instant.now(), forsendelseMottatt,
+            forsendelseMottatt.plus(SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS), personDokument.sammensattNavn, personDokument.sammensattNavn,
             personDokument.postadresse.adresselinjer(), personDokument.postadresse.postnr, personDokument.postadresse.poststed,
             null, false);
     }
