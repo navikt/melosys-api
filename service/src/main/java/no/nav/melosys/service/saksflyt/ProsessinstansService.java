@@ -238,7 +238,6 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    @Transactional
     public void opprettProsessinstansOpprettOgDistribuerBrev(Produserbaredokumenter produserbartDokument, Behandling behandling) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);

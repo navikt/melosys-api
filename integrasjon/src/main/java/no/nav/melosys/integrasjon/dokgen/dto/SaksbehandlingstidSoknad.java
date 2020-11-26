@@ -1,10 +1,13 @@
 package no.nav.melosys.integrasjon.dokgen.dto;
 
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -12,19 +15,26 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.TekniskException;
 
+import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 
 public class SaksbehandlingstidSoknad extends DokgenDto {
-    private final LocalDateTime datoMottatt;
-    private final LocalDateTime datoBehandlingstid;
+    @JsonSerialize(using = InstantSerializer.class)
+    @JsonFormat(shape = STRING)
+    private final Instant datoMottatt;
+
+    @JsonSerialize(using = InstantSerializer.class)
+    @JsonFormat(shape = STRING)
+    private final Instant datoBehandlingstid;
+
     private final Sakstyper typeSoknad;
     private final Aktoersroller avsenderTypeSoknad;
     private final boolean mottakerRepresentantForBruker;
     private final String avsenderSoknad;
     private final String avsenderLand;
 
-    private SaksbehandlingstidSoknad(String fnr, String saksnummer, LocalDateTime dagensDato,
-                                    LocalDateTime datoMottatt, LocalDateTime datoBehandlingstid,
+    private SaksbehandlingstidSoknad(String fnr, String saksnummer, Instant dagensDato,
+                                    Instant datoMottatt, Instant datoBehandlingstid,
                                     String navnBruker, String navnMottaker, List<String> adresselinjer,
                                     String postnr, String poststed, Sakstyper typeSoknad,
                                     Aktoersroller avsenderTypeSoknad, boolean mottakerRepresentantForBruker,
@@ -42,19 +52,19 @@ public class SaksbehandlingstidSoknad extends DokgenDto {
     public static SaksbehandlingstidSoknad av(Behandling behandling) throws TekniskException {
         Fagsak fagsak = behandling.getFagsak();
         PersonDokument personDokument = behandling.hentPersonDokument();
-        LocalDateTime datoMottatt = LocalDateTime.ofInstant(fagsak.getRegistrertDato(), ZoneId.systemDefault());
+        Instant datoMottatt = fagsak.getRegistrertDato();
 
-        return new SaksbehandlingstidSoknad(personDokument.fnr, fagsak.getSaksnummer(), LocalDateTime.now(), datoMottatt,
-            datoMottatt.plusDays(SAKSBEHANDLINGSTID_DAGER), personDokument.sammensattNavn, personDokument.sammensattNavn,
+        return new SaksbehandlingstidSoknad(personDokument.fnr, fagsak.getSaksnummer(), Instant.now(), datoMottatt,
+            datoMottatt.plus(SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS), personDokument.sammensattNavn, personDokument.sammensattNavn,
             personDokument.postadresse.adresselinjer(), personDokument.postadresse.postnr, personDokument.postadresse.poststed,
             fagsak.getType(), BRUKER, false, null, null);
     }
 
-    public LocalDateTime getDatoMottatt() {
+    public Instant getDatoMottatt() {
         return datoMottatt;
     }
 
-    public LocalDateTime getDatoBehandlingstid() {
+    public Instant getDatoBehandlingstid() {
         return datoBehandlingstid;
     }
 

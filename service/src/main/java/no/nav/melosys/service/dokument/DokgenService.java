@@ -27,7 +27,8 @@ public class DokgenService {
     public byte[] produserBrev(Produserbaredokumenter produserbartDokument, Behandling behandling) throws TekniskException, FunksjonellException {
         String malnavn = dokgenMalResolver.hentMalnavn(produserbartDokument);
 
-        return lagPdf(malnavn, dokgenMalResolver.mapBehandling(produserbartDokument, behandling));
+        DokgenDto dokgenDto = dokgenMalResolver.mapBehandling(produserbartDokument, behandling);
+        return lagPdf(malnavn, dokgenDto);
     }
 
     boolean erTilgjengeligDokgenmal(Produserbaredokumenter produserbartDokument) {

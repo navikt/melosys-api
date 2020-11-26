@@ -1,21 +1,32 @@
 package no.nav.melosys.integrasjon.dokgen.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
+
+import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
 public abstract class DokgenDto {
     private final String fnr;
     private final String saksnummer;
-    private final LocalDateTime dagensDato;
+
+    @JsonSerialize(using = InstantSerializer.class)
+    @JsonFormat(shape = STRING)
+    private final Instant dagensDato;
+
     private final String navnBruker;
     private final String navnMottaker;
     private final List<String> adresselinjer;
     private final String postnr;
     private final String poststed;
 
+    // Saksbehandlingstid er 12 uker fra dato for utsendelse av brev, uavhengig av helg, helligdager, osv.
     protected static final int SAKSBEHANDLINGSTID_DAGER = 12 * 7;
 
-    protected DokgenDto(String fnr, String saksnummer, LocalDateTime dagensDato,
+    protected DokgenDto(String fnr, String saksnummer, Instant dagensDato,
                         String navnBruker, String navnMottaker, List<String> adresselinjer,
                         String postnr, String poststed) {
         this.fnr = fnr;
@@ -36,7 +47,7 @@ public abstract class DokgenDto {
         return saksnummer;
     }
 
-    public LocalDateTime getDagensDato() {
+    public Instant getDagensDato() {
         return dagensDato;
     }
 

@@ -13,6 +13,7 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DokumentServiceFasade {
@@ -44,6 +45,7 @@ public class DokumentServiceFasade {
         return dokumentService.produserUtkast(produserbartDokument, behandlingId, brevbestillingDto);
     }
 
+    @Transactional
     public void produserDokument(Produserbaredokumenter produserbartDokument, long behandlingId,
                                  BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
         String saksbehandler = SubjectHandler.getInstance().getUserID();
@@ -58,6 +60,7 @@ public class DokumentServiceFasade {
         produserDokument(produserbartDokument, Mottaker.av(brevbestillingDto.mottaker), behandlingId, brevbestilling);
     }
 
+    @Transactional
     public void produserDokument(Produserbaredokumenter produserbartDokument, Mottaker mottaker,
                                  long behandlingID, Brevbestilling brevbestilling) throws TekniskException, FunksjonellException {
         if (dokgenService.erTilgjengeligDokgenmal(produserbartDokument)) {
