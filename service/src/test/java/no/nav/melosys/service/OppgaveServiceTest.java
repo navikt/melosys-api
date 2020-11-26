@@ -154,7 +154,7 @@ public class OppgaveServiceTest {
         behandling.getFagsak().setSaksnummer("MEL-11111");
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
-        verify(oppgaveFasade).opprettOppgave(any(Oppgave.class));
+        verify(oppgaveFasade).opprettOppgave(any(Oppgave.class), anyBoolean());
     }
 
     @Test

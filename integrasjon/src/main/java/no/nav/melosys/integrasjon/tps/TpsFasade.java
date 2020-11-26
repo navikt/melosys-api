@@ -20,4 +20,6 @@ public interface TpsFasade {
         throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException;
 
     String hentSammensattNavn(String fnr) throws FunksjonellException, IntegrasjonException;
+
+    boolean harSensitiveOpplysninger(String fnr) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException;
 }
