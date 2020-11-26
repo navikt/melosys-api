@@ -33,9 +33,9 @@ public class SaksbehandlingstidKlage extends DokgenDto {
     private SaksbehandlingstidKlage(String fnr, String saksnummer, Instant dagensDato,
                                    Instant datoMottatt, Instant datoBehandlingstid,
                                    String navnBruker, String navnMottaker, List<String> adresselinjer,
-                                   String postnr, String poststed, Instant datoVedtak,
+                                   String postnr, String poststed, String land, Instant datoVedtak,
                                    boolean mottakerRepresentantForBruker) {
-        super(fnr, saksnummer, dagensDato, navnBruker, navnMottaker, adresselinjer, postnr, poststed);
+        super(fnr, saksnummer, dagensDato, navnBruker, navnMottaker, adresselinjer, postnr, poststed, land);
         this.datoMottatt = datoMottatt;
         this.datoBehandlingstid = datoBehandlingstid;
         this.datoVedtak = datoVedtak;
@@ -46,9 +46,10 @@ public class SaksbehandlingstidKlage extends DokgenDto {
         Fagsak fagsak = behandling.getFagsak();
         PersonDokument personDokument = behandling.hentPersonDokument();
 
+        String land = personDokument.postadresse.land != null ? personDokument.postadresse.land.toString() : null;
         return new SaksbehandlingstidKlage(personDokument.fnr, fagsak.getSaksnummer(), Instant.now(), forsendelseMottatt,
             forsendelseMottatt.plus(SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS), personDokument.sammensattNavn, personDokument.sammensattNavn,
-            personDokument.postadresse.adresselinjer(), personDokument.postadresse.postnr, personDokument.postadresse.poststed,
+            personDokument.postadresse.adresselinjer(), personDokument.postadresse.postnr, personDokument.postadresse.poststed, land,
             null, false);
     }
 

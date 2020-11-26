@@ -4,11 +4,14 @@ import java.time.Instant;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
+@JsonInclude(Include.NON_EMPTY)
 public abstract class DokgenDto {
     private final String fnr;
     private final String saksnummer;
@@ -22,13 +25,14 @@ public abstract class DokgenDto {
     private final List<String> adresselinjer;
     private final String postnr;
     private final String poststed;
+    private final String land;
 
     // Saksbehandlingstid er 12 uker fra dato for utsendelse av brev, uavhengig av helg, helligdager, osv.
     protected static final int SAKSBEHANDLINGSTID_DAGER = 12 * 7;
 
     protected DokgenDto(String fnr, String saksnummer, Instant dagensDato,
                         String navnBruker, String navnMottaker, List<String> adresselinjer,
-                        String postnr, String poststed) {
+                        String postnr, String poststed, String land) {
         this.fnr = fnr;
         this.saksnummer = saksnummer;
         this.dagensDato = dagensDato;
@@ -37,6 +41,7 @@ public abstract class DokgenDto {
         this.adresselinjer = adresselinjer;
         this.postnr = postnr;
         this.poststed = poststed;
+        this.land = land;
     }
 
     public String getFnr() {
@@ -69,5 +74,9 @@ public abstract class DokgenDto {
 
     public String getPoststed() {
         return poststed;
+    }
+
+    public String getLand() {
+        return land;
     }
 }
