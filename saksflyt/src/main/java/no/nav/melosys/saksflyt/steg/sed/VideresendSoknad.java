@@ -31,7 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.arkiv.DokumentVariant.lagArkivVariant;
+import static no.nav.melosys.domain.arkiv.DokumentVariant.lagDokumentVariant;
 
 /**
  * Sender et brev med søknad som vedlegg til utenlandsk myndighet
@@ -117,7 +117,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
         FysiskDokument fysiskDokument = new FysiskDokument();
         fysiskDokument.setBrevkode(SedType.A008.name());
         fysiskDokument.setDokumentKategori(DokumentKategoriKode.SOK.getKode());
-        fysiskDokument.setDokumentVarianter(Collections.singletonList(lagArkivVariant(vedleggData)));
+        fysiskDokument.setDokumentVarianter(Collections.singletonList(lagDokumentVariant(vedleggData)));
         fysiskDokument.setTittel(hentSøknadTittel(behandling));
         return Collections.singletonList(fysiskDokument);
     }

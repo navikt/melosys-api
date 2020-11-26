@@ -7,7 +7,7 @@ import java.util.List;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.msm.AltinnDokument;
 
-import static no.nav.melosys.domain.arkiv.DokumentVariant.lagArkivVariant;
+import static no.nav.melosys.domain.arkiv.DokumentVariant.lagDokumentVariant;
 
 public class FysiskDokument extends ArkivDokument {
     private static final String DOKUMENT_KATEGORI_SED = "SED";
@@ -22,7 +22,7 @@ public class FysiskDokument extends ArkivDokument {
         fysiskDokument.setDokumentKategori(DOKUMENT_KATEGORI_SED);
         fysiskDokument.setTittel(hentTittelForSedType(sedType));
         fysiskDokument.setBrevkode(sedType.name());
-        fysiskDokument.setDokumentVarianter(Collections.singletonList(lagArkivVariant(sedPdf)));
+        fysiskDokument.setDokumentVarianter(Collections.singletonList(lagDokumentVariant(sedPdf)));
         return fysiskDokument;
     }
 
@@ -31,7 +31,7 @@ public class FysiskDokument extends ArkivDokument {
         fysiskDokument.setDokumentKategori(DOKUMENT_KATEGORI_SOKNAD);
         fysiskDokument.setTittel(hentTittelForAltinnDokument(altinnDokument.getDokumentType()));
         byte[] innhold = Base64.getDecoder().decode(altinnDokument.getInnhold());
-        fysiskDokument.setDokumentVarianter(Collections.singletonList(lagArkivVariant(innhold)));
+        fysiskDokument.setDokumentVarianter(Collections.singletonList(lagDokumentVariant(innhold)));
         return fysiskDokument;
     }
 
