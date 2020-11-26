@@ -17,11 +17,10 @@ public final class SoeknadMapper {
         throw new UnsupportedOperationException();
     }
 
-    //TODO: MELSOYS-3527
-    static Soeknad lagSoeknadDokument(MedlemskapArbeidEOSM søknad) {
+    static Soeknad lagSoeknad(MedlemskapArbeidEOSM søknad) {
         final Soeknad soeknad = new Soeknad();
         final Innhold innhold = søknad.getInnhold();
-        soeknad.personOpplysninger.utenlandskIdent.add(lagUtenlandskIdent(innhold.getArbeidstaker()));
+        soeknad.personOpplysninger.utenlandskIdent.add(lagUtenlandskIdent(innhold));
         soeknad.juridiskArbeidsgiverNorge = lagJuridiskArbeidsgiverNorge(innhold.getArbeidsgiver());
         soeknad.soeknadsland = hentsoeknadsland(innhold);
         soeknad.periode = lagPeriode(innhold);
@@ -29,10 +28,10 @@ public final class SoeknadMapper {
         return soeknad;
     }
 
-    private static UtenlandskIdent lagUtenlandskIdent(Arbeidstaker arbeidstaker) {
+    private static UtenlandskIdent lagUtenlandskIdent(Innhold innhold) {
         UtenlandskIdent utenlandskIdent = new UtenlandskIdent();
-        utenlandskIdent.ident = arbeidstaker.getUtenlandskIDnummer();
-        utenlandskIdent.landkode = arbeidstaker.getUtenlandskIDland();
+        utenlandskIdent.ident = innhold.getArbeidstaker().getUtenlandskIDnummer();
+        utenlandskIdent.landkode = innhold.getMidlertidigUtsendt().getArbeidsland();
         return utenlandskIdent;
     }
 

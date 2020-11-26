@@ -37,7 +37,7 @@
                         <xjbSource>src/main/resources/binding.xjb</xjbSource>
                     </xjbSources>
                     <sources>
-                        <source>src/main/resources/NAV_MedlemskapArbeidEOS_M_2020-06-08_6320_45770_SERES.xsd</source>
+                        <source>src/main/resources/xsd</source>
                     </sources>
                     <packageName>no.nav.melosys.soknad_altinn</packageName>
                 </configuration>

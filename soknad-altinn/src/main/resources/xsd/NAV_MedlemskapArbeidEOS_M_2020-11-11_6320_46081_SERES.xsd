@@ -8,7 +8,7 @@
          <xsd:attribute name="XSLT-skriptnavn" fixed="SERES_XSD_GEN"/>
          <xsd:attribute name="XSD-generatorversjon" fixed="2.0.23"/>
          <xsd:attribute name="XSLT-prosessor" fixed="SAXON versjon 9.1.0.7"/>
-         <xsd:attribute name="generert" fixed="2020-06-08T16:01:07.207+02:00"/>
+         <xsd:attribute name="generert" fixed="2020-11-11T12:58:56.128+01:00"/>
          <xsd:attribute name="navneromprefix" fixed="http://seres.no/xsd"/>
          <xsd:attribute name="namespace" fixed="http://seres.no/xsd/NAV/MedlemskapArbeidEOS_M/2020"/>
          <xsd:attribute name="meldingsnavn" fixed="melding"/>
@@ -39,7 +39,7 @@
       </xsd:sequence>
       <xsd:attribute name="dataFormatProvider" type="xsd:string" use="required" fixed="SERES"/>
       <xsd:attribute name="dataFormatId" type="xsd:string" use="required" fixed="6320"/>
-      <xsd:attribute name="dataFormatVersion" type="xsd:string" use="required" fixed="45770"/>
+      <xsd:attribute name="dataFormatVersion" type="xsd:string" use="required" fixed="46081"/>
       <xsd:anyAttribute/>
    </xsd:complexType>
    <xsd:complexType name="Innhold" seres:elementtype="Meldingsdel"
@@ -77,6 +77,12 @@
                       minOccurs="0"
                       seres:elementtype="Dataegenskap"
                       seres:guid="http://seres.no/guid/NAV/Dataegenskap/offentligVirksomhet/773973"/>
+         <xsd:element name="virksomhetsnavn" type="Tekst" nillable="true" minOccurs="0"
+                      seres:elementtype="Dataegenskap"
+                      seres:guid="http://seres.no/guid/NAV/Dataegenskap/virksomhetsnavn/779624"/>
+         <xsd:element name="adresse" type="ArbeidsgiverAdresse" nillable="true" minOccurs="0"
+                      seres:elementtype="Dataegenskap"
+                      seres:guid="http://seres.no/guid/NAV/Dataegenskap/adresse/779651"/>
       </xsd:sequence>
    </xsd:complexType>
    <xsd:complexType name="Kontaktperson" seres:elementtype="Dataobjekttype"
@@ -117,6 +123,23 @@
                       seres:guid="http://seres.no/guid/NAV/Dataegenskap/andelRekrutteresINorge/776157"/>
       </xsd:sequence>
    </xsd:complexType>
+   <xsd:complexType name="ArbeidsgiverAdresse" seres:elementtype="Datakomplekstype"
+                    seres:guid="http://seres.no/guid/NAV/Datakomplekstype/ArbeidsgiverAdresse/779656">
+      <xsd:sequence>
+         <xsd:element name="gate" type="Tekst" nillable="true" minOccurs="0"
+                      seres:elementtype="DataTypeegenskap"
+                      seres:guid="http://seres.no/guid/NAV/DataTypeegenskap/gate/779655"/>
+         <xsd:element name="land" type="Tekst" nillable="true" minOccurs="0"
+                      seres:elementtype="DataTypeegenskap"
+                      seres:guid="http://seres.no/guid/NAV/DataTypeegenskap/land/779654"/>
+         <xsd:element name="postkode" type="Tekst" nillable="true" minOccurs="0"
+                      seres:elementtype="DataTypeegenskap"
+                      seres:guid="http://seres.no/guid/NAV/DataTypeegenskap/postkode/779653"/>
+         <xsd:element name="poststed" type="Poststed" nillable="true" minOccurs="0"
+                      seres:elementtype="DataTypeegenskap"
+                      seres:guid="http://seres.no/guid/NAV/DataTypeegenskap/poststed/779652"/>
+      </xsd:sequence>
+   </xsd:complexType>
    <xsd:complexType name="Arbeidstaker" seres:elementtype="Dataobjekttype"
                     seres:guid="http://seres.no/guid/NAV/Dataobjekttype/Arbeidstaker/768867">
       <xsd:sequence>
@@ -129,13 +152,6 @@
          <xsd:element name="foedeland" type="Tekst" nillable="true" minOccurs="0"
                       seres:elementtype="Dataegenskap"
                       seres:guid="http://seres.no/guid/NAV/Dataegenskap/foedeland/770073"/>
-         <xsd:element name="statsborgerskap" type="Tekst" nillable="true" minOccurs="0"
-                      seres:elementtype="Dataegenskap"
-                      seres:guid="http://seres.no/guid/NAV/Dataegenskap/statsborgerskap/770360"/>
-         <xsd:element name="fullmaktTilTredjepart" type="SvaralternativJaNei" nillable="true"
-                      minOccurs="0"
-                      seres:elementtype="Dataegenskap"
-                      seres:guid="http://seres.no/guid/NAV/Dataegenskap/fullmaktTilTredjepart/770389"/>
          <xsd:element name="reiserMedBarnTilUtlandet" type="SvaralternativJaNei" nillable="true"
                       minOccurs="0"
                       seres:elementtype="Dataegenskap"
@@ -149,9 +165,9 @@
          <xsd:element name="utenlandskIDnummer" type="Tekst" nillable="true" minOccurs="0"
                       seres:elementtype="Dataegenskap"
                       seres:guid="http://seres.no/guid/NAV/Dataegenskap/utenlandskIDnummer/775095"/>
-         <xsd:element name="utenlandskIDland" type="Tekst" nillable="true" minOccurs="0"
+         <xsd:element name="fulltNavn" type="Tekst" nillable="true" minOccurs="0"
                       seres:elementtype="Dataegenskap"
-                      seres:guid="http://seres.no/guid/NAV/Dataegenskap/utenlandskIDland/775094"/>
+                      seres:guid="http://seres.no/guid/NAV/Dataegenskap/fulltNavn/779650"/>
       </xsd:sequence>
    </xsd:complexType>
    <xsd:complexType name="Barn" seres:elementtype="Dataobjekttype"
@@ -555,6 +571,10 @@
    <xsd:simpleType name="SvaralternativJaNei" seres:elementtype="Dataenkeltype"
                    seres:guid="http://seres.no/guid/NAV/Dataenkeltype/SvaralternativJaNei/474066">
       <xsd:restriction base="xsd:boolean"/>
+   </xsd:simpleType>
+   <xsd:simpleType name="Poststed" seres:elementtype="Dataenkeltype"
+                   seres:guid="http://seres.no/guid/NAV/Dataenkeltype/Poststed/451467">
+      <xsd:restriction base="xsd:string"/>
    </xsd:simpleType>
    <xsd:simpleType name="Dato" seres:elementtype="Dataenkeltype"
                    seres:guid="http://seres.no/guid/NAV/Dataenkeltype/Dato/451464">
