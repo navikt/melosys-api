@@ -278,7 +278,8 @@ public class AvklartefaktaServiceTest {
         AvklarteMedfolgendeBarn avklarteMedfølgendeBarn
             = avklartefaktaService.hentAvklarteMedfølgendeBarn(1L);
 
-        assertThat(avklarteMedfølgendeBarn.barnOmfattetAvNorskTrygd).containsExactly("omfattet");
+        assertThat(avklarteMedfølgendeBarn.barnOmfattetAvNorskTrygd)
+            .extracting("fnr").containsExactly("omfattet");
         assertThat(avklarteMedfølgendeBarn.barnIkkeOmfattetAvNorskTrygd)
             .extracting("fnr")
             .containsExactlyInAnyOrder("ikkeOmfattet1", "ikkeOmfattet2");

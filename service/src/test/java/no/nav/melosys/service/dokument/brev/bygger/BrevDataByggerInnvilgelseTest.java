@@ -10,6 +10,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
@@ -17,6 +18,7 @@ import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -59,6 +61,8 @@ public class BrevDataByggerInnvilgelseTest {
     AnmodningsperiodeService anmodningsperiodeService;
     @Mock
     VilkaarsresultatService vilkaarsresultatService;
+    @Mock
+    TpsFasade tpsFasade;
 
     private Behandling behandling;
     private BrevbestillingDto brevbestillingDto;
@@ -94,6 +98,7 @@ public class BrevDataByggerInnvilgelseTest {
         when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Landkoder.AT);
         when(landvelgerService.hentBostedsland(anyLong(), any(BehandlingsgrunnlagData.class))).thenReturn(Landkoder.NO);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Landkoder.DE));
+        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(Collections.emptySet(), Collections.emptySet()));
 
         brevDataByggerInnvilgelse = new BrevDataByggerInnvilgelse(avklartefaktaService,
             landvelgerService,
@@ -101,7 +106,8 @@ public class BrevDataByggerInnvilgelseTest {
             anmodningsperiodeService,
             brevbestillingDto,
             brevDataByggerA1,
-            vilkaarsresultatService);
+            vilkaarsresultatService,
+            tpsFasade);
     }
 
     public BrevDataGrunnlag lagBrevdataGrunnlag() throws TekniskException {

@@ -6,10 +6,10 @@ import java.util.Set;
 
 public class AvklarteMedfolgendeBarn {
 
-    public final Set<String> barnOmfattetAvNorskTrygd;
+    public final Set<OmfattetBarn> barnOmfattetAvNorskTrygd;
     public final Set<IkkeOmfattetBarn> barnIkkeOmfattetAvNorskTrygd;
 
-    public AvklarteMedfolgendeBarn(Set<String> barnOmfattetAvNorskTrygd, Set<IkkeOmfattetBarn> barnIkkeOmfattetAvNorskTrygd) {
+    public AvklarteMedfolgendeBarn(Set<OmfattetBarn> barnOmfattetAvNorskTrygd, Set<IkkeOmfattetBarn> barnIkkeOmfattetAvNorskTrygd) {
         this.barnOmfattetAvNorskTrygd = barnOmfattetAvNorskTrygd;
         this.barnIkkeOmfattetAvNorskTrygd = barnIkkeOmfattetAvNorskTrygd;
     }

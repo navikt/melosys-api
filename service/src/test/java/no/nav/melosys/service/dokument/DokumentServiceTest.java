@@ -325,9 +325,10 @@ public final class DokumentServiceTest {
         UtenlandskMyndighetService utenlandskMyndighetService = mock(UtenlandskMyndighetService.class);
         UtpekingService utpekingService = mock(UtpekingService.class);
         VilkaarsresultatService vilkaarsresultatService = mock(VilkaarsresultatService.class);
+        TpsFasade tpsFasade = mock(TpsFasade.class);
         return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService, joarkService,
-            landvelgerService, lovvalgsperiodeService, saksopplysningerService,
-            utenlandskMyndighetService, utpekingService, vilkaarsresultatRepository, vilkaarsresultatService);
+            landvelgerService, lovvalgsperiodeService, saksopplysningerService, utenlandskMyndighetService,
+            utpekingService, vilkaarsresultatRepository, vilkaarsresultatService, tpsFasade);
     }
 
     private BrevDataByggerVelger lagBrevdatabyggerVelgerMock() throws FunksjonellException, TekniskException {

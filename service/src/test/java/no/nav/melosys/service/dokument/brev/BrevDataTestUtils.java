@@ -15,6 +15,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ForetakUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
+import no.nav.melosys.domain.familie.OmfattetBarn;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
@@ -139,9 +140,11 @@ public class BrevDataTestUtils {
     }
 
     public static AvklarteMedfolgendeBarn lagAvklarteMedfølgendeBarn() {
-        return new AvklarteMedfolgendeBarn(
-            Set.of("fnrOmfattet"),
-            Set.of(new IkkeOmfattetBarn("fnrIkkeOmfattet", OVER_18_AR.getKode(), null))
-        );
+        OmfattetBarn omfattetBarn = new OmfattetBarn("fnrOmfattet");
+        omfattetBarn.sammensattNavn = "Omfattet Barn";
+        IkkeOmfattetBarn ikkeOmfattetBarn = new IkkeOmfattetBarn("fnrIkkeOmfattet", OVER_18_AR.getKode(), null);
+        ikkeOmfattetBarn.sammensattNavn = "Ikke Omfattet Barn";
+
+        return new AvklarteMedfolgendeBarn(Set.of(omfattetBarn), Set.of(ikkeOmfattetBarn));
     }
 }

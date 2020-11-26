@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.xml.bind.JAXBElement;
@@ -20,6 +21,7 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.Fartsomraade;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
+import no.nav.melosys.domain.familie.OmfattetBarn;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
@@ -29,6 +31,7 @@ import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import org.xml.sax.SAXException;
 
+import static java.util.Map.entry;
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_1;
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_2;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.lagXmlDato;
@@ -40,6 +43,13 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
     private static final String JA = "true";
 
     private static final String XSD_LOCATION = "melosysbrev/melosys_000108.xsd";
+
+    private static final Map<Medfolgende_barn_begrunnelser, BarnAvslagBegrunnelseKode> BARN_AVSLAG_BEGRUNNELSE_KODE_MAP
+        = Map.ofEntries(
+            entry(Medfolgende_barn_begrunnelser.OVER_18_AR, BarnAvslagBegrunnelseKode.OVER_18_AAR),
+            entry(Medfolgende_barn_begrunnelser.IKKE_SOEKERS_BARN, BarnAvslagBegrunnelseKode.IKKE_SOEKERS_BARN),
+            entry(Medfolgende_barn_begrunnelser.IKKE_BOSATT_I_NORGE, BarnAvslagBegrunnelseKode.IKKE_BOSATT_I_NORGE),
+            entry(Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER, BarnAvslagBegrunnelseKode.MANGLER_OPPLYSNINGER));
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevdata) throws JAXBException, SAXException, TekniskException {
@@ -134,11 +144,6 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         fag.setAntallBarnOmfattetAvNorskTrygd(BigInteger.valueOf(brevdata.avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd.size()));
         fag.setBarnIkkeOmfattetAvNorskTrygdListe(hentBarnIkkeOmfattetAvNorskTrygd(brevdata.avklarteMedfolgendeBarn));
         fag.setBarnOmfattetAvNorskTrygdListe(hentBarnOmfattetAvNorskTrygd(brevdata.avklarteMedfolgendeBarn));
-
-        if (brevdata.avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd.size() == 1) {
-            fag.setBarnAvslagBegrunnelse(tilBarnAvslagBegrunnelseKode(
-                brevdata.avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd.iterator().next().begrunnelse));
-        }
         if (brevdata.avklarteMedfolgendeBarn.hentBegrunnelseFritekst().isPresent()) {
             fag.setMedfoelgendeBarnFritekst(brevdata.avklarteMedfolgendeBarn.hentBegrunnelseFritekst().get());
         }
@@ -182,33 +187,23 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             .withBarnAvslag(barnAvslag).build();
     }
 
-    private static BarnInnvilgelseType lagBarnInnvilgelseType(String fnr) {
-        return BarnInnvilgelseType.builder().withBarnOmfattetAvNorskTrygd(fnr).build();
+    private static BarnInnvilgelseType lagBarnInnvilgelseType(OmfattetBarn omfattetBarn) {
+        return BarnInnvilgelseType.builder().withBarnOmfattetAvNorskTrygd(omfattetBarn.sammensattNavn).build();
     }
 
     private BarnAvslagType lagBarnAvslagType(IkkeOmfattetBarn ikkeOmfattetBarn) throws TekniskException {
         return BarnAvslagType.builder()
             .withBarnAvslagBegrunnelse(tilBarnAvslagBegrunnelseKode(ikkeOmfattetBarn.begrunnelse))
-            .withBarnIkkeOmfattetAvNorskTrygd(ikkeOmfattetBarn.fnr).build();
+            .withBarnIkkeOmfattetAvNorskTrygd(ikkeOmfattetBarn.sammensattNavn).build();
     }
 
     private BarnAvslagBegrunnelseKode tilBarnAvslagBegrunnelseKode(Medfolgende_barn_begrunnelser begrunnelse) throws TekniskException {
         if (begrunnelse == null) {
             return null;
+        } else if (BARN_AVSLAG_BEGRUNNELSE_KODE_MAP.containsKey(begrunnelse)) {
+            return BARN_AVSLAG_BEGRUNNELSE_KODE_MAP.get(begrunnelse);
         }
-
-        switch (begrunnelse) {
-            case OVER_18_AR:
-                return BarnAvslagBegrunnelseKode.OVER_18_AAR;
-            case IKKE_SOEKERS_BARN:
-                return BarnAvslagBegrunnelseKode.IKKE_SOEKERS_BARN;
-            case IKKE_BOSATT_I_NORGE:
-                return BarnAvslagBegrunnelseKode.IKKE_BOSATT_I_NORGE;
-            case MANGLER_OPPLYSNINGER:
-                return BarnAvslagBegrunnelseKode.MANGLER_OPPLYSNINGER;
-            default:
-                throw new TekniskException("Ukjent begrunnelse " + begrunnelse + " kan ikke mappes til BarnAvslagBegrunnelseKode");
-        }
+        throw new TekniskException("Ukjent begrunnelse " + begrunnelse + " kan ikke mappes til BarnAvslagBegrunnelseKode");
     }
 
     private static JAXBElement<BrevdataType> lagBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag, VedleggType vedlegg) {

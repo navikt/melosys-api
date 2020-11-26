@@ -2,6 +2,7 @@ package no.nav.melosys.service.dokument.brev;
 
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.integrasjon.joark.JoarkService;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -27,6 +28,7 @@ public class BrevDataByggerVelger {
     private final UtpekingService utpekingService;
     private final VilkaarsresultatRepository vilkaarsresultatRepository;
     private final VilkaarsresultatService vilkaarsresultatService;
+    private final TpsFasade tpsFasade;
 
     @Autowired
     public BrevDataByggerVelger(AnmodningsperiodeService anmodningsperiodeService,
@@ -38,7 +40,8 @@ public class BrevDataByggerVelger {
                                 UtenlandskMyndighetService utenlandskMyndighetService,
                                 UtpekingService utpekingService,
                                 VilkaarsresultatRepository vilkaarsresultatRepository,
-                                VilkaarsresultatService vilkaarsresultatService) {
+                                VilkaarsresultatService vilkaarsresultatService,
+                                TpsFasade tpsFasade) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.avklartefaktaService = avklartefaktaService;
         this.joarkService = joarkService;
@@ -49,6 +52,7 @@ public class BrevDataByggerVelger {
         this.utpekingService = utpekingService;
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
         this.vilkaarsresultatService = vilkaarsresultatService;
+        this.tpsFasade = tpsFasade;
     }
 
     public BrevDataBygger hent(Produserbaredokumenter produserbartDokument, BrevbestillingDto brevbestillingDto) {
@@ -73,7 +77,8 @@ public class BrevDataByggerVelger {
                                                     lovvalgsperiodeService,
                                                     anmodningsperiodeService,
                                                     brevbestillingDto,
-                                                    vilkaarsresultatService);
+                                                    vilkaarsresultatService,
+                                                    tpsFasade);
             case ORIENTERING_UTPEKING_UTLAND:
                 return new BrevDataByggerUtpekingAnnetLand(utpekingService, brevbestillingDto);
             case ORIENTERING_VIDERESENDT_SOEKNAD:
@@ -106,13 +111,14 @@ public class BrevDataByggerVelger {
     private BrevDataBygger lagBrevDataByggerInnvilgelse(BrevbestillingDto brevbestillingDto) {
         BrevDataByggerA1 brevbyggerA1 =
             new BrevDataByggerA1(avklartefaktaService, landvelgerService);
-
         return new BrevDataByggerInnvilgelse(avklartefaktaService,
             landvelgerService,
             lovvalgsperiodeService,
             anmodningsperiodeService,
             brevbestillingDto,
-            brevbyggerA1, vilkaarsresultatService);
+            brevbyggerA1,
+            vilkaarsresultatService,
+            tpsFasade);
     }
 
     private BrevDataBygger lagBrevDataByggerInnvilgelseFlereLand(BrevbestillingDto brevbestillingDto) {

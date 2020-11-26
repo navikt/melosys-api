@@ -7,6 +7,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.avklartefakta.*;
 import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
+import no.nav.melosys.domain.familie.OmfattetBarn;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
@@ -124,11 +125,11 @@ public class AvklartefaktaService {
     }
 
     public AvklarteMedfolgendeBarn hentAvklarteMedfølgendeBarn(long behandlingID) {
-        Set<String> barnOmfattetAvNorskTrygd = new HashSet<>();
+        Set<OmfattetBarn> barnOmfattetAvNorskTrygd = new HashSet<>();
         Set<IkkeOmfattetBarn> barnIkkeOmfattetAvNorskTrygd = new HashSet<>();
         for (Avklartefakta avklartefakta : avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingID, Avklartefaktatyper.VURDERING_LOVVALG_BARN)) {
             if (avklartefakta.getFakta().equals(VALGT_FAKTA)) {
-                barnOmfattetAvNorskTrygd.add(avklartefakta.getSubjekt());
+                barnOmfattetAvNorskTrygd.add(new OmfattetBarn(avklartefakta.getSubjekt()));
             } else {
                 String begrunnelse = avklartefakta.getRegistreringer().iterator().next().getBegrunnelseKode();
                 barnIkkeOmfattetAvNorskTrygd.add(
