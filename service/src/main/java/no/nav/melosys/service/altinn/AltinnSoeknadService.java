@@ -62,7 +62,7 @@ public class AltinnSoeknadService {
 
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
         Behandling behandling = fagsak.hentAktivBehandling();
-        behandlingsgrunnlagService.opprettSøknadUtsendteArbeidstakereEøs(behandling.getId(), SoeknadMapper.lagSoeknadDokument(søknad));
+        behandlingsgrunnlagService.opprettSøknadUtsendteArbeidstakereEøs(behandling.getId(), SoeknadMapper.lagSoeknad(søknad));
         avklarteVirksomheterService.lagreVirksomhetSomAvklartfakta(hentArbeidsgiverID(søknad), behandling.getId());
 
         return behandling;
