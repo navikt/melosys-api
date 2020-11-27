@@ -94,6 +94,7 @@
         <javassist.version>3.24.0-GA</javassist.version>
         <jaxb2-basics-runtime.version>0.12.0</jaxb2-basics-runtime.version>
         <objenesis.version>3.1</objenesis.version>
+        <woodstox.version>6.0.1</woodstox.version>
         <xmlsec.version>2.1.4</xmlsec.version>
     </properties>
 
@@ -375,6 +376,11 @@
 
 
             <!-- Transitive avhengiheter med konflikter -->
+            <dependency>
+                <groupId>com.fasterxml.woodstox</groupId>
+                <artifactId>woodstox-core</artifactId>
+                <version>${woodstox.version}</version>
+            </dependency>
             <dependency>
                 <groupId>commons-logging</groupId>
                 <artifactId>commons-logging</artifactId>

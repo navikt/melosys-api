@@ -53,19 +53,36 @@ public class BehandlingsgrunnlagService {
         return opprettBehandlingsgrunnlag(behandlingID, soeknad, Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS, VERSJON_SOEKNAD_GRUNNLAG);
     }
 
-    //Altinn
     public Behandlingsgrunnlag opprettSøknadUtsendteArbeidstakereEøs(long behandlingID,
+                                                                     String orginalData,
                                                                      Soeknad soeknad) throws FunksjonellException, IntegrasjonException {
-        return opprettBehandlingsgrunnlag(behandlingID, soeknad, Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS, VERSJON_SOEKNAD_GRUNNLAG);
+        return opprettBehandlingsgrunnlag(
+            behandlingID,
+            orginalData,
+            soeknad,
+            Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS,
+            VERSJON_SOEKNAD_GRUNNLAG
+        );
     }
 
     public Behandlingsgrunnlag opprettSøknadFolketrygden(long behandlingID,
-                                                     SoeknadFtrl soeknad) throws FunksjonellException, IntegrasjonException {
+                                                         SoeknadFtrl soeknad) throws FunksjonellException, IntegrasjonException {
         return opprettBehandlingsgrunnlag(behandlingID, soeknad, Behandlingsgrunnlagtyper.SØKNAD_FOLKETRYGDEN, VERSJON_SOEKNAD_GRUNNLAG);
     }
 
-    private Behandlingsgrunnlag opprettBehandlingsgrunnlag(long behandlingID, BehandlingsgrunnlagData behandlingsgrunnlagData,
-                                                           Behandlingsgrunnlagtyper type, String versjon) throws FunksjonellException, IntegrasjonException {
+    private Behandlingsgrunnlag opprettBehandlingsgrunnlag(long behandlingID,
+                                                           BehandlingsgrunnlagData behandlingsgrunnlagData,
+                                                           Behandlingsgrunnlagtyper type,
+                                                           String versjon) throws FunksjonellException, IntegrasjonException {
+
+        return opprettBehandlingsgrunnlag(behandlingID, null, behandlingsgrunnlagData, type, versjon);
+    }
+
+    private Behandlingsgrunnlag opprettBehandlingsgrunnlag(long behandlingID,
+                                                           String originalData,
+                                                           BehandlingsgrunnlagData behandlingsgrunnlagData,
+                                                           Behandlingsgrunnlagtyper type,
+                                                           String versjon) throws FunksjonellException, IntegrasjonException {
 
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         if (behandling.getBehandlingsgrunnlag() != null) {
@@ -80,6 +97,7 @@ public class BehandlingsgrunnlagService {
         behandlingsgrunnlag.setType(type);
         behandlingsgrunnlag.setVersjon(versjon);
         behandlingsgrunnlag.setMottaksdato(hentMottaksdato(behandling.getInitierendeJournalpostId()));
+        behandlingsgrunnlag.setOriginalData(originalData);
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
         return behandlingsgrunnlagRepository.save(behandlingsgrunnlag);
     }

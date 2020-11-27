@@ -75,6 +75,8 @@ public class AltinnSoeknadServiceTest {
         assertThat(req.getBehandlingstype()).isEqualTo(Behandlingstyper.SOEKNAD);
         assertThat(req.getArbeidsgiver()).isEqualTo(søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer());
         assertThat(req.getAktørID()).isEqualTo(aktørID);
+
+        verify(behandlingsgrunnlagService).opprettSøknadUtsendteArbeidstakereEøs(eq(1L), anyString(), any());
     }
 
     @Test
