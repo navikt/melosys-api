@@ -40,7 +40,7 @@
 
         <!-- Melosys -->
         <melosys.jsonschema.version>1.35.78-158</melosys.jsonschema.version>
-        <melosys.internt.kodeverk.version>5.15.47</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.15.48</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.57</melosys.brev.version>
 
         <!-- NAV -->
@@ -350,6 +350,11 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-web</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-webflux</artifactId>
                 <version>${spring-boot.version}</version>
             </dependency>
             <dependency>

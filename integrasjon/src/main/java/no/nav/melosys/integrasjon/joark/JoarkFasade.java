@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.joark;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -47,4 +48,6 @@ public interface JoarkFasade {
     List<JournalfoeringMangel> utledJournalfoeringsbehov(String journalpostID) throws FunksjonellException;
 
     LocalDate hentMottaksDatoForJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException;
+
+    Instant hentInstantMottaksDatoForJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException ;
 }

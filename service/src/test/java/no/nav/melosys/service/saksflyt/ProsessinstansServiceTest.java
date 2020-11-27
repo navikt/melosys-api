@@ -19,6 +19,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.ProsessType;
@@ -40,8 +41,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -169,6 +171,21 @@ class ProsessinstansServiceTest {
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
         return behandling;
+    }
+
+    @Test
+    void opprettProsessinstansOpprettOgDistribuerBrev() {
+        String saksbehandler = settInnloggetSaksbehandler();
+
+        Behandling behandling = lagBehandling();
+        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, behandling);
+
+        verify(prosessinstansRepo).save(piCaptor.capture());
+
+        Prosessinstans lagretInstans = piCaptor.getValue();
+        assertEquals(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, lagretInstans.getType());
+        assertEquals(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, lagretInstans.getData(ProsessDataKey.PRODUSERBART_BREV, Produserbaredokumenter.class));
+        assertEquals(saksbehandler, lagretInstans.getData(ProsessDataKey.SAKSBEHANDLER));
     }
 
     @Test

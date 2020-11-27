@@ -11,8 +11,7 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.dokument.DokumentHentingService;
-import no.nav.melosys.service.dokument.DokumentService;
-import no.nav.melosys.service.dokument.brev.BrevData;
+import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.SedPdfData;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -35,17 +34,16 @@ public class DokumentTjeneste {
     private static final String APPLICATION_PDF = "application/pdf";
     private static final String APPLICATION_JSON_UTF8 = MediaType.APPLICATION_JSON_VALUE + "; charset=UTF-8";
 
-    private final DokumentService dokumentService;
+    private final DokumentServiceFasade dokumentServiceFasade;
     private final DokumentHentingService dokumentHentingService;
     private final EessiService eessiService;
     private final TilgangService tilgangService;
 
     @Autowired
-    public DokumentTjeneste(DokumentService dokumentService,
-                            DokumentHentingService dokumentHentingService,
+    public DokumentTjeneste(DokumentServiceFasade dokumentServiceFasade, DokumentHentingService dokumentHentingService,
                             EessiService eessiService,
                             TilgangService tilgangService) {
-        this.dokumentService = dokumentService;
+        this.dokumentServiceFasade = dokumentServiceFasade;
         this.dokumentHentingService = dokumentHentingService;
         this.eessiService = eessiService;
         this.tilgangService = tilgangService;
@@ -80,7 +78,7 @@ public class DokumentTjeneste {
         throws TekniskException, FunksjonellException {
         byte[] dokument;
         tilgangService.sjekkTilgang(behandlingID);
-        dokument = dokumentService.produserUtkast(produserbartDokument, behandlingID, brevBestillingDto);
+        dokument = dokumentServiceFasade.produserUtkast(produserbartDokument, behandlingID, brevBestillingDto);
         return lagResponseAvDokument(dokument, produserbartDokument.getKode() + "_utkast.pdf");
     }
 
@@ -104,8 +102,8 @@ public class DokumentTjeneste {
         }
         tilgangService.sjekkTilgang(behandlingID);
         // Produserer utkast for å få eventuelle feil før bestilling i saksflyt.
-        dokumentService.produserUtkast(produserbartDokument, behandlingID, brevBestillingDto);
-        dokumentService.produserDokumentISaksflyt(produserbartDokument, brevBestillingDto.mottaker, behandlingID, new BrevData(brevBestillingDto));
+        dokumentServiceFasade.produserUtkast(produserbartDokument, behandlingID, brevBestillingDto);
+        dokumentServiceFasade.produserDokument(produserbartDokument, behandlingID, brevBestillingDto);
         return ResponseEntity.noContent().build();
     }
 
