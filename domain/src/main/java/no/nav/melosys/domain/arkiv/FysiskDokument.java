@@ -1,9 +1,11 @@
 package no.nav.melosys.domain.arkiv;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.msm.AltinnDokument;
 
@@ -23,6 +25,23 @@ public class FysiskDokument extends ArkivDokument {
         fysiskDokument.setTittel(hentTittelForSedType(sedType));
         fysiskDokument.setBrevkode(sedType.name());
         fysiskDokument.setDokumentVarianter(Collections.singletonList(lagDokumentVariant(sedPdf)));
+        return fysiskDokument;
+    }
+
+    static FysiskDokument lagFysiskHovedDokumentAltinn(AltinnDokument altinnDokument,
+                                                  Behandlingsgrunnlag behandlingsgrunnlag) {
+        FysiskDokument fysiskDokument = new FysiskDokument();
+        fysiskDokument.setDokumentKategori(DOKUMENT_KATEGORI_SOKNAD);
+        fysiskDokument.setTittel(hentTittelForAltinnDokument(altinnDokument.getDokumentType()));
+        byte[] innhold = Base64.getDecoder().decode(altinnDokument.getInnhold());
+        var dokumentVarianter = List.of(
+            lagDokumentVariant(innhold),
+            lagDokumentVariant(
+                behandlingsgrunnlag.getOriginalData().getBytes(StandardCharsets.UTF_8),
+                DokumentVariant.VariantFormat.ORIGINAL
+            )
+        );
+        fysiskDokument.setDokumentVarianter(dokumentVarianter);
         return fysiskDokument;
     }
 

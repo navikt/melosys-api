@@ -9,9 +9,10 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.msm.AltinnDokument;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
 
-import static no.nav.melosys.domain.arkiv.FysiskDokument.lagFysiskDokumentAltinn;
-import static no.nav.melosys.domain.arkiv.FysiskDokument.lagFysiskDokumentSed;
+import static no.nav.melosys.domain.arkiv.FysiskDokument.*;
 
 public class OpprettJournalpost extends Journalpost {
     private static final String SENTRAL_UTSKRIFT = "S";
@@ -60,13 +61,15 @@ public class OpprettJournalpost extends Journalpost {
     public static OpprettJournalpost lagJournalpostForMottakAltinnSøknad(Fagsak fagsak,
                                                                          Collection<AltinnDokument> dokumenter,
                                                                          String brukerID,
-                                                                         String avsenderNavn) {
+                                                                         String avsenderNavn)
+        throws FunksjonellException, TekniskException {
         AltinnDokument hovedDokument = dokumenter.stream().filter(AltinnDokument::erSøknad)
             .collect(MoreCollectors.onlyElement());
         dokumenter.remove(hovedDokument);
 
         OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
-        opprettJournalpost.setHoveddokument(lagFysiskDokumentAltinn(hovedDokument));
+        final var behandlingsgrunnlag = fagsak.hentSistAktiveBehandling().getBehandlingsgrunnlag();
+        opprettJournalpost.setHoveddokument(lagFysiskHovedDokumentAltinn(hovedDokument, behandlingsgrunnlag));
         opprettJournalpost.setInnhold(opprettJournalpost.getHoveddokument().getTittel());
         opprettJournalpost.setVedlegg(dokumenter.stream().map(FysiskDokument::lagFysiskDokumentAltinn).collect(Collectors.toList()));
         opprettJournalpost.setArkivSakId(fagsak.getGsakSaksnummer().toString());

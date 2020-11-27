@@ -10,6 +10,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.msm.AltinnDokument;
@@ -52,7 +53,8 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
     private OpprettOgFerdigstillAltinnJournalpost opprettOgFerdigstillAltinnJournalpost;
 
     private final Prosessinstans prosessinstans = new Prosessinstans();
-    private final Behandling behandling = new Behandling();
+    private final Behandling behandling = lagBehandling();
+
     private final Aktoer bruker = new Aktoer();
     private final String ident = "00000000000";
 
@@ -84,6 +86,7 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
         fagsak.setGsakSaksnummer(123L);
         fagsak.setAktører(Set.of(bruker, representant));
         behandling.setFagsak(fagsak);
+        fagsak.getBehandlinger().add(behandling);
         prosessinstans.setBehandling(behandling);
 
         var dokumenter = new ArrayList<AltinnDokument>();
@@ -136,5 +139,14 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
         OpprettJournalpost opprettJournalpost = captor.getValue();
 
         assertThat(opprettJournalpost.getKorrespondansepartNavn()).isEqualTo("Arbeidsgiver");
+    }
+
+
+    private Behandling lagBehandling() {
+        Behandling behandling = new Behandling();
+        Behandlingsgrunnlag grunnlag = new Behandlingsgrunnlag();
+        grunnlag.setOriginalData("Original Can't Touch This");
+        behandling.setBehandlingsgrunnlag(grunnlag);
+        return behandling;
     }
 }
