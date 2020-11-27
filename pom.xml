@@ -72,7 +72,7 @@
         <json-smart.version>2.3</json-smart.version>
         <jms-api.version>2.0.1</jms-api.version>
         <junit.version>4.12</junit.version>
-        <micrometer-jvm-extras.version>0.1.4</micrometer-jvm-extras.version>
+        <micrometer-jvm-extras.version>0.2.0</micrometer-jvm-extras.version>
         <mockrunner.version>2.0.1</mockrunner.version>
         <ojdbc.version>18.3.0.0</ojdbc.version>
         <oracle.version>18</oracle.version>
