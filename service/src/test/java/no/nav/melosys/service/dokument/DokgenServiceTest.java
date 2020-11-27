@@ -7,7 +7,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
@@ -54,10 +53,7 @@ class DokgenServiceTest {
 
     @Test
     void produserBrevOk() throws Exception {
-        Journalpost journalpost = new Journalpost("123");
-        journalpost.setForsendelseMottatt(Instant.now());
-        when(mockJoarkFasade.hentJournalpost(any())).thenReturn(journalpost);
-
+        when(mockJoarkFasade.hentInstantMottaksDatoForJournalpost(any())).thenReturn(Instant.now());
         when(mockDokgenConsumer.lagPdf(anyString(), any())).thenReturn(expectedPdf);
 
         byte[] pdfResponse = dokgenService.produserBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, lagBehandling());
@@ -71,7 +67,6 @@ class DokgenServiceTest {
         unleash.enableAll();
 
         assertTrue(dokgenService.erTilgjengeligDokgenmal(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD));
-
         assertFalse(dokgenService.erTilgjengeligDokgenmal(ATTEST_A1));
     }
 

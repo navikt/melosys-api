@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -34,7 +33,7 @@ public class DokgenService {
     public byte[] produserBrev(Produserbaredokumenter produserbartDokument, Behandling behandling) throws TekniskException, FunksjonellException {
         String malnavn = dokgenMalResolver.hentMalnavn(produserbartDokument);
 
-        DokgenDto dokgenDto = dokgenMalResolver.mapBehandling(produserbartDokument, behandling, getForsendelseMottattFraJournalpost(behandling));
+        DokgenDto dokgenDto = dokgenMalResolver.mapBehandling(produserbartDokument, behandling, hentForsendelseMottattFraJournalpost(behandling));
         return lagPdf(malnavn, dokgenDto);
     }
 
@@ -47,10 +46,8 @@ public class DokgenService {
         return dokgenConsumer.lagPdf(malNavn, dokgenDto);
     }
 
-    private Instant getForsendelseMottattFraJournalpost(Behandling behandling) throws SikkerhetsbegrensningException, IntegrasjonException {
-        String initierendeJournalpostId = behandling.getInitierendeJournalpostId();
-        Journalpost journalpost = joarkFasade.hentJournalpost(initierendeJournalpostId);
-        return journalpost.getForsendelseMottatt();
+    private Instant hentForsendelseMottattFraJournalpost(Behandling behandling) throws SikkerhetsbegrensningException, IntegrasjonException {
+        return joarkFasade.hentInstantMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId());
     }
 
 }
