@@ -10,7 +10,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.domain.kodeverk.VilkårsvurderingSpørsmål;
+import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_forutgaaende_trygdetid_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser;
 import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.security.token.support.core.api.Protected;
@@ -36,11 +38,19 @@ public class MelosysInterntKodeverkTjeneste {
 
     @GetMapping("/folketrygden")
     @ApiOperation(value = "Henter koder fra internt kodeverk til saksbehandling av folketrygden-saker")
-    public ResponseEntity<Map<String, Collection<KodeDto>>> hentKoderTilFolketrygden() {
-        Map<String, Collection<KodeDto>> kodeverdier = new HashMap<>();
+    public ResponseEntity<Map<String, Object>> hentKoderTilFolketrygden() {
+        Map<String, Object> kodeverdier = new HashMap<>();
         kodeverdier.put(Trygdedekninger.class.getSimpleName(), tilKodeDto(medlemskapsperiodeService.hentGyldigeTrygdedekninger()));
-        kodeverdier.put(VilkårsvurderingSpørsmål.class.getSimpleName(), tilKodeDto(VilkårsvurderingSpørsmål.values()));
+        kodeverdier.put(Vilkaar.class.getSimpleName(), tilKodeDto(Vilkaar.values()));
+        kodeverdier.put("begrunnelser", lagBegrunnelser());
         return ResponseEntity.ok(kodeverdier);
+    }
+
+    private Map<String, Collection<KodeDto>> lagBegrunnelser() {
+        Map<String, Collection<KodeDto>> begrunnelser = new HashMap<>();
+        begrunnelser.put(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.class.getSimpleName(), tilKodeDto(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.values()));
+        begrunnelser.put(Ftrl_2_8_forutgaaende_trygdetid_begrunnelser.class.getSimpleName(), tilKodeDto(Ftrl_2_8_forutgaaende_trygdetid_begrunnelser.values()));
+        return begrunnelser;
     }
 
     private <T extends Kodeverk> Collection<KodeDto> tilKodeDto(Collection<T> kodeverk) {
@@ -50,6 +60,4 @@ public class MelosysInterntKodeverkTjeneste {
     private Collection<KodeDto> tilKodeDto(Kodeverk... kodeverk) {
         return Stream.of(kodeverk).map(k -> new KodeDto(k.getKode(), k.getBeskrivelse())).collect(Collectors.toSet());
     }
-
-
 }
