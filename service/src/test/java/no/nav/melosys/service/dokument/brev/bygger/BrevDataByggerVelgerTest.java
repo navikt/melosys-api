@@ -2,6 +2,7 @@ package no.nav.melosys.service.dokument.brev.bygger;
 
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.integrasjon.joark.JoarkService;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -38,10 +39,11 @@ public class BrevDataByggerVelgerTest {
         UtpekingService utpekingService = mock(UtpekingService.class);
         VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
         VilkaarsresultatService vilkaarsresultatService = mock(VilkaarsresultatService.class);
+        TpsFasade tpsFasade = mock(TpsFasade.class);
 
         brevDataByggerVelger = new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService, joarkService,
-            landvelgerService, lovvalgsperiodeService, saksopplysningerService,
-            utenlandskMyndighetService, utpekingService, vilkaarsresultatRepository, vilkaarsresultatService);
+            landvelgerService, lovvalgsperiodeService, saksopplysningerService, utenlandskMyndighetService,
+            utpekingService, vilkaarsresultatRepository, vilkaarsresultatService, tpsFasade);
     }
 
     @Test

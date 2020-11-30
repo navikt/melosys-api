@@ -3,11 +3,16 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.util.Set;
 
 import no.nav.melosys.domain.Anmodningsperiode;
+import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
+import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
+import no.nav.melosys.domain.familie.OmfattetBarn;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -27,13 +32,15 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final VilkaarsresultatService vilkaarsresultatService;
+    private final TpsFasade tpsFasade;
 
     public BrevDataByggerInnvilgelse(AvklartefaktaService avklartefaktaService,
                                      LandvelgerService landvelgerService,
                                      LovvalgsperiodeService lovvalgsperiodeService,
                                      AnmodningsperiodeService anmodningsperiodeService,
                                      BrevbestillingDto brevbestillingDto,
-                                     VilkaarsresultatService vilkaarsresultatService) {
+                                     VilkaarsresultatService vilkaarsresultatService,
+                                     TpsFasade tpsFasade) {
         this.landvelgerService = landvelgerService;
         this.avklartefaktaService = avklartefaktaService;
         this.anmodningsperiodeService = anmodningsperiodeService;
@@ -41,6 +48,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.vilkaarsresultatService = vilkaarsresultatService;
         this.brevbyggerA1 = null;
+        this.tpsFasade = tpsFasade;
     }
 
     public BrevDataByggerInnvilgelse(AvklartefaktaService avklartefaktaService,
@@ -49,7 +57,8 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
                                      AnmodningsperiodeService anmodningsperiodeService,
                                      BrevbestillingDto brevbestillingDto,
                                      BrevDataByggerA1 brevbyggerA1,
-                                     VilkaarsresultatService vilkaarsresultatService) {
+                                     VilkaarsresultatService vilkaarsresultatService,
+                                     TpsFasade tpsFasade) {
         this.landvelgerService = landvelgerService;
         this.avklartefaktaService = avklartefaktaService;
         this.anmodningsperiodeService = anmodningsperiodeService;
@@ -57,6 +66,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         this.brevbyggerA1 = brevbyggerA1;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.vilkaarsresultatService = vilkaarsresultatService;
+        this.tpsFasade = tpsFasade;
     }
 
     @Override
@@ -99,7 +109,19 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
 
         brevdata.erArt16UtenArt12 = vilkaarsresultatService.harVilkaarForArtikkel16(behandlingID) && !vilkaarsresultatService.harVilkaarForArtikkel12(behandlingID);
         brevdata.erTuristskip = vilkaarsresultatService.oppfyllerVilkaar(behandlingID, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP);
+        brevdata.avklarteMedfolgendeBarn = hentAvklarteMedfølgendeBarn(behandlingID);
 
         return brevdata;
+    }
+
+    private AvklarteMedfolgendeBarn hentAvklarteMedfølgendeBarn(long behandlingID) throws FunksjonellException, IntegrasjonException {
+        AvklarteMedfolgendeBarn avklarteMedfolgendeBarn = avklartefaktaService.hentAvklarteMedfølgendeBarn(behandlingID);
+        for (OmfattetBarn omfattetBarn : avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd) {
+            omfattetBarn.sammensattNavn = tpsFasade.hentSammensattNavn(omfattetBarn.fnr);
+        }
+        for (IkkeOmfattetBarn ikkeOmfattetBarn : avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd) {
+            ikkeOmfattetBarn.sammensattNavn = tpsFasade.hentSammensattNavn(ikkeOmfattetBarn.fnr);
+        }
+        return avklarteMedfolgendeBarn;
     }
 }

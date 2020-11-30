@@ -71,8 +71,7 @@ import org.junit.Test;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagAnmodningsperiodeSvarInnvilgelse;
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagBostedsadresse;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.AdditionalMatchers.not;
@@ -174,6 +173,7 @@ public final class DokumentServiceTest {
         brevdataInnvilgelse.arbeidsland = "Norway";
         brevdataInnvilgelse.setAnmodningsperiodesvar(lagAnmodningsperiodeSvarInnvilgelse());
         brevdataInnvilgelse.trygdemyndighetsland = "Denmark";
+        brevdataInnvilgelse.avklarteMedfolgendeBarn = lagAvklarteMedfølgendeBarn();
 
         return brevdataInnvilgelse;
     }
@@ -325,9 +325,10 @@ public final class DokumentServiceTest {
         UtenlandskMyndighetService utenlandskMyndighetService = mock(UtenlandskMyndighetService.class);
         UtpekingService utpekingService = mock(UtpekingService.class);
         VilkaarsresultatService vilkaarsresultatService = mock(VilkaarsresultatService.class);
+        TpsFasade tpsFasade = mock(TpsFasade.class);
         return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService, joarkService,
-            landvelgerService, lovvalgsperiodeService, saksopplysningerService,
-            utenlandskMyndighetService, utpekingService, vilkaarsresultatRepository, vilkaarsresultatService);
+            landvelgerService, lovvalgsperiodeService, saksopplysningerService, utenlandskMyndighetService,
+            utpekingService, vilkaarsresultatRepository, vilkaarsresultatService, tpsFasade);
     }
 
     private BrevDataByggerVelger lagBrevdatabyggerVelgerMock() throws FunksjonellException, TekniskException {
