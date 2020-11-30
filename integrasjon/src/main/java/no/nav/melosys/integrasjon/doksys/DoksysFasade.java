@@ -12,4 +12,6 @@ public interface DoksysFasade {
     DokumentbestillingResponse produserIkkeredigerbartDokument(Dokumentbestilling dokumentbestilling) throws FunksjonellException, TekniskException;
 
     String distribuerJournalpost(String journalpostId, StrukturertAdresse mottakeradresse);
+
+    String distribuerJournalpost(String journalpostId);
 }

@@ -10,7 +10,6 @@ import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.doksys.Dokumentbestilling;
@@ -33,9 +32,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.w3c.dom.Element;
-
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER;
 
 @Service
 @Primary
@@ -164,20 +160,5 @@ public class DokumentService {
         DokumentbestillingMetadata metadata = brevDataService.lagBestillingMetadata(produserbartDokument, mottaker, kontaktopplysning, behandling, brevData);
         Element brevinnhold = brevDataService.lagBrevXML(produserbartDokument, mottaker, kontaktopplysning, behandling, brevData);
         return new Dokumentbestilling(metadata, brevinnhold);
-    }
-
-    @Transactional(rollbackFor = MelosysException.class)
-    public void produserDokumentISaksflyt(Produserbaredokumenter produserbartDokument, Aktoersroller mottaker, long behandlingID, BrevData brevdata)
-        throws FunksjonellException {
-        Assert.notNull(mottaker, "Dokument uten mottaker.");
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
-
-        if (produserbartDokument == MELDING_MANGLENDE_OPPLYSNINGER) {
-            prosessinstansService.opprettProsessinstansMangelbrev(behandling, mottaker, brevdata);
-        } else if (produserbartDokument == MELDING_FORVENTET_SAKSBEHANDLINGSTID) {
-            prosessinstansService.opprettProsessinstansForvaltningsmelding(behandling);
-        } else {
-            throw new FunksjonellException("Produserbaredokumenter " + produserbartDokument + " er ikke støttet.");
-        }
     }
 }

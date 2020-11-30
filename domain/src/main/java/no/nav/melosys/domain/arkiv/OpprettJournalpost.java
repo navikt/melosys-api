@@ -96,6 +96,18 @@ public class OpprettJournalpost extends Journalpost {
         return opprettJournalpost;
     }
 
+    public static OpprettJournalpost lagJournalpostForBrev(String tittel, String brukerFnr, byte[] pdf) {
+        OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
+        opprettJournalpost.setHoveddokument(lagInfoBrevPdf(tittel, pdf));
+        opprettJournalpost.setJournalposttype(Journalposttype.UT);
+        opprettJournalpost.setJournalførendeEnhet(MEDLEMSKAP_OG_AVGIFT);
+        opprettJournalpost.setTema(MEDLEMSKAP);
+        opprettJournalpost.setBrukerId(brukerFnr);
+        opprettJournalpost.setInnhold(opprettJournalpost.getHoveddokument().getTittel());
+
+        return opprettJournalpost;
+    }
+
     public String getJournalførendeEnhet() {
         return journalførendeEnhet;
     }

@@ -138,41 +138,10 @@ public final class DokumentServiceTest {
         verify(dokSysFasade).produserDokumentutkast(any(Dokumentbestilling.class));
     }
 
-    @Test
-    public final void produserMangelbrevISaksflyt() throws Exception {
-        BrevbestillingDto brevbestilling = lagBrevBestillingDto(BRUKER);
-        instans.produserDokumentISaksflyt(MELDING_MANGLENDE_OPPLYSNINGER, brevbestilling.mottaker, BEHANDLINGSID, new BrevData(brevbestilling));
-    }
-
-    @Test
-    public final void produserForvaltningsmeldingISaksflyt_fungerer() throws MelosysException {
-        instans.produserDokumentISaksflyt(MELDING_FORVENTET_SAKSBEHANDLINGSTID, BRUKER, BEHANDLINGSID, null);
-
-        verify(prosessinstansService).opprettProsessinstansForvaltningsmelding(argThat(b -> BEHANDLINGSID == b.getId()));
-    }
-
     private static BrevbestillingDto lagBrevBestillingDto(Aktoersroller rolle) {
         BrevbestillingDto brevbestilling = new BrevbestillingDto();
         brevbestilling.mottaker = rolle;
         return brevbestilling;
-    }
-
-    @Test
-    public final void produserMangelbrevISaksflyt_utenMottaker_kasterUnntak() {
-        Throwable unntak = catchThrowable(() -> instans.produserDokumentISaksflyt(MELDING_MANGLENDE_OPPLYSNINGER, null, BEHANDLINGSID, null));
-        assertThat(unntak).isInstanceOfAny(IllegalArgumentException.class);
-    }
-
-    @Test
-    public final void produserInnvilgelsesbrevISaksflytUtenBehandlingKasterUnntak() {
-        Throwable unntak = catchThrowable(() -> instans.produserDokumentISaksflyt(INNVILGELSE_YRKESAKTIV, BRUKER, ~BEHANDLINGSID, null));
-        assertThat(unntak).isInstanceOfAny(IkkeFunnetException.class).hasNoCause().hasMessageContaining("finnes ikke");
-    }
-
-    @Test
-    public final void produserUkjentDokumenttypeISaksflytKasterUnntak() {
-        Throwable unntak = catchThrowable(() -> instans.produserDokumentISaksflyt(MELDING_HENLAGT_SAK, ARBEIDSGIVER, BEHANDLINGSID, null));
-        assertThat(unntak).isInstanceOfAny(FunksjonellException.class).hasNoCause().hasMessageContaining("er ikke støttet");
     }
 
     @Test
