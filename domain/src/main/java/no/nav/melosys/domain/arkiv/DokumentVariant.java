@@ -1,42 +1,38 @@
 package no.nav.melosys.domain.arkiv;
 
 public class DokumentVariant {
-    private static final String ARKIV = "ARKIV";
-
     private byte[] data;
     private Filtype filtype;
-    private String variantFormat;
+    private VariantFormat variantFormat;
 
-    public static DokumentVariant lagArkivVariant(byte[] pdf) {
-        DokumentVariant dokumentVariant = new DokumentVariant();
-        dokumentVariant.setVariantFormat(ARKIV);
-        dokumentVariant.setFiltype(DokumentVariant.Filtype.PDFA);
-        dokumentVariant.setData(pdf);
-        return dokumentVariant;
+    private DokumentVariant(byte[] data, Filtype filtype, VariantFormat variantFormat) {
+        this.data = data;
+        this.filtype = filtype;
+        this.variantFormat = variantFormat;
+    }
+
+    public static DokumentVariant lagDokumentVariant(byte[] data) {
+        return lagDokumentVariant(data, VariantFormat.ARKIV);
+    }
+
+    public static DokumentVariant lagDokumentVariant(byte[] data, VariantFormat variantFormat) {
+        return new DokumentVariant(
+            data,
+            DokumentVariant.Filtype.PDFA,
+            variantFormat
+        );
     }
 
     public byte[] getData() {
         return data;
     }
 
-    public void setData(byte[] data) {
-        this.data = data;
-    }
-
     public Filtype getFiltype() {
         return filtype;
     }
 
-    public void setFiltype(Filtype filtype) {
-        this.filtype = filtype;
-    }
-
-    public String getVariantFormat() {
+    public VariantFormat getVariantFormat() {
         return variantFormat;
-    }
-
-    public void setVariantFormat(String variantFormat) {
-        this.variantFormat = variantFormat;
     }
 
     public enum Filtype {
@@ -57,5 +53,10 @@ public class DokumentVariant {
         DXML,
         JSON,
         PNG
+    }
+
+    public enum VariantFormat {
+        ARKIV,
+        ORIGINAL
     }
 }

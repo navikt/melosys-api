@@ -130,7 +130,7 @@ public class OpprettJournalpostRequest {
     private static DokumentVariant dokumentVariant(no.nav.melosys.domain.arkiv.DokumentVariant dokumentVariant) {
         return DokumentVariant.builder()
             .filtype(JournalpostFiltype.valueOf(dokumentVariant.getFiltype().name()))
-            .variantformat(dokumentVariant.getVariantFormat())
+            .variantformat(dokumentVariant.getVariantFormat().name())
             .fysiskDokument(dokumentVariant.getData())
             .build();
     }

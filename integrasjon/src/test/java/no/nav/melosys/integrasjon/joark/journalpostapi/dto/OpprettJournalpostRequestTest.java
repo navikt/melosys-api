@@ -18,10 +18,7 @@ public class OpprettJournalpostRequestTest {
         hoveddokument.setTittel("tittel");
         hoveddokument.setBrevkode("brevkode");
         hoveddokument.setDokumentKategori("kategori");
-        no.nav.melosys.domain.arkiv.DokumentVariant dokumentVariant = new no.nav.melosys.domain.arkiv.DokumentVariant();
-        dokumentVariant.setData("pdf".getBytes());
-        dokumentVariant.setFiltype(DokumentVariant.Filtype.PDFA);
-        dokumentVariant.setVariantFormat("ARKIV");
+        no.nav.melosys.domain.arkiv.DokumentVariant dokumentVariant = DokumentVariant.lagDokumentVariant("pdf".getBytes());
         hoveddokument.setDokumentVarianter(Collections.singletonList(dokumentVariant));
 
         OpprettJournalpost opprettJournalpost = new OpprettJournalpost();

@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Fullmektig;
@@ -60,9 +62,19 @@ public class AltinnSoeknadService {
             .medBehandlingstype(Behandlingstyper.SOEKNAD)
             .build();
 
-        Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
-        Behandling behandling = fagsak.hentAktivBehandling();
-        behandlingsgrunnlagService.opprettSøknadUtsendteArbeidstakereEøs(behandling.getId(), SoeknadMapper.lagSoeknad(søknad));
+        final Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
+        final Behandling behandling = fagsak.hentAktivBehandling();
+        String søknadXml;
+        try {
+            søknadXml = new XmlMapper().writeValueAsString(søknad);
+        } catch (JsonProcessingException e) {
+            throw new TekniskException(e);
+        }
+        behandlingsgrunnlagService.opprettSøknadUtsendteArbeidstakereEøs(
+            behandling.getId(),
+            søknadXml,
+            SoeknadMapper.lagSoeknad(søknad)
+        );
         avklarteVirksomheterService.lagreVirksomhetSomAvklartfakta(hentArbeidsgiverID(søknad), behandling.getId());
 
         return behandling;
