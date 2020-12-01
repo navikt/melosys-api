@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import no.nav.melosys.domain.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
@@ -42,6 +43,7 @@ public class MelosysInterntKodeverkTjeneste {
         Map<String, Object> kodeverdier = new HashMap<>();
         kodeverdier.put(Trygdedekninger.class.getSimpleName(), tilKodeDto(medlemskapsperiodeService.hentGyldigeTrygdedekninger()));
         kodeverdier.put(Vilkaar.class.getSimpleName(), tilKodeDto(Vilkaar.values()));
+        kodeverdier.put(InnvilgelsesResultat.class.getSimpleName(), tilKodeDto(InnvilgelsesResultat.values()));
         kodeverdier.put("begrunnelser", lagBegrunnelser());
         return ResponseEntity.ok(kodeverdier);
     }

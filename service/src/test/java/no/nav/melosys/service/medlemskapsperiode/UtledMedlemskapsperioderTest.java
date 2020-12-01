@@ -33,7 +33,7 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            new Medlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.FRIVILLIG, trygdedekning)
+            new Medlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, trygdedekning)
         );
     }
 
@@ -47,7 +47,7 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            new Medlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.FRIVILLIG, trygdedekning)
+            new Medlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, trygdedekning)
         );
     }
 
@@ -63,7 +63,7 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            new Medlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.FRIVILLIG, trygdedekning)
+            new Medlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.PLIKTIG, trygdedekning)
         );
     }
 
@@ -79,7 +79,7 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            new Medlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.FRIVILLIG, trygdedekning)
+            new Medlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, trygdedekning)
         );
     }
 
@@ -93,7 +93,7 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            new Medlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.FRIVILLIG, trygdedekning)
+            new Medlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, trygdedekning)
         );
     }
 
@@ -107,7 +107,7 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            new Medlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.FRIVILLIG, trygdedekning)
+            new Medlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.PLIKTIG, trygdedekning)
         );
     }
 
@@ -123,8 +123,8 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            new Medlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, bestemmelse, InnvilgelsesResultat.DELVIS_INNVILGET, Medlemskapstyper.FRIVILLIG, Trygdedekninger.PENSJONSDEL),
-            new Medlemskapsperiode(mottaksdato, søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.FRIVILLIG, trygdedekning)
+            new Medlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, bestemmelse, InnvilgelsesResultat.DELVIS_INNVILGET, Medlemskapstyper.PLIKTIG, Trygdedekninger.PENSJONSDEL),
+            new Medlemskapsperiode(mottaksdato, søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, trygdedekning)
         );
     }
 
@@ -138,8 +138,8 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            new Medlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, bestemmelse, InnvilgelsesResultat.DELVIS_INNVILGET, Medlemskapstyper.FRIVILLIG, Trygdedekninger.PENSJONSDEL),
-            new Medlemskapsperiode(mottaksdato, søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.FRIVILLIG, trygdedekning)
+            new Medlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, bestemmelse, InnvilgelsesResultat.DELVIS_INNVILGET, Medlemskapstyper.PLIKTIG, Trygdedekninger.PENSJONSDEL),
+            new Medlemskapsperiode(mottaksdato, søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, trygdedekning)
         );
     }
 
@@ -153,8 +153,8 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            new Medlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, bestemmelse, InnvilgelsesResultat.DELVIS_INNVILGET, Medlemskapstyper.FRIVILLIG, Trygdedekninger.PENSJONSDEL),
-            new Medlemskapsperiode(mottaksdato, søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.FRIVILLIG, trygdedekning)
+            new Medlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, bestemmelse, InnvilgelsesResultat.DELVIS_INNVILGET, Medlemskapstyper.PLIKTIG, Trygdedekninger.PENSJONSDEL),
+            new Medlemskapsperiode(mottaksdato, søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, trygdedekning)
         );
     }
 
@@ -168,7 +168,7 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            new Medlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.DELVIS_INNVILGET, Medlemskapstyper.FRIVILLIG, Trygdedekninger.PENSJONSDEL)
+            new Medlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.DELVIS_INNVILGET, Medlemskapstyper.PLIKTIG, Trygdedekninger.PENSJONSDEL)
         );
     }
 
@@ -184,8 +184,8 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            new Medlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, bestemmelse, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.FRIVILLIG, trygdedekning),
-            new Medlemskapsperiode(mottaksdato, søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.FRIVILLIG, trygdedekning)
+            new Medlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, bestemmelse, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.PLIKTIG, trygdedekning),
+            new Medlemskapsperiode(mottaksdato, søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, trygdedekning)
         );
     }
 
@@ -199,7 +199,7 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            new Medlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.FRIVILLIG, trygdedekning)
+            new Medlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.PLIKTIG, trygdedekning)
         );
     }
 
@@ -213,7 +213,7 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            new Medlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.FRIVILLIG, trygdedekning)
+            new Medlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.PLIKTIG, trygdedekning)
         );
     }
 }

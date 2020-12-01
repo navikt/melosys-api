@@ -14,7 +14,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import org.springframework.data.util.Pair;
 
 import static no.nav.melosys.domain.InnvilgelsesResultat.*;
-import static no.nav.melosys.domain.kodeverk.Medlemskapstyper.FRIVILLIG;
+import static no.nav.melosys.domain.kodeverk.Medlemskapstyper.PLIKTIG;
 import static no.nav.melosys.domain.kodeverk.Trygdedekninger.*;
 
 final class UtledMedlemskapsperioder {
@@ -71,7 +71,7 @@ final class UtledMedlemskapsperioder {
                                                  final String arbeidsland,
                                                  final InnvilgelsesResultat innvilgelsesResultat) {
         return new Medlemskapsperiode(
-            søknadsperiode.getFom(), søknadsperiode.getTom(), arbeidsland, bestemmelse, innvilgelsesResultat, FRIVILLIG, trygdedekning
+            søknadsperiode.getFom(), søknadsperiode.getTom(), arbeidsland, bestemmelse, innvilgelsesResultat, PLIKTIG, trygdedekning
         );
     }
 

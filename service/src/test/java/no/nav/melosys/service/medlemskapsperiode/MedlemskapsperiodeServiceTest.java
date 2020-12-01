@@ -1,15 +1,17 @@
 package no.nav.melosys.service.medlemskapsperiode;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Optional;
 
 import no.nav.melosys.domain.InnvilgelsesResultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
 import no.nav.melosys.repository.MedlemskapsperiodeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +32,8 @@ class MedlemskapsperiodeServiceTest {
 
     @Mock
     private MedlemskapsperiodeRepository medlemskapsperiodeRepository;
+    @Mock
+    private MedlemAvFolketrygdenRepository medlemAvFolketrygdenRepository;
 
     private MedlemskapsperiodeService medlemskapsperiodeService;
 
@@ -41,17 +45,19 @@ class MedlemskapsperiodeServiceTest {
 
     @BeforeEach
     void setup() {
-        medlemskapsperiodeService = new MedlemskapsperiodeService(medlemskapsperiodeRepository);
+        medlemskapsperiodeService = new MedlemskapsperiodeService(medlemskapsperiodeRepository, medlemAvFolketrygdenRepository);
     }
 
     @Test
     void hentMedlemskapsperioder() {
         medlemskapsperiodeService.hentMedlemskapsperioder(1L);
-        verify(medlemskapsperiodeRepository).findByBehandlingsresultatId(eq(1L));
+        verify(medlemAvFolketrygdenRepository).findByBehandlingsresultatId(eq(1L));
     }
 
     @Test
     void opprettMedlemskapsperiode_finnesIngenEksisterende_kasterException() {
+        when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID))
+            .thenReturn(Optional.of(lagMedlemAvFolketrygden()));
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> medlemskapsperiodeService.opprettMedlemskapsperiode(
                 behandlingsresultatID, LocalDate.now(), LocalDate.now().plusYears(1),
@@ -62,8 +68,8 @@ class MedlemskapsperiodeServiceTest {
     @Test
     void opprettMedlemskapsperiode_finnesEksisterende_verifiserFårSammeArbeidslandOgBestemmelse() throws FunksjonellException {
         final var eksisterende = lagMedlemskapsperiode();
-        when(medlemskapsperiodeRepository.findByBehandlingsresultatId(eq(behandlingsresultatID)))
-            .thenReturn(Collections.singleton(eksisterende));
+        when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID))
+            .thenReturn(Optional.of(lagMedlemAvFolketrygden(eksisterende)));
 
         medlemskapsperiodeService.opprettMedlemskapsperiode(behandlingsresultatID, LocalDate.now().minusYears(1), LocalDate.now(),
             InnvilgelsesResultat.AVSLAATT, Trygdedekninger.HELSEDEL);
@@ -79,8 +85,8 @@ class MedlemskapsperiodeServiceTest {
     @Test
     void oppdaterMedlemskapsperiode_medlemskapsperoideFinnes_oppdateres() throws FunksjonellException {
         final var medlemskapsperiode = lagMedlemskapsperiode();
-        when(medlemskapsperiodeRepository.findByBehandlingsresultatId(eq(behandlingsresultatID)))
-            .thenReturn(Collections.singleton(medlemskapsperiode));
+        when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID))
+            .thenReturn(Optional.of(lagMedlemAvFolketrygden(medlemskapsperiode)));
 
         LocalDate nå = LocalDate.now();
         medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID, nå, nå,
@@ -96,8 +102,8 @@ class MedlemskapsperiodeServiceTest {
     @Test
     void oppdaterMedlemskapsperiode_trygdedekningStøttesIkke_kasterException() {
         final var medlemskapsperiode = lagMedlemskapsperiode();
-        when(medlemskapsperiodeRepository.findByBehandlingsresultatId(eq(behandlingsresultatID)))
-            .thenReturn(Collections.singleton(medlemskapsperiode));
+        when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID))
+            .thenReturn(Optional.of(lagMedlemAvFolketrygden(medlemskapsperiode)));
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID, LocalDate.now(),
@@ -108,8 +114,8 @@ class MedlemskapsperiodeServiceTest {
     @Test
     void oppdaterMedlemskapsperiode_tomDatoErFørFomDato_kasterException() {
         final var medlemskapsperiode = lagMedlemskapsperiode();
-        when(medlemskapsperiodeRepository.findByBehandlingsresultatId(eq(behandlingsresultatID)))
-            .thenReturn(Collections.singleton(medlemskapsperiode));
+        when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID))
+            .thenReturn(Optional.of(lagMedlemAvFolketrygden(medlemskapsperiode)));
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID, LocalDate.now(),
@@ -119,8 +125,8 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     void oppdaterMedlemskapsperiode_utenTrygdedekning_oppdateres() {
-        when(medlemskapsperiodeRepository.findByBehandlingsresultatId(eq(behandlingsresultatID)))
-            .thenReturn(Collections.singleton(lagMedlemskapsperiode()));
+        when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID))
+            .thenReturn(Optional.of(lagMedlemAvFolketrygden(lagMedlemskapsperiode())));
 
         LocalDate nå = LocalDate.now();
         assertThatExceptionOfType(FunksjonellException.class)
@@ -131,16 +137,18 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     void oppdaterMedlemskapsperiode_finnerIkkeMedlemskapsperiode_kasterException() {
+        when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID))
+            .thenReturn(Optional.of(lagMedlemAvFolketrygden()));
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> medlemskapsperiodeService.oppdaterMedlemskapsperiode(0, 0, LocalDate.now(),
+            .isThrownBy(() -> medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingsresultatID, 0, LocalDate.now(),
                 LocalDate.now(), InnvilgelsesResultat.DELVIS_INNVILGET, Trygdedekninger.HELSE_OG_PENSJONSDEL))
             .withMessageContaining("har ingen");
     }
 
     @Test
     void slettMedlemskapsperiode_erEnesteMedlemskapsperiode_kasterException() {
-        when(medlemskapsperiodeRepository.findByBehandlingsresultatId(eq(behandlingsresultatID)))
-            .thenReturn(Collections.singletonList(lagMedlemskapsperiode()));
+        when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID))
+            .thenReturn(Optional.of(lagMedlemAvFolketrygden(lagMedlemskapsperiode())));
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> medlemskapsperiodeService.slettMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID))
@@ -149,6 +157,8 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     void slettMedlemskapsperiode_finnerIkkeMedlemskapsperiode_kasterException() {
+        when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID))
+            .thenReturn(Optional.of(lagMedlemAvFolketrygden()));
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> medlemskapsperiodeService.slettMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID))
             .withMessageContaining("ingen medlemskapsperiode med id");
@@ -159,11 +169,17 @@ class MedlemskapsperiodeServiceTest {
         var medlemskapsperiode1 = lagMedlemskapsperiode();
         var medlemskapsperiode2 = lagMedlemskapsperiode();
         medlemskapsperiode2.setId(123321L);
-        when(medlemskapsperiodeRepository.findByBehandlingsresultatId(behandlingsresultatID))
-            .thenReturn(List.of(lagMedlemskapsperiode(), lagMedlemskapsperiode()));
+        when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID))
+            .thenReturn(Optional.of(lagMedlemAvFolketrygden(medlemskapsperiode1, medlemskapsperiode2)));
 
         medlemskapsperiodeService.slettMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID);
         verify(medlemskapsperiodeRepository).delete(medlemskapsperiode1);
+    }
+
+    private MedlemAvFolketrygden lagMedlemAvFolketrygden(Medlemskapsperiode... medlemskapsperioder) {
+        MedlemAvFolketrygden medlemAvFolketrygden = new MedlemAvFolketrygden();
+        medlemAvFolketrygden.setMedlemskapsperioder(Arrays.asList(medlemskapsperioder));
+        return medlemAvFolketrygden;
     }
 
     private Medlemskapsperiode lagMedlemskapsperiode() {
@@ -173,7 +189,7 @@ class MedlemskapsperiodeServiceTest {
         medlemskapsperiode.setTom(LocalDate.now().plusYears(1));
         medlemskapsperiode.setBestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD);
         medlemskapsperiode.setTrygdedekning(Trygdedekninger.FULL_DEKNING_FTRL);
-        medlemskapsperiode.setMedlemskapstype(Medlemskapstyper.FRIVILLIG);
+        medlemskapsperiode.setMedlemskapstype(Medlemskapstyper.PLIKTIG);
         medlemskapsperiode.setArbeidsland("BR");
         return medlemskapsperiode;
     }
