@@ -78,7 +78,7 @@
         <oracle.version>18</oracle.version>
         <org.json.version>20180813</org.json.version>
         <oxmlparserv2.version>11.2.0.1.nojaxpservice</oxmlparserv2.version>
-        <easy-random.version>4.0.0</easy-random.version>
+        <easy-random.version>5.0.0</easy-random.version>
         <restFixture.version>4.4</restFixture.version>
         <shedlock.version>4.15.0</shedlock.version>
         <slf4j.version>1.7.25</slf4j.version>
