@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
@@ -75,6 +76,9 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<BehandlingsresultatBegrunnelse> behandlingsresultatBegrunnelser = new HashSet<>(1);
+
+    @OneToOne(mappedBy = "medlem_av_folketrygden")
+    private MedlemAvFolketrygden medlemAvFolketrygden;
 
     public Long getId() {
         return id;
@@ -202,6 +206,14 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public void setKontrollresultater(Set<Kontrollresultat> kontrollresultater) {
         this.kontrollresultater = kontrollresultater;
+    }
+
+    public MedlemAvFolketrygden getMedlemAvFolketrygden() {
+        return medlemAvFolketrygden;
+    }
+
+    public void setMedlemAvFolketrygden(MedlemAvFolketrygden medlemAvFolketrygden) {
+        this.medlemAvFolketrygden = medlemAvFolketrygden;
     }
 
     @Override

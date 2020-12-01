@@ -26,7 +26,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 @Protected
 @RestController
-@RequestMapping("/behandlinger/{behandlingID}/medlemskapsperioder")
 @Api(tags = {"medlemskapsperioder"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class MedlemskapsperiodeTjeneste {
