@@ -1,7 +1,6 @@
 package no.nav.melosys.service.medlemskapsperiode;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -10,11 +9,13 @@ import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode;
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
 import no.nav.melosys.repository.MedlemskapsperiodeRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +26,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -35,6 +37,8 @@ class OpprettMedlemskapsperiodeServiceTest {
     @Mock
     private MedlemskapsperiodeRepository medlemskapsperiodeRepository;
     @Mock
+    private MedlemAvFolketrygdenRepository medlemAvFolketrygdenRepository;
+    @Mock
     private BehandlingsresultatService behandlingsresultatService;
 
     private OpprettMedlemskapsperiodeService opprettMedlemskapsperiodeService;
@@ -43,7 +47,7 @@ class OpprettMedlemskapsperiodeServiceTest {
 
     @BeforeEach
     public void setup() {
-        opprettMedlemskapsperiodeService = new OpprettMedlemskapsperiodeService(medlemskapsperiodeRepository, behandlingsresultatService);
+        opprettMedlemskapsperiodeService = new OpprettMedlemskapsperiodeService(medlemAvFolketrygdenRepository, behandlingsresultatService);
     }
 
     @Test
@@ -51,7 +55,7 @@ class OpprettMedlemskapsperiodeServiceTest {
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
         behandlingsresultat.getVilkaarsresultater().add(lagOppfyltVilkår(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID));
         when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingsresultatID))).thenReturn(behandlingsresultat);
-        when(medlemskapsperiodeRepository.saveAll(anyCollection())).thenAnswer(a -> new ArrayList<>(a.getArgument(0)));
+        when(medlemAvFolketrygdenRepository.save(any(MedlemAvFolketrygden.class))).thenAnswer(returnsFirstArg());
         assertThat(
             opprettMedlemskapsperiodeService.utledMedlemskapsperioderFraSøknad(behandlingsresultatID, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A)
         ).isNotEmpty();

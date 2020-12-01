@@ -8,13 +8,14 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.repository.MedlemskapsperiodeRepository;
+import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,11 +28,11 @@ import static no.nav.melosys.domain.util.KodeverkUtils.tilStringCollection;
 
 @Service
 public class OpprettMedlemskapsperiodeService {
-    private final MedlemskapsperiodeRepository medlemskapsperiodeRepository;
+    private final MedlemAvFolketrygdenRepository medlemAvFolketrygdenRepository;
     private final BehandlingsresultatService behandlingsresultatService;
 
-    public OpprettMedlemskapsperiodeService(MedlemskapsperiodeRepository medlemskapsperiodeRepository, BehandlingsresultatService behandlingsresultatService) {
-        this.medlemskapsperiodeRepository = medlemskapsperiodeRepository;
+    public OpprettMedlemskapsperiodeService(MedlemAvFolketrygdenRepository medlemAvFolketrygdenRepository, BehandlingsresultatService behandlingsresultatService) {
+        this.medlemAvFolketrygdenRepository = medlemAvFolketrygdenRepository;
         this.behandlingsresultatService = behandlingsresultatService;
     }
 
@@ -44,7 +45,8 @@ public class OpprettMedlemskapsperiodeService {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         validerSakstype(behandlingsresultat.getBehandling().getFagsak());
         validerVilkår(behandlingsresultat, bestemmelse);
-        medlemskapsperiodeRepository.deleteByBehandlingsresultat(behandlingsresultat);
+        var medlemAvFolketrygden = hentEllerOpprettMedlemAvFolketrygden(behandlingsresultat);
+        medlemAvFolketrygden.getMedlemskapsperioder().clear();
 
         Behandling behandling = behandlingsresultat.getBehandling();
         Behandlingsgrunnlag behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
@@ -60,8 +62,19 @@ public class OpprettMedlemskapsperiodeService {
             )
         );
 
-        medlemskapsperioder.forEach(m -> m.setBehandlingsresultat(behandlingsresultat));
-        return medlemskapsperiodeRepository.saveAll(medlemskapsperioder);
+        medlemAvFolketrygden.getMedlemskapsperioder().addAll(medlemskapsperioder);
+        medlemskapsperioder.forEach(m -> m.setMedlemAvFolketrygden(medlemAvFolketrygden));
+        return medlemAvFolketrygdenRepository.save(medlemAvFolketrygden).getMedlemskapsperioder();
+    }
+
+    private MedlemAvFolketrygden hentEllerOpprettMedlemAvFolketrygden(Behandlingsresultat behandlingsresultat) {
+        if (behandlingsresultat.getMedlemAvFolketrygden() != null) {
+            return behandlingsresultat.getMedlemAvFolketrygden();
+        }
+
+        var medlemAvFolketrygden = new MedlemAvFolketrygden();
+        medlemAvFolketrygden.setBehandlingsresultat(behandlingsresultat);
+        return medlemAvFolketrygdenRepository.save(medlemAvFolketrygden);
     }
 
     private void validerVilkår(Behandlingsresultat behandlingsresultat, Folketrygdloven_kap2_bestemmelser bestemmelse) throws FunksjonellException {
