@@ -1,7 +1,9 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.arkiv.JournalpostBestilling;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -51,9 +53,19 @@ public class OpprettJournalforBrev implements StegBehandler {
         byte[] pdf = dokgenService.produserBrev(produserbartDokument, behandling);
         log.info("Produserbartdokument {} for behandling {} produsert", produserbartDokument, behandling.getId());
 
+        PersonDokument personDokument = behandling.hentPersonDokument();
+
+        JournalpostBestilling bestilling = new JournalpostBestilling(
+            produserbartDokument.getBeskrivelse(),
+            personDokument.fnr,
+            personDokument.sammensattNavn,
+            personDokument.fnr,
+            behandling.getFagsak().getGsakSaksnummer().toString(),
+            pdf
+        );
+
         String journalpostId = joarkFasade.opprettJournalpost(
-            OpprettJournalpost.lagJournalpostForBrev(produserbartDokument.getBeskrivelse(),
-                behandling.hentPersonDokument().fnr, pdf), true);
+            OpprettJournalpost.lagJournalpostForBrev(bestilling), true);
 
         log.info("Brev for behandling {} er journalført, journalpostId {}", behandling.getId(), journalpostId);
         prosessinstans.setData(DISTRIBUERBAR_JOURNALPOST_ID, journalpostId);

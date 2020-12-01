@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -70,6 +71,7 @@ class OpprettJournalforBrevTest {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setSaksopplysninger(singleton(lagPersonopplysning()));
+        behandling.setFagsak(lagFagsak());
         return behandling;
     }
 
@@ -80,6 +82,12 @@ class OpprettJournalforBrevTest {
         personDokument.fnr = "99887766554";
         saksopplysning.setDokument(personDokument);
         return saksopplysning;
+    }
+
+    private Fagsak lagFagsak() {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setGsakSaksnummer(123L);
+        return fagsak;
     }
 
 }
