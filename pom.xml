@@ -51,7 +51,7 @@
         <doksys.dokumentproduksjon.version>3.3.4</doksys.dokumentproduksjon.version>
         <joark.journalfoerinngaaende.version>0.0.21</joark.journalfoerinngaaende.version>
         <sakogbehandling.version>1.0.0-alpha011</sakogbehandling.version>
-        <token-support.version>1.3.0</token-support.version>
+        <token-support.version>1.3.1</token-support.version>
         <utbetaling.version>1.1.3</utbetaling.version>
 
         <!-- Versjoner av eksterne biblioteker -->
@@ -72,18 +72,17 @@
         <json-smart.version>2.3</json-smart.version>
         <jms-api.version>2.0.1</jms-api.version>
         <junit.version>4.12</junit.version>
-        <micrometer-jvm-extras.version>0.1.4</micrometer-jvm-extras.version>
-        <mockrunner.version>2.0.1</mockrunner.version>
+        <micrometer-jvm-extras.version>0.2.0</micrometer-jvm-extras.version>
         <ojdbc.version>18.3.0.0</ojdbc.version>
         <oracle.version>18</oracle.version>
         <org.json.version>20180813</org.json.version>
         <oxmlparserv2.version>11.2.0.1.nojaxpservice</oxmlparserv2.version>
-        <easy-random.version>4.0.0</easy-random.version>
+        <easy-random.version>5.0.0</easy-random.version>
         <restFixture.version>4.4</restFixture.version>
         <shedlock.version>4.15.0</shedlock.version>
         <slf4j.version>1.7.25</slf4j.version>
         <spring-boot.version>2.2.0.RELEASE</spring-boot.version>
-        <springfox.version>2.9.2</springfox.version>
+        <springfox.version>3.0.0</springfox.version>
         <swagger.version>1.5.21</swagger.version>
         <unleash.version>3.3.3</unleash.version>
 
@@ -227,30 +226,9 @@
                 <version>${micrometer-jvm-extras.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-jaxrs</artifactId>
-                <version>${swagger.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.ws.rs</groupId>
-                        <artifactId>jsr311-api</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
                 <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger2</artifactId>
+                <artifactId>springfox-boot-starter</artifactId>
                 <version>${springfox.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger-ui</artifactId>
-                <version>${springfox.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-annotations</artifactId>
-                <version>${swagger.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.jms</groupId>
@@ -527,11 +505,6 @@
                 <groupId>com.github.everit-org.json-schema</groupId>
                 <artifactId>org.everit.json.schema</artifactId>
                 <version>${everit.jsonschema.validator.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.mockrunner</groupId>
-                <artifactId>mockrunner-jms</artifactId>
-                <version>${mockrunner.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jeasy</groupId>
