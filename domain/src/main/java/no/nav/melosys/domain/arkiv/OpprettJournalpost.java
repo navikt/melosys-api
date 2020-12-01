@@ -103,6 +103,8 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setJournalførendeEnhet(MEDLEMSKAP_OG_AVGIFT);
         opprettJournalpost.setTema(MEDLEMSKAP);
         opprettJournalpost.setBrukerId(brukerFnr);
+        opprettJournalpost.setKorrespondansepartId(brukerFnr);
+        opprettJournalpost.setKorrespondansepartIdType(FNR);
         opprettJournalpost.setInnhold(opprettJournalpost.getHoveddokument().getTittel());
 
         return opprettJournalpost;
