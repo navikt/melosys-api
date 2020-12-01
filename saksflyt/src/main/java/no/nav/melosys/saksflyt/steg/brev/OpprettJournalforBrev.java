@@ -53,7 +53,7 @@ public class OpprettJournalforBrev implements StegBehandler {
 
         String journalpostId = joarkFasade.opprettJournalpost(
             OpprettJournalpost.lagJournalpostForBrev(produserbartDokument.getBeskrivelse(),
-                behandling.hentPersonDokument().fnr, pdf), true);
+                behandling.hentPersonDokument().fnr, behandling.hentPersonDokument().sammensattNavn, pdf), true);
 
         log.info("Brev for behandling {} er journalført, journalpostId {}", behandling.getId(), journalpostId);
         prosessinstans.setData(DISTRIBUERBAR_JOURNALPOST_ID, journalpostId);
