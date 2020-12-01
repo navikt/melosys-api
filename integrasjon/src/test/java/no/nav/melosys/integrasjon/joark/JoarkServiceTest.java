@@ -17,14 +17,10 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
-import no.nav.melosys.integrasjon.joark.inngaaendejournal.InngaaendeJournalConsumer;
 import no.nav.melosys.integrasjon.joark.journal.JournalConsumer;
 import no.nav.melosys.integrasjon.joark.journalfoerinngaaende.JournalfoerInngaaendeConsumer;
 import no.nav.melosys.integrasjon.joark.journalpostapi.JournalpostapiConsumer;
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.*;
-import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.DokumentInformasjonMangler;
-import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.Journalfoeringsbehov;
-import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.JournalpostMangler;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.Journalposttyper;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.ArkivSak;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.DetaljertDokumentinformasjon;
@@ -49,8 +45,6 @@ class JoarkServiceTest {
     private JoarkService joarkService;
 
     @Mock
-    private InngaaendeJournalConsumer inngaaendeJournalConsumer;
-    @Mock
     private JournalConsumer journalConsumer;
     @Mock
     private JournalfoerInngaaendeConsumer journalfoerInngaaendeConsumer;
@@ -65,7 +59,7 @@ class JoarkServiceTest {
 
     @BeforeEach
     public void setUp() {
-        this.joarkService = new JoarkService(inngaaendeJournalConsumer, journalConsumer, journalfoerInngaaendeConsumer, journalpostapiConsumer);
+        this.joarkService = new JoarkService(journalConsumer, journalfoerInngaaendeConsumer, journalpostapiConsumer);
     }
 
     @Test
@@ -111,35 +105,6 @@ class JoarkServiceTest {
     }
 
 
-    @Test
-    void konverterTilJournalfoeringmangler() {
-        JournalpostMangler input = new JournalpostMangler();
-        input.setArkivSak(Journalfoeringsbehov.MANGLER);
-        input.setAvsenderId(Journalfoeringsbehov.MANGLER_IKKE);
-        input.setAvsenderNavn(Journalfoeringsbehov.MANGLER);
-        input.setBruker(Journalfoeringsbehov.MANGLER);
-        input.setForsendelseInnsendt(Journalfoeringsbehov.MANGLER_IKKE);
-        DokumentInformasjonMangler dokumentInformasjonMangler = new DokumentInformasjonMangler();
-        dokumentInformasjonMangler.setDokumentkategori(Journalfoeringsbehov.MANGLER);
-        dokumentInformasjonMangler.setTittel(Journalfoeringsbehov.MANGLER_IKKE);
-        input.setHoveddokument(dokumentInformasjonMangler);
-        input.setInnhold(Journalfoeringsbehov.MANGLER);
-        input.setTema(Journalfoeringsbehov.MANGLER);
-
-        List<JournalfoeringMangel> journalfoeringMangler = joarkService.konverterTilJournalfoeringmangler(input);
-
-        assertThat(journalfoeringMangler).isNotNull()
-            .isNotEmpty()
-            .contains(JournalfoeringMangel.ARKIVSAK)
-            .doesNotContain(JournalfoeringMangel.AVSENDERID)
-            .contains(JournalfoeringMangel.AVSENDERNAVN)
-            .contains(JournalfoeringMangel.BRUKER)
-            .doesNotContain(JournalfoeringMangel.FORSENDELSEINNSENDT)
-            .contains(JournalfoeringMangel.HOVEDDOKUMENT_KATEGORI)
-            .doesNotContain(JournalfoeringMangel.HOVEDDOKUMENT_TITTEL)
-            .contains(JournalfoeringMangel.INNHOLD)
-            .contains(JournalfoeringMangel.TEMA);
-    }
 
     @Test
     void oppdaterJournalpost_påkrevdeVerdierUtfylt() throws Exception {
@@ -154,7 +119,7 @@ class JoarkServiceTest {
             .medHovedDokumentID(hovedDokumentID).medBrukerID("12345")
             .medAvsenderID("12").medAvsenderNavn("321").medAvsenderType(Avsendertyper.ORGANISASJON)
             .medTittel(tittel).medFysiskeVedlegg(vedleggMedTitler)
-            .medLogiskeVedleggTitler(Arrays.asList("dok1", "dok2")).medDokumentkategori(true).build();
+            .medLogiskeVedleggTitler(Arrays.asList("dok1", "dok2")).build();
 
         GetJournalpostResponse eksisterendeJournalpost = new GetJournalpostResponse();
         eksisterendeJournalpost.getDokumentListe().add(
@@ -206,7 +171,7 @@ class JoarkServiceTest {
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medArkivSakID(1L)
             .medBrukerID("12345").medHovedDokumentID(hovedDokumentID)
             .medAvsenderID("12").medAvsenderNavn("321").medAvsenderType(Avsendertyper.PERSON).medTittel(tittel).medFysiskeVedlegg(null)
-            .medLogiskeVedleggTitler(null).medDokumentkategori(true).build();
+            .medLogiskeVedleggTitler(null).build();
 
         when(journalfoerInngaaendeConsumer.hentJournalpost(anyString())).thenReturn(new GetJournalpostResponse());
         joarkService.oppdaterJournalpost("123", journalpostOppdatering, false);

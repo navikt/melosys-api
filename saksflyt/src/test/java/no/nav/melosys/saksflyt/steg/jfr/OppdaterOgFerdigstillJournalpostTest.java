@@ -1,11 +1,7 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.arkiv.JournalfoeringMangel;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
@@ -52,28 +48,7 @@ class OppdaterOgFerdigstillJournalpostTest {
         prosessinstans.getBehandling().getFagsak().setGsakSaksnummer(123321L);
         agent.utfør(prosessinstans);
 
-        verify(joarkFasade).utledJournalfoeringsbehov(any());
         verify(joarkFasade).oppdaterJournalpost(any(), oppdateringArgumentCaptor.capture(), eq(true));
-        assertThat(oppdateringArgumentCaptor.getValue().isMedDokumentkategori()).isFalse();
-    }
-
-    @Test
-    void utfoerSteg_oppdaterDokumentKategori() throws MelosysException {
-        List<JournalfoeringMangel> mangler = new ArrayList<>();
-        mangler.add(JournalfoeringMangel.HOVEDDOKUMENT_KATEGORI);
-        when(joarkFasade.utledJournalfoeringsbehov(any())).thenReturn(mangler);
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.JFR_NY_SAK);
-        prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, "navn");
-        prosessinstans.setBehandling(new Behandling());
-        prosessinstans.getBehandling().setFagsak(new Fagsak());
-        prosessinstans.getBehandling().getFagsak().setGsakSaksnummer(123321L);
-
-        agent.utfør(prosessinstans);
-
-        verify(joarkFasade).utledJournalfoeringsbehov(any());
-        verify(joarkFasade).oppdaterJournalpost(any(), oppdateringArgumentCaptor.capture(), eq(true));
-        assertThat(oppdateringArgumentCaptor.getValue().isMedDokumentkategori()).isTrue();
     }
 
     @Test
@@ -90,7 +65,6 @@ class OppdaterOgFerdigstillJournalpostTest {
         prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, "navn");
         agent.utfør(prosessinstans);
 
-        verify(joarkFasade).utledJournalfoeringsbehov(any());
         verify(joarkFasade).oppdaterJournalpost(any(), oppdateringArgumentCaptor.capture(), eq(true));
         assertThat(oppdateringArgumentCaptor.getValue().getArkivSakID()).isEqualTo(gsakSaksnummer);
     }

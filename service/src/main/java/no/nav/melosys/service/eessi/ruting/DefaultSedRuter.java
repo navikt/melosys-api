@@ -53,13 +53,13 @@ public class DefaultSedRuter implements SedRuter {
     public void rutSedTilBehandling(Prosessinstans prosessinstans, Long arkivsakID) throws MelosysException {
         final MelosysEessiMelding eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
         SedType sedType = SedType.valueOf(eessiMelding.getSedType());
+        Optional<Fagsak> fagsak = arkivsakID != null ? fagsakService.finnFagsakFraArkivsakID(arkivsakID) : Optional.empty();
 
-        if (arkivsakID == null) {
+        if (fagsak.isEmpty()) {
             log.info("Oppretter oppgave sed {} i rinasak {}", eessiMelding.getSedId(), eessiMelding.getRinaSaksnummer());
             oppgaveService.opprettJournalføringsoppgave(eessiMelding.getJournalpostId(), prosessinstans.hentAktørIDFraDataEllerSED());
         } else {
-            Fagsak fagsak = fagsakService.hentFagsakFraArkivsakID(arkivsakID);
-            Behandling behandling = fagsak.hentSistAktiveBehandling();
+            Behandling behandling = fagsak.get().hentSistAktiveBehandling();
 
             if (behandling.erAktiv()) {
                 behandlingService.oppdaterStatus(behandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);

@@ -17,8 +17,6 @@ public final class JournalpostOppdatering {
     private final String tittel;
     private final Map<String, String> fysiskeVedlegg;
     private final List<String> logiskeVedleggTitler;
-    // Om dokumentkategori skal oppdatteres med standardverdi "IS", Ikke tolkbart skjema
-    private final boolean medDokumentkategori;
     private final LocalDate mottattDato;
 
     public static class Builder {
@@ -33,7 +31,6 @@ public final class JournalpostOppdatering {
         private LocalDate mottattDato;
         private Map<String, String> fysiskeVedlegg = new HashMap<>();
         private List<String> logiskeVedleggTitler = new ArrayList<>();
-        private boolean medDokumentkategori;
 
         public Builder medArkivSakID(Long arkivSakID) {
             this.arkivSakID = arkivSakID;
@@ -94,11 +91,6 @@ public final class JournalpostOppdatering {
             return this;
         }
 
-        public Builder medDokumentkategori(boolean medDokumentkategori) {
-            this.medDokumentkategori = medDokumentkategori;
-            return this;
-        }
-
         public JournalpostOppdatering build() {
             return new JournalpostOppdatering(this);
         }
@@ -114,7 +106,6 @@ public final class JournalpostOppdatering {
         this.tittel = builder.tittel;
         this.fysiskeVedlegg = builder.fysiskeVedlegg;
         this.logiskeVedleggTitler = builder.logiskeVedleggTitler;
-        this.medDokumentkategori = builder.medDokumentkategori;
         this.mottattDato = builder.mottattDato;
         this.avsenderLand = builder.avsenderLand;
     }
@@ -174,17 +165,12 @@ public final class JournalpostOppdatering {
         return !CollectionUtils.isEmpty(logiskeVedleggTitler);
     }
 
-    public boolean isMedDokumentkategori() {
-        return medDokumentkategori;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof JournalpostOppdatering)) return false;
         JournalpostOppdatering that = (JournalpostOppdatering) o;
-        return isMedDokumentkategori() == that.isMedDokumentkategori() &&
-            Objects.equals(getArkivSakID(), that.getArkivSakID()) &&
+        return Objects.equals(getArkivSakID(), that.getArkivSakID()) &&
             Objects.equals(getHovedDokumentID(), that.getHovedDokumentID()) &&
             Objects.equals(getBrukerID(), that.getBrukerID()) &&
             Objects.equals(getAvsenderID(), that.getAvsenderID()) &&
@@ -198,6 +184,6 @@ public final class JournalpostOppdatering {
     @Override
     public int hashCode() {
         return Objects.hash(getArkivSakID(), getHovedDokumentID(), getBrukerID(), getAvsenderID(), getAvsenderNavn(),
-            getAvsenderType(), getTittel(), getFysiskeVedlegg(), getLogiskeVedleggTitler(), isMedDokumentkategori());
+            getAvsenderType(), getTittel(), getFysiskeVedlegg(), getLogiskeVedleggTitler());
     }
 }
