@@ -73,7 +73,6 @@
         <jms-api.version>2.0.1</jms-api.version>
         <junit.version>4.12</junit.version>
         <micrometer-jvm-extras.version>0.1.4</micrometer-jvm-extras.version>
-        <mockrunner.version>2.0.1</mockrunner.version>
         <ojdbc.version>18.3.0.0</ojdbc.version>
         <oracle.version>18</oracle.version>
         <org.json.version>20180813</org.json.version>
@@ -506,11 +505,6 @@
                 <groupId>com.github.everit-org.json-schema</groupId>
                 <artifactId>org.everit.json.schema</artifactId>
                 <version>${everit.jsonschema.validator.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.mockrunner</groupId>
-                <artifactId>mockrunner-jms</artifactId>
-                <version>${mockrunner.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jeasy</groupId>
