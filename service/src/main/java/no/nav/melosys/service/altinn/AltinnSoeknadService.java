@@ -15,7 +15,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.msm.AltinnDokument;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.altinn.SoknadMottakConsumer;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -50,7 +49,7 @@ public class AltinnSoeknadService {
     }
 
     public Behandling opprettFagsakOgBehandlingFraAltinnSøknad(String søknadReferanse) throws FunksjonellException, TekniskException {
-        MedlemskapArbeidEOSM søknad = soknadMottakConsumer.hentSøknad(søknadReferanse);
+        final MedlemskapArbeidEOSM søknad = soknadMottakConsumer.hentSøknad(søknadReferanse);
 
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medAktørID(hentAktørID(søknad))
@@ -92,9 +91,9 @@ public class AltinnSoeknadService {
         return soknadMottakConsumer.hentDokumenter(søknadReferanse);
     }
 
-    private String hentAktørID(MedlemskapArbeidEOSM søknad) throws IkkeFunnetException {
-        if (søknad.getInnhold().getArbeidstaker().getFoedselsnummer() == null) {
-            return null;
+    private String hentAktørID(MedlemskapArbeidEOSM søknad) throws FunksjonellException {
+        if (StringUtils.isBlank(søknad.getInnhold().getArbeidstaker().getFoedselsnummer())) {
+            throw new FunksjonellException("Søknader fra Altinn må inneholde fnr.");
         }
         return tpsFasade.hentAktørIdForIdent(søknad.getInnhold().getArbeidstaker().getFoedselsnummer());
     }
