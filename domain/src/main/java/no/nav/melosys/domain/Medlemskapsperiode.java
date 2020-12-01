@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 import javax.persistence.*;
 
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
@@ -16,8 +17,8 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
     private Long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "beh_resultat_id", nullable = false, updatable = false)
-    private Behandlingsresultat behandlingsresultat;
+    @JoinColumn(name = "medlem_av_folketrygden_id", nullable = false, updatable = false)
+    private MedlemAvFolketrygden medlemAvFolketrygden;
 
     @Column(name = "fom_dato", nullable = false)
     private LocalDate fom;
@@ -47,6 +48,25 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
     @Column(name = "medlperiode_id")
     private Long medlPeriodeID;
 
+    public Medlemskapsperiode() {
+    }
+
+    public Medlemskapsperiode(LocalDate fom,
+                              LocalDate tom,
+                              String arbeidsland,
+                              Folketrygdloven_kap2_bestemmelser bestemmelse,
+                              InnvilgelsesResultat innvilgelsesresultat,
+                              Medlemskapstyper medlemskapstype,
+                              Trygdedekninger trygdedekning) {
+        this.fom = fom;
+        this.tom = tom;
+        this.arbeidsland = arbeidsland;
+        this.bestemmelse = bestemmelse;
+        this.innvilgelsesresultat = innvilgelsesresultat;
+        this.medlemskapstype = medlemskapstype;
+        this.trygdedekning = trygdedekning;
+    }
+
     public Long getId() {
         return id;
     }
@@ -55,12 +75,12 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
         this.id = id;
     }
 
-    public Behandlingsresultat getBehandlingsresultat() {
-        return behandlingsresultat;
+    public MedlemAvFolketrygden getMedlemAvFolketrygden() {
+        return medlemAvFolketrygden;
     }
 
-    public void setBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
-        this.behandlingsresultat = behandlingsresultat;
+    public void setMedlemAvFolketrygden(MedlemAvFolketrygden medlemAvFolketrygden) {
+        this.medlemAvFolketrygden = medlemAvFolketrygden;
     }
 
     public LocalDate getFom() {
@@ -133,7 +153,7 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
         if (o == null || getClass() != o.getClass()) return false;
         Medlemskapsperiode that = (Medlemskapsperiode) o;
         return Objects.equals(id, that.id) &&
-            Objects.equals(behandlingsresultat, that.behandlingsresultat) &&
+            Objects.equals(medlemAvFolketrygden, that.medlemAvFolketrygden) &&
             Objects.equals(fom, that.fom) &&
             Objects.equals(tom, that.tom) &&
             Objects.equals(arbeidsland, that.arbeidsland) &&
@@ -146,6 +166,22 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, behandlingsresultat, fom, tom, arbeidsland, bestemmelse, innvilgelsesresultat, medlemskapstype, trygdedekning, medlPeriodeID);
+        return Objects.hash(id, medlemAvFolketrygden, fom, tom, arbeidsland, bestemmelse, innvilgelsesresultat, medlemskapstype, trygdedekning, medlPeriodeID);
+    }
+
+    @Override
+    public String toString() {
+        return "Medlemskapsperiode{" +
+            "id=" + id +
+            ", medlemAvFolketrygden=" + medlemAvFolketrygden +
+            ", fom=" + fom +
+            ", tom=" + tom +
+            ", arbeidsland='" + arbeidsland + '\'' +
+            ", bestemmelse=" + bestemmelse +
+            ", innvilgelsesresultat=" + innvilgelsesresultat +
+            ", medlemskapstype=" + medlemskapstype +
+            ", trygdedekning=" + trygdedekning +
+            ", medlPeriodeID=" + medlPeriodeID +
+            '}';
     }
 }
