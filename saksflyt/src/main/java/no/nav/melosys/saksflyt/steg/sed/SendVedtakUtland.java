@@ -20,11 +20,13 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.SedSomBrevService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.hendelser.A1BestiltHendelse;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
@@ -39,18 +41,22 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     private final BrevBestiller brevBestiller;
     private final SedSomBrevService sedSomBrevService;
     private final UtpekingService utpekingService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
     public SendVedtakUtland(@Qualifier("system") EessiService eessiService,
                             BehandlingService behandlingService,
                             BehandlingsresultatService behandlingsresultatService,
                             BrevBestiller brevBestiller,
-                            SedSomBrevService sedSomBrevService, UtpekingService utpekingService) {
+                            SedSomBrevService sedSomBrevService,
+                            UtpekingService utpekingService,
+                            ApplicationEventPublisher applicationEventPublisher) {
         super(eessiService, behandlingsresultatService);
         this.behandlingService = behandlingService;
         this.brevBestiller = brevBestiller;
         this.sedSomBrevService = sedSomBrevService;
         this.utpekingService = utpekingService;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Override
@@ -102,6 +108,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             prosessinstans.setData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, utpektLand);
         } else {
             brevBestiller.bestill(lagBrevBestilling(prosessinstans));
+            applicationEventPublisher.publishEvent(new A1BestiltHendelse(this, behandling.getId()));
         }
     }
 

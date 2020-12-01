@@ -29,7 +29,7 @@ public enum ProsessType implements Kodeverk {
     REGISTRERING_UNNTAK_NY_SAK("REGISTRERING_UNNTAK_NY_SAK", "Registrering av unntak - ny sak"),
     REGISTRERING_UNNTAK_NY_BEHANDLING("REGISTRERING_UNNTAK_NY_BEHANDLING", "Registrering av unntak - ny behandling"),
     UTPEKING_AVVIS("UTPEKING_AVVIS", "Avviser utpeking mottatt i en A003"),
-    VIDERESEND_SOKNAD("VIDERESEND_SOKNAD", "Videresend søknad");
+    VIDERESEND_SOKNAD("VIDERESEND_SOKNAD", "Videresend søknad"), FEILET_HENDELSE("FEILET_HENDELSE", "Intern hendelse i melosys som har feilet");
 
     private String kode;
     private String beskrivelse;

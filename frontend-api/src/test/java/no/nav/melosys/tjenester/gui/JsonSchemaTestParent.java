@@ -88,7 +88,7 @@ public class JsonSchemaTestParent {
         jsonSchemaValidator(objectMapper).valider(o, hentSchemaStream(schemaNavn));
     }
 
-    protected <T> void validerArray(Collection<T> liste, String schemaNavn) throws IOException, TekniskException {
+    protected <T> void validerArray(Collection<T> liste, String schemaNavn) throws IOException {
         String json = objectMapper().writeValueAsString(liste);
         valider(new JSONArray(json), schemaNavn);
     }

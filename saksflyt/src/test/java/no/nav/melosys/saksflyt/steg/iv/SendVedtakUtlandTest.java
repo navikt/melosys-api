@@ -24,6 +24,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.SedSomBrevService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.hendelser.A1BestiltHendelse;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -50,6 +52,8 @@ class SendVedtakUtlandTest {
     private SedSomBrevService sedSomBrevService;
     @Mock
     private UtpekingService utpekingService;
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
 
     private SendVedtakUtland sendVedtakUtland;
 
@@ -81,7 +85,7 @@ class SendVedtakUtlandTest {
         behandlingsresultat.setBehandling(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingService, behandlingsresultatService, brevBestiller, sedSomBrevService, utpekingService);
+        sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingService, behandlingsresultatService, brevBestiller, sedSomBrevService, utpekingService, applicationEventPublisher);
     }
 
     @Test
@@ -157,5 +161,13 @@ class SendVedtakUtlandTest {
         sendVedtakUtland.utfør(prosessinstans);
 
         verify(eessiService).sendGodkjenningArbeidFlereLand(eq(behandling.getId()), eq("Hei"));
+    }
+
+    @Test
+    void utfør_sendA1_forventHendelse() throws MelosysException {
+        sendVedtakUtland.utfør(prosessinstans);
+
+        verify(brevBestiller).bestill(any(Brevbestilling.class));
+        verify(applicationEventPublisher).publishEvent(any(A1BestiltHendelse.class));
     }
 }

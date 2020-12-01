@@ -11,6 +11,8 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.hendelser.A1BestiltHendelse;
+import no.nav.melosys.service.hendelser.FeiletHendelse;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1Producer;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.A1TypeUtstedelse;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse;
@@ -19,6 +21,8 @@ import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -29,15 +33,31 @@ public class UtstedtA1Service {
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final LandvelgerService landvelgerService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
     public UtstedtA1Service(UtstedtA1Producer utstedtA1Producer,
                             BehandlingService behandlingService,
-                            BehandlingsresultatService behandlingsresultatService, LandvelgerService landvelgerService) {
+                            BehandlingsresultatService behandlingsresultatService,
+                            LandvelgerService landvelgerService,
+                            ApplicationEventPublisher applicationEventPublisher) {
         this.utstedtA1Producer = utstedtA1Producer;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.landvelgerService = landvelgerService;
+        this.applicationEventPublisher = applicationEventPublisher;
+    }
+
+    @EventListener
+    @SuppressWarnings("unused")
+    public void håndterA1Bestilt(A1BestiltHendelse a1BestiltHendelse) {
+        try {
+            log.info("Mottatt hendelse om bestilt A1");
+            sendMeldingOmUtstedtA1(a1BestiltHendelse.getBehandlingID());
+        } catch (TekniskException | FunksjonellException e) {
+            FeiletHendelse feiletHendelse = new FeiletHendelse(this, e, a1BestiltHendelse);
+            applicationEventPublisher.publishEvent(feiletHendelse);
+        }
     }
 
     public UtstedtA1Melding sendMeldingOmUtstedtA1(Long behandlingID) throws TekniskException, FunksjonellException {
