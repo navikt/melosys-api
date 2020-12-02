@@ -5,6 +5,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,13 +32,13 @@ class OpprettSoeknadTest {
     }
 
     @Test
-    void utfør_behandlingstemaUtsendtArbeidstaker_oppretterSøknad() throws FunksjonellException {
+    void utfør_behandlingstemaUtsendtArbeidstaker_oppretterSøknad() throws FunksjonellException, IntegrasjonException {
         opprettSoeknad.utfør(lagProsessinstans(Behandlingstema.UTSENDT_ARBEIDSTAKER));
         verify(behandlingsgrunnlagService).opprettSøknadGrunnlag(eq(behandlingID), any(Soeknad.class));
     }
 
     @Test
-    void utfør_behandlingsTemaØvrigeSed_oppretterIkkeSøknad() throws FunksjonellException {
+    void utfør_behandlingsTemaØvrigeSed_oppretterIkkeSøknad() throws FunksjonellException, IntegrasjonException {
         opprettSoeknad.utfør(lagProsessinstans(Behandlingstema.ØVRIGE_SED_MED));
         verify(behandlingsgrunnlagService, never()).opprettSøknadGrunnlag(eq(behandlingID), any(Soeknad.class));
     }

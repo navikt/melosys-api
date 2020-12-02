@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
@@ -75,6 +76,9 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<BehandlingsresultatBegrunnelse> behandlingsresultatBegrunnelser = new HashSet<>(1);
+
+    @OneToOne(mappedBy = "behandlingsresultat")
+    private MedlemAvFolketrygden medlemAvFolketrygden;
 
     public Long getId() {
         return id;
@@ -204,6 +208,14 @@ public class Behandlingsresultat extends RegistreringsInfo {
         this.kontrollresultater = kontrollresultater;
     }
 
+    public MedlemAvFolketrygden getMedlemAvFolketrygden() {
+        return medlemAvFolketrygden;
+    }
+
+    public void setMedlemAvFolketrygden(MedlemAvFolketrygden medlemAvFolketrygden) {
+        this.medlemAvFolketrygden = medlemAvFolketrygden;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -278,7 +290,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public boolean erGodkjenningEllerInnvilgelseArt13() {
         return (erInnvilgelse() || erGodkjenningRegistreringUnntak())
-            && finnValidertLovvalgsperiode().stream().anyMatch(Medlemskapsperiode::erArtikkel13);
+            && finnValidertLovvalgsperiode().stream().anyMatch(PeriodeOmLovvalg::erArtikkel13);
     }
 
     // Medl skal ikke oppdateres ved avslag.
@@ -290,11 +302,11 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return lovvalgsperioder.stream().anyMatch(l -> l.getMedlPeriodeID() != null);
     }
 
-    public boolean harMedlemskapsperiode() {
+    public boolean harPeriodeOmLovvalg() {
         return !lovvalgsperioder.isEmpty() || !anmodningsperioder.isEmpty() || !utpekingsperioder.isEmpty();
     }
 
-    public Medlemskapsperiode hentValidertMedlemskapsperiode() {
+    public PeriodeOmLovvalg hentValidertPeriodeOmLovvalg() {
         if (!lovvalgsperioder.isEmpty()) {
             return hentValidertLovvalgsperiode();
         } else if (!anmodningsperioder.isEmpty()){
@@ -303,7 +315,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
             return hentValidertUtpekingsperiode();
         }
 
-        throw new NoSuchElementException("Ingen medlemskapsperiode finnes for behandling " + id);
+        throw new NoSuchElementException("Ingen periode om lovvalg finnes for behandling " + id);
     }
 
     public Lovvalgsperiode hentValidertLovvalgsperiode() {
@@ -347,6 +359,15 @@ public class Behandlingsresultat extends RegistreringsInfo {
             .filter(vr -> vr.getVilkaar() == vilkaarType)
             .flatMap(vr -> vr.getBegrunnelser().stream())
             .collect(Collectors.toSet());
+    }
+
+    public boolean oppfyllerVilkår(Collection<Vilkaar> vilkår) {
+        return vilkår.stream().allMatch(this::oppfyllerVilkår);
+    }
+
+    public boolean oppfyllerVilkår(Vilkaar vilkår) {
+        return vilkaarsresultater.stream()
+            .anyMatch(v -> v.getVilkaar() == vilkår && v.isOppfylt());
     }
 
     public boolean erAutomatisert() {

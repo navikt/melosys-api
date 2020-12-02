@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.HarPeriode;
 import no.nav.melosys.domain.dokument.felles.Periode;
@@ -20,7 +19,6 @@ public class PostadressePeriode implements HarPeriode {
     public UstrukturertAdresse postadresse;
 
     @Override
-    @JsonIgnore
     public ErPeriode getPeriode() {
         return periode;
     }

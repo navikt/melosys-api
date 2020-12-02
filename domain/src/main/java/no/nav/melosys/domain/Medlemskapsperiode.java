@@ -1,56 +1,187 @@
 package no.nav.melosys.domain;
 
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import java.time.LocalDate;
+import java.util.Objects;
+import javax.persistence.*;
+
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.*;
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004.*;
+@Entity
+@Table(name = "medlemskapsperiode")
+public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdloven_kap2_bestemmelser> {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "medlem_av_folketrygden_id", nullable = false, updatable = false)
+    private MedlemAvFolketrygden medlemAvFolketrygden;
 
-public interface Medlemskapsperiode extends ErPeriode {
-    LovvalgBestemmelse getBestemmelse();
+    @Column(name = "fom_dato", nullable = false)
+    private LocalDate fom;
 
-    Landkoder getLovvalgsland();
+    @Column(name = "tom_dato")
+    private LocalDate tom;
 
-    LovvalgBestemmelse getTilleggsbestemmelse();
+    @Column(name = "arbeidsland", nullable = false)
+    private String arbeidsland;
 
-    Trygdedekninger getDekning();
+    @Enumerated(EnumType.STRING)
+    @Column(name = "bestemmelse", nullable = false)
+    private Folketrygdloven_kap2_bestemmelser bestemmelse;
 
-    Long getMedlPeriodeID();
+    @Enumerated(EnumType.STRING)
+    @Column(name = "innvilgelse_resultat", nullable = false)
+    private InnvilgelsesResultat innvilgelsesresultat;
 
-    default boolean erArtikkel12() {
-        return getBestemmelse() == FO_883_2004_ART12_1 || getBestemmelse() == FO_883_2004_ART12_2;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "medlemskapstype", nullable = false)
+    private Medlemskapstyper medlemskapstype;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "trygde_dekning", nullable = false)
+    private Trygdedekninger trygdedekning;
+
+    @Column(name = "medlperiode_id")
+    private Long medlPeriodeID;
+
+    public Medlemskapsperiode() {
     }
 
-    default boolean erArtikkel13() {
-        return getBestemmelse() == FO_883_2004_ART13_1A
-            || getBestemmelse() == FO_883_2004_ART13_1B1 || getBestemmelse() == FO_883_2004_ART13_1B2
-            || getBestemmelse() == FO_883_2004_ART13_1B3 || getBestemmelse() == FO_883_2004_ART13_1B4
-            || getBestemmelse() == FO_883_2004_ART13_2A || getBestemmelse() == FO_883_2004_ART13_2B
-            || getBestemmelse() == FO_883_2004_ART13_3
-            || getBestemmelse() == FO_883_2004_ART13_4;
+    public Medlemskapsperiode(LocalDate fom,
+                              LocalDate tom,
+                              String arbeidsland,
+                              Folketrygdloven_kap2_bestemmelser bestemmelse,
+                              InnvilgelsesResultat innvilgelsesresultat,
+                              Medlemskapstyper medlemskapstype,
+                              Trygdedekninger trygdedekning) {
+        this.fom = fom;
+        this.tom = tom;
+        this.arbeidsland = arbeidsland;
+        this.bestemmelse = bestemmelse;
+        this.innvilgelsesresultat = innvilgelsesresultat;
+        this.medlemskapstype = medlemskapstype;
+        this.trygdedekning = trygdedekning;
     }
 
-    default boolean erArtikkel11() {
-        return getBestemmelse() == FO_883_2004_ART11_1
-            || getBestemmelse() == FO_883_2004_ART11_3A
-            || getBestemmelse() == FO_883_2004_ART11_3B
-            || getBestemmelse() == FO_883_2004_ART11_3C
-            || getBestemmelse() == FO_883_2004_ART11_3E
-            || getBestemmelse() == FO_883_2004_ART11_4_2
-            || getBestemmelse() == FO_883_2004_ART11_5
-            || getTilleggsbestemmelse() == FO_883_2004_ART11_2
-            || getTilleggsbestemmelse() == FO_883_2004_ART11_4_1
-            || getTilleggsbestemmelse() == FO_883_2004_ART11_5;
+    public Long getId() {
+        return id;
     }
 
-    default boolean erArtikkel11_4() {
-        return getBestemmelse() == FO_883_2004_ART11_4_2
-            || getTilleggsbestemmelse() == FO_883_2004_ART11_4_1;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    default boolean erArtikkel11_3aMed11_5Tilleggsbestemmelse() {
-        return getBestemmelse() == FO_883_2004_ART11_3A && getTilleggsbestemmelse() == FO_883_2004_ART11_5;
+    public MedlemAvFolketrygden getMedlemAvFolketrygden() {
+        return medlemAvFolketrygden;
+    }
+
+    public void setMedlemAvFolketrygden(MedlemAvFolketrygden medlemAvFolketrygden) {
+        this.medlemAvFolketrygden = medlemAvFolketrygden;
+    }
+
+    public LocalDate getFom() {
+        return fom;
+    }
+
+    public void setFom(LocalDate fom) {
+        this.fom = fom;
+    }
+
+    public LocalDate getTom() {
+        return tom;
+    }
+
+    public void setTom(LocalDate tom) {
+        this.tom = tom;
+    }
+
+    public String getArbeidsland() {
+        return arbeidsland;
+    }
+
+    public void setArbeidsland(String arbeidsland) {
+        this.arbeidsland = arbeidsland;
+    }
+
+    public Folketrygdloven_kap2_bestemmelser getBestemmelse() {
+        return bestemmelse;
+    }
+
+    public void setBestemmelse(Folketrygdloven_kap2_bestemmelser bestemmelse) {
+        this.bestemmelse = bestemmelse;
+    }
+
+    public InnvilgelsesResultat getInnvilgelsesresultat() {
+        return innvilgelsesresultat;
+    }
+
+    public void setInnvilgelsesresultat(InnvilgelsesResultat innvilgelsesresultat) {
+        this.innvilgelsesresultat = innvilgelsesresultat;
+    }
+
+    public Medlemskapstyper getMedlemskapstype() {
+        return medlemskapstype;
+    }
+
+    public void setMedlemskapstype(Medlemskapstyper medlemskapstype) {
+        this.medlemskapstype = medlemskapstype;
+    }
+
+    public Trygdedekninger getTrygdedekning() {
+        return trygdedekning;
+    }
+
+    public void setTrygdedekning(Trygdedekninger trygdedekning) {
+        this.trygdedekning = trygdedekning;
+    }
+
+    public Long getMedlPeriodeID() {
+        return medlPeriodeID;
+    }
+
+    public void setMedlPeriodeID(Long medlPeriodeID) {
+        this.medlPeriodeID = medlPeriodeID;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Medlemskapsperiode that = (Medlemskapsperiode) o;
+        return Objects.equals(id, that.id) &&
+            Objects.equals(medlemAvFolketrygden, that.medlemAvFolketrygden) &&
+            Objects.equals(fom, that.fom) &&
+            Objects.equals(tom, that.tom) &&
+            Objects.equals(arbeidsland, that.arbeidsland) &&
+            bestemmelse == that.bestemmelse &&
+            innvilgelsesresultat == that.innvilgelsesresultat &&
+            medlemskapstype == that.medlemskapstype &&
+            trygdedekning == that.trygdedekning &&
+            Objects.equals(medlPeriodeID, that.medlPeriodeID);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, medlemAvFolketrygden, fom, tom, arbeidsland, bestemmelse, innvilgelsesresultat, medlemskapstype, trygdedekning, medlPeriodeID);
+    }
+
+    @Override
+    public String toString() {
+        return "Medlemskapsperiode{" +
+            "id=" + id +
+            ", medlemAvFolketrygden=" + medlemAvFolketrygden +
+            ", fom=" + fom +
+            ", tom=" + tom +
+            ", arbeidsland='" + arbeidsland + '\'' +
+            ", bestemmelse=" + bestemmelse +
+            ", innvilgelsesresultat=" + innvilgelsesresultat +
+            ", medlemskapstype=" + medlemskapstype +
+            ", trygdedekning=" + trygdedekning +
+            ", medlPeriodeID=" + medlPeriodeID +
+            '}';
     }
 }

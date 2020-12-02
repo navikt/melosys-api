@@ -1,17 +1,21 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.Collections;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.behandling.EndreBehandlingstemaService;
+import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.tildto.SaksopplysningerTilDto;
@@ -23,9 +27,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.util.Collections;
-import java.util.List;
 
 @Protected
 @RestController
@@ -95,6 +96,7 @@ public class BehandlingTjeneste {
     }
 
     @GetMapping("{behandlingID}")
+    @JsonView(DokumentView.FrontendApi.class)
     @ApiOperation(value = "Hent en spesifikk behandling", response = BehandlingDto.class)
     public ResponseEntity<BehandlingDto> hentBehandling(@PathVariable("behandlingID") long behandlingID)
         throws MelosysException {
@@ -145,13 +147,13 @@ public class BehandlingTjeneste {
         return behandlingDto;
     }
 
-    private BehandlingOppsummeringDto tilOppsummeringDto(Behandling behandling) throws TekniskException, IkkeFunnetException {
+    private BehandlingOppsummeringDto tilOppsummeringDto(Behandling behandling) throws TekniskException {
         BehandlingOppsummeringDto behandlingOppsummeringDto = new BehandlingOppsummeringDto();
         behandlingOppsummeringDto.setBehandlingsstatus(behandling.getStatus());
         behandlingOppsummeringDto.setBehandlingstype(behandling.getType());
         behandlingOppsummeringDto.setBehandlingstema(behandling.getTema());
         behandlingOppsummeringDto.setEndretDato(behandling.getEndretDato());
-        behandlingOppsummeringDto.setEndretAvNavn(saksbehandlerService.hentNavnForIdent(behandling.getEndretAv()));
+        behandlingOppsummeringDto.setEndretAvNavn(saksbehandlerService.finnNavnForIdent(behandling.getEndretAv()).orElse(behandling.getEndretAv()));
         behandlingOppsummeringDto.setRegistrertDato(behandling.getRegistrertDato());
         behandlingOppsummeringDto.setSisteOpplysningerHentetDato(behandling.getSistOpplysningerHentetDato());
         return behandlingOppsummeringDto;

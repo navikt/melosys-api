@@ -4,7 +4,7 @@ import java.io.StringWriter;
 import javax.xml.bind.JAXBException;
 
 import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningKilde;
+import no.nav.melosys.domain.SaksopplysningKildesystem;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -61,8 +61,8 @@ public class SakOgBehandlingService implements SakOgBehandlingFasade {
         }
 
         Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokumentXml(xmlWriter.toString());
-        saksopplysning.setKilde(SaksopplysningKilde.SOB);
+        saksopplysning.leggTilKildesystemOgMottattDokument(
+            SaksopplysningKildesystem.SOB, xmlWriter.toString());
         saksopplysning.setType(SaksopplysningType.SOB_SAK);
         saksopplysning.setVersjon(SOB_VERSJON);
 

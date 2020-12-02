@@ -1,5 +1,7 @@
 package no.nav.melosys.service.avklartefakta;
 
+import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VIRKSOMHET;
+
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -12,8 +14,10 @@ import no.nav.melosys.domain.dokument.adresse.Adresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -24,12 +28,15 @@ import org.springframework.stereotype.Service;
 public class AvklarteVirksomheterService {
     protected final AvklartefaktaService avklartefaktaService;
     protected final RegisterOppslagService registerOppslagService;
+    protected final BehandlingService behandlingService;
 
     @Autowired
     public AvklarteVirksomheterService(AvklartefaktaService avklartefaktaService,
-                                       RegisterOppslagService registerOppslagService) {
+                                       RegisterOppslagService registerOppslagService,
+                                       BehandlingService behandlingService) {
         this.avklartefaktaService = avklartefaktaService;
         this.registerOppslagService = registerOppslagService;
+        this.behandlingService = behandlingService;
     }
 
     public List<AvklartVirksomhet> hentUtenlandskeVirksomheter(Behandling behandling) {
@@ -84,5 +91,41 @@ public class AvklarteVirksomheterService {
         List<AvklartVirksomhet> norskeVirksomheter = hentNorskeArbeidsgivere(behandling, adressekonverterer);
         norskeVirksomheter.addAll(hentNorskeSelvstendigeForetak(behandling, adressekonverterer));
         return norskeVirksomheter;
+    }
+
+    public void lagreVirksomheterSomAvklartefakta(List<String> orgIDliste, Long behandlingID) throws FunksjonellException, TekniskException {
+        erOrgIDerGyldig(orgIDliste, behandlingID);
+        for (String orgID : orgIDliste) {
+            avklartefaktaService.leggTilAvklarteFakta(behandlingID, VIRKSOMHET, VIRKSOMHET.getKode(), orgID, "TRUE");
+        }
+    }
+
+    private boolean erOrgIDerGyldig(List<String> orgIDliste, Long behandlingID) throws FunksjonellException, TekniskException {
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        for (String orgID : orgIDliste) {
+            if (!erOrgIDGyldig(orgID, behandling)) {
+                throw new FunksjonellException("Orgnr " + orgID + " hører ikke til noen av arbeidsforholdene");
+            }
+        }
+        return true;
+    }
+
+    private boolean erOrgIDGyldig(String orgID, Behandling behandling) throws TekniskException {
+        BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        return erVirksomhetForetakUtland(orgID, behandlingsgrunnlagData)
+            || erVirksomhetSelvstendigForetakEllerLagtInnManuelt(orgID, behandlingsgrunnlagData)
+            || erVirksomhetArbeidNorge(orgID, behandling);
+    }
+
+    private boolean erVirksomhetForetakUtland(String uuid, BehandlingsgrunnlagData behandlingsgrunnlagData) {
+        return behandlingsgrunnlagData.hentUtenlandskeArbeidsgivereUuid().contains(uuid);
+    }
+
+    private boolean erVirksomhetSelvstendigForetakEllerLagtInnManuelt(String orgnr, BehandlingsgrunnlagData behandlingsgrunnlagData) {
+        return behandlingsgrunnlagData.hentAlleOrganisasjonsnumre().contains(orgnr);
+    }
+
+    private boolean erVirksomhetArbeidNorge(String orgnr, Behandling behandling) throws TekniskException {
+        return behandling.hentArbeidsforholdDokument().hentOrgnumre().contains(orgnr);
     }
 }

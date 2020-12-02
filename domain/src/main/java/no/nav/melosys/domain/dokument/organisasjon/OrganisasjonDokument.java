@@ -1,10 +1,14 @@
 package no.nav.melosys.domain.dokument.organisasjon;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.*;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 import no.nav.melosys.domain.AbstraktOrganisasjon;
+import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 
@@ -29,6 +33,7 @@ public class OrganisasjonDokument  extends AbstraktOrganisasjon implements Sakso
     }
 
     @Override
+    @JsonView(DokumentView.FrontendApi.class)
     public StrukturertAdresse getForretningsadresse() {
         if (organisasjonDetaljer == null) return null;
 
@@ -36,6 +41,7 @@ public class OrganisasjonDokument  extends AbstraktOrganisasjon implements Sakso
     }
 
     @Override
+    @JsonView(DokumentView.FrontendApi.class)
     public StrukturertAdresse getPostadresse() {
         if (organisasjonDetaljer == null) return null;
 
@@ -49,6 +55,12 @@ public class OrganisasjonDokument  extends AbstraktOrganisasjon implements Sakso
 
     public void setNavn(List<String> navn) {
         this.navn = navn;
+    }
+
+    // Brukes til å deserialisere objektet fra databasen
+    @JsonProperty("navn")
+    public void setNavn(String navn) {
+        this.navn = new ArrayList<>(List.of(navn));
     }
 
     public OrganisasjonsDetaljer getOrganisasjonDetaljer() {

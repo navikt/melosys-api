@@ -6,19 +6,18 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
+import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.dokument.inntekt.Inntekt;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Loennsinntekt")
-public class Loennsinntekt
-        extends Inntekt
-{
+public class Loennsinntekt extends Inntekt {
 
     @XmlElement(required = true)
     protected String beskrivelse; //"http://nav.no/kodeverk/Kodeverk/Loennsbeskrivelse"s
 
-    @JsonIgnore
+    @JsonView(DokumentView.Database.class)
     protected Integer antall;
 
     @Override

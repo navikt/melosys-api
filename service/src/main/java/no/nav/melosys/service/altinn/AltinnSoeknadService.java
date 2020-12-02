@@ -119,8 +119,9 @@ public class AltinnSoeknadService {
             return null;
         }
         String kontaktpersonNavn = kontaktperson.getKontaktpersonNavn();
-        return StringUtils.isNotBlank(kontaktpersonNavn)
-            ? Kontaktopplysning.av(hentKontaktVirksomhetsnummer(søknad), kontaktpersonNavn) : null;
+        String kontaktpersonTelefon = kontaktperson.getKontaktpersonTelefon();
+        return StringUtils.isNotBlank(kontaktpersonNavn) || StringUtils.isNotBlank(kontaktpersonTelefon)
+            ? Kontaktopplysning.av(hentKontaktVirksomhetsnummer(søknad), kontaktpersonNavn, kontaktpersonTelefon) : null;
     }
 
     private static String hentKontaktVirksomhetsnummer(MedlemskapArbeidEOSM søknad){

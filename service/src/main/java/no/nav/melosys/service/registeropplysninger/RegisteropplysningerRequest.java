@@ -3,11 +3,13 @@ package no.nav.melosys.service.registeropplysninger;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import org.apache.commons.lang3.StringUtils;
 
@@ -17,13 +19,16 @@ public class RegisteropplysningerRequest {
     private final String fnr;
     private final LocalDate fom;
     private final LocalDate tom;
+    private final Informasjonsbehov informasjonsbehov;
 
-    public RegisteropplysningerRequest(Long behandlingID, Set<SaksopplysningType> opplysningstyper, String fnr, LocalDate fom, LocalDate tom) {
+    public RegisteropplysningerRequest(Long behandlingID, Set<SaksopplysningType> opplysningstyper,
+                                       String fnr, LocalDate fom, LocalDate tom, Informasjonsbehov informasjonsbehov) {
         this.behandlingID = behandlingID;
         this.opplysningstyper = opplysningstyper;
         this.fnr = fnr;
         this.fom = fom;
         this.tom = tom;
+        this.informasjonsbehov = informasjonsbehov;
     }
 
     public static RegisteropplysningerRequestBuilder builder() {
@@ -50,12 +55,17 @@ public class RegisteropplysningerRequest {
         return tom;
     }
 
+    public Informasjonsbehov getInformasjonsbehov() {
+        return Objects.requireNonNullElse(informasjonsbehov, Informasjonsbehov.STANDARD);
+    }
+
     public static class RegisteropplysningerRequestBuilder {
         private Long behandlingID;
         private SaksopplysningTyper saksopplysningTyper = new SaksopplysningTyper(new HashSet<>());
         private String fnr;
         private LocalDate fom;
         private LocalDate tom;
+        private Informasjonsbehov informasjonsbehov;
 
         RegisteropplysningerRequestBuilder() {
         }
@@ -85,9 +95,14 @@ public class RegisteropplysningerRequest {
             return this;
         }
 
+        public RegisteropplysningerRequestBuilder informasjonsbehov(Informasjonsbehov informasjonsbehov) {
+            this.informasjonsbehov = informasjonsbehov;
+            return this;
+        }
+
         public RegisteropplysningerRequest build() throws TekniskException {
             valider();
-            return new RegisteropplysningerRequest(behandlingID, saksopplysningTyper.getOpplysningstyper(), fnr, fom, tom);
+            return new RegisteropplysningerRequest(behandlingID, saksopplysningTyper.getOpplysningstyper(), fnr, fom, tom, informasjonsbehov);
         }
 
         private void valider() throws TekniskException {

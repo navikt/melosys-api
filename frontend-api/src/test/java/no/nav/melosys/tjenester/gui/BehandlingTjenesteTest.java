@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
+import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
@@ -76,6 +77,7 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
             .randomize(GeografiskAdresse.class, () -> random.nextObject(SemistrukturertAdresse.class))
             .randomize(MidlertidigPostadresse.class, () -> Math.random() > 0.5 ? random.nextObject(MidlertidigPostadresseNorge.class) : random.nextObject(MidlertidigPostadresseUtland.class))
             .randomize(named("fnr").and(ofType(String.class)), new NumericStringRandomizer(11))
+            .randomize(named("fnrAnnenForelder").and(ofType(String.class)), new NumericStringRandomizer(11))
             .randomize(named("orgnummer").and(ofType(String.class)), new NumericStringRandomizer(9))
         );
     }
@@ -91,7 +93,9 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     void hentBehandling_erSchemaValidert() throws IOException {
         BehandlingDto behandlingDto = random.nextObject(BehandlingDto.class);
         behandlingDto.getSaksopplysninger().setSed(null);
-        String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(behandlingDto);
+        String jsonString = objectMapperMedKodeverkServiceStub()
+            .writerWithView(DokumentView.FrontendApi.class)
+            .writeValueAsString(behandlingDto);
         valider(jsonString, BEHANDLINGER_SCHEMA, log);
     }
 
