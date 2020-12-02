@@ -13,7 +13,7 @@ import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.dto.*;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
-import no.nav.melosys.integrasjon.felles.RestIntegrasjon;
+import no.nav.melosys.integrasjon.felles.JsonRestIntegrasjon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -22,7 +22,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
-public class EessiConsumerImpl implements EessiConsumer, RestIntegrasjon {
+public class EessiConsumerImpl implements EessiConsumer, JsonRestIntegrasjon {
 
     private static final Logger log = LoggerFactory.getLogger(EessiConsumerImpl.class);
 

@@ -3,14 +3,14 @@ package no.nav.melosys.integrasjon.joark.journalfoerinngaaende;
 import no.nav.dok.tjenester.journalfoerinngaaende.GetJournalpostResponse;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.integrasjon.felles.RestIntegrasjon;
+import no.nav.melosys.integrasjon.felles.JsonRestIntegrasjon;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-public class JournalfoerInngaaendeConsumer implements RestIntegrasjon {
+public class JournalfoerInngaaendeConsumer implements JsonRestIntegrasjon {
 
     private final RestTemplate restTemplate;
 

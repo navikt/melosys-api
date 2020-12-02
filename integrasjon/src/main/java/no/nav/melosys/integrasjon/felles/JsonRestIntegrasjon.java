@@ -5,7 +5,7 @@ import org.springframework.http.MediaType;
 
 import java.util.Collections;
 
-public interface RestIntegrasjon {
+public interface JsonRestIntegrasjon {
 
     default HttpHeaders getDefaultHeaders() {
         HttpHeaders headers = new HttpHeaders();

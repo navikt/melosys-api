@@ -5,13 +5,13 @@ import java.util.Set;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
-import no.nav.melosys.integrasjon.felles.RestIntegrasjon;
+import no.nav.melosys.integrasjon.felles.JsonRestIntegrasjon;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 @Component
-public class InngangsvilkaarConsumerImpl implements InngangsvilkaarConsumer, RestIntegrasjon {
+public class InngangsvilkaarConsumerImpl implements InngangsvilkaarConsumer, JsonRestIntegrasjon {
 
     private final RestTemplate restTemplate;
 

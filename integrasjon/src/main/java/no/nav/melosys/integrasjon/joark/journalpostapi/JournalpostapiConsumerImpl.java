@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.integrasjon.felles.RestIntegrasjon;
+import no.nav.melosys.integrasjon.felles.JsonRestIntegrasjon;
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +17,7 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-public class JournalpostapiConsumerImpl implements JournalpostapiConsumer, RestIntegrasjon {
+public class JournalpostapiConsumerImpl implements JournalpostapiConsumer, JsonRestIntegrasjon {
     private static final Logger log = LoggerFactory.getLogger(JournalpostapiConsumerImpl.class);
 
     private final RestTemplate restTemplate;
