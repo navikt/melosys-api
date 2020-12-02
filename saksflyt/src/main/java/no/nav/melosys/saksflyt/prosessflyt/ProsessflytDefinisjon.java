@@ -112,7 +112,6 @@ public final class ProsessflytDefinisjon {
                 SEND_VEDTAKSBREV_INNLAND,
                 SEND_VEDTAK_UTLAND,
                 DISTRIBUER_JOURNALPOST_UTLAND,
-                SEND_STATISTIKK_UTSTEDT_A1,
                 OPPRETT_AVGIFTSOPPGAVE,
                 AVSLUTT_SAK_OG_BEHANDLING,
                 SOB_BEHANDLING_AVSLUTTET
@@ -126,7 +125,6 @@ public final class ProsessflytDefinisjon {
                 SEND_VEDTAKSBREV_INNLAND,
                 SEND_VEDTAK_UTLAND,
                 DISTRIBUER_JOURNALPOST_UTLAND,
-                SEND_STATISTIKK_UTSTEDT_A1,
                 OPPRETT_AVGIFTSOPPGAVE,
                 AVSLUTT_SAK_OG_BEHANDLING,
                 SOB_BEHANDLING_AVSLUTTET

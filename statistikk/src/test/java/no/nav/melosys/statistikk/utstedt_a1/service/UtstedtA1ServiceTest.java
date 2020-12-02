@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.ApplicationEventMulticaster;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
@@ -42,7 +42,7 @@ class UtstedtA1ServiceTest {
     @Mock
     private LandvelgerService landvelgerService;
     @Mock
-    private ApplicationEventPublisher applicationEventPublisher;
+    private ApplicationEventMulticaster melosysHendelseMulticaster;
 
     private UtstedtA1Service utstedtA1Service;
 
@@ -50,7 +50,7 @@ class UtstedtA1ServiceTest {
 
     @BeforeEach
     void setUp() {
-        utstedtA1Service = new UtstedtA1Service(utstedtA1Producer, behandlingService, behandlingsresultatService, landvelgerService, applicationEventPublisher);
+        utstedtA1Service = new UtstedtA1Service(utstedtA1Producer, behandlingService, behandlingsresultatService, landvelgerService, melosysHendelseMulticaster);
     }
 
     @Test
@@ -119,6 +119,8 @@ class UtstedtA1ServiceTest {
 
         return behandling;
     }
+
+    // todo test for feilet behandling med multicast
 
     private static Behandlingsresultat lagBehandlingsresultat() {
         return lagBehandlingsresultat(false);

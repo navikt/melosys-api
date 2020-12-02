@@ -21,7 +21,7 @@ import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
@@ -33,19 +33,19 @@ public class UtstedtA1Service {
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final LandvelgerService landvelgerService;
-    private final ApplicationEventPublisher applicationEventPublisher;
+    private final ApplicationEventMulticaster melosysHendelseMulticaster;
 
     @Autowired
     public UtstedtA1Service(UtstedtA1Producer utstedtA1Producer,
                             BehandlingService behandlingService,
                             BehandlingsresultatService behandlingsresultatService,
                             LandvelgerService landvelgerService,
-                            ApplicationEventPublisher applicationEventPublisher) {
+                            ApplicationEventMulticaster melosysHendelseMulticaster) {
         this.utstedtA1Producer = utstedtA1Producer;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.landvelgerService = landvelgerService;
-        this.applicationEventPublisher = applicationEventPublisher;
+        this.melosysHendelseMulticaster = melosysHendelseMulticaster;
     }
 
     @EventListener
@@ -56,7 +56,7 @@ public class UtstedtA1Service {
             sendMeldingOmUtstedtA1(a1BestiltHendelse.getBehandlingID());
         } catch (TekniskException | FunksjonellException e) {
             FeiletHendelse feiletHendelse = new FeiletHendelse(this, e, a1BestiltHendelse);
-            applicationEventPublisher.publishEvent(feiletHendelse);
+            melosysHendelseMulticaster.multicastEvent(feiletHendelse);
         }
     }
 
