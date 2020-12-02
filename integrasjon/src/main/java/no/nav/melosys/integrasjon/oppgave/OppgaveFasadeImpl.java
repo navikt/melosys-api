@@ -137,11 +137,15 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
 
     @Override
     public String opprettOppgave(Oppgave oppgave) throws FunksjonellException, TekniskException {
-        return opprettSensitivOppgave(oppgave, false);
+        return opprettOppgave(oppgave, false);
     }
 
     @Override
-    public String opprettSensitivOppgave(Oppgave oppgave, boolean erSensitiv) throws FunksjonellException, TekniskException {
+    public String opprettSensitivOppgave(Oppgave oppgave) throws FunksjonellException, TekniskException {
+        return opprettOppgave(oppgave, true);
+    }
+
+    private String opprettOppgave(Oppgave oppgave, boolean erSensitiv) throws FunksjonellException, TekniskException {
         LocalDate idag = LocalDate.now();
         OpprettOppgaveDto oppgaveDto = new OpprettOppgaveDto();
         oppgaveDto.setAktivDato(idag);

@@ -130,7 +130,9 @@ public class OppgaveService {
                 .setSaksnummer(behandling.getFagsak().getSaksnummer())
                 .build();
 
-            String oppgaveID = oppgaveFasade.opprettSensitivOppgave(oppgave, harBeskyttelsesbehov(behandling));
+            String oppgaveID = harBeskyttelsesbehov(behandling)
+                ? oppgaveFasade.opprettSensitivOppgave(oppgave)
+                : oppgaveFasade.opprettOppgave(oppgave);
             log.info("Opprettet oppgave {} for behandling {}", oppgaveID, behandling.getId());
         } else if (tilordnetRessurs != null && !tilordnetRessurs.equals(eksisterendeOppgave.get().getTilordnetRessurs())) {
             log.info("Oppgave eksisterer, oppdaterer tilordnetRessurs for oppgave tilknyttet behandling {}", behandling.getId());

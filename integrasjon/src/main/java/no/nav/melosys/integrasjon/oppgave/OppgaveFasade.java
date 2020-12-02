@@ -51,9 +51,9 @@ public interface OppgaveFasade {
     String opprettOppgave(Oppgave oppgave) throws FunksjonellException, TekniskException;
 
     /**
-     * Oppretter en oppgave for Melosys eller NAV Viken i Oppgave, avhengig av beskyttelsesbehov
+     * Oppretter en oppgave for NAV Viken i Oppgave og returnerer en unik oppgaveId
      */
-    String opprettSensitivOppgave(Oppgave oppgave, boolean erSensitiv) throws FunksjonellException, TekniskException;
+    String opprettSensitivOppgave(Oppgave oppgave) throws FunksjonellException, TekniskException;
 
     /**
      * Legger tilbake en oppgave i Oppgave

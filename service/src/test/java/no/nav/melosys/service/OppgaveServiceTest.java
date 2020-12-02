@@ -157,7 +157,8 @@ public class OppgaveServiceTest {
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
-        verify(oppgaveFasade).opprettSensitivOppgave(any(Oppgave.class), eq(false));
+        verify(oppgaveFasade).opprettOppgave(any(Oppgave.class));
+        verify(oppgaveFasade, never()).opprettSensitivOppgave(any(Oppgave.class));
     }
 
     @Test
@@ -199,7 +200,8 @@ public class OppgaveServiceTest {
         behandling.hentPersonDokument().diskresjonskode = new Diskresjonskode("SPSF");
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
-        verify(oppgaveFasade).opprettSensitivOppgave(any(Oppgave.class), eq(true));
+        verify(oppgaveFasade, never()).opprettOppgave(any(Oppgave.class));
+        verify(oppgaveFasade).opprettSensitivOppgave(any(Oppgave.class));
     }
 
     @Test
@@ -215,7 +217,8 @@ public class OppgaveServiceTest {
         when(tpsFasade.harStrengtFortroligAdresse("fnrBarn")).thenReturn(true);
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
-        verify(oppgaveFasade).opprettSensitivOppgave(any(Oppgave.class), eq(true));
+        verify(oppgaveFasade, never()).opprettOppgave(any(Oppgave.class));
+        verify(oppgaveFasade).opprettSensitivOppgave(any(Oppgave.class));
     }
 
     private static Behandling lagBehandling() {
