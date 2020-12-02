@@ -1,19 +1,16 @@
 package no.nav.melosys.integrasjon.joark.journalfoerinngaaende;
 
-import java.util.Collections;
-
 import no.nav.dok.tjenester.journalfoerinngaaende.GetJournalpostResponse;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.integrasjon.felles.JsonRestIntegrasjon;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-public class JournalfoerInngaaendeConsumer {
+public class JournalfoerInngaaendeConsumer implements JsonRestIntegrasjon {
 
     private final RestTemplate restTemplate;
 
@@ -23,14 +20,7 @@ public class JournalfoerInngaaendeConsumer {
 
     public GetJournalpostResponse hentJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException {
         return exchange("/journalposter/{journalpostID}", HttpMethod.GET,
-            new HttpEntity<>(getHttpHeaders()), GetJournalpostResponse.class, journalpostID);
-    }
-
-    private HttpHeaders getHttpHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return headers;
+            new HttpEntity<>(getDefaultHeaders()), GetJournalpostResponse.class, journalpostID);
     }
 
     private <T> T exchange(String uri, HttpMethod method, HttpEntity<?> entity, Class<T> clazz, Object... variabler) throws SikkerhetsbegrensningException, IntegrasjonException {
