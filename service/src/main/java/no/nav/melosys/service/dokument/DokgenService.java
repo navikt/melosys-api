@@ -50,4 +50,7 @@ public class DokgenService {
         return joarkFasade.hentInstantMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId());
     }
 
+    public String hentMalnavn(Produserbaredokumenter produserbartDokument) throws FunksjonellException {
+        return dokgenMalResolver.hentMalnavn(produserbartDokument);
+    }
 }
