@@ -98,7 +98,7 @@ public class OpprettJournalpost extends Journalpost {
 
     public static OpprettJournalpost lagJournalpostForBrev(JournalpostBestilling bestilling) {
         OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
-        opprettJournalpost.setHoveddokument(lagInfoBrevPdf(bestilling.getTittel(), bestilling.getPdf()));
+        opprettJournalpost.setHoveddokument(lagInfoBrevPdf(bestilling.getTittel(), bestilling.getBrevkode(), bestilling.getPdf()));
         opprettJournalpost.setJournalposttype(Journalposttype.UT);
         opprettJournalpost.setJournalførendeEnhet(MEDLEMSKAP_OG_AVGIFT);
         opprettJournalpost.setTema(MEDLEMSKAP);

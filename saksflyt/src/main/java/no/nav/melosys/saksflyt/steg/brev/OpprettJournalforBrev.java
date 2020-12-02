@@ -57,6 +57,7 @@ public class OpprettJournalforBrev implements StegBehandler {
 
         JournalpostBestilling bestilling = new JournalpostBestilling(
             produserbartDokument.getBeskrivelse(),
+            dokgenService.hentMalnavn(produserbartDokument),
             personDokument.fnr,
             personDokument.sammensattNavn,
             personDokument.fnr,
