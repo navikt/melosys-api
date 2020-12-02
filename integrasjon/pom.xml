@@ -205,17 +205,5 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>com.mockrunner</groupId>
-            <artifactId>mockrunner-jms</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>xerces</groupId>
-                    <artifactId>xercesImpl</artifactId>
-                </exclusion>
-            </exclusions>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 </project>
