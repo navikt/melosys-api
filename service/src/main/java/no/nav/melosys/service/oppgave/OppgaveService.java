@@ -250,6 +250,8 @@ public class OppgaveService {
     private boolean harBeskyttelsesbehov(Behandling behandling) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
         if (behandling.hentPersonDokument().diskresjonskode.erKode6()) {
             return true;
+        } else if (behandling.getBehandlingsgrunnlag() == null) {
+            return false;
         }
         for (String fnr : behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().hentFnrMedfølgendeBarn()) {
             if (tpsFasade.harStrengtFortroligAdresse(fnr)) {
