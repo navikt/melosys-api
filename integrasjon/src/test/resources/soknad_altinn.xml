@@ -56,9 +56,11 @@
                 </arbeidPaaLand>
                 <offshoreEnheter>
                     <offshoreEnhet>
-                        <enhetsType>plattform</enhetsType>
-                        <enhetsNavn>abc</enhetsNavn>
-                        <sokkelLand>ALBANIA</sokkelLand>
+                        <offshoreEnhet>
+                            <enhetsType>plattform</enhetsType>
+                            <enhetsNavn>abc</enhetsNavn>
+                            <sokkelLand>ALBANIA</sokkelLand>
+                        </offshoreEnhet>
                     </offshoreEnhet>
                 </offshoreEnheter>
                 <luftfart>

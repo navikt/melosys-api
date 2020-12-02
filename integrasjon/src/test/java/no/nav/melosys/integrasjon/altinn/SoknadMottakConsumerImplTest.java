@@ -8,7 +8,9 @@ import java.util.Collections;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.msm.AltinnDokument;
 import no.nav.melosys.soknad_altinn.Innhold;
@@ -19,6 +21,7 @@ import org.junit.Test;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
@@ -38,6 +41,9 @@ public class SoknadMottakConsumerImplTest {
 
     @Before
     public void setup() {
+        restTemplate.getMessageConverters().add(0, new MappingJackson2XmlHttpMessageConverter(
+            new XmlMapper().registerModule(new JaxbAnnotationModule())
+        ));
         server = MockRestServiceServer.createServer(restTemplate);
         soknadMottakConsumer = new SoknadMottakConsumerImpl(restTemplate);
     }

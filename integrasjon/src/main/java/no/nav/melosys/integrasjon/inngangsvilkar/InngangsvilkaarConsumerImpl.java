@@ -5,6 +5,7 @@ import java.util.Set;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
+import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -14,6 +15,8 @@ public class InngangsvilkaarConsumerImpl implements InngangsvilkaarConsumer {
     private final RestTemplate restTemplate;
 
     public InngangsvilkaarConsumerImpl(RestTemplate inngangsVilkaarRestTemplate) {
+        inngangsVilkaarRestTemplate.getMessageConverters().removeIf(converter
+            -> converter instanceof MappingJackson2XmlHttpMessageConverter);
         this.restTemplate = inngangsVilkaarRestTemplate;
     }
 
