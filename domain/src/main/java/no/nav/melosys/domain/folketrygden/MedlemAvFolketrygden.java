@@ -31,6 +31,9 @@ public class MedlemAvFolketrygden {
     @OneToMany(mappedBy = "medlemAvFolketrygden", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Collection<Medlemskapsperiode> medlemskapsperioder = new HashSet<>(1);
 
+    @OneToOne(mappedBy = "medlemAvFolketrygden", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private FastsattTrygdeavgift fastsattTrygdeavgift;
+
     public Long getId() {
         return id;
     }
@@ -69,5 +72,13 @@ public class MedlemAvFolketrygden {
 
     public void setMedlemskapsperioder(Collection<Medlemskapsperiode> medlemskapsperioder) {
         this.medlemskapsperioder = medlemskapsperioder;
+    }
+
+    public FastsattTrygdeavgift getFastsattTrygdeavgift() {
+        return fastsattTrygdeavgift;
+    }
+
+    public void setFastsattTrygdeavgift(FastsattTrygdeavgift fastsattTrygdeavgift) {
+        this.fastsattTrygdeavgift = fastsattTrygdeavgift;
     }
 }
