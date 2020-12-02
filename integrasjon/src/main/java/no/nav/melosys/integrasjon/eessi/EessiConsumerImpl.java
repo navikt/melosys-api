@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.eessi;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,17 +13,16 @@ import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.dto.*;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
+import no.nav.melosys.integrasjon.felles.RestIntegrasjon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
-public class EessiConsumerImpl implements EessiConsumer {
+public class EessiConsumerImpl implements EessiConsumer, RestIntegrasjon {
 
     private static final Logger log = LoggerFactory.getLogger(EessiConsumerImpl.class);
 
@@ -120,13 +118,6 @@ public class EessiConsumerImpl implements EessiConsumer {
         } catch (RestClientResponseException e) {
             throw ExceptionMapper.springExTilMelosysEx(e, hentFeilmelding(e));
         }
-    }
-
-    private HttpHeaders getDefaultHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-        return headers;
     }
 
     private String hentFeilmelding(RestClientResponseException ex) {

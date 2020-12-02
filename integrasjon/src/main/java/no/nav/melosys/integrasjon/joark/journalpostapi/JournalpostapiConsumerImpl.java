@@ -1,25 +1,23 @@
 package no.nav.melosys.integrasjon.joark.journalpostapi;
 
 import java.io.IOException;
-import java.util.Collections;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.integrasjon.felles.RestIntegrasjon;
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-public class JournalpostapiConsumerImpl implements JournalpostapiConsumer {
+public class JournalpostapiConsumerImpl implements JournalpostapiConsumer, RestIntegrasjon {
     private static final Logger log = LoggerFactory.getLogger(JournalpostapiConsumerImpl.class);
 
     private final RestTemplate restTemplate;
@@ -37,7 +35,7 @@ public class JournalpostapiConsumerImpl implements JournalpostapiConsumer {
                 request.getJournalpostType().name(), request.getSak() != null ? request.getSak().getArkivsaksnummer() : "ukjent");
         }
 
-        return restTemplate.postForObject("/journalpost?forsoekFerdigstill={forsoekFerdigstill}", new HttpEntity<>(request, getHttpHeaders()), OpprettJournalpostResponse.class, forsøkEndeligJfr);
+        return restTemplate.postForObject("/journalpost?forsoekFerdigstill={forsoekFerdigstill}", new HttpEntity<>(request, getDefaultHeaders()), OpprettJournalpostResponse.class, forsøkEndeligJfr);
     }
 
     @Override
@@ -45,7 +43,7 @@ public class JournalpostapiConsumerImpl implements JournalpostapiConsumer {
         if (log.isInfoEnabled()) {
             log.info("Oppdaterer journalpost med id {}", journalpostId);
         }
-        exchange("/journalpost/{journalpostID}", HttpMethod.PUT, new HttpEntity<>(request, getHttpHeaders()), journalpostId);
+        exchange("/journalpost/{journalpostID}", HttpMethod.PUT, new HttpEntity<>(request, getDefaultHeaders()), journalpostId);
     }
 
     @Override
@@ -55,7 +53,7 @@ public class JournalpostapiConsumerImpl implements JournalpostapiConsumer {
         }
 
         LogiskVedleggRequest request = new LogiskVedleggRequest(tittel);
-        exchange("/dokumentInfo/{dokumentInfoId}/logiskVedlegg/", HttpMethod.POST, new HttpEntity<>(request, getHttpHeaders()), dokumentInfoId);
+        exchange("/dokumentInfo/{dokumentInfoId}/logiskVedlegg/", HttpMethod.POST, new HttpEntity<>(request, getDefaultHeaders()), dokumentInfoId);
     }
 
     @Override
@@ -64,7 +62,7 @@ public class JournalpostapiConsumerImpl implements JournalpostapiConsumer {
             log.info("Fjerner logisk vedlegg {} for dokument med id {}", logiskVedleggId, dokumentInfoId);
         }
 
-        exchange("/dokumentInfo/{dokumentInfoId}/logiskVedlegg/{logiskVedleggId}", HttpMethod.DELETE, new HttpEntity<>(getHttpHeaders()), dokumentInfoId, logiskVedleggId);
+        exchange("/dokumentInfo/{dokumentInfoId}/logiskVedlegg/{logiskVedleggId}", HttpMethod.DELETE, new HttpEntity<>(getDefaultHeaders()), dokumentInfoId, logiskVedleggId);
     }
 
     @Override
@@ -72,14 +70,7 @@ public class JournalpostapiConsumerImpl implements JournalpostapiConsumer {
         if (log.isInfoEnabled()) {
             log.info("Ferdigstill journalpost med id {}", journalpostId);
         }
-        exchange("/journalpost/{journalpostID}/ferdigstill", HttpMethod.PATCH, new HttpEntity<>(request, getHttpHeaders()), journalpostId);
-    }
-
-    private HttpHeaders getHttpHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return headers;
+        exchange("/journalpost/{journalpostID}/ferdigstill", HttpMethod.PATCH, new HttpEntity<>(request, getDefaultHeaders()), journalpostId);
     }
 
     private void exchange(String uri, HttpMethod method, HttpEntity<?> entity, Object... variabler) throws SikkerhetsbegrensningException, IntegrasjonException {
