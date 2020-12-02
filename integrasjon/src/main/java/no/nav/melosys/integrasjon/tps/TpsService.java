@@ -226,7 +226,7 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    public boolean harSensitiveOpplysninger(String fnr) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    public boolean harStrengtFortroligAdresse(String fnr) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
         Saksopplysning saksopplysning = hentPerson(fnr, Informasjonsbehov.INGEN);
         PersonDokument personDokument = (PersonDokument) saksopplysning.getDokument();
         return personDokument.diskresjonskode != null && personDokument.diskresjonskode.erKode6();

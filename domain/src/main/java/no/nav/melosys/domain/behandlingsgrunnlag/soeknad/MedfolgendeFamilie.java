@@ -20,7 +20,7 @@ public class MedfolgendeFamilie {
         return fnr;
     }
 
-    static boolean erBarn(MedfolgendeFamilie medfolgendeFamilie) {
-        return medfolgendeFamilie.relasjonsrolle == Relasjonsrolle.BARN;
+    public boolean erBarn() {
+        return relasjonsrolle == Relasjonsrolle.BARN;
     }
 }

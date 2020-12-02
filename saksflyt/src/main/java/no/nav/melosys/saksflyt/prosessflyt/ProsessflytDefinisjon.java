@@ -283,7 +283,6 @@ public final class ProsessflytDefinisjon {
                 SOB_BEHANDLING_OPPRETTET,
                 HENT_REGISTEROPPLYSNINGER,
                 VURDER_INNGANGSVILKÅR,
-                AVKLAR_BESKYTTELSESBEHOV,
                 OPPRETT_OPPGAVE
             )
         );

@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.oppgave;
 
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -29,14 +28,11 @@ public class OpprettOppgave implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
-        boolean harSensitiveOpplysninger
-            = prosessinstans.getData(ProsessDataKey.HAR_SENSITIVE_OPPLYSNINGER, Boolean.class, false);
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
             prosessinstans.getBehandling(),
             prosessinstans.hentJournalpostID(),
             prosessinstans.getBehandling().getFagsak().hentBruker().getAktørId(),
-            prosessinstans.hentSaksbehandlerHvisTilordnes(),
-            harSensitiveOpplysninger
+            prosessinstans.hentSaksbehandlerHvisTilordnes()
         );
     }
 }

@@ -71,4 +71,11 @@ public class BehandlingsgrunnlagData {
             .distinct()
             .collect(Collectors.toList());
     }
+
+    public Set<String> hentFnrMedfølgendeBarn() {
+        return personOpplysninger.medfolgendeFamilie.stream()
+            .filter(MedfolgendeFamilie::erBarn)
+            .map(MedfolgendeFamilie::getFnr)
+            .collect(Collectors.toSet());
+    }
 }

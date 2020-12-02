@@ -5,7 +5,6 @@ import no.nav.melosys.domain.kodeverk.Kodeverk;
 public enum ProsessSteg implements Kodeverk {
 
     AVKLAR_ARBEIDSGIVER("AVKLAR_ARBEIDSGIVER", "Avklaring av norsk arbeidsgiver"),
-    AVKLAR_BESKYTTELSESBEHOV("AVKLAR_BESKYTTELSESBEHOV", "Avklaring beskyttelsesbehov for person og medfølgende barn"),
     AVKLAR_MYNDIGHET("AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
     AVSLUTT_SAK_OG_BEHANDLING("AVSLUTT_SAK_OG_BEHANDLING", "Avslutt fagsak og aktiv behandling"),
     AVSLUTT_TIDLIGERE_MEDL_PERIODE("AVSLUTT_TIDLIGERE_MEDL_PERIODE", "Avslutter tidligere periode i Medl"),

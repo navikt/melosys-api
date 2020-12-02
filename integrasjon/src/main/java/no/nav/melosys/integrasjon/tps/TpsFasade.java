@@ -21,5 +21,5 @@ public interface TpsFasade {
 
     String hentSammensattNavn(String fnr) throws FunksjonellException, IntegrasjonException;
 
-    boolean harSensitiveOpplysninger(String fnr) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException;
+    boolean harStrengtFortroligAdresse(String fnr) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException;
 }
