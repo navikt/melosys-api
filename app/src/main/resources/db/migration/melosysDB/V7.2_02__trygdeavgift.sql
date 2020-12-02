@@ -5,8 +5,8 @@ CREATE TABLE fastsatt_trygdeavgift
     type                                  VARCHAR2(99),
     betales_av                            VARCHAR2(99),
     representant_nr                       VARCHAR2(99),
-    avgiftspliktig_norsk_inntekt_mnd      NUMBER(19),
-    avgiftspliktig_utenlandsk_inntekt_mnd NUMBER(19),
+    avgiftspliktig_norsk_inntekt_md       NUMBER(19),
+    avgiftspliktig_utenlandsk_inntekt_md  NUMBER(19),
     CONSTRAINT pk_fastsatt_trygdeavgift PRIMARY KEY (id)
 );
 
@@ -21,7 +21,7 @@ CREATE TABLE trygdeavgift
     type                        VARCHAR2(99) NOT NULL,
     trygdesats                  NUMBER(5,1) NOT NULL,
     avgiftskode                 VARCHAR2(20) NOT NULL,
-    CONSTRAINT pk_trygdeavgift PRIMARY KEY (id)
+    CONSTRAINT pk_trygdeavgift  PRIMARY KEY (id)
 );
 
 ALTER TABLE trygdeavgift

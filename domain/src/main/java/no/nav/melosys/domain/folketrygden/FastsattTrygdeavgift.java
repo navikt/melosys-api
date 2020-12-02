@@ -22,10 +22,10 @@ public class FastsattTrygdeavgift {
     @Column(name = "betales_av")
     private String betalesAv;
 
-    @Column(name = "avgiftspliktig_norsk_inntekt_mnd")
+    @Column(name = "avgiftspliktig_norsk_inntekt_md")
     private Long avgiftspliktigNorskInntektMnd;
 
-    @Column(name = "avgiftspliktig_utenlandsk_inntekt_mnd")
+    @Column(name = "avgiftspliktig_utenlandsk_inntekt_md")
     private Long avgiftspliktigUtenlandskInntektMnd;
 
     public Long getId() {
