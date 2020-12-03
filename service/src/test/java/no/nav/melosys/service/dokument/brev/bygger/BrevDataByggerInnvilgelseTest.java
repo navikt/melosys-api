@@ -23,6 +23,7 @@ import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
@@ -63,6 +64,8 @@ public class BrevDataByggerInnvilgelseTest {
     VilkaarsresultatService vilkaarsresultatService;
     @Mock
     TpsFasade tpsFasade;
+    @Mock
+    BehandlingsgrunnlagService behandlingsgrunnlagService;
 
     private Behandling behandling;
     private BrevbestillingDto brevbestillingDto;
@@ -107,7 +110,8 @@ public class BrevDataByggerInnvilgelseTest {
             brevbestillingDto,
             brevDataByggerA1,
             vilkaarsresultatService,
-            tpsFasade);
+            tpsFasade,
+            behandlingsgrunnlagService);
     }
 
     public BrevDataGrunnlag lagBrevdataGrunnlag() throws TekniskException {

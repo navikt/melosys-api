@@ -1,6 +1,9 @@
 package no.nav.melosys.domain.behandlingsgrunnlag.soeknad;
 
+import java.util.UUID;
+
 public class MedfolgendeFamilie {
+    public String uuid;
     public String fnr;
     public String navn;
     public Relasjonsrolle relasjonsrolle;
@@ -11,6 +14,7 @@ public class MedfolgendeFamilie {
 
     public static MedfolgendeFamilie tilBarnFraFnr(String fnr) {
         MedfolgendeFamilie medfolgendeFamilie = new MedfolgendeFamilie();
+        medfolgendeFamilie.uuid = UUID.randomUUID().toString();
         medfolgendeFamilie.fnr = fnr;
         medfolgendeFamilie.relasjonsrolle = Relasjonsrolle.BARN;
         return medfolgendeFamilie;

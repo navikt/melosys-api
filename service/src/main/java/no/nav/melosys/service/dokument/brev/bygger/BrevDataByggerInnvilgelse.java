@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.util.Set;
 
 import no.nav.melosys.domain.Anmodningsperiode;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
 import no.nav.melosys.domain.familie.OmfattetBarn;
@@ -16,6 +17,7 @@ import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
@@ -33,6 +35,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final VilkaarsresultatService vilkaarsresultatService;
     private final TpsFasade tpsFasade;
+    private final BehandlingsgrunnlagService behandlingsgrunnlagService;
 
     public BrevDataByggerInnvilgelse(AvklartefaktaService avklartefaktaService,
                                      LandvelgerService landvelgerService,
@@ -40,7 +43,8 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
                                      AnmodningsperiodeService anmodningsperiodeService,
                                      BrevbestillingDto brevbestillingDto,
                                      VilkaarsresultatService vilkaarsresultatService,
-                                     TpsFasade tpsFasade) {
+                                     TpsFasade tpsFasade,
+                                     BehandlingsgrunnlagService behandlingsgrunnlagService) {
         this.landvelgerService = landvelgerService;
         this.avklartefaktaService = avklartefaktaService;
         this.anmodningsperiodeService = anmodningsperiodeService;
@@ -49,6 +53,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         this.vilkaarsresultatService = vilkaarsresultatService;
         this.brevbyggerA1 = null;
         this.tpsFasade = tpsFasade;
+        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
     }
 
     public BrevDataByggerInnvilgelse(AvklartefaktaService avklartefaktaService,
@@ -58,7 +63,8 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
                                      BrevbestillingDto brevbestillingDto,
                                      BrevDataByggerA1 brevbyggerA1,
                                      VilkaarsresultatService vilkaarsresultatService,
-                                     TpsFasade tpsFasade) {
+                                     TpsFasade tpsFasade,
+                                     BehandlingsgrunnlagService behandlingsgrunnlagService) {
         this.landvelgerService = landvelgerService;
         this.avklartefaktaService = avklartefaktaService;
         this.anmodningsperiodeService = anmodningsperiodeService;
@@ -67,6 +73,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.vilkaarsresultatService = vilkaarsresultatService;
         this.tpsFasade = tpsFasade;
+        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
     }
 
     @Override
@@ -117,10 +124,10 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
     private AvklarteMedfolgendeBarn hentAvklarteMedfølgendeBarn(long behandlingID) throws FunksjonellException, IntegrasjonException {
         AvklarteMedfolgendeBarn avklarteMedfolgendeBarn = avklartefaktaService.hentAvklarteMedfølgendeBarn(behandlingID);
         for (OmfattetBarn omfattetBarn : avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd) {
-            omfattetBarn.sammensattNavn = tpsFasade.hentSammensattNavn(omfattetBarn.fnr);
+            omfattetBarn.sammensattNavn = tpsFasade.hentSammensattNavn(omfattetBarn.fnrEllerUuid);
         }
         for (IkkeOmfattetBarn ikkeOmfattetBarn : avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd) {
-            ikkeOmfattetBarn.sammensattNavn = tpsFasade.hentSammensattNavn(ikkeOmfattetBarn.fnr);
+            ikkeOmfattetBarn.sammensattNavn = tpsFasade.hentSammensattNavn(ikkeOmfattetBarn.fnrEllerUuid);
         }
         return avklarteMedfolgendeBarn;
     }

@@ -279,16 +279,16 @@ public class AvklartefaktaServiceTest {
             = avklartefaktaService.hentAvklarteMedfølgendeBarn(1L);
 
         assertThat(avklarteMedfølgendeBarn.barnOmfattetAvNorskTrygd)
-            .extracting("fnr").containsExactly("omfattet");
+            .extracting("fnrEllerUuid").containsExactly("omfattet");
         assertThat(avklarteMedfølgendeBarn.barnIkkeOmfattetAvNorskTrygd)
-            .extracting("fnr")
+            .extracting("fnrEllerUuid")
             .containsExactlyInAnyOrder("ikkeOmfattet1", "ikkeOmfattet2");
         assertThat(avklarteMedfølgendeBarn.barnIkkeOmfattetAvNorskTrygd)
-            .filteredOn(barnIkkeOmfattet -> barnIkkeOmfattet.fnr.equals("ikkeOmfattet1"))
+            .filteredOn(barnIkkeOmfattet -> barnIkkeOmfattet.fnrEllerUuid.equals("ikkeOmfattet1"))
             .extracting("begrunnelse")
             .isEqualTo(List.of(Medfolgende_barn_begrunnelser.OVER_18_AR));
         assertThat(avklarteMedfølgendeBarn.barnIkkeOmfattetAvNorskTrygd)
-            .filteredOn(barnIkkeOmfattet -> barnIkkeOmfattet.fnr.equals("ikkeOmfattet2"))
+            .filteredOn(barnIkkeOmfattet -> barnIkkeOmfattet.fnrEllerUuid.equals("ikkeOmfattet2"))
             .extracting("begrunnelse")
             .isEqualTo(List.of(Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER));
         assertThat(avklarteMedfølgendeBarn.hentBegrunnelseFritekst().orElse("")).isEqualTo("begrunnelseFritekst");
