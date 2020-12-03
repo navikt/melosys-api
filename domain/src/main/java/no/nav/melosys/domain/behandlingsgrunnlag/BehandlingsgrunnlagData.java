@@ -1,9 +1,6 @@
 package no.nav.melosys.domain.behandlingsgrunnlag;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -77,5 +74,12 @@ public class BehandlingsgrunnlagData {
             .filter(MedfolgendeFamilie::erBarn)
             .map(MedfolgendeFamilie::getFnr)
             .collect(Collectors.toSet());
+    }
+
+    public Map<String, String> hentUuidNavnMedfølgendeBarn() {
+        return personOpplysninger.medfolgendeFamilie.stream()
+            .filter(MedfolgendeFamilie::erBarn)
+            .filter(MedfolgendeFamilie::harUuidOgNavn)
+            .collect(Collectors.toMap(MedfolgendeFamilie::getUuid, MedfolgendeFamilie::getNavn));
     }
 }

@@ -1,16 +1,20 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
+import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
+import no.nav.melosys.domain.familie.OmfattetBarn;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
@@ -42,7 +46,7 @@ import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagAnmodnin
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagPersonsaksopplysning;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BrevDataByggerInnvilgelseTest {
@@ -188,5 +192,57 @@ public class BrevDataByggerInnvilgelseTest {
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
         assertThat(brevData.erArt16UtenArt12).isTrue();
+    }
+
+    @Test
+    public void lag_medfølgendeBarnHarFnr_henterNavnFraTps() throws TekniskException, FunksjonellException {
+        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(
+            Set.of(new OmfattetBarn("fnr1")),
+            Set.of(new IkkeOmfattetBarn("fnr2", null, null))));
+        when(tpsFasade.hentSammensattNavn(eq("fnr1"))).thenReturn("Navn1");
+        when(tpsFasade.hentSammensattNavn(eq("fnr2"))).thenReturn("Navn2");
+
+        BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
+        assertThat(brevData.avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd)
+            .extracting("sammensattNavn").containsExactly("Navn1");
+        assertThat(brevData.avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd)
+            .extracting("sammensattNavn").containsExactly("Navn2");
+
+        verify(tpsFasade, times(2)).hentSammensattNavn(anyString());
+    }
+
+    @Test
+    public void lag_medfølgendeBarnHarUuid_henterNavnFraBehandlingsgrunnlag() throws TekniskException, FunksjonellException {
+        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(
+            Set.of(new OmfattetBarn("uuid1")),
+            Set.of(new IkkeOmfattetBarn("uuid2", null, null))));
+        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(lagBehandlingsgrunnlagMedMedfølgendeBarn());
+
+        BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
+        assertThat(brevData.avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd)
+            .extracting("sammensattNavn").containsExactly("Navn1");
+        assertThat(brevData.avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd)
+            .extracting("sammensattNavn").containsExactly("Navn2");
+
+        verify(tpsFasade, never()).hentSammensattNavn(anyString());
+    }
+
+    private Behandlingsgrunnlag lagBehandlingsgrunnlagMedMedfølgendeBarn() {
+        BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
+        behandlingsgrunnlagData.personOpplysninger.medfolgendeFamilie.addAll(List.of(
+            lagMedfølgendeBarnMedUuidOgNavn("uuid1", "Navn1"),
+            lagMedfølgendeBarnMedUuidOgNavn("uuid2", "Navn2")
+        ));
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+        return behandlingsgrunnlag;
+    }
+
+    private MedfolgendeFamilie lagMedfølgendeBarnMedUuidOgNavn(String uuid, String navn) {
+        MedfolgendeFamilie barn = new MedfolgendeFamilie();
+        barn.uuid = uuid;
+        barn.navn = navn;
+        barn.relasjonsrolle = MedfolgendeFamilie.Relasjonsrolle.BARN;
+        return barn;
     }
 }

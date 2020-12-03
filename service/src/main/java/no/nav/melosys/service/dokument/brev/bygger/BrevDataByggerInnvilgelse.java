@@ -1,5 +1,7 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 import no.nav.melosys.domain.Anmodningsperiode;
@@ -11,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
@@ -123,12 +126,23 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
 
     private AvklarteMedfolgendeBarn hentAvklarteMedfølgendeBarn(long behandlingID) throws FunksjonellException, IntegrasjonException {
         AvklarteMedfolgendeBarn avklarteMedfolgendeBarn = avklartefaktaService.hentAvklarteMedfølgendeBarn(behandlingID);
+        Map<String, String> uuidNavnMedfølgendeBarn = hentUuidNavnMedfølgendeBarn(behandlingID);
         for (OmfattetBarn omfattetBarn : avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd) {
-            omfattetBarn.sammensattNavn = tpsFasade.hentSammensattNavn(omfattetBarn.fnrEllerUuid);
+            omfattetBarn.sammensattNavn = uuidNavnMedfølgendeBarn.containsKey(omfattetBarn.fnrEllerUuid)
+                ? uuidNavnMedfølgendeBarn.get(omfattetBarn.fnrEllerUuid)
+                : tpsFasade.hentSammensattNavn(omfattetBarn.fnrEllerUuid);
         }
         for (IkkeOmfattetBarn ikkeOmfattetBarn : avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd) {
-            ikkeOmfattetBarn.sammensattNavn = tpsFasade.hentSammensattNavn(ikkeOmfattetBarn.fnrEllerUuid);
+            ikkeOmfattetBarn.sammensattNavn = uuidNavnMedfølgendeBarn.containsKey(ikkeOmfattetBarn.fnrEllerUuid)
+                ? uuidNavnMedfølgendeBarn.get(ikkeOmfattetBarn.fnrEllerUuid)
+                : tpsFasade.hentSammensattNavn(ikkeOmfattetBarn.fnrEllerUuid);
         }
         return avklarteMedfolgendeBarn;
+    }
+
+    private Map<String, String> hentUuidNavnMedfølgendeBarn(long behandlingID) throws IkkeFunnetException {
+        Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID);
+        return behandlingsgrunnlag == null ? Collections.emptyMap()
+            : behandlingsgrunnlag.getBehandlingsgrunnlagdata().hentUuidNavnMedfølgendeBarn();
     }
 }
