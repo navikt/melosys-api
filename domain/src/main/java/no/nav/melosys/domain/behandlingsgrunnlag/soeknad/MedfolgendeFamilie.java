@@ -15,4 +15,12 @@ public class MedfolgendeFamilie {
         medfolgendeFamilie.relasjonsrolle = Relasjonsrolle.BARN;
         return medfolgendeFamilie;
     }
+
+    public String getFnr() {
+        return fnr;
+    }
+
+    public boolean erBarn() {
+        return relasjonsrolle == Relasjonsrolle.BARN;
+    }
 }

@@ -11,6 +11,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
@@ -129,7 +130,9 @@ public class OppgaveService {
                 .setSaksnummer(behandling.getFagsak().getSaksnummer())
                 .build();
 
-            String oppgaveID = oppgaveFasade.opprettOppgave(oppgave);
+            String oppgaveID = harBeskyttelsesbehov(behandling)
+                ? oppgaveFasade.opprettSensitivOppgave(oppgave)
+                : oppgaveFasade.opprettOppgave(oppgave);
             log.info("Opprettet oppgave {} for behandling {}", oppgaveID, behandling.getId());
         } else if (tilordnetRessurs != null && !tilordnetRessurs.equals(eksisterendeOppgave.get().getTilordnetRessurs())) {
             log.info("Oppgave eksisterer, oppdaterer tilordnetRessurs for oppgave tilknyttet behandling {}", behandling.getId());
@@ -242,5 +245,19 @@ public class OppgaveService {
     private static PeriodeDto mapPeriode(Soeknad soeknad) {
         Periode periode = hentPeriode(soeknad);
         return new PeriodeDto(periode.getFom(), periode.getTom());
+    }
+
+    private boolean harBeskyttelsesbehov(Behandling behandling) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+        if (behandling.hentPersonDokument().diskresjonskode.erKode6()) {
+            return true;
+        } else if (behandling.getBehandlingsgrunnlag() == null) {
+            return false;
+        }
+        for (String fnr : behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().hentFnrMedfølgendeBarn()) {
+            if (tpsFasade.harStrengtFortroligAdresse(fnr)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

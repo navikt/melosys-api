@@ -225,6 +225,13 @@ public class TpsService implements TpsFasade {
         return personDokument != null ? personDokument.sammensattNavn : null;
     }
 
+    @Override
+    public boolean harStrengtFortroligAdresse(String fnr) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+        Saksopplysning saksopplysning = hentPerson(fnr, Informasjonsbehov.INGEN);
+        PersonDokument personDokument = (PersonDokument) saksopplysning.getDokument();
+        return personDokument.diskresjonskode != null && personDokument.diskresjonskode.erKode6();
+    }
+
     private Set<no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov> mapInformasjonsbehovTilTps(Informasjonsbehov behov) {
         switch (behov) {
             case STANDARD:

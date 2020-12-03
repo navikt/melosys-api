@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
+import static no.nav.melosys.integrasjon.Konstanter.NAV_VIKEN_ENHET_ID;
 
 @Service
 @Primary
@@ -136,6 +137,15 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
 
     @Override
     public String opprettOppgave(Oppgave oppgave) throws FunksjonellException, TekniskException {
+        return opprettOppgave(oppgave, false);
+    }
+
+    @Override
+    public String opprettSensitivOppgave(Oppgave oppgave) throws FunksjonellException, TekniskException {
+        return opprettOppgave(oppgave, true);
+    }
+
+    private String opprettOppgave(Oppgave oppgave, boolean erSensitiv) throws FunksjonellException, TekniskException {
         LocalDate idag = LocalDate.now();
         OpprettOppgaveDto oppgaveDto = new OpprettOppgaveDto();
         oppgaveDto.setAktivDato(idag);
@@ -160,7 +170,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         oppgaveDto.setPrioritet(oppgave.getPrioritet().toString());
         oppgaveDto.setSaksreferanse(oppgave.getSaksnummer());
         oppgaveDto.setTema(oppgave.getTema().getKode());
-        oppgaveDto.setTildeltEnhetsnr(Integer.toString(MELOSYS_ENHET_ID));
+        oppgaveDto.setTildeltEnhetsnr(Integer.toString(erSensitiv ? NAV_VIKEN_ENHET_ID : MELOSYS_ENHET_ID));
         if (oppgave.getBehandlesAvApplikasjon() != Fagsystem.INTET) {
             oppgaveDto.setBehandlesAvApplikasjon(oppgave.getBehandlesAvApplikasjon().getKode());
         }
