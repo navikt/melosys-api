@@ -1,7 +1,5 @@
 package no.nav.melosys.domain.behandlingsgrunnlag.soeknad;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.UUID;
 
 public class MedfolgendeFamilie {
@@ -15,16 +13,13 @@ public class MedfolgendeFamilie {
     }
 
     public static MedfolgendeFamilie tilBarnFraFnr(String fnr) {
-        MedfolgendeFamilie medfolgendeFamilie = new MedfolgendeFamilie();
-        medfolgendeFamilie.uuid = UUID.randomUUID().toString();
-        medfolgendeFamilie.fnr = fnr;
-        medfolgendeFamilie.relasjonsrolle = Relasjonsrolle.BARN;
-        return medfolgendeFamilie;
+        return tilBarnFraUuidFnrOgNavn(UUID.randomUUID().toString(), fnr, null);
     }
 
-    public static MedfolgendeFamilie tilBarnFraUuidOgNavn(String uuid, String navn) {
+    public static MedfolgendeFamilie tilBarnFraUuidFnrOgNavn(String uuid, String fnr, String navn) {
         MedfolgendeFamilie medfolgendeFamilie = new MedfolgendeFamilie();
         medfolgendeFamilie.uuid = uuid;
+        medfolgendeFamilie.fnr = fnr;
         medfolgendeFamilie.navn = navn;
         medfolgendeFamilie.relasjonsrolle = Relasjonsrolle.BARN;
         return medfolgendeFamilie;
@@ -38,15 +33,7 @@ public class MedfolgendeFamilie {
         return fnr;
     }
 
-    public String getNavn() {
-        return navn;
-    }
-
     public boolean erBarn() {
         return relasjonsrolle == Relasjonsrolle.BARN;
-    }
-
-    public boolean harUuidOgNavn() {
-        return StringUtils.isNotBlank(uuid) && StringUtils.isNotBlank(navn);
     }
 }
