@@ -83,4 +83,8 @@ public class PersonDokument implements SaksopplysningDokument {
             .filter(forelder -> !fnrGjeldendeForelder.equals(forelder.fnr))
             .findAny();
     }
+
+    public boolean harBeskyttelsesbehov() {
+        return diskresjonskode != null && diskresjonskode.erKode6();
+    }
 }

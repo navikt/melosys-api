@@ -249,7 +249,7 @@ public class OppgaveService {
 
     private boolean harBeskyttelsesbehov(long behandlingID) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        if (behandling.hentPersonDokument().diskresjonskode.erKode6()) {
+        if (behandling.hentPersonDokument().harBeskyttelsesbehov()) {
             return true;
         } else if (behandling.getBehandlingsgrunnlag() == null) {
             return false;
