@@ -4,7 +4,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser
 
 public class IkkeOmfattetBarn {
 
-    public String uuid;
+    public final String uuid;
     public final Medfolgende_barn_begrunnelser begrunnelse;
     private final String begrunnnelseFritekst;
     public String sammensattNavn;
