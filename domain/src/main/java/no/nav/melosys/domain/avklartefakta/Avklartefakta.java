@@ -39,6 +39,15 @@ public class Avklartefakta {
     @OneToMany(mappedBy = "avklartefakta", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AvklartefaktaRegistrering> registreringer = new HashSet<>();
 
+    public Avklartefakta() {
+    }
+
+    public Avklartefakta(Avklartefaktatyper type, String subjekt, String fakta) {
+        this.type = type;
+        this.subjekt = subjekt;
+        this.fakta = fakta;
+    }
+
     public Long getId() {
         return id;
     }
@@ -129,4 +138,17 @@ public class Avklartefakta {
         return Objects.hash(behandlingsresultat, type, subjekt, fakta, referanse);
     }
 
+    @Override
+    public String toString() {
+        return "Avklartefakta{" +
+            "id=" + id +
+            ", behandlingsresultat=" + behandlingsresultat +
+            ", type=" + type +
+            ", referanse='" + referanse + '\'' +
+            ", subjekt='" + subjekt + '\'' +
+            ", fakta='" + fakta + '\'' +
+            ", begrunnelseFritekst='" + begrunnelseFritekst + '\'' +
+            ", registreringer=" + registreringer +
+            '}';
+    }
 }

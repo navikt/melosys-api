@@ -1,0 +1,195 @@
+package no.nav.melosys.service.avgift;
+
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfo;
+import no.nav.melosys.domain.avgift.OppdaterAvgiftsgrunnlagRequest;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
+import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class AvgiftsgrunnlagServiceTest {
+
+    @Mock
+    private BehandlingsresultatService behandlingsresultatService;
+
+    private AvgiftsgrunnlagService avgiftsgrunnlagService;
+
+    private final long behandlingsresultatID = 223;
+
+    private static final String FAKTA_TRUE = "TRUE";
+    private static final String FAKTA_FALSE = "FALSE";
+
+    @BeforeEach
+    void setup() {
+        avgiftsgrunnlagService = new AvgiftsgrunnlagService(behandlingsresultatService);
+    }
+
+    @Test
+    void lagreAvgiftsinformasjon_lønnsforholdNull_kasterFeil() {
+        final var request = new OppdaterAvgiftsgrunnlagRequest(null, null, null);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> avgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request))
+            .withMessageContaining("Lønnsforhold");
+    }
+
+    @Test
+    void lagreAvgiftsinformasjon_lønnFraNorgeMenIkkeOppgitt_kasterFeil() {
+        final var request = new OppdaterAvgiftsgrunnlagRequest(Loenn_forhold.LØNN_FRA_NORGE, null, null);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> avgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request))
+            .withMessageContaining("Mangler informasjon om lønn fra Norge");
+    }
+
+    @Test
+    void lagreAvgiftsinformasjon_lønnFraUtlandMenIkkeOppgitt_kasterFeil() {
+        final var request = new OppdaterAvgiftsgrunnlagRequest(Loenn_forhold.LØNN_FRA_UTLANDET, null, null);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> avgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request))
+            .withMessageContaining("Mangler informasjon om lønn fra utland");
+    }
+
+    @Test
+    void lagreAvgiftsinformasjon_kunAvgiftspliktigNorge_lagres() throws FunksjonellException {
+        final var behandlingsresultat = lagBehandlingsresultat();
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
+        final var request = new OppdaterAvgiftsgrunnlagRequest(
+            Loenn_forhold.LØNN_FRA_NORGE,
+            new AvgiftsgrunnlagInfo(true, false, null),
+            null);
+        avgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request);
+
+        assertThat(behandlingsresultat.getAvklartefakta())
+            .containsExactlyInAnyOrder(
+                new Avklartefakta(LØNN_FORHOLD_VIRKSOMHET, null, Loenn_forhold.LØNN_FRA_NORGE.getKode()),
+                new Avklartefakta(LØNN_NORGE_SKATTEPLIKTIG_NORGE, null, FAKTA_TRUE),
+                new Avklartefakta(LØNN_NORGE_ARBEIDSGIVERAVGIFT, null, FAKTA_FALSE),
+                new Avklartefakta(LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE, null, FAKTA_FALSE)
+            );
+
+        assertThat(behandlingsresultat.getMedlemAvFolketrygden()).isNotNull()
+            .extracting(
+                MedlemAvFolketrygden::getVurderingTrygdeavgiftNorskInntekt,
+                MedlemAvFolketrygden::getVurderingTrygdeavgiftUtenlandskInntekt,
+                m -> m.getFastsattTrygdeavgift().getTrygdeavgiftstype()
+            )
+            .containsExactly(
+                Vurderingsutfall_trygdeavgift_norsk_inntekt.NORSK_INNTEKT_TRYGDEAVGIFT_NAV,
+                Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV,
+                Trygdeavgift_typer.FORELØPIG
+            );
+    }
+
+    @Test
+    void lagreAvgiftsinformasjon_kunAvgiftspliktigUtland_lagres() throws FunksjonellException {
+        final var behandlingsresultat = lagBehandlingsresultat();
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
+        final var request = new OppdaterAvgiftsgrunnlagRequest(
+            Loenn_forhold.LØNN_FRA_UTLANDET,
+            null,
+            new AvgiftsgrunnlagInfo(false, false, null));
+        avgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request);
+
+        assertThat(behandlingsresultat.getAvklartefakta())
+            .containsExactlyInAnyOrder(
+                new Avklartefakta(LØNN_FORHOLD_VIRKSOMHET, null, Loenn_forhold.LØNN_FRA_UTLANDET.getKode()),
+                new Avklartefakta(LØNN_UTL_SKATTEPLIKTIG_NORGE, null, FAKTA_FALSE),
+                new Avklartefakta(LØNN_UTL_ARBEIDSGIVERAVGIFT, null, FAKTA_FALSE),
+                new Avklartefakta(LØNN_UTL_SÆRLIG_AVGIFTS_GRUPPE, null, FAKTA_FALSE)
+            );
+
+        assertThat(behandlingsresultat.getMedlemAvFolketrygden()).isNotNull()
+            .extracting(
+                MedlemAvFolketrygden::getVurderingTrygdeavgiftNorskInntekt,
+                MedlemAvFolketrygden::getVurderingTrygdeavgiftUtenlandskInntekt,
+                m -> m.getFastsattTrygdeavgift().getTrygdeavgiftstype()
+            )
+            .containsExactly(
+                Vurderingsutfall_trygdeavgift_norsk_inntekt.NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV,
+                Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV,
+                Trygdeavgift_typer.FORELØPIG
+            );
+    }
+
+    @Test
+    void lagreAvgiftsinformasjon_deltLønn_lagres() throws FunksjonellException {
+        final var behandlingsresultat = lagBehandlingsresultat();
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
+        final var request = new OppdaterAvgiftsgrunnlagRequest(
+            Loenn_forhold.DELT_LØNN,
+            new AvgiftsgrunnlagInfo(true, false, null),
+            new AvgiftsgrunnlagInfo(false, false, null));
+        avgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request);
+
+        assertThat(behandlingsresultat.getAvklartefakta())
+            .containsExactlyInAnyOrder(
+                new Avklartefakta(LØNN_FORHOLD_VIRKSOMHET, null, Loenn_forhold.DELT_LØNN.getKode()),
+                new Avklartefakta(LØNN_NORGE_SKATTEPLIKTIG_NORGE, null, FAKTA_TRUE),
+                new Avklartefakta(LØNN_NORGE_ARBEIDSGIVERAVGIFT, null, FAKTA_FALSE),
+                new Avklartefakta(LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE, null, FAKTA_FALSE),
+                new Avklartefakta(LØNN_UTL_SKATTEPLIKTIG_NORGE, null, FAKTA_FALSE),
+                new Avklartefakta(LØNN_UTL_ARBEIDSGIVERAVGIFT, null, FAKTA_FALSE),
+                new Avklartefakta(LØNN_UTL_SÆRLIG_AVGIFTS_GRUPPE, null, FAKTA_FALSE)
+            );
+
+        assertThat(behandlingsresultat.getMedlemAvFolketrygden()).isNotNull()
+            .extracting(
+                MedlemAvFolketrygden::getVurderingTrygdeavgiftNorskInntekt,
+                MedlemAvFolketrygden::getVurderingTrygdeavgiftUtenlandskInntekt,
+                m -> m.getFastsattTrygdeavgift().getTrygdeavgiftstype()
+            )
+            .containsExactly(
+                Vurderingsutfall_trygdeavgift_norsk_inntekt.NORSK_INNTEKT_TRYGDEAVGIFT_NAV,
+                Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV,
+                Trygdeavgift_typer.FORELØPIG
+            );
+    }
+
+    @Test
+    void lagreAvgiftsinformasjon_lønnFraNorgeErMisjonær_ikkeAvgiftspliktig() throws FunksjonellException {
+        final var behandlingsresultat = lagBehandlingsresultat();
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
+        final var request = new OppdaterAvgiftsgrunnlagRequest(
+            Loenn_forhold.LØNN_FRA_NORGE,
+            new AvgiftsgrunnlagInfo(true, false, Saerligeavgiftsgrupper.MISJONÆR),
+            null);
+        avgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request);
+
+        assertThat(behandlingsresultat.getAvklartefakta())
+            .containsExactlyInAnyOrder(
+                new Avklartefakta(LØNN_FORHOLD_VIRKSOMHET, null, Loenn_forhold.LØNN_FRA_NORGE.getKode()),
+                new Avklartefakta(LØNN_NORGE_SKATTEPLIKTIG_NORGE, null, FAKTA_TRUE),
+                new Avklartefakta(LØNN_NORGE_ARBEIDSGIVERAVGIFT, null, FAKTA_FALSE),
+                new Avklartefakta(LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE, Saerligeavgiftsgrupper.MISJONÆR.getKode(), FAKTA_TRUE)
+            );
+
+        assertThat(behandlingsresultat.getMedlemAvFolketrygden()).isNotNull()
+            .extracting(
+                MedlemAvFolketrygden::getVurderingTrygdeavgiftNorskInntekt,
+                MedlemAvFolketrygden::getVurderingTrygdeavgiftUtenlandskInntekt,
+                m -> m.getFastsattTrygdeavgift().getTrygdeavgiftstype()
+            )
+            .containsExactly(
+                Vurderingsutfall_trygdeavgift_norsk_inntekt.NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV,
+                Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV,
+                Trygdeavgift_typer.FORELØPIG
+            );
+    }
+
+    private Behandlingsresultat lagBehandlingsresultat() {
+        return new Behandlingsresultat();
+    }
+
+}
