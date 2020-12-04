@@ -22,6 +22,14 @@ public class MedfolgendeFamilie {
         return medfolgendeFamilie;
     }
 
+    public static MedfolgendeFamilie tilBarnFraUuidOgNavn(String uuid, String navn) {
+        MedfolgendeFamilie medfolgendeFamilie = new MedfolgendeFamilie();
+        medfolgendeFamilie.uuid = uuid;
+        medfolgendeFamilie.navn = navn;
+        medfolgendeFamilie.relasjonsrolle = Relasjonsrolle.BARN;
+        return medfolgendeFamilie;
+    }
+
     public String getUuid() {
         return uuid;
     }

@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
@@ -213,36 +214,24 @@ public class BrevDataByggerInnvilgelseTest {
 
     @Test
     public void lag_medfølgendeBarnHarUuid_henterNavnFraBehandlingsgrunnlag() throws TekniskException, FunksjonellException {
+        MedfolgendeFamilie barn1 = MedfolgendeFamilie.tilBarnFraUuidOgNavn(UUID.randomUUID().toString(), "Navn1");
+        MedfolgendeFamilie barn2 = MedfolgendeFamilie.tilBarnFraUuidOgNavn(UUID.randomUUID().toString(), "Navn2");
+        BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
+        behandlingsgrunnlagData.personOpplysninger.medfolgendeFamilie.addAll(List.of(barn1, barn2));
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+
         when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(
-            Set.of(new OmfattetBarn("uuid1")),
-            Set.of(new IkkeOmfattetBarn("uuid2", null, null))));
-        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(lagBehandlingsgrunnlagMedMedfølgendeBarn());
+            Set.of(new OmfattetBarn(barn1.uuid)),
+            Set.of(new IkkeOmfattetBarn(barn2.uuid, null, null))));
+        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
         assertThat(brevData.avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd)
-            .extracting("sammensattNavn").containsExactly("Navn1");
+            .extracting("sammensattNavn").containsExactly(barn1.navn);
         assertThat(brevData.avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd)
-            .extracting("sammensattNavn").containsExactly("Navn2");
+            .extracting("sammensattNavn").containsExactly(barn2.navn);
 
         verify(tpsFasade, never()).hentSammensattNavn(anyString());
-    }
-
-    private Behandlingsgrunnlag lagBehandlingsgrunnlagMedMedfølgendeBarn() {
-        BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
-        behandlingsgrunnlagData.personOpplysninger.medfolgendeFamilie.addAll(List.of(
-            lagMedfølgendeBarnMedUuidOgNavn("uuid1", "Navn1"),
-            lagMedfølgendeBarnMedUuidOgNavn("uuid2", "Navn2")
-        ));
-        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
-        return behandlingsgrunnlag;
-    }
-
-    private MedfolgendeFamilie lagMedfølgendeBarnMedUuidOgNavn(String uuid, String navn) {
-        MedfolgendeFamilie barn = new MedfolgendeFamilie();
-        barn.uuid = uuid;
-        barn.navn = navn;
-        barn.relasjonsrolle = MedfolgendeFamilie.Relasjonsrolle.BARN;
-        return barn;
     }
 }

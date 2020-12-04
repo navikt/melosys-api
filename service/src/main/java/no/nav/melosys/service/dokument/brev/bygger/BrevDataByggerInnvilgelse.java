@@ -128,14 +128,14 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         AvklarteMedfolgendeBarn avklarteMedfolgendeBarn = avklartefaktaService.hentAvklarteMedfølgendeBarn(behandlingID);
         Map<String, String> uuidNavnMedfølgendeBarn = hentUuidNavnMedfølgendeBarn(behandlingID);
         for (OmfattetBarn omfattetBarn : avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd) {
-            omfattetBarn.sammensattNavn = uuidNavnMedfølgendeBarn.containsKey(omfattetBarn.fnrEllerUuid)
-                ? uuidNavnMedfølgendeBarn.get(omfattetBarn.fnrEllerUuid)
-                : tpsFasade.hentSammensattNavn(omfattetBarn.fnrEllerUuid);
+            omfattetBarn.sammensattNavn = omfattetBarn.fnr != null
+                ? tpsFasade.hentSammensattNavn(omfattetBarn.fnr)
+                : uuidNavnMedfølgendeBarn.get(omfattetBarn.uuid);
         }
         for (IkkeOmfattetBarn ikkeOmfattetBarn : avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd) {
-            ikkeOmfattetBarn.sammensattNavn = uuidNavnMedfølgendeBarn.containsKey(ikkeOmfattetBarn.fnrEllerUuid)
-                ? uuidNavnMedfølgendeBarn.get(ikkeOmfattetBarn.fnrEllerUuid)
-                : tpsFasade.hentSammensattNavn(ikkeOmfattetBarn.fnrEllerUuid);
+            ikkeOmfattetBarn.sammensattNavn = ikkeOmfattetBarn.fnr != null
+                ? tpsFasade.hentSammensattNavn(ikkeOmfattetBarn.fnr)
+                : uuidNavnMedfølgendeBarn.get(ikkeOmfattetBarn.uuid);
         }
         return avklarteMedfolgendeBarn;
     }
