@@ -130,7 +130,7 @@ public class OppgaveService {
                 .setSaksnummer(behandling.getFagsak().getSaksnummer())
                 .build();
 
-            String oppgaveID = harBeskyttelsesbehov(behandling)
+            String oppgaveID = harBeskyttelsesbehov(behandling.getId())
                 ? oppgaveFasade.opprettSensitivOppgave(oppgave)
                 : oppgaveFasade.opprettOppgave(oppgave);
             log.info("Opprettet oppgave {} for behandling {}", oppgaveID, behandling.getId());
@@ -247,7 +247,8 @@ public class OppgaveService {
         return new PeriodeDto(periode.getFom(), periode.getTom());
     }
 
-    private boolean harBeskyttelsesbehov(Behandling behandling) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+    private boolean harBeskyttelsesbehov(long behandlingID) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
         if (behandling.hentPersonDokument().diskresjonskode.erKode6()) {
             return true;
         } else if (behandling.getBehandlingsgrunnlag() == null) {
