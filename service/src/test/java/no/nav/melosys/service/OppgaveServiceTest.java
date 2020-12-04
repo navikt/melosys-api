@@ -155,6 +155,7 @@ public class OppgaveServiceTest {
         behandling.getFagsak().setSaksnummer("MEL-11111");
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
         verify(oppgaveFasade).opprettOppgave(any(Oppgave.class));
@@ -196,8 +197,8 @@ public class OppgaveServiceTest {
         behandling.getFagsak().setSaksnummer("MEL-11111");
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
-
         behandling.hentPersonDokument().diskresjonskode = new Diskresjonskode("SPSF");
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
         verify(oppgaveFasade, never()).opprettOppgave(any(Oppgave.class));
@@ -211,10 +212,10 @@ public class OppgaveServiceTest {
         behandling.getFagsak().setSaksnummer("MEL-11111");
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
-
         behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().personOpplysninger.medfolgendeFamilie
             = List.of(MedfolgendeFamilie.tilBarnFraFnr("fnrBarn"));
         when(tpsFasade.harStrengtFortroligAdresse("fnrBarn")).thenReturn(true);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
         verify(oppgaveFasade, never()).opprettOppgave(any(Oppgave.class));
