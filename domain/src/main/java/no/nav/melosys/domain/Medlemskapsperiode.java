@@ -1,9 +1,11 @@
 package no.nav.melosys.domain;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Objects;
 import javax.persistence.*;
 
+import no.nav.melosys.domain.avgift.Trygdeavgift;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
@@ -47,6 +49,10 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
 
     @Column(name = "medlperiode_id")
     private Long medlPeriodeID;
+
+    @OneToMany(mappedBy = "medlemskapsperiode", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private Collection<Trygdeavgift> trygdeavgift;
+
 
     public Medlemskapsperiode() {
     }
@@ -145,6 +151,14 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
 
     public void setMedlPeriodeID(Long medlPeriodeID) {
         this.medlPeriodeID = medlPeriodeID;
+    }
+
+    public Collection<Trygdeavgift> getTrygdeavgift() {
+        return trygdeavgift;
+    }
+
+    public void setTrygdeavgift(Collection<Trygdeavgift> trygdeavgift) {
+        this.trygdeavgift = trygdeavgift;
     }
 
     @Override

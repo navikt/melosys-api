@@ -18,7 +18,6 @@ CREATE TABLE trygdeavgift
 (
     id                          NUMBER(19) GENERATED ALWAYS AS IDENTITY,
     medlemskapsperiode_id       NUMBER(19) NOT NULL,
-    type                        VARCHAR2(99) NOT NULL,
     trygdesats                  NUMBER(5,1) NOT NULL,
     avgiftskode                 VARCHAR2(20) NOT NULL,
     CONSTRAINT pk_trygdeavgift  PRIMARY KEY (id)
