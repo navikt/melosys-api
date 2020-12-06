@@ -3,12 +3,14 @@ package no.nav.melosys.service.avgift;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.avgift.Avgiftsgrunnlag;
 import no.nav.melosys.domain.avgift.OppdaterAvgiftsgrunnlagRequest;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.springframework.stereotype.Service;
@@ -36,7 +38,7 @@ public class AvgiftsgrunnlagService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void oppdaterAvgiftsgrunnlag(long behandlingsresultatID, OppdaterAvgiftsgrunnlagRequest req) throws FunksjonellException {
+    public Avgiftsgrunnlag oppdaterAvgiftsgrunnlag(long behandlingsresultatID, OppdaterAvgiftsgrunnlagRequest req) throws FunksjonellException {
         valider(req);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID);
         behandlingsresultat.getAvklartefakta().removeIf(a -> AVKLARTE_FAKTA_KODER.contains(a.getType()));
@@ -57,6 +59,7 @@ public class AvgiftsgrunnlagService {
                 : UTENLANDSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV);
 
         behandlingsresultatService.lagre(behandlingsresultat);
+        return hentAvgiftsgrunnlag(behandlingsresultatID);
     }
 
     private MedlemAvFolketrygden hentEllerOpprettMedlemAvFolketrygden(Behandlingsresultat behandlingsresultat) {
@@ -102,5 +105,11 @@ public class AvgiftsgrunnlagService {
         if ((req.getLønnsforhold() == LØNN_FRA_UTLANDET || req.getLønnsforhold() == DELT_LØNN) && req.getAvgiftsGrunnlagUtland() == null) {
             throw new FunksjonellException("Mangler informasjon om lønn fra utlandet");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Avgiftsgrunnlag hentAvgiftsgrunnlag(long behandlingresultatID) throws IkkeFunnetException {
+        return Avgiftsgrunnlag.av(behandlingsresultatService.hentBehandlingsresultat(behandlingresultatID));
+
     }
 }

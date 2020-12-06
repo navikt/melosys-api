@@ -12,7 +12,10 @@ import no.nav.melosys.domain.kodeverk.Loenn_forhold;
 import no.nav.melosys.domain.kodeverk.Saerligeavgiftsgrupper;
 import no.nav.melosys.exception.FunksjonellException;
 
-public class OppdaterAvgiftsgrunnlagRequest extends AbstraktAvgiftsgrunnlag {
+import static no.nav.melosys.domain.avklartefakta.Avklartefakta.IKKE_VALGT_FAKTA;
+import static no.nav.melosys.domain.avklartefakta.Avklartefakta.VALGT_FAKTA;
+
+public class OppdaterAvgiftsgrunnlagRequest extends AbstraktAvgiftsgrunnlag<AvgiftsgrunnlagInfo, AvgiftsgrunnlagInfo> {
 
     public OppdaterAvgiftsgrunnlagRequest(Loenn_forhold lønnsforhold,
                                           AvgiftsgrunnlagInfo avgiftsGrunnlagNorge,
@@ -81,7 +84,7 @@ public class OppdaterAvgiftsgrunnlagRequest extends AbstraktAvgiftsgrunnlag {
     }
 
     private String tilFakta(Boolean fakta) {
-        return Boolean.TRUE.equals(fakta) ? "TRUE" : "FALSE";
+        return Boolean.TRUE.equals(fakta) ? VALGT_FAKTA : IKKE_VALGT_FAKTA;
     }
 
 }

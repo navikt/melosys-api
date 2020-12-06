@@ -12,6 +12,9 @@ import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 @Table(name = "avklartefakta")
 public class Avklartefakta {
 
+    public static final String VALGT_FAKTA = "TRUE";
+    public static final String IKKE_VALGT_FAKTA = "FALSE";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -150,5 +153,9 @@ public class Avklartefakta {
             ", begrunnelseFritekst='" + begrunnelseFritekst + '\'' +
             ", registreringer=" + registreringer +
             '}';
+    }
+
+    public static boolean erValgtFakta(Avklartefakta avklartefakta) {
+        return VALGT_FAKTA.equalsIgnoreCase(avklartefakta.getFakta());
     }
 }

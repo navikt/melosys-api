@@ -8,6 +8,7 @@ import no.nav.melosys.service.avgift.AvgiftsgrunnlagService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/behandlinger/{behandlingID}/avgift")
 public class AvgiftTjeneste {
 
     private final AvgiftsgrunnlagService avgiftsgrunnlagService;
@@ -18,30 +19,27 @@ public class AvgiftTjeneste {
         this.tilgangService = tilgangService;
     }
 
-    @PutMapping("/behandlinger/{behandlingID}/avgift/grunnlag")
+    @PutMapping("/grunnlag")
     public Object oppdaterAvgiftsgrunnlag(@PathVariable("behandlingID") long behandlingID,
                                           @RequestBody OppdaterAvgiftsgrunnlagRequest oppdaterAvgiftsgrunnlagRequest
     ) throws FunksjonellException, TekniskException {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
-        avgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingID, oppdaterAvgiftsgrunnlagRequest);
-        return null;
+        return avgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingID, oppdaterAvgiftsgrunnlagRequest);
     }
 
-    @GetMapping("/behandlinger/{behandlingID}/avgift/grunnlag")
+    @GetMapping("/grunnlag")
     public Object hentAvgiftsgrunnlag(@PathVariable("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
-        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
-
-        return null;
+        tilgangService.sjekkTilgang(behandlingID);
+        return avgiftsgrunnlagService.hentAvgiftsgrunnlag(behandlingID);
     }
 
-    @PutMapping("/behandlinger/{behandlingID}/avgift/beregning")
+    @PutMapping("/beregning")
     public Object oppdaterBeregningsgrunnlag(@PathVariable("behandlingID") long behandlingID,
                                                          @RequestBody Object oppdaterBeregningsgrunnlagRequest) {
-
         return null;
     }
 
-    @GetMapping("/behandlinger/{behandlingID}/avgift/beregning")
+    @GetMapping("/beregning")
     public Object hentBeregningsresultat(@PathVariable("behandlingID") long behandlingID) {
         return null;
     }

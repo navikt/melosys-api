@@ -2,14 +2,14 @@ package no.nav.melosys.domain.avgift;
 
 import no.nav.melosys.domain.kodeverk.Loenn_forhold;
 
-public abstract class AbstraktAvgiftsgrunnlag {
+public abstract class AbstraktAvgiftsgrunnlag<N extends AvgiftsgrunnlagInfo, U extends AvgiftsgrunnlagInfo> {
     protected final Loenn_forhold lønnsforhold;
-    protected final AvgiftsgrunnlagInfo avgiftsGrunnlagNorge;
-    protected final AvgiftsgrunnlagInfo avgiftsGrunnlagUtland;
+    protected final N avgiftsGrunnlagNorge;
+    protected final U avgiftsGrunnlagUtland;
 
     public AbstraktAvgiftsgrunnlag(Loenn_forhold lønnsforhold,
-                                   AvgiftsgrunnlagInfo avgiftsGrunnlagNorge,
-                                   AvgiftsgrunnlagInfo avgiftsGrunnlagUtland) {
+                                   N avgiftsGrunnlagNorge,
+                                   U avgiftsGrunnlagUtland) {
         this.lønnsforhold = lønnsforhold;
         this.avgiftsGrunnlagNorge = avgiftsGrunnlagNorge;
         this.avgiftsGrunnlagUtland = avgiftsGrunnlagUtland;
@@ -19,11 +19,19 @@ public abstract class AbstraktAvgiftsgrunnlag {
         return lønnsforhold;
     }
 
-    public AvgiftsgrunnlagInfo getAvgiftsGrunnlagNorge() {
+    public N getAvgiftsGrunnlagNorge() {
         return avgiftsGrunnlagNorge;
     }
 
-    public AvgiftsgrunnlagInfo getAvgiftsGrunnlagUtland() {
+    public U getAvgiftsGrunnlagUtland() {
         return avgiftsGrunnlagUtland;
+    }
+
+    public static boolean harLønnsforholdINorge(Loenn_forhold lønnsforhold) {
+        return lønnsforhold == Loenn_forhold.DELT_LØNN || lønnsforhold == Loenn_forhold.LØNN_FRA_NORGE;
+    }
+
+    public static boolean harLønnsforholdIUtlandet(Loenn_forhold lønnsforhold) {
+        return lønnsforhold == Loenn_forhold.DELT_LØNN || lønnsforhold == Loenn_forhold.LØNN_FRA_UTLANDET;
     }
 }
