@@ -99,6 +99,9 @@ public class BehandlingsgrunnlagService {
         if (behandling.getBehandlingsgrunnlag() != null) {
             throw new FunksjonellException("Finnes allerede behandlingsgrunnlag for behandling " + behandling.getId());
         }
+        if (eksternReferanseID != null && harMottattSøknadMedEksternReferanseID(eksternReferanseID)) {
+            throw new FunksjonellException("Det finnes allerede behandlingsgrunnlag med eksterReferanseID " + eksternReferanseID);
+        }
 
         Instant nå = Instant.now();
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();

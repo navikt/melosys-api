@@ -307,7 +307,7 @@ public class ProsessinstansService {
     @Transactional
     public void opprettProsessinstansSøknadMottatt(SoknadMottatt søknadMottatt) {
         if (behandlingsgrunnlagService.harMottattSøknadMedEksternReferanseID(søknadMottatt.getSoknadID())) {
-            logger.info("Søknad med søknadID {} har vært mottatt tidligere.", søknadMottatt.getSoknadID());
+            logger.warn("Søknad med søknadID {} har vært mottatt tidligere.", søknadMottatt.getSoknadID());
         } else {
             Prosessinstans prosessinstans = new ProsessinstansBuilder()
                 .medType(ProsessType.MOTTAK_SOKNAD_ALTINN)
