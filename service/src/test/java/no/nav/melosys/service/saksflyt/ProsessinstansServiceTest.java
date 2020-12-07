@@ -1,6 +1,7 @@
 package no.nav.melosys.service.saksflyt;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -30,6 +31,7 @@ import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.journalforing.dto.*;
 import no.nav.melosys.service.sak.OpprettSakDto;
+import no.nav.melosys.service.soknad.SoknadMottatt;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.jeasy.random.EasyRandom;
@@ -383,6 +385,27 @@ class ProsessinstansServiceTest {
         assertThat(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID)).isNotEmpty();
         assertThat(prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID)).isNotEmpty();
         assertThat(prosessinstans.getData(ProsessDataKey.EESSI_MELDING)).isNotEmpty();
+    }
+
+    @Test
+    void opprettProsessinstansSøknadMottatt_finnesIkkeFraFør_oppretterNyProsessinstans() {
+        SoknadMottatt søknadMottatt = new SoknadMottatt("søknadID", ZonedDateTime.now());
+
+        prosessinstansService.opprettProsessinstansSøknadMottatt(søknadMottatt);
+        verify(prosessinstansRepo).save(piCaptor.capture());
+
+        Prosessinstans prosessinstans = piCaptor.getValue();
+        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.MOTTAK_SOKNAD_ALTINN);
+        assertThat(prosessinstans.getData(ProsessDataKey.MOTTATT_SOKNAD_ID)).isEqualTo(søknadMottatt.getSoknadID());
+    }
+
+    @Test
+    void opprettProsessinstansSøknadMottatt_finnesFraFør_oppretterIkkeNyProsessinstans() {
+        SoknadMottatt søknadMottatt = new SoknadMottatt("søknadID", ZonedDateTime.now());
+        when(behandlingsgrunnlagService.harMottattSøknadMedEksternReferanseID(eq(søknadMottatt.getSoknadID()))).thenReturn(true);
+
+        prosessinstansService.opprettProsessinstansSøknadMottatt(søknadMottatt);
+        verify(prosessinstansRepo, never()).save(any(Prosessinstans.class));
     }
 
     private MelosysEessiMelding hentMelosysEessiMelding(LocalDate fom, LocalDate tom) {
