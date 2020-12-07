@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface BehandlingsgrunnlagRepository extends JpaRepository<Behandlingsgrunnlag, Long> {
     Optional<Behandlingsgrunnlag> findByBehandling_Id(long behandlingId);
+
+    Optional<Behandlingsgrunnlag> findByEksternReferanseID(String eksternReferanseID);
 }

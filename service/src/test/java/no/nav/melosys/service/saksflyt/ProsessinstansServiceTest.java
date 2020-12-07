@@ -27,6 +27,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.journalforing.dto.*;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
@@ -54,6 +55,8 @@ class ProsessinstansServiceTest {
     private ProsessinstansRepository prosessinstansRepo;
     @Mock
     private UtenlandskMyndighetService utenlandskMyndighetService;
+    @Mock
+    private BehandlingsgrunnlagService behandlingsgrunnlagService;
 
     @Captor
     private ArgumentCaptor<Prosessinstans> piCaptor;
@@ -62,7 +65,8 @@ class ProsessinstansServiceTest {
 
     @BeforeEach
     public void setUp() {
-        prosessinstansService = new ProsessinstansService(applicationEventPublisher, prosessinstansRepo, utenlandskMyndighetService);
+        prosessinstansService = new ProsessinstansService(applicationEventPublisher,
+            prosessinstansRepo, utenlandskMyndighetService, behandlingsgrunnlagService);
     }
 
     @Test

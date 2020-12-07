@@ -1,0 +1,2 @@
+ALTER TABLE BEHANDLINGSGRUNNLAG ADD ekstern_referanse_id VARCHAR2(99);
+CREATE UNIQUE INDEX idx_ekstern_referanse_id_behandlingsgrunnlag_unik ON behandlingsgrunnlag(ekstern_referanse_id);

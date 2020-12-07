@@ -72,7 +72,8 @@ public class AltinnSoeknadService {
         behandlingsgrunnlagService.opprettSøknadUtsendteArbeidstakereEøs(
             behandling.getId(),
             søknadXml,
-            SoeknadMapper.lagSoeknad(søknad)
+            SoeknadMapper.lagSoeknad(søknad),
+            søknadReferanse
         );
         avklarteVirksomheterService.lagreVirksomhetSomAvklartfakta(hentArbeidsgiverID(søknad), behandling.getId());
 
