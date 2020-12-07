@@ -136,6 +136,6 @@ public class BehandlingsgrunnlagService {
     }
 
     public boolean harMottattSøknadMedEksternReferanseID(String eksternReferanseID) {
-        return behandlingsgrunnlagRepository.findByEksternReferanseID(eksternReferanseID).isPresent();
+        return !behandlingsgrunnlagRepository.findByEksternReferanseID(eksternReferanseID).isEmpty();
     }
 }
