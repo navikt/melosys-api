@@ -52,8 +52,8 @@ class TrygdeavgiftConsumerTest {
 
         TrygdeavgiftDto response = trygdeavgiftConsumer.beregnTrygdeavgift(lagBeregningsgrunnlagDto());
         assertThat(response)
-            .extracting(TrygdeavgiftDto::getAvgiftskode, TrygdeavgiftDto::getAvgiftssats, TrygdeavgiftDto::getKvartalsavgift)
-            .containsExactly("T2R", new BigDecimal("28.7"), new BigDecimal(114800));
+            .extracting(TrygdeavgiftDto::getAvgiftskode, TrygdeavgiftDto::getAvgiftssats, TrygdeavgiftDto::getMaanedsavgift)
+            .containsExactly("B2R", new BigDecimal("21.8"), new BigDecimal(21800));
     }
 
     private BeregningsgrunnlagDto lagBeregningsgrunnlagDto() {

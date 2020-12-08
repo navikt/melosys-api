@@ -8,15 +8,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class TrygdeavgiftDto {
     private final String avgiftskode;
     private final BigDecimal avgiftssats;
-    private final BigDecimal kvartalsavgift;
+    private final BigDecimal maanedsavgift;
 
     @JsonCreator
     public TrygdeavgiftDto(@JsonProperty("avgiftskode") String avgiftskode,
                            @JsonProperty("avgiftssats") BigDecimal avgiftssats,
-                           @JsonProperty("kvartalsavgift") BigDecimal kvartalsavgift) {
+                           @JsonProperty("kvartalsavgift") BigDecimal maanedsavgift) {
         this.avgiftskode = avgiftskode;
         this.avgiftssats = avgiftssats;
-        this.kvartalsavgift = kvartalsavgift;
+        this.maanedsavgift = maanedsavgift;
     }
 
     public String getAvgiftskode() {
@@ -27,7 +27,7 @@ public class TrygdeavgiftDto {
         return avgiftssats;
     }
 
-    public BigDecimal getKvartalsavgift() {
-        return kvartalsavgift;
+    public BigDecimal getMaanedsavgift() {
+        return maanedsavgift;
     }
 }
