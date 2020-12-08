@@ -3,9 +3,9 @@ package no.nav.melosys.service.avgift;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.avgift.Avgiftsgrunnlag;
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfo;
-import no.nav.melosys.domain.avgift.OppdaterAvgiftsgrunnlagRequest;
+import no.nav.melosys.domain.avgift.OppdaterTrygdeavgiftsgrunnlagRequest;
+import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.*;
@@ -45,7 +45,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
     @Test
     void lagreAvgiftsinformasjon_lønnsforholdNull_kasterFeil() {
-        final var request = new OppdaterAvgiftsgrunnlagRequest(null, null, null);
+        final var request = new OppdaterTrygdeavgiftsgrunnlagRequest(null, null, null);
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request))
             .withMessageContaining("Lønnsforhold");
@@ -53,7 +53,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
     @Test
     void lagreAvgiftsinformasjon_lønnFraNorgeMenIkkeOppgitt_kasterFeil() {
-        final var request = new OppdaterAvgiftsgrunnlagRequest(Loenn_forhold.LØNN_FRA_NORGE, null, null);
+        final var request = new OppdaterTrygdeavgiftsgrunnlagRequest(Loenn_forhold.LØNN_FRA_NORGE, null, null);
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request))
             .withMessageContaining("Mangler informasjon om lønn fra Norge");
@@ -61,7 +61,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
     @Test
     void lagreAvgiftsinformasjon_lønnFraUtlandMenIkkeOppgitt_kasterFeil() {
-        final var request = new OppdaterAvgiftsgrunnlagRequest(Loenn_forhold.LØNN_FRA_UTLANDET, null, null);
+        final var request = new OppdaterTrygdeavgiftsgrunnlagRequest(Loenn_forhold.LØNN_FRA_UTLANDET, null, null);
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request))
             .withMessageContaining("Mangler informasjon om lønn fra utland");
@@ -71,7 +71,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     void lagreAvgiftsinformasjon_kunAvgiftspliktigNorge_lagres() throws FunksjonellException {
         final var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
-        final var request = new OppdaterAvgiftsgrunnlagRequest(
+        final var request = new OppdaterTrygdeavgiftsgrunnlagRequest(
             Loenn_forhold.LØNN_FRA_NORGE,
             new AvgiftsgrunnlagInfo(true, false, null),
             null);
@@ -102,7 +102,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     void lagreAvgiftsinformasjon_kunAvgiftspliktigUtland_lagres() throws FunksjonellException {
         final var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
-        final var request = new OppdaterAvgiftsgrunnlagRequest(
+        final var request = new OppdaterTrygdeavgiftsgrunnlagRequest(
             Loenn_forhold.LØNN_FRA_UTLANDET,
             null,
             new AvgiftsgrunnlagInfo(false, false, null));
@@ -133,7 +133,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     void lagreAvgiftsinformasjon_deltLønn_lagres() throws FunksjonellException {
         final var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
-        final var request = new OppdaterAvgiftsgrunnlagRequest(
+        final var request = new OppdaterTrygdeavgiftsgrunnlagRequest(
             Loenn_forhold.DELT_LØNN,
             new AvgiftsgrunnlagInfo(true, false, null),
             new AvgiftsgrunnlagInfo(false, false, null));
@@ -167,7 +167,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     void lagreAvgiftsinformasjon_lønnFraNorgeErMisjonær_ikkeAvgiftspliktig() throws FunksjonellException {
         final var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
-        final var request = new OppdaterAvgiftsgrunnlagRequest(
+        final var request = new OppdaterTrygdeavgiftsgrunnlagRequest(
             Loenn_forhold.LØNN_FRA_NORGE,
             new AvgiftsgrunnlagInfo(true, false, Saerligeavgiftsgrupper.MISJONÆR),
             null);
@@ -213,7 +213,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
         assertThat(trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(behandlingsresultatID))
             .extracting(
-                Avgiftsgrunnlag::getLønnsforhold,
+                Trygdeavgiftsgrunnlag::getLønnsforhold,
                 a -> a.getAvgiftsGrunnlagNorge().getBetalerArbeidsgiverAvgift(),
                 a -> a.getAvgiftsGrunnlagNorge().getErSkattepliktig(),
                 a -> a.getAvgiftsGrunnlagNorge().getSærligAvgiftsgruppe(),

@@ -10,16 +10,16 @@ import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Loenn_forhold;
 import no.nav.melosys.domain.kodeverk.Saerligeavgiftsgrupper;
 
-public class Avgiftsgrunnlag extends AbstraktAvgiftsgrunnlag<AvgiftsgrunnlagInfoNorge, AvgiftsgrunnlagInfoUtland> {
+public class Trygdeavgiftsgrunnlag extends AbstraktAvgiftsgrunnlag<AvgiftsgrunnlagInfoNorge, AvgiftsgrunnlagInfoUtland> {
 
-    public Avgiftsgrunnlag(Loenn_forhold lønnsforhold, AvgiftsgrunnlagInfoNorge avgiftsGrunnlagNorge, AvgiftsgrunnlagInfoUtland avgiftsGrunnlagUtland) {
+    public Trygdeavgiftsgrunnlag(Loenn_forhold lønnsforhold, AvgiftsgrunnlagInfoNorge avgiftsGrunnlagNorge, AvgiftsgrunnlagInfoUtland avgiftsGrunnlagUtland) {
         super(lønnsforhold, avgiftsGrunnlagNorge, avgiftsGrunnlagUtland);
     }
 
-    public static Avgiftsgrunnlag av(Behandlingsresultat behandlingsresultat) {
+    public static Trygdeavgiftsgrunnlag av(Behandlingsresultat behandlingsresultat) {
         final var avklarteFakta = behandlingsresultat.getAvklartefakta();
         final var lønnsforhold = finnLønnsforholdFakta(avklarteFakta);
-        return new Avgiftsgrunnlag(
+        return new Trygdeavgiftsgrunnlag(
             lønnsforhold,
             harLønnsforholdINorge(lønnsforhold) ? lagAvgiftsgrunnlagNorge(avklarteFakta, behandlingsresultat.getMedlemAvFolketrygden()) : null,
             harLønnsforholdIUtlandet(lønnsforhold) ? lagAvgiftsgrunnlagUtland(avklarteFakta, behandlingsresultat.getMedlemAvFolketrygden()) : null

@@ -3,8 +3,8 @@ package no.nav.melosys.service.avgift;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.avgift.Avgiftsgrunnlag;
-import no.nav.melosys.domain.avgift.OppdaterAvgiftsgrunnlagRequest;
+import no.nav.melosys.domain.avgift.OppdaterTrygdeavgiftsgrunnlagRequest;
+import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
@@ -38,7 +38,7 @@ public class TrygdeavgiftsgrunnlagService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public Avgiftsgrunnlag oppdaterAvgiftsgrunnlag(long behandlingsresultatID, OppdaterAvgiftsgrunnlagRequest req) throws FunksjonellException {
+    public Trygdeavgiftsgrunnlag oppdaterAvgiftsgrunnlag(long behandlingsresultatID, OppdaterTrygdeavgiftsgrunnlagRequest req) throws FunksjonellException {
         valider(req);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID);
         behandlingsresultat.getAvklartefakta().removeIf(a -> AVKLARTE_FAKTA_KODER.contains(a.getType()));
@@ -84,17 +84,17 @@ public class TrygdeavgiftsgrunnlagService {
         return fastsattTrygdeavgift;
     }
 
-    private boolean skalInnkreveAvgiftLønnNorge(OppdaterAvgiftsgrunnlagRequest req) {
+    private boolean skalInnkreveAvgiftLønnNorge(OppdaterTrygdeavgiftsgrunnlagRequest req) {
         return (req.getLønnsforhold() == LØNN_FRA_NORGE || req.getLønnsforhold() == DELT_LØNN) &&
             req.getAvgiftsGrunnlagNorge().erAvgiftspliktig();
     }
 
-    private boolean skalInnkreveAvgiftLønnUtland(OppdaterAvgiftsgrunnlagRequest req) {
+    private boolean skalInnkreveAvgiftLønnUtland(OppdaterTrygdeavgiftsgrunnlagRequest req) {
         return (req.getLønnsforhold() == LØNN_FRA_UTLANDET || req.getLønnsforhold() == DELT_LØNN) &&
             req.getAvgiftsGrunnlagUtland().erAvgiftspliktig();
     }
 
-    private void valider(OppdaterAvgiftsgrunnlagRequest req) throws FunksjonellException {
+    private void valider(OppdaterTrygdeavgiftsgrunnlagRequest req) throws FunksjonellException {
         if (req.getLønnsforhold() == null) {
             throw new FunksjonellException("Lønnsforhold ikke oppgitt");
         }
@@ -108,8 +108,8 @@ public class TrygdeavgiftsgrunnlagService {
     }
 
     @Transactional(readOnly = true)
-    public Avgiftsgrunnlag hentAvgiftsgrunnlag(long behandlingresultatID) throws IkkeFunnetException {
-        return Avgiftsgrunnlag.av(behandlingsresultatService.hentBehandlingsresultat(behandlingresultatID));
+    public Trygdeavgiftsgrunnlag hentAvgiftsgrunnlag(long behandlingresultatID) throws IkkeFunnetException {
+        return Trygdeavgiftsgrunnlag.av(behandlingsresultatService.hentBehandlingsresultat(behandlingresultatID));
 
     }
 }

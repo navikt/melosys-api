@@ -15,11 +15,11 @@ import no.nav.melosys.exception.FunksjonellException;
 import static no.nav.melosys.domain.avklartefakta.Avklartefakta.IKKE_VALGT_FAKTA;
 import static no.nav.melosys.domain.avklartefakta.Avklartefakta.VALGT_FAKTA;
 
-public class OppdaterAvgiftsgrunnlagRequest extends AbstraktAvgiftsgrunnlag<AvgiftsgrunnlagInfo, AvgiftsgrunnlagInfo> {
+public class OppdaterTrygdeavgiftsgrunnlagRequest extends AbstraktAvgiftsgrunnlag<AvgiftsgrunnlagInfo, AvgiftsgrunnlagInfo> {
 
-    public OppdaterAvgiftsgrunnlagRequest(Loenn_forhold lønnsforhold,
-                                          AvgiftsgrunnlagInfo avgiftsGrunnlagNorge,
-                                          AvgiftsgrunnlagInfo avgiftsGrunnlagUtland) {
+    public OppdaterTrygdeavgiftsgrunnlagRequest(Loenn_forhold lønnsforhold,
+                                                AvgiftsgrunnlagInfo avgiftsGrunnlagNorge,
+                                                AvgiftsgrunnlagInfo avgiftsGrunnlagUtland) {
         super(lønnsforhold, avgiftsGrunnlagNorge, avgiftsGrunnlagUtland);
     }
 

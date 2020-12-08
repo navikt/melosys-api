@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui.avklartefakta;
 
-import no.nav.melosys.domain.avgift.OppdaterAvgiftsgrunnlagRequest;
+import no.nav.melosys.domain.avgift.OppdaterTrygdeavgiftsgrunnlagRequest;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
@@ -21,10 +21,10 @@ public class AvgiftTjeneste {
 
     @PutMapping("/grunnlag")
     public Object oppdaterAvgiftsgrunnlag(@PathVariable("behandlingID") long behandlingID,
-                                          @RequestBody OppdaterAvgiftsgrunnlagRequest oppdaterAvgiftsgrunnlagRequest
+                                          @RequestBody OppdaterTrygdeavgiftsgrunnlagRequest oppdaterTrygdeavgiftsgrunnlagRequest
     ) throws FunksjonellException, TekniskException {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
-        return trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingID, oppdaterAvgiftsgrunnlagRequest);
+        return trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingID, oppdaterTrygdeavgiftsgrunnlagRequest);
     }
 
     @GetMapping("/grunnlag")
