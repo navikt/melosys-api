@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Saerligeavgiftsgrupper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.integrasjon.trygdeavgift.dto.BeregningsgrunnlagDto;
+import no.nav.melosys.integrasjon.trygdeavgift.dto.MelosysTrygdeavgfitBeregningDto;
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftDto;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -56,8 +56,8 @@ class TrygdeavgiftConsumerTest {
             .containsExactly("B2R", new BigDecimal("21.8"), new BigDecimal(21800));
     }
 
-    private BeregningsgrunnlagDto lagBeregningsgrunnlagDto() {
-        return new BeregningsgrunnlagDto(Boolean.FALSE, Boolean.FALSE, Trygdedekninger.HELSEDEL,
+    private MelosysTrygdeavgfitBeregningDto lagBeregningsgrunnlagDto() {
+        return new MelosysTrygdeavgfitBeregningDto(Boolean.FALSE, Boolean.FALSE, Trygdedekninger.HELSEDEL,
             Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8, 123321, LocalDate.now(), Saerligeavgiftsgrupper.ARBEIDSTAKER_MALAYSIA);
     }
 

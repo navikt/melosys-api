@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon.trygdeavgift;
 
-import no.nav.melosys.integrasjon.trygdeavgift.dto.BeregningsgrunnlagDto;
+import no.nav.melosys.integrasjon.trygdeavgift.dto.MelosysTrygdeavgfitBeregningDto;
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -25,10 +25,10 @@ public class TrygdeavgiftConsumer {
         httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
     }
 
-    public TrygdeavgiftDto beregnTrygdeavgift(BeregningsgrunnlagDto beregningsgrunnlagDto) {
+    public TrygdeavgiftDto beregnTrygdeavgift(MelosysTrygdeavgfitBeregningDto melosysTrygdeavgfitBeregningDto) {
         return webClient.post()
             .uri("/v1/beregn-trygdeavgift")
-            .bodyValue(beregningsgrunnlagDto)
+            .bodyValue(melosysTrygdeavgfitBeregningDto)
             .retrieve()
             .bodyToMono(TrygdeavgiftDto.class)
             .block();
