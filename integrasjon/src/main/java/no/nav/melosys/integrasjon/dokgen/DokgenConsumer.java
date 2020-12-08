@@ -8,6 +8,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import static java.lang.String.format;
+
 @Component
 public class DokgenConsumer {
     private static final Logger log = LoggerFactory.getLogger(DokgenConsumer.class);
@@ -18,12 +20,15 @@ public class DokgenConsumer {
         this.webClient = WebClient.create(url);
     }
 
-    public byte[] lagPdf(String malNavn, DokgenDto dokgenDto) {
+    public byte[] lagPdf(String malNavn, DokgenDto dokgenDto, boolean bestillKopi) {
         log.info("Produserer PDF i melosys-dokgen. Mal: {}", malNavn);
-        String lagPdfUri = "/mal/{malNavn}/lag-pdf";
+        String lagPdfUri = format("/mal/%s/lag-pdf", malNavn);
 
-        return webClient.post().uri(lagPdfUri, malNavn)
-            .contentType(MediaType.APPLICATION_JSON)
+        return webClient.post().uri(uriBuilder ->
+            uriBuilder
+                .path(lagPdfUri)
+                .queryParam("somKopi", bestillKopi)
+                .build())
             .bodyValue(dokgenDto)
             .retrieve()
             .bodyToMono(byte[].class)

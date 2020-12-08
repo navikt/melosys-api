@@ -9,7 +9,9 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.DokgenService;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,11 +38,17 @@ class OpprettJournalforBrevTest {
     @Mock
     private JoarkFasade mockJoarkFasade;
 
+    @Mock
+    private EregFasade mockEregFasade;
+
+    @Mock
+    private KontaktopplysningService mockKontaktopplysningService;
+
     private OpprettJournalforBrev opprettJournalforBrev;
 
     @BeforeEach
     void init() {
-        opprettJournalforBrev = new OpprettJournalforBrev(mockBehandlingService, mockDokgenService, mockJoarkFasade);
+        opprettJournalforBrev = new OpprettJournalforBrev(mockBehandlingService, mockDokgenService, mockJoarkFasade, mockEregFasade, mockKontaktopplysningService);
     }
 
     @Test
@@ -51,43 +59,19 @@ class OpprettJournalforBrevTest {
 
     @Test
     void utførOpprettJournalforBrev() throws Exception {
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
-        when(mockDokgenService.produserBrev(any(), any())).thenReturn("pdf".getBytes());
+        Behandling behandling = TestdataFactory.lagBehandling();
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockDokgenService.produserBrev(any())).thenReturn("pdf".getBytes());
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
 
         Prosessinstans prosessinstans = new Prosessinstans();
-        Behandling behandling = lagBehandling();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.PRODUSERBART_BREV, Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
 
         opprettJournalforBrev.utfør(prosessinstans);
 
         verify(mockBehandlingService).hentBehandling(anyLong());
-        verify(mockDokgenService).produserBrev(any(), any());
+        verify(mockDokgenService).produserBrev(any());
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
-
-    private Behandling lagBehandling() {
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setSaksopplysninger(singleton(lagPersonopplysning()));
-        behandling.setFagsak(lagFagsak());
-        return behandling;
-    }
-
-    private Saksopplysning lagPersonopplysning() {
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.PERSOPL);
-        PersonDokument personDokument = new PersonDokument();
-        personDokument.fnr = "99887766554";
-        saksopplysning.setDokument(personDokument);
-        return saksopplysning;
-    }
-
-    private Fagsak lagFagsak() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setGsakSaksnummer(123L);
-        return fagsak;
-    }
-
 }

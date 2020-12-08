@@ -124,12 +124,6 @@ public class JoarkService implements JoarkFasade {
         return LocalDate.ofInstant(hentJournalpost(journalpostID).getForsendelseMottatt(), ZoneId.systemDefault());
     }
 
-    @Override
-    public Instant hentInstantMottaksDatoForJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException {
-        return hentJournalpost(journalpostID).getForsendelseMottatt();
-    }
-
-
     private ArkivDokument lagArkivDokument(Dokument dokument) {
         ArkivDokument arkivDokument = new ArkivDokument();
         arkivDokument.setDokumentId(dokument.getDokumentId());

@@ -6,15 +6,18 @@ public final class JournalpostBestilling {
     private final String brukerFnr;
     private final String avsenderNavn;
     private final String avsenderId;
+    private final boolean avsenderOrg;
     private final String arkivSakId;
     private final byte[] pdf;
 
-    public JournalpostBestilling(String tittel, String brevkode, String brukerFnr, String avsenderNavn, String avsenderId, String arkivSakId, byte[] pdf) {
+    public JournalpostBestilling(String tittel, String brevkode, String brukerFnr, String avsenderNavn,
+                                 String avsenderId, boolean avsenderOrg, String arkivSakId, byte[] pdf) {
         this.tittel = tittel;
         this.brevkode = brevkode;
         this.brukerFnr = brukerFnr;
         this.avsenderNavn = avsenderNavn;
         this.avsenderId = avsenderId;
+        this.avsenderOrg = avsenderOrg;
         this.arkivSakId = arkivSakId;
         this.pdf = pdf;
     }
@@ -37,6 +40,10 @@ public final class JournalpostBestilling {
 
     public String getAvsenderId() {
         return avsenderId;
+    }
+
+    public boolean erAvsenderOrg() {
+        return avsenderOrg;
     }
 
     public String getArkivSakId() {

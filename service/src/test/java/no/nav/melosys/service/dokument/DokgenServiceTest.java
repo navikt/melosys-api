@@ -4,6 +4,8 @@ import java.time.Instant;
 
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
@@ -20,13 +22,13 @@ import static java.util.Collections.singleton;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ATTEST_A1;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DokgenServiceTest {
 
+    public static final String FNR = "99887766554";
     @Mock
     private DokgenConsumer mockDokgenConsumer;
 
@@ -49,16 +51,29 @@ class DokgenServiceTest {
 
     @Test
     void produserBrevFeilerUtilgjengeligMal() {
-        assertThrows(FunksjonellException.class, () -> dokgenService.produserBrev(ATTEST_A1, lagBehandling()));
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling(
+            ATTEST_A1,
+            lagBehandling(),
+            null,
+            null
+        );
+        assertThrows(FunksjonellException.class, () -> dokgenService.produserBrev(brevbestilling));
     }
 
     @Test
-    void produserBrevOk() throws Exception {
+    void produserBrevTilBrukerOk() throws Exception {
         when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
-        when(mockJoarkFasade.hentInstantMottaksDatoForJournalpost(any())).thenReturn(Instant.now());
-        when(mockDokgenConsumer.lagPdf(anyString(), any())).thenReturn(expectedPdf);
+        when(mockDokgenConsumer.lagPdf(anyString(), any(), anyBoolean())).thenReturn(expectedPdf);
+        when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
 
-        byte[] pdfResponse = dokgenService.produserBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, lagBehandling());
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling(
+            MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
+            lagBehandling(),
+            null,
+            null
+        );
+
+        byte[] pdfResponse = dokgenService.produserBrev(brevbestilling);
 
         assertNotNull(pdfResponse);
         assertEquals(expectedPdf, pdfResponse);
@@ -90,9 +105,17 @@ class DokgenServiceTest {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.PERSOPL);
         PersonDokument personDokument = new PersonDokument();
-        personDokument.fnr = "99887766554";
+        personDokument.fnr = FNR;
         saksopplysning.setDokument(personDokument);
         return saksopplysning;
+    }
+
+    private Journalpost lagJournalpost() {
+        Journalpost journalpost = new Journalpost("1234");
+        journalpost.setForsendelseMottatt(Instant.now());
+        journalpost.setAvsenderNavn("Mr. Avsender");
+        journalpost.setAvsenderId(FNR);
+        return journalpost;
     }
 
 }

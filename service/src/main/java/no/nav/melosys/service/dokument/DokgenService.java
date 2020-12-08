@@ -1,9 +1,10 @@
 package no.nav.melosys.service.dokument;
 
-import java.time.Instant;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -32,11 +33,15 @@ public class DokgenService {
         this.dokgenMalMapper = dokgenMalMapper;
     }
 
-    public byte[] produserBrev(Produserbaredokumenter produserbartDokument, Behandling behandling) throws TekniskException, FunksjonellException {
-        String malnavn = dokgenMalResolver.hentMalnavn(produserbartDokument);
+    public byte[] produserBrev(DokgenBrevbestilling brevbestilling) throws FunksjonellException, TekniskException {
+        String malnavn = dokgenMalResolver.hentMalnavn(brevbestilling.getProduserbartdokument());
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(settJournalpostOpplysninger(brevbestilling.getBehandling(), brevbestilling));
 
-        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(produserbartDokument, behandling, hentForsendelseMottattFraJournalpost(behandling));
-        return lagPdf(malnavn, dokgenDto);
+        return dokgenConsumer.lagPdf(malnavn, dokgenDto, brevbestilling.bestillKopi());
+    }
+
+    public String hentMalnavn(Produserbaredokumenter produserbartDokument) throws FunksjonellException {
+        return dokgenMalResolver.hentMalnavn(produserbartDokument);
     }
 
     boolean erTilgjengeligDokgenmal(Produserbaredokumenter produserbartDokument) {
@@ -44,15 +49,11 @@ public class DokgenService {
         return tilgjengeligeMaler.contains(produserbartDokument);
     }
 
-    private byte[] lagPdf(String malNavn, DokgenDto dokgenDto) {
-        return dokgenConsumer.lagPdf(malNavn, dokgenDto);
-    }
-
-    private Instant hentForsendelseMottattFraJournalpost(Behandling behandling) throws SikkerhetsbegrensningException, IntegrasjonException {
-        return joarkFasade.hentInstantMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId());
-    }
-
-    public String hentMalnavn(Produserbaredokumenter produserbartDokument) throws FunksjonellException {
-        return dokgenMalResolver.hentMalnavn(produserbartDokument);
+    private DokgenBrevbestilling settJournalpostOpplysninger(Behandling behandling, DokgenBrevbestilling brevbestilling) throws SikkerhetsbegrensningException, IntegrasjonException {
+        Journalpost journalpost = joarkFasade.hentJournalpost(behandling.getInitierendeJournalpostId());
+        brevbestilling.setForsendelseMottatt(journalpost.getForsendelseMottatt());
+        brevbestilling.setAvsenderNavn(journalpost.getAvsenderNavn());
+        brevbestilling.setAvsenderId(journalpost.getAvsenderId());
+        return brevbestilling;
     }
 }

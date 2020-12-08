@@ -106,9 +106,9 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setTema(MEDLEMSKAP);
         opprettJournalpost.setArkivSakId(bestilling.getArkivSakId());
         opprettJournalpost.setBrukerId(bestilling.getBrukerFnr());
-        opprettJournalpost.setKorrespondansepartId(bestilling.getBrukerFnr());
+        opprettJournalpost.setKorrespondansepartId(bestilling.getAvsenderId());
         opprettJournalpost.setKorrespondansepartNavn(bestilling.getAvsenderNavn());
-        opprettJournalpost.setKorrespondansepartIdType(FNR);
+        opprettJournalpost.setKorrespondansepartIdType(bestilling.erAvsenderOrg() ? ORGNR : FNR);
         opprettJournalpost.setInnhold(opprettJournalpost.getHoveddokument().getTittel());
 
         return opprettJournalpost;

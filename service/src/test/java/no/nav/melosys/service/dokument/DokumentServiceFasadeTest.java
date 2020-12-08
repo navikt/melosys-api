@@ -32,13 +32,16 @@ class DokumentServiceFasadeTest {
     private BehandlingService mockBehandlingService;
     @Mock
     private ProsessinstansService mockProsessinstansService;
+    @Mock
+    private BrevmottakerService mockBrevmottakerService;
+    //FIXME Oppdatere tester
 
     private DokumentServiceFasade dokumentServiceFasade;
 
     @BeforeEach
     void init() {
         dokumentServiceFasade = new DokumentServiceFasade(mockDokumentService, mockDokumentSystemService,
-            mockDokgenService, mockBehandlingService, mockProsessinstansService);
+            mockDokgenService, mockBehandlingService, mockProsessinstansService, mockBrevmottakerService);
         Mockito.reset(
             mockDokgenService,
             mockDokumentService,
@@ -54,7 +57,7 @@ class DokumentServiceFasadeTest {
 
         dokumentServiceFasade.produserUtkast(MELDING_FORVENTET_SAKSBEHANDLINGSTID, 1, new BrevbestillingDto());
 
-        verify(mockDokgenService).produserBrev(any(), any());
+        verify(mockDokgenService).produserBrev(any());
         verifyNoInteractions(mockDokumentService);
     }
 
@@ -82,7 +85,7 @@ class DokumentServiceFasadeTest {
 
         dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.av(Aktoersroller.BRUKER), 1, new Brevbestilling.Builder().build());
 
-        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(), any());
+        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any());
         verifyNoInteractions(mockDokumentService);
     }
 
@@ -92,7 +95,7 @@ class DokumentServiceFasadeTest {
 
         dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID,1, new BrevbestillingDto());
 
-        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(), any());
+        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any());
         verifyNoInteractions(mockDokumentService);
     }
 }

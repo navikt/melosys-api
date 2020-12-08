@@ -5,6 +5,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -20,22 +21,24 @@ import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserDokume
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserDokumentutkastResponse;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentRequest;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentResponse;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class DokSysServiceTest {
+@ExtendWith(MockitoExtension.class)
+class DokSysServiceTest {
 
     @Mock
     private DokumentproduksjonConsumer dokumentproduksjonConsumer;
@@ -44,13 +47,13 @@ public class DokSysServiceTest {
 
     private DoksysService dokSysService;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         dokSysService = new DoksysService(dokumentproduksjonConsumer, distribuerJournalpostConsumer);
     }
 
     @Test
-    public void produserDokumentutkast() throws Exception {
+    void produserDokumentutkast() throws Exception {
         DokumentbestillingMetadata metadata = lagMetadataForBruker(null);
         when(dokumentproduksjonConsumer.produserDokumentutkast(any())).thenReturn(new ProduserDokumentutkastResponse());
 
@@ -63,7 +66,7 @@ public class DokSysServiceTest {
     }
 
     @Test
-    public void produserIkkeredigerbartDokument_forBruker() throws Exception {
+    void produserIkkeredigerbartDokument_forBruker() throws Exception {
         DokumentbestillingMetadata metadata = lagMetadataForBruker(null);
         when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
 
@@ -79,7 +82,7 @@ public class DokSysServiceTest {
     }
 
     @Test
-    public void produserIkkeredigerbartDokument_forBrukerMedPostadresse_girPostadresseOgNavn() throws Exception {
+    void produserIkkeredigerbartDokument_forBrukerMedPostadresse_girPostadresseOgNavn() throws Exception {
         StrukturertAdresse postadresse = new StrukturertAdresse();
         postadresse.gatenavn = "Gatenavn";
         postadresse.husnummer = "123";
@@ -136,7 +139,7 @@ public class DokSysServiceTest {
     }
 
     @Test
-    public void produserIkkeredigerbartDokument_tilUtenlandskMyndighet() throws Exception {
+    void produserIkkeredigerbartDokument_tilUtenlandskMyndighet() throws Exception {
         DokumentbestillingMetadata metadata = lagMetadataMedMyndighet();
         when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
 
@@ -152,6 +155,139 @@ public class DokSysServiceTest {
         UtenlandskPostadresse utenlandskPostadresse = (UtenlandskPostadresse) dokInfo.getAdresse();
         assertThat(utenlandskPostadresse.getAdresselinje1()).isEqualTo(metadata.utenlandskMyndighet.gateadresse);
         assertThat(utenlandskPostadresse.getLand().getValue()).isEqualTo(metadata.utenlandskMyndighet.landkode.getKode());
+    }
+
+    @Test
+    void distribuerJournalpost_norskAdresse() {
+        StrukturertAdresse mottakeradresse = new StrukturertAdresse();
+        mottakeradresse.landkode = "NO";
+        mottakeradresse.gatenavn = "gate";
+        mottakeradresse.postnummer = "0463";
+        mottakeradresse.region = "Oslo";
+        mottakeradresse.husnummer = "4B";
+        mottakeradresse.poststed = "Oslo";
+
+        when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
+            .thenReturn(new DistribuerJournalpostResponse("123"));
+
+        dokSysService.distribuerJournalpost("123456", mottakeradresse);
+
+        ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
+        verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
+
+        assertThat(captor.getValue().getJournalpostId()).isEqualTo("123456");
+        assertThat(captor.getValue().getAdresse().getAdresseType()).isEqualTo("norskPostadresse");
+    }
+
+    @Test
+    void distribuerJournalpost_utenlandskAdresse() {
+        StrukturertAdresse mottakeradresse = new StrukturertAdresse();
+        mottakeradresse.landkode = "SE";
+        mottakeradresse.gatenavn = "svensk gate";
+        mottakeradresse.postnummer = "9999";
+        mottakeradresse.region = "Sverige";
+        mottakeradresse.husnummer = "4B";
+        mottakeradresse.poststed = "Stockholm";
+
+        when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
+            .thenReturn(new DistribuerJournalpostResponse("123"));
+
+        dokSysService.distribuerJournalpost("123456", mottakeradresse);
+
+        ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
+        verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
+
+        assertThat(captor.getValue().getJournalpostId()).isEqualTo("123456");
+        assertThat(captor.getValue().getAdresse().getAdresseType()).isEqualTo("utenlandskPostadresse");
+    }
+
+    @Test
+    void distribuerJournalpost_utenAdresse() {
+        String journalpostId = "123456";
+
+        when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
+            .thenReturn(new DistribuerJournalpostResponse("123"));
+
+        dokSysService.distribuerJournalpost(journalpostId);
+
+        ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
+        verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
+
+        assertEquals(journalpostId, captor.getValue().getJournalpostId());
+        assertNull(captor.getValue().getAdresse());
+    }
+
+    @Test
+    void distribuerJournalpost_medStrukturertNorskAdresse_utenKontaktopplysning() {
+        String journalpostId = "123456";
+        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
+        strukturertAdresse.gatenavn = "Postboks 222";
+        strukturertAdresse.postnummer = "9999";
+        strukturertAdresse.landkode = "NO";
+
+        when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
+            .thenReturn(new DistribuerJournalpostResponse("123"));
+
+        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, null);
+
+        ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
+        verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
+
+        DistribuerJournalpostRequest request = captor.getValue();
+        assertEquals(journalpostId, request.getJournalpostId());
+        assertEquals("norskPostadresse", request.getAdresse().getAdresseType());
+        assertEquals(strukturertAdresse.gatenavn, request.getAdresse().getAdresselinje1());
+        assertEquals(strukturertAdresse.postnummer, request.getAdresse().getPostnummer());
+    }
+
+    @Test
+    void distribuerJournalpost_medStrukturertUtenlandskAdresse_utenKontaktopplysning() {
+        String journalpostId = "123456";
+        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
+        strukturertAdresse.gatenavn = "Postboks 222";
+        strukturertAdresse.postnummer = "9999";
+        strukturertAdresse.landkode = "BE";
+
+        when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
+            .thenReturn(new DistribuerJournalpostResponse("123"));
+
+        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, null);
+
+        ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
+        verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
+
+        DistribuerJournalpostRequest request = captor.getValue();
+        assertEquals(journalpostId, request.getJournalpostId());
+        assertEquals("utenlandskPostadresse", request.getAdresse().getAdresseType());
+        assertEquals(strukturertAdresse.gatenavn, request.getAdresse().getAdresselinje1());
+        assertNull(request.getAdresse().getPostnummer());
+    }
+
+    @Test
+    void distribuerJournalpost_medStrukturertNorskAdresse_medKontaktopplysning() {
+        String journalpostId = "123456";
+        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
+        strukturertAdresse.gatenavn = "Postboks 222";
+        strukturertAdresse.postnummer = "9999";
+        strukturertAdresse.landkode = "NO";
+
+        Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
+        kontaktopplysning.setKontaktNavn("Fetter Anton");
+
+        when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
+            .thenReturn(new DistribuerJournalpostResponse("123"));
+
+        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, kontaktopplysning);
+
+        ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
+        verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
+
+        DistribuerJournalpostRequest request = captor.getValue();
+        assertEquals(journalpostId, request.getJournalpostId());
+        assertEquals("norskPostadresse", request.getAdresse().getAdresseType());
+        assertEquals("v/Fetter Anton", request.getAdresse().getAdresselinje1());
+        assertEquals(strukturertAdresse.gatenavn, request.getAdresse().getAdresselinje2());
+        assertEquals(strukturertAdresse.postnummer, request.getAdresse().getPostnummer());
     }
 
     private DokumentbestillingMetadata lagMetadataMedMyndighet() {
@@ -183,49 +319,5 @@ public class DokSysServiceTest {
         Document doc = builder.newDocument();
 
         return doc.createElement("brevData");
-    }
-
-    @Test
-    public void distribuerJournalpost_norskAdresse() {
-        StrukturertAdresse mottakeradresse = new StrukturertAdresse();
-        mottakeradresse.landkode = "NO";
-        mottakeradresse.gatenavn = "gate";
-        mottakeradresse.postnummer = "0463";
-        mottakeradresse.region = "Oslo";
-        mottakeradresse.husnummer = "4B";
-        mottakeradresse.poststed = "Oslo";
-
-        when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
-            .thenReturn(new DistribuerJournalpostResponse("123"));
-
-        dokSysService.distribuerJournalpost("123456", mottakeradresse);
-
-        ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
-        verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
-
-        assertThat(captor.getValue().getJournalpostId()).isEqualTo("123456");
-        assertThat(captor.getValue().getAdresse().getAdresseType()).isEqualTo("norskPostadresse");
-    }
-
-    @Test
-    public void distribuerJournalpost_utenlandskAdresse() {
-        StrukturertAdresse mottakeradresse = new StrukturertAdresse();
-        mottakeradresse.landkode = "SE";
-        mottakeradresse.gatenavn = "svensk gate";
-        mottakeradresse.postnummer = "9999";
-        mottakeradresse.region = "Sverige";
-        mottakeradresse.husnummer = "4B";
-        mottakeradresse.poststed = "Stockholm";
-
-        when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
-            .thenReturn(new DistribuerJournalpostResponse("123"));
-
-        dokSysService.distribuerJournalpost("123456", mottakeradresse);
-
-        ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
-        verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
-
-        assertThat(captor.getValue().getJournalpostId()).isEqualTo("123456");
-        assertThat(captor.getValue().getAdresse().getAdresseType()).isEqualTo("utenlandskPostadresse");
     }
 }
