@@ -1,6 +1,7 @@
 package no.nav.melosys.domain;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 import javax.persistence.*;
@@ -10,6 +11,9 @@ import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+
+import static no.nav.melosys.domain.InnvilgelsesResultat.DELVIS_INNVILGET;
+import static no.nav.melosys.domain.InnvilgelsesResultat.INNVILGET;
 
 @Entity
 @Table(name = "medlemskapsperiode")
@@ -51,7 +55,7 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
     private Long medlPeriodeID;
 
     @OneToMany(mappedBy = "medlemskapsperiode", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Collection<Trygdeavgift> trygdeavgift;
+    private Collection<Trygdeavgift> trygdeavgift = new ArrayList<>(1);
 
 
     public Medlemskapsperiode() {
@@ -159,6 +163,10 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
 
     public void setTrygdeavgift(Collection<Trygdeavgift> trygdeavgift) {
         this.trygdeavgift = trygdeavgift;
+    }
+
+    public boolean erInnvilget() {
+        return innvilgelsesresultat == INNVILGET || innvilgelsesresultat == DELVIS_INNVILGET;
     }
 
     @Override
