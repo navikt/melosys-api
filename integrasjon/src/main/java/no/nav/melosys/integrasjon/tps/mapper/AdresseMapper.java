@@ -142,9 +142,12 @@ class AdresseMapper {
 
         if (person.getBostedsadresse().getStrukturertAdresse() instanceof no.nav.tjeneste.virksomhet.person.v3.informasjon.Gateadresse) {
             no.nav.tjeneste.virksomhet.person.v3.informasjon.Gateadresse gateadresse = (no.nav.tjeneste.virksomhet.person.v3.informasjon.Gateadresse) person.getBostedsadresse().getStrukturertAdresse();
-            postadresse.adresselinje1 = (Optional.ofNullable(gateadresse.getGatenavn())
-                .orElse("") + " " + Optional.ofNullable(gateadresse.getHusnummer() == null ? null : gateadresse.getHusnummer()
-                .toString()).orElse("") + Optional.ofNullable(gateadresse.getHusbokstav()).orElse(""));
+
+            postadresse.adresselinje1 = (gateadresse.getGatenavn() == null ? "" : gateadresse.getGatenavn())
+                + " "
+                + (gateadresse.getHusnummer() == null ? "" : gateadresse.getHusnummer().toString())
+                + (gateadresse.getHusbokstav() == null ? "" : gateadresse.getHusbokstav());
+            
         } else if (person.getBostedsadresse().getStrukturertAdresse() instanceof Matrikkeladresse) {
             Matrikkeladresse matrikkeladresse = (Matrikkeladresse) person.getBostedsadresse().getStrukturertAdresse();
             postadresse.adresselinje1 = matrikkeladresse.getEiendomsnavn();

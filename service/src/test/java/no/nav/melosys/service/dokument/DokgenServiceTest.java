@@ -44,7 +44,7 @@ class DokgenServiceTest {
 
     @BeforeEach
     void init() {
-        dokgenService = new DokgenService(mockDokgenConsumer, new DokgenMalResolver(unleash), mockJoarkFasade, mockKodeverkService);
+        dokgenService = new DokgenService(mockDokgenConsumer, new DokgenMalResolver(unleash), mockJoarkFasade, new DokgenMalMapper(mockKodeverkService));
     }
 
     @Test
