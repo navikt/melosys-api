@@ -8,13 +8,13 @@ import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/behandlinger/{behandlingID}/avgift")
-public class AvgiftTjeneste {
+@RequestMapping("/behandlinger/{behandlingID}/trygdeavgift")
+public class TrygdeavgiftTjeneste {
 
     private final TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService;
     private final TilgangService tilgangService;
 
-    public AvgiftTjeneste(TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService, TilgangService tilgangService) {
+    public TrygdeavgiftTjeneste(TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService, TilgangService tilgangService) {
         this.trygdeavgiftsgrunnlagService = trygdeavgiftsgrunnlagService;
         this.tilgangService = tilgangService;
     }
