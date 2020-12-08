@@ -24,6 +24,7 @@ public class OpprettJournalpost extends Journalpost {
     private static final String ORGNR = "ORGNR";
     private static final String FNR = "FNR";
 
+    private String eksternReferanseId;
     private String journalførendeEnhet;
     private String korrespondansepartIdType;
     private String korrespondansepartLand;
@@ -74,6 +75,7 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setVedlegg(dokumenter.stream().map(FysiskDokument::lagFysiskDokumentAltinn).collect(Collectors.toList()));
         opprettJournalpost.setArkivSakId(fagsak.getGsakSaksnummer().toString());
         opprettJournalpost.setMottaksKanal(ALTINN);
+        opprettJournalpost.setEksternReferanseId(hovedDokument.getSoknadID());
         opprettJournalpost.setJournalposttype(Journalposttype.INN);
         opprettJournalpost.setJournalførendeEnhet(MEDLEMSKAP_OG_AVGIFT);
         opprettJournalpost.setTema(MEDLEMSKAP);
@@ -110,6 +112,14 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setInnhold(opprettJournalpost.getHoveddokument().getTittel());
 
         return opprettJournalpost;
+    }
+
+    public String getEksternReferanseId() {
+        return eksternReferanseId;
+    }
+
+    public void setEksternReferanseId(String eksternReferanseId) {
+        this.eksternReferanseId = eksternReferanseId;
     }
 
     public String getJournalførendeEnhet() {

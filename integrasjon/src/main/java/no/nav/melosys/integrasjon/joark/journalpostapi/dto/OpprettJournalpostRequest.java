@@ -73,6 +73,7 @@ public class OpprettJournalpostRequest {
             .bruker(bruker(opprettJournalpost.getBrukerId()))
             .tema(opprettJournalpost.getTema())
             .kanal(opprettJournalpost.getMottaksKanal())
+            .eksternReferanseId(opprettJournalpost.getEksternReferanseId())
             .sak(arkivsak(opprettJournalpost.getArkivSakId()))
             .journalfoerendeEnhet(opprettJournalpost.getJournalførendeEnhet())
             .journalpostType(JournalpostType.av(opprettJournalpost.getJournalposttype()))
