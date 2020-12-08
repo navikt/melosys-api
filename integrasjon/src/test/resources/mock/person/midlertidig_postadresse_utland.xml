@@ -23,6 +23,9 @@
                     <adresselinje3>United Kingdom</adresselinje3>
                 </ustrukturertAdresse>
             </midlertidigPostadresse>
+            <gjeldendePostadressetype>
+                MIDLERTIDIG_POSTADRESSE_UTLAND
+            </gjeldendePostadressetype>
         </person>
     </response>
 </b:hentPersonResponse>

@@ -3,15 +3,13 @@ package no.nav.melosys.service.dokument;
 import java.time.Instant;
 
 import no.finn.unleash.FakeUnleash;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
 import no.nav.melosys.integrasjon.dokgen.DokgenMalResolver;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +33,9 @@ class DokgenServiceTest {
     @Mock
     private JoarkFasade mockJoarkFasade;
 
+    @Mock
+    private KodeverkService mockKodeverkService;
+
     private final FakeUnleash unleash = new FakeUnleash();
 
     private DokgenService dokgenService;
@@ -43,7 +44,7 @@ class DokgenServiceTest {
 
     @BeforeEach
     void init() {
-        dokgenService = new DokgenService(mockDokgenConsumer, new DokgenMalResolver(unleash), mockJoarkFasade);
+        dokgenService = new DokgenService(mockDokgenConsumer, new DokgenMalResolver(unleash), mockJoarkFasade, new DokgenMalMapper(mockKodeverkService));
     }
 
     @Test
@@ -53,6 +54,7 @@ class DokgenServiceTest {
 
     @Test
     void produserBrevOk() throws Exception {
+        when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
         when(mockJoarkFasade.hentInstantMottaksDatoForJournalpost(any())).thenReturn(Instant.now());
         when(mockDokgenConsumer.lagPdf(anyString(), any())).thenReturn(expectedPdf);
 

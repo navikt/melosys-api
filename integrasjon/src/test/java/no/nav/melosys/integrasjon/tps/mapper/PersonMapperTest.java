@@ -9,18 +9,21 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import no.nav.melosys.domain.dokument.felles.Land;
+import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.person.UstrukturertAdresse;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class PersonMapperTest {
+class PersonMapperTest {
 
     @Test
-    public void mapTilPerson_medDokumentFraXml_girForventetMapping() {
+    void mapTilPerson_medDokumentFraXml_girForventetMapping() {
         final String kilde = "mock/person/tps_person_3.0_mock.xml";
         HentPersonResponse response = lagHentPersonResponseFraXml(kilde);
 
@@ -47,7 +50,7 @@ public class PersonMapperTest {
     }
 
     @Test
-    public void testFamilierelasjoner() throws Exception {
+    void testFamilierelasjoner() {
         final String kilde = "mock/person/familierelasjoner.xml";
         HentPersonResponse response = lagHentPersonResponseFraXml(kilde);
 
@@ -58,7 +61,7 @@ public class PersonMapperTest {
     }
 
     @Test
-    public void testMidlertidigPostadresseUtland() throws Exception {
+    void testMidlertidigPostadresseUtland() {
         final String kilde = "mock/person/midlertidig_postadresse_utland.xml";
         HentPersonResponse response = lagHentPersonResponseFraXml(kilde);
 
@@ -70,8 +73,8 @@ public class PersonMapperTest {
         Assertions.assertThat(dokument.midlertidigPostadresse.land.getKode()).isEqualTo("GBR");
     }
 
-    @org.junit.Test
-    public void testMidlertidigPostadresseNorge() throws Exception {
+    @Test
+    void testMidlertidigPostadresseNorge() {
         final String kilde = "mock/person/midlertidig_postadresse_norge.xml";
         HentPersonResponse response = lagHentPersonResponseFraXml(kilde);
 
@@ -83,6 +86,48 @@ public class PersonMapperTest {
         MidlertidigPostadresseNorge midlertidigPostadresseNorge = (MidlertidigPostadresseNorge) dokument.midlertidigPostadresse;
         Assertions.assertThat(midlertidigPostadresseNorge.gateadresse.getGatenummer()).isEqualTo(29);
         Assertions.assertThat(midlertidigPostadresseNorge.gateadresse.getHusnummer()).isEqualTo(7);
+    }
+
+    @Test
+    void gittBostedsadresseGjeldendeMapGjeldendePostadresse() {
+        final String kilde = "mock/person/bostedsadresse.xml";
+        HentPersonResponse response = lagHentPersonResponseFraXml(kilde);
+
+        PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson());
+
+        assertNotNull(dokument);
+
+        Bostedsadresse bostedsadresse = dokument.bostedsadresse;
+        UstrukturertAdresse gjeldendePostadresse = dokument.gjeldendePostadresse;
+
+        assertNotNull(bostedsadresse);
+        assertNotNull(gjeldendePostadresse);
+        assertNotNull(dokument.postadresse);
+
+        assertEquals(bostedsadresse.getLand(), gjeldendePostadresse.land);
+        assertEquals(bostedsadresse.getPostnr(), gjeldendePostadresse.postnr);
+    }
+
+    @Test
+    void gittMidlertidigadresseGjeldendeMapGjeldendePostadresse() {
+        final String kilde = "mock/person/midlertidig_co_adresse.xml";
+        HentPersonResponse response = lagHentPersonResponseFraXml(kilde);
+
+        PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson());
+
+        assertNotNull(dokument);
+
+        Bostedsadresse bostedsadresse = dokument.bostedsadresse;
+        UstrukturertAdresse gjeldendePostadresse = dokument.gjeldendePostadresse;
+        MidlertidigPostadresseNorge midlertidigPostadresseNorge = (MidlertidigPostadresseNorge) dokument.midlertidigPostadresse;
+
+        assertNotNull(bostedsadresse);
+        assertNotNull(gjeldendePostadresse);
+        assertNotNull(midlertidigPostadresseNorge);
+
+        assertEquals(midlertidigPostadresseNorge.land, gjeldendePostadresse.land);
+        assertEquals(midlertidigPostadresseNorge.poststed, gjeldendePostadresse.postnr);
+        assertTrue(gjeldendePostadresse.adresselinje1.startsWith("C/O"));
     }
 
     private HentPersonResponse lagHentPersonResponseFraXml(String ressurs) {

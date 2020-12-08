@@ -1,18 +1,12 @@
 package no.nav.melosys.integrasjon.dokgen;
 
-import java.time.Instant;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import no.finn.unleash.Unleash;
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.dokgen.dto.DokgenDto;
-import no.nav.melosys.integrasjon.dokgen.dto.SaksbehandlingstidKlage;
-import no.nav.melosys.integrasjon.dokgen.dto.SaksbehandlingstidSoknad;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +31,7 @@ public class DokgenMalResolver {
         this.unleash = unleash;
     }
 
-    public Set<Produserbaredokumenter> utledTilgjengeligeMaler () {
+    public Set<Produserbaredokumenter> utledTilgjengeligeMaler() {
         return DOKGEN_MALER.keySet().stream()
             .filter(key -> unleash.isEnabled("melosys.brev." + key.name()))
             .collect(toSet());
@@ -48,18 +42,6 @@ public class DokgenMalResolver {
             return DOKGEN_MALER.get(produserbartDokument);
         } else {
             throw new FunksjonellException(format("Fant ikke malnavn for produserbartDokument %s", produserbartDokument));
-        }
-    }
-
-    public DokgenDto mapBehandling(Produserbaredokumenter produserbartDokument, Behandling behandling, Instant forsendelseMottatt) throws TekniskException, FunksjonellException {
-        switch (produserbartDokument) {
-            case MELDING_FORVENTET_SAKSBEHANDLINGSTID:
-            case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD:
-                return SaksbehandlingstidSoknad.av(behandling, forsendelseMottatt);
-            case MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE:
-                return SaksbehandlingstidKlage.av(behandling, forsendelseMottatt);
-            default:
-                throw new FunksjonellException(format("ProduserbartDokument %s er ikke støttet av melosys-dokgen", produserbartDokument));
         }
     }
 }

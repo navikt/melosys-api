@@ -22,18 +22,20 @@ public class DokgenService {
     private final DokgenConsumer dokgenConsumer;
     private final DokgenMalResolver dokgenMalResolver;
     private final JoarkFasade joarkFasade;
+    private final DokgenMalMapper dokgenMalMapper;
 
     @Autowired
-    public DokgenService(DokgenConsumer dokgenConsumer, DokgenMalResolver dokgenMalResolver, JoarkFasade joarkFasade) {
+    public DokgenService(DokgenConsumer dokgenConsumer, DokgenMalResolver dokgenMalResolver, JoarkFasade joarkFasade, DokgenMalMapper dokgenMalMapper) {
         this.dokgenConsumer = dokgenConsumer;
         this.dokgenMalResolver = dokgenMalResolver;
         this.joarkFasade = joarkFasade;
+        this.dokgenMalMapper = dokgenMalMapper;
     }
 
     public byte[] produserBrev(Produserbaredokumenter produserbartDokument, Behandling behandling) throws TekniskException, FunksjonellException {
         String malnavn = dokgenMalResolver.hentMalnavn(produserbartDokument);
 
-        DokgenDto dokgenDto = dokgenMalResolver.mapBehandling(produserbartDokument, behandling, hentForsendelseMottattFraJournalpost(behandling));
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(produserbartDokument, behandling, hentForsendelseMottattFraJournalpost(behandling));
         return lagPdf(malnavn, dokgenDto);
     }
 
