@@ -18,8 +18,10 @@ CREATE TABLE trygdeavgift
 (
     id                          NUMBER(19) GENERATED ALWAYS AS IDENTITY,
     medlemskapsperiode_id       NUMBER(19) NOT NULL,
+    trygdeavgift_belop_md       NUMBER(19,2) NOT NULL,
     trygdesats                  NUMBER(5,1) NOT NULL,
     avgiftskode                 VARCHAR2(20) NOT NULL,
+    avgift_for_inntekt          VARCHAR(99) NOT NULL,
     CONSTRAINT pk_trygdeavgift  PRIMARY KEY (id)
 );
 
