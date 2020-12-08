@@ -53,11 +53,11 @@ public class SaksbehandlingstidSoknad extends DokgenDto {
         Fagsak fagsak = behandling.getFagsak();
         PersonDokument personDokument = behandling.hentPersonDokument();
 
-        String land = personDokument.postadresse.land != null ? personDokument.postadresse.land.toString() : null;
+        String land = personDokument.gjeldendePostadresse.land != null ? personDokument.gjeldendePostadresse.land.toString() : null;
 
         return new SaksbehandlingstidSoknad(personDokument.fnr, fagsak.getSaksnummer(), Instant.now(), forsendelseMottatt,
             forsendelseMottatt.plus(SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS), personDokument.sammensattNavn, personDokument.sammensattNavn,
-            personDokument.postadresse.adresselinjer(), personDokument.postadresse.postnr, personDokument.postadresse.poststed, land,
+            personDokument.gjeldendePostadresse.adresselinjer(), personDokument.gjeldendePostadresse.postnr, personDokument.gjeldendePostadresse.poststed, land,
             fagsak.getType(), BRUKER, false, null, null);
     }
 

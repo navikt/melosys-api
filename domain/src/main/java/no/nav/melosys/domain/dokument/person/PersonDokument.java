@@ -63,6 +63,8 @@ public class PersonDokument implements SaksopplysningDokument {
 
     public MidlertidigPostadresse midlertidigPostadresse = new MidlertidigPostadresse();
 
+    public UstrukturertAdresse gjeldendePostadresse = new UstrukturertAdresse();
+
     @XmlTransient
     @JsonProperty(defaultValue = "false" )
     public boolean erEgenAnsatt; // MELOSYS-1580
