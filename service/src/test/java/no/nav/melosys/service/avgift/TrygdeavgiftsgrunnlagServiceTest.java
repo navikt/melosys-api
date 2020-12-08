@@ -28,26 +28,26 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class AvgiftsgrunnlagServiceTest {
+class TrygdeavgiftsgrunnlagServiceTest {
 
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
 
-    private AvgiftsgrunnlagService avgiftsgrunnlagService;
+    private TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService;
 
     private final long behandlingsresultatID = 223;
 
 
     @BeforeEach
     void setup() {
-        avgiftsgrunnlagService = new AvgiftsgrunnlagService(behandlingsresultatService);
+        trygdeavgiftsgrunnlagService = new TrygdeavgiftsgrunnlagService(behandlingsresultatService);
     }
 
     @Test
     void lagreAvgiftsinformasjon_lønnsforholdNull_kasterFeil() {
         final var request = new OppdaterAvgiftsgrunnlagRequest(null, null, null);
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> avgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request))
+            .isThrownBy(() -> trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request))
             .withMessageContaining("Lønnsforhold");
     }
 
@@ -55,7 +55,7 @@ class AvgiftsgrunnlagServiceTest {
     void lagreAvgiftsinformasjon_lønnFraNorgeMenIkkeOppgitt_kasterFeil() {
         final var request = new OppdaterAvgiftsgrunnlagRequest(Loenn_forhold.LØNN_FRA_NORGE, null, null);
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> avgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request))
+            .isThrownBy(() -> trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request))
             .withMessageContaining("Mangler informasjon om lønn fra Norge");
     }
 
@@ -63,7 +63,7 @@ class AvgiftsgrunnlagServiceTest {
     void lagreAvgiftsinformasjon_lønnFraUtlandMenIkkeOppgitt_kasterFeil() {
         final var request = new OppdaterAvgiftsgrunnlagRequest(Loenn_forhold.LØNN_FRA_UTLANDET, null, null);
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> avgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request))
+            .isThrownBy(() -> trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request))
             .withMessageContaining("Mangler informasjon om lønn fra utland");
     }
 
@@ -75,7 +75,7 @@ class AvgiftsgrunnlagServiceTest {
             Loenn_forhold.LØNN_FRA_NORGE,
             new AvgiftsgrunnlagInfo(true, false, null),
             null);
-        avgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request);
+        trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request);
 
         assertThat(behandlingsresultat.getAvklartefakta())
             .containsExactlyInAnyOrder(
@@ -106,7 +106,7 @@ class AvgiftsgrunnlagServiceTest {
             Loenn_forhold.LØNN_FRA_UTLANDET,
             null,
             new AvgiftsgrunnlagInfo(false, false, null));
-        avgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request);
+        trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request);
 
         assertThat(behandlingsresultat.getAvklartefakta())
             .containsExactlyInAnyOrder(
@@ -137,7 +137,7 @@ class AvgiftsgrunnlagServiceTest {
             Loenn_forhold.DELT_LØNN,
             new AvgiftsgrunnlagInfo(true, false, null),
             new AvgiftsgrunnlagInfo(false, false, null));
-        avgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request);
+        trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request);
 
         assertThat(behandlingsresultat.getAvklartefakta())
             .containsExactlyInAnyOrder(
@@ -171,7 +171,7 @@ class AvgiftsgrunnlagServiceTest {
             Loenn_forhold.LØNN_FRA_NORGE,
             new AvgiftsgrunnlagInfo(true, false, Saerligeavgiftsgrupper.MISJONÆR),
             null);
-        avgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request);
+        trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request);
 
         assertThat(behandlingsresultat.getAvklartefakta())
             .containsExactlyInAnyOrder(
@@ -211,7 +211,7 @@ class AvgiftsgrunnlagServiceTest {
         behandlingsresultat.getMedlemAvFolketrygden().setVurderingTrygdeavgiftUtenlandskInntekt(UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV);
         behandlingsresultat.getMedlemAvFolketrygden().setVurderingTrygdeavgiftNorskInntekt(NORSK_INNTEKT_TRYGDEAVGIFT_NAV);
 
-        assertThat(avgiftsgrunnlagService.hentAvgiftsgrunnlag(behandlingsresultatID))
+        assertThat(trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(behandlingsresultatID))
             .extracting(
                 Avgiftsgrunnlag::getLønnsforhold,
                 a -> a.getAvgiftsGrunnlagNorge().getBetalerArbeidsgiverAvgift(),

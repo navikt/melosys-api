@@ -24,7 +24,7 @@ import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_utenl
 import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV;
 
 @Service
-public class AvgiftsgrunnlagService {
+public class TrygdeavgiftsgrunnlagService {
 
     private static final Set<Avklartefaktatyper> AVKLARTE_FAKTA_KODER = Set.of(
         LØNN_NORGE_SKATTEPLIKTIG_NORGE, LØNN_NORGE_ARBEIDSGIVERAVGIFT, LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE,
@@ -33,7 +33,7 @@ public class AvgiftsgrunnlagService {
 
     private final BehandlingsresultatService behandlingsresultatService;
 
-    public AvgiftsgrunnlagService(BehandlingsresultatService behandlingsresultatService) {
+    public TrygdeavgiftsgrunnlagService(BehandlingsresultatService behandlingsresultatService) {
         this.behandlingsresultatService = behandlingsresultatService;
     }
 
