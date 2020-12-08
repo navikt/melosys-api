@@ -39,6 +39,7 @@ public class FysiskDokument extends ArkivDokument {
             lagDokumentVariant(innhold),
             lagDokumentVariant(
                 behandlingsgrunnlag.getOriginalData().getBytes(StandardCharsets.UTF_8),
+                DokumentVariant.Filtype.XML,
                 DokumentVariant.VariantFormat.ORIGINAL
             )
         );
