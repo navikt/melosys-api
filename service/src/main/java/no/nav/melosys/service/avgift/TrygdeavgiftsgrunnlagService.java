@@ -82,7 +82,10 @@ public class TrygdeavgiftsgrunnlagService {
                         eksisterende.setSubjekt(oppdatertAvklartfakta.getSubjekt());
                         eksisterende.setFakta(oppdatertAvklartfakta.getFakta());
                     },
-                    () -> behandlingsresultat.getAvklartefakta().add(oppdatertAvklartfakta)
+                    () -> {
+                        oppdatertAvklartfakta.setBehandlingsresultat(behandlingsresultat);
+                        behandlingsresultat.getAvklartefakta().add(oppdatertAvklartfakta);
+                    }
 
                 );
         }
