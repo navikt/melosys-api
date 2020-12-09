@@ -77,6 +77,7 @@ public class OppdaterTrygdeavgiftsgrunnlagRequest extends AbstraktAvgiftsgrunnla
 
     private Avklartefakta lag(Avklartefaktatyper type, String fakta, String subjekt) {
         var avklartefakta = new Avklartefakta();
+        avklartefakta.setReferanse(type.getKode());
         avklartefakta.setType(type);
         avklartefakta.setFakta(fakta);
         avklartefakta.setSubjekt(subjekt);

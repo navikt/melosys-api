@@ -1,10 +1,15 @@
 package no.nav.melosys.service.avgift;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.avgift.OppdaterTrygdeavgiftsgrunnlagRequest;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
@@ -26,7 +31,7 @@ import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_utenl
 @Service
 public class TrygdeavgiftsgrunnlagService {
 
-    private static final Set<Avklartefaktatyper> AVKLARTE_FAKTA_KODER = Set.of(
+    private static final Set<Avklartefaktatyper> AVKLARTE_FAKTA_KODER = Set.of(LØNN_FORHOLD_VIRKSOMHET,
         LØNN_NORGE_SKATTEPLIKTIG_NORGE, LØNN_NORGE_ARBEIDSGIVERAVGIFT, LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE,
         LØNN_UTL_SKATTEPLIKTIG_NORGE, LØNN_UTL_ARBEIDSGIVERAVGIFT, LØNN_UTL_SÆRLIG_AVGIFTS_GRUPPE
     );
@@ -41,8 +46,7 @@ public class TrygdeavgiftsgrunnlagService {
     public Trygdeavgiftsgrunnlag oppdaterAvgiftsgrunnlag(long behandlingsresultatID, OppdaterTrygdeavgiftsgrunnlagRequest req) throws FunksjonellException {
         valider(req);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID);
-        behandlingsresultat.getAvklartefakta().removeIf(a -> AVKLARTE_FAKTA_KODER.contains(a.getType()));
-        behandlingsresultat.getAvklartefakta().addAll(req.tilAvklartefakta());
+        oppdaterAvklartefakta(behandlingsresultat, req.tilAvklartefakta());
 
         MedlemAvFolketrygden medlemAvFolketrygden = hentEllerOpprettMedlemAvFolketrygden(behandlingsresultat);
         FastsattTrygdeavgift fastsattTrygdeavgift = hentEllerOpprettFastsattTrygdeavgift(medlemAvFolketrygden);
@@ -60,6 +64,31 @@ public class TrygdeavgiftsgrunnlagService {
 
         behandlingsresultatService.lagre(behandlingsresultat);
         return hentAvgiftsgrunnlag(behandlingsresultatID);
+    }
+
+    private void oppdaterAvklartefakta(Behandlingsresultat behandlingsresultat, Collection<Avklartefakta> oppdaterteAvklartefakta) {
+        Map<Avklartefaktatyper, Avklartefakta> eksisterendeAvklartefaktaMap = behandlingsresultat.getAvklartefakta()
+            .stream()
+            .collect(Collectors.toMap(Avklartefakta::getType, a -> a));
+
+        Set<Avklartefaktatyper> oppdaterteAvklartefaktatyper = oppdaterteAvklartefakta.stream()
+            .map(Avklartefakta::getType)
+            .collect(Collectors.toSet());
+
+        for (Avklartefakta oppdatertAvklartfakta : oppdaterteAvklartefakta) {
+            Optional.ofNullable(eksisterendeAvklartefaktaMap.get(oppdatertAvklartfakta.getType()))
+                .ifPresentOrElse(
+                    eksisterende -> {
+                        eksisterende.setSubjekt(oppdatertAvklartfakta.getSubjekt());
+                        eksisterende.setFakta(oppdatertAvklartfakta.getFakta());
+                    },
+                    () -> behandlingsresultat.getAvklartefakta().add(oppdatertAvklartfakta)
+
+                );
+        }
+
+        behandlingsresultat.getAvklartefakta()
+            .removeIf(a -> AVKLARTE_FAKTA_KODER.contains(a.getType()) && !oppdaterteAvklartefaktatyper.contains(a.getType()));
     }
 
     private MedlemAvFolketrygden hentEllerOpprettMedlemAvFolketrygden(Behandlingsresultat behandlingsresultat) {

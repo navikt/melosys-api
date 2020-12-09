@@ -45,7 +45,8 @@ public class Avklartefakta {
     public Avklartefakta() {
     }
 
-    public Avklartefakta(Avklartefaktatyper type, String subjekt, String fakta) {
+    public Avklartefakta(String referanse, Avklartefaktatyper type, String subjekt, String fakta) {
+        this.referanse = referanse;
         this.type = type;
         this.subjekt = subjekt;
         this.fakta = fakta;

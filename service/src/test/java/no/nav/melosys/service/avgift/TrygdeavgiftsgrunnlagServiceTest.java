@@ -79,10 +79,10 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
         assertThat(behandlingsresultat.getAvklartefakta())
             .containsExactlyInAnyOrder(
-                new Avklartefakta(LØNN_FORHOLD_VIRKSOMHET, null, Loenn_forhold.LØNN_FRA_NORGE.getKode()),
-                new Avklartefakta(LØNN_NORGE_SKATTEPLIKTIG_NORGE, null, VALGT_FAKTA),
-                new Avklartefakta(LØNN_NORGE_ARBEIDSGIVERAVGIFT, null, IKKE_VALGT_FAKTA),
-                new Avklartefakta(LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE, null, IKKE_VALGT_FAKTA)
+                new Avklartefakta(LØNN_FORHOLD_VIRKSOMHET.getKode(), LØNN_FORHOLD_VIRKSOMHET, null, Loenn_forhold.LØNN_FRA_NORGE.getKode()),
+                new Avklartefakta(LØNN_NORGE_SKATTEPLIKTIG_NORGE.getKode(), LØNN_NORGE_SKATTEPLIKTIG_NORGE, null, VALGT_FAKTA),
+                new Avklartefakta(LØNN_NORGE_ARBEIDSGIVERAVGIFT.getKode(), LØNN_NORGE_ARBEIDSGIVERAVGIFT, null, IKKE_VALGT_FAKTA),
+                new Avklartefakta(LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE.getKode(), LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE, null, IKKE_VALGT_FAKTA)
             );
 
         assertThat(behandlingsresultat.getMedlemAvFolketrygden()).isNotNull()
@@ -110,10 +110,10 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
         assertThat(behandlingsresultat.getAvklartefakta())
             .containsExactlyInAnyOrder(
-                new Avklartefakta(LØNN_FORHOLD_VIRKSOMHET, null, Loenn_forhold.LØNN_FRA_UTLANDET.getKode()),
-                new Avklartefakta(LØNN_UTL_SKATTEPLIKTIG_NORGE, null, IKKE_VALGT_FAKTA),
-                new Avklartefakta(LØNN_UTL_ARBEIDSGIVERAVGIFT, null, IKKE_VALGT_FAKTA),
-                new Avklartefakta(LØNN_UTL_SÆRLIG_AVGIFTS_GRUPPE, null, IKKE_VALGT_FAKTA)
+                new Avklartefakta(LØNN_FORHOLD_VIRKSOMHET.getKode(), LØNN_FORHOLD_VIRKSOMHET, null, Loenn_forhold.LØNN_FRA_UTLANDET.getKode()),
+                new Avklartefakta(LØNN_UTL_SKATTEPLIKTIG_NORGE.getKode(), LØNN_UTL_SKATTEPLIKTIG_NORGE, null, IKKE_VALGT_FAKTA),
+                new Avklartefakta(LØNN_UTL_ARBEIDSGIVERAVGIFT.getKode(), LØNN_UTL_ARBEIDSGIVERAVGIFT, null, IKKE_VALGT_FAKTA),
+                new Avklartefakta(LØNN_UTL_SÆRLIG_AVGIFTS_GRUPPE.getKode(), LØNN_UTL_SÆRLIG_AVGIFTS_GRUPPE, null, IKKE_VALGT_FAKTA)
             );
 
         assertThat(behandlingsresultat.getMedlemAvFolketrygden()).isNotNull()
@@ -141,13 +141,13 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
         assertThat(behandlingsresultat.getAvklartefakta())
             .containsExactlyInAnyOrder(
-                new Avklartefakta(LØNN_FORHOLD_VIRKSOMHET, null, Loenn_forhold.DELT_LØNN.getKode()),
-                new Avklartefakta(LØNN_NORGE_SKATTEPLIKTIG_NORGE, null, VALGT_FAKTA),
-                new Avklartefakta(LØNN_NORGE_ARBEIDSGIVERAVGIFT, null, IKKE_VALGT_FAKTA),
-                new Avklartefakta(LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE, null, IKKE_VALGT_FAKTA),
-                new Avklartefakta(LØNN_UTL_SKATTEPLIKTIG_NORGE, null, IKKE_VALGT_FAKTA),
-                new Avklartefakta(LØNN_UTL_ARBEIDSGIVERAVGIFT, null, IKKE_VALGT_FAKTA),
-                new Avklartefakta(LØNN_UTL_SÆRLIG_AVGIFTS_GRUPPE, null, IKKE_VALGT_FAKTA)
+                new Avklartefakta(LØNN_FORHOLD_VIRKSOMHET.getKode(), LØNN_FORHOLD_VIRKSOMHET, null, Loenn_forhold.DELT_LØNN.getKode()),
+                new Avklartefakta(LØNN_NORGE_SKATTEPLIKTIG_NORGE.getKode(), LØNN_NORGE_SKATTEPLIKTIG_NORGE, null, VALGT_FAKTA),
+                new Avklartefakta(LØNN_NORGE_ARBEIDSGIVERAVGIFT.getKode(), LØNN_NORGE_ARBEIDSGIVERAVGIFT, null, IKKE_VALGT_FAKTA),
+                new Avklartefakta(LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE.getKode(), LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE, null, IKKE_VALGT_FAKTA),
+                new Avklartefakta(LØNN_UTL_SKATTEPLIKTIG_NORGE.getKode(), LØNN_UTL_SKATTEPLIKTIG_NORGE, null, IKKE_VALGT_FAKTA),
+                new Avklartefakta(LØNN_UTL_ARBEIDSGIVERAVGIFT.getKode(), LØNN_UTL_ARBEIDSGIVERAVGIFT, null, IKKE_VALGT_FAKTA),
+                new Avklartefakta(LØNN_UTL_SÆRLIG_AVGIFTS_GRUPPE.getKode(), LØNN_UTL_SÆRLIG_AVGIFTS_GRUPPE, null, IKKE_VALGT_FAKTA)
             );
 
         assertThat(behandlingsresultat.getMedlemAvFolketrygden()).isNotNull()
@@ -175,10 +175,10 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
         assertThat(behandlingsresultat.getAvklartefakta())
             .containsExactlyInAnyOrder(
-                new Avklartefakta(LØNN_FORHOLD_VIRKSOMHET, null, Loenn_forhold.LØNN_FRA_NORGE.getKode()),
-                new Avklartefakta(LØNN_NORGE_SKATTEPLIKTIG_NORGE, null, VALGT_FAKTA),
-                new Avklartefakta(LØNN_NORGE_ARBEIDSGIVERAVGIFT, null, IKKE_VALGT_FAKTA),
-                new Avklartefakta(LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE, Saerligeavgiftsgrupper.MISJONÆR.getKode(), VALGT_FAKTA)
+                new Avklartefakta(LØNN_FORHOLD_VIRKSOMHET.getKode(), LØNN_FORHOLD_VIRKSOMHET, null, Loenn_forhold.LØNN_FRA_NORGE.getKode()),
+                new Avklartefakta(LØNN_NORGE_SKATTEPLIKTIG_NORGE.getKode(), LØNN_NORGE_SKATTEPLIKTIG_NORGE, null, VALGT_FAKTA),
+                new Avklartefakta(LØNN_NORGE_ARBEIDSGIVERAVGIFT.getKode(), LØNN_NORGE_ARBEIDSGIVERAVGIFT, null, IKKE_VALGT_FAKTA),
+                new Avklartefakta(LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE.getKode(), LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE, Saerligeavgiftsgrupper.MISJONÆR.getKode(), VALGT_FAKTA)
             );
 
         assertThat(behandlingsresultat.getMedlemAvFolketrygden()).isNotNull()
@@ -199,13 +199,13 @@ class TrygdeavgiftsgrunnlagServiceTest {
         final var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
         behandlingsresultat.getAvklartefakta().addAll(Set.of(
-            new Avklartefakta(LØNN_FORHOLD_VIRKSOMHET, null, Loenn_forhold.DELT_LØNN.getKode()),
-            new Avklartefakta(LØNN_NORGE_SKATTEPLIKTIG_NORGE, null, VALGT_FAKTA),
-            new Avklartefakta(LØNN_NORGE_ARBEIDSGIVERAVGIFT, null, IKKE_VALGT_FAKTA),
-            new Avklartefakta(LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE, Saerligeavgiftsgrupper.MISJONÆR.getKode(), VALGT_FAKTA),
-            new Avklartefakta(LØNN_UTL_SKATTEPLIKTIG_NORGE, null, IKKE_VALGT_FAKTA),
-            new Avklartefakta(LØNN_UTL_ARBEIDSGIVERAVGIFT, null, IKKE_VALGT_FAKTA),
-            new Avklartefakta(LØNN_UTL_SÆRLIG_AVGIFTS_GRUPPE, null, IKKE_VALGT_FAKTA)
+            new Avklartefakta(LØNN_FORHOLD_VIRKSOMHET.getKode(), LØNN_FORHOLD_VIRKSOMHET, null, Loenn_forhold.DELT_LØNN.getKode()),
+            new Avklartefakta(LØNN_NORGE_SKATTEPLIKTIG_NORGE.getKode(), LØNN_NORGE_SKATTEPLIKTIG_NORGE, null, VALGT_FAKTA),
+            new Avklartefakta(LØNN_NORGE_ARBEIDSGIVERAVGIFT.getKode(), LØNN_NORGE_ARBEIDSGIVERAVGIFT, null, IKKE_VALGT_FAKTA),
+            new Avklartefakta(LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE.getKode(), LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE, Saerligeavgiftsgrupper.MISJONÆR.getKode(), VALGT_FAKTA),
+            new Avklartefakta(LØNN_UTL_SKATTEPLIKTIG_NORGE.getKode(), LØNN_UTL_SKATTEPLIKTIG_NORGE, null, IKKE_VALGT_FAKTA),
+            new Avklartefakta(LØNN_UTL_ARBEIDSGIVERAVGIFT.getKode(), LØNN_UTL_ARBEIDSGIVERAVGIFT, null, IKKE_VALGT_FAKTA),
+            new Avklartefakta(LØNN_UTL_SÆRLIG_AVGIFTS_GRUPPE.getKode(), LØNN_UTL_SÆRLIG_AVGIFTS_GRUPPE, null, IKKE_VALGT_FAKTA)
         ));
         behandlingsresultat.setMedlemAvFolketrygden(new MedlemAvFolketrygden());
         behandlingsresultat.getMedlemAvFolketrygden().setVurderingTrygdeavgiftUtenlandskInntekt(UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV);
