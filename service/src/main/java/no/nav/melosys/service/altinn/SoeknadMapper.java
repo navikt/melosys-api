@@ -20,7 +20,9 @@ public final class SoeknadMapper {
     static Soeknad lagSoeknad(MedlemskapArbeidEOSM søknad) {
         final Soeknad soeknad = new Soeknad();
         final Innhold innhold = søknad.getInnhold();
-        soeknad.personOpplysninger.utenlandskIdent.add(lagUtenlandskIdent(innhold));
+        if (innhold.getArbeidstaker().getUtenlandskIDnummer() != null) {
+            soeknad.personOpplysninger.utenlandskIdent.add(lagUtenlandskIdent(innhold));
+        }
         soeknad.juridiskArbeidsgiverNorge = lagJuridiskArbeidsgiverNorge(innhold.getArbeidsgiver());
         soeknad.soeknadsland = hentsoeknadsland(innhold);
         soeknad.periode = lagPeriode(innhold);
