@@ -105,8 +105,8 @@ public class TrygdeavgiftsberegningService {
         medlemskapsperiode.getTrygdeavgift().add(
             new Trygdeavgift(
                 medlemskapsperiode,
-                beregningsresultat.getMaanedsavgift().doubleValue(),
-                beregningsresultat.getAvgiftssats().doubleValue(),
+                beregningsresultat.getMaanedsavgift(),
+                beregningsresultat.getAvgiftssats(),
                 beregningsresultat.getAvgiftskode(),
                 erAvgiftForNorskInntekt
             )

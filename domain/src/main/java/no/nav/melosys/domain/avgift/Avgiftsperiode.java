@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.avgift;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -11,15 +12,15 @@ public class Avgiftsperiode {
     private final LocalDate fom;
     private final LocalDate tom;
     private final Trygdedekninger trygdedekning;
-    private final double avgiftssats;
-    private final double avgiftPerMd;
+    private final BigDecimal avgiftssats;
+    private final BigDecimal avgiftPerMd;
     private final boolean forNorskInntekt;
 
     Avgiftsperiode(LocalDate fom,
                    LocalDate tom,
                    Trygdedekninger trygdedekning,
-                   double avgiftssats,
-                   double avgiftPerMd,
+                   BigDecimal avgiftssats,
+                   BigDecimal avgiftPerMd,
                    boolean forNorskInntekt) {
         this.fom = fom;
         this.tom = tom;
@@ -41,11 +42,11 @@ public class Avgiftsperiode {
         return trygdedekning;
     }
 
-    public double getAvgiftssats() {
+    public BigDecimal getAvgiftssats() {
         return avgiftssats;
     }
 
-    public double getAvgiftPerMd() {
+    public BigDecimal getAvgiftPerMd() {
         return avgiftPerMd;
     }
 

@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.avgift;
 
+import java.math.BigDecimal;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.Medlemskapsperiode;
@@ -20,10 +21,10 @@ public class Trygdeavgift {
     private Medlemskapsperiode medlemskapsperiode;
 
     @Column(name = "trygdeavgift_belop_md", nullable = false)
-    private double trygdeavgiftsbeløpMd;
+    private BigDecimal trygdeavgiftsbeløpMd;
 
     @Column(name = "trygdesats", nullable = false)
-    private double trygdesats;
+    private BigDecimal trygdesats;
 
     @Column(name = "avgiftskode", nullable = false)
     private String avgiftskode;
@@ -36,8 +37,8 @@ public class Trygdeavgift {
     }
 
     public Trygdeavgift(Medlemskapsperiode medlemskapsperiode,
-                        double trygdeavgiftsbeløpMd,
-                        double trygdesats,
+                        BigDecimal trygdeavgiftsbeløpMd,
+                        BigDecimal trygdesats,
                         String avgiftskode,
                         boolean erAvgiftForNorskInntekt) {
         this.medlemskapsperiode = medlemskapsperiode;
@@ -63,19 +64,19 @@ public class Trygdeavgift {
         this.medlemskapsperiode = medlemskapsperiode;
     }
 
-    public double getTrygdeavgiftsbeløpMd() {
+    public BigDecimal getTrygdeavgiftsbeløpMd() {
         return trygdeavgiftsbeløpMd;
     }
 
-    public void setTrygdeavgiftsbeløpMd(double trygdeavgiftsBeløp) {
+    public void setTrygdeavgiftsbeløpMd(BigDecimal trygdeavgiftsBeløp) {
         this.trygdeavgiftsbeløpMd = trygdeavgiftsBeløp;
     }
 
-    public double getTrygdesats() {
+    public BigDecimal getTrygdesats() {
         return trygdesats;
     }
 
-    public void setTrygdesats(double trygdesats) {
+    public void setTrygdesats(BigDecimal trygdesats) {
         this.trygdesats = trygdesats;
     }
 

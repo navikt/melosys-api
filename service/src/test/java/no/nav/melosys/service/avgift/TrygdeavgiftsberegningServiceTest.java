@@ -119,10 +119,13 @@ class TrygdeavgiftsberegningServiceTest {
         when(trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(eq(behandlingsresultatID))).thenReturn(
             new Trygdeavgiftsgrunnlag(Loenn_forhold.LØNN_FRA_UTLANDET, null, new AvgiftsgrunnlagInfoUtland(true, false, null, UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV))
         );
+
+        final var forventetTrygdeavgiftsbeløp = new BigDecimal("10");
+        final var forventetTrygdesats = new BigDecimal("12.2");
         when(trygdeavgiftConsumer.beregnTrygdeavgift(eq(new MelosysTrygdeavgfitBeregningDto(
             false, true, medlemskapsperiode.getTrygdedekning(), medlemskapsperiode.getBestemmelse(),
             medlemAvFolketrygden.getFastsattTrygdeavgift().getAvgiftspliktigUtenlandskInntektMnd(), LocalDate.now(), null
-        )))).thenReturn(new TrygdeavgiftDto("kode", new BigDecimal("12.1"), new BigDecimal(10)));
+        )))).thenReturn(new TrygdeavgiftDto("kode", forventetTrygdesats, forventetTrygdeavgiftsbeløp));
 
         trygdeavgiftsberegningService.beregnAvgift(behandlingsresultatID);
 
@@ -136,8 +139,8 @@ class TrygdeavgiftsberegningServiceTest {
             ).containsExactly(
                 false,
                 "kode",
-                10.0,
-                12.1
+                forventetTrygdeavgiftsbeløp,
+                forventetTrygdesats
         );
     }
 
@@ -157,8 +160,11 @@ class TrygdeavgiftsberegningServiceTest {
                 new AvgiftsgrunnlagInfoNorge(true, true, null, NORSK_INNTEKT_TRYGDEAVGIFT_NAV),
                 new AvgiftsgrunnlagInfoUtland(true, false, null, UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV))
         );
+
+        final var forventetTrygdeavgiftsbeløp = new BigDecimal("10");
+        final var forventetTrygdesats = new BigDecimal("12.2");
         when(trygdeavgiftConsumer.beregnTrygdeavgift(any(MelosysTrygdeavgfitBeregningDto.class)))
-            .thenReturn(new TrygdeavgiftDto("kode", new BigDecimal("12.1"), new BigDecimal(10)));
+            .thenReturn(new TrygdeavgiftDto("kode", forventetTrygdesats, forventetTrygdeavgiftsbeløp));
 
         trygdeavgiftsberegningService.beregnAvgift(behandlingsresultatID);
         verify(trygdeavgiftConsumer, times(2)).beregnTrygdeavgift(any(MelosysTrygdeavgfitBeregningDto.class));
@@ -173,12 +179,12 @@ class TrygdeavgiftsberegningServiceTest {
             ).containsExactlyInAnyOrder(
                 false,
                 "kode",
-                10.0,
-                12.1,
+                forventetTrygdeavgiftsbeløp,
+                forventetTrygdesats,
                 true,
                 "kode",
-                10.0,
-                12.1
+                forventetTrygdeavgiftsbeløp,
+                forventetTrygdesats
         );
     }
 
@@ -248,9 +254,9 @@ class TrygdeavgiftsberegningServiceTest {
     private Trygdeavgift lagTrygdeavgift(boolean forNorskInntekt) {
         Trygdeavgift trygdeavgift = new Trygdeavgift();
         trygdeavgift.setAvgiftForInntekt(forNorskInntekt ? Trygdeavgift.AvgiftForInntekt.NORSK_INNTEKT : Trygdeavgift.AvgiftForInntekt.UTENLANDSK_INNTEKT);
-        trygdeavgift.setTrygdeavgiftsbeløpMd(10);
+        trygdeavgift.setTrygdeavgiftsbeløpMd(new BigDecimal(10));
         trygdeavgift.setAvgiftskode("ABC");
-        trygdeavgift.setTrygdesats(1.1);
+        trygdeavgift.setTrygdesats(new BigDecimal("1.1"));
         return trygdeavgift;
     }
 }
