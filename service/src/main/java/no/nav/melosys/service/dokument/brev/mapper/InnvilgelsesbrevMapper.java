@@ -39,7 +39,6 @@ import static no.nav.melosys.service.dokument.brev.mapper.felles.Vilkaarbegrunne
 import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.mapArt122BegrunnelseType;
 
 public final class InnvilgelsesbrevMapper implements BrevDataMapper {
-
     private static final String JA = "true";
 
     private static final String XSD_LOCATION = "melosysbrev/melosys_000108.xsd";
@@ -141,11 +140,18 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             fag.setArt16UtenArt12(JA);
         }
 
-        fag.setAntallBarnOmfattetAvNorskTrygd(BigInteger.valueOf(brevdata.avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd.size()));
-        fag.setBarnIkkeOmfattetAvNorskTrygdListe(hentBarnIkkeOmfattetAvNorskTrygd(brevdata.avklarteMedfolgendeBarn));
-        fag.setBarnOmfattetAvNorskTrygdListe(hentBarnOmfattetAvNorskTrygd(brevdata.avklarteMedfolgendeBarn));
-        if (brevdata.avklarteMedfolgendeBarn.hentBegrunnelseFritekst().isPresent()) {
-            fag.setMedfoelgendeBarnFritekst(brevdata.avklarteMedfolgendeBarn.hentBegrunnelseFritekst().get());
+        if (brevdata.avklarteMedfolgendeBarn.finnes()) {
+            fag.setErVurderingLovvalgBarn(JA);
+            fag.setAntallBarnOmfattetAvNorskTrygd(
+                BigInteger.valueOf(brevdata.avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd.size())
+            );
+            fag.setBarnIkkeOmfattetAvNorskTrygdListe(hentBarnIkkeOmfattetAvNorskTrygd(brevdata.avklarteMedfolgendeBarn));
+            fag.setBarnOmfattetAvNorskTrygdListe(hentBarnOmfattetAvNorskTrygd(brevdata.avklarteMedfolgendeBarn));
+            if (brevdata.avklarteMedfolgendeBarn.hentBegrunnelseFritekst().isPresent()) {
+                fag.setMedfoelgendeBarnFritekst(brevdata.avklarteMedfolgendeBarn.hentBegrunnelseFritekst().get());
+            }
+        } else {
+            fag.setAntallBarnOmfattetAvNorskTrygd(BigInteger.valueOf(0));
         }
 
         return fag;
