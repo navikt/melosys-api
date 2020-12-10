@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfo;
 import no.nav.melosys.domain.kodeverk.Saerligeavgiftsgrupper;
 
-class AvgiftsgrunnlagInfoDto {
+public class AvgiftsgrunnlagInfoDto {
     private final boolean erSkattepliktig;
     private final boolean betalerArbeidsgiverAvgift;
     private final Saerligeavgiftsgrupper særligAvgiftsgruppe;

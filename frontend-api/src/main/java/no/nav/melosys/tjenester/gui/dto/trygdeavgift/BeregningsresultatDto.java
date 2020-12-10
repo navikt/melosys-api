@@ -2,7 +2,9 @@ package no.nav.melosys.tjenester.gui.dto.trygdeavgift;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 
+import no.nav.melosys.domain.avgift.Avgiftsperiode;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsberegningsresultat;
 
 public class BeregningsresultatDto extends OppdaterBeregningsgrunnlagDto {
@@ -31,6 +33,8 @@ public class BeregningsresultatDto extends OppdaterBeregningsgrunnlagDto {
         final Collection<AvgiftsperiodeDto> avgiftsperioderNorge = new ArrayList<>();
         final Collection<AvgiftsperiodeDto> avgiftsperioderUtland = new ArrayList<>();
         trygdeavgiftsberegningsresultat.getAvgiftsperioder()
+            .stream()
+            .sorted(Comparator.comparing(Avgiftsperiode::getFom))
             .forEach(a -> {
                 if (a.isForNorskInntekt()) {
                     avgiftsperioderNorge.add(AvgiftsperiodeDto.av(a));

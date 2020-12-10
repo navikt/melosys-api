@@ -16,12 +16,12 @@ public class Avgiftsperiode {
     private final BigDecimal avgiftPerMd;
     private final boolean forNorskInntekt;
 
-    Avgiftsperiode(LocalDate fom,
-                   LocalDate tom,
-                   Trygdedekninger trygdedekning,
-                   BigDecimal avgiftssats,
-                   BigDecimal avgiftPerMd,
-                   boolean forNorskInntekt) {
+    public Avgiftsperiode(LocalDate fom,
+                          LocalDate tom,
+                          Trygdedekninger trygdedekning,
+                          BigDecimal avgiftssats,
+                          BigDecimal avgiftPerMd,
+                          boolean forNorskInntekt) {
         this.fom = fom;
         this.tom = tom;
         this.trygdedekning = trygdedekning;

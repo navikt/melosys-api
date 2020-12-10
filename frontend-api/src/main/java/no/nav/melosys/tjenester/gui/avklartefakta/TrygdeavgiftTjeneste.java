@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui.avklartefakta;
 
+import io.swagger.annotations.Api;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Protected
 @RestController
+@Api(tags = {"trygdeavgift"})
 @RequestMapping("/behandlinger/{behandlingID}/trygdeavgift")
 public class TrygdeavgiftTjeneste {
 
@@ -32,22 +34,26 @@ public class TrygdeavgiftTjeneste {
     }
 
     @PutMapping("/grunnlag")
-    public AvgiftsgrunnlagDto oppdaterAvgiftsgrunnlag(@PathVariable("behandlingID") long behandlingID,
-                                                      @RequestBody OppdaterAvgiftsgrunnlagDto oppdaterAvgiftsgrunnlagDto
+    public ResponseEntity<AvgiftsgrunnlagDto> oppdaterAvgiftsgrunnlag(@PathVariable("behandlingID") long behandlingID,
+                                                                      @RequestBody OppdaterAvgiftsgrunnlagDto oppdaterAvgiftsgrunnlagDto
     ) throws FunksjonellException, TekniskException {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
-        return AvgiftsgrunnlagDto.av(
-            trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(
-                behandlingID, oppdaterAvgiftsgrunnlagDto.til()
+        return ResponseEntity.ok(
+            AvgiftsgrunnlagDto.av(
+                trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(
+                    behandlingID, oppdaterAvgiftsgrunnlagDto.til()
+                )
             )
         );
     }
 
     @GetMapping("/grunnlag")
-    public AvgiftsgrunnlagDto hentAvgiftsgrunnlag(@PathVariable("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
+    public ResponseEntity<AvgiftsgrunnlagDto> hentAvgiftsgrunnlag(@PathVariable("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
         tilgangService.sjekkTilgang(behandlingID);
-        return AvgiftsgrunnlagDto.av(
-            trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(behandlingID)
+        return ResponseEntity.ok(
+            AvgiftsgrunnlagDto.av(
+                trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(behandlingID)
+            )
         );
     }
 
@@ -65,7 +71,7 @@ public class TrygdeavgiftTjeneste {
     }
 
     @GetMapping("/beregning")
-    public Object hentBeregningsresultat(@PathVariable("behandlingID") long behandlingID) throws IkkeFunnetException {
+    public ResponseEntity<BeregningsresultatDto> hentBeregningsresultat(@PathVariable("behandlingID") long behandlingID) throws IkkeFunnetException {
         return ResponseEntity.ok(
             BeregningsresultatDto.av(
                 trygdeavgiftsberegningService.hentBeregningsresultat(behandlingID)

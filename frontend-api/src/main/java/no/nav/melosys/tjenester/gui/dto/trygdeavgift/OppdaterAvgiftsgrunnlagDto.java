@@ -7,35 +7,35 @@ import no.nav.melosys.domain.kodeverk.Loenn_forhold;
 
 public class OppdaterAvgiftsgrunnlagDto {
     private final Loenn_forhold lønnsforhold;
-    private final AvgiftsgrunnlagInfoDto inntektsinformasjonNorge;
-    private final AvgiftsgrunnlagInfoDto inntektsinformasjonUtland;
+    private final AvgiftsgrunnlagInfoDto trygdeavgiftsgrunnlagNorge;
+    private final AvgiftsgrunnlagInfoDto trygdeavgiftsgrunnlagUtland;
 
     @JsonCreator
     public OppdaterAvgiftsgrunnlagDto(@JsonProperty("lønnsforhold") Loenn_forhold lønnsforhold,
-                                      @JsonProperty("inntektsinformasjonNorge") AvgiftsgrunnlagInfoDto inntektsinformasjonNorge,
-                                      @JsonProperty("inntektsinformasjonUtland") AvgiftsgrunnlagInfoDto inntektsinformasjonUtland) {
+                                      @JsonProperty("trygdeavgiftsgrunnlagNorge") AvgiftsgrunnlagInfoDto trygdeavgiftsgrunnlagNorge,
+                                      @JsonProperty("trygdeavgiftsgrunnlagUtland") AvgiftsgrunnlagInfoDto trygdeavgiftsgrunnlagUtland) {
         this.lønnsforhold = lønnsforhold;
-        this.inntektsinformasjonNorge = inntektsinformasjonNorge;
-        this.inntektsinformasjonUtland = inntektsinformasjonUtland;
+        this.trygdeavgiftsgrunnlagNorge = trygdeavgiftsgrunnlagNorge;
+        this.trygdeavgiftsgrunnlagUtland = trygdeavgiftsgrunnlagUtland;
     }
 
     public Loenn_forhold getLønnsforhold() {
         return lønnsforhold;
     }
 
-    public AvgiftsgrunnlagInfoDto getInntektsinformasjonNorge() {
-        return inntektsinformasjonNorge;
+    public AvgiftsgrunnlagInfoDto getTrygdeavgiftsgrunnlagNorge() {
+        return trygdeavgiftsgrunnlagNorge;
     }
 
-    public AvgiftsgrunnlagInfoDto getInntektsinformasjonUtland() {
-        return inntektsinformasjonUtland;
+    public AvgiftsgrunnlagInfoDto getTrygdeavgiftsgrunnlagUtland() {
+        return trygdeavgiftsgrunnlagUtland;
     }
 
     public OppdaterTrygdeavgiftsgrunnlagRequest til() {
         return new OppdaterTrygdeavgiftsgrunnlagRequest(
             this.lønnsforhold,
-            this.inntektsinformasjonNorge != null ? this.inntektsinformasjonNorge.til() : null,
-            this.inntektsinformasjonUtland != null ? this.inntektsinformasjonUtland.til() : null
+            this.trygdeavgiftsgrunnlagNorge != null ? this.trygdeavgiftsgrunnlagNorge.til() : null,
+            this.trygdeavgiftsgrunnlagUtland != null ? this.trygdeavgiftsgrunnlagUtland.til() : null
         );
     }
 }
