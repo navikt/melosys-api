@@ -36,9 +36,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class TpsServiceTest {
-    private static final String FNR_1 = TpsTestData.STD_KVINNE_FNR;
+    private static final String FNR = "88888888888";
     private static final String FNR_UKJENT = "88888888889";
-    private static final Long AKTØRID_1 = TpsTestData.STD_KVINNE_AKTØR_ID;
+    private static final Long AKTØRID_1 = 1000021552067L;
 
     private AktorConsumer aktorConsumer;
     private PersonConsumer personConsumer;
@@ -53,7 +53,7 @@ public class TpsServiceTest {
         when(aktorConsumer.hentAktørIdForIdent(any())).thenReturn(hentAktørIdResponse());
 
         HentIdentForAktoerIdResponse identResponse = new HentIdentForAktoerIdResponse();
-        identResponse.setIdent(FNR_1);
+        identResponse.setIdent(FNR);
         when(aktorConsumer.hentIdentForAktoerId(any())).thenReturn(identResponse);
 
         DokumentFactory dokumentFactory = new DokumentFactory(JaxbConfig.jaxb2Marshaller(), new XsltTemplatesFactory());
@@ -69,7 +69,7 @@ public class TpsServiceTest {
 
         when(aktorConsumer.hentAktørIdForIdent(any())).thenReturn(r1);
 
-        String aktørIdForIdent = service.hentAktørIdForIdent(FNR_1);
+        String aktørIdForIdent = service.hentAktørIdForIdent(FNR);
         assertNotNull(aktørIdForIdent);
         assertEquals(AKTØRID_1.toString(), aktørIdForIdent);
     }
@@ -116,11 +116,11 @@ public class TpsServiceTest {
     public void aktørIdFinnesICache() throws IkkeFunnetException, HentAktoerIdForIdentPersonIkkeFunnet, HentIdentForAktoerIdPersonIkkeFunnet {
         aktørIdCache.onApplicationEvent(null);
 
-        String aktørId = service.hentAktørIdForIdent(FNR_1);
+        String aktørId = service.hentAktørIdForIdent(FNR);
         assertEquals(Long.toString(AKTØRID_1), aktørId);
 
         String fnr = service.hentIdentForAktørId(aktørId);
-        assertThat(fnr).isEqualTo(FNR_1);
+        assertThat(fnr).isEqualTo(FNR);
 
         verify(aktorConsumer).hentAktørIdForIdent(any());
         verify(aktorConsumer, never()).hentIdentForAktoerId(any());
@@ -131,13 +131,13 @@ public class TpsServiceTest {
         throws IkkeFunnetException, HentAktoerIdForIdentPersonIkkeFunnet, HentIdentForAktoerIdPersonIkkeFunnet {
         aktørIdCache.onApplicationEvent(null);
 
-        String aktørId = service.hentAktørIdForIdent(FNR_1);
+        String aktørId = service.hentAktørIdForIdent(FNR);
         assertEquals(Long.toString(AKTØRID_1), aktørId);
 
         await().atMost(Duration.ofMillis(1500)).until(() -> aktørIdCache.erTom());
 
         String fnr = service.hentIdentForAktørId(aktørId);
-        assertThat(fnr).isEqualTo(FNR_1);
+        assertThat(fnr).isEqualTo(FNR);
 
         verify(aktorConsumer).hentAktørIdForIdent(any());
         verify(aktorConsumer).hentIdentForAktoerId(any());
@@ -171,7 +171,7 @@ public class TpsServiceTest {
         aktørIdResponse.setAktoerId(Long.toString(AKTØRID_1));
 
         IdentDetaljer identDetaljer = new IdentDetaljer();
-        identDetaljer.setTpsId(FNR_1);
+        identDetaljer.setTpsId(FNR);
         aktørIdResponse.setIdentHistorikk(new ArrayList<>());
         aktørIdResponse.getIdentHistorikk().add(identDetaljer);
 
