@@ -2,6 +2,7 @@ package no.nav.melosys.service.medlemskapsperiode;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.Optional;
 
 import no.nav.melosys.domain.InnvilgelsesResultat;
@@ -169,16 +170,17 @@ class MedlemskapsperiodeServiceTest {
         var medlemskapsperiode1 = lagMedlemskapsperiode();
         var medlemskapsperiode2 = lagMedlemskapsperiode();
         medlemskapsperiode2.setId(123321L);
+        var medlemAvFolketrygden = lagMedlemAvFolketrygden(medlemskapsperiode1, medlemskapsperiode2);
         when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID))
-            .thenReturn(Optional.of(lagMedlemAvFolketrygden(medlemskapsperiode1, medlemskapsperiode2)));
+            .thenReturn(Optional.of(medlemAvFolketrygden));
 
         medlemskapsperiodeService.slettMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID);
-        verify(medlemskapsperiodeRepository).delete(medlemskapsperiode1);
+        assertThat(medlemAvFolketrygden.getMedlemskapsperioder()).hasSize(1);
     }
 
     private MedlemAvFolketrygden lagMedlemAvFolketrygden(Medlemskapsperiode... medlemskapsperioder) {
         MedlemAvFolketrygden medlemAvFolketrygden = new MedlemAvFolketrygden();
-        medlemAvFolketrygden.setMedlemskapsperioder(Arrays.asList(medlemskapsperioder));
+        medlemAvFolketrygden.setMedlemskapsperioder(new LinkedList<>(Arrays.asList(medlemskapsperioder)));
         return medlemAvFolketrygden;
     }
 

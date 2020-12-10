@@ -108,7 +108,8 @@ public class MedlemskapsperiodeService {
 
     @Transactional
     public void slettMedlemskapsperiode(long behandlingsresultatID, long medlemskapsperiodeID) throws FunksjonellException {
-        Collection<Medlemskapsperiode> medlemskapsperioder = hentMedlemAvFolketrygden(behandlingsresultatID).getMedlemskapsperioder();
+        MedlemAvFolketrygden medlemAvFolketrygden = hentMedlemAvFolketrygden(behandlingsresultatID);
+        Collection<Medlemskapsperiode> medlemskapsperioder = medlemAvFolketrygden.getMedlemskapsperioder();
 
         if (medlemskapsperioder.size() == 1) {
             throw new FunksjonellException("Behandlingen må ha minst en medlemskapsperiode");
@@ -119,7 +120,7 @@ public class MedlemskapsperiodeService {
             .findFirst()
             .orElseThrow(() -> new IkkeFunnetException("Finner ingen medlemskapsperiode med id " + medlemskapsperiodeID + " for behandling " + behandlingsresultatID));
 
-        medlemskapsperiodeRepository.delete(medlemskapsperiode);
+        medlemAvFolketrygden.getMedlemskapsperioder().remove(medlemskapsperiode);
     }
 
     public Collection<Trygdedekninger> hentGyldigeTrygdedekninger() {
