@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.test;
+package no.nav.melosys.integrasjon.tps;
 
 public class TpsTestData {
 
