@@ -67,6 +67,10 @@ public class JournalfoeringService {
     public void opprettOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
         Journalpost journalpost = hentJournalpost(journalfoeringDto.getJournalpostID());
 
+        if (journalpost.isErFerdigstilt()) {
+            throw new FunksjonellException("Journalposten er allerede ferdigstilt!");
+        }
+
         if (journalpost.mottaksKanalErEessi()) {
             validerKanOppretteSakFraSed(journalpost);
         }

@@ -190,6 +190,15 @@ public class JournalfoeringServiceTest {
             .withMessageContaining("BrukerID mangler");
     }
 
+    @Test
+    public void opprettOgJournalfør_journalpostErFerdigstilt_kasterException() {
+        journalpost.setErFerdigstilt(true);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
+            .withMessageContaining("allerede ferdigstilt");
+    }
+
 
     @Test
     public void tilordneSakOgJournalfør_ønskerNyBehandlingEndretPeriode_ingenAktiveBehandlingerProsessinstansOpprettet() throws MelosysException {
