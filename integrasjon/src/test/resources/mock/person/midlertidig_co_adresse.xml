@@ -1,0 +1,63 @@
+<b:hentPersonResponse xmlns:b="http://nav.no/tjeneste/virksomhet/person/v3" xmlns:a="http://nav.no/tjeneste/virksomhet/person/v3/informasjon">
+    <response>
+        <person xmlns:c="http://www.w3.org/2001/XMLSchema-instance" c:type="a:Bruker">
+            <bostedsadresse>
+                <strukturertAdresse c:type="a:Gateadresse">
+                    <landkode>NOR</landkode>
+                    <tilleggsadresseType>Offisiell adresse</tilleggsadresseType>
+                    <poststed>0350</poststed>
+                    <kommunenummer>0301</kommunenummer>
+                    <gatenavn>Bak Gate</gatenavn>
+                    <husnummer>10</husnummer>
+                </strukturertAdresse>
+            </bostedsadresse>
+            <sivilstand fomGyldighetsperiode="9999-01-01T00:00:00.000+01:00">
+                <sivilstand>UGIF</sivilstand>
+            </sivilstand>
+            <statsborgerskap>
+                <land>NOR</land>
+            </statsborgerskap>
+            <aktoer c:type="a:PersonIdent">
+                <ident>
+                    <ident>12345678910</ident>
+                    <type>FNR</type>
+                </ident>
+            </aktoer>
+            <kjoenn>
+                <kjoenn>M</kjoenn>
+            </kjoenn>
+            <personnavn>
+                <etternavn>Navn</etternavn>
+                <fornavn>Nytt</fornavn>
+                <sammensattNavn>Nytt Navn</sammensattNavn>
+            </personnavn>
+            <personstatus>
+                <personstatus>BOSA</personstatus>
+            </personstatus>
+            <foedselsdato>
+                <foedselsdato>1968-09-20+01:00</foedselsdato>
+            </foedselsdato>
+            <gjeldendePostadressetype>MIDLERTIDIG_POSTADRESSE_NORGE</gjeldendePostadressetype>
+            <geografiskTilknytning c:type="a:Bydel">
+                <geografiskTilknytning>030105</geografiskTilknytning>
+            </geografiskTilknytning>
+            <midlertidigPostadresse c:type="a:MidlertidigPostadresseNorge">
+                <postleveringsPeriode>
+                    <fom>2020-01-07T00:00:00.000+01:00</fom>
+                    <tom>2021-01-07T00:00:00.000+01:00</tom>
+                </postleveringsPeriode>
+                <strukturertAdresse c:type="a:Gateadresse">
+                    <landkode>NOR</landkode>
+                    <tilleggsadresse>Bjarne Betjent</tilleggsadresse>
+                    <tilleggsadresseType>C/O</tilleggsadresseType>
+                    <poststed>3960</poststed>
+                    <bolignummer>82</bolignummer>
+                    <kommunenummer>0814</kommunenummer>
+                    <gatenavn>Flesbergveien</gatenavn>
+                    <husnummer>38</husnummer>
+                    <husbokstav>1</husbokstav>
+                </strukturertAdresse>
+            </midlertidigPostadresse>
+        </person>
+    </response>
+</b:hentPersonResponse>

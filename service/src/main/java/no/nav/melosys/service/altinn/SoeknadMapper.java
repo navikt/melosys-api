@@ -20,7 +20,9 @@ public final class SoeknadMapper {
     static Soeknad lagSoeknad(MedlemskapArbeidEOSM søknad) {
         final Soeknad soeknad = new Soeknad();
         final Innhold innhold = søknad.getInnhold();
-        soeknad.personOpplysninger.utenlandskIdent.add(lagUtenlandskIdent(innhold));
+        if (innhold.getArbeidstaker().getUtenlandskIDnummer() != null) {
+            soeknad.personOpplysninger.utenlandskIdent.add(lagUtenlandskIdent(innhold));
+        }
         soeknad.juridiskArbeidsgiverNorge = lagJuridiskArbeidsgiverNorge(innhold.getArbeidsgiver());
         soeknad.soeknadsland = hentsoeknadsland(innhold);
         soeknad.periode = lagPeriode(innhold);
@@ -37,7 +39,7 @@ public final class SoeknadMapper {
 
     private static JuridiskArbeidsgiverNorge lagJuridiskArbeidsgiverNorge(Arbeidsgiver arbeidsgiver) {
         JuridiskArbeidsgiverNorge juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
-        if (arbeidsgiver != null && arbeidsgiver.getSamletVirksomhetINorge() != null) {
+        if (arbeidsgiver != null && !arbeidsgiver.isOffentligVirksomhet() && arbeidsgiver.getSamletVirksomhetINorge() != null) {
             SamletVirksomhetINorge samletVirksomhetINorge = arbeidsgiver.getSamletVirksomhetINorge();
             juridiskArbeidsgiverNorge.antallAnsatte = samletVirksomhetINorge.getAntallAnsatte().intValue();
             juridiskArbeidsgiverNorge.antallAdmAnsatte = samletVirksomhetINorge.getAntallAdministrativeAnsatteINorge().intValue();
@@ -46,6 +48,7 @@ public final class SoeknadMapper {
             juridiskArbeidsgiverNorge.andelOppdragINorge = new BigDecimal(samletVirksomhetINorge.getAndelOppdragINorge());
             juridiskArbeidsgiverNorge.andelKontrakterINorge = new BigDecimal(samletVirksomhetINorge.getAndelKontrakterInngaasINorge());
             juridiskArbeidsgiverNorge.andelRekruttertINorge = new BigDecimal(samletVirksomhetINorge.getAndelRekrutteresINorge());
+            juridiskArbeidsgiverNorge.ekstraArbeidsgivere = List.of(arbeidsgiver.getVirksomhetsnummer());
         }
         return juridiskArbeidsgiverNorge;
     }

@@ -55,13 +55,15 @@ public class BehandlingsgrunnlagService {
 
     public Behandlingsgrunnlag opprettSøknadUtsendteArbeidstakereEøs(long behandlingID,
                                                                      String orginalData,
-                                                                     Soeknad soeknad) throws FunksjonellException, IntegrasjonException {
+                                                                     Soeknad soeknad,
+                                                                     String eksternReferanseID) throws FunksjonellException, IntegrasjonException {
         return opprettBehandlingsgrunnlag(
             behandlingID,
             orginalData,
             soeknad,
             Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS,
-            VERSJON_SOEKNAD_GRUNNLAG
+            VERSJON_SOEKNAD_GRUNNLAG,
+            eksternReferanseID
         );
     }
 
@@ -83,10 +85,22 @@ public class BehandlingsgrunnlagService {
                                                            BehandlingsgrunnlagData behandlingsgrunnlagData,
                                                            Behandlingsgrunnlagtyper type,
                                                            String versjon) throws FunksjonellException, IntegrasjonException {
+        return opprettBehandlingsgrunnlag(behandlingID, originalData, behandlingsgrunnlagData, type, versjon, null);
+    }
+
+    private Behandlingsgrunnlag opprettBehandlingsgrunnlag(long behandlingID,
+                                                           String originalData,
+                                                           BehandlingsgrunnlagData behandlingsgrunnlagData,
+                                                           Behandlingsgrunnlagtyper type,
+                                                           String versjon,
+                                                           String eksternReferanseID) throws FunksjonellException, IntegrasjonException {
 
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         if (behandling.getBehandlingsgrunnlag() != null) {
             throw new FunksjonellException("Finnes allerede behandlingsgrunnlag for behandling " + behandling.getId());
+        }
+        if (eksternReferanseID != null && harMottattSøknadMedEksternReferanseID(eksternReferanseID)) {
+            throw new FunksjonellException("Det finnes allerede behandlingsgrunnlag med eksterReferanseID " + eksternReferanseID);
         }
 
         Instant nå = Instant.now();
@@ -98,6 +112,7 @@ public class BehandlingsgrunnlagService {
         behandlingsgrunnlag.setVersjon(versjon);
         behandlingsgrunnlag.setMottaksdato(hentMottaksdato(behandling.getInitierendeJournalpostId()));
         behandlingsgrunnlag.setOriginalData(originalData);
+        behandlingsgrunnlag.setEksternReferanseID(eksternReferanseID);
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
         return behandlingsgrunnlagRepository.save(behandlingsgrunnlag);
     }
@@ -118,5 +133,9 @@ public class BehandlingsgrunnlagService {
 
     public Optional<Behandlingsgrunnlag> finnBehandlingsgrunnlag(Long behandlingID) {
         return behandlingsgrunnlagRepository.findByBehandling_Id(behandlingID);
+    }
+
+    public boolean harMottattSøknadMedEksternReferanseID(String eksternReferanseID) {
+        return !behandlingsgrunnlagRepository.findByEksternReferanseID(eksternReferanseID).isEmpty();
     }
 }

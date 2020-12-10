@@ -1,8 +1,12 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 import no.nav.melosys.domain.Anmodningsperiode;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MedfolgendeFamilie;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
 import no.nav.melosys.domain.familie.OmfattetBarn;
@@ -10,12 +14,14 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
@@ -33,6 +39,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final VilkaarsresultatService vilkaarsresultatService;
     private final TpsFasade tpsFasade;
+    private final BehandlingsgrunnlagService behandlingsgrunnlagService;
 
     public BrevDataByggerInnvilgelse(AvklartefaktaService avklartefaktaService,
                                      LandvelgerService landvelgerService,
@@ -40,7 +47,8 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
                                      AnmodningsperiodeService anmodningsperiodeService,
                                      BrevbestillingDto brevbestillingDto,
                                      VilkaarsresultatService vilkaarsresultatService,
-                                     TpsFasade tpsFasade) {
+                                     TpsFasade tpsFasade,
+                                     BehandlingsgrunnlagService behandlingsgrunnlagService) {
         this.landvelgerService = landvelgerService;
         this.avklartefaktaService = avklartefaktaService;
         this.anmodningsperiodeService = anmodningsperiodeService;
@@ -49,6 +57,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         this.vilkaarsresultatService = vilkaarsresultatService;
         this.brevbyggerA1 = null;
         this.tpsFasade = tpsFasade;
+        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
     }
 
     public BrevDataByggerInnvilgelse(AvklartefaktaService avklartefaktaService,
@@ -58,7 +67,8 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
                                      BrevbestillingDto brevbestillingDto,
                                      BrevDataByggerA1 brevbyggerA1,
                                      VilkaarsresultatService vilkaarsresultatService,
-                                     TpsFasade tpsFasade) {
+                                     TpsFasade tpsFasade,
+                                     BehandlingsgrunnlagService behandlingsgrunnlagService) {
         this.landvelgerService = landvelgerService;
         this.avklartefaktaService = avklartefaktaService;
         this.anmodningsperiodeService = anmodningsperiodeService;
@@ -67,6 +77,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.vilkaarsresultatService = vilkaarsresultatService;
         this.tpsFasade = tpsFasade;
+        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
     }
 
     @Override
@@ -116,12 +127,27 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
 
     private AvklarteMedfolgendeBarn hentAvklarteMedfølgendeBarn(long behandlingID) throws FunksjonellException, IntegrasjonException {
         AvklarteMedfolgendeBarn avklarteMedfolgendeBarn = avklartefaktaService.hentAvklarteMedfølgendeBarn(behandlingID);
+        Map<String, MedfolgendeFamilie> medfølgendeBarn = hentMedfølgendeBarn(behandlingID);
         for (OmfattetBarn omfattetBarn : avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd) {
-            omfattetBarn.sammensattNavn = tpsFasade.hentSammensattNavn(omfattetBarn.fnr);
+            if (!medfølgendeBarn.containsKey(omfattetBarn.uuid)) {
+                throw new FunksjonellException("Avklart medfølgende barn " + omfattetBarn.uuid + " finnes ikke i behandlingsgrunnlaget");
+            }
+            MedfolgendeFamilie barn = medfølgendeBarn.get(omfattetBarn.uuid);
+            omfattetBarn.sammensattNavn = barn.fnr != null ? tpsFasade.hentSammensattNavn(barn.fnr) : barn.navn;
         }
         for (IkkeOmfattetBarn ikkeOmfattetBarn : avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd) {
-            ikkeOmfattetBarn.sammensattNavn = tpsFasade.hentSammensattNavn(ikkeOmfattetBarn.fnr);
+            if (!medfølgendeBarn.containsKey(ikkeOmfattetBarn.uuid)) {
+                throw new FunksjonellException("Avklart medfølgende barn " + ikkeOmfattetBarn.uuid + " finnes ikke i behandlingsgrunnlaget");
+            }
+            MedfolgendeFamilie barn = medfølgendeBarn.get(ikkeOmfattetBarn.uuid);
+            ikkeOmfattetBarn.sammensattNavn = barn.fnr != null ? tpsFasade.hentSammensattNavn(barn.fnr) : barn.navn;
         }
         return avklarteMedfolgendeBarn;
+    }
+
+    private Map<String, MedfolgendeFamilie> hentMedfølgendeBarn(long behandlingID) throws IkkeFunnetException {
+        Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID);
+        return behandlingsgrunnlag == null ? Collections.emptyMap()
+            : behandlingsgrunnlag.getBehandlingsgrunnlagdata().hentMedfølgendeBarn();
     }
 }

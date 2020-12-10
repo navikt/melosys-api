@@ -3,6 +3,7 @@ package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
@@ -63,7 +64,8 @@ public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
             .randomize(named("fnr").and(ofType(String.class)), new NumericStringRandomizer(11))
             .randomize(named("orgnr").and(ofType(String.class)), new NumericStringRandomizer(9))
             .randomize(named("orgnummer").and(ofType(String.class)), new NumericStringRandomizer(9))
-            .randomize(named("typeFlyvninger"), () -> new EnumRandomizer<>(Flyvningstyper.class).getRandomValue().getKode()));
+            .randomize(named("typeFlyvninger"), () -> new EnumRandomizer<>(Flyvningstyper.class).getRandomValue().getKode())
+            .randomize(named("uuid"), () -> UUID.randomUUID().toString()));
     }
 
     @Test

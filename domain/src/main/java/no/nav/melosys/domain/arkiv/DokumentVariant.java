@@ -1,9 +1,9 @@
 package no.nav.melosys.domain.arkiv;
 
 public class DokumentVariant {
-    private byte[] data;
-    private Filtype filtype;
-    private VariantFormat variantFormat;
+    private final byte[] data;
+    private final Filtype filtype;
+    private final VariantFormat variantFormat;
 
     private DokumentVariant(byte[] data, Filtype filtype, VariantFormat variantFormat) {
         this.data = data;
@@ -12,13 +12,19 @@ public class DokumentVariant {
     }
 
     public static DokumentVariant lagDokumentVariant(byte[] data) {
-        return lagDokumentVariant(data, VariantFormat.ARKIV);
-    }
-
-    public static DokumentVariant lagDokumentVariant(byte[] data, VariantFormat variantFormat) {
         return new DokumentVariant(
             data,
             DokumentVariant.Filtype.PDFA,
+            VariantFormat.ARKIV
+        );
+    }
+
+    public static DokumentVariant lagDokumentVariant(byte[] data,
+                                                     Filtype filtype,
+                                                     VariantFormat variantFormat) {
+        return new DokumentVariant(
+            data,
+            filtype,
             variantFormat
         );
     }

@@ -24,6 +24,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.sak.OpprettSakDto;
@@ -47,16 +48,19 @@ public class ProsessinstansService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final ProsessinstansRepository prosessinstansRepo;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
+    private final BehandlingsgrunnlagService behandlingsgrunnlagService;
 
     private final Counter prosessinstanserOpprettet = Metrics.counter(MetrikkerNavn.PROSESSINSTANSER_OPPRETTET);
 
     @Autowired
     public ProsessinstansService(ApplicationEventPublisher applicationEventPublisher,
                                  ProsessinstansRepository prosessinstansRepo,
-                                 UtenlandskMyndighetService utenlandskMyndighetService) {
+                                 UtenlandskMyndighetService utenlandskMyndighetService,
+                                 BehandlingsgrunnlagService behandlingsgrunnlagService) {
         this.applicationEventPublisher = applicationEventPublisher;
         this.prosessinstansRepo = prosessinstansRepo;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
+        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
     }
 
     public Prosessinstans lagJournalføringProsessinstans(ProsessType type, JournalfoeringDto journalfoeringDto) {
@@ -302,13 +306,17 @@ public class ProsessinstansService {
 
     @Transactional
     public void opprettProsessinstansSøknadMottatt(SoknadMottatt søknadMottatt) {
-        Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(ProsessType.MOTTAK_SOKNAD_ALTINN)
-            .build();
-        prosessinstans.setData(ProsessDataKey.MOTTATT_SOKNAD_ID, søknadMottatt.getSoknadID());
-        prosessinstans.setData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, true);
+        if (behandlingsgrunnlagService.harMottattSøknadMedEksternReferanseID(søknadMottatt.getSoknadID())) {
+            logger.warn("Søknad med søknadID {} har vært mottatt tidligere.", søknadMottatt.getSoknadID());
+        } else {
+            Prosessinstans prosessinstans = new ProsessinstansBuilder()
+                .medType(ProsessType.MOTTAK_SOKNAD_ALTINN)
+                .build();
+            prosessinstans.setData(ProsessDataKey.MOTTATT_SOKNAD_ID, søknadMottatt.getSoknadID());
+            prosessinstans.setData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, true);
 
-        lagre(prosessinstans);
+            lagre(prosessinstans);
+        }
     }
 
     public void opprettProsessinstansAvvisUtpeking(Behandling behandling, UtpekingAvvis utpekingAvvis) {

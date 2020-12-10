@@ -9,7 +9,10 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MedfolgendeFamilie;
 import no.nav.melosys.domain.dokument.felles.Land;
+import no.nav.melosys.domain.dokument.person.Diskresjonskode;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode;
@@ -147,14 +150,16 @@ public class OppgaveServiceTest {
 
     @Test
     public void opprettEllerGjenbrukBehandlingsoppgave_ingenEksisterendeOppgave_oppgaveBlirOpprettet() throws FunksjonellException, TekniskException {
-        Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.SOEKNAD);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        Behandling behandling = lagBehandling();
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer("MEL-11111");
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
         verify(oppgaveFasade).opprettOppgave(any(Oppgave.class));
+        verify(oppgaveFasade, never()).opprettSensitivOppgave(any(Oppgave.class));
     }
 
     @Test
@@ -185,6 +190,38 @@ public class OppgaveServiceTest {
         assertThat(oppgaveOppdateringCaptor.getValue().getTilordnetRessurs()).isEqualTo(tilordnetRessurs);
     }
 
+    @Test
+    public void opprettEllerGjenbrukBehandlingsoppgave_personHarBeskyttelsesbehov_sensitivOppgaveBlirOpprettet() throws FunksjonellException, TekniskException {
+        Behandling behandling = lagBehandling();
+        behandling.setFagsak(new Fagsak());
+        behandling.getFagsak().setSaksnummer("MEL-11111");
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
+        behandling.hentPersonDokument().diskresjonskode = new Diskresjonskode("SPSF");
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
+        verify(oppgaveFasade, never()).opprettOppgave(any(Oppgave.class));
+        verify(oppgaveFasade).opprettSensitivOppgave(any(Oppgave.class));
+    }
+
+    @Test
+    public void opprettEllerGjenbrukBehandlingsoppgave_barnHarBeskyttelsesbehov_sensitivOppgaveBlirOpprettet() throws FunksjonellException, TekniskException {
+        Behandling behandling = lagBehandling();
+        behandling.setFagsak(new Fagsak());
+        behandling.getFagsak().setSaksnummer("MEL-11111");
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
+        behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().personOpplysninger.medfolgendeFamilie
+            = List.of(MedfolgendeFamilie.tilBarnFraFnr("fnrBarn"));
+        when(tpsFasade.harStrengtFortroligAdresse("fnrBarn")).thenReturn(true);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
+        verify(oppgaveFasade, never()).opprettOppgave(any(Oppgave.class));
+        verify(oppgaveFasade).opprettSensitivOppgave(any(Oppgave.class));
+    }
+
     private static Behandling lagBehandling() {
         Set<Saksopplysning> saksopplysninger = new HashSet<>();
 
@@ -210,6 +247,7 @@ public class OppgaveServiceTest {
         PersonDokument personDokument = new PersonDokument();
         personDokument.fnr = "fnr";
         personDokument.sammensattNavn = "sammensattNavn";
+        personDokument.diskresjonskode = new Diskresjonskode(null);
         return personDokument;
     }
 
