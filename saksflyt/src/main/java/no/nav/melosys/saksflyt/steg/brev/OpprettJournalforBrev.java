@@ -69,26 +69,26 @@ public class OpprettJournalforBrev implements StegBehandler {
             kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), mottaker.getOrgnr()).orElse(null);
         }
 
-        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling(
-            produserbartDokument,
-            behandling,
-            org,
-            kontaktopplysning
-        );
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder()
+            .medProduserbartdokument(produserbartDokument)
+            .medBehandling(behandling)
+            .medOrg(org)
+            .medKontaktopplysning(kontaktopplysning)
+            .build();
 
         byte[] pdf = dokgenService.produserBrev(brevbestilling);
         log.info("Produserbartdokument {} for behandling {} produsert", produserbartDokument, behandling.getId());
 
-        JournalpostBestilling bestilling = new JournalpostBestilling(
-            produserbartDokument.getBeskrivelse(),
-            dokgenService.hentMalnavn(produserbartDokument),
-            personDokument.fnr,
-            org == null ? personDokument.sammensattNavn : org.getNavn(),
-            org == null ? personDokument.fnr : org.getOrgnummer(),
-            org != null,
-            behandling.getFagsak().getGsakSaksnummer().toString(),
-            pdf
-        );
+        JournalpostBestilling bestilling = new JournalpostBestilling.Builder()
+            .medTittel(produserbartDokument.getBeskrivelse())
+            .medBrevkode(dokgenService.hentMalnavn(produserbartDokument))
+            .medBrukerFnr(personDokument.fnr)
+            .medAvsenderNavn(org == null ? personDokument.sammensattNavn : org.getNavn())
+            .medAvsenderId(org == null ? personDokument.fnr : org.getOrgnummer())
+            .medErAvsenderOrg(org != null)
+            .medArkivSakId(behandling.getFagsak().getGsakSaksnummer().toString())
+            .medPdf(pdf)
+            .build();
 
         String journalpostId = joarkFasade.opprettJournalpost(OpprettJournalpost.lagJournalpostForBrev(bestilling), true);
 

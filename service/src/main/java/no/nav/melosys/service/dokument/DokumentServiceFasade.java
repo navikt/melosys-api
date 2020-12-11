@@ -45,13 +45,12 @@ public class DokumentServiceFasade {
                                  BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
         if (dokgenService.erTilgjengeligDokgenmal(produserbartDokument)) {
             Behandling behandling = behandlingService.hentBehandling(behandlingId);
-            DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling(
-                produserbartDokument,
-                behandling,
-                null,
-                null
-            );
-            brevbestilling.setBestillKopi(true);
+            DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder()
+                .medProduserbartdokument(produserbartDokument)
+                .medBehandling(behandling)
+                .medBestillKopi(true)
+                .build();
+
             return dokgenService.produserBrev(brevbestilling);
         }
         return dokumentService.produserUtkast(produserbartDokument, behandlingId, brevbestillingDto);

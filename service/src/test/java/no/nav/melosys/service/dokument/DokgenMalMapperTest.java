@@ -5,7 +5,6 @@ import java.time.LocalDate;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
@@ -53,12 +52,11 @@ class DokgenMalMapperTest {
 
     @Test
     void feilerNårProduserbartDokumentIkkeErStøttet() {
-        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling(
-            ATTEST_A1,
-            new Behandling(),
-            null,
-            null
-        );
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder()
+            .medProduserbartdokument(ATTEST_A1)
+            .medBehandling(new Behandling())
+            .build();
+
         assertThrows(FunksjonellException.class, () ->
             dokgenMalMapper.mapBehandling(brevbestilling)
         );
@@ -73,14 +71,11 @@ class DokgenMalMapperTest {
         behandling.setSaksopplysninger(singleton(lagPersonopplysning()));
         behandling.setFagsak(lagFagsak());
 
-        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling(
-            MELDING_FORVENTET_SAKSBEHANDLINGSTID,
-            behandling,
-            null,
-            null
-        );
-
-        brevbestilling.setForsendelseMottatt(Instant.now());
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder()
+            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
+            .medBehandling(behandling)
+            .medForsendelseMottatt(Instant.now())
+            .build();
 
         DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling);
 
@@ -100,14 +95,12 @@ class DokgenMalMapperTest {
         behandling.setSaksopplysninger(singleton(lagPersonopplysning()));
         behandling.setFagsak(lagFagsak());
 
-        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling(
-            MELDING_FORVENTET_SAKSBEHANDLINGSTID,
-            behandling,
-            lagOrg(),
-            null
-        );
-
-        brevbestilling.setForsendelseMottatt(Instant.now());
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder()
+            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
+            .medBehandling(behandling)
+            .medOrg(lagOrg())
+            .medForsendelseMottatt(Instant.now())
+            .build();
 
         DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling);
 
@@ -127,14 +120,13 @@ class DokgenMalMapperTest {
         behandling.setSaksopplysninger(singleton(lagPersonopplysning()));
         behandling.setFagsak(lagFagsak());
 
-        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling(
-            MELDING_FORVENTET_SAKSBEHANDLINGSTID,
-            behandling,
-            lagOrg(),
-            lagKontaktOpplysning()
-        );
-
-        brevbestilling.setForsendelseMottatt(Instant.now());
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder()
+            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
+            .medBehandling(behandling)
+            .medOrg(lagOrg())
+            .medKontaktopplysning(lagKontaktOpplysning())
+            .medForsendelseMottatt(Instant.now())
+            .build();
 
         DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling);
 

@@ -51,9 +51,11 @@ public class DokgenService {
 
     private DokgenBrevbestilling settJournalpostOpplysninger(Behandling behandling, DokgenBrevbestilling brevbestilling) throws SikkerhetsbegrensningException, IntegrasjonException {
         Journalpost journalpost = joarkFasade.hentJournalpost(behandling.getInitierendeJournalpostId());
-        brevbestilling.setForsendelseMottatt(journalpost.getForsendelseMottatt());
-        brevbestilling.setAvsenderNavn(journalpost.getAvsenderNavn());
-        brevbestilling.setAvsenderId(journalpost.getAvsenderId());
-        return brevbestilling;
+        DokgenBrevbestilling.Builder builder = brevbestilling.toBuilder();
+        return builder
+            .medForsendelseMottatt(journalpost.getForsendelseMottatt())
+            .medAvsenderNavn(journalpost.getAvsenderNavn())
+            .medAvsenderId(journalpost.getAvsenderId())
+            .build();
     }
 }

@@ -51,12 +51,11 @@ class DokgenServiceTest {
 
     @Test
     void produserBrevFeilerUtilgjengeligMal() {
-        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling(
-            ATTEST_A1,
-            lagBehandling(),
-            null,
-            null
-        );
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder()
+            .medProduserbartdokument(ATTEST_A1)
+            .medBehandling(lagBehandling())
+            .build();
+
         assertThrows(FunksjonellException.class, () -> dokgenService.produserBrev(brevbestilling));
     }
 
@@ -66,12 +65,10 @@ class DokgenServiceTest {
         when(mockDokgenConsumer.lagPdf(anyString(), any(), anyBoolean())).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
 
-        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling(
-            MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
-            lagBehandling(),
-            null,
-            null
-        );
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder()
+            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
+            .medBehandling(lagBehandling())
+            .build();
 
         byte[] pdfResponse = dokgenService.produserBrev(brevbestilling);
 
