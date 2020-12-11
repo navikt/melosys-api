@@ -91,7 +91,7 @@ public class LandvelgerService {
     }
 
     public Collection<Landkoder> hentUtenlandskTrygdemyndighetsland(long behandlingID) throws IkkeFunnetException {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultatMedSaksbehandling(behandlingID); // todo hvorfor?
 
         if (erArtikkel13(behandlingsresultat) && !erVideresendt(behandlingsresultat)) {
             return hentUtenlandskTrygdemyndighetslandArtikkel13(behandlingsresultat);

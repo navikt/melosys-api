@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.event.ApplicationEventMulticaster;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
@@ -41,7 +41,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     private final BrevBestiller brevBestiller;
     private final SedSomBrevService sedSomBrevService;
     private final UtpekingService utpekingService;
-    private final ApplicationEventMulticaster melosysHendelseMulticaster;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
     public SendVedtakUtland(@Qualifier("system") EessiService eessiService,
@@ -50,13 +50,13 @@ public class SendVedtakUtland extends AbstraktSendUtland {
                             BrevBestiller brevBestiller,
                             SedSomBrevService sedSomBrevService,
                             UtpekingService utpekingService,
-                            ApplicationEventMulticaster melosysHendelseMulticaster) {
+                            ApplicationEventPublisher applicationEventPublisher) {
         super(eessiService, behandlingsresultatService);
         this.behandlingService = behandlingService;
         this.brevBestiller = brevBestiller;
         this.sedSomBrevService = sedSomBrevService;
         this.utpekingService = utpekingService;
-        this.melosysHendelseMulticaster = melosysHendelseMulticaster;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Override
@@ -75,7 +75,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             utpekingService.oppdaterSendtUtland(behandlingsresultat.hentValidertUtpekingsperiode());
             SendUtlandStatus status = sendSedA003(prosessinstans);
             log.info("SendUtlandStatus for behandling {}: {}", behandling.getId(), status);
-        } else if (skalSendesUtland(behandlingsresultat)){
+        } else if (skalSendesUtland(behandlingsresultat)) {
             super.sendUtland(avklarBucType(behandling), prosessinstans);
         }
 
@@ -108,7 +108,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             prosessinstans.setData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, utpektLand);
         } else {
             brevBestiller.bestill(lagBrevBestilling(prosessinstans));
-            melosysHendelseMulticaster.multicastEvent(new A1BestiltHendelse(this, behandling.getId()));
+            applicationEventPublisher.publishEvent(new A1BestiltHendelse(this, behandling.getId()));
         }
     }
 

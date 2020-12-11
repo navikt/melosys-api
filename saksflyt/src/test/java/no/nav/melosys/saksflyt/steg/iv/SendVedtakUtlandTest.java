@@ -33,7 +33,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.event.ApplicationEventMulticaster;
+import org.springframework.context.ApplicationEventPublisher;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -53,7 +53,7 @@ class SendVedtakUtlandTest {
     @Mock
     private UtpekingService utpekingService;
     @Mock
-    private ApplicationEventMulticaster melosysHendelseMulticaster;
+    ApplicationEventPublisher applicationEventPublisher;
 
     private SendVedtakUtland sendVedtakUtland;
 
@@ -85,7 +85,7 @@ class SendVedtakUtlandTest {
         behandlingsresultat.setBehandling(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingService, behandlingsresultatService, brevBestiller, sedSomBrevService, utpekingService, melosysHendelseMulticaster);
+        sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingService, behandlingsresultatService, brevBestiller, sedSomBrevService, utpekingService, applicationEventPublisher);
     }
 
     @Test
@@ -168,6 +168,6 @@ class SendVedtakUtlandTest {
         sendVedtakUtland.utfør(prosessinstans);
 
         verify(brevBestiller).bestill(any(Brevbestilling.class));
-        verify(melosysHendelseMulticaster).multicastEvent(any(A1BestiltHendelse.class));
+        verify(applicationEventPublisher).publishEvent(any(A1BestiltHendelse.class));
     }
 }

@@ -81,7 +81,7 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler, Fei
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(feiletHendelse.getSourceEvent().getBehandlingID());
         prosessinstans.setBehandling(behandling);
 
-        behandleFeil(prosessinstans, null, feiletHendelse.getFeil());
+        behandleFeil(prosessinstans, ProsessSteg.UKJENT, feiletHendelse.getFeil());
     }
 
     private void behandleFlytIkkeFunnet(Prosessinstans prosessinstans) {

@@ -50,7 +50,7 @@ class UtstedtA1ServiceTest {
 
     @BeforeEach
     void setUp() {
-        utstedtA1Service = new UtstedtA1Service(utstedtA1Producer, behandlingService, behandlingsresultatService, landvelgerService, melosysHendelseMulticaster);
+        utstedtA1Service = new UtstedtA1Service(utstedtA1Producer, behandlingService, behandlingsresultatService, landvelgerService);
     }
 
     @Test

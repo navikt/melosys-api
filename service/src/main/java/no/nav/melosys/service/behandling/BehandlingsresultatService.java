@@ -51,6 +51,11 @@ public class BehandlingsresultatService {
             .orElseThrow(() -> new IkkeFunnetException("Kan ikke finne behandlingsresultat for behandling: " + behandlingsid));
     }
 
+    public Behandlingsresultat hentBehandlingsresultatMedSaksbehandling(long behandlingsid) throws IkkeFunnetException {
+        return behandlingsresultatRepository.findWithSaksbehandlingById(behandlingsid)
+            .orElseThrow(() -> new IkkeFunnetException("Kan ikke finne behandlingsresultat for behandling: " + behandlingsid));
+    }
+
     public Behandlingsresultat hentBehandlingsresultatMedKontrollresultat(long behandlingsid) throws IkkeFunnetException {
         return behandlingsresultatRepository.findWithKontrollresultaterById(behandlingsid)
             .orElseThrow(() -> new IkkeFunnetException("Kan ikke finne behandlingsresultat for behandling: " + behandlingsid));

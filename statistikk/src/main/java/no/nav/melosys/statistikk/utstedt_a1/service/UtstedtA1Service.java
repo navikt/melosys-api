@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collection;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.FunksjonellException;
@@ -21,7 +22,6 @@ import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
@@ -33,41 +33,45 @@ public class UtstedtA1Service {
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final LandvelgerService landvelgerService;
-    private final ApplicationEventMulticaster melosysHendelseMulticaster;
+    private final Unleash unleash;
 
     @Autowired
     public UtstedtA1Service(UtstedtA1Producer utstedtA1Producer,
                             BehandlingService behandlingService,
                             BehandlingsresultatService behandlingsresultatService,
                             LandvelgerService landvelgerService,
-                            ApplicationEventMulticaster melosysHendelseMulticaster) {
+                            Unleash unleash) {
         this.utstedtA1Producer = utstedtA1Producer;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.landvelgerService = landvelgerService;
-        this.melosysHendelseMulticaster = melosysHendelseMulticaster;
+        this.unleash = unleash;
     }
 
+    // todo async eller ikke?
     @EventListener
     @SuppressWarnings("unused")
-    public void håndterA1Bestilt(A1BestiltHendelse a1BestiltHendelse) {
+    public FeiletHendelse handterA1Bestilt(A1BestiltHendelse a1BestiltHendelse) {
         try {
             log.info("Mottatt hendelse om bestilt A1");
             sendMeldingOmUtstedtA1(a1BestiltHendelse.getBehandlingID());
+            return null;
         } catch (TekniskException | FunksjonellException e) {
-            FeiletHendelse feiletHendelse = new FeiletHendelse(this, e, a1BestiltHendelse);
-            melosysHendelseMulticaster.multicastEvent(feiletHendelse);
+            return new FeiletHendelse(this, e, a1BestiltHendelse);
         }
     }
 
     public UtstedtA1Melding sendMeldingOmUtstedtA1(Long behandlingID) throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultatMedSaksbehandling(behandlingID);
         return sendMeldingOmUtstedtA1(behandling, behandlingsresultat);
     }
 
     public UtstedtA1Melding sendMeldingOmUtstedtA1(Behandling behandling, Behandlingsresultat behandlingsresultat) throws TekniskException, FunksjonellException {
+        if (!unleash.isEnabled("melosys.statistikkA1")) {
+            return null;
+        }
+
         if (behandlingsresultat.erAvslag()) {
             log.info("Behandling {} er avslått. Ingen melding om utstedt A1 blir sendt", behandling.getId());
             return null;
