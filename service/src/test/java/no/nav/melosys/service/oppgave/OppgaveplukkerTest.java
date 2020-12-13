@@ -28,9 +28,7 @@ import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.service.oppgave.dto.TilbakeleggingDto;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -42,12 +40,8 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class OppgaveplukkerTest {
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     @Mock
     private OppgaveFasade oppgaveFasade;
-
     @Mock
     private OppgaveTilbakeleggingRepository oppgaveTilbakkeleggingRepo;
     @Mock
@@ -85,7 +79,7 @@ public class OppgaveplukkerTest {
         oppgaver.add(opprettOppgave("3", Oppgavetyper.JFR, PrioritetType.NORM, LocalDate.of(2018, 8, 10), LocalDate.now(), "MEL-123"));
         oppgaver.add(opprettOppgave("4", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 5), LocalDate.now(), "MEL-1234"));
 
-        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(Behandlingstema.class))).thenReturn(oppgaver);
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(String.class))).thenReturn(oppgaver);
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(Behandlingstema.UTSENDT_ARBEIDSTAKER.getKode());
 
@@ -103,7 +97,7 @@ public class OppgaveplukkerTest {
 
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
-        assertThat(oppgave.isPresent()).isTrue();
+        assertThat(oppgave).isPresent();
         oppgave.ifPresent(o -> assertThat(o.getOppgaveId()).isEqualTo("4"));
     }
 
@@ -115,7 +109,7 @@ public class OppgaveplukkerTest {
         oppgaver.add(opprettOppgave("3", Oppgavetyper.BEH_SAK_MK, PrioritetType.NORM, LocalDate.of(2018, 8, 10), LocalDate.now(), "MEL-123"));
         oppgaver.add(opprettOppgave("4", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 7), LocalDate.now().plusDays(1L), "MEL-1234"));
 
-        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(Behandlingstema.class))).thenReturn(oppgaver);
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(String.class))).thenReturn(oppgaver);
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(Behandlingstema.UTSENDT_ARBEIDSTAKER.getKode());
 
@@ -133,7 +127,7 @@ public class OppgaveplukkerTest {
 
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
-        assertThat(oppgave.isPresent()).isTrue();
+        assertThat(oppgave).isPresent();
         oppgave.ifPresent(o -> assertThat(o.getOppgaveId()).isEqualTo("2"));
     }
 
@@ -142,7 +136,7 @@ public class OppgaveplukkerTest {
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2019, 8, 7), LocalDate.now(), "MEL-1"));
         oppgaver.add(opprettOppgave("2", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-1"));
-        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(Behandlingstema.class))).thenReturn(oppgaver);
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(String.class))).thenReturn(oppgaver);
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(Behandlingstema.UTSENDT_ARBEIDSTAKER.getKode());
 
@@ -160,8 +154,11 @@ public class OppgaveplukkerTest {
 
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
-        assertThat(oppgave.isPresent()).isTrue();
-        oppgave.ifPresent(o -> assertThat(o.getOppgaveId()).isEqualTo("2"));
+        assertThat(oppgave)
+            .isPresent()
+            .get()
+            .extracting(Oppgave::getOppgaveId)
+            .isEqualTo("2");
         assertThat(fagsak.hentAktivBehandling().getStatus()).isEqualTo(Behandlingsstatus.AVVENT_DOK_PART);
     }
 
@@ -184,7 +181,7 @@ public class OppgaveplukkerTest {
 
         when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
 
-        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(Behandlingstema.class))).thenReturn(oppgaver);
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(String.class))).thenReturn(oppgaver);
 
         List<OppgaveTilbakelegging> tilbakelagt = new ArrayList<>();
         tilbakelagt.add(new OppgaveTilbakelegging());
@@ -194,7 +191,7 @@ public class OppgaveplukkerTest {
 
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
-        assertThat(oppgave.isPresent()).isTrue();
+        assertThat(oppgave).isPresent();
         oppgave.ifPresent(o -> assertThat(o.getOppgaveId()).isEqualTo("2"));
     }
 
@@ -217,7 +214,7 @@ public class OppgaveplukkerTest {
 
         when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
 
-        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(Behandlingstema.class))).thenReturn(oppgaver);
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(String.class))).thenReturn(oppgaver);
 
         List<OppgaveTilbakelegging> tilbakelagt = new ArrayList<>();
         tilbakelagt.add(new OppgaveTilbakelegging());
@@ -227,7 +224,7 @@ public class OppgaveplukkerTest {
 
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
-        assertThat(oppgave.isPresent()).isFalse();
+        assertThat(oppgave).isEmpty();
     }
 
     @Test
@@ -283,7 +280,7 @@ public class OppgaveplukkerTest {
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1"));
 
-        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(Behandlingstema.class))).thenReturn(oppgaver);
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(String.class))).thenReturn(oppgaver);
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(Behandlingstema.UTSENDT_ARBEIDSTAKER.getKode());
 
@@ -301,9 +298,9 @@ public class OppgaveplukkerTest {
 
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
-        verify(oppgaveFasade).finnUtildelteOppgaverEtterFrist(any(Behandlingstema.class));
+        verify(oppgaveFasade).finnUtildelteOppgaverEtterFrist(any(String.class));
 
-        assertThat(oppgave.isPresent()).isTrue();
+        assertThat(oppgave).isPresent();
     }
 
     @Test
@@ -311,7 +308,7 @@ public class OppgaveplukkerTest {
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1"));
 
-        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(Behandlingstema.class))).thenReturn(oppgaver);
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(String.class))).thenReturn(oppgaver);
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(Behandlingstema.UTSENDT_ARBEIDSTAKER.getKode());
 
@@ -330,7 +327,7 @@ public class OppgaveplukkerTest {
 
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
-        assertThat(oppgave.isPresent()).isFalse();
+        assertThat(oppgave).isEmpty();
     }
 
     @Test
@@ -338,7 +335,7 @@ public class OppgaveplukkerTest {
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1"));
 
-        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(Behandlingstema.class))).thenReturn(oppgaver);
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(String.class))).thenReturn(oppgaver);
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(Behandlingstema.UTSENDT_ARBEIDSTAKER.getKode());
 
@@ -355,7 +352,7 @@ public class OppgaveplukkerTest {
         when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
 
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
-        assertThat(oppgave.isPresent()).isFalse();
+        assertThat(oppgave).isEmpty();
     }
 
     @Test
@@ -365,7 +362,7 @@ public class OppgaveplukkerTest {
 
         ArgumentCaptor<Behandling> behandlingCaptor = ArgumentCaptor.forClass(Behandling.class);
 
-        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(Behandlingstema.class))).thenReturn(oppgaver);
+        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(any(String.class))).thenReturn(oppgaver);
 
         PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto(Behandlingstema.UTSENDT_ARBEIDSTAKER.getKode());
 
@@ -382,10 +379,10 @@ public class OppgaveplukkerTest {
 
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
-        verify(oppgaveFasade).finnUtildelteOppgaverEtterFrist(any(Behandlingstema.class));
+        verify(oppgaveFasade).finnUtildelteOppgaverEtterFrist(any(String.class));
         verify(behandlingService).lagre(behandlingCaptor.capture());
 
-        assertThat(oppgave.isPresent()).isTrue();
+        assertThat(oppgave).isPresent();
         assertThat(behandlingCaptor.getValue().getStatus()).isEqualTo(Behandlingsstatus.UNDER_BEHANDLING);
     }
 

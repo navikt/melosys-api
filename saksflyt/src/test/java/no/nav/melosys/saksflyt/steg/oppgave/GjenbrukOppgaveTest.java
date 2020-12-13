@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class GjenbrukOppgaveTest {
+
     @Mock
     private OppgaveService oppgaveService;
     @Captor
@@ -52,11 +53,12 @@ class GjenbrukOppgaveTest {
 
         gjenbrukOppgave.utfør(lagProsessinstans(oppgaveID, saksnummer));
         verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
-        assertThat(oppgaveCaptor.getValue()).hasFieldOrPropertyWithValue("saksnummer", saksnummer)
+        assertThat(oppgaveCaptor.getValue())
+            .hasFieldOrPropertyWithValue("saksnummer", saksnummer)
             .hasFieldOrPropertyWithValue("behandlesAvApplikasjon", Fagsystem.MELOSYS)
             .hasFieldOrPropertyWithValue("oppgavetype", Oppgavetyper.BEH_SAK_MK)
-            .hasFieldOrPropertyWithValue("behandlingstema", Behandlingstema.UTSENDT_ARBEIDSTAKER)
-            .hasFieldOrPropertyWithValue("behandlingstype", Behandlingstyper.SOEKNAD)
+            .hasFieldOrPropertyWithValue("behandlingstema", "ab0424")
+            .hasFieldOrPropertyWithValue("behandlingstype", "ae0034")
             .hasFieldOrPropertyWithValue("tilordnetRessurs", "Deg321")
             .hasFieldOrPropertyWithValue("aktørId", "123321");
     }

@@ -60,7 +60,7 @@ public class Oppgaveplukker {
         validerPlukkOppgave(plukkDto);
 
         Behandlingstema behandlingstema = Behandlingstema.valueOf(plukkDto.getBehandlingstema());
-        List<Oppgave> ufordelteOppgaver = oppgaveFasade.finnUtildelteOppgaverEtterFrist(behandlingstema);
+        List<Oppgave> ufordelteOppgaver = oppgaveFasade.finnUtildelteOppgaverEtterFrist(OppgaveFactory.hentOppgaveParametere(behandlingstema).behandlingstype);
 
         fjernOppgaverSomVenterForDokumentasjon(ufordelteOppgaver);
 
