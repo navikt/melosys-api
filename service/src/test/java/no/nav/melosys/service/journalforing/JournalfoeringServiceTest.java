@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Optional;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
@@ -51,6 +52,8 @@ public class JournalfoeringServiceTest {
     @Mock
     private TpsFasade tpsFasade;
 
+    private final FakeUnleash unleash = new FakeUnleash();
+
     private JournalfoeringService journalfoeringService;
     private JournalfoeringOpprettDto opprettDto;
     private JournalfoeringTilordneDto tilordneDto;
@@ -61,12 +64,12 @@ public class JournalfoeringServiceTest {
 
     @Before
     public void setup() throws MelosysException {
-
+        unleash.enableAll();
         journalpost = new Journalpost("123");
         journalpost.setHoveddokument(new ArkivDokument());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
-        this.journalfoeringService = new JournalfoeringService(joarkFasade, oppgaveService, prosessinstansService, eessiService, fagsakService, tpsFasade);
+        this.journalfoeringService = new JournalfoeringService(joarkFasade, oppgaveService, prosessinstansService, eessiService, fagsakService, tpsFasade, unleash);
         opprettDto = new JournalfoeringOpprettDto();
         opprettDto.setJournalpostID("setJournalpostID");
         opprettDto.setOppgaveID("setOppgaveID");
@@ -160,6 +163,31 @@ public class JournalfoeringServiceTest {
 
         verify(prosessinstansService).lagre(any(Prosessinstans.class));
         verify(oppgaveService).ferdigstillOppgave(anyString());
+    }
+
+    @Test
+    public void opprettSakOgJournalfør_sakstypeFtrlFeatureToggleFolketrygdMvpDisabled_kasterException() {
+        FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, null, "DK", Sakstyper.FTRL);
+        opprettDto.setFagsak(fagsakDto);
+        opprettDto.setBehandlingstemaKode(Behandlingstema.ARBEID_I_UTLANDET.getKode());
+        unleash.disableAll();
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
+            .withMessageContaining("Kan ikke opprett ny sak med behandlingstema " + Behandlingstema.ARBEID_I_UTLANDET);
+    }
+
+    @Test
+    public void opprettSakOgJournalfør_sakstypeFtrlFeatureToggleFolketrygdMvpEnabled_oppretterSak() throws MelosysException {
+        FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, null, "DK", Sakstyper.FTRL);
+        opprettDto.setFagsak(fagsakDto);
+        opprettDto.setBehandlingstemaKode(Behandlingstema.ARBEID_I_UTLANDET.getKode());
+
+        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK), any()))
+            .thenReturn(new Prosessinstans());
+
+        journalfoeringService.opprettOgJournalfør(opprettDto);
+        verify(prosessinstansService).lagre(any(Prosessinstans.class));
     }
 
     @Test

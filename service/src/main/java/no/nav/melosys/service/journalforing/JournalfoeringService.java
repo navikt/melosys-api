@@ -2,6 +2,7 @@ package no.nav.melosys.service.journalforing;
 
 import java.util.Optional;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
@@ -46,6 +47,7 @@ public class JournalfoeringService {
     private final EessiService eessiService;
     private final FagsakService fagsakService;
     private final TpsFasade tpsFasade;
+    private final Unleash unleash;
 
     @Autowired
     public JournalfoeringService(JoarkFasade joarkFasade,
@@ -53,13 +55,14 @@ public class JournalfoeringService {
                                  ProsessinstansService prosessinstansService,
                                  EessiService eessiService,
                                  FagsakService fagsakService,
-                                 TpsFasade tpsFasade) {
+                                 TpsFasade tpsFasade, Unleash unleash) {
         this.joarkFasade = joarkFasade;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.eessiService = eessiService;
         this.fagsakService = fagsakService;
         this.tpsFasade = tpsFasade;
+        this.unleash = unleash;
     }
 
     public Journalpost hentJournalpost(String journalpostID) throws FunksjonellException, IntegrasjonException {
@@ -121,6 +124,10 @@ public class JournalfoeringService {
 
         if (!erGyldigBehandlingstemaForSakstype(sakstype, behandlingstema)) {
             throw new FunksjonellException("Behandlingstema " + behandlingstema + " er ikke gyldig for sakstype " + sakstype);
+        }
+
+        if (behandlingstema == Behandlingstema.ARBEID_I_UTLANDET && !unleash.isEnabled("melosys.folketrygden.mvp")) {
+            throw new FunksjonellException("Kan ikke opprett ny sak med behandlingstema " + behandlingstema);
         }
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
