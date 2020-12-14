@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -72,8 +73,7 @@ public final class SoeknadMapper {
 
         if (barn != null && barn.getBarnet() != null) {
             medfølgendeBarn = barn.getBarnet().stream()
-                .map(Barnet::getFoedselsnummer)
-                .map(MedfolgendeFamilie::tilBarnFraFnr)
+                .map(mapBarnTilMedfølgendeFamilie)
                 .collect(Collectors.toList());
         }
         return medfølgendeBarn;
@@ -82,4 +82,7 @@ public final class SoeknadMapper {
     private static LocalDate xmlCalTilLocalDate(XMLGregorianCalendar calendar) {
         return calendar == null ? null : LocalDate.of(calendar.getYear(), calendar.getMonth(), calendar.getDay());
     }
+
+    private static Function<Barnet, MedfolgendeFamilie> mapBarnTilMedfølgendeFamilie
+        = barnet -> MedfolgendeFamilie.tilBarnFraFnrOgNavn(barnet.getFoedselsnummer(), barnet.getNavn());
 }
