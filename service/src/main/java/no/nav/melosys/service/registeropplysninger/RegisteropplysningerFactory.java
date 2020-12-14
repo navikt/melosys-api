@@ -6,7 +6,9 @@ import no.nav.melosys.exception.TekniskException;
 /**
  * Setter saksopplysningtyper per behandlingstema, iht. https://confluence.adeo.no/display/TEESSI/Saksopplysninger+per+behandlingstema
  */
-public class RegisteropplysningerFactory {
+public final class RegisteropplysningerFactory {
+
+    private RegisteropplysningerFactory() {}
 
     public static RegisteropplysningerRequest.SaksopplysningTyper utledSaksopplysningTyper(Behandlingstema behandlingstema) throws TekniskException {
         switch (behandlingstema) {
@@ -16,6 +18,7 @@ public class RegisteropplysningerFactory {
             case IKKE_YRKESAKTIV:
             case ARBEID_ETT_LAND_ØVRIG:
             case ARBEID_NORGE_BOSATT_ANNET_LAND:
+            case ARBEID_I_UTLANDET:
                 return hentSaksopplysningTyperForBehandlingAvSøknad();
             case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING:
             case REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE:
