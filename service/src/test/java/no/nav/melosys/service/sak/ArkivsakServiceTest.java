@@ -21,18 +21,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SakServiceTest {
+public class ArkivsakServiceTest {
     @Mock
     private SakConsumer sakConsumer;
 
-    private SakService sakService;
+    private ArkivsakService arkivsakService;
 
     @Captor
     private ArgumentCaptor<SakDto> captor;
 
     @Before
     public void setup() {
-        sakService = new SakService(sakConsumer);
+        arkivsakService = new ArkivsakService(sakConsumer);
     }
 
     @Test
@@ -46,7 +46,7 @@ public class SakServiceTest {
         sakDto.setId(sakID);
         when(sakConsumer.opprettSak(any())).thenReturn(sakDto);
 
-        Long opprettetSakID = sakService.opprettSak(saksnummer, behandlingstema, aktørID);
+        Long opprettetSakID = arkivsakService.opprettSak(saksnummer, behandlingstema, aktørID);
 
         assertThat(opprettetSakID).isEqualTo(sakID);
         verify(sakConsumer).opprettSak(captor.capture());
@@ -66,7 +66,7 @@ public class SakServiceTest {
         sakDto.setId(sakID);
         when(sakConsumer.opprettSak(any())).thenReturn(sakDto);
 
-        Long opprettetSakID = sakService.opprettSak(saksnummer, behandlingstema, aktørID);
+        Long opprettetSakID = arkivsakService.opprettSak(saksnummer, behandlingstema, aktørID);
 
         assertThat(opprettetSakID).isEqualTo(sakID);
         verify(sakConsumer).opprettSak(captor.capture());
@@ -82,7 +82,7 @@ public class SakServiceTest {
         sakDto.setTema(Tema.UFM.getKode());
         when(sakConsumer.hentSak(eq(sakID))).thenReturn(sakDto);
 
-        Tema tema = sakService.hentTemaFraSak(sakID);
+        Tema tema = arkivsakService.hentTemaFraSak(sakID);
         assertThat(tema).isEqualTo(Tema.UFM);
     }
 }

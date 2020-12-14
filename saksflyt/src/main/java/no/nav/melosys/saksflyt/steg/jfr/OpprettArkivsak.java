@@ -8,8 +8,8 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.service.sak.ArkivsakService;
 import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.sak.SakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +23,12 @@ public class OpprettArkivsak implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OpprettArkivsak.class);
 
     private final FagsakService fagsakService;
-    private final SakService sakService;
+    private final ArkivsakService arkivsakService;
 
     @Autowired
-    public OpprettArkivsak(FagsakService fagsakService, SakService sakService) {
+    public OpprettArkivsak(FagsakService fagsakService, ArkivsakService arkivsakService) {
         this.fagsakService = fagsakService;
-        this.sakService = sakService;
+        this.arkivsakService = arkivsakService;
     }
 
     @Override
@@ -50,7 +50,7 @@ public class OpprettArkivsak implements StegBehandler {
         String saksnummer = fagsak.getSaksnummer();
         Behandlingstema behandlingstema = behandling.getTema();
 
-        Long gsakSakId = sakService.opprettSak(saksnummer, behandlingstema, aktørId);
+        Long gsakSakId = arkivsakService.opprettSak(saksnummer, behandlingstema, aktørId);
         fagsak.setGsakSaksnummer(gsakSakId);
         fagsakService.lagre(fagsak);
 
