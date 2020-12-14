@@ -50,7 +50,15 @@ public class DistribuerJournalpost implements StegBehandler {
         }
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         String journalpostId = prosessinstans.getData(DISTRIBUERBAR_JOURNALPOST_ID);
-        Aktoer mottaker = prosessinstans.getData(MOTTAKER, Aktoer.class);
+        Aktoer mottaker = prosessinstans.getData(MOTTAKER, Aktoer.class, null);
+
+        if (isEmpty(journalpostId)) {
+            throw new FunksjonellException("JournalpostId mangler, kan ikke distribuere");
+        }
+
+        if (mottaker == null) {
+            throw new FunksjonellException("Prosessinstans mangler mottaker");
+        }
 
         OrganisasjonDokument org = null;
         Kontaktopplysning kontaktopplysning = null;
@@ -58,10 +66,6 @@ public class DistribuerJournalpost implements StegBehandler {
         if (!Aktoersroller.BRUKER.equals(mottaker.getRolle())) {
             org = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottaker.getOrgnr()).getDokument();
             kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), mottaker.getOrgnr()).orElse(null);
-        }
-
-        if (isEmpty(journalpostId)) {
-            throw new FunksjonellException("JournalpostId mangler, kan ikke distribuere");
         }
 
         String bestillingsId;

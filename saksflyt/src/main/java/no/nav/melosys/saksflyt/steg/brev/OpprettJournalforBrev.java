@@ -60,9 +60,13 @@ public class OpprettJournalforBrev implements StegBehandler {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         PersonDokument personDokument = behandling.hentPersonDokument();
         Produserbaredokumenter produserbartDokument = prosessinstans.getData(PRODUSERBART_BREV, Produserbaredokumenter.class);
-        Aktoer mottaker = prosessinstans.getData(MOTTAKER, Aktoer.class);
+        Aktoer mottaker = prosessinstans.getData(MOTTAKER, Aktoer.class, null);
         OrganisasjonDokument org = null;
         Kontaktopplysning kontaktopplysning = null;
+
+        if (mottaker == null) {
+            throw new FunksjonellException("Prosessinstans mangler mottaker");
+        }
 
         if (!Aktoersroller.BRUKER.equals(mottaker.getRolle())) {
             org = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottaker.getOrgnr()).getDokument();

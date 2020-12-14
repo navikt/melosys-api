@@ -1,7 +1,10 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -44,8 +47,27 @@ class DistribuerJournalpostTest {
     }
 
     @Test
-    void utførFeilerJournalpostIdMangler() {
+    void utførFeilerVedManglendeBehandling() {
         assertThrows(FunksjonellException.class, () -> distribuerJournalpost.utfør(new Prosessinstans()));
+    }
+
+    @Test
+    void utførFeilerVedManglendeJournalpostId() throws Exception {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        Behandling behandling = TestdataFactory.lagBehandling();
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        prosessinstans.setBehandling(behandling);
+        assertThrows(FunksjonellException.class, () -> distribuerJournalpost.utfør(prosessinstans));
+    }
+
+    @Test
+    void utførFeilerVedManglendeMottaker() throws Exception {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        Behandling behandling = TestdataFactory.lagBehandling();
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        prosessinstans.setBehandling(behandling);
+        prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, "123");
+        assertThrows(FunksjonellException.class, () -> distribuerJournalpost.utfør(prosessinstans));
     }
 
     @Test
@@ -61,8 +83,15 @@ class DistribuerJournalpostTest {
     @Test
     void utførDistribuerJournalpostMedAdresse() throws Exception {
         String journalpostId = "12345";
+        OrganisasjonDokument organisasjonDokument = TestdataFactory.lagOrg();
+        Kontaktopplysning kontaktopplysning = TestdataFactory.lagKontaktOpplysning();
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setDokument(organisasjonDokument);
 
         Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.REPRESENTANT);
+
+        when(mockEregFasade.hentOrganisasjon(any())).thenReturn(saksopplysning);
+        when(mockKontaktopplysningService.hentKontaktopplysning(any(), any())).thenReturn(Optional.of(kontaktopplysning));
 
         distribuerJournalpost.utfør(prosessinstans);
 
