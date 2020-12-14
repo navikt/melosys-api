@@ -4,7 +4,9 @@ import java.util.List;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -46,8 +48,12 @@ public class OpprettSoeknad implements StegBehandler {
             Soeknad soeknad = new Soeknad();
             soeknad.periode = periode;
             soeknad.soeknadsland.landkoder = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, new TypeReference<List<String>>() {});
-
-            behandlingsgrunnlagService.opprettSøknadYrkesaktiveEøs(behandlingID, soeknad);
+            Sakstyper sakstype = prosessinstans.getBehandling().getFagsak().getType();
+            if (sakstype == Sakstyper.FTRL) {
+                behandlingsgrunnlagService.opprettSøknadFolketrygden(behandlingID, new SoeknadFtrl());
+            } else {
+                behandlingsgrunnlagService.opprettSøknadYrkesaktiveEøs(behandlingID, soeknad);
+            }
             log.info("Opprettet søknad for behandling {}.", behandlingID);
         } else {
             log.info("Ikke opprettet søknad for behandling {} med tema {}", behandlingID, prosessinstans.getBehandling().getTema());
