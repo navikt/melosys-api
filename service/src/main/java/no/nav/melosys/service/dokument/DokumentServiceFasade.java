@@ -4,7 +4,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -61,8 +61,8 @@ public class DokumentServiceFasade {
                                  BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
         String saksbehandler = SubjectHandler.getInstance().getUserID();
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
-        Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(produserbartDokument)
-            .medAvsender(saksbehandler)
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProdserbartDokument(produserbartDokument)
+            .medAvsenderNavn(saksbehandler)
             .medMottakere(Mottaker.av(brevbestillingDto.mottaker))
             .medBegrunnelseKode(brevbestillingDto.begrunnelseKode)
             .medYtterligereInformasjon(brevbestillingDto.ytterligereInformasjon)
@@ -73,7 +73,7 @@ public class DokumentServiceFasade {
 
     @Transactional
     public void produserDokument(Produserbaredokumenter produserbartDokument, Mottaker mottaker,
-                                 long behandlingID, Brevbestilling brevbestilling) throws TekniskException, FunksjonellException {
+                                 long behandlingID, DoksysBrevbestilling brevbestilling) throws TekniskException, FunksjonellException {
         if (dokgenService.erTilgjengeligDokgenmal(produserbartDokument)) {
             Behandling behandling = behandlingService.hentBehandling(behandlingID);
             List<Aktoer> mottakere = brevmottakerService.avklarMottakere(produserbartDokument, mottaker, behandling);

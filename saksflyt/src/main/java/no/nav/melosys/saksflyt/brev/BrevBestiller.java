@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.brev;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
@@ -24,15 +24,15 @@ public class BrevBestiller {
     }
 
     public void bestill(Produserbaredokumenter dokumentType, String avsender, Mottaker mottaker, Behandling behandling) throws FunksjonellException, TekniskException {
-        Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(dokumentType)
-            .medAvsender(avsender)
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProdserbartDokument(dokumentType)
+            .medAvsenderNavn(avsender)
             .medMottakere(mottaker)
             .medBehandling(behandling).build();
         bestill(brevbestilling);
     }
 
-    public void bestill(Brevbestilling brevbestilling) throws FunksjonellException, TekniskException {
-        Produserbaredokumenter dokumentType = brevbestilling.getDokumentType();
+    public void bestill(DoksysBrevbestilling brevbestilling) throws FunksjonellException, TekniskException {
+        Produserbaredokumenter dokumentType = brevbestilling.getProduserbartdokument();
         Behandling behandling = brevbestilling.getBehandling();
 
         for (Mottaker mottaker : brevbestilling.getMottakere()) {

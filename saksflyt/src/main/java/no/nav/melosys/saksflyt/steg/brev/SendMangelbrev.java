@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.time.Period;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -56,8 +56,8 @@ public class SendMangelbrev implements StegBehandler {
         String saksbehandler = brevData.saksbehandler;
         String fritekst = brevData.fritekst;
 
-        Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(MELDING_MANGLENDE_OPPLYSNINGER)
-            .medAvsender(saksbehandler)
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProdserbartDokument(MELDING_MANGLENDE_OPPLYSNINGER)
+            .medAvsenderNavn(saksbehandler)
             .medMottakere(Mottaker.av(mottaker))
             .medBehandling(behandling)
             .medFritekst(fritekst).build();

@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -49,9 +49,9 @@ public class SendMangelbrevTest {
 
         agent.utfør(p);
 
-        ArgumentCaptor<Brevbestilling> brevbestillingArgumentCaptor = ArgumentCaptor.forClass(Brevbestilling.class);
+        ArgumentCaptor<DoksysBrevbestilling> brevbestillingArgumentCaptor = ArgumentCaptor.forClass(DoksysBrevbestilling.class);
         verify(brevBestiller).bestill(brevbestillingArgumentCaptor.capture());
-        assertThat(brevbestillingArgumentCaptor.getValue().getDokumentType()).isEqualTo(Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER);
+        assertThat(brevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER);
         verify(behandlingRepo).save(any(Behandling.class));
     }
 

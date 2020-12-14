@@ -5,7 +5,7 @@ import java.util.List;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
-import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -77,8 +77,8 @@ public class DokumentService {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Aktoersroller mottakerRolle = brevbestillingDto.mottaker == null ?
             brevmottakerService.avklarMottakerRolleFraDokument(produserbartDokument) : brevbestillingDto.mottaker;
-        Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(produserbartDokument)
-            .medAvsender(SubjectHandler.getInstance().getUserID())
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProdserbartDokument(produserbartDokument)
+            .medAvsenderNavn(SubjectHandler.getInstance().getUserID())
             .medMottakerRolle(mottakerRolle)
             .medBehandling(behandling)
             .medBegrunnelseKode(brevbestillingDto.begrunnelseKode)
@@ -109,13 +109,13 @@ public class DokumentService {
     public void produserDokument(Produserbaredokumenter produserbartDokument,
                                  Mottaker mottaker,
                                  long behandlingID,
-                                 Brevbestilling brevbestilling)
+                                 DoksysBrevbestilling brevbestilling)
         throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         // FIXME: Behandling i brevbestilling byttes ut med behandlingId for å samle ansvar for henting av saksopplysninger
-        Brevbestilling nyBrevbestilling = new Brevbestilling.Builder()
-            .medDokumentType(brevbestilling.getDokumentType())
-            .medAvsender(brevbestilling.getAvsender())
+        DoksysBrevbestilling nyBrevbestilling = new DoksysBrevbestilling.Builder()
+            .medProdserbartDokument(brevbestilling.getProduserbartdokument())
+            .medAvsenderNavn(brevbestilling.getAvsenderNavn())
             .medMottakerRolle(brevbestilling.getMottakerRolle())
             .medMottakere(brevbestilling.getMottakere())
             .medBehandling(behandling)
@@ -131,17 +131,17 @@ public class DokumentService {
         }
     }
 
-    private BrevData lagBrevData(Brevbestilling brevbestilling) throws FunksjonellException, TekniskException {
-        final var dokumentType = brevbestilling.getDokumentType();
+    private BrevData lagBrevData(DoksysBrevbestilling brevbestilling) throws FunksjonellException, TekniskException {
+        final var dokumentType = brevbestilling.getProduserbartdokument();
         Assert.notNull(dokumentType, "Ingen gyldig dokumentType.");
 
         BrevDataBygger brevDataBygger = brevDataByggerVelger.hent(dokumentType, lagBrevbestillingDto(brevbestilling));
         BrevDataGrunnlag brevDataGrunnlag = brevdataGrunnlagFactory.av(brevbestilling);
 
-        return brevDataBygger.lag(brevDataGrunnlag, brevbestilling.getAvsender());
+        return brevDataBygger.lag(brevDataGrunnlag, brevbestilling.getAvsenderNavn());
     }
 
-    private static BrevbestillingDto lagBrevbestillingDto(Brevbestilling brevbestilling) {
+    private static BrevbestillingDto lagBrevbestillingDto(DoksysBrevbestilling brevbestilling) {
         final BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.mottaker = brevbestilling.getMottakerRolle();
         brevbestillingDto.begrunnelseKode = brevbestilling.getBegrunnelseKode();

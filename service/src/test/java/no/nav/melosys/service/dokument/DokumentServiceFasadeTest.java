@@ -3,7 +3,7 @@ package no.nav.melosys.service.dokument;
 import java.util.Collections;
 
 import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -76,7 +76,7 @@ class DokumentServiceFasadeTest {
     void skalKalleDokumentServiceProduserDokument() throws Exception {
         when(mockDokgenService.erTilgjengeligDokgenmal(any())).thenReturn(false);
 
-        dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.av(Aktoersroller.BRUKER), 1, new Brevbestilling.Builder().build());
+        dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.av(Aktoersroller.BRUKER), 1, new DoksysBrevbestilling.Builder().build());
 
         verify(mockDokumentSystemService).produserDokument(any(), any(), anyLong(), any());
     }
@@ -86,7 +86,7 @@ class DokumentServiceFasadeTest {
         when(mockDokgenService.erTilgjengeligDokgenmal(any())).thenReturn(true);
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any())).thenReturn(Collections.singletonList(new Aktoer()));
 
-        dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.av(Aktoersroller.BRUKER), 1, new Brevbestilling.Builder().build());
+        dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.av(Aktoersroller.BRUKER), 1, new DoksysBrevbestilling.Builder().build());
 
         verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any());
         verifyNoInteractions(mockDokumentService);

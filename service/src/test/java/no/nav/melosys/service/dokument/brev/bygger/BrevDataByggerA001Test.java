@@ -5,7 +5,7 @@ import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
@@ -156,10 +156,10 @@ public class BrevDataByggerA001Test {
     }
 
     private BrevDataGrunnlag lagBrevDataGrunnlag() throws TekniskException {
-        return lagBrevDataGrunnlag(new Brevbestilling.Builder().medBehandling(behandling).build());
+        return lagBrevDataGrunnlag(new DoksysBrevbestilling.Builder().medBehandling(behandling).build());
     }
 
-    private BrevDataGrunnlag lagBrevDataGrunnlag(Brevbestilling brevbestilling) throws TekniskException {
+    private BrevDataGrunnlag lagBrevDataGrunnlag(DoksysBrevbestilling brevbestilling) throws TekniskException {
         RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(ereg, mock(TpsFasade.class));
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class));
         return new BrevDataGrunnlag(brevbestilling, mock(KodeverkService.class), avklarteVirksomheterService, avklartefaktaService);
@@ -300,7 +300,7 @@ public class BrevDataByggerA001Test {
     @Test
     public void lagBrevdata_ytterligereInfoFraBestilling_infoFinnes() throws MelosysException {
         final String forventetInfo = "By the way...";
-        Brevbestilling brevbestilling = new Brevbestilling.Builder()
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
             .medBehandling(behandling)
             .medYtterligereInformasjon(forventetInfo).build();
         BrevDataGrunnlag brevdataGrunnlag =  lagBrevDataGrunnlag(brevbestilling);

@@ -7,36 +7,23 @@ import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
-public class DokgenBrevbestilling {
-    private final Produserbaredokumenter produserbartdokument;
-    private final Behandling behandling;
+public class DokgenBrevbestilling extends Brevbestilling {
     private final OrganisasjonDokument org;
     private final Kontaktopplysning kontaktopplysning;
-    private Instant forsendelseMottatt;
-    private String avsenderNavn;
-    private String avsenderId;
-    private boolean bestillKopi = false;
+    private final Instant forsendelseMottatt;
+    private final String avsenderId;
+    private final boolean bestillKopi;
 
     private DokgenBrevbestilling(Produserbaredokumenter produserbartdokument, Behandling behandling,
-                                OrganisasjonDokument org, Kontaktopplysning kontaktopplysning,
-                                Instant forsendelseMottatt, String avsenderNavn, String avsenderId,
-                                boolean bestillKopi) {
-        this.produserbartdokument = produserbartdokument;
-        this.behandling = behandling;
+                                 OrganisasjonDokument org, Kontaktopplysning kontaktopplysning,
+                                 Instant forsendelseMottatt, String avsenderNavn, String avsenderId,
+                                 boolean bestillKopi) {
+        super(produserbartdokument, behandling, avsenderNavn);
         this.org = org;
         this.kontaktopplysning = kontaktopplysning;
         this.forsendelseMottatt = forsendelseMottatt;
-        this.avsenderNavn = avsenderNavn;
         this.avsenderId = avsenderId;
         this.bestillKopi = bestillKopi;
-    }
-
-    public Produserbaredokumenter getProduserbartdokument() {
-        return produserbartdokument;
-    }
-
-    public Behandling getBehandling() {
-        return behandling;
     }
 
     public OrganisasjonDokument getOrg() {
@@ -49,10 +36,6 @@ public class DokgenBrevbestilling {
 
     public Instant getForsendelseMottatt() {
         return forsendelseMottatt;
-    }
-
-    public String getAvsenderNavn() {
-        return avsenderNavn;
     }
 
     public String getAvsenderId() {
