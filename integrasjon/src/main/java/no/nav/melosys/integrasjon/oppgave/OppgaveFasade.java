@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon.oppgave;
 import java.util.List;
 import java.util.Set;
 
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -19,7 +18,7 @@ public interface OppgaveFasade {
      * Finner aktive og utildelte oppgaver som svarer til noen gitt kriterier.
      * Oppgave sorterer oppgavene stigende etter frist.
      */
-    List<Oppgave> finnUtildelteOppgaverEtterFrist(Behandlingstema behandlingstema) throws TekniskException, FunksjonellException;
+    List<Oppgave> finnUtildelteOppgaverEtterFrist(String behandlingstype) throws TekniskException, FunksjonellException;
 
     void oppdaterOppgave(String oppgaveID, OppgaveOppdatering oppgaveOppdatering) throws FunksjonellException, TekniskException;
 

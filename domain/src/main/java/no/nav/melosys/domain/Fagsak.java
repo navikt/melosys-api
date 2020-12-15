@@ -207,4 +207,8 @@ public class Fagsak extends RegistreringsInfo {
     public int hashCode() {
         return 31;
     }
+
+    public static boolean erSakstypeFtrl(Sakstyper sakstype) {
+        return Sakstyper.FTRL == sakstype;
+    }
 }

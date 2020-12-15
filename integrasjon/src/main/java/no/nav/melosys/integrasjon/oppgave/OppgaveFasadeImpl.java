@@ -8,12 +8,10 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.google.common.collect.ImmutableMap;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.domain.util.KodeverkUtils;
@@ -31,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 import static no.nav.melosys.integrasjon.Konstanter.NAV_VIKEN_ENHET_ID;
 
@@ -43,33 +40,6 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     private static final String OPPGAVE_STATUS_FERDIGSTILT = "FERDIGSTILT";
     private static final String SORTERINGSFELT = "FRIST";
     private static final String OPPGAVE_STATUSKATEGORI_AAPEN = "AAPEN";
-    private static final String NY_VURDERING_BEHANDLINGTYPEKODE = "ae0240";
-    private static final String ENDRET_PERIODE_BEHANDLINGSTYPEKODE = "ae0052";
-
-    private static final String EUEOS_BEHANDLINGSTEMAKODE = "ab0424";
-    private static final String EUEOS_BEHANDLINGSTEMAKODE_GAMMEL = "ab0390";
-
-
-    private static final ImmutableMap<Behandlingstema, String> BEHANDLINGSTYPE_FELLESKODE_MAP =
-        ImmutableMap.<Behandlingstema, String>builder()
-            .put(UTSENDT_ARBEIDSTAKER, "ae0034")
-            .put(UTSENDT_SELVSTENDIG, "ae0034")
-            .put(IKKE_YRKESAKTIV, "ae0238")
-            //.put(ENDRET_PERIODE, "ae0052")
-            //.put(ANKE, "ae0046")
-            //.put(KLAGE, "ae0058")
-            .put(ARBEID_ETT_LAND_ØVRIG, "ae0243")
-            .put(BESLUTNING_LOVVALG_NORGE, "ae0112")
-            .put(BESLUTNING_LOVVALG_ANNET_LAND, "ae0113")
-            .put(ANMODNING_OM_UNNTAK_HOVEDREGEL, "ae0110")
-            .put(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, "ae0111")
-            .put(REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, "ae0235")
-            .put(ARBEID_FLERE_LAND, "ae0242")
-            .put(ØVRIGE_SED_MED, "ae0254")
-            .put(ØVRIGE_SED_UFM, "ae0254")
-            .put(TRYGDETID, "ae0236")
-            .build();
-
 
     private final OppgaveConsumer oppgaveConsumer;
 
@@ -86,48 +56,23 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public List<Oppgave> finnUtildelteOppgaverEtterFrist(Behandlingstema behandlingstema)
+    public List<Oppgave> finnUtildelteOppgaverEtterFrist(String behandlingstype)
         throws FunksjonellException, TekniskException {
 
         OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
-            .medBehandlingsType(hentFellesKode(behandlingstema))
-            .medBehandlingstema(EUEOS_BEHANDLINGSTEMAKODE)
+            .medBehandlingsType(behandlingstype)
             .medOppgaveTyper(hentGyldigeOppgavetyper())
             .medSorteringsfelt(SORTERINGSFELT)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
-            .medTildeltRessurs(false);
+            .medTildeltRessurs(false)
+            .medBehandlesAvApplikasjon(Fagsystem.MELOSYS.getKode());
 
         List<OppgaveDto> oppgaver = oppgaveConsumer.hentOppgaveListe(searchRequestBuilder.build());
-
-        if (erBehandlingstypeUtsending(behandlingstema)) {
-
-            oppgaver.addAll(oppgaveConsumer.hentOppgaveListe(
-                searchRequestBuilder.medBehandlingstema(EUEOS_BEHANDLINGSTEMAKODE_GAMMEL).build()
-            ));
-
-            oppgaver.addAll(oppgaveConsumer.hentOppgaveListe(
-                searchRequestBuilder
-                    .medBehandlingstema(EUEOS_BEHANDLINGSTEMAKODE)
-                    .medBehandlingsType(NY_VURDERING_BEHANDLINGTYPEKODE)
-                    .build()
-            ));
-
-            oppgaver.addAll(oppgaveConsumer.hentOppgaveListe(
-                searchRequestBuilder
-                    .medBehandlingstema(EUEOS_BEHANDLINGSTEMAKODE)
-                    .medBehandlingsType(ENDRET_PERIODE_BEHANDLINGSTYPEKODE)
-                    .build()
-            ));
-        }
 
         return oppgaver.stream().map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
             .filter(erGyldigJournalføringEllerBehandlingsoppgave)
             .collect(Collectors.toList());
-    }
-
-    private boolean erBehandlingstypeUtsending(Behandlingstema behandlingstema) {
-        return behandlingstema == UTSENDT_ARBEIDSTAKER || behandlingstema == UTSENDT_SELVSTENDIG;
     }
 
     @Override
@@ -150,13 +95,8 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         OpprettOppgaveDto oppgaveDto = new OpprettOppgaveDto();
         oppgaveDto.setAktivDato(idag);
         oppgaveDto.setAktørId(oppgave.getAktørId());
-        if (oppgave.getBehandlingstype() != null) {
-            oppgaveDto.setBehandlingstype(hentFellesKode(oppgave.getBehandlingstema()));
-        }
-        if (oppgave.getBehandlingstema() != null) {
-            oppgaveDto.setBehandlingstema(EUEOS_BEHANDLINGSTEMAKODE);
-            //oppgaveDto.setBehandlingstema(oppgave.getBehandlingstema().getKode()); todo: mapping til nytt kodeverk når det kommer..
-        }
+        oppgaveDto.setBehandlingstema(oppgave.getBehandlingstema());
+        oppgaveDto.setBehandlingstype(oppgave.getBehandlingstype());
         oppgaveDto.setBeskrivelse(oppgave.getBeskrivelse());
 
         if (oppgave.getFristFerdigstillelse() != null) {
@@ -196,9 +136,6 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         }
         if (oppgaveOppdatering.getTema() != null) {
             oppgaveDto.setTema(oppgaveOppdatering.getTema().getKode());
-        }
-        if (oppgaveOppdatering.getBehandlingstema() != null) {
-            oppgaveDto.setBehandlingstype(hentFellesKode(oppgaveOppdatering.getBehandlingstema()));
         }
         if (oppgaveOppdatering.getBehandlesAvApplikasjon() != null && oppgaveOppdatering.getBehandlesAvApplikasjon() != Fagsystem.INTET) {
             oppgaveDto.setBehandlesAvApplikasjon(oppgaveOppdatering.getBehandlesAvApplikasjon().getKode());
@@ -319,24 +256,13 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .setTildeltEnhetsnr(oppgaveDto.getTildeltEnhetsnr())
             .setTilordnetRessurs(oppgaveDto.getTilordnetRessurs())
             .setVersjon(oppgaveDto.getVersjon())
-            /*todo, ikke bruke lenger - kan ikke mappes tilbake hvis vi bruker melosys behandlingstema?
-            .setBehandlingstema(mapTilEnumFraKode(OppgaveBehandlingstema.class, oppgaveDto.getBehandlingstema(), oppgaveId))*/
+            .setBehandlingstema(oppgaveDto.getBehandlingstema())
             .setTema(mapTilEnumFraKode(Tema.class, oppgaveDto.getTema(), oppgaveId))
             .setOppgavetype(mapTilEnumFraKode(Oppgavetyper.class, oppgaveDto.getOppgavetype(), oppgaveId))
             .setPrioritet(StringUtils.isNotEmpty(oppgaveDto.getPrioritet()) ? PrioritetType.valueOf(oppgaveDto.getPrioritet()) : null)
             .setBehandlesAvApplikasjon(mapTilEnumFraKode(Fagsystem.class, StringUtils.defaultString(oppgaveDto.getBehandlesAvApplikasjon()), oppgaveId));
 
         return domainOppgaveBuilder.build();
-    }
-
-    /**
-     * Henter koder fra felleskodeverk: Behandlingstyper.
-     */
-    private static String hentFellesKode(Behandlingstema behandlingstema) {
-        if (BEHANDLINGSTYPE_FELLESKODE_MAP.containsKey(behandlingstema)) {
-            return BEHANDLINGSTYPE_FELLESKODE_MAP.get(behandlingstema);
-        }
-        throw new IllegalArgumentException(behandlingstema + " er ikke implementert i felleskodeverk.");
     }
 
     private static <K extends Kodeverk> K mapTilEnumFraKode(Class<K> clazz, String verdi, String oppgaveId) {

@@ -48,6 +48,7 @@ public enum ProsessDataKey {
     REVURDER_BEGRUNNELSE("revurderBegrunnelse"),
     SAKSBEHANDLER("saksbehandler"),
     SAKSNUMMER("saksnummer"),
+    SAKSTYPE("sakstype"),
     SED_DOKUMENT("sedDokument"),
     SKAL_SENDES_FORVALTNINGSMELDING("skalSendesForvaltningsmelding"),
     SKAL_TILORDNES("skalTilordnes"),
