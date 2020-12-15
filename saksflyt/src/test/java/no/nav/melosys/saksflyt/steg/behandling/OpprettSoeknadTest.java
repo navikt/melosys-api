@@ -34,13 +34,13 @@ class OpprettSoeknadTest {
     @Test
     void utfør_behandlingstemaUtsendtArbeidstaker_oppretterSøknad() throws FunksjonellException, IntegrasjonException {
         opprettSoeknad.utfør(lagProsessinstans(Behandlingstema.UTSENDT_ARBEIDSTAKER));
-        verify(behandlingsgrunnlagService).opprettSøknadGrunnlag(eq(behandlingID), any(Soeknad.class));
+        verify(behandlingsgrunnlagService).opprettSøknadYrkesaktiveEøs(eq(behandlingID), any(Soeknad.class));
     }
 
     @Test
     void utfør_behandlingsTemaØvrigeSed_oppretterIkkeSøknad() throws FunksjonellException, IntegrasjonException {
         opprettSoeknad.utfør(lagProsessinstans(Behandlingstema.ØVRIGE_SED_MED));
-        verify(behandlingsgrunnlagService, never()).opprettSøknadGrunnlag(eq(behandlingID), any(Soeknad.class));
+        verify(behandlingsgrunnlagService, never()).opprettSøknadYrkesaktiveEøs(eq(behandlingID), any(Soeknad.class));
     }
 
     private Prosessinstans lagProsessinstans(Behandlingstema behandlingstema) {

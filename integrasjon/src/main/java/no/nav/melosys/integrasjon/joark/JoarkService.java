@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.joark;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
@@ -121,6 +122,11 @@ public class JoarkService implements JoarkFasade {
     @Override
     public LocalDate hentMottaksDatoForJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException {
         return LocalDate.ofInstant(hentJournalpost(journalpostID).getForsendelseMottatt(), ZoneId.systemDefault());
+    }
+
+    @Override
+    public Instant hentInstantMottaksDatoForJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException {
+        return hentJournalpost(journalpostID).getForsendelseMottatt();
     }
 
 

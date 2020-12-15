@@ -63,6 +63,8 @@ public class PersonDokument implements SaksopplysningDokument {
 
     public MidlertidigPostadresse midlertidigPostadresse = new MidlertidigPostadresse();
 
+    public UstrukturertAdresse gjeldendePostadresse = new UstrukturertAdresse();
+
     @XmlTransient
     @JsonProperty(defaultValue = "false" )
     public boolean erEgenAnsatt; // MELOSYS-1580
@@ -82,5 +84,9 @@ public class PersonDokument implements SaksopplysningDokument {
             .filter(Familiemedlem::erForelder)
             .filter(forelder -> !fnrGjeldendeForelder.equals(forelder.fnr))
             .findAny();
+    }
+
+    public boolean harBeskyttelsesbehov() {
+        return diskresjonskode != null && diskresjonskode.erKode6();
     }
 }

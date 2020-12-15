@@ -93,28 +93,32 @@ public class AvklarteVirksomheterService {
         return norskeVirksomheter;
     }
 
-    public void lagreVirksomheterSomAvklartefakta(List<String> orgIDliste, Long behandlingID) throws FunksjonellException, TekniskException {
-        erOrgIDerGyldig(orgIDliste, behandlingID);
-        for (String orgID : orgIDliste) {
-            avklartefaktaService.leggTilAvklarteFakta(behandlingID, VIRKSOMHET, VIRKSOMHET.getKode(), orgID, "TRUE");
+    public void lagreVirksomheterSomAvklartefakta(List<String> virksomhetIDer, Long behandlingID) throws FunksjonellException, TekniskException {
+        erVirksomhetIDerGyldige(virksomhetIDer, behandlingID);
+        for (String virksomhetID : virksomhetIDer) {
+            lagreVirksomhetSomAvklartfakta(virksomhetID, behandlingID);
         }
     }
 
-    private boolean erOrgIDerGyldig(List<String> orgIDliste, Long behandlingID) throws FunksjonellException, TekniskException {
+    public void lagreVirksomhetSomAvklartfakta(String virksomhetID, Long behandlingID) throws FunksjonellException, TekniskException {
+        avklartefaktaService.leggTilAvklarteFakta(behandlingID, VIRKSOMHET, VIRKSOMHET.getKode(), virksomhetID, "TRUE");
+    }
+
+    private boolean erVirksomhetIDerGyldige(List<String> virksomhetIDer, Long behandlingID) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        for (String orgID : orgIDliste) {
-            if (!erOrgIDGyldig(orgID, behandling)) {
-                throw new FunksjonellException("Orgnr " + orgID + " hører ikke til noen av arbeidsforholdene");
+        for (String virksomhetID : virksomhetIDer) {
+            if (!erVirksomhetIDGyldig(virksomhetID, behandling)) {
+                throw new FunksjonellException("VirksomhetID " + virksomhetID + " hører ikke til noen av arbeidsforholdene");
             }
         }
         return true;
     }
 
-    private boolean erOrgIDGyldig(String orgID, Behandling behandling) throws TekniskException {
+    private boolean erVirksomhetIDGyldig(String virksomhetID, Behandling behandling) throws TekniskException {
         BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
-        return erVirksomhetForetakUtland(orgID, behandlingsgrunnlagData)
-            || erVirksomhetSelvstendigForetakEllerLagtInnManuelt(orgID, behandlingsgrunnlagData)
-            || erVirksomhetArbeidNorge(orgID, behandling);
+        return erVirksomhetForetakUtland(virksomhetID, behandlingsgrunnlagData)
+            || erVirksomhetSelvstendigForetakEllerLagtInnManuelt(virksomhetID, behandlingsgrunnlagData)
+            || erVirksomhetArbeidNorge(virksomhetID, behandling);
     }
 
     private boolean erVirksomhetForetakUtland(String uuid, BehandlingsgrunnlagData behandlingsgrunnlagData) {

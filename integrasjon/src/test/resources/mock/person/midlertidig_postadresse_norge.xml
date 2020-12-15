@@ -23,6 +23,9 @@
                     <husbokstav>A</husbokstav>
                 </strukturertAdresse>
             </midlertidigPostadresse>
+            <gjeldendePostadressetype>
+                MIDLERTIDIG_POSTADRESSE_NORGE
+            </gjeldendePostadressetype>
         </person>
     </response>
 </b:hentPersonResponse>

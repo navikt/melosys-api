@@ -48,28 +48,59 @@ public class BehandlingsgrunnlagService {
         return opprettBehandlingsgrunnlag(behandlingID, sedGrunnlag, Behandlingsgrunnlagtyper.SED, VERSJON_SED_GRUNNLAG);
     }
 
-    public Behandlingsgrunnlag opprettSøknadGrunnlag(long behandlingID,
-                                                     Soeknad soeknad) throws FunksjonellException, IntegrasjonException {
+    public Behandlingsgrunnlag opprettSøknadYrkesaktiveEøs(long behandlingID,
+                                                           Soeknad soeknad) throws FunksjonellException, IntegrasjonException {
         return opprettBehandlingsgrunnlag(behandlingID, soeknad, Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS, VERSJON_SOEKNAD_GRUNNLAG);
     }
 
-    //Altinn
-    public Behandlingsgrunnlag opprettSøknadUtsending(long behandlingID,
-                                                     Soeknad soeknad) throws FunksjonellException, IntegrasjonException {
-        return opprettBehandlingsgrunnlag(behandlingID, soeknad, Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS, VERSJON_SOEKNAD_GRUNNLAG);
+    public Behandlingsgrunnlag opprettSøknadUtsendteArbeidstakereEøs(long behandlingID,
+                                                                     String orginalData,
+                                                                     Soeknad soeknad,
+                                                                     String eksternReferanseID) throws FunksjonellException, IntegrasjonException {
+        return opprettBehandlingsgrunnlag(
+            behandlingID,
+            orginalData,
+            soeknad,
+            Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS,
+            VERSJON_SOEKNAD_GRUNNLAG,
+            eksternReferanseID
+        );
     }
 
     public Behandlingsgrunnlag opprettSøknadFolketrygden(long behandlingID,
-                                                     SoeknadFtrl soeknad) throws FunksjonellException, IntegrasjonException {
+                                                         SoeknadFtrl soeknad) throws FunksjonellException, IntegrasjonException {
         return opprettBehandlingsgrunnlag(behandlingID, soeknad, Behandlingsgrunnlagtyper.SØKNAD_FOLKETRYGDEN, VERSJON_SOEKNAD_GRUNNLAG);
     }
 
-    private Behandlingsgrunnlag opprettBehandlingsgrunnlag(long behandlingID, BehandlingsgrunnlagData behandlingsgrunnlagData,
-                                                           Behandlingsgrunnlagtyper type, String versjon) throws FunksjonellException, IntegrasjonException {
+    private Behandlingsgrunnlag opprettBehandlingsgrunnlag(long behandlingID,
+                                                           BehandlingsgrunnlagData behandlingsgrunnlagData,
+                                                           Behandlingsgrunnlagtyper type,
+                                                           String versjon) throws FunksjonellException, IntegrasjonException {
+
+        return opprettBehandlingsgrunnlag(behandlingID, null, behandlingsgrunnlagData, type, versjon);
+    }
+
+    private Behandlingsgrunnlag opprettBehandlingsgrunnlag(long behandlingID,
+                                                           String originalData,
+                                                           BehandlingsgrunnlagData behandlingsgrunnlagData,
+                                                           Behandlingsgrunnlagtyper type,
+                                                           String versjon) throws FunksjonellException, IntegrasjonException {
+        return opprettBehandlingsgrunnlag(behandlingID, originalData, behandlingsgrunnlagData, type, versjon, null);
+    }
+
+    private Behandlingsgrunnlag opprettBehandlingsgrunnlag(long behandlingID,
+                                                           String originalData,
+                                                           BehandlingsgrunnlagData behandlingsgrunnlagData,
+                                                           Behandlingsgrunnlagtyper type,
+                                                           String versjon,
+                                                           String eksternReferanseID) throws FunksjonellException, IntegrasjonException {
 
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         if (behandling.getBehandlingsgrunnlag() != null) {
             throw new FunksjonellException("Finnes allerede behandlingsgrunnlag for behandling " + behandling.getId());
+        }
+        if (eksternReferanseID != null && harMottattSøknadMedEksternReferanseID(eksternReferanseID)) {
+            throw new FunksjonellException("Det finnes allerede behandlingsgrunnlag med eksterReferanseID " + eksternReferanseID);
         }
 
         Instant nå = Instant.now();
@@ -80,6 +111,8 @@ public class BehandlingsgrunnlagService {
         behandlingsgrunnlag.setType(type);
         behandlingsgrunnlag.setVersjon(versjon);
         behandlingsgrunnlag.setMottaksdato(hentMottaksdato(behandling.getInitierendeJournalpostId()));
+        behandlingsgrunnlag.setOriginalData(originalData);
+        behandlingsgrunnlag.setEksternReferanseID(eksternReferanseID);
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
         return behandlingsgrunnlagRepository.save(behandlingsgrunnlag);
     }
@@ -100,5 +133,9 @@ public class BehandlingsgrunnlagService {
 
     public Optional<Behandlingsgrunnlag> finnBehandlingsgrunnlag(Long behandlingID) {
         return behandlingsgrunnlagRepository.findByBehandling_Id(behandlingID);
+    }
+
+    public boolean harMottattSøknadMedEksternReferanseID(String eksternReferanseID) {
+        return !behandlingsgrunnlagRepository.findByEksternReferanseID(eksternReferanseID).isEmpty();
     }
 }

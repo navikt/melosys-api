@@ -1,6 +1,11 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
@@ -14,14 +19,19 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Fartsomraade;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MaritimtArbeid;
+import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
+import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
+import no.nav.melosys.domain.familie.OmfattetBarn;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import org.xml.sax.SAXException;
 
+import static java.util.Map.entry;
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_1;
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_2;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.lagXmlDato;
@@ -29,10 +39,16 @@ import static no.nav.melosys.service.dokument.brev.mapper.felles.Vilkaarbegrunne
 import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.mapArt122BegrunnelseType;
 
 public final class InnvilgelsesbrevMapper implements BrevDataMapper {
-
     private static final String JA = "true";
 
     private static final String XSD_LOCATION = "melosysbrev/melosys_000108.xsd";
+
+    private static final Map<Medfolgende_barn_begrunnelser, BarnAvslagBegrunnelseKode> BARN_AVSLAG_BEGRUNNELSE_KODE_MAP
+        = Map.ofEntries(
+            entry(Medfolgende_barn_begrunnelser.OVER_18_AR, BarnAvslagBegrunnelseKode.OVER_18_AAR),
+            entry(Medfolgende_barn_begrunnelser.IKKE_SOEKERS_BARN, BarnAvslagBegrunnelseKode.IKKE_SOEKERS_BARN),
+            entry(Medfolgende_barn_begrunnelser.IKKE_BOSATT_I_NORGE, BarnAvslagBegrunnelseKode.IKKE_BOSATT_I_NORGE),
+            entry(Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER, BarnAvslagBegrunnelseKode.MANGLER_OPPLYSNINGER));
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevdata) throws JAXBException, SAXException, TekniskException {
@@ -124,6 +140,20 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             fag.setArt16UtenArt12(JA);
         }
 
+        if (brevdata.avklarteMedfolgendeBarn.finnes()) {
+            fag.setErVurderingLovvalgBarn(JA);
+            fag.setAntallBarnOmfattetAvNorskTrygd(
+                BigInteger.valueOf(brevdata.avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd.size())
+            );
+            fag.setBarnIkkeOmfattetAvNorskTrygdListe(hentBarnIkkeOmfattetAvNorskTrygd(brevdata.avklarteMedfolgendeBarn));
+            fag.setBarnOmfattetAvNorskTrygdListe(hentBarnOmfattetAvNorskTrygd(brevdata.avklarteMedfolgendeBarn));
+            if (brevdata.avklarteMedfolgendeBarn.hentBegrunnelseFritekst().isPresent()) {
+                fag.setMedfoelgendeBarnFritekst(brevdata.avklarteMedfolgendeBarn.hentBegrunnelseFritekst().get());
+            }
+        } else {
+            fag.setAntallBarnOmfattetAvNorskTrygd(BigInteger.valueOf(0));
+        }
+
         return fag;
     }
 
@@ -144,6 +174,42 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             default:
                 throw new TekniskException("Ukjent vedtakstype " + vedtakstype + " kan ikke mappes til VedtaksTypeKode");
         }
+    }
+
+    private BarnOmfattetAvNorskTrygdListeType hentBarnOmfattetAvNorskTrygd(AvklarteMedfolgendeBarn avklarteMedfolgendeBarn) {
+        List<BarnInnvilgelseType> barnInnvilgelse = avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd.stream()
+            .map(InnvilgelsesbrevMapper::lagBarnInnvilgelseType)
+            .collect(Collectors.toList());
+        return BarnOmfattetAvNorskTrygdListeType.builder()
+            .withBarnInnvilgelse(barnInnvilgelse).build();
+    }
+
+    private BarnIkkeOmfattetAvNorskTrygdListeType hentBarnIkkeOmfattetAvNorskTrygd(AvklarteMedfolgendeBarn avklarteMedfolgendeBarn) throws TekniskException {
+        List<BarnAvslagType> barnAvslag = new ArrayList<>();
+        for (IkkeOmfattetBarn medfolgendeBarn : avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd) {
+            barnAvslag.add(lagBarnAvslagType(medfolgendeBarn));
+        }
+        return BarnIkkeOmfattetAvNorskTrygdListeType.builder()
+            .withBarnAvslag(barnAvslag).build();
+    }
+
+    private static BarnInnvilgelseType lagBarnInnvilgelseType(OmfattetBarn omfattetBarn) {
+        return BarnInnvilgelseType.builder().withBarnOmfattetAvNorskTrygd(omfattetBarn.sammensattNavn).build();
+    }
+
+    private BarnAvslagType lagBarnAvslagType(IkkeOmfattetBarn ikkeOmfattetBarn) throws TekniskException {
+        return BarnAvslagType.builder()
+            .withBarnAvslagBegrunnelse(tilBarnAvslagBegrunnelseKode(ikkeOmfattetBarn.begrunnelse))
+            .withBarnIkkeOmfattetAvNorskTrygd(ikkeOmfattetBarn.sammensattNavn).build();
+    }
+
+    private BarnAvslagBegrunnelseKode tilBarnAvslagBegrunnelseKode(Medfolgende_barn_begrunnelser begrunnelse) throws TekniskException {
+        if (begrunnelse == null) {
+            return null;
+        } else if (BARN_AVSLAG_BEGRUNNELSE_KODE_MAP.containsKey(begrunnelse)) {
+            return BARN_AVSLAG_BEGRUNNELSE_KODE_MAP.get(begrunnelse);
+        }
+        throw new TekniskException("Ukjent begrunnelse " + begrunnelse + " kan ikke mappes til BarnAvslagBegrunnelseKode");
     }
 
     private static JAXBElement<BrevdataType> lagBrevdataType(FellesType fellesType, MelosysNAVFelles navFelles, Fag fag, VedleggType vedlegg) {

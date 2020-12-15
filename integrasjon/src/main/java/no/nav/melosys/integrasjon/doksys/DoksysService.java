@@ -159,6 +159,17 @@ public class DoksysService implements DoksysFasade {
         return distribuerJournalpostConsumer.distribuerJournalpost(request).getBestillingsId();
     }
 
+    @Override
+    public String distribuerJournalpost(String journalpostId) {
+        DistribuerJournalpostRequest request = DistribuerJournalpostRequest.builder()
+            .journalpostId(journalpostId)
+            .bestillendeFagsystem(MELOSYS.getKode())
+            .dokumentProdApp(MELOSYS.getKode())
+            .build();
+
+        return distribuerJournalpostConsumer.distribuerJournalpost(request).getBestillingsId();
+    }
+
     private static Adresse norskAdresse(StrukturertAdresse strukturertAdresse) {
         return Adresse.builder()
             .adressetype("norskPostadresse")

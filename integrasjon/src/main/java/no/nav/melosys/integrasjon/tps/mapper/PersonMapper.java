@@ -39,6 +39,7 @@ public class PersonMapper {
         dokument.postadresse = AdresseMapper.mapTilPostadresse(person.getPostadresse());
         if (person instanceof Bruker) {
             dokument.midlertidigPostadresse = AdresseMapper.mapTilMidlertidigPostadresse(((Bruker) person).getMidlertidigPostadresse());
+            dokument.gjeldendePostadresse = AdresseMapper.mapTilGjeldendePostadresse((Bruker) person);
         }
         dokument.familiemedlemmer = FamiliemedlemMapper.mapTilFamiliemedlemmer(person.getHarFraRolleI());
         return dokument;

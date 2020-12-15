@@ -1,10 +1,9 @@
 package no.nav.melosys.integrasjon.felles;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
+import no.nav.melosys.integrasjon.felles.mdc.MDCOperations;
 import org.junit.Test;
 
-import no.nav.melosys.integrasjon.felles.mdc.MDCOperations;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MDCOperationsTest {
 
@@ -17,8 +16,7 @@ public class MDCOperationsTest {
 
         String callId2 = MDCOperations.generateCallId();
 
-        assertThat(callId2).isNotNull();
-        assertThat(callId2).isNotEqualTo(callId1);
+        assertThat(callId2).isNotNull().isNotEqualTo(callId1);
     }
 
     @Test

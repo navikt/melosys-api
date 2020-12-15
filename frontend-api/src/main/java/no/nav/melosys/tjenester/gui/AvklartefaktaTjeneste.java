@@ -73,7 +73,7 @@ public class AvklartefaktaTjeneste {
                                                                    @RequestBody VirksomheterDto virksomheter) throws TekniskException, FunksjonellException {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
 
-        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomheter.getOrgnummer(), behandlingID);
+        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomheter.getVirksomhetIDer(), behandlingID);
 
         return AvklartefaktaOppsummeringDto.av(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }

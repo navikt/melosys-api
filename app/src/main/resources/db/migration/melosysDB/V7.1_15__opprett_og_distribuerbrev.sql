@@ -1,0 +1,3 @@
+INSERT INTO PROSESS_TYPE(KODE, NAVN) VALUES('OPPRETT_OG_DISTRIBUER_BREV','Opprett, journalfør og distribuer brev');
+INSERT INTO PROSESS_STEG (kode, navn) VALUES ('OPPRETT_OG_JOURNALFØR_BREV', 'Opprett nytt brev');
+INSERT INTO PROSESS_STEG (kode, navn) VALUES ('DISTRIBUER_JOURNALPOST', 'Distribuer journalpost');
