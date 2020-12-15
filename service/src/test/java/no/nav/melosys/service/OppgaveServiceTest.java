@@ -213,7 +213,7 @@ public class OppgaveServiceTest {
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
         behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().personOpplysninger.medfolgendeFamilie
-            = List.of(MedfolgendeFamilie.tilBarnFraFnr("fnrBarn"));
+            = List.of(MedfolgendeFamilie.tilBarnFraFnrOgNavn("fnrBarn", null));
         when(tpsFasade.harStrengtFortroligAdresse("fnrBarn")).thenReturn(true);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 

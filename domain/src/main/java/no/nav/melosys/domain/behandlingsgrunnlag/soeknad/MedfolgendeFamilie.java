@@ -12,8 +12,8 @@ public class MedfolgendeFamilie {
         BARN
     }
 
-    public static MedfolgendeFamilie tilBarnFraFnr(String fnr) {
-        return tilBarnFraUuidFnrOgNavn(UUID.randomUUID().toString(), fnr, null);
+    public static MedfolgendeFamilie tilBarnFraFnrOgNavn(String fnr, String navn) {
+        return tilBarnFraUuidFnrOgNavn(UUID.randomUUID().toString(), fnr, navn);
     }
 
     public static MedfolgendeFamilie tilBarnFraUuidFnrOgNavn(String uuid, String fnr, String navn) {
