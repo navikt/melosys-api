@@ -197,17 +197,7 @@
                 <version>${ibmmq.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.oracle</groupId>
-                <artifactId>xdb6</artifactId>
-                <version>${oracle.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.oracle</groupId>
-                <artifactId>xmlparserv2</artifactId>
-                <version>${oxmlparserv2.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.oracle.jdbc</groupId>
+                <groupId>com.oracle.database.jdbc</groupId>
                 <artifactId>ojdbc8</artifactId>
                 <version>${ojdbc.version}</version>
             </dependency>
