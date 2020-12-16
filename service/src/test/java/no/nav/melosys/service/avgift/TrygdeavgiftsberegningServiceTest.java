@@ -28,7 +28,6 @@ import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_norsk
 import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV;
 import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -57,21 +56,29 @@ class TrygdeavgiftsberegningServiceTest {
     }
 
     @Test
-    void oppdaterBeregningsgrunnlag_medNorskAvgiftSkalIkkeBetaleAvgiftTilNorge_kasterFeil() {
-        var request = new OppdaterTrygdeavgiftsberegningRequest(1L, null);
+    void oppdaterBeregningsgrunnlag_medNorskOgUtenlandskAvgiftSkalIkkeBetaleAvgiftForNorskInntekt_setterIkkeAvgiftNorge() throws FunksjonellException {
+        var request = new OppdaterTrygdeavgiftsberegningRequest(1L, 2L);
         medlemAvFolketrygden.setVurderingTrygdeavgiftNorskInntekt(NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV);
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> trygdeavgiftsberegningService.oppdaterBeregningsgrunnlag(behandlingsresultatID, request))
-            .withMessageContaining("trygdeavgift for norsk inntekt");
+        medlemAvFolketrygden.setVurderingTrygdeavgiftUtenlandskInntekt(UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV);
+        when(trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(eq(behandlingsresultatID)))
+            .thenReturn(new Trygdeavgiftsgrunnlag(Loenn_forhold.LØNN_FRA_NORGE, new AvgiftsgrunnlagInfoNorge(true, false, null, NORSK_INNTEKT_TRYGDEAVGIFT_NAV), null));
+        trygdeavgiftsberegningService.oppdaterBeregningsgrunnlag(behandlingsresultatID, request);
+        assertThat(medlemAvFolketrygden.getFastsattTrygdeavgift())
+            .extracting(FastsattTrygdeavgift::getAvgiftspliktigUtenlandskInntektMnd, FastsattTrygdeavgift::getAvgiftspliktigNorskInntektMnd)
+            .containsExactly(request.getAvgiftspliktigLønnUtland(), null);
     }
 
     @Test
-    void oppdaterBeregningsgrunnlag_medUtenlandskAvgiftSkalIkkeBetaleAvgiftTilUtlandet_kasterFeil() {
-        var request = new OppdaterTrygdeavgiftsberegningRequest(null, 1L);
+    void oppdaterBeregningsgrunnlag_medNorskOgUtenlandskAvgiftSkalIkkeBetaleAvgiftForUtenlandskInntket_setterIkkeAvgiftUtland() throws FunksjonellException {
+        var request = new OppdaterTrygdeavgiftsberegningRequest(1L, 2L);
+        medlemAvFolketrygden.setVurderingTrygdeavgiftNorskInntekt(NORSK_INNTEKT_TRYGDEAVGIFT_NAV);
         medlemAvFolketrygden.setVurderingTrygdeavgiftUtenlandskInntekt(UTENLANDSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV);
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> trygdeavgiftsberegningService.oppdaterBeregningsgrunnlag(behandlingsresultatID, request))
-            .withMessageContaining("trygdeavgift for utenlandsk inntekt");
+        when(trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(eq(behandlingsresultatID)))
+            .thenReturn(new Trygdeavgiftsgrunnlag(Loenn_forhold.LØNN_FRA_NORGE, new AvgiftsgrunnlagInfoNorge(true, false, null, NORSK_INNTEKT_TRYGDEAVGIFT_NAV), null));
+        trygdeavgiftsberegningService.oppdaterBeregningsgrunnlag(behandlingsresultatID, request);
+        assertThat(medlemAvFolketrygden.getFastsattTrygdeavgift())
+            .extracting(FastsattTrygdeavgift::getAvgiftspliktigUtenlandskInntektMnd, FastsattTrygdeavgift::getAvgiftspliktigNorskInntektMnd)
+            .containsExactly(null, request.getAvgiftspliktigLønnNorge());
     }
 
     @Test
