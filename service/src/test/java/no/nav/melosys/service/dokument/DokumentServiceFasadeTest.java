@@ -57,9 +57,11 @@ class DokumentServiceFasadeTest {
     void skalKalleDokgenProduserUtkast() throws Exception {
         when(mockDokgenService.erTilgjengeligDokgenmal(any(Produserbaredokumenter.class))).thenReturn(true);
 
-        dokumentServiceFasade.produserUtkast(MELDING_FORVENTET_SAKSBEHANDLINGSTID, 1, new BrevbestillingDto());
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.mottaker = Aktoersroller.BRUKER;
+        dokumentServiceFasade.produserUtkast(MELDING_FORVENTET_SAKSBEHANDLINGSTID, 1, brevbestillingDto);
 
-        verify(mockDokgenService).produserBrev(any());
+        verify(mockDokgenService).produserBrev(any(), anyLong(), any(), eq(true));
         verifyNoInteractions(mockDokumentService);
     }
 

@@ -2,6 +2,7 @@ package no.nav.melosys.domain.brev;
 
 import java.time.Instant;
 
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -12,17 +13,21 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private final Kontaktopplysning kontaktopplysning;
     private final Instant forsendelseMottatt;
     private final String avsenderId;
+    private final long behandlingId;
+    private final Aktoer mottaker;
     private final boolean bestillKopi;
 
     private DokgenBrevbestilling(Produserbaredokumenter produserbartdokument, Behandling behandling,
                                  OrganisasjonDokument org, Kontaktopplysning kontaktopplysning,
                                  Instant forsendelseMottatt, String avsenderNavn, String avsenderId,
-                                 boolean bestillKopi) {
+                                 long behandlingId, Aktoer mottaker, boolean bestillKopi) {
         super(produserbartdokument, behandling, avsenderNavn);
         this.org = org;
         this.kontaktopplysning = kontaktopplysning;
         this.forsendelseMottatt = forsendelseMottatt;
         this.avsenderId = avsenderId;
+        this.behandlingId = behandlingId;
+        this.mottaker = mottaker;
         this.bestillKopi = bestillKopi;
     }
 
@@ -42,6 +47,14 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return avsenderId;
     }
 
+    public long getBehandlingId() {
+        return behandlingId;
+    }
+
+    public Aktoer getMottaker() {
+        return mottaker;
+    }
+
     public boolean bestillKopi() {
         return bestillKopi;
     }
@@ -58,6 +71,8 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private Instant forsendelseMottatt;
         private String avsenderNavn;
         private String avsenderId;
+        private long behandlingId;
+        private Aktoer mottaker;
         private boolean bestillKopi;
 
         public Builder() {
@@ -72,6 +87,8 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.forsendelseMottatt = brevbestilling.forsendelseMottatt;
             this.avsenderNavn = brevbestilling.avsenderNavn;
             this.avsenderId = brevbestilling.avsenderId;
+            this.behandlingId = brevbestilling.behandlingId;
+            this.mottaker = brevbestilling.mottaker;
             this.bestillKopi = brevbestilling.bestillKopi;
         }
 
@@ -110,6 +127,16 @@ public class DokgenBrevbestilling extends Brevbestilling {
             return this;
         }
 
+        public Builder medBehandlingId(long behandlingId) {
+            this.behandlingId = behandlingId;
+            return this;
+        }
+
+        public Builder medMottaker(Aktoer mottaker) {
+            this.mottaker = mottaker;
+            return this;
+        }
+
         public Builder medBestillKopi(boolean bestillKopi) {
             this.bestillKopi = bestillKopi;
             return this;
@@ -117,7 +144,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
         public DokgenBrevbestilling build() {
             return new DokgenBrevbestilling(produserbartdokument, behandling, org, kontaktopplysning,
-                forsendelseMottatt, avsenderNavn, avsenderId, bestillKopi);
+                forsendelseMottatt, avsenderNavn, avsenderId, behandlingId, mottaker, bestillKopi);
         }
     }
 }

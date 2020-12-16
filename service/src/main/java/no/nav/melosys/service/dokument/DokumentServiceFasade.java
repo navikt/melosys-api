@@ -44,14 +44,8 @@ public class DokumentServiceFasade {
     public byte[] produserUtkast(Produserbaredokumenter produserbartDokument, long behandlingId,
                                  BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
         if (dokgenService.erTilgjengeligDokgenmal(produserbartDokument)) {
-            Behandling behandling = behandlingService.hentBehandling(behandlingId);
-            DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder()
-                .medProduserbartdokument(produserbartDokument)
-                .medBehandling(behandling)
-                .medBestillKopi(true)
-                .build();
-
-            return dokgenService.produserBrev(brevbestilling);
+            return dokgenService.produserBrev(produserbartDokument, behandlingId,
+                Mottaker.av(brevbestillingDto.mottaker).getAktør(), true);
         }
         return dokumentService.produserUtkast(produserbartDokument, behandlingId, brevbestillingDto);
     }
