@@ -41,22 +41,20 @@ public class DokumentService {
     private final BehandlingService behandlingService;
     private final BrevDataService brevDataService;
     private final DoksysFasade dokSysFasade;
-    private final ProsessinstansService prosessinstansService;
     private final BrevmottakerService brevmottakerService;
     private final BrevDataByggerVelger brevDataByggerVelger;
     private final BrevdataGrunnlagFactory brevdataGrunnlagFactory;
 
     @Autowired
     public DokumentService(BehandlingService behandlingService,
-                           BrevDataService brevDataService, DoksysFasade dokSysFasade,
-                           ProsessinstansService prosessinstansService,
+                           BrevDataService brevDataService,
+                           DoksysFasade dokSysFasade,
                            BrevmottakerService brevmottakerService,
                            BrevDataByggerVelger brevDataByggerVelger,
                            BrevdataGrunnlagFactory brevdataGrunnlagFactory) {
         this.behandlingService = behandlingService;
         this.brevDataService = brevDataService;
         this.dokSysFasade = dokSysFasade;
-        this.prosessinstansService = prosessinstansService;
         this.brevmottakerService = brevmottakerService;
         this.brevDataByggerVelger = brevDataByggerVelger;
         this.brevdataGrunnlagFactory = brevdataGrunnlagFactory;

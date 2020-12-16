@@ -47,7 +47,7 @@ public class BrevmottakerService {
         this.behandlingsresultatService = behandlingsresultatService;
     }
 
-    public Aktoersroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) throws TekniskException {
+    Aktoersroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) throws TekniskException {
         Aktoersroller mottakerRolle;
         if (DOKUMENTER_TIL_BRUKER.contains(produserbartDokument)) {
             mottakerRolle = BRUKER;
