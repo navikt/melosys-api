@@ -1,7 +1,5 @@
 package no.nav.melosys.tjenester.gui.kodeverk;
 
-import java.io.IOException;
-
 import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +22,7 @@ class MelosysInterntKodeverkTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentKoderTilFolketrygden_validerSchema() throws IOException {
+    void hentKoderTilFolketrygden_validerSchema() throws Exception {
         valider(melosysInterntKodeverkTjeneste.hentKoderTilFolketrygden().getBody(), INTERNT_KODEVERK_SCHEMA);
     }
 }

@@ -43,10 +43,10 @@ public class UtstedtA1Producer {
 
         try {
             SendResult<String, UtstedtA1Melding> res = future.get(15L, TimeUnit.SECONDS);
-            log.info("Melding sendt på topic {} for behandling {}. Record.key: {}, offset: {}",
+            log.info("Melding sendt på topic {} for behandling {}. Record.value: {}, offset: {}",
                 topicName,
                 res.getProducerRecord().value().getBehandlingId(),
-                res.getProducerRecord().key(),
+                res.getProducerRecord().value(),
                 res.getRecordMetadata().offset()
             );
 

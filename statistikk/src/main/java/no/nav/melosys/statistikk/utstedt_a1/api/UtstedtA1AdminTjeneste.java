@@ -8,7 +8,6 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.AdminTjeneste;
-import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding;
 import no.nav.melosys.statistikk.utstedt_a1.service.UtstedtA1Service;
 import no.nav.security.token.support.core.api.Unprotected;
 import org.slf4j.Logger;
@@ -43,13 +42,13 @@ public class UtstedtA1AdminTjeneste implements AdminTjeneste {
     }
 
     @PostMapping("/{behandlingID}/publiserMelding")
-    public ResponseEntity<UtstedtA1Melding> publiser(
+    public ResponseEntity<Void> publiserMelding(
         @RequestHeader(API_KEY_HEADER) String apiKey,
         @PathVariable long behandlingID
     ) throws FunksjonellException, TekniskException {
         validerApikey(apiKey);
-        UtstedtA1Melding utstedtA1Melding = utstedtA1Service.sendMeldingOmUtstedtA1(behandlingID);
-        return ResponseEntity.ok(utstedtA1Melding);
+        utstedtA1Service.sendMeldingOmUtstedtA1(behandlingID);
+        return ResponseEntity.ok().build();
     }
 
     /*
