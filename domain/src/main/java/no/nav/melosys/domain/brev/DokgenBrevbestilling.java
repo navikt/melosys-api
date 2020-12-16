@@ -17,18 +17,15 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private final Aktoer mottaker;
     private final boolean bestillKopi;
 
-    private DokgenBrevbestilling(Produserbaredokumenter produserbartdokument, Behandling behandling,
-                                 OrganisasjonDokument org, Kontaktopplysning kontaktopplysning,
-                                 Instant forsendelseMottatt, String avsenderNavn, String avsenderId,
-                                 long behandlingId, Aktoer mottaker, boolean bestillKopi) {
-        super(produserbartdokument, behandling, avsenderNavn);
-        this.org = org;
-        this.kontaktopplysning = kontaktopplysning;
-        this.forsendelseMottatt = forsendelseMottatt;
-        this.avsenderId = avsenderId;
-        this.behandlingId = behandlingId;
-        this.mottaker = mottaker;
-        this.bestillKopi = bestillKopi;
+    private DokgenBrevbestilling(Builder builder) {
+        super(builder.produserbartdokument, builder.behandling, builder.avsenderNavn);
+        this.org = builder.org;
+        this.kontaktopplysning = builder.kontaktopplysning;
+        this.forsendelseMottatt = builder.forsendelseMottatt;
+        this.avsenderId = builder.avsenderId;
+        this.behandlingId = builder.behandlingId;
+        this.mottaker = builder.mottaker;
+        this.bestillKopi = builder.bestillKopi;
     }
 
     public OrganisasjonDokument getOrg() {
@@ -143,8 +140,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         }
 
         public DokgenBrevbestilling build() {
-            return new DokgenBrevbestilling(produserbartdokument, behandling, org, kontaktopplysning,
-                forsendelseMottatt, avsenderNavn, avsenderId, behandlingId, mottaker, bestillKopi);
+            return new DokgenBrevbestilling(this);
         }
     }
 }

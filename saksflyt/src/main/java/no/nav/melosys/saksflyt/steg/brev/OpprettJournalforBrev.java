@@ -66,9 +66,9 @@ public class OpprettJournalforBrev implements StegBehandler {
             .medTittel(produserbartDokument.getBeskrivelse())
             .medBrevkode(dokgenService.hentMalnavn(produserbartDokument))
             .medBrukerFnr(personDokument.fnr)
-            .medAvsenderNavn(mottaker.erOrganisasjon() ? eregFasade.hentOrganisasjonNavn(mottaker.getOrgnr()) :  personDokument.sammensattNavn)
-            .medAvsenderId(mottaker.erOrganisasjon() ? mottaker.getOrgnr() : personDokument.fnr)
-            .medErAvsenderOrg(mottaker.erOrganisasjon())
+            .medMottakerNavn(mottaker.erOrganisasjon() ? eregFasade.hentOrganisasjonNavn(mottaker.getOrgnr()) :  personDokument.sammensattNavn)
+            .medMottakerId(mottaker.erOrganisasjon() ? mottaker.getOrgnr() : personDokument.fnr)
+            .medErMottakerOrg(mottaker.erOrganisasjon())
             .medArkivSakId(behandling.getFagsak().getGsakSaksnummer().toString())
             .medPdf(pdf)
             .build();
