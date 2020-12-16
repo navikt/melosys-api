@@ -5,6 +5,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 
 public class BrevDataInnvilgelse extends BrevData {
@@ -19,6 +20,7 @@ public class BrevDataInnvilgelse extends BrevData {
     public String personNavn;
     public boolean erArt16UtenArt12;
     public boolean erTuristskip;
+    public AvklarteMedfolgendeBarn avklarteMedfolgendeBarn;
 
     public BrevDataInnvilgelse(BrevbestillingDto brevbestillingDto, String saksbehandler) {
         super(brevbestillingDto, saksbehandler);

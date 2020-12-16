@@ -375,10 +375,7 @@ class JoarkServiceTest {
         hoveddokument.setTittel("tittel");
         hoveddokument.setBrevkode("brevkode");
 
-        DokumentVariant dokumentVariant = new DokumentVariant();
-        dokumentVariant.setFiltype(DokumentVariant.Filtype.PDFA);
-        dokumentVariant.setVariantFormat("ARKIV");
-        dokumentVariant.setData("dokument".getBytes());
+        DokumentVariant dokumentVariant = DokumentVariant.lagDokumentVariant("dokument".getBytes());
         hoveddokument.setDokumentVarianter(Collections.singletonList(dokumentVariant));
 
         hoveddokument.setDokumentKategori(DokumentKategoriKode.SED.name());

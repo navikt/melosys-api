@@ -1,15 +1,21 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
+import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
+import no.nav.melosys.domain.familie.OmfattetBarn;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
@@ -17,10 +23,12 @@ import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
@@ -37,9 +45,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagAnmodningsperiodeSvarInnvilgelse;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagPersonsaksopplysning;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BrevDataByggerInnvilgelseTest {
@@ -59,6 +68,10 @@ public class BrevDataByggerInnvilgelseTest {
     AnmodningsperiodeService anmodningsperiodeService;
     @Mock
     VilkaarsresultatService vilkaarsresultatService;
+    @Mock
+    TpsFasade tpsFasade;
+    @Mock
+    BehandlingsgrunnlagService behandlingsgrunnlagService;
 
     private Behandling behandling;
     private BrevbestillingDto brevbestillingDto;
@@ -94,6 +107,7 @@ public class BrevDataByggerInnvilgelseTest {
         when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Landkoder.AT);
         when(landvelgerService.hentBostedsland(anyLong(), any(BehandlingsgrunnlagData.class))).thenReturn(Landkoder.NO);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Landkoder.DE));
+        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(Collections.emptySet(), Collections.emptySet()));
 
         brevDataByggerInnvilgelse = new BrevDataByggerInnvilgelse(avklartefaktaService,
             landvelgerService,
@@ -101,7 +115,9 @@ public class BrevDataByggerInnvilgelseTest {
             anmodningsperiodeService,
             brevbestillingDto,
             brevDataByggerA1,
-            vilkaarsresultatService);
+            vilkaarsresultatService,
+            tpsFasade,
+            behandlingsgrunnlagService);
     }
 
     public BrevDataGrunnlag lagBrevdataGrunnlag() throws TekniskException {
@@ -178,5 +194,77 @@ public class BrevDataByggerInnvilgelseTest {
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
         assertThat(brevData.erArt16UtenArt12).isTrue();
+    }
+
+    @Test
+    public void lag_medfølgendeBarnHarFnr_henterNavnFraTps() throws TekniskException, FunksjonellException {
+        MedfolgendeFamilie barn1 = MedfolgendeFamilie.tilBarnFraUuidFnrOgNavn(UUID.randomUUID().toString(), "fnr1", null);
+        MedfolgendeFamilie barn2 = MedfolgendeFamilie.tilBarnFraUuidFnrOgNavn(UUID.randomUUID().toString(), "fnr2", null);
+        BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
+        behandlingsgrunnlagData.personOpplysninger.medfolgendeFamilie.addAll(List.of(barn1, barn2));
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+
+        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(
+            Set.of(new OmfattetBarn(barn1.uuid)),
+            Set.of(new IkkeOmfattetBarn(barn2.uuid, null, null))));
+        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
+        when(tpsFasade.hentSammensattNavn(eq(barn1.fnr))).thenReturn("Navn1");
+        when(tpsFasade.hentSammensattNavn(eq(barn2.fnr))).thenReturn("Navn2");
+
+        BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
+        assertThat(brevData.avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd)
+            .extracting("sammensattNavn").containsExactly("Navn1");
+        assertThat(brevData.avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd)
+            .extracting("sammensattNavn").containsExactly("Navn2");
+
+        verify(tpsFasade, times(2)).hentSammensattNavn(anyString());
+    }
+
+    @Test
+    public void lag_medfølgendeBarnHarUuid_henterNavnFraBehandlingsgrunnlag() throws TekniskException, FunksjonellException {
+        MedfolgendeFamilie barn1 = MedfolgendeFamilie.tilBarnFraUuidFnrOgNavn(UUID.randomUUID().toString(), null, "Navn1");
+        MedfolgendeFamilie barn2 = MedfolgendeFamilie.tilBarnFraUuidFnrOgNavn(UUID.randomUUID().toString(), null, "Navn2");
+        BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
+        behandlingsgrunnlagData.personOpplysninger.medfolgendeFamilie.addAll(List.of(barn1, barn2));
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+
+        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(
+            Set.of(new OmfattetBarn(barn1.uuid)),
+            Set.of(new IkkeOmfattetBarn(barn2.uuid, null, null))));
+        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
+
+        BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
+        assertThat(brevData.avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd)
+            .extracting("sammensattNavn").containsExactly(barn1.navn);
+        assertThat(brevData.avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd)
+            .extracting("sammensattNavn").containsExactly(barn2.navn);
+
+        verify(tpsFasade, never()).hentSammensattNavn(anyString());
+    }
+
+    @Test
+    public void lag_omfattetBarnIkkeIBehandlingsgrunnlag_kasterException() {
+        MedfolgendeFamilie barn = MedfolgendeFamilie.tilBarnFraUuidFnrOgNavn(UUID.randomUUID().toString(), null, "Navn");
+
+        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(
+            Set.of(new OmfattetBarn(barn.uuid)), Collections.emptySet()));
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler))
+            .withMessageContaining("finnes ikke i behandlingsgrunnlaget");
+    }
+
+    @Test
+    public void lag_ikkeOmfattetBarnIkkeIBehandlingsgrunnlag_kasterException() {
+        MedfolgendeFamilie barn = MedfolgendeFamilie.tilBarnFraUuidFnrOgNavn(UUID.randomUUID().toString(), null, "Navn");
+
+        when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(
+            Collections.emptySet(), Set.of(new IkkeOmfattetBarn(barn.uuid, null, null))));
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler))
+            .withMessageContaining("finnes ikke i behandlingsgrunnlaget");
     }
 }

@@ -4,9 +4,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.avklartefakta.*;
-import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
+import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
+import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
+import no.nav.melosys.domain.familie.OmfattetBarn;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
@@ -20,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static no.nav.melosys.domain.avklartefakta.Avklartefakta.VALGT_FAKTA;
+
 @Service
 public class AvklartefaktaService {
 
@@ -29,7 +34,6 @@ public class AvklartefaktaService {
 
     private final AvklartefaktaDtoKonverterer faktaKonverterer;
 
-    private static final String VALGT_FAKTA = "TRUE";
     private static final String FANT_IKKE_RESULTAT = "Fant ikke behandlingsresultat for behandlingsid: ";
 
     private static final EnumSet<Avklartefaktatyper> MARITIME_FAKTATYPER = EnumSet.of(
@@ -124,11 +128,11 @@ public class AvklartefaktaService {
     }
 
     public AvklarteMedfolgendeBarn hentAvklarteMedfølgendeBarn(long behandlingID) {
-        Set<String> barnOmfattetAvNorskTrygd = new HashSet<>();
+        Set<OmfattetBarn> barnOmfattetAvNorskTrygd = new HashSet<>();
         Set<IkkeOmfattetBarn> barnIkkeOmfattetAvNorskTrygd = new HashSet<>();
         for (Avklartefakta avklartefakta : avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingID, Avklartefaktatyper.VURDERING_LOVVALG_BARN)) {
             if (avklartefakta.getFakta().equals(VALGT_FAKTA)) {
-                barnOmfattetAvNorskTrygd.add(avklartefakta.getSubjekt());
+                barnOmfattetAvNorskTrygd.add(new OmfattetBarn(avklartefakta.getSubjekt()));
             } else {
                 String begrunnelse = avklartefakta.getRegistreringer().iterator().next().getBegrunnelseKode();
                 barnIkkeOmfattetAvNorskTrygd.add(

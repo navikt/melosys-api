@@ -73,6 +73,7 @@ public class OpprettJournalpostRequest {
             .bruker(bruker(opprettJournalpost.getBrukerId()))
             .tema(opprettJournalpost.getTema())
             .kanal(opprettJournalpost.getMottaksKanal())
+            .eksternReferanseId(opprettJournalpost.getEksternReferanseId())
             .sak(arkivsak(opprettJournalpost.getArkivSakId()))
             .journalfoerendeEnhet(opprettJournalpost.getJournalførendeEnhet())
             .journalpostType(JournalpostType.av(opprettJournalpost.getJournalposttype()))
@@ -130,7 +131,7 @@ public class OpprettJournalpostRequest {
     private static DokumentVariant dokumentVariant(no.nav.melosys.domain.arkiv.DokumentVariant dokumentVariant) {
         return DokumentVariant.builder()
             .filtype(JournalpostFiltype.valueOf(dokumentVariant.getFiltype().name()))
-            .variantformat(dokumentVariant.getVariantFormat())
+            .variantformat(dokumentVariant.getVariantFormat().name())
             .fysiskDokument(dokumentVariant.getData())
             .build();
     }

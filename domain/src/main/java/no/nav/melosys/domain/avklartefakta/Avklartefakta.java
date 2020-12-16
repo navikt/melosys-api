@@ -12,6 +12,9 @@ import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 @Table(name = "avklartefakta")
 public class Avklartefakta {
 
+    public static final String VALGT_FAKTA = "TRUE";
+    public static final String IKKE_VALGT_FAKTA = "FALSE";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -38,6 +41,17 @@ public class Avklartefakta {
 
     @OneToMany(mappedBy = "avklartefakta", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<AvklartefaktaRegistrering> registreringer = new HashSet<>();
+
+    public Avklartefakta() {
+    }
+
+    public Avklartefakta(Behandlingsresultat behandlingsresultat, String referanse, Avklartefaktatyper type, String subjekt, String fakta) {
+        this.behandlingsresultat = behandlingsresultat;
+        this.referanse = referanse;
+        this.type = type;
+        this.subjekt = subjekt;
+        this.fakta = fakta;
+    }
 
     public Long getId() {
         return id;
@@ -129,4 +143,21 @@ public class Avklartefakta {
         return Objects.hash(behandlingsresultat, type, subjekt, fakta, referanse);
     }
 
+    @Override
+    public String toString() {
+        return "Avklartefakta{" +
+            "id=" + id +
+            ", behandlingsresultat=" + behandlingsresultat +
+            ", type=" + type +
+            ", referanse='" + referanse + '\'' +
+            ", subjekt='" + subjekt + '\'' +
+            ", fakta='" + fakta + '\'' +
+            ", begrunnelseFritekst='" + begrunnelseFritekst + '\'' +
+            ", registreringer=" + registreringer +
+            '}';
+    }
+
+    public static boolean erValgtFakta(Avklartefakta avklartefakta) {
+        return VALGT_FAKTA.equalsIgnoreCase(avklartefakta.getFakta());
+    }
 }

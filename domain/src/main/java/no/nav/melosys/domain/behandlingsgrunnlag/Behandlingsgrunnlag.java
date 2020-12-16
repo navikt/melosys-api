@@ -45,6 +45,9 @@ public class Behandlingsgrunnlag {
     @Column(name = "data")
     private String jsonData;
 
+    @Column(name = "ekstern_referanse_id")
+    private String eksternReferanseID;
+
     @Transient
     private BehandlingsgrunnlagData behandlingsgrunnlagdata;
 
@@ -118,6 +121,14 @@ public class Behandlingsgrunnlag {
 
     public void setJsonData(String jsonData) {
         this.jsonData = jsonData;
+    }
+
+    public String getEksternReferanseID() {
+        return eksternReferanseID;
+    }
+
+    public void setEksternReferanseID(String eksternReferanseID) {
+        this.eksternReferanseID = eksternReferanseID;
     }
 
     public BehandlingsgrunnlagData getBehandlingsgrunnlagdata() {

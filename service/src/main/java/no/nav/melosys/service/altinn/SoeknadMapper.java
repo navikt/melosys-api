@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -17,11 +18,12 @@ public final class SoeknadMapper {
         throw new UnsupportedOperationException();
     }
 
-    //TODO: MELSOYS-3527
-    static Soeknad lagSoeknadDokument(MedlemskapArbeidEOSM søknad) {
+    static Soeknad lagSoeknad(MedlemskapArbeidEOSM søknad) {
         final Soeknad soeknad = new Soeknad();
         final Innhold innhold = søknad.getInnhold();
-        soeknad.personOpplysninger.utenlandskIdent.add(lagUtenlandskIdent(innhold.getArbeidstaker()));
+        if (innhold.getArbeidstaker().getUtenlandskIDnummer() != null) {
+            soeknad.personOpplysninger.utenlandskIdent.add(lagUtenlandskIdent(innhold));
+        }
         soeknad.juridiskArbeidsgiverNorge = lagJuridiskArbeidsgiverNorge(innhold.getArbeidsgiver());
         soeknad.soeknadsland = hentsoeknadsland(innhold);
         soeknad.periode = lagPeriode(innhold);
@@ -29,16 +31,16 @@ public final class SoeknadMapper {
         return soeknad;
     }
 
-    private static UtenlandskIdent lagUtenlandskIdent(Arbeidstaker arbeidstaker) {
+    private static UtenlandskIdent lagUtenlandskIdent(Innhold innhold) {
         UtenlandskIdent utenlandskIdent = new UtenlandskIdent();
-        utenlandskIdent.ident = arbeidstaker.getUtenlandskIDnummer();
-        utenlandskIdent.landkode = arbeidstaker.getUtenlandskIDland();
+        utenlandskIdent.ident = innhold.getArbeidstaker().getUtenlandskIDnummer();
+        utenlandskIdent.landkode = innhold.getMidlertidigUtsendt().getArbeidsland();
         return utenlandskIdent;
     }
 
     private static JuridiskArbeidsgiverNorge lagJuridiskArbeidsgiverNorge(Arbeidsgiver arbeidsgiver) {
         JuridiskArbeidsgiverNorge juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
-        if (arbeidsgiver != null && arbeidsgiver.getSamletVirksomhetINorge() != null) {
+        if (arbeidsgiver != null && !arbeidsgiver.isOffentligVirksomhet() && arbeidsgiver.getSamletVirksomhetINorge() != null) {
             SamletVirksomhetINorge samletVirksomhetINorge = arbeidsgiver.getSamletVirksomhetINorge();
             juridiskArbeidsgiverNorge.antallAnsatte = samletVirksomhetINorge.getAntallAnsatte().intValue();
             juridiskArbeidsgiverNorge.antallAdmAnsatte = samletVirksomhetINorge.getAntallAdministrativeAnsatteINorge().intValue();
@@ -47,6 +49,7 @@ public final class SoeknadMapper {
             juridiskArbeidsgiverNorge.andelOppdragINorge = new BigDecimal(samletVirksomhetINorge.getAndelOppdragINorge());
             juridiskArbeidsgiverNorge.andelKontrakterINorge = new BigDecimal(samletVirksomhetINorge.getAndelKontrakterInngaasINorge());
             juridiskArbeidsgiverNorge.andelRekruttertINorge = new BigDecimal(samletVirksomhetINorge.getAndelRekrutteresINorge());
+            juridiskArbeidsgiverNorge.ekstraArbeidsgivere = List.of(arbeidsgiver.getVirksomhetsnummer());
         }
         return juridiskArbeidsgiverNorge;
     }
@@ -70,8 +73,7 @@ public final class SoeknadMapper {
 
         if (barn != null && barn.getBarnet() != null) {
             medfølgendeBarn = barn.getBarnet().stream()
-                .map(Barnet::getFoedselsnummer)
-                .map(MedfolgendeFamilie::tilBarnFraFnr)
+                .map(mapBarnTilMedfølgendeFamilie)
                 .collect(Collectors.toList());
         }
         return medfølgendeBarn;
@@ -80,4 +82,7 @@ public final class SoeknadMapper {
     private static LocalDate xmlCalTilLocalDate(XMLGregorianCalendar calendar) {
         return calendar == null ? null : LocalDate.of(calendar.getYear(), calendar.getMonth(), calendar.getDay());
     }
+
+    private static Function<Barnet, MedfolgendeFamilie> mapBarnTilMedfølgendeFamilie
+        = barnet -> MedfolgendeFamilie.tilBarnFraFnrOgNavn(barnet.getFoedselsnummer(), barnet.getNavn());
 }
