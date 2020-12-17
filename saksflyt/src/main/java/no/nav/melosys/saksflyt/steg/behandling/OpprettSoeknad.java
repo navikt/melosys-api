@@ -3,12 +3,13 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import java.util.List;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import org.slf4j.Logger;
@@ -36,7 +37,7 @@ public class OpprettSoeknad implements StegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, IntegrasjonException {
         long behandlingID = prosessinstans.getBehandling().getId();
 
         if (prosessinstans.getBehandling().erBehandlingAvSøknad()) {
@@ -46,7 +47,7 @@ public class OpprettSoeknad implements StegBehandler {
             soeknad.periode = periode;
             soeknad.soeknadsland.landkoder = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, new TypeReference<List<String>>() {});
 
-            behandlingsgrunnlagService.opprettSøknadGrunnlag(behandlingID, soeknad);
+            behandlingsgrunnlagService.opprettSøknadYrkesaktiveEøs(behandlingID, soeknad);
             log.info("Opprettet søknad for behandling {}.", behandlingID);
         } else {
             log.info("Ikke opprettet søknad for behandling {} med tema {}", behandlingID, prosessinstans.getBehandling().getTema());

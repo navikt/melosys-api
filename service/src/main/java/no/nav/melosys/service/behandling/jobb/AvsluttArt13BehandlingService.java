@@ -63,7 +63,7 @@ public class AvsluttArt13BehandlingService {
                 + lovvalgsperiode.getBestemmelse());
         } else if (lovvalgsperiode.getMedlPeriodeID() == null) {
             throw new FunksjonellException("Behandling " + behandling.getId()
-                + " har en medlemskapsperiode som ikke er registrert i medl. Kan ikke avslutte art13 behandling automatisk");
+                + " har en lovvalgsperiode som ikke er registrert i medl. Kan ikke avslutte art13 behandling automatisk");
         }
 
         fagsakService.avsluttFagsakOgBehandling(behandling.getFagsak(), behandling, Saksstatuser.LOVVALG_AVKLART);

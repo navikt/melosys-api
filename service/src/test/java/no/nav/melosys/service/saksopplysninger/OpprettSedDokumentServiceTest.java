@@ -51,7 +51,7 @@ public class OpprettSedDokumentServiceTest {
 
         opprettSedDokumentService.opprettSedSaksopplysning(hentMelosysEessiMelding(), behandling);
 
-        verify(dokumentFactory).lagInternXml(any(Saksopplysning.class));
+        verify(dokumentFactory).lagForenkletXml(any(Saksopplysning.class));
         verify(saksopplysningRepository).save(any(Saksopplysning.class));
     }
 

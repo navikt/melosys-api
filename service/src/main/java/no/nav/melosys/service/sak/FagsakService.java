@@ -233,6 +233,7 @@ public class FagsakService {
 
         Aktoer aktør = new Aktoer();
         aktør.setAktørId(opprettSakRequest.getAktørID());
+        aktør.setUtenlandskPersonId(opprettSakRequest.getUtenlandskPersonId());
         aktør.setFagsak(fagsak);
         aktør.setRolle(Aktoersroller.BRUKER);
         aktører.add(aktør);
@@ -270,7 +271,7 @@ public class FagsakService {
         if (CollectionUtils.isNotEmpty(kontaktopplysninger)) {
             kontaktopplysninger.forEach(opplysning -> kontaktopplysningService
                 .lagEllerOppdaterKontaktopplysning(saksnummer, opplysning.getKontaktopplysningID().getOrgnr(),
-                    opplysning.getKontaktOrgnr(), opplysning.getKontaktNavn()));
+                    opplysning.getKontaktOrgnr(), opplysning.getKontaktNavn(), opplysning.getKontaktTelefon()));
         }
 
         Behandlingstyper behandlingstype = opprettSakRequest.getBehandlingstype();
@@ -399,11 +400,11 @@ public class FagsakService {
     }
 
     private void avsluttTidligereMedlPeriode(Behandlingsresultat behandlingsresultat) throws IkkeFunnetException, SikkerhetsbegrensningException {
-        Collection<? extends Medlemskapsperiode> anmodningsperioder = behandlingsresultat.getAnmodningsperioder();
-        Collection<? extends Medlemskapsperiode> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
+        Collection<? extends PeriodeOmLovvalg> anmodningsperioder = behandlingsresultat.getAnmodningsperioder();
+        Collection<? extends PeriodeOmLovvalg> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
 
         Optional<Long> medlPeriodeID = Stream.concat(anmodningsperioder.stream(), lovvalgsperioder.stream())
-            .map(Medlemskapsperiode::getMedlPeriodeID)
+            .map(PeriodeOmLovvalg::getMedlPeriodeID)
             .filter(Objects::nonNull)
             .findFirst();
 

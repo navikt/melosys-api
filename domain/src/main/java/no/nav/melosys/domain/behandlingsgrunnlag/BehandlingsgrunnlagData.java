@@ -1,9 +1,6 @@
 package no.nav.melosys.domain.behandlingsgrunnlag;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -48,15 +45,17 @@ public class BehandlingsgrunnlagData {
             .collect(Collectors.toSet());
     }
 
-    public Set<String> hentAllePersonnumre() {
-        return personOpplysninger.hentAllePersonnummer()
-            .filter(StringUtils::isNotEmpty)
-            .collect(Collectors.toSet());
-    }
-
     public List<String> hentUtenlandskeArbeidsstederLandkode() {
         return arbeidUtland.stream()
             .map(a -> a.adresse != null ? a.adresse.landkode : null)
+            .filter(Objects::nonNull)
+            .distinct()
+            .collect(Collectors.toList());
+    }
+
+    public List<String> hentUtenlandskeArbeidsgivereUuid() {
+        return foretakUtland.stream()
+            .map(f -> f.uuid)
             .filter(Objects::nonNull)
             .distinct()
             .collect(Collectors.toList());
@@ -68,5 +67,18 @@ public class BehandlingsgrunnlagData {
             .filter(Objects::nonNull)
             .distinct()
             .collect(Collectors.toList());
+    }
+
+    public Set<String> hentFnrMedfølgendeBarn() {
+        return personOpplysninger.medfolgendeFamilie.stream()
+            .filter(MedfolgendeFamilie::erBarn)
+            .map(MedfolgendeFamilie::getFnr)
+            .collect(Collectors.toSet());
+    }
+
+    public Map<String, MedfolgendeFamilie> hentMedfølgendeBarn() {
+        return personOpplysninger.medfolgendeFamilie.stream()
+            .filter(MedfolgendeFamilie::erBarn)
+            .collect(Collectors.toMap(MedfolgendeFamilie::getUuid, mf -> mf));
     }
 }

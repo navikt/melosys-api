@@ -6,7 +6,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningKilde;
+import no.nav.melosys.domain.SaksopplysningKildesystem;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.exception.*;
@@ -81,8 +81,8 @@ public class UtbetaldataService implements UtbetaldataFasade {
 
     private static Saksopplysning lagSaksopplysning(StringWriter xmlWriter) {
         Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokumentXml(xmlWriter.toString());
-        saksopplysning.setKilde(SaksopplysningKilde.UTBETALDATA);
+        saksopplysning.leggTilKildesystemOgMottattDokument(
+            SaksopplysningKildesystem.UTBETALDATA, xmlWriter.toString());
         saksopplysning.setType(SaksopplysningType.UTBETAL);
         saksopplysning.setVersjon(UTBETAL_VERSJON);
         return saksopplysning;

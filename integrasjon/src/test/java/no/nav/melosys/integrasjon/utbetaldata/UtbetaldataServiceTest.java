@@ -10,6 +10,7 @@ import javax.xml.transform.stream.StreamSource;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
+import no.nav.melosys.domain.SaksopplysningKildesystem;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
@@ -63,10 +64,12 @@ public class UtbetaldataServiceTest {
         verify(utbetalingConsumer).hentUtbetalingsinformasjon(any());
 
         assertThat(saksopplysning).isNotNull();
-        assertThat(saksopplysning.getDokumentXml()).isNotEmpty();
         assertThat(saksopplysning.getType()).isEqualTo(SaksopplysningType.UTBETAL);
         assertThat(saksopplysning.getVersjon()).isEqualTo("1.0");
-        assertThat(saksopplysning.getKilde()).isEqualTo(SaksopplysningKilde.UTBETALDATA);
+        assertThat(saksopplysning.getKilder()).isNotNull();
+        SaksopplysningKilde kilde = saksopplysning.getKilder().iterator().next();
+        assertThat(kilde.getMottattDokument()).isNotEmpty();
+        assertThat(kilde.getKilde()).isEqualTo(SaksopplysningKildesystem.UTBETALDATA);
 
         UtbetalingDokument utbetalingDokument = (UtbetalingDokument) saksopplysning.getDokument();
         assertThat(utbetalingDokument).isNotNull();
@@ -84,10 +87,12 @@ public class UtbetaldataServiceTest {
         verify(utbetalingConsumer).hentUtbetalingsinformasjon(any());
 
         assertThat(saksopplysning).isNotNull();
-        assertThat(saksopplysning.getDokumentXml()).isNotEmpty();
         assertThat(saksopplysning.getType()).isEqualTo(SaksopplysningType.UTBETAL);
         assertThat(saksopplysning.getVersjon()).isEqualTo("1.0");
-        assertThat(saksopplysning.getKilde()).isEqualTo(SaksopplysningKilde.UTBETALDATA);
+        assertThat(saksopplysning.getKilder()).isNotNull();
+        SaksopplysningKilde kilde = saksopplysning.getKilder().iterator().next();
+        assertThat(kilde.getMottattDokument()).isNotEmpty();
+        assertThat(kilde.getKilde()).isEqualTo(SaksopplysningKildesystem.UTBETALDATA);
 
         UtbetalingDokument utbetalingDokument = (UtbetalingDokument) saksopplysning.getDokument();
         assertThat(utbetalingDokument).isNotNull();

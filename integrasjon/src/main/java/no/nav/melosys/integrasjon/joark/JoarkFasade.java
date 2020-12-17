@@ -1,8 +1,9 @@
 package no.nav.melosys.integrasjon.joark;
 
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
-import no.nav.melosys.domain.arkiv.JournalfoeringMangel;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.exception.*;
@@ -40,8 +41,7 @@ public interface JoarkFasade {
     void oppdaterJournalpost(String journalpostID, JournalpostOppdatering journalpostOppdatering, boolean forsøkFerdigstill)
         throws SikkerhetsbegrensningException, TekniskException;
 
-    /**
-     * Returnerer en liste av mangler i journalposten med den oppgitte IDen
-     */
-    List<JournalfoeringMangel> utledJournalfoeringsbehov(String journalpostID) throws FunksjonellException;
+    LocalDate hentMottaksDatoForJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException;
+
+    Instant hentInstantMottaksDatoForJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException ;
 }

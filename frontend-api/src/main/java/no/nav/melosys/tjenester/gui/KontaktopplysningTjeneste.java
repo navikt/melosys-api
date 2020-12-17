@@ -48,7 +48,7 @@ public class KontaktopplysningTjeneste {
                                          @PathVariable("orgnr") String orgnr,
                                          @RequestBody KontaktInfoDto kontaktInfoDto) {
         Kontaktopplysning kontaktopplysning = kontaktopplysningService.lagEllerOppdaterKontaktopplysning(saksnummer, orgnr,
-            kontaktInfoDto.getKontaktorgnr(), kontaktInfoDto.getKontaktnavn());
+            kontaktInfoDto.getKontaktorgnr(), kontaktInfoDto.getKontaktnavn(), kontaktInfoDto.getKontakttelefon());
         return ResponseEntity.ok(kontaktopplysning);
     }
 

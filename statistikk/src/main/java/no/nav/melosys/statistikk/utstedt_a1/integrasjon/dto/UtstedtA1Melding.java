@@ -73,4 +73,19 @@ public class UtstedtA1Melding {
     public ZonedDateTime getMeldingOpprettetTidspunkt() {
         return meldingOpprettetTidspunkt;
     }
+
+    @Override
+    public String toString() {
+        return "UtstedtA1Melding{" +
+            "serienummer='" + serienummer + '\'' +
+            ", saksnummer='" + saksnummer + '\'' +
+            ", behandlingId=" + behandlingId +
+            ", artikkel=" + artikkel +
+            ", periode=" + periode +
+            ", utsendtTilLand='" + utsendtTilLand + '\'' +
+            ", datoUtstedelse=" + datoUtstedelse +
+            ", typeUtstedelse=" + typeUtstedelse +
+            ", meldingOpprettetTidspunkt=" + meldingOpprettetTidspunkt +
+            '}';
+    }
 }

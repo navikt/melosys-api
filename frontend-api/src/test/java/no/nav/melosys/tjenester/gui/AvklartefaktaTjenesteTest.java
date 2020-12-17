@@ -8,6 +8,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.junit.Before;
@@ -35,10 +36,12 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
     private AvklartefaktaService avklartefaktaService;
     @Mock
     private TilgangService tilgangService;
+    @Mock
+    private AvklarteVirksomheterService avklarteVirksomheterService;
 
     @Before
     public void setUp() {
-        avklartefaktaTjeneste = new AvklartefaktaTjeneste(avklartefaktaService, tilgangService);
+        avklartefaktaTjeneste = new AvklartefaktaTjeneste(avklartefaktaService, tilgangService, avklarteVirksomheterService);
     }
 
     @Test

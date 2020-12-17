@@ -51,6 +51,11 @@ public interface OppgaveFasade {
     String opprettOppgave(Oppgave oppgave) throws FunksjonellException, TekniskException;
 
     /**
+     * Oppretter en oppgave for NAV Viken i Oppgave og returnerer en unik oppgaveId
+     */
+    String opprettSensitivOppgave(Oppgave oppgave) throws FunksjonellException, TekniskException;
+
+    /**
      * Legger tilbake en oppgave i Oppgave
      */
     void leggTilbakeOppgave(String oppgaveId) throws FunksjonellException, TekniskException;

@@ -2,6 +2,8 @@ package no.nav.melosys.service.kodeverk;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +77,28 @@ public class KodeverkService {
         }
         log.warn("Fant ingen gyldig term for kode {} i kodeverk {}", kode, kodeverk.getNavn());
         return UKJENT;
+    }
+
+    public List<KodeDto> hentGyldigeKoderForKodeverk(FellesKodeverk kodeverk) {
+        if (StringUtils.isEmpty(kodeverk)) {
+            log.error("Metode hentGyldigeKoderForKodeverk kalt for kodeverk {}", kodeverk);
+            return Collections.emptyList();
+        }
+
+        no.nav.melosys.integrasjon.kodeverk.Kodeverk hentetKodeverk = hentKodeverk(kodeverk.getNavn());
+
+        if (hentetKodeverk == null) {
+            log.warn("Fant ikke kodeverk {}", kodeverk.getNavn());
+            return Collections.emptyList();
+        }
+
+        List<KodeDto> gyldigeKoder = new ArrayList<>();
+        LocalDate idag = LocalDate.now();
+
+        for (Map.Entry<String, List<Kode>> entry : hentetKodeverk.getKoder().entrySet()) {
+            entry.getValue().stream().filter(kode -> !kode.getGyldigFom().isAfter(idag) && !kode.getGyldigTom().isBefore(idag)).findFirst().map(kode -> new KodeDto(kode.getKode(), kode.getNavn())).ifPresent(gyldigeKoder::add);
+        }
+        return gyldigeKoder;
     }
 
     /*

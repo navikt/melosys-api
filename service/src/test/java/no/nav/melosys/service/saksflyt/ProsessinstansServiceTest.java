@@ -1,6 +1,7 @@
 package no.nav.melosys.service.saksflyt;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -19,6 +20,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.ProsessType;
@@ -26,8 +28,10 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.journalforing.dto.*;
 import no.nav.melosys.service.sak.OpprettSakDto;
+import no.nav.melosys.service.soknad.SoknadMottatt;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.jeasy.random.EasyRandom;
@@ -40,8 +44,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,6 +57,8 @@ class ProsessinstansServiceTest {
     private ProsessinstansRepository prosessinstansRepo;
     @Mock
     private UtenlandskMyndighetService utenlandskMyndighetService;
+    @Mock
+    private BehandlingsgrunnlagService behandlingsgrunnlagService;
 
     @Captor
     private ArgumentCaptor<Prosessinstans> piCaptor;
@@ -60,7 +67,8 @@ class ProsessinstansServiceTest {
 
     @BeforeEach
     public void setUp() {
-        prosessinstansService = new ProsessinstansService(applicationEventPublisher, prosessinstansRepo, utenlandskMyndighetService);
+        prosessinstansService = new ProsessinstansService(applicationEventPublisher,
+            prosessinstansRepo, utenlandskMyndighetService, behandlingsgrunnlagService);
     }
 
     @Test
@@ -169,6 +177,21 @@ class ProsessinstansServiceTest {
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
         return behandling;
+    }
+
+    @Test
+    void opprettProsessinstansOpprettOgDistribuerBrev() {
+        String saksbehandler = settInnloggetSaksbehandler();
+
+        Behandling behandling = lagBehandling();
+        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, behandling);
+
+        verify(prosessinstansRepo).save(piCaptor.capture());
+
+        Prosessinstans lagretInstans = piCaptor.getValue();
+        assertEquals(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, lagretInstans.getType());
+        assertEquals(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, lagretInstans.getData(ProsessDataKey.PRODUSERBART_BREV, Produserbaredokumenter.class));
+        assertEquals(saksbehandler, lagretInstans.getData(ProsessDataKey.SAKSBEHANDLER));
     }
 
     @Test
@@ -362,6 +385,27 @@ class ProsessinstansServiceTest {
         assertThat(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID)).isNotEmpty();
         assertThat(prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID)).isNotEmpty();
         assertThat(prosessinstans.getData(ProsessDataKey.EESSI_MELDING)).isNotEmpty();
+    }
+
+    @Test
+    void opprettProsessinstansSøknadMottatt_finnesIkkeFraFør_oppretterNyProsessinstans() {
+        SoknadMottatt søknadMottatt = new SoknadMottatt("søknadID", ZonedDateTime.now());
+
+        prosessinstansService.opprettProsessinstansSøknadMottatt(søknadMottatt);
+        verify(prosessinstansRepo).save(piCaptor.capture());
+
+        Prosessinstans prosessinstans = piCaptor.getValue();
+        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.MOTTAK_SOKNAD_ALTINN);
+        assertThat(prosessinstans.getData(ProsessDataKey.MOTTATT_SOKNAD_ID)).isEqualTo(søknadMottatt.getSoknadID());
+    }
+
+    @Test
+    void opprettProsessinstansSøknadMottatt_finnesFraFør_oppretterIkkeNyProsessinstans() {
+        SoknadMottatt søknadMottatt = new SoknadMottatt("søknadID", ZonedDateTime.now());
+        when(behandlingsgrunnlagService.harMottattSøknadMedEksternReferanseID(eq(søknadMottatt.getSoknadID()))).thenReturn(true);
+
+        prosessinstansService.opprettProsessinstansSøknadMottatt(søknadMottatt);
+        verify(prosessinstansRepo, never()).save(any(Prosessinstans.class));
     }
 
     private MelosysEessiMelding hentMelosysEessiMelding(LocalDate fom, LocalDate tom) {

@@ -61,24 +61,31 @@ public class UtstedtA1Service {
         }
     }
 
-    public UtstedtA1Melding sendMeldingOmUtstedtA1(Long behandlingID) throws TekniskException, FunksjonellException {
+    public void sendMeldingOmUtstedtA1(Long behandlingID) throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultatMedSaksbehandling(behandlingID);
-        return sendMeldingOmUtstedtA1(behandling, behandlingsresultat);
+        sendMeldingOmUtstedtA1(behandling, behandlingsresultat);
     }
 
-    public UtstedtA1Melding sendMeldingOmUtstedtA1(Behandling behandling, Behandlingsresultat behandlingsresultat) throws TekniskException, FunksjonellException {
+    public void sendMeldingOmUtstedtA1(Behandling behandling, Behandlingsresultat behandlingsresultat) throws TekniskException, FunksjonellException {
         if (!unleash.isEnabled("melosys.statistikkA1")) {
-            return null;
+            return;
         }
 
-        if (behandlingsresultat.erAvslag()) {
-            log.info("Behandling {} er avslått. Ingen melding om utstedt A1 blir sendt", behandling.getId());
-            return null;
-        }
+        validerBehandling(behandling, behandlingsresultat);
 
         final UtstedtA1Melding melding = lagMelding(behandling, behandlingsresultat);
-        return utstedtA1Producer.produserMelding(melding);
+        utstedtA1Producer.produserMelding(melding);
+    }
+
+    private void validerBehandling(Behandling behandling, Behandlingsresultat behandlingsresultat) throws FunksjonellException {
+        if (behandlingsresultat.erAvslag()) {
+            throw new FunksjonellException(String.format("Behandling %s er avslått. Ingen melding om utstedt A1 blir sendt", behandling.getId()));
+        }
+
+        if (behandling.erAktiv()) {
+            throw new FunksjonellException(String.format("Behandling %s er aktiv. Ingen melding om utstedt A1 blir sendt", behandling.getId()));
+        }
     }
 
     private UtstedtA1Melding lagMelding(Behandling behandling, Behandlingsresultat behandlingsresultat) throws TekniskException, FunksjonellException {

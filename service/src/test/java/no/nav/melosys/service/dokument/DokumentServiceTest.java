@@ -71,8 +71,7 @@ import org.junit.Test;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagAnmodningsperiodeSvarInnvilgelse;
-import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagBostedsadresse;
+import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.AdditionalMatchers.not;
@@ -138,41 +137,10 @@ public final class DokumentServiceTest {
         verify(dokSysFasade).produserDokumentutkast(any(Dokumentbestilling.class));
     }
 
-    @Test
-    public final void produserMangelbrevISaksflyt() throws Exception {
-        BrevbestillingDto brevbestilling = lagBrevBestillingDto(BRUKER);
-        instans.produserDokumentISaksflyt(MELDING_MANGLENDE_OPPLYSNINGER, brevbestilling.mottaker, BEHANDLINGSID, new BrevData(brevbestilling));
-    }
-
-    @Test
-    public final void produserForvaltningsmeldingISaksflyt_fungerer() throws MelosysException {
-        instans.produserDokumentISaksflyt(MELDING_FORVENTET_SAKSBEHANDLINGSTID, BRUKER, BEHANDLINGSID, null);
-
-        verify(prosessinstansService).opprettProsessinstansForvaltningsmelding(argThat(b -> BEHANDLINGSID == b.getId()));
-    }
-
     private static BrevbestillingDto lagBrevBestillingDto(Aktoersroller rolle) {
         BrevbestillingDto brevbestilling = new BrevbestillingDto();
         brevbestilling.mottaker = rolle;
         return brevbestilling;
-    }
-
-    @Test
-    public final void produserMangelbrevISaksflyt_utenMottaker_kasterUnntak() {
-        Throwable unntak = catchThrowable(() -> instans.produserDokumentISaksflyt(MELDING_MANGLENDE_OPPLYSNINGER, null, BEHANDLINGSID, null));
-        assertThat(unntak).isInstanceOfAny(IllegalArgumentException.class);
-    }
-
-    @Test
-    public final void produserInnvilgelsesbrevISaksflytUtenBehandlingKasterUnntak() {
-        Throwable unntak = catchThrowable(() -> instans.produserDokumentISaksflyt(INNVILGELSE_YRKESAKTIV, BRUKER, ~BEHANDLINGSID, null));
-        assertThat(unntak).isInstanceOfAny(IkkeFunnetException.class).hasNoCause().hasMessageContaining("finnes ikke");
-    }
-
-    @Test
-    public final void produserUkjentDokumenttypeISaksflytKasterUnntak() {
-        Throwable unntak = catchThrowable(() -> instans.produserDokumentISaksflyt(MELDING_HENLAGT_SAK, ARBEIDSGIVER, BEHANDLINGSID, null));
-        assertThat(unntak).isInstanceOfAny(FunksjonellException.class).hasNoCause().hasMessageContaining("er ikke støttet");
     }
 
     @Test
@@ -205,6 +173,7 @@ public final class DokumentServiceTest {
         brevdataInnvilgelse.arbeidsland = "Norway";
         brevdataInnvilgelse.setAnmodningsperiodesvar(lagAnmodningsperiodeSvarInnvilgelse());
         brevdataInnvilgelse.trygdemyndighetsland = "Denmark";
+        brevdataInnvilgelse.avklarteMedfolgendeBarn = lagAvklarteMedfølgendeBarn();
 
         return brevdataInnvilgelse;
     }
@@ -278,7 +247,7 @@ public final class DokumentServiceTest {
         KodeverkService kodeverkService = new KodeverkService(kodeverkRegister);
         EregFasade eregFasade = mockEregFasade();
         RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(eregFasade, tpsFasade);
-        AvklarteVirksomheterSystemService avklarteVirksomheterSystemService = new AvklarteVirksomheterSystemService(avklartefaktaService, registerOppslagService);
+        AvklarteVirksomheterSystemService avklarteVirksomheterSystemService = new AvklarteVirksomheterSystemService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class));
         Brevbestilling brevbestilling = new Brevbestilling.Builder().medBehandling(lagBehandling()).build();
         BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService,avklarteVirksomheterSystemService, avklartefaktaService);
         BrevdataGrunnlagFactory brevdataGrunnlagFactory = mock(BrevdataGrunnlagFactory.class);
@@ -356,9 +325,10 @@ public final class DokumentServiceTest {
         UtenlandskMyndighetService utenlandskMyndighetService = mock(UtenlandskMyndighetService.class);
         UtpekingService utpekingService = mock(UtpekingService.class);
         VilkaarsresultatService vilkaarsresultatService = mock(VilkaarsresultatService.class);
+        TpsFasade tpsFasade = mock(TpsFasade.class);
         return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService, joarkService,
-            landvelgerService, lovvalgsperiodeService, saksopplysningerService,
-            utenlandskMyndighetService, utpekingService, vilkaarsresultatRepository, vilkaarsresultatService);
+            landvelgerService, lovvalgsperiodeService, saksopplysningerService, utenlandskMyndighetService,
+            utpekingService, vilkaarsresultatRepository, vilkaarsresultatService, tpsFasade, behandlingsgrunnlagService);
     }
 
     private BrevDataByggerVelger lagBrevdatabyggerVelgerMock() throws FunksjonellException, TekniskException {

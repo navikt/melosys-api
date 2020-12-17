@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-import no.nav.melosys.domain.arkiv.JournalfoeringMangel;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -48,10 +47,6 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
 
         boolean medDokumentkategori = false;
         String journalpostID = prosessinstans.getData(JOURNALPOST_ID);
-        List<JournalfoeringMangel> mangler = joarkFasade.utledJournalfoeringsbehov(journalpostID);
-        if (mangler.contains(JournalfoeringMangel.HOVEDDOKUMENT_KATEGORI)) {
-            medDokumentkategori = true;
-        }
 
         Long arkivSakID;
         if (prosessinstans.getBehandling() == null) {
@@ -87,7 +82,7 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
             .medTittel(tittel)
             .medMottattDato(mottattDato)
             .medFysiskeVedlegg(fysiskeVedleggMedTitler)
-            .medLogiskeVedleggTitler(logiskeVedleggTitler).medDokumentkategori(medDokumentkategori).build();
+            .medLogiskeVedleggTitler(logiskeVedleggTitler).build();
         joarkFasade.oppdaterJournalpost(journalpostID, journalpostOppdatering, true);
         log.info("Oppdatert og ferdigstilt journalpost {}. ArkivsakID: {}", journalpostID, arkivSakID);
     }

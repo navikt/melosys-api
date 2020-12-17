@@ -206,11 +206,25 @@ public class BehandlingService {
         for (Saksopplysning saksopplysning : tidligsteInaktiveBehandling.getSaksopplysninger()) {
             Saksopplysning saksopplysningsreplika = (Saksopplysning) BeanUtils.cloneBean(saksopplysning);
             saksopplysningsreplika.setBehandling(behandlingsreplika);
+            saksopplysningsreplika.setKilder(replikerKilder(saksopplysningsreplika, saksopplysning.getKilder()));
             saksopplysningsreplika.setId(null);
             behandlingsreplika.getSaksopplysninger().add(saksopplysningsreplika);
         }
         behandlingRepository.save(behandlingsreplika);
         return behandlingsreplika;
+    }
+
+    private Set<SaksopplysningKilde> replikerKilder(Saksopplysning saksopplysningreplika, Set<SaksopplysningKilde> kilder)
+        throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        Set<SaksopplysningKilde> kildereplikas = new HashSet<>();
+        for (var kilde : kilder) {
+            var kildereplika = (SaksopplysningKilde) BeanUtils.cloneBean(kilde);
+            kildereplika.setId(null);
+            kildereplika.setSaksopplysning(saksopplysningreplika);
+            kildereplikas.add(kildereplika);
+        }
+
+        return kildereplikas;
     }
 
     private Behandlingsgrunnlag repolikerBehandlingsgrunnlag(Behandling behandlingsreplika, Behandlingsgrunnlag opprinneligBehandlingsgrunnlag)

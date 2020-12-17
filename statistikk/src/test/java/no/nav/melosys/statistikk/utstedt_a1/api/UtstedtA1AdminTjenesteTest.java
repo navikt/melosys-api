@@ -9,7 +9,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding;
 import no.nav.melosys.statistikk.utstedt_a1.service.UtstedtA1Service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.AdditionalMatchers.or;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -42,8 +40,7 @@ class UtstedtA1AdminTjenesteTest {
 
     @Test
     void publiser() throws Exception {
-        when(utstedtA1Service.sendMeldingOmUtstedtA1(anyLong())).thenReturn(mock(UtstedtA1Melding.class));
-        utstedtA1AdminTjeneste.publiser(apiKey, 1L);
+        utstedtA1AdminTjeneste.publiserMelding(apiKey, 1L);
         verify(utstedtA1Service).sendMeldingOmUtstedtA1(eq(1L));
     }
 
@@ -54,7 +51,6 @@ class UtstedtA1AdminTjenesteTest {
             lagBehandling(2L),
             lagBehandling(3L)
         ));
-        when(utstedtA1Service.sendMeldingOmUtstedtA1(anyLong())).thenReturn(mock(UtstedtA1Melding.class));
 
         Map<String, Set<Long>> behandlinger = utstedtA1AdminTjeneste.publiserEksisterendeBehandlinger(apiKey, Collections.emptySet()).getBody();
 
@@ -70,7 +66,6 @@ class UtstedtA1AdminTjenesteTest {
             lagBehandling(2L),
             lagBehandling(3L)
         ));
-        when(utstedtA1Service.sendMeldingOmUtstedtA1(anyLong())).thenReturn(mock(UtstedtA1Melding.class));
 
         Map<String, Set<Long>> behandlinger = utstedtA1AdminTjeneste.publiserEksisterendeBehandlinger(apiKey, Set.of(1L, 2L, 3L)).getBody();
 
@@ -86,8 +81,8 @@ class UtstedtA1AdminTjenesteTest {
             lagBehandling(2L),
             lagBehandling(3L)
         ));
-        when(utstedtA1Service.sendMeldingOmUtstedtA1(or(eq(1L), eq(2L)))).thenReturn(mock(UtstedtA1Melding.class));
-        when(utstedtA1Service.sendMeldingOmUtstedtA1(3L)).thenThrow(new TekniskException("ugyldig behandling"));
+        doNothing().when(utstedtA1Service).sendMeldingOmUtstedtA1(or(eq(1L), eq(2L)));
+        doThrow(new TekniskException("ugyldig behandling")).when(utstedtA1Service).sendMeldingOmUtstedtA1(3L);
 
         Map<String, Set<Long>> behandlinger = utstedtA1AdminTjeneste.publiserEksisterendeBehandlinger(apiKey, Set.of(1L, 2L, 3L)).getBody();
 
@@ -99,7 +94,7 @@ class UtstedtA1AdminTjenesteTest {
     @Test
     void feilApiKeyOppgittForventForbidden() {
         assertThatExceptionOfType(SikkerhetsbegrensningException.class)
-            .isThrownBy(() -> utstedtA1AdminTjeneste.publiser("Dum dummy", 1L))
+            .isThrownBy(() -> utstedtA1AdminTjeneste.publiserMelding("Dum dummy", 1L))
             .withMessageContaining("apikey");
         assertThatExceptionOfType(SikkerhetsbegrensningException.class)
             .isThrownBy(() -> utstedtA1AdminTjeneste.publiserEksisterendeBehandlinger("Dumdum", Collections.emptySet()))

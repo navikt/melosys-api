@@ -7,6 +7,7 @@ import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.util.Assert;
@@ -110,7 +111,7 @@ public class Fagsak extends RegistreringsInfo {
     }
 
     public Aktoer hentBruker() throws TekniskException {
-        return hentAktørMedRolleTypeBruker();
+        return hentAktørMedRolleType(Aktoersroller.BRUKER);
     }
 
     public List<Aktoer> hentMyndigheter() {
@@ -118,18 +119,25 @@ public class Fagsak extends RegistreringsInfo {
     }
 
     /**
-     * Returnerer den sist oppdaterte behandlingen knyttet til saken
+     * Henter arbeidsgiver i tilfeller hvor det er forventet at det kun finnes en eller ingen
      */
-    public Behandling getSistOppdaterteBehandling() throws FunksjonellException {
-        return getBehandlinger().stream()
-            .max(Comparator.comparing(Behandling::getEndretDato))
-            .orElseThrow(() -> new FunksjonellException("Finner ikke behandlinger for fagsak " + saksnummer));
+    public Aktoer hentUnikArbeidsgiver() throws TekniskException {
+        return hentAktørMedRolleType(Aktoersroller.ARBEIDSGIVER);
     }
 
-    private Aktoer hentAktørMedRolleTypeBruker() throws TekniskException {
-        Collection<Aktoer> kandidater = hentAktørerMedRolleType(Aktoersroller.BRUKER);
+    /**
+     * Returnerer den sist oppdaterte behandlingen knyttet til saken
+     */
+    public Behandling getSistOppdaterteBehandling() throws IkkeFunnetException {
+        return getBehandlinger().stream()
+            .max(Comparator.comparing(Behandling::getEndretDato))
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlinger for fagsak " + saksnummer));
+    }
+
+    private Aktoer hentAktørMedRolleType(Aktoersroller rolleType) throws TekniskException {
+        Collection<Aktoer> kandidater = hentAktørerMedRolleType(rolleType);
         if (kandidater.size() > 1) {
-            throw new TekniskException("Det finnes mer enn en aktør med rollen " + Aktoersroller.BRUKER.getBeskrivelse() + " for sak " + saksnummer);
+            throw new TekniskException("Det finnes mer enn en aktør med rollen " + rolleType.getBeskrivelse() + " for sak " + saksnummer);
         }
         return kandidater.stream().findFirst().orElse(null);
     }

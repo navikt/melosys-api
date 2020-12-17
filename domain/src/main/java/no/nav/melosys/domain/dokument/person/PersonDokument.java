@@ -3,11 +3,11 @@ package no.nav.melosys.domain.dokument.person;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
@@ -25,6 +25,8 @@ public class PersonDokument implements SaksopplysningDokument {
 
     public Sivilstand sivilstand;
 
+    public LocalDate sivilstandGyldighetsperiodeFom;
+
     /** Kodeverk: Landkoder */
     public Land statsborgerskap;
 
@@ -32,13 +34,10 @@ public class PersonDokument implements SaksopplysningDokument {
     @JsonProperty("kjoenn")
     public KjoennsType kjønn;
 
-    @JsonIgnore
     public String fornavn;
 
-    @JsonIgnore
     public String mellomnavn;
 
-    @JsonIgnore
     public String etternavn;
 
     public String sammensattNavn;
@@ -50,25 +49,21 @@ public class PersonDokument implements SaksopplysningDokument {
     public LocalDate fødselsdato;
 
     @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
-    @JsonIgnore
     public LocalDate dødsdato;
 
-    @JsonIgnore
     public Diskresjonskode diskresjonskode;
 
-    @JsonProperty("personStatus")
     public Personstatus personstatus;
 
     public LocalDate statsborgerskapDato;
 
-    @JsonIgnore
     public Bostedsadresse bostedsadresse = new Bostedsadresse();
 
-    @JsonIgnore
     public UstrukturertAdresse postadresse = new UstrukturertAdresse();
 
-    @JsonIgnore
     public MidlertidigPostadresse midlertidigPostadresse = new MidlertidigPostadresse();
+
+    public UstrukturertAdresse gjeldendePostadresse = new UstrukturertAdresse();
 
     @XmlTransient
     @JsonProperty(defaultValue = "false" )
@@ -82,5 +77,16 @@ public class PersonDokument implements SaksopplysningDokument {
 
     public boolean manglerBostedsadresse() {
         return bostedsadresse.erTom();
+    }
+
+    public Optional<Familiemedlem> hentAnnenForelder(String fnrGjeldendeForelder) {
+        return familiemedlemmer.stream()
+            .filter(Familiemedlem::erForelder)
+            .filter(forelder -> !fnrGjeldendeForelder.equals(forelder.fnr))
+            .findAny();
+    }
+
+    public boolean harBeskyttelsesbehov() {
+        return diskresjonskode != null && diskresjonskode.erKode6();
     }
 }

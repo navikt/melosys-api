@@ -42,9 +42,8 @@ public class MedlServiceTest {
         MedlemskapMock medlemskapMock = new MedlemskapMock();
         behandleMedlemskapV2 = mock(BehandleMedlemskapV2.class);
         BehandleMedlemskapConsumerImpl behandleMedlemskapConsumer1 = new BehandleMedlemskapConsumerImpl(behandleMedlemskapV2);
-        BehandleMedlemskapConsumer behandleMedlemskapConsumer = behandleMedlemskapConsumer1;
         DokumentFactory dokumentFactory = new DokumentFactory(JaxbConfig.jaxb2Marshaller(), new XsltTemplatesFactory());
-        medlService = new MedlService(medlemskapMock, behandleMedlemskapConsumer, dokumentFactory);
+        medlService = new MedlService(medlemskapMock, behandleMedlemskapConsumer1, dokumentFactory);
 
         lovvalgsperiode = new Lovvalgsperiode();
 
@@ -52,15 +51,16 @@ public class MedlServiceTest {
         response.setPeriodeId(123L);
 
         medlServiceSpy = spy(medlService);
-        when(behandleMedlemskapConsumer.opprettPeriode(ArgumentMatchers.any(OpprettPeriodeRequest.class))).thenReturn(response);
+        when(((BehandleMedlemskapConsumer) behandleMedlemskapConsumer1).opprettPeriode(ArgumentMatchers.any(OpprettPeriodeRequest.class))).thenReturn(response);
     }
 
     @Test
-    @SuppressWarnings("Duplicates")
     public void getPeriodeListe() throws MelosysException {
         Saksopplysning saksopplysning = medlService.hentPeriodeListe(fnr, null, null);
         assertNotNull(saksopplysning);
-        assertNotNull(saksopplysning.getDokumentXml());
+        assertNotNull(saksopplysning.getKilder());
+        assertFalse(saksopplysning.getKilder().isEmpty());
+        assertNotNull(saksopplysning.getKilder().iterator().next().getMottattDokument());
 
         MedlemskapDokument medlemskapDokument = (MedlemskapDokument) saksopplysning.getDokument();
 
@@ -102,7 +102,7 @@ public class MedlServiceTest {
         OppdaterPeriodeRequest oppdaterPeriodeRequest = captor.getValue();
 
         assertThat(oppdaterPeriodeRequest.getPeriodeId()).isEqualTo(periodeId);
-        assertThat(oppdaterPeriodeRequest.getVersjon()).isEqualTo(0);
+        assertThat(oppdaterPeriodeRequest.getVersjon()).isZero();
     }
 
     @Test

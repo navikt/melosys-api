@@ -1,0 +1,1 @@
+ALTER TABLE kontaktopplysning ADD kontakt_telefon VARCHAR2(99) NULL;

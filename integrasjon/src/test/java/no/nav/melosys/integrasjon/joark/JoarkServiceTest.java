@@ -1,6 +1,8 @@
 package no.nav.melosys.integrasjon.joark;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 
 import no.nav.dok.tjenester.journalfoerinngaaende.Bruker;
@@ -11,16 +13,14 @@ import no.nav.melosys.domain.arkiv.DokumentVariant;
 import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
-import no.nav.melosys.integrasjon.joark.inngaaendejournal.InngaaendeJournalConsumer;
 import no.nav.melosys.integrasjon.joark.journal.JournalConsumer;
 import no.nav.melosys.integrasjon.joark.journalfoerinngaaende.JournalfoerInngaaendeConsumer;
 import no.nav.melosys.integrasjon.joark.journalpostapi.JournalpostapiConsumer;
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.*;
-import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.DokumentInformasjonMangler;
-import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.Journalfoeringsbehov;
-import no.nav.tjeneste.virksomhet.inngaaendejournal.v1.informasjon.JournalpostMangler;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.Journalposttyper;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.ArkivSak;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.DetaljertDokumentinformasjon;
@@ -45,8 +45,6 @@ class JoarkServiceTest {
     private JoarkService joarkService;
 
     @Mock
-    private InngaaendeJournalConsumer inngaaendeJournalConsumer;
-    @Mock
     private JournalConsumer journalConsumer;
     @Mock
     private JournalfoerInngaaendeConsumer journalfoerInngaaendeConsumer;
@@ -61,7 +59,7 @@ class JoarkServiceTest {
 
     @BeforeEach
     public void setUp() {
-        this.joarkService = new JoarkService(inngaaendeJournalConsumer, journalConsumer, journalfoerInngaaendeConsumer, journalpostapiConsumer);
+        this.joarkService = new JoarkService(journalConsumer, journalfoerInngaaendeConsumer, journalpostapiConsumer);
     }
 
     @Test
@@ -107,35 +105,6 @@ class JoarkServiceTest {
     }
 
 
-    @Test
-    void konverterTilJournalfoeringmangler() {
-        JournalpostMangler input = new JournalpostMangler();
-        input.setArkivSak(Journalfoeringsbehov.MANGLER);
-        input.setAvsenderId(Journalfoeringsbehov.MANGLER_IKKE);
-        input.setAvsenderNavn(Journalfoeringsbehov.MANGLER);
-        input.setBruker(Journalfoeringsbehov.MANGLER);
-        input.setForsendelseInnsendt(Journalfoeringsbehov.MANGLER_IKKE);
-        DokumentInformasjonMangler dokumentInformasjonMangler = new DokumentInformasjonMangler();
-        dokumentInformasjonMangler.setDokumentkategori(Journalfoeringsbehov.MANGLER);
-        dokumentInformasjonMangler.setTittel(Journalfoeringsbehov.MANGLER_IKKE);
-        input.setHoveddokument(dokumentInformasjonMangler);
-        input.setInnhold(Journalfoeringsbehov.MANGLER);
-        input.setTema(Journalfoeringsbehov.MANGLER);
-
-        List<JournalfoeringMangel> journalfoeringMangler = joarkService.konverterTilJournalfoeringmangler(input);
-
-        assertThat(journalfoeringMangler).isNotNull()
-            .isNotEmpty()
-            .contains(JournalfoeringMangel.ARKIVSAK)
-            .doesNotContain(JournalfoeringMangel.AVSENDERID)
-            .contains(JournalfoeringMangel.AVSENDERNAVN)
-            .contains(JournalfoeringMangel.BRUKER)
-            .doesNotContain(JournalfoeringMangel.FORSENDELSEINNSENDT)
-            .contains(JournalfoeringMangel.HOVEDDOKUMENT_KATEGORI)
-            .doesNotContain(JournalfoeringMangel.HOVEDDOKUMENT_TITTEL)
-            .contains(JournalfoeringMangel.INNHOLD)
-            .contains(JournalfoeringMangel.TEMA);
-    }
 
     @Test
     void oppdaterJournalpost_påkrevdeVerdierUtfylt() throws Exception {
@@ -150,7 +119,7 @@ class JoarkServiceTest {
             .medHovedDokumentID(hovedDokumentID).medBrukerID("12345")
             .medAvsenderID("12").medAvsenderNavn("321").medAvsenderType(Avsendertyper.ORGANISASJON)
             .medTittel(tittel).medFysiskeVedlegg(vedleggMedTitler)
-            .medLogiskeVedleggTitler(Arrays.asList("dok1", "dok2")).medDokumentkategori(true).build();
+            .medLogiskeVedleggTitler(Arrays.asList("dok1", "dok2")).build();
 
         GetJournalpostResponse eksisterendeJournalpost = new GetJournalpostResponse();
         eksisterendeJournalpost.getDokumentListe().add(
@@ -202,7 +171,7 @@ class JoarkServiceTest {
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medArkivSakID(1L)
             .medBrukerID("12345").medHovedDokumentID(hovedDokumentID)
             .medAvsenderID("12").medAvsenderNavn("321").medAvsenderType(Avsendertyper.PERSON).medTittel(tittel).medFysiskeVedlegg(null)
-            .medLogiskeVedleggTitler(null).medDokumentkategori(true).build();
+            .medLogiskeVedleggTitler(null).build();
 
         when(journalfoerInngaaendeConsumer.hentJournalpost(anyString())).thenReturn(new GetJournalpostResponse());
         joarkService.oppdaterJournalpost("123", journalpostOppdatering, false);
@@ -311,6 +280,18 @@ class JoarkServiceTest {
     }
 
     @Test
+    void hentMottaksDatoForJournalpost_journalpostFinnes_returnererMottaksdato() throws SikkerhetsbegrensningException, IntegrasjonException {
+        final String journalpostID = "12421";
+        GetJournalpostResponse response = new GetJournalpostResponse();
+        response.getDokumentListe().add(new Dokument());
+        response.setForsendelseMottatt(new Date());
+        when(journalfoerInngaaendeConsumer.hentJournalpost(eq(journalpostID))).thenReturn(response);
+
+        assertThat(joarkService.hentMottaksDatoForJournalpost(journalpostID))
+            .isEqualTo(LocalDate.ofInstant(response.getForsendelseMottatt().toInstant(), ZoneId.systemDefault()));
+    }
+
+    @Test
     void ferdigstillJournalpost_journalpostBlirJournalført_ingenException() throws Exception {
         String journalpostId = "123";
         PutJournalpostResponse putJournalpostResponse = new PutJournalpostResponse();
@@ -359,6 +340,24 @@ class JoarkServiceTest {
         verify(journalpostapiConsumer, never()).opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean());
     }
 
+    @Test
+    void opprettJournalpost_forsendelseMottattErSatt_forventDatoMottatt() throws FunksjonellException {
+        OpprettJournalpost opprettJournalpost = lagOpprettJournalpost();
+        opprettJournalpost.setForsendelseMottatt(Instant.now());
+
+        when(journalpostapiConsumer.opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean()))
+            .thenReturn(OpprettJournalpostResponse.builder().journalpostId("1234").build());
+        joarkService.opprettJournalpost(opprettJournalpost, false);
+
+        ArgumentCaptor<OpprettJournalpostRequest> captor = ArgumentCaptor.forClass(OpprettJournalpostRequest.class);
+        verify(journalpostapiConsumer).opprettJournalpost(captor.capture(), anyBoolean());
+
+        OpprettJournalpostRequest opprettJournalpostRequest = captor.getValue();
+        assertThat(opprettJournalpostRequest).isNotNull();
+        assertThat(opprettJournalpostRequest.getDatoMottatt())
+            .isEqualTo(LocalDate.ofInstant(opprettJournalpost.getForsendelseMottatt(), ZoneId.systemDefault()));
+    }
+
     private OpprettJournalpost lagOpprettJournalpost() {
         OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
         opprettJournalpost.setJournalposttype(Journalposttype.UT);
@@ -376,10 +375,7 @@ class JoarkServiceTest {
         hoveddokument.setTittel("tittel");
         hoveddokument.setBrevkode("brevkode");
 
-        DokumentVariant dokumentVariant = new DokumentVariant();
-        dokumentVariant.setFiltype(DokumentVariant.Filtype.PDFA);
-        dokumentVariant.setVariantFormat("ARKIV");
-        dokumentVariant.setData("dokument".getBytes());
+        DokumentVariant dokumentVariant = DokumentVariant.lagDokumentVariant("dokument".getBytes());
         hoveddokument.setDokumentVarianter(Collections.singletonList(dokumentVariant));
 
         hoveddokument.setDokumentKategori(DokumentKategoriKode.SED.name());
