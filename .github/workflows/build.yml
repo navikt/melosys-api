@@ -1,13 +1,17 @@
 on:
-  push:
-    branches:
-      - 'master'
-      - 'develop'
-      - 'github-actions'
   pull_request:
     branches:
       - 'master'
       - 'develop'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Miljø'
+        required: true
+        default: 'q2'
+
+env:
+  IMAGE: docker.pkg.github.com/${{ github.repository }}/melosys-api:${{ github.sha }}
 
 jobs:
   build:
@@ -34,10 +38,42 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
+    if: ${{ github.event.inputs.environment != '' }}
     steps:
       - uses: actions/download-artifact@v2
         with:
           name: melosys-app
+      - name: GitHub Package Registry login
+        run: |
+          echo ${GITHUB_TOKEN} | docker login -u ${GITHUB_REPOSITORY} --password-stdin docker.pkg.github.com
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Docker build
         run: |
-          docker build -t docker.pkg.github.com/${GITHUB_REPOSITORY}/melosys-api:${GITHUB_SHA} .
+          docker build -t ${IMAGE} .
+          docker push ${IMAGE}
+      - name: Deploy to prod
+        if: github.event.inputs.environment == 'p'
+        run: |
+          echo "CLUSTER=prod-fss" >> $GITHUB_ENV
+          echo "NAMESPACE=default" >> $GITHUB_ENV
+          echo "URL=melosys-api.nais.adeo.no" >> $GITHUB_ENV
+      - name: Deploy to q1
+        if: github.event.inputs.environment == 'q1'
+        run: |
+          echo "CLUSTER=dev-fss" >> $GITHUB_ENV
+          echo "NAMESPACE=default" >> $GITHUB_ENV
+          echo "URL=melosys-api.dev.adeo.no" >> $GITHUB_ENV
+      - name: Deploy to q2
+        if: github.event.inputs.environment == 'q2'
+        run: |
+          echo "CLUSTER=dev-fss" >> $GITHUB_ENV
+          echo "NAMESPACE=q2" >> $GITHUB_ENV
+          echo "URL=melosys-api-q2.dev.adeo.no" >> $GITHUB_ENV
+      - uses: nais/deploy/actions/deploy@v1
+        if: ${{ env.CLUSTER != '' }}
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: ${{ env.CLUSTER }}
+          RESOURCE: nais.yml
+          VAR: IMAGE=${{ env.IMAGE }},NAMESPACE=${{ env.NAMESPACE }},URL=${{ env.URL }}
