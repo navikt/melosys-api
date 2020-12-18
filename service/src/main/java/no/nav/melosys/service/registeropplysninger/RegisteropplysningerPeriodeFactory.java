@@ -1,11 +1,11 @@
 package no.nav.melosys.service.registeropplysninger;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
+
 import no.nav.melosys.domain.Behandling;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDate;
-import java.time.YearMonth;
 
 @Component
 public class RegisteropplysningerPeriodeFactory {
@@ -106,10 +106,8 @@ public class RegisteropplysningerPeriodeFactory {
         YearMonth tomMnd;
 
         LocalDate nå = LocalDate.now();
-        if (tom == null) {
-            fomMnd = YearMonth.from(fom);
-            tomMnd = YearMonth.from(fom.plusYears(2));
-        } else if (fom.isBefore(nå) && tom.isAfter(nå)) { //1. Periode påbegynt: utbetalinger periode med 2 mnd tilbake
+        //1. Periode påbegynt: utbetalinger periode med 2 mnd tilbake
+        if (fom.isBefore(nå) && (tom == null || tom.isAfter(nå))) {
             fomMnd = YearMonth.from(fom.minusMonths(2L));
             tomMnd = YearMonth.from(nå);
         } else if (fom.isAfter(nå)) { //2. Periode ikke påbegynt. Inneværende mnd og 2 mnd tilbake
