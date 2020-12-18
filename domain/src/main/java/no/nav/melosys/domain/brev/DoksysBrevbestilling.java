@@ -9,7 +9,7 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
 public final class DoksysBrevbestilling extends Brevbestilling {
     private final Aktoersroller mottakerRolle;
-    private final Collection<Mottaker> mottaker;
+    private final Collection<Mottaker> mottaker; //NOTE Flytt opp til Brevbestilling
     private final String begrunnelseKode;
     private final String fritekst;
     private final String ytterligereInformasjon;

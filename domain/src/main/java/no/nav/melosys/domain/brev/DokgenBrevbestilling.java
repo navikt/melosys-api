@@ -14,7 +14,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private final Instant forsendelseMottatt;
     private final String avsenderId;
     private final long behandlingId;
-    private final Aktoer mottaker;
+    private final Aktoer mottaker; //NOTE Flytt opp til Brevbestilling
     private final boolean bestillKopi;
 
     private DokgenBrevbestilling(Builder builder) {

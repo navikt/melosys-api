@@ -5,7 +5,6 @@ import java.util.List;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
-import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
@@ -70,6 +69,7 @@ public class DokumentServiceFasade {
                                  long behandlingID, DoksysBrevbestilling brevbestilling) throws TekniskException, FunksjonellException {
         if (dokgenService.erTilgjengeligDokgenmal(produserbartDokument)) {
             Behandling behandling = behandlingService.hentBehandling(behandlingID);
+            //NOTE @Lunde Utvide for å støtte FastMottaker i BrevmottakerService
             List<Aktoer> mottakere = brevmottakerService.avklarMottakere(produserbartDokument, mottaker, behandling);
             for (Aktoer aktoer : mottakere) {
                 prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(produserbartDokument, behandling, aktoer);
