@@ -12,8 +12,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.hendelser.A1BestiltHendelse;
-import no.nav.melosys.service.hendelser.FeiletHendelse;
+import no.nav.melosys.service.hendelser.VedtakMetadataLagretHendelse;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1Producer;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.A1TypeUtstedelse;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse;
@@ -23,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -48,16 +48,16 @@ public class UtstedtA1Service {
         this.unleash = unleash;
     }
 
-    // todo async eller ikke?
+    @Async
     @EventListener
     @SuppressWarnings("unused")
-    public FeiletHendelse handterA1Bestilt(A1BestiltHendelse a1BestiltHendelse) {
+    public void handterA1Bestilt(VedtakMetadataLagretHendelse vedtakMetadataLagretHendelse) {
         try {
-            log.info("Mottatt hendelse om bestilt A1");
-            sendMeldingOmUtstedtA1(a1BestiltHendelse.getBehandlingID());
-            return null;
-        } catch (TekniskException | FunksjonellException e) {
-            return new FeiletHendelse(this, e, a1BestiltHendelse);
+            log.info("Mottatt hendelse om vedtak metadata lagret");
+            sendMeldingOmUtstedtA1(vedtakMetadataLagretHendelse.getBehandlingID());
+        } catch (Exception e) {
+            log.error("Sending av melding feilet: ", e);
+            // new FeiletHendelse(this, e, vedtakMetadataLagretHendelse);// todo publish event
         }
     }
 

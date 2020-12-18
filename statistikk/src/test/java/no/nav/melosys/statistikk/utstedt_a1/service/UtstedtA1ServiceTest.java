@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -12,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -26,9 +28,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.event.ApplicationEventMulticaster;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -44,8 +46,8 @@ class UtstedtA1ServiceTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private LandvelgerService landvelgerService;
-    @Mock
-    private ApplicationEventMulticaster melosysHendelseMulticaster;
+
+    private final FakeUnleash unleash = new FakeUnleash();
 
     @Captor
     private ArgumentCaptor<UtstedtA1Melding> captor;
@@ -56,20 +58,21 @@ class UtstedtA1ServiceTest {
 
     @BeforeEach
     void setUp() {
-        utstedtA1Service = new UtstedtA1Service(utstedtA1Producer, behandlingService, behandlingsresultatService, landvelgerService);
+        utstedtA1Service = new UtstedtA1Service(utstedtA1Producer, behandlingService, behandlingsresultatService, landvelgerService, unleash);
+        unleash.enableAll();
     }
 
     @Test
     void sendMeldingOmUtstedtA1() throws Exception {
         when(behandlingService.hentBehandlingUtenSaksopplysninger(eq(BEHANDLING_ID))).thenReturn(lagBehandling());
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(lagBehandlingsresultat());
+        when(behandlingsresultatService.hentBehandlingsresultatMedSaksbehandling(eq(BEHANDLING_ID))).thenReturn(lagBehandlingsresultat());
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(BEHANDLING_ID))).thenReturn(List.of(Landkoder.SE));
         when(utstedtA1Producer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());
 
         utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID);
 
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(eq(BEHANDLING_ID));
-        verify(behandlingsresultatService).hentBehandlingsresultat(eq(BEHANDLING_ID));
+        verify(behandlingsresultatService).hentBehandlingsresultatMedSaksbehandling(eq(BEHANDLING_ID));
         verify(landvelgerService).hentUtenlandskTrygdemyndighetsland(eq(BEHANDLING_ID));
         verify(utstedtA1Producer).produserMelding(captor.capture());
 
@@ -84,12 +87,14 @@ class UtstedtA1ServiceTest {
     @Test
     void sendMeldingOmUtstedtA1_avslag_forventIngenMelding() throws Exception {
         when(behandlingService.hentBehandlingUtenSaksopplysninger(eq(BEHANDLING_ID))).thenReturn(lagBehandling());
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(lagBehandlingsresultat(true));
+        when(behandlingsresultatService.hentBehandlingsresultatMedSaksbehandling(eq(BEHANDLING_ID))).thenReturn(lagBehandlingsresultat(true));
 
-        utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID))
+            .withMessageContaining("er avslått");
 
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(eq(BEHANDLING_ID));
-        verify(behandlingsresultatService).hentBehandlingsresultat(eq(BEHANDLING_ID));
+        verify(behandlingsresultatService).hentBehandlingsresultatMedSaksbehandling(eq(BEHANDLING_ID));
         verify(landvelgerService, never()).hentUtenlandskTrygdemyndighetsland(anyLong());
         verify(utstedtA1Producer, never()).produserMelding(any(UtstedtA1Melding.class));
     }
@@ -102,7 +107,7 @@ class UtstedtA1ServiceTest {
         utstedtA1Service.sendMeldingOmUtstedtA1(lagBehandling(), lagBehandlingsresultat());
 
         verify(behandlingService, never()).hentBehandlingUtenSaksopplysninger(anyLong());
-        verify(behandlingsresultatService, never()).hentBehandlingsresultat(anyLong());
+        verify(behandlingsresultatService, never()).hentBehandlingsresultatMedKontrollresultat(anyLong());
         verify(landvelgerService).hentUtenlandskTrygdemyndighetsland(eq(BEHANDLING_ID));
         verify(utstedtA1Producer).produserMelding(captor.capture());
 
@@ -111,11 +116,14 @@ class UtstedtA1ServiceTest {
     }
 
     @Test
-    void sendMeldingOmUtstedtA1_behandlingIkkeAvsluttet_forventIngenKallMotServicer() throws Exception {
-        utstedtA1Service.sendMeldingOmUtstedtA1(lagBehandling(Behandlingsstatus.UNDER_BEHANDLING), lagBehandlingsresultat());
+    void sendMeldingOmUtstedtA1_behandlingIkkeAvsluttet_forventException() throws Exception {
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> utstedtA1Service
+                .sendMeldingOmUtstedtA1(lagBehandling(Behandlingsstatus.UNDER_BEHANDLING), lagBehandlingsresultat()))
+            .withMessageContaining("er aktiv");
 
         verify(behandlingService, never()).hentBehandlingUtenSaksopplysninger(anyLong());
-        verify(behandlingsresultatService, never()).hentBehandlingsresultat(anyLong());
+        verify(behandlingsresultatService, never()).hentBehandlingsresultatMedSaksbehandling(anyLong());
         verify(landvelgerService, never()).hentUtenlandskTrygdemyndighetsland(anyLong());
         verify(utstedtA1Producer, never()).produserMelding(any(UtstedtA1Melding.class));
     }

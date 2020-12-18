@@ -8,8 +8,8 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.hendelser.A1BestiltHendelse;
 import no.nav.melosys.service.hendelser.FeiletHendelse;
+import no.nav.melosys.service.hendelser.VedtakMetadataLagretHendelse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,8 +39,8 @@ class FeiletHendelseHandlerTest {
 
     @Test
     void behandleFeiletHendelse_forventNoe() throws IkkeFunnetException {
-        A1BestiltHendelse a1BestiltHendelse = new A1BestiltHendelse(this, 1L);
-        FeiletHendelse feiletHendelse = new FeiletHendelse(this, new FunksjonellException("noe gikk galt"), a1BestiltHendelse);
+        VedtakMetadataLagretHendelse vedtakMetadataLagretHendelse = new VedtakMetadataLagretHendelse(this, 1L);
+        FeiletHendelse feiletHendelse = new FeiletHendelse(this, new FunksjonellException("noe gikk galt"), vedtakMetadataLagretHendelse);
 
         feiletHendelseHandler.behandleFeiletHendelse(feiletHendelse);
 
