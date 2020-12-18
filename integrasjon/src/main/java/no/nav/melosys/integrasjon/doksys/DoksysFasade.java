@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.doksys;
 
+import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -12,6 +13,8 @@ public interface DoksysFasade {
     DokumentbestillingResponse produserIkkeredigerbartDokument(Dokumentbestilling dokumentbestilling) throws FunksjonellException, TekniskException;
 
     String distribuerJournalpost(String journalpostId, StrukturertAdresse mottakeradresse);
+
+    String distribuerJournalpost(String journalpostId, StrukturertAdresse mottakeradresse, Kontaktopplysning kontaktopplysning);
 
     String distribuerJournalpost(String journalpostId);
 }

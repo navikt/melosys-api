@@ -4,7 +4,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -77,11 +77,11 @@ public class SendHenleggelsesbrevTest {
 
         sendHenleggelsesbrev.utfør(prosessinstans);
 
-        ArgumentCaptor<Brevbestilling> brevbestillingCaptor = ArgumentCaptor.forClass(Brevbestilling.class);
+        ArgumentCaptor<DoksysBrevbestilling> brevbestillingCaptor = ArgumentCaptor.forClass(DoksysBrevbestilling.class);
         verify(brevBestiller).bestill(brevbestillingCaptor.capture());
-        Brevbestilling brevbestilling = brevbestillingCaptor.getValue();
+        DoksysBrevbestilling brevbestilling = brevbestillingCaptor.getValue();
 
-        assertThat(brevbestilling.getDokumentType()).isEqualTo(Produserbaredokumenter.MELDING_HENLAGT_SAK);
+        assertThat(brevbestilling.getProduserbartdokument()).isEqualTo(Produserbaredokumenter.MELDING_HENLAGT_SAK);
         assertThat(brevbestilling.getMottakere().iterator().next().getRolle()).isEqualTo(Aktoersroller.BRUKER);
         assertThat(brevbestilling.getFritekst()).isEqualTo(behandlingsresultat.getBegrunnelseFritekst());
     }

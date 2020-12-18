@@ -6,7 +6,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
@@ -42,7 +42,7 @@ public class BrevDataGrunnlagTest {
     @Mock
     private AvklartefaktaService avklartefaktaService;
 
-    private Brevbestilling brevbestilling;
+    private DoksysBrevbestilling brevbestilling;
     private Behandling behandling;
     private PersonDokument person;
     private Soeknad søknad;
@@ -68,7 +68,7 @@ public class BrevDataGrunnlagTest {
         søknad = new Soeknad();
         behandling = lagBehandling(søknad, person);
 
-        brevbestilling = new Brevbestilling.Builder().medBehandling(behandling).build();
+        brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
         dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, mock(AvklarteVirksomheterService.class), avklartefaktaService);
     }
 

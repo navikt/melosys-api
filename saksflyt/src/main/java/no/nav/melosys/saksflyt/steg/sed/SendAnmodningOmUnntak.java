@@ -6,7 +6,7 @@ import java.time.ZoneId;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -72,10 +72,10 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
         brevBestiller.bestill(lagBrevBestilling(prosessinstans));
     }
 
-    private Brevbestilling lagBrevBestilling(Prosessinstans prosessinstans) throws IkkeFunnetException {
+    private DoksysBrevbestilling lagBrevBestilling(Prosessinstans prosessinstans) throws IkkeFunnetException {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
-        return new Brevbestilling.Builder().medDokumentType(Produserbaredokumenter.ANMODNING_UNNTAK)
-            .medAvsender(hentSaksbehandler(prosessinstans))
+        return new DoksysBrevbestilling.Builder().medProdserbartDokument(Produserbaredokumenter.ANMODNING_UNNTAK)
+            .medAvsenderNavn(hentSaksbehandler(prosessinstans))
             .medMottakere(Mottaker.av(MYNDIGHET))
             .medBehandling(behandling)
             .medYtterligereInformasjon(prosessinstans.getData(YTTERLIGERE_INFO_SED))

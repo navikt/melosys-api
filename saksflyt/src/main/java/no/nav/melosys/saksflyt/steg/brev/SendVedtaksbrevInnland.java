@@ -7,7 +7,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -97,8 +97,8 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             mottakerListe = List.of(Mottaker.av(BRUKER));
         }
 
-        Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(avslagTypeBruker)
-            .medAvsender(saksbehandler)
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProdserbartDokument(avslagTypeBruker)
+            .medAvsenderNavn(saksbehandler)
             .medBehandling(behandling)
             .medMottakere(mottakerListe)
             .medFritekst(fritekst)
@@ -109,9 +109,9 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             Produserbaredokumenter avslagTypeArbeidsgiver = (behandlingsresultatType != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL)
                 ? AVSLAG_ARBEIDSGIVER : AVSLAG_MANGLENDE_OPPLYSNINGER;
 
-            Brevbestilling.Builder brevbestillingArbeidsgiver = new Brevbestilling.Builder()
-                .medDokumentType(avslagTypeArbeidsgiver)
-                .medAvsender(saksbehandler)
+            DoksysBrevbestilling.Builder brevbestillingArbeidsgiver = new DoksysBrevbestilling.Builder()
+                .medProdserbartDokument(avslagTypeArbeidsgiver)
+                .medAvsenderNavn(saksbehandler)
                 .medBehandling(behandling)
                 .medMottakere(Mottaker.av(ARBEIDSGIVER))
                 .medFritekst(fritekst);
@@ -134,8 +134,8 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             mottakerListe.add(FastMottaker.av(SKATTEOPPKREVER_UTLAND));
         }
 
-        Brevbestilling innvilgelseBrukerOgSkatt = new Brevbestilling.Builder().medDokumentType(innvilgelseType)
-            .medAvsender(saksbehandler)
+        DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProdserbartDokument(innvilgelseType)
+            .medAvsenderNavn(saksbehandler)
             .medBehandling(behandling)
             .medBegrunnelseKode(begrunnelseKode)
             .medMottakere(mottakerListe)
@@ -146,8 +146,8 @@ public class SendVedtaksbrevInnland implements StegBehandler {
 
     private void sendUtpekingsbrev(Behandling behandling, String saksbehandler, String fritekst)
         throws FunksjonellException, TekniskException {
-        Brevbestilling brevbestilling = new Brevbestilling.Builder().medDokumentType(ORIENTERING_UTPEKING_UTLAND)
-            .medAvsender(saksbehandler)
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProdserbartDokument(ORIENTERING_UTPEKING_UTLAND)
+            .medAvsenderNavn(saksbehandler)
             .medBehandling(behandling)
             .medMottakere(Mottaker.av(BRUKER))
             .medFritekst(fritekst)

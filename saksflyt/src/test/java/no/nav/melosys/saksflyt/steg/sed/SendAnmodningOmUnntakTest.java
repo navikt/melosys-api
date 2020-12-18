@@ -9,7 +9,7 @@ import com.google.common.collect.Sets;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -55,7 +55,7 @@ public class SendAnmodningOmUnntakTest {
 
     private Prosessinstans prosessinstans;
     @Captor
-    private ArgumentCaptor<Brevbestilling> brevbestillingArgumentCaptor;
+    private ArgumentCaptor<DoksysBrevbestilling> brevbestillingArgumentCaptor;
 
     private static final long BEHANDLING_ID = 1L;
     private static final String MOTTAKER_INSTITSJON = "SE:123";
@@ -92,7 +92,7 @@ public class SendAnmodningOmUnntakTest {
 
         verify(brevBestiller).bestill(brevbestillingArgumentCaptor.capture());
         assertThat(brevbestillingArgumentCaptor.getValue().getMottakere()).contains(Mottaker.av(Aktoersroller.MYNDIGHET));
-        assertThat(brevbestillingArgumentCaptor.getValue().getDokumentType()).isEqualTo(Produserbaredokumenter.ANMODNING_UNNTAK);
+        assertThat(brevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(Produserbaredokumenter.ANMODNING_UNNTAK);
         assertThat(brevbestillingArgumentCaptor.getValue().getYtterligereInformasjon()).isEqualTo("Mer info");
         verify(anmodningsperiodeService).oppdaterAnmodningsperiodeSendtForBehandling(eq(BEHANDLING_ID));
     }
