@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.jayway.jsonpath.JsonPath;
 import com.networknt.schema.*;
 import com.networknt.schema.uri.URIFetcher;
 import no.nav.melosys.service.kodeverk.KodeDto;
@@ -119,18 +120,24 @@ public class JsonSchemaTestParent {
     }
 
     private void valider(JsonNode jsonNode, JsonSchema schema, Logger logger) {
-        ValidationResult result = schema.validateAndCollect(jsonNode); //.validate(jsonNode);
+        ValidationResult result = schema.validateAndCollect(jsonNode);
         if (!result.getValidationMessages().isEmpty()){
-            formaterFeil(result, schema, logger);
+            formaterFeil(result, schema, jsonNode.toString(), logger);
         }
     }
 
-    private void formaterFeil(ValidationResult validationResult, JsonSchema schema, Logger logger) {
+    private void formaterFeil(ValidationResult validationResult, JsonSchema schema, String json, Logger logger) {
         logger.error(FEILMELDING, schema.getCurrentUri().toString());
-        validationResult.getValidationMessages()
-            .forEach(jsonObject -> logger.error(jsonObject.getMessage()));
+        validationResult.getValidationMessages().forEach(
+            validationMessage -> logger.error(formaterMelding(validationMessage, json)));
         throw new ValidationException(String.format("%s: %d schema violations found",
             schema.getCurrentUri(), validationResult.getValidationMessages().size()));
+    }
+
+    private String formaterMelding(ValidationMessage validationMessage, String json) {
+        String verdi = JsonPath.read(json, validationMessage.getPath());
+        String sti = validationMessage.getPath();
+        return validationMessage.getMessage().replace(sti, sti + " [" + verdi + "]");
     }
 
     private static class ClasspathURIFetcher implements URIFetcher {
