@@ -24,4 +24,12 @@ public class Periode implements ErPeriode {
     public LocalDate getTom() {
         return tom;
     }
+
+    @Override
+    public String toString() {
+        return "Periode{" +
+            "fom=" + fom +
+            ", tom=" + tom +
+            '}';
+    }
 }

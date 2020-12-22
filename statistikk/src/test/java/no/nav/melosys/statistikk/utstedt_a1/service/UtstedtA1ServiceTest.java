@@ -28,6 +28,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.event.ApplicationEventMulticaster;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -46,6 +47,8 @@ class UtstedtA1ServiceTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private LandvelgerService landvelgerService;
+    @Mock
+    private ApplicationEventMulticaster melosysHendelseMulticaster;
 
     private final FakeUnleash unleash = new FakeUnleash();
 
@@ -58,7 +61,7 @@ class UtstedtA1ServiceTest {
 
     @BeforeEach
     void setUp() {
-        utstedtA1Service = new UtstedtA1Service(utstedtA1Producer, behandlingService, behandlingsresultatService, landvelgerService, unleash);
+        utstedtA1Service = new UtstedtA1Service(utstedtA1Producer, behandlingService, behandlingsresultatService, landvelgerService, unleash, melosysHendelseMulticaster);
         unleash.enableAll();
     }
 

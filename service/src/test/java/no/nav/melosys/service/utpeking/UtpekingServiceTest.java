@@ -36,7 +36,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.ApplicationEventMulticaster;
 
 import static no.nav.melosys.service.vedtak.VedtakService.FRIST_KLAGE_UKER;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -66,7 +66,7 @@ public class UtpekingServiceTest {
     @Mock
     private VedtakKontrollService vedtakKontrollService;
     @Mock
-    private ApplicationEventPublisher applicationEventPublisher;
+    private ApplicationEventMulticaster melosysHendelseMulticaster;
 
     @Captor
     private ArgumentCaptor<Collection<Lovvalgsperiode>> lovvalgsperiodeCaptor;
@@ -83,7 +83,7 @@ public class UtpekingServiceTest {
     @Before
     public void setup() throws FunksjonellException {
         utpekingService = new UtpekingService(behandlingService, behandlingsresultatService, eessiService, landvelgerService,
-            lovvalgsperiodeService, oppgaveService, prosessinstansService, utpekingsperiodeRepository, vedtakKontrollService, applicationEventPublisher);
+            lovvalgsperiodeService, oppgaveService, prosessinstansService, utpekingsperiodeRepository, vedtakKontrollService, melosysHendelseMulticaster);
 
         fagsak.setBehandlinger(List.of(behandling));
         behandling.setId(behandlingID);

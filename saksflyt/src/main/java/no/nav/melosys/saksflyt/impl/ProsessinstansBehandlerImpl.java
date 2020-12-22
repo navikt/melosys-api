@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -70,7 +71,9 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler, Fei
         }
     }
 
+    @Async
     @EventListener
+    @Override
     public void behandleFeiletHendelse(FeiletHendelse feiletHendelse) throws IkkeFunnetException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setId(UUID.randomUUID());

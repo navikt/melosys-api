@@ -12,6 +12,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.hendelser.FeiletHendelse;
 import no.nav.melosys.service.hendelser.VedtakMetadataLagretHendelse;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1Producer;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.A1TypeUtstedelse;
@@ -21,9 +22,10 @@ import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.EventListener;
+import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 @Service
 public class UtstedtA1Service {
@@ -34,30 +36,32 @@ public class UtstedtA1Service {
     private final BehandlingsresultatService behandlingsresultatService;
     private final LandvelgerService landvelgerService;
     private final Unleash unleash;
+    private final ApplicationEventMulticaster melosysHendelseMulticaster;
 
     @Autowired
     public UtstedtA1Service(UtstedtA1Producer utstedtA1Producer,
                             BehandlingService behandlingService,
                             BehandlingsresultatService behandlingsresultatService,
                             LandvelgerService landvelgerService,
-                            Unleash unleash) {
+                            Unleash unleash,
+                            ApplicationEventMulticaster melosysHendelseMulticaster) {
         this.utstedtA1Producer = utstedtA1Producer;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.landvelgerService = landvelgerService;
         this.unleash = unleash;
+        this.melosysHendelseMulticaster = melosysHendelseMulticaster;
     }
 
     @Async
-    @EventListener
+    @TransactionalEventListener
     @SuppressWarnings("unused")
     public void handterA1Bestilt(VedtakMetadataLagretHendelse vedtakMetadataLagretHendelse) {
         try {
             log.info("Mottatt hendelse om vedtak metadata lagret");
             sendMeldingOmUtstedtA1(vedtakMetadataLagretHendelse.getBehandlingID());
         } catch (Exception e) {
-            log.error("Sending av melding feilet: ", e);
-            // new FeiletHendelse(this, e, vedtakMetadataLagretHendelse);// todo publish event
+            melosysHendelseMulticaster.multicastEvent(new FeiletHendelse(this, e, vedtakMetadataLagretHendelse));
         }
     }
 
