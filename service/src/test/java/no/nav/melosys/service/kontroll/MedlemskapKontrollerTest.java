@@ -132,6 +132,16 @@ public class MedlemskapKontrollerTest {
             .isFalse();
     }
 
+    @Test
+    public void overlappendeGyldigMedlemsperiode_kildeLånekassen_ingenTreff() {
+        MedlemskapDokument medlemskapDokument = hentMedlemskapsDokument();
+        Medlemsperiode medlemsperiode = medlemskapDokument.getMedlemsperiode().get(0);
+        medlemsperiode.kilde = "LAANEKASSEN";
+        assertThat(MedlemskapKontroller.overlappendeMedlemsperiodeGyldigPeriode(
+            LocalDate.now(), LocalDate.now().plusYears(2), medlemskapDokument)
+        ).isFalse();
+    }
+
     private MedlemskapDokument hentMedlemskapsDokument() {
         MedlemskapDokument medlemskapDokument = new MedlemskapDokument();
 

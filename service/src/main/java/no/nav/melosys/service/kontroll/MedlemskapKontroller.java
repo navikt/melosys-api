@@ -41,7 +41,7 @@ public final class MedlemskapKontroller {
     }
 
     private static boolean overlappendeMedlemsperiodeMedPredikatFinnes(LocalDate fom, LocalDate tom, MedlemskapDokument medlemskapDokument, Predicate<Medlemsperiode> medlemsperiodeFilter) {
-        for (Medlemsperiode medlemsperiode : medlemskapDokument.getMedlemsperiode()) {
+        for (Medlemsperiode medlemsperiode : medlemskapDokument.hentMedlemsperioderKildeIkkeLånekassen()) {
             Periode periode = medlemsperiode.getPeriode();
             if (medlemsperiodeFilter.test(medlemsperiode) && PeriodeKontroller.periodeOverlapper(fom, tom, periode.getFom(), periode.getTom())) {
                 return true;
