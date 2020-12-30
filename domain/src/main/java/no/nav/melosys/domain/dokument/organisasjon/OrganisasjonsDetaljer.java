@@ -140,6 +140,10 @@ public class OrganisasjonsDetaljer {
 
             if (sAdresse.erUtenlandsk()) {
                 strukturertAdresse.poststed = StringUtils.isEmpty(sAdresse.getPoststedUtland()) ? sAdresse.getPoststed() : sAdresse.getPoststedUtland();
+                // Utenlandsk adresse kan ha postnummer som en del av poststed
+                if (strukturertAdresse.postnummer == null) {
+                    strukturertAdresse.postnummer = " ";
+                }
             } else {
                 strukturertAdresse.poststed = sAdresse.getPoststed() == null ? "" : sAdresse.getPoststed();
             }
