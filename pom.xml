@@ -81,7 +81,6 @@
         <restFixture.version>4.4</restFixture.version>
         <shedlock.version>4.15.0</shedlock.version>
         <slf4j.version>1.7.25</slf4j.version>
-        <spring-boot.version>2.4.1</spring-boot.version>
         <springfox.version>3.0.0</springfox.version>
         <swagger.version>1.5.21</swagger.version>
         <unleash.version>3.3.3</unleash.version>
@@ -324,21 +323,6 @@
                 <version>${apache-httpclients.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-aop</artifactId>
-                <version>${spring-boot.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-web</artifactId>
-                <version>${spring-boot.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-webflux</artifactId>
-                <version>${spring-boot.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.springframework.kafka</groupId>
                 <artifactId>spring-kafka</artifactId>
                 <version>${spring-kafka.version}</version>
@@ -553,17 +537,6 @@
                 <type>test-jar</type>
             </dependency>
             <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-test</artifactId>
-                <version>${spring-boot.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.vaadin.external.google</groupId>
-                        <artifactId>android-json</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
                 <groupId>no.nav.security</groupId>
                 <artifactId>token-validation-test-support</artifactId>
                 <version>${token-support.version}</version>
@@ -576,6 +549,19 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.vaadin.external.google</groupId>
+                    <artifactId>android-json</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
 
     <build>
         <pluginManagement>
