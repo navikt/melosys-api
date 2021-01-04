@@ -8,13 +8,11 @@ import java.util.Objects;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 
 public final class Oppgave {
     private final String aktørId;
-    private final Behandlingstema behandlingstema;
-    private final Behandlingstyper behandlingstype;
+    private final String behandlingstema;
+    private final String behandlingstype;
     private final String beskrivelse;
     private final Fagsystem behandlesAvApplikasjon;
     private final ZonedDateTime opprettetTidspunkt;
@@ -35,8 +33,8 @@ public final class Oppgave {
     public static class Builder {
         private String aktørId;
         private Fagsystem behandlesAvApplikasjon;
-        private Behandlingstema behandlingstema;
-        private Behandlingstyper behandlingstype;
+        private String behandlingstema;
+        private String behandlingstype;
         private String beskrivelse;
         private ZonedDateTime opprettetTidspunkt;
         private LocalDate fristFerdigstillelse;
@@ -52,9 +50,6 @@ public final class Oppgave {
         private int versjon;
         private LocalDate aktivDato;
         private String status;
-
-        public Builder() {
-        }
 
         public Builder setOppgaveId(String oppgaveId) {
             this.oppgaveId = oppgaveId;
@@ -121,12 +116,12 @@ public final class Oppgave {
             return this;
         }
 
-        public Builder setBehandlingstype(Behandlingstyper behandlingstype) {
+        public Builder setBehandlingstype(String behandlingstype) {
             this.behandlingstype = behandlingstype;
             return this;
         }
 
-        public Builder setBehandlingstema(Behandlingstema behandlingstema) {
+        public Builder setBehandlingstema(String behandlingstema) {
             this.behandlingstema = behandlingstema;
             return this;
         }
@@ -186,11 +181,11 @@ public final class Oppgave {
         return behandlesAvApplikasjon;
     }
 
-    public Behandlingstema getBehandlingstema() {
+    public String getBehandlingstema() {
         return behandlingstema;
     }
 
-    public Behandlingstyper getBehandlingstype() {
+    public String getBehandlingstype() {
         return behandlingstype;
     }
 

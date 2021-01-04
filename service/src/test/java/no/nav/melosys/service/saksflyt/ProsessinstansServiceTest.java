@@ -6,6 +6,7 @@ import java.util.*;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -184,7 +185,7 @@ class ProsessinstansServiceTest {
         String saksbehandler = settInnloggetSaksbehandler();
 
         Behandling behandling = lagBehandling();
-        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, behandling);
+        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, behandling, new Aktoer());
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 

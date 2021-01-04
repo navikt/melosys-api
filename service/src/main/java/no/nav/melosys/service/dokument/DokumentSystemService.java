@@ -16,6 +16,6 @@ public class DokumentSystemService extends DokumentService {
     public DokumentSystemService(BehandlingService behandlingService,
                                  BrevDataService brevDataService, @Qualifier("system") DoksysFasade dokSysFasade,
                                  BrevmottakerService brevmottakerService, BrevDataByggerVelger brevDataByggerVelger, BrevdataGrunnlagFactory brevdataGrunnlagFactory) {
-        super(behandlingService, brevDataService, dokSysFasade, null,  brevmottakerService, brevDataByggerVelger, brevdataGrunnlagFactory);
+        super(behandlingService, brevDataService, dokSysFasade, brevmottakerService, brevDataByggerVelger, brevdataGrunnlagFactory);
     }
 }

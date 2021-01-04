@@ -4,12 +4,14 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Optional;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -50,6 +52,8 @@ public class JournalfoeringServiceTest {
     @Mock
     private TpsFasade tpsFasade;
 
+    private final FakeUnleash unleash = new FakeUnleash();
+
     private JournalfoeringService journalfoeringService;
     private JournalfoeringOpprettDto opprettDto;
     private JournalfoeringTilordneDto tilordneDto;
@@ -60,12 +64,12 @@ public class JournalfoeringServiceTest {
 
     @Before
     public void setup() throws MelosysException {
-
+        unleash.enableAll();
         journalpost = new Journalpost("123");
         journalpost.setHoveddokument(new ArkivDokument());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
-        this.journalfoeringService = new JournalfoeringService(joarkFasade, oppgaveService, prosessinstansService, eessiService, fagsakService, tpsFasade);
+        this.journalfoeringService = new JournalfoeringService(joarkFasade, oppgaveService, prosessinstansService, eessiService, fagsakService, tpsFasade, unleash);
         opprettDto = new JournalfoeringOpprettDto();
         opprettDto.setJournalpostID("setJournalpostID");
         opprettDto.setOppgaveID("setOppgaveID");
@@ -73,9 +77,11 @@ public class JournalfoeringServiceTest {
         opprettDto.setAvsenderID("setAvsenderID");
         opprettDto.setAvsenderType(Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET);
         opprettDto.setBrukerID("setBrukerID");
-        opprettDto.setHoveddokument(new DokumentDto("3333","setDokumenttittel"));
+        opprettDto.setHoveddokument(new DokumentDto("3333", "setDokumenttittel"));
         opprettDto.setArbeidsgiverID("123456789");
         opprettDto.setBehandlingstemaKode(Behandlingstema.UTSENDT_ARBEIDSTAKER.getKode());
+
+        opprettDto.setFagsak(new FagsakDto());
 
         tilordneDto = new JournalfoeringTilordneDto();
         tilordneDto.setBehandlingstypeKode(Behandlingstyper.ENDRET_PERIODE.getKode());
@@ -99,7 +105,7 @@ public class JournalfoeringServiceTest {
 
     @Test
     public void opprettSakOgJournalfør_ikkeSed_prosessinstansBlirOpprettet() throws MelosysException {
-        FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK");
+        FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
         opprettDto.setFagsak(fagsakDto);
         when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK), any()))
             .thenReturn(new Prosessinstans());
@@ -111,9 +117,36 @@ public class JournalfoeringServiceTest {
     }
 
     @Test
-    public void opprettSakOgJournalfør_fomEtterTom_feiler() {
-        FagsakDto fagsakDto = lagFagsakDto(LocalDate.MAX, LocalDate.MIN, "DK");
+    public void opprettSakOgJournalfør_sakstypeFtrlUtenLandOgPeriode_prosessinstansBlirOpprettet() throws MelosysException {
+        FagsakDto fagsakDto = lagFagsakDto(null, null, null, Sakstyper.FTRL);
         opprettDto.setFagsak(fagsakDto);
+        opprettDto.setBehandlingstemaKode(Behandlingstema.ARBEID_I_UTLANDET.getKode());
+        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK), any()))
+            .thenReturn(new Prosessinstans());
+
+        journalfoeringService.opprettOgJournalfør(opprettDto);
+
+        verify(prosessinstansService).lagre(any(Prosessinstans.class));
+        verify(oppgaveService).ferdigstillOppgave(anyString());
+    }
+
+    @Test
+    public void opprettSakOgJournalfør_sakstypeFtrlBehandlingstemaArbeidFlereLand_feilKombinasjonSakstypeBehandlingstemaKasterFeil() {
+        FagsakDto fagsakDto = lagFagsakDto(null, null, null, Sakstyper.FTRL);
+        opprettDto.setFagsak(fagsakDto);
+        opprettDto.setBehandlingstemaKode(Behandlingstema.ARBEID_FLERE_LAND.getKode());
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
+            .withMessageContaining("ikke gyldig for sakstype");
+    }
+
+    @Test
+    public void opprettSakOgJournalfør_fomEtterTom_feiler() {
+        FagsakDto fagsakDto = lagFagsakDto(LocalDate.MAX, LocalDate.MIN, "DK", Sakstyper.EU_EOS);
+        opprettDto.setFagsak(fagsakDto);
+        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK), any()))
+            .thenReturn(new Prosessinstans());
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
             .withMessageContaining("Fra og med dato kan ikke være etter til og med dato");
@@ -121,7 +154,7 @@ public class JournalfoeringServiceTest {
 
     @Test
     public void opprettSakOgJournalfør_utenTom_gyldig() throws MelosysException {
-        FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, null, "DK");
+        FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, null, "DK", Sakstyper.EU_EOS);
         opprettDto.setFagsak(fagsakDto);
         when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK), any()))
             .thenReturn(new Prosessinstans());
@@ -130,6 +163,31 @@ public class JournalfoeringServiceTest {
 
         verify(prosessinstansService).lagre(any(Prosessinstans.class));
         verify(oppgaveService).ferdigstillOppgave(anyString());
+    }
+
+    @Test
+    public void opprettSakOgJournalfør_sakstypeFtrlFeatureToggleFolketrygdMvpDisabled_kasterException() {
+        FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, null, "DK", Sakstyper.FTRL);
+        opprettDto.setFagsak(fagsakDto);
+        opprettDto.setBehandlingstemaKode(Behandlingstema.ARBEID_I_UTLANDET.getKode());
+        unleash.disableAll();
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
+            .withMessageContaining("Kan ikke opprett ny sak med behandlingstema " + Behandlingstema.ARBEID_I_UTLANDET);
+    }
+
+    @Test
+    public void opprettSakOgJournalfør_sakstypeFtrlFeatureToggleFolketrygdMvpEnabled_oppretterSak() throws MelosysException {
+        FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, null, "DK", Sakstyper.FTRL);
+        opprettDto.setFagsak(fagsakDto);
+        opprettDto.setBehandlingstemaKode(Behandlingstema.ARBEID_I_UTLANDET.getKode());
+
+        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK), any()))
+            .thenReturn(new Prosessinstans());
+
+        journalfoeringService.opprettOgJournalfør(opprettDto);
+        verify(prosessinstansService).lagre(any(Prosessinstans.class));
     }
 
     @Test
@@ -188,6 +246,15 @@ public class JournalfoeringServiceTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
             .withMessageContaining("BrukerID mangler");
+    }
+
+    @Test
+    public void opprettOgJournalfør_journalpostErFerdigstilt_kasterException() {
+        journalpost.setErFerdigstilt(true);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
+            .withMessageContaining("allerede ferdigstilt");
     }
 
 
@@ -305,13 +372,14 @@ public class JournalfoeringServiceTest {
         verify(prosessinstansService).opprettProsessinstansSedMottak(eq(eessiMelding), eq(aktørID));
     }
 
-    private FagsakDto lagFagsakDto(LocalDate fom, LocalDate tom, String land) {
+    private FagsakDto lagFagsakDto(LocalDate fom, LocalDate tom, String land, Sakstyper sakstype) {
         FagsakDto fagsakDto = new FagsakDto();
+        fagsakDto.setSakstype(sakstype.getKode());
         PeriodeDto periode = new PeriodeDto();
         periode.setFom(fom);
         periode.setTom(tom);
         fagsakDto.setSoknadsperiode(periode);
-        fagsakDto.setLand(Collections.singletonList("DK"));
+        fagsakDto.setLand(Collections.singletonList(land));
         return fagsakDto;
     }
 }

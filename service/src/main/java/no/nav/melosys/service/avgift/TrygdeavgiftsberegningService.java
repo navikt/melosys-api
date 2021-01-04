@@ -18,9 +18,7 @@ import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_norsk_inntekt.NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV;
 import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_norsk_inntekt.NORSK_INNTEKT_TRYGDEAVGIFT_NAV;
-import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV;
 import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV;
 
 @Service
@@ -42,15 +40,18 @@ public class TrygdeavgiftsberegningService {
     public void oppdaterBeregningsgrunnlag(long behandlingsresultatID, OppdaterTrygdeavgiftsberegningRequest request) throws FunksjonellException {
         final var medlemAvFolketrygden = hentMedlemAvFolketrygden(behandlingsresultatID);
 
-        if (request.getAvgiftspliktigLønnNorge() != null && medlemAvFolketrygden.getVurderingTrygdeavgiftNorskInntekt() == NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV) {
-            throw new FunksjonellException("Skal ikke betales trygdeavgift for norsk inntekt");
+        if (medlemAvFolketrygden.getVurderingTrygdeavgiftNorskInntekt() == NORSK_INNTEKT_TRYGDEAVGIFT_NAV) {
+            medlemAvFolketrygden.getFastsattTrygdeavgift().setAvgiftspliktigNorskInntektMnd(request.getAvgiftspliktigLønnNorge());
+        } else {
+            medlemAvFolketrygden.getFastsattTrygdeavgift().setAvgiftspliktigNorskInntektMnd(null);
         }
-        medlemAvFolketrygden.getFastsattTrygdeavgift().setAvgiftspliktigNorskInntektMnd(request.getAvgiftspliktigLønnNorge());
 
-        if (request.getAvgiftspliktigLønnUtland() != null && medlemAvFolketrygden.getVurderingTrygdeavgiftUtenlandskInntekt() == UTENLANDSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV) {
-            throw new FunksjonellException("Skal ikke betales trygdeavgift for utenlandsk inntekt");
+        if (medlemAvFolketrygden.getVurderingTrygdeavgiftUtenlandskInntekt() == UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV) {
+            medlemAvFolketrygden.getFastsattTrygdeavgift().setAvgiftspliktigUtenlandskInntektMnd(request.getAvgiftspliktigLønnUtland());
+        } else {
+            medlemAvFolketrygden.getFastsattTrygdeavgift().setAvgiftspliktigUtenlandskInntektMnd(null);
         }
-        medlemAvFolketrygden.getFastsattTrygdeavgift().setAvgiftspliktigUtenlandskInntektMnd(request.getAvgiftspliktigLønnUtland());
+
         beregnAvgift(behandlingsresultatID);
     }
 

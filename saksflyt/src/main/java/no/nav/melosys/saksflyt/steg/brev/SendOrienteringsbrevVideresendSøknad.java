@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -45,9 +45,9 @@ public class SendOrienteringsbrevVideresendSøknad implements StegBehandler {
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
         String fritekst = prosessinstans.getData(BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST);
 
-        Brevbestilling brevbestilling = new Brevbestilling.Builder()
-            .medAvsender(saksbehandler)
-            .medDokumentType(Produserbaredokumenter.ORIENTERING_VIDERESENDT_SOEKNAD)
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
+            .medAvsenderNavn(saksbehandler)
+            .medProdserbartDokument(Produserbaredokumenter.ORIENTERING_VIDERESENDT_SOEKNAD)
             .medMottakere(Mottaker.av(Aktoersroller.BRUKER))
             .medBehandling(behandling)
             .medFritekst(fritekst)

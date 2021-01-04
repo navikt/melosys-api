@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
-import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
@@ -63,9 +63,9 @@ public class SendHenleggelsesbrev implements StegBehandler {
             .filter(henleggelsesGrunnerKoder::contains)
             .findFirst().orElseThrow(() -> new IkkeFunnetException("Finner ingen henleggelsesgrunn"));
 
-        Brevbestilling brevbestilling = new Brevbestilling.Builder()
-            .medDokumentType(MELDING_HENLAGT_SAK)
-            .medAvsender(saksbehandler)
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
+            .medProdserbartDokument(MELDING_HENLAGT_SAK)
+            .medAvsenderNavn(saksbehandler)
             .medMottakere(Mottaker.av(Aktoersroller.BRUKER))
             .medBehandling(behandling)
             .medBegrunnelseKode(begrunnelseKode)

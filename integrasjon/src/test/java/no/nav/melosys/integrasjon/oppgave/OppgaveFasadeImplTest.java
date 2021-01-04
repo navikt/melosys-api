@@ -10,8 +10,6 @@ import java.util.Set;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.MelosysException;
@@ -20,18 +18,18 @@ import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumer;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public final class OppgaveFasadeImplTest {
     @Mock
     private OppgaveConsumer oppgaveConsumer;
@@ -42,17 +40,18 @@ public final class OppgaveFasadeImplTest {
 
     private OppgaveFasadeImpl oppgaveFasadeImpl;
 
-    @Before
+    @BeforeEach
     public void setup() {
         oppgaveFasadeImpl = new OppgaveFasadeImpl(oppgaveConsumer);
     }
 
     @Test
-    public void opprettOppgave_vurderDokument_setterData() throws Exception {
+    void opprettOppgave_vurderDokument_setterData() throws Exception {
+        final String behandlingstema = "ae9999";
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder()
             .setOppgavetype(Oppgavetyper.VUR)
             .setTema(Tema.MED)
-            .setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            .setBehandlingstema(behandlingstema)
             .setFristFerdigstillelse(LocalDate.now());
         oppgaveFasadeImpl.opprettOppgave(oppgaveBuilder.build());
 
@@ -61,12 +60,12 @@ public final class OppgaveFasadeImplTest {
         OpprettOppgaveDto opprettOppgaveDto = captor.getValue();
 
         assertThat(opprettOppgaveDto.getOppgavetype()).isEqualTo(Oppgavetyper.VUR.getKode());
-        assertThat(opprettOppgaveDto.getBehandlingstema()).isEqualTo("ab0424");
+        assertThat(opprettOppgaveDto.getBehandlingstema()).isEqualTo(behandlingstema);
         assertThat(opprettOppgaveDto.getFristFerdigstillelse()).isNotNull();
     }
 
     @Test
-    public void opprettOppgave_gyldigOppgave_validerDto() throws Exception {
+    void opprettOppgave_gyldigOppgave_validerDto() throws Exception {
         Oppgave oppgave = lagOppgave();
 
         oppgaveFasadeImpl.opprettOppgave(oppgave);
@@ -78,7 +77,7 @@ public final class OppgaveFasadeImplTest {
         assertThat(oppgaveDto.getJournalpostId()).isEqualTo(oppgave.getJournalpostId());
         assertThat(oppgaveDto.getAktørId()).isEqualTo(oppgave.getAktørId());
         assertThat(oppgaveDto.getBehandlesAvApplikasjon()).isEqualTo(Fagsystem.MELOSYS.getKode());
-        assertThat(oppgaveDto.getBehandlingstype()).isEqualTo("ae0034");
+        assertThat(oppgaveDto.getBehandlingstype()).isEqualTo(oppgave.getBehandlingstype());
         assertThat(oppgaveDto.getBeskrivelse()).isEqualTo("bla bla");
         assertThat(oppgaveDto.getOppgavetype()).isEqualTo(oppgave.getOppgavetype().getKode());
         assertThat(oppgaveDto.getPrioritet()).isEqualTo(PrioritetType.NORM.toString());
@@ -88,7 +87,7 @@ public final class OppgaveFasadeImplTest {
     }
 
     @Test
-    public void finnOppgaveListeMedAnsvarlig_gyldigOppgave_verifiserToKallMotOppgave() throws Exception {
+    void finnOppgaveListeMedAnsvarlig_gyldigOppgave_verifiserToKallMotOppgave() throws Exception {
         OppgaveDto oppgaveDto = new OppgaveDto();
         when(oppgaveConsumer.hentOppgaveListe(any(OppgaveSearchRequest.class)))
             .thenReturn(Collections.singletonList(oppgaveDto));
@@ -104,7 +103,7 @@ public final class OppgaveFasadeImplTest {
     }
 
     @Test
-    public void finnOppgaveListeMedAnsvarlig_toDuplikateOppgaver_filtrererUtDuplikater() throws Exception {
+    void finnOppgaveListeMedAnsvarlig_toDuplikateOppgaver_filtrererUtDuplikater() throws Exception {
         final String oppgaveID = "123duplikat";
 
         OppgaveDto oppgaveDto1 = new OppgaveDto();
@@ -121,7 +120,7 @@ public final class OppgaveFasadeImplTest {
     }
 
     @Test
-    public void testMappingMellomDTOogDomainForOppgave() throws MelosysException {
+    void testMappingMellomDTOogDomainForOppgave() throws MelosysException {
         OppgaveDto oppgaveDto = new OppgaveDto();
         oppgaveDto.setId("1234");
         oppgaveDto.setSaksreferanse("456");
@@ -138,7 +137,7 @@ public final class OppgaveFasadeImplTest {
     }
 
     @Test
-    public void finnUtildelteOppgaverEtterFrist_mottarBehandlingsOppgaveUtenSaksreferanse_returnererGyldigeOppgaver() throws Exception {
+    void finnUtildelteOppgaverEtterFrist_mottarBehandlingsOppgaveUtenSaksreferanse_returnererGyldigeOppgaver() throws Exception {
         OppgaveDto jfrOppgave = new OppgaveDto();
         jfrOppgave.setOppgavetype("JFR");
         OppgaveDto behOppgave = new OppgaveDto();
@@ -148,7 +147,7 @@ public final class OppgaveFasadeImplTest {
         when(oppgaveConsumer.hentOppgaveListe(any(OppgaveSearchRequest.class)))
             .thenReturn(List.of(jfrOppgave, behOppgave, ikkeGyldigOppgave));
 
-        List<Oppgave> oppgaver = oppgaveFasadeImpl.finnUtildelteOppgaverEtterFrist(Behandlingstema.TRYGDETID);
+        List<Oppgave> oppgaver = oppgaveFasadeImpl.finnUtildelteOppgaverEtterFrist("abbehandlingstema1234");
 
         assertThat(oppgaver.size()).isEqualTo(2);
         assertThat(oppgaver.get(0).getOppgavetype()).isEqualTo(Oppgavetyper.JFR);
@@ -159,8 +158,8 @@ public final class OppgaveFasadeImplTest {
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setAktivDato(LocalDate.now());
         oppgaveBuilder.setAktørId("aktoer123");
-        oppgaveBuilder.setBehandlingstype(Behandlingstyper.SOEKNAD);
-        oppgaveBuilder.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        oppgaveBuilder.setBehandlingstype("aebehandlingstype1234");
+        oppgaveBuilder.setBehandlingstema("abbehandlingstema1234");
         oppgaveBuilder.setBeskrivelse("bla bla");
         oppgaveBuilder.setOpprettetTidspunkt(ZonedDateTime.now());
         oppgaveBuilder.setFristFerdigstillelse(LocalDate.now().plusMonths(1L));

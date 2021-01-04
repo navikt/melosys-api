@@ -3,7 +3,7 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -120,7 +120,7 @@ public class BrevDataByggerAvslagYrkesaktivTest {
 
     public BrevDataGrunnlag lagBrevressurser(Behandling behandling) throws TekniskException {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class));
-        Brevbestilling brevbestilling = new Brevbestilling.Builder().medBehandling(behandling).build();
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
         return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 }

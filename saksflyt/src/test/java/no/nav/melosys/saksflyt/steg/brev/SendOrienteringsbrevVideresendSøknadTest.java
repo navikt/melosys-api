@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -37,7 +37,7 @@ public class SendOrienteringsbrevVideresendSøknadTest {
     private Prosessinstans prosessinstans;
 
     @Captor
-    private ArgumentCaptor<Brevbestilling> captor;
+    private ArgumentCaptor<DoksysBrevbestilling> captor;
 
 
     @Before
@@ -55,8 +55,8 @@ public class SendOrienteringsbrevVideresendSøknadTest {
     public void utfør_brevbestilling_harRiktigBrevTypeOgMottaker() throws FunksjonellException, TekniskException {
         steg.utfør(prosessinstans);
         verify(brevBestiller).bestill(captor.capture());
-        Brevbestilling brevbestilling = captor.getValue();
-        assertThat(brevbestilling.getDokumentType()).isEqualTo(Produserbaredokumenter.ORIENTERING_VIDERESENDT_SOEKNAD);
+        DoksysBrevbestilling brevbestilling = captor.getValue();
+        assertThat(brevbestilling.getProduserbartdokument()).isEqualTo(Produserbaredokumenter.ORIENTERING_VIDERESENDT_SOEKNAD);
         assertThat(brevbestilling.getMottakere().stream().map(Mottaker::getRolle)).containsExactly(Aktoersroller.BRUKER);
         assertThat(brevbestilling.getBehandling()).isEqualTo(behandling);
     }

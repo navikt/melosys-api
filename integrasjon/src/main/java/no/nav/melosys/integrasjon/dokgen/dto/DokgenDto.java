@@ -8,8 +8,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
+import no.nav.melosys.domain.Kontaktopplysning;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 
 @JsonInclude(Include.NON_EMPTY)
 public abstract class DokgenDto {
@@ -81,6 +86,43 @@ public abstract class DokgenDto {
     }
 
     public String getLand() {
+        return land;
+    }
+
+    protected static List<String> mapAdresselinjer(OrganisasjonDokument org, Kontaktopplysning kontaktopplysning, PersonDokument personDokument) {
+        List<String> adresselinjer;
+        if (org == null) {
+            adresselinjer = personDokument.gjeldendePostadresse.adresselinjer();
+        } else {
+            if (kontaktopplysning != null) {
+                adresselinjer = asList(
+                    "v/" + kontaktopplysning.getKontaktNavn(),
+                    org.getPostadresse().gatenavn +
+                        ((org.getPostadresse().husnummer == null) ? "" : " " + org.getPostadresse().husnummer)
+                );
+            } else {
+                adresselinjer = singletonList(org.getPostadresse().gatenavn +
+                    ((org.getPostadresse().husnummer == null) ? "" : " " + org.getPostadresse().husnummer));
+            }
+        }
+        return adresselinjer;
+    }
+
+    protected static String mapPostnr(OrganisasjonDokument org, PersonDokument personDokument) {
+        return (org == null) ? personDokument.gjeldendePostadresse.postnr : org.getPostadresse().postnummer;
+    }
+
+    protected static String mapPostSted(OrganisasjonDokument org, PersonDokument personDokument) {
+        return (org == null) ? personDokument.gjeldendePostadresse.poststed : org.getPostadresse().poststed;
+    }
+
+    protected static String mapLandForAdresse(OrganisasjonDokument organisasjonDokument, PersonDokument personDokument) {
+        String land;
+        if (organisasjonDokument == null) {
+            land = personDokument.gjeldendePostadresse.land != null ? personDokument.gjeldendePostadresse.land.toString() : null;
+        } else {
+            land = organisasjonDokument.getPostadresse().landkode != null ? organisasjonDokument.getPostadresse().landkode : null;
+        }
         return land;
     }
 }

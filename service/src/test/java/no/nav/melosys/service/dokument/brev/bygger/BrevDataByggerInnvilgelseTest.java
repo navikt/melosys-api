@@ -10,7 +10,7 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MedfolgendeFamilie;
-import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
@@ -121,7 +121,7 @@ public class BrevDataByggerInnvilgelseTest {
     }
 
     public BrevDataGrunnlag lagBrevdataGrunnlag() throws TekniskException {
-        Brevbestilling brevbestilling = new Brevbestilling.Builder().medBehandling(behandling).build();
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
         return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 

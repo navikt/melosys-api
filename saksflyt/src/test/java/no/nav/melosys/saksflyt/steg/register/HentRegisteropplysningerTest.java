@@ -5,10 +5,13 @@ import java.time.LocalDate;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -87,5 +90,25 @@ class HentRegisteropplysningerTest {
         assertThat(requestCaptor.getValue())
             .extracting(RegisteropplysningerRequest::getBehandlingID, RegisteropplysningerRequest::getFnr, RegisteropplysningerRequest::getFom, RegisteropplysningerRequest::getTom)
             .containsExactly(behandling.getId(), ident, periode.getFom(), periode.getTom());
+    }
+
+    @Test
+    void utfør_sakstypeFtrl_henterKunPersonopplysninger() throws MelosysException {
+        behandling.setTema(Behandlingstema.ARBEID_I_UTLANDET);
+        behandling.getFagsak().setType(Sakstyper.FTRL);
+
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(new SoeknadFtrl());
+        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
+
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        hentRegisteropplysninger.utfør(prosessinstans);
+
+        verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
+
+        assertThat(requestCaptor.getValue().getOpplysningstyper())
+            .containsOnly(SaksopplysningType.PERSOPL);
     }
 }

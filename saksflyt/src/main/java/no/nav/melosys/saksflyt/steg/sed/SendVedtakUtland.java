@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.steg.sed;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
@@ -81,10 +81,10 @@ public class SendVedtakUtland extends AbstraktSendUtland {
         return sendUtland(BucType.LA_BUC_02, prosessinstans);
     }
 
-    private Brevbestilling lagBrevBestilling(Prosessinstans prosessinstans) throws IkkeFunnetException {
+    private DoksysBrevbestilling lagBrevBestilling(Prosessinstans prosessinstans) throws IkkeFunnetException {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
-        return new Brevbestilling.Builder().medDokumentType(ATTEST_A1)
-            .medAvsender(hentSaksbehandler(prosessinstans))
+        return new DoksysBrevbestilling.Builder().medProdserbartDokument(ATTEST_A1)
+            .medAvsenderNavn(hentSaksbehandler(prosessinstans))
             .medMottakere(Mottaker.av(MYNDIGHET))
             .medBehandling(behandling)
             .medBegrunnelseKode(hentBegrunnelseKode(prosessinstans))
