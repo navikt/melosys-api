@@ -15,6 +15,7 @@ import static no.nav.melosys.domain.saksflyt.ProsessStatus.FEILET;
 import static no.nav.melosys.domain.saksflyt.ProsessStatus.FERDIG;
 import static no.nav.melosys.domain.saksflyt.ProsessType.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -36,7 +37,8 @@ public class ProsessinstansStatusCacheTest {
 
     @Test
     public void antallProsessinstanserFeilet() {
-        when(prosessinstansRepository.antallAktiveOgFeiletPerTypeOgStatus()).thenReturn(prosessinstansMetrikkerList);
+        when(prosessinstansRepository.antallAktiveOgFeiletPerTypeOgStatus(anyCollection()))
+            .thenReturn(prosessinstansMetrikkerList);
         assertThat(cache.antallProsessinstanserFeilet(JFR_NY_BEHANDLING)).isEqualTo(0.0);
         assertThat(cache.antallProsessinstanserFeilet(JFR_KNYTT)).isEqualTo(1.0);
         assertThat(cache.antallProsessinstanserFeilet(IVERKSETT_VEDTAK)).isEqualTo(2.0);
