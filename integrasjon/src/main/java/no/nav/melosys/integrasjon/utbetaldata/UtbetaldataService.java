@@ -39,9 +39,16 @@ public class UtbetaldataService implements UtbetaldataFasade {
 
     @Override
     public Saksopplysning hentUtbetalingerBarnetrygd(String fnr, LocalDate fom, LocalDate tom) throws TekniskException, FunksjonellException {
-        HentUtbetalingsinformasjonResponse response = filtrerYtelserAvTypeBarnetrygd(
-                hentUtbetalingsinformasjon(lagRequest(fnr, fom, tom))
-        );
+        HentUtbetalingsinformasjonResponse response;
+
+        // Utbetldata støtter ikke uthenting av data for lenger tilbake enn 3 år
+        if (tom != null && datoErEldreEnnTreÅr(tom)) {
+            response = new HentUtbetalingsinformasjonResponse();
+        } else {
+            response = filtrerYtelserAvTypeBarnetrygd(
+                    hentUtbetalingsinformasjon(lagRequest(fnr, fom, tom))
+            );
+        }
 
         // Response -> xml
         StringWriter xmlWriter = lagXml(response);
@@ -110,6 +117,10 @@ public class UtbetaldataService implements UtbetaldataFasade {
         periodetype.setValue(YTELSESPERIODE);
         periode.setPeriodeType(periodetype);
 
+        if (datoErEldreEnnTreÅr(fom)) {
+            fom = LocalDate.now().minusYears(3);
+        }
+
         try {
             periode.setFom(KonverteringsUtils.localDateToXMLGregorianCalendar(fom));
             periode.setTom(KonverteringsUtils.localDateToXMLGregorianCalendar(tom));
@@ -136,5 +147,9 @@ public class UtbetaldataService implements UtbetaldataFasade {
         return ytelse.getYtelsestype() != null
             && ytelse.getYtelsestype().getValue() != null
             && ytelse.getYtelsestype().getValue().trim().equalsIgnoreCase(BARNETRYGD);
+    }
+
+    private static boolean datoErEldreEnnTreÅr(LocalDate dato) {
+        return dato.isBefore(LocalDate.now().minusYears(3));
     }
 }
