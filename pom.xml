@@ -88,7 +88,7 @@
 
         <!-- Transitive avhengiheter -->
         <asm.version>7.1</asm.version>
-        <bcprov-jdk15on.version>1.57</bcprov-jdk15on.version>
+        <bcprov-jdk15on.version>1.68</bcprov-jdk15on.version>
         <commons-logging.version>1.2</commons-logging.version>
         <javassist.version>3.27.0-GA</javassist.version>
         <jaxb2-basics-runtime.version>0.12.0</jaxb2-basics-runtime.version>
