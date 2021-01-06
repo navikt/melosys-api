@@ -21,20 +21,20 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vedtak.VedtakService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BestemBehandlingsmåteSvarAnmodningUnntakTest {
+@ExtendWith(MockitoExtension.class)
+class BestemBehandlingsmåteSvarAnmodningUnntakTest {
     @Mock
     private AnmodningsperiodeService anmodningsperiodeService;
     @Mock
@@ -53,7 +53,7 @@ public class BestemBehandlingsmåteSvarAnmodningUnntakTest {
 
     private Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
         anmodningsperiodeSvar.setAnmodningsperiode(anmodningsperiode);
@@ -63,7 +63,7 @@ public class BestemBehandlingsmåteSvarAnmodningUnntakTest {
     }
 
     @Test
-    public void utfør_anmodningsperiodeIkkeInnvilget_statusSvarAouMottattBehandling() throws Exception {
+    void utfør_anmodningsperiodeIkkeInnvilget_statusSvarAouMottattBehandling() throws Exception {
         anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setYtterligereInformasjon("hei");
@@ -91,7 +91,7 @@ public class BestemBehandlingsmåteSvarAnmodningUnntakTest {
     }
 
     @Test
-    public void utfør_anmodningsperiodeInnvilget_fattVedtak() throws Exception {
+    void utfør_anmodningsperiodeInnvilget_fattVedtak() throws Exception {
         anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setSvarAnmodningUnntak(new SvarAnmodningUnntak());
@@ -119,7 +119,7 @@ public class BestemBehandlingsmåteSvarAnmodningUnntakTest {
     }
 
     @Test
-    public void utfør_anmodningsperiodeInnvilgetMedYtteligereInfo_statusSvarAouMottattBehandling() throws Exception {
+    void utfør_anmodningsperiodeInnvilgetMedYtteligereInfo_statusSvarAouMottattBehandling() throws Exception {
         anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setYtterligereInformasjon("hei");
@@ -147,7 +147,7 @@ public class BestemBehandlingsmåteSvarAnmodningUnntakTest {
     }
 
     @Test
-    public void utfør_valideringsfeilFattVedtak_statusSvarAouMottattBehandling() throws MelosysException {
+    void utfør_valideringsfeilFattVedtak_statusSvarAouMottattBehandling() throws MelosysException {
         KontrollfeilDto kontrollfeilDto = new KontrollfeilDto();
         kontrollfeilDto.setKode(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER.getKode());
 

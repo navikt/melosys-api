@@ -80,7 +80,7 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
         Anmodningsperiode anmodningsperiode = anmodningsperiodeService.hentAnmodningsperioder(behandlingID)
             .stream().findFirst()
             .orElseThrow(() -> new TekniskException("Finner ingen anmodningsperiode for behandling " + behandlingID));
-        boolean erInnvilgelse = anmodningsperiode.getAnmodningsperiodeSvar().getAnmodningsperiodeSvarType() == Anmodningsperiodesvartyper.INNVILGELSE;
+        boolean erInnvilgelse = anmodningsperiode.getAnmodningsperiodeSvar().erInnvilgelse();
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
         lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID,
             Collections.singleton(Lovvalgsperiode.av(anmodningsperiode.getAnmodningsperiodeSvar(), Medlemskapstyper.PLIKTIG))
