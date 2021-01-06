@@ -95,7 +95,7 @@
         <joda-time.version>2.9.4</joda-time.version>
         <objenesis.version>3.1</objenesis.version>
         <stax2-api.version>4.2.1</stax2-api.version>
-        <woodstox.version>6.0.1</woodstox.version>
+        <woodstox.version>6.2.3</woodstox.version>
         <xmlsec.version>2.1.4</xmlsec.version>
     </properties>
 
