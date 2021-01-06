@@ -51,7 +51,7 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
     @Captor
     private ArgumentCaptor<Collection<Lovvalgsperiode>> captor;
 
-    private Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
+    private final Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
 
     @BeforeEach
     public void setUp() {
@@ -72,11 +72,7 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
-
-        Behandling behandling = new Behandling();
-        behandling.setId(123L);
-
-        prosessinstans.setBehandling(behandling);
+        prosessinstans.setBehandling(lagBehandling());
 
         bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
 
@@ -91,7 +87,7 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
     }
 
     @Test
-    void utfør_anmodningsperiodeInnvilget_fattVedtak() throws Exception {
+    void utfør_anmodningsperiodeInnvilgetOgStatusAouSendt_fattVedtak() throws Exception {
         anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setSvarAnmodningUnntak(new SvarAnmodningUnntak());
@@ -99,11 +95,10 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
-
-        Behandling behandling = new Behandling();
-        behandling.setId(123L);
-
+        Behandling behandling = lagBehandling(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
         prosessinstans.setBehandling(behandling);
+
+        when(behandlingService.hentBehandling(behandling.getId())).thenReturn(behandling);
 
         bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
 
@@ -119,6 +114,26 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
     }
 
     @Test
+    void utfør_anmodningsperiodeInnvilgetStatusIkkeAouSendt_statusSvarAouMottattBehandling() throws Exception {
+        anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
+        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
+        melosysEessiMelding.setSvarAnmodningUnntak(new SvarAnmodningUnntak());
+        melosysEessiMelding.getSvarAnmodningUnntak().setBeslutning(SvarAnmodningUnntak.Beslutning.INNVILGELSE);
+
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
+        Behandling behandling = lagBehandling(Behandlingsstatus.VURDER_DOKUMENT);
+        prosessinstans.setBehandling(behandling);
+
+        when(behandlingService.hentBehandling(behandling.getId())).thenReturn(behandling);
+
+        bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
+
+        verify(vedtakService, never()).fattVedtak(anyLong(), any());
+        verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
+    }
+
+    @Test
     void utfør_anmodningsperiodeInnvilgetMedYtteligereInfo_statusSvarAouMottattBehandling() throws Exception {
         anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
@@ -128,11 +143,7 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
-
-        Behandling behandling = new Behandling();
-        behandling.setId(123L);
-
-        prosessinstans.setBehandling(behandling);
+        prosessinstans.setBehandling(lagBehandling());
 
         bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
 
@@ -163,11 +174,10 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
-
-        Behandling behandling = new Behandling();
-        behandling.setId(123L);
-
+        Behandling behandling = lagBehandling();
         prosessinstans.setBehandling(behandling);
+
+        when(behandlingService.hentBehandling(behandling.getId())).thenReturn(behandling);
 
         bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
 
@@ -181,5 +191,19 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
 
         Lovvalgsperiode lovvalgsperiode = lagredeLovvalgsperioder.iterator().next();
         assertThat(lovvalgsperiode.getInnvilgelsesresultat()).isEqualTo(InnvilgelsesResultat.INNVILGET);
+    }
+
+    private static Behandling lagBehandling() {
+        Behandling behandling = new Behandling();
+        behandling.setId(123L);
+        behandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
+        return behandling;
+    }
+
+    private static Behandling lagBehandling(Behandlingsstatus behandlingsstatus) {
+        Behandling behandling = new Behandling();
+        behandling.setId(123L);
+        behandling.setStatus(behandlingsstatus);
+        return behandling;
     }
 }

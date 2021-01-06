@@ -17,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
@@ -27,7 +28,6 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vedtak.VedtakService;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,13 +80,12 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
         Anmodningsperiode anmodningsperiode = anmodningsperiodeService.hentAnmodningsperioder(behandlingID)
             .stream().findFirst()
             .orElseThrow(() -> new TekniskException("Finner ingen anmodningsperiode for behandling " + behandlingID));
-        boolean erInnvilgelse = anmodningsperiode.getAnmodningsperiodeSvar().erInnvilgelse();
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
         lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID,
             Collections.singleton(Lovvalgsperiode.av(anmodningsperiode.getAnmodningsperiodeSvar(), Medlemskapstyper.PLIKTIG))
         );
 
-        if (erInnvilgelse && !inneholderYtterligereInformasjon(melosysEessiMelding)) {
+        if (vedtakFattesAutomatisk(behandlingID, anmodningsperiode, melosysEessiMelding)) {
             log.info("Mottatt svar {} på anmodning om unntak for behandling {}. Iverksetter vedtak",
                 Anmodningsperiodesvartyper.INNVILGELSE, behandlingID);
             fattVedtak(behandlingID);
@@ -98,6 +97,14 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
             behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
         }
         registrerMetrikk(melosysEessiMelding);
+    }
+
+    private boolean vedtakFattesAutomatisk(long behandlingID,
+                                           Anmodningsperiode anmodningsperiode,
+                                           MelosysEessiMelding melosysEessiMelding) throws IkkeFunnetException {
+        return anmodningsperiode.getAnmodningsperiodeSvar().erInnvilgelse()
+            && !melosysEessiMelding.inneholderYtterligereInformasjon()
+            && behandlingService.hentBehandling(behandlingID).harStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
     }
 
     private void fattVedtak(long behandlingID) throws MelosysException {
@@ -112,10 +119,6 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
         }
     }
 
-    private boolean inneholderYtterligereInformasjon(MelosysEessiMelding melosysEessiMelding) {
-        return StringUtils.isNotEmpty(melosysEessiMelding.getYtterligereInformasjon());
-    }
-
     private void registrerMetrikk(MelosysEessiMelding melosysEessiMelding) {
         SvarAnmodningUnntak.Beslutning beslutning = melosysEessiMelding.getSvarAnmodningUnntak().getBeslutning();
         if (beslutning == SvarAnmodningUnntak.Beslutning.AVSLAG) {
@@ -124,7 +127,9 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
             Metrics.counter(SVAR_AOU, TAG_RESULTAT, DELVIS_INNVILGELSE).increment();
         } else if (beslutning == SvarAnmodningUnntak.Beslutning.INNVILGELSE) {
             Metrics.counter(
-                SVAR_AOU, TAG_RESULTAT, inneholderYtterligereInformasjon(melosysEessiMelding) ? INNVILGELSE_YTTERLIGEREINFO : INNVILGELSE
+                SVAR_AOU,
+                TAG_RESULTAT,
+                melosysEessiMelding.inneholderYtterligereInformasjon() ? INNVILGELSE_YTTERLIGEREINFO : INNVILGELSE
             ).increment();
         }
     }

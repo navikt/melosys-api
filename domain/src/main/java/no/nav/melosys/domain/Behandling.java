@@ -409,6 +409,10 @@ public class Behandling extends RegistreringsInfo {
             || Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND.getKode().equalsIgnoreCase(behandlingstemaKode);
     }
 
+    public boolean harStatus(Behandlingsstatus status) {
+        return this.status == status;
+    }
+
     @Override
     public String toString() {
         return "Behandling{" +
