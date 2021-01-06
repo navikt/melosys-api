@@ -33,7 +33,7 @@ public class AnmodningsperiodeService {
         this.anmodningsperiodeSvarRepository = anmodningsperiodeSvarRepository;
     }
 
-    public Optional<Anmodningsperiode> hentAnmodningsperiode(long anmodningsperiodeID) {
+    public Optional<Anmodningsperiode> finnAnmodningsperiode(long anmodningsperiodeID) {
         return anmodningsperiodeRepository.findById(anmodningsperiodeID);
     }
 

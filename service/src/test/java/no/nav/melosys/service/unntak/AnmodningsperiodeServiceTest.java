@@ -49,7 +49,7 @@ public class AnmodningsperiodeServiceTest {
     @Test
     public void hentAnmodningsperiode() {
         long anmodningsperiodeID = 1;
-        anmodningsperiodeService.hentAnmodningsperiode(anmodningsperiodeID);
+        anmodningsperiodeService.finnAnmodningsperiode(anmodningsperiodeID);
         verify(anmodningsperiodeRepository).findById(eq(anmodningsperiodeID));
     }
 

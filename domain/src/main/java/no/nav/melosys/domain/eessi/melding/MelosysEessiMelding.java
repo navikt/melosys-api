@@ -5,6 +5,7 @@ import java.util.Objects;
 
 import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
+import org.apache.commons.lang3.StringUtils;
 
 public class MelosysEessiMelding {
     private String sedId;
@@ -229,5 +230,9 @@ public class MelosysEessiMelding {
     @Override
     public int hashCode() {
         return Objects.hash(sedId, rinaSaksnummer, avsender, journalpostId, dokumentId, gsakSaksnummer, aktoerId, statsborgerskap, arbeidssteder, periode, lovvalgsland, artikkel, erEndring, midlertidigBestemmelse, ytterligereInformasjon, bucType, sedType, svarAnmodningUnntak, anmodningUnntak);
+    }
+
+    public boolean inneholderYtterligereInformasjon() {
+        return StringUtils.isNotEmpty(getYtterligereInformasjon());
     }
 }
