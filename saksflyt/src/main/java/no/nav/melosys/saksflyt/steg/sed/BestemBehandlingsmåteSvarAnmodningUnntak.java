@@ -41,8 +41,8 @@ import static no.nav.melosys.metrics.MetrikkerNavn.TAG_RESULTAT;
 public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(BestemBehandlingsmåteSvarAnmodningUnntak.class);
 
-    private static final String INNVILGELSE = "godkjent";
-    private static final String INNVILGELSE_YTTERLIGEREINFO = "godkjentmedinfo";
+    private static final String INNVILGELSE_AUTO_VEDTAK = "godkjent.automatisk";
+    private static final String INNVILGELSE_MANUELL_BEHANDLING = "godkjent.manuellbehandling";
     private static final String DELVIS_INNVILGELSE = "delvisinnvilgelse";
     private static final String AVSLAG = "avslag";
 
@@ -66,7 +66,7 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
     }
 
     static {
-        Stream.of(INNVILGELSE, INNVILGELSE_YTTERLIGEREINFO, DELVIS_INNVILGELSE, AVSLAG).forEach(s -> Metrics.counter(SVAR_AOU, TAG_RESULTAT, s));
+        Stream.of(INNVILGELSE_AUTO_VEDTAK, INNVILGELSE_MANUELL_BEHANDLING, DELVIS_INNVILGELSE, AVSLAG).forEach(s -> Metrics.counter(SVAR_AOU, TAG_RESULTAT, s));
     }
 
     @Override
@@ -85,7 +85,8 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
             Collections.singleton(Lovvalgsperiode.av(anmodningsperiode.getAnmodningsperiodeSvar(), Medlemskapstyper.PLIKTIG))
         );
 
-        if (vedtakFattesAutomatisk(behandlingID, anmodningsperiode, melosysEessiMelding)) {
+        boolean vedtakFattesAutomatisk = vedtakFattesAutomatisk(behandlingID, anmodningsperiode, melosysEessiMelding);
+        if (vedtakFattesAutomatisk) {
             log.info("Mottatt svar {} på anmodning om unntak for behandling {}. Iverksetter vedtak",
                 Anmodningsperiodesvartyper.INNVILGELSE, behandlingID);
             fattVedtak(behandlingID);
@@ -96,7 +97,7 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
                 Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
             behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
         }
-        registrerMetrikk(melosysEessiMelding);
+        registrerMetrikk(melosysEessiMelding, vedtakFattesAutomatisk);
     }
 
     private boolean vedtakFattesAutomatisk(long behandlingID,
@@ -119,7 +120,7 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
         }
     }
 
-    private void registrerMetrikk(MelosysEessiMelding melosysEessiMelding) {
+    private void registrerMetrikk(MelosysEessiMelding melosysEessiMelding, boolean vedtakFattesAutomatisk) {
         SvarAnmodningUnntak.Beslutning beslutning = melosysEessiMelding.getSvarAnmodningUnntak().getBeslutning();
         if (beslutning == SvarAnmodningUnntak.Beslutning.AVSLAG) {
             Metrics.counter(SVAR_AOU, TAG_RESULTAT, AVSLAG).increment();
@@ -129,7 +130,7 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
             Metrics.counter(
                 SVAR_AOU,
                 TAG_RESULTAT,
-                melosysEessiMelding.inneholderYtterligereInformasjon() ? INNVILGELSE_YTTERLIGEREINFO : INNVILGELSE
+                vedtakFattesAutomatisk ? INNVILGELSE_AUTO_VEDTAK : INNVILGELSE_MANUELL_BEHANDLING
             ).increment();
         }
     }
