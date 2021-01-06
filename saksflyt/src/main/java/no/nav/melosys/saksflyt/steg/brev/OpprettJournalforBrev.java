@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.JournalpostBestilling;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
@@ -12,6 +11,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.DokgenService;
@@ -22,6 +22,8 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_OG_JOURNALFØR_BREV;
+import static org.springframework.util.StringUtils.hasText;
+import static org.springframework.util.StringUtils.isEmpty;
 
 @Component
 public class OpprettJournalforBrev implements StegBehandler {
@@ -30,13 +32,15 @@ public class OpprettJournalforBrev implements StegBehandler {
     private final BehandlingService behandlingService;
     private final DokgenService dokgenService;
     private final JoarkFasade joarkFasade;
+    private final TpsFasade tpsFasade;
     private final EregFasade eregFasade;
 
     @Autowired
-    public OpprettJournalforBrev(BehandlingService behandlingService, DokgenService dokgenService, JoarkFasade joarkFasade, EregFasade eregFasade) {
+    public OpprettJournalforBrev(BehandlingService behandlingService, DokgenService dokgenService, JoarkFasade joarkFasade, TpsFasade tpsFasade, EregFasade eregFasade) {
         this.behandlingService = behandlingService;
         this.dokgenService = dokgenService;
         this.joarkFasade = joarkFasade;
+        this.tpsFasade = tpsFasade;
         this.eregFasade = eregFasade;
     }
 
@@ -53,22 +57,31 @@ public class OpprettJournalforBrev implements StegBehandler {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         PersonDokument personDokument = behandling.hentPersonDokument();
         Produserbaredokumenter produserbartDokument = prosessinstans.getData(PRODUSERBART_BREV, Produserbaredokumenter.class);
-        Aktoer mottaker = prosessinstans.getData(MOTTAKER, Aktoer.class, null);
 
-        if (mottaker == null) {
-            throw new FunksjonellException("Prosessinstans mangler mottaker");
+        String aktørId = prosessinstans.getData(AKTØR_ID);
+        String orgnr = prosessinstans.getData(ORGNR, String.class, null);
+        String fnr = null;
+        String sammensattNavn = null;
+
+        if (isEmpty(aktørId) && isEmpty(orgnr)) {
+            throw new FunksjonellException("Mangler mottaker");
         }
 
-        byte[] pdf = dokgenService.produserBrev(produserbartDokument, behandling.getId(), mottaker);
+        if (isEmpty(orgnr)) {
+            fnr = tpsFasade.hentIdentForAktørId(aktørId);
+            sammensattNavn = tpsFasade.hentSammensattNavn(fnr);
+        }
+
+        byte[] pdf = dokgenService.produserBrev(produserbartDokument, behandling.getId(), orgnr);
         log.info("Produserbartdokument {} for behandling {} produsert", produserbartDokument, behandling.getId());
 
         JournalpostBestilling bestilling = new JournalpostBestilling.Builder()
             .medTittel(produserbartDokument.getBeskrivelse())
             .medBrevkode(dokgenService.hentMalnavn(produserbartDokument))
             .medBrukerFnr(personDokument.fnr)
-            .medMottakerNavn(mottaker.erOrganisasjon() ? eregFasade.hentOrganisasjonNavn(mottaker.getOrgnr()) :  personDokument.sammensattNavn)
-            .medMottakerId(mottaker.erOrganisasjon() ? mottaker.getOrgnr() : personDokument.fnr)
-            .medErMottakerOrg(mottaker.erOrganisasjon())
+            .medMottakerNavn(hasText(orgnr) ? eregFasade.hentOrganisasjonNavn(orgnr) : sammensattNavn)
+            .medMottakerId(hasText(orgnr) ? orgnr : fnr)
+            .medErMottakerOrg(hasText(orgnr))
             .medArkivSakId(behandling.getFagsak().getGsakSaksnummer().toString())
             .medPdf(pdf)
             .build();

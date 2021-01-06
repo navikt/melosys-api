@@ -8,6 +8,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.DokgenService;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,11 +38,15 @@ class OpprettJournalforBrevTest {
     @Mock
     private EregFasade mockEregFasade;
 
+    @Mock
+    private TpsFasade mockTpsFasade;
+
     private OpprettJournalforBrev opprettJournalforBrev;
 
     @BeforeEach
     void init() {
-        opprettJournalforBrev = new OpprettJournalforBrev(mockBehandlingService, mockDokgenService, mockJoarkFasade, mockEregFasade);
+        opprettJournalforBrev = new OpprettJournalforBrev(mockBehandlingService, mockDokgenService,
+            mockJoarkFasade, mockTpsFasade, mockEregFasade);
     }
 
     @Test
@@ -68,9 +73,9 @@ class OpprettJournalforBrevTest {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.PRODUSERBART_BREV, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-        Aktoer value = new Aktoer();
-        value.setRolle(Aktoersroller.BRUKER);
-        prosessinstans.setData(ProsessDataKey.MOTTAKER, value);
+
+        prosessinstans.setData(ProsessDataKey.MOTTAKER, Aktoersroller.BRUKER);
+        prosessinstans.setData(ProsessDataKey.AKTØR_ID, "1234");
 
         opprettJournalforBrev.utfør(prosessinstans);
 
@@ -90,9 +95,8 @@ class OpprettJournalforBrevTest {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.PRODUSERBART_BREV, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-        Aktoer value = new Aktoer();
-        value.setRolle(Aktoersroller.REPRESENTANT);
-        prosessinstans.setData(ProsessDataKey.MOTTAKER, value);
+        prosessinstans.setData(ProsessDataKey.MOTTAKER, Aktoersroller.REPRESENTANT);
+        prosessinstans.setData(ProsessDataKey.ORGNR, "12345");
 
         opprettJournalforBrev.utfør(prosessinstans);
 

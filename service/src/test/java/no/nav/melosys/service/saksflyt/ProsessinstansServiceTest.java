@@ -14,6 +14,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
@@ -183,9 +184,13 @@ class ProsessinstansServiceTest {
     @Test
     void opprettProsessinstansOpprettOgDistribuerBrev() {
         String saksbehandler = settInnloggetSaksbehandler();
-
         Behandling behandling = lagBehandling();
-        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, behandling, new Aktoer());
+        Aktoer mottaker = new Aktoer();
+        mottaker.setRolle(Aktoersroller.BRUKER);
+        mottaker.setAktørId("123");
+        mottaker.setOrgnr(null);
+
+        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, behandling, mottaker);
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
