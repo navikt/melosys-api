@@ -2,7 +2,6 @@ package no.nav.melosys.service.dokument;
 
 import java.util.Set;
 
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
@@ -18,6 +17,8 @@ import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import static org.springframework.util.StringUtils.hasText;
 
 @Service
 public class DokgenService {
@@ -44,12 +45,12 @@ public class DokgenService {
     }
 
     public byte[] produserBrev(Produserbaredokumenter produserbartdokument, long behandlingId,
-                               Aktoer mottaker) throws FunksjonellException, TekniskException {
-        return produserBrev(produserbartdokument, behandlingId, mottaker, false);
+                               String orgnr) throws FunksjonellException, TekniskException {
+        return produserBrev(produserbartdokument, behandlingId, orgnr, false);
     }
 
     public byte[] produserBrev(Produserbaredokumenter produserbartdokument, long behandlingId,
-                               Aktoer mottaker, boolean bestillKopi) throws FunksjonellException, TekniskException {
+                               String orgnr, boolean bestillKopi) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         String malnavn = dokgenMalResolver.hentMalnavn(produserbartdokument);
 
@@ -57,8 +58,8 @@ public class DokgenService {
             .medProduserbartdokument(produserbartdokument)
             .medBehandling(behandling);
 
-        if (mottaker.erOrganisasjon()) {
-            settOrganisasjonsOpplysninger(behandling, mottaker, brevbestilling);
+        if (hasText(orgnr)) {
+            settOrganisasjonsOpplysninger(behandling, orgnr, brevbestilling);
         }
 
         settJournalpostOpplysninger(behandling, brevbestilling);
@@ -77,13 +78,13 @@ public class DokgenService {
         return tilgjengeligeMaler.contains(produserbartDokument);
     }
 
-    private void settOrganisasjonsOpplysninger(Behandling behandling, Aktoer mottaker,
+    private void settOrganisasjonsOpplysninger(Behandling behandling, String orgnr,
                                                DokgenBrevbestilling.Builder brevbestilling)
         throws IkkeFunnetException, IntegrasjonException {
         brevbestilling
-            .medOrg((OrganisasjonDokument) eregFasade.hentOrganisasjon(mottaker.getOrgnr()).getDokument())
+            .medOrg((OrganisasjonDokument) eregFasade.hentOrganisasjon(orgnr).getDokument())
             .medKontaktopplysning(
-                kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), mottaker.getOrgnr()).orElse(null)
+                kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), orgnr).orElse(null)
             );
     }
 

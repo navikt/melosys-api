@@ -40,8 +40,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.MOTTAKER;
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.PRODUSERBART_BREV;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
+import static org.springframework.util.StringUtils.hasText;
 
 @Service
 public class ProsessinstansService {
@@ -248,7 +248,11 @@ public class ProsessinstansService {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
         prosessinstans.setData(PRODUSERBART_BREV, produserbartDokument);
-        prosessinstans.setData(MOTTAKER, mottaker);
+        prosessinstans.setData(MOTTAKER, mottaker.getRolle());
+        prosessinstans.setData(AKTØR_ID, mottaker.getAktørId());
+        if (hasText(mottaker.getOrgnr())) {
+            prosessinstans.setData(ORGNR, mottaker.getOrgnr());
+        }
         prosessinstans.setBehandling(behandling);
         lagre(prosessinstans);
     }

@@ -68,7 +68,7 @@ class DokgenServiceTest {
 
     @Test
     void produserBrevFeilerUtilgjengeligMal() {
-        assertThrows(FunksjonellException.class, () -> dokgenService.produserBrev(ATTEST_A1, 123L, new Aktoer()));
+        assertThrows(FunksjonellException.class, () -> dokgenService.produserBrev(ATTEST_A1, 123L, null));
     }
 
     @Test
@@ -81,7 +81,7 @@ class DokgenServiceTest {
         Aktoer mottaker = new Aktoer();
         mottaker.setRolle(Aktoersroller.BRUKER);
 
-        byte[] pdfResponse = dokgenService.produserBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L, mottaker);
+        byte[] pdfResponse = dokgenService.produserBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L, mottaker.getOrgnr());
 
         assertNotNull(pdfResponse);
         assertEquals(expectedPdf, pdfResponse);
@@ -102,8 +102,9 @@ class DokgenServiceTest {
 
         Aktoer mottaker = new Aktoer();
         mottaker.setRolle(Aktoersroller.REPRESENTANT);
+        mottaker.setOrgnr("123456789");
 
-        byte[] pdfResponse = dokgenService.produserBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L, mottaker);
+        byte[] pdfResponse = dokgenService.produserBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L, mottaker.getOrgnr());
 
         assertNotNull(pdfResponse);
         assertEquals(expectedPdf, pdfResponse);
