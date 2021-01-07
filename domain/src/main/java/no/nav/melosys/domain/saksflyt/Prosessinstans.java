@@ -43,6 +43,7 @@ public class Prosessinstans {
     @JoinColumn(name = "behandling_id")
     private Behandling behandling;
 
+    @Lob
     @Column(name = "data")
     @Convert(converter = PropertiesConverter.class)
     private final Properties data = new Properties();

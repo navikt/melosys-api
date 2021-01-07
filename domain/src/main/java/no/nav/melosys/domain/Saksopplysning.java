@@ -12,8 +12,7 @@ import no.nav.melosys.domain.jpa.SaksopplysningDokumentConverter;
 @Entity
 @Table(name = "saksopplysning")
 public class Saksopplysning {
-    public static final String XMLTYPE = "xmltype";
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -38,6 +37,7 @@ public class Saksopplysning {
     @Column(name = "endret_dato", nullable = false)
     private Instant endretDato;
 
+    @Lob
     @Convert(converter = SaksopplysningDokumentConverter.class)
     @Column(name = "dokument", nullable = false, updatable = false)
     private SaksopplysningDokument dokument;
