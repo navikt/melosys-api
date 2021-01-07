@@ -38,6 +38,7 @@ import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.context.ApplicationEventPublisher;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
@@ -100,7 +101,7 @@ class SendVedtaksbrevInnlandTest {
 
         dokService = spy(lagDokumentService(byggerVelger));
         dokumentServiceFasade = new DokumentServiceFasade(mock(DokumentService.class), dokService, mock(DokgenService.class),
-            mock(BehandlingService.class), mock(ProsessinstansService.class), mock(BrevmottakerService.class));
+            mock(BehandlingService.class), mock(ProsessinstansService.class), mock(BrevmottakerService.class), mock(ApplicationEventPublisher.class));
         BrevBestiller brevBestiller = new BrevBestiller(dokumentServiceFasade);
 
         BehandlingService behandlingService = mock(BehandlingService.class);

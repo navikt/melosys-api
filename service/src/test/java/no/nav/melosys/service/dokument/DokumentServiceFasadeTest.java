@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,13 +38,15 @@ class DokumentServiceFasadeTest {
     private ProsessinstansService mockProsessinstansService;
     @Mock
     private BrevmottakerService mockBrevmottakerService;
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
 
     private DokumentServiceFasade dokumentServiceFasade;
 
     @BeforeEach
     void init() {
         dokumentServiceFasade = new DokumentServiceFasade(mockDokumentService, mockDokumentSystemService,
-            mockDokgenService, mockBehandlingService, mockProsessinstansService, mockBrevmottakerService);
+            mockDokgenService, mockBehandlingService, mockProsessinstansService, mockBrevmottakerService, applicationEventPublisher);
         Mockito.reset(
             mockDokgenService,
             mockDokumentService,
