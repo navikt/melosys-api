@@ -16,6 +16,7 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import static org.springframework.util.StringUtils.hasText;
@@ -32,8 +33,10 @@ public class DokgenService {
     private final KontaktopplysningService kontaktopplysningService;
 
     @Autowired
-    public DokgenService(DokgenConsumer dokgenConsumer, DokgenMalResolver dokgenMalResolver, JoarkFasade joarkFasade,
-                         DokgenMalMapper dokgenMalMapper, BehandlingService behandlingService, EregFasade eregFasade,
+    public DokgenService(DokgenConsumer dokgenConsumer, DokgenMalResolver dokgenMalResolver,
+                         @Qualifier("system") JoarkFasade joarkFasade,
+                         DokgenMalMapper dokgenMalMapper, BehandlingService behandlingService,
+                         @Qualifier("system")  EregFasade eregFasade,
                          KontaktopplysningService kontaktopplysningService) {
         this.dokgenConsumer = dokgenConsumer;
         this.dokgenMalResolver = dokgenMalResolver;
