@@ -249,7 +249,9 @@ public class ProsessinstansService {
         prosessinstans.setType(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
         prosessinstans.setData(PRODUSERBART_BREV, produserbartDokument);
         prosessinstans.setData(MOTTAKER, mottaker.getRolle());
-        prosessinstans.setData(AKTØR_ID, mottaker.getAktørId());
+        if (hasText(mottaker.getAktørId())) {
+            prosessinstans.setData(AKTØR_ID, mottaker.getAktørId());
+        }
         if (hasText(mottaker.getOrgnr())) {
             prosessinstans.setData(ORGNR, mottaker.getOrgnr());
         }

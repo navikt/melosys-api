@@ -182,13 +182,32 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    void opprettProsessinstansOpprettOgDistribuerBrev() {
+    void opprettProsessinstansOpprettOgDistribuerBrevBruker() {
         String saksbehandler = settInnloggetSaksbehandler();
         Behandling behandling = lagBehandling();
         Aktoer mottaker = new Aktoer();
         mottaker.setRolle(Aktoersroller.BRUKER);
         mottaker.setAktørId("123");
         mottaker.setOrgnr(null);
+
+        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, behandling, mottaker);
+
+        verify(prosessinstansRepo).save(piCaptor.capture());
+
+        Prosessinstans lagretInstans = piCaptor.getValue();
+        assertEquals(ProsessType.OPPRETT_OG_DISTRIBUER_BREV, lagretInstans.getType());
+        assertEquals(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, lagretInstans.getData(ProsessDataKey.PRODUSERBART_BREV, Produserbaredokumenter.class));
+        assertEquals(saksbehandler, lagretInstans.getData(ProsessDataKey.SAKSBEHANDLER));
+    }
+
+    @Test
+    void opprettProsessinstansOpprettOgDistribuerBrevArbeidsgiver() {
+        String saksbehandler = settInnloggetSaksbehandler();
+        Behandling behandling = lagBehandling();
+        Aktoer mottaker = new Aktoer();
+        mottaker.setRolle(Aktoersroller.ARBEIDSGIVER);
+        mottaker.setAktørId(null);
+        mottaker.setOrgnr("987654321");
 
         prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, behandling, mottaker);
 
