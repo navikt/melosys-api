@@ -18,12 +18,13 @@ import no.nav.melosys.service.dokument.DokgenService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_OG_JOURNALFØR_BREV;
 import static org.springframework.util.StringUtils.hasText;
-import static org.springframework.util.StringUtils.isEmpty;
+import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Component
 public class OpprettJournalforBrev implements StegBehandler {
@@ -36,7 +37,8 @@ public class OpprettJournalforBrev implements StegBehandler {
     private final EregFasade eregFasade;
 
     @Autowired
-    public OpprettJournalforBrev(BehandlingService behandlingService, DokgenService dokgenService, JoarkFasade joarkFasade, TpsFasade tpsFasade, EregFasade eregFasade) {
+    public OpprettJournalforBrev(BehandlingService behandlingService, DokgenService dokgenService,
+                                 JoarkFasade joarkFasade, @Qualifier("system") TpsFasade tpsFasade, EregFasade eregFasade) {
         this.behandlingService = behandlingService;
         this.dokgenService = dokgenService;
         this.joarkFasade = joarkFasade;
