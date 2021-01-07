@@ -180,7 +180,10 @@
             <groupId>no.nav.tjenester</groupId>
             <artifactId>nav-behandleMedlemskap-v2-tjenestespesifikasjon</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>no.nav.tjenester</groupId>
+            <artifactId>medlemskapsunntak-api-v1</artifactId>
+        </dependency>
         <!-- Utbetaling -->
         <dependency>
             <groupId>no.nav.tjenester.fim</groupId>
