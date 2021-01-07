@@ -97,6 +97,7 @@
         <stax2-api.version>4.2.1</stax2-api.version>
         <woodstox.version>6.2.3</woodstox.version>
         <xmlsec.version>2.1.4</xmlsec.version>
+        <medlemskapsunntak-api-v1.version>1.1</medlemskapsunntak-api-v1.version>
     </properties>
 
     <!-- Unngå å put scope i dependency management. Sett det heller der det
@@ -476,6 +477,11 @@
                 <groupId>no.nav.tjenester</groupId>
                 <artifactId>nav-behandleMedlemskap-v2-tjenestespesifikasjon</artifactId>
                 <version>${behandle-medlemskap-v2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.tjenester</groupId>
+                <artifactId>medlemskapsunntak-api-v1</artifactId>
+                <version>${medlemskapsunntak-api-v1.version}</version>
             </dependency>
             <!-- Dokumenthåndtering (DOKPROD) -->
             <dependency>
