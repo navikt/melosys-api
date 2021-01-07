@@ -38,7 +38,9 @@ public class OpprettJournalforBrev implements StegBehandler {
 
     @Autowired
     public OpprettJournalforBrev(BehandlingService behandlingService, DokgenService dokgenService,
-                                 JoarkFasade joarkFasade, @Qualifier("system") TpsFasade tpsFasade, EregFasade eregFasade) {
+                                 @Qualifier("system") JoarkFasade joarkFasade,
+                                 @Qualifier("system") TpsFasade tpsFasade,
+                                 @Qualifier("system") EregFasade eregFasade) {
         this.behandlingService = behandlingService;
         this.dokgenService = dokgenService;
         this.joarkFasade = joarkFasade;
