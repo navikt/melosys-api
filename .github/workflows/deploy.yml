@@ -76,6 +76,7 @@ jobs:
     needs: docker
     if: always() && (needs.docker.result == 'success' || needs.docker.result == 'skipped')
     steps:
+      - uses: actions/checkout@v2
       - name: Deploy to prod
         if: github.event.inputs.environment == 'p'
         run: |
