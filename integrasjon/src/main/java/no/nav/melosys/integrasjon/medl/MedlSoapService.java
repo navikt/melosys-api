@@ -24,6 +24,7 @@ import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriode
 import no.nav.tjeneste.virksomhet.medlemskap.v2.PersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.Sikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Foedselsnummer;
+import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Medlemsperiode;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeRequest;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeResponse;
 import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeRequest;
@@ -126,7 +127,7 @@ public class MedlSoapService implements MedlFasade {
                 throw new TekniskException("Det er ikke lagret noen medlPeriodeID på lovvalgsperiode som skal oppdateres i MEDL");
             }
             HentPeriodeResponse hentPeriodeResponse = medlemskapConsumer.hentPeriode(lagHentPeriodeRequest(medlPeriodeID));
-            no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Medlemsperiode periode = Optional.ofNullable(hentPeriodeResponse.getPeriode())
+            Medlemsperiode periode = Optional.ofNullable(hentPeriodeResponse.getPeriode())
                 .orElseThrow(() -> new TekniskException("Fant ingen eksisterende medlPeriode med id " + medlPeriodeID));
             OppdaterPeriodeRequest request = MedlPeriodeKonverter.konverterTilOppdaterPeriodeRequest(lovvalgsperiode, periodestatusMedl, lovvalgMedl, kildedokumenttypeMedl, periode.getVersjon());
             behandleMedlemskapConsumer.oppdaterPeriode(request);
