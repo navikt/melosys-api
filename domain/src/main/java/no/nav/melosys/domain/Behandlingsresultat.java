@@ -235,11 +235,13 @@ public class Behandlingsresultat extends RegistreringsInfo {
     }
 
     public boolean erAvslag() {
-        if (type == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
-            return true;
-        }
-        return type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            && hentValidertLovvalgsperiode().erAvslått();
+        return erAvslagManglendeOpplysninger() ||
+            (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            && hentValidertLovvalgsperiode().erAvslått());
+    }
+
+    public boolean erAvslagManglendeOpplysninger() {
+        return type == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL;
     }
 
     public boolean erAnmodningOmUnntak() {

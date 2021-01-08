@@ -9,6 +9,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -99,6 +101,23 @@ class LagreLovvalgsperiodeMedlTest {
         behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
         lagreLovvalgsperiodeMedl.utfør(prosessinstans);
         verifyNoInteractions(medlPeriodeService);
+    }
+
+    @Test
+    void utfør_typeFastsattLovvalgslandIngenLovvalgsperiode_forventException() {
+        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> lagreLovvalgsperiodeMedl.utfør(prosessinstans))
+            .withMessageContaining("Finner ingen lovvalgsperiode");
+    }
+
+    @Test
+    void utfør_lovvalgsperiodeFinnesInnvilgelsesresultatDelvisInnvilget_forventException() {
+        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(11L, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, InnvilgelsesResultat.DELVIS_INNVILGET);
+        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> lagreLovvalgsperiodeMedl.utfør(prosessinstans))
+            .withMessageContaining("Ukjent eller ikke-eksisterende innvilgelsesresultat");
     }
 
     private Lovvalgsperiode lagLovvalgsperiode(Long medlPeriodeID,
