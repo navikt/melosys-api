@@ -56,7 +56,7 @@
 
         <!-- Versjoner av eksterne biblioteker -->
         <apache-httpclients.version>4.5.13</apache-httpclients.version>
-        <cxf.version>3.3.4</cxf.version>
+        <cxf.version>3.4.2</cxf.version>
         <commons-collections4.version>4.4</commons-collections4.version>
         <commons-lang.version>3.9</commons-lang.version>
         <commons-text.version>1.8</commons-text.version>
