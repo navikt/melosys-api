@@ -26,7 +26,7 @@ public class ProsessinstansBehandlerImplTest {
     @Mock
     private ProsessinstansRepository prosessinstansRepository;
     @Mock
-    private StegBehandler mangelBrevStebehandler;
+    private StegBehandler SED_MOTTAK_RUTINGStebehandler;
 
     private ProsessinstansBehandler prosessinstansBehandler;
 
@@ -34,34 +34,34 @@ public class ProsessinstansBehandlerImplTest {
 
     @Before
     public void setup() {
-        when(mangelBrevStebehandler.inngangsSteg()).thenReturn(ProsessSteg.MANGELBREV);
+        when(SED_MOTTAK_RUTINGStebehandler.inngangsSteg()).thenReturn(ProsessSteg.SED_MOTTAK_RUTING);
         when(prosessinstansRepository.save(any(Prosessinstans.class))).thenAnswer(returnsFirstArg());
-        prosessinstansBehandler = new ProsessinstansBehandlerImpl(Collections.singleton(mangelBrevStebehandler), prosessinstansRepository);
+        prosessinstansBehandler = new ProsessinstansBehandlerImpl(Collections.singleton(SED_MOTTAK_RUTINGStebehandler), prosessinstansRepository);
 
         when(prosessinstans.getId()).thenReturn(UUID.randomUUID());
-        prosessinstans.setType(ProsessType.MANGELBREV);
+        prosessinstans.setType(ProsessType.MOTTAK_SED);
         prosessinstans.setStatus(ProsessStatus.KLAR);
     }
 
     @Test
     public void behandleProsessinstans_nyProsessinstansStegNull_blirBehandlet() throws MelosysException {
         prosessinstansBehandler.behandleProsessinstans(prosessinstans);
-        assertThat(prosessinstans.getSistFullførtSteg()).isEqualTo(ProsessSteg.MANGELBREV);
+        assertThat(prosessinstans.getSistFullførtSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_RUTING);
         assertThat(prosessinstans.getStatus()).isEqualTo(ProsessStatus.FERDIG);
-        verify(mangelBrevStebehandler).utfør(eq(prosessinstans));
+        verify(SED_MOTTAK_RUTINGStebehandler).utfør(eq(prosessinstans));
         verify(prosessinstansRepository, times(2)).save(eq(prosessinstans));
     }
 
     @Test
     public void behandleProsessinstans_nyProsessinstansStegNullStegbehandlerKasterFeil_statusFeiletBlirLagretMedHendelse() throws MelosysException {
-        doThrow(new FunksjonellException("FEIL!")).when(mangelBrevStebehandler).utfør(eq(prosessinstans));
+        doThrow(new FunksjonellException("FEIL!")).when(SED_MOTTAK_RUTINGStebehandler).utfør(eq(prosessinstans));
 
         prosessinstansBehandler.behandleProsessinstans(prosessinstans);
         assertThat(prosessinstans.getSistFullførtSteg()).isNull();
         assertThat(prosessinstans.getStatus()).isEqualTo(ProsessStatus.FEILET);
         assertThat(prosessinstans.getHendelser()).hasSize(1)
             .flatExtracting(ProsessinstansHendelse::getSteg, ProsessinstansHendelse::getProsessinstans)
-            .containsExactly(ProsessSteg.MANGELBREV, prosessinstans);
+            .containsExactly(ProsessSteg.SED_MOTTAK_RUTING, prosessinstans);
         verify(prosessinstansRepository).save(eq(prosessinstans));
     }
 
@@ -69,7 +69,7 @@ public class ProsessinstansBehandlerImplTest {
     public void behandleProsessinstans_prosessinstansMedStatusFeilet_blirIkkeBehandlet() throws MelosysException {
         prosessinstans.setStatus(ProsessStatus.FEILET);
         prosessinstansBehandler.behandleProsessinstans(prosessinstans);
-        verify(mangelBrevStebehandler, never()).utfør(any());
+        verify(SED_MOTTAK_RUTINGStebehandler, never()).utfør(any());
         verify(prosessinstansRepository, never()).save(any());
     }
 }
