@@ -54,7 +54,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "utfall_utpeking")
-    private Utfallregistreringunntak utfallUtpeking; //FIXME: egne kodeverk-verdier for utfallUtpeking
+    private Utfallregistreringunntak utfallUtpeking;
 
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Avklartefakta> avklartefakta = new HashSet<>(1);
@@ -293,15 +293,6 @@ public class Behandlingsresultat extends RegistreringsInfo {
     public boolean erGodkjenningEllerInnvilgelseArt13() {
         return (erInnvilgelse() || erGodkjenningRegistreringUnntak())
             && finnValidertLovvalgsperiode().stream().anyMatch(PeriodeOmLovvalg::erArtikkel13);
-    }
-
-    // Medl skal ikke oppdateres ved avslag.
-    public boolean medlOppdateres() {
-        return harMedlPeriode() || !erAvslag();
-    }
-
-    private boolean harMedlPeriode() {
-        return lovvalgsperioder.stream().anyMatch(l -> l.getMedlPeriodeID() != null);
     }
 
     public boolean harPeriodeOmLovvalg() {

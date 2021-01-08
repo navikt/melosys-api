@@ -38,18 +38,21 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
         final Optional<Lovvalgsperiode> lovvalgsperiode = behandlingsresultat.finnValidertLovvalgsperiode();
 
         if (lovvalgsperiode.isPresent()) {
-            if (lovvalgsperiode.stream().anyMatch(Lovvalgsperiode::erAvslått)) {
-                final Optional<Long> medlPeriodeID = lovvalgsperiode.map(Lovvalgsperiode::getMedlPeriodeID);
-                if (medlPeriodeID.isPresent()) {
-                    medlPeriodeService.avvisPeriode(medlPeriodeID.get());
-                }
-            } else if (lovvalgsperiode.stream().anyMatch(Lovvalgsperiode::erInnvilget)) {
-                opprettEllerOppdaterMedlPeriode(prosessinstans.getBehandling(), lovvalgsperiode.get());
-            } else {
-                throw new FunksjonellException("Ukjent eller ikke-eksisterende innvilgelsesresultat for en lovvalgsperiode: " + lovvalgsperiode.get().getInnvilgelsesresultat());
-            }
+            oppdaterLovvalgsperiode(prosessinstans.getBehandling(), lovvalgsperiode.get());
         } else if (!behandlingsresultat.erAvslagManglendeOpplysninger()){
             throw new FunksjonellException("Finner ingen lovvalgsperiode for behandling " + behandlingID);
+        }
+    }
+
+    private void oppdaterLovvalgsperiode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) throws FunksjonellException, TekniskException {
+        if (lovvalgsperiode.erAvslått()) {
+            if (lovvalgsperiode.getMedlPeriodeID() != null) {
+                medlPeriodeService.avvisPeriode(lovvalgsperiode.getMedlPeriodeID());
+            }
+        } else if (lovvalgsperiode.erInnvilget()) {
+            opprettEllerOppdaterMedlPeriode(behandling, lovvalgsperiode);
+        } else {
+            throw new FunksjonellException("Ukjent eller ikke-eksisterende innvilgelsesresultat for en lovvalgsperiode: " + lovvalgsperiode.getInnvilgelsesresultat());
         }
     }
 
