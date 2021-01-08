@@ -4,11 +4,13 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
-import no.nav.melosys.integrasjon.medl.MedlFasade;
+import no.nav.melosys.integrasjon.medl.MedlRestService;
+import no.nav.melosys.integrasjon.medl.MedlSoapService;
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.AnmodningsperiodeRepository;
@@ -26,10 +28,13 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MedlPeriodeServiceTest {
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
     @Mock
     private TpsFasade tpsFasade;
     @Mock
-    private MedlFasade medlFasade;
+    private MedlSoapService medlSoapService;
+    @Mock
+    private MedlRestService medlRestService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
@@ -46,25 +51,25 @@ public class MedlPeriodeServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        medlPeriodeService = new MedlPeriodeService(tpsFasade, medlFasade, behandlingsresultatService, lovvalgsperiodeRepository, anmodningsperiodeRepository, utpekingsperiodeRepository);
+        medlPeriodeService = new MedlPeriodeService(fakeUnleash, tpsFasade, medlSoapService, medlRestService, behandlingsresultatService, lovvalgsperiodeRepository, anmodningsperiodeRepository, utpekingsperiodeRepository);
 
-        when(medlFasade.opprettPeriodeForeløpig(anyString(), any(PeriodeOmLovvalg.class), any(KildedokumenttypeMedl.class))).thenReturn(MEDL_PERIODE_ID);
-        when(medlFasade.opprettPeriodeUnderAvklaring(anyString(), any(PeriodeOmLovvalg.class), any(KildedokumenttypeMedl.class))).thenReturn(MEDL_PERIODE_ID);
-        when(medlFasade.opprettPeriodeEndelig(anyString(), any(Lovvalgsperiode.class), any(KildedokumenttypeMedl.class))).thenReturn(MEDL_PERIODE_ID);
+        when(medlSoapService.opprettPeriodeForeløpig(anyString(), any(PeriodeOmLovvalg.class), any(KildedokumenttypeMedl.class))).thenReturn(MEDL_PERIODE_ID);
+        when(medlSoapService.opprettPeriodeUnderAvklaring(anyString(), any(PeriodeOmLovvalg.class), any(KildedokumenttypeMedl.class))).thenReturn(MEDL_PERIODE_ID);
+        when(medlSoapService.opprettPeriodeEndelig(anyString(), any(Lovvalgsperiode.class), any(KildedokumenttypeMedl.class))).thenReturn(MEDL_PERIODE_ID);
     }
 
     @Test
-    public void hentPeriodeListe() throws IntegrasjonException, SikkerhetsbegrensningException, IkkeFunnetException {
+    public void hentPeriodeListe() throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
         medlPeriodeService.hentPeriodeListe(FNR, LocalDate.now(), LocalDate.now().plusMonths(2));
 
-        verify(medlFasade).hentPeriodeListe(eq(FNR), any(LocalDate.class), any(LocalDate.class));
+        verify(medlSoapService).hentPeriodeListe(eq(FNR), any(LocalDate.class), any(LocalDate.class));
     }
 
     @Test
     public void opprettPeriodeForeløpig() throws FunksjonellException, TekniskException {
         medlPeriodeService.opprettPeriodeForeløpig(new Utpekingsperiode(), 1L, true, FNR);
 
-        verify(medlFasade).opprettPeriodeForeløpig(eq(FNR), any(Utpekingsperiode.class), eq(KildedokumenttypeMedl.SED));
+        verify(medlSoapService).opprettPeriodeForeløpig(eq(FNR), any(Utpekingsperiode.class), eq(KildedokumenttypeMedl.SED));
         verify(utpekingsperiodeRepository).save(any(Utpekingsperiode.class));
     }
 
@@ -72,7 +77,7 @@ public class MedlPeriodeServiceTest {
     public void opprettPeriodeUnderAvklaring() throws FunksjonellException, TekniskException {
         medlPeriodeService.opprettPeriodeUnderAvklaring(new Anmodningsperiode(), 1L, false, FNR);
 
-        verify(medlFasade).opprettPeriodeUnderAvklaring(eq(FNR), any(Anmodningsperiode.class), eq(KildedokumenttypeMedl.HENV_SOKNAD));
+        verify(medlSoapService).opprettPeriodeUnderAvklaring(eq(FNR), any(Anmodningsperiode.class), eq(KildedokumenttypeMedl.HENV_SOKNAD));
         verify(anmodningsperiodeRepository).save(any(Anmodningsperiode.class));
     }
 
@@ -80,7 +85,7 @@ public class MedlPeriodeServiceTest {
     public void opprettPeriodeEndelig() throws FunksjonellException, TekniskException {
         medlPeriodeService.opprettPeriodeEndelig(new Lovvalgsperiode(), 1L, true, FNR);
 
-        verify(medlFasade).opprettPeriodeEndelig(eq(FNR), any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
+        verify(medlSoapService).opprettPeriodeEndelig(eq(FNR), any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
         verify(lovvalgsperiodeRepository).save(any(Lovvalgsperiode.class));
     }
 
@@ -90,25 +95,25 @@ public class MedlPeriodeServiceTest {
         lovvalgsperiode.setMedlPeriodeID(MEDL_PERIODE_ID);
         medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode, false);
 
-        verify(medlFasade).oppdaterPeriodeEndelig(eq(lovvalgsperiode), eq(KildedokumenttypeMedl.HENV_SOKNAD));
+        verify(medlSoapService).oppdaterPeriodeEndelig(eq(lovvalgsperiode), eq(KildedokumenttypeMedl.HENV_SOKNAD));
     }
 
     @Test
     public void avvisPeriode() throws SikkerhetsbegrensningException, IkkeFunnetException {
         medlPeriodeService.avvisPeriode(MEDL_PERIODE_ID);
-        verify(medlFasade).avvisPeriode(eq(MEDL_PERIODE_ID), eq(StatusaarsakMedl.AVVIST));
+        verify(medlSoapService).avvisPeriode(eq(MEDL_PERIODE_ID), eq(StatusaarsakMedl.AVVIST));
     }
 
     @Test
     public void avvisPeriodeFeilregistrert() throws SikkerhetsbegrensningException, IkkeFunnetException {
         medlPeriodeService.avvisPeriodeFeilregistrert(MEDL_PERIODE_ID);
-        verify(medlFasade).avvisPeriode(eq(MEDL_PERIODE_ID), eq(StatusaarsakMedl.FEILREGISTRERT));
+        verify(medlSoapService).avvisPeriode(eq(MEDL_PERIODE_ID), eq(StatusaarsakMedl.FEILREGISTRERT));
     }
 
     @Test
     public void avvisPeriodeOpphørt() throws SikkerhetsbegrensningException, IkkeFunnetException {
         medlPeriodeService.avvisPeriodeOpphørt(MEDL_PERIODE_ID);
-        verify(medlFasade).avvisPeriode(eq(MEDL_PERIODE_ID), eq(StatusaarsakMedl.OPPHORT));
+        verify(medlSoapService).avvisPeriode(eq(MEDL_PERIODE_ID), eq(StatusaarsakMedl.OPPHORT));
     }
 
     @Test
@@ -129,7 +134,7 @@ public class MedlPeriodeServiceTest {
         medlPeriodeService.avsluttTidligerMedlPeriode(fagsak);
 
         verify(behandlingsresultatService).hentBehandlingsresultat(eq(1L));
-        verify(medlFasade).avvisPeriode(eq(MEDL_PERIODE_ID), eq(StatusaarsakMedl.AVVIST));
+        verify(medlSoapService).avvisPeriode(eq(MEDL_PERIODE_ID), eq(StatusaarsakMedl.AVVIST));
     }
 
     @Test
@@ -148,6 +153,6 @@ public class MedlPeriodeServiceTest {
         medlPeriodeService.avsluttTidligerMedlPeriode(fagsak);
 
         verify(behandlingsresultatService).hentBehandlingsresultat(eq(1L));
-        verify(medlFasade, never()).avvisPeriode(anyLong(), any(StatusaarsakMedl.class));
+        verify(medlSoapService, never()).avvisPeriode(anyLong(), any(StatusaarsakMedl.class));
     }
 }

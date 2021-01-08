@@ -9,16 +9,19 @@ import no.nav.melosys.integrasjon.reststs.RestStsClient;
 import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForGet;
 import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPost;
 import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPut;
-import org.checkerframework.checker.compilermsgs.qual.CompilerMessageKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 
-@CompilerMessageKey
+import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
+
+@Component
 public class MedlemskapRestConsumer implements RestConsumer {
     private static final String CONSUMER_ID = "srvmelosys";
 
@@ -35,42 +38,41 @@ public class MedlemskapRestConsumer implements RestConsumer {
     }
 
     public List<MedlemskapsunntakForGet> hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom) {
+        return asList(hentPeriodeListe(fnr, fom, tom, ""));
+    }
 
-//
-//        [
-//        {
-//            "dekning": "string",
-//            "fraOgMed": "string",
-//            "grunnlag": "string",
-//            "helsedel": true,
-//            "ident": "string",
-//            "lovvalg": "string",
-//            "lovvalgsland": "string",
-//            "medlem": true,
-//            "sporingsinformasjon": {
-//            "besluttet": "string",
-//                "kilde": "string",
-//                "kildedokument": "string",
-//                "opprettet": "2021-01-07T11:17:03.857Z",
-//                "opprettetAv": "string",
-//                "registrert": "string",
-//                "sistEndret": "2021-01-07T11:17:03.857Z",
-//                "sistEndretAv": "string",
-//                "versjon": 0
-//        },
-//            "status": "string",
-//            "statusaarsak": "string",
-//            "studieinformasjon": {
-//            "delstudie": true,
-//                "soeknadInnvilget": true,
-//                "statsborgerland": "string",
-//                "studieland": "string"
-//        },
-//            "tilOgMed": "string",
-//            "unntakId": 0
-//        }
-//]
-        return null;
+    public List<MedlemskapsunntakForGet> hentPeriodeListeUtenLaanekassen(String fnr, LocalDate fom, LocalDate tom) {
+        return asList(hentPeriodeListe(fnr, fom, tom, "LAANEKASSEN"));
+    }
+
+    private MedlemskapsunntakForGet[] hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom, String eksluderteKilder) {
+        return requireNonNull(
+            webClient.get().uri(uriBuilder ->
+                uriBuilder
+                    .path("")
+                    .queryParam("fraOgMed", fom)
+                    .queryParam("tilOgMed", tom)
+                    .queryParam("inkluderSporingsinfo", true)
+                    .queryParam("ekskluderKilder", eksluderteKilder)
+                    .build())
+                .header("Nav-Personident", fnr)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(MedlemskapsunntakForGet[].class)
+                .block()
+        );
+    }
+
+    public MedlemskapsunntakForGet hentPeriode(String periodeId) {
+        return webClient.get().uri(uriBuilder ->
+            uriBuilder
+                .path("/{periodeId}")
+                .queryParam("inkluderSporingsinfo", true)
+                .build(periodeId))
+            .accept(MediaType.APPLICATION_JSON)
+            .retrieve()
+            .bodyToMono(MedlemskapsunntakForGet.class)
+            .block();
     }
 
     public MedlemskapsunntakForGet opprettPeriode(MedlemskapsunntakForPost request) {
