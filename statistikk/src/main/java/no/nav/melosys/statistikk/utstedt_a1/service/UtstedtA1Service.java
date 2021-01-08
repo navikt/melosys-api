@@ -27,6 +27,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.IVERKSETTER_VEDTAK;
+
 @Service
 public class UtstedtA1Service {
     private static final Logger log = LoggerFactory.getLogger(UtstedtA1Service.class);
@@ -82,12 +84,12 @@ public class UtstedtA1Service {
         utstedtA1Producer.produserMelding(melding);
     }
 
-    private void validerBehandling(Behandling behandling, Behandlingsresultat behandlingsresultat) throws FunksjonellException {
+    private static void validerBehandling(Behandling behandling, Behandlingsresultat behandlingsresultat) throws FunksjonellException {
         if (behandlingsresultat.erAvslag()) {
             throw new FunksjonellException(String.format("Behandling %s er avslått. Ingen melding om utstedt A1 blir sendt", behandling.getId()));
         }
 
-        if (behandling.erAktiv()) {
+        if (behandling.erAktiv() || behandling.getStatus() != IVERKSETTER_VEDTAK) {
             throw new FunksjonellException(String.format("Behandling %s er aktiv. Ingen melding om utstedt A1 blir sendt", behandling.getId()));
         }
     }

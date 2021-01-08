@@ -152,8 +152,6 @@ class UtstedtA1ServiceTest {
         return behandling;
     }
 
-    // todo test for feilet behandling med multicast
-
     private static Behandlingsresultat lagBehandlingsresultat() {
         return lagBehandlingsresultat(false);
     }

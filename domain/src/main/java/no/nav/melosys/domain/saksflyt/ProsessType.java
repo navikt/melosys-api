@@ -12,6 +12,7 @@ public enum ProsessType implements Kodeverk {
     ANMODNING_OM_UNNTAK_SVAR("ANMODNING_OM_UNNTAK_SVAR", "Mottar svar på anmodning om unntak"),
     ARBEID_FLERE_LAND_NY_SAK("ARBEID_FLERE_LAND_NY_SAK","Mottak av A003 - ny sak"),
     ARBEID_FLERE_LAND_NY_BEHANDLING("ARBEID_FLERE_LAND_NY_BEHANDLING","Mottak av A003 - ny behandling"),
+    FEILET_HENDELSE("FEILET_HENDELSE", "Intern hendelse i melosys som har feilet"),
     FORVALTNINGSMELDING_SEND("FORVALTNINGSMELDING_SEND", "Sender forvaltningsmelding"),
     HENLEGG_SAK("HENLEGG_SAK", "Henlegg en sak"),
     IVERKSETT_VEDTAK("IVERKSETT_VEDTAK", "Iverksett vedtak"),
@@ -30,7 +31,7 @@ public enum ProsessType implements Kodeverk {
     REGISTRERING_UNNTAK_NY_SAK("REGISTRERING_UNNTAK_NY_SAK", "Registrering av unntak - ny sak"),
     REGISTRERING_UNNTAK_NY_BEHANDLING("REGISTRERING_UNNTAK_NY_BEHANDLING", "Registrering av unntak - ny behandling"),
     UTPEKING_AVVIS("UTPEKING_AVVIS", "Avviser utpeking mottatt i en A003"),
-    VIDERESEND_SOKNAD("VIDERESEND_SOKNAD", "Videresend søknad"), FEILET_HENDELSE("FEILET_HENDELSE", "Intern hendelse i melosys som har feilet");
+    VIDERESEND_SOKNAD("VIDERESEND_SOKNAD", "Videresend søknad");
 
     private String kode;
     private String beskrivelse;
