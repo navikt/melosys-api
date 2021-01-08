@@ -83,18 +83,21 @@ jobs:
           echo "CLUSTER=prod-fss" >> $GITHUB_ENV
           echo "NAMESPACE=default" >> $GITHUB_ENV
           echo "URL=melosys-api.nais.adeo.no" >> $GITHUB_ENV
+          echo "ENVIRONMENT=p" >> $GITHUB_ENV
       - name: Deploy to q1
         if: github.event.inputs.environment == 'q1'
         run: |
           echo "CLUSTER=dev-fss" >> $GITHUB_ENV
           echo "NAMESPACE=default" >> $GITHUB_ENV
           echo "URL=melosys-api.dev.adeo.no" >> $GITHUB_ENV
+          echo "ENVIRONMENT=q1" >> $GITHUB_ENV
       - name: Deploy to q2
         if: github.event.inputs.environment == 'q2' || (github.event_name == 'push' && github.ref == 'refs/heads/master')
         run: |
           echo "CLUSTER=dev-fss" >> $GITHUB_ENV
           echo "NAMESPACE=q2" >> $GITHUB_ENV
           echo "URL=melosys-api-q2.dev.adeo.no" >> $GITHUB_ENV
+          echo "ENVIRONMENT=q2" >> $GITHUB_ENV
       - uses: nais/deploy/actions/deploy@v1
         if: ${{ env.CLUSTER != '' }}
         env:
@@ -128,6 +131,6 @@ jobs:
           SLACK_COLOR: "${{ job.status == 'success' && 'good' || 'danger' }}"
           SLACK_USERNAME: Github Actions
           SLACK_ICON: https://github.com/github.png?size=48
-          SLACK_TITLE: "melosys-api ${{ job.status == 'success' && 'ble deployet' || 'kunne ikke deployes' }} til ${{ github.event.inputs.environment }}"
+          SLACK_TITLE: "melosys-api ${{ job.status == 'success' && 'ble deployet' || 'kunne ikke deployes' }} til ${{ env.ENVIRONMENT }}"
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_MESSAGE: ${{ fromJson(steps.get_message.outputs.data).message }}
