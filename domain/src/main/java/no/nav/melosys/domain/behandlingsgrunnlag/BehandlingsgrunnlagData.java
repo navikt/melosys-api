@@ -76,6 +76,13 @@ public class BehandlingsgrunnlagData {
             .collect(Collectors.toSet());
     }
 
+    public Set<String> hentFnrMedfølgendeEktefelleSamboer() {
+        return personOpplysninger.medfolgendeFamilie.stream()
+            .filter(MedfolgendeFamilie::erEktefelleSamboer)
+            .map(MedfolgendeFamilie::getFnr)
+            .collect(Collectors.toSet());
+    }
+
     public Map<String, MedfolgendeFamilie> hentMedfølgendeBarn() {
         return personOpplysninger.medfolgendeFamilie.stream()
             .filter(MedfolgendeFamilie::erBarn)
