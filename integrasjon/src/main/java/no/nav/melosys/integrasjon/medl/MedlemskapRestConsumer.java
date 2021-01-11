@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.medl;
 import java.time.LocalDate;
 import java.util.List;
 
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.felles.RestConsumer;
 import no.nav.melosys.integrasjon.reststs.RestStsClient;
 import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForGet;
@@ -40,10 +41,6 @@ public class MedlemskapRestConsumer implements RestConsumer {
 
     public List<MedlemskapsunntakForGet> hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom) {
         return asList(hentPeriodeListe(fnr, fom, tom, ""));
-    }
-
-    public List<MedlemskapsunntakForGet> hentPeriodeListeUtenLaanekassen(String fnr, LocalDate fom, LocalDate tom) {
-        return asList(hentPeriodeListe(fnr, fom, tom, "LAANEKASSEN"));
     }
 
     private MedlemskapsunntakForGet[] hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom, String eksluderteKilder) {
@@ -95,11 +92,17 @@ public class MedlemskapRestConsumer implements RestConsumer {
 
     private ExchangeFilterFunction headerFilter() {
         return ExchangeFilterFunction.ofRequestProcessor(
-            request -> Mono.just(ClientRequest.from(request)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + restStsClient.hentToken())
-                .header("Nav-Call-Id", getCallID())
-                .header("Nav-Consumer-Id", CONSUMER_ID)
-                .build())
+            request -> {
+                try {
+                    return Mono.just(ClientRequest.from(request)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + restStsClient.collectToken())
+                        .header("Nav-Call-Id", getCallID())
+                        .header("Nav-Consumer-Id", CONSUMER_ID)
+                        .build());
+                } catch (MelosysException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         );
     }
 }
