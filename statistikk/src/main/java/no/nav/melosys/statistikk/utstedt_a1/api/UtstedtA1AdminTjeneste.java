@@ -51,6 +51,18 @@ public class UtstedtA1AdminTjeneste implements AdminTjeneste {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/publiserMelding/eksisterendeBehandlingerFom")
+    public ResponseEntity<Map<String, Set<Long>>> publiserEksisterendeBehandlingerFomDato(
+        @RequestHeader(API_KEY_HEADER) String apiKey,
+        @RequestBody EksisterendeBehandlingerFomDto eksisterendeBehandlingerFomDto
+    ) throws SikkerhetsbegrensningException {
+        validerApikey(apiKey);
+        return ResponseEntity.ok(
+            publiserEksisterendeBehandlinger(behandlingRepository.findByRegistrertDatoIsGreaterThanEqual(
+                eksisterendeBehandlingerFomDto.getFom()))
+        );
+    }
+
     /*
     Endepunkt som skal brukes én gang for å sende meldinger om vedtak med tilbakevirkende kraft (alle vedtak fattet
     siden Melosys gikk i produksjon). Skal fjernes etter bruk. Løsning for MELOSYS-4180.
@@ -70,6 +82,10 @@ public class UtstedtA1AdminTjeneste implements AdminTjeneste {
         }
         log.info("Hentet {} behandlinger", eksisterendeBehandlinger.size());
 
+        return ResponseEntity.ok(publiserEksisterendeBehandlinger(eksisterendeBehandlinger));
+    }
+
+    private Map<String, Set<Long>> publiserEksisterendeBehandlinger(List<Behandling> eksisterendeBehandlinger) {
         Set<Long> sendteBehandlinger = new HashSet<>();
         Set<Long> feiledeBehandlinger = new HashSet<>();
         for (Behandling behandling : eksisterendeBehandlinger) {
@@ -84,9 +100,9 @@ public class UtstedtA1AdminTjeneste implements AdminTjeneste {
 
         log.info("Sendt melding om utstedt A1 for {} behandlinger", sendteBehandlinger.size());
         log.info("Melding om utstedt A1 feilet for {} behandlinger", feiledeBehandlinger.size());
-        return ResponseEntity.ok(Map.of(
+        return Map.of(
             "sendteBehandlinger", sendteBehandlinger,
-            "feiledeBehandlinger", feiledeBehandlinger));
+            "feiledeBehandlinger", feiledeBehandlinger);
     }
 
     @Override

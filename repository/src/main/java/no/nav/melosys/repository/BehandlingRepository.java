@@ -1,5 +1,6 @@
 package no.nav.melosys.repository;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
@@ -26,4 +27,6 @@ public interface BehandlingRepository extends CrudRepository<Behandling, Long> {
     @Query("SELECT NEW no.nav.melosys.repository.BehandlingStatistikk(b.tema, COUNT(b)) FROM Behandling b "
         + "WHERE b.status NOT IN (?1) GROUP BY b.tema")
     List<BehandlingStatistikk> antallBehandlingerPerTemaUtenStatuser(Collection<Behandlingsstatus> lukkedeStatuser);
+
+    List<Behandling> findByRegistrertDatoIsGreaterThanEqual(LocalDate fom);
 }

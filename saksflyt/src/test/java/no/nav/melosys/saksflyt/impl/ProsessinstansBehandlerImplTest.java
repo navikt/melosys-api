@@ -9,7 +9,6 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.ProsessinstansBehandler;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
-import no.nav.melosys.service.behandling.BehandlingService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,8 +27,6 @@ public class ProsessinstansBehandlerImplTest {
     private ProsessinstansRepository prosessinstansRepository;
     @Mock
     private StegBehandler mangelBrevStebehandler;
-    @Mock
-    private BehandlingService behandlingService;
 
     private ProsessinstansBehandler prosessinstansBehandler;
 
@@ -39,7 +36,7 @@ public class ProsessinstansBehandlerImplTest {
     public void setup() {
         when(mangelBrevStebehandler.inngangsSteg()).thenReturn(ProsessSteg.MANGELBREV);
         when(prosessinstansRepository.save(any(Prosessinstans.class))).thenAnswer(returnsFirstArg());
-        prosessinstansBehandler = new ProsessinstansBehandlerImpl(Collections.singleton(mangelBrevStebehandler), prosessinstansRepository, behandlingService);
+        prosessinstansBehandler = new ProsessinstansBehandlerImpl(Collections.singleton(mangelBrevStebehandler), prosessinstansRepository);
 
         when(prosessinstans.getId()).thenReturn(UUID.randomUUID());
         prosessinstans.setType(ProsessType.MANGELBREV);

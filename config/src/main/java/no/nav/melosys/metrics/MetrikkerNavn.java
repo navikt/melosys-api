@@ -15,6 +15,7 @@ public final class MetrikkerNavn {
     public static final String PROSESSINSTANSER = METRIKKER_NAMESPACE + "prosessinstanser.";
     public static final String UNNTAKSPERIODE_KONTROLL_TREFF = METRIKKER_NAMESPACE + "unntakperiode.treffbegrunnelse";
     public static final String SVAR_AOU = METRIKKER_NAMESPACE + "svar.aou";
+    public static final String HENDELSER_FEILET = METRIKKER_NAMESPACE + "hendelser.feilet";
 
     public static final String TAG_TEMA = "tema";
     public static final String TAG_TYPE = "type";

@@ -78,20 +78,23 @@ public class UtstedtA1Service {
             return;
         }
 
-        validerBehandling(behandling, behandlingsresultat);
-
-        final UtstedtA1Melding melding = lagMelding(behandling, behandlingsresultat);
-        utstedtA1Producer.produserMelding(melding);
+        if (validerBehandling(behandling, behandlingsresultat)) {
+            final UtstedtA1Melding melding = lagMelding(behandling, behandlingsresultat);
+            utstedtA1Producer.produserMelding(melding);
+        }
     }
 
-    private static void validerBehandling(Behandling behandling, Behandlingsresultat behandlingsresultat) throws FunksjonellException {
+    private static boolean validerBehandling(Behandling behandling, Behandlingsresultat behandlingsresultat) throws FunksjonellException {
         if (behandlingsresultat.erAvslag()) {
-            throw new FunksjonellException(String.format("Behandling %s er avslått. Ingen melding om utstedt A1 blir sendt", behandling.getId()));
+            log.info("Behandling {} er avslått. Ingen melding om utstedt A1 blir sendt", behandling.getId());
+            return false;
         }
 
         if (behandling.erAktiv() || behandling.getStatus() != IVERKSETTER_VEDTAK) {
             throw new FunksjonellException(String.format("Behandling %s er aktiv. Ingen melding om utstedt A1 blir sendt", behandling.getId()));
         }
+
+        return true;
     }
 
     private UtstedtA1Melding lagMelding(Behandling behandling, Behandlingsresultat behandlingsresultat) throws TekniskException, FunksjonellException {
