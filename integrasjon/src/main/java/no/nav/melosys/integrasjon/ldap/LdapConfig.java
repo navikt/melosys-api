@@ -12,8 +12,12 @@ public class LdapConfig {
     public LdapContextSource ldapContextSource(LdapCredentials ldapCredentials) {
         LdapContextSource contextSource = new LdapContextSource();
         contextSource.setUrl(ldapCredentials.getUrl());
-        contextSource.setUserDn(ldapCredentials.getUsername() + "@" + ldapCredentials.getDomain());
-        contextSource.setPassword(ldapCredentials.getPassword());
+
+        //For å koble til lokal ldap-server uten autentisering
+        if (ldapCredentials.getUsername() != null && ldapCredentials.getPassword() != null) {
+            contextSource.setUserDn(ldapCredentials.getUsername() + "@" + ldapCredentials.getDomain());
+            contextSource.setPassword(ldapCredentials.getPassword());
+        }
         contextSource.setBase(ldapCredentials.getUserbasedn());
 
         return contextSource;
