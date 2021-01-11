@@ -4,8 +4,11 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
+import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.reststs.RestStsClient;
 import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForGet;
+import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPut;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -15,8 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -81,5 +83,32 @@ class MedlemskapRestConsumerTest {
         MedlemskapsunntakForGet medlemskapsunntak = restConsumer.hentPeriode("123");
 
         assertNotNull(medlemskapsunntak);
+    }
+
+    @Test
+    void skalKasteRuntimeExceptionVedManglendeToken() throws Exception {
+        when(mockRestStsClient.collectToken()).thenThrow(new TekniskException("Feilet"));
+
+        String actual = assertThrows(RuntimeException.class, () -> {
+            restConsumer.hentPeriode("123");
+        }).getMessage();
+
+        assertEquals("Feilet", actual);
+    }
+
+    @Test
+    void skalKasteRuntimeExceptionVedOppdatering() {
+        String feilmelding = "Validering feilet";
+        wireMockServer.stubFor(put(urlPathEqualTo("/"))
+            .willReturn(aResponse()
+                .withStatus(400)
+                .withBody(feilmelding)
+            )
+        );
+
+        String actual = assertThrows(RuntimeException.class, () ->
+            restConsumer.oppdaterPeriode(MedlemskapsunntakForPut.builder().build())).getMessage();
+
+        assertEquals(feilmelding, actual);
     }
 }
