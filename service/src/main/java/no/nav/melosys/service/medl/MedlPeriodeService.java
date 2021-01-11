@@ -19,6 +19,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class MedlPeriodeService {
     private static final Logger log = LoggerFactory.getLogger(MedlPeriodeService.class);
+    public static final String UNLEASH_MEDL_OPPRETT = "melosys.medl.rest.opprett";
+    public static final String UNLEASH_MEDL_OPPDATER = "melosys.medl.rest.oppdater";
+    public static final String UNLEASH_MEDL_HENT = "melosys.medl.rest.hent";
 
     private final Unleash unleash;
     private final TpsFasade tpsFasade;
@@ -50,28 +53,17 @@ public class MedlPeriodeService {
     }
 
     public Saksopplysning hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
-        if (unleash.isEnabled("melosys.medl.rest.hent")) {
+        if (unleash.isEnabled(UNLEASH_MEDL_HENT)) {
             return medlRestService.hentPeriodeListe(fnr, fom, tom);
         }
         return medlSoapService.hentPeriodeListe(fnr, fom, tom);
     }
 
     public void opprettPeriodeForeløpig(PeriodeOmLovvalg periodeOmLovvalg, Long behandlingID, boolean erSed) throws TekniskException, FunksjonellException {
-        opprettPeriodeForeløpig(periodeOmLovvalg, behandlingID, erSed, hentFnr(behandlingID));
-    }
-
-    public void opprettPeriodeUnderAvklaring(PeriodeOmLovvalg periodeOmLovvalg, Long behandlingID, boolean erSed) throws TekniskException, FunksjonellException {
-        opprettPeriodeUnderAvklaring(periodeOmLovvalg, behandlingID, erSed, hentFnr(behandlingID));
-    }
-
-    public void opprettPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, Long behandlingID, boolean erSed) throws TekniskException, FunksjonellException {
-        opprettPeriodeEndelig(lovvalgsperiode, behandlingID, erSed, hentFnr(behandlingID));
-    }
-
-    public void opprettPeriodeForeløpig(PeriodeOmLovvalg periodeOmLovvalg, Long behandlingID, boolean erSed, String fnr) throws TekniskException, FunksjonellException {
         log.info("Oppretter foreløpig periode i MEDL for behandling {}", behandlingID);
+        String fnr = hentFnr(behandlingID);
         Long medlPeriodeID;
-        if (unleash.isEnabled("melosys.medl.rest.opprett")) {
+        if (unleash.isEnabled(UNLEASH_MEDL_OPPRETT)) {
             medlPeriodeID = medlRestService.opprettPeriodeForeløpig(fnr, periodeOmLovvalg, hentKildedokumenttype(erSed));
         } else {
             medlPeriodeID = medlSoapService.opprettPeriodeForeløpig(fnr, periodeOmLovvalg, hentKildedokumenttype(erSed));
@@ -79,10 +71,11 @@ public class MedlPeriodeService {
         lagreMedlPeriodeId(medlPeriodeID, periodeOmLovvalg, behandlingID);
     }
 
-    public void opprettPeriodeUnderAvklaring(PeriodeOmLovvalg periodeOmLovvalg, Long behandlingID, boolean erSed, String fnr) throws TekniskException, FunksjonellException {
+    public void opprettPeriodeUnderAvklaring(PeriodeOmLovvalg periodeOmLovvalg, Long behandlingID, boolean erSed) throws TekniskException, FunksjonellException {
         log.info("Oppretter periode under avklaring i MEDL for behandling {}", behandlingID);
+        String fnr = hentFnr(behandlingID);
         Long medlPeriodeID;
-        if (unleash.isEnabled("melosys.medl.rest.opprett")) {
+        if (unleash.isEnabled(UNLEASH_MEDL_OPPRETT)) {
             medlPeriodeID = medlRestService.opprettPeriodeUnderAvklaring(fnr, periodeOmLovvalg, hentKildedokumenttype(erSed));
         } else {
             medlPeriodeID = medlSoapService.opprettPeriodeUnderAvklaring(fnr, periodeOmLovvalg, hentKildedokumenttype(erSed));
@@ -90,20 +83,21 @@ public class MedlPeriodeService {
         lagreMedlPeriodeId(medlPeriodeID, periodeOmLovvalg, behandlingID);
     }
 
-    public void opprettPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, Long behandlingID, boolean erSed, String fnr) throws TekniskException, FunksjonellException {
+    public void opprettPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, Long behandlingID, boolean erSed) throws TekniskException, FunksjonellException {
+        String fnr = hentFnr(behandlingID);
         log.info("Oppretter endelig periode i MEDL for behandling {}", behandlingID);
         Long medlPeriodeID;
-        if (unleash.isEnabled("melosys.medl.rest.opprett")) {
-            medlPeriodeID = medlRestService.opprettPeriodeEndelig(fnr != null ? fnr : hentFnr(behandlingID), lovvalgsperiode, hentKildedokumenttype(erSed));
+        if (unleash.isEnabled(UNLEASH_MEDL_OPPRETT)) {
+            medlPeriodeID = medlRestService.opprettPeriodeEndelig(fnr, lovvalgsperiode, hentKildedokumenttype(erSed));
         } else {
-            medlPeriodeID = medlSoapService.opprettPeriodeEndelig(fnr != null ? fnr : hentFnr(behandlingID), lovvalgsperiode, hentKildedokumenttype(erSed));
+            medlPeriodeID = medlSoapService.opprettPeriodeEndelig(fnr, lovvalgsperiode, hentKildedokumenttype(erSed));
         }
-        lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode);
+        lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandlingID);
     }
 
     public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, boolean erSed) throws FunksjonellException, TekniskException {
         log.info("Oppdaterer MEDL-periode {} til status endelig", lovvalgsperiode.getMedlPeriodeID());
-        if (unleash.isEnabled("melosys.medl.rest.oppdater")) {
+        if (unleash.isEnabled(UNLEASH_MEDL_OPPDATER)) {
             medlRestService.oppdaterPeriodeEndelig(lovvalgsperiode, hentKildedokumenttype(erSed));
         } else {
             medlSoapService.oppdaterPeriodeEndelig(lovvalgsperiode, hentKildedokumenttype(erSed));
@@ -112,7 +106,7 @@ public class MedlPeriodeService {
 
     public void oppdaterPeriodeForeløpig(Lovvalgsperiode lovvalgsperiode, boolean erSed) throws FunksjonellException, TekniskException {
         log.info("Oppdaterer MEDL-periode {} til status foreløpig", lovvalgsperiode.getMedlPeriodeID());
-        if (unleash.isEnabled("melosys.medl.rest.oppdater")) {
+        if (unleash.isEnabled(UNLEASH_MEDL_OPPDATER)) {
             medlRestService.oppdaterPeriodeForeløpig(lovvalgsperiode, hentKildedokumenttype(erSed));
         } else {
             medlSoapService.oppdaterPeriodeForeløpig(lovvalgsperiode, hentKildedokumenttype(erSed));
@@ -147,7 +141,7 @@ public class MedlPeriodeService {
     }
 
     private void avvisPeriode(long medlPeriodeId, StatusaarsakMedl statusaarsakMedl) throws SikkerhetsbegrensningException, IkkeFunnetException {
-        if (unleash.isEnabled("melosys.medl.rest.oppdater")) {
+        if (unleash.isEnabled(UNLEASH_MEDL_OPPDATER)) {
             medlRestService.avvisPeriode(medlPeriodeId, statusaarsakMedl);
         } else {
             medlSoapService.avvisPeriode(medlPeriodeId, statusaarsakMedl);

@@ -1,5 +1,9 @@
 package no.nav.melosys.integrasjon.reststs;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Map;
+
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
@@ -14,10 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.Map;
 
 @Service
 public class RestStsClient implements RestConsumer {
@@ -48,23 +48,12 @@ public class RestStsClient implements RestConsumer {
         return token;
     }
 
-    public synchronized String hentToken() {
-        if (shouldCollectNewToken()) {
-            try {
-                token = generateToken();
-            } catch (MelosysException e) {
-                log.error("Klarte ikke hente STS token");
-            }
-        }
-
-        return token;
-    }
-
     private String generateToken() throws MelosysException {
         log.info("Henter oidc-token fra security-token-service");
         try {
             ResponseEntity<Map<String, Object>> response = restTemplate
-                    .exchange(createUriString(), HttpMethod.GET, createHttpEntity(), new ParameterizedTypeReference<Map<String, Object>>() {});
+                .exchange(createUriString(), HttpMethod.GET, createHttpEntity(), new ParameterizedTypeReference<Map<String, Object>>() {
+                });
 
             Map<String, Object> responseBody = response.getBody();
             setExpiryTime(Long.valueOf(responseBody.get(EXPIRES_IN_KEY).toString()));
@@ -88,8 +77,8 @@ public class RestStsClient implements RestConsumer {
 
     private String createUriString() {
         return UriComponentsBuilder.fromPath("/")
-                .queryParam("grant_type", "client_credentials")
-                .queryParam("scope", "openid").toUriString();
+            .queryParam("grant_type", "client_credentials")
+            .queryParam("scope", "openid").toUriString();
     }
 
     private HttpEntity<?> createHttpEntity() {
