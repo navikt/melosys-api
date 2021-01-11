@@ -6,6 +6,7 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.dokument.DokumentBestiltEvent;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -14,6 +15,7 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,18 +28,21 @@ public class DokumentServiceFasade {
     private final BehandlingService behandlingService;
     private final ProsessinstansService prosessinstansService;
     private final BrevmottakerService brevmottakerService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
 
     @Autowired
     public DokumentServiceFasade(DokumentService dokumentService, DokumentSystemService dokumentSystemService,
                                  DokgenService dokgenService, BehandlingService behandlingService,
-                                 ProsessinstansService prosessinstansService, BrevmottakerService brevmottakerService) {
+                                 ProsessinstansService prosessinstansService, BrevmottakerService brevmottakerService,
+                                 ApplicationEventPublisher applicationEventPublisher) {
         this.dokumentService = dokumentService;
         this.dokumentSystemService = dokumentSystemService;
         this.dokgenService = dokgenService;
         this.behandlingService = behandlingService;
         this.prosessinstansService = prosessinstansService;
         this.brevmottakerService = brevmottakerService;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     public byte[] produserUtkast(Produserbaredokumenter produserbartDokument, long behandlingId,
@@ -77,5 +82,7 @@ public class DokumentServiceFasade {
         } else {
             dokumentSystemService.produserDokument(produserbartDokument, mottaker, behandlingID, brevbestilling);
         }
+
+        applicationEventPublisher.publishEvent(new DokumentBestiltEvent(behandlingID, produserbartDokument));
     }
 }

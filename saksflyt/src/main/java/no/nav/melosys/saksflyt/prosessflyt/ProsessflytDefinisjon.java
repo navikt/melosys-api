@@ -16,12 +16,6 @@ public final class ProsessflytDefinisjon {
     private static final Map<ProsessType, ProsessFlyt> PROSESS_FLYT_MAP = new EnumMap<>(ProsessType.class);
 
     static {
-        PROSESS_FLYT_MAP.put(
-            ProsessType.MANGELBREV,
-            new ProsessFlyt(ProsessType.MANGELBREV,
-                MANGELBREV
-            )
-        );
 
         PROSESS_FLYT_MAP.put(
             ProsessType.OPPRETT_OG_DISTRIBUER_BREV,
