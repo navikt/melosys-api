@@ -48,6 +48,18 @@ public class RestStsClient implements RestConsumer {
         return token;
     }
 
+    public synchronized String hentToken() {
+        if (shouldCollectNewToken()) {
+            try {
+                token = generateToken();
+            } catch (MelosysException e) {
+                log.error("Klarte ikke hente STS token");
+            }
+        }
+
+        return token;
+    }
+
     private String generateToken() throws MelosysException {
         log.info("Henter oidc-token fra security-token-service");
         try {

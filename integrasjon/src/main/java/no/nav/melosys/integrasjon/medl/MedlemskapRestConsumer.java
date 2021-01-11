@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon.medl;
 import java.time.LocalDate;
 import java.util.List;
 
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.felles.RestConsumer;
 import no.nav.melosys.integrasjon.reststs.RestStsClient;
 import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForGet;
@@ -15,8 +14,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
@@ -93,15 +94,12 @@ public class MedlemskapRestConsumer implements RestConsumer {
     }
 
     private ExchangeFilterFunction headerFilter() {
-        return ((clientRequest, next) -> {
-            try {
-                clientRequest.headers().add(HttpHeaders.AUTHORIZATION, "Bearer " + restStsClient.collectToken());
-                clientRequest.headers().add("Nav-Call-Id", getCallID());
-                clientRequest.headers().add("Nav-Consumer-Id", CONSUMER_ID);
-            } catch (MelosysException e) {
-                e.printStackTrace();
-            }
-            return next.exchange(clientRequest);
-        });
+        return ExchangeFilterFunction.ofRequestProcessor(
+            request -> Mono.just(ClientRequest.from(request)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + restStsClient.hentToken())
+                .header("Nav-Call-Id", getCallID())
+                .header("Nav-Consumer-Id", CONSUMER_ID)
+                .build())
+        );
     }
 }
