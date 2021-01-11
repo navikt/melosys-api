@@ -1,9 +1,9 @@
-package no.nav.melosys.service.dokument;
+package no.nav.melosys.domain.dokument;
 
+import no.nav.melosys.domain.BehandlingEvent;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import org.springframework.context.ApplicationEvent;
 
-public class DokumentBestiltEvent extends ApplicationEvent {
+public class DokumentBestiltEvent extends BehandlingEvent {
     private final long behandlingID;
     private final Produserbaredokumenter produserbaredokumenter;
 
