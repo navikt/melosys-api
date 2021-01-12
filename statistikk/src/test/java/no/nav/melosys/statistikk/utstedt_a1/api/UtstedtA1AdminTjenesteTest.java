@@ -1,6 +1,7 @@
 package no.nav.melosys.statistikk.utstedt_a1.api;
 
-import java.util.Collections;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -8,7 +9,7 @@ import java.util.Set;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.BehandlingRepository;
+import no.nav.melosys.repository.VedtakMetadataRepository;
 import no.nav.melosys.statistikk.utstedt_a1.service.UtstedtA1Service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,14 +29,14 @@ class UtstedtA1AdminTjenesteTest {
     @Mock
     private UtstedtA1Service utstedtA1Service;
     @Mock
-    private BehandlingRepository behandlingRepository;
+    private VedtakMetadataRepository vedtakMetadataRepository;
     private final String apiKey = "dummy";
 
     private UtstedtA1AdminTjeneste utstedtA1AdminTjeneste;
 
     @BeforeEach
     void setUp() {
-        utstedtA1AdminTjeneste = new UtstedtA1AdminTjeneste(utstedtA1Service, behandlingRepository, apiKey);
+        utstedtA1AdminTjeneste = new UtstedtA1AdminTjeneste(utstedtA1Service, vedtakMetadataRepository, apiKey);
     }
 
     @Test
@@ -45,29 +46,11 @@ class UtstedtA1AdminTjenesteTest {
     }
 
     @Test
-    void publiserEksisterendeBehandlinger_medIngenOppgitteBehandlinger_forventListe() throws Exception {
-        when(behandlingRepository.findAll()).thenReturn(List.of(
-            lagBehandling(1L),
-            lagBehandling(2L),
-            lagBehandling(3L)
-        ));
+    void publiserEksisterendeBehandlinger_forventListe() throws Exception {
+        when(vedtakMetadataRepository.findBehandlingIdByRegistrertDatoIsGreaterThanEqual(anyInstant()))
+            .thenReturn(List.of(1L, 2L, 3L));
 
-        Map<String, Set<Long>> behandlinger = utstedtA1AdminTjeneste.publiserEksisterendeBehandlinger(apiKey, Collections.emptySet()).getBody();
-
-        assertThat(behandlinger).isNotNull();
-        assertThat(behandlinger.get("feiledeBehandlinger")).isEmpty();
-        assertThat(behandlinger.get("sendteBehandlinger")).containsExactlyInAnyOrder(1L, 2L, 3L);
-    }
-
-    @Test
-    void publiserEksisterendeBehandlinger_medOppgitteBehandlingerIngenFeiledeBehandlinger_forventListe() throws Exception {
-        when(behandlingRepository.findAllById(anyIterable())).thenReturn(List.of(
-            lagBehandling(1L),
-            lagBehandling(2L),
-            lagBehandling(3L)
-        ));
-
-        Map<String, Set<Long>> behandlinger = utstedtA1AdminTjeneste.publiserEksisterendeBehandlinger(apiKey, Set.of(1L, 2L, 3L)).getBody();
+        Map<String, Set<Long>> behandlinger = utstedtA1AdminTjeneste.publiserEksisterendeBehandlinger(apiKey, LocalDate.now()).getBody();
 
         assertThat(behandlinger).isNotNull();
         assertThat(behandlinger.get("feiledeBehandlinger")).isEmpty();
@@ -76,15 +59,12 @@ class UtstedtA1AdminTjenesteTest {
 
     @Test
     void publiserEksisterendeBehandlinger_medOppgitteBehandlingerOgBehandlingFeiler_forventListe() throws Exception {
-        when(behandlingRepository.findAllById(anyIterable())).thenReturn(List.of(
-            lagBehandling(1L),
-            lagBehandling(2L),
-            lagBehandling(3L)
-        ));
+        when(vedtakMetadataRepository.findBehandlingIdByRegistrertDatoIsGreaterThanEqual(anyInstant()))
+            .thenReturn(List.of(1L, 2L, 3L));
         doNothing().when(utstedtA1Service).sendMeldingOmUtstedtA1(or(eq(1L), eq(2L)));
         doThrow(new TekniskException("ugyldig behandling")).when(utstedtA1Service).sendMeldingOmUtstedtA1(3L);
 
-        Map<String, Set<Long>> behandlinger = utstedtA1AdminTjeneste.publiserEksisterendeBehandlinger(apiKey, Set.of(1L, 2L, 3L)).getBody();
+        Map<String, Set<Long>> behandlinger = utstedtA1AdminTjeneste.publiserEksisterendeBehandlinger(apiKey, LocalDate.now()).getBody();
 
         assertThat(behandlinger).isNotNull();
         assertThat(behandlinger.get("feiledeBehandlinger")).containsExactly(3L);
@@ -97,7 +77,7 @@ class UtstedtA1AdminTjenesteTest {
             .isThrownBy(() -> utstedtA1AdminTjeneste.publiserMelding("Dum dummy", 1L))
             .withMessageContaining("apikey");
         assertThatExceptionOfType(SikkerhetsbegrensningException.class)
-            .isThrownBy(() -> utstedtA1AdminTjeneste.publiserEksisterendeBehandlinger("Dumdum", Collections.emptySet()))
+            .isThrownBy(() -> utstedtA1AdminTjeneste.publiserEksisterendeBehandlinger("Dumdum", LocalDate.now()))
             .withMessageContaining("apikey");
     }
 
@@ -105,5 +85,9 @@ class UtstedtA1AdminTjenesteTest {
         Behandling behandling = new Behandling();
         behandling.setId(behandlingID);
         return behandling;
+    }
+
+    private static Instant anyInstant() {
+        return any(Instant.class);
     }
 }

@@ -10,10 +10,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
-import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.hendelser.FeiletHendelse;
-import no.nav.melosys.service.hendelser.VedtakMetadataLagretHendelse;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1Producer;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.A1TypeUtstedelse;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse;
@@ -22,82 +19,51 @@ import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ApplicationEventMulticaster;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.event.TransactionalEventListener;
-
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.IVERKSETTER_VEDTAK;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UtstedtA1Service {
     private static final Logger log = LoggerFactory.getLogger(UtstedtA1Service.class);
 
     private final UtstedtA1Producer utstedtA1Producer;
-    private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final LandvelgerService landvelgerService;
     private final Unleash unleash;
-    private final ApplicationEventMulticaster melosysHendelseMulticaster;
 
     @Autowired
     public UtstedtA1Service(UtstedtA1Producer utstedtA1Producer,
-                            BehandlingService behandlingService,
                             BehandlingsresultatService behandlingsresultatService,
                             LandvelgerService landvelgerService,
-                            Unleash unleash,
-                            ApplicationEventMulticaster melosysHendelseMulticaster) {
+                            Unleash unleash) {
         this.utstedtA1Producer = utstedtA1Producer;
-        this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.landvelgerService = landvelgerService;
         this.unleash = unleash;
-        this.melosysHendelseMulticaster = melosysHendelseMulticaster;
     }
 
-    @Async
-    @TransactionalEventListener
-    @SuppressWarnings("unused")
-    public void handterA1Bestilt(VedtakMetadataLagretHendelse vedtakMetadataLagretHendelse) {
-        try {
-            log.info("Mottatt hendelse om vedtak metadata lagret");
-            sendMeldingOmUtstedtA1(vedtakMetadataLagretHendelse.getBehandlingID());
-        } catch (Exception e) {
-            melosysHendelseMulticaster.multicastEvent(new FeiletHendelse(this, e, vedtakMetadataLagretHendelse));
-        }
-    }
-
+    @Transactional(readOnly = true)
     public void sendMeldingOmUtstedtA1(Long behandlingID) throws TekniskException, FunksjonellException {
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultatMedSaksbehandling(behandlingID);
-        sendMeldingOmUtstedtA1(behandling, behandlingsresultat);
-    }
-
-    public void sendMeldingOmUtstedtA1(Behandling behandling, Behandlingsresultat behandlingsresultat) throws TekniskException, FunksjonellException {
         if (!unleash.isEnabled("melosys.statistikkA1")) {
             return;
         }
 
-        if (validerBehandling(behandling, behandlingsresultat)) {
-            final UtstedtA1Melding melding = lagMelding(behandling, behandlingsresultat);
-            utstedtA1Producer.produserMelding(melding);
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        if (behandlingsresultat.a1Produseres()) {
+            log.info("Produserer melding om utstedt A1 for behandling {}", behandlingID);
+            sendMeldingOmUtstedtA1(behandlingsresultat);
+        } else {
+            log.info("Melding om utstedt A1 blir ikke sendt for behandling {}", behandlingID);
         }
     }
 
-    private static boolean validerBehandling(Behandling behandling, Behandlingsresultat behandlingsresultat) throws FunksjonellException {
-        if (behandlingsresultat.erAvslag()) {
-            log.info("Behandling {} er avslått. Ingen melding om utstedt A1 blir sendt", behandling.getId());
-            return false;
-        }
-
-        if (behandling.erAktiv() || behandling.getStatus() != IVERKSETTER_VEDTAK) {
-            throw new FunksjonellException(String.format("Behandling %s er aktiv. Ingen melding om utstedt A1 blir sendt", behandling.getId()));
-        }
-
-        return true;
+    private void sendMeldingOmUtstedtA1(Behandlingsresultat behandlingsresultat) throws TekniskException, FunksjonellException {
+        final UtstedtA1Melding melding = lagMelding(behandlingsresultat);
+        utstedtA1Producer.produserMelding(melding);
     }
 
-    private UtstedtA1Melding lagMelding(Behandling behandling, Behandlingsresultat behandlingsresultat) throws TekniskException, FunksjonellException {
+    private UtstedtA1Melding lagMelding(Behandlingsresultat behandlingsresultat) throws TekniskException, FunksjonellException {
+        final Behandling behandling = behandlingsresultat.getBehandling();
         final Fagsak fagsak = behandling.getFagsak();
 
         final String saksnummer = fagsak.getSaksnummer();
