@@ -1,6 +1,5 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -43,7 +42,6 @@ import no.nav.melosys.tjenester.gui.util.FagsakBehandlingFactory;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
-import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -99,7 +97,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void videresendSchemaValidering() throws IOException, JSONException {
+    public void videresendSchemaValidering() throws Exception {
         VideresendDto fagsakDto = random.nextObject(VideresendDto.class);
 
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(fagsakDto);
@@ -107,7 +105,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void fagsakSchemaValidering() throws IOException, JSONException {
+    public void fagsakSchemaValidering() throws Exception {
         FagsakDto fagsakDto = random.nextObject(FagsakDto.class);
 
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(fagsakDto);
@@ -115,7 +113,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void fagsakOpprettSchemaValidering() throws IOException, JSONException {
+    public void fagsakOpprettSchemaValidering() throws Exception {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
 
         String jsonString = new ObjectMapper().registerModule(new JavaTimeModule()).configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false).writeValueAsString(opprettSakDto);
@@ -123,7 +121,7 @@ public class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void fagsakUtpekSchemaValidering() throws IOException {
+    public void fagsakUtpekSchemaValidering() throws Exception {
         UtpekDto utpekDto = random.nextObject(UtpekDto.class);
 
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(utpekDto);

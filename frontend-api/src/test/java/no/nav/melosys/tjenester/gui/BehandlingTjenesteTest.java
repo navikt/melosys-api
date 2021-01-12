@@ -18,8 +18,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.behandling.EndreBehandlingstemaService;
+import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.EndreBehandlingstemaDto;
 import no.nav.melosys.tjenester.gui.dto.TidligereMedlemsperioderDto;
@@ -83,14 +83,14 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void behandlingerPerioderValidering() throws IOException {
+    void behandlingerPerioderValidering() throws Exception {
         TidligereMedlemsperioderDto tidligereMedlemsperioderDto = new TidligereMedlemsperioderDto();
         tidligereMedlemsperioderDto.periodeIder = Arrays.asList(2L, 3L, 5L);
         valider(tidligereMedlemsperioderDto, TIDLIGERE_MEDLEMSPERIODER_SCHEMA, log);
     }
 
     @Test
-    void hentBehandling_erSchemaValidert() throws IOException {
+    void hentBehandling_erSchemaValidert() throws Exception {
         BehandlingDto behandlingDto = random.nextObject(BehandlingDto.class);
         behandlingDto.getSaksopplysninger().setSed(null);
         String jsonString = objectMapperMedKodeverkServiceStub()
@@ -107,7 +107,7 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void endreBehandlinstemaValidering() throws IOException {
+    void endreBehandlinstemaValidering() throws Exception {
         EndreBehandlingstemaDto endreBehandlingstemaDto = new EndreBehandlingstemaDto();
         endreBehandlingstemaDto.setBehandlingstema(Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND.getKode());
         valider(endreBehandlingstemaDto, ENDRE_BEHANDLINGSTEMA_POST_SCHEMA, log);

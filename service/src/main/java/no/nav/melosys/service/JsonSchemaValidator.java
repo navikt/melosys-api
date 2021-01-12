@@ -1,29 +1,17 @@
 package no.nav.melosys.service;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import javax.validation.ValidationException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.jayway.jsonpath.JsonPath;
+import com.networknt.schema.*;
 import no.nav.melosys.exception.TekniskException;
-import org.everit.json.schema.Schema;
-import org.everit.json.schema.ValidationException;
-import org.everit.json.schema.loader.SchemaLoader;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,31 +20,31 @@ public class JsonSchemaValidator {
         .registerModule(new JavaTimeModule())
         .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
-    private static final SchemaLoader.SchemaLoaderBuilder DEFAULT_SCHEMA_LOADER_BUILDER = SchemaLoader.builder()
-        .draftV7Support()
-        .useDefaults(true);
+    private static final JsonSchemaFactory DEFAULT_JSON_SCHEMA_FACTORY = JsonSchemaFactory
+        .builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7))
+        .build();
 
     private static final Logger log = LoggerFactory.getLogger(JsonSchemaValidator.class);
     private static final String FEILMELDING = "Schemavalidering feilet for schema {}";
 
     private final ObjectMapper objectMapper;
-    private final SchemaLoader.SchemaLoaderBuilder schemaLoaderBuilder;
+    private final JsonSchemaFactory jsonSchemaFactory;
 
-    public JsonSchemaValidator(ObjectMapper objectMapper, SchemaLoader.SchemaLoaderBuilder schemaLoaderBuilder) {
+    public JsonSchemaValidator(ObjectMapper objectMapper, JsonSchemaFactory jsonSchemaFactory) {
         this.objectMapper = objectMapper;
-        this.schemaLoaderBuilder = schemaLoaderBuilder;
+        this.jsonSchemaFactory = jsonSchemaFactory;
     }
 
-    public JsonSchemaValidator(SchemaLoader.SchemaLoaderBuilder schemaLoaderBuilder) {
-        this(DEFAULT_OBJECT_MAPPER, schemaLoaderBuilder);
+    public JsonSchemaValidator(JsonSchemaFactory jsonSchemaFactory) {
+        this(DEFAULT_OBJECT_MAPPER, jsonSchemaFactory);
     }
 
     public JsonSchemaValidator(ObjectMapper objectMapper) {
-        this(objectMapper, DEFAULT_SCHEMA_LOADER_BUILDER);
+        this(objectMapper, DEFAULT_JSON_SCHEMA_FACTORY);
     }
 
     public JsonSchemaValidator() {
-        this(DEFAULT_OBJECT_MAPPER, DEFAULT_SCHEMA_LOADER_BUILDER);
+        this(DEFAULT_OBJECT_MAPPER, DEFAULT_JSON_SCHEMA_FACTORY);
     }
 
     public void valider(Object object, String schemaNavn) throws TekniskException {
@@ -64,27 +52,49 @@ public class JsonSchemaValidator {
     }
 
     public void valider(String json, String schemaNavn) throws TekniskException {
-        valider(new JSONObject(json), hentSchema(schemaNavn));
+        valider(tilJsonNode(json), hentSchema(schemaNavn));
     }
 
-    public void valider(String json, InputStream schemaStream) {
+    public void valider(String json, InputStream schemaStream) throws TekniskException {
         valider(json, schemaStream, log);
     }
 
-    public void valider(String json, InputStream schemaStream, Logger logger) {
-        valider(new JSONObject(json), hentSchema(schemaStream), logger);
+    public void valider(String json, InputStream schemaStream, Logger logger) throws TekniskException {
+        valider(tilJsonNode(json), hentSchema(schemaStream), logger);
     }
 
     public void valider(Object o, InputStream schemaStream) throws TekniskException {
         valider(objektTilString(o), schemaStream, log);
     }
 
-    public void valider(JSONArray jsonArray, InputStream schemaStream) {
-        valider(jsonArray, schemaStream, log);
+    public void valider(ArrayNode arrayNode, InputStream schemaStream) throws TekniskException {
+        valider(arrayNode, schemaStream, log);
     }
 
-    public void valider(JSONArray jsonArray, InputStream schemaStream, Logger logger) {
-        valider(jsonArray, hentSchema(schemaStream), logger);
+    public void valider(ArrayNode arrayNode, InputStream schemaStream, Logger logger) throws TekniskException {
+        valider(arrayNode, hentSchema(schemaStream), logger);
+    }
+
+    private void valider(ArrayNode arrayNode, JsonSchema schema, Logger logger) {
+        ValidationResult result = schema.validateAndCollect(arrayNode);
+        if (!result.getValidationMessages().isEmpty()) {
+            formaterFeil(result, schema, arrayNode.toString(), logger);
+        }
+    }
+
+    public void valider(JsonNode jsonObject, InputStream schemaStream, Logger logger) throws TekniskException {
+        valider(jsonObject, hentSchema(schemaStream), logger);
+    }
+
+    private void valider(JsonNode jsonNode, JsonSchema schema) {
+        valider(jsonNode, schema, log);
+    }
+
+    private void valider(JsonNode jsonNode, JsonSchema schema, Logger logger) {
+        ValidationResult result = schema.validateAndCollect(jsonNode);
+        if (!result.getValidationMessages().isEmpty()) {
+            formaterFeil(result, schema, jsonNode.toString(), logger);
+        }
     }
 
     private String objektTilString(Object object) throws TekniskException {
@@ -95,59 +105,35 @@ public class JsonSchemaValidator {
         }
     }
 
-    private Schema hentSchema(String schemaNavn) throws TekniskException {
+    private JsonNode tilJsonNode(String jsonString) throws TekniskException {
         try {
-            final Path path = Paths.get(Objects.requireNonNull(
-                getClass().getClassLoader().getResource(schemaNavn)).toURI());
-
-            try (final Stream<String> schemaStream = Files.lines(path)) {
-                return byggSchema(schemaStream.collect(Collectors.joining("\n")));
-            }
-        } catch (URISyntaxException | IOException e) {
-            throw new TekniskException(String.format("Feil ved henting av schema %s", schemaNavn), e);
+            return objectMapper.readTree(jsonString);
+        } catch (JsonProcessingException e) {
+            throw new TekniskException("Feil ved mapping av string til json", e);
         }
     }
 
-    private Schema hentSchema(InputStream schemaStream) {
-        return byggSchema(
-            new BufferedReader(new InputStreamReader(schemaStream, StandardCharsets.UTF_8))
-                .lines().collect(Collectors.joining("\n")));
+    private JsonSchema hentSchema(String schemaNavn) {
+        InputStream inputStream = Thread.currentThread().getContextClassLoader()
+            .getResourceAsStream(schemaNavn);
+        return hentSchema(inputStream);
     }
 
-    private Schema byggSchema(String schemaString) throws JSONException {
-        return byggSchema(new JSONObject(schemaString));
+    private JsonSchema hentSchema(InputStream schemaStream) {
+        return jsonSchemaFactory.getSchema(schemaStream);
     }
 
-    private Schema byggSchema(JSONObject rawSchema) {
-        SchemaLoader loader = schemaLoaderBuilder.schemaJson(rawSchema).build();
-        return loader.load().build();
+    private void formaterFeil(ValidationResult validationResult, JsonSchema schema, String json, Logger logger) {
+        logger.error(FEILMELDING, schema.getCurrentUri().toString());
+        validationResult.getValidationMessages().forEach(
+            validationMessage -> logger.error(formaterMelding(validationMessage, json)));
+        throw new ValidationException(String.format("%s: %d schema violations found",
+            schema.getCurrentUri(), validationResult.getValidationMessages().size()));
     }
 
-    private void valider(JSONArray jsonArray, Schema schema, Logger logger) {
-        try {
-            schema.validate(jsonArray);
-        } catch (ValidationException e) {
-            formaterFeil(e, schema, logger);
-        }
-    }
-
-    private void valider(JSONObject jsonObject, Schema schema) {
-        valider(jsonObject, schema, log);
-    }
-
-    private void valider(JSONObject jsonObject, Schema schema, Logger logger) {
-        try {
-            schema.validate(jsonObject);
-        } catch (ValidationException e) {
-            formaterFeil(e, schema, logger);
-        }
-    }
-
-    private void formaterFeil(ValidationException e, Schema schema, Logger logger) {
-        logger.error(FEILMELDING, schema.getTitle());
-        e.getCausingExceptions().stream()
-            .map(ValidationException::toJSON)
-            .forEach(jsonObject -> logger.error(jsonObject.toString()));
-        throw e;
+    private String formaterMelding(ValidationMessage validationMessage, String json) {
+        String verdi = JsonPath.read(json, validationMessage.getPath());
+        String sti = validationMessage.getPath();
+        return validationMessage.getMessage().replace(sti, sti + " [" + verdi + "]");
     }
 }

@@ -1,6 +1,5 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -8,12 +7,14 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.aktoer.AktoerService;
 import no.nav.melosys.service.sak.FagsakService;
-import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,7 +48,7 @@ public class AktoerTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void aktoerSchemaValidering() throws IOException, JSONException {
+    public void aktoerSchemaValidering() throws Exception {
         AktoerDto aktoerDto = new AktoerDto();
         aktoerDto.setAktoerID("1234");
         aktoerDto.setRolleKode("BRUKER");

@@ -118,7 +118,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void tilbakeleggOppgave() throws IOException {
+    public void tilbakeleggOppgave() throws Exception {
         TilbakeleggingDto tilbakelegging = defaultEasyRandom().nextObject(TilbakeleggingDto.class);
 
         assertThat(tilbakelegging).isNotNull();

@@ -8,15 +8,11 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Comparators;
 import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
@@ -36,9 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -66,7 +60,7 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void hentDokumenter() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException, IOException {
+    public void hentDokumenter() throws Exception {
         List<Journalpost> journalposter = defaultEasyRandom().objects(Journalpost.class, 3).collect(Collectors.toList());
         given(dokumentHentingService.hentDokumenter(anyString())).willReturn(journalposter);
 

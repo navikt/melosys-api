@@ -21,7 +21,7 @@ class LovvalgsbestemmelseTest {
 
     @Test
     void av_ugyldigBestemmelse_forventException() {
-        LovvalgBestemmelse ugyldigBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2;
+        LovvalgBestemmelse ugyldigBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4;
         assertThatExceptionOfType(UnsupportedOperationException.class)
             .isThrownBy(() -> Lovvalgsbestemmelse.av(ugyldigBestemmelse))
             .withMessageContaining("støttes ikke for melding om utstedt A1");
@@ -30,7 +30,7 @@ class LovvalgsbestemmelseTest {
     private static final Set<LovvalgBestemmelse> GYLDIGE_BESTEMMELSER = Set.of(
         Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A,
         Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B,
-        Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4,
+        Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2,
         Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5,
         Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
         Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2,
