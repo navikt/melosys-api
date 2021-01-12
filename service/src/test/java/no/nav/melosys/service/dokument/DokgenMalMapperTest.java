@@ -22,8 +22,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static java.util.Collections.singleton;
-import static java.util.Collections.singletonList;
+import static java.util.Arrays.asList;
+import static java.util.Collections.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ATTEST_A1;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,6 +38,7 @@ class DokgenMalMapperTest {
     public static final String SAMMENSATT_NAVN = "Donald Duck";
     public static final String NAVN_ORG = "Advokatene AS";
     public static final String POSTBOKS_ORG = "POSTBOKS 200";
+    public static final String FORRETNINGSADRESSE_ORG = "Storgata 1";
     public static final String POSTNR_ORG = "9990";
     public static final String KONTAKT_NAVN = "Fetter Anton";
     @Mock
@@ -112,6 +113,35 @@ class DokgenMalMapperTest {
     }
 
     @Test
+    void skalMappeMedFullmektigForretningsAdresse() throws Exception {
+        when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
+
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setSaksopplysninger(singleton(lagPersonopplysning()));
+        behandling.setFagsak(lagFagsak());
+
+        OrganisasjonDokument org = lagOrg();
+        org.getOrganisasjonDetaljer().forretningsadresse = asList(lagOrgForretningsadresse());
+        org.getOrganisasjonDetaljer().postadresse = emptyList();
+
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder()
+            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
+            .medBehandling(behandling)
+            .medOrg(org)
+            .medForsendelseMottatt(Instant.now())
+            .build();
+
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling);
+
+        assertTrue(dokgenDto instanceof SaksbehandlingstidSoknad);
+        assertEquals(SAMMENSATT_NAVN, dokgenDto.getNavnBruker());
+        assertEquals(NAVN_ORG, dokgenDto.getNavnMottaker());
+        assertEquals(FORRETNINGSADRESSE_ORG, dokgenDto.getAdresselinjer().get(0));
+        assertEquals(POSTNR_ORG, dokgenDto.getPostnr());
+    }
+
+    @Test
     void skalMappeMedFullmektigMedKontaktpersonAdresse() throws Exception {
         when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
 
@@ -178,6 +208,14 @@ class DokgenMalMapperTest {
     private GeografiskAdresse lagOrgAdresse() {
         SemistrukturertAdresse semistrukturertAdresse = new SemistrukturertAdresse();
         semistrukturertAdresse.setAdresselinje1(POSTBOKS_ORG);
+        semistrukturertAdresse.setPostnr(POSTNR_ORG);
+        semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(2), LocalDate.now().plusDays(2)));
+        return semistrukturertAdresse;
+    }
+
+    private GeografiskAdresse lagOrgForretningsadresse() {
+        SemistrukturertAdresse semistrukturertAdresse = new SemistrukturertAdresse();
+        semistrukturertAdresse.setAdresselinje1(FORRETNINGSADRESSE_ORG);
         semistrukturertAdresse.setPostnr(POSTNR_ORG);
         semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(2), LocalDate.now().plusDays(2)));
         return semistrukturertAdresse;
