@@ -1,6 +1,8 @@
 package no.nav.melosys.integrasjon.doksys;
 
+import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.person.UstrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -27,9 +29,12 @@ import org.w3c.dom.Node;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static no.nav.melosys.domain.Fagsystem.GSAK_I_JOARK;
 import static no.nav.melosys.domain.Fagsystem.MELOSYS;
 import static no.nav.melosys.domain.dokument.adresse.Adresse.sammenslå;
+import static no.nav.melosys.domain.dokument.felles.Land.NORGE;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 
 @Service
@@ -160,6 +165,18 @@ public class DoksysService implements DoksysFasade {
     }
 
     @Override
+    public String distribuerJournalpost(String journalpostId, StrukturertAdresse mottakeradresse, Kontaktopplysning kontaktopplysning) {
+        DistribuerJournalpostRequest request = DistribuerJournalpostRequest.builder()
+            .journalpostId(journalpostId)
+            .bestillendeFagsystem(MELOSYS.getKode())
+            .dokumentProdApp(MELOSYS.getKode())
+            .adresse(mapAdresse(mottakeradresse, kontaktopplysning))
+            .build();
+
+        return distribuerJournalpostConsumer.distribuerJournalpost(request).getBestillingsId();
+    }
+
+    @Override
     public String distribuerJournalpost(String journalpostId) {
         DistribuerJournalpostRequest request = DistribuerJournalpostRequest.builder()
             .journalpostId(journalpostId)
@@ -189,6 +206,30 @@ public class DoksysService implements DoksysFasade {
             .adresselinje3(strukturertAdresse.region)
             .land(strukturertAdresse.landkode)
             .build();
+    }
+
+    private Adresse mapAdresse(StrukturertAdresse strukturertAdresse, Kontaktopplysning kontaktopplysning) {
+        Adresse.AdresseBuilder adresseBuilder = Adresse.builder()
+            .land(strukturertAdresse.landkode);
+
+        if (kontaktopplysning != null) {
+            adresseBuilder
+                .adresselinje1("v/" + kontaktopplysning.getKontaktNavn())
+                .adresselinje2(strukturertAdresse.gatenavn + ((strukturertAdresse.husnummer == null) ? "" : " " + strukturertAdresse.husnummer));
+        } else {
+            adresseBuilder
+                .adresselinje1(strukturertAdresse.gatenavn + ((strukturertAdresse.husnummer == null) ? "" : " " + strukturertAdresse.husnummer));
+        }
+
+        if (strukturertAdresse.erNorsk()) {
+            adresseBuilder.adressetype("norskPostadresse")
+            .postnummer(strukturertAdresse.postnummer)
+            .poststed(strukturertAdresse.poststed);
+        } else {
+            adresseBuilder.adressetype("utenlandskPostadresse");
+        }
+
+        return adresseBuilder.build();
     }
 
     private UtenlandskPostadresse lagUtenlandskAdresse(StrukturertAdresse postadresse) {

@@ -142,4 +142,8 @@ public class AnmodningsperiodeSvar {
     public boolean erAvslag() {
         return anmodningsperiodeSvarType == Anmodningsperiodesvartyper.AVSLAG;
     }
+
+    public boolean erInnvilgelse() {
+        return anmodningsperiodeSvarType == Anmodningsperiodesvartyper.INNVILGELSE;
+    }
 }

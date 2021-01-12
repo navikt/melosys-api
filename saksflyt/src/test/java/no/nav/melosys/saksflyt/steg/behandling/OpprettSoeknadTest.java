@@ -1,7 +1,10 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -32,21 +35,29 @@ class OpprettSoeknadTest {
     }
 
     @Test
-    void utfør_behandlingstemaUtsendtArbeidstaker_oppretterSøknad() throws FunksjonellException, IntegrasjonException {
-        opprettSoeknad.utfør(lagProsessinstans(Behandlingstema.UTSENDT_ARBEIDSTAKER));
+    void utfør_behandlingstemaUtsendtArbeidstaker_oppretterSøknadYrkesaktiveEøs() throws FunksjonellException, IntegrasjonException {
+        opprettSoeknad.utfør(lagProsessinstans(Sakstyper.EU_EOS, Behandlingstema.UTSENDT_ARBEIDSTAKER));
         verify(behandlingsgrunnlagService).opprettSøknadYrkesaktiveEøs(eq(behandlingID), any(Soeknad.class));
     }
 
     @Test
+    void utfør_behandlingstemaArbeidIUtlandet_oppretterSøknadFtrl() throws FunksjonellException, IntegrasjonException {
+        opprettSoeknad.utfør(lagProsessinstans(Sakstyper.FTRL, Behandlingstema.ARBEID_I_UTLANDET));
+        verify(behandlingsgrunnlagService).opprettSøknadFolketrygden(eq(behandlingID), any(SoeknadFtrl.class));
+    }
+
+    @Test
     void utfør_behandlingsTemaØvrigeSed_oppretterIkkeSøknad() throws FunksjonellException, IntegrasjonException {
-        opprettSoeknad.utfør(lagProsessinstans(Behandlingstema.ØVRIGE_SED_MED));
+        opprettSoeknad.utfør(lagProsessinstans(Sakstyper.EU_EOS, Behandlingstema.ØVRIGE_SED_MED));
         verify(behandlingsgrunnlagService, never()).opprettSøknadYrkesaktiveEøs(eq(behandlingID), any(Soeknad.class));
     }
 
-    private Prosessinstans lagProsessinstans(Behandlingstema behandlingstema) {
+    private Prosessinstans lagProsessinstans(Sakstyper sakstype, Behandlingstema behandlingstema) {
         Behandling behandling = new Behandling();
         behandling.setId(behandlingID);
         behandling.setTema(behandlingstema);
+        behandling.setFagsak(new Fagsak());
+        behandling.getFagsak().setType(sakstype);
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         return prosessinstans;

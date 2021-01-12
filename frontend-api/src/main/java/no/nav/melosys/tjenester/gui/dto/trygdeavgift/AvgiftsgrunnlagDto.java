@@ -32,7 +32,7 @@ public class AvgiftsgrunnlagDto extends OppdaterAvgiftsgrunnlagDto {
         return new AvgiftsgrunnlagDto(
             trygdeavgiftsgrunnlag.getLønnsforhold(),
             trygdeavgiftsgrunnlag.getAvgiftsGrunnlagNorge() != null ? AvgiftsgrunnlagInfoDto.av(trygdeavgiftsgrunnlag.getAvgiftsGrunnlagNorge()) : null,
-            trygdeavgiftsgrunnlag.getAvgiftsGrunnlagUtland() != null ? AvgiftsgrunnlagInfoDto.av(trygdeavgiftsgrunnlag.getAvgiftsGrunnlagNorge()) : null,
+            trygdeavgiftsgrunnlag.getAvgiftsGrunnlagUtland() != null ? AvgiftsgrunnlagInfoDto.av(trygdeavgiftsgrunnlag.getAvgiftsGrunnlagUtland()) : null,
             trygdeavgiftsgrunnlag.getAvgiftsGrunnlagNorge() != null ? trygdeavgiftsgrunnlag.getAvgiftsGrunnlagNorge().getVurderingTrygdeavgiftNorskInntekt() : null,
             trygdeavgiftsgrunnlag.getAvgiftsGrunnlagUtland() != null ? trygdeavgiftsgrunnlag.getAvgiftsGrunnlagUtland().getVurderingTrygdeavgiftUtenlandskInntekt() : null
         );

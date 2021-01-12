@@ -110,6 +110,10 @@ public class Aktoer extends RegistreringsInfo {
         return Aktoersroller.MYNDIGHET == rolle && institusjonId != null;
     }
 
+    public boolean erOrganisasjon() {
+        return !Aktoersroller.BRUKER.equals(rolle);
+    }
+
     public Landkoder hentMyndighetLandkode() throws TekniskException {
         if (erUtenlandskMyndighet()) {
             String[] split = institusjonId.split(":");

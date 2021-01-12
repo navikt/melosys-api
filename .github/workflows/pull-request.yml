@@ -1,0 +1,15 @@
+on: pull_request
+
+jobs:
+  build:
+    runs-on: [self-hosted, java-11]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Build
+        run: mvn clean package -B -e -U

@@ -268,6 +268,12 @@ public class BehandlingService {
         }
     }
 
+    public void oppdaterStatusOgSvarfrist(Behandling behandling, Behandlingsstatus behandlingsstatus, Instant svarfristDato) {
+        behandling.setStatus(behandlingsstatus);
+        behandling.setDokumentasjonSvarfristDato(svarfristDato);
+        lagre(behandling);
+    }
+
     public boolean erBehandlingRedigerbarOgTilordnetSaksbehandler(Behandling behandling, String saksbehandler) throws FunksjonellException, TekniskException {
         if (!behandling.erRedigerbar()) {
             return false;

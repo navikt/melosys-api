@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
+import no.nav.dok.tjenester.journalfoerinngaaende.Avsender;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.exception.*;
@@ -42,6 +43,4 @@ public interface JoarkFasade {
         throws SikkerhetsbegrensningException, TekniskException;
 
     LocalDate hentMottaksDatoForJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException;
-
-    Instant hentInstantMottaksDatoForJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException ;
 }

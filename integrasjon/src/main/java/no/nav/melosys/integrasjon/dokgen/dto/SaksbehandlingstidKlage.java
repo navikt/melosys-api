@@ -10,6 +10,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.exception.TekniskException;
 
@@ -28,29 +30,36 @@ public class SaksbehandlingstidKlage extends DokgenDto {
     @JsonFormat(shape = STRING)
     private final Instant datoVedtak;
 
-    private final boolean mottakerRepresentantForBruker;
-
     private SaksbehandlingstidKlage(String fnr, String saksnummer, Instant dagensDato,
-                                   Instant datoMottatt, Instant datoBehandlingstid,
-                                   String navnBruker, String navnMottaker, List<String> adresselinjer,
-                                   String postnr, String poststed, String land, Instant datoVedtak,
-                                   boolean mottakerRepresentantForBruker) {
+                                    Instant datoMottatt, Instant datoBehandlingstid,
+                                    String navnBruker, String navnMottaker, List<String> adresselinjer,
+                                    String postnr, String poststed, String land, Instant datoVedtak) {
         super(fnr, saksnummer, dagensDato, navnBruker, navnMottaker, adresselinjer, postnr, poststed, land);
         this.datoMottatt = datoMottatt;
         this.datoBehandlingstid = datoBehandlingstid;
         this.datoVedtak = datoVedtak;
-        this.mottakerRepresentantForBruker = mottakerRepresentantForBruker;
     }
 
-    public static SaksbehandlingstidKlage av(Behandling behandling, Instant forsendelseMottatt) throws TekniskException {
+    public static SaksbehandlingstidKlage av(DokgenBrevbestilling brevbestilling) throws TekniskException {
+        Behandling behandling = brevbestilling.getBehandling();
         Fagsak fagsak = behandling.getFagsak();
+        OrganisasjonDokument org = brevbestilling.getOrg();
         PersonDokument personDokument = behandling.hentPersonDokument();
 
-        String land = personDokument.gjeldendePostadresse.land != null ? personDokument.gjeldendePostadresse.land.toString() : null;
-        return new SaksbehandlingstidKlage(personDokument.fnr, fagsak.getSaksnummer(), Instant.now(), forsendelseMottatt,
-            forsendelseMottatt.plus(SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS), personDokument.sammensattNavn, personDokument.sammensattNavn,
-            personDokument.gjeldendePostadresse.adresselinjer(), personDokument.gjeldendePostadresse.postnr, personDokument.gjeldendePostadresse.poststed, land,
-            null, false);
+        return new SaksbehandlingstidKlage(
+            personDokument.fnr,
+            fagsak.getSaksnummer(),
+            Instant.now(),
+            brevbestilling.getForsendelseMottatt(),
+            brevbestilling.getForsendelseMottatt().plus(SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS),
+            personDokument.sammensattNavn,
+            (org == null ? personDokument.sammensattNavn : org.getNavn()),
+            mapAdresselinjer(org, brevbestilling.getKontaktopplysning(), personDokument),
+            mapPostnr(org, personDokument),
+            mapPoststed(org, personDokument),
+            mapLandForAdresse(org, personDokument),
+            null
+        );
     }
 
     public Instant getDatoMottatt() {
@@ -63,10 +72,6 @@ public class SaksbehandlingstidKlage extends DokgenDto {
 
     public Instant getDatoVedtak() {
         return datoVedtak;
-    }
-    
-    public boolean isMottakerRepresentantForBruker() {
-        return mottakerRepresentantForBruker;
     }
 
 }

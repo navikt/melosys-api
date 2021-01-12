@@ -1,6 +1,9 @@
 package no.nav.melosys.service.dokument;
 
-import no.nav.melosys.domain.brev.Brevbestilling;
+import java.util.Collections;
+
+import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -13,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
 import static org.mockito.ArgumentMatchers.any;
@@ -32,13 +36,17 @@ class DokumentServiceFasadeTest {
     private BehandlingService mockBehandlingService;
     @Mock
     private ProsessinstansService mockProsessinstansService;
+    @Mock
+    private BrevmottakerService mockBrevmottakerService;
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
 
     private DokumentServiceFasade dokumentServiceFasade;
 
     @BeforeEach
     void init() {
         dokumentServiceFasade = new DokumentServiceFasade(mockDokumentService, mockDokumentSystemService,
-            mockDokgenService, mockBehandlingService, mockProsessinstansService);
+            mockDokgenService, mockBehandlingService, mockProsessinstansService, mockBrevmottakerService, applicationEventPublisher);
         Mockito.reset(
             mockDokgenService,
             mockDokumentService,
@@ -52,9 +60,11 @@ class DokumentServiceFasadeTest {
     void skalKalleDokgenProduserUtkast() throws Exception {
         when(mockDokgenService.erTilgjengeligDokgenmal(any(Produserbaredokumenter.class))).thenReturn(true);
 
-        dokumentServiceFasade.produserUtkast(MELDING_FORVENTET_SAKSBEHANDLINGSTID, 1, new BrevbestillingDto());
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.mottaker = Aktoersroller.BRUKER;
+        dokumentServiceFasade.produserUtkast(MELDING_FORVENTET_SAKSBEHANDLINGSTID, 1, brevbestillingDto);
 
-        verify(mockDokgenService).produserBrev(any(), any());
+        verify(mockDokgenService).produserBrev(any(), anyLong(), any(), eq(true));
         verifyNoInteractions(mockDokumentService);
     }
 
@@ -71,7 +81,7 @@ class DokumentServiceFasadeTest {
     void skalKalleDokumentServiceProduserDokument() throws Exception {
         when(mockDokgenService.erTilgjengeligDokgenmal(any())).thenReturn(false);
 
-        dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.av(Aktoersroller.BRUKER), 1, new Brevbestilling.Builder().build());
+        dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.av(Aktoersroller.BRUKER), 1, new DoksysBrevbestilling.Builder().build());
 
         verify(mockDokumentSystemService).produserDokument(any(), any(), anyLong(), any());
     }
@@ -79,20 +89,22 @@ class DokumentServiceFasadeTest {
     @Test
     void skalKalleProsessinstansServiceProduserDokument() throws Exception {
         when(mockDokgenService.erTilgjengeligDokgenmal(any())).thenReturn(true);
+        when(mockBrevmottakerService.avklarMottakere(any(), any(), any())).thenReturn(Collections.singletonList(new Aktoer()));
 
-        dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.av(Aktoersroller.BRUKER), 1, new Brevbestilling.Builder().build());
+        dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.av(Aktoersroller.BRUKER), 1, new DoksysBrevbestilling.Builder().build());
 
-        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(), any());
+        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any());
         verifyNoInteractions(mockDokumentService);
     }
 
     @Test
     void skalKalleProsessinstansServiceProduserDokument_dto() throws Exception {
         when(mockDokgenService.erTilgjengeligDokgenmal(any())).thenReturn(true);
+        when(mockBrevmottakerService.avklarMottakere(any(), any(), any())).thenReturn(Collections.singletonList(new Aktoer()));
 
-        dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID,1, new BrevbestillingDto());
+        dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, 1, new BrevbestillingDto());
 
-        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(), any());
+        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(), any(), any());
         verifyNoInteractions(mockDokumentService);
     }
 }

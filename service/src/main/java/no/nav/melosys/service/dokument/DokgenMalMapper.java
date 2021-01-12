@@ -1,11 +1,9 @@
 package no.nav.melosys.service.dokument;
 
-import java.time.Instant;
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.dokgen.dto.DokgenDto;
@@ -27,18 +25,18 @@ public class DokgenMalMapper {
         this.kodeverkService = kodeverkService;
     }
 
-    public DokgenDto mapBehandling(Produserbaredokumenter produserbartDokument, Behandling behandling, Instant forsendelseMottatt) throws TekniskException, FunksjonellException {
+    public DokgenDto mapBehandling(DokgenBrevbestilling brevbestilling) throws TekniskException, FunksjonellException {
         DokgenDto dto;
-        switch (produserbartDokument) {
+        switch (brevbestilling.getProduserbartdokument()) {
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID:
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD:
-                dto = SaksbehandlingstidSoknad.av(behandling, forsendelseMottatt);
+                dto = SaksbehandlingstidSoknad.av(brevbestilling);
                 break;
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE:
-                dto = SaksbehandlingstidKlage.av(behandling, forsendelseMottatt);
+                dto = SaksbehandlingstidKlage.av(brevbestilling);
                 break;
             default:
-                throw new FunksjonellException(format("ProduserbartDokument %s er ikke støttet av melosys-dokgen", produserbartDokument));
+                throw new FunksjonellException(format("ProduserbartDokument %s er ikke støttet av melosys-dokgen", brevbestilling.getProduserbartdokument()));
         }
 
         dto.setPoststed(hentPoststed(dto.getPostnr()));

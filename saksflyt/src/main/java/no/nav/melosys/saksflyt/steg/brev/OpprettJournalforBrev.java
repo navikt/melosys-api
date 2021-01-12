@@ -9,18 +9,22 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.DokgenService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID;
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.PRODUSERBART_BREV;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_OG_JOURNALFØR_BREV;
+import static org.springframework.util.StringUtils.hasText;
+import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Component
 public class OpprettJournalforBrev implements StegBehandler {
@@ -29,12 +33,19 @@ public class OpprettJournalforBrev implements StegBehandler {
     private final BehandlingService behandlingService;
     private final DokgenService dokgenService;
     private final JoarkFasade joarkFasade;
+    private final TpsFasade tpsFasade;
+    private final EregFasade eregFasade;
 
     @Autowired
-    public OpprettJournalforBrev(BehandlingService behandlingService, DokgenService dokgenService, JoarkFasade joarkFasade) {
+    public OpprettJournalforBrev(BehandlingService behandlingService, DokgenService dokgenService,
+                                 @Qualifier("system") JoarkFasade joarkFasade,
+                                 @Qualifier("system") TpsFasade tpsFasade,
+                                 @Qualifier("system") EregFasade eregFasade) {
         this.behandlingService = behandlingService;
         this.dokgenService = dokgenService;
         this.joarkFasade = joarkFasade;
+        this.tpsFasade = tpsFasade;
+        this.eregFasade = eregFasade;
     }
 
     @Override
@@ -48,25 +59,38 @@ public class OpprettJournalforBrev implements StegBehandler {
             throw new FunksjonellException("Prosessinstans mangler behandling");
         }
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
+        PersonDokument personDokument = behandling.hentPersonDokument();
         Produserbaredokumenter produserbartDokument = prosessinstans.getData(PRODUSERBART_BREV, Produserbaredokumenter.class);
 
-        byte[] pdf = dokgenService.produserBrev(produserbartDokument, behandling);
+        String aktørId = prosessinstans.getData(AKTØR_ID);
+        String orgnr = prosessinstans.getData(ORGNR, String.class, null);
+        String fnr = null;
+        String sammensattNavn = null;
+
+        if (isEmpty(aktørId) && isEmpty(orgnr)) {
+            throw new FunksjonellException("Mangler mottaker");
+        }
+
+        if (isEmpty(orgnr)) {
+            fnr = tpsFasade.hentIdentForAktørId(aktørId);
+            sammensattNavn = tpsFasade.hentSammensattNavn(fnr);
+        }
+
+        byte[] pdf = dokgenService.produserBrev(produserbartDokument, behandling.getId(), orgnr);
         log.info("Produserbartdokument {} for behandling {} produsert", produserbartDokument, behandling.getId());
 
-        PersonDokument personDokument = behandling.hentPersonDokument();
+        JournalpostBestilling bestilling = new JournalpostBestilling.Builder()
+            .medTittel(produserbartDokument.getBeskrivelse())
+            .medBrevkode(dokgenService.hentMalnavn(produserbartDokument))
+            .medBrukerFnr(personDokument.fnr)
+            .medMottakerNavn(hasText(orgnr) ? eregFasade.hentOrganisasjonNavn(orgnr) : sammensattNavn)
+            .medMottakerId(hasText(orgnr) ? orgnr : fnr)
+            .medErMottakerOrg(hasText(orgnr))
+            .medArkivSakId(behandling.getFagsak().getGsakSaksnummer().toString())
+            .medPdf(pdf)
+            .build();
 
-        JournalpostBestilling bestilling = new JournalpostBestilling(
-            produserbartDokument.getBeskrivelse(),
-            dokgenService.hentMalnavn(produserbartDokument),
-            personDokument.fnr,
-            personDokument.sammensattNavn,
-            personDokument.fnr,
-            behandling.getFagsak().getGsakSaksnummer().toString(),
-            pdf
-        );
-
-        String journalpostId = joarkFasade.opprettJournalpost(
-            OpprettJournalpost.lagJournalpostForBrev(bestilling), true);
+        String journalpostId = joarkFasade.opprettJournalpost(OpprettJournalpost.lagJournalpostForBrev(bestilling), true);
 
         log.info("Brev for behandling {} er journalført, journalpostId {}", behandling.getId(), journalpostId);
         prosessinstans.setData(DISTRIBUERBAR_JOURNALPOST_ID, journalpostId);

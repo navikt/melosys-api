@@ -7,18 +7,18 @@ import java.util.List;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Soeknadsland;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.KontrollresultatService;
@@ -26,20 +26,20 @@ import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class OppfriskSaksopplysningerServiceTest {
+@ExtendWith(MockitoExtension.class)
+class OppfriskSaksopplysningerServiceTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
@@ -59,7 +59,7 @@ public class OppfriskSaksopplysningerServiceTest {
 
     private static final long BEHANDLING_ID = 11L;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IkkeFunnetException {
         oppfriskSaksopplysningerService = new OppfriskSaksopplysningerService(
             behandlingService, behandlingsresultatService,
@@ -72,7 +72,7 @@ public class OppfriskSaksopplysningerServiceTest {
     }
 
     @Test
-    public void oppfriskSaksopplysning() throws MelosysException {
+    void oppfriskSaksopplysning() throws MelosysException {
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
@@ -82,7 +82,7 @@ public class OppfriskSaksopplysningerServiceTest {
     }
 
     @Test
-    public void oppfriskSaksopplysning_medSED_kallerKontroller() throws MelosysException {
+    void oppfriskSaksopplysning_medSED_kallerKontroller() throws MelosysException {
         Behandling behandling = lagBehandling();
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE);
 
@@ -95,7 +95,7 @@ public class OppfriskSaksopplysningerServiceTest {
     }
 
     @Test
-    public void oppfriskSaksopplysning_sakstypeUkjentErSøknad_oppdatererType() throws MelosysException {
+    void oppfriskSaksopplysning_sakstypeUkjentErSøknad_oppdatererType() throws MelosysException {
         Behandling behandling = lagBehandling();
         behandling.getFagsak().setType(Sakstyper.UKJENT);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
@@ -108,7 +108,7 @@ public class OppfriskSaksopplysningerServiceTest {
     }
 
     @Test
-    public void oppfriskSaksopplysning_sakstypeUkjentNorgeUtpekt_oppdatererType() throws MelosysException {
+    void oppfriskSaksopplysning_sakstypeUkjentNorgeUtpekt_oppdatererType() throws MelosysException {
         Behandling behandling = lagBehandling();
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         behandling.getFagsak().setType(Sakstyper.UKJENT);
@@ -122,7 +122,7 @@ public class OppfriskSaksopplysningerServiceTest {
     }
 
     @Test
-    public void oppfriskSaksopplysning_utenFamilierelasjoner_girForventetInformasjonsbehov() throws MelosysException {
+    void oppfriskSaksopplysning_utenFamilierelasjoner_girForventetInformasjonsbehov() throws MelosysException {
         Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         ArgumentCaptor<RegisteropplysningerRequest> requestCaptor = ArgumentCaptor.forClass(RegisteropplysningerRequest.class);
@@ -132,7 +132,7 @@ public class OppfriskSaksopplysningerServiceTest {
     }
 
     @Test
-    public void oppfriskSaksopplysning_medFamilierelasjoner_girForventetInformasjonsbehov() throws MelosysException {
+    void oppfriskSaksopplysning_medFamilierelasjoner_girForventetInformasjonsbehov() throws MelosysException {
         Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         ArgumentCaptor<RegisteropplysningerRequest> requestCaptor = ArgumentCaptor.forClass(RegisteropplysningerRequest.class);

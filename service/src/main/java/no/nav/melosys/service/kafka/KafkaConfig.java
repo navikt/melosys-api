@@ -17,7 +17,7 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
-import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer2;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 @Configuration
@@ -63,8 +63,8 @@ public class KafkaConfig {
         return props;
     }
 
-    private <T> ErrorHandlingDeserializer2<T> valueDeserializer(Class<T> targetType) {
-        return new ErrorHandlingDeserializer2<>(new JsonDeserializer<>(targetType, false));
+    private <T> ErrorHandlingDeserializer<T> valueDeserializer(Class<T> targetType) {
+        return new ErrorHandlingDeserializer<>(new JsonDeserializer<>(targetType, false));
     }
 
     @Bean

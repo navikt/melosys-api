@@ -7,9 +7,9 @@ import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.tps.TpsFasade;
-import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.KontrollresultatService;
@@ -85,7 +85,7 @@ public class OppfriskSaksopplysningerService {
         }
 
         Fagsak fagsak = behandling.getFagsak();
-        if (behandling.kanResultereIVedtak() && !Sakstyper.EU_EOS.equals(fagsak.getType())) {
+        if (behandling.kanResultereIVedtak() && fagsak.getType() == Sakstyper.UKJENT) {
             boolean kvalifisererForEF_883_2004 = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, behandling.finnSøknadsLand(), periode);
             fagsakService.oppdaterType(fagsak, kvalifisererForEF_883_2004);
         }

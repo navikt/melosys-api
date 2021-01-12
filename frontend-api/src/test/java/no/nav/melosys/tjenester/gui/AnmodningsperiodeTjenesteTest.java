@@ -96,7 +96,7 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
         anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
         anmodningsperiode.setAnmodningsperiodeSvar(anmodningsperiodeSvar);
 
-        when(anmodningsperiodeService.hentAnmodningsperiode(anyLong())).thenReturn(Optional.of(anmodningsperiode));
+        when(anmodningsperiodeService.finnAnmodningsperiode(anyLong())).thenReturn(Optional.of(anmodningsperiode));
 
         AnmodningsperiodeSvarDto svarDto = anmodningsperiodeTjeneste.hentAnmodningsperiodeSvar(1L);
         assertThat(svarDto).isNotNull();
@@ -119,7 +119,7 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
         svar.setAnmodningsperiode(anmodningsperiode);
         anmodningsperiode.setAnmodningsperiodeSvar(svar);
 
-        when(anmodningsperiodeService.hentAnmodningsperiode(anyLong())).thenReturn(Optional.of(anmodningsperiode));
+        when(anmodningsperiodeService.finnAnmodningsperiode(anyLong())).thenReturn(Optional.of(anmodningsperiode));
         when(anmodningsperiodeService.lagreAnmodningsperiodeSvar(anyLong(), any()))
             .thenReturn(svar);
 

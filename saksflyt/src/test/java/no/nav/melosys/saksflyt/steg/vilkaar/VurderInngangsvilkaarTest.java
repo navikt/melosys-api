@@ -9,6 +9,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -17,16 +18,16 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class VurderInngangsvilkaarTest {
+@ExtendWith(MockitoExtension.class)
+class VurderInngangsvilkaarTest {
     @Mock
     private InngangsvilkaarService inngangsvilkaarService;
     @Mock
@@ -37,10 +38,9 @@ public class VurderInngangsvilkaarTest {
     private VurderInngangsvilkaar vurderInngangsvilkaar;
 
     private final long behandlingID = 143;
-    private final String saksnummer = "MEL-432";
     private final Behandling behandling = new Behandling();
 
-    @Before
+    @BeforeEach
     public void setUp() throws IkkeFunnetException {
         vurderInngangsvilkaar = new VurderInngangsvilkaar(inngangsvilkaarService, fagsakService, behandlingService);
 
@@ -51,7 +51,7 @@ public class VurderInngangsvilkaarTest {
     }
 
     @Test
-    public void utfoerSteg_funker() throws FunksjonellException, TekniskException {
+    void utfoerSteg_funker() throws FunksjonellException, TekniskException {
         BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
         behandlingsgrunnlagData.periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(1L));
         behandlingsgrunnlagData.soeknadsland.landkoder = List.of(Landkoder.NO.getKode(), Landkoder.SE.getKode());
@@ -60,7 +60,8 @@ public class VurderInngangsvilkaarTest {
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
 
         Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(saksnummer);
+        fagsak.setType(Sakstyper.UKJENT);
+        fagsak.setSaksnummer("MEL-432");
         behandling.setFagsak(fagsak);
 
         Prosessinstans prosessinstans = new Prosessinstans();
@@ -78,10 +79,23 @@ public class VurderInngangsvilkaarTest {
     }
 
     @Test
-    public void utfør_behandlingstemaBeslutningLovvalgAnnetLand_vurdererIkkeInngangsvilkår() throws FunksjonellException, TekniskException {
+    void utfør_behandlingstemaBeslutningLovvalgAnnetLand_vurdererIkkeInngangsvilkår() throws FunksjonellException, TekniskException {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
+        behandling.setFagsak(new Fagsak());
+        behandling.getFagsak().setType(Sakstyper.EU_EOS);
+
+        vurderInngangsvilkaar.utfør(prosessinstans);
+        verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), any());
+    }
+
+    @Test
+    void utfør_sakstypeFtrl_vurdererIkkeInngangsvilkår() throws FunksjonellException, TekniskException {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+        behandling.setFagsak(new Fagsak());
+        behandling.getFagsak().setType(Sakstyper.FTRL);
 
         vurderInngangsvilkaar.utfør(prosessinstans);
         verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), any());

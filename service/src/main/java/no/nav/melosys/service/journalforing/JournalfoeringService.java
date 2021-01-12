@@ -2,11 +2,13 @@ package no.nav.melosys.service.journalforing;
 
 import java.util.Optional;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -32,6 +34,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
+import static no.nav.melosys.domain.Fagsak.erSakstypeFtrl;
+import static no.nav.melosys.service.sak.SakstypeBehandlingstemaKobling.erGyldigBehandlingstemaForSakstype;
 
 @Service
 public class JournalfoeringService {
@@ -43,6 +47,7 @@ public class JournalfoeringService {
     private final EessiService eessiService;
     private final FagsakService fagsakService;
     private final TpsFasade tpsFasade;
+    private final Unleash unleash;
 
     @Autowired
     public JournalfoeringService(JoarkFasade joarkFasade,
@@ -50,13 +55,14 @@ public class JournalfoeringService {
                                  ProsessinstansService prosessinstansService,
                                  EessiService eessiService,
                                  FagsakService fagsakService,
-                                 TpsFasade tpsFasade) {
+                                 TpsFasade tpsFasade, Unleash unleash) {
         this.joarkFasade = joarkFasade;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.eessiService = eessiService;
         this.fagsakService = fagsakService;
         this.tpsFasade = tpsFasade;
+        this.unleash = unleash;
     }
 
     public Journalpost hentJournalpost(String journalpostID) throws FunksjonellException, IntegrasjonException {
@@ -66,6 +72,10 @@ public class JournalfoeringService {
     @Transactional(rollbackFor = MelosysException.class)
     public void opprettOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
         Journalpost journalpost = hentJournalpost(journalfoeringDto.getJournalpostID());
+
+        if (journalpost.isErFerdigstilt()) {
+            throw new FunksjonellException("Journalposten er allerede ferdigstilt!");
+        }
 
         if (journalpost.mottaksKanalErEessi()) {
             validerKanOppretteSakFraSed(journalpost);
@@ -108,18 +118,29 @@ public class JournalfoeringService {
         log.info("{} oppretter ny sak etter journalføring av journalpost {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID());
 
         valider(journalfoeringDto);
-        if (erBehandlingAvSøknad(journalfoeringDto.getBehandlingstemaKode())) {
-            validerOpprettSakForSøknadBehandlingFelter(journalfoeringDto);
+
+        final Sakstyper sakstype = Sakstyper.valueOf(journalfoeringDto.getFagsak().getSakstype());
+        final Behandlingstema behandlingstema = Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode());
+
+        if (!erGyldigBehandlingstemaForSakstype(sakstype, behandlingstema)) {
+            throw new FunksjonellException("Behandlingstema " + behandlingstema + " er ikke gyldig for sakstype " + sakstype);
+        }
+
+        if (behandlingstema == Behandlingstema.ARBEID_I_UTLANDET && !unleash.isEnabled("melosys.folketrygden.mvp")) {
+            throw new FunksjonellException("Kan ikke opprett ny sak med behandlingstema " + behandlingstema);
         }
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode()));
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, erBehandlingAvSøknad(journalfoeringDto.getBehandlingstemaKode()) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED);
+        prosessinstans.setData(ProsessDataKey.SAKSTYPE, sakstype);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, erBehandlingAvSøknad(behandlingstema) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED);
 
-        if (erBehandlingAvSøknad(journalfoeringDto.getBehandlingstemaKode())){
+        if (!erSakstypeFtrl(sakstype) && erBehandlingAvSøknad(behandlingstema)) {
+            validerOpprettSakForSøknadBehandlingFelter(journalfoeringDto);
             prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringDto.getFagsak().getLand());
             prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringDto.getFagsak().getSoknadsperiode());
         }
+
         if (StringUtils.isNotEmpty(journalfoeringDto.getArbeidsgiverID())) {
             prosessinstans.setData(ProsessDataKey.ARBEIDSGIVER, journalfoeringDto.getArbeidsgiverID());
         }

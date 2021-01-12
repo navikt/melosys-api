@@ -77,7 +77,7 @@ public class AnmodningsperiodeTjeneste {
     public AnmodningsperiodeSvarDto hentAnmodningsperiodeSvar(@PathVariable("anmodningsperiodeID") long anmodningsperiodeID)
         throws FunksjonellException, TekniskException {
 
-        Optional<Anmodningsperiode> anmodningsperiodeOptional = anmodningsperiodeService.hentAnmodningsperiode(anmodningsperiodeID);
+        Optional<Anmodningsperiode> anmodningsperiodeOptional = anmodningsperiodeService.finnAnmodningsperiode(anmodningsperiodeID);
 
         long behandlingID = anmodningsperiodeOptional.map(Anmodningsperiode::getBehandlingsresultat)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke anmodningsperiode med id " + anmodningsperiodeID)).getId();
@@ -96,7 +96,7 @@ public class AnmodningsperiodeTjeneste {
                                                                @RequestBody AnmodningsperiodeSvarDto anmodningsperiodeSvarDto)
         throws FunksjonellException, TekniskException {
 
-        long behandlingID = anmodningsperiodeService.hentAnmodningsperiode(anmodningsperiodeID)
+        long behandlingID = anmodningsperiodeService.finnAnmodningsperiode(anmodningsperiodeID)
             .map(Anmodningsperiode::getBehandlingsresultat)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke anmodningsperiode med id " + anmodningsperiodeID)).getId();
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);

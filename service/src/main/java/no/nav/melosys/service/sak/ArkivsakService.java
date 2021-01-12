@@ -14,13 +14,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SakService {
+public class ArkivsakService {
 
-    private static final Logger log = LoggerFactory.getLogger(SakService.class);
+    private static final Logger log = LoggerFactory.getLogger(ArkivsakService.class);
 
     private final SakConsumer sakConsumer;
 
-    public SakService(@Qualifier("system") SakConsumer sakConsumer) {
+    public ArkivsakService(@Qualifier("system") SakConsumer sakConsumer) {
         this.sakConsumer = sakConsumer;
     }
 

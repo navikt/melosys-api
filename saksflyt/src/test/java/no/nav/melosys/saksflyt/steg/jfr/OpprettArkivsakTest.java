@@ -8,8 +8,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.sak.ArkivsakService;
 import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.sak.SakService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 class OpprettArkivsakTest {
 
     @Mock
-    private SakService sakService;
+    private ArkivsakService arkivsakService;
     @Mock
     private FagsakService fagsakService;
 
@@ -33,7 +33,7 @@ class OpprettArkivsakTest {
 
     @BeforeEach
     public void setUp() {
-        opprettArkivsak = new OpprettArkivsak(fagsakService, sakService);
+        opprettArkivsak = new OpprettArkivsak(fagsakService, arkivsakService);
     }
 
     @Test
@@ -56,7 +56,7 @@ class OpprettArkivsakTest {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
-        when(sakService.opprettSak(eq(fagsak.getSaksnummer()), eq(behandling.getTema()), eq(aktørID))).thenReturn(forventetArkivsakID);
+        when(arkivsakService.opprettSak(eq(fagsak.getSaksnummer()), eq(behandling.getTema()), eq(aktørID))).thenReturn(forventetArkivsakID);
         opprettArkivsak.utfør(prosessinstans);
 
         assertThat(fagsak.getGsakSaksnummer()).isEqualTo(forventetArkivsakID);

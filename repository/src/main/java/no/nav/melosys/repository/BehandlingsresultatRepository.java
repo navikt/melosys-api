@@ -8,9 +8,6 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface BehandlingsresultatRepository extends CrudRepository<Behandlingsresultat, Long> {
 
-    @EntityGraph(attributePaths={"avklartefakta", "lovvalgsperioder", "anmodningsperioder", "vilkaarsresultater", "kontrollresultater"})
-    Optional<Behandlingsresultat> findWithSaksbehandlingById(Long behandlingID);
-
-    @EntityGraph(attributePaths={"kontrollresultater"})
+    @EntityGraph(attributePaths={"kontrollresultater"}, type = EntityGraph.EntityGraphType.LOAD)
     Optional<Behandlingsresultat> findWithKontrollresultaterById(Long behandlingID);
 }

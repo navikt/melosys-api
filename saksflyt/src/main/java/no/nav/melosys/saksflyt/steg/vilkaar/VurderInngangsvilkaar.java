@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.vilkaar;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -40,7 +41,7 @@ public class VurderInngangsvilkaar implements StegBehandler {
         final long behandlingID = prosessinstans.getBehandling().getId();
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
-        if (behandling.kanResultereIVedtak()) {
+        if (behandling.getFagsak().getType() != Sakstyper.FTRL && behandling.kanResultereIVedtak()) {
             var søknadsland = behandling.finnSøknadsLand();
             var periode = behandling.hentPeriode();
 

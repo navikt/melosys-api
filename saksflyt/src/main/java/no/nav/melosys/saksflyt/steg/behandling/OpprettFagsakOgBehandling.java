@@ -61,7 +61,11 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
         String initierendeDokumentId = prosessinstans.getData(DOKUMENT_ID);
         Behandlingstyper behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class);
         Behandlingstema behandlingstema = prosessinstans.getData(BEHANDLINGSTEMA, Behandlingstema.class);
-        Sakstyper sakstype = erBehandlingAvSøknad(behandlingstema) ? Sakstyper.UKJENT : Sakstyper.EU_EOS;
+        Sakstyper sakstype = prosessinstans.getData(SAKSTYPE, Sakstyper.class);
+
+        if (sakstype != Sakstyper.FTRL) {
+            sakstype = erBehandlingAvSøknad(behandlingstema) ? Sakstyper.UKJENT : Sakstyper.EU_EOS;
+        }
 
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medAktørID(aktørID)

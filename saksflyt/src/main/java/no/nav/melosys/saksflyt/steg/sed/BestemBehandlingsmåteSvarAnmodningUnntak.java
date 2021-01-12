@@ -17,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
@@ -27,7 +28,6 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vedtak.VedtakService;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,8 +41,8 @@ import static no.nav.melosys.metrics.MetrikkerNavn.TAG_RESULTAT;
 public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(BestemBehandlingsmåteSvarAnmodningUnntak.class);
 
-    private static final String INNVILGELSE = "godkjent";
-    private static final String INNVILGELSE_YTTERLIGEREINFO = "godkjentmedinfo";
+    private static final String INNVILGELSE_AUTO_VEDTAK = "godkjent.automatisk";
+    private static final String INNVILGELSE_MANUELL_BEHANDLING = "godkjent.manuellbehandling";
     private static final String DELVIS_INNVILGELSE = "delvisinnvilgelse";
     private static final String AVSLAG = "avslag";
 
@@ -66,7 +66,7 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
     }
 
     static {
-        Stream.of(INNVILGELSE, INNVILGELSE_YTTERLIGEREINFO, DELVIS_INNVILGELSE, AVSLAG).forEach(s -> Metrics.counter(SVAR_AOU, TAG_RESULTAT, s));
+        Stream.of(INNVILGELSE_AUTO_VEDTAK, INNVILGELSE_MANUELL_BEHANDLING, DELVIS_INNVILGELSE, AVSLAG).forEach(s -> Metrics.counter(SVAR_AOU, TAG_RESULTAT, s));
     }
 
     @Override
@@ -80,13 +80,13 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
         Anmodningsperiode anmodningsperiode = anmodningsperiodeService.hentAnmodningsperioder(behandlingID)
             .stream().findFirst()
             .orElseThrow(() -> new TekniskException("Finner ingen anmodningsperiode for behandling " + behandlingID));
-        boolean erInnvilgelse = anmodningsperiode.getAnmodningsperiodeSvar().getAnmodningsperiodeSvarType() == Anmodningsperiodesvartyper.INNVILGELSE;
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
         lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID,
             Collections.singleton(Lovvalgsperiode.av(anmodningsperiode.getAnmodningsperiodeSvar(), Medlemskapstyper.PLIKTIG))
         );
 
-        if (erInnvilgelse && !inneholderYtterligereInformasjon(melosysEessiMelding)) {
+        boolean vedtakFattesAutomatisk = vedtakFattesAutomatisk(behandlingID, anmodningsperiode, melosysEessiMelding);
+        if (vedtakFattesAutomatisk) {
             log.info("Mottatt svar {} på anmodning om unntak for behandling {}. Iverksetter vedtak",
                 Anmodningsperiodesvartyper.INNVILGELSE, behandlingID);
             fattVedtak(behandlingID);
@@ -97,7 +97,15 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
                 Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
             behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.SVAR_ANMODNING_MOTTATT);
         }
-        registrerMetrikk(melosysEessiMelding);
+        registrerMetrikk(melosysEessiMelding, vedtakFattesAutomatisk);
+    }
+
+    private boolean vedtakFattesAutomatisk(long behandlingID,
+                                           Anmodningsperiode anmodningsperiode,
+                                           MelosysEessiMelding melosysEessiMelding) throws IkkeFunnetException {
+        return anmodningsperiode.getAnmodningsperiodeSvar().erInnvilgelse()
+            && !melosysEessiMelding.inneholderYtterligereInformasjon()
+            && behandlingService.hentBehandling(behandlingID).harStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
     }
 
     private void fattVedtak(long behandlingID) throws MelosysException {
@@ -112,11 +120,7 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
         }
     }
 
-    private boolean inneholderYtterligereInformasjon(MelosysEessiMelding melosysEessiMelding) {
-        return StringUtils.isNotEmpty(melosysEessiMelding.getYtterligereInformasjon());
-    }
-
-    private void registrerMetrikk(MelosysEessiMelding melosysEessiMelding) {
+    private void registrerMetrikk(MelosysEessiMelding melosysEessiMelding, boolean vedtakFattesAutomatisk) {
         SvarAnmodningUnntak.Beslutning beslutning = melosysEessiMelding.getSvarAnmodningUnntak().getBeslutning();
         if (beslutning == SvarAnmodningUnntak.Beslutning.AVSLAG) {
             Metrics.counter(SVAR_AOU, TAG_RESULTAT, AVSLAG).increment();
@@ -124,7 +128,9 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
             Metrics.counter(SVAR_AOU, TAG_RESULTAT, DELVIS_INNVILGELSE).increment();
         } else if (beslutning == SvarAnmodningUnntak.Beslutning.INNVILGELSE) {
             Metrics.counter(
-                SVAR_AOU, TAG_RESULTAT, inneholderYtterligereInformasjon(melosysEessiMelding) ? INNVILGELSE_YTTERLIGEREINFO : INNVILGELSE
+                SVAR_AOU,
+                TAG_RESULTAT,
+                vedtakFattesAutomatisk ? INNVILGELSE_AUTO_VEDTAK : INNVILGELSE_MANUELL_BEHANDLING
             ).increment();
         }
     }

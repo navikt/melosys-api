@@ -5,6 +5,7 @@ import org.apache.cxf.Bus;
 import org.apache.cxf.ws.security.SecurityConstants;
 import org.apache.cxf.ws.security.tokenstore.SecurityToken;
 import org.apache.cxf.ws.security.tokenstore.TokenStore;
+import org.apache.cxf.ws.security.tokenstore.TokenStoreException;
 import org.apache.cxf.ws.security.tokenstore.TokenStoreFactory;
 import org.apache.cxf.ws.security.trust.STSClient;
 import org.slf4j.Logger;
@@ -13,7 +14,7 @@ import org.slf4j.LoggerFactory;
 public class NAVSTSClient extends STSClient {
     private static final Logger logger = LoggerFactory.getLogger(NAVSTSClient.class);
     private static TokenStore tokenStore;
-    private StsClientType type;
+    private final StsClientType type;
 
     public enum StsClientType {
         SYSTEM_SAML,
@@ -31,7 +32,10 @@ public class NAVSTSClient extends STSClient {
     }
 
     @Override
-    public SecurityToken requestSecurityToken(String appliesTo, String action, String requestType, String binaryExchange) throws Exception {
+    public SecurityToken requestSecurityToken(String appliesTo,
+                                              String action,
+                                              String requestType,
+                                              String binaryExchange) throws Exception {
         ensureTokenStoreExists();
 
         final SubjectHandler subjectHandler = SubjectHandler.getInstance();
@@ -73,16 +77,17 @@ public class NAVSTSClient extends STSClient {
         return jwt;
     }
 
-    private void ensureTokenStoreExists() {
+    private void ensureTokenStoreExists() throws TokenStoreException {
         if (tokenStore == null) {
             createTokenStore();
         }
     }
 
-    private synchronized void createTokenStore() {
+    private synchronized void createTokenStore() throws TokenStoreException {
         if (tokenStore == null) {
             logger.debug("Creating tokenStore");
-            tokenStore = TokenStoreFactory.newInstance().newTokenStore(SecurityConstants.TOKEN_STORE_CACHE_INSTANCE, message);
+            tokenStore = TokenStoreFactory.newInstance()
+                .newTokenStore(SecurityConstants.TOKEN_STORE_CACHE_INSTANCE, message);
         }
     }
 }

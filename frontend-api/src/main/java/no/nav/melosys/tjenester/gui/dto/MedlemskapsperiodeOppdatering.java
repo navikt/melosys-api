@@ -14,8 +14,8 @@ public class MedlemskapsperiodeOppdatering {
     private final InnvilgelsesResultat innvilgelsesResultat;
 
     @JsonCreator
-    public MedlemskapsperiodeOppdatering(@JsonProperty("fom") LocalDate fomDato,
-                                         @JsonProperty("tom") LocalDate tomDato,
+    public MedlemskapsperiodeOppdatering(@JsonProperty("fomDato") LocalDate fomDato,
+                                         @JsonProperty("tomDato") LocalDate tomDato,
                                          @JsonProperty("trygdedekning") Trygdedekninger trygdedekning,
                                          @JsonProperty("innvilgelsesResultat") InnvilgelsesResultat innvilgelsesResultat) {
         this.fomDato = fomDato;

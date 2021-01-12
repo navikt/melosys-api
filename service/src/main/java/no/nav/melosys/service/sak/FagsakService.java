@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
@@ -40,6 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
 import static no.nav.melosys.metrics.MetrikkerNavn.SAKER_OPPRETTET;
+import static no.nav.melosys.service.sak.SakstypeBehandlingstemaKobling.erGyldigBehandlingstemaForSakstype;
 
 @Service
 public class FagsakService {
@@ -54,6 +56,7 @@ public class FagsakService {
     private final ProsessinstansService prosessinstansService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
+    private final Unleash unleash;
 
     private final Counter sakerOpprettet = Metrics.counter(SAKER_OPPRETTET);
 
@@ -65,7 +68,7 @@ public class FagsakService {
                          TpsFasade tpsFasade,
                          @Lazy ProsessinstansService prosessinstansService,
                          BehandlingsresultatService behandlingsresultatService,
-                         MedlPeriodeService medlPeriodeService) {
+                         MedlPeriodeService medlPeriodeService, Unleash unleash) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
         this.kontaktopplysningService = kontaktopplysningService;
@@ -74,6 +77,7 @@ public class FagsakService {
         this.prosessinstansService = prosessinstansService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
+        this.unleash = unleash;
     }
 
     public Fagsak hentFagsak(String saksnummer) throws IkkeFunnetException {
@@ -119,11 +123,17 @@ public class FagsakService {
     }
 
     void validerOpprettSakDto(OpprettSakDto opprettSakDto) throws FunksjonellException {
-        if (opprettSakDto.getBehandlingstema() == null) {
+        final var sakstype = opprettSakDto.getSakstype();
+        final var behandlingstema = opprettSakDto.getBehandlingstema();
+        if (behandlingstema == null) {
             throw new FunksjonellException("Behandlingstema mangler for å opprette ny sak");
-        } else if (!erBehandlingAvSøknad(opprettSakDto.getBehandlingstema())
+        } else if (!erBehandlingAvSøknad(behandlingstema)
             && !erBehandlingAvSedForespørsler(opprettSakDto.getBehandlingstema())) {
             throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + opprettSakDto.getBehandlingstema());
+        } else if (!erGyldigBehandlingstemaForSakstype(sakstype, behandlingstema)) {
+            throw new FunksjonellException("Behandlingstema " + behandlingstema + " er ikke gyldig for sakstype " + sakstype);
+        } else if (behandlingstema == Behandlingstema.ARBEID_I_UTLANDET && !unleash.isEnabled("melosys.folketrygden.mvp")) {
+            throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema);
         }
 
         boolean feilet = false;

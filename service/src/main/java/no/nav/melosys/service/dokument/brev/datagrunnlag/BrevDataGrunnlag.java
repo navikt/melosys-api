@@ -2,7 +2,7 @@ package no.nav.melosys.service.dokument.brev.datagrunnlag;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -13,14 +13,14 @@ import no.nav.melosys.service.dokument.DataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public class BrevDataGrunnlag implements DataGrunnlag {
-    private final Brevbestilling brevbestilling;
+    private final DoksysBrevbestilling brevbestilling;
     private final BehandlingsgrunnlagData behandlingsgrunnlagData;
     private final PersonDokument person;
     private final AvklarteVirksomheterGrunnlag avklarteVirksomheterGrunnlag;
     private final BostedGrunnlag bostedGrunnlag;
     private final ArbeidsstedGrunnlag arbeidsstedGrunnlag;
 
-    public BrevDataGrunnlag(Brevbestilling brevbestilling,
+    public BrevDataGrunnlag(DoksysBrevbestilling brevbestilling,
                             KodeverkService kodeverkService,
                             AvklarteVirksomheterService avklarteVirksomheterService,
                             AvklartefaktaService avklartefaktaService) throws TekniskException {
@@ -42,7 +42,7 @@ public class BrevDataGrunnlag implements DataGrunnlag {
         return brevbestilling.getBehandling();
     }
 
-    public Brevbestilling getBrevbestilling() {
+    public DoksysBrevbestilling getBrevbestilling() {
         return brevbestilling;
     }
 

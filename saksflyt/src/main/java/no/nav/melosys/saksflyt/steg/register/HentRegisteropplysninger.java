@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.register;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
@@ -44,10 +45,18 @@ public class HentRegisteropplysninger implements StegBehandler {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         String brukerId = tpsFasade.hentIdentForAktørId(behandling.getFagsak().hentBruker().getAktørId());
 
+
         var registeropplysningerRequestBuilder = RegisteropplysningerRequest.builder()
             .behandlingID(prosessinstans.getBehandling().getId())
-            .fnr(brukerId)
-            .saksopplysningTyper(utledSaksopplysningTyper(prosessinstans.getBehandling().getTema()));
+            .fnr(brukerId);
+
+        if (behandling.getFagsak().getType() == Sakstyper.FTRL) {
+            registeropplysningerRequestBuilder
+                .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder().personopplysninger().build());
+        } else {
+            registeropplysningerRequestBuilder
+                .saksopplysningTyper(utledSaksopplysningTyper(prosessinstans.getBehandling().getTema()));
+        }
 
         behandling.finnPeriode().ifPresent(periode -> {
             registeropplysningerRequestBuilder.fom(periode.getFom());
