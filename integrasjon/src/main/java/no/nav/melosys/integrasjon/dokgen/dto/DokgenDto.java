@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 import no.nav.melosys.domain.Kontaktopplysning;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 
@@ -94,35 +95,55 @@ public abstract class DokgenDto {
         if (org == null) {
             adresselinjer = personDokument.gjeldendePostadresse.adresselinjer();
         } else {
+            StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
             if (kontaktopplysning != null) {
                 adresselinjer = asList(
                     "v/" + kontaktopplysning.getKontaktNavn(),
-                    org.getPostadresse().gatenavn +
-                        ((org.getPostadresse().husnummer == null) ? "" : " " + org.getPostadresse().husnummer)
+                    orgAdresse.gatenavn +
+                        ((orgAdresse.husnummer == null) ? "" : " " + orgAdresse.husnummer)
                 );
             } else {
-                adresselinjer = singletonList(org.getPostadresse().gatenavn +
-                    ((org.getPostadresse().husnummer == null) ? "" : " " + org.getPostadresse().husnummer));
+                adresselinjer = singletonList(orgAdresse.gatenavn +
+                    ((orgAdresse.husnummer == null) ? "" : " " + orgAdresse.husnummer));
             }
         }
         return adresselinjer;
     }
 
     protected static String mapPostnr(OrganisasjonDokument org, PersonDokument personDokument) {
-        return (org == null) ? personDokument.gjeldendePostadresse.postnr : org.getPostadresse().postnummer;
+        String postNr;
+        if (org == null) {
+            postNr = personDokument.gjeldendePostadresse.postnr;
+        } else {
+            StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
+            postNr = orgAdresse.postnummer;
+        }
+        return postNr;
     }
 
-    protected static String mapPostSted(OrganisasjonDokument org, PersonDokument personDokument) {
-        return (org == null) ? personDokument.gjeldendePostadresse.poststed : org.getPostadresse().poststed;
+    protected static String mapPoststed(OrganisasjonDokument org, PersonDokument personDokument) {
+        String poststed;
+        if (org == null) {
+            poststed = personDokument.gjeldendePostadresse.poststed;
+        } else {
+            StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
+            poststed = orgAdresse.poststed;
+        }
+        return poststed;
     }
 
-    protected static String mapLandForAdresse(OrganisasjonDokument organisasjonDokument, PersonDokument personDokument) {
+    protected static String mapLandForAdresse(OrganisasjonDokument org, PersonDokument personDokument) {
         String land;
-        if (organisasjonDokument == null) {
+        if (org == null) {
             land = personDokument.gjeldendePostadresse.land != null ? personDokument.gjeldendePostadresse.land.toString() : null;
         } else {
-            land = organisasjonDokument.getPostadresse().landkode != null ? organisasjonDokument.getPostadresse().landkode : null;
+            StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
+            land = orgAdresse.landkode != null ? orgAdresse.landkode : null;
         }
         return land;
+    }
+
+    private static StrukturertAdresse hentTilgjengeligAdresse(OrganisasjonDokument org) {
+        return org.getPostadresse() == null ? org.getForretningsadresse() : org.getPostadresse();
     }
 }

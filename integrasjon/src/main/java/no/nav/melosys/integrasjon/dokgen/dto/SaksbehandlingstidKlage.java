@@ -54,10 +54,10 @@ public class SaksbehandlingstidKlage extends DokgenDto {
             brevbestilling.getForsendelseMottatt().plus(SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS),
             personDokument.sammensattNavn,
             (org == null ? personDokument.sammensattNavn : org.getNavn()),
-            mapAdresselinjer(brevbestilling.getOrg(), brevbestilling.getKontaktopplysning(), personDokument),
-            mapPostnr(brevbestilling.getOrg(), personDokument),
-            mapPostSted(brevbestilling.getOrg(), personDokument),
-            mapLandForAdresse(brevbestilling.getOrg(), personDokument),
+            mapAdresselinjer(org, brevbestilling.getKontaktopplysning(), personDokument),
+            mapPostnr(org, personDokument),
+            mapPoststed(org, personDokument),
+            mapLandForAdresse(org, personDokument),
             null
         );
     }
