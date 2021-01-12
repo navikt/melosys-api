@@ -1,7 +1,5 @@
 package no.nav.melosys.service.avklartefakta;
 
-import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VIRKSOMHET;
-
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -22,6 +20,8 @@ import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+
+import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VIRKSOMHET;
 
 @Service
 @Primary
@@ -93,25 +93,26 @@ public class AvklarteVirksomheterService {
         return norskeVirksomheter;
     }
 
-    public void lagreVirksomheterSomAvklartefakta(List<String> virksomhetIDer, Long behandlingID) throws FunksjonellException, TekniskException {
-        erVirksomhetIDerGyldige(virksomhetIDer, behandlingID);
+    public void lagreVirksomheterSomAvklartefakta(List<String> virksomhetIDer,
+                                                  Long behandlingID) throws FunksjonellException, TekniskException {
+        validerVirksomhetIDerGyldige(virksomhetIDer, behandlingID);
         for (String virksomhetID : virksomhetIDer) {
             lagreVirksomhetSomAvklartfakta(virksomhetID, behandlingID);
         }
     }
 
-    public void lagreVirksomhetSomAvklartfakta(String virksomhetID, Long behandlingID) throws FunksjonellException, TekniskException {
+    public void lagreVirksomhetSomAvklartfakta(String virksomhetID, Long behandlingID) throws FunksjonellException {
         avklartefaktaService.leggTilAvklarteFakta(behandlingID, VIRKSOMHET, VIRKSOMHET.getKode(), virksomhetID, "TRUE");
     }
 
-    private boolean erVirksomhetIDerGyldige(List<String> virksomhetIDer, Long behandlingID) throws FunksjonellException, TekniskException {
+    private void validerVirksomhetIDerGyldige(List<String> virksomhetIDer,
+                                                 Long behandlingID) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         for (String virksomhetID : virksomhetIDer) {
             if (!erVirksomhetIDGyldig(virksomhetID, behandling)) {
                 throw new FunksjonellException("VirksomhetID " + virksomhetID + " hører ikke til noen av arbeidsforholdene");
             }
         }
-        return true;
     }
 
     private boolean erVirksomhetIDGyldig(String virksomhetID, Behandling behandling) throws TekniskException {
