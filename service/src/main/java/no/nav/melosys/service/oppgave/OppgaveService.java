@@ -259,11 +259,6 @@ public class OppgaveService {
                 return true;
             }
         }
-        for (String fnr : behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().hentFnrMedfølgendeEktefelleSamboer()) {
-            if (tpsFasade.harStrengtFortroligAdresse(fnr)) {
-                return true;
-            }
-        }
         return false;
     }
 }

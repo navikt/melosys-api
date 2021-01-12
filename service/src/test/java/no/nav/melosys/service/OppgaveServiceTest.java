@@ -222,23 +222,6 @@ public class OppgaveServiceTest {
         verify(oppgaveFasade).opprettSensitivOppgave(any(Oppgave.class));
     }
 
-    @Test
-    public void opprettEllerGjenbrukBehandlingsoppgave_ektefelleSamboerHarBeskyttelsesbehov_sensitivOppgaveBlirOpprettet() throws FunksjonellException, TekniskException {
-        Behandling behandling = lagBehandling();
-        behandling.setFagsak(new Fagsak());
-        behandling.getFagsak().setSaksnummer("MEL-11111");
-        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
-        behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().personOpplysninger.medfolgendeFamilie
-            = List.of(MedfolgendeFamilie.tilEktefelleSamboerFraFnrOgNavn("fnrEktefelleSamboer", null));
-        when(tpsFasade.harStrengtFortroligAdresse("fnrEktefelleSamboer")).thenReturn(true);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-
-        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
-        verify(oppgaveFasade, never()).opprettOppgave(any(Oppgave.class));
-        verify(oppgaveFasade).opprettSensitivOppgave(any(Oppgave.class));
-    }
-
     private static Behandling lagBehandling() {
         Set<Saksopplysning> saksopplysninger = new HashSet<>();
 
