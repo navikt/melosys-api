@@ -65,7 +65,7 @@
         <logback.version>1.2.3</logback.version>
         <logstash.version>6.6</logstash.version>
         <hikaricp.version>3.3.0</hikaricp.version>
-        <ibmmq.version>9.0.5.0</ibmmq.version>
+        <ibmmq.version>9.2.1.0</ibmmq.version>
         <javax.ws.rs-api.version>2.1</javax.ws.rs-api.version>
         <json-smart.version>2.3</json-smart.version>
         <jms-api.version>2.0.1</jms-api.version>
