@@ -8,13 +8,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 
 public enum Lovvalgsbestemmelse {
     ART_11_3_a("11.3a"),
     ART_11_3_b("11.3b"),
     ART_11_4("11.4"),
-    ART_11_5("11.5"),
     ART_12_1("12.1"),
     ART_12_2("12.2"),
     ART_13_1("13.1"),
@@ -28,7 +26,6 @@ public enum Lovvalgsbestemmelse {
             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A, Lovvalgsbestemmelse.ART_11_3_a)
             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B, Lovvalgsbestemmelse.ART_11_3_b)
             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2, Lovvalgsbestemmelse.ART_11_4)
-            .put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5, Lovvalgsbestemmelse.ART_11_5)
             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Lovvalgsbestemmelse.ART_12_1)
             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2, Lovvalgsbestemmelse.ART_12_2)
             .put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, Lovvalgsbestemmelse.ART_13_1)

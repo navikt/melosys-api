@@ -4,7 +4,6 @@ import java.util.Set;
 
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -31,7 +30,6 @@ class LovvalgsbestemmelseTest {
         Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A,
         Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B,
         Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2,
-        Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5,
         Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1,
         Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2,
         Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A,
