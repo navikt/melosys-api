@@ -13,28 +13,19 @@ public class MedfolgendeFamilie {
     }
 
     public static MedfolgendeFamilie tilBarnFraFnrOgNavn(String fnr, String navn) {
-        return tilBarnFraUuidFnrOgNavn(UUID.randomUUID().toString(), fnr, navn);
+        return tilMedfolgendeFamilie(UUID.randomUUID().toString(), fnr, navn, Relasjonsrolle.BARN);
     }
 
     public static MedfolgendeFamilie tilEktefelleSamboerFraFnrOgNavn(String fnr, String navn) {
-        return tilEktefelleSamboerFraUuidFnrOgNavn(UUID.randomUUID().toString(), fnr, navn);
+        return tilMedfolgendeFamilie(UUID.randomUUID().toString(), fnr, navn, Relasjonsrolle.EKTEFELLE_SAMBOER);
     }
 
-    public static MedfolgendeFamilie tilBarnFraUuidFnrOgNavn(String uuid, String fnr, String navn) {
+    public static MedfolgendeFamilie tilMedfolgendeFamilie(String uuid, String fnr, String navn, Relasjonsrolle rolle) {
         MedfolgendeFamilie medfolgendeFamilie = new MedfolgendeFamilie();
         medfolgendeFamilie.uuid = uuid;
         medfolgendeFamilie.fnr = fnr;
         medfolgendeFamilie.navn = navn;
-        medfolgendeFamilie.relasjonsrolle = Relasjonsrolle.BARN;
-        return medfolgendeFamilie;
-    }
-
-    public static MedfolgendeFamilie tilEktefelleSamboerFraUuidFnrOgNavn(String uuid, String fnr, String navn) {
-        MedfolgendeFamilie medfolgendeFamilie = new MedfolgendeFamilie();
-        medfolgendeFamilie.uuid = uuid;
-        medfolgendeFamilie.fnr = fnr;
-        medfolgendeFamilie.navn = navn;
-        medfolgendeFamilie.relasjonsrolle = Relasjonsrolle.EKTEFELLE_SAMBOER;
+        medfolgendeFamilie.relasjonsrolle = rolle;
         return medfolgendeFamilie;
     }
 
