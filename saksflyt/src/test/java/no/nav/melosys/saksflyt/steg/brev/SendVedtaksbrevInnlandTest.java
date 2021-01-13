@@ -63,7 +63,6 @@ class SendVedtaksbrevInnlandTest {
     private static final long ART13_1B1_UTPEKING_BEHANDLINGSID = 53L;
 
     private static DokumentSystemService dokService;
-    private static DokumentServiceFasade dokumentServiceFasade;
 
     private static SendVedtaksbrevInnland lagStegbehandler(Behandling behandling) throws Exception {
         String saksbehandler = "Z123456";
@@ -100,7 +99,7 @@ class SendVedtaksbrevInnlandTest {
         when(byggerVelger.hent(eq(ORIENTERING_UTPEKING_UTLAND), any())).thenReturn(brevDataByggerUtpekingAnnetLand);
 
         dokService = spy(lagDokumentService(byggerVelger));
-        dokumentServiceFasade = new DokumentServiceFasade(mock(DokumentService.class), dokService, mock(DokgenService.class),
+        DokumentServiceFasade dokumentServiceFasade = new DokumentServiceFasade(mock(DokumentService.class), dokService, mock(DokgenService.class),
             mock(BehandlingService.class), mock(ProsessinstansService.class), mock(BrevmottakerService.class), mock(ApplicationEventPublisher.class));
         BrevBestiller brevBestiller = new BrevBestiller(dokumentServiceFasade);
 
@@ -383,14 +382,14 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    void utfør_utenlandskForetak_innvilgelseSendesTilSkatteoppkreverUtland() throws Exception {
+    void utfør_utenlandskForetak_innvilgelseSendesTilStatligSkatteoppkreving() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(ART13_1A_INNVILGET_BEHANDLINGSID);
         prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(new ForetakUtland());
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
 
         instans.utfør(prosessinstans);
 
-        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV_FLERE_LAND), eq(FastMottaker.av(SKATTEOPPKREVER_UTLAND)), anyLong(), any());
+        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV_FLERE_LAND), eq(FastMottaker.av(STATLIG_SKATTEOPPKREVING)), anyLong(), any());
     }
 
     @Test
@@ -404,26 +403,26 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    void utfør_innvilgelsesMedForetakUtland_senderInnvilgelseTilSkatteoppkreverUtland() throws Exception {
+    void utfør_innvilgelsesMedForetakUtland_senderInnvilgelseTilStatligSkatteoppkreving() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_UTENLANDSK_VIRKSOMHET_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(new ForetakUtland());
         instans.utfør(prosessinstans);
 
-        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV), eq(FastMottaker.av(SKATTEOPPKREVER_UTLAND)), anyLong(), any());
+        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV), eq(FastMottaker.av(STATLIG_SKATTEOPPKREVING)), anyLong(), any());
     }
 
     @Test
-    void utfør_innvilgelses161_senderIkkeBrevTilSkatteoppkreverUtland() throws Exception {
+    void utfør_innvilgelses161_senderIkkeBrevTilStatligSkatteoppkreving() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utfør(prosessinstans);
 
-        verify(dokService, never()).produserDokument(any(), eq(FastMottaker.av(SKATTEOPPKREVER_UTLAND)), anyLong(), any());
+        verify(dokService, never()).produserDokument(any(), eq(FastMottaker.av(STATLIG_SKATTEOPPKREVING)), anyLong(), any());
     }
 
     @Test
-    void utfør_innvilgelse161MedUtenlandskSelvstendigArbeid_senderIkkeBrevTilSkatteoppkreverUtland() throws Exception {
+    void utfør_innvilgelse161MedUtenlandskSelvstendigArbeid_senderIkkeBrevTilStatligSkatteoppkreving() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
 
@@ -433,11 +432,11 @@ class SendVedtaksbrevInnlandTest {
 
         instans.utfør(prosessinstans);
 
-        verify(dokService, never()).produserDokument(any(), eq(FastMottaker.av(SKATTEOPPKREVER_UTLAND)), anyLong(), any());
+        verify(dokService, never()).produserDokument(any(), eq(FastMottaker.av(STATLIG_SKATTEOPPKREVING)), anyLong(), any());
     }
 
     @Test
-    void utfør_innvilgelse161MedForetakUtlandOgUtenlandskSelvstendigArbeid_senderIkkeBrevTilSkatteoppkreverUtland() throws Exception {
+    void utfør_innvilgelse161MedForetakUtlandOgUtenlandskSelvstendigArbeid_senderIkkeBrevTilStatligSkatteoppkreving() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
 
@@ -448,7 +447,7 @@ class SendVedtaksbrevInnlandTest {
 
         instans.utfør(prosessinstans);
 
-        verify(dokService, never()).produserDokument(any(), eq(FastMottaker.av(SKATTEOPPKREVER_UTLAND)), anyLong(), any());
+        verify(dokService, never()).produserDokument(any(), eq(FastMottaker.av(STATLIG_SKATTEOPPKREVING)), anyLong(), any());
     }
 
     @Test

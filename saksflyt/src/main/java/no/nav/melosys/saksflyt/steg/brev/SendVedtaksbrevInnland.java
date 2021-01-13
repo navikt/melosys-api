@@ -130,8 +130,8 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             ? INNVILGELSE_YRKESAKTIV_FLERE_LAND : INNVILGELSE_YRKESAKTIV;
 
         List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.av(BRUKER), FastMottaker.av(SKATT)));
-        if (skalSendesTilSkatteoppkreverUtland(behandling.getBehandlingsgrunnlag())) {
-            mottakerListe.add(FastMottaker.av(SKATTEOPPKREVER_UTLAND));
+        if (skalSendesTilStatligSkatteoppkreving(behandling.getBehandlingsgrunnlag())) {
+            mottakerListe.add(FastMottaker.av(STATLIG_SKATTEOPPKREVING));
         }
 
         DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProdserbartDokument(innvilgelseType)
@@ -166,7 +166,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         }
     }
 
-    private static boolean skalSendesTilSkatteoppkreverUtland(Behandlingsgrunnlag behandlingsgrunnlag) {
+    private static boolean skalSendesTilStatligSkatteoppkreving(Behandlingsgrunnlag behandlingsgrunnlag) {
         return finnesForetakUtland(behandlingsgrunnlag)
             && !finnesUtenlandskSelvstendigForetak(behandlingsgrunnlag);
     }
