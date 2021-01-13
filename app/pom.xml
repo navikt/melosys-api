@@ -36,9 +36,9 @@
             <artifactId>sikkerhet</artifactId>
         </dependency>
         <dependency>
-        <groupId>no.nav.melosys</groupId>
-        <artifactId>melosys-statistikk</artifactId>
-    </dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>melosys-statistikk</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.oracle.jdbc</groupId>

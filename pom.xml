@@ -165,14 +165,14 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.melosys</groupId>
-                <artifactId>melosys-internt-kodeverk</artifactId>
-                <version>${melosys.internt.kodeverk.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>melosys-statistikk</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.melosys</groupId>
+                <artifactId>melosys-internt-kodeverk</artifactId>
+                <version>${melosys.internt.kodeverk.version}</version>
             </dependency>
 
             <!-- Eksterne biblioteker -->
