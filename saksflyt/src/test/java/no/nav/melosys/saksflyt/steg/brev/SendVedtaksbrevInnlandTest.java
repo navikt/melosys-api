@@ -382,17 +382,6 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    void utfør_utenlandskForetak_innvilgelseSendesTilStatligSkatteoppkreving() throws Exception {
-        Prosessinstans prosessinstans = lagProsessinstans(ART13_1A_INNVILGET_BEHANDLINGSID);
-        prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(new ForetakUtland());
-        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-
-        instans.utfør(prosessinstans);
-
-        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV_FLERE_LAND), eq(FastMottaker.av(STATLIG_SKATTEOPPKREVING)), anyLong(), any());
-    }
-
-    @Test
     void utfør_innvilgelses13_1A_senderIkkeInnvilgelseTilArbeidsgiver() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(ART13_1A_INNVILGET_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
@@ -403,18 +392,19 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    void utfør_innvilgelsesMedForetakUtland_senderInnvilgelseTilStatligSkatteoppkreving() throws Exception {
-        Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_UTENLANDSK_VIRKSOMHET_BEHANDLINGSID);
+    void utfør_innvilgelsesMedUtenlandskForetak_senderBrevTilStatligSkatteoppkreving() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART13_1A_INNVILGET_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(new ForetakUtland());
         instans.utfør(prosessinstans);
 
-        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV), eq(FastMottaker.av(STATLIG_SKATTEOPPKREVING)), anyLong(), any());
+        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV_FLERE_LAND), eq(FastMottaker.av(STATLIG_SKATTEOPPKREVING)), anyLong(), any());
     }
 
     @Test
-    void utfør_innvilgelses161_senderIkkeBrevTilStatligSkatteoppkreving() throws Exception {
-        Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_BEHANDLINGSID);
+    void utfør_innvilgelses12_senderIkkeBrevTilStatligSkatteoppkreving() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
+        prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(new ForetakUtland());
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utfør(prosessinstans);
 
