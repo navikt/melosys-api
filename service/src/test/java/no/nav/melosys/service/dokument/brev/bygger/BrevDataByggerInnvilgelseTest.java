@@ -198,8 +198,8 @@ public class BrevDataByggerInnvilgelseTest {
 
     @Test
     public void lag_medfølgendeBarnHarFnr_henterNavnFraTps() throws TekniskException, FunksjonellException {
-        MedfolgendeFamilie barn1 = MedfolgendeFamilie.tilBarnFraUuidFnrOgNavn(UUID.randomUUID().toString(), "fnr1", null);
-        MedfolgendeFamilie barn2 = MedfolgendeFamilie.tilBarnFraUuidFnrOgNavn(UUID.randomUUID().toString(), "fnr2", null);
+        MedfolgendeFamilie barn1 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), "fnr1", null, MedfolgendeFamilie.Relasjonsrolle.BARN);
+        MedfolgendeFamilie barn2 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), "fnr2", null, MedfolgendeFamilie.Relasjonsrolle.BARN);
         BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
         behandlingsgrunnlagData.personOpplysninger.medfolgendeFamilie.addAll(List.of(barn1, barn2));
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
@@ -223,8 +223,8 @@ public class BrevDataByggerInnvilgelseTest {
 
     @Test
     public void lag_medfølgendeBarnHarUuid_henterNavnFraBehandlingsgrunnlag() throws TekniskException, FunksjonellException {
-        MedfolgendeFamilie barn1 = MedfolgendeFamilie.tilBarnFraUuidFnrOgNavn(UUID.randomUUID().toString(), null, "Navn1");
-        MedfolgendeFamilie barn2 = MedfolgendeFamilie.tilBarnFraUuidFnrOgNavn(UUID.randomUUID().toString(), null, "Navn2");
+        MedfolgendeFamilie barn1 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn1", MedfolgendeFamilie.Relasjonsrolle.BARN);
+        MedfolgendeFamilie barn2 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn2", MedfolgendeFamilie.Relasjonsrolle.BARN);
         BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
         behandlingsgrunnlagData.personOpplysninger.medfolgendeFamilie.addAll(List.of(barn1, barn2));
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
@@ -246,7 +246,7 @@ public class BrevDataByggerInnvilgelseTest {
 
     @Test
     public void lag_omfattetBarnIkkeIBehandlingsgrunnlag_kasterException() {
-        MedfolgendeFamilie barn = MedfolgendeFamilie.tilBarnFraUuidFnrOgNavn(UUID.randomUUID().toString(), null, "Navn");
+        MedfolgendeFamilie barn = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn", MedfolgendeFamilie.Relasjonsrolle.BARN);
 
         when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(
             Set.of(new OmfattetBarn(barn.uuid)), Collections.emptySet()));
@@ -258,7 +258,7 @@ public class BrevDataByggerInnvilgelseTest {
 
     @Test
     public void lag_ikkeOmfattetBarnIkkeIBehandlingsgrunnlag_kasterException() {
-        MedfolgendeFamilie barn = MedfolgendeFamilie.tilBarnFraUuidFnrOgNavn(UUID.randomUUID().toString(), null, "Navn");
+        MedfolgendeFamilie barn = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn", MedfolgendeFamilie.Relasjonsrolle.BARN);
 
         when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(
             Collections.emptySet(), Set.of(new IkkeOmfattetBarn(barn.uuid, null, null))));

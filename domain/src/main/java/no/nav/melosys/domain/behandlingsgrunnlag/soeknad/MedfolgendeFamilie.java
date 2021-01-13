@@ -9,19 +9,23 @@ public class MedfolgendeFamilie {
     public Relasjonsrolle relasjonsrolle;
 
     public enum Relasjonsrolle {
-        BARN
+        BARN, EKTEFELLE_SAMBOER
     }
 
     public static MedfolgendeFamilie tilBarnFraFnrOgNavn(String fnr, String navn) {
-        return tilBarnFraUuidFnrOgNavn(UUID.randomUUID().toString(), fnr, navn);
+        return tilMedfolgendeFamilie(UUID.randomUUID().toString(), fnr, navn, Relasjonsrolle.BARN);
     }
 
-    public static MedfolgendeFamilie tilBarnFraUuidFnrOgNavn(String uuid, String fnr, String navn) {
+    public static MedfolgendeFamilie tilEktefelleSamboerFraFnrOgNavn(String fnr, String navn) {
+        return tilMedfolgendeFamilie(UUID.randomUUID().toString(), fnr, navn, Relasjonsrolle.EKTEFELLE_SAMBOER);
+    }
+
+    public static MedfolgendeFamilie tilMedfolgendeFamilie(String uuid, String fnr, String navn, Relasjonsrolle rolle) {
         MedfolgendeFamilie medfolgendeFamilie = new MedfolgendeFamilie();
         medfolgendeFamilie.uuid = uuid;
         medfolgendeFamilie.fnr = fnr;
         medfolgendeFamilie.navn = navn;
-        medfolgendeFamilie.relasjonsrolle = Relasjonsrolle.BARN;
+        medfolgendeFamilie.relasjonsrolle = rolle;
         return medfolgendeFamilie;
     }
 
@@ -35,5 +39,9 @@ public class MedfolgendeFamilie {
 
     public boolean erBarn() {
         return relasjonsrolle == Relasjonsrolle.BARN;
+    }
+
+    public boolean erEktefelleSamboer() {
+        return relasjonsrolle == Relasjonsrolle.EKTEFELLE_SAMBOER;
     }
 }
