@@ -72,7 +72,7 @@ public class VedtakServiceTest {
     @Mock
     private AvklartefaktaService avklartefaktaService;
     @Mock
-    private ApplicationEventMulticaster melosysHendelseMulticaster;
+    private ApplicationEventMulticaster melosysEventMulticaster;
 
     private VedtakService vedtakService;
 
@@ -87,7 +87,7 @@ public class VedtakServiceTest {
     @Before
     public void setUp() throws Exception {
         vedtakService = new VedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService,
-            eessiService, landvelgerService, tpsFasade, registeropplysningerService, vedtakKontrollService, avklartefaktaService, melosysHendelseMulticaster);
+            eessiService, landvelgerService, tpsFasade, registeropplysningerService, vedtakKontrollService, avklartefaktaService, melosysEventMulticaster);
         SpringSubjectHandler.set(new TestSubjectHandler());
 
         behandlingID = 1L;

@@ -66,7 +66,7 @@ public class UtpekingServiceTest {
     @Mock
     private VedtakKontrollService vedtakKontrollService;
     @Mock
-    private ApplicationEventMulticaster melosysHendelseMulticaster;
+    private ApplicationEventMulticaster melosysEventMulticaster;
 
     @Captor
     private ArgumentCaptor<Collection<Lovvalgsperiode>> lovvalgsperiodeCaptor;
@@ -83,7 +83,7 @@ public class UtpekingServiceTest {
     @Before
     public void setup() throws FunksjonellException {
         utpekingService = new UtpekingService(behandlingService, behandlingsresultatService, eessiService, landvelgerService,
-            lovvalgsperiodeService, oppgaveService, prosessinstansService, utpekingsperiodeRepository, vedtakKontrollService, melosysHendelseMulticaster);
+            lovvalgsperiodeService, oppgaveService, prosessinstansService, utpekingsperiodeRepository, vedtakKontrollService, melosysEventMulticaster);
 
         fagsak.setBehandlinger(List.of(behandling));
         behandling.setId(behandlingID);

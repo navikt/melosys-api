@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.VedtakMetadataLagretEvent;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -26,7 +27,6 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.hendelser.VedtakMetadataLagretHendelse;
 import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
@@ -56,7 +56,7 @@ public class VedtakService {
     private final RegisteropplysningerService registeropplysningerService;
     private final VedtakKontrollService vedtakKontrollService;
     private final AvklartefaktaService avklartefaktaService;
-    private final ApplicationEventMulticaster melosysHendelseMulticaster;
+    private final ApplicationEventMulticaster melosysEventMulticaster;
 
     public static final int FRIST_KLAGE_UKER = 6;
 
@@ -66,7 +66,7 @@ public class VedtakService {
                          EessiService eessiService, LandvelgerService landvelgerService,
                          TpsFasade tpsFasade, RegisteropplysningerService registeropplysningerService,
                          VedtakKontrollService vedtakKontrollService, AvklartefaktaService avklartefaktaService,
-                         ApplicationEventMulticaster melosysHendelseMulticaster) {
+                         ApplicationEventMulticaster melosysEventMulticaster) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
@@ -77,7 +77,7 @@ public class VedtakService {
         this.registeropplysningerService = registeropplysningerService;
         this.vedtakKontrollService = vedtakKontrollService;
         this.avklartefaktaService = avklartefaktaService;
-        this.melosysHendelseMulticaster = melosysHendelseMulticaster;
+        this.melosysEventMulticaster = melosysEventMulticaster;
     }
 
     @Transactional(rollbackFor = MelosysException.class, noRollbackFor = {ValideringException.class})
@@ -127,7 +127,7 @@ public class VedtakService {
         behandlingsresultat.setFastsattAvLand(Landkoder.NO);
         behandlingsresultatService.lagre(behandlingsresultat);
 
-        melosysHendelseMulticaster.multicastEvent(new VedtakMetadataLagretHendelse(this, behandling.getId()));
+        melosysEventMulticaster.multicastEvent(new VedtakMetadataLagretEvent(behandling.getId()));
     }
 
     private void validerInnvilgelse(Vedtakstyper vedtakstype,

@@ -23,7 +23,6 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.hendelser.VedtakMetadataLagretHendelse;
 import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -49,14 +48,14 @@ public class UtpekingService {
     private final ProsessinstansService prosessinstansService;
     private final UtpekingsperiodeRepository utpekingsperiodeRepository;
     private final VedtakKontrollService vedtakKontrollService;
-    private final ApplicationEventMulticaster melosysHendelseMulticaster;
+    private final ApplicationEventMulticaster melosysEventMulticaster;
 
     public UtpekingService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
                            EessiService eessiService, LandvelgerService landvelgerService,
                            LovvalgsperiodeService lovvalgsperiodeService, OppgaveService oppgaveService,
                            ProsessinstansService prosessinstansService,
                            UtpekingsperiodeRepository utpekingsperiodeRepository, VedtakKontrollService vedtakKontrollService,
-                           ApplicationEventMulticaster melosysHendelseMulticaster) {
+                           ApplicationEventMulticaster melosysEventMulticaster) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.eessiService = eessiService;
@@ -66,7 +65,7 @@ public class UtpekingService {
         this.prosessinstansService = prosessinstansService;
         this.utpekingsperiodeRepository = utpekingsperiodeRepository;
         this.vedtakKontrollService = vedtakKontrollService;
-        this.melosysHendelseMulticaster = melosysHendelseMulticaster;
+        this.melosysEventMulticaster = melosysEventMulticaster;
     }
 
     public Collection<Utpekingsperiode> hentUtpekingsperioder(long behandlingID) {
@@ -133,7 +132,7 @@ public class UtpekingService {
         behandlingsresultat.settVedtakMetadata(Vedtakstyper.FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(VedtakService.FRIST_KLAGE_UKER));
         behandlingsresultatService.lagre(behandlingsresultat);
 
-        melosysHendelseMulticaster.multicastEvent(new VedtakMetadataLagretHendelse(this, behandlingsresultat.getId()));
+        melosysEventMulticaster.multicastEvent(new VedtakMetadataLagretEvent(behandlingsresultat.getId()));
     }
 
     private void opprettLovvalgsperiode(long behandlingID, Utpekingsperiode utpekingsperiode) {

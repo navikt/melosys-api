@@ -28,8 +28,8 @@ public class VedtakSystemService extends VedtakService {
                                RegisteropplysningerService registeropplysningerService,
                                VedtakKontrollService vedtakKontrollService,
                                AvklartefaktaService avklartefaktaService,
-                               ApplicationEventMulticaster melosysHendelseMulticaster) {
+                               ApplicationEventMulticaster melosysEventMulticaster) {
         super(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService,
-            eessiService, landvelgerService, tpsFasade, registeropplysningerService, vedtakKontrollService, avklartefaktaService, melosysHendelseMulticaster);
+            eessiService, landvelgerService, tpsFasade, registeropplysningerService, vedtakKontrollService, avklartefaktaService, melosysEventMulticaster);
     }
 }
