@@ -121,7 +121,7 @@ class MedlemskapsperiodeTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentBestemmelserMedVilkår_validerSchema() throws IOException {
+    void hentBestemmelserMedVilkår_validerSchema() throws Exception {
         when(opprettMedlemskapsperiodeService.hentBestemmelserMedVilkaar()).thenCallRealMethod();
         when(opprettMedlemskapsperiodeService.hentMuligeBegrunnelser(any(Vilkaar.class))).thenCallRealMethod();
         validerArray(medlemskapsperiodeTjeneste.hentBestemmelserMedVilkaar().getBody(), MEDLEMSKAPSPERIODER_BESTEMMELSE_SCHEMA);

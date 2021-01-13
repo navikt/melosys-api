@@ -13,7 +13,7 @@
         "fom": "2020-10-09",
         "tom": "2020-11-09"
       },
-      "utstasjoneringTilLand": "SE",
+      "utsendtTilLand": "SE",
       "datoUtstedelse": "2020-10-09",
       "typeUtstedelse": "FØRSTEGANG",
       "meldingOpprettetTidspunkt": "2020-10-09T10:15:24.064758"
@@ -26,7 +26,7 @@
     "aktorId",
     "artikkel",
     "periode",
-    "utstasjoneringTilLand",
+    "utsendtTilLand",
     "datoUtstedelse",
     "typeUtstedelse",
     "meldingOpprettetTidspunkt"
@@ -96,11 +96,11 @@
       },
       "additionalProperties": false
     },
-    "utstasjoneringTilLand": {
-      "$id": "#/properties/utstasjoneringTilLand",
+    "utsendtTilLand": {
+      "$id": "#/properties/utsendtTilLand",
       "type": ["string", "null"],
       "maxLength": 2,
-      "description": "Landkode hvor aktør er utstasjonert (art. 12)"
+      "description": "Landkode for land A1 er utstedt til (art. 12)"
     },
     "datoUtstedelse": {
       "$id": "#/properties/datoUtstedelse",

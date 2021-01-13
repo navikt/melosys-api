@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingStatistikk;
 import no.nav.melosys.service.statistikk.StatistikkService;
 import no.nav.melosys.tjenester.gui.dto.statistikk.StatistikkDto;
@@ -23,7 +24,7 @@ class StatistikkTjenesteTest extends JsonSchemaTestParent {
     StatistikkService statistikkService;
 
     @Test
-    void hentStatistikk_schemaValidert() throws IOException {
+    void hentStatistikk_schemaValidert() throws IOException, TekniskException {
         StatistikkTjeneste statistikkTjeneste = new StatistikkTjeneste(statistikkService);
         when(statistikkService.hentBehandlingstatistikk()).thenReturn(lagBehandlingStatistikk());
 

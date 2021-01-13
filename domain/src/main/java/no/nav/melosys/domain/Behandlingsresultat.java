@@ -380,6 +380,9 @@ public class Behandlingsresultat extends RegistreringsInfo {
             && utfallRegistreringUnntak == Utfallregistreringunntak.GODKJENT;
     }
 
+    public boolean a1Produseres() {
+        return erInnvilgelse() && !erUtpeking() && harVedtak();
+    }
 
     public void settVedtakMetadata(Vedtakstyper vedtakstype,
                                    String revurderBegrunnelse,

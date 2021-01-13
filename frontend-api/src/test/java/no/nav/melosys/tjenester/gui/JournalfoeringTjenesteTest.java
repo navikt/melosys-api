@@ -1,7 +1,5 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.io.IOException;
-
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -90,7 +88,7 @@ class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void journalførSedSchemaValidering() throws IOException {
+    void journalførSedSchemaValidering() throws Exception {
         JournalfoeringSedDto journalfoeringSedDto = new JournalfoeringSedDto();
         journalfoeringSedDto.setOppgaveID("123123");
         journalfoeringSedDto.setBrukerID(SAMPLE_FNR);

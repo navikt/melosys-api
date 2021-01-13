@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.VedtakMetadataLagretEvent;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -35,6 +36,7 @@ import no.nav.melosys.service.validering.Kontrollfeil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,6 +56,7 @@ public class VedtakService {
     private final RegisteropplysningerService registeropplysningerService;
     private final VedtakKontrollService vedtakKontrollService;
     private final AvklartefaktaService avklartefaktaService;
+    private final ApplicationEventMulticaster melosysEventMulticaster;
 
     public static final int FRIST_KLAGE_UKER = 6;
 
@@ -62,7 +65,8 @@ public class VedtakService {
                          OppgaveService oppgaveService, ProsessinstansService prosessinstansService,
                          EessiService eessiService, LandvelgerService landvelgerService,
                          TpsFasade tpsFasade, RegisteropplysningerService registeropplysningerService,
-                         VedtakKontrollService vedtakKontrollService, AvklartefaktaService avklartefaktaService) {
+                         VedtakKontrollService vedtakKontrollService, AvklartefaktaService avklartefaktaService,
+                         ApplicationEventMulticaster melosysEventMulticaster) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
@@ -73,6 +77,7 @@ public class VedtakService {
         this.registeropplysningerService = registeropplysningerService;
         this.vedtakKontrollService = vedtakKontrollService;
         this.avklartefaktaService = avklartefaktaService;
+        this.melosysEventMulticaster = melosysEventMulticaster;
     }
 
     @Transactional(rollbackFor = MelosysException.class, noRollbackFor = {ValideringException.class})
@@ -121,6 +126,8 @@ public class VedtakService {
         behandlingsresultat.setBegrunnelseFritekst(behandlingresultatBegrunnelseFritekst);
         behandlingsresultat.setFastsattAvLand(Landkoder.NO);
         behandlingsresultatService.lagre(behandlingsresultat);
+
+        melosysEventMulticaster.multicastEvent(new VedtakMetadataLagretEvent(behandling.getId()));
     }
 
     private void validerInnvilgelse(Vedtakstyper vedtakstype,
