@@ -171,10 +171,10 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         }
     }
 
-    private static boolean brevSendesTilStatligSkatteoppkreving(Lovvalgsperiode lovvalgsperiode, Behandlingsgrunnlag behandlingsgrunnlag) {
+    private static boolean brevSendesTilStatligSkatteoppkreving(Lovvalgsperiode lovvalgsperiode,
+                                                                Behandlingsgrunnlag behandlingsgrunnlag) {
         return harArtikkelRelevantForStatligSkatteoppkreving(lovvalgsperiode)
-            && finnesForetakUtland(behandlingsgrunnlag)
-            && !finnesUtenlandskSelvstendigForetak(behandlingsgrunnlag);
+            && finnesForetakUtland(behandlingsgrunnlag);
     }
 
     public static boolean harArtikkelRelevantForStatligSkatteoppkreving(Lovvalgsperiode lovvalgsperiode) {
@@ -186,11 +186,6 @@ public class SendVedtaksbrevInnland implements StegBehandler {
 
     private static boolean finnesForetakUtland(Behandlingsgrunnlag behandlingsgrunnlag) {
         return !behandlingsgrunnlag.getBehandlingsgrunnlagdata().foretakUtland.isEmpty();
-    }
-
-    private static boolean finnesUtenlandskSelvstendigForetak(Behandlingsgrunnlag behandlingsgrunnlag) {
-        return behandlingsgrunnlag.getBehandlingsgrunnlagdata().foretakUtland.stream()
-            .anyMatch(foretakUtland -> Boolean.TRUE.equals(foretakUtland.selvstendigNæringsvirksomhet));
     }
 
     private String hentBegrunnelseKode(Prosessinstans prosessinstans) {

@@ -412,35 +412,6 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    void utfør_innvilgelse161MedUtenlandskSelvstendigArbeid_senderIkkeBrevTilStatligSkatteoppkreving() throws Exception {
-        Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_BEHANDLINGSID);
-        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-
-        ForetakUtland utenlandskSelvstendigArbeid = new ForetakUtland();
-        utenlandskSelvstendigArbeid.selvstendigNæringsvirksomhet = Boolean.TRUE;
-        prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(utenlandskSelvstendigArbeid);
-
-        instans.utfør(prosessinstans);
-
-        verify(dokService, never()).produserDokument(any(), eq(FastMottaker.av(STATLIG_SKATTEOPPKREVING)), anyLong(), any());
-    }
-
-    @Test
-    void utfør_innvilgelse161MedForetakUtlandOgUtenlandskSelvstendigArbeid_senderIkkeBrevTilStatligSkatteoppkreving() throws Exception {
-        Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_BEHANDLINGSID);
-        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-
-        ForetakUtland utenlandskSelvstendigArbeid = new ForetakUtland();
-        utenlandskSelvstendigArbeid.selvstendigNæringsvirksomhet = Boolean.TRUE;
-        prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(utenlandskSelvstendigArbeid);
-        prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(new ForetakUtland());
-
-        instans.utfør(prosessinstans);
-
-        verify(dokService, never()).produserDokument(any(), eq(FastMottaker.av(STATLIG_SKATTEOPPKREVING)), anyLong(), any());
-    }
-
-    @Test
     void utfør_innvilgelses12_senderInnvilgelseTilArbeidsgiver() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
