@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.VedtakMetadataRepository;
@@ -47,7 +46,7 @@ class UtstedtA1AdminTjenesteTest {
 
     @Test
     void publiserEksisterendeBehandlinger_forventListe() throws Exception {
-        when(vedtakMetadataRepository.findBehandlingIdByRegistrertDatoIsGreaterThanEqual(anyInstant()))
+        when(vedtakMetadataRepository.findBehandlingsresultatIdByRegistrertDatoIsGreaterThanEqual(anyInstant()))
             .thenReturn(List.of(1L, 2L, 3L));
 
         Map<String, Set<Long>> behandlinger = utstedtA1AdminTjeneste.publiserEksisterendeBehandlinger(apiKey, LocalDate.now()).getBody();
@@ -59,7 +58,7 @@ class UtstedtA1AdminTjenesteTest {
 
     @Test
     void publiserEksisterendeBehandlinger_medOppgitteBehandlingerOgBehandlingFeiler_forventListe() throws Exception {
-        when(vedtakMetadataRepository.findBehandlingIdByRegistrertDatoIsGreaterThanEqual(anyInstant()))
+        when(vedtakMetadataRepository.findBehandlingsresultatIdByRegistrertDatoIsGreaterThanEqual(anyInstant()))
             .thenReturn(List.of(1L, 2L, 3L));
         doNothing().when(utstedtA1Service).sendMeldingOmUtstedtA1(or(eq(1L), eq(2L)));
         doThrow(new TekniskException("ugyldig behandling")).when(utstedtA1Service).sendMeldingOmUtstedtA1(3L);
@@ -79,12 +78,6 @@ class UtstedtA1AdminTjenesteTest {
         assertThatExceptionOfType(SikkerhetsbegrensningException.class)
             .isThrownBy(() -> utstedtA1AdminTjeneste.publiserEksisterendeBehandlinger("Dumdum", LocalDate.now()))
             .withMessageContaining("apikey");
-    }
-
-    private Behandling lagBehandling(Long behandlingID) {
-        Behandling behandling = new Behandling();
-        behandling.setId(behandlingID);
-        return behandling;
     }
 
     private static Instant anyInstant() {
