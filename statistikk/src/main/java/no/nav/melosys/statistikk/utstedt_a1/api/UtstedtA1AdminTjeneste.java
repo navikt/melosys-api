@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
@@ -58,12 +59,14 @@ public class UtstedtA1AdminTjeneste implements AdminTjeneste {
     @PostMapping("/publiserMelding/eksisterendeBehandlinger")
     public ResponseEntity<Map<String, Set<Long>>> publiserEksisterendeBehandlinger(
         @RequestHeader(API_KEY_HEADER) String apiKey,
-        @RequestParam("fom") LocalDate fom
+        @RequestParam("fom") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fom
     ) throws SikkerhetsbegrensningException {
         validerApikey(apiKey);
         return ResponseEntity.ok(
             publiserEksisterendeBehandlinger(vedtakMetadataRepository
-                .findBehandlingIdByRegistrertDatoIsGreaterThanEqual(fom.atStartOfDay(ZoneId.systemDefault()).toInstant())));
+                .findBehandlingsresultatIdByRegistrertDatoIsGreaterThanEqual(
+                    fom.atStartOfDay(ZoneId.systemDefault()).toInstant())
+            ));
     }
 
     private Map<String, Set<Long>> publiserEksisterendeBehandlinger(Collection<Long> eksisterendeBehandlinger) {
