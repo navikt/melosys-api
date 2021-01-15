@@ -174,7 +174,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     private static boolean brevSendesTilStatligSkatteoppkreving(Lovvalgsperiode lovvalgsperiode,
                                                                 Behandlingsgrunnlag behandlingsgrunnlag) {
         return harArtikkelRelevantForStatligSkatteoppkreving(lovvalgsperiode)
-            && finnesForetakUtland(behandlingsgrunnlag);
+            && finnesArbeidsgiverUtland(behandlingsgrunnlag);
     }
 
     public static boolean harArtikkelRelevantForStatligSkatteoppkreving(Lovvalgsperiode lovvalgsperiode) {
@@ -184,8 +184,10 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             || lovvalgsperiode.getBestemmelse() == FO_883_2004_ART16_1;
     }
 
-    private static boolean finnesForetakUtland(Behandlingsgrunnlag behandlingsgrunnlag) {
-        return !behandlingsgrunnlag.getBehandlingsgrunnlagdata().foretakUtland.isEmpty();
+    private static boolean finnesArbeidsgiverUtland(Behandlingsgrunnlag behandlingsgrunnlag) {
+        return !behandlingsgrunnlag.getBehandlingsgrunnlagdata().foretakUtland.isEmpty()
+            && behandlingsgrunnlag.getBehandlingsgrunnlagdata().foretakUtland.stream()
+            .anyMatch(foretakUtland -> Boolean.FALSE.equals(foretakUtland.selvstendigNæringsvirksomhet));
     }
 
     private String hentBegrunnelseKode(Prosessinstans prosessinstans) {
