@@ -1,7 +1,7 @@
 package no.nav.melosys.domain.behandlingsgrunnlag;
 
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ArbeidsgiversBekreftelse;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Arbeidsinntekt;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.ArbeidsgiversBekreftelse;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Arbeidsinntekt;
 
 public class Soeknad extends BehandlingsgrunnlagData {
 

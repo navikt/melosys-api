@@ -3,7 +3,7 @@ package no.nav.melosys.domain.behandlingsgrunnlag;
 import java.util.Collections;
 import java.util.Set;
 
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.SelvstendigForetak;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.SelvstendigForetak;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
