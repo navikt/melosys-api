@@ -11,15 +11,20 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForGet;
+import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPost;
+import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPut;
 import no.nav.tjenester.medlemskapsunntak.api.v1.Sporingsinformasjon;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import static no.nav.melosys.integrasjon.medl.MedlPeriodeKonverter.*;
 
 @Service
 public class MedlRestService implements MedlFasade {
@@ -48,7 +53,7 @@ public class MedlRestService implements MedlFasade {
             Medlemsperiode medlemsperiode = new Medlemsperiode();
             medlemsperiode.id = m.getUnntakId();
             medlemsperiode.periode = new Periode(m.getFraOgMed(), m.getTilOgMed());
-            medlemsperiode.type = m.getMedlem() ? "PMMEDSKP" : "PUMEDSKP"; //NOTE Sjekke at dette blir rett
+            medlemsperiode.type = m.getMedlem() ? "PMMEDSKP" : "PUMEDSKP";
             medlemsperiode.status = m.getStatus();
             medlemsperiode.grunnlagstype = m.getGrunnlag();
             medlemsperiode.land = m.getLovvalgsland();
@@ -78,32 +83,112 @@ public class MedlRestService implements MedlFasade {
     }
 
     @Override
-    public Long opprettPeriodeEndelig(String fnr, Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        throw new NotImplementedException("Ikke implementert");
+    public Long opprettPeriodeEndelig(String fnr, Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
+        return opprettPeriode(fnr, lovvalgsperiode, PeriodestatusMedl.GYLD, LovvalgMedl.ENDL, kildedokumenttypeMedl);
     }
 
     @Override
-    public Long opprettPeriodeUnderAvklaring(String fnr, PeriodeOmLovvalg periodeOmLovvalg, KildedokumenttypeMedl kildedokumenttypeMedl) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        throw new NotImplementedException("Ikke implementert");
+    public Long opprettPeriodeUnderAvklaring(String fnr, PeriodeOmLovvalg periodeOmLovvalg, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
+        return opprettPeriode(fnr, periodeOmLovvalg, PeriodestatusMedl.UAVK, LovvalgMedl.UAVK, kildedokumenttypeMedl);
     }
 
     @Override
-    public Long opprettPeriodeForeløpig(String fnr, PeriodeOmLovvalg periodeOmLovvalg, KildedokumenttypeMedl kildedokumenttypeMedl) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        throw new NotImplementedException("Ikke implementert");
+    public Long opprettPeriodeForeløpig(String fnr, PeriodeOmLovvalg periodeOmLovvalg, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
+        return opprettPeriode(fnr, periodeOmLovvalg, PeriodestatusMedl.UAVK, LovvalgMedl.FORL, kildedokumenttypeMedl);
     }
 
     @Override
     public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException, FunksjonellException {
-        throw new NotImplementedException("Ikke implementert");
+        oppdaterPeriode(lovvalgsperiode, PeriodestatusMedl.GYLD, LovvalgMedl.ENDL, kildedokumenttypeMedl);
     }
 
     @Override
-    public void oppdaterPeriodeForeløpig(Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws FunksjonellException, TekniskException {
-        throw new NotImplementedException("Ikke implementert");
+    public void oppdaterPeriodeForeløpig(Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
+        oppdaterPeriode(lovvalgsperiode, PeriodestatusMedl.UAVK, LovvalgMedl.FORL, kildedokumenttypeMedl);
     }
 
     @Override
     public void avvisPeriode(Long medlPeriodeID, StatusaarsakMedl årsak) throws SikkerhetsbegrensningException, IkkeFunnetException {
-        throw new NotImplementedException("Ikke implementert");
+        MedlemskapsunntakForGet eksisterendePeriode = hentEksisterendePeriode(medlPeriodeID);
+
+        MedlemskapsunntakForPut.SporingsinformasjonForPut sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut.builder()
+            .kildedokument(eksisterendePeriode.getSporingsinformasjon().getKildedokument())
+            .versjon(eksisterendePeriode.getSporingsinformasjon().getVersjon())
+            .build();
+
+        MedlemskapsunntakForPut request = MedlemskapsunntakForPut.builder()
+            .unntakId(eksisterendePeriode.getUnntakId())
+            .fraOgMed(eksisterendePeriode.getFraOgMed())
+            .tilOgMed(eksisterendePeriode.getTilOgMed())
+            .status(PeriodestatusMedl.AVST.getKode())
+            .statusaarsak(årsak.getKode())
+            .dekning(eksisterendePeriode.getDekning())
+            .lovvalgsland(eksisterendePeriode.getLovvalgsland())
+            .lovvalg(eksisterendePeriode.getLovvalg())
+            .grunnlag(eksisterendePeriode.getGrunnlag())
+            .sporingsinformasjon(sporingsinformasjon)
+            .build();
+
+        medlemskapRestConsumer.oppdaterPeriode(request);
+    }
+
+    private Long opprettPeriode(String fnr, PeriodeOmLovvalg periodeOmLovvalg, PeriodestatusMedl periodestatusMedl,
+                                LovvalgMedl lovvalgMedl, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
+
+        MedlemskapsunntakForPost.SporingsinformasjonForPost sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost.builder()
+            .kildedokument(kildedokumenttypeMedl.getKode())
+            .build();
+
+        LovvalgBestemmelse bestemmelse = hentLovvalgBestemmelse(periodeOmLovvalg);
+
+        MedlemskapsunntakForPost request = MedlemskapsunntakForPost.builder()
+            .ident(fnr)
+            .fraOgMed(periodeOmLovvalg.getFom())
+            .tilOgMed(periodeOmLovvalg.getTom())
+            .status(periodestatusMedl.getKode())
+            .dekning(tilMedlTrygdeDekning(periodeOmLovvalg.getDekning()).getKode())
+            .lovvalgsland(LandkoderUtils.tilIso3(periodeOmLovvalg.getLovvalgsland().getKode()))
+            .lovvalg(lovvalgMedl.getKode())
+            .grunnlag(tilGrunnlagMedltype(bestemmelse).getKode())
+            .sporingsinformasjon(sporingsinformasjon)
+            .build();
+
+        return medlemskapRestConsumer.opprettPeriode(request).getUnntakId();
+    }
+
+    private void oppdaterPeriode(Lovvalgsperiode lovvalgsperiode, PeriodestatusMedl periodestatusMedl,
+                                 LovvalgMedl lovvalgMedl, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
+
+        Long medlPeriodeID = lovvalgsperiode.getMedlPeriodeID();
+        if (medlPeriodeID == null) {
+            throw new TekniskException("Det er ikke lagret noen medlPeriodeID på lovvalgsperiode som skal oppdateres i MEDL");
+        }
+
+        MedlemskapsunntakForGet eksisterendePeriode = hentEksisterendePeriode(medlPeriodeID);
+
+        MedlemskapsunntakForPut.SporingsinformasjonForPut sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut.builder()
+            .kildedokument(kildedokumenttypeMedl.getKode())
+            .versjon(eksisterendePeriode.getSporingsinformasjon().getVersjon())
+            .build();
+
+        LovvalgBestemmelse bestemmelse = hentLovvalgBestemmelse(lovvalgsperiode);
+
+        MedlemskapsunntakForPut request = MedlemskapsunntakForPut.builder()
+            .unntakId(medlPeriodeID)
+            .fraOgMed(lovvalgsperiode.getFom())
+            .tilOgMed(lovvalgsperiode.getTom())
+            .status(periodestatusMedl.getKode())
+            .dekning(tilMedlTrygdeDekning(lovvalgsperiode.getDekning()).getKode())
+            .lovvalgsland(LandkoderUtils.tilIso3(lovvalgsperiode.getLovvalgsland().getKode()))
+            .lovvalg(lovvalgMedl.getKode())
+            .grunnlag(tilGrunnlagMedltype(bestemmelse).getKode())
+            .sporingsinformasjon(sporingsinformasjon)
+            .build();
+
+        medlemskapRestConsumer.oppdaterPeriode(request);
+    }
+
+    private MedlemskapsunntakForGet hentEksisterendePeriode(Long medlPeriodeID) {
+        return medlemskapRestConsumer.hentPeriode(medlPeriodeID.toString());
     }
 }
