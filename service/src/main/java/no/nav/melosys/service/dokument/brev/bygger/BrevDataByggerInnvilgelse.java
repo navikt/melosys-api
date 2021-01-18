@@ -9,7 +9,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MedfolgendeFamilie;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
-import no.nav.melosys.domain.familie.OmfattetBarn;
+import no.nav.melosys.domain.familie.OmfattetFamilie;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
@@ -128,7 +128,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
     private AvklarteMedfolgendeBarn hentAvklarteMedfølgendeBarn(long behandlingID) throws FunksjonellException, IntegrasjonException {
         AvklarteMedfolgendeBarn avklarteMedfolgendeBarn = avklartefaktaService.hentAvklarteMedfølgendeBarn(behandlingID);
         Map<String, MedfolgendeFamilie> medfølgendeBarn = hentMedfølgendeBarn(behandlingID);
-        for (OmfattetBarn omfattetBarn : avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd) {
+        for (OmfattetFamilie omfattetBarn : avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd) {
             if (!medfølgendeBarn.containsKey(omfattetBarn.uuid)) {
                 throw new FunksjonellException("Avklart medfølgende barn " + omfattetBarn.uuid + " finnes ikke i behandlingsgrunnlaget");
             }

@@ -14,6 +14,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.tjenester.gui.dto.AvklartefaktaOppsummeringDto;
+import no.nav.melosys.tjenester.gui.dto.MedfolgendeFamilieDto;
 import no.nav.melosys.tjenester.gui.dto.VirksomheterDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,6 +75,17 @@ public class AvklartefaktaTjeneste {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
 
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomheter.getVirksomhetIDer(), behandlingID);
+
+        return AvklartefaktaOppsummeringDto.av(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
+    }
+
+    @PostMapping("{behandlingID}/medfolgendeFamilie")
+    @ApiOperation(value = "Lagre medfolgendeFamilie som avklartefakta", response = AvklartefaktaOppsummeringDto.class)
+    public AvklartefaktaOppsummeringDto lagreMedfolgendeFamilieSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
+        @RequestBody MedfolgendeFamilieDto medfolgendeFamilieDto) throws TekniskException, FunksjonellException {
+        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
+
+        avklartefaktaService.lagreMedfolgendeFamilieSomAvklartefakta(medfolgendeFamilieDto.getAvklarteMedfolgendeBarnFtrl(), medfolgendeFamilieDto.getAvklarteMedfolgendeEktefelleSamboer(), behandlingID);
 
         return AvklartefaktaOppsummeringDto.av(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }

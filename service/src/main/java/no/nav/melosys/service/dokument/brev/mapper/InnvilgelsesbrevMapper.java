@@ -21,7 +21,7 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.Fartsomraade;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MaritimtArbeid;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
-import no.nav.melosys.domain.familie.OmfattetBarn;
+import no.nav.melosys.domain.familie.OmfattetFamilie;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
@@ -193,7 +193,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             .withBarnAvslag(barnAvslag).build();
     }
 
-    private static BarnInnvilgelseType lagBarnInnvilgelseType(OmfattetBarn omfattetBarn) {
+    private static BarnInnvilgelseType lagBarnInnvilgelseType(OmfattetFamilie omfattetBarn) {
         return BarnInnvilgelseType.builder().withBarnOmfattetAvNorskTrygd(omfattetBarn.sammensattNavn).build();
     }
 

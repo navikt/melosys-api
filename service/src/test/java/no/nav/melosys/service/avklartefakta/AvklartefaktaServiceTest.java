@@ -7,11 +7,16 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
+import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarnFtrl;
+import no.nav.melosys.domain.familie.AvklarteMedfolgendeEktefelleSamboer;
+import no.nav.melosys.domain.familie.IkkeOmfattetEktefelleSamboer;
+import no.nav.melosys.domain.familie.OmfattetFamilie;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
@@ -26,6 +31,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -292,6 +299,103 @@ public class AvklartefaktaServiceTest {
             .extracting("begrunnelse")
             .isEqualTo(List.of(Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER));
         assertThat(avklarteMedfølgendeBarn.hentBegrunnelseFritekst().orElse("")).isEqualTo("begrunnelseFritekst");
+    }
+
+    @Test
+    public void lagreMedfolgendeFamilieSomAvklartefakta_ikkeOmfattetFamilie_lagresKorrekt() throws FunksjonellException {
+        Set<IkkeOmfattetEktefelleSamboer> ikkeOmfattetEktefelleSamboers = Set.of(
+            new IkkeOmfattetEktefelleSamboer("uuid1", "SAMBOER_UTEN_FELLES_BARN", "fritekstForUuid7"));
+        AvklarteMedfolgendeEktefelleSamboer avklarteMedfolgendeEktefelleSamboer =
+            new AvklarteMedfolgendeEktefelleSamboer(Set.of(), ikkeOmfattetEktefelleSamboers);
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setId(1L);
+
+        Avklartefakta forventetAvklartefakta = new Avklartefakta();
+        forventetAvklartefakta.setSubjekt("uuid1");
+        forventetAvklartefakta.setType(Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER);
+        forventetAvklartefakta.setReferanse(Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER.getKode());
+        forventetAvklartefakta.setFakta("FALSE");
+        forventetAvklartefakta.setBegrunnelseFritekst("fritekstForUuid7");
+        forventetAvklartefakta.setBehandlingsresultat(behandlingsresultat);
+
+        AvklartefaktaRegistrering forventetRegistrering = new AvklartefaktaRegistrering();
+        forventetRegistrering.setAvklartefakta(forventetAvklartefakta);
+        forventetRegistrering.setBegrunnelseKode("SAMBOER_UTEN_FELLES_BARN");
+
+        when(behandlingsresultatRepository.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
+
+        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), eq(Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER)))
+            .thenReturn(Optional.of(forventetAvklartefakta));
+
+        avklartefaktaService.lagreMedfolgendeFamilieSomAvklartefakta(
+            new AvklarteMedfolgendeBarnFtrl(Set.of(), Set.of()), avklarteMedfolgendeEktefelleSamboer, 1L);
+
+        verify(avklarteFaktaRepository, times(2)).save(captor.capture());
+
+        List<Avklartefakta> capturedAvklarteFakta = captor.getAllValues();
+        assertEquals(capturedAvklarteFakta.size(), 2);
+        Avklartefakta utenRegistrering = capturedAvklarteFakta.get(0);
+        Avklartefakta medRegistrering = capturedAvklarteFakta.get(1);
+
+        assertEquals(utenRegistrering.getSubjekt(), forventetAvklartefakta.getSubjekt());
+        assertEquals(utenRegistrering.getType(), forventetAvklartefakta.getType());
+        assertEquals(utenRegistrering.getReferanse(), forventetAvklartefakta.getReferanse());
+        assertEquals(utenRegistrering.getFakta(), forventetAvklartefakta.getFakta());
+        assertEquals(utenRegistrering.getBegrunnelseFritekst(), forventetAvklartefakta.getBegrunnelseFritekst());
+        assertEquals(utenRegistrering.getBehandlingsresultat(), forventetAvklartefakta.getBehandlingsresultat());
+
+        assertEquals(medRegistrering.getSubjekt(), forventetAvklartefakta.getSubjekt());
+        assertEquals(medRegistrering.getType(), forventetAvklartefakta.getType());
+        assertEquals(medRegistrering.getReferanse(), forventetAvklartefakta.getReferanse());
+        assertEquals(medRegistrering.getFakta(), forventetAvklartefakta.getFakta());
+        assertEquals(medRegistrering.getBegrunnelseFritekst(), forventetAvklartefakta.getBegrunnelseFritekst());
+        assertEquals(medRegistrering.getBehandlingsresultat(), forventetAvklartefakta.getBehandlingsresultat());
+        assertEquals(medRegistrering.getRegistreringer().size(), 1);
+
+        AvklartefaktaRegistrering registreringFraCaptured = medRegistrering.getRegistreringer().iterator().next();
+        assertEquals(registreringFraCaptured.getAvklartefakta(), forventetRegistrering.getAvklartefakta());
+        assertEquals(registreringFraCaptured.getBegrunnelseKode(), forventetRegistrering.getBegrunnelseKode());
+    }
+
+    @Test
+    public void lagreMedfolgendeFamilieSomAvklartefakta_omfattetFamilie_lagresKorrekt() throws FunksjonellException {
+        Set<OmfattetFamilie> omfattetBarn = Set.of(new OmfattetFamilie("uuid1"));
+        AvklarteMedfolgendeBarnFtrl avklarteMedfolgendeBarnFtrl =
+            new AvklarteMedfolgendeBarnFtrl(omfattetBarn, Set.of());
+        Set<OmfattetFamilie> omfattetEktefelleSamboer = Set.of(new OmfattetFamilie("uuid2"));
+        AvklarteMedfolgendeEktefelleSamboer avklarteMedfolgendeEktefelleSamboer =
+            new AvklarteMedfolgendeEktefelleSamboer(omfattetEktefelleSamboer, Set.of());
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setId(1L);
+        when(behandlingsresultatRepository.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
+
+        avklartefaktaService.lagreMedfolgendeFamilieSomAvklartefakta(
+            avklarteMedfolgendeBarnFtrl, avklarteMedfolgendeEktefelleSamboer, 1L);
+
+        verify(avklarteFaktaRepository, times(2)).save(captor.capture());
+
+        List<Avklartefakta> capturedAvklarteFakta = captor.getAllValues();
+        assertEquals(capturedAvklarteFakta.size(), 2);
+        Avklartefakta avklartBarn = capturedAvklarteFakta.get(0);
+        Avklartefakta avklartEktefelleSamboer = capturedAvklarteFakta.get(1);
+
+        assertEquals(avklartBarn.getSubjekt(), "uuid1");
+        assertEquals(avklartBarn.getType(), Avklartefaktatyper.VURDERING_LOVVALG_BARN);
+        assertEquals(avklartBarn.getReferanse(), Avklartefaktatyper.VURDERING_LOVVALG_BARN.getKode());
+        assertEquals(avklartBarn.getFakta(), "TRUE");
+        assertNull(avklartBarn.getBegrunnelseFritekst());
+        assertEquals(avklartBarn.getBehandlingsresultat(), behandlingsresultat);
+        assertTrue(avklartBarn.getRegistreringer().isEmpty());
+
+        assertEquals(avklartEktefelleSamboer.getSubjekt(), "uuid2");
+        assertEquals(avklartEktefelleSamboer.getType(), Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER);
+        assertEquals(avklartEktefelleSamboer.getReferanse(), Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER.getKode());
+        assertEquals(avklartEktefelleSamboer.getFakta(), "TRUE");
+        assertNull(avklartEktefelleSamboer.getBegrunnelseFritekst());
+        assertEquals(avklartEktefelleSamboer.getBehandlingsresultat(), behandlingsresultat);
+        assertTrue(avklartEktefelleSamboer.getRegistreringer().isEmpty());
     }
 
     private static Avklartefakta lagAvklartIkkeOmfattetBarn(String subjectID, Medfolgende_barn_begrunnelser begrunnelse, String begrunnelseFritekst) {
