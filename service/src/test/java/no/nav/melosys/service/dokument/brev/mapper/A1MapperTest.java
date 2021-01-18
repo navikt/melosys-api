@@ -20,12 +20,12 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ForetakUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.LuftfartBase;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ForetakUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.LuftfartBase;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -251,6 +251,13 @@ public class A1MapperTest {
             .collect(Collectors.toList());
 
         assertThat(utfylteAdresselinjer.size()).isGreaterThan(1);
+    }
+
+    @Test
+    public void mapTilBrevXML_brukerErStatsløs_forventStatløsTekst() throws TekniskException {
+        brevData.person.statsborgerskap = Land.av(Land.STATSLØS);
+        A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
+        assertThat(a1.getPerson().getStatsborgerskap()).isEqualTo("Stateless");
     }
 
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException, TekniskException {
