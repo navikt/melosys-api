@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.behandlingsgrunnlag.soeknad;
+package no.nav.melosys.domain.behandlingsgrunnlag.data;
 
 public class SelvstendigForetak {
     public String orgnr;

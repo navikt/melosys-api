@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.behandlingsgrunnlag.soeknad;
+package no.nav.melosys.domain.behandlingsgrunnlag.data;
 
 import java.time.LocalDate;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
