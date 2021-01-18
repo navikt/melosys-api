@@ -76,7 +76,7 @@ public class UtstedtA1AdminTjeneste implements AdminTjeneste {
             try {
                 utstedtA1Service.sendMeldingOmUtstedtA1(behandlingID);
                 sendteBehandlinger.add(behandlingID);
-            } catch (TekniskException | FunksjonellException e) {
+            } catch (Exception e) {
                 feiledeBehandlinger.add(behandlingID);
                 log.error("Melding om utstedt A1 for behandling {} ble ikke sendt", behandlingID, e);
             }
