@@ -7,9 +7,8 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
-import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarnFtrl;
-import no.nav.melosys.domain.familie.AvklarteMedfolgendeEktefelleSamboer;
-import no.nav.melosys.domain.familie.IkkeOmfattetEktefelleSamboer;
+import no.nav.melosys.domain.familie.AvklarteMedfolgendeFamilie;
+import no.nav.melosys.domain.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.familie.OmfattetFamilie;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -303,10 +302,10 @@ public class AvklartefaktaServiceTest {
 
     @Test
     public void lagreMedfolgendeFamilieSomAvklartefakta_ikkeOmfattetFamilie_lagresKorrekt() throws FunksjonellException {
-        Set<IkkeOmfattetEktefelleSamboer> ikkeOmfattetEktefelleSamboers = Set.of(
-            new IkkeOmfattetEktefelleSamboer("uuid1", "SAMBOER_UTEN_FELLES_BARN", "fritekstForUuid7"));
-        AvklarteMedfolgendeEktefelleSamboer avklarteMedfolgendeEktefelleSamboer =
-            new AvklarteMedfolgendeEktefelleSamboer(Set.of(), ikkeOmfattetEktefelleSamboers);
+        Set<IkkeOmfattetFamilie> ikkeOmfattetEktefelleSamboers = Set.of(
+            new IkkeOmfattetFamilie("uuid1", "SAMBOER_UTEN_FELLES_BARN", "fritekstForUuid7"));
+        AvklarteMedfolgendeFamilie avklarteMedfolgendeEktefelleSamboer =
+            new AvklarteMedfolgendeFamilie(Set.of(), ikkeOmfattetEktefelleSamboers);
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(1L);
@@ -329,7 +328,7 @@ public class AvklartefaktaServiceTest {
             .thenReturn(Optional.of(forventetAvklartefakta));
 
         avklartefaktaService.lagreMedfolgendeFamilieSomAvklartefakta(
-            new AvklarteMedfolgendeBarnFtrl(Set.of(), Set.of()), avklarteMedfolgendeEktefelleSamboer, 1L);
+            new AvklarteMedfolgendeFamilie(Set.of(), Set.of()), avklarteMedfolgendeEktefelleSamboer, 1L);
 
         verify(avklarteFaktaRepository, times(2)).save(captor.capture());
 
@@ -361,18 +360,18 @@ public class AvklartefaktaServiceTest {
     @Test
     public void lagreMedfolgendeFamilieSomAvklartefakta_omfattetFamilie_lagresKorrekt() throws FunksjonellException {
         Set<OmfattetFamilie> omfattetBarn = Set.of(new OmfattetFamilie("uuid1"));
-        AvklarteMedfolgendeBarnFtrl avklarteMedfolgendeBarnFtrl =
-            new AvklarteMedfolgendeBarnFtrl(omfattetBarn, Set.of());
+        AvklarteMedfolgendeFamilie avklarteMedfolgendeBarn =
+            new AvklarteMedfolgendeFamilie(omfattetBarn, Set.of());
         Set<OmfattetFamilie> omfattetEktefelleSamboer = Set.of(new OmfattetFamilie("uuid2"));
-        AvklarteMedfolgendeEktefelleSamboer avklarteMedfolgendeEktefelleSamboer =
-            new AvklarteMedfolgendeEktefelleSamboer(omfattetEktefelleSamboer, Set.of());
+        AvklarteMedfolgendeFamilie avklarteMedfolgendeEktefelleSamboer =
+            new AvklarteMedfolgendeFamilie(omfattetEktefelleSamboer, Set.of());
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(1L);
         when(behandlingsresultatRepository.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
 
         avklartefaktaService.lagreMedfolgendeFamilieSomAvklartefakta(
-            avklarteMedfolgendeBarnFtrl, avklarteMedfolgendeEktefelleSamboer, 1L);
+            avklarteMedfolgendeBarn, avklarteMedfolgendeEktefelleSamboer, 1L);
 
         verify(avklarteFaktaRepository, times(2)).save(captor.capture());
 

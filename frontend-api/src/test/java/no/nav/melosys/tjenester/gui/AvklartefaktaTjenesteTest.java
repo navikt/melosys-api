@@ -8,10 +8,8 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
-import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarnFtrl;
-import no.nav.melosys.domain.familie.AvklarteMedfolgendeEktefelleSamboer;
-import no.nav.melosys.domain.familie.IkkeOmfattetBarnFtrl;
-import no.nav.melosys.domain.familie.IkkeOmfattetEktefelleSamboer;
+import no.nav.melosys.domain.familie.AvklarteMedfolgendeFamilie;
+import no.nav.melosys.domain.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.familie.OmfattetFamilie;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.exception.FunksjonellException;
@@ -79,14 +77,14 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void lagreMedfolgendeFamilieSomAvklarteFakta_énAvHverMuligInput_returnererKorrekt() throws FunksjonellException, TekniskException {
         Set<OmfattetFamilie> omfattetBarn = Set.of(new OmfattetFamilie("uuid1"));
-        Set<IkkeOmfattetBarnFtrl> ikkeOmfattetBarnFtrls = Set.of(new IkkeOmfattetBarnFtrl("uuid2", "OVER_18_AR", "fritekstForUuid2"));
-        AvklarteMedfolgendeBarnFtrl avklarteMedfolgendeBarnFtrl = new AvklarteMedfolgendeBarnFtrl(omfattetBarn, ikkeOmfattetBarnFtrls);
+        Set<IkkeOmfattetFamilie> ikkeOmfattetBarns = Set.of(new IkkeOmfattetFamilie("uuid2", "OVER_18_AR", "fritekstForUuid2"));
+        AvklarteMedfolgendeFamilie avklarteMedfolgendeBarn = new AvklarteMedfolgendeFamilie(omfattetBarn, ikkeOmfattetBarns);
 
         Set<OmfattetFamilie> omfattetEktefelleSamboer = Set.of(new OmfattetFamilie("uuid3"));
-        Set<IkkeOmfattetEktefelleSamboer> ikkeOmfattetEktefelleSamboers = Set.of(new IkkeOmfattetEktefelleSamboer("uuid4", "SAMBOER_UTEN_FELLES_BARN", "fritekstForUuid4"));
-        AvklarteMedfolgendeEktefelleSamboer avklarteMedfolgendeEktefelleSamboer = new AvklarteMedfolgendeEktefelleSamboer(omfattetEktefelleSamboer, ikkeOmfattetEktefelleSamboers);
+        Set<IkkeOmfattetFamilie> ikkeOmfattetEktefelleSamboers = Set.of(new IkkeOmfattetFamilie("uuid4", "SAMBOER_UTEN_FELLES_BARN", "fritekstForUuid4"));
+        AvklarteMedfolgendeFamilie avklarteMedfolgendeEktefelleSamboer = new AvklarteMedfolgendeFamilie(omfattetEktefelleSamboer, ikkeOmfattetEktefelleSamboers);
 
-        MedfolgendeFamilieDto medfolgendeFamilieDto = new MedfolgendeFamilieDto(avklarteMedfolgendeBarnFtrl, avklarteMedfolgendeEktefelleSamboer);
+        MedfolgendeFamilieDto medfolgendeFamilieDto = new MedfolgendeFamilieDto(avklarteMedfolgendeBarn, avklarteMedfolgendeEktefelleSamboer);
 
         when(avklartefaktaService.hentAlleAvklarteFakta(eq(1L))).thenReturn(Set.of(
             lagAvklartefaktaDto("uuid1", Avklartefaktatyper.VURDERING_LOVVALG_BARN, true, "", ""),
@@ -96,21 +94,21 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
 
         AvklartefaktaOppsummeringDto response = avklartefaktaTjeneste.lagreMedfolgendeFamilieSomAvklarteFakta(1L, medfolgendeFamilieDto);
 
-        Set<OmfattetFamilie> responseOmfattetBarn = response.getMedfolgendeFamilie().getAvklarteMedfolgendeBarnFtrl().barnOmfattetAvNorskTrygd;
+        Set<OmfattetFamilie> responseOmfattetBarn = response.getMedfolgendeFamilie().getAvklarteMedfolgendeBarn().familieOmfattetAvNorskTrygd;
         assertEquals(responseOmfattetBarn.size(), 1);
         assertEquals(responseOmfattetBarn.iterator().next().uuid, omfattetBarn.iterator().next().uuid);
 
-        Set<IkkeOmfattetBarnFtrl> responseIkkeOmfattetBarn = response.getMedfolgendeFamilie().getAvklarteMedfolgendeBarnFtrl().barnIkkeOmfattetAvNorskTrygd;
+        Set<IkkeOmfattetFamilie> responseIkkeOmfattetBarn = response.getMedfolgendeFamilie().getAvklarteMedfolgendeBarn().familieIkkeOmfattetAvNorskTrygd;
         assertEquals(responseIkkeOmfattetBarn.size(), 1);
-        assertEquals(responseIkkeOmfattetBarn.iterator().next().uuid, ikkeOmfattetBarnFtrls.iterator().next().uuid);
-        assertEquals(responseIkkeOmfattetBarn.iterator().next().begrunnelse, ikkeOmfattetBarnFtrls.iterator().next().begrunnelse);
-        assertEquals(responseIkkeOmfattetBarn.iterator().next().begrunnelseFritekst, ikkeOmfattetBarnFtrls.iterator().next().begrunnelseFritekst);
+        assertEquals(responseIkkeOmfattetBarn.iterator().next().uuid, ikkeOmfattetBarns.iterator().next().uuid);
+        assertEquals(responseIkkeOmfattetBarn.iterator().next().begrunnelse, ikkeOmfattetBarns.iterator().next().begrunnelse);
+        assertEquals(responseIkkeOmfattetBarn.iterator().next().begrunnelseFritekst, ikkeOmfattetBarns.iterator().next().begrunnelseFritekst);
 
-        Set<OmfattetFamilie> responseOmfattetEktefelleSamboer = response.getMedfolgendeFamilie().getAvklarteMedfolgendeEktefelleSamboer().ektefelleSamboerOmfattetAvNorskTrygd;
+        Set<OmfattetFamilie> responseOmfattetEktefelleSamboer = response.getMedfolgendeFamilie().getAvklarteMedfolgendeEktefelleSamboer().familieOmfattetAvNorskTrygd;
         assertEquals(responseOmfattetEktefelleSamboer.size(), 1);
         assertEquals(responseOmfattetEktefelleSamboer.iterator().next().uuid, omfattetEktefelleSamboer.iterator().next().uuid);
 
-        Set<IkkeOmfattetEktefelleSamboer> responseIkkeOmfattetEktefelleSamboer = response.getMedfolgendeFamilie().getAvklarteMedfolgendeEktefelleSamboer().ektefelleSamboerIkkeOmfattetAvNorskTrygd;
+        Set<IkkeOmfattetFamilie> responseIkkeOmfattetEktefelleSamboer = response.getMedfolgendeFamilie().getAvklarteMedfolgendeEktefelleSamboer().familieIkkeOmfattetAvNorskTrygd;
         assertEquals(responseIkkeOmfattetEktefelleSamboer.size(), 1);
         assertEquals(responseIkkeOmfattetEktefelleSamboer.iterator().next().uuid, ikkeOmfattetEktefelleSamboers.iterator().next().uuid);
         assertEquals(responseIkkeOmfattetEktefelleSamboer.iterator().next().begrunnelse, ikkeOmfattetEktefelleSamboers.iterator().next().begrunnelse);

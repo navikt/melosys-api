@@ -8,8 +8,7 @@ import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
-import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarnFtrl;
-import no.nav.melosys.domain.familie.AvklarteMedfolgendeEktefelleSamboer;
+import no.nav.melosys.domain.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
 import no.nav.melosys.domain.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.familie.OmfattetFamilie;
@@ -168,11 +167,11 @@ public class AvklartefaktaService {
         avklarteFaktaRepository.saveAll(avklartefaktaList);
     }
 
-    public void lagreMedfolgendeFamilieSomAvklartefakta(AvklarteMedfolgendeBarnFtrl medfolgendeBarnFtrl, AvklarteMedfolgendeEktefelleSamboer medfolgendeEktefelleSamboer, Long behandlingsid) throws FunksjonellException {
-        lagreOmfattetFamilieSomAvklartfakta(behandlingsid, VURDERING_LOVVALG_BARN, medfolgendeBarnFtrl.barnOmfattetAvNorskTrygd);
-        lagreIkkeOmfattetFamilieSomAvklartfakta(behandlingsid, VURDERING_LOVVALG_BARN, medfolgendeBarnFtrl.barnIkkeOmfattetAvNorskTrygd);
-        lagreOmfattetFamilieSomAvklartfakta(behandlingsid, VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, medfolgendeEktefelleSamboer.ektefelleSamboerOmfattetAvNorskTrygd);
-        lagreIkkeOmfattetFamilieSomAvklartfakta(behandlingsid, VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, medfolgendeEktefelleSamboer.ektefelleSamboerIkkeOmfattetAvNorskTrygd);
+    public void lagreMedfolgendeFamilieSomAvklartefakta(AvklarteMedfolgendeFamilie medfolgendeBarn, AvklarteMedfolgendeFamilie medfolgendeEktefelleSamboer, Long behandlingsid) throws FunksjonellException {
+        lagreOmfattetFamilieSomAvklartfakta(behandlingsid, VURDERING_LOVVALG_BARN, medfolgendeBarn.familieOmfattetAvNorskTrygd);
+        lagreIkkeOmfattetFamilieSomAvklartfakta(behandlingsid, VURDERING_LOVVALG_BARN, medfolgendeBarn.familieIkkeOmfattetAvNorskTrygd);
+        lagreOmfattetFamilieSomAvklartfakta(behandlingsid, VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, medfolgendeEktefelleSamboer.familieOmfattetAvNorskTrygd);
+        lagreIkkeOmfattetFamilieSomAvklartfakta(behandlingsid, VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, medfolgendeEktefelleSamboer.familieIkkeOmfattetAvNorskTrygd);
     }
 
     public void lagreOmfattetFamilieSomAvklartfakta(Long behandlingsid, Avklartefaktatyper avklartefaktatype, Set<OmfattetFamilie> omfattetFamilie) throws IkkeFunnetException {
@@ -196,7 +195,7 @@ public class AvklartefaktaService {
                 ikkeOmfattet.uuid,
                 "FALSE",
                 ikkeOmfattet.begrunnelseFritekst,
-                ikkeOmfattet.begrunnelse.getKode()
+                ikkeOmfattet.begrunnelse
             );
         }
     }

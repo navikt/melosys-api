@@ -85,7 +85,7 @@ public class AvklartefaktaTjeneste {
         @RequestBody MedfolgendeFamilieDto medfolgendeFamilieDto) throws TekniskException, FunksjonellException {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
 
-        avklartefaktaService.lagreMedfolgendeFamilieSomAvklartefakta(medfolgendeFamilieDto.getAvklarteMedfolgendeBarnFtrl(), medfolgendeFamilieDto.getAvklarteMedfolgendeEktefelleSamboer(), behandlingID);
+        avklartefaktaService.lagreMedfolgendeFamilieSomAvklartefakta(medfolgendeFamilieDto.getAvklarteMedfolgendeBarn(), medfolgendeFamilieDto.getAvklarteMedfolgendeEktefelleSamboer(), behandlingID);
 
         return AvklartefaktaOppsummeringDto.av(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
