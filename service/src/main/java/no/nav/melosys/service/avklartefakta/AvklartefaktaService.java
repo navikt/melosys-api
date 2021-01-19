@@ -13,8 +13,11 @@ import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
 import no.nav.melosys.domain.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.familie.OmfattetFamilie;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
+import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -22,6 +25,8 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.service.behandling.BehandlingService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +42,8 @@ public class AvklartefaktaService {
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;
 
+    private final BehandlingService behandlingService;
+
     private final AvklartefaktaDtoKonverterer faktaKonverterer;
 
     private static final String FANT_IKKE_RESULTAT = "Fant ikke behandlingsresultat for behandlingsid: ";
@@ -46,9 +53,10 @@ public class AvklartefaktaService {
         Avklartefaktatyper.ARBEIDSLAND);
 
     @Autowired
-    public AvklartefaktaService(AvklarteFaktaRepository avklarteFaktaRepository, BehandlingsresultatRepository behandlingsresultatRepository, AvklartefaktaDtoKonverterer faktaKonverterer) {
+    public AvklartefaktaService(AvklarteFaktaRepository avklarteFaktaRepository, BehandlingsresultatRepository behandlingsresultatRepository, BehandlingService behandlingService, AvklartefaktaDtoKonverterer faktaKonverterer) {
         this.avklarteFaktaRepository = avklarteFaktaRepository;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
+        this.behandlingService = behandlingService;
         this.faktaKonverterer = faktaKonverterer;
     }
 
@@ -168,10 +176,38 @@ public class AvklartefaktaService {
     }
 
     public void lagreMedfolgendeFamilieSomAvklartefakta(AvklarteMedfolgendeFamilie medfolgendeBarn, AvklarteMedfolgendeFamilie medfolgendeEktefelleSamboer, Long behandlingsid) throws FunksjonellException {
+        validerMedfolgendeFamilie(medfolgendeBarn, medfolgendeEktefelleSamboer, behandlingsid);
+
         lagreOmfattetFamilieSomAvklartfakta(behandlingsid, VURDERING_LOVVALG_BARN, medfolgendeBarn.familieOmfattetAvNorskTrygd);
         lagreIkkeOmfattetFamilieSomAvklartfakta(behandlingsid, VURDERING_LOVVALG_BARN, medfolgendeBarn.familieIkkeOmfattetAvNorskTrygd);
         lagreOmfattetFamilieSomAvklartfakta(behandlingsid, VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, medfolgendeEktefelleSamboer.familieOmfattetAvNorskTrygd);
         lagreIkkeOmfattetFamilieSomAvklartfakta(behandlingsid, VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, medfolgendeEktefelleSamboer.familieIkkeOmfattetAvNorskTrygd);
+    }
+
+    private void validerMedfolgendeFamilie(AvklarteMedfolgendeFamilie medfolgendeBarn, AvklarteMedfolgendeFamilie medfolgendeEktefelleSamboer, Long behandlingsid) throws FunksjonellException {
+        Set<String> uuidTilFamilie = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsid).getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().hentUuidMedfølgendeFamilie();
+        validerOmfattetFamilie(medfolgendeBarn.familieOmfattetAvNorskTrygd, uuidTilFamilie);
+        validerOmfattetFamilie(medfolgendeEktefelleSamboer.familieOmfattetAvNorskTrygd, uuidTilFamilie);
+        validerIkkeOmfattetFamilie(medfolgendeBarn.familieIkkeOmfattetAvNorskTrygd, true);
+        validerIkkeOmfattetFamilie(medfolgendeEktefelleSamboer.familieIkkeOmfattetAvNorskTrygd, false);
+    }
+
+    private void validerOmfattetFamilie(Set<OmfattetFamilie> omfattetFamilieSet, Set<String> lagredeFamiliemedlemmerUuid) throws FunksjonellException {
+        for (OmfattetFamilie omfattetFamilie : omfattetFamilieSet) {
+            if (!lagredeFamiliemedlemmerUuid.contains(omfattetFamilie.uuid)){
+                throw new FunksjonellException("Medfolgende familie som er omfattet av norsk trygd: " + omfattetFamilie.uuid + " er ikke lagret i behandlingsgrunnlaget.");
+            }
+        }
+    }
+
+    private void validerIkkeOmfattetFamilie(Set<IkkeOmfattetFamilie> ikkeOmfattetFamilieSet, Boolean barn) throws FunksjonellException {
+        for (IkkeOmfattetFamilie ikkeOmfattetFamilie : ikkeOmfattetFamilieSet) {
+            try {
+                Kodeverk begrunnelse = barn ? Medfolgende_barn_begrunnelser_ftrl.valueOf(ikkeOmfattetFamilie.begrunnelse) : Medfolgende_ektefelle_samboer_begrunnelser_ftrl.valueOf(ikkeOmfattetFamilie.begrunnelse);
+            } catch (RuntimeException e) {
+                throw new FunksjonellException("Begrunnelsen til medfolgende ektefelle/samboer: " + ikkeOmfattetFamilie.begrunnelse + " er ikke gyldig.");
+            }
+        }
     }
 
     public void lagreOmfattetFamilieSomAvklartfakta(Long behandlingsid, Avklartefaktatyper avklartefaktatype, Set<OmfattetFamilie> omfattetFamilie) throws IkkeFunnetException {

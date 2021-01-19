@@ -220,7 +220,7 @@ public final class DokumentServiceTest {
         BehandlingsresultatRepository behandlingsresultatRepository = mockBehandlingsresultatRepo(behandlingsresultat);
         AvklarteFaktaRepository avklarteFaktaRepository = mockAvklarteFaktaRepository(arbeidsgiverFaktum, yrkesgruppeFaktum);
         AvklartefaktaDtoKonverterer faktaKonverterer = new AvklartefaktaDtoKonverterer();
-        AvklartefaktaService avklartefaktaService = new AvklartefaktaService(avklarteFaktaRepository, behandlingsresultatRepository, faktaKonverterer);
+        AvklartefaktaService avklartefaktaService = new AvklartefaktaService(avklarteFaktaRepository, behandlingsresultatRepository, behandlingService, faktaKonverterer);
 
         if (brevdatabyggervelger == null) {
             brevdatabyggervelger = lagBrevdataByggerVelger(avklartefaktaService);

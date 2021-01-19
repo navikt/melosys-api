@@ -3,7 +3,12 @@ package no.nav.melosys.service.avklartefakta;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MedfolgendeFamilie;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.OpplysningerOmBrukeren;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
@@ -20,6 +25,8 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.service.behandling.BehandlingService;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +35,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -41,6 +49,8 @@ public class AvklartefaktaServiceTest {
     @Mock
     private BehandlingsresultatRepository behandlingsresultatRepository;
     @Mock
+    private BehandlingService behandlingService;
+    @Mock
     private AvklartefaktaDtoKonverterer avklartefaktaDtoKonverterer;
 
     private AvklartefaktaService avklartefaktaService;
@@ -50,7 +60,7 @@ public class AvklartefaktaServiceTest {
 
     @Before
     public void setUp() {
-        avklartefaktaService = new AvklartefaktaService(avklarteFaktaRepository, behandlingsresultatRepository, avklartefaktaDtoKonverterer);
+        avklartefaktaService = new AvklartefaktaService(avklarteFaktaRepository, behandlingsresultatRepository, behandlingService, avklartefaktaDtoKonverterer);
     }
 
     @Test
@@ -322,6 +332,8 @@ public class AvklartefaktaServiceTest {
         forventetRegistrering.setAvklartefakta(forventetAvklartefakta);
         forventetRegistrering.setBegrunnelseKode("SAMBOER_UTEN_FELLES_BARN");
 
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(mockBehandling());
+
         when(behandlingsresultatRepository.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
 
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), eq(Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER)))
@@ -370,6 +382,8 @@ public class AvklartefaktaServiceTest {
         behandlingsresultat.setId(1L);
         when(behandlingsresultatRepository.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
 
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(mockBehandling());
+
         avklartefaktaService.lagreMedfolgendeFamilieSomAvklartefakta(
             avklarteMedfolgendeBarn, avklarteMedfolgendeEktefelleSamboer, 1L);
 
@@ -395,6 +409,36 @@ public class AvklartefaktaServiceTest {
         assertNull(avklartEktefelleSamboer.getBegrunnelseFritekst());
         assertEquals(avklartEktefelleSamboer.getBehandlingsresultat(), behandlingsresultat);
         assertTrue(avklartEktefelleSamboer.getRegistreringer().isEmpty());
+    }
+
+    @Test
+    public void lagreMedfolgendeFamilieSomAvklartefakta_uuidIkkeLagretIBehandlingsgrunnlaget_kasterFeilmelding() throws FunksjonellException {
+        Set<OmfattetFamilie> omfattetBarn = Set.of(new OmfattetFamilie("uuid3"));
+        AvklarteMedfolgendeFamilie avklarteMedfolgendeBarn = new AvklarteMedfolgendeFamilie(omfattetBarn, Set.of());
+        AvklarteMedfolgendeFamilie avklarteMedfolgendeEktefelleSamboer = new AvklarteMedfolgendeFamilie(Set.of(), Set.of());
+
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(mockBehandling());
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> avklartefaktaService.lagreMedfolgendeFamilieSomAvklartefakta(avklarteMedfolgendeBarn, avklarteMedfolgendeEktefelleSamboer, 1L))
+            .withMessageContaining("Medfolgende familie som er omfattet av norsk trygd: uuid3 er ikke lagret i behandlingsgrunnlaget.");
+
+        verify(avklarteFaktaRepository, never()).save(captor.capture());
+    }
+    @Test
+    public void lagreMedfolgendeFamilieSomAvklartefakta_ugyldigBegrunnelseKode_kasterFeilmelding() throws FunksjonellException {
+        Set<IkkeOmfattetFamilie> ikkeOmfattetBarn = Set.of(
+            new IkkeOmfattetFamilie("uuid1", "SAMBOER_UTEN_FELLES_BARN", "fritekstForUuid1"));
+        AvklarteMedfolgendeFamilie avklarteMedfolgendeBarn = new AvklarteMedfolgendeFamilie(Set.of(), ikkeOmfattetBarn);
+        AvklarteMedfolgendeFamilie avklarteMedfolgendeEktefelleSamboer = new AvklarteMedfolgendeFamilie(Set.of(), Set.of());
+
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(mockBehandling());
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> avklartefaktaService.lagreMedfolgendeFamilieSomAvklartefakta(avklarteMedfolgendeBarn, avklarteMedfolgendeEktefelleSamboer, 1L))
+            .withMessageContaining("Begrunnelsen til medfolgende ektefelle/samboer: SAMBOER_UTEN_FELLES_BARN er ikke gyldig.");
+
+        verify(avklarteFaktaRepository, never()).save(captor.capture());
     }
 
     private static Avklartefakta lagAvklartIkkeOmfattetBarn(String subjectID, Medfolgende_barn_begrunnelser begrunnelse, String begrunnelseFritekst) {
@@ -424,5 +468,22 @@ public class AvklartefaktaServiceTest {
         registrering.setBegrunnelseKode(begrunnelsekode);
         avklartefakta.setRegistreringer(new HashSet<>(List.of(registrering)));
         return avklartefakta;
+    }
+
+    private static Behandling mockBehandling() {
+        MedfolgendeFamilie medfolgendeFamilieUuid1 = new MedfolgendeFamilie();
+        medfolgendeFamilieUuid1.uuid = "uuid1";
+        MedfolgendeFamilie medfolgendeFamilieUuid2 = new MedfolgendeFamilie();
+        medfolgendeFamilieUuid2.uuid = "uuid2";
+        OpplysningerOmBrukeren opplysningerOmBrukeren = new OpplysningerOmBrukeren();
+        opplysningerOmBrukeren.medfolgendeFamilie.add(medfolgendeFamilieUuid1);
+        opplysningerOmBrukeren.medfolgendeFamilie.add(medfolgendeFamilieUuid2);
+        BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
+        behandlingsgrunnlagData.personOpplysninger = opplysningerOmBrukeren;
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+        Behandling behandling = new Behandling();
+        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
+        return behandling;
     }
 }
