@@ -29,6 +29,7 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.vedtak.VedtakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -47,12 +48,14 @@ public class UtpekingService {
     private final ProsessinstansService prosessinstansService;
     private final UtpekingsperiodeRepository utpekingsperiodeRepository;
     private final VedtakKontrollService vedtakKontrollService;
+    private final ApplicationEventMulticaster melosysEventMulticaster;
 
     public UtpekingService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
                            EessiService eessiService, LandvelgerService landvelgerService,
                            LovvalgsperiodeService lovvalgsperiodeService, OppgaveService oppgaveService,
                            ProsessinstansService prosessinstansService,
-                           UtpekingsperiodeRepository utpekingsperiodeRepository, VedtakKontrollService vedtakKontrollService) {
+                           UtpekingsperiodeRepository utpekingsperiodeRepository, VedtakKontrollService vedtakKontrollService,
+                           ApplicationEventMulticaster melosysEventMulticaster) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.eessiService = eessiService;
@@ -62,6 +65,7 @@ public class UtpekingService {
         this.prosessinstansService = prosessinstansService;
         this.utpekingsperiodeRepository = utpekingsperiodeRepository;
         this.vedtakKontrollService = vedtakKontrollService;
+        this.melosysEventMulticaster = melosysEventMulticaster;
     }
 
     public Collection<Utpekingsperiode> hentUtpekingsperioder(long behandlingID) {
@@ -127,6 +131,8 @@ public class UtpekingService {
         behandlingsresultat.setFastsattAvLand(Landkoder.NO);
         behandlingsresultat.settVedtakMetadata(Vedtakstyper.FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(VedtakService.FRIST_KLAGE_UKER));
         behandlingsresultatService.lagre(behandlingsresultat);
+
+        melosysEventMulticaster.multicastEvent(new VedtakMetadataLagretEvent(behandlingsresultat.getId()));
     }
 
     private void opprettLovvalgsperiode(long behandlingID, Utpekingsperiode utpekingsperiode) {

@@ -47,7 +47,7 @@ public class BehandlingsresultatTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void validerBehandlingsresultat() throws IOException {
+    public void validerBehandlingsresultat() throws Exception {
         EasyRandomParameters easyRandomParameters = defaultEasyRandomParameters()
             .randomize(named("behandlingsresultatTypeKode").and(ofType(String.class)), () -> new EnumRandomizer<>(Behandlingsresultattyper.class).getRandomValue().getKode())
             .randomize(named("vedtakstype").and(ofType(String.class)), () -> new EnumRandomizer<>(Vedtakstyper.class, Vedtakstyper.ENDRINGSVEDTAK).getRandomValue().getKode());

@@ -45,7 +45,8 @@ public class SendVedtakUtland extends AbstraktSendUtland {
                             BehandlingService behandlingService,
                             BehandlingsresultatService behandlingsresultatService,
                             BrevBestiller brevBestiller,
-                            SedSomBrevService sedSomBrevService, UtpekingService utpekingService) {
+                            SedSomBrevService sedSomBrevService,
+                            UtpekingService utpekingService) {
         super(eessiService, behandlingsresultatService);
         this.behandlingService = behandlingService;
         this.brevBestiller = brevBestiller;
@@ -69,7 +70,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             utpekingService.oppdaterSendtUtland(behandlingsresultat.hentValidertUtpekingsperiode());
             SendUtlandStatus status = sendSedA003(prosessinstans);
             log.info("SendUtlandStatus for behandling {}: {}", behandling.getId(), status);
-        } else if (skalSendesUtland(behandlingsresultat)){
+        } else if (skalSendesUtland(behandlingsresultat)) {
             super.sendUtland(avklarBucType(behandling), prosessinstans);
         }
 

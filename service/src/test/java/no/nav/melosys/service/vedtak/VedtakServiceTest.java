@@ -42,6 +42,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.context.event.ApplicationEventMulticaster;
 
 import static no.nav.melosys.service.vedtak.VedtakService.FRIST_KLAGE_UKER;
 import static org.assertj.core.api.Assertions.*;
@@ -70,6 +71,8 @@ public class VedtakServiceTest {
     private VedtakKontrollService vedtakKontrollService;
     @Mock
     private AvklartefaktaService avklartefaktaService;
+    @Mock
+    private ApplicationEventMulticaster melosysEventMulticaster;
 
     private VedtakService vedtakService;
 
@@ -84,7 +87,7 @@ public class VedtakServiceTest {
     @Before
     public void setUp() throws Exception {
         vedtakService = new VedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService,
-            eessiService, landvelgerService, tpsFasade, registeropplysningerService, vedtakKontrollService, avklartefaktaService);
+            eessiService, landvelgerService, tpsFasade, registeropplysningerService, vedtakKontrollService, avklartefaktaService, melosysEventMulticaster);
         SpringSubjectHandler.set(new TestSubjectHandler());
 
         behandlingID = 1L;

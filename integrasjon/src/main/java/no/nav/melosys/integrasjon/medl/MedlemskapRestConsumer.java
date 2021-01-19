@@ -9,6 +9,8 @@ import no.nav.melosys.integrasjon.reststs.RestStsClient;
 import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForGet;
 import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPost;
 import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPut;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -25,6 +27,7 @@ import static java.util.Objects.requireNonNull;
 
 @Component
 public class MedlemskapRestConsumer implements RestConsumer {
+    private static final Logger log = LoggerFactory.getLogger(MedlemskapRestConsumer.class);
     private static final String CONSUMER_ID = "srvmelosys";
 
     private final RestStsClient restStsClient;
@@ -36,6 +39,7 @@ public class MedlemskapRestConsumer implements RestConsumer {
         this.webClient = WebClient.builder()
             .baseUrl(url)
             .filter(headerFilter())
+            .filter(errorFilter())
             .build();
     }
 
@@ -100,9 +104,22 @@ public class MedlemskapRestConsumer implements RestConsumer {
                         .header("Nav-Consumer-Id", CONSUMER_ID)
                         .build());
                 } catch (MelosysException e) {
-                    throw new RuntimeException(e);
+                    throw new RuntimeException(e.getMessage());
                 }
             }
         );
+    }
+
+    private ExchangeFilterFunction errorFilter() {
+        return ExchangeFilterFunction.ofResponseProcessor(response -> {
+            if(response.statusCode().isError()) {
+                return response.bodyToMono(String.class)
+                    .flatMap(errorBody -> {
+                        log.error("Kall mot MEDL feilet. {} - {}", response.statusCode(), errorBody);
+                        return Mono.error(new RuntimeException(errorBody));
+                    });
+            }
+            return Mono.just(response);
+        });
     }
 }

@@ -3,8 +3,8 @@ package no.nav.melosys.service.kontroll;
 import java.util.List;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ArbeidUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ForetakUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.ArbeidUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import org.junit.Before;
 import org.junit.Test;

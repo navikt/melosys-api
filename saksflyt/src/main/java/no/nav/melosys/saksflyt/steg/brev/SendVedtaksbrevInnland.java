@@ -31,6 +31,8 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.SEND_VEDTAKSBREV_INNLAND;
 import static no.nav.melosys.saksflyt.brev.FastMottaker.*;
@@ -130,8 +132,11 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             ? INNVILGELSE_YRKESAKTIV_FLERE_LAND : INNVILGELSE_YRKESAKTIV;
 
         List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.av(BRUKER), FastMottaker.av(SKATT)));
-        if (skalSendesTilSkatteoppkreverUtland(behandling.getBehandlingsgrunnlag())) {
-            mottakerListe.add(FastMottaker.av(SKATTEOPPKREVER_UTLAND));
+        if (brevSendesTilStatligSkatteoppkreving(
+            resultat.hentValidertLovvalgsperiode(),
+            behandling.getBehandlingsgrunnlag()
+        )) {
+            mottakerListe.add(FastMottaker.av(STATLIG_SKATTEOPPKREVING));
         }
 
         DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProdserbartDokument(innvilgelseType)
@@ -166,18 +171,23 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         }
     }
 
-    private static boolean skalSendesTilSkatteoppkreverUtland(Behandlingsgrunnlag behandlingsgrunnlag) {
-        return finnesForetakUtland(behandlingsgrunnlag)
-            && !finnesUtenlandskSelvstendigForetak(behandlingsgrunnlag);
+    private static boolean brevSendesTilStatligSkatteoppkreving(Lovvalgsperiode lovvalgsperiode,
+                                                                Behandlingsgrunnlag behandlingsgrunnlag) {
+        return harArtikkelRelevantForStatligSkatteoppkreving(lovvalgsperiode)
+            && finnesArbeidsgiverUtland(behandlingsgrunnlag);
     }
 
-    private static boolean finnesForetakUtland(Behandlingsgrunnlag behandlingsgrunnlag) {
-        return !behandlingsgrunnlag.getBehandlingsgrunnlagdata().foretakUtland.isEmpty();
+    public static boolean harArtikkelRelevantForStatligSkatteoppkreving(Lovvalgsperiode lovvalgsperiode) {
+        return lovvalgsperiode.erArtikkel11()
+            || lovvalgsperiode.erArtikkel13_1()
+            || lovvalgsperiode.getBestemmelse() == FO_883_2004_ART13_4
+            || lovvalgsperiode.getBestemmelse() == FO_883_2004_ART16_1;
     }
 
-    private static boolean finnesUtenlandskSelvstendigForetak(Behandlingsgrunnlag behandlingsgrunnlag) {
-        return behandlingsgrunnlag.getBehandlingsgrunnlagdata().foretakUtland.stream()
-            .anyMatch(foretakUtland -> Boolean.TRUE.equals(foretakUtland.selvstendigNæringsvirksomhet));
+    private static boolean finnesArbeidsgiverUtland(Behandlingsgrunnlag behandlingsgrunnlag) {
+        return !behandlingsgrunnlag.getBehandlingsgrunnlagdata().foretakUtland.isEmpty()
+            && behandlingsgrunnlag.getBehandlingsgrunnlagdata().foretakUtland.stream()
+            .anyMatch(foretakUtland -> Boolean.FALSE.equals(foretakUtland.selvstendigNæringsvirksomhet));
     }
 
     private String hentBegrunnelseKode(Prosessinstans prosessinstans) {
