@@ -8,7 +8,6 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MedfolgendeFamilie;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.OpplysningerOmBrukeren;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
@@ -313,7 +312,7 @@ public class AvklartefaktaServiceTest {
     @Test
     public void lagreMedfolgendeFamilieSomAvklartefakta_ikkeOmfattetFamilie_lagresKorrekt() throws FunksjonellException {
         Set<IkkeOmfattetFamilie> ikkeOmfattetEktefelleSamboers = Set.of(
-            new IkkeOmfattetFamilie("uuid1", "SAMBOER_UTEN_FELLES_BARN", "fritekstForUuid7"));
+            new IkkeOmfattetFamilie("uuid2", "SAMBOER_UTEN_FELLES_BARN", "fritekstForUuid2"));
         AvklarteMedfolgendeFamilie avklarteMedfolgendeEktefelleSamboer =
             new AvklarteMedfolgendeFamilie(Set.of(), ikkeOmfattetEktefelleSamboers);
 
@@ -321,11 +320,11 @@ public class AvklartefaktaServiceTest {
         behandlingsresultat.setId(1L);
 
         Avklartefakta forventetAvklartefakta = new Avklartefakta();
-        forventetAvklartefakta.setSubjekt("uuid1");
+        forventetAvklartefakta.setSubjekt("uuid2");
         forventetAvklartefakta.setType(Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER);
         forventetAvklartefakta.setReferanse(Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER.getKode());
         forventetAvklartefakta.setFakta("FALSE");
-        forventetAvklartefakta.setBegrunnelseFritekst("fritekstForUuid7");
+        forventetAvklartefakta.setBegrunnelseFritekst("fritekstForUuid2");
         forventetAvklartefakta.setBehandlingsresultat(behandlingsresultat);
 
         AvklartefaktaRegistrering forventetRegistrering = new AvklartefaktaRegistrering();
@@ -425,6 +424,7 @@ public class AvklartefaktaServiceTest {
 
         verify(avklarteFaktaRepository, never()).save(captor.capture());
     }
+
     @Test
     public void lagreMedfolgendeFamilieSomAvklartefakta_ugyldigBegrunnelseKode_kasterFeilmelding() throws FunksjonellException {
         Set<IkkeOmfattetFamilie> ikkeOmfattetBarn = Set.of(
@@ -437,6 +437,21 @@ public class AvklartefaktaServiceTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> avklartefaktaService.lagreMedfolgendeFamilieSomAvklartefakta(avklarteMedfolgendeBarn, avklarteMedfolgendeEktefelleSamboer, 1L))
             .withMessageContaining("Begrunnelsen til medfolgende ektefelle/samboer: SAMBOER_UTEN_FELLES_BARN er ikke gyldig.");
+
+        verify(avklarteFaktaRepository, never()).save(captor.capture());
+    }
+
+    @Test
+    public void lagreMedfolgendeFamilieSomAvklartefakta_relasjonskodeMatcherIkke_kasterFeilmelding() throws FunksjonellException {
+        Set<OmfattetFamilie> omfattetBarn = Set.of(new OmfattetFamilie("uuid2"));
+        AvklarteMedfolgendeFamilie avklarteMedfolgendeBarn = new AvklarteMedfolgendeFamilie(omfattetBarn, Set.of());
+        AvklarteMedfolgendeFamilie avklarteMedfolgendeEktefelleSamboer = new AvklarteMedfolgendeFamilie(Set.of(), Set.of());
+
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(mockBehandling());
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> avklartefaktaService.lagreMedfolgendeFamilieSomAvklartefakta(avklarteMedfolgendeBarn, avklarteMedfolgendeEktefelleSamboer, 1L))
+            .withMessageContaining("Medfolgende familie som er omfattet av norsk trygd: uuid2 er lagret med feil relasjonsrolle.");
 
         verify(avklarteFaktaRepository, never()).save(captor.capture());
     }
@@ -471,15 +486,10 @@ public class AvklartefaktaServiceTest {
     }
 
     private static Behandling mockBehandling() {
-        MedfolgendeFamilie medfolgendeFamilieUuid1 = new MedfolgendeFamilie();
-        medfolgendeFamilieUuid1.uuid = "uuid1";
-        MedfolgendeFamilie medfolgendeFamilieUuid2 = new MedfolgendeFamilie();
-        medfolgendeFamilieUuid2.uuid = "uuid2";
-        OpplysningerOmBrukeren opplysningerOmBrukeren = new OpplysningerOmBrukeren();
-        opplysningerOmBrukeren.medfolgendeFamilie.add(medfolgendeFamilieUuid1);
-        opplysningerOmBrukeren.medfolgendeFamilie.add(medfolgendeFamilieUuid2);
+        MedfolgendeFamilie medfolgendeFamilieUuid1 = MedfolgendeFamilie.tilMedfolgendeFamilie("uuid1", "fnr1", null, MedfolgendeFamilie.Relasjonsrolle.BARN);
+        MedfolgendeFamilie medfolgendeFamilieUuid2 = MedfolgendeFamilie.tilMedfolgendeFamilie("uuid2", "fnr2", null, MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER);
         BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
-        behandlingsgrunnlagData.personOpplysninger = opplysningerOmBrukeren;
+        behandlingsgrunnlagData.personOpplysninger.medfolgendeFamilie.addAll(List.of(medfolgendeFamilieUuid1, medfolgendeFamilieUuid2));
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
         Behandling behandling = new Behandling();

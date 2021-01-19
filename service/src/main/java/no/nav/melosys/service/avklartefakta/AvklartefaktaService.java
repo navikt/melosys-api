@@ -7,6 +7,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
+import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MedfolgendeFamilie;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
@@ -185,27 +186,33 @@ public class AvklartefaktaService {
     }
 
     private void validerMedfolgendeFamilie(AvklarteMedfolgendeFamilie medfolgendeBarn, AvklarteMedfolgendeFamilie medfolgendeEktefelleSamboer, Long behandlingsid) throws FunksjonellException {
-        Set<String> uuidTilFamilie = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsid).getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().hentUuidMedfølgendeFamilie();
-        validerOmfattetFamilie(medfolgendeBarn.familieOmfattetAvNorskTrygd, uuidTilFamilie);
-        validerOmfattetFamilie(medfolgendeEktefelleSamboer.familieOmfattetAvNorskTrygd, uuidTilFamilie);
-        validerIkkeOmfattetFamilie(medfolgendeBarn.familieIkkeOmfattetAvNorskTrygd, true);
-        validerIkkeOmfattetFamilie(medfolgendeEktefelleSamboer.familieIkkeOmfattetAvNorskTrygd, false);
+        Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolleFraBehandlingsgrunnlag = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsid).getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().hentUuidOgRolleMedfølgendeFamilie();
+        validerOmfattetFamilie(medfolgendeBarn.familieOmfattetAvNorskTrygd, true, uuidOgRolleFraBehandlingsgrunnlag);
+        validerOmfattetFamilie(medfolgendeEktefelleSamboer.familieOmfattetAvNorskTrygd, false, uuidOgRolleFraBehandlingsgrunnlag);
+        validerIkkeOmfattetFamilie(medfolgendeBarn.familieIkkeOmfattetAvNorskTrygd, true, uuidOgRolleFraBehandlingsgrunnlag);
+        validerIkkeOmfattetFamilie(medfolgendeEktefelleSamboer.familieIkkeOmfattetAvNorskTrygd, false, uuidOgRolleFraBehandlingsgrunnlag);
     }
 
-    private void validerOmfattetFamilie(Set<OmfattetFamilie> omfattetFamilieSet, Set<String> lagredeFamiliemedlemmerUuid) throws FunksjonellException {
+    private void validerOmfattetFamilie(Set<OmfattetFamilie> omfattetFamilieSet, Boolean barn, Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolle) throws FunksjonellException {
         for (OmfattetFamilie omfattetFamilie : omfattetFamilieSet) {
-            if (!lagredeFamiliemedlemmerUuid.contains(omfattetFamilie.uuid)){
+            if (!uuidOgRolle.containsKey(omfattetFamilie.uuid)){
                 throw new FunksjonellException("Medfolgende familie som er omfattet av norsk trygd: " + omfattetFamilie.uuid + " er ikke lagret i behandlingsgrunnlaget.");
+            }
+            if (barn ? uuidOgRolle.get(omfattetFamilie.uuid) != MedfolgendeFamilie.Relasjonsrolle.BARN : uuidOgRolle.get(omfattetFamilie.uuid) != MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER) {
+                throw new FunksjonellException("Medfolgende familie som er omfattet av norsk trygd: " + omfattetFamilie.uuid + " er lagret med feil relasjonsrolle.");
             }
         }
     }
 
-    private void validerIkkeOmfattetFamilie(Set<IkkeOmfattetFamilie> ikkeOmfattetFamilieSet, Boolean barn) throws FunksjonellException {
+    private void validerIkkeOmfattetFamilie(Set<IkkeOmfattetFamilie> ikkeOmfattetFamilieSet, Boolean barn, Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolle) throws FunksjonellException {
         for (IkkeOmfattetFamilie ikkeOmfattetFamilie : ikkeOmfattetFamilieSet) {
             try {
                 Kodeverk begrunnelse = barn ? Medfolgende_barn_begrunnelser_ftrl.valueOf(ikkeOmfattetFamilie.begrunnelse) : Medfolgende_ektefelle_samboer_begrunnelser_ftrl.valueOf(ikkeOmfattetFamilie.begrunnelse);
             } catch (RuntimeException e) {
                 throw new FunksjonellException("Begrunnelsen til medfolgende ektefelle/samboer: " + ikkeOmfattetFamilie.begrunnelse + " er ikke gyldig.");
+            }
+            if (barn ? uuidOgRolle.get(ikkeOmfattetFamilie.uuid) != MedfolgendeFamilie.Relasjonsrolle.BARN : uuidOgRolle.get(ikkeOmfattetFamilie.uuid) != MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER) {
+                throw new FunksjonellException("Medfolgende familie som ikke er omfattet av norsk trygd: " + ikkeOmfattetFamilie.uuid + " er lagret med feil relasjonsrolle.");
             }
         }
     }

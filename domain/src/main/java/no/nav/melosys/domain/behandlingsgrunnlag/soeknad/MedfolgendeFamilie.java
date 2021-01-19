@@ -37,6 +37,10 @@ public class MedfolgendeFamilie {
         return fnr;
     }
 
+    public Relasjonsrolle getRelasjonsrolle() {
+        return relasjonsrolle;
+    }
+
     public boolean erBarn() {
         return relasjonsrolle == Relasjonsrolle.BARN;
     }
