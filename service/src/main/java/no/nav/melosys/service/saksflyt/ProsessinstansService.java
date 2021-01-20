@@ -15,7 +15,6 @@ import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -213,7 +212,6 @@ public class ProsessinstansService {
     }
 
     public void opprettProsessinstansForkortPeriode(Behandling behandling,
-                                                    Endretperiode endretperiodeBegrunnelse,
                                                     String fritekst,
                                                     String fritekstSed) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
@@ -223,7 +221,6 @@ public class ProsessinstansService {
             .medYtterligereinformasjonSed(fritekstSed)
             .build();
 
-        prosessinstans.setData(BEGRUNNELSEKODE, endretperiodeBegrunnelse);
         prosessinstans.setData(VEDTAKSTYPE, Vedtakstyper.ENDRINGSVEDTAK.getKode());
         lagre(prosessinstans);
     }

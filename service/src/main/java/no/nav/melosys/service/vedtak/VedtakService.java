@@ -210,7 +210,6 @@ public class VedtakService {
         }
         prosessinstansService.opprettProsessinstansForkortPeriode(
             behandling,
-            endretperiode,
             fritekst,
             fritekstSed
         );
