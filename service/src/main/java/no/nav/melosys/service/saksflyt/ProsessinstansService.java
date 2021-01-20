@@ -14,7 +14,6 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -177,7 +176,7 @@ public class ProsessinstansService {
 
     public void opprettProsessinstansIverksettVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType,
                                                      String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner,
-                                                     Vedtakstyper vedtakstype, String revurderBegrunnelse) {
+                                                     String revurderBegrunnelse) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK)
             .medBehandling(behandling)
@@ -187,7 +186,6 @@ public class ProsessinstansService {
             .build();
 
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, behandlingsresultatType.getKode());
-        prosessinstans.setData(ProsessDataKey.VEDTAKSTYPE, vedtakstype.getKode());
         if (StringUtils.isNotEmpty(revurderBegrunnelse)) {
             prosessinstans.setData(ProsessDataKey.REVURDER_BEGRUNNELSE, revurderBegrunnelse);
         }
@@ -221,7 +219,6 @@ public class ProsessinstansService {
             .medYtterligereinformasjonSed(fritekstSed)
             .build();
 
-        prosessinstans.setData(VEDTAKSTYPE, Vedtakstyper.ENDRINGSVEDTAK.getKode());
         lagre(prosessinstans);
     }
 
@@ -310,8 +307,6 @@ public class ProsessinstansService {
             .medBegrunnelseFritekst(fritekstBrev)
             .build();
         prosessinstans.setData(ProsessDataKey.UTPEKT_LAND, utpektLand);
-        prosessinstans.setData(ProsessDataKey.VEDTAKSTYPE, Vedtakstyper.FØRSTEGANGSVEDTAK.getKode());
-
         lagre(prosessinstans);
     }
 
