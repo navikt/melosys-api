@@ -283,7 +283,11 @@ public class VedtakServiceTest {
 
         verify(avklartefaktaService).leggTilBegrunnelse(eq(behandlingID), eq(Avklartefaktatyper.AARSAK_ENDRING_PERIODE), eq(endretperiodeBegrunnelse.getKode()));
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
-        verify(prosessinstansService).opprettProsessinstansForkortPeriode(any(Behandling.class), eq("FRITEKST"), eq("FRITEKST_SED"));
+        verify(prosessinstansService).opprettProsessinstansForkortPeriode(any(Behandling.class),
+            eq(endretperiodeBegrunnelse),
+            eq("FRITEKST"),
+            eq("FRITEKST_SED")
+        );
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
     }
 }

@@ -1,10 +1,10 @@
 package no.nav.melosys.service.saksflyt;
 
-import javax.annotation.Nullable;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
@@ -15,6 +15,7 @@ import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -211,16 +212,20 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansForkortPeriode(Behandling behandling, String fritekst, String fritekstSed) {
-        Prosessinstans nyprosessinstans = new ProsessinstansBuilder()
+    public void opprettProsessinstansForkortPeriode(Behandling behandling,
+                                                    Endretperiode endretperiodeBegrunnelse,
+                                                    String fritekst,
+                                                    String fritekstSed) {
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
             .medType(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE)
             .medBegrunnelseFritekst(fritekst)
             .medYtterligereinformasjonSed(fritekstSed)
             .build();
 
-        nyprosessinstans.setData(ProsessDataKey.VEDTAKSTYPE, Vedtakstyper.ENDRINGSVEDTAK.getKode());
-        lagre(nyprosessinstans);
+        prosessinstans.setData(BEGRUNNELSEKODE, endretperiodeBegrunnelse);
+        prosessinstans.setData(VEDTAKSTYPE, Vedtakstyper.ENDRINGSVEDTAK.getKode());
+        lagre(prosessinstans);
     }
 
     public void opprettProsessinstansGodkjennUnntaksperiode(Behandling behandling, boolean varsleUtland) {

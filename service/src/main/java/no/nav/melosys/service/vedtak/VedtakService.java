@@ -208,7 +208,12 @@ public class VedtakService {
         if (prosessinstansService.harAktivProsessinstans(behandlingID)) {
             throw new FunksjonellException("Det finnes allerede en aktiv prosess for behandling " + behandling);
         }
-        prosessinstansService.opprettProsessinstansForkortPeriode(behandling, fritekst, fritekstSed);
+        prosessinstansService.opprettProsessinstansForkortPeriode(
+            behandling,
+            endretperiode,
+            fritekst,
+            fritekstSed
+        );
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 }
