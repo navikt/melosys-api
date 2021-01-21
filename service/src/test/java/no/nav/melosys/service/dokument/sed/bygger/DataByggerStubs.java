@@ -54,11 +54,11 @@ class DataByggerStubs {
         selvstendigForetak.orgnr = "12312312";
         søknadDokument.selvstendigArbeid.selvstendigForetak = Collections.singletonList(selvstendigForetak);
         søknadDokument.selvstendigArbeid.erSelvstendig = true;
-        ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse = hentStrukturertAddresseStub();
-        arbeidUtland.foretakNavn = "foretaknavn";
-        arbeidUtland.foretakOrgnr = "32132133";
-        søknadDokument.arbeidUtland = Lists.newArrayList(arbeidUtland);
+        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
+        fysiskArbeidssted.adresse = hentStrukturertAddresseStub();
+        fysiskArbeidssted.foretakNavn = "foretaknavn";
+        fysiskArbeidssted.foretakOrgnr = "32132133";
+        søknadDokument.fysiskeArbeidsstederUtland = Lists.newArrayList(fysiskArbeidssted);
         UtenlandskIdent utenlandskIdent = new UtenlandskIdent();
         utenlandskIdent.ident = "439205843";
         utenlandskIdent.landkode = "SE";
@@ -111,12 +111,12 @@ class DataByggerStubs {
         Behandling behandling = hentBehandlingStub();
         BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
 
-        ArbeidUtland arbeidUtland = behandlingsgrunnlagData.arbeidUtland.remove(0);
-        arbeidUtland.adresse.poststed = null;
+        FysiskArbeidssted fysiskArbeidssted = behandlingsgrunnlagData.fysiskeArbeidsstederUtland.remove(0);
+        fysiskArbeidssted.adresse.poststed = null;
         if (arbeidUtlandManglerLandkode) {
-            arbeidUtland.adresse.landkode = null;
+            fysiskArbeidssted.adresse.landkode = null;
         }
-        behandlingsgrunnlagData.arbeidUtland.add(arbeidUtland);
+        behandlingsgrunnlagData.fysiskeArbeidsstederUtland.add(fysiskArbeidssted);
 
         ForetakUtland foretakUtland = behandlingsgrunnlagData.foretakUtland.remove(0);
         foretakUtland.adresse.postnummer = null;

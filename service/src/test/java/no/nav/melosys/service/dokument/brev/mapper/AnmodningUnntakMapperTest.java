@@ -15,7 +15,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ArbeidUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
@@ -155,13 +155,13 @@ public class AnmodningUnntakMapperTest {
         fagsak.setType(Sakstyper.EU_EOS);
         behandling.setFagsak(fagsak);
 
-        ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse = new StrukturertAdresse();
-        arbeidUtland.adresse.landkode = "NO";
+        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
+        fysiskArbeidssted.adresse = new StrukturertAdresse();
+        fysiskArbeidssted.adresse.landkode = "NO";
 
         Soeknad soeknad = new Soeknad();
-        soeknad.arbeidUtland = new ArrayList<>();
-        soeknad.arbeidUtland.add(arbeidUtland);
+        soeknad.fysiskeArbeidsstederUtland = new ArrayList<>();
+        soeknad.fysiskeArbeidsstederUtland.add(fysiskArbeidssted);
 
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(soeknad);

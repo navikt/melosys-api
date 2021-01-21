@@ -37,7 +37,7 @@ public class ArbeidsstedGrunnlag {
     }
 
     private List<Arbeidssted> hentFysiskearbeidssteder() {
-        List<Arbeidssted> fysiskeArbeidssteder = grunnlagData.arbeidUtland.stream()
+        List<Arbeidssted> fysiskeArbeidssteder = grunnlagData.fysiskeArbeidsstederUtland.stream()
             .map(au -> new FysiskArbeidssted(au.foretakNavn, au.foretakOrgnr, au.adresse))
             .collect(Collectors.toList());
 

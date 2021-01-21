@@ -1,13 +1,13 @@
 package no.nav.melosys.service.kontroll;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ArbeidUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.service.validering.Kontrollfeil;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class AdresseUtlandKontroller {
 
@@ -17,15 +17,15 @@ public abstract class AdresseUtlandKontroller {
     static final String FORETAK_UTLAND_LAND = "behandlingsgrunnlag.foretakUtland[%d].adresse.landkode";
 
     public static Kontrollfeil arbeidsstedManglerFelter(BehandlingsgrunnlagData behandlingsgrunnlagData) {
-        List<ArbeidUtland> arbeidUtlandListe = behandlingsgrunnlagData.arbeidUtland;
+        List<FysiskArbeidssted> fysiskArbeidsstedListe = behandlingsgrunnlagData.fysiskeArbeidsstederUtland;
         List<String> felter = new ArrayList<>();
 
-        for (int i = 0; i < arbeidUtlandListe.size(); i++) {
-            ArbeidUtland arbeidUtland = arbeidUtlandListe.get(i);
-            if (arbeidUtland.foretakNavn == null) {
+        for (int i = 0; i < fysiskArbeidsstedListe.size(); i++) {
+            FysiskArbeidssted fysiskArbeidssted = fysiskArbeidsstedListe.get(i);
+            if (fysiskArbeidssted.foretakNavn == null) {
                 felter.add(String.format(ARBEID_UTLAND_NAVN, i));
             }
-            if (arbeidUtland.adresse.landkode == null) {
+            if (fysiskArbeidssted.adresse.landkode == null) {
                 felter.add(String.format(ARBEID_UTLAND_LAND, i));
             }
         }
