@@ -35,6 +35,7 @@ public abstract class DokgenDto {
 
     // Saksbehandlingstid er 12 uker fra dato for utsendelse av brev, uavhengig av helg, helligdager, osv.
     protected static final int SAKSBEHANDLINGSTID_DAGER = 12 * 7;
+    protected static final int DOKUMENTASJON_SVARFRIST_UKER_MANGELBREV = 4;
 
     protected DokgenDto(String fnr, String saksnummer, Instant dagensDato,
                         String navnBruker, String navnMottaker, List<String> adresselinjer,

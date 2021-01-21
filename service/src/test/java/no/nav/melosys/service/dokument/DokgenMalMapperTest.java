@@ -2,6 +2,10 @@ package no.nav.melosys.service.dokument;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.Period;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalField;
+import java.time.temporal.TemporalUnit;
 import java.util.List;
 
 import no.nav.melosys.domain.*;
@@ -207,6 +211,7 @@ class DokgenMalMapperTest {
         MangelbrevBruker result = (MangelbrevBruker) dokgenDto;
         assertEquals("Dummy", result.getFritekstMottaksinfo());
         assertEquals("Dummy", result.getFritekstMangelinfo());
+        assertEquals(Instant.now().plus(Period.ofWeeks(4)).truncatedTo(ChronoUnit.DAYS), result.getDatoInnsendingsfrist().truncatedTo(ChronoUnit.DAYS));
     }
 
     @Test
@@ -235,6 +240,7 @@ class DokgenMalMapperTest {
         assertEquals("Dummy", result.getFritekstMottaksinfo());
         assertEquals("Dummy", result.getFritekstMangelinfo());
         assertEquals("Fullmektig AS", result.getNavnFullmektig());
+        assertEquals(Instant.now().plus(Period.ofWeeks(4)).truncatedTo(ChronoUnit.DAYS), result.getDatoInnsendingsfrist().truncatedTo(ChronoUnit.DAYS));
     }
 
     private Fagsak lagFagsak() {

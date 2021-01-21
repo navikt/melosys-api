@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.dokgen.dto;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.time.Period;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -46,7 +46,7 @@ public class MangelbrevArbeidsgiver extends Mangelbrev {
                 .medLand(mapLandForAdresse(org, personDokument))
                 .medDatoMottatt(brevbestilling.getForsendelseMottatt())
                 .medDatoVedtatt(hentVedtaksdato(behandlingsresultat))
-                .medDatoInnsendingsfrist(brevbestilling.getForsendelseMottatt().plus(SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS))
+                .medDatoInnsendingsfrist(Instant.now().plus(Period.ofWeeks(DOKUMENTASJON_SVARFRIST_UKER_MANGELBREV)))
                 .medSakstype(fagsak.getType())
                 .medBehandlingstype(fagsak.getSistOppdaterteBehandling().getType())
                 .medSaksbehandlerNavn(fagsak.getEndretAv())
