@@ -56,7 +56,7 @@ class DataByggerStubs {
         søknadDokument.selvstendigArbeid.erSelvstendig = true;
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
         fysiskArbeidssted.adresse = hentStrukturertAddresseStub();
-        fysiskArbeidssted.foretakNavn = "foretaknavn";
+        fysiskArbeidssted.virksomhetNavn = "foretaknavn";
         fysiskArbeidssted.foretakOrgnr = "32132133";
         søknadDokument.fysiskeArbeidsstederUtland = Lists.newArrayList(fysiskArbeidssted);
         UtenlandskIdent utenlandskIdent = new UtenlandskIdent();

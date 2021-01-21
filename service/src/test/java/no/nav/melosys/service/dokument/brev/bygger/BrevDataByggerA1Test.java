@@ -170,12 +170,12 @@ class BrevDataByggerA1Test {
         mockAvklarteOrganisasjoner(Collections.singletonList(orgnr2));
 
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        fysiskArbeidssted.foretakNavn = "Utenlandsk Oppdragsgiver LTD";
+        fysiskArbeidssted.virksomhetNavn = "Utenlandsk Oppdragsgiver LTD";
         fysiskArbeidssted.adresse = lagStrukturertAdresse();
         søknad.fysiskeArbeidsstederUtland.add(fysiskArbeidssted);
 
         BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(dataGrunnlag, saksbehandler);
-        assertThat(brevDataDto.bivirksomheter.stream().map(uv -> uv.navn)).contains(fysiskArbeidssted.foretakNavn);
+        assertThat(brevDataDto.bivirksomheter.stream().map(uv -> uv.navn)).contains(fysiskArbeidssted.virksomhetNavn);
         assertThat(brevDataDto.arbeidssteder.stream()
             .filter(no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted::erFysisk)
             .map(no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted.class::cast)

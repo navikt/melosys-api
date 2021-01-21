@@ -41,7 +41,7 @@ class SedGrunnlagMapperTest {
 
         assertThat(sedGrunnlag.fysiskeArbeidsstederUtland)
             .extracting(
-                arbeidUtland -> arbeidUtland.foretakNavn,
+                arbeidUtland -> arbeidUtland.virksomhetNavn,
                 arbeidUtland -> arbeidUtland.foretakOrgnr)
             .containsExactlyInAnyOrder(
                 tuple("Testarbeidsstednavn", null),
