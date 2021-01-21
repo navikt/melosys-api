@@ -25,7 +25,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BEGRUNNELSEKODE;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -67,7 +66,6 @@ public class SendHenleggelsesbrevTest {
 
         behandlingsresultat.setBegrunnelseFritekst("fritekst");
         behandlingsresultat.getBehandlingsresultatBegrunnelser().add(begrunnelse);
-        prosessinstans.setData(BEGRUNNELSEKODE, Henleggelsesgrunner.ANNET);
         prosessinstans.setData(BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST, "fritekst");
         Behandling behandling = new Behandling();
         behandling.setId(behandlingID);

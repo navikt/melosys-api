@@ -68,7 +68,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         Behandlingsresultattyper behandlingsresultatType = resultat.getType();
         String saksbehandler = hentSaksbehandler(prosessinstans, resultat);
-        String begrunnelseKode = hentBegrunnelsekodeForkortetPeriode(resultat);
+        String begrunnelseKode = hentBegrunnelsekodeTilForkortetPeriode(resultat);
         String fritekst = hentBegrunnelseFritekst(prosessinstans);
 
         if (resultat.erAvslag()) {
@@ -192,7 +192,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             .anyMatch(foretakUtland -> Boolean.FALSE.equals(foretakUtland.selvstendigNæringsvirksomhet));
     }
 
-    private String hentBegrunnelsekodeForkortetPeriode(Behandlingsresultat behandlingsresultat) {
+    private String hentBegrunnelsekodeTilForkortetPeriode(Behandlingsresultat behandlingsresultat) {
         return behandlingsresultat.getAvklartefakta().stream()
             .filter(avklartfakta -> avklartfakta.getType() == Avklartefaktatyper.AARSAK_ENDRING_PERIODE)
             .map(Avklartefakta::getFakta)

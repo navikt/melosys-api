@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.BucType;
@@ -70,6 +71,13 @@ class SendVedtakUtlandTest {
         prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
+        Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+
+        sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingService, behandlingsresultatService, brevBestiller, sedSomBrevService, utpekingService);
+    }
+
+    private Behandlingsresultat lagBehandlingsresultat() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(BEHANDLING_ID);
         lovvalgsperiode = new Lovvalgsperiode();
@@ -79,9 +87,9 @@ class SendVedtakUtlandTest {
         behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
         behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         behandlingsresultat.setBehandling(behandling);
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-
-        sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingService, behandlingsresultatService, brevBestiller, sedSomBrevService, utpekingService);
+        Set<Avklartefakta> avklartefakta = Set.of(new Avklartefakta());
+        behandlingsresultat.setAvklartefakta(avklartefakta);
+        return behandlingsresultat;
     }
 
     @Test
@@ -94,6 +102,9 @@ class SendVedtakUtlandTest {
     @Test
     void utfør_ingenInstitusjonEessiKlar_senderBrev() throws Exception {
         when(behandlingService.hentBehandling(anyLong())).thenReturn(prosessinstans.getBehandling());
+        when(behandlingsresultatService.hentBehandlingsresultatMedAvklartefakta(anyLong()))
+            .thenReturn(lagBehandlingsresultat());
+
         sendVedtakUtland.utfør(prosessinstans);
         verify(brevBestiller).bestill(brevbestillingArgumentCaptor.capture());
         assertThat(brevbestillingArgumentCaptor.getValue().getMottakere()).contains(Mottaker.av(Aktoersroller.MYNDIGHET));

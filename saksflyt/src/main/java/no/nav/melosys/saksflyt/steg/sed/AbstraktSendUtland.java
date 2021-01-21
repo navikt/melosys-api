@@ -5,8 +5,10 @@ import java.util.Set;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Vedlegg;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -56,13 +58,16 @@ public abstract class AbstraktSendUtland implements StegBehandler {
 
     protected abstract boolean skalSendesUtland(Behandlingsresultat behandlingsresultat);
 
-    protected String hentBegrunnelseKode(Prosessinstans prosessinstans) {
-        Endretperiode endretPeriodeBegrunnelseKode = prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperiode.class);
-        String begrunnelseKode = null;
-        if (endretPeriodeBegrunnelseKode != null) {
-            begrunnelseKode = endretPeriodeBegrunnelseKode.getKode();
-        }
-        return begrunnelseKode;
+    protected String hentBegrunnelsekodeTilForkortetPeriode(Prosessinstans prosessinstans) throws IkkeFunnetException {
+        Behandlingsresultat behandlingsresultat =
+            behandlingsresultatService.hentBehandlingsresultatMedAvklartefakta(prosessinstans.getBehandling().getId());
+        return behandlingsresultat.getAvklartefakta().stream()
+            .filter(avklartfakta -> avklartfakta.getType() == Avklartefaktatyper.AARSAK_ENDRING_PERIODE)
+            .map(Avklartefakta::getFakta)
+            .map(Endretperiode::valueOf)
+            .map(Endretperiode::getKode)
+            .findFirst()
+            .orElse(null);
     }
 
     protected String hentSaksbehandler(Prosessinstans prosessinstans) throws IkkeFunnetException {

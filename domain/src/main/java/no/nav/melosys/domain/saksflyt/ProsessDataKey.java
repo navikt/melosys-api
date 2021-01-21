@@ -13,7 +13,6 @@ public enum ProsessDataKey {
     AVSENDER_LAND("avsenderLand"),
     AVSENDER_NAVN("avsenderNavn"),
     AVSENDER_TYPE("avsenderType"),
-    BEGRUNNELSEKODE("begrunnelsekode"),
     BEHANDLINGSRESULTATTYPE("behandlingsresultatType"),
     BEHANDLINGSRESULTAT_BEGRUNNELSER("behandlingsresultatBegrunnelse"),
     BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST("behandlingsresultatBegrunnelseFritekst"),
