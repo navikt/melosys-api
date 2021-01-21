@@ -39,7 +39,7 @@ class SedGrunnlagMapperTest {
                 utenlandskIdent -> utenlandskIdent.landkode)
             .containsExactly(tuple("15225345345", "BG"));
 
-        assertThat(sedGrunnlag.arbeidUtland)
+        assertThat(sedGrunnlag.fysiskeArbeidsstederUtland)
             .extracting(
                 arbeidUtland -> arbeidUtland.foretakNavn,
                 arbeidUtland -> arbeidUtland.foretakOrgnr)

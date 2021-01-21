@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.eessi.sed;
 
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ArbeidUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.FysiskArbeidssted;
 import org.apache.commons.lang3.StringUtils;
 
 public class Arbeidssted {
@@ -18,13 +18,13 @@ public class Arbeidssted {
         return arbeidssted;
     }
 
-    public ArbeidUtland tilArbeidUtland() {
-        ArbeidUtland arbeidUtland = new ArbeidUtland();
+    public FysiskArbeidssted tilArbeidUtland() {
+        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
 
-        arbeidUtland.adresse = adresse.tilStrukturertAdresse();
-        arbeidUtland.foretakNavn = navn;
+        fysiskArbeidssted.adresse = adresse.tilStrukturertAdresse();
+        fysiskArbeidssted.foretakNavn = navn;
 
-        return arbeidUtland;
+        return fysiskArbeidssted;
     }
 
     public String getNavn() {

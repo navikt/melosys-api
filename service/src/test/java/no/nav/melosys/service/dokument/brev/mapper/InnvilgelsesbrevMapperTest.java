@@ -14,7 +14,7 @@ import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ArbeidUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MaritimtArbeid;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
@@ -141,10 +141,10 @@ public class InnvilgelsesbrevMapperTest {
 
     private static Soeknad lagSoeknadDokument() {
         Soeknad dokument = new Soeknad();
-        ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse = new StrukturertAdresse();
-        arbeidUtland.adresse.landkode = Landkoder.AT.getKode();
-        dokument.arbeidUtland = Collections.singletonList(arbeidUtland);
+        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
+        fysiskArbeidssted.adresse = new StrukturertAdresse();
+        fysiskArbeidssted.adresse.landkode = Landkoder.AT.getKode();
+        dokument.fysiskeArbeidsstederUtland = Collections.singletonList(fysiskArbeidssted);
         dokument.maritimtArbeid.add(lagMaritimtArbeidUtenFartsområde());
         return dokument;
     }

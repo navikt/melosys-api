@@ -5,7 +5,7 @@ import java.util.*;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ArbeidUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
@@ -285,7 +285,7 @@ public class LandvelgerServiceTest {
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
 
-        søknad.arbeidUtland = Collections.emptyList();
+        søknad.fysiskeArbeidsstederUtland = Collections.emptyList();
         søknad.foretakUtland = Collections.emptyList();
         søknad.soeknadsland.landkoder = List.of(Landkoder.SE.toString(), Landkoder.DK.toString(), Landkoder.NO.toString());
 
@@ -305,7 +305,7 @@ public class LandvelgerServiceTest {
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
 
-        søknad.arbeidUtland = List.of(lagArbeidUtland(Landkoder.DE));
+        søknad.fysiskeArbeidsstederUtland = List.of(lagArbeidUtland(Landkoder.DE));
         søknad.foretakUtland = List.of(lagForetakUtland(Landkoder.ES));
         søknad.soeknadsland.landkoder = List.of(Landkoder.SE.toString(), Landkoder.DK.toString(), Landkoder.NO.toString());
 
@@ -325,7 +325,7 @@ public class LandvelgerServiceTest {
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
 
-        søknad.arbeidUtland = List.of(lagArbeidUtland(Landkoder.DE));
+        søknad.fysiskeArbeidsstederUtland = List.of(lagArbeidUtland(Landkoder.DE));
         søknad.foretakUtland = List.of(lagForetakUtland(Landkoder.ES));
         søknad.soeknadsland.landkoder = List.of(Landkoder.SE.toString(), Landkoder.DK.toString(), Landkoder.NO.toString());
 
@@ -375,10 +375,10 @@ public class LandvelgerServiceTest {
         return utenlandskAdresse;
     }
 
-    private static ArbeidUtland lagArbeidUtland(Landkoder landkode) {
-        ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse = lagUtenlandskAdresse(landkode);
-        return arbeidUtland;
+    private static FysiskArbeidssted lagArbeidUtland(Landkoder landkode) {
+        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
+        fysiskArbeidssted.adresse = lagUtenlandskAdresse(landkode);
+        return fysiskArbeidssted;
     }
 
     private static ForetakUtland lagForetakUtland(Landkoder landkode) {

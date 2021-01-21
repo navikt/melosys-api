@@ -17,8 +17,7 @@ public class BehandlingsgrunnlagData {
 
     public OpplysningerOmBrukeren personOpplysninger = new OpplysningerOmBrukeren();
 
-    // Opplysninger om arbeid i utlandet
-    public List<ArbeidUtland> arbeidUtland = new ArrayList<>();
+    public List<FysiskArbeidssted> fysiskeArbeidsstederUtland = new ArrayList<>();
 
     // Opplysninger om foretak i utlandet
     public List<ForetakUtland> foretakUtland = new ArrayList<>();
@@ -46,7 +45,7 @@ public class BehandlingsgrunnlagData {
     }
 
     public List<String> hentUtenlandskeArbeidsstederLandkode() {
-        return arbeidUtland.stream()
+        return fysiskeArbeidsstederUtland.stream()
             .map(a -> a.adresse != null ? a.adresse.landkode : null)
             .filter(Objects::nonNull)
             .distinct()
