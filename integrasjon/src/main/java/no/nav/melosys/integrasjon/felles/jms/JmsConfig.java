@@ -44,6 +44,9 @@ public class JmsConfig {
     @Value("${SBEH.queueName}")
     private String sakBehKøNavn;
 
+    @Value("${SBEH.username}")
+    private String sakBehUsername;
+
     @Bean(name = HENDELSESKØ)
     public Queue hendelseshåndterer() throws JMSException {
         return new MQQueue(sakBehKøNavn);
@@ -88,7 +91,7 @@ public class JmsConfig {
 
         connectionFactory.setBooleanProperty(JmsConstants.USER_AUTHENTICATION_MQCSP, false);
         UserCredentialsConnectionFactoryAdapter credentialQueueConnectionFactory = new UserCredentialsConnectionFactoryAdapter();
-        credentialQueueConnectionFactory.setUsername("srvappserver");
+        credentialQueueConnectionFactory.setUsername(sakBehUsername);
         credentialQueueConnectionFactory.setPassword("");
         credentialQueueConnectionFactory.setTargetConnectionFactory(connectionFactory);
 
