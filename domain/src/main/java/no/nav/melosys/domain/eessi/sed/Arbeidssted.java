@@ -22,7 +22,7 @@ public class Arbeidssted {
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
 
         fysiskArbeidssted.adresse = adresse.tilStrukturertAdresse();
-        fysiskArbeidssted.foretakNavn = navn;
+        fysiskArbeidssted.virksomhetNavn = navn;
 
         return fysiskArbeidssted;
     }

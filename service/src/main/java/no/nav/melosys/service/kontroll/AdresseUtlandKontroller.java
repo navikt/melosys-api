@@ -22,7 +22,7 @@ public abstract class AdresseUtlandKontroller {
 
         for (int i = 0; i < fysiskArbeidsstedListe.size(); i++) {
             FysiskArbeidssted fysiskArbeidssted = fysiskArbeidsstedListe.get(i);
-            if (fysiskArbeidssted.foretakNavn == null) {
+            if (fysiskArbeidssted.virksomhetNavn == null) {
                 felter.add(String.format(ARBEID_UTLAND_NAVN, i));
             }
             if (fysiskArbeidssted.adresse.landkode == null) {
