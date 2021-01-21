@@ -90,7 +90,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private Map<DokgenMetaKey, Object> variableFelter = null;
 
         public Builder() {
-
         }
 
         public Builder(DokgenBrevbestilling brevbestilling) {
