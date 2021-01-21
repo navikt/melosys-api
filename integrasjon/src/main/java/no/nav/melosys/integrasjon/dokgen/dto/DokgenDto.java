@@ -8,10 +8,16 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Kontaktopplysning;
+import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.exception.TekniskException;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static java.util.Arrays.asList;
@@ -49,6 +55,23 @@ public abstract class DokgenDto {
         this.postnr = postnr;
         this.poststed = poststed;
         this.land = land;
+    }
+
+    protected DokgenDto(DokgenBrevbestilling brevbestilling) throws TekniskException {
+        Behandling behandling = brevbestilling.getBehandling();
+        OrganisasjonDokument org = brevbestilling.getOrg();
+        Fagsak fagsak = behandling.getFagsak();
+        PersonDokument personDokument = behandling.hentPersonDokument();
+
+        this.fnr = personDokument.fnr;
+        this.saksnummer = fagsak.getSaksnummer();
+        this.dagensDato = Instant.now();
+        this.navnBruker = personDokument.sammensattNavn;
+        this.navnMottaker = (org == null ? personDokument.sammensattNavn : org.getNavn());
+        this.adresselinjer = mapAdresselinjer(org, brevbestilling.getKontaktopplysning(), personDokument);
+        this.postnr = mapPostnr(org, personDokument);
+        this.poststed = mapPoststed(org, personDokument);
+        this.land = mapLandForAdresse(org, personDokument);
     }
 
     public String getFnr() {
