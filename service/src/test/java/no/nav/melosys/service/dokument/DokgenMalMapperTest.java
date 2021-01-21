@@ -2,9 +2,11 @@ package no.nav.melosys.service.dokument;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
+import no.nav.melosys.domain.brev.DokgenMetaKey;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
@@ -12,9 +14,16 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.UstrukturertAdresse;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.DokgenDto;
+import no.nav.melosys.integrasjon.dokgen.dto.MangelbrevArbeidsgiver;
+import no.nav.melosys.integrasjon.dokgen.dto.MangelbrevBruker;
 import no.nav.melosys.integrasjon.dokgen.dto.SaksbehandlingstidSoknad;
+import no.nav.melosys.integrasjon.ereg.EregFasade;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,8 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ATTEST_A1;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -41,14 +49,21 @@ class DokgenMalMapperTest {
     public static final String FORRETNINGSADRESSE_ORG = "Storgata 1";
     public static final String POSTNR_ORG = "9990";
     public static final String KONTAKT_NAVN = "Fetter Anton";
+
     @Mock
     private KodeverkService mockKodeverkService;
+
+    @Mock
+    private BehandlingsresultatService mockBehandlingsresultatService;
+
+    @Mock
+    private EregFasade mockEregFasade;
 
     private DokgenMalMapper dokgenMalMapper;
 
     @BeforeEach
     void init() {
-        dokgenMalMapper = new DokgenMalMapper(mockKodeverkService);
+        dokgenMalMapper = new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService, mockEregFasade);
     }
 
     @Test
@@ -168,10 +183,81 @@ class DokgenMalMapperTest {
         assertEquals(POSTNR_ORG, dokgenDto.getPostnr());
     }
 
+    @Test
+    void skalMappeMangelbrevTilBruker() throws Exception {
+        when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
+
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setSaksopplysninger(singleton(lagPersonopplysning()));
+        behandling.setFagsak(lagFagsak(true));
+
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder()
+            .medProduserbartdokument(MANGELBREV_BRUKER)
+            .medBehandling(behandling)
+            .medOrg(lagOrg())
+            .medKontaktopplysning(lagKontaktOpplysning())
+            .medForsendelseMottatt(Instant.now())
+            .medVariabeltFelt(DokgenMetaKey.FRITEKST_MOTTAKSINFO, "Dummy")
+            .medVariabeltFelt(DokgenMetaKey.FRITEKST_MANGELINFO, "Dummy")
+            .build();
+
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling);
+        assertTrue(dokgenDto instanceof MangelbrevBruker);
+        MangelbrevBruker result = (MangelbrevBruker) dokgenDto;
+        assertEquals("Dummy", result.getFritekstMottaksinfo());
+        assertEquals("Dummy", result.getFritekstMangelinfo());
+    }
+
+    @Test
+    void skalMappeMangelbrevTilArbeidsgiver() throws Exception {
+        when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
+        when(mockEregFasade.hentOrganisasjonNavn(any())).thenReturn("Fullmektig AS");
+
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setSaksopplysninger(singleton(lagPersonopplysning()));
+        behandling.setFagsak(lagFagsak(true));
+
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder()
+            .medProduserbartdokument(MANGELBREV_ARBEIDSGIVER)
+            .medBehandling(behandling)
+            .medOrg(lagOrg())
+            .medKontaktopplysning(lagKontaktOpplysning())
+            .medForsendelseMottatt(Instant.now())
+            .medVariabeltFelt(DokgenMetaKey.FRITEKST_MOTTAKSINFO, "Dummy")
+            .medVariabeltFelt(DokgenMetaKey.FRITEKST_MANGELINFO, "Dummy")
+            .build();
+
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling);
+        assertTrue(dokgenDto instanceof MangelbrevArbeidsgiver);
+        MangelbrevArbeidsgiver result = (MangelbrevArbeidsgiver) dokgenDto;
+        assertEquals("Dummy", result.getFritekstMottaksinfo());
+        assertEquals("Dummy", result.getFritekstMangelinfo());
+        assertEquals("Fullmektig AS", result.getNavnFullmektig());
+    }
+
     private Fagsak lagFagsak() {
+        return lagFagsak(false);
+    }
+
+    private Fagsak lagFagsak(boolean medRepresentant) {
         Fagsak fagsak = new Fagsak();
         fagsak.setRegistrertDato(Instant.now());
+        fagsak.setBehandlinger(lagBehandlinger());
+        if (medRepresentant) {
+            Aktoer representant = new Aktoer();
+            representant.setRolle(Aktoersroller.REPRESENTANT);
+            representant.setRepresenterer(Representerer.BRUKER);
+            fagsak.getAktører().add(representant);
+        }
         return fagsak;
+    }
+
+    private List<Behandling> lagBehandlinger() {
+        Behandling behandling = new Behandling();
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        return singletonList(behandling);
     }
 
     private Saksopplysning lagPersonopplysning() {

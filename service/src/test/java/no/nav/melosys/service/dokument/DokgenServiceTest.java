@@ -20,6 +20,7 @@ import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,6 +54,8 @@ class DokgenServiceTest {
     private EregFasade mockEregFasade;
     @Mock
     private KontaktopplysningService mockKontaktOpplysningService;
+    @Mock
+    private BehandlingsresultatService mockBehandlingsresultatService;
 
     private final FakeUnleash unleash = new FakeUnleash();
 
@@ -63,7 +66,7 @@ class DokgenServiceTest {
     @BeforeEach
     void init() {
         dokgenService = new DokgenService(mockDokgenConsumer, new DokgenMalResolver(unleash), mockJoarkFasade,
-            new DokgenMalMapper(mockKodeverkService), mockBehandlingsService, mockEregFasade, mockKontaktOpplysningService);
+            new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService, mockEregFasade), mockBehandlingsService, mockEregFasade, mockKontaktOpplysningService);
     }
 
     @Test

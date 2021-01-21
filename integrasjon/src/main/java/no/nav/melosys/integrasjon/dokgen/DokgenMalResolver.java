@@ -24,6 +24,8 @@ public class DokgenMalResolver {
             .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID, "saksbehandlingstid_soknad")
             .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, "saksbehandlingstid_soknad")
             .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE, "saksbehandlingstid_klage")
+            .put(MANGELBREV_BRUKER, "mangelbrev_bruker")
+            .put(MANGELBREV_ARBEIDSGIVER, "mangelbrev_arbeidsgiver")
             .build());
 
     @Autowired
