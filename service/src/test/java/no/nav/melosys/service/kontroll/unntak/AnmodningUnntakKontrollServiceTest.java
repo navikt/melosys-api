@@ -86,7 +86,7 @@ public class AnmodningUnntakKontrollServiceTest {
 
     @Test
     public void utførKontroller_arbeidsstedManglerFelter_returnererKode() throws FunksjonellException, TekniskException {
-        behandlingsgrunnlagData.fysiskeArbeidsstederUtland = List.of(new FysiskArbeidssted());
+        behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidsstederUtland = List.of(new FysiskArbeidssted());
 
         Collection<Kontrollfeil> resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID);
         assertThat(resultat)

@@ -261,7 +261,7 @@ public class OppgaveServiceTest {
         Soeknad soeknad = new Soeknad();
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
         fysiskArbeidssted.adresse.landkode = new Land(Land.NORGE).getKode();
-        soeknad.fysiskeArbeidsstederUtland = Collections.singletonList(fysiskArbeidssted);
+        soeknad.arbeidPaaLand.fysiskeArbeidsstederUtland= Collections.singletonList(fysiskArbeidssted);
 
         soeknad.oppholdUtland.oppholdslandkoder = Collections.singletonList(Landkoder.NO.getKode());
         soeknad.oppholdUtland.oppholdsPeriode = new Periode(LocalDate.now(), LocalDate.of(2018, 12, 12));

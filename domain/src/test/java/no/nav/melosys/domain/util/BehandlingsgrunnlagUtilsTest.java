@@ -77,6 +77,6 @@ public class BehandlingsgrunnlagUtilsTest {
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
         fysiskArbeidssted.adresse = new StrukturertAdresse();
         fysiskArbeidssted.adresse.landkode = Landkoder.BE.getKode();
-        soeknad.fysiskeArbeidsstederUtland = Collections.singletonList(fysiskArbeidssted);
+        soeknad.arbeidPaaLand.fysiskeArbeidsstederUtland = Collections.singletonList(fysiskArbeidssted);
     }
 }

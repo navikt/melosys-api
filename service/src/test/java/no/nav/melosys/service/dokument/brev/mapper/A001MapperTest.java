@@ -99,7 +99,7 @@ public class A001MapperTest {
         FysiskArbeidssted arbeidssted = new FysiskArbeidssted();
         arbeidssted.adresse = strukturertAdresse;
         Soeknad søknad = new Soeknad();
-        søknad.fysiskeArbeidsstederUtland = Arrays.asList(arbeidssted);
+        søknad.arbeidPaaLand.fysiskeArbeidsstederUtland = Arrays.asList(arbeidssted);
 
         AvklartVirksomhet virksomhet = new AvklartVirksomhet("JARLSBERG AS",
                                                "123456789",

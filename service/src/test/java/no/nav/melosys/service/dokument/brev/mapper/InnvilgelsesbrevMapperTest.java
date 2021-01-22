@@ -144,7 +144,7 @@ public class InnvilgelsesbrevMapperTest {
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
         fysiskArbeidssted.adresse = new StrukturertAdresse();
         fysiskArbeidssted.adresse.landkode = Landkoder.AT.getKode();
-        dokument.fysiskeArbeidsstederUtland = Collections.singletonList(fysiskArbeidssted);
+        dokument.arbeidPaaLand.fysiskeArbeidsstederUtland = Collections.singletonList(fysiskArbeidssted);
         dokument.maritimtArbeid.add(lagMaritimtArbeidUtenFartsområde());
         return dokument;
     }

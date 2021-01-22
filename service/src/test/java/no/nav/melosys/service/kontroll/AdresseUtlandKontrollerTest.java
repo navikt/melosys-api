@@ -19,7 +19,7 @@ public class AdresseUtlandKontrollerTest {
     @Before
     public void setup() {
         behandlingsgrunnlagData = new BehandlingsgrunnlagData();
-        behandlingsgrunnlagData.fysiskeArbeidsstederUtland = List.of(new FysiskArbeidssted());
+        behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidsstederUtland = List.of(new FysiskArbeidssted());
         behandlingsgrunnlagData.foretakUtland = List.of(new ForetakUtland());
     }
 
