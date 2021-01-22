@@ -14,6 +14,10 @@
       }
     ]
   },
+  "arbeidPaaLand": {
+    "erHjemmekontor": true,
+    "erFastArbeidssted": false
+  },
   "fysiskeArbeidsstederUtland": [
     {
       "adresse": {
@@ -24,8 +28,7 @@
         "poststed": "Poststedet",
         "landkode": "DE"
       },
-      "virksomhetNavn": "EQUINOR",
-      "arbeidUtlandHjemmekontor": false
+      "virksomhetNavn": "EQUINOR"
     }
   ],
   "foretakUtland": [

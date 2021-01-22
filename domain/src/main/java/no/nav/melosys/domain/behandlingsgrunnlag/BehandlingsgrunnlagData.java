@@ -17,6 +17,8 @@ public class BehandlingsgrunnlagData {
 
     public OpplysningerOmBrukeren personOpplysninger = new OpplysningerOmBrukeren();
 
+    public ArbeidPaaLand arbeidPaaLand = new ArbeidPaaLand();
+
     public List<FysiskArbeidssted> fysiskeArbeidsstederUtland = new ArrayList<>();
 
     // Opplysninger om foretak i utlandet
