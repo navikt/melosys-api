@@ -1,5 +1,6 @@
 package no.nav.melosys.service.avklartefakta;
 
+import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.SAMBOER_UTEN_FELLES_BARN;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -63,7 +64,7 @@ public class AvklarteMedfolgendeFamilieServiceTest {
     @Test
     public void lagreMedfolgendeFamilieSomAvklartefakta_ikkeOmfattetFamilie_lagresKorrekt() throws FunksjonellException {
         Set<IkkeOmfattetFamilie> ikkeOmfattetEktefelleSamboers = Set.of(
-            new IkkeOmfattetFamilie("uuid2", "SAMBOER_UTEN_FELLES_BARN", "fritekstForUuid2"));
+            new IkkeOmfattetFamilie("uuid2", SAMBOER_UTEN_FELLES_BARN, "fritekstForUuid2"));
         AvklarteMedfolgendeFamilie avklarteMedfolgendeEktefelleSamboer =
             new AvklarteMedfolgendeFamilie(Set.of(), ikkeOmfattetEktefelleSamboers);
 
@@ -179,7 +180,7 @@ public class AvklarteMedfolgendeFamilieServiceTest {
     @Test
     public void lagreMedfolgendeFamilieSomAvklartefakta_ugyldigBegrunnelseKode_kasterFeilmelding() throws FunksjonellException {
         Set<IkkeOmfattetFamilie> ikkeOmfattetBarn = Set.of(
-            new IkkeOmfattetFamilie("uuid1", "SAMBOER_UTEN_FELLES_BARN", "fritekstForUuid1"));
+            new IkkeOmfattetFamilie("uuid1", SAMBOER_UTEN_FELLES_BARN, "fritekstForUuid1"));
         AvklarteMedfolgendeFamilie avklarteMedfolgendeBarn = new AvklarteMedfolgendeFamilie(Set.of(), ikkeOmfattetBarn);
         AvklarteMedfolgendeFamilie avklarteMedfolgendeEktefelleSamboer = new AvklarteMedfolgendeFamilie(Set.of(), Set.of());
 

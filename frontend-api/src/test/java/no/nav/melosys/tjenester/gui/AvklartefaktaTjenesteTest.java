@@ -31,6 +31,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR;
+import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.SAMBOER_UTEN_FELLES_BARN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -80,11 +82,11 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void lagreMedfolgendeFamilieSomAvklarteFakta_énAvHverMuligInput_returnererKorrekt() throws FunksjonellException, TekniskException {
         Set<OmfattetFamilie> omfattetBarn = Set.of(new OmfattetFamilie("uuid1"));
-        Set<IkkeOmfattetFamilie> ikkeOmfattetBarns = Set.of(new IkkeOmfattetFamilie("uuid2", "OVER_18_AR", "fritekstForUuid2"));
+        Set<IkkeOmfattetFamilie> ikkeOmfattetBarns = Set.of(new IkkeOmfattetFamilie("uuid2", OVER_18_AR, "fritekstForUuid2"));
         AvklarteMedfolgendeFamilie avklarteMedfolgendeBarn = new AvklarteMedfolgendeFamilie(omfattetBarn, ikkeOmfattetBarns);
 
         Set<OmfattetFamilie> omfattetEktefelleSamboer = Set.of(new OmfattetFamilie("uuid3"));
-        Set<IkkeOmfattetFamilie> ikkeOmfattetEktefelleSamboers = Set.of(new IkkeOmfattetFamilie("uuid4", "SAMBOER_UTEN_FELLES_BARN", "fritekstForUuid4"));
+        Set<IkkeOmfattetFamilie> ikkeOmfattetEktefelleSamboers = Set.of(new IkkeOmfattetFamilie("uuid4", SAMBOER_UTEN_FELLES_BARN, "fritekstForUuid4"));
         AvklarteMedfolgendeFamilie avklarteMedfolgendeEktefelleSamboer = new AvklarteMedfolgendeFamilie(omfattetEktefelleSamboer, ikkeOmfattetEktefelleSamboers);
 
         MedfolgendeFamilieDto medfolgendeFamilieDto = new MedfolgendeFamilieDto(avklarteMedfolgendeBarn, avklarteMedfolgendeEktefelleSamboer);

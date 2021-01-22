@@ -67,7 +67,7 @@ public class AvklarteMedfolgendeFamilieService {
     private void validerIkkeOmfattetFamilie(Set<IkkeOmfattetFamilie> ikkeOmfattetFamilieSet, boolean barn, Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolle) throws FunksjonellException {
         for (IkkeOmfattetFamilie ikkeOmfattetFamilie : ikkeOmfattetFamilieSet) {
             try {
-                Kodeverk begrunnelse = barn ? Medfolgende_barn_begrunnelser_ftrl.valueOf(ikkeOmfattetFamilie.getBegrunnelse()) : Medfolgende_ektefelle_samboer_begrunnelser_ftrl.valueOf(ikkeOmfattetFamilie.getBegrunnelse());
+                Kodeverk begrunnelse = barn ? ((Medfolgende_barn_begrunnelser_ftrl) ikkeOmfattetFamilie.getBegrunnelse()) : ((Medfolgende_ektefelle_samboer_begrunnelser_ftrl) ikkeOmfattetFamilie.getBegrunnelse());
             } catch (RuntimeException e) {
                 throw new FunksjonellException("Begrunnelsen til medfolgende ektefelle/samboer: " + ikkeOmfattetFamilie.getBegrunnelse() + " er ikke gyldig.");
             }
@@ -89,8 +89,8 @@ public class AvklarteMedfolgendeFamilieService {
         }
     }
 
-    public <T extends IkkeOmfattetFamilie> void lagreIkkeOmfattetFamilieSomAvklartfakta(long behandlingID, Avklartefaktatyper avklartefaktatype, Set<T> ikkeOmfattetFamilie) throws IkkeFunnetException {
-        for(T ikkeOmfattet : ikkeOmfattetFamilie) {
+    public void lagreIkkeOmfattetFamilieSomAvklartfakta(long behandlingID, Avklartefaktatyper avklartefaktatype, Set<IkkeOmfattetFamilie> ikkeOmfattetFamilie) throws IkkeFunnetException {
+        for(IkkeOmfattetFamilie ikkeOmfattet : ikkeOmfattetFamilie) {
             avklartefaktaService.leggTilAvklarteFakta(
                 behandlingID,
                 avklartefaktatype,
@@ -98,7 +98,7 @@ public class AvklarteMedfolgendeFamilieService {
                 ikkeOmfattet.getUuid(),
                 "FALSE",
                 ikkeOmfattet.getBegrunnelseFritekst(),
-                ikkeOmfattet.getBegrunnelse()
+                ikkeOmfattet.getBegrunnelse().getKode()
             );
         }
     }

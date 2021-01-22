@@ -9,6 +9,8 @@ import java.util.Set;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.familie.OmfattetFamilie;
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 
 public class MedfolgendeFamilieDto {
@@ -47,7 +49,7 @@ public class MedfolgendeFamilieDto {
                     avklarteMedfolgendeBarn.getFamilieOmfattetAvNorskTrygd().add(new OmfattetFamilie(avklartefakta.getSubjektID()));
                 }
                 else if ("FALSE".equals(avklartefakta.getFakta().get(0))) {
-                    avklarteMedfolgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd().add(new IkkeOmfattetFamilie(avklartefakta.getSubjektID(), avklartefakta.getBegrunnelseKoder().get(0), avklartefakta.getBegrunnelseFritekst()));
+                    avklarteMedfolgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd().add(new IkkeOmfattetFamilie(avklartefakta.getSubjektID(), Medfolgende_barn_begrunnelser_ftrl.valueOf(avklartefakta.getBegrunnelseKoder().get(0)), avklartefakta.getBegrunnelseFritekst()));
                 }
 
             } else if (VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER.getKode().equals(avklartefakta.getReferanse()) && VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER.equals(avklartefakta.getAvklartefaktaType())) {
@@ -56,7 +58,7 @@ public class MedfolgendeFamilieDto {
                     avklarteMedfolgendeEktefelleSamboer.getFamilieOmfattetAvNorskTrygd().add(new OmfattetFamilie(avklartefakta.getSubjektID()));
                 }
                 else if ("FALSE".equals(avklartefakta.getFakta().get(0))) {
-                    avklarteMedfolgendeEktefelleSamboer.getFamilieIkkeOmfattetAvNorskTrygd().add(new IkkeOmfattetFamilie(avklartefakta.getSubjektID(), avklartefakta.getBegrunnelseKoder().get(0), avklartefakta.getBegrunnelseFritekst()));
+                    avklarteMedfolgendeEktefelleSamboer.getFamilieIkkeOmfattetAvNorskTrygd().add(new IkkeOmfattetFamilie(avklartefakta.getSubjektID(), Medfolgende_ektefelle_samboer_begrunnelser_ftrl.valueOf(avklartefakta.getBegrunnelseKoder().get(0)), avklartefakta.getBegrunnelseFritekst()));
                 }
             }
         }
