@@ -160,8 +160,8 @@ public class AnmodningUnntakMapperTest {
         fysiskArbeidssted.adresse.landkode = "NO";
 
         Soeknad soeknad = new Soeknad();
-        soeknad.fysiskeArbeidsstederUtland = new ArrayList<>();
-        soeknad.fysiskeArbeidsstederUtland.add(fysiskArbeidssted);
+        soeknad.arbeidPaaLand.fysiskeArbeidsstederUtland= new ArrayList<>();
+        soeknad.arbeidPaaLand.fysiskeArbeidsstederUtland.add(fysiskArbeidssted);
 
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(soeknad);

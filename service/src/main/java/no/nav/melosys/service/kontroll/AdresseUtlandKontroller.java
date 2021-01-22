@@ -17,7 +17,7 @@ public abstract class AdresseUtlandKontroller {
     static final String FORETAK_UTLAND_LAND = "behandlingsgrunnlag.foretakUtland[%d].adresse.landkode";
 
     public static Kontrollfeil arbeidsstedManglerFelter(BehandlingsgrunnlagData behandlingsgrunnlagData) {
-        List<FysiskArbeidssted> fysiskArbeidsstedListe = behandlingsgrunnlagData.fysiskeArbeidsstederUtland;
+        List<FysiskArbeidssted> fysiskArbeidsstedListe = behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidsstederUtland;
         List<String> felter = new ArrayList<>();
 
         for (int i = 0; i < fysiskArbeidsstedListe.size(); i++) {

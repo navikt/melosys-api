@@ -19,8 +19,6 @@ public class BehandlingsgrunnlagData {
 
     public ArbeidPaaLand arbeidPaaLand = new ArbeidPaaLand();
 
-    public List<FysiskArbeidssted> fysiskeArbeidsstederUtland = new ArrayList<>();
-
     // Opplysninger om foretak i utlandet
     public List<ForetakUtland> foretakUtland = new ArrayList<>();
 
@@ -47,7 +45,7 @@ public class BehandlingsgrunnlagData {
     }
 
     public List<String> hentUtenlandskeArbeidsstederLandkode() {
-        return fysiskeArbeidsstederUtland.stream()
+        return arbeidPaaLand.fysiskeArbeidsstederUtland.stream()
             .map(a -> a.adresse != null ? a.adresse.landkode : null)
             .filter(Objects::nonNull)
             .distinct()

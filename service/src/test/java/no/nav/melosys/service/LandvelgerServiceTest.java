@@ -285,7 +285,7 @@ public class LandvelgerServiceTest {
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
 
-        søknad.fysiskeArbeidsstederUtland = Collections.emptyList();
+        søknad.arbeidPaaLand.fysiskeArbeidsstederUtland = Collections.emptyList();
         søknad.foretakUtland = Collections.emptyList();
         søknad.soeknadsland.landkoder = List.of(Landkoder.SE.toString(), Landkoder.DK.toString(), Landkoder.NO.toString());
 
@@ -305,7 +305,7 @@ public class LandvelgerServiceTest {
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
 
-        søknad.fysiskeArbeidsstederUtland = List.of(lagArbeidUtland(Landkoder.DE));
+        søknad.arbeidPaaLand.fysiskeArbeidsstederUtland = List.of(lagArbeidUtland(Landkoder.DE));
         søknad.foretakUtland = List.of(lagForetakUtland(Landkoder.ES));
         søknad.soeknadsland.landkoder = List.of(Landkoder.SE.toString(), Landkoder.DK.toString(), Landkoder.NO.toString());
 
@@ -325,7 +325,7 @@ public class LandvelgerServiceTest {
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
 
-        søknad.fysiskeArbeidsstederUtland = List.of(lagArbeidUtland(Landkoder.DE));
+        søknad.arbeidPaaLand.fysiskeArbeidsstederUtland = List.of(lagArbeidUtland(Landkoder.DE));
         søknad.foretakUtland = List.of(lagForetakUtland(Landkoder.ES));
         søknad.soeknadsland.landkoder = List.of(Landkoder.SE.toString(), Landkoder.DK.toString(), Landkoder.NO.toString());
 

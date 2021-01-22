@@ -175,8 +175,8 @@ class OppfriskSaksopplysningerServiceTest {
         Soeknad soeknad = new Soeknad();
 
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        soeknad.fysiskeArbeidsstederUtland = new ArrayList<>();
-        soeknad.fysiskeArbeidsstederUtland.add(fysiskArbeidssted);
+        soeknad.arbeidPaaLand.fysiskeArbeidsstederUtland = new ArrayList<>();
+        soeknad.arbeidPaaLand.fysiskeArbeidsstederUtland.add(fysiskArbeidssted);
 
         soeknad.periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
         soeknad.soeknadsland = Soeknadsland.av(List.of("SE"));
