@@ -194,7 +194,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
     }
 
     private static BarnInnvilgelseType lagBarnInnvilgelseType(OmfattetFamilie omfattetBarn) {
-        return BarnInnvilgelseType.builder().withBarnOmfattetAvNorskTrygd(omfattetBarn.sammensattNavn).build();
+        return BarnInnvilgelseType.builder().withBarnOmfattetAvNorskTrygd(omfattetBarn.getSammensattNavn()).build();
     }
 
     private BarnAvslagType lagBarnAvslagType(IkkeOmfattetBarn ikkeOmfattetBarn) throws TekniskException {

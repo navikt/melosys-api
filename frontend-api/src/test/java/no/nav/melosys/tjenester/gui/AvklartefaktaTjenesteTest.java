@@ -99,23 +99,23 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
 
         Set<OmfattetFamilie> responseOmfattetBarn = response.getMedfolgendeFamilie().getAvklarteMedfolgendeBarn().getFamilieOmfattetAvNorskTrygd();
         assertEquals(responseOmfattetBarn.size(), 1);
-        assertEquals(responseOmfattetBarn.iterator().next().uuid, omfattetBarn.iterator().next().uuid);
+        assertEquals(responseOmfattetBarn.iterator().next().getUuid(), omfattetBarn.iterator().next().getUuid());
 
         Set<IkkeOmfattetFamilie> responseIkkeOmfattetBarn = response.getMedfolgendeFamilie().getAvklarteMedfolgendeBarn().getFamilieIkkeOmfattetAvNorskTrygd();
         assertEquals(responseIkkeOmfattetBarn.size(), 1);
-        assertEquals(responseIkkeOmfattetBarn.iterator().next().uuid, ikkeOmfattetBarns.iterator().next().uuid);
-        assertEquals(responseIkkeOmfattetBarn.iterator().next().begrunnelse, ikkeOmfattetBarns.iterator().next().begrunnelse);
-        assertEquals(responseIkkeOmfattetBarn.iterator().next().begrunnelseFritekst, ikkeOmfattetBarns.iterator().next().begrunnelseFritekst);
+        assertEquals(responseIkkeOmfattetBarn.iterator().next().getUuid(), ikkeOmfattetBarns.iterator().next().getUuid());
+        assertEquals(responseIkkeOmfattetBarn.iterator().next().getBegrunnelse(), ikkeOmfattetBarns.iterator().next().getBegrunnelse());
+        assertEquals(responseIkkeOmfattetBarn.iterator().next().getBegrunnelseFritekst(), ikkeOmfattetBarns.iterator().next().getBegrunnelseFritekst());
 
         Set<OmfattetFamilie> responseOmfattetEktefelleSamboer = response.getMedfolgendeFamilie().getAvklarteMedfolgendeEktefelleSamboer().getFamilieOmfattetAvNorskTrygd();
         assertEquals(responseOmfattetEktefelleSamboer.size(), 1);
-        assertEquals(responseOmfattetEktefelleSamboer.iterator().next().uuid, omfattetEktefelleSamboer.iterator().next().uuid);
+        assertEquals(responseOmfattetEktefelleSamboer.iterator().next().getUuid(), omfattetEktefelleSamboer.iterator().next().getUuid());
 
         Set<IkkeOmfattetFamilie> responseIkkeOmfattetEktefelleSamboer = response.getMedfolgendeFamilie().getAvklarteMedfolgendeEktefelleSamboer().getFamilieIkkeOmfattetAvNorskTrygd();
         assertEquals(responseIkkeOmfattetEktefelleSamboer.size(), 1);
-        assertEquals(responseIkkeOmfattetEktefelleSamboer.iterator().next().uuid, ikkeOmfattetEktefelleSamboers.iterator().next().uuid);
-        assertEquals(responseIkkeOmfattetEktefelleSamboer.iterator().next().begrunnelse, ikkeOmfattetEktefelleSamboers.iterator().next().begrunnelse);
-        assertEquals(responseIkkeOmfattetEktefelleSamboer.iterator().next().begrunnelseFritekst, ikkeOmfattetEktefelleSamboers.iterator().next().begrunnelseFritekst);
+        assertEquals(responseIkkeOmfattetEktefelleSamboer.iterator().next().getUuid(), ikkeOmfattetEktefelleSamboers.iterator().next().getUuid());
+        assertEquals(responseIkkeOmfattetEktefelleSamboer.iterator().next().getBegrunnelse(), ikkeOmfattetEktefelleSamboers.iterator().next().getBegrunnelse());
+        assertEquals(responseIkkeOmfattetEktefelleSamboer.iterator().next().getBegrunnelseFritekst(), ikkeOmfattetEktefelleSamboers.iterator().next().getBegrunnelseFritekst());
     }
 
     @Test(expected = FunksjonellException.class)

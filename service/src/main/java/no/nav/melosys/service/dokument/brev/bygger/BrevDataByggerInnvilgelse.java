@@ -129,11 +129,11 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         AvklarteMedfolgendeBarn avklarteMedfolgendeBarn = avklartefaktaService.hentAvklarteMedfølgendeBarn(behandlingID);
         Map<String, MedfolgendeFamilie> medfølgendeBarn = hentMedfølgendeBarn(behandlingID);
         for (OmfattetFamilie omfattetBarn : avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd) {
-            if (!medfølgendeBarn.containsKey(omfattetBarn.uuid)) {
-                throw new FunksjonellException("Avklart medfølgende barn " + omfattetBarn.uuid + " finnes ikke i behandlingsgrunnlaget");
+            if (!medfølgendeBarn.containsKey(omfattetBarn.getUuid())) {
+                throw new FunksjonellException("Avklart medfølgende barn " + omfattetBarn.getUuid() + " finnes ikke i behandlingsgrunnlaget");
             }
-            MedfolgendeFamilie barn = medfølgendeBarn.get(omfattetBarn.uuid);
-            omfattetBarn.sammensattNavn = barn.fnr != null ? tpsFasade.hentSammensattNavn(barn.fnr) : barn.navn;
+            MedfolgendeFamilie barn = medfølgendeBarn.get(omfattetBarn.getUuid());
+            omfattetBarn.setSammensattNavn(barn.fnr != null ? tpsFasade.hentSammensattNavn(barn.fnr) : barn.navn);
         }
         for (IkkeOmfattetBarn ikkeOmfattetBarn : avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd) {
             if (!medfølgendeBarn.containsKey(ikkeOmfattetBarn.uuid)) {

@@ -141,7 +141,7 @@ public class BrevDataTestUtils {
 
     public static AvklarteMedfolgendeBarn lagAvklarteMedfølgendeBarn() {
         OmfattetFamilie omfattetBarn = new OmfattetFamilie("fnrOmfattet");
-        omfattetBarn.sammensattNavn = "Omfattet Barn";
+        omfattetBarn.setSammensattNavn("Omfattet Barn");
         IkkeOmfattetBarn ikkeOmfattetBarn = new IkkeOmfattetBarn("fnrIkkeOmfattet", OVER_18_AR.getKode(), null);
         ikkeOmfattetBarn.sammensattNavn = "Ikke Omfattet Barn";
 
