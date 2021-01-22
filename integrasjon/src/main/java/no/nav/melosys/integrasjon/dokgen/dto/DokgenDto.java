@@ -12,7 +12,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Kontaktopplysning;
-import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -42,20 +41,6 @@ public abstract class DokgenDto {
     // Saksbehandlingstid er 12 uker fra dato for utsendelse av brev, uavhengig av helg, helligdager, osv.
     protected static final int SAKSBEHANDLINGSTID_DAGER = 12 * 7;
     protected static final int DOKUMENTASJON_SVARFRIST_UKER_MANGELBREV = 4;
-
-    protected DokgenDto(String fnr, String saksnummer, Instant dagensDato,
-                        String navnBruker, String navnMottaker, List<String> adresselinjer,
-                        String postnr, String poststed, String land) {
-        this.fnr = fnr;
-        this.saksnummer = saksnummer;
-        this.dagensDato = dagensDato;
-        this.navnBruker = navnBruker;
-        this.navnMottaker = navnMottaker;
-        this.adresselinjer = adresselinjer;
-        this.postnr = postnr;
-        this.poststed = poststed;
-        this.land = land;
-    }
 
     protected DokgenDto(DokgenBrevbestilling brevbestilling) throws TekniskException {
         Behandling behandling = brevbestilling.getBehandling();
@@ -165,6 +150,11 @@ public abstract class DokgenDto {
             land = orgAdresse.landkode != null ? orgAdresse.landkode : null;
         }
         return land;
+    }
+
+    protected static Instant hentVedtaksdato(Behandlingsresultat behandlingsresultat) {
+        return (behandlingsresultat != null && behandlingsresultat.harVedtak()) ?
+            behandlingsresultat.getVedtakMetadata().getVedtaksdato() : null;
     }
 
     private static StrukturertAdresse hentTilgjengeligAdresse(OrganisasjonDokument org) {
