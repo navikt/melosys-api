@@ -16,6 +16,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
+import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -51,10 +52,12 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
     private TilgangService tilgangService;
     @Mock
     private AvklarteVirksomheterService avklarteVirksomheterService;
+    @Mock
+    private AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
 
     @Before
     public void setUp() {
-        avklartefaktaTjeneste = new AvklartefaktaTjeneste(avklartefaktaService, tilgangService, avklarteVirksomheterService);
+        avklartefaktaTjeneste = new AvklartefaktaTjeneste(avklartefaktaService, tilgangService, avklarteVirksomheterService, avklarteMedfolgendeFamilieService);
     }
 
     @Test
@@ -94,21 +97,21 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
 
         AvklartefaktaOppsummeringDto response = avklartefaktaTjeneste.lagreMedfolgendeFamilieSomAvklarteFakta(1L, medfolgendeFamilieDto);
 
-        Set<OmfattetFamilie> responseOmfattetBarn = response.getMedfolgendeFamilie().getAvklarteMedfolgendeBarn().familieOmfattetAvNorskTrygd;
+        Set<OmfattetFamilie> responseOmfattetBarn = response.getMedfolgendeFamilie().getAvklarteMedfolgendeBarn().getFamilieOmfattetAvNorskTrygd();
         assertEquals(responseOmfattetBarn.size(), 1);
         assertEquals(responseOmfattetBarn.iterator().next().uuid, omfattetBarn.iterator().next().uuid);
 
-        Set<IkkeOmfattetFamilie> responseIkkeOmfattetBarn = response.getMedfolgendeFamilie().getAvklarteMedfolgendeBarn().familieIkkeOmfattetAvNorskTrygd;
+        Set<IkkeOmfattetFamilie> responseIkkeOmfattetBarn = response.getMedfolgendeFamilie().getAvklarteMedfolgendeBarn().getFamilieIkkeOmfattetAvNorskTrygd();
         assertEquals(responseIkkeOmfattetBarn.size(), 1);
         assertEquals(responseIkkeOmfattetBarn.iterator().next().uuid, ikkeOmfattetBarns.iterator().next().uuid);
         assertEquals(responseIkkeOmfattetBarn.iterator().next().begrunnelse, ikkeOmfattetBarns.iterator().next().begrunnelse);
         assertEquals(responseIkkeOmfattetBarn.iterator().next().begrunnelseFritekst, ikkeOmfattetBarns.iterator().next().begrunnelseFritekst);
 
-        Set<OmfattetFamilie> responseOmfattetEktefelleSamboer = response.getMedfolgendeFamilie().getAvklarteMedfolgendeEktefelleSamboer().familieOmfattetAvNorskTrygd;
+        Set<OmfattetFamilie> responseOmfattetEktefelleSamboer = response.getMedfolgendeFamilie().getAvklarteMedfolgendeEktefelleSamboer().getFamilieOmfattetAvNorskTrygd();
         assertEquals(responseOmfattetEktefelleSamboer.size(), 1);
         assertEquals(responseOmfattetEktefelleSamboer.iterator().next().uuid, omfattetEktefelleSamboer.iterator().next().uuid);
 
-        Set<IkkeOmfattetFamilie> responseIkkeOmfattetEktefelleSamboer = response.getMedfolgendeFamilie().getAvklarteMedfolgendeEktefelleSamboer().familieIkkeOmfattetAvNorskTrygd;
+        Set<IkkeOmfattetFamilie> responseIkkeOmfattetEktefelleSamboer = response.getMedfolgendeFamilie().getAvklarteMedfolgendeEktefelleSamboer().getFamilieIkkeOmfattetAvNorskTrygd();
         assertEquals(responseIkkeOmfattetEktefelleSamboer.size(), 1);
         assertEquals(responseIkkeOmfattetEktefelleSamboer.iterator().next().uuid, ikkeOmfattetEktefelleSamboers.iterator().next().uuid);
         assertEquals(responseIkkeOmfattetEktefelleSamboer.iterator().next().begrunnelse, ikkeOmfattetEktefelleSamboers.iterator().next().begrunnelse);

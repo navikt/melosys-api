@@ -7,26 +7,18 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
-import no.nav.melosys.domain.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
-import no.nav.melosys.domain.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.familie.OmfattetFamilie;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
-import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
-import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
-import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.service.behandling.BehandlingService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.avklartefakta.Avklartefakta.VALGT_FAKTA;
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_LOVVALG_BARN;
-import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER;
 
 @Service
 public class AvklartefaktaService {
@@ -42,8 +33,6 @@ public class AvklartefaktaService {
     private final AvklarteFaktaRepository avklarteFaktaRepository;
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;
-
-    private final BehandlingService behandlingService;
 
     private final AvklartefaktaDtoKonverterer faktaKonverterer;
 
@@ -54,55 +43,54 @@ public class AvklartefaktaService {
         Avklartefaktatyper.ARBEIDSLAND);
 
     @Autowired
-    public AvklartefaktaService(AvklarteFaktaRepository avklarteFaktaRepository, BehandlingsresultatRepository behandlingsresultatRepository, BehandlingService behandlingService, AvklartefaktaDtoKonverterer faktaKonverterer) {
+    public AvklartefaktaService(AvklarteFaktaRepository avklarteFaktaRepository, BehandlingsresultatRepository behandlingsresultatRepository, AvklartefaktaDtoKonverterer faktaKonverterer) {
         this.avklarteFaktaRepository = avklarteFaktaRepository;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
-        this.behandlingService = behandlingService;
         this.faktaKonverterer = faktaKonverterer;
     }
 
     @Transactional
-    public Set<AvklartefaktaDto> hentAlleAvklarteFakta(long behandlingsid) {
-        Set<Avklartefakta> avklartefakta = avklarteFaktaRepository.findByBehandlingsresultatId(behandlingsid);
+    public Set<AvklartefaktaDto> hentAlleAvklarteFakta(long behandlingID) {
+        Set<Avklartefakta> avklartefakta = avklarteFaktaRepository.findByBehandlingsresultatId(behandlingID);
 
         return avklartefakta.stream().map(AvklartefaktaDto::new).collect(Collectors.toSet());
     }
 
-    public Set<Landkoder> hentAlleAvklarteArbeidsland(long behandlingsid) {
+    public Set<Landkoder> hentAlleAvklarteArbeidsland(long behandlingID) {
         Set<Avklartefakta> avklarteArbeidsland =
-            avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatyper.ARBEIDSLAND);
+            avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingID, Avklartefaktatyper.ARBEIDSLAND);
 
         return avklarteArbeidsland.stream()
             .map(af -> Landkoder.valueOf(af.getFakta()))
             .collect(Collectors.toSet());
     }
 
-    public Optional<Landkoder> hentBostedland(long behandlingsid) {
-        return avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatyper.BOSTEDSLAND).stream()
+    public Optional<Landkoder> hentBostedland(long behandlingID) {
+        return avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingID, Avklartefaktatyper.BOSTEDSLAND).stream()
             .map(af -> Landkoder.valueOf(af.getFakta()))
             .findFirst();
     }
 
     // Denne leverer enten norske orgnr eller uuid for identifikasjon av utenlandske foretak
-    public Set<String> hentAvklarteOrgnrOgUuid(long behandlingsid) {
+    public Set<String> hentAvklarteOrgnrOgUuid(long behandlingID) {
         Set<Avklartefakta> avklartefakta =
-                avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingsid, Avklartefaktatyper.VIRKSOMHET, VALGT_FAKTA);
+                avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingID, Avklartefaktatyper.VIRKSOMHET, VALGT_FAKTA);
         return avklartefakta.stream()
                 .map(Avklartefakta::getSubjekt)
                 .collect(Collectors.toSet());
     }
 
-    public Optional<Yrkesgrupper> finnYrkesGruppe(long behandlingsid) throws TekniskException {
+    public Optional<Yrkesgrupper> finnYrkesGruppe(long behandlingID) throws TekniskException {
         final var avklartYrkesgruppeType = avklarteFaktaRepository
-            .findByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatyper.YRKESGRUPPE)
+            .findByBehandlingsresultatIdAndType(behandlingID, Avklartefaktatyper.YRKESGRUPPE)
             .map(Avklartefakta::getFakta).map(AvklartYrkesgruppeType::valueOf).orElse(null);
 
         return (avklartYrkesgruppeType == null) ? Optional.empty() : Optional.of(avklartYrkesgruppeType.tilYrkesgruppeType());
     }
 
-    public Set<Landkoder> hentLandkoderMedMarginaltArbeid(long behandlingsid) {
+    public Set<Landkoder> hentLandkoderMedMarginaltArbeid(long behandlingID) {
         Collection<Avklartefakta> marginaltArbeid =
-            avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingsid, Avklartefaktatyper.MARGINALT_ARBEID, VALGT_FAKTA);
+            avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingID, Avklartefaktatyper.MARGINALT_ARBEID, VALGT_FAKTA);
 
         return marginaltArbeid.stream()
             .map(Avklartefakta::getSubjekt)
@@ -110,15 +98,15 @@ public class AvklartefaktaService {
             .collect(Collectors.toSet());
     }
 
-    public boolean harMarginaltArbeid(long behandlingsid) {
+    public boolean harMarginaltArbeid(long behandlingID) {
         Collection<Avklartefakta> marginaltArbeid =
-            avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingsid, Avklartefaktatyper.MARGINALT_ARBEID, VALGT_FAKTA);
+            avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingID, Avklartefaktatyper.MARGINALT_ARBEID, VALGT_FAKTA);
         return !marginaltArbeid.isEmpty();
     }
 
-    public Set<Maritimtyper> hentMaritimTyper(long behandlingsid) {
+    public Set<Maritimtyper> hentMaritimTyper(long behandlingID) {
         Set<Avklartefakta> avklartefakta =
-            avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingsid, Avklartefaktatyper.SOKKEL_ELLER_SKIP);
+            avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingID, Avklartefaktatyper.SOKKEL_ELLER_SKIP);
         return avklartefakta.stream()
             .map(af -> Maritimtyper.valueOf(af.getFakta()))
             .collect(Collectors.toSet());
@@ -132,9 +120,9 @@ public class AvklartefaktaService {
             .findFirst();
     }
 
-    public Map<String, AvklartMaritimtArbeid> hentMaritimeAvklartfaktaEtterSubjekt(long behandlingsid) {
+    public Map<String, AvklartMaritimtArbeid> hentMaritimeAvklartfaktaEtterSubjekt(long behandlingID) {
         Set<Avklartefakta> maritimeAvklartefakta =
-            avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(behandlingsid, MARITIME_FAKTATYPER);
+            avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(behandlingID, MARITIME_FAKTATYPER);
 
         Map<String, List<Avklartefakta>> maritimtArbeidGruppert = grupperForSubjekt(maritimeAvklartefakta);
         return maritimtArbeidGruppert.entrySet().stream()
@@ -162,11 +150,11 @@ public class AvklartefaktaService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void lagreAvklarteFakta(long behandlingsid, Set<AvklartefaktaDto> avklartefaktaDtos) throws IkkeFunnetException {
-        Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingsid)
-            .orElseThrow(() -> new IkkeFunnetException(FANT_IKKE_RESULTAT + behandlingsid));
+    public void lagreAvklarteFakta(long behandlingID, Set<AvklartefaktaDto> avklartefaktaDtos) throws IkkeFunnetException {
+        Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingID)
+            .orElseThrow(() -> new IkkeFunnetException(FANT_IKKE_RESULTAT + behandlingID));
 
-        avklarteFaktaRepository.deleteByBehandlingsresultatId(behandlingsid);
+        avklarteFaktaRepository.deleteByBehandlingsresultatId(behandlingID);
         avklarteFaktaRepository.flush();
 
         List<Avklartefakta> avklartefaktaList = avklartefaktaDtos.stream()
@@ -176,77 +164,10 @@ public class AvklartefaktaService {
         avklarteFaktaRepository.saveAll(avklartefaktaList);
     }
 
-    public void lagreMedfolgendeFamilieSomAvklartefakta(AvklarteMedfolgendeFamilie medfolgendeBarn, AvklarteMedfolgendeFamilie medfolgendeEktefelleSamboer, Long behandlingsid) throws FunksjonellException {
-        validerMedfolgendeFamilie(medfolgendeBarn, medfolgendeEktefelleSamboer, behandlingsid);
-
-        lagreOmfattetFamilieSomAvklartfakta(behandlingsid, VURDERING_LOVVALG_BARN, medfolgendeBarn.familieOmfattetAvNorskTrygd);
-        lagreIkkeOmfattetFamilieSomAvklartfakta(behandlingsid, VURDERING_LOVVALG_BARN, medfolgendeBarn.familieIkkeOmfattetAvNorskTrygd);
-        lagreOmfattetFamilieSomAvklartfakta(behandlingsid, VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, medfolgendeEktefelleSamboer.familieOmfattetAvNorskTrygd);
-        lagreIkkeOmfattetFamilieSomAvklartfakta(behandlingsid, VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, medfolgendeEktefelleSamboer.familieIkkeOmfattetAvNorskTrygd);
-    }
-
-    private void validerMedfolgendeFamilie(AvklarteMedfolgendeFamilie medfolgendeBarn, AvklarteMedfolgendeFamilie medfolgendeEktefelleSamboer, Long behandlingsid) throws FunksjonellException {
-        Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolleFraBehandlingsgrunnlag = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsid).getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().hentUuidOgRolleMedfølgendeFamilie();
-        validerOmfattetFamilie(medfolgendeBarn.familieOmfattetAvNorskTrygd, true, uuidOgRolleFraBehandlingsgrunnlag);
-        validerOmfattetFamilie(medfolgendeEktefelleSamboer.familieOmfattetAvNorskTrygd, false, uuidOgRolleFraBehandlingsgrunnlag);
-        validerIkkeOmfattetFamilie(medfolgendeBarn.familieIkkeOmfattetAvNorskTrygd, true, uuidOgRolleFraBehandlingsgrunnlag);
-        validerIkkeOmfattetFamilie(medfolgendeEktefelleSamboer.familieIkkeOmfattetAvNorskTrygd, false, uuidOgRolleFraBehandlingsgrunnlag);
-    }
-
-    private void validerOmfattetFamilie(Set<OmfattetFamilie> omfattetFamilieSet, Boolean barn, Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolle) throws FunksjonellException {
-        for (OmfattetFamilie omfattetFamilie : omfattetFamilieSet) {
-            if (!uuidOgRolle.containsKey(omfattetFamilie.uuid)){
-                throw new FunksjonellException("Medfolgende familie som er omfattet av norsk trygd: " + omfattetFamilie.uuid + " er ikke lagret i behandlingsgrunnlaget.");
-            }
-            if (barn ? uuidOgRolle.get(omfattetFamilie.uuid) != MedfolgendeFamilie.Relasjonsrolle.BARN : uuidOgRolle.get(omfattetFamilie.uuid) != MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER) {
-                throw new FunksjonellException("Medfolgende familie som er omfattet av norsk trygd: " + omfattetFamilie.uuid + " er lagret med feil relasjonsrolle.");
-            }
-        }
-    }
-
-    private void validerIkkeOmfattetFamilie(Set<IkkeOmfattetFamilie> ikkeOmfattetFamilieSet, Boolean barn, Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolle) throws FunksjonellException {
-        for (IkkeOmfattetFamilie ikkeOmfattetFamilie : ikkeOmfattetFamilieSet) {
-            try {
-                Kodeverk begrunnelse = barn ? Medfolgende_barn_begrunnelser_ftrl.valueOf(ikkeOmfattetFamilie.begrunnelse) : Medfolgende_ektefelle_samboer_begrunnelser_ftrl.valueOf(ikkeOmfattetFamilie.begrunnelse);
-            } catch (RuntimeException e) {
-                throw new FunksjonellException("Begrunnelsen til medfolgende ektefelle/samboer: " + ikkeOmfattetFamilie.begrunnelse + " er ikke gyldig.");
-            }
-            if (barn ? uuidOgRolle.get(ikkeOmfattetFamilie.uuid) != MedfolgendeFamilie.Relasjonsrolle.BARN : uuidOgRolle.get(ikkeOmfattetFamilie.uuid) != MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER) {
-                throw new FunksjonellException("Medfolgende familie som ikke er omfattet av norsk trygd: " + ikkeOmfattetFamilie.uuid + " er lagret med feil relasjonsrolle.");
-            }
-        }
-    }
-
-    public void lagreOmfattetFamilieSomAvklartfakta(Long behandlingsid, Avklartefaktatyper avklartefaktatype, Set<OmfattetFamilie> omfattetFamilie) throws IkkeFunnetException {
-        for(OmfattetFamilie omfattet : omfattetFamilie) {
-            leggTilAvklarteFakta(
-                behandlingsid,
-                avklartefaktatype,
-                avklartefaktatype.getKode(),
-                omfattet.uuid,
-                "TRUE"
-            );
-        }
-    }
-
-    public <T extends IkkeOmfattetFamilie> void lagreIkkeOmfattetFamilieSomAvklartfakta(Long behandlingsid, Avklartefaktatyper avklartefaktatype, Set<T> ikkeOmfattetFamilie) throws IkkeFunnetException {
-        for(T ikkeOmfattet : ikkeOmfattetFamilie) {
-            leggTilAvklarteFakta(
-                behandlingsid,
-                avklartefaktatype,
-                avklartefaktatype.getKode(),
-                ikkeOmfattet.uuid,
-                "FALSE",
-                ikkeOmfattet.begrunnelseFritekst,
-                ikkeOmfattet.begrunnelse
-            );
-        }
-    }
-
     @Transactional(rollbackFor = MelosysException.class)
-    public void leggTilAvklarteFakta(long behandlingsid, Avklartefaktatyper type, String referanse, String subjekt, String fakta) throws IkkeFunnetException {
-        Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingsid)
-            .orElseThrow(() -> new IkkeFunnetException(FANT_IKKE_RESULTAT + behandlingsid));
+    public void leggTilAvklarteFakta(long behandlingID, Avklartefaktatyper type, String referanse, String subjekt, String fakta) throws IkkeFunnetException {
+        Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingID)
+            .orElseThrow(() -> new IkkeFunnetException(FANT_IKKE_RESULTAT + behandlingID));
 
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setType(type);
@@ -259,9 +180,9 @@ public class AvklartefaktaService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void leggTilAvklarteFakta(long behandlingsid, Avklartefaktatyper type, String referanse, String subjekt, String fakta, String begrunnelseFritekst, String begrunnelseKode) throws IkkeFunnetException {
-        Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingsid)
-            .orElseThrow(() -> new IkkeFunnetException(FANT_IKKE_RESULTAT + behandlingsid));
+    public void leggTilAvklarteFakta(long behandlingID, Avklartefaktatyper type, String referanse, String subjekt, String fakta, String begrunnelseFritekst, String begrunnelseKode) throws IkkeFunnetException {
+        Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingID)
+            .orElseThrow(() -> new IkkeFunnetException(FANT_IKKE_RESULTAT + behandlingID));
 
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setType(type);
@@ -273,18 +194,18 @@ public class AvklartefaktaService {
 
         avklarteFaktaRepository.save(avklartefakta);
 
-        leggTilRegistrering(behandlingsid, type, begrunnelseKode);
+        leggTilRegistrering(behandlingID, type, begrunnelseKode);
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void leggTilBegrunnelse(long behandlingsid, Avklartefaktatyper avklartefaktatype, String begrunnelseKode) throws IkkeFunnetException {
-        leggTilAvklarteFakta(behandlingsid, avklartefaktatype, avklartefaktatype.getKode(), null, begrunnelseKode);
+    public void leggTilBegrunnelse(long behandlingID, Avklartefaktatyper avklartefaktatype, String begrunnelseKode) throws IkkeFunnetException {
+        leggTilAvklarteFakta(behandlingID, avklartefaktatype, avklartefaktatype.getKode(), null, begrunnelseKode);
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void leggTilRegistrering(long behandlingsid, Avklartefaktatyper avklartefaktatype, String begrunnelseKode) throws IkkeFunnetException {
-        Avklartefakta avklartefakta = avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingsid, avklartefaktatype)
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke avklarte fakta av type " + avklartefaktatype.name() + " for behandling " + behandlingsid));
+    public void leggTilRegistrering(long behandlingID, Avklartefaktatyper avklartefaktatype, String begrunnelseKode) throws IkkeFunnetException {
+        Avklartefakta avklartefakta = avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingID, avklartefaktatype)
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke avklarte fakta av type " + avklartefaktatype.name() + " for behandling " + behandlingID));
 
         AvklartefaktaRegistrering registrering = new AvklartefaktaRegistrering();
         registrering.setBegrunnelseKode(begrunnelseKode);

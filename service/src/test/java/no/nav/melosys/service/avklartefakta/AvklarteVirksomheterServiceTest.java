@@ -56,9 +56,6 @@ public class AvklarteVirksomheterServiceTest {
     private RegisterOppslagService registerOppslagService;
 
     @Mock
-    private BehandlingsgrunnlagService behandlingsgrunnlagService;
-
-    @Mock
     private BehandlingService behandlingService;
 
     private Behandling behandling;

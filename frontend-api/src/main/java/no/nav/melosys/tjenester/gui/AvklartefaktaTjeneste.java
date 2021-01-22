@@ -10,6 +10,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
+import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -31,14 +32,16 @@ public class AvklartefaktaTjeneste {
 
     private final AvklartefaktaService avklartefaktaService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
+    private final AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
 
     private final TilgangService tilgangService;
 
     @Autowired
-    public AvklartefaktaTjeneste(AvklartefaktaService avklartefaktaService, TilgangService tilgangService, AvklarteVirksomheterService avklarteVirksomheterService) {
+    public AvklartefaktaTjeneste(AvklartefaktaService avklartefaktaService, TilgangService tilgangService, AvklarteVirksomheterService avklarteVirksomheterService, AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService) {
         this.avklartefaktaService = avklartefaktaService;
         this.tilgangService = tilgangService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
+        this.avklarteMedfolgendeFamilieService = avklarteMedfolgendeFamilieService;
     }
 
     @GetMapping("{behandlingID}")
@@ -85,7 +88,7 @@ public class AvklartefaktaTjeneste {
         @RequestBody MedfolgendeFamilieDto medfolgendeFamilieDto) throws TekniskException, FunksjonellException {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
 
-        avklartefaktaService.lagreMedfolgendeFamilieSomAvklartefakta(medfolgendeFamilieDto.getAvklarteMedfolgendeBarn(), medfolgendeFamilieDto.getAvklarteMedfolgendeEktefelleSamboer(), behandlingID);
+        avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(behandlingID, medfolgendeFamilieDto.getAvklarteMedfolgendeBarn(), medfolgendeFamilieDto.getAvklarteMedfolgendeEktefelleSamboer());
 
         return AvklartefaktaOppsummeringDto.av(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }

@@ -44,19 +44,19 @@ public class MedfolgendeFamilieDto {
             if (VURDERING_LOVVALG_BARN.getKode().equals(avklartefakta.getReferanse()) && VURDERING_LOVVALG_BARN.equals(avklartefakta.getAvklartefaktaType())) {
 
                 if ("TRUE".equals(avklartefakta.getFakta().get(0))) {
-                    avklarteMedfolgendeBarn.familieOmfattetAvNorskTrygd.add(new OmfattetFamilie(avklartefakta.getSubjektID()));
+                    avklarteMedfolgendeBarn.getFamilieOmfattetAvNorskTrygd().add(new OmfattetFamilie(avklartefakta.getSubjektID()));
                 }
                 else if ("FALSE".equals(avklartefakta.getFakta().get(0))) {
-                    avklarteMedfolgendeBarn.familieIkkeOmfattetAvNorskTrygd.add(new IkkeOmfattetFamilie(avklartefakta.getSubjektID(), avklartefakta.getBegrunnelseKoder().get(0), avklartefakta.getBegrunnelseFritekst()));
+                    avklarteMedfolgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd().add(new IkkeOmfattetFamilie(avklartefakta.getSubjektID(), avklartefakta.getBegrunnelseKoder().get(0), avklartefakta.getBegrunnelseFritekst()));
                 }
 
             } else if (VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER.getKode().equals(avklartefakta.getReferanse()) && VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER.equals(avklartefakta.getAvklartefaktaType())) {
 
                 if ("TRUE".equals(avklartefakta.getFakta().get(0))) {
-                    avklarteMedfolgendeEktefelleSamboer.familieOmfattetAvNorskTrygd.add(new OmfattetFamilie(avklartefakta.getSubjektID()));
+                    avklarteMedfolgendeEktefelleSamboer.getFamilieOmfattetAvNorskTrygd().add(new OmfattetFamilie(avklartefakta.getSubjektID()));
                 }
                 else if ("FALSE".equals(avklartefakta.getFakta().get(0))) {
-                    avklarteMedfolgendeEktefelleSamboer.familieIkkeOmfattetAvNorskTrygd.add(new IkkeOmfattetFamilie(avklartefakta.getSubjektID(), avklartefakta.getBegrunnelseKoder().get(0), avklartefakta.getBegrunnelseFritekst()));
+                    avklarteMedfolgendeEktefelleSamboer.getFamilieIkkeOmfattetAvNorskTrygd().add(new IkkeOmfattetFamilie(avklartefakta.getSubjektID(), avklartefakta.getBegrunnelseKoder().get(0), avklartefakta.getBegrunnelseFritekst()));
                 }
             }
         }
