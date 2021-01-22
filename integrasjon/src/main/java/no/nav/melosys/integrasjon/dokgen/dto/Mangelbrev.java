@@ -7,8 +7,14 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Kontaktopplysning;
+import no.nav.melosys.domain.brev.Brevbestilling;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.exception.TekniskException;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
@@ -35,6 +41,18 @@ public class Mangelbrev extends DokgenDto {
     protected Mangelbrev(Builder builder) {
         super(builder.fnr, builder.saksnummer, builder.dagensDato, builder.navnBruker, builder.navnMottaker,
             builder.adresselinjer, builder.postnr, builder.poststed, builder.land);
+        this.datoMottatt = builder.datoMottatt;
+        this.datoVedtatt = builder.datoVedtatt;
+        this.datoInnsendingsfrist = builder.datoInnsendingsfrist;
+        this.sakstype = builder.sakstype;
+        this.behandlingstype = builder.behandlingstype;
+        this.saksbehandlerNavn = builder.saksbehandlerNavn;
+        this.fritekstMangelinfo = builder.fritekstMangelinfo;
+        this.fritekstMottaksinfo = builder.fritekstMottaksinfo;
+    }
+
+    public Mangelbrev(DokgenBrevbestilling brevbestilling, Builder builder) throws TekniskException {
+        super(brevbestilling);
         this.datoMottatt = builder.datoMottatt;
         this.datoVedtatt = builder.datoVedtatt;
         this.datoInnsendingsfrist = builder.datoInnsendingsfrist;
