@@ -99,6 +99,9 @@ public class AvklarteVirksomheterService {
     public void lagreVirksomheterSomAvklartefakta(List<String> virksomhetIDer,
                                                   Long behandlingID) throws FunksjonellException, TekniskException {
         validerVirksomhetIDerGyldige(virksomhetIDer, behandlingID);
+
+        avklartefaktaService.slettAvklarteFakta(behandlingID, VIRKSOMHET);
+
         for (String virksomhetID : virksomhetIDer) {
             lagreVirksomhetSomAvklartfakta(virksomhetID, behandlingID);
         }

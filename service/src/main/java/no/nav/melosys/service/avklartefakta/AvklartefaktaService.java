@@ -150,6 +150,12 @@ public class AvklartefaktaService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
+    public void slettAvklarteFakta(long behandlingID, Avklartefaktatyper type) {
+        avklarteFaktaRepository.deleteByBehandlingsresultatIdAndType(behandlingID, type);
+        avklarteFaktaRepository.flush();
+    }
+
+    @Transactional(rollbackFor = MelosysException.class)
     public void lagreAvklarteFakta(long behandlingID, Set<AvklartefaktaDto> avklartefaktaDtos) throws IkkeFunnetException {
         Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException(FANT_IKKE_RESULTAT + behandlingID));
@@ -192,9 +198,13 @@ public class AvklartefaktaService {
         avklartefakta.setBehandlingsresultat(resultat);
         avklartefakta.setBegrunnelseFritekst(begrunnelseFritekst);
 
-        avklarteFaktaRepository.save(avklartefakta);
+        AvklartefaktaRegistrering registrering = new AvklartefaktaRegistrering();
+        registrering.setBegrunnelseKode(begrunnelseKode);
+        registrering.setAvklartefakta(avklartefakta);
 
-        leggTilRegistrering(behandlingID, type, begrunnelseKode);
+        avklartefakta.getRegistreringer().add(registrering);
+
+        avklarteFaktaRepository.save(avklartefakta);
     }
 
     @Transactional(rollbackFor = MelosysException.class)

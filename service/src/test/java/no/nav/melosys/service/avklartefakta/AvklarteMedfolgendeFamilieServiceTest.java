@@ -93,29 +93,19 @@ public class AvklarteMedfolgendeFamilieServiceTest {
         avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(
             1L, new AvklarteMedfolgendeFamilie(Set.of(), Set.of()), avklarteMedfolgendeEktefelleSamboer);
 
-        verify(avklarteFaktaRepository, times(2)).save(captor.capture());
+        verify(avklarteFaktaRepository, times(1)).save(captor.capture());
 
-        List<Avklartefakta> capturedAvklarteFakta = captor.getAllValues();
-        assertEquals(capturedAvklarteFakta.size(), 2);
-        Avklartefakta utenRegistrering = capturedAvklarteFakta.get(0);
-        Avklartefakta medRegistrering = capturedAvklarteFakta.get(1);
+        Avklartefakta capturedAvklarteFakta = captor.getValue();
 
-        assertEquals(utenRegistrering.getSubjekt(), forventetAvklartefakta.getSubjekt());
-        assertEquals(utenRegistrering.getType(), forventetAvklartefakta.getType());
-        assertEquals(utenRegistrering.getReferanse(), forventetAvklartefakta.getReferanse());
-        assertEquals(utenRegistrering.getFakta(), forventetAvklartefakta.getFakta());
-        assertEquals(utenRegistrering.getBegrunnelseFritekst(), forventetAvklartefakta.getBegrunnelseFritekst());
-        assertEquals(utenRegistrering.getBehandlingsresultat(), forventetAvklartefakta.getBehandlingsresultat());
+        assertEquals(capturedAvklarteFakta.getSubjekt(), forventetAvklartefakta.getSubjekt());
+        assertEquals(capturedAvklarteFakta.getType(), forventetAvklartefakta.getType());
+        assertEquals(capturedAvklarteFakta.getReferanse(), forventetAvklartefakta.getReferanse());
+        assertEquals(capturedAvklarteFakta.getFakta(), forventetAvklartefakta.getFakta());
+        assertEquals(capturedAvklarteFakta.getBegrunnelseFritekst(), forventetAvklartefakta.getBegrunnelseFritekst());
+        assertEquals(capturedAvklarteFakta.getBehandlingsresultat(), forventetAvklartefakta.getBehandlingsresultat());
+        assertEquals(capturedAvklarteFakta.getRegistreringer().size(), 1);
 
-        assertEquals(medRegistrering.getSubjekt(), forventetAvklartefakta.getSubjekt());
-        assertEquals(medRegistrering.getType(), forventetAvklartefakta.getType());
-        assertEquals(medRegistrering.getReferanse(), forventetAvklartefakta.getReferanse());
-        assertEquals(medRegistrering.getFakta(), forventetAvklartefakta.getFakta());
-        assertEquals(medRegistrering.getBegrunnelseFritekst(), forventetAvklartefakta.getBegrunnelseFritekst());
-        assertEquals(medRegistrering.getBehandlingsresultat(), forventetAvklartefakta.getBehandlingsresultat());
-        assertEquals(medRegistrering.getRegistreringer().size(), 1);
-
-        AvklartefaktaRegistrering registreringFraCaptured = medRegistrering.getRegistreringer().iterator().next();
+        AvklartefaktaRegistrering registreringFraCaptured = capturedAvklarteFakta.getRegistreringer().iterator().next();
         assertEquals(registreringFraCaptured.getAvklartefakta(), forventetRegistrering.getAvklartefakta());
         assertEquals(registreringFraCaptured.getBegrunnelseKode(), forventetRegistrering.getBegrunnelseKode());
     }

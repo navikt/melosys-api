@@ -39,6 +39,9 @@ public class AvklarteMedfolgendeFamilieService {
     public void lagreMedfolgendeFamilieSomAvklartefakta(long behandlingID, AvklarteMedfolgendeFamilie medfolgendeBarn, AvklarteMedfolgendeFamilie medfolgendeEktefelleSamboer) throws FunksjonellException {
         validerMedfolgendeFamilie(behandlingID, medfolgendeBarn, medfolgendeEktefelleSamboer);
 
+        avklartefaktaService.slettAvklarteFakta(behandlingID, VURDERING_LOVVALG_BARN);
+        avklartefaktaService.slettAvklarteFakta(behandlingID, VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER);
+
         lagreOmfattetFamilieSomAvklartfakta(behandlingID, VURDERING_LOVVALG_BARN, medfolgendeBarn.getFamilieOmfattetAvNorskTrygd());
         lagreIkkeOmfattetFamilieSomAvklartfakta(behandlingID, VURDERING_LOVVALG_BARN, medfolgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd());
         lagreOmfattetFamilieSomAvklartfakta(behandlingID, VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, medfolgendeEktefelleSamboer.getFamilieOmfattetAvNorskTrygd());
