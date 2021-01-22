@@ -13,7 +13,6 @@ public enum ProsessDataKey {
     AVSENDER_LAND("avsenderLand"),
     AVSENDER_NAVN("avsenderNavn"),
     AVSENDER_TYPE("avsenderType"),
-    BEGRUNNELSEKODE("begrunnelsekode"),
     BEHANDLINGSRESULTATTYPE("behandlingsresultatType"),
     BEHANDLINGSRESULTAT_BEGRUNNELSER("behandlingsresultatBegrunnelse"),
     BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST("behandlingsresultatBegrunnelseFritekst"),
@@ -61,7 +60,6 @@ public enum ProsessDataKey {
     UTPEKING_AVVIS("utpekingAvvis"),
     UTPEKT_LAND("utpektLand"),
     VARSLE_UTLAND("varsleUtland"),
-    VEDTAKSTYPE("vedtakstype"),
     YTTERLIGERE_INFO_SED("ytterligereInformasjonSed");
 
     private String kode;

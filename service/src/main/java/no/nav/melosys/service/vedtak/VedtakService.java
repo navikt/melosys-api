@@ -109,7 +109,7 @@ public class VedtakService {
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
         behandlingService.lagre(behandling);
         prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType,
-            fritekst, fritekstSed, mottakerinstitusjoner, vedtakstype, revurderBegrunnelse);
+            fritekst, fritekstSed, mottakerinstitusjoner, revurderBegrunnelse);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
@@ -208,7 +208,11 @@ public class VedtakService {
         if (prosessinstansService.harAktivProsessinstans(behandlingID)) {
             throw new FunksjonellException("Det finnes allerede en aktiv prosess for behandling " + behandling);
         }
-        prosessinstansService.opprettProsessinstansForkortPeriode(behandling, fritekst, fritekstSed);
+        prosessinstansService.opprettProsessinstansForkortPeriode(
+            behandling,
+            fritekst,
+            fritekstSed
+        );
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 }

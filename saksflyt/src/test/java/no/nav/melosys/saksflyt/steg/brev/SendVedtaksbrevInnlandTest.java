@@ -4,11 +4,13 @@ import java.time.LocalDate;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
@@ -61,6 +63,7 @@ class SendVedtaksbrevInnlandTest {
     private static final long ART13_1A_INNVILGET_BEHANDLINGSID = 51L;
     private static final long ART11_4_INNVILGET_BEHANDLINGSID = 52L;
     private static final long ART13_1B1_UTPEKING_BEHANDLINGSID = 53L;
+    private static final long ART12_1_FORKORTET_PERIODE_BEHANDLINGSID = 54L;
 
     private static DokumentSystemService dokService;
 
@@ -121,7 +124,8 @@ class SendVedtaksbrevInnlandTest {
             BEHANDLINGSID_MANGLENDE_OPPL,
             ART13_1A_INNVILGET_BEHANDLINGSID,
             ART13_1B1_UTPEKING_BEHANDLINGSID,
-            ART11_4_INNVILGET_BEHANDLINGSID);
+            ART11_4_INNVILGET_BEHANDLINGSID,
+            ART12_1_FORKORTET_PERIODE_BEHANDLINGSID);
         when(behandlingService.hentBehandling(longThat(behandlingReferanser::contains))).thenReturn(behandling);
         return behandlingService;
     }
@@ -188,6 +192,15 @@ class SendVedtaksbrevInnlandTest {
         norskLovvalgUtenInnvilgetBestemmelse.setType(Behandlingsresultattyper.IKKE_FASTSATT);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGSID_NORSK_LOVVALG_UTEN_INNVILGET_BESTEMMELSE)).thenReturn(norskLovvalgUtenInnvilgetBestemmelse);
 
+        Behandlingsresultat endretPeriode12_1resultat = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1));
+        endretPeriode12_1resultat.getAvklartefakta().add(
+            new Avklartefakta(
+                endretPeriode12_1resultat,
+                Avklartefaktatyper.AARSAK_ENDRING_PERIODE.getKode(),
+                Avklartefaktatyper.AARSAK_ENDRING_PERIODE,
+                null,
+                Endretperiode.ENDRINGER_ARBEIDSSITUASJON.getKode()));
+        when(behandlingsresultatService.hentBehandlingsresultat(ART12_1_FORKORTET_PERIODE_BEHANDLINGSID)).thenReturn(endretPeriode12_1resultat);
         return behandlingsresultatService;
     }
 
@@ -491,9 +504,8 @@ class SendVedtaksbrevInnlandTest {
 
     @Test
     final void utfør_PåInnvilgelsesBrev_medBegrunnelsekode_oppdatererBrevdata() throws Exception {
-        Prosessinstans prosessinstans = lagProsessinstans(ART12_2_INNVILGET_BEHANDLINGSID);
-        StegBehandler instans = lagStegbehandler(lagBehandling(ART12_2_INNVILGET_BEHANDLINGSID));
-        prosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, Endretperiode.ENDRINGER_ARBEIDSSITUASJON);
+        Prosessinstans prosessinstans = lagProsessinstans(ART12_1_FORKORTET_PERIODE_BEHANDLINGSID);
+        StegBehandler instans = lagStegbehandler(lagBehandling(ART12_1_FORKORTET_PERIODE_BEHANDLINGSID));
         ArgumentCaptor<DoksysBrevbestilling> captor = ArgumentCaptor.forClass(DoksysBrevbestilling.class);
 
         instans.utfør(prosessinstans);

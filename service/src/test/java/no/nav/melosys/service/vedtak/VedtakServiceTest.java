@@ -138,7 +138,7 @@ public class VedtakServiceTest {
 
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
         verify(behandlingService).lagre(eq(behandling));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq(behandlingsresultatFritekst), eq("FRITEKST_SED"), eq(mottakerinstitusjoner), eq(vedtakstype), isNull());
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq(behandlingsresultatFritekst), eq("FRITEKST_SED"), eq(mottakerinstitusjoner), isNull());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
 
         assertThat(behandlingsresultat)
@@ -163,7 +163,7 @@ public class VedtakServiceTest {
 
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
         verify(behandlingService).lagre(eq(behandling));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq(behandlingsresultatFritekst), eq("FRITEKST_SED"), anySet(), eq(vedtakstype), isNull());
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(any(Behandling.class), eq(resultatType), eq(behandlingsresultatFritekst), eq("FRITEKST_SED"), anySet(), isNull());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
 
         assertThat(behandlingsresultat)
@@ -189,7 +189,7 @@ public class VedtakServiceTest {
         behandlingsresultat.setAnmodningsperioder(Collections.singleton(anmodningsperiode));
 
         vedtakService.fattVedtak(behandlingID, resultatType, behandlingsresultatFritekst, "FRITEKST_SED", null, vedtakstype, null);
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), eq(behandlingsresultatFritekst), eq("FRITEKST_SED"), anySet(), eq(vedtakstype), isNull());
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), eq(behandlingsresultatFritekst), eq("FRITEKST_SED"), anySet(), isNull());
 
         assertThat(behandlingsresultat)
             .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst)
@@ -206,7 +206,7 @@ public class VedtakServiceTest {
 
         vedtakService.fattVedtak(behandlingID, resultatType, null, null, null, vedtakstype, null);
         verify(prosessinstansService)
-            .opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), isNull(), anySet(), eq(vedtakstype), isNull());
+            .opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), isNull(), anySet(), isNull());
 
         assertThat(behandlingsresultat)
             .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst)
@@ -223,7 +223,7 @@ public class VedtakServiceTest {
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
 
         vedtakService.fattVedtak(behandlingID, resultatType, null, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), isNull(), anySet(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), isNull());
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(eq(behandling), eq(resultatType), isNull(), isNull(), anySet(), isNull());
     }
 
     @Test
@@ -237,7 +237,7 @@ public class VedtakServiceTest {
             .withMessageContaining("vedtak-prosess");
 
         verify(prosessinstansService, never())
-            .opprettProsessinstansIverksettVedtak(any(), any(), any(), any(), anySet(), eq(Vedtakstyper.FØRSTEGANGSVEDTAK), any());
+            .opprettProsessinstansIverksettVedtak(any(), any(), any(), any(), anySet(), any());
     }
 
     @Test
@@ -283,7 +283,11 @@ public class VedtakServiceTest {
 
         verify(avklartefaktaService).leggTilBegrunnelse(eq(behandlingID), eq(Avklartefaktatyper.AARSAK_ENDRING_PERIODE), eq(endretperiodeBegrunnelse.getKode()));
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
-        verify(prosessinstansService).opprettProsessinstansForkortPeriode(any(Behandling.class), eq("FRITEKST"), eq("FRITEKST_SED"));
+        verify(prosessinstansService).opprettProsessinstansForkortPeriode(
+            any(Behandling.class),
+            eq("FRITEKST"),
+            eq("FRITEKST_SED")
+        );
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
     }
 }
