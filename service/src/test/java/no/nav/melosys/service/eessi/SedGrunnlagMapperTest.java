@@ -40,12 +40,10 @@ class SedGrunnlagMapperTest {
             .containsExactly(tuple("15225345345", "BG"));
 
         assertThat(sedGrunnlag.fysiskeArbeidsstederUtland)
-            .extracting(
-                arbeidUtland -> arbeidUtland.virksomhetNavn,
-                arbeidUtland -> arbeidUtland.foretakOrgnr)
+            .extracting(arbeidUtland -> arbeidUtland.virksomhetNavn)
             .containsExactlyInAnyOrder(
-                tuple("Testarbeidsstednavn", null),
-                tuple("Testarbeidsstednavn2", null)
+                "Testarbeidsstednavn",
+                "Testarbeidsstednavn2"
             );
 
         assertThat(sedGrunnlag.juridiskArbeidsgiverNorge.ekstraArbeidsgivere)
