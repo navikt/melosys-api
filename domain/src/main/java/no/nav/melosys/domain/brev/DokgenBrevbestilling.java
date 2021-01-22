@@ -1,8 +1,6 @@
 package no.nav.melosys.domain.brev;
 
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
@@ -19,10 +17,9 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private final long behandlingId;
     private final Aktoer mottaker; //NOTE Flytt opp til Brevbestilling
     private final boolean bestillKopi;
-    private final Map<DokgenMetaKey, Object> variableFelter;
     private final Behandlingsresultat behandlingsresultat;
 
-    private DokgenBrevbestilling(Builder builder) {
+    protected DokgenBrevbestilling(Builder<?> builder) {
         super(builder.produserbartdokument, builder.behandling, builder.avsenderNavn);
         this.org = builder.org;
         this.kontaktopplysning = builder.kontaktopplysning;
@@ -32,7 +29,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
         this.mottaker = builder.mottaker;
         this.bestillKopi = builder.bestillKopi;
         this.behandlingsresultat = builder.behandlingsresultat;
-        this.variableFelter = builder.variableFelter;
     }
 
     public OrganisasjonDokument getOrg() {
@@ -67,15 +63,11 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return behandlingsresultat;
     }
 
-    public <T> T getVariabeltFelt(DokgenMetaKey key, Class<T> type) {
-        return (variableFelter != null && variableFelter.get(key) != null) ? type.cast(variableFelter.get(key)) : null;
-    }
-
     public Builder toBuilder() {
-        return new Builder(this);
+        return new Builder (this);
     }
 
-    public static final class Builder {
+    public static class Builder<T extends Builder<T>> {
         private Produserbaredokumenter produserbartdokument;
         private Behandling behandling;
         private OrganisasjonDokument org;
@@ -87,7 +79,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private Aktoer mottaker;
         private boolean bestillKopi;
         private Behandlingsresultat behandlingsresultat;
-        private Map<DokgenMetaKey, Object> variableFelter = null;
 
         public Builder() {
         }
@@ -104,75 +95,61 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.mottaker = brevbestilling.mottaker;
             this.bestillKopi = brevbestilling.bestillKopi;
             this.behandlingsresultat = brevbestilling.behandlingsresultat;
-            this.variableFelter = brevbestilling.variableFelter;
         }
 
-        public Builder medProduserbartdokument(Produserbaredokumenter produserbartdokument) {
+        public T medProduserbartdokument(Produserbaredokumenter produserbartdokument) {
             this.produserbartdokument = produserbartdokument;
-            return this;
+            return (T) this;
         }
 
-        public Builder medBehandling(Behandling behandling) {
+        public T medBehandling(Behandling behandling) {
             this.behandling = behandling;
-            return this;
+            return (T) this;
         }
 
-        public Builder medOrg(OrganisasjonDokument org) {
+        public T medOrg(OrganisasjonDokument org) {
             this.org = org;
-            return this;
+            return (T) this;
         }
 
-        public Builder medKontaktopplysning(Kontaktopplysning kontaktopplysning) {
+        public T medKontaktopplysning(Kontaktopplysning kontaktopplysning) {
             this.kontaktopplysning = kontaktopplysning;
-            return this;
+            return (T) this;
         }
 
-        public Builder medForsendelseMottatt(Instant forsendelseMottatt) {
+        public T medForsendelseMottatt(Instant forsendelseMottatt) {
             this.forsendelseMottatt = forsendelseMottatt;
-            return this;
+            return (T) this;
         }
 
-        public Builder medAvsenderNavn(String avsenderNavn) {
+        public T medAvsenderNavn(String avsenderNavn) {
             this.avsenderNavn = avsenderNavn;
-            return this;
+            return (T) this;
         }
 
-        public Builder medAvsenderId(String avsenderId) {
+        public T medAvsenderId(String avsenderId) {
             this.avsenderId = avsenderId;
-            return this;
+            return (T) this;
         }
 
-        public Builder medBehandlingId(long behandlingId) {
+        public T medBehandlingId(long behandlingId) {
             this.behandlingId = behandlingId;
-            return this;
+            return (T) this;
         }
 
-        public Builder medMottaker(Aktoer mottaker) {
+        public T medMottaker(Aktoer mottaker) {
             this.mottaker = mottaker;
-            return this;
+            return (T) this;
         }
 
-        public Builder medBestillKopi(boolean bestillKopi) {
+        public T medBestillKopi(boolean bestillKopi) {
             this.bestillKopi = bestillKopi;
-            return this;
+            return (T) this;
         }
 
-        public Builder medBehandlingsResultat(Behandlingsresultat behandlingsresultat) {
+        public T medBehandlingsResultat(Behandlingsresultat behandlingsresultat) {
             this.behandlingsresultat = behandlingsresultat;
-            return this;
-        }
-
-        public Builder medVariableFelter(Map<DokgenMetaKey, Object> variableFelter) {
-            this.variableFelter = variableFelter;
-            return this;
-        }
-
-        public Builder medVariabeltFelt(DokgenMetaKey key, Object object) {
-            if (this.variableFelter == null) {
-                this.variableFelter = new HashMap<>();
-            }
-            this.variableFelter.put(key, object);
-            return this;
+            return (T) this;
         }
 
         public DokgenBrevbestilling build() {

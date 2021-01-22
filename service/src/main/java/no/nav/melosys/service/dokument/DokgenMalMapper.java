@@ -8,7 +8,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.brev.DokgenMetaKey;
+import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -51,14 +51,15 @@ public class DokgenMalMapper {
                 dto = SaksbehandlingstidKlage.av(brevbestilling);
                 break;
             case MANGELBREV_BRUKER:
-                dto = MangelbrevBruker.av(brevbestilling.toBuilder()
+                dto = MangelbrevBruker.av(((MangelbrevBrevbestilling) brevbestilling).toBuilder()
                     .medBehandlingsResultat(hentBehandlingsResultat(brevbestilling.getBehandling().getId()))
                     .build());
                 break;
             case MANGELBREV_ARBEIDSGIVER:
-                dto = MangelbrevArbeidsgiver.av(brevbestilling.toBuilder()
+                MangelbrevBrevbestilling bestilling = (MangelbrevBrevbestilling) brevbestilling;
+                dto = MangelbrevArbeidsgiver.av(bestilling.toBuilder()
                     .medBehandlingsResultat(hentBehandlingsResultat(brevbestilling.getBehandling().getId()))
-                    .medVariabeltFelt(DokgenMetaKey.FULLMEKTIGNAVN, hentFullmektigNavn(brevbestilling.getBehandling().getFagsak()))
+                    .medFullmektigNavn(hentFullmektigNavn(brevbestilling.getBehandling().getFagsak()))
                     .build());
                 break;
             default:
@@ -73,13 +74,8 @@ public class DokgenMalMapper {
         return kodeverkService.dekod(FellesKodeverk.POSTNUMMER, postnr, LocalDate.now());
     }
 
-    private Behandlingsresultat hentBehandlingsResultat(Long behandlingId) {
-        try {
-            return behandlingsresultatService.hentBehandlingsresultat(behandlingId);
-        } catch (IkkeFunnetException e) {
-            // Har ikke blitt behandlet
-            return null;
-        }
+    private Behandlingsresultat hentBehandlingsResultat(Long behandlingId) throws IkkeFunnetException {
+        return behandlingsresultatService.hentBehandlingsresultat(behandlingId);
     }
 
     private String hentFullmektigNavn(Fagsak fagsak) throws IkkeFunnetException, IntegrasjonException {

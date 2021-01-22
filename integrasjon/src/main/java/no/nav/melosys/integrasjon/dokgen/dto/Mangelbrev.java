@@ -6,10 +6,8 @@ import java.time.Period;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
-import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.brev.DokgenMetaKey;
+import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -37,7 +35,7 @@ public class Mangelbrev extends DokgenDto {
     private final String fritekstMangelinfo;
     private final String fritekstMottaksinfo;
 
-    protected Mangelbrev(DokgenBrevbestilling brevbestilling) throws TekniskException, IkkeFunnetException {
+    protected Mangelbrev(MangelbrevBrevbestilling brevbestilling) throws TekniskException, IkkeFunnetException {
         super(brevbestilling);
         Fagsak fagsak = brevbestilling.getBehandling().getFagsak();
 
@@ -47,8 +45,8 @@ public class Mangelbrev extends DokgenDto {
         this.sakstype = fagsak.getType();
         this.behandlingstype = fagsak.getSistOppdaterteBehandling().getType();
         this.saksbehandlerNavn = fagsak.getEndretAv();
-        this.fritekstMangelinfo = brevbestilling.getVariabeltFelt(DokgenMetaKey.FRITEKST_MANGELINFO, String.class);
-        this.fritekstMottaksinfo = brevbestilling.getVariabeltFelt(DokgenMetaKey.FRITEKST_MOTTAKSINFO, String.class);
+        this.fritekstMangelinfo = brevbestilling.getFritekstMangelInfo();
+        this.fritekstMottaksinfo = brevbestilling.getFritekstMottaksInfo();
     }
 
     public Instant getDatoMottatt() {
