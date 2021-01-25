@@ -13,13 +13,21 @@ import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 
 public interface EessiConsumer {
 
-    OpprettSedDto opprettBucOgSed(SedDataDto sedDataDto, Collection<Vedlegg> vedlegg, BucType bucType, boolean forsøkSend) throws MelosysException;
+    OpprettSedDto opprettBucOgSed(SedDataDto sedDataDto,
+                                  Collection<Vedlegg> vedlegg,
+                                  BucType bucType,
+                                  boolean forsøkSend,
+                                  boolean oppdaterEksisterendeOmFinnes) throws MelosysException;
 
-    void sendSedPåEksisterendeBuc(SedDataDto sedDataDto, String rinaSaksnummer, SedType sedType) throws MelosysException;
+    void sendSedPåEksisterendeBuc(SedDataDto sedDataDto,
+                                  String rinaSaksnummer,
+                                  SedType sedType) throws MelosysException;
 
-    List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, List<String> statuser) throws MelosysException;
+    List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer,
+                                              List<String> statuser) throws MelosysException;
 
-    List<Institusjon> hentMottakerinstitusjoner(String bucType, Collection<String> landkode) throws MelosysException;
+    List<Institusjon> hentMottakerinstitusjoner(String bucType,
+                                                Collection<String> landkode) throws MelosysException;
 
     MelosysEessiMelding hentMelosysEessiMeldingFraJournalpostID(String journalpostID) throws MelosysException;
 

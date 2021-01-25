@@ -56,22 +56,22 @@ public class EessiConsumerTest {
     public void opprettOgSend_forventMap() throws Exception {
 
         BucType bucType = BucType.LA_BUC_01;
-        server.expect(requestTo("/buc/" + bucType + "?sendAutomatisk=true"))
+        server.expect(requestTo("/buc/" + bucType + "?sendAutomatisk=true&oppdaterEksisterende=true"))
             .andExpect(method(HttpMethod.POST))
             .andExpect(header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
             .andExpect(header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE))
             .andRespond(withSuccess("{\"rinaSaksnummer\":\"12345\",\"rinaUrl\":\"localhost:3000\"}", MediaType.APPLICATION_JSON));
 
-        OpprettSedDto opprettSedDto = eessiConsumer.opprettBucOgSed(sedDataDto, Collections.singleton(new Vedlegg("pdf".getBytes(), "tittel")), bucType, true);
+        OpprettSedDto opprettSedDto = eessiConsumer.opprettBucOgSed(sedDataDto, Collections.singleton(new Vedlegg("pdf".getBytes(), "tittel")), bucType, true, true);
         assertThat(opprettSedDto.getRinaSaksnummer()).isEqualTo("12345");
     }
 
     @Test(expected = MelosysException.class)
     public void opprettOgSend_forventException() throws Exception {
         BucType bucType = BucType.LA_BUC_01;
-        server.expect(requestTo("/buc/" + bucType + "?sendAutomatisk=true"))
+        server.expect(requestTo("/buc/" + bucType + "?sendAutomatisk=true&oppdaterEksisterende=true"))
             .andRespond(withBadRequest());
-        eessiConsumer.opprettBucOgSed(sedDataDto, null, BucType.LA_BUC_01, true);
+        eessiConsumer.opprettBucOgSed(sedDataDto, null, BucType.LA_BUC_01, true, true);
     }
 
     @Test
