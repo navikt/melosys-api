@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -52,13 +53,13 @@ public class DokgenMalMapper {
                 break;
             case MANGELBREV_BRUKER:
                 dto = MangelbrevBruker.av(((MangelbrevBrevbestilling) brevbestilling).toBuilder()
-                    .medBehandlingsResultat(hentBehandlingsResultat(brevbestilling.getBehandling().getId()))
+                    .medVedtaksdato(hentVedtaksdato(brevbestilling.getBehandling().getId()))
                     .build());
                 break;
             case MANGELBREV_ARBEIDSGIVER:
                 MangelbrevBrevbestilling bestilling = (MangelbrevBrevbestilling) brevbestilling;
                 dto = MangelbrevArbeidsgiver.av(bestilling.toBuilder()
-                    .medBehandlingsResultat(hentBehandlingsResultat(brevbestilling.getBehandling().getId()))
+                    .medVedtaksdato(hentVedtaksdato(brevbestilling.getBehandling().getId()))
                     .medFullmektigNavn(hentFullmektigNavn(brevbestilling.getBehandling().getFagsak()))
                     .build());
                 break;
@@ -74,8 +75,10 @@ public class DokgenMalMapper {
         return kodeverkService.dekod(FellesKodeverk.POSTNUMMER, postnr, LocalDate.now());
     }
 
-    private Behandlingsresultat hentBehandlingsResultat(Long behandlingId) throws IkkeFunnetException {
-        return behandlingsresultatService.hentBehandlingsresultat(behandlingId);
+    private Instant hentVedtaksdato(Long behandlingId) throws IkkeFunnetException {
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
+        return (behandlingsresultat != null && behandlingsresultat.harVedtak()) ?
+            behandlingsresultat.getVedtakMetadata().getVedtaksdato() : null;
     }
 
     private String hentFullmektigNavn(Fagsak fagsak) throws IkkeFunnetException, IntegrasjonException {

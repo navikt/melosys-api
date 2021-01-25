@@ -40,7 +40,7 @@ public class Mangelbrev extends DokgenDto {
         Fagsak fagsak = brevbestilling.getBehandling().getFagsak();
 
         this.datoMottatt = brevbestilling.getForsendelseMottatt();
-        this.datoVedtatt = hentVedtaksdato(brevbestilling.getBehandlingsresultat());
+        this.datoVedtatt = brevbestilling.getVedtaksdato();
         this.datoInnsendingsfrist = Instant.now().plus(Period.ofWeeks(DOKUMENTASJON_SVARFRIST_UKER_MANGELBREV));
         this.sakstype = fagsak.getType();
         this.behandlingstype = fagsak.getSistOppdaterteBehandling().getType();

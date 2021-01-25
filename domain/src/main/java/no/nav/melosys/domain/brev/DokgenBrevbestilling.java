@@ -17,7 +17,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private final long behandlingId;
     private final Aktoer mottaker; //NOTE Flytt opp til Brevbestilling
     private final boolean bestillKopi;
-    private final Behandlingsresultat behandlingsresultat;
+    private final Instant vedtaksdato;
 
     protected DokgenBrevbestilling(Builder<?> builder) {
         super(builder.produserbartdokument, builder.behandling, builder.avsenderNavn);
@@ -28,7 +28,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         this.behandlingId = builder.behandlingId;
         this.mottaker = builder.mottaker;
         this.bestillKopi = builder.bestillKopi;
-        this.behandlingsresultat = builder.behandlingsresultat;
+        this.vedtaksdato = builder.vedtaksdato;
     }
 
     public OrganisasjonDokument getOrg() {
@@ -59,8 +59,8 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return bestillKopi;
     }
 
-    public Behandlingsresultat getBehandlingsresultat() {
-        return behandlingsresultat;
+    public Instant getVedtaksdato() {
+        return vedtaksdato;
     }
 
     public Builder toBuilder() {
@@ -78,7 +78,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private long behandlingId;
         private Aktoer mottaker;
         private boolean bestillKopi;
-        private Behandlingsresultat behandlingsresultat;
+        private Instant vedtaksdato;
 
         public Builder() {
         }
@@ -94,7 +94,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.behandlingId = brevbestilling.behandlingId;
             this.mottaker = brevbestilling.mottaker;
             this.bestillKopi = brevbestilling.bestillKopi;
-            this.behandlingsresultat = brevbestilling.behandlingsresultat;
+            this.vedtaksdato = brevbestilling.vedtaksdato;
         }
 
         public T medProduserbartdokument(Produserbaredokumenter produserbartdokument) {
@@ -147,8 +147,8 @@ public class DokgenBrevbestilling extends Brevbestilling {
             return (T) this;
         }
 
-        public T medBehandlingsResultat(Behandlingsresultat behandlingsresultat) {
-            this.behandlingsresultat = behandlingsresultat;
+        public T medVedtaksdato(Instant vedtaksdato) {
+            this.vedtaksdato = vedtaksdato;
             return (T) this;
         }
 

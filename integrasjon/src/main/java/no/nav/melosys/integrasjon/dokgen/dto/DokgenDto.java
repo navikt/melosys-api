@@ -152,11 +152,6 @@ public abstract class DokgenDto {
         return land;
     }
 
-    protected static Instant hentVedtaksdato(Behandlingsresultat behandlingsresultat) {
-        return (behandlingsresultat != null && behandlingsresultat.harVedtak()) ?
-            behandlingsresultat.getVedtakMetadata().getVedtaksdato() : null;
-    }
-
     private static StrukturertAdresse hentTilgjengeligAdresse(OrganisasjonDokument org) {
         return org.getPostadresse() == null ? org.getForretningsadresse() : org.getPostadresse();
     }
