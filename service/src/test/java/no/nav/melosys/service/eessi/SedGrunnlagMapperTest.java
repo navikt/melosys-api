@@ -40,7 +40,7 @@ class SedGrunnlagMapperTest {
             .containsExactly(tuple("15225345345", "BG"));
 
         assertThat(sedGrunnlag.arbeidPaaLand.fysiskeArbeidsstederUtland)
-            .extracting(arbeidUtland -> arbeidUtland.virksomhetNavn)
+            .extracting(arbeidssted -> arbeidssted.virksomhetNavn)
             .containsExactlyInAnyOrder(
                 "Testarbeidsstednavn",
                 "Testarbeidsstednavn2"

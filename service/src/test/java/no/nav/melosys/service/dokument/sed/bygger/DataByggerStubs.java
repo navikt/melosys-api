@@ -104,7 +104,7 @@ class DataByggerStubs {
         return behandling;
     }
 
-    static Behandling hentBehandlingMedManglendeAdressefelterStub(boolean arbeidUtlandManglerLandkode,
+    static Behandling hentBehandlingMedManglendeAdressefelterStub(boolean fysiskArbeidsstedManglerLandkode,
                                                                   boolean arbeidsgivendeForetakUtlandManglerLandkode,
                                                                   boolean selvstendigForetakUtlandManglerLandkode) {
         Behandling behandling = hentBehandlingStub();
@@ -112,7 +112,7 @@ class DataByggerStubs {
 
         FysiskArbeidssted fysiskArbeidssted = behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidsstederUtland.remove(0);
         fysiskArbeidssted.adresse.poststed = null;
-        if (arbeidUtlandManglerLandkode) {
+        if (fysiskArbeidsstedManglerLandkode) {
             fysiskArbeidssted.adresse.landkode = null;
         }
         behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidsstederUtland.add(fysiskArbeidssted);

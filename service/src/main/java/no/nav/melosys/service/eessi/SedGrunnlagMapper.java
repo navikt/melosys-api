@@ -23,7 +23,7 @@ public class SedGrunnlagMapper {
 
         sedGrunnlag.personOpplysninger = tilPersonopplysninger(sedGrunnlagDto.getUtenlandskIdent());
         sedGrunnlag.bosted = tilBosted(sedGrunnlagDto.getBostedsadresse());
-        sedGrunnlag.arbeidPaaLand.fysiskeArbeidsstederUtland = tilArbeidUtland(sedGrunnlagDto.getArbeidssteder());
+        sedGrunnlag.arbeidPaaLand.fysiskeArbeidsstederUtland = tilFysiskeArbeidssteder(sedGrunnlagDto.getArbeidssteder());
         sedGrunnlag.foretakUtland = tilForetakUtland(sedGrunnlagDto.getArbeidsgivendeVirksomheter(), sedGrunnlagDto.getSelvstendigeVirksomheter());
         sedGrunnlag.periode = tilPeriode(sedGrunnlagDto.getLovvalgsperioder());
         sedGrunnlag.ytterligereInformasjon = sedGrunnlagDto.getYtterligereInformasjon();
@@ -77,8 +77,8 @@ public class SedGrunnlagMapper {
         return bosted;
     }
 
-    private static List<FysiskArbeidssted> tilArbeidUtland(List<no.nav.melosys.domain.eessi.sed.Arbeidssted> arbeidssteder) {
-        return arbeidssteder.stream().map(no.nav.melosys.domain.eessi.sed.Arbeidssted::tilArbeidUtland).collect(Collectors.toList());
+    private static List<FysiskArbeidssted> tilFysiskeArbeidssteder(List<no.nav.melosys.domain.eessi.sed.Arbeidssted> arbeidssteder) {
+        return arbeidssteder.stream().map(no.nav.melosys.domain.eessi.sed.Arbeidssted::tilFysiskArbeidssted).collect(Collectors.toList());
     }
 
     private static List<ForetakUtland> tilForetakUtland(List<Virksomhet> arbeidsgivendeVirksomheter, List<Virksomhet> selvstendigeVirksomheter) {
