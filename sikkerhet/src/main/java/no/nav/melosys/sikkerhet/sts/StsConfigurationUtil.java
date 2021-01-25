@@ -11,9 +11,9 @@ import org.apache.cxf.binding.soap.SoapMessage;
 import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.endpoint.Endpoint;
 import org.apache.cxf.endpoint.EndpointException;
-import org.apache.cxf.frontend.ClientProxy;
 import org.apache.cxf.ext.logging.LoggingInInterceptor;
 import org.apache.cxf.ext.logging.LoggingOutInterceptor;
+import org.apache.cxf.frontend.ClientProxy;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.rt.security.SecurityConstants;
 import org.apache.cxf.service.model.EndpointInfo;
@@ -32,12 +32,20 @@ public class StsConfigurationUtil {
     private static final String STS_USER_USERNAME = "systemuser.username";
     @SuppressWarnings("squid:S2068")
     private static final String STS_USER_PASSWORD = "systemuser.password";
+    private static final String SPRING_ACTIVE_PROFILES = "spring.profiles.active";
 
     private StsConfigurationUtil() {
         throw new IllegalAccessError("Skal ikke instansieres");
     }
 
     public static <T> T wrapWithSts(T port, NAVSTSClient.StsClientType samlTokenType) {
+
+        //Ignorer sts-kall ved mock-kjøring
+        final String aktivProfil = System.getProperty(SPRING_ACTIVE_PROFILES);
+        if (aktivProfil != null && aktivProfil.equals("local-mock")) {
+            return port;
+        }
+
         Client client = ClientProxy.getClient(port);
         switch (samlTokenType) {
             case SECURITYCONTEXT_TIL_SAML:
