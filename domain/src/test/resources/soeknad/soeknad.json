@@ -15,7 +15,7 @@
     ]
   },
   "arbeidPaaLand": {
-    "fysiskeArbeidsstederUtland": [
+    "fysiskeArbeidssteder": [
       {
         "adresse": {
           "gatenavn": "Adresseveien 123",

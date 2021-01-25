@@ -75,8 +75,8 @@ public class FagsakBehandlingFactory {
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
         fysiskArbeidssted.adresse.landkode = "SE";
         soeknad.soeknadsland.landkoder.add(Landkoder.DK.getKode());
-        soeknad.arbeidPaaLand.fysiskeArbeidsstederUtland= new ArrayList<>();
-        soeknad.arbeidPaaLand.fysiskeArbeidsstederUtland.add(fysiskArbeidssted);
+        soeknad.arbeidPaaLand.fysiskeArbeidssteder = new ArrayList<>();
+        soeknad.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
         soeknad.oppholdUtland.oppholdslandkoder.add("FI");
         soeknad.periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(
             LocalDate.of(2019,1,1), LocalDate.of(2019,2,1));

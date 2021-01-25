@@ -19,7 +19,7 @@ public class AdresseUtlandKontrollerTest {
     @Before
     public void setup() {
         behandlingsgrunnlagData = new BehandlingsgrunnlagData();
-        behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidsstederUtland = List.of(new FysiskArbeidssted());
+        behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidssteder = List.of(new FysiskArbeidssted());
         behandlingsgrunnlagData.foretakUtland = List.of(new ForetakUtland());
     }
 
@@ -28,7 +28,7 @@ public class AdresseUtlandKontrollerTest {
         Kontrollfeil kontrollfeil = AdresseUtlandKontroller.arbeidsstedManglerFelter(behandlingsgrunnlagData);
         assertThat(kontrollfeil)
             .extracting(Kontrollfeil::getKode, Kontrollfeil::getFelter)
-            .contains(List.of(String.format(ARBEID_UTLAND_NAVN, 0), String.format(ARBEID_UTLAND_LAND, 0)));
+            .contains(List.of(String.format(ARBEIDSSTED_FIRMANAVN, 0), String.format(ARBEIDSSTED_LAND, 0)));
     }
 
     @Test

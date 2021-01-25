@@ -31,8 +31,8 @@ public final class BehandlingsgrunnlagStub {
 
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
         fysiskArbeidssted.adresse.landkode = "DE";
-        søknad.arbeidPaaLand.fysiskeArbeidsstederUtland = new ArrayList<>();
-        søknad.arbeidPaaLand.fysiskeArbeidsstederUtland.add(fysiskArbeidssted);
+        søknad.arbeidPaaLand.fysiskeArbeidssteder = new ArrayList<>();
+        søknad.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
         søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere = ekstraArbeidsgivere;
         søknad.foretakUtland = foretakUtland;
         søknad.soeknadsland.landkoder.add("DE");
