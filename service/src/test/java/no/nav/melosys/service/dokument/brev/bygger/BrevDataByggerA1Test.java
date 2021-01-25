@@ -172,7 +172,7 @@ class BrevDataByggerA1Test {
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
         fysiskArbeidssted.virksomhetNavn = "Utenlandsk Oppdragsgiver LTD";
         fysiskArbeidssted.adresse = lagStrukturertAdresse();
-        søknad.arbeidPaaLand.fysiskeArbeidsstederUtland.add(fysiskArbeidssted);
+        søknad.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
 
         BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(dataGrunnlag, saksbehandler);
         assertThat(brevDataDto.bivirksomheter.stream().map(uv -> uv.navn)).contains(fysiskArbeidssted.virksomhetNavn);

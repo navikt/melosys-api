@@ -45,7 +45,7 @@ public class BehandlingsgrunnlagData {
     }
 
     public List<String> hentUtenlandskeArbeidsstederLandkode() {
-        return arbeidPaaLand.fysiskeArbeidsstederUtland.stream()
+        return arbeidPaaLand.fysiskeArbeidssteder.stream()
             .map(a -> a.adresse != null ? a.adresse.landkode : null)
             .filter(Objects::nonNull)
             .distinct()

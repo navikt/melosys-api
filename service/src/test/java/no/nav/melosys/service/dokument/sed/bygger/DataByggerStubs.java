@@ -57,7 +57,7 @@ class DataByggerStubs {
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
         fysiskArbeidssted.adresse = hentStrukturertAddresseStub();
         fysiskArbeidssted.virksomhetNavn = "foretaknavn";
-        søknadDokument.arbeidPaaLand.fysiskeArbeidsstederUtland = Lists.newArrayList(fysiskArbeidssted);
+        søknadDokument.arbeidPaaLand.fysiskeArbeidssteder = Lists.newArrayList(fysiskArbeidssted);
         UtenlandskIdent utenlandskIdent = new UtenlandskIdent();
         utenlandskIdent.ident = "439205843";
         utenlandskIdent.landkode = "SE";
@@ -110,12 +110,12 @@ class DataByggerStubs {
         Behandling behandling = hentBehandlingStub();
         BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
 
-        FysiskArbeidssted fysiskArbeidssted = behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidsstederUtland.remove(0);
+        FysiskArbeidssted fysiskArbeidssted = behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidssteder.remove(0);
         fysiskArbeidssted.adresse.poststed = null;
         if (fysiskArbeidsstedManglerLandkode) {
             fysiskArbeidssted.adresse.landkode = null;
         }
-        behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidsstederUtland.add(fysiskArbeidssted);
+        behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
 
         ForetakUtland foretakUtland = behandlingsgrunnlagData.foretakUtland.remove(0);
         foretakUtland.adresse.postnummer = null;

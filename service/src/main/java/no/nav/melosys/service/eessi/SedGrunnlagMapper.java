@@ -23,7 +23,7 @@ public class SedGrunnlagMapper {
 
         sedGrunnlag.personOpplysninger = tilPersonopplysninger(sedGrunnlagDto.getUtenlandskIdent());
         sedGrunnlag.bosted = tilBosted(sedGrunnlagDto.getBostedsadresse());
-        sedGrunnlag.arbeidPaaLand.fysiskeArbeidsstederUtland = tilFysiskeArbeidssteder(sedGrunnlagDto.getArbeidssteder());
+        sedGrunnlag.arbeidPaaLand.fysiskeArbeidssteder = tilFysiskeArbeidssteder(sedGrunnlagDto.getArbeidssteder());
         sedGrunnlag.foretakUtland = tilForetakUtland(sedGrunnlagDto.getArbeidsgivendeVirksomheter(), sedGrunnlagDto.getSelvstendigeVirksomheter());
         sedGrunnlag.periode = tilPeriode(sedGrunnlagDto.getLovvalgsperioder());
         sedGrunnlag.ytterligereInformasjon = sedGrunnlagDto.getYtterligereInformasjon();

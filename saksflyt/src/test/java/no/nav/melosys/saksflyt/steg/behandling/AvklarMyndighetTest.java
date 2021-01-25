@@ -71,7 +71,7 @@ class AvklarMyndighetTest {
         søknadDokument.soeknadsland.landkoder.add("BE");
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
         fysiskArbeidssted.adresse.landkode = "HR";
-        søknadDokument.arbeidPaaLand.fysiskeArbeidsstederUtland.add(fysiskArbeidssted);
+        søknadDokument.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
         søknadDokument.bosted.oppgittAdresse.landkode = "IT";
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknadDokument);

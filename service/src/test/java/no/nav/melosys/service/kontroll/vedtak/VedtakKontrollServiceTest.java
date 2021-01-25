@@ -128,7 +128,7 @@ public class VedtakKontrollServiceTest {
     public void utførKontroller_arbeidsstedManglerFelter_returnererKode() throws FunksjonellException, TekniskException {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
-        behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidsstederUtland = List.of(new FysiskArbeidssted());
+        behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidssteder = List.of(new FysiskArbeidssted());
 
         Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
         assertThat(resultat)
