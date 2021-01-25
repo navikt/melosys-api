@@ -45,8 +45,8 @@ public class Mangelbrev extends DokgenDto {
         this.sakstype = fagsak.getType();
         this.behandlingstype = fagsak.getSistOppdaterteBehandling().getType();
         this.saksbehandlerNavn = fagsak.getEndretAv();
-        this.fritekstMangelinfo = brevbestilling.getFritekstMangelInfo();
-        this.fritekstMottaksinfo = brevbestilling.getFritekstMottaksInfo();
+        this.fritekstMangelinfo = brevbestilling.getManglerInfoFritekst();
+        this.fritekstMottaksinfo = brevbestilling.getInnledningFritekst();
     }
 
     public Instant getDatoMottatt() {

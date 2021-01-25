@@ -199,8 +199,8 @@ class DokgenMalMapperTest {
             .medOrg(lagOrg())
             .medKontaktopplysning(lagKontaktOpplysning())
             .medForsendelseMottatt(Instant.now())
-            .medFritekstMottaksInfo("Dummy")
-            .medFritekstMangelInfo("Dummy")
+            .medInnledningFritekst("Dummy")
+            .medManglerInfoFritekst("Dummy")
             .build();
 
         DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling);
@@ -227,8 +227,8 @@ class DokgenMalMapperTest {
             .medOrg(lagOrg())
             .medKontaktopplysning(lagKontaktOpplysning())
             .medForsendelseMottatt(Instant.now())
-            .medFritekstMottaksInfo("Dummy")
-            .medFritekstMangelInfo("Dummy")
+            .medInnledningFritekst("Dummy")
+            .medManglerInfoFritekst("Dummy")
             .build();
 
         DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling);
