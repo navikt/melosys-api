@@ -38,14 +38,16 @@ public class EessiConsumerImpl implements EessiConsumer, JsonRestIntegrasjon {
     public OpprettSedDto opprettBucOgSed(SedDataDto sedDataDto,
                                          Collection<Vedlegg> vedlegg,
                                          BucType bucType,
-                                         boolean sendAutomatisk) throws MelosysException {
+                                         boolean sendAutomatisk,
+                                         boolean oppdaterEksisterendeOmFinnes) throws MelosysException {
         return exchange(
-            "/buc/{bucType}?sendAutomatisk={sendAutomatisk}",
+            "/buc/{bucType}?sendAutomatisk={sendAutomatisk}&oppdaterEksisterende={oppdaterEksisterendeOmFinnes}",
             HttpMethod.POST,
             new HttpEntity<>(new OpprettBucOgSedDto(sedDataDto, vedlegg), getDefaultHeaders()),
             new ParameterizedTypeReference<OpprettSedDto>() {},
             bucType,
-            sendAutomatisk);
+            sendAutomatisk,
+            oppdaterEksisterendeOmFinnes);
     }
 
     @Override
