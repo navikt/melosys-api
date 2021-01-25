@@ -281,7 +281,7 @@ public class LandvelgerServiceTest {
     }
 
     @Test
-    public void hentUtenlandskTrygdemyndighetsland_artikkel13IngenArbeidUtland_forventLand() throws IkkeFunnetException {
+    public void hentUtenlandskTrygdemyndighetsland_artikkel13IngenArbeidssted_forventLand() throws IkkeFunnetException {
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
 
@@ -301,11 +301,11 @@ public class LandvelgerServiceTest {
     }
 
     @Test
-    public void hentUtenlandskTrygdemyndighetsland_artikkel13MedArbeidUtland_forventLand() throws IkkeFunnetException {
+    public void hentUtenlandskTrygdemyndighetsland_artikkel13MedArbeidssted_forventLand() throws IkkeFunnetException {
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
 
-        søknad.arbeidPaaLand.fysiskeArbeidsstederUtland = List.of(lagArbeidUtland(Landkoder.DE));
+        søknad.arbeidPaaLand.fysiskeArbeidsstederUtland = List.of(lagFysiskArbeidssted(Landkoder.DE));
         søknad.foretakUtland = List.of(lagForetakUtland(Landkoder.ES));
         søknad.soeknadsland.landkoder = List.of(Landkoder.SE.toString(), Landkoder.DK.toString(), Landkoder.NO.toString());
 
@@ -321,11 +321,12 @@ public class LandvelgerServiceTest {
     }
 
     @Test
-    public void hentUtenlandskTrygdemyndighetsland_artikkel13MedArbeidUtlandOgMarginaltArbeid_forventLand() throws IkkeFunnetException {
+    public void hentUtenlandskTrygdemyndighetsland_artikkel13MedArbeidsstedOgMarginaltArbeid_forventLand()
+        throws IkkeFunnetException {
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
 
-        søknad.arbeidPaaLand.fysiskeArbeidsstederUtland = List.of(lagArbeidUtland(Landkoder.DE));
+        søknad.arbeidPaaLand.fysiskeArbeidsstederUtland = List.of(lagFysiskArbeidssted(Landkoder.DE));
         søknad.foretakUtland = List.of(lagForetakUtland(Landkoder.ES));
         søknad.soeknadsland.landkoder = List.of(Landkoder.SE.toString(), Landkoder.DK.toString(), Landkoder.NO.toString());
 
@@ -375,7 +376,7 @@ public class LandvelgerServiceTest {
         return utenlandskAdresse;
     }
 
-    private static FysiskArbeidssted lagArbeidUtland(Landkoder landkode) {
+    private static FysiskArbeidssted lagFysiskArbeidssted(Landkoder landkode) {
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
         fysiskArbeidssted.adresse = lagUtenlandskAdresse(landkode);
         return fysiskArbeidssted;

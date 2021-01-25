@@ -46,7 +46,7 @@ public class BehandlingsgrunnlagUtilsTest {
     @Test
     public void hentPeriode_opphold() {
         Soeknad soeknad = new Soeknad();
-        leggTilArbeidUtland(soeknad);
+        leggTilFysiskArbeidssted(soeknad);
 
         Periode periode_2 = new Periode(LocalDate.MIN.plusYears(1), LocalDate.MAX);
         soeknad.periode = periode_2;
@@ -73,7 +73,7 @@ public class BehandlingsgrunnlagUtilsTest {
         assertThat(landkoder).isEmpty();
     }
 
-    private void leggTilArbeidUtland(Soeknad soeknad) {
+    private void leggTilFysiskArbeidssted(Soeknad soeknad) {
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
         fysiskArbeidssted.adresse = new StrukturertAdresse();
         fysiskArbeidssted.adresse.landkode = Landkoder.BE.getKode();

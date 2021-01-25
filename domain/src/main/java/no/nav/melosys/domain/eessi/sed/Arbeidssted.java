@@ -18,7 +18,7 @@ public class Arbeidssted {
         return arbeidssted;
     }
 
-    public FysiskArbeidssted tilArbeidUtland() {
+    public FysiskArbeidssted tilFysiskArbeidssted() {
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
 
         fysiskArbeidssted.adresse = adresse.tilStrukturertAdresse();
