@@ -57,7 +57,7 @@ public class DokgenService {
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         String malnavn = dokgenMalResolver.hentMalnavn(produserbartdokument);
 
-        DokgenBrevbestilling.Builder brevbestilling = new DokgenBrevbestilling.Builder()
+        DokgenBrevbestilling.Builder<?> brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(produserbartdokument)
             .medBehandling(behandling);
 
