@@ -4,7 +4,6 @@ import java.util.Objects;
 
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
-import no.nav.melosys.exception.TekniskException;
 
 public class SvarAnmodningUnntak {
     public enum Beslutning {
@@ -63,7 +62,7 @@ public class SvarAnmodningUnntak {
         return Objects.hash(getBeslutning(), getBegrunnelse(), getDelvisInnvilgetPeriode());
     }
 
-    public static SvarAnmodningUnntak av(AnmodningsperiodeSvar anmodningsperiodeSvar) throws TekniskException {
+    public static SvarAnmodningUnntak av(AnmodningsperiodeSvar anmodningsperiodeSvar) {
         return new SvarAnmodningUnntak(
             hentBeslutningForSvartype(anmodningsperiodeSvar.getAnmodningsperiodeSvarType()),
             anmodningsperiodeSvar.getBegrunnelseFritekst(),
@@ -74,7 +73,7 @@ public class SvarAnmodningUnntak {
         );
     }
 
-    private static Beslutning hentBeslutningForSvartype(Anmodningsperiodesvartyper anmodningsperiodeSvarType) throws TekniskException {
+    private static Beslutning hentBeslutningForSvartype(Anmodningsperiodesvartyper anmodningsperiodeSvarType) {
         switch (anmodningsperiodeSvarType) {
             case INNVILGELSE:
                 return Beslutning.INNVILGELSE;
@@ -83,7 +82,7 @@ public class SvarAnmodningUnntak {
             case AVSLAG:
                 return Beslutning.AVSLAG;
             default:
-                throw new TekniskException("Ukjent AnmodningsperiodeSvarType " + anmodningsperiodeSvarType + " kan ikke mappes til Beslutning");
+                throw new IllegalArgumentException("Ukjent AnmodningsperiodeSvarType " + anmodningsperiodeSvarType + " kan ikke mappes til Beslutning");
         }
     }
 }

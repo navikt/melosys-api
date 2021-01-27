@@ -279,16 +279,12 @@ public class SedDataBygger {
             .collect(Collectors.toList());
     }
 
-    private static SvarAnmodningUnntak lagSvarAnmodningUnntakDto(Behandlingsresultat behandlingsresultat) throws TekniskException {
-        Anmodningsperiode anmodningsperiode = null;
-        if (behandlingsresultat.getAnmodningsperioder().iterator().hasNext()) {
-            anmodningsperiode = behandlingsresultat.getAnmodningsperioder().iterator().next();
-        }
-
-        if (anmodningsperiode != null && anmodningsperiode.getAnmodningsperiodeSvar() != null) {
-            return SvarAnmodningUnntak.av(anmodningsperiode.getAnmodningsperiodeSvar());
-        }
-        return null;
+    private static SvarAnmodningUnntak lagSvarAnmodningUnntakDto(Behandlingsresultat behandlingsresultat) {
+        return behandlingsresultat.getAnmodningsperioder().stream()
+            .findFirst()
+            .map(Anmodningsperiode::getAnmodningsperiodeSvar)
+            .map(SvarAnmodningUnntak::av)
+            .orElse(null);
     }
 
     private static String hentUnntaksBegrunnelse(Behandlingsresultat behandlingsresultat) {
