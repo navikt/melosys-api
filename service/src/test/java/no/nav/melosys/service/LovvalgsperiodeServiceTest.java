@@ -13,23 +13,23 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.GrunnlagMedl;
+import no.nav.melosys.integrasjon.medl.MedlPeriodeKonverter;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class LovvalgsperiodeServiceTest {
+class LovvalgsperiodeServiceTest {
 
-    private BehandlingRepository behandlingRepositoryMock = mock(BehandlingRepository.class);
+    private final BehandlingRepository behandlingRepositoryMock = mock(BehandlingRepository.class);
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -39,7 +39,7 @@ public class LovvalgsperiodeServiceTest {
     private static final Collection<Lovvalgsperiode> LOVVALGSPERIODER = Collections.singletonList(new Lovvalgsperiode());
     private LovvalgsperiodeRepository lovvalgsperiodeRepositoryMock = mock(LovvalgsperiodeRepository.class);
 
-    @Before
+    @BeforeEach
     public void setUp() {
         TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository = lagTidligerePerioderRepo();
 
@@ -55,7 +55,7 @@ public class LovvalgsperiodeServiceTest {
         TidligereMedlemsperiode tidligerePeriode = new TidligereMedlemsperiode();
         tidligerePeriode.setId(medlemsperiodeId);
 
-        when(tidligereMedlemsperiodeRepository.findById_BehandlingId(anyLong())).thenReturn(Collections.singletonList(tidligerePeriode));
+        when(tidligereMedlemsperiodeRepository.findById_BehandlingId(eq(1L))).thenReturn(Collections.singletonList(tidligerePeriode));
         return tidligereMedlemsperiodeRepository;
     }
 
@@ -74,13 +74,13 @@ public class LovvalgsperiodeServiceTest {
     }
 
     @Test
-    public void hentIngenLovvalgsperioderGirTomListe() {
+    void hentIngenLovvalgsperioderGirTomListe() {
         Collection<Lovvalgsperiode> resultat = instanse.hentLovvalgsperioder(42L);
         assertThat(resultat).isEmpty();
     }
 
     @Test
-    public void lagreLovvalgsperioderGirKopiMedBehandlingsresultat() {
+    void lagreLovvalgsperioderGirKopiMedBehandlingsresultat() {
         assertThat(LOVVALGSPERIODER.iterator().next().getBehandlingsresultat()).isNull();
         Collection<Lovvalgsperiode> resultat = instanse.lagreLovvalgsperioder(13L, LOVVALGSPERIODER);
         assertThat(resultat).size().isEqualTo(LOVVALGSPERIODER.size());
@@ -88,7 +88,7 @@ public class LovvalgsperiodeServiceTest {
     }
 
     @Test
-    public void lagreLovvalgsperioderUtenBehandlingsresultatKasterException() {
+    void lagreLovvalgsperioderUtenBehandlingsresultatKasterException() {
         Throwable thrown = catchThrowable(() ->
             instanse.lagreLovvalgsperioder(42L, LOVVALGSPERIODER)
         );
@@ -97,7 +97,7 @@ public class LovvalgsperiodeServiceTest {
     }
 
     @Test
-    public void testTidligereLovvalgsperioder() throws TekniskException {
+    void tidligereLovvalgsperioder_enValgtMedlemsperiode_returnererEnTidligerLovvalgsperiode() throws TekniskException {
         Medlemsperiode medlemsperiode = lagMedlemsperiode(23L, GrunnlagMedl.FO_12_2.getKode());
         Medlemsperiode medlemsperiodeFeilId = lagMedlemsperiode(46L, GrunnlagMedl.FO_12_2.getKode());
 
@@ -107,15 +107,22 @@ public class LovvalgsperiodeServiceTest {
 
         Behandling behandling = lagBehandlingMedMedlOpplysning(medlDokument);
 
-        Collection<Lovvalgsperiode> lovvalgsperioder = instanse.hentTidligereLovvalgsperioder(behandling);
-        AssertionsForInterfaceTypes.assertThat(lovvalgsperioder.stream().map(Lovvalgsperiode::getMedlPeriodeID)).containsOnly(medlemsperiode.id);
-        AssertionsForInterfaceTypes.assertThat(lovvalgsperioder.stream().map(Lovvalgsperiode::getFom)).isNotNull();
-        AssertionsForInterfaceTypes.assertThat(lovvalgsperioder.stream().map(Lovvalgsperiode::getTom)).isNotNull();
-        AssertionsForInterfaceTypes.assertThat(lovvalgsperioder.stream().map(Lovvalgsperiode::getBestemmelse)).isNotNull();
+        assertThat(instanse.hentTidligereLovvalgsperioder(behandling))
+            .flatExtracting(
+                Lovvalgsperiode::getMedlPeriodeID,
+                Lovvalgsperiode::getFom,
+                Lovvalgsperiode::getTom,
+                Lovvalgsperiode::getBestemmelse
+            ).containsExactly(
+                medlemsperiode.id,
+                medlemsperiode.getPeriode().getFom(),
+                medlemsperiode.getPeriode().getTom(),
+                MedlPeriodeKonverter.tilLovvalgBestemmelse(GrunnlagMedl.valueOf(medlemsperiode.getGrunnlagstype()))
+            );
     }
 
     @Test
-    public void testTidligerePerioderUkjentMapping() throws TekniskException {
+    void tidligerePerioder_ukjentGrunnlagskodeMedl_grunnlagMappetTilAnnet() throws TekniskException {
         Medlemsperiode medlemsperiode = lagMedlemsperiode(23L, "AV_ANNET"); // Eksempel på mapping som ikke melosys kjenner til
 
         MedlemskapDokument medlDokument = new MedlemskapDokument();
@@ -130,7 +137,14 @@ public class LovvalgsperiodeServiceTest {
     }
 
     @Test
-    public void hentOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingMedTidligerePeriode_returnererPeriode() throws IkkeFunnetException {
+    void tidligerePerioder_ingenPerioderValgt_returnererTomCollection() throws TekniskException {
+        Behandling behandling = new Behandling();
+        behandling.setId(2L);
+        assertThat(instanse.hentTidligereLovvalgsperioder(behandling)).isEmpty();
+    }
+
+    @Test
+    void hentOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingMedTidligerePeriode_returnererPeriode() throws IkkeFunnetException {
         Behandling behandling = new Behandling();
         Behandling opprinneligBehandling = new Behandling();
         opprinneligBehandling.setId(5L);
@@ -146,24 +160,24 @@ public class LovvalgsperiodeServiceTest {
     }
 
     @Test
-    public void hentOpprinneligLovvalgsperiode_finnerIngenBehandling_kasterException() throws IkkeFunnetException {
-        expectedException.expect(IkkeFunnetException.class);
-        expectedException.expectMessage("Fant ingen behandling");
-        instanse.hentOpprinneligLovvalgsperiode(5L);
+    void hentOpprinneligLovvalgsperiode_finnerIngenBehandling_kasterException() {
+        assertThatExceptionOfType(IkkeFunnetException.class)
+            .isThrownBy(() -> instanse.hentOpprinneligLovvalgsperiode(5L))
+            .withMessageContaining("Fant ingen behandling");
     }
 
     @Test
-    public void hentOpprinneligLovvalgsperiode_finnerIkkeOpprinneligBehandling_kasterException() throws IkkeFunnetException {
+    void hentOpprinneligLovvalgsperiode_finnerIkkeOpprinneligBehandling_kasterException() {
         Optional<Behandling> behandling = Optional.of(new Behandling());
         doReturn(behandling).when(behandlingRepositoryMock).findById(5L);
 
-        expectedException.expect(IkkeFunnetException.class);
-        expectedException.expectMessage("Fant ingen opprinnelig behandling");
-        instanse.hentOpprinneligLovvalgsperiode(5L);
+        assertThatExceptionOfType(IkkeFunnetException.class)
+            .isThrownBy(() -> instanse.hentOpprinneligLovvalgsperiode(5L))
+            .withMessageContaining("Fant ingen opprinnelig behandling");
     }
 
     @Test
-    public void hentOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingUtenTidligerePeriode_kasterException() throws IkkeFunnetException {
+    void hentOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingUtenTidligerePeriode_kasterException() {
         Behandling behandling = new Behandling();
         Optional<Behandling> optionalBehandling = Optional.of(behandling);
         doReturn(optionalBehandling).when(behandlingRepositoryMock).findById(5L);
@@ -172,13 +186,13 @@ public class LovvalgsperiodeServiceTest {
         opprinneligBehandling.setId(5L);
         behandling.setOpprinneligBehandling(opprinneligBehandling);
 
-        expectedException.expect(IkkeFunnetException.class);
-        expectedException.expectMessage("Fant ingen opprinnelig lovvalgsperiode");
-        instanse.hentOpprinneligLovvalgsperiode(5L);
+        assertThatExceptionOfType(IkkeFunnetException.class)
+            .isThrownBy(() -> instanse.hentOpprinneligLovvalgsperiode(5L))
+            .withMessageContaining("Fant ingen opprinnelig lovvalgsperiode");
     }
 
     @Test
-    public void finnOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingMedTidligerePeriode_returnererPeriode() {
+    void finnOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingMedTidligerePeriode_returnererPeriode() {
         Behandling behandling = new Behandling();
         Behandling opprinneligBehandling = new Behandling();
         opprinneligBehandling.setId(5L);
@@ -191,12 +205,11 @@ public class LovvalgsperiodeServiceTest {
         doReturn(optionalBehandling).when(behandlingRepositoryMock).findById(5L);
 
         Optional<Lovvalgsperiode> lovvalgsperiode = instanse.finnOpprinneligLovvalgsperiode(5L);
-        assertThat(lovvalgsperiode).isPresent();
-        assertThat(lovvalgsperiode.get()).isEqualTo(opprinneligLovvalgsperiode);
+        assertThat(lovvalgsperiode).contains(opprinneligLovvalgsperiode);
     }
 
     @Test
-    public void finnOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingUtenTidligerePeriode_optionalEmpty() {
+    void finnOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingUtenTidligerePeriode_optionalEmpty() {
         Behandling behandling = new Behandling();
         Optional<Behandling> optionalBehandling = Optional.of(behandling);
         doReturn(optionalBehandling).when(behandlingRepositoryMock).findById(5L);

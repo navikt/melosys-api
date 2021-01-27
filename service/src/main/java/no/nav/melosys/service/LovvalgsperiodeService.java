@@ -86,6 +86,10 @@ public class LovvalgsperiodeService {
             .map(utvalgtPeriode -> utvalgtPeriode.getId().getPeriodeId())
             .collect(Collectors.toSet());
 
+        if (utvalgtePeriodeIDer.isEmpty()) {
+            return Collections.emptySet();
+        }
+
         MedlemskapDokument medlemskapdokument = behandling.hentMedlemskapDokument();
         Set<Medlemsperiode> perioder = medlemskapdokument.getMedlemsperiode().stream()
             .filter(periode -> utvalgtePeriodeIDer.contains(periode.id))
