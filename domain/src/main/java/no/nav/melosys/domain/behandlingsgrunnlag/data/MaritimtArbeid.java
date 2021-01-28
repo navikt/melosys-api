@@ -1,9 +1,6 @@
 package no.nav.melosys.domain.behandlingsgrunnlag.data;
 
 public class MaritimtArbeid {
-    public String foretakNavn;
-    public String foretakOrgnr;
-
     public String enhetNavn;
     public String fartsomradeKode;
     public String flaggLandkode;
