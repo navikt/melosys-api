@@ -25,6 +25,6 @@ public class LagreMedfolgendeFamilieDto {
                 .map(familieDto -> new OmfattetFamilie(familieDto.getUuid())).collect(Collectors.toSet()),
             medfolgendeFamilie.stream()
                 .filter(MedfolgendeFamilieDto::isIkkeOmfattet)
-                .map(familieDto -> new IkkeOmfattetFamilie(familieDto.getUuid(), familieDto.getBegrunnelseKode(), familieDto.getBegrunnelsefritekst())).collect(Collectors.toSet()));
+                .map(familieDto -> new IkkeOmfattetFamilie(familieDto.getUuid(), familieDto.getBegrunnelseKode(), familieDto.getBegrunnelseFritekst())).collect(Collectors.toSet()));
     }
 }

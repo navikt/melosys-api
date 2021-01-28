@@ -103,19 +103,19 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
 
         assertEquals(forventetMedfolgendeFamilie.get(0).getUuid(), medFolgendeFamilieFraResponse.get(0).getUuid());
         assertEquals(forventetMedfolgendeFamilie.get(0).getBegrunnelseKode(), medFolgendeFamilieFraResponse.get(0).getBegrunnelseKode());
-        assertEquals(forventetMedfolgendeFamilie.get(0).getBegrunnelsefritekst(), medFolgendeFamilieFraResponse.get(0).getBegrunnelsefritekst());
+        assertEquals(forventetMedfolgendeFamilie.get(0).getBegrunnelseFritekst(), medFolgendeFamilieFraResponse.get(0).getBegrunnelseFritekst());
 
         assertEquals(forventetMedfolgendeFamilie.get(1).getUuid(), medFolgendeFamilieFraResponse.get(1).getUuid());
         assertEquals(forventetMedfolgendeFamilie.get(1).getBegrunnelseKode(), medFolgendeFamilieFraResponse.get(1).getBegrunnelseKode());
-        assertEquals(forventetMedfolgendeFamilie.get(1).getBegrunnelsefritekst(), medFolgendeFamilieFraResponse.get(1).getBegrunnelsefritekst());
+        assertEquals(forventetMedfolgendeFamilie.get(1).getBegrunnelseFritekst(), medFolgendeFamilieFraResponse.get(1).getBegrunnelseFritekst());
 
         assertEquals(forventetMedfolgendeFamilie.get(2).getUuid(), medFolgendeFamilieFraResponse.get(2).getUuid());
         assertEquals(forventetMedfolgendeFamilie.get(2).getBegrunnelseKode(), medFolgendeFamilieFraResponse.get(2).getBegrunnelseKode());
-        assertEquals(forventetMedfolgendeFamilie.get(2).getBegrunnelsefritekst(), medFolgendeFamilieFraResponse.get(2).getBegrunnelsefritekst());
+        assertEquals(forventetMedfolgendeFamilie.get(2).getBegrunnelseFritekst(), medFolgendeFamilieFraResponse.get(2).getBegrunnelseFritekst());
 
         assertEquals(forventetMedfolgendeFamilie.get(3).getUuid(), medFolgendeFamilieFraResponse.get(3).getUuid());
         assertEquals(forventetMedfolgendeFamilie.get(3).getBegrunnelseKode(), medFolgendeFamilieFraResponse.get(3).getBegrunnelseKode());
-        assertEquals(forventetMedfolgendeFamilie.get(3).getBegrunnelsefritekst(), medFolgendeFamilieFraResponse.get(3).getBegrunnelsefritekst());
+        assertEquals(forventetMedfolgendeFamilie.get(3).getBegrunnelseFritekst(), medFolgendeFamilieFraResponse.get(3).getBegrunnelseFritekst());
     }
 
     @Test(expected = FunksjonellException.class)

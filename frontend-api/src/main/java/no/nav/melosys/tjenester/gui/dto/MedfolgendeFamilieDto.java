@@ -12,13 +12,13 @@ public class MedfolgendeFamilieDto {
     private final String uuid;
     private final boolean omfattet;
     private final String begrunnelseKode;
-    private final String begrunnelsefritekst;
+    private final String begrunnelseFritekst;
 
-    public MedfolgendeFamilieDto(String uuid, boolean omfattet, String begrunnelseKode, String begrunnelsefritekst) {
+    public MedfolgendeFamilieDto(String uuid, boolean omfattet, String begrunnelseKode, String begrunnelseFritekst) {
         this.uuid = uuid;
         this.omfattet = omfattet;
         this.begrunnelseKode = begrunnelseKode;
-        this.begrunnelsefritekst = begrunnelsefritekst;
+        this.begrunnelseFritekst = begrunnelseFritekst;
     }
 
     public static Set<MedfolgendeFamilieDto> av(Set<AvklartefaktaDto> avklartefaktas) {
@@ -51,7 +51,7 @@ public class MedfolgendeFamilieDto {
         return begrunnelseKode;
     }
 
-    public String getBegrunnelsefritekst() {
-        return begrunnelsefritekst;
+    public String getBegrunnelseFritekst() {
+        return begrunnelseFritekst;
     }
 }
