@@ -152,7 +152,7 @@ public class InnvilgelsesbrevMapperTest {
     private static MaritimtArbeid lagMaritimtArbeidUtenFartsområde() {
         MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
         maritimtArbeid.enhetNavn = "Dunfjæder";
-        maritimtArbeid.installasjonsLandkode = "NO";
+        maritimtArbeid.innretningLandkode = "NO";
         return maritimtArbeid;
     }
 

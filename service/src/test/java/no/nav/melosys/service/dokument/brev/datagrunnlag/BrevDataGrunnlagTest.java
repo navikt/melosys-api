@@ -129,26 +129,10 @@ public class BrevDataGrunnlagTest {
         assertThat(arbeidssteder.size()).isEqualTo(1);
 
         MaritimtArbeidssted arbeidssted = (MaritimtArbeidssted) arbeidssteder.get(0);
-        assertThat(arbeidssted.getForetakNavn()).isEqualTo(maritimtArbeidISøknad.foretakNavn);
         assertThat(arbeidssted.getEnhetNavn()).isEqualTo(maritimtArbeidISøknad.enhetNavn);
-        assertThat(arbeidssted.getIdnummer()).isEqualTo(maritimtArbeidISøknad.foretakOrgnr);
-        assertThat(arbeidssted.getYrkesgruppe().getKode()).isEqualTo(Yrkesgrupper.SOKKEL_ELLER_SKIP.getKode());
-    }
-
-    @Test
-    public void hentArbeidssteder_medMaritimtArbeidUtenForetak_girMaritimeArbeidssteder() {
-        MaritimtArbeid maritimtArbeidISøknad = lagMaritimtArbeid();
-        maritimtArbeidISøknad.foretakOrgnr = null;
-        maritimtArbeidISøknad.foretakNavn = null;
-        this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
-
-        List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder();
-        assertThat(arbeidssteder.size()).isEqualTo(1);
-
-        MaritimtArbeidssted arbeidssted = (MaritimtArbeidssted) arbeidssteder.get(0);
         assertThat(arbeidssted.getForetakNavn()).isNullOrEmpty();
-        assertThat(arbeidssted.getEnhetNavn()).isEqualTo("Dunfjæder");
         assertThat(arbeidssted.getIdnummer()).isNullOrEmpty();
+        assertThat(arbeidssted.getYrkesgruppe().getKode()).isEqualTo(Yrkesgrupper.SOKKEL_ELLER_SKIP.getKode());
     }
 
     @Test

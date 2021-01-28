@@ -50,7 +50,6 @@ public class ArbeidsstedGrunnlag {
     }
 
     private List<MaritimtArbeidssted> hentMaritimeArbeidssteder() {
-        // Arbeidssted for maritimt arbeid benytter foretakNavn og foretakOrgnr fra søknad, og arbeidsland fra avklartfakta
         return grunnlagData.maritimtArbeid.stream()
             .map(this::lagMaritimtArbeidssted)
             .filter(Objects::nonNull)
@@ -64,6 +63,7 @@ public class ArbeidsstedGrunnlag {
     }
 
     private MaritimtArbeidssted lagMaritimtArbeidssted(MaritimtArbeid maritimtArbeid) {
+        // Arbeidssted for maritimt arbeid benytter arbeidsland fra avklartfakta
         AvklartMaritimtArbeid avklartMaritimtArbeid = avklarteMaritimeArbeidEtterSubjekt.get(maritimtArbeid.enhetNavn);
         if (avklartMaritimtArbeid != null) {
             return new MaritimtArbeidssted(maritimtArbeid, avklartMaritimtArbeid);

@@ -1,12 +1,12 @@
 package no.nav.melosys.domain.behandlingsgrunnlag.data;
 
-public class MaritimtArbeid {
-    public String foretakNavn;
-    public String foretakOrgnr;
+import no.nav.melosys.domain.kodeverk.Innretningstyper;
 
+public class MaritimtArbeid {
     public String enhetNavn;
     public String fartsomradeKode;
     public String flaggLandkode;
-    public String installasjonsLandkode;
+    public String innretningLandkode;
+    public Innretningstyper innretningstype;
     public String territorialfarvann;
 }

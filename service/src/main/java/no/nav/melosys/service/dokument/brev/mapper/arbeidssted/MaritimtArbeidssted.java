@@ -12,7 +12,7 @@ public final class MaritimtArbeidssted extends AbstractArbeidssted implements Ik
     private final String flaggLandKode;
 
     public MaritimtArbeidssted(MaritimtArbeid maritimtArbeid, AvklartMaritimtArbeid avklartMaritimtArbeid) {
-        super(maritimtArbeid.foretakNavn, maritimtArbeid.foretakOrgnr, avklartMaritimtArbeid.getLand());
+        super(null, null, avklartMaritimtArbeid.getLand());
         this.avklartMaritimtArbeid = avklartMaritimtArbeid;
         this.enhetNavn = maritimtArbeid.enhetNavn;
         this.flaggLandKode = maritimtArbeid.flaggLandkode;
