@@ -4,6 +4,7 @@ import java.time.Instant;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -16,8 +17,9 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private final long behandlingId;
     private final Aktoer mottaker; //NOTE Flytt opp til Brevbestilling
     private final boolean bestillKopi;
+    private final Instant vedtaksdato;
 
-    private DokgenBrevbestilling(Builder builder) {
+    protected DokgenBrevbestilling(Builder<?> builder) {
         super(builder.produserbartdokument, builder.behandling, builder.avsenderNavn);
         this.org = builder.org;
         this.kontaktopplysning = builder.kontaktopplysning;
@@ -26,6 +28,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         this.behandlingId = builder.behandlingId;
         this.mottaker = builder.mottaker;
         this.bestillKopi = builder.bestillKopi;
+        this.vedtaksdato = builder.vedtaksdato;
     }
 
     public OrganisasjonDokument getOrg() {
@@ -56,11 +59,15 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return bestillKopi;
     }
 
-    public Builder toBuilder() {
-        return new Builder(this);
+    public Instant getVedtaksdato() {
+        return vedtaksdato;
     }
 
-    public static final class Builder {
+    public Builder toBuilder() {
+        return new Builder (this);
+    }
+
+    public static class Builder<T extends Builder<T>> {
         private Produserbaredokumenter produserbartdokument;
         private Behandling behandling;
         private OrganisasjonDokument org;
@@ -71,9 +78,9 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private long behandlingId;
         private Aktoer mottaker;
         private boolean bestillKopi;
+        private Instant vedtaksdato;
 
         public Builder() {
-
         }
 
         public Builder(DokgenBrevbestilling brevbestilling) {
@@ -87,56 +94,62 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.behandlingId = brevbestilling.behandlingId;
             this.mottaker = brevbestilling.mottaker;
             this.bestillKopi = brevbestilling.bestillKopi;
+            this.vedtaksdato = brevbestilling.vedtaksdato;
         }
 
-        public Builder medProduserbartdokument(Produserbaredokumenter produserbartdokument) {
+        public T medProduserbartdokument(Produserbaredokumenter produserbartdokument) {
             this.produserbartdokument = produserbartdokument;
-            return this;
+            return (T) this;
         }
 
-        public Builder medBehandling(Behandling behandling) {
+        public T medBehandling(Behandling behandling) {
             this.behandling = behandling;
-            return this;
+            return (T) this;
         }
 
-        public Builder medOrg(OrganisasjonDokument org) {
+        public T medOrg(OrganisasjonDokument org) {
             this.org = org;
-            return this;
+            return (T) this;
         }
 
-        public Builder medKontaktopplysning(Kontaktopplysning kontaktopplysning) {
+        public T medKontaktopplysning(Kontaktopplysning kontaktopplysning) {
             this.kontaktopplysning = kontaktopplysning;
-            return this;
+            return (T) this;
         }
 
-        public Builder medForsendelseMottatt(Instant forsendelseMottatt) {
+        public T medForsendelseMottatt(Instant forsendelseMottatt) {
             this.forsendelseMottatt = forsendelseMottatt;
-            return this;
+            return (T) this;
         }
 
-        public Builder medAvsenderNavn(String avsenderNavn) {
+        public T medAvsenderNavn(String avsenderNavn) {
             this.avsenderNavn = avsenderNavn;
-            return this;
+            return (T) this;
         }
 
-        public Builder medAvsenderId(String avsenderId) {
+        public T medAvsenderId(String avsenderId) {
             this.avsenderId = avsenderId;
-            return this;
+            return (T) this;
         }
 
-        public Builder medBehandlingId(long behandlingId) {
+        public T medBehandlingId(long behandlingId) {
             this.behandlingId = behandlingId;
-            return this;
+            return (T) this;
         }
 
-        public Builder medMottaker(Aktoer mottaker) {
+        public T medMottaker(Aktoer mottaker) {
             this.mottaker = mottaker;
-            return this;
+            return (T) this;
         }
 
-        public Builder medBestillKopi(boolean bestillKopi) {
+        public T medBestillKopi(boolean bestillKopi) {
             this.bestillKopi = bestillKopi;
-            return this;
+            return (T) this;
+        }
+
+        public T medVedtaksdato(Instant vedtaksdato) {
+            this.vedtaksdato = vedtaksdato;
+            return (T) this;
         }
 
         public DokgenBrevbestilling build() {

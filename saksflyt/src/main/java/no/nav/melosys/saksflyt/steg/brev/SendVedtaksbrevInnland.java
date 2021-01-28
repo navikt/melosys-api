@@ -6,9 +6,11 @@ import java.util.List;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -66,7 +68,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         Behandlingsresultattyper behandlingsresultatType = resultat.getType();
         String saksbehandler = hentSaksbehandler(prosessinstans, resultat);
-        String begrunnelseKode = hentBegrunnelseKode(prosessinstans);
+        String begrunnelseKode = hentBegrunnelsekodeTilForkortetPeriode(resultat);
         String fritekst = hentBegrunnelseFritekst(prosessinstans);
 
         if (resultat.erAvslag()) {
@@ -190,13 +192,14 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             .anyMatch(foretakUtland -> Boolean.FALSE.equals(foretakUtland.selvstendigNæringsvirksomhet));
     }
 
-    private String hentBegrunnelseKode(Prosessinstans prosessinstans) {
-        Endretperiode endretPeriodeBegrunnelseKode = prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperiode.class);
-        String begrunnelseKode = null;
-        if (endretPeriodeBegrunnelseKode != null) {
-            begrunnelseKode = endretPeriodeBegrunnelseKode.getKode();
-        }
-        return begrunnelseKode;
+    private String hentBegrunnelsekodeTilForkortetPeriode(Behandlingsresultat behandlingsresultat) {
+        return behandlingsresultat.getAvklartefakta().stream()
+            .filter(avklartfakta -> avklartfakta.getType() == Avklartefaktatyper.AARSAK_ENDRING_PERIODE)
+            .map(Avklartefakta::getFakta)
+            .map(Endretperiode::valueOf)
+            .map(Endretperiode::getKode)
+            .findFirst()
+            .orElse(null);
     }
 
     private String hentBegrunnelseFritekst(Prosessinstans prosessinstans) {

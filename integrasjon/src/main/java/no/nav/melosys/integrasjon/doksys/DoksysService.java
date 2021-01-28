@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.doksys;
 
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.UstrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
@@ -29,12 +28,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static no.nav.melosys.domain.Fagsystem.GSAK_I_JOARK;
 import static no.nav.melosys.domain.Fagsystem.MELOSYS;
 import static no.nav.melosys.domain.dokument.adresse.Adresse.sammenslå;
-import static no.nav.melosys.domain.dokument.felles.Land.NORGE;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 
 @Service

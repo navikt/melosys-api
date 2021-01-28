@@ -13,7 +13,6 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -65,12 +64,8 @@ public class HentMottakerinstitusjonerForkortetPeriodeTest {
 
     @Test
     public void utfør_harTidligereBUC_setterMottakerInstitusjoner() throws MelosysException {
-        Endretperiode endretperiodeKode = Endretperiode.ARBEIDSFORHOLD_AVSLUTTET;
-
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(lagBehandling());
-        p.setData(ProsessDataKey.BEGRUNNELSEKODE, endretperiodeKode);
-
         Set<String> mottakerInstitusjoner = Set.of("SE:123");
 
         when(eessiService.landErEessiReady(eq(BucType.LA_BUC_04.name()), any(Collection.class))).thenReturn(true);
@@ -85,12 +80,8 @@ public class HentMottakerinstitusjonerForkortetPeriodeTest {
 
     @Test
     public void utfør_ikkeEessiReady_ingenMottakerInstitusjoner() throws MelosysException {
-        Endretperiode endretperiodeKode = Endretperiode.ARBEIDSFORHOLD_AVSLUTTET;
-
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(lagBehandling());
-        p.setData(ProsessDataKey.BEGRUNNELSEKODE, endretperiodeKode);
-
         Set<String> mottakerInstitusjoner = Collections.emptySet();
 
         when(eessiService.landErEessiReady(eq(BucType.LA_BUC_04.name()), any(Collection.class))).thenReturn(true);
@@ -105,11 +96,8 @@ public class HentMottakerinstitusjonerForkortetPeriodeTest {
 
     @Test
     public void utfør_erEessiReadyFinnerIngenBuc_kasterException() throws MelosysException {
-        Endretperiode endretperiodeKode = Endretperiode.ARBEIDSFORHOLD_AVSLUTTET;
-
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(lagBehandling());
-        p.setData(ProsessDataKey.BEGRUNNELSEKODE, endretperiodeKode);
 
         when(eessiService.landErEessiReady(eq(BucType.LA_BUC_04.name()), any(Collection.class))).thenReturn(true);
         when(eessiService.hentTilknyttedeBucer(anyLong(), anyList())).thenReturn(Collections.emptyList());

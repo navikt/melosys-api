@@ -83,12 +83,13 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     }
 
     private DoksysBrevbestilling lagBrevBestilling(Prosessinstans prosessinstans) throws IkkeFunnetException {
-        Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
+        Long behandlingID = prosessinstans.getBehandling().getId();
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
         return new DoksysBrevbestilling.Builder().medProdserbartDokument(ATTEST_A1)
             .medAvsenderNavn(hentSaksbehandler(prosessinstans))
             .medMottakere(Mottaker.av(MYNDIGHET))
             .medBehandling(behandling)
-            .medBegrunnelseKode(hentBegrunnelseKode(prosessinstans))
+            .medBegrunnelseKode(hentBegrunnelsekodeTilForkortetPeriode(prosessinstans))
             .build();
     }
 
