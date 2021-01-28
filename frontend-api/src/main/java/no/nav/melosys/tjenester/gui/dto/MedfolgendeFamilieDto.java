@@ -1,68 +1,57 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_LOVVALG_BARN;
-import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER;
-
-import java.util.HashSet;
-import java.util.Set;
-
-import no.nav.melosys.domain.familie.AvklarteMedfolgendeFamilie;
-import no.nav.melosys.domain.familie.IkkeOmfattetFamilie;
-import no.nav.melosys.domain.familie.OmfattetFamilie;
-import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
-import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static no.nav.melosys.domain.avklartefakta.Avklartefakta.VALGT_FAKTA;
+
 public class MedfolgendeFamilieDto {
-    private AvklarteMedfolgendeFamilie avklarteMedfolgendeBarn;
-    private AvklarteMedfolgendeFamilie avklarteMedfolgendeEktefelleSamboer;
+    private final String uuid;
+    private final boolean omfattet;
+    private final String begrunnelseKode;
+    private final String begrunnelsefritekst;
 
-    public MedfolgendeFamilieDto(AvklarteMedfolgendeFamilie avklarteMedfolgendeBarn, AvklarteMedfolgendeFamilie avklarteMedfolgendeEktefelleSamboer) {
-        this.avklarteMedfolgendeBarn = avklarteMedfolgendeBarn;
-        this.avklarteMedfolgendeEktefelleSamboer = avklarteMedfolgendeEktefelleSamboer;
+    public MedfolgendeFamilieDto(String uuid, boolean omfattet, String begrunnelseKode, String begrunnelsefritekst) {
+        this.uuid = uuid;
+        this.omfattet = omfattet;
+        this.begrunnelseKode = begrunnelseKode;
+        this.begrunnelsefritekst = begrunnelsefritekst;
     }
 
-    public AvklarteMedfolgendeFamilie getAvklarteMedfolgendeBarn() {
-        return avklarteMedfolgendeBarn;
+    public static Set<MedfolgendeFamilieDto> av(Set<AvklartefaktaDto> avklartefaktas) {
+        return avklartefaktas.stream()
+            .map(avklartefakta -> new MedfolgendeFamilieDto(
+                avklartefakta.getSubjektID(),
+                tilBoolean(avklartefakta.getFakta()),
+                avklartefakta.getBegrunnelseKoder().stream().findFirst().orElse(null),
+                avklartefakta.getBegrunnelseFritekst()))
+            .collect(Collectors.toSet());
     }
 
-    public AvklarteMedfolgendeFamilie getAvklarteMedfolgendeEktefelleSamboer() {
-        return avklarteMedfolgendeEktefelleSamboer;
+    private static boolean tilBoolean(List<String> fakta) {
+        return VALGT_FAKTA.equals(fakta.get(0));
     }
 
-    public void setAvklarteMedfolgendeBarn(AvklarteMedfolgendeFamilie avklarteMedfolgendeBarn) {
-        this.avklarteMedfolgendeBarn = avklarteMedfolgendeBarn;
+    public String getUuid() {
+        return uuid;
     }
 
-    public void setAvklarteMedfolgendeEktefelleSamboer(AvklarteMedfolgendeFamilie avklarteMedfolgendeEktefelleSamboer) {
-        this.avklarteMedfolgendeEktefelleSamboer = avklarteMedfolgendeEktefelleSamboer;
+    public boolean isOmfattet() {
+        return omfattet;
     }
 
-    public static MedfolgendeFamilieDto tilMedfolgendeFamilieDto(Set<AvklartefaktaDto> avklartefaktas) {
-        AvklarteMedfolgendeFamilie avklarteMedfolgendeBarn = new AvklarteMedfolgendeFamilie(new HashSet<>(), new HashSet<>());
-        AvklarteMedfolgendeFamilie avklarteMedfolgendeEktefelleSamboer = new AvklarteMedfolgendeFamilie(new HashSet<>(), new HashSet<>());
+    public boolean isIkkeOmfattet() {
+        return !isOmfattet();
+    }
 
-        for (AvklartefaktaDto avklartefakta : avklartefaktas) {
-            if (VURDERING_LOVVALG_BARN.getKode().equals(avklartefakta.getReferanse()) && VURDERING_LOVVALG_BARN.equals(avklartefakta.getAvklartefaktaType())) {
+    public String getBegrunnelseKode() {
+        return begrunnelseKode;
+    }
 
-                if ("TRUE".equals(avklartefakta.getFakta().get(0))) {
-                    avklarteMedfolgendeBarn.getFamilieOmfattetAvNorskTrygd().add(new OmfattetFamilie(avklartefakta.getSubjektID()));
-                }
-                else if ("FALSE".equals(avklartefakta.getFakta().get(0))) {
-                    avklarteMedfolgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd().add(new IkkeOmfattetFamilie(avklartefakta.getSubjektID(), Medfolgende_barn_begrunnelser_ftrl.valueOf(avklartefakta.getBegrunnelseKoder().get(0)), avklartefakta.getBegrunnelseFritekst()));
-                }
-
-            } else if (VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER.getKode().equals(avklartefakta.getReferanse()) && VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER.equals(avklartefakta.getAvklartefaktaType())) {
-
-                if ("TRUE".equals(avklartefakta.getFakta().get(0))) {
-                    avklarteMedfolgendeEktefelleSamboer.getFamilieOmfattetAvNorskTrygd().add(new OmfattetFamilie(avklartefakta.getSubjektID()));
-                }
-                else if ("FALSE".equals(avklartefakta.getFakta().get(0))) {
-                    avklarteMedfolgendeEktefelleSamboer.getFamilieIkkeOmfattetAvNorskTrygd().add(new IkkeOmfattetFamilie(avklartefakta.getSubjektID(), Medfolgende_ektefelle_samboer_begrunnelser_ftrl.valueOf(avklartefakta.getBegrunnelseKoder().get(0)), avklartefakta.getBegrunnelseFritekst()));
-                }
-            }
-        }
-
-        return new MedfolgendeFamilieDto(avklarteMedfolgendeBarn, avklarteMedfolgendeEktefelleSamboer);
+    public String getBegrunnelsefritekst() {
+        return begrunnelsefritekst;
     }
 }

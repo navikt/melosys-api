@@ -1,20 +1,21 @@
 package no.nav.melosys.service.avklartefakta;
 
+import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.SAMBOER_UTEN_FELLES_BARN;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
+
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,159 +49,174 @@ public class AvklarteMedfolgendeFamilieServiceTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
+    private BehandlingsresultatService behandlingsresultatService;
+    @Mock
     private AvklartefaktaDtoKonverterer avklartefaktaDtoKonverterer;
 
     private AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
 
     @Captor
     private ArgumentCaptor<Avklartefakta> captor;
+    
+    private static final String uuidBarn = "uuidBarn";
+    private static final String uuidEktefelleSamboer = "uuidEktefelleSamboer";
+    private static final String fritekstBarn = "fritekstBarn";
+    private static final String fritekstEktefelleSamboer = "fritekstEktefelleSamboer";
 
     @Before
     public void setUp() {
         AvklartefaktaService avklartefaktaService = new AvklartefaktaService(avklarteFaktaRepository, behandlingsresultatRepository, avklartefaktaDtoKonverterer);
-        avklarteMedfolgendeFamilieService = new AvklarteMedfolgendeFamilieService(behandlingService, avklartefaktaService);
+        avklarteMedfolgendeFamilieService = new AvklarteMedfolgendeFamilieService(behandlingService, behandlingsresultatService, avklartefaktaService);
     }
 
     @Test
     public void lagreMedfolgendeFamilieSomAvklartefakta_ikkeOmfattetFamilie_lagresKorrekt() throws FunksjonellException {
-        Set<IkkeOmfattetFamilie> ikkeOmfattetEktefelleSamboers = Set.of(
-            new IkkeOmfattetFamilie("uuid2", SAMBOER_UTEN_FELLES_BARN, "fritekstForUuid2"));
-        AvklarteMedfolgendeFamilie avklarteMedfolgendeEktefelleSamboer =
-            new AvklarteMedfolgendeFamilie(Set.of(), ikkeOmfattetEktefelleSamboers);
+        AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie =
+            new AvklarteMedfolgendeFamilie(Set.of(), Set.of(
+                new IkkeOmfattetFamilie(uuidBarn, OVER_18_AR.getKode(), fritekstBarn),
+                new IkkeOmfattetFamilie(uuidEktefelleSamboer, SAMBOER_UTEN_FELLES_BARN.getKode(), fritekstEktefelleSamboer)));
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(1L);
 
-        Avklartefakta forventetAvklartefakta = new Avklartefakta();
-        forventetAvklartefakta.setSubjekt("uuid2");
-        forventetAvklartefakta.setType(Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER);
-        forventetAvklartefakta.setReferanse(Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER.getKode());
-        forventetAvklartefakta.setFakta("FALSE");
-        forventetAvklartefakta.setBegrunnelseFritekst("fritekstForUuid2");
-        forventetAvklartefakta.setBehandlingsresultat(behandlingsresultat);
-
-        AvklartefaktaRegistrering forventetRegistrering = new AvklartefaktaRegistrering();
-        forventetRegistrering.setAvklartefakta(forventetAvklartefakta);
-        forventetRegistrering.setBegrunnelseKode("SAMBOER_UTEN_FELLES_BARN");
-
         when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(mockBehandling());
+        when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat);
 
-        when(behandlingsresultatRepository.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
-
-        when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), eq(Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER)))
-            .thenReturn(Optional.of(forventetAvklartefakta));
-
-        avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(
-            1L, new AvklarteMedfolgendeFamilie(Set.of(), Set.of()), avklarteMedfolgendeEktefelleSamboer);
-
-        verify(avklarteFaktaRepository, times(1)).save(captor.capture());
-
-        Avklartefakta capturedAvklarteFakta = captor.getValue();
-
-        assertEquals(capturedAvklarteFakta.getSubjekt(), forventetAvklartefakta.getSubjekt());
-        assertEquals(capturedAvklarteFakta.getType(), forventetAvklartefakta.getType());
-        assertEquals(capturedAvklarteFakta.getReferanse(), forventetAvklartefakta.getReferanse());
-        assertEquals(capturedAvklarteFakta.getFakta(), forventetAvklartefakta.getFakta());
-        assertEquals(capturedAvklarteFakta.getBegrunnelseFritekst(), forventetAvklartefakta.getBegrunnelseFritekst());
-        assertEquals(capturedAvklarteFakta.getBehandlingsresultat(), forventetAvklartefakta.getBehandlingsresultat());
-        assertEquals(capturedAvklarteFakta.getRegistreringer().size(), 1);
-
-        AvklartefaktaRegistrering registreringFraCaptured = capturedAvklarteFakta.getRegistreringer().iterator().next();
-        assertEquals(registreringFraCaptured.getAvklartefakta(), forventetRegistrering.getAvklartefakta());
-        assertEquals(registreringFraCaptured.getBegrunnelseKode(), forventetRegistrering.getBegrunnelseKode());
-    }
-
-    @Test
-    public void lagreMedfolgendeFamilieSomAvklartefakta_omfattetFamilie_lagresKorrekt() throws FunksjonellException {
-        Set<OmfattetFamilie> omfattetBarn = Set.of(new OmfattetFamilie("uuid1"));
-        AvklarteMedfolgendeFamilie avklarteMedfolgendeBarn =
-            new AvklarteMedfolgendeFamilie(omfattetBarn, Set.of());
-        Set<OmfattetFamilie> omfattetEktefelleSamboer = Set.of(new OmfattetFamilie("uuid2"));
-        AvklarteMedfolgendeFamilie avklarteMedfolgendeEktefelleSamboer =
-            new AvklarteMedfolgendeFamilie(omfattetEktefelleSamboer, Set.of());
-
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setId(1L);
-        when(behandlingsresultatRepository.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
-
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(mockBehandling());
-
-        avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(
-            1L, avklarteMedfolgendeBarn, avklarteMedfolgendeEktefelleSamboer);
+        avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(1L, avklarteMedfolgendeFamilie);
 
         verify(avklarteFaktaRepository, times(2)).save(captor.capture());
 
         List<Avklartefakta> capturedAvklarteFakta = captor.getAllValues();
+        capturedAvklarteFakta.sort(Comparator.comparing(Avklartefakta::getSubjekt));
+        assertEquals(2, capturedAvklarteFakta.size());
+        Avklartefakta avklartBarn = capturedAvklarteFakta.get(0);
+        Avklartefakta avklartEktefelleSamboer = capturedAvklarteFakta.get(1);
+
+        assertEquals(uuidBarn, avklartBarn.getSubjekt());
+        assertEquals(Avklartefaktatyper.VURDERING_LOVVALG_BARN, avklartBarn.getType());
+        assertEquals(Avklartefaktatyper.VURDERING_LOVVALG_BARN.getKode(), avklartBarn.getReferanse());
+        assertEquals(Avklartefakta.IKKE_VALGT_FAKTA, avklartBarn.getFakta());
+        assertEquals(fritekstBarn, avklartBarn.getBegrunnelseFritekst());
+        assertEquals(behandlingsresultat, avklartBarn.getBehandlingsresultat());
+        assertEquals(1, avklartBarn.getRegistreringer().size());
+
+        AvklartefaktaRegistrering registreringBarn = avklartBarn.getRegistreringer().iterator().next();
+        assertEquals(OVER_18_AR.getKode(), registreringBarn.getBegrunnelseKode());
+
+        assertEquals(uuidEktefelleSamboer, avklartEktefelleSamboer.getSubjekt());
+        assertEquals(Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, avklartEktefelleSamboer.getType());
+        assertEquals(Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER.getKode(), avklartEktefelleSamboer.getReferanse());
+        assertEquals(Avklartefakta.IKKE_VALGT_FAKTA, avklartEktefelleSamboer.getFakta());
+        assertEquals(fritekstEktefelleSamboer, avklartEktefelleSamboer.getBegrunnelseFritekst());
+        assertEquals(behandlingsresultat, avklartEktefelleSamboer.getBehandlingsresultat());
+        assertEquals(1, avklartEktefelleSamboer.getRegistreringer().size());
+
+        AvklartefaktaRegistrering registreringEktefelleSamboer = avklartEktefelleSamboer.getRegistreringer().iterator().next();
+        assertEquals(SAMBOER_UTEN_FELLES_BARN.getKode(), registreringEktefelleSamboer.getBegrunnelseKode());
+    }
+
+    @Test
+    public void lagreMedfolgendeFamilieSomAvklartefakta_omfattetFamilie_lagresKorrekt() throws FunksjonellException {
+        AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie =
+            new AvklarteMedfolgendeFamilie(
+                Set.of(new OmfattetFamilie(uuidBarn), new OmfattetFamilie(uuidEktefelleSamboer)),
+                Set.of());
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setId(1L);
+
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(mockBehandling());
+        when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat);
+
+        avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(1L, avklarteMedfolgendeFamilie);
+
+        verify(avklarteFaktaRepository, times(2)).save(captor.capture());
+
+        List<Avklartefakta> capturedAvklarteFakta = captor.getAllValues();
+        capturedAvklarteFakta.sort(Comparator.comparing(Avklartefakta::getSubjekt));
         assertEquals(capturedAvklarteFakta.size(), 2);
         Avklartefakta avklartBarn = capturedAvklarteFakta.get(0);
         Avklartefakta avklartEktefelleSamboer = capturedAvklarteFakta.get(1);
 
-        assertEquals(avklartBarn.getSubjekt(), "uuid1");
-        assertEquals(avklartBarn.getType(), Avklartefaktatyper.VURDERING_LOVVALG_BARN);
-        assertEquals(avklartBarn.getReferanse(), Avklartefaktatyper.VURDERING_LOVVALG_BARN.getKode());
-        assertEquals(avklartBarn.getFakta(), "TRUE");
+        assertEquals(uuidBarn, avklartBarn.getSubjekt());
+        assertEquals(Avklartefaktatyper.VURDERING_LOVVALG_BARN, avklartBarn.getType());
+        assertEquals(Avklartefaktatyper.VURDERING_LOVVALG_BARN.getKode(), avklartBarn.getReferanse());
+        assertEquals(Avklartefakta.VALGT_FAKTA, avklartBarn.getFakta());
         assertNull(avklartBarn.getBegrunnelseFritekst());
-        assertEquals(avklartBarn.getBehandlingsresultat(), behandlingsresultat);
+        assertEquals(behandlingsresultat, avklartBarn.getBehandlingsresultat());
         assertTrue(avklartBarn.getRegistreringer().isEmpty());
 
-        assertEquals(avklartEktefelleSamboer.getSubjekt(), "uuid2");
-        assertEquals(avklartEktefelleSamboer.getType(), Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER);
-        assertEquals(avklartEktefelleSamboer.getReferanse(), Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER.getKode());
-        assertEquals(avklartEktefelleSamboer.getFakta(), "TRUE");
+        assertEquals(uuidEktefelleSamboer, avklartEktefelleSamboer.getSubjekt());
+        assertEquals(Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, avklartEktefelleSamboer.getType());
+        assertEquals(Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER.getKode(), avklartEktefelleSamboer.getReferanse());
+        assertEquals(Avklartefakta.VALGT_FAKTA, avklartEktefelleSamboer.getFakta());
         assertNull(avklartEktefelleSamboer.getBegrunnelseFritekst());
-        assertEquals(avklartEktefelleSamboer.getBehandlingsresultat(), behandlingsresultat);
+        assertEquals(behandlingsresultat, avklartEktefelleSamboer.getBehandlingsresultat());
         assertTrue(avklartEktefelleSamboer.getRegistreringer().isEmpty());
     }
 
     @Test
-    public void lagreMedfolgendeFamilieSomAvklartefakta_uuidIkkeLagretIBehandlingsgrunnlaget_kasterFeilmelding() throws FunksjonellException {
-        Set<OmfattetFamilie> omfattetBarn = Set.of(new OmfattetFamilie("uuid3"));
-        AvklarteMedfolgendeFamilie avklarteMedfolgendeBarn = new AvklarteMedfolgendeFamilie(omfattetBarn, Set.of());
-        AvklarteMedfolgendeFamilie avklarteMedfolgendeEktefelleSamboer = new AvklarteMedfolgendeFamilie(Set.of(), Set.of());
+    public void lagreMedfolgendeFamilieSomAvklartefakta_omfattetFamilieIkkeLagretIBehandlingsgrunnlaget_kasterFeilmelding() throws FunksjonellException {
+        AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie =
+            new AvklarteMedfolgendeFamilie(Set.of(new OmfattetFamilie("uuid3")), Set.of());
 
         when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(mockBehandling());
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(1L, avklarteMedfolgendeBarn, avklarteMedfolgendeEktefelleSamboer))
+            .isThrownBy(() -> avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(1L, avklarteMedfolgendeFamilie))
             .withMessageContaining("Medfolgende familie som er omfattet av norsk trygd: uuid3 er ikke lagret i behandlingsgrunnlaget.");
 
         verify(avklarteFaktaRepository, never()).save(captor.capture());
     }
 
     @Test
-    public void lagreMedfolgendeFamilieSomAvklartefakta_ugyldigBegrunnelseKode_kasterFeilmelding() throws FunksjonellException {
-        Set<IkkeOmfattetFamilie> ikkeOmfattetBarn = Set.of(
-            new IkkeOmfattetFamilie("uuid1", SAMBOER_UTEN_FELLES_BARN, "fritekstForUuid1"));
-        AvklarteMedfolgendeFamilie avklarteMedfolgendeBarn = new AvklarteMedfolgendeFamilie(Set.of(), ikkeOmfattetBarn);
-        AvklarteMedfolgendeFamilie avklarteMedfolgendeEktefelleSamboer = new AvklarteMedfolgendeFamilie(Set.of(), Set.of());
+    public void lagreMedfolgendeFamilieSomAvklartefakta_ikkeOmfattetFamilieIkkeLagretIBehandlingsgrunnlaget_kasterFeilmelding() throws FunksjonellException {
+        AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie =
+            new AvklarteMedfolgendeFamilie(Set.of(), Set.of(
+                new IkkeOmfattetFamilie("uuid3", OVER_18_AR.getKode(), fritekstBarn)));
 
         when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(mockBehandling());
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(1L, avklarteMedfolgendeBarn, avklarteMedfolgendeEktefelleSamboer))
-            .withMessageContaining("Begrunnelsen til medfolgende ektefelle/samboer: SAMBOER_UTEN_FELLES_BARN er ikke gyldig.");
+            .isThrownBy(() -> avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(1L, avklarteMedfolgendeFamilie))
+            .withMessageContaining("Medfolgende familie som ikke er omfattet av norsk trygd: uuid3 er ikke lagret i behandlingsgrunnlaget.");
 
         verify(avklarteFaktaRepository, never()).save(captor.capture());
     }
 
     @Test
-    public void lagreMedfolgendeFamilieSomAvklartefakta_relasjonskodeMatcherIkke_kasterFeilmelding() throws FunksjonellException {
-        Set<OmfattetFamilie> omfattetBarn = Set.of(new OmfattetFamilie("uuid2"));
-        AvklarteMedfolgendeFamilie avklarteMedfolgendeBarn = new AvklarteMedfolgendeFamilie(omfattetBarn, Set.of());
-        AvklarteMedfolgendeFamilie avklarteMedfolgendeEktefelleSamboer = new AvklarteMedfolgendeFamilie(Set.of(), Set.of());
+    public void lagreMedfolgendeFamilieSomAvklartefakta_ugyldigBegrunnelseKode_kasterFeilmelding() throws FunksjonellException {
+        AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie =
+            new AvklarteMedfolgendeFamilie(Set.of(), Set.of(
+                new IkkeOmfattetFamilie(uuidBarn, SAMBOER_UTEN_FELLES_BARN.getKode(), fritekstBarn)));
 
         when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(mockBehandling());
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(1L, avklarteMedfolgendeBarn, avklarteMedfolgendeEktefelleSamboer))
-            .withMessageContaining("Medfolgende familie som er omfattet av norsk trygd: uuid2 er lagret med feil relasjonsrolle.");
+            .isThrownBy(() -> avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(1L, avklarteMedfolgendeFamilie))
+            .withMessageContaining("Begrunnelsen til medfolgende familie " + uuidBarn + ": " + SAMBOER_UTEN_FELLES_BARN.getKode() + " er ikke gyldig.");
+
+        verify(avklarteFaktaRepository, never()).save(captor.capture());
+    }
+
+    @Test
+    public void lagreMedfolgendeFamilieSomAvklartefakta_ikkeSattBegrunnelseKode_kasterFeilmelding() throws FunksjonellException {
+        AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie =
+            new AvklarteMedfolgendeFamilie(Set.of(), Set.of(
+                new IkkeOmfattetFamilie(uuidBarn, null, fritekstBarn)));
+
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(mockBehandling());
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(1L, avklarteMedfolgendeFamilie))
+            .withMessageContaining("Begrunnelsen til medfolgende familie " + uuidBarn + ": " + null + " er ikke satt.");
 
         verify(avklarteFaktaRepository, never()).save(captor.capture());
     }
 
     private static Behandling mockBehandling() {
-        MedfolgendeFamilie medfolgendeFamilieUuid1 = MedfolgendeFamilie.tilMedfolgendeFamilie("uuid1", "fnr1", null, MedfolgendeFamilie.Relasjonsrolle.BARN);
-        MedfolgendeFamilie medfolgendeFamilieUuid2 = MedfolgendeFamilie.tilMedfolgendeFamilie("uuid2", "fnr2", null, MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER);
+        MedfolgendeFamilie medfolgendeFamilieUuid1 = MedfolgendeFamilie.tilMedfolgendeFamilie(uuidBarn, "fnr1", null, MedfolgendeFamilie.Relasjonsrolle.BARN);
+        MedfolgendeFamilie medfolgendeFamilieUuid2 = MedfolgendeFamilie.tilMedfolgendeFamilie(uuidEktefelleSamboer, "fnr2", null, MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER);
         BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
         behandlingsgrunnlagData.personOpplysninger.medfolgendeFamilie.addAll(List.of(medfolgendeFamilieUuid1, medfolgendeFamilieUuid2));
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();

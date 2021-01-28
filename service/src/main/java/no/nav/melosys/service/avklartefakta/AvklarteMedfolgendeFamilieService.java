@@ -3,8 +3,13 @@ package no.nav.melosys.service.avklartefakta;
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_LOVVALG_BARN;
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,8 +18,6 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.familie.OmfattetFamilie;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
-import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.exception.FunksjonellException;
@@ -27,82 +30,68 @@ public class AvklarteMedfolgendeFamilieService {
 
     private final BehandlingService behandlingService;
 
+    private final BehandlingsresultatService behandlingsresultatService;
+
     private final AvklartefaktaService avklartefaktaService;
 
     @Autowired
-    public AvklarteMedfolgendeFamilieService(BehandlingService behandlingService, AvklartefaktaService avklartefaktaService) {
+    public AvklarteMedfolgendeFamilieService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService, AvklartefaktaService avklartefaktaService) {
         this.behandlingService = behandlingService;
+        this.behandlingsresultatService = behandlingsresultatService;
         this.avklartefaktaService = avklartefaktaService;
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void lagreMedfolgendeFamilieSomAvklartefakta(long behandlingID, AvklarteMedfolgendeFamilie medfolgendeBarn, AvklarteMedfolgendeFamilie medfolgendeEktefelleSamboer) throws FunksjonellException {
-        validerMedfolgendeFamilie(behandlingID, medfolgendeBarn, medfolgendeEktefelleSamboer);
+    public void lagreMedfolgendeFamilieSomAvklartefakta(long behandlingID, AvklarteMedfolgendeFamilie medfolgendeFamilie) throws FunksjonellException {
+        Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolleFraBehandlingsgrunnlag =
+            behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID).getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().hentUuidOgRolleMedfølgendeFamilie();
+
+        validerMedfolgendeFamilie(medfolgendeFamilie, uuidOgRolleFraBehandlingsgrunnlag);
 
         avklartefaktaService.slettAvklarteFakta(behandlingID, VURDERING_LOVVALG_BARN);
         avklartefaktaService.slettAvklarteFakta(behandlingID, VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER);
 
-        lagreOmfattetFamilieSomAvklartfakta(behandlingID, VURDERING_LOVVALG_BARN, medfolgendeBarn.getFamilieOmfattetAvNorskTrygd());
-        lagreIkkeOmfattetFamilieSomAvklartfakta(behandlingID, VURDERING_LOVVALG_BARN, medfolgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd());
-        lagreOmfattetFamilieSomAvklartfakta(behandlingID, VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, medfolgendeEktefelleSamboer.getFamilieOmfattetAvNorskTrygd());
-        lagreIkkeOmfattetFamilieSomAvklartfakta(behandlingID, VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, medfolgendeEktefelleSamboer.getFamilieIkkeOmfattetAvNorskTrygd());
+        lagreFamilieSomAvklartfakta(behandlingID, medfolgendeFamilie.tilAvklartefakta(uuidOgRolleFraBehandlingsgrunnlag));
     }
 
-    private void validerMedfolgendeFamilie(long behandlingID, AvklarteMedfolgendeFamilie medfolgendeBarn, AvklarteMedfolgendeFamilie medfolgendeEktefelleSamboer) throws FunksjonellException {
-        Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolleFraBehandlingsgrunnlag = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID).getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().hentUuidOgRolleMedfølgendeFamilie();
-        validerOmfattetFamilie(medfolgendeBarn.getFamilieOmfattetAvNorskTrygd(), true, uuidOgRolleFraBehandlingsgrunnlag);
-        validerOmfattetFamilie(medfolgendeEktefelleSamboer.getFamilieOmfattetAvNorskTrygd(), false, uuidOgRolleFraBehandlingsgrunnlag);
-        validerIkkeOmfattetFamilie(medfolgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd(), true, uuidOgRolleFraBehandlingsgrunnlag);
-        validerIkkeOmfattetFamilie(medfolgendeEktefelleSamboer.getFamilieIkkeOmfattetAvNorskTrygd(), false, uuidOgRolleFraBehandlingsgrunnlag);
+    private void validerMedfolgendeFamilie(AvklarteMedfolgendeFamilie medfolgendeFamilie, Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolleFraBehandlingsgrunnlag) throws FunksjonellException {
+        validerOmfattetFamilie(medfolgendeFamilie.getFamilieOmfattetAvNorskTrygd(), uuidOgRolleFraBehandlingsgrunnlag);
+        validerIkkeOmfattetFamilie(medfolgendeFamilie.getFamilieIkkeOmfattetAvNorskTrygd(), uuidOgRolleFraBehandlingsgrunnlag);
     }
 
-    private void validerOmfattetFamilie(Set<OmfattetFamilie> omfattetFamilieSet, boolean barn, Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolle) throws FunksjonellException {
+    private void validerOmfattetFamilie(Set<OmfattetFamilie> omfattetFamilieSet, Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolle) throws FunksjonellException {
         for (OmfattetFamilie omfattetFamilie : omfattetFamilieSet) {
-            if (!uuidOgRolle.containsKey(omfattetFamilie.getUuid())){
+            if (!uuidOgRolle.containsKey(omfattetFamilie.getUuid())) {
                 throw new FunksjonellException("Medfolgende familie som er omfattet av norsk trygd: " + omfattetFamilie.getUuid() + " er ikke lagret i behandlingsgrunnlaget.");
             }
-            if (barn ? uuidOgRolle.get(omfattetFamilie.getUuid()) != MedfolgendeFamilie.Relasjonsrolle.BARN : uuidOgRolle.get(omfattetFamilie.getUuid()) != MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER) {
-                throw new FunksjonellException("Medfolgende familie som er omfattet av norsk trygd: " + omfattetFamilie.getUuid() + " er lagret med feil relasjonsrolle.");
-            }
         }
     }
 
-    private void validerIkkeOmfattetFamilie(Set<IkkeOmfattetFamilie> ikkeOmfattetFamilieSet, boolean barn, Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolle) throws FunksjonellException {
+    private void validerIkkeOmfattetFamilie(Set<IkkeOmfattetFamilie> ikkeOmfattetFamilieSet, Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolle) throws FunksjonellException {
         for (IkkeOmfattetFamilie ikkeOmfattetFamilie : ikkeOmfattetFamilieSet) {
+            if (!uuidOgRolle.containsKey(ikkeOmfattetFamilie.getUuid())) {
+                throw new FunksjonellException("Medfolgende familie som ikke er omfattet av norsk trygd: " + ikkeOmfattetFamilie.getUuid() + " er ikke lagret i behandlingsgrunnlaget.");
+            }
             try {
-                Kodeverk begrunnelse = barn ? ((Medfolgende_barn_begrunnelser_ftrl) ikkeOmfattetFamilie.getBegrunnelse()) : ((Medfolgende_ektefelle_samboer_begrunnelser_ftrl) ikkeOmfattetFamilie.getBegrunnelse());
-            } catch (RuntimeException e) {
-                throw new FunksjonellException("Begrunnelsen til medfolgende ektefelle/samboer: " + ikkeOmfattetFamilie.getBegrunnelse() + " er ikke gyldig.");
-            }
-            if (barn ? uuidOgRolle.get(ikkeOmfattetFamilie.getUuid()) != MedfolgendeFamilie.Relasjonsrolle.BARN : uuidOgRolle.get(ikkeOmfattetFamilie.getUuid()) != MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER) {
-                throw new FunksjonellException("Medfolgende familie som ikke er omfattet av norsk trygd: " + ikkeOmfattetFamilie.getUuid() + " er lagret med feil relasjonsrolle.");
+                if (MedfolgendeFamilie.Relasjonsrolle.BARN.equals(uuidOgRolle.get(ikkeOmfattetFamilie.getUuid()))) {
+                    Medfolgende_barn_begrunnelser_ftrl.valueOf(ikkeOmfattetFamilie.getBegrunnelse());
+                } else {
+                    Medfolgende_ektefelle_samboer_begrunnelser_ftrl.valueOf(ikkeOmfattetFamilie.getBegrunnelse());
+                }
+            } catch (IllegalArgumentException e) {
+                throw new FunksjonellException("Begrunnelsen til medfolgende familie " + ikkeOmfattetFamilie.getUuid() + ": " + ikkeOmfattetFamilie.getBegrunnelse() + " er ikke gyldig.");
+            } catch (NullPointerException e) {
+                throw new FunksjonellException("Begrunnelsen til medfolgende familie " + ikkeOmfattetFamilie.getUuid() + ": " + ikkeOmfattetFamilie.getBegrunnelse() + " er ikke satt.");
             }
         }
     }
 
-    public void lagreOmfattetFamilieSomAvklartfakta(long behandlingID, Avklartefaktatyper avklartefaktatype, Set<OmfattetFamilie> omfattetFamilie) throws IkkeFunnetException {
-        for(OmfattetFamilie omfattet : omfattetFamilie) {
-            avklartefaktaService.leggTilAvklarteFakta(
-                behandlingID,
-                avklartefaktatype,
-                avklartefaktatype.getKode(),
-                omfattet.getUuid(),
-                "TRUE"
-            );
-        }
-    }
+    public void lagreFamilieSomAvklartfakta(long behandlingID, Collection<Avklartefakta> avklartefaktaFraMedfolgendeFamilie) throws IkkeFunnetException {
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 
-    public void lagreIkkeOmfattetFamilieSomAvklartfakta(long behandlingID, Avklartefaktatyper avklartefaktatype, Set<IkkeOmfattetFamilie> ikkeOmfattetFamilie) throws IkkeFunnetException {
-        for(IkkeOmfattetFamilie ikkeOmfattet : ikkeOmfattetFamilie) {
-            avklartefaktaService.leggTilAvklarteFakta(
-                behandlingID,
-                avklartefaktatype,
-                avklartefaktatype.getKode(),
-                ikkeOmfattet.getUuid(),
-                "FALSE",
-                ikkeOmfattet.getBegrunnelseFritekst(),
-                ikkeOmfattet.getBegrunnelse().getKode()
-            );
-        }
+        avklartefaktaFraMedfolgendeFamilie.forEach(avklartefakta -> {
+            avklartefakta.setBehandlingsresultat(behandlingsresultat);
+            avklartefaktaService.lagre(avklartefakta);
+        });
     }
 }

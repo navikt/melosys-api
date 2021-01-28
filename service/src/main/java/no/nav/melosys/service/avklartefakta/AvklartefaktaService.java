@@ -186,24 +186,7 @@ public class AvklartefaktaService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void leggTilAvklarteFakta(long behandlingID, Avklartefaktatyper type, String referanse, String subjekt, String fakta, String begrunnelseFritekst, String begrunnelseKode) throws IkkeFunnetException {
-        Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException(FANT_IKKE_RESULTAT + behandlingID));
-
-        Avklartefakta avklartefakta = new Avklartefakta();
-        avklartefakta.setType(type);
-        avklartefakta.setReferanse(referanse);
-        avklartefakta.setSubjekt(subjekt);
-        avklartefakta.setFakta(fakta);
-        avklartefakta.setBehandlingsresultat(resultat);
-        avklartefakta.setBegrunnelseFritekst(begrunnelseFritekst);
-
-        AvklartefaktaRegistrering registrering = new AvklartefaktaRegistrering();
-        registrering.setBegrunnelseKode(begrunnelseKode);
-        registrering.setAvklartefakta(avklartefakta);
-
-        avklartefakta.getRegistreringer().add(registrering);
-
+    public void lagre(Avklartefakta avklartefakta) {
         avklarteFaktaRepository.save(avklartefakta);
     }
 

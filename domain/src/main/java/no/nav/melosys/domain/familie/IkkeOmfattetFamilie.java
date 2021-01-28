@@ -4,10 +4,10 @@ import no.nav.melosys.domain.kodeverk.Kodeverk;
 
 public class IkkeOmfattetFamilie {
     private final String uuid;
-    private final Kodeverk begrunnelse;
+    private final String begrunnelse;
     private final String begrunnelseFritekst;
 
-    public IkkeOmfattetFamilie(String uuid, Kodeverk begrunnelse, String begrunnelseFritekst) {
+    public IkkeOmfattetFamilie(String uuid, String begrunnelse, String begrunnelseFritekst) {
         this.uuid = uuid;
         this.begrunnelse = begrunnelse;
         this.begrunnelseFritekst = begrunnelseFritekst;
@@ -17,7 +17,7 @@ public class IkkeOmfattetFamilie {
         return uuid;
     }
 
-    public Kodeverk getBegrunnelse() {
+    public String getBegrunnelse() {
         return begrunnelse;
     }
 
