@@ -1,6 +1,7 @@
 package no.nav.melosys.featuretoggle;
 
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import no.finn.unleash.DefaultUnleash;
 import no.finn.unleash.FakeUnleash;
@@ -16,7 +17,7 @@ public class FeatureToggleConfig {
     @Bean
     public Unleash unleash(Environment environment) {
 
-        if (Arrays.asList(environment.getActiveProfiles()).contains("local")) {
+        if (!Collections.disjoint(List.of(environment.getActiveProfiles()), List.of("local", "local-mock"))) {
             var fakeUnleash = new FakeUnleash();
             fakeUnleash.enableAll();
             return fakeUnleash;
