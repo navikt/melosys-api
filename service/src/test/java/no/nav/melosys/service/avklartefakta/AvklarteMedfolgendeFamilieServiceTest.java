@@ -2,10 +2,8 @@ package no.nav.melosys.service.avklartefakta;
 
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.SAMBOER_UTEN_FELLES_BARN;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -88,31 +86,31 @@ public class AvklarteMedfolgendeFamilieServiceTest {
 
         List<Avklartefakta> capturedAvklarteFakta = captor.getAllValues();
         capturedAvklarteFakta.sort(Comparator.comparing(Avklartefakta::getSubjekt));
-        assertEquals(2, capturedAvklarteFakta.size());
+        assertThat(capturedAvklarteFakta.size()).isEqualTo(2);
         Avklartefakta avklartBarn = capturedAvklarteFakta.get(0);
         Avklartefakta avklartEktefelleSamboer = capturedAvklarteFakta.get(1);
 
-        assertEquals(uuidBarn, avklartBarn.getSubjekt());
-        assertEquals(Avklartefaktatyper.VURDERING_LOVVALG_BARN, avklartBarn.getType());
-        assertEquals(Avklartefaktatyper.VURDERING_LOVVALG_BARN.getKode(), avklartBarn.getReferanse());
-        assertEquals(Avklartefakta.IKKE_VALGT_FAKTA, avklartBarn.getFakta());
-        assertEquals(fritekstBarn, avklartBarn.getBegrunnelseFritekst());
-        assertEquals(behandlingsresultat, avklartBarn.getBehandlingsresultat());
-        assertEquals(1, avklartBarn.getRegistreringer().size());
+        assertThat(avklartBarn.getSubjekt()).isEqualTo(uuidBarn);
+        assertThat(avklartBarn.getType()).isEqualTo(Avklartefaktatyper.VURDERING_LOVVALG_BARN);
+        assertThat(avklartBarn.getReferanse()).isEqualTo(Avklartefaktatyper.VURDERING_LOVVALG_BARN.getKode());
+        assertThat(avklartBarn.getFakta()).isEqualTo(Avklartefakta.IKKE_VALGT_FAKTA);
+        assertThat(avklartBarn.getBegrunnelseFritekst()).isEqualTo(fritekstBarn);
+        assertThat(avklartBarn.getBehandlingsresultat()).isEqualTo(behandlingsresultat);
+        assertThat(avklartBarn.getRegistreringer().size()).isEqualTo(1);
 
         AvklartefaktaRegistrering registreringBarn = avklartBarn.getRegistreringer().iterator().next();
-        assertEquals(OVER_18_AR.getKode(), registreringBarn.getBegrunnelseKode());
+        assertThat(registreringBarn.getBegrunnelseKode()).isEqualTo(OVER_18_AR.getKode());
 
-        assertEquals(uuidEktefelleSamboer, avklartEktefelleSamboer.getSubjekt());
-        assertEquals(Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, avklartEktefelleSamboer.getType());
-        assertEquals(Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER.getKode(), avklartEktefelleSamboer.getReferanse());
-        assertEquals(Avklartefakta.IKKE_VALGT_FAKTA, avklartEktefelleSamboer.getFakta());
-        assertEquals(fritekstEktefelleSamboer, avklartEktefelleSamboer.getBegrunnelseFritekst());
-        assertEquals(behandlingsresultat, avklartEktefelleSamboer.getBehandlingsresultat());
-        assertEquals(1, avklartEktefelleSamboer.getRegistreringer().size());
+        assertThat(avklartEktefelleSamboer.getSubjekt()).isEqualTo(uuidEktefelleSamboer);
+        assertThat(avklartEktefelleSamboer.getType()).isEqualTo(Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER);
+        assertThat(avklartEktefelleSamboer.getReferanse()).isEqualTo(Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER.getKode());
+        assertThat(avklartEktefelleSamboer.getFakta()).isEqualTo(Avklartefakta.IKKE_VALGT_FAKTA);
+        assertThat(avklartEktefelleSamboer.getBegrunnelseFritekst()).isEqualTo(fritekstEktefelleSamboer);
+        assertThat(avklartEktefelleSamboer.getBehandlingsresultat()).isEqualTo(behandlingsresultat);
+        assertThat(avklartEktefelleSamboer.getRegistreringer().size()).isEqualTo(1);
 
         AvklartefaktaRegistrering registreringEktefelleSamboer = avklartEktefelleSamboer.getRegistreringer().iterator().next();
-        assertEquals(SAMBOER_UTEN_FELLES_BARN.getKode(), registreringEktefelleSamboer.getBegrunnelseKode());
+        assertThat(registreringEktefelleSamboer.getBegrunnelseKode()).isEqualTo(SAMBOER_UTEN_FELLES_BARN.getKode());
     }
 
     @Test
@@ -134,25 +132,25 @@ public class AvklarteMedfolgendeFamilieServiceTest {
 
         List<Avklartefakta> capturedAvklarteFakta = captor.getAllValues();
         capturedAvklarteFakta.sort(Comparator.comparing(Avklartefakta::getSubjekt));
-        assertEquals(capturedAvklarteFakta.size(), 2);
+        assertThat(capturedAvklarteFakta.size()).isEqualTo(2);
         Avklartefakta avklartBarn = capturedAvklarteFakta.get(0);
         Avklartefakta avklartEktefelleSamboer = capturedAvklarteFakta.get(1);
 
-        assertEquals(uuidBarn, avklartBarn.getSubjekt());
-        assertEquals(Avklartefaktatyper.VURDERING_LOVVALG_BARN, avklartBarn.getType());
-        assertEquals(Avklartefaktatyper.VURDERING_LOVVALG_BARN.getKode(), avklartBarn.getReferanse());
-        assertEquals(Avklartefakta.VALGT_FAKTA, avklartBarn.getFakta());
-        assertNull(avklartBarn.getBegrunnelseFritekst());
-        assertEquals(behandlingsresultat, avklartBarn.getBehandlingsresultat());
-        assertTrue(avklartBarn.getRegistreringer().isEmpty());
+        assertThat(avklartBarn.getSubjekt()).isEqualTo(uuidBarn);
+        assertThat(avklartBarn.getType()).isEqualTo(Avklartefaktatyper.VURDERING_LOVVALG_BARN);
+        assertThat(avklartBarn.getReferanse()).isEqualTo(Avklartefaktatyper.VURDERING_LOVVALG_BARN.getKode());
+        assertThat(avklartBarn.getFakta()).isEqualTo(Avklartefakta.VALGT_FAKTA);
+        assertThat(avklartBarn.getBegrunnelseFritekst()).isNull();
+        assertThat(avklartBarn.getBehandlingsresultat()).isEqualTo(behandlingsresultat);
+        assertThat(avklartBarn.getRegistreringer().isEmpty()).isTrue();
 
-        assertEquals(uuidEktefelleSamboer, avklartEktefelleSamboer.getSubjekt());
-        assertEquals(Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, avklartEktefelleSamboer.getType());
-        assertEquals(Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER.getKode(), avklartEktefelleSamboer.getReferanse());
-        assertEquals(Avklartefakta.VALGT_FAKTA, avklartEktefelleSamboer.getFakta());
-        assertNull(avklartEktefelleSamboer.getBegrunnelseFritekst());
-        assertEquals(behandlingsresultat, avklartEktefelleSamboer.getBehandlingsresultat());
-        assertTrue(avklartEktefelleSamboer.getRegistreringer().isEmpty());
+        assertThat(avklartEktefelleSamboer.getSubjekt()).isEqualTo(uuidEktefelleSamboer);
+        assertThat(avklartEktefelleSamboer.getType()).isEqualTo(Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER);
+        assertThat(avklartEktefelleSamboer.getReferanse()).isEqualTo(Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER.getKode());
+        assertThat(avklartEktefelleSamboer.getFakta()).isEqualTo(Avklartefakta.VALGT_FAKTA);
+        assertThat(avklartEktefelleSamboer.getBegrunnelseFritekst()).isNull();
+        assertThat(avklartEktefelleSamboer.getBehandlingsresultat()).isEqualTo(behandlingsresultat);
+        assertThat(avklartEktefelleSamboer.getRegistreringer().isEmpty()).isTrue();
     }
 
     @Test

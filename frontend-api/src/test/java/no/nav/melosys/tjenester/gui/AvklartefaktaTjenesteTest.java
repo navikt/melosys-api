@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.SAMBOER_UTEN_FELLES_BARN;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -99,23 +98,23 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
         List<MedfolgendeFamilieDto> forventetMedfolgendeFamilie = lagreMedfolgendeFamilieDto.getMedfolgendeFamilie()
             .stream().sorted(Comparator.comparing(MedfolgendeFamilieDto::getUuid)).collect(Collectors.toList());
 
-        assertEquals(forventetMedfolgendeFamilie.size(), medFolgendeFamilieFraResponse.size());
+        assertThat(medFolgendeFamilieFraResponse.size()).isEqualTo(forventetMedfolgendeFamilie.size());
 
-        assertEquals(forventetMedfolgendeFamilie.get(0).getUuid(), medFolgendeFamilieFraResponse.get(0).getUuid());
-        assertEquals(forventetMedfolgendeFamilie.get(0).getBegrunnelseKode(), medFolgendeFamilieFraResponse.get(0).getBegrunnelseKode());
-        assertEquals(forventetMedfolgendeFamilie.get(0).getBegrunnelseFritekst(), medFolgendeFamilieFraResponse.get(0).getBegrunnelseFritekst());
+        assertThat(medFolgendeFamilieFraResponse.get(0).getUuid()).isEqualTo(forventetMedfolgendeFamilie.get(0).getUuid());
+        assertThat(medFolgendeFamilieFraResponse.get(0).getBegrunnelseKode()).isEqualTo(forventetMedfolgendeFamilie.get(0).getBegrunnelseKode());
+        assertThat(medFolgendeFamilieFraResponse.get(0).getBegrunnelseFritekst()).isEqualTo(forventetMedfolgendeFamilie.get(0).getBegrunnelseFritekst());
 
-        assertEquals(forventetMedfolgendeFamilie.get(1).getUuid(), medFolgendeFamilieFraResponse.get(1).getUuid());
-        assertEquals(forventetMedfolgendeFamilie.get(1).getBegrunnelseKode(), medFolgendeFamilieFraResponse.get(1).getBegrunnelseKode());
-        assertEquals(forventetMedfolgendeFamilie.get(1).getBegrunnelseFritekst(), medFolgendeFamilieFraResponse.get(1).getBegrunnelseFritekst());
+        assertThat(medFolgendeFamilieFraResponse.get(1).getUuid()).isEqualTo(forventetMedfolgendeFamilie.get(1).getUuid());
+        assertThat(medFolgendeFamilieFraResponse.get(1).getBegrunnelseKode()).isEqualTo(forventetMedfolgendeFamilie.get(1).getBegrunnelseKode());
+        assertThat(medFolgendeFamilieFraResponse.get(1).getBegrunnelseFritekst()).isEqualTo(forventetMedfolgendeFamilie.get(1).getBegrunnelseFritekst());
 
-        assertEquals(forventetMedfolgendeFamilie.get(2).getUuid(), medFolgendeFamilieFraResponse.get(2).getUuid());
-        assertEquals(forventetMedfolgendeFamilie.get(2).getBegrunnelseKode(), medFolgendeFamilieFraResponse.get(2).getBegrunnelseKode());
-        assertEquals(forventetMedfolgendeFamilie.get(2).getBegrunnelseFritekst(), medFolgendeFamilieFraResponse.get(2).getBegrunnelseFritekst());
+        assertThat(medFolgendeFamilieFraResponse.get(2).getUuid()).isEqualTo(forventetMedfolgendeFamilie.get(2).getUuid());
+        assertThat(medFolgendeFamilieFraResponse.get(2).getBegrunnelseKode()).isEqualTo(forventetMedfolgendeFamilie.get(2).getBegrunnelseKode());
+        assertThat(medFolgendeFamilieFraResponse.get(2).getBegrunnelseFritekst()).isEqualTo(forventetMedfolgendeFamilie.get(2).getBegrunnelseFritekst());
 
-        assertEquals(forventetMedfolgendeFamilie.get(3).getUuid(), medFolgendeFamilieFraResponse.get(3).getUuid());
-        assertEquals(forventetMedfolgendeFamilie.get(3).getBegrunnelseKode(), medFolgendeFamilieFraResponse.get(3).getBegrunnelseKode());
-        assertEquals(forventetMedfolgendeFamilie.get(3).getBegrunnelseFritekst(), medFolgendeFamilieFraResponse.get(3).getBegrunnelseFritekst());
+        assertThat(medFolgendeFamilieFraResponse.get(3).getUuid()).isEqualTo(forventetMedfolgendeFamilie.get(3).getUuid());
+        assertThat(medFolgendeFamilieFraResponse.get(3).getBegrunnelseKode()).isEqualTo(forventetMedfolgendeFamilie.get(3).getBegrunnelseKode());
+        assertThat(medFolgendeFamilieFraResponse.get(3).getBegrunnelseFritekst()).isEqualTo(forventetMedfolgendeFamilie.get(3).getBegrunnelseFritekst());
     }
 
     @Test(expected = FunksjonellException.class)
