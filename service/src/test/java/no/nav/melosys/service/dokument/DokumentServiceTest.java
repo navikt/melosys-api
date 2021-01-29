@@ -100,7 +100,7 @@ public final class DokumentServiceTest {
     @Test
     public final void produserInnvilgelsesbrev_medFullmektig_senderTilBrukerOgFullmektig() throws Exception {
         DokumentService dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock());
-        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProdserbartDokument(INNVILGELSE_YRKESAKTIV).build();
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(INNVILGELSE_YRKESAKTIV).build();
         dokumentServiceMedMockVelger.produserDokument(INNVILGELSE_YRKESAKTIV, Mottaker.av(BRUKER), BEHANDLINGSID, brevbestilling);
         verify(dokSysFasade, times(2)).produserIkkeredigerbartDokument(any(Dokumentbestilling.class));
     }
@@ -192,7 +192,7 @@ public final class DokumentServiceTest {
 
     private static DoksysBrevbestilling lagBrevbestillingAvslagArbeidsgiver() {
         DoksysBrevbestilling.Builder builder = new DoksysBrevbestilling.Builder();
-        builder.medProdserbartDokument(Produserbaredokumenter.AVSLAG_ARBEIDSGIVER);
+        builder.medProduserbartDokument(Produserbaredokumenter.AVSLAG_ARBEIDSGIVER);
         builder.medBehandling(lagBehandling());
         return builder.build();
     }

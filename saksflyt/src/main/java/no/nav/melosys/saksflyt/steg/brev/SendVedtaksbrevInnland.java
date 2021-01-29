@@ -101,7 +101,8 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             mottakerListe = List.of(Mottaker.av(BRUKER));
         }
 
-        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProdserbartDokument(avslagTypeBruker)
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
+            .medProduserbartDokument(avslagTypeBruker)
             .medAvsenderNavn(saksbehandler)
             .medBehandling(behandling)
             .medMottakere(mottakerListe)
@@ -114,7 +115,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
                 ? AVSLAG_ARBEIDSGIVER : AVSLAG_MANGLENDE_OPPLYSNINGER;
 
             DoksysBrevbestilling.Builder brevbestillingArbeidsgiver = new DoksysBrevbestilling.Builder()
-                .medProdserbartDokument(avslagTypeArbeidsgiver)
+                .medProduserbartDokument(avslagTypeArbeidsgiver)
                 .medAvsenderNavn(saksbehandler)
                 .medBehandling(behandling)
                 .medMottakere(Mottaker.av(ARBEIDSGIVER))
@@ -141,7 +142,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             mottakerListe.add(FastMottaker.av(STATLIG_SKATTEOPPKREVING));
         }
 
-        DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProdserbartDokument(innvilgelseType)
+        DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProduserbartDokument(innvilgelseType)
             .medAvsenderNavn(saksbehandler)
             .medBehandling(behandling)
             .medBegrunnelseKode(begrunnelseKode)
@@ -153,7 +154,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
 
     private void sendUtpekingsbrev(Behandling behandling, String saksbehandler, String fritekst)
         throws FunksjonellException, TekniskException {
-        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProdserbartDokument(ORIENTERING_UTPEKING_UTLAND)
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(ORIENTERING_UTPEKING_UTLAND)
             .medAvsenderNavn(saksbehandler)
             .medBehandling(behandling)
             .medMottakere(Mottaker.av(BRUKER))

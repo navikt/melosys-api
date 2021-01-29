@@ -24,7 +24,7 @@ public class BrevBestiller {
     }
 
     public void bestill(Produserbaredokumenter dokumentType, String avsender, Mottaker mottaker, Behandling behandling) throws FunksjonellException, TekniskException {
-        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProdserbartDokument(dokumentType)
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(dokumentType)
             .medAvsenderNavn(avsender)
             .medMottakere(mottaker)
             .medBehandling(behandling).build();
