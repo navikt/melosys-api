@@ -43,7 +43,7 @@ public class MedfolgendeFamilieDto {
         return omfattet;
     }
 
-    public boolean isIkkeOmfattet() {
+    public boolean erIkkeOmfattet() {
         return !isOmfattet();
     }
 

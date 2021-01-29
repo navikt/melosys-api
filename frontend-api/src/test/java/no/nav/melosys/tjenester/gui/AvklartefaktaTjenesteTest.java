@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -43,6 +44,13 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
     private static final Logger log = LoggerFactory.getLogger(AvklartefaktaTjenesteTest.class);
 
     private static final String AVKLARTEFAKTA_SCHEMA = "avklartefakta-schema.json";
+    private static final String AVKLARTEFAKTA_MEDFOLGENDEFAMILIE_POST_SCHEMA="avklartefakta-medfolgendefamilie-post-schema.json";
+    private static final String AVKLARTEFAKTA_OPPSUMMERING_SCHEMA="avklartefakta-oppsummering-schema.json";
+
+    private static final String uuid1 = "36053ce6-75e5-4430-b8af-2ce60092877d";
+    private static final String uuid2 = "e502441e-9cdd-4d2a-84c2-25261b6e7cb2";
+    private static final String uuid3 = "d7645947-e7e9-46c0-987a-d0e91d6fed6f";
+    private static final String uuid4 = "4136cdce-0c09-4693-a032-5914575c3ac3";
 
     private AvklartefaktaTjeneste avklartefaktaTjeneste;
 
@@ -78,20 +86,24 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void lagreMedfolgendeFamilieSomAvklarteFakta_énAvHverMuligInput_returnererKorrekt() throws FunksjonellException, TekniskException {
+    public void lagreMedfolgendeFamilieSomAvklarteFakta_énAvHverMuligInput_returnererKorrekt() throws FunksjonellException, TekniskException, IOException {
         LagreMedfolgendeFamilieDto lagreMedfolgendeFamilieDto = new LagreMedfolgendeFamilieDto(Set.of(
-            new MedfolgendeFamilieDto("uuid1", true, null, null),
-            new MedfolgendeFamilieDto("uuid2", false, OVER_18_AR.getKode(), "fritekstForUuid2"),
-            new MedfolgendeFamilieDto("uuid3", true, null, null),
-            new MedfolgendeFamilieDto("uuid4", false, SAMBOER_UTEN_FELLES_BARN.getKode(), "fritekstForUuid4")));
+            new MedfolgendeFamilieDto(uuid1, true, null, null),
+            new MedfolgendeFamilieDto(uuid2, false, OVER_18_AR.getKode(), "fritekstForUuid2"),
+            new MedfolgendeFamilieDto(uuid3, true, null, null),
+            new MedfolgendeFamilieDto(uuid4, false, SAMBOER_UTEN_FELLES_BARN.getKode(), "fritekstForUuid4")));
+
+        valider(lagreMedfolgendeFamilieDto, AVKLARTEFAKTA_MEDFOLGENDEFAMILIE_POST_SCHEMA, log);
 
         when(avklartefaktaService.hentAlleAvklarteFakta(eq(1L))).thenReturn(Set.of(
-            lagAvklartefaktaDto("uuid1", Avklartefaktatyper.VURDERING_LOVVALG_BARN, true, null, null),
-            lagAvklartefaktaDto("uuid2", Avklartefaktatyper.VURDERING_LOVVALG_BARN, false, "fritekstForUuid2", OVER_18_AR.getKode()),
-            lagAvklartefaktaDto("uuid3", Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, true, null, null),
-            lagAvklartefaktaDto("uuid4", Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, false, "fritekstForUuid4", SAMBOER_UTEN_FELLES_BARN.getKode())));
+            lagAvklartefaktaDto(uuid1, Avklartefaktatyper.VURDERING_LOVVALG_BARN, true, null, null),
+            lagAvklartefaktaDto(uuid2, Avklartefaktatyper.VURDERING_LOVVALG_BARN, false, "fritekstForUuid2", OVER_18_AR.getKode()),
+            lagAvklartefaktaDto(uuid3, Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, true, null, null),
+            lagAvklartefaktaDto(uuid4, Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, false, "fritekstForUuid4", SAMBOER_UTEN_FELLES_BARN.getKode())));
 
         AvklartefaktaOppsummeringDto response = avklartefaktaTjeneste.lagreMedfolgendeFamilieSomAvklarteFakta(1L, lagreMedfolgendeFamilieDto);
+
+        valider(response, AVKLARTEFAKTA_OPPSUMMERING_SCHEMA, log);
 
         List<MedfolgendeFamilieDto> medFolgendeFamilieFraResponse = response.getMedfolgendeFamilie()
             .stream().sorted(Comparator.comparing(MedfolgendeFamilieDto::getUuid)).collect(Collectors.toList());
