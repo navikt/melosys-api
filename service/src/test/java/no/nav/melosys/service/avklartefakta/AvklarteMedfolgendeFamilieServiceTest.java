@@ -183,7 +183,7 @@ public class AvklarteMedfolgendeFamilieServiceTest {
     }
 
     @Test
-    public void lagreMedfolgendeFamilieSomAvklartefakta_ugyldigBegrunnelseKode_kasterFeilmelding() throws FunksjonellException {
+    public void lagreMedfolgendeFamilieSomAvklartefakta_ugyldigBegrunnelseKodeForBarn_kasterFeilmelding() throws FunksjonellException {
         AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie =
             new AvklarteMedfolgendeFamilie(Set.of(), Set.of(
                 new IkkeOmfattetFamilie(uuidBarn, SAMBOER_UTEN_FELLES_BARN.getKode(), fritekstBarn)));
@@ -192,7 +192,22 @@ public class AvklarteMedfolgendeFamilieServiceTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(1L, avklarteMedfolgendeFamilie))
-            .withMessageContaining("Begrunnelsen til medfolgende familie " + uuidBarn + ": " + SAMBOER_UTEN_FELLES_BARN.getKode() + " er ikke gyldig.");
+            .withMessageContaining("Begrunnelsen til medfolgende barn " + uuidBarn + ": " + SAMBOER_UTEN_FELLES_BARN.getKode() + " er ikke gyldig.");
+
+        verify(avklarteFaktaRepository, never()).save(captor.capture());
+    }
+
+    @Test
+    public void lagreMedfolgendeFamilieSomAvklartefakta_ugyldigBegrunnelseKodeForEktefelleSamboer_kasterFeilmelding() throws FunksjonellException {
+        AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie =
+            new AvklarteMedfolgendeFamilie(Set.of(), Set.of(
+                new IkkeOmfattetFamilie(uuidEktefelleSamboer, OVER_18_AR.getKode(), fritekstEktefelleSamboer)));
+
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(mockBehandling());
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(1L, avklarteMedfolgendeFamilie))
+            .withMessageContaining("Begrunnelsen til medfolgende ektefelle/samboer " + uuidEktefelleSamboer + ": " + OVER_18_AR.getKode() + " er ikke gyldig.");
 
         verify(avklarteFaktaRepository, never()).save(captor.capture());
     }

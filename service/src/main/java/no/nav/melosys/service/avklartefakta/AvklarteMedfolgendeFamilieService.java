@@ -6,6 +6,8 @@ import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_MEDLEM
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
@@ -68,20 +70,21 @@ public class AvklarteMedfolgendeFamilieService {
     }
 
     private void validerIkkeOmfattetFamilie(Set<IkkeOmfattetFamilie> ikkeOmfattetFamilieSet, Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolle) throws FunksjonellException {
+        var begrunnelserBarn = Stream.of(Medfolgende_barn_begrunnelser_ftrl.values()).map(Medfolgende_barn_begrunnelser_ftrl::getKode).collect(Collectors.toList());
+        var begrunnelserEktefelleSamboer =Stream.of(Medfolgende_ektefelle_samboer_begrunnelser_ftrl.values()).map(Medfolgende_ektefelle_samboer_begrunnelser_ftrl::getKode).collect(Collectors.toList());
+
         for (IkkeOmfattetFamilie ikkeOmfattetFamilie : ikkeOmfattetFamilieSet) {
             if (!uuidOgRolle.containsKey(ikkeOmfattetFamilie.getUuid())) {
                 throw new FunksjonellException("Medfolgende familie som ikke er omfattet av norsk trygd: " + ikkeOmfattetFamilie.getUuid() + " er ikke lagret i behandlingsgrunnlaget.");
             }
-            try {
-                if (MedfolgendeFamilie.Relasjonsrolle.BARN.equals(uuidOgRolle.get(ikkeOmfattetFamilie.getUuid()))) {
-                    Medfolgende_barn_begrunnelser_ftrl.valueOf(ikkeOmfattetFamilie.getBegrunnelse());
-                } else {
-                    Medfolgende_ektefelle_samboer_begrunnelser_ftrl.valueOf(ikkeOmfattetFamilie.getBegrunnelse());
-                }
-            } catch (IllegalArgumentException e) {
-                throw new FunksjonellException("Begrunnelsen til medfolgende familie " + ikkeOmfattetFamilie.getUuid() + ": " + ikkeOmfattetFamilie.getBegrunnelse() + " er ikke gyldig.");
-            } catch (NullPointerException e) {
+            if (ikkeOmfattetFamilie.getBegrunnelse() == null || ikkeOmfattetFamilie.getBegrunnelse().isEmpty()) {
                 throw new FunksjonellException("Begrunnelsen til medfolgende familie " + ikkeOmfattetFamilie.getUuid() + ": " + ikkeOmfattetFamilie.getBegrunnelse() + " er ikke satt.");
+            }
+            if (MedfolgendeFamilie.Relasjonsrolle.BARN.equals(uuidOgRolle.get(ikkeOmfattetFamilie.getUuid())) && !begrunnelserBarn.contains(ikkeOmfattetFamilie.getBegrunnelse())) {
+                throw new FunksjonellException("Begrunnelsen til medfolgende barn " + ikkeOmfattetFamilie.getUuid() + ": " + ikkeOmfattetFamilie.getBegrunnelse() + " er ikke gyldig.");
+            }
+            if (MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER.equals(uuidOgRolle.get(ikkeOmfattetFamilie.getUuid())) && !begrunnelserEktefelleSamboer.contains(ikkeOmfattetFamilie.getBegrunnelse())) {
+                throw new FunksjonellException("Begrunnelsen til medfolgende ektefelle/samboer " + ikkeOmfattetFamilie.getUuid() + ": " + ikkeOmfattetFamilie.getBegrunnelse() + " er ikke gyldig.");
             }
         }
     }
