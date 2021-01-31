@@ -3,6 +3,8 @@ package no.nav.melosys.tjenester.gui.dto;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.familie.OmfattetFamilie;
@@ -10,7 +12,8 @@ import no.nav.melosys.domain.familie.OmfattetFamilie;
 public class LagreMedfolgendeFamilieDto {
     private final Set<MedfolgendeFamilieDto> medfolgendeFamilie;
 
-    public LagreMedfolgendeFamilieDto(Set<MedfolgendeFamilieDto> medfolgendeFamilie) {
+    @JsonCreator
+    public LagreMedfolgendeFamilieDto(@JsonProperty("medfolgendeFamilie") Set<MedfolgendeFamilieDto> medfolgendeFamilie) {
         this.medfolgendeFamilie = medfolgendeFamilie;
     }
 
