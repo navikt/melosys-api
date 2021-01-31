@@ -206,8 +206,8 @@ class DokgenMalMapperTest {
         DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling);
         assertTrue(dokgenDto instanceof MangelbrevBruker);
         MangelbrevBruker result = (MangelbrevBruker) dokgenDto;
-        assertEquals("Dummy", result.getFritekstMottaksinfo());
-        assertEquals("Dummy", result.getFritekstMangelinfo());
+        assertEquals("Dummy", result.getInnledningFritekst());
+        assertEquals("Dummy", result.getManglerInfoFritekst());
         assertEquals(Instant.now().plus(Period.ofWeeks(4)).truncatedTo(ChronoUnit.DAYS), result.getDatoInnsendingsfrist().truncatedTo(ChronoUnit.DAYS));
     }
 
@@ -234,8 +234,8 @@ class DokgenMalMapperTest {
         DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling);
         assertTrue(dokgenDto instanceof MangelbrevArbeidsgiver);
         MangelbrevArbeidsgiver result = (MangelbrevArbeidsgiver) dokgenDto;
-        assertEquals("Dummy", result.getFritekstMottaksinfo());
-        assertEquals("Dummy", result.getFritekstMangelinfo());
+        assertEquals("Dummy", result.getInnledningFritekst());
+        assertEquals("Dummy", result.getManglerInfoFritekst());
         assertEquals("Fullmektig AS", result.getNavnFullmektig());
         assertEquals(Instant.now().plus(Period.ofWeeks(4)).truncatedTo(ChronoUnit.DAYS), result.getDatoInnsendingsfrist().truncatedTo(ChronoUnit.DAYS));
     }

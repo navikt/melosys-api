@@ -13,6 +13,7 @@ public interface Oppstart {
         list.add("securityTokenService.url");
         list.add("systemuser.username");
         list.add("systemuser.password");
+        list.add("spring.profiles.active");
 
         list.forEach(this::loadProperty);
     }

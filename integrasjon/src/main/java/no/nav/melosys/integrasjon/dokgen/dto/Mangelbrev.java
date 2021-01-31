@@ -32,8 +32,8 @@ public class Mangelbrev extends DokgenDto {
     private final Sakstyper sakstype;
     private final Behandlingstyper behandlingstype;
     private final String saksbehandlerNavn;
-    private final String fritekstMangelinfo;
-    private final String fritekstMottaksinfo;
+    private final String manglerInfoFritekst;
+    private final String innledningFritekst;
 
     protected Mangelbrev(MangelbrevBrevbestilling brevbestilling) throws TekniskException, IkkeFunnetException {
         super(brevbestilling);
@@ -45,8 +45,8 @@ public class Mangelbrev extends DokgenDto {
         this.sakstype = fagsak.getType();
         this.behandlingstype = fagsak.getSistOppdaterteBehandling().getType();
         this.saksbehandlerNavn = fagsak.getEndretAv();
-        this.fritekstMangelinfo = brevbestilling.getManglerInfoFritekst();
-        this.fritekstMottaksinfo = brevbestilling.getInnledningFritekst();
+        this.manglerInfoFritekst = brevbestilling.getManglerInfoFritekst();
+        this.innledningFritekst = brevbestilling.getInnledningFritekst();
     }
 
     public Instant getDatoMottatt() {
@@ -73,11 +73,11 @@ public class Mangelbrev extends DokgenDto {
         return saksbehandlerNavn;
     }
 
-    public String getFritekstMangelinfo() {
-        return fritekstMangelinfo;
+    public String getManglerInfoFritekst() {
+        return manglerInfoFritekst;
     }
 
-    public String getFritekstMottaksinfo() {
-        return fritekstMottaksinfo;
+    public String getInnledningFritekst() {
+        return innledningFritekst;
     }
 }

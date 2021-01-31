@@ -38,6 +38,7 @@ public class PepTest {
         when(abacService.evaluate(any())).thenReturn(abacResponse);
     }
 
+    @Test
     public void testSjekkTilgangTilFnr() throws SikkerhetsbegrensningException {
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
         pep.sjekkTilgangTilFnr("12345678910");
@@ -62,7 +63,7 @@ public class PepTest {
     }
 
 
-    @Test()
+    @Test
     public void testSjekkTilgangTilAktor() throws SikkerhetsbegrensningException {
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
         pep.sjekkTilgangTilAktoerId("12345678910");
