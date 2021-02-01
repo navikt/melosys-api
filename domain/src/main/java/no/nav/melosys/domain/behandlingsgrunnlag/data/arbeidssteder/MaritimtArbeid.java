@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.behandlingsgrunnlag.data;
+package no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder;
 
 import no.nav.melosys.domain.kodeverk.Innretningstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
