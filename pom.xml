@@ -74,7 +74,7 @@
         <networknt.json-schema-validator.version>1.0.45</networknt.json-schema-validator.version>
         <nimbus-jose-jwt.version>8.20.1</nimbus-jose-jwt.version>
         <ojdbc.version>18.3.0.0</ojdbc.version>
-        <okhttp.version>4.9.0</okhttp.version>
+        <okhttp.version>4.9.1</okhttp.version>
         <oracle.version>18</oracle.version>
         <org.json.version>20180813</org.json.version>
         <oxmlparserv2.version>11.2.0.1.nojaxpservice</oxmlparserv2.version>
