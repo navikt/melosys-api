@@ -16,6 +16,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.LuftfartBase;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.*;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Innretningstyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
 import no.nav.melosys.soknad_altinn.*;
 
 public final class SoeknadMapper {
@@ -141,7 +142,7 @@ public final class SoeknadMapper {
     private static MaritimtArbeid lagArbeidsstedPåSkip(SkipListe.Skip skip) {
         MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
         maritimtArbeid.enhetNavn = skip.getSkipNavn();
-        maritimtArbeid.fartsomradeKode = skip.getFartsomraade().toString();
+        maritimtArbeid.fartsomradeKode = Fartsomrader.valueOf(skip.getFartsomraade().toString().toUpperCase());
         maritimtArbeid.flaggLandkode = skip.getFlaggland();
         maritimtArbeid.territorialfarvann = skip.getTerritorialEllerHavnLand();
         return maritimtArbeid;

@@ -12,6 +12,8 @@ import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM;
 import no.nav.melosys.soknad_altinn.ObjectFactory;
 import org.junit.jupiter.api.Test;
 
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader.INNENRIKS;
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader.UTENRIKS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SoeknadMapperTest {
@@ -65,10 +67,10 @@ class SoeknadMapperTest {
         assertThat(soeknad.maritimtArbeid).isNotEmpty();
         final MaritimtArbeid maritimtArbeidInnenriks = soeknad.maritimtArbeid.get(0);
         assertThat(maritimtArbeidInnenriks.enhetNavn).isEqualTo("abcd");
-        assertThat(maritimtArbeidInnenriks.fartsomradeKode).isEqualTo("INNENRIKS");
+        assertThat(maritimtArbeidInnenriks.fartsomradeKode).isEqualTo(INNENRIKS);
         assertThat(maritimtArbeidInnenriks.territorialfarvann).isEqualTo("BG");
         final MaritimtArbeid maritimtArbeidUtenriks = soeknad.maritimtArbeid.get(1);
-        assertThat(maritimtArbeidUtenriks.fartsomradeKode).isEqualTo("UTENRIKS");
+        assertThat(maritimtArbeidUtenriks.fartsomradeKode).isEqualTo(UTENRIKS);
         assertThat(maritimtArbeidUtenriks.flaggLandkode).isEqualTo("FO");
     }
 
