@@ -10,10 +10,11 @@ import java.util.stream.Collectors;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ArbeidPaaLand;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.FysiskArbeidssted;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.LuftfartBase;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.ArbeidPaaLand;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.LuftfartBase;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Flyvningstyper;
 import no.nav.melosys.domain.kodeverk.Innretningstyper;

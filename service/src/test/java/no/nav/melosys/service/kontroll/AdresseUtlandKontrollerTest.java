@@ -3,7 +3,7 @@ package no.nav.melosys.service.kontroll;
 import java.util.List;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.FysiskArbeidssted;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import org.junit.Before;
