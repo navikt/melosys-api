@@ -10,13 +10,16 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +27,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;
+import static org.springframework.util.StringUtils.hasText;
 
 @Component
 public class DokgenMalMapper {
@@ -31,18 +35,27 @@ public class DokgenMalMapper {
     private final KodeverkService kodeverkService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final EregFasade eregFasade;
+    private final TpsFasade tpsFasade;
 
     @Autowired
     public DokgenMalMapper(KodeverkService kodeverkService,
                            BehandlingsresultatService behandlingsresultatService,
-                           @Qualifier("system") EregFasade eregFasade) {
+                           @Qualifier("system") EregFasade eregFasade,
+                           @Qualifier("system") TpsFasade tpsFasade) {
         this.kodeverkService = kodeverkService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.eregFasade = eregFasade;
+        this.tpsFasade = tpsFasade;
     }
 
     public DokgenDto mapBehandling(DokgenBrevbestilling brevbestilling) throws TekniskException, FunksjonellException {
         DokgenDto dto;
+        if (brevbestilling.getOrg() == null) {
+            String fnr = brevbestilling.getBehandling().hentPersonDokument().fnr;
+            //NOTE Henter opplysninger på nytt for å sikre at korrekt adresse benyttes
+            PersonDokument personDokument = (PersonDokument) tpsFasade.hentPerson(fnr, Informasjonsbehov.STANDARD).getDokument();
+            brevbestilling.toBuilder().medPersonDokument(personDokument).build();
+        }
         switch (brevbestilling.getProduserbartdokument()) {
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID:
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD:
@@ -67,7 +80,9 @@ public class DokgenMalMapper {
                 throw new FunksjonellException(format("ProduserbartDokument %s er ikke støttet av melosys-dokgen", brevbestilling.getProduserbartdokument()));
         }
 
-        dto.setPoststed(hentPoststed(dto.getPostnr()));
+        if (hasText(dto.getPostnr())) {
+            dto.setPoststed(hentPoststed(dto.getPostnr()));
+        }
         return dto;
     }
 

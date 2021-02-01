@@ -25,6 +25,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.MangelbrevArbeidsgiver;
 import no.nav.melosys.integrasjon.dokgen.dto.MangelbrevBruker;
 import no.nav.melosys.integrasjon.dokgen.dto.SaksbehandlingstidSoknad;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,18 +61,23 @@ class DokgenMalMapperTest {
     @Mock
     private EregFasade mockEregFasade;
 
+    @Mock
+    private TpsFasade mockTpsFasade;
+
     private DokgenMalMapper dokgenMalMapper;
 
     @BeforeEach
     void init() {
-        dokgenMalMapper = new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService, mockEregFasade);
+        dokgenMalMapper = new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService, mockEregFasade, mockTpsFasade);
     }
 
     @Test
-    void feilerNårProduserbartDokumentIkkeErStøttet() {
+    void feilerNårProduserbartDokumentIkkeErStøttet() throws Exception {
+        when(mockTpsFasade.hentPerson(any(), any())).thenReturn(lagPersonopplysning());
+
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(ATTEST_A1)
-            .medBehandling(new Behandling())
+            .medBehandling(lagBehandling(lagFagsak()))
             .build();
 
         assertThrows(FunksjonellException.class, () ->
@@ -82,11 +88,9 @@ class DokgenMalMapperTest {
     @Test
     void skalMappeMedBrukerAdresse() throws Exception {
         when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
+        when(mockTpsFasade.hentPerson(any(), any())).thenReturn(lagPersonopplysning());
 
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setSaksopplysninger(singleton(lagPersonopplysning()));
-        behandling.setFagsak(lagFagsak());
+        Behandling behandling = lagBehandling(lagFagsak());
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
@@ -107,10 +111,7 @@ class DokgenMalMapperTest {
     void skalMappeMedFullmektigAdresse() throws Exception {
         when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
 
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setSaksopplysninger(singleton(lagPersonopplysning()));
-        behandling.setFagsak(lagFagsak());
+        Behandling behandling = lagBehandling(lagFagsak());
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
@@ -132,10 +133,7 @@ class DokgenMalMapperTest {
     void skalMappeMedFullmektigForretningsAdresse() throws Exception {
         when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
 
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setSaksopplysninger(singleton(lagPersonopplysning()));
-        behandling.setFagsak(lagFagsak());
+        Behandling behandling = lagBehandling(lagFagsak());
 
         OrganisasjonDokument org = lagOrg();
         org.getOrganisasjonDetaljer().forretningsadresse = singletonList(lagOrgForretningsadresse());
@@ -161,10 +159,7 @@ class DokgenMalMapperTest {
     void skalMappeMedFullmektigMedKontaktpersonAdresse() throws Exception {
         when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
 
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setSaksopplysninger(singleton(lagPersonopplysning()));
-        behandling.setFagsak(lagFagsak());
+        Behandling behandling = lagBehandling(lagFagsak());
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
@@ -188,10 +183,7 @@ class DokgenMalMapperTest {
     void skalMappeMangelbrevTilBruker() throws Exception {
         when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
 
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setSaksopplysninger(singleton(lagPersonopplysning()));
-        behandling.setFagsak(lagFagsak(true));
+        Behandling behandling = lagBehandling(lagFagsak(true));
 
         DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
             .medProduserbartdokument(MANGELBREV_BRUKER)
@@ -216,10 +208,7 @@ class DokgenMalMapperTest {
         when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
         when(mockEregFasade.hentOrganisasjonNavn(any())).thenReturn("Fullmektig AS");
 
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setSaksopplysninger(singleton(lagPersonopplysning()));
-        behandling.setFagsak(lagFagsak(true));
+        Behandling behandling = lagBehandling(lagFagsak(true));
 
         DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
             .medProduserbartdokument(MANGELBREV_ARBEIDSGIVER)
@@ -255,6 +244,14 @@ class DokgenMalMapperTest {
             fagsak.getAktører().add(representant);
         }
         return fagsak;
+    }
+
+    private Behandling lagBehandling(Fagsak fagsak) {
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setSaksopplysninger(singleton(lagPersonopplysning()));
+        behandling.setFagsak(fagsak);
+        return behandling;
     }
 
     private List<Behandling> lagBehandlinger() {

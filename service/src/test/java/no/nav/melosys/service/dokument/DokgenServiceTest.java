@@ -18,6 +18,7 @@ import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
 import no.nav.melosys.integrasjon.dokgen.DokgenMalResolver;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -53,6 +54,8 @@ class DokgenServiceTest {
     @Mock
     private EregFasade mockEregFasade;
     @Mock
+    private TpsFasade mockTpsFasade;
+    @Mock
     private KontaktopplysningService mockKontaktOpplysningService;
     @Mock
     private BehandlingsresultatService mockBehandlingsresultatService;
@@ -66,7 +69,8 @@ class DokgenServiceTest {
     @BeforeEach
     void init() {
         dokgenService = new DokgenService(mockDokgenConsumer, new DokgenMalResolver(unleash), mockJoarkFasade,
-            new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService, mockEregFasade), mockBehandlingsService, mockEregFasade, mockKontaktOpplysningService);
+            new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService, mockEregFasade, mockTpsFasade),
+            mockBehandlingsService, mockEregFasade, mockKontaktOpplysningService);
     }
 
     @Test
@@ -76,10 +80,10 @@ class DokgenServiceTest {
 
     @Test
     void produserBrevTilBrukerOk() throws Exception {
-        when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
         when(mockDokgenConsumer.lagPdf(anyString(), any(), anyBoolean())).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
+        when(mockTpsFasade.hentPerson(any(), any())).thenReturn(lagPersonopplysning());
 
         Aktoer mottaker = new Aktoer();
         mottaker.setRolle(Aktoersroller.BRUKER);
@@ -96,7 +100,6 @@ class DokgenServiceTest {
 
     @Test
     void produserBrevTilRepresentantOk() throws Exception {
-        when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
         when(mockDokgenConsumer.lagPdf(anyString(), any(), anyBoolean())).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
