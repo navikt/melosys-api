@@ -4,9 +4,9 @@ import java.time.Instant;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
 public class DokgenBrevbestilling extends Brevbestilling {
@@ -18,6 +18,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private final Aktoer mottaker; //NOTE Flytt opp til Brevbestilling
     private final boolean bestillKopi;
     private final Instant vedtaksdato;
+    private final PersonDokument persondokument;
 
     protected DokgenBrevbestilling(Builder<?> builder) {
         super(builder.produserbartdokument, builder.behandling, builder.avsenderNavn);
@@ -29,6 +30,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         this.mottaker = builder.mottaker;
         this.bestillKopi = builder.bestillKopi;
         this.vedtaksdato = builder.vedtaksdato;
+        this.persondokument = builder.persondokument;
     }
 
     public OrganisasjonDokument getOrg() {
@@ -63,6 +65,10 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return vedtaksdato;
     }
 
+    public PersonDokument getPersondokument() {
+        return persondokument;
+    }
+
     public Builder toBuilder() {
         return new Builder (this);
     }
@@ -79,6 +85,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private Aktoer mottaker;
         private boolean bestillKopi;
         private Instant vedtaksdato;
+        private PersonDokument persondokument;
 
         public Builder() {
         }
@@ -95,6 +102,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.mottaker = brevbestilling.mottaker;
             this.bestillKopi = brevbestilling.bestillKopi;
             this.vedtaksdato = brevbestilling.vedtaksdato;
+            this.persondokument = brevbestilling.persondokument;
         }
 
         public T medProduserbartdokument(Produserbaredokumenter produserbartdokument) {
@@ -149,6 +157,11 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
         public T medVedtaksdato(Instant vedtaksdato) {
             this.vedtaksdato = vedtaksdato;
+            return (T) this;
+        }
+
+        public T medPersonDokument(PersonDokument personDokument) {
+            this.persondokument = personDokument;
             return (T) this;
         }
 

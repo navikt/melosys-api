@@ -43,7 +43,8 @@ public abstract class DokgenDto {
         Behandling behandling = brevbestilling.getBehandling();
         OrganisasjonDokument org = brevbestilling.getOrg();
         Fagsak fagsak = behandling.getFagsak();
-        PersonDokument personDokument = behandling.hentPersonDokument();
+        PersonDokument personDokument = brevbestilling.getPersondokument() == null ?
+            brevbestilling.getBehandling().hentPersonDokument() : brevbestilling.getPersondokument();
 
         this.fnr = personDokument.fnr;
         this.saksnummer = fagsak.getSaksnummer();
