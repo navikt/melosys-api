@@ -1,16 +1,18 @@
 package no.nav.melosys.domain.behandlingsgrunnlag.data;
 
+import no.nav.melosys.domain.kodeverk.Flyvningstyper;
+
 public class LuftfartBase {
     public String hjemmebaseNavn;
     public String hjemmebaseLand;
-    public String typeFlyvninger;
+    public Flyvningstyper typeFlyvninger;
 
     public LuftfartBase() {
     }
 
-    public LuftfartBase(String hjemmebaseNavn, String hjemmebaseLand, String typeFlyvninger) {
+    public LuftfartBase(String hjemmebaseNavn, String hjemmebaseLand, Flyvningstyper flyvningstype) {
         this.hjemmebaseNavn = hjemmebaseNavn;
         this.hjemmebaseLand = hjemmebaseLand;
-        this.typeFlyvninger = typeFlyvninger;
+        this.typeFlyvninger = flyvningstype;
     }
 }

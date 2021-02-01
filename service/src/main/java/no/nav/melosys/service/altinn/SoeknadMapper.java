@@ -15,6 +15,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.LuftfartBase;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.*;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.kodeverk.Flyvningstyper;
 import no.nav.melosys.domain.kodeverk.Innretningstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
 import no.nav.melosys.soknad_altinn.*;
@@ -157,7 +158,7 @@ public final class SoeknadMapper {
         return new LuftfartBase(
             luftfartbase.getHjemmebaseNavn(),
             luftfartbase.getHjemmebaseLand(),
-            luftfartbase.getTypeFlyvninger().toString()
+            Flyvningstyper.valueOf(luftfartbase.getTypeFlyvninger().toString().toUpperCase())
         );
     }
 
