@@ -12,7 +12,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
@@ -21,7 +20,6 @@ import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveOversiktDto;
 import no.nav.melosys.tjenester.gui.dto.oppgave.PlukketOppgaveDto;
-import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,7 +57,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void mineOppgaver() throws MelosysException, IOException, JSONException {
+    public void mineOppgaver() throws FunksjonellException, TekniskException, IOException {
         List<OppgaveDto> oppgaver = new ArrayList<>();
         int oppgaveNr = 1 + defaultEasyRandom().nextInt(2);
         for (int i = 0; i < oppgaveNr; i++) {
