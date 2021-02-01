@@ -12,6 +12,7 @@ import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM;
 import no.nav.melosys.soknad_altinn.ObjectFactory;
 import org.junit.jupiter.api.Test;
 
+import static no.nav.melosys.domain.kodeverk.Flyvningstyper.INTERNASJONAL;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader.INNENRIKS;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader.UTENRIKS;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -86,7 +87,7 @@ class SoeknadMapperTest {
         final LuftfartBase luftfartBase = soeknad.luftfartBaser.get(0);
         assertThat(luftfartBase.hjemmebaseNavn).isEqualTo("koti");
         assertThat(luftfartBase.hjemmebaseLand).isEqualTo("FI");
-        assertThat(luftfartBase.typeFlyvninger).isEqualTo("INTERNASJONAL");
+        assertThat(luftfartBase.typeFlyvninger).isEqualTo(INTERNASJONAL);
     }
 
     private MedlemskapArbeidEOSM parseSøknadXML() throws JAXBException {
