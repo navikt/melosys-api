@@ -17,7 +17,6 @@ import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.dokument.arbeidsforhold.Fartsomraade;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MaritimtArbeid;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
@@ -25,6 +24,7 @@ import no.nav.melosys.domain.familie.OmfattetBarn;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
@@ -85,7 +85,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         fag.setFlaggland(brevdata.arbeidsland);
         if (!grunnlagData.maritimtArbeid.isEmpty()) {
             MaritimtArbeid maritimtArbeid = grunnlagData.maritimtArbeid.iterator().next();
-            if (Fartsomraade.INNENRIKS.getKode().equalsIgnoreCase(maritimtArbeid.fartsomradeKode)) {
+            if (Fartsomrader.INNENRIKS == maritimtArbeid.fartsomradeKode) {
                 fag.setArbeidPåTerritorialfarvann(JA);
             }
         }

@@ -1,10 +1,11 @@
 package no.nav.melosys.domain.behandlingsgrunnlag.data;
 
 import no.nav.melosys.domain.kodeverk.Innretningstyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
 
 public class MaritimtArbeid {
     public String enhetNavn;
-    public String fartsomradeKode;
+    public Fartsomrader fartsomradeKode;
     public String flaggLandkode;
     public String innretningLandkode;
     public Innretningstyper innretningstype;
