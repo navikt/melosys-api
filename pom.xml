@@ -76,7 +76,7 @@
         <ojdbc.version>18.3.0.0</ojdbc.version>
         <okhttp.version>4.9.0</okhttp.version>
         <oracle.version>18</oracle.version>
-        <org.json.version>20180813</org.json.version>
+        <org.json.version>20201115</org.json.version>
         <oxmlparserv2.version>11.2.0.1.nojaxpservice</oxmlparserv2.version>
         <easy-random.version>5.0.0</easy-random.version>
         <restFixture.version>4.4</restFixture.version>
