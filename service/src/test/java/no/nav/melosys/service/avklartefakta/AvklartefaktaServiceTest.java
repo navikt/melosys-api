@@ -16,6 +16,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

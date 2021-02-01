@@ -76,6 +76,11 @@ public class BehandlingsgrunnlagData {
             .collect(Collectors.toSet());
     }
 
+    public Map<String, MedfolgendeFamilie.Relasjonsrolle> hentUuidOgRolleMedfølgendeFamilie() {
+        return personOpplysninger.medfolgendeFamilie.stream()
+            .collect(Collectors.toMap(MedfolgendeFamilie::getUuid, MedfolgendeFamilie::getRelasjonsrolle));
+    }
+
     public Map<String, MedfolgendeFamilie> hentMedfølgendeBarn() {
         return personOpplysninger.medfolgendeFamilie.stream()
             .filter(MedfolgendeFamilie::erBarn)

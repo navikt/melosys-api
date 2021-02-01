@@ -8,6 +8,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.SelvstendigForetak;
@@ -23,7 +24,6 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,9 +54,6 @@ public class AvklarteVirksomheterServiceTest {
 
     @Mock
     private RegisterOppslagService registerOppslagService;
-
-    @Mock
-    private BehandlingsgrunnlagService behandlingsgrunnlagService;
 
     @Mock
     private BehandlingService behandlingService;
@@ -192,7 +189,7 @@ public class AvklarteVirksomheterServiceTest {
         forberedValidering();
 
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomhetIDer, 1L);
-        verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), uuid1, "TRUE");
+        verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), uuid1, Avklartefakta.VALGT_FAKTA);
     }
 
     @Test
@@ -201,7 +198,7 @@ public class AvklarteVirksomheterServiceTest {
         forberedValidering();
 
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomhetIDer, 1L);
-        verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr1, "TRUE");
+        verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr1, Avklartefakta.VALGT_FAKTA);
     }
 
     @Test
@@ -210,7 +207,7 @@ public class AvklarteVirksomheterServiceTest {
         forberedValidering();
 
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomhetIDer, 1L);
-        verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr2, "TRUE");
+        verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr2, Avklartefakta.VALGT_FAKTA);
     }
 
     @Test
@@ -219,7 +216,7 @@ public class AvklarteVirksomheterServiceTest {
         forberedValidering();
 
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomhetIDer, 1L);
-        verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr3, "TRUE");
+        verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr3, Avklartefakta.VALGT_FAKTA);
     }
 
     @Test
@@ -230,7 +227,7 @@ public class AvklarteVirksomheterServiceTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomhetIDer, 1L))
             .withMessage(String.format("VirksomhetID %s hører ikke til noen av arbeidsforholdene", orgnr4));
-        verify(avklartefaktaService, never()).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatyper.class), anyString(), anyString(), eq("TRUE"));
+        verify(avklartefaktaService, never()).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatyper.class), anyString(), anyString(), eq(Avklartefakta.VALGT_FAKTA));
     }
 
     private void forberedValidering() throws FunksjonellException {

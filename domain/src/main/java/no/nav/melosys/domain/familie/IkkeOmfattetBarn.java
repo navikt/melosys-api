@@ -6,16 +6,16 @@ public class IkkeOmfattetBarn {
 
     public final String uuid;
     public final Medfolgende_barn_begrunnelser begrunnelse;
-    private final String begrunnnelseFritekst;
+    private final String begrunnelseFritekst;
     public String sammensattNavn;
 
-    public IkkeOmfattetBarn(String uuid, String begrunnelse, String begrunnnelseFritekst) {
+    public IkkeOmfattetBarn(String uuid, String begrunnelse, String begrunnelseFritekst) {
         this.uuid = uuid;
         this.begrunnelse = begrunnelse == null ? null : Medfolgende_barn_begrunnelser.valueOf(begrunnelse);
-        this.begrunnnelseFritekst = begrunnnelseFritekst;
+        this.begrunnelseFritekst = begrunnelseFritekst;
     }
 
-    String getBegrunnnelseFritekst() {
-        return begrunnnelseFritekst;
+    String getBegrunnelseFritekst() {
+        return begrunnelseFritekst;
     }
 }

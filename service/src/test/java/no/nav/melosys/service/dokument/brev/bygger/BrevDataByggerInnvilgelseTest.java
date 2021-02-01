@@ -15,7 +15,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
-import no.nav.melosys.domain.familie.OmfattetBarn;
+import no.nav.melosys.domain.familie.OmfattetFamilie;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
@@ -206,7 +206,7 @@ public class BrevDataByggerInnvilgelseTest {
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
 
         when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(
-            Set.of(new OmfattetBarn(barn1.uuid)),
+            Set.of(new OmfattetFamilie(barn1.uuid)),
             Set.of(new IkkeOmfattetBarn(barn2.uuid, null, null))));
         when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
         when(tpsFasade.hentSammensattNavn(eq(barn1.fnr))).thenReturn("Navn1");
@@ -231,7 +231,7 @@ public class BrevDataByggerInnvilgelseTest {
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
 
         when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(
-            Set.of(new OmfattetBarn(barn1.uuid)),
+            Set.of(new OmfattetFamilie(barn1.uuid)),
             Set.of(new IkkeOmfattetBarn(barn2.uuid, null, null))));
         when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
 
@@ -249,7 +249,7 @@ public class BrevDataByggerInnvilgelseTest {
         MedfolgendeFamilie barn = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn", MedfolgendeFamilie.Relasjonsrolle.BARN);
 
         when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(
-            Set.of(new OmfattetBarn(barn.uuid)), Collections.emptySet()));
+            Set.of(new OmfattetFamilie(barn.uuid)), Collections.emptySet()));
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler))

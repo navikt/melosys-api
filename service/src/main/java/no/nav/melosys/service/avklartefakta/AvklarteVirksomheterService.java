@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.adresse.Adresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
@@ -14,12 +15,14 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VIRKSOMHET;
 
@@ -93,16 +96,20 @@ public class AvklarteVirksomheterService {
         return norskeVirksomheter;
     }
 
+    @Transactional(rollbackFor = MelosysException.class)
     public void lagreVirksomheterSomAvklartefakta(List<String> virksomhetIDer,
                                                   Long behandlingID) throws FunksjonellException, TekniskException {
         validerVirksomhetIDerGyldige(virksomhetIDer, behandlingID);
+
+        avklartefaktaService.slettAvklarteFakta(behandlingID, VIRKSOMHET);
+
         for (String virksomhetID : virksomhetIDer) {
             lagreVirksomhetSomAvklartfakta(virksomhetID, behandlingID);
         }
     }
 
     public void lagreVirksomhetSomAvklartfakta(String virksomhetID, Long behandlingID) throws FunksjonellException {
-        avklartefaktaService.leggTilAvklarteFakta(behandlingID, VIRKSOMHET, VIRKSOMHET.getKode(), virksomhetID, "TRUE");
+        avklartefaktaService.leggTilAvklarteFakta(behandlingID, VIRKSOMHET, VIRKSOMHET.getKode(), virksomhetID, Avklartefakta.VALGT_FAKTA);
     }
 
     private void validerVirksomhetIDerGyldige(List<String> virksomhetIDer,

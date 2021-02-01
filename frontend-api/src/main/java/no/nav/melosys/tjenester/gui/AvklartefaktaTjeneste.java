@@ -10,10 +10,12 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
+import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.tjenester.gui.dto.AvklartefaktaOppsummeringDto;
+import no.nav.melosys.tjenester.gui.dto.LagreMedfolgendeFamilieDto;
 import no.nav.melosys.tjenester.gui.dto.VirksomheterDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,14 +32,16 @@ public class AvklartefaktaTjeneste {
 
     private final AvklartefaktaService avklartefaktaService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
+    private final AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
 
     private final TilgangService tilgangService;
 
     @Autowired
-    public AvklartefaktaTjeneste(AvklartefaktaService avklartefaktaService, TilgangService tilgangService, AvklarteVirksomheterService avklarteVirksomheterService) {
+    public AvklartefaktaTjeneste(AvklartefaktaService avklartefaktaService, TilgangService tilgangService, AvklarteVirksomheterService avklarteVirksomheterService, AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService) {
         this.avklartefaktaService = avklartefaktaService;
         this.tilgangService = tilgangService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
+        this.avklarteMedfolgendeFamilieService = avklarteMedfolgendeFamilieService;
     }
 
     @GetMapping("{behandlingID}")
@@ -74,6 +78,17 @@ public class AvklartefaktaTjeneste {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
 
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomheter.getVirksomhetIDer(), behandlingID);
+
+        return AvklartefaktaOppsummeringDto.av(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
+    }
+
+    @PostMapping("{behandlingID}/medfolgendeFamilie")
+    @ApiOperation(value = "Lagre medfolgendeFamilie som avklartefakta", response = AvklartefaktaOppsummeringDto.class)
+    public AvklartefaktaOppsummeringDto lagreMedfolgendeFamilieSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
+        @RequestBody LagreMedfolgendeFamilieDto lagreMedfolgendeFamilieDto) throws TekniskException, FunksjonellException {
+        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
+
+        avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(behandlingID, lagreMedfolgendeFamilieDto.til());
 
         return AvklartefaktaOppsummeringDto.av(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }

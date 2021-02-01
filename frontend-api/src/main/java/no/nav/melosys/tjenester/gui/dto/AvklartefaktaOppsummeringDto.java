@@ -7,9 +7,18 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 public class AvklartefaktaOppsummeringDto {
 
     private VirksomheterDto virksomheter;
+    private Set<MedfolgendeFamilieDto> medfolgendeFamilie;
+
+    public Set<MedfolgendeFamilieDto> getMedfolgendeFamilie() {
+        return medfolgendeFamilie;
+    }
 
     public VirksomheterDto getVirksomheter() {
         return virksomheter;
+    }
+
+    public void setMedfolgendeFamilie(Set<MedfolgendeFamilieDto> medfolgendeFamilie) {
+        this.medfolgendeFamilie = medfolgendeFamilie;
     }
 
     public void setVirksomheter(VirksomheterDto virksomheter) {
@@ -18,7 +27,8 @@ public class AvklartefaktaOppsummeringDto {
 
     public static AvklartefaktaOppsummeringDto av(Set<AvklartefaktaDto> avklartefakta) {
         AvklartefaktaOppsummeringDto avklartefaktaOppsummeringDto = new AvklartefaktaOppsummeringDto();
-        avklartefaktaOppsummeringDto.setVirksomheter(VirksomheterDto.tilVirksomheterDto(avklartefakta));
+        avklartefaktaOppsummeringDto.setVirksomheter(VirksomheterDto.av(avklartefakta));
+        avklartefaktaOppsummeringDto.setMedfolgendeFamilie(MedfolgendeFamilieDto.av(avklartefakta));
         return avklartefaktaOppsummeringDto;
     }
 }
