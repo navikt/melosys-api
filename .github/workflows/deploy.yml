@@ -106,24 +106,8 @@ jobs:
           RESOURCE: nais.yml
           VAR: IMAGE=${{ env.IMAGE }},NAMESPACE=${{ env.NAMESPACE }},URL=${{ env.URL }}
 
-      - uses: octokit/request-action@v2.x
-        if: ${{ env.CLUSTER != '' }}
-        id: get_sha
-        with:
-          route: GET /repos/:repository/git/:ref
-          repository: ${{ github.repository }}
-          ref: ${{ github.event.ref }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: octokit/request-action@v2.x
-        if: ${{ env.CLUSTER != '' }}
-        id: get_message
-        with:
-          route: GET /repos/:repository/git/commits/:ref
-          repository: ${{ github.repository }}
-          ref: ${{ fromJson(steps.get_sha.outputs.data).object.sha }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get commit message
+        run: echo "COMMIT_MSG=$(git log --format=%s -n 1)" >> $GITHUB_ENV
       - name: Slack Notification
         if: ${{ env.CLUSTER != '' }}
         uses: rtCamp/action-slack-notify@v2
@@ -133,4 +117,4 @@ jobs:
           SLACK_ICON: https://github.com/github.png?size=48
           SLACK_TITLE: "melosys-api ${{ job.status == 'success' && 'ble deployet' || 'kunne ikke deployes' }} til ${{ env.ENVIRONMENT }}"
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_MESSAGE: ${{ fromJson(steps.get_message.outputs.data).message }}
+          SLACK_MESSAGE: ${{ env.COMMIT_MSG }}
