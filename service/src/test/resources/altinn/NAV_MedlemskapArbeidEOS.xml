@@ -59,15 +59,70 @@
             <arbeidssted>
                 <typeArbeidssted>land</typeArbeidssted>
                 <arbeidPaaLand>
-                    <fysiskeArbeidssteder/>
-                    <hjemmekontor>false</hjemmekontor>
+                    <fysiskeArbeidssteder>
+                        <fysiskArbeidssted>
+                            <gatenavn>Gaten 1</gatenavn>
+                            <by>Stedet</by>
+                            <postkode>1234</postkode>
+                            <region>Region</region>
+                            <land>BE</land>
+                            <firmanavn>Firmaet</firmanavn>
+                        </fysiskArbeidssted>
+                        <fysiskArbeidssted>
+                            <gatenavn>Gaten 2</gatenavn>
+                            <by>Byen</by>
+                            <postkode>5678</postkode>
+                            <region>Region</region>
+                            <land>CH</land>
+                            <firmanavn>Virksomheten</firmanavn>
+                        </fysiskArbeidssted>
+                    </fysiskeArbeidssteder>
+                    <hjemmekontor>true</hjemmekontor>
                     <fastArbeidssted>false</fastArbeidssted>
                 </arbeidPaaLand>
-                <offshoreEnheter/>
+                <offshoreEnheter>
+                    <offshoreEnhet>
+                        <enhetsType>plattform</enhetsType>
+                        <enhetsNavn>Landplattform</enhetsNavn>
+                        <sokkelLand>CH</sokkelLand>
+                    </offshoreEnhet>
+                    <offshoreEnhet>
+                        <enhetsType>boreskip</enhetsType>
+                        <enhetsNavn>Båt på land</enhetsNavn>
+                        <sokkelLand>LI</sokkelLand>
+                    </offshoreEnhet>
+                    <offshoreEnhet>
+                        <enhetsType>annenStasjonaerEnhet</enhetsType>
+                        <enhetsNavn>Noe annet</enhetsNavn>
+                        <sokkelLand>MT</sokkelLand>
+                    </offshoreEnhet>
+                </offshoreEnheter>
                 <luftfart>
-                    <luftfartBaser/>
+                    <luftfartBaser>
+                        <luftfartbase>
+                            <hjemmebaseNavn>koti</hjemmebaseNavn>
+                            <hjemmebaseLand>FI</hjemmebaseLand>
+                            <typeFlyvninger>internasjonal</typeFlyvninger>
+                        </luftfartbase>
+                        <luftfartbase>
+                            <hjemmebaseNavn>hus</hjemmebaseNavn>
+                            <hjemmebaseLand>NO</hjemmebaseLand>
+                            <typeFlyvninger>begge</typeFlyvninger>
+                        </luftfartbase>
+                    </luftfartBaser>
                 </luftfart>
-                <skipListe/>
+                <skipListe>
+                    <skip>
+                        <skipNavn>abcd</skipNavn>
+                        <fartsomraade>innenriks</fartsomraade>
+                        <territorialEllerHavnLand>BG</territorialEllerHavnLand>
+                    </skip>
+                    <skip>
+                        <skipNavn>sdgh</skipNavn>
+                        <fartsomraade>utenriks</fartsomraade>
+                        <flaggland>FO</flaggland>
+                    </skip>
+                </skipListe>
             </arbeidssted>
         </midlertidigUtsendt>
         <fullmakt>
