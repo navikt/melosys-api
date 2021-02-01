@@ -9,8 +9,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import no.nav.melosys.domain.behandlingsgrunnlag.data.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.ArbeidPaaLand;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.FysiskArbeidssted;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.LuftfartBase;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.*;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.kodeverk.Innretningstyper;
 import no.nav.melosys.soknad_altinn.*;
 
 public final class SoeknadMapper {
@@ -19,16 +24,30 @@ public final class SoeknadMapper {
     }
 
     static Soeknad lagSoeknad(MedlemskapArbeidEOSM søknad) {
-        final Soeknad soeknad = new Soeknad();
         final Innhold innhold = søknad.getInnhold();
+        final Soeknad soeknad = new Soeknad();
+        soeknad.soeknadsland = hentsoeknadsland(innhold);
+        soeknad.periode = lagPeriode(innhold);
         if (innhold.getArbeidstaker().getUtenlandskIDnummer() != null) {
             soeknad.personOpplysninger.utenlandskIdent.add(lagUtenlandskIdent(innhold));
         }
-        soeknad.juridiskArbeidsgiverNorge = lagJuridiskArbeidsgiverNorge(innhold.getArbeidsgiver());
-        soeknad.soeknadsland = hentsoeknadsland(innhold);
-        soeknad.periode = lagPeriode(innhold);
         soeknad.personOpplysninger.medfolgendeFamilie = hentMedfølgendeBarn(innhold);
+        lagArbeidssteder(innhold, soeknad);
+        soeknad.juridiskArbeidsgiverNorge = lagJuridiskArbeidsgiverNorge(innhold.getArbeidsgiver());
         return soeknad;
+    }
+
+    private static Soeknadsland hentsoeknadsland(Innhold innhold) {
+        Collection<String> landFraAltinn = List.of(innhold.getMidlertidigUtsendt().getArbeidsland());
+        return Soeknadsland.av(landFraAltinn);
+    }
+
+    private static Periode lagPeriode(Innhold innhold) {
+        Tidsrom utsendingsperiode = innhold.getMidlertidigUtsendt().getUtenlandsoppdraget()
+            .getPeriodeUtland();
+        LocalDate periodeFra = xmlCalTilLocalDate(utsendingsperiode.getPeriodeFra());
+        LocalDate periodeTil = xmlCalTilLocalDate(utsendingsperiode.getPeriodeTil());
+        return new Periode(periodeFra, periodeTil);
     }
 
     private static UtenlandskIdent lagUtenlandskIdent(Innhold innhold) {
@@ -36,6 +55,109 @@ public final class SoeknadMapper {
         utenlandskIdent.ident = innhold.getArbeidstaker().getUtenlandskIDnummer();
         utenlandskIdent.landkode = innhold.getMidlertidigUtsendt().getArbeidsland();
         return utenlandskIdent;
+    }
+
+    private static List<MedfolgendeFamilie> hentMedfølgendeBarn(Innhold innhold) {
+        Barn barn = innhold.getArbeidstaker().getBarn();
+        List<MedfolgendeFamilie> medfølgendeBarn = new ArrayList<>();
+
+        if (barn != null && barn.getBarnet() != null) {
+            medfølgendeBarn = barn.getBarnet().stream()
+                .map(mapBarnTilMedfølgendeFamilie)
+                .collect(Collectors.toList());
+        }
+        return medfølgendeBarn;
+    }
+
+    private static void lagArbeidssteder(Innhold innhold, Soeknad soeknad) {
+        final Arbeidssted arbeidssted = innhold.getMidlertidigUtsendt().getArbeidssted();
+        final ArbeidsstedType arbeidsstedType = ArbeidsstedType.valueOf(arbeidssted.getTypeArbeidssted().toUpperCase());
+
+        switch (arbeidsstedType) {
+            case LAND:
+                soeknad.arbeidPaaLand = lagArbeidPåLand(arbeidssted.getArbeidPaaLand());
+                break;
+            case OFFSHORE:
+                soeknad.maritimtArbeid = lagOffshoreArbeid(arbeidssted.getOffshoreEnheter());
+                break;
+            case SKIPSFART:
+                soeknad.maritimtArbeid = lagArbeidPåSkip(arbeidssted.getSkipListe());
+                break;
+            case LUFTFART:
+                soeknad.luftfartBaser = lagLuftfartBaser(arbeidssted.getLuftfart());
+                break;
+            default:
+                throw new IllegalArgumentException("ArbeidsstedType ikke støttet: " + arbeidsstedType);
+        }
+    }
+
+    private static ArbeidPaaLand lagArbeidPåLand(no.nav.melosys.soknad_altinn.ArbeidPaaLand arbeidPaaLandAltinn) {
+        ArbeidPaaLand arbeidPaaLand = new ArbeidPaaLand();
+        arbeidPaaLand.fysiskeArbeidssteder = arbeidPaaLandAltinn.getFysiskeArbeidssteder().getFysiskArbeidssted()
+            .stream().map(SoeknadMapper::lagFysiskArbeidssted).collect(Collectors.toList());
+        arbeidPaaLand.erFastArbeidssted = arbeidPaaLandAltinn.isFastArbeidssted();
+        arbeidPaaLand.erHjemmekontor = arbeidPaaLandAltinn.isHjemmekontor();
+        return arbeidPaaLand;
+    }
+
+    private static FysiskArbeidssted lagFysiskArbeidssted(no.nav.melosys.soknad_altinn.FysiskArbeidssted fa) {
+        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
+        fysiskArbeidssted.virksomhetNavn = fa.getFirmanavn();
+        fysiskArbeidssted.adresse = new StrukturertAdresse(
+            fa.getGatenavn(), null, fa.getPostkode(), fa.getBy(), fa.getRegion(), fa.getLand()
+        );
+        return fysiskArbeidssted;
+    }
+
+    private static List<MaritimtArbeid> lagOffshoreArbeid(OffshoreEnheter offshoreEnheter) {
+        return offshoreEnheter.getOffshoreEnhet().stream().map(SoeknadMapper::lagOffshoreArbeidssted)
+            .collect(Collectors.toList());
+    }
+
+    private static MaritimtArbeid lagOffshoreArbeidssted(OffshoreEnheter.OffshoreEnhet offshoreEnhet) {
+        MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
+        maritimtArbeid.enhetNavn = offshoreEnhet.getEnhetsNavn();
+        maritimtArbeid.innretningstype = mapInnretningstyper(offshoreEnhet.getEnhetsType());
+        maritimtArbeid.innretningLandkode = offshoreEnhet.getSokkelLand();
+        return maritimtArbeid;
+    }
+
+    private static Innretningstyper mapInnretningstyper(OffshoreEnhetstype offshoreEnhetstype) {
+        switch (offshoreEnhetstype) {
+            case BORESKIP:
+                return Innretningstyper.BORESKIP;
+            case PLATTFORM:
+            case ANNEN_STASJONAER_ENHET:
+                return Innretningstyper.PLATTFORM;
+            default:
+                return Innretningstyper.valueOf(offshoreEnhetstype.toString());
+        }
+    }
+
+    private static List<MaritimtArbeid> lagArbeidPåSkip(SkipListe skipListe) {
+        return skipListe.getSkip().stream().map(SoeknadMapper::lagArbeidsstedPåSkip).collect(Collectors.toList());
+    }
+
+    private static MaritimtArbeid lagArbeidsstedPåSkip(SkipListe.Skip skip) {
+        MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
+        maritimtArbeid.enhetNavn = skip.getSkipNavn();
+        maritimtArbeid.fartsomradeKode = skip.getFartsomraade().toString();
+        maritimtArbeid.flaggLandkode = skip.getFlaggland();
+        maritimtArbeid.territorialfarvann = skip.getTerritorialEllerHavnLand();
+        return maritimtArbeid;
+    }
+
+    private static List<LuftfartBase> lagLuftfartBaser(Luftfart luftfart) {
+        return luftfart.getLuftfartBaser().getLuftfartbase().stream().map(SoeknadMapper::lagLuftfartBase)
+            .collect(Collectors.toList());
+    }
+
+    private static LuftfartBase lagLuftfartBase(Luftfartbaser.Luftfartbase luftfartbase) {
+        return new LuftfartBase(
+            luftfartbase.getHjemmebaseNavn(),
+            luftfartbase.getHjemmebaseLand(),
+            luftfartbase.getTypeFlyvninger().toString()
+        );
     }
 
     private static JuridiskArbeidsgiverNorge lagJuridiskArbeidsgiverNorge(Arbeidsgiver arbeidsgiver) {
@@ -54,35 +176,10 @@ public final class SoeknadMapper {
         return juridiskArbeidsgiverNorge;
     }
 
-    private static Soeknadsland hentsoeknadsland(Innhold innhold) {
-        Collection<String> landFraAltinn = List.of(innhold.getMidlertidigUtsendt().getArbeidsland());
-        return Soeknadsland.av(landFraAltinn);
-    }
-
-    private static Periode lagPeriode(Innhold innhold) {
-        Tidsrom utsendingsperiode = innhold.getMidlertidigUtsendt().getUtenlandsoppdraget()
-            .getPeriodeUtland();
-        LocalDate periodeFra = xmlCalTilLocalDate(utsendingsperiode.getPeriodeFra());
-        LocalDate periodeTil = xmlCalTilLocalDate(utsendingsperiode.getPeriodeTil());
-        return new Periode(periodeFra, periodeTil);
-    }
-
-    private static List<MedfolgendeFamilie> hentMedfølgendeBarn(Innhold innhold) {
-        Barn barn = innhold.getArbeidstaker().getBarn();
-        List<MedfolgendeFamilie> medfølgendeBarn = new ArrayList<>();
-
-        if (barn != null && barn.getBarnet() != null) {
-            medfølgendeBarn = barn.getBarnet().stream()
-                .map(mapBarnTilMedfølgendeFamilie)
-                .collect(Collectors.toList());
-        }
-        return medfølgendeBarn;
-    }
-
     private static LocalDate xmlCalTilLocalDate(XMLGregorianCalendar calendar) {
         return calendar == null ? null : LocalDate.of(calendar.getYear(), calendar.getMonth(), calendar.getDay());
     }
 
-    private static Function<Barnet, MedfolgendeFamilie> mapBarnTilMedfølgendeFamilie
+    private static final Function<Barnet, MedfolgendeFamilie> mapBarnTilMedfølgendeFamilie
         = barnet -> MedfolgendeFamilie.tilBarnFraFnrOgNavn(barnet.getFoedselsnummer(), barnet.getNavn());
 }
