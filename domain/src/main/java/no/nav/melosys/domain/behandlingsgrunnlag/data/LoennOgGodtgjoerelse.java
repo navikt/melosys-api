@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.behandlingsgrunnlag.data;
 
-public class Arbeidsinntekt {
+public class LoennOgGodtgjoerelse {
     public Integer inntektNorskIPerioden;
     public Integer inntektUtenlandskIPerioden;
     public Integer inntektNaeringIPerioden;
