@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.LoennOgGodtgjoerelse;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.ArbeidPaaLand;
@@ -36,6 +37,7 @@ public final class SoeknadMapper {
         }
         soeknad.personOpplysninger.medfolgendeFamilie = hentMedfølgendeBarn(innhold);
         lagArbeidssteder(innhold, soeknad);
+        soeknad.loennOgGodtgjoerelse = lagLoennOgGodtgjoerelse(innhold.getMidlertidigUtsendt());
         soeknad.juridiskArbeidsgiverNorge = lagJuridiskArbeidsgiverNorge(innhold.getArbeidsgiver());
         return soeknad;
     }
@@ -161,6 +163,33 @@ public final class SoeknadMapper {
             luftfartbase.getHjemmebaseLand(),
             Flyvningstyper.valueOf(luftfartbase.getTypeFlyvninger().toString().toUpperCase())
         );
+    }
+
+    private static LoennOgGodtgjoerelse lagLoennOgGodtgjoerelse(MidlertidigUtsendt midlertidigUtsendt) {
+        no.nav.melosys.soknad_altinn.LoennOgGodtgjoerelse loennOgGodtgjoerelseAltinn =
+            midlertidigUtsendt.getLoennOgGodtgjoerelse();
+        return new LoennOgGodtgjoerelse(
+            loennOgGodtgjoerelseAltinn.isNorskArbgUtbetalerLoenn(),
+            midlertidigUtsendt.getUtenlandsoppdraget().isErArbeidstakerAnsattHelePerioden(),
+            loennOgGodtgjoerelseAltinn.isUtlArbgUtbetalerLoenn(),
+            loennOgGodtgjoerelseAltinn.isUtlArbTilhorerSammeKonsern(),
+            hentNorskBruttoLoennPerMnd(loennOgGodtgjoerelseAltinn),
+            loennOgGodtgjoerelseAltinn.getLoennUtlArbg(),
+            loennOgGodtgjoerelseAltinn.isMottarNaturalytelser(),
+            loennOgGodtgjoerelseAltinn.getSamletVerdiNaturalytelser(),
+            loennOgGodtgjoerelseAltinn.isBetalerArbeidsgiveravgift(),
+            loennOgGodtgjoerelseAltinn.isTrukketTrygdeavgift()
+        );
+    }
+
+    private static BigDecimal hentNorskBruttoLoennPerMnd(
+        no.nav.melosys.soknad_altinn.LoennOgGodtgjoerelse loennOgGodtgjoerelseAltinn) {
+        // Hvis norskArbgUtbetalerLoenn == true OG utlArbgUtbetalerLoenn == false kan man oppleve å motta både
+        // <loennNorskArbg>0</loennNorskArbg> og <loennNorskArbg></loennNorskArbg> fra Altinn
+        boolean harAltinnEtProblem = loennOgGodtgjoerelseAltinn.isNorskArbgUtbetalerLoenn()
+            && !loennOgGodtgjoerelseAltinn.isUtlArbgUtbetalerLoenn()
+            && BigDecimal.ZERO.equals(loennOgGodtgjoerelseAltinn.getLoennNorskArbg());
+        return harAltinnEtProblem ? null : loennOgGodtgjoerelseAltinn.getLoennNorskArbg();
     }
 
     private static JuridiskArbeidsgiverNorge lagJuridiskArbeidsgiverNorge(Arbeidsgiver arbeidsgiver) {

@@ -89,16 +89,16 @@
     "ekstraArbeidsgivere": []
   },
   "loennOgGodtgjoerelse": {
-    "inntektNorskIPerioden": 5500,
-    "inntektUtenlandskIPerioden": 2000,
-    "inntektNaeringIPerioden": 1000,
-    "inntektNaturalytelser": {
-      "friBolig": true,
-      "friBil": true,
-      "friAnnet": "Ubegrenset mengde kaffegrut fra bedriftens kaffemaskinen"
-    },
-    "inntektErInnrapporteringspliktig": true,
-    "inntektTrygdeavgiftBlirTrukket": true
+    "norskArbgUtbetalerLoenn": false,
+    "erArbeidstakerAnsattHelePerioden": true,
+    "utlArbgUtbetalerLoenn": true,
+    "utlArbTilhoererSammeKonsern": false,
+    "bruttoLoennPerMnd": 7000.12,
+    "bruttoLoennUtlandPerMnd": 14000.23,
+    "mottarNaturalytelser": true,
+    "samletVerdiNaturalytelser": 99000.57,
+    "erArbeidsgiveravgiftHelePerioden": true,
+    "erTrukketTrygdeavgift": false
   },
   "arbeidsgiversBekreftelse": {
     "arbeidsgiverBekrefterUtsendelse": true,
