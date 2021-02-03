@@ -42,14 +42,19 @@
                 <samletUtsendingsperiode></samletUtsendingsperiode>
                 <sendesUtOppdragIUtlandet>false</sendesUtOppdragIUtlandet>
                 <ansattForOppdragIUtlandet>false</ansattForOppdragIUtlandet>
+                <erArbeidstakerAnsattHelePerioden>true</erArbeidstakerAnsattHelePerioden>
                 <drattPaaEgetInitiativ>false</drattPaaEgetInitiativ>
                 <erstatterTidligereUtsendte>false</erstatterTidligereUtsendte>
                 <naeringsGruppe>2019-08-05</naeringsGruppe>
             </utenlandsoppdraget>
             <loennOgGodtgjoerelse>
                 <norskArbgUtbetalerLoenn>true</norskArbgUtbetalerLoenn>
-                <utlArbgUtbetalerLoenn>false</utlArbgUtbetalerLoenn>
+                <utlArbgUtbetalerLoenn>true</utlArbgUtbetalerLoenn>
+                <utlArbTilhorerSammeKonsern>false</utlArbTilhorerSammeKonsern>
+                <loennUtlArbg>1000.00</loennUtlArbg>
+                <loennNorskArbg>2000.00</loennNorskArbg>
                 <mottarNaturalytelser>false</mottarNaturalytelser>
+                <samletVerdiNaturalytelser>10000.50</samletVerdiNaturalytelser>
                 <trukketTrygdeavgift>true</trukketTrygdeavgift>
                 <betalerArbeidsgiveravgift>true</betalerArbeidsgiveravgift>
             </loennOgGodtgjoerelse>

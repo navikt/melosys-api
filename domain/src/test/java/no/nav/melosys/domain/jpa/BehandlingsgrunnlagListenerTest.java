@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.jpa;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -64,7 +65,8 @@ class BehandlingsgrunnlagListenerTest {
         assertKonvertering(jsonNode, søknad);
         assertThat(søknad.arbeidsgiversBekreftelse.arbeidsgiverBekrefterUtsendelse)
             .isEqualTo(jsonNode.get("arbeidsgiversBekreftelse").get("arbeidsgiverBekrefterUtsendelse").booleanValue());
-        assertThat(jsonNode.get("loennOgGodtgjoerelse")).isNotNull();
+        assertThat(søknad.loennOgGodtgjoerelse.bruttoLoennPerMnd).isEqualTo(
+            new BigDecimal(jsonNode.get("loennOgGodtgjoerelse").get("bruttoLoennPerMnd").asText()));
     }
 
     private void assertKonvertering(JsonNode jsonNode, BehandlingsgrunnlagData data) {
