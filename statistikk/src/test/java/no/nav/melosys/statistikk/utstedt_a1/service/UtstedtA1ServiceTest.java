@@ -9,6 +9,7 @@ import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -88,6 +89,44 @@ class UtstedtA1ServiceTest {
         verify(utstedtA1Producer, never()).produserMelding(any(UtstedtA1Melding.class));
     }
 
+    @Test
+    void sendMeldingOmUtstedtA1_art13_forventTomLandkode() throws Exception {
+        when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(lagBehandlingsresultat(false, lagBehandling(), Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A));
+        when(utstedtA1Producer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());
+
+        utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID);
+
+        verify(behandlingsresultatService).hentBehandlingsresultat(eq(BEHANDLING_ID));
+        verify(landvelgerService, never()).hentUtenlandskTrygdemyndighetsland(anyLong());
+        verify(utstedtA1Producer).produserMelding(captor.capture());
+
+        UtstedtA1Melding melding = captor.getValue();
+        assertThat(melding).isNotNull();
+        assertThat(melding.getSerienummer()).isEqualTo("MEL-123123");
+        assertThat(melding.getUtsendtTilLand()).isNull();
+        assertThat(melding.getArtikkel()).isEqualTo(Lovvalgsbestemmelse.ART_13_1);
+        assertThat(melding.getTypeUtstedelse()).isEqualTo(A1TypeUtstedelse.FØRSTEGANG);
+    }
+
+    @Test
+    void sendMeldingOmUtstedtA1_art11_forventTomLandkode() throws Exception {
+        when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(lagBehandlingsresultat(false, lagBehandling(), Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A));
+        when(utstedtA1Producer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());
+
+        utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID);
+
+        verify(behandlingsresultatService).hentBehandlingsresultat(eq(BEHANDLING_ID));
+        verify(landvelgerService, never()).hentUtenlandskTrygdemyndighetsland(anyLong());
+        verify(utstedtA1Producer).produserMelding(captor.capture());
+
+        UtstedtA1Melding melding = captor.getValue();
+        assertThat(melding).isNotNull();
+        assertThat(melding.getSerienummer()).isEqualTo("MEL-123123");
+        assertThat(melding.getUtsendtTilLand()).isNull();
+        assertThat(melding.getArtikkel()).isEqualTo(Lovvalgsbestemmelse.ART_11_3_a);
+        assertThat(melding.getTypeUtstedelse()).isEqualTo(A1TypeUtstedelse.FØRSTEGANG);
+    }
+
     private static Behandling lagBehandling() {
         return lagBehandling(Behandlingsstatus.AVSLUTTET);
     }
@@ -114,8 +153,12 @@ class UtstedtA1ServiceTest {
     }
 
     private static Behandlingsresultat lagBehandlingsresultat(boolean erAvslag, Behandling behandling) {
+        return lagBehandlingsresultat(erAvslag, behandling, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+    }
+
+    private static Behandlingsresultat lagBehandlingsresultat(boolean erAvslag, Behandling behandling, LovvalgBestemmelse bestemmelse) {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+        lovvalgsperiode.setBestemmelse(bestemmelse);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusMonths(3));
