@@ -72,7 +72,7 @@ public class UtstedtA1Service {
 
         final Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
         final Lovvalgsbestemmelse artikkel = Lovvalgsbestemmelse.av(lovvalgsperiode.getBestemmelse());
-        final String utsendtTilLand = hentUtsendtTilLand(behandlingID, lovvalgsperiode.erArtikkel13());
+        final String utsendtTilLand = hentUtsendtTilLand(behandlingID, lovvalgsperiode);
 
         final VedtakMetadata vedtakMetadata = behandlingsresultat.getVedtakMetadata();
         final LocalDate vedtaksdato = LocalDate.ofInstant(vedtakMetadata.getVedtaksdato(), ZoneId.systemDefault());
@@ -89,8 +89,8 @@ public class UtstedtA1Service {
         );
     }
 
-    private String hentUtsendtTilLand(Long behandlingID, boolean erArt13) throws FunksjonellException {
-        if (erArt13) {
+    private String hentUtsendtTilLand(Long behandlingID, Lovvalgsperiode lovvalgsperiode) throws FunksjonellException {
+        if (lovvalgsperiode.erArtikkel11() || lovvalgsperiode.erArtikkel13()) {
             return null;
         }
 
