@@ -1,13 +1,13 @@
 package no.nav.melosys.integrasjon;
 
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 public final class KonverteringsUtils {
 
@@ -24,11 +24,7 @@ public final class KonverteringsUtils {
     }
 
     public static XMLGregorianCalendar localDateToXMLGregorianCalendar(LocalDate dateTime) throws DatatypeConfigurationException {
-        if (dateTime == null) {
-            return null;
-        }
-        final DatatypeFactory factory = DatatypeFactory.newInstance();
-        return factory.newXMLGregorianCalendar(dateTime.format(DateTimeFormatter.ISO_DATE));
+        return localDateTimeToXMLGregorianCalendar(dateTime.atStartOfDay());
     }
 
     public static Instant xmlGregorianCalendarToInstant(XMLGregorianCalendar xmlGregorianCalendar) {
