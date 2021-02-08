@@ -7,20 +7,23 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 public class MottakerDto {
     private final String type;
     private final Aktoersroller rolle;
+    private final String orgnr;
     private final boolean kanOverstyres;
     private final List<String> adresselinjer;
 
-    private MottakerDto(String type, Aktoersroller rolle, boolean kanOverstyres, List<String> adresselinjer) {
-        this.type = type;
-        this.rolle = rolle;
-        this.kanOverstyres = kanOverstyres;
-        this.adresselinjer = adresselinjer;
+    private MottakerDto(Builder builder) {
+        this.type = builder.type;
+        this.rolle = builder.rolle;
+        this.orgnr = builder.orgnr;
+        this.kanOverstyres = builder.kanOverstyres;
+        this.adresselinjer = builder.adresselinjer;
     }
 
     public static final class Builder {
         private String type;
         private Aktoersroller rolle;
-        private boolean kanOverstyres;
+        private String orgnr;
+        private boolean kanOverstyres = false;
         private List<String> adresselinjer;
 
         public Builder medType(String type) {
@@ -33,8 +36,13 @@ public class MottakerDto {
             return this;
         }
 
-        public Builder medKanOverstyres(boolean kanOverstyres) {
-            this.kanOverstyres = kanOverstyres;
+        public Builder medOrgnr(String orgnr) {
+            this.orgnr = orgnr;
+            return this;
+        }
+
+        public Builder kanOverstyres() {
+            this.kanOverstyres = true;
             return this;
         }
 
@@ -44,7 +52,7 @@ public class MottakerDto {
         }
 
         public MottakerDto build() {
-            return new MottakerDto(type, rolle, kanOverstyres, adresselinjer);
+            return new MottakerDto(this);
         }
     }
 }

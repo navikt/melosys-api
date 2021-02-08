@@ -6,17 +6,26 @@ import java.util.List;
 public class BrevmalFeltDto {
     private final String kode;
     private final String beskrivelse;
+    private final FeltType feltType;
+    private final String hjelpetekst;
+    private final boolean paakrevd;
     private final List<FeltvalgDto> valg;
 
-    private BrevmalFeltDto(String kode, String beskrivelse, List<FeltvalgDto> valg) {
-        this.kode = kode;
-        this.beskrivelse = beskrivelse;
-        this.valg = valg;
+    private BrevmalFeltDto(Builder builder) {
+        this.kode = builder.kode;
+        this.beskrivelse = builder.beskrivelse;
+        this.feltType = builder.feltType;
+        this.hjelpetekst = builder.hjelpetekst;
+        this.paakrevd = builder.paakrevd;
+        this.valg = builder.valg;
     }
 
     public static final class Builder {
         private String kode;
         private String beskrivelse;
+        private FeltType feltType;
+        private String hjelpetekst;
+        private boolean paakrevd = false;
         private List<FeltvalgDto> valg;
 
         public Builder medKode(String kode) {
@@ -26,6 +35,21 @@ public class BrevmalFeltDto {
 
         public Builder medBeskrivelse(String beskrivelse) {
             this.beskrivelse = beskrivelse;
+            return this;
+        }
+
+        public Builder medFeltType(FeltType feltType) {
+            this.feltType = feltType;
+            return this;
+        }
+
+        public Builder medHjelpetekst(String hjelpetekst) {
+            this.hjelpetekst = hjelpetekst;
+            return this;
+        }
+
+        public Builder erPåkrevd() {
+            this.paakrevd = true;
             return this;
         }
 
@@ -43,7 +67,7 @@ public class BrevmalFeltDto {
         }
 
         public BrevmalFeltDto build() {
-            return new BrevmalFeltDto(kode, beskrivelse, valg);
+            return new BrevmalFeltDto(this);
         }
     }
 }
