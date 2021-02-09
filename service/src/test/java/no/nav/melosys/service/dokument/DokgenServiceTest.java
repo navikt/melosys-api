@@ -23,6 +23,7 @@ import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,6 +60,10 @@ class DokgenServiceTest {
     private KontaktopplysningService mockKontaktOpplysningService;
     @Mock
     private BehandlingsresultatService mockBehandlingsresultatService;
+    @Mock
+    private BrevmottakerService mockBrevMottakerService;
+    @Mock
+    private ProsessinstansService mockProsessinstansService;
 
     private final FakeUnleash unleash = new FakeUnleash();
 
@@ -70,7 +75,8 @@ class DokgenServiceTest {
     void init() {
         dokgenService = new DokgenService(mockDokgenConsumer, new DokgenMalResolver(unleash), mockJoarkFasade,
             new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService, mockEregFasade, mockTpsFasade),
-            mockBehandlingsService, mockEregFasade, mockKontaktOpplysningService);
+            mockBehandlingsService,
+            mockEregFasade, mockKontaktOpplysningService, mockBrevMottakerService, mockProsessinstansService);
     }
 
     @Test

@@ -46,7 +46,7 @@ class DokumentServiceFasadeTest {
     @BeforeEach
     void init() {
         dokumentServiceFasade = new DokumentServiceFasade(mockDokumentService, mockDokumentSystemService,
-            mockDokgenService, mockBehandlingService, mockProsessinstansService, mockBrevmottakerService, applicationEventPublisher);
+            mockDokgenService, mockBehandlingService, applicationEventPublisher);
         Mockito.reset(
             mockDokgenService,
             mockDokumentService,

@@ -6,6 +6,8 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevmalInnholdService;
+import no.nav.melosys.service.dokument.DokgenService;
+import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,11 +28,17 @@ class DokgenBrevTjenesteTest {
     @Mock
     private AvklarteVirksomheterService mockAvklarteVirksomheterService;
 
+    @Mock
+    private DokumentServiceFasade mockDokServiceFasade;
+
+    @Mock
+    private DokgenService mockDokgenService;
+
     private DokgenBrevTjeneste dokgenBrevTjeneste;
 
     @BeforeEach
     void init() {
-        BrevmalInnholdService brevmalInnholdService = new BrevmalInnholdService(mockBehandlingService, mockAvklarteVirksomheterService);
+        BrevmalInnholdService brevmalInnholdService = new BrevmalInnholdService(mockBehandlingService, mockAvklarteVirksomheterService, mockDokServiceFasade, mockDokgenService);
         dokgenBrevTjeneste = new DokgenBrevTjeneste(brevmalInnholdService);
     }
 
