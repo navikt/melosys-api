@@ -21,6 +21,9 @@ import no.nav.melosys.domain.kodeverk.Flyvningstyper;
 import no.nav.melosys.domain.kodeverk.Innretningstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
 import no.nav.melosys.soknad_altinn.*;
+import org.apache.commons.lang3.StringUtils;
+
+import static no.nav.melosys.domain.util.LandkoderUtils.tilIso2FraLandnavn;
 
 public final class SoeknadMapper {
     private SoeknadMapper() {
@@ -38,6 +41,11 @@ public final class SoeknadMapper {
         soeknad.personOpplysninger.medfolgendeFamilie = hentMedfølgendeBarn(innhold);
         lagArbeidssteder(innhold, soeknad);
         soeknad.loennOgGodtgjoerelse = lagLoennOgGodtgjoerelse(innhold.getMidlertidigUtsendt());
+        final var virksomhetIUtlandet = innhold.getMidlertidigUtsendt().getVirksomhetIUtlandet();
+        if (virksomhetIUtlandet != null
+            && StringUtils.isNotBlank(virksomhetIUtlandet.getNavn())) {
+            soeknad.foretakUtland.add(lagUtenlandskVirksomhet(virksomhetIUtlandet));
+        }
         soeknad.juridiskArbeidsgiverNorge = lagJuridiskArbeidsgiverNorge(innhold.getArbeidsgiver());
         return soeknad;
     }
@@ -190,6 +198,19 @@ public final class SoeknadMapper {
             && !loennOgGodtgjoerelseAltinn.isUtlArbgUtbetalerLoenn()
             && BigDecimal.ZERO.equals(loennOgGodtgjoerelseAltinn.getLoennNorskArbg());
         return harAltinnEtProblem ? null : loennOgGodtgjoerelseAltinn.getLoennNorskArbg();
+    }
+
+    private static ForetakUtland lagUtenlandskVirksomhet(VirksomhetIUtlandet virksomhetIUtlandet) {
+        ForetakUtland foretakUtland = new ForetakUtland();
+        foretakUtland.navn = virksomhetIUtlandet.getNavn();
+        foretakUtland.orgnr = virksomhetIUtlandet.getRegistreringsnummer();
+        final PostadresseUtland postadresseUtland = virksomhetIUtlandet.getAdresse();
+        foretakUtland.adresse.gatenavn = postadresseUtland.getGatenavn();
+        foretakUtland.adresse.postnummer = postadresseUtland.getPostkode();
+        foretakUtland.adresse.poststed = postadresseUtland.getBy();
+        foretakUtland.adresse.region = postadresseUtland.getRegion();
+        foretakUtland.adresse.landkode = tilIso2FraLandnavn(postadresseUtland.getLand());
+        return foretakUtland;
     }
 
     private static JuridiskArbeidsgiverNorge lagJuridiskArbeidsgiverNorge(Arbeidsgiver arbeidsgiver) {
