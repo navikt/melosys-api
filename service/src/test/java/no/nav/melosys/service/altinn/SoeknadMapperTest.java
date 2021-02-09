@@ -56,6 +56,13 @@ class SoeknadMapperTest {
         assertThat(loennOgGodtgjoerelse.samletVerdiNaturalytelser).isEqualTo(new BigDecimal("10000.50"));
         assertThat(loennOgGodtgjoerelse.erArbeidsgiveravgiftHelePerioden).isTrue();
         assertThat(loennOgGodtgjoerelse.erTrukketTrygdeavgift).isTrue();
+        final var foretakUtland = soeknad.foretakUtland.get(0);
+        assertThat(foretakUtland.navn).isEqualTo("Virskomheten i utlandet");
+        assertThat(foretakUtland.orgnr).isEqualTo("XYZ123456789");
+        assertThat(foretakUtland.adresse.gatenavn).isEqualTo("gatenavn med mer");
+        assertThat(foretakUtland.adresse.poststed).isEqualTo("testbyen");
+        assertThat(foretakUtland.adresse.postnummer).isEqualTo("UTLAND-1234");
+        assertThat(foretakUtland.adresse.landkode).isEqualTo("BE");
     }
 
     @Test

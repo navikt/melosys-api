@@ -59,7 +59,15 @@
                 <betalerArbeidsgiveravgift>true</betalerArbeidsgiveravgift>
             </loennOgGodtgjoerelse>
             <virksomhetIUtlandet>
-                <adresse></adresse>
+                <navn>Virskomheten i utlandet</navn>
+                <registreringsnummer>XYZ123456789</registreringsnummer>
+                <adresse>
+                    <gatenavn>gatenavn med mer</gatenavn>
+                    <by>testbyen</by>
+                    <postkode>UTLAND-1234</postkode>
+                    <region>testregion</region>
+                    <land>BELGIA</land>
+                </adresse>
             </virksomhetIUtlandet>
             <arbeidssted>
                 <typeArbeidssted>land</typeArbeidssted>
