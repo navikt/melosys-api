@@ -8,7 +8,8 @@ import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.dokument.DokgenService;
+import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +23,8 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING
 import static no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper.LOENNET_ARBEID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,11 +36,17 @@ class BrevmalInnholdServiceTest {
     @Mock
     private AvklarteVirksomheterService mockAvklarteVirksomheterService;
 
+    @Mock
+    private DokumentServiceFasade mockDokServiceFasade;
+
+    @Mock
+    private DokgenService mockDokgenService;
+
     private BrevmalInnholdService brevmalInnholdService;
 
     @BeforeEach
     void init() {
-        brevmalInnholdService = new BrevmalInnholdService(mockBehandlingService, mockAvklarteVirksomheterService);
+        brevmalInnholdService = new BrevmalInnholdService(mockBehandlingService, mockAvklarteVirksomheterService, mockDokServiceFasade, mockDokgenService);
     }
 
     @Test

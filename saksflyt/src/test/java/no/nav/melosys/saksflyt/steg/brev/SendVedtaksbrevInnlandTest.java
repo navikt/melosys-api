@@ -103,7 +103,7 @@ class SendVedtaksbrevInnlandTest {
 
         dokService = spy(lagDokumentService(byggerVelger));
         DokumentServiceFasade dokumentServiceFasade = new DokumentServiceFasade(mock(DokumentService.class), dokService, mock(DokgenService.class),
-            mock(BehandlingService.class), mock(ProsessinstansService.class), mock(BrevmottakerService.class), mock(ApplicationEventPublisher.class));
+            mock(BehandlingService.class), mock(ApplicationEventPublisher.class));
         BrevBestiller brevBestiller = new BrevBestiller(dokumentServiceFasade);
 
         BehandlingService behandlingService = mock(BehandlingService.class);
