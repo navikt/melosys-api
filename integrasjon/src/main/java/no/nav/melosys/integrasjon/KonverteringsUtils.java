@@ -23,8 +23,8 @@ public final class KonverteringsUtils {
         return factory.newXMLGregorianCalendar(localDateTime.format(DateTimeFormatter.ISO_DATE_TIME));
     }
 
-    public static XMLGregorianCalendar localDateToXMLGregorianCalendar(LocalDate dateTime) throws DatatypeConfigurationException {
-        return localDateTimeToXMLGregorianCalendar(dateTime.atStartOfDay());
+    public static XMLGregorianCalendar localDateToXMLGregorianCalendar(LocalDate localDate) throws DatatypeConfigurationException {
+        return localDateTimeToXMLGregorianCalendar(localDate.atStartOfDay());
     }
 
     public static Instant xmlGregorianCalendarToInstant(XMLGregorianCalendar xmlGregorianCalendar) {
