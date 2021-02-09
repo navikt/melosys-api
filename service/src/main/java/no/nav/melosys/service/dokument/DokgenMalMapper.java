@@ -83,6 +83,7 @@ public class DokgenMalMapper {
         if (hasText(dto.getPostnr())) {
             dto.setPoststed(hentPoststed(dto.getPostnr()));
         }
+        dto.setLand(hentLandnavn(dto.getLand()));
         return dto;
     }
 
@@ -102,5 +103,16 @@ public class DokgenMalMapper {
             return eregFasade.hentOrganisasjonNavn(representant.get().getOrgnr());
         }
         return null;
+    }
+
+    private String hentLandnavn(String landkode) {
+        String landnavn = "";
+        if (hasText(landkode)) {
+            landnavn = kodeverkService.dekod(FellesKodeverk.LANDKODER, landkode, LocalDate.now());
+            if (landnavn.equals("UKJENT")) {
+                landnavn = kodeverkService.dekod(FellesKodeverk.LANDKODERISO2, landkode, LocalDate.now());
+            }
+        }
+        return landnavn.equals("UKJENT") ? "" : landnavn;
     }
 }

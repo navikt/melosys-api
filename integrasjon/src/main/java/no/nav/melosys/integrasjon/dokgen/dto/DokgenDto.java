@@ -32,7 +32,7 @@ public abstract class DokgenDto {
     private final List<String> adresselinjer;
     private final String postnr;
     private String poststed;
-    private final String land;
+    private String land;
 
     // Saksbehandlingstid er 12 uker fra dato for utsendelse av brev, uavhengig av helg, helligdager, osv.
     protected static final int SAKSBEHANDLINGSTID_DAGER = 12 * 7;
@@ -95,5 +95,9 @@ public abstract class DokgenDto {
 
     public String getLand() {
         return land;
+    }
+
+    public void setLand(String land) {
+        this.land = land;
     }
 }
