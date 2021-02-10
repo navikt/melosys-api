@@ -53,6 +53,8 @@ public final class TestdataFactory {
     static GeografiskAdresse lagOrgAdresse() {
         SemistrukturertAdresse semistrukturertAdresse = new SemistrukturertAdresse();
         semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(2), LocalDate.now().plusDays(2)));
+        semistrukturertAdresse.setLandkode("NO");
+        semistrukturertAdresse.setPostnr("1234");
         return semistrukturertAdresse;
     }
 
