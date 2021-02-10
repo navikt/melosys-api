@@ -1,6 +1,5 @@
 package no.nav.melosys.service.brev;
 
-import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
@@ -27,7 +26,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class BrevServiceTest {
+class BrevmalInnholdServiceTest {
 
     @Mock
     private BehandlingService mockBehandlingService;
@@ -38,18 +37,18 @@ class BrevServiceTest {
     @Mock
     private KodeverkService mockKodeverkService;
 
-    private BrevService brevService;
+    private BrevmalInnholdService brevmalInnholdService;
 
     @BeforeEach
     void init() {
-        brevService = new BrevService(mockBehandlingService, mockAvklarteVirksomheterService, mockKodeverkService);
+        brevmalInnholdService = new BrevmalInnholdService(mockBehandlingService, mockAvklarteVirksomheterService, mockKodeverkService);
     }
 
     @Test
     void gittIkkeAvsluttetBehandlingSkalTilgjengeligeBrevmalerReturneres() throws Exception {
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(new Behandling());
 
-        List<Produserbaredokumenter> brevMaler = brevService.hentBrevMaler(123L);
+        List<Produserbaredokumenter> brevMaler = brevmalInnholdService.hentBrevMaler(123L);
 
         assertEquals(2, brevMaler.size());
         assertTrue(brevMaler.containsAll(asList(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MANGELBREV_BRUKER)));
@@ -61,7 +60,7 @@ class BrevServiceTest {
         AvklartVirksomhet avklartVirksomhet = new AvklartVirksomhet("Advokatene AS", "123456789", new StrukturertAdresse(), LOENNET_ARBEID);
         when(mockAvklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(singletonList(avklartVirksomhet));
 
-        List<AvklartVirksomhet> arbeidsgivere = brevService.hentArbeidsgivere(123L);
+        List<AvklartVirksomhet> arbeidsgivere = brevmalInnholdService.hentArbeidsgivere(123L);
 
         assertEquals(1, arbeidsgivere.size());
         AvklartVirksomhet virksomhet = arbeidsgivere.get(0);

@@ -10,7 +10,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.brev.BrevService;
+import no.nav.melosys.service.brev.BrevmalInnholdService;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalDto;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalFeltDto;
 import no.nav.melosys.tjenester.gui.dto.brev.FeltType;
@@ -35,11 +35,11 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING
 @RequestScope
 public class BrevTjeneste {
 
-    private final BrevService brevService;
+    private final BrevmalInnholdService brevmalInnholdService;
 
     @Autowired
-    public BrevTjeneste(BrevService brevService) {
-        this.brevService = brevService;
+    public BrevTjeneste(BrevmalInnholdService brevmalInnholdService) {
+        this.brevmalInnholdService = brevmalInnholdService;
     }
 
     @GetMapping("/tilgjengelige-maler")
@@ -49,8 +49,8 @@ public class BrevTjeneste {
     }
 
     private List<BrevmalDto> byggBrevmalListe(long behandlingId) throws IkkeFunnetException, TekniskException {
-        List<Produserbaredokumenter> produserbareDokumenter = brevService.hentBrevMaler(behandlingId);
-        List<AvklartVirksomhet> arbeidsgivere = brevService.hentArbeidsgivere(behandlingId);
+        List<Produserbaredokumenter> produserbareDokumenter = brevmalInnholdService.hentBrevMaler(behandlingId);
+        List<AvklartVirksomhet> arbeidsgivere = brevmalInnholdService.hentArbeidsgivere(behandlingId);
 
         List<BrevmalDto> maler = new ArrayList<>();
         produserbareDokumenter.forEach(p -> {

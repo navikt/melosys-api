@@ -5,7 +5,7 @@ import java.util.List;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.brev.BrevService;
+import no.nav.melosys.service.brev.BrevmalInnholdService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,14 +30,14 @@ class BrevTjenesteTest {
     @Mock
     private KodeverkService mockKodeverkService;
 
-    private BrevService brevService;
+    private BrevmalInnholdService brevmalInnholdService;
 
     private BrevTjeneste brevTjeneste;
 
     @BeforeEach
     void init() {
-        brevService = new BrevService(mockBehandlingService, mockAvklarteVirksomheterService, mockKodeverkService);
-        brevTjeneste = new BrevTjeneste(brevService);
+        brevmalInnholdService = new BrevmalInnholdService(mockBehandlingService, mockAvklarteVirksomheterService, mockKodeverkService);
+        brevTjeneste = new BrevTjeneste(brevmalInnholdService);
     }
 
     @Test

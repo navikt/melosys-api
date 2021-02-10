@@ -24,14 +24,14 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @Service
-public class BrevService {
+public class BrevmalInnholdService {
 
     private final BehandlingService behandlingService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final KodeverkService kodeverkService;
 
     @Autowired
-    public BrevService(BehandlingService behandlingService, AvklarteVirksomheterService avklarteVirksomheterService, KodeverkService kodeverkService) {
+    public BrevmalInnholdService(BehandlingService behandlingService, AvklarteVirksomheterService avklarteVirksomheterService, KodeverkService kodeverkService) {
         this.behandlingService = behandlingService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.kodeverkService = kodeverkService;
