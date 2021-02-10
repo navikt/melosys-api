@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.AVSLUTTET;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -42,7 +41,7 @@ public class BrevService {
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         List<Produserbaredokumenter> brevmaler = asList(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MANGELBREV_BRUKER);
 
-        return AVSLUTTET.equals(behandling.getStatus()) ? emptyList() : brevmaler;
+        return behandling.erAktiv() ? brevmaler : emptyList();
     }
 
     public List<AvklartVirksomhet> hentArbeidsgivere(long behandlingId) throws IkkeFunnetException, TekniskException {

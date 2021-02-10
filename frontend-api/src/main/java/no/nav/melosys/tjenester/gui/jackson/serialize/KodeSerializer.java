@@ -21,7 +21,8 @@ public class KodeSerializer extends StdSerializer<Kodeverk> {
         Avsendertyper.class, Tema.class, Behandlingsgrunnlagtyper.class, InnvilgelsesResultat.class,
         Folketrygdloven_kap2_bestemmelser.class, Medlemskapstyper.class, Trygdedekninger.class, Vilkaar.class,
         Saerligeavgiftsgrupper.class, Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.class,
-        Vurderingsutfall_trygdeavgift_norsk_inntekt.class, Loenn_forhold.class
+        Vurderingsutfall_trygdeavgift_norsk_inntekt.class, Loenn_forhold.class,
+        Aktoersroller.class
     );
 
     public KodeSerializer() {
