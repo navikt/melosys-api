@@ -90,7 +90,7 @@ public class UtstedtA1Service {
     }
 
     private String hentUtsendtTilLand(Long behandlingID, Lovvalgsperiode lovvalgsperiode) throws FunksjonellException {
-        if (lovvalgsperiode.erArtikkel11() || lovvalgsperiode.erArtikkel13()) {
+        if (landSkalIkkeSendes(lovvalgsperiode)) {
             return null;
         }
 
@@ -102,5 +102,10 @@ public class UtstedtA1Service {
         return mottakere.stream().findFirst()
             .orElseThrow(() -> new FunksjonellException("Finner ingen gyldige mottakere av A1 for behandling " + behandlingID))
             .getKode();
+    }
+
+    private boolean landSkalIkkeSendes(Lovvalgsperiode lovvalgsperiode) {
+        return lovvalgsperiode.erArtikkel13()
+            || (lovvalgsperiode.erArtikkel11() && !lovvalgsperiode.erArtikkel12());
     }
 }
