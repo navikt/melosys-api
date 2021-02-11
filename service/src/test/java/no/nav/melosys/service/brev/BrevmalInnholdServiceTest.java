@@ -34,14 +34,11 @@ class BrevmalInnholdServiceTest {
     @Mock
     private AvklarteVirksomheterService mockAvklarteVirksomheterService;
 
-    @Mock
-    private KodeverkService mockKodeverkService;
-
     private BrevmalInnholdService brevmalInnholdService;
 
     @BeforeEach
     void init() {
-        brevmalInnholdService = new BrevmalInnholdService(mockBehandlingService, mockAvklarteVirksomheterService, mockKodeverkService);
+        brevmalInnholdService = new BrevmalInnholdService(mockBehandlingService, mockAvklarteVirksomheterService);
     }
 
     @Test
@@ -58,7 +55,7 @@ class BrevmalInnholdServiceTest {
     void gittRegistrertSkalArbeidsgiverReturneres() throws Exception {
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(new Behandling());
         AvklartVirksomhet avklartVirksomhet = new AvklartVirksomhet("Advokatene AS", "123456789", new StrukturertAdresse(), LOENNET_ARBEID);
-        when(mockAvklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(singletonList(avklartVirksomhet));
+        when(mockAvklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(singletonList(avklartVirksomhet));
 
         List<AvklartVirksomhet> arbeidsgivere = brevmalInnholdService.hentArbeidsgivere(123L);
 

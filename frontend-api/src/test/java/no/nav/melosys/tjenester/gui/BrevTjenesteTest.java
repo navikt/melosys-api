@@ -6,7 +6,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevmalInnholdService;
-import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,16 +26,13 @@ class BrevTjenesteTest {
     @Mock
     private AvklarteVirksomheterService mockAvklarteVirksomheterService;
 
-    @Mock
-    private KodeverkService mockKodeverkService;
-
     private BrevmalInnholdService brevmalInnholdService;
 
     private BrevTjeneste brevTjeneste;
 
     @BeforeEach
     void init() {
-        brevmalInnholdService = new BrevmalInnholdService(mockBehandlingService, mockAvklarteVirksomheterService, mockKodeverkService);
+        brevmalInnholdService = new BrevmalInnholdService(mockBehandlingService, mockAvklarteVirksomheterService);
         brevTjeneste = new BrevTjeneste(brevmalInnholdService);
     }
 
