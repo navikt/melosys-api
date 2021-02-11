@@ -1,6 +1,7 @@
 package no.nav.melosys.service.sak;
 
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -10,8 +11,8 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Bosted;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -26,22 +27,20 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class VideresendSoknadServiceTest {
-
+@ExtendWith(MockitoExtension.class)
+class VideresendSoknadServiceTest {
     @Mock
     private EessiService eessiService;
     @Mock
@@ -59,15 +58,12 @@ public class VideresendSoknadServiceTest {
 
     private final Fagsak fagsak = new Fagsak();
     private final Behandling behandling = new Behandling();
-    private BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
-    private PersonDokument personDokument = new PersonDokument();
+    private final BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
+    private final PersonDokument personDokument = new PersonDokument();
 
     private final String saksnummer = "MEL-2222";
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
+    @BeforeEach
     public void setup() throws IkkeFunnetException {
         videresendSoknadService = new VideresendSoknadService(
             fagsakService, behandlingsresultatService, prosessinstansService, landvelgerService, eessiService, oppgaveService
@@ -94,7 +90,7 @@ public class VideresendSoknadServiceTest {
     }
 
     @Test
-    public void henleggOgVideresend_bostedsLandSpaniaErSøknad_prosessinstansBlirOpprettet() throws MelosysException {
+    void henleggOgVideresend_bostedsLandSpaniaErSøknad_prosessinstansBlirOpprettet() throws MelosysException {
         final Set<String> validerteMottakere = Set.of("ES:mottakerID123");
         when(landvelgerService.hentBostedsland(eq(behandling))).thenReturn(Landkoder.ES);
         when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), eq(List.of(Landkoder.ES)), eq(BucType.LA_BUC_03)))
@@ -102,7 +98,7 @@ public class VideresendSoknadServiceTest {
 
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
-        videresendSoknadService.videresend(saksnummer, "", "fritekst");
+        videresendSoknadService.videresend(saksnummer, "", "fritekst", Collections.emptyList());
 
         verify(fagsakService).avsluttFagsakOgBehandling(fagsak, Saksstatuser.VIDERESENDT);
         verify(prosessinstansService).opprettProsessinstansVideresendSoknad(eq(behandling),
@@ -112,48 +108,44 @@ public class VideresendSoknadServiceTest {
     }
 
     @Test
-    public void henleggOgVideresend_ikkeSøknad_kasterException() throws MelosysException {
+    void henleggOgVideresend_ikkeSøknad_kasterException() {
         when(landvelgerService.hentBostedsland(eq(behandling))).thenReturn(Landkoder.ES);
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
 
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("er ikke behandling av en søknad");
-
-        videresendSoknadService.videresend(saksnummer, "", "");
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> videresendSoknadService.videresend(saksnummer, "", "", Collections.emptyList()))
+            .withMessageContaining("er ikke behandling av en søknad");
     }
 
     @Test
-    public void henleggOgVideresend_bostedsLandNorgeErSøknad_kasterException() throws MelosysException {
+    void henleggOgVideresend_bostedsLandNorgeErSøknad_kasterException() {
         when(landvelgerService.hentBostedsland(eq(behandling))).thenReturn(Landkoder.NO);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("til Norge");
-
-        videresendSoknadService.videresend(saksnummer, "", "");
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> videresendSoknadService.videresend(saksnummer, "", "", Collections.emptyList()))
+            .withMessageContaining("til Norge");
     }
 
     @Test
-    public void henleggOgVideresend_bostedsLanIkkeAvklartErSøknad_kasterException() throws MelosysException {
+    void henleggOgVideresend_bostedsLanIkkeAvklartErSøknad_kasterException() throws MelosysException {
         when(landvelgerService.hentBostedsland(eq(behandling))).thenReturn(null);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("Bostedsland ikke avklart");
-
-        videresendSoknadService.videresend(saksnummer, "", "");
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> videresendSoknadService.videresend(saksnummer, "", "", Collections.emptyList()))
+            .withMessageContaining("Bostedsland ikke avklart");
     }
 
     @Test
-    public void henleggOgVideresend_ikkeLagretBostedsadresseISøknadEllerTPS_kasterException() throws MelosysException {
+    void henleggOgVideresend_ikkeLagretBostedsadresseISøknadEllerTPS_kasterException() throws MelosysException {
         when(landvelgerService.hentBostedsland(eq(behandling))).thenReturn(Landkoder.SE);
         behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
         behandlingsgrunnlagData.bosted = new Bosted();
 
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("mangler bostedsadresse");
-
-        videresendSoknadService.videresend(saksnummer, "", "");
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> videresendSoknadService.videresend(saksnummer, "", "", Collections.emptyList()))
+            .withMessageContaining("mangler bostedsadresse");
     }
 
 }

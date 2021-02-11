@@ -24,11 +24,9 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -39,9 +37,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AnmodningUnntakServiceTest {
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     @Mock
     private BehandlingService behandlingService;
     @Mock
@@ -79,12 +74,12 @@ class AnmodningUnntakServiceTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-111");
         behandling.setFagsak(fagsak);
-        behandling.getSaksopplysninger().add(lagPersonSaksopplysning(true));
+        behandling.getSaksopplysninger().add(lagPersonSaksopplysning());
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID))).thenReturn(Collections.singletonList(Landkoder.SE));
 
-        anmodningUnntakService.anmodningOmUnntak(behandlingID, mottakerInstitusjon, fritekstSed);
+        anmodningUnntakService.anmodningOmUnntak(behandlingID, mottakerInstitusjon, fritekstSed, Collections.emptyList());
 
         verify(anmodningUnntakKontrollService).utførKontroller(behandlingID);
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), anySet(), eq(fritekstSed));
@@ -101,11 +96,11 @@ class AnmodningUnntakServiceTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-111");
         behandling.setFagsak(fagsak);
-        behandling.getSaksopplysninger().add(lagPersonSaksopplysning(true));
+        behandling.getSaksopplysninger().add(lagPersonSaksopplysning());
         when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID))).thenReturn(Collections.singletonList(Landkoder.SE));
 
-        anmodningUnntakService.anmodningOmUnntak(behandlingID, null, fritekstSed);
+        anmodningUnntakService.anmodningOmUnntak(behandlingID, null, fritekstSed, Collections.emptyList());
 
         verify(anmodningUnntakKontrollService).utførKontroller(behandlingID);
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), anySet(), eq(fritekstSed));
@@ -180,7 +175,7 @@ class AnmodningUnntakServiceTest {
     }
 
     @Test
-    void anmodningOmUnntakSvar_avslagForLangFritekst_forventException() throws FunksjonellException, TekniskException {
+    void anmodningOmUnntakSvar_avslagForLangFritekst_forventException() throws FunksjonellException {
         Behandling behandling = lagBehandling();
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
@@ -208,11 +203,9 @@ class AnmodningUnntakServiceTest {
         return behandling;
     }
 
-    private static Saksopplysning lagPersonSaksopplysning(boolean medAdresse) {
+    private static Saksopplysning lagPersonSaksopplysning() {
         PersonDokument personDokument = new PersonDokument();
-        if (medAdresse) {
-            personDokument.bostedsadresse.setPostnr("2123");
-        }
+        personDokument.bostedsadresse.setPostnr("2123");
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.PERSOPL);
         saksopplysning.setDokument(personDokument);

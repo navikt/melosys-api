@@ -1,12 +1,16 @@
 package no.nav.melosys.tjenester.gui.saksflyt;
 
+import java.util.stream.Collectors;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
 import no.nav.melosys.tjenester.gui.dto.AnmodningUnntakDto;
 import no.nav.security.token.support.core.api.Protected;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.MediaType;
@@ -35,7 +39,13 @@ public class AnmodningUnntakTjeneste {
                                                   @RequestBody AnmodningUnntakDto anmodningUnntakDto)
         throws MelosysException {
         tilgangService.sjekkTilgang(behandlingID);
-        anmodningUnntakService.anmodningOmUnntak(behandlingID, anmodningUnntakDto.getMottakerinstitusjon(), anmodningUnntakDto.getFritekstSed());
+        anmodningUnntakService.anmodningOmUnntak(behandlingID,
+            anmodningUnntakDto.getMottakerinstitusjon(),
+            anmodningUnntakDto.getFritekstSed(),
+            anmodningUnntakDto.getVedlegg().stream()
+                .map(v -> new DokumentReferanse(v.getJournalpostID(), v.getDokumentID()))
+                .collect(Collectors.toUnmodifiableList())
+        );
         return ResponseEntity.ok().build();
     }
 

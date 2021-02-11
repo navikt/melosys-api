@@ -8,9 +8,10 @@ import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RegistreringsInfo;
+import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.service.SaksopplysningerService;
@@ -88,7 +89,7 @@ public class FagsakTjeneste {
         fagsakService.bestillNySakOgBehandling(opprettSakDto);
         return ResponseEntity.ok().build();
     }
-    
+
     @PostMapping("/sok")
     @ApiOperation(
         value = "Søk etter saker på ident eller saksnummer",
@@ -128,7 +129,11 @@ public class FagsakTjeneste {
 
         videresendSoknadService.videresend(saksnummer,
             videresendDto.getMottakerinstitusjon(),
-            videresendDto.getFritekst());
+            videresendDto.getFritekst(),
+            videresendDto.getVedlegg().stream().map(
+                v -> new DokumentReferanse(v.getJournalpostID(), v.getDokumentID())).collect(
+                Collectors.toUnmodifiableList())
+        );
         return ResponseEntity.ok().build();
     }
 

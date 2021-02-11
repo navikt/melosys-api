@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -63,7 +64,8 @@ public class AnmodningUnntakService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void anmodningOmUnntak(long behandlingID, String mottakerinstitusjon, String ytterligereInformasjonSed) throws MelosysException {
+    public void anmodningOmUnntak(long behandlingID, String mottakerinstitusjon, String ytterligereInformasjonSed,
+                                  Collection<DokumentReferanse> vedleggReferanser) throws MelosysException {
         Set<String> mottakerinstitusjoner = validerMottakerInstitusjon(behandlingID, mottakerinstitusjon);
 
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
