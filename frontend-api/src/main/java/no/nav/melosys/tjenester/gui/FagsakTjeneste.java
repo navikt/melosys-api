@@ -88,25 +88,7 @@ public class FagsakTjeneste {
         fagsakService.bestillNySakOgBehandling(opprettSakDto);
         return ResponseEntity.ok().build();
     }
-
-    @Deprecated
-    @GetMapping("/sok")
-    @ApiOperation(
-        value = "Søk etter saker på fødselsnummer eller d-nummer",
-        notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer."),
-        response = FagsakOppsummeringDto.class,
-        responseContainer = "List")
-    public List<FagsakOppsummeringDto> hentFagsaker(@RequestParam("fnr") String fnr) throws FunksjonellException {
-        //TODO: slettes etter POST-endepunkt under er tatt i bruk
-        Iterable<Fagsak> saker;
-        if (fnr == null) {
-            throw new FunksjonellException("fnr er null");
-        }
-        tilgangService.sjekkFnr(fnr);
-        saker = fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, fnr);
-        return tilFagsakOppsummeringDtoer(saker);
-    }
-
+    
     @PostMapping("/sok")
     @ApiOperation(
         value = "Søk etter saker på ident eller saksnummer",
