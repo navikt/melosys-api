@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.dto.eessi;
+package no.nav.melosys.tjenester.gui.dto.dokumentarkiv;
 
 public class VedleggDto {
     private String journalpostID;

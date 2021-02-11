@@ -20,7 +20,7 @@ import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucBestillingDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucerTilknyttetBehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.OpprettBucSvarDto;
-import no.nav.melosys.tjenester.gui.dto.eessi.VedleggDto;
+import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.VedleggDto;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
