@@ -18,7 +18,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class BrevTjenesteTest {
+class DokgenBrevTjenesteTest {
 
     @Mock
     private BehandlingService mockBehandlingService;
@@ -26,21 +26,19 @@ class BrevTjenesteTest {
     @Mock
     private AvklarteVirksomheterService mockAvklarteVirksomheterService;
 
-    private BrevmalInnholdService brevmalInnholdService;
-
-    private BrevTjeneste brevTjeneste;
+    private DokgenBrevTjeneste dokgenBrevTjeneste;
 
     @BeforeEach
     void init() {
-        brevmalInnholdService = new BrevmalInnholdService(mockBehandlingService, mockAvklarteVirksomheterService);
-        brevTjeneste = new BrevTjeneste(brevmalInnholdService);
+        BrevmalInnholdService brevmalInnholdService = new BrevmalInnholdService(mockBehandlingService, mockAvklarteVirksomheterService);
+        dokgenBrevTjeneste = new DokgenBrevTjeneste(brevmalInnholdService);
     }
 
     @Test
     void skalReturnereTilgjengeligeBrevmaler() throws Exception {
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(new Behandling());
 
-        List<BrevmalDto> brevmaler = brevTjeneste.hentTilgjengeligeMaler(123L);
+        List<BrevmalDto> brevmaler = dokgenBrevTjeneste.hentTilgjengeligeMaler(123L);
         assertEquals(2, brevmaler.size());
     }
 

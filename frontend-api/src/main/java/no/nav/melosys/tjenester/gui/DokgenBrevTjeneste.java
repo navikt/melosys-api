@@ -33,12 +33,12 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING
 @RequestMapping("/brev")
 @Api(tags = {"brev"})
 @RequestScope
-public class BrevTjeneste {
+public class DokgenBrevTjeneste {
 
     private final BrevmalInnholdService brevmalInnholdService;
 
     @Autowired
-    public BrevTjeneste(BrevmalInnholdService brevmalInnholdService) {
+    public DokgenBrevTjeneste(BrevmalInnholdService brevmalInnholdService) {
         this.brevmalInnholdService = brevmalInnholdService;
     }
 
