@@ -8,7 +8,6 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
-import no.nav.melosys.tjenester.gui.dto.dokument.PersonhistorikkDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.SedDokumentDto;
 import no.nav.melosys.tjenester.gui.dto.inntekt.InntektDto;
 

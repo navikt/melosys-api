@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.dto.dokument;
+package no.nav.melosys.tjenester.gui.dto;
 
 import java.util.ArrayList;
 import java.util.List;
