@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.sed;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -36,7 +37,8 @@ public abstract class AbstraktSendUtland implements StegBehandler {
         return sendUtland(bucType, prosessinstans, null);
     }
 
-    protected SendUtlandStatus sendUtland(BucType bucType, Prosessinstans prosessinstans, Vedlegg vedlegg) throws MelosysException {
+    protected SendUtlandStatus sendUtland(BucType bucType, Prosessinstans prosessinstans, Collection<Vedlegg> vedlegg) throws
+        MelosysException {
         Long behandlingID = prosessinstans.getBehandling().getId();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 
@@ -44,7 +46,8 @@ public abstract class AbstraktSendUtland implements StegBehandler {
             Set<String> mottakerinstitusjoner = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<Set<String>>() {});
 
             if (!CollectionUtils.isEmpty(mottakerinstitusjoner)) {
-                eessiService.opprettOgSendSed(behandlingID, new ArrayList<>(mottakerinstitusjoner), bucType, vedlegg, prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
+                eessiService.opprettOgSendSed(behandlingID, new ArrayList<>(mottakerinstitusjoner), bucType, vedlegg,
+                    prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
                 return SendUtlandStatus.SED_SENDT;
             } else {
                 sendBrev(prosessinstans);

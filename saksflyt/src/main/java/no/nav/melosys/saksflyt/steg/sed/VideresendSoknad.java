@@ -1,7 +1,9 @@
 package no.nav.melosys.saksflyt.steg.sed;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -76,7 +78,8 @@ public class VideresendSoknad extends AbstraktSendUtland {
             prosessinstans.getBehandling().getId(), sendtStatus);
     }
 
-    private Vedlegg hentSøknadSomVedlegg(Behandling behandling) throws FunksjonellException, IntegrasjonException {
+    private Collection<Vedlegg> hentSøknadSomVedlegg(Behandling behandling) throws FunksjonellException,
+        IntegrasjonException {
         final String journalpostID = behandling.getInitierendeJournalpostId();
 
         if (StringUtils.isEmpty(journalpostID)) {
@@ -87,7 +90,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
         String tittel = journalpost.getHoveddokument().getTittel();
         byte[] pdf = joarkFasade.hentDokument(journalpostID, journalpost.getHoveddokument().getDokumentId());
 
-        return new Vedlegg(pdf, tittel);
+        return Set.of(new Vedlegg(pdf, tittel));
     }
 
     @Override
@@ -99,7 +102,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
     protected void sendBrev(Prosessinstans prosessinstans) throws MelosysException {
         Behandling behandling = prosessinstans.getBehandling();
 
-        // Fagsak må hentes på nytt fra detabasen da den har blitt oppdatert i AvklarMyndighet
+        // Fagsak må hentes på nytt fra db da den har blitt oppdatert i AvklarMyndighet
         Fagsak fagsak = fagsakService.hentFagsak(behandling.getFagsak().getSaksnummer());
         behandling.setFagsak(fagsak);
 
@@ -112,7 +115,8 @@ public class VideresendSoknad extends AbstraktSendUtland {
     }
 
     private List<FysiskDokument> lagSøknadVedlegg(Behandling behandling) throws FunksjonellException, IntegrasjonException {
-        byte[] vedleggData = hentSøknadSomVedlegg(behandling).getInnhold();
+        //FIXME
+        byte[] vedleggData = hentSøknadSomVedlegg(behandling).stream().findFirst().get().getInnhold();
 
         FysiskDokument fysiskDokument = new FysiskDokument();
         fysiskDokument.setBrevkode(SedType.A008.name());
