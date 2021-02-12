@@ -5,9 +5,9 @@ import java.util.*;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ArbeidUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.MaritimtArbeid;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -281,11 +281,11 @@ public class LandvelgerServiceTest {
     }
 
     @Test
-    public void hentUtenlandskTrygdemyndighetsland_artikkel13IngenArbeidUtland_forventLand() throws IkkeFunnetException {
+    public void hentUtenlandskTrygdemyndighetsland_artikkel13IngenArbeidssted_forventLand() throws IkkeFunnetException {
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
 
-        søknad.arbeidUtland = Collections.emptyList();
+        søknad.arbeidPaaLand.fysiskeArbeidssteder = Collections.emptyList();
         søknad.foretakUtland = Collections.emptyList();
         søknad.soeknadsland.landkoder = List.of(Landkoder.SE.toString(), Landkoder.DK.toString(), Landkoder.NO.toString());
 
@@ -301,11 +301,11 @@ public class LandvelgerServiceTest {
     }
 
     @Test
-    public void hentUtenlandskTrygdemyndighetsland_artikkel13MedArbeidUtland_forventLand() throws IkkeFunnetException {
+    public void hentUtenlandskTrygdemyndighetsland_artikkel13MedArbeidssted_forventLand() throws IkkeFunnetException {
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
 
-        søknad.arbeidUtland = List.of(lagArbeidUtland(Landkoder.DE));
+        søknad.arbeidPaaLand.fysiskeArbeidssteder = List.of(lagFysiskArbeidssted(Landkoder.DE));
         søknad.foretakUtland = List.of(lagForetakUtland(Landkoder.ES));
         søknad.soeknadsland.landkoder = List.of(Landkoder.SE.toString(), Landkoder.DK.toString(), Landkoder.NO.toString());
 
@@ -321,11 +321,12 @@ public class LandvelgerServiceTest {
     }
 
     @Test
-    public void hentUtenlandskTrygdemyndighetsland_artikkel13MedArbeidUtlandOgMarginaltArbeid_forventLand() throws IkkeFunnetException {
+    public void hentUtenlandskTrygdemyndighetsland_artikkel13MedArbeidsstedOgMarginaltArbeid_forventLand()
+        throws IkkeFunnetException {
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
 
-        søknad.arbeidUtland = List.of(lagArbeidUtland(Landkoder.DE));
+        søknad.arbeidPaaLand.fysiskeArbeidssteder = List.of(lagFysiskArbeidssted(Landkoder.DE));
         søknad.foretakUtland = List.of(lagForetakUtland(Landkoder.ES));
         søknad.soeknadsland.landkoder = List.of(Landkoder.SE.toString(), Landkoder.DK.toString(), Landkoder.NO.toString());
 
@@ -375,10 +376,10 @@ public class LandvelgerServiceTest {
         return utenlandskAdresse;
     }
 
-    private static ArbeidUtland lagArbeidUtland(Landkoder landkode) {
-        ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse = lagUtenlandskAdresse(landkode);
-        return arbeidUtland;
+    private static FysiskArbeidssted lagFysiskArbeidssted(Landkoder landkode) {
+        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
+        fysiskArbeidssted.adresse = lagUtenlandskAdresse(landkode);
+        return fysiskArbeidssted;
     }
 
     private static ForetakUtland lagForetakUtland(Landkoder landkode) {

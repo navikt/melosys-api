@@ -2,7 +2,7 @@ package no.nav.melosys.saksflyt.steg.behandling;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ArbeidUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -69,9 +69,9 @@ class AvklarMyndighetTest {
         behandling.setType(Behandlingstyper.SOEKNAD);
         Soeknad søknadDokument = new Soeknad();
         søknadDokument.soeknadsland.landkoder.add("BE");
-        ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse.landkode = "HR";
-        søknadDokument.arbeidUtland.add(arbeidUtland);
+        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
+        fysiskArbeidssted.adresse.landkode = "HR";
+        søknadDokument.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
         søknadDokument.bosted.oppgittAdresse.landkode = "IT";
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknadDokument);

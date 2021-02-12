@@ -7,7 +7,7 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ArbeidUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.SelvstendigForetak;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
@@ -23,8 +23,6 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagSystemService;
 import org.junit.jupiter.api.BeforeEach;
@@ -171,16 +169,16 @@ class BrevDataByggerA1Test {
     void lag_ArbeidsstedHosOppdragsgiver_girUtenlandskvirksomhet() throws FunksjonellException, TekniskException {
         mockAvklarteOrganisasjoner(Collections.singletonList(orgnr2));
 
-        ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.foretakNavn = "Utenlandsk Oppdragsgiver LTD";
-        arbeidUtland.adresse = lagStrukturertAdresse();
-        søknad.arbeidUtland.add(arbeidUtland);
+        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
+        fysiskArbeidssted.virksomhetNavn = "Utenlandsk Oppdragsgiver LTD";
+        fysiskArbeidssted.adresse = lagStrukturertAdresse();
+        søknad.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
 
         BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(dataGrunnlag, saksbehandler);
-        assertThat(brevDataDto.bivirksomheter.stream().map(uv -> uv.navn)).contains(arbeidUtland.foretakNavn);
+        assertThat(brevDataDto.bivirksomheter.stream().map(uv -> uv.navn)).contains(fysiskArbeidssted.virksomhetNavn);
         assertThat(brevDataDto.arbeidssteder.stream()
-            .filter(Arbeidssted::erFysisk)
-            .map(FysiskArbeidssted.class::cast)
-            .map(FysiskArbeidssted::getAdresse)).contains(arbeidUtland.adresse);
+            .filter(no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted::erFysisk)
+            .map(no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted.class::cast)
+            .map(no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted::getAdresse)).contains(fysiskArbeidssted.adresse);
     }
 }

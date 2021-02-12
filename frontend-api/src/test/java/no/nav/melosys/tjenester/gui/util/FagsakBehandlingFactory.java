@@ -11,7 +11,7 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ArbeidUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -72,11 +72,11 @@ public class FagsakBehandlingFactory {
 
     public static Soeknad lagSøknadDokument() {
         Soeknad soeknad = new Soeknad();
-        ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse.landkode = "SE";
+        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
+        fysiskArbeidssted.adresse.landkode = "SE";
         soeknad.soeknadsland.landkoder.add(Landkoder.DK.getKode());
-        soeknad.arbeidUtland = new ArrayList<>();
-        soeknad.arbeidUtland.add(arbeidUtland);
+        soeknad.arbeidPaaLand.fysiskeArbeidssteder = new ArrayList<>();
+        soeknad.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
         soeknad.oppholdUtland.oppholdslandkoder.add("FI");
         soeknad.periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(
             LocalDate.of(2019,1,1), LocalDate.of(2019,2,1));

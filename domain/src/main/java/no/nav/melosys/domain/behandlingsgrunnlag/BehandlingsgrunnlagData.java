@@ -6,6 +6,9 @@ import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.ArbeidPaaLand;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.LuftfartBase;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.MaritimtArbeid;
 import org.apache.commons.lang3.StringUtils;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -17,8 +20,7 @@ public class BehandlingsgrunnlagData {
 
     public OpplysningerOmBrukeren personOpplysninger = new OpplysningerOmBrukeren();
 
-    // Opplysninger om arbeid i utlandet
-    public List<ArbeidUtland> arbeidUtland = new ArrayList<>();
+    public ArbeidPaaLand arbeidPaaLand = new ArbeidPaaLand();
 
     // Opplysninger om foretak i utlandet
     public List<ForetakUtland> foretakUtland = new ArrayList<>();
@@ -46,7 +48,7 @@ public class BehandlingsgrunnlagData {
     }
 
     public List<String> hentUtenlandskeArbeidsstederLandkode() {
-        return arbeidUtland.stream()
+        return arbeidPaaLand.fysiskeArbeidssteder.stream()
             .map(a -> a.adresse != null ? a.adresse.landkode : null)
             .filter(Objects::nonNull)
             .distinct()
