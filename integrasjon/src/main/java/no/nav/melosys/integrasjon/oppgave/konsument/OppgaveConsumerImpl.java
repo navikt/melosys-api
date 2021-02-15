@@ -1,6 +1,5 @@
 package no.nav.melosys.integrasjon.oppgave.konsument;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,9 +55,8 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
             ).retrieve()
             .onStatus(HttpStatus::isError, this::håndterFeil)
             .bodyToMono(OppgaveSvar.class)
-            .blockOptional()
             .map(OppgaveSvar::getOppgaver)
-            .orElse(Collections.emptyList());
+            .block();
     }
 
     private Optional<String> arrayTilQueryParam(String[] array) {
