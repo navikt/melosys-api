@@ -19,7 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class OppgaveConsumerImplTest {
 
@@ -77,9 +77,9 @@ class OppgaveConsumerImplTest {
                 .setBody(testFil(OPPGAVE_FEILMELDING_JSON_PATH))
         );
 
-        assertThatExceptionOfType(IkkeFunnetException.class)
-            .isThrownBy(() -> oppgaveConsumer.hentOppgave("1"))
-            .withMessageContaining("Fant ingen oppgave");
+        assertThatThrownBy(() -> oppgaveConsumer.hentOppgave("1"))
+            .hasRootCauseInstanceOf(IkkeFunnetException.class)
+            .hasMessageContaining("Fant ingen oppgave");
     }
 
     @Test
