@@ -37,7 +37,6 @@ public class PersonConsumerConfig {
         factoryBean.setEndpointName(PERSON_V3_PORT);
         factoryBean.setServiceClass(PersonV3.class);
         factoryBean.setAddress(endpointUrl);
-        factoryBean.getFeatures().add(new WSAddressingFeature());
         factoryBean.getFeatures().add(new LoggingFeature());
         factoryBean.getOutInterceptors().add(new CallIdOutInterceptor());
         return factoryBean.create(PersonV3.class);
