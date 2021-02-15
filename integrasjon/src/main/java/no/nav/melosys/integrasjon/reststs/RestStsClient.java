@@ -40,6 +40,10 @@ public class RestStsClient implements RestConsumer {
         this.restTemplate = restTemplate;
     }
 
+    public String bearerToken() throws MelosysException {
+        return "Bearer " + collectToken();
+    }
+
     public synchronized String collectToken() throws MelosysException {
         if (shouldCollectNewToken()) {
             token = generateToken();
