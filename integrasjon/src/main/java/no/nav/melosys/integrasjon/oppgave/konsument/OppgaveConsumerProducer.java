@@ -1,32 +1,53 @@
 package no.nav.melosys.integrasjon.oppgave.konsument;
 
-import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.integrasjon.felles.SystemContextExchangeFilter;
+import no.nav.melosys.integrasjon.felles.UserContextExchangeFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class OppgaveConsumerProducer {
 
-    private final String endpointUrl;
+    private final String url;
 
     @Autowired
-    public OppgaveConsumerProducer(@Value("${OppgaveAPI_v1.url}") String endpointUrl) {
-        this.endpointUrl = endpointUrl;
+    public OppgaveConsumerProducer(@Value("${OppgaveAPI_v1.url}") String url) {
+        this.url = url;
     }
 
     @Bean
     @Primary
-    public OppgaveConsumer oppgaveConsumer() throws IntegrasjonException {
-        return new OppgaveConsumerImpl(endpointUrl, false);
+    public OppgaveConsumer oppgaveConsumer(WebClient.Builder webClientBuilder, UserContextExchangeFilter userContextExchangeFilter) {
+        return new OppgaveConsumerImpl(
+            webClientBuilder
+                .filter(userContextExchangeFilter)
+                .defaultHeaders(this::defaultHeaders)
+                .baseUrl(url)
+                .build()
+        );
     }
 
     @Bean
     @Qualifier("system")
-    public OppgaveConsumer oppgaveSystemConsumer() throws IntegrasjonException {
-        return new OppgaveConsumerImpl(endpointUrl, true);
+    public OppgaveConsumer oppgaveSystemConsumer(WebClient.Builder webClientBuilder, SystemContextExchangeFilter systemContextExchangeFilter) {
+        return new OppgaveConsumerImpl(
+            webClientBuilder
+            .filter(systemContextExchangeFilter)
+            .defaultHeaders(this::defaultHeaders)
+            .baseUrl(url)
+            .build()
+        );
+    }
+
+    private void defaultHeaders(HttpHeaders httpHeaders) {
+        httpHeaders.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
+        httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
     }
 }
