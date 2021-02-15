@@ -1,19 +1,12 @@
 package no.nav.melosys.service.dokument.brev.datagrunnlag;
 
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
-import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
@@ -47,9 +40,7 @@ public class AvklarteVirksomheterGrunnlagTest {
         AvklartVirksomhet arbeidsgiver = lagNorskVirksomhet();
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.singletonList(arbeidsgiver));
 
-        when(kodeverkService.dekod(any(FellesKodeverk.class), anyString(), any(LocalDate.class))).thenReturn("Poststed");
-
-        dataGrunnlag = new AvklarteVirksomheterGrunnlag(mock(Behandling.class), avklarteVirksomheterService, kodeverkService);
+        dataGrunnlag = new AvklarteVirksomheterGrunnlag(mock(Behandling.class), avklarteVirksomheterService);
     }
 
     @Test
@@ -158,82 +149,5 @@ public class AvklarteVirksomheterGrunnlagTest {
         assertThat(bivirksomheter).hasSize(1);
 
         assertThat(bivirksomheter.iterator().next()).isEqualToComparingFieldByField(forventetUtenlandskVirksomhet);
-    }
-
-    @Test
-    public void utfyllManglendeAdressefelter_gyldigForretningsadresse_girForretningsadresse() {
-        StrukturertAdresse adresse = dataGrunnlag.utfyllManglendeAdressefelter(lagOrganisasjonDokument("2345", "Forretningsgatenavn"));
-
-        assertThat(adresse.gatenavn).isEqualTo("Forretningsgatenavn");
-        assertThat(adresse.postnummer).isEqualTo("2345");
-        assertThat(adresse.poststed).isEqualTo("Poststed");
-        assertThat(adresse.landkode).isEqualTo("NO");
-
-        verify(kodeverkService).dekod(eq(FellesKodeverk.POSTNUMMER), eq("2345"), any(LocalDate.class));
-    }
-
-    @Test
-    public void utfyllManglendeAdressefelter_forretningsadresseManglerGatenavn_girForretningsadresseMedBlanktGatenavn() {
-        StrukturertAdresse adresse = dataGrunnlag.utfyllManglendeAdressefelter(lagOrganisasjonDokument("2345", null));
-
-        assertThat(adresse.gatenavn).isEqualTo(" ");
-        assertThat(adresse.postnummer).isEqualTo("2345");
-        assertThat(adresse.poststed).isEqualTo("Poststed");
-        assertThat(adresse.landkode).isEqualTo("NO");
-
-        verify(kodeverkService).dekod(eq(FellesKodeverk.POSTNUMMER), eq("2345"), any(LocalDate.class));
-    }
-
-    @Test
-    public void utfyllManglendeAdressefelter_utenlandskIngenForretningsadressePostadresseUtenPostnummer_postnummerTomString() {
-        var organisasjonDokument = lagOrganisasjonDokument(null, null, null, "DK");
-        organisasjonDokument.organisasjonDetaljer.forretningsadresse = Collections.emptyList();
-        organisasjonDokument.organisasjonDetaljer.postadresse.stream().findFirst().ifPresent(a -> ((SemistrukturertAdresse)a).setPostnr(null));
-        StrukturertAdresse adresse = dataGrunnlag.utfyllManglendeAdressefelter(organisasjonDokument);
-
-        assertThat(adresse.gatenavn).isEqualTo("Postgatenavn");
-        assertThat(adresse.postnummer).isEqualTo(" ");
-        assertThat(adresse.poststed).isEqualTo("Postpoststed");
-        assertThat(adresse.landkode).isEqualTo("DK");
-
-        verify(kodeverkService, never()).dekod(any(), any(), any());
-    }
-
-    @Test
-    public void utfyllManglendeAdressefelter_forretningsadresseManglerPostnr_girPostadresse() {
-        StrukturertAdresse adresse = dataGrunnlag.utfyllManglendeAdressefelter(lagOrganisasjonDokument(null, null));
-
-        assertThat(adresse.gatenavn).isEqualTo("Postgatenavn");
-        assertThat(adresse.postnummer).isEqualTo("6789");
-        assertThat(adresse.poststed).isEqualTo("Poststed");
-        assertThat(adresse.landkode).isEqualTo("NO");
-
-        verify(kodeverkService).dekod(eq(FellesKodeverk.POSTNUMMER), eq("6789"), any(LocalDate.class));
-    }
-
-    private OrganisasjonDokument lagOrganisasjonDokument(String forretningsPostnr, String forretningsGatenavn) {
-        return lagOrganisasjonDokument(forretningsPostnr, forretningsGatenavn, "6789", "NO");
-    }
-
-    private OrganisasjonDokument lagOrganisasjonDokument(String forretningsPostnr, String forretningsGatenavn, String postadressePostnr, String postadresseLand) {
-        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
-        OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
-        organisasjonDokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
-        SemistrukturertAdresse forretningsadresse = new SemistrukturertAdresse();
-        organisasjonsDetaljer.forretningsadresse.add(forretningsadresse);
-        forretningsadresse.setAdresselinje1(forretningsGatenavn);
-        forretningsadresse.setPostnr(forretningsPostnr);
-        forretningsadresse.setPoststed("Forretningspoststed");
-        forretningsadresse.setLandkode("NO");
-        forretningsadresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1)));
-        SemistrukturertAdresse postadresse = new SemistrukturertAdresse();
-        organisasjonsDetaljer.postadresse.add(postadresse);
-        postadresse.setAdresselinje1("Postgatenavn");
-        postadresse.setPostnr(postadressePostnr);
-        postadresse.setPoststed("Postpoststed");
-        postadresse.setLandkode(postadresseLand);
-        postadresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1)));
-
-        return organisasjonDokument;
     }
 }

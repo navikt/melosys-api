@@ -95,8 +95,8 @@ class BrevDataByggerA1Test {
 
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
             registerOppslagService,
-            mock(BehandlingService.class)
-        );
+            mock(BehandlingService.class),
+                kodeverkService);
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
         dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
         brevDataByggerA1 = new BrevDataByggerA1(avklartefaktaService, landvelgerService);

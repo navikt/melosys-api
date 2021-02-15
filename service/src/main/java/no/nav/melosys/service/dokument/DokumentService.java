@@ -22,7 +22,6 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +74,7 @@ public class DokumentService {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Aktoersroller mottakerRolle = brevbestillingDto.mottaker == null ?
             brevmottakerService.avklarMottakerRolleFraDokument(produserbartDokument) : brevbestillingDto.mottaker;
-        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProdserbartDokument(produserbartDokument)
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(produserbartDokument)
             .medAvsenderNavn(SubjectHandler.getInstance().getUserID())
             .medMottakerRolle(mottakerRolle)
             .medBehandling(behandling)
@@ -112,7 +111,7 @@ public class DokumentService {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         // FIXME: Behandling i brevbestilling byttes ut med behandlingId for å samle ansvar for henting av saksopplysninger
         DoksysBrevbestilling nyBrevbestilling = new DoksysBrevbestilling.Builder()
-            .medProdserbartDokument(brevbestilling.getProduserbartdokument())
+            .medProduserbartDokument(brevbestilling.getProduserbartdokument())
             .medAvsenderNavn(brevbestilling.getAvsenderNavn())
             .medMottakerRolle(brevbestilling.getMottakerRolle())
             .medMottakere(brevbestilling.getMottakere())
