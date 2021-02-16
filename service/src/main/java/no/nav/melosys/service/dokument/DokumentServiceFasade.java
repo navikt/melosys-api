@@ -40,7 +40,7 @@ public class DokumentServiceFasade {
                                  BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
         if (dokgenService.erTilgjengeligDokgenmal(produserbartDokument)) {
             return dokgenService.produserBrev(produserbartDokument, behandlingId,
-                Mottaker.av(brevbestillingDto.mottaker).getAktør().getOrgnr(), true);
+                Mottaker.av(brevbestillingDto.getMottaker()).getAktør().getOrgnr(), brevbestillingDto, true);
         }
         return dokumentService.produserUtkast(produserbartDokument, behandlingId, brevbestillingDto);
     }
@@ -52,19 +52,19 @@ public class DokumentServiceFasade {
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(produserbartDokument)
             .medAvsenderNavn(saksbehandler)
-            .medMottakere(Mottaker.av(brevbestillingDto.mottaker))
-            .medBegrunnelseKode(brevbestillingDto.begrunnelseKode)
-            .medYtterligereInformasjon(brevbestillingDto.ytterligereInformasjon)
+            .medMottakere(Mottaker.av(brevbestillingDto.getMottaker()))
+            .medBegrunnelseKode(brevbestillingDto.getBegrunnelseKode())
+            .medYtterligereInformasjon(brevbestillingDto.getYtterligereInformasjon())
             .medBehandling(behandling)
-            .medFritekst(brevbestillingDto.fritekst).build();
-        produserDokument(produserbartDokument, Mottaker.av(brevbestillingDto.mottaker), behandlingId, brevbestilling);
+            .medFritekst(brevbestillingDto.getFritekst()).build();
+        produserDokument(produserbartDokument, Mottaker.av(brevbestillingDto.getMottaker()), behandlingId, brevbestilling, brevbestillingDto);
     }
 
     @Transactional
     public void produserDokument(Produserbaredokumenter produserbartDokument, Mottaker mottaker,
-                                 long behandlingID, DoksysBrevbestilling brevbestilling) throws TekniskException, FunksjonellException {
+                                 long behandlingID, DoksysBrevbestilling brevbestilling, BrevbestillingDto brevbestillingDto) throws TekniskException, FunksjonellException {
         if (dokgenService.erTilgjengeligDokgenmal(produserbartDokument)) {
-            dokgenService.produserOgDistribuerBrev(produserbartDokument, mottaker, behandlingID);
+            dokgenService.produserOgDistribuerBrev(produserbartDokument, behandlingID, brevbestillingDto);
         } else {
             dokumentSystemService.produserDokument(produserbartDokument, mottaker, behandlingID, brevbestilling);
         }

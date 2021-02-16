@@ -138,9 +138,9 @@ public final class DokumentServiceTest {
     }
 
     private static BrevbestillingDto lagBrevBestillingDto(Aktoersroller rolle) {
-        BrevbestillingDto brevbestilling = new BrevbestillingDto();
-        brevbestilling.mottaker = rolle;
-        return brevbestilling;
+        return new BrevbestillingDto.Builder()
+            .medMottaker(rolle)
+            .build();
     }
 
     @Test
@@ -341,7 +341,7 @@ public final class DokumentServiceTest {
 
         BrevDataByggerVelger brevdatabyggervelger = mock(BrevDataByggerVelger.class);
         if (bestillingDto != null) {
-            if (bestillingDto.mottaker == ARBEIDSGIVER) {
+            if (bestillingDto.getMottaker() == ARBEIDSGIVER) {
                 when(brevdatabyggervelger.hent(any(), eq(bestillingDto))).thenReturn(brevDataByggerAvslagArbeidsgiver);
                 when(brevDataByggerAvslagArbeidsgiver.lag(any(), any())).thenReturn(lagBrevDataAvslagArbeidsgiver());
             } else {

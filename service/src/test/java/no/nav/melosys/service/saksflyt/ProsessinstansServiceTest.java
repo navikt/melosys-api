@@ -31,6 +31,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.journalforing.dto.*;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.soknad.SoknadMottatt;
@@ -189,7 +190,7 @@ class ProsessinstansServiceTest {
         mottaker.setAktørId("123");
         mottaker.setOrgnr(null);
 
-        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, behandling, mottaker);
+        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, behandling, mottaker, new BrevbestillingDto.Builder().build());
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
@@ -208,7 +209,7 @@ class ProsessinstansServiceTest {
         mottaker.setAktørId(null);
         mottaker.setOrgnr("987654321");
 
-        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, behandling, mottaker);
+        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, behandling, mottaker, new BrevbestillingDto.Builder().build());
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 

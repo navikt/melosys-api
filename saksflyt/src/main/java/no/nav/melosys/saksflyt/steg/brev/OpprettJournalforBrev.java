@@ -15,6 +15,7 @@ import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.DokgenService;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +62,7 @@ public class OpprettJournalforBrev implements StegBehandler {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         PersonDokument personDokument = behandling.hentPersonDokument();
         Produserbaredokumenter produserbartDokument = prosessinstans.getData(PRODUSERBART_BREV, Produserbaredokumenter.class);
+        BrevbestillingDto brevbestilling = prosessinstans.getData(BREVBESTILLING, BrevbestillingDto.class);
 
         String aktørId = prosessinstans.getData(AKTØR_ID);
         String orgnr = prosessinstans.getData(ORGNR, String.class, null);
@@ -76,7 +78,7 @@ public class OpprettJournalforBrev implements StegBehandler {
             sammensattNavn = tpsFasade.hentSammensattNavn(fnr);
         }
 
-        byte[] pdf = dokgenService.produserBrev(produserbartDokument, behandling.getId(), orgnr);
+        byte[] pdf = dokgenService.produserBrev(produserbartDokument, behandling.getId(), orgnr, brevbestilling);
         log.info("Produserbartdokument {} for behandling {} produsert", produserbartDokument, behandling.getId());
 
         JournalpostBestilling bestilling = new JournalpostBestilling.Builder()

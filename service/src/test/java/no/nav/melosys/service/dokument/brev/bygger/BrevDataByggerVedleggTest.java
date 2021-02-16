@@ -51,10 +51,11 @@ public class BrevDataByggerVedleggTest {
 
     @Test
     public void testByggA1FraForhåndsvisning() throws FunksjonellException, TekniskException {
-        BrevbestillingDto brevbestilling = new BrevbestillingDto();
-        brevbestilling.mottaker = Aktoersroller.BRUKER;
-        brevbestilling.fritekst = "FRITEKST";
-        brevbestilling.begrunnelseKode = "tom";
+        BrevbestillingDto brevbestilling = new BrevbestillingDto.Builder()
+            .medMottaker(Aktoersroller.BRUKER)
+            .medFritekst("FRITEKST")
+            .medBegrunnelseKode("tom")
+            .build();
 
         BrevDataBygger brevDataByggerVedlegg = new BrevDataByggerVedlegg(brevDatabyggerA001, brevbestilling);
         BrevDataVedlegg brevData = (BrevDataVedlegg) brevDataByggerVedlegg.lag(mock(BrevDataGrunnlag.class), "Z123456");

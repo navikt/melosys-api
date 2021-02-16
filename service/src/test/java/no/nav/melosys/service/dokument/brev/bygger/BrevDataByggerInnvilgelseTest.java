@@ -9,10 +9,10 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
 import no.nav.melosys.domain.familie.OmfattetFamilie;
@@ -87,10 +87,11 @@ public class BrevDataByggerInnvilgelseTest {
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new Soeknad());
 
-        brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.mottaker = Aktoersroller.BRUKER;
-        brevbestillingDto.begrunnelseKode = "BEGRUNNELSEKODE";
-        brevbestillingDto.fritekst = "FRITEKST";
+        brevbestillingDto = new BrevbestillingDto.Builder()
+            .medMottaker(Aktoersroller.BRUKER)
+            .medBegrunnelseKode("BEGRUNNELSEKODE")
+            .medFritekst("FRITEKST")
+            .build();
 
         PersonDokument person = new PersonDokument();
         person.sammensattNavn = "Tom Mestokk";
