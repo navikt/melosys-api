@@ -14,6 +14,7 @@ import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1Producer;
@@ -124,6 +125,29 @@ class UtstedtA1ServiceTest {
         assertThat(melding.getSerienummer()).isEqualTo("MEL-123123");
         assertThat(melding.getUtsendtTilLand()).isNull();
         assertThat(melding.getArtikkel()).isEqualTo(Lovvalgsbestemmelse.ART_11_3_a);
+        assertThat(melding.getTypeUtstedelse()).isEqualTo(A1TypeUtstedelse.FØRSTEGANG);
+    }
+
+    @Test
+    void sendMeldingOmUtstedtA1_art12MedTilleggsbestemmelseArt11_forventLandkode() throws Exception {
+        Behandlingsresultat behandlingsresultat = lagBehandlingsresultat(false, lagBehandling(), Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+        behandlingsresultat.getLovvalgsperioder().stream().findFirst().get().setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5);
+
+        when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(behandlingsresultat);
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(BEHANDLING_ID))).thenReturn(List.of(Landkoder.SE));
+        when(utstedtA1Producer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());
+
+        utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID);
+
+        verify(behandlingsresultatService).hentBehandlingsresultat(eq(BEHANDLING_ID));
+        verify(landvelgerService).hentUtenlandskTrygdemyndighetsland(eq(BEHANDLING_ID));
+        verify(utstedtA1Producer).produserMelding(captor.capture());
+
+        UtstedtA1Melding melding = captor.getValue();
+        assertThat(melding).isNotNull();
+        assertThat(melding.getSerienummer()).isEqualTo("MEL-123123");
+        assertThat(melding.getUtsendtTilLand()).isEqualTo("SE");
+        assertThat(melding.getArtikkel()).isEqualTo(Lovvalgsbestemmelse.ART_12_1);
         assertThat(melding.getTypeUtstedelse()).isEqualTo(A1TypeUtstedelse.FØRSTEGANG);
     }
 
