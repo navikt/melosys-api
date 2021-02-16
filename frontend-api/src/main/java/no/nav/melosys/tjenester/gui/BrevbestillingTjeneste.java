@@ -11,8 +11,8 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.brev.BrevmalInnholdService;
-import no.nav.melosys.service.dokument.ProduserBrevDTO;
+import no.nav.melosys.service.brev.BrevbestillingService;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalDto;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalFeltDto;
 import no.nav.melosys.tjenester.gui.dto.brev.FeltType;
@@ -31,16 +31,16 @@ import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 
 @Protected
 @RestController
-@RequestMapping("/brev")
-@Api(tags = {"brev"})
+@RequestMapping("/dokumenter/v2") //TODO Endre url når gjennomtestet
+@Api(tags = {"dokumenterv2"})
 @RequestScope
-public class DokgenBrevTjeneste {
+public class BrevbestillingTjeneste {
 
-    private final BrevmalInnholdService brevmalInnholdService;
+    private final BrevbestillingService brevbestillingService;
 
     @Autowired
-    public DokgenBrevTjeneste(BrevmalInnholdService brevmalInnholdService) {
-        this.brevmalInnholdService = brevmalInnholdService;
+    public BrevbestillingTjeneste(BrevbestillingService brevbestillingService) {
+        this.brevbestillingService = brevbestillingService;
     }
 
     @GetMapping("/tilgjengelige-maler")
@@ -49,26 +49,28 @@ public class DokgenBrevTjeneste {
         return byggBrevmalListe(behandlingId);
     }
 
-    @PostMapping(value = "/produser-utkast/{behandlingID}/{produserbartDokument}", consumes = "application/json", produces = {APPLICATION_PDF_VALUE})
+    @PostMapping(value = "pdf/brev/utkast/{behandlingID}/{produserbartDokument}", consumes = "application/json", produces = {APPLICATION_PDF_VALUE})
     @ApiOperation(value = "Produser utkast")
     public ResponseEntity<byte[]> produserUtkast(@PathVariable long behandlingID,
                                                  @PathVariable Produserbaredokumenter produserbartDokument,
-                                                 @RequestBody ProduserBrevDTO produserBrevDTO) throws FunksjonellException, TekniskException {
-        byte[] pdf = brevmalInnholdService.produserUtkast(produserbartDokument, behandlingID, produserBrevDTO);
+                                                 @RequestBody BrevbestillingDto brevbestillingDto)
+        throws FunksjonellException, TekniskException {
+
+        byte[] pdf = brevbestillingService.produserUtkast(produserbartDokument, behandlingID, brevbestillingDto);
         return new ResponseEntity<>(pdf, genPdfHeaders("utkast_" + behandlingID, false), HttpStatus.OK);
     }
 
-    @PostMapping("/produser-brev/{behandlingID}/{produserbartDokument}")
+    @PostMapping("opprett/{behandlingID}/{produserbartDokument}")
     @ApiOperation(value = "Produser brev gjennom melosys-dokgen")
     public void produserBrev(@PathVariable("behandlingID") long behandlingID,
-                               @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
-                               @RequestBody ProduserBrevDTO produserBrevDTO) {
-        brevmalInnholdService.produserBrev(produserbartDokument, behandlingID, produserBrevDTO);
+                             @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
+                             @RequestBody BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
+        brevbestillingService.produserBrev(produserbartDokument, behandlingID, brevbestillingDto);
     }
 
     private List<BrevmalDto> byggBrevmalListe(long behandlingId) throws IkkeFunnetException, TekniskException {
-        List<Produserbaredokumenter> produserbareDokumenter = brevmalInnholdService.hentBrevMaler(behandlingId);
-        List<AvklartVirksomhet> arbeidsgivere = brevmalInnholdService.hentArbeidsgivere(behandlingId);
+        List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentBrevMaler(behandlingId);
+        List<AvklartVirksomhet> arbeidsgivere = brevbestillingService.hentArbeidsgivere(behandlingId);
 
         List<BrevmalDto> maler = new ArrayList<>();
         produserbareDokumenter.forEach(p -> {

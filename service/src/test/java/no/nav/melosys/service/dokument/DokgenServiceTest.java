@@ -22,6 +22,7 @@ import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
@@ -81,7 +82,7 @@ class DokgenServiceTest {
 
     @Test
     void produserBrevFeilerUtilgjengeligMal() {
-        assertThrows(FunksjonellException.class, () -> dokgenService.produserBrev(ATTEST_A1, 123L, null));
+        assertThrows(FunksjonellException.class, () -> dokgenService.produserBrev(ATTEST_A1, 123L, null, null));
     }
 
     @Test
@@ -94,7 +95,7 @@ class DokgenServiceTest {
         Aktoer mottaker = new Aktoer();
         mottaker.setRolle(Aktoersroller.BRUKER);
 
-        byte[] pdfResponse = dokgenService.produserBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L, mottaker.getOrgnr());
+        byte[] pdfResponse = dokgenService.produserBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L, mottaker.getOrgnr(), new BrevbestillingDto.Builder().build());
 
         assertNotNull(pdfResponse);
         assertEquals(expectedPdf, pdfResponse);
@@ -116,7 +117,7 @@ class DokgenServiceTest {
         mottaker.setRolle(Aktoersroller.REPRESENTANT);
         mottaker.setOrgnr("123456789");
 
-        byte[] pdfResponse = dokgenService.produserBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L, mottaker.getOrgnr());
+        byte[] pdfResponse = dokgenService.produserBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L, mottaker.getOrgnr(), new BrevbestillingDto.Builder().build());
 
         assertNotNull(pdfResponse);
         assertEquals(expectedPdf, pdfResponse);

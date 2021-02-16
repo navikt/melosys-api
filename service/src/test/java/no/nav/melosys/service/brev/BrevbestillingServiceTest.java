@@ -28,7 +28,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class BrevmalInnholdServiceTest {
+class BrevbestillingServiceTest {
 
     @Mock
     private BehandlingService mockBehandlingService;
@@ -42,18 +42,18 @@ class BrevmalInnholdServiceTest {
     @Mock
     private DokgenService mockDokgenService;
 
-    private BrevmalInnholdService brevmalInnholdService;
+    private BrevbestillingService brevbestillingService;
 
     @BeforeEach
     void init() {
-        brevmalInnholdService = new BrevmalInnholdService(mockBehandlingService, mockAvklarteVirksomheterService, mockDokServiceFasade, mockDokgenService);
+        brevbestillingService = new BrevbestillingService(mockBehandlingService, mockAvklarteVirksomheterService, mockDokServiceFasade, mockDokgenService);
     }
 
     @Test
     void gittIkkeAvsluttetBehandlingSkalTilgjengeligeBrevmalerReturneres() throws Exception {
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(new Behandling());
 
-        List<Produserbaredokumenter> brevMaler = brevmalInnholdService.hentBrevMaler(123L);
+        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentBrevMaler(123L);
 
         assertEquals(2, brevMaler.size());
         assertTrue(brevMaler.containsAll(asList(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MANGELBREV_BRUKER)));
@@ -65,7 +65,7 @@ class BrevmalInnholdServiceTest {
         AvklartVirksomhet avklartVirksomhet = new AvklartVirksomhet("Advokatene AS", "123456789", new StrukturertAdresse(), LOENNET_ARBEID);
         when(mockAvklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(singletonList(avklartVirksomhet));
 
-        List<AvklartVirksomhet> arbeidsgivere = brevmalInnholdService.hentArbeidsgivere(123L);
+        List<AvklartVirksomhet> arbeidsgivere = brevbestillingService.hentArbeidsgivere(123L);
 
         assertEquals(1, arbeidsgivere.size());
         AvklartVirksomhet virksomhet = arbeidsgivere.get(0);

@@ -5,7 +5,7 @@ import java.util.List;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.brev.BrevmalInnholdService;
+import no.nav.melosys.service.brev.BrevbestillingService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalDto;
@@ -20,7 +20,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class DokgenBrevTjenesteTest {
+class BrevbestillingTjenesteTest {
 
     @Mock
     private BehandlingService mockBehandlingService;
@@ -34,19 +34,19 @@ class DokgenBrevTjenesteTest {
     @Mock
     private DokgenService mockDokgenService;
 
-    private DokgenBrevTjeneste dokgenBrevTjeneste;
+    private BrevbestillingTjeneste brevbestillingTjeneste;
 
     @BeforeEach
     void init() {
-        BrevmalInnholdService brevmalInnholdService = new BrevmalInnholdService(mockBehandlingService, mockAvklarteVirksomheterService, mockDokServiceFasade, mockDokgenService);
-        dokgenBrevTjeneste = new DokgenBrevTjeneste(brevmalInnholdService);
+        BrevbestillingService brevbestillingService = new BrevbestillingService(mockBehandlingService, mockAvklarteVirksomheterService, mockDokServiceFasade, mockDokgenService);
+        brevbestillingTjeneste = new BrevbestillingTjeneste(brevbestillingService);
     }
 
     @Test
     void skalReturnereTilgjengeligeBrevmaler() throws Exception {
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(new Behandling());
 
-        List<BrevmalDto> brevmaler = dokgenBrevTjeneste.hentTilgjengeligeMaler(123L);
+        List<BrevmalDto> brevmaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
         assertEquals(2, brevmaler.size());
     }
 

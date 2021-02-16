@@ -15,7 +15,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
-import no.nav.melosys.service.dokument.ProduserBrevDTO;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +24,7 @@ import static java.util.Collections.emptyList;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 
 @Service
-public class BrevmalInnholdService {
+public class BrevbestillingService {
 
     private final BehandlingService behandlingService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
@@ -32,7 +32,7 @@ public class BrevmalInnholdService {
     private final DokgenService dokgenService;
 
     @Autowired
-    public BrevmalInnholdService(BehandlingService behandlingService, AvklarteVirksomheterService avklarteVirksomheterService,
+    public BrevbestillingService(BehandlingService behandlingService, AvklarteVirksomheterService avklarteVirksomheterService,
                                  DokumentServiceFasade dokumentServiceFasade, DokgenService dokgenService) {
         this.behandlingService = behandlingService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
@@ -52,27 +52,13 @@ public class BrevmalInnholdService {
         return avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling);
     }
 
-    public void produserBrev(Produserbaredokumenter produserbartDokument, long behandlingID, ProduserBrevDTO produserBrevDTO) {
-//        dokumentServiceFasade.produserDokument(produserbaredokumenter, mottaker, behandlingId);
+    public void produserBrev(Produserbaredokumenter produserbartDokument, long behandlingID, BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
+        dokgenService.produserOgDistribuerBrev(produserbartDokument, behandlingID, brevbestillingDto);
     }
 
-    public byte[] produserUtkast(Produserbaredokumenter produserbartDokument, long behandlingID, ProduserBrevDTO produserBrevDTO)
+    public byte[] produserUtkast(Produserbaredokumenter produserbartDokument, long behandlingID, BrevbestillingDto brevbestillingDto)
         throws FunksjonellException, TekniskException {
-        DokgenBrevbestilling.Builder<?> brevbestilling = new DokgenBrevbestilling.Builder<>();
 
-        if (MANGELBREV_BRUKER == produserbartDokument || MANGELBREV_ARBEIDSGIVER == produserbartDokument) {
-            brevbestilling = new MangelbrevBrevbestilling.Builder()
-                .medInnledningFritekst(produserBrevDTO.getInnledningFritekst())
-                .medManglerInfoFritekst(produserBrevDTO.getManglerFritekst())
-                .medFullmektigNavn(produserBrevDTO.getFullmektigNavn());
-        }
-
-        brevbestilling
-            .medProduserbartdokument(produserbartDokument)
-            .medBehandlingId(behandlingID)
-            .medMottaker(Mottaker.av(produserBrevDTO.getMottaker()).getAktør())
-            .medBestillKopi(true);
-
-        return dokgenService.produserBrev(brevbestilling.build());
+        return dokumentServiceFasade.produserUtkast(produserbartDokument, behandlingID, brevbestillingDto);
     }
 }

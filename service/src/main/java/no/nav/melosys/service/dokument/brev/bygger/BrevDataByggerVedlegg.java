@@ -35,8 +35,8 @@ public class BrevDataByggerVedlegg implements BrevDataBygger {
         }
 
         if (brevbestillingDto != null) {
-            brevData.fritekst = brevbestillingDto.fritekst;
-            brevData.begrunnelseKode = brevbestillingDto.begrunnelseKode;
+            brevData.fritekst = brevbestillingDto.getFritekst();
+            brevData.begrunnelseKode = brevbestillingDto.getBegrunnelseKode();
         }
 
         return brevData;
