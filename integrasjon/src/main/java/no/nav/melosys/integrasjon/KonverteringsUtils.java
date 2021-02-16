@@ -24,7 +24,7 @@ public final class KonverteringsUtils {
     }
 
     public static XMLGregorianCalendar localDateToXMLGregorianCalendar(LocalDate localDate) throws DatatypeConfigurationException {
-        return localDateTimeToXMLGregorianCalendar(localDate.atStartOfDay());
+        return localDate != null ? localDateTimeToXMLGregorianCalendar(localDate.atStartOfDay()) : null;
     }
 
     public static Instant xmlGregorianCalendarToInstant(XMLGregorianCalendar xmlGregorianCalendar) {
