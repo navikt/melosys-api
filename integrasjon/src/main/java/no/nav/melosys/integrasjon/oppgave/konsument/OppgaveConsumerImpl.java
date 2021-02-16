@@ -64,13 +64,13 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
     }
 
     @Override
-    public void oppdaterOppgave(OppgaveDto request) throws FunksjonellException, TekniskException {
-        webClient.put()
+    public OppgaveDto oppdaterOppgave(OppgaveDto request) throws FunksjonellException, TekniskException {
+        return webClient.put()
             .uri(uriBuilder -> uriBuilder.path("/{oppgaveID}").build(request.getId()))
             .bodyValue(request)
             .retrieve()
             .onStatus(HttpStatus::isError, this::håndterFeil)
-            .toBodilessEntity()
+            .bodyToMono(OppgaveDto.class)
             .block();
     }
 

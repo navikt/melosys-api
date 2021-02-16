@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
@@ -106,14 +108,16 @@ class OppgaveConsumerImplTest {
     }
 
     @Test
-    void oppdaterOppgave_oppgaveOppdateres_ingenRetur() throws Exception {
+    void oppdaterOppgave_oppgaveOppdateres_verifiserMapping() throws Exception {
         mockServer.enqueue(
             new MockResponse()
                 .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(testFil(OPPGAVE_GET_JSON_PATH))
         );
 
-        oppgaveConsumer.oppdaterOppgave(new OppgaveDto());
+        assertThat(oppgaveConsumer.oppdaterOppgave(new OppgaveDto()))
+            .extracting(OppgaveDto::getId)
+            .isEqualTo("11519");
     }
 
     @Test
@@ -132,7 +136,9 @@ class OppgaveConsumerImplTest {
         return new String(
             Files.readAllBytes(
                 Paths.get(
-                    getClass().getClassLoader().getResource(path).toURI()
+                    Optional.ofNullable(getClass().getClassLoader().getResource(path))
+                    .orElseThrow(() -> new NoSuchElementException("Ingen fil " + path))
+                    .toURI()
                 )
             )
         );

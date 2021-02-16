@@ -14,7 +14,7 @@ public interface OppgaveConsumer {
 
     List<OppgaveDto> hentOppgaveListe(OppgaveSearchRequest oppgaveSearchRequest) throws FunksjonellException, TekniskException;
 
-    void oppdaterOppgave(OppgaveDto request) throws FunksjonellException, TekniskException;
+    OppgaveDto oppdaterOppgave(OppgaveDto request) throws FunksjonellException, TekniskException;
 
     String opprettOppgave(OpprettOppgaveDto request) throws FunksjonellException, TekniskException;
 }
