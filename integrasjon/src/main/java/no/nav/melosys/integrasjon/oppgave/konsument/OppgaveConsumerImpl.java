@@ -1,7 +1,10 @@
 package no.nav.melosys.integrasjon.oppgave.konsument;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.felles.FeilResponseDto;
@@ -50,9 +53,9 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
                     .queryParam("limit", OPPGAVE_ANTALL_LIMIT)
                     .queryParamIfPresent("behandlingstype", Optional.ofNullable(oppgaveSearchRequest.getBehandlingstype()))
                     .queryParamIfPresent("behandlingstema", Optional.ofNullable(oppgaveSearchRequest.getBehandlingstema()))
-                    .queryParamIfPresent("oppgavetype", arrayTilQueryParam(oppgaveSearchRequest.getOppgavetype()))
-                    .queryParamIfPresent("saksreferanse", arrayTilQueryParam(oppgaveSearchRequest.getSaksreferanse()))
-                    .queryParamIfPresent("tema", arrayTilQueryParam(oppgaveSearchRequest.getTema()))
+                    .queryParamIfPresent("oppgavetype", tilOptionalListe(oppgaveSearchRequest.getOppgavetype()))
+                    .queryParamIfPresent("saksreferanse", tilOptionalListe(oppgaveSearchRequest.getSaksreferanse()))
+                    .queryParamIfPresent("tema", tilOptionalListe(oppgaveSearchRequest.getTema()))
                     .build()
             ).header(CORRELATION_ID, getCallID())
             .retrieve()
@@ -62,8 +65,8 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
             .block();
     }
 
-    private Optional<String> arrayTilQueryParam(String[] array) {
-        return array != null ? Optional.of(String.join(",", array)) : Optional.empty();
+    private Optional<Collection<String>> tilOptionalListe(String[] array) {
+        return array != null ? Optional.of(Arrays.stream(array).collect(Collectors.toList())) : Optional.empty();
     }
 
     @Override
