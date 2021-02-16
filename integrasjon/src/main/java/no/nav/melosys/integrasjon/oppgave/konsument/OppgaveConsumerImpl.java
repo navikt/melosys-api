@@ -81,9 +81,8 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
             .retrieve()
             .onStatus(HttpStatus::isError, this::håndterFeil)
             .bodyToMono(OppgaveDto.class)
-            .blockOptional()
             .map(OppgaveDto::getId)
-            .orElseThrow(() -> new IllegalStateException("Feil"));
+            .block();
     }
 
     private Mono<Exception> håndterFeil(ClientResponse clientResponse) {
