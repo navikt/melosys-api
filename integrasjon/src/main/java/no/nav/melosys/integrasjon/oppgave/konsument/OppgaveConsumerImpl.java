@@ -17,6 +17,7 @@ import reactor.core.publisher.Mono;
 public class OppgaveConsumerImpl implements OppgaveConsumer {
 
     private static final int OPPGAVE_ANTALL_LIMIT = 100;
+    private static final String CORRELATION_ID = "X-Correlation-ID";
 
     private final WebClient webClient;
 
@@ -28,6 +29,7 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
     public OppgaveDto hentOppgave(String oppgaveId) {
         return webClient.get()
             .uri(uri -> uri.path("/{oppgaveID}").build(oppgaveId))
+            .header(CORRELATION_ID, getCallID())
             .retrieve()
             .onStatus(HttpStatus::isError, this::håndterFeil)
             .bodyToMono(OppgaveDto.class)
@@ -52,7 +54,8 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
                     .queryParamIfPresent("saksreferanse", arrayTilQueryParam(oppgaveSearchRequest.getSaksreferanse()))
                     .queryParamIfPresent("tema", arrayTilQueryParam(oppgaveSearchRequest.getTema()))
                     .build()
-            ).retrieve()
+            ).header(CORRELATION_ID, getCallID())
+            .retrieve()
             .onStatus(HttpStatus::isError, this::håndterFeil)
             .bodyToMono(OppgaveSvar.class)
             .map(OppgaveSvar::getOppgaver)
@@ -67,6 +70,7 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
     public OppgaveDto oppdaterOppgave(OppgaveDto request) throws FunksjonellException, TekniskException {
         return webClient.put()
             .uri(uriBuilder -> uriBuilder.path("/{oppgaveID}").build(request.getId()))
+            .header(CORRELATION_ID, getCallID())
             .bodyValue(request)
             .retrieve()
             .onStatus(HttpStatus::isError, this::håndterFeil)
@@ -77,6 +81,7 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
     @Override
     public String opprettOppgave(OpprettOppgaveDto request) throws FunksjonellException, TekniskException {
         return webClient.post()
+            .header(CORRELATION_ID, getCallID())
             .bodyValue(request)
             .retrieve()
             .onStatus(HttpStatus::isError, this::håndterFeil)
