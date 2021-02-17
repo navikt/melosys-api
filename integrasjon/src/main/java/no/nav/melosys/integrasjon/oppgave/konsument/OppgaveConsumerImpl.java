@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono;
 public class OppgaveConsumerImpl implements OppgaveConsumer, RestConsumer {
 
     // Oppgave (/Abac) kaster feil om svaret på et søk inneholder oppgaver med 50+ unike personer
-    private static final int OPPGAVE_ANTALL_ABAC_LIMIT = 50;
+    private static final int OPPGAVE_ANTALL_ABAC_LIMIT = 40;
     private static final String CORRELATION_ID = "X-Correlation-ID";
 
     private final WebClient webClient;
