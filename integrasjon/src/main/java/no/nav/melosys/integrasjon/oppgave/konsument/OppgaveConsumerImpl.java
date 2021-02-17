@@ -17,7 +17,8 @@ import reactor.core.publisher.Mono;
 
 public class OppgaveConsumerImpl implements OppgaveConsumer, RestConsumer {
 
-    private static final int OPPGAVE_ANTALL_LIMIT = 50;
+    // Oppgave (/Abac) kaster feil om svaret på et søk inneholder oppgaver med 50+ unike personer
+    private static final int OPPGAVE_ANTALL_ABAC_LIMIT = 50;
     private static final String CORRELATION_ID = "X-Correlation-ID";
 
     private final WebClient webClient;
@@ -52,7 +53,7 @@ public class OppgaveConsumerImpl implements OppgaveConsumer, RestConsumer {
                     .queryParamIfPresent("tilordnetRessurs", Optional.ofNullable(oppgaveSearchRequest.getTilordnetRessurs()))
                     .queryParamIfPresent("statuskategori", Optional.ofNullable(oppgaveSearchRequest.getStatusKategori()))
                     .queryParamIfPresent("behandlesAvApplikasjon", Optional.ofNullable(oppgaveSearchRequest.getBehandlesAvApplikasjon()))
-                    .queryParam("limit", OPPGAVE_ANTALL_LIMIT)
+                    .queryParam("limit", OPPGAVE_ANTALL_ABAC_LIMIT)
                     .queryParam("offset", offset)
                     .queryParamIfPresent("behandlingstype", Optional.ofNullable(oppgaveSearchRequest.getBehandlingstype()))
                     .queryParamIfPresent("behandlingstema", Optional.ofNullable(oppgaveSearchRequest.getBehandlingstema()))
@@ -71,8 +72,8 @@ public class OppgaveConsumerImpl implements OppgaveConsumer, RestConsumer {
         }
 
         List<OppgaveDto> oppgaveListe = new ArrayList<>(svar.getOppgaver());
-        if (svar.getAntallTreffTotalt() > offset + OPPGAVE_ANTALL_LIMIT) {
-            oppgaveListe.addAll(hentOppgaveListe(oppgaveSearchRequest, offset + OPPGAVE_ANTALL_LIMIT));
+        if (svar.getAntallTreffTotalt() > offset + OPPGAVE_ANTALL_ABAC_LIMIT) {
+            oppgaveListe.addAll(hentOppgaveListe(oppgaveSearchRequest, offset + OPPGAVE_ANTALL_ABAC_LIMIT));
         }
         return oppgaveListe;
     }
