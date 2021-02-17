@@ -47,6 +47,7 @@ public class OppgaveConsumerImpl implements OppgaveConsumer, RestConsumer {
         OppgaveSvar svar = webClient.get()
             .uri(uriBuilder ->
                 uriBuilder
+                    .queryParamIfPresent("aktoerId", Optional.ofNullable(oppgaveSearchRequest.getAktørId()))
                     .queryParamIfPresent("tildeltEnhetsnr", Optional.ofNullable(oppgaveSearchRequest.getTildeltEnhetsnr()))
                     .queryParamIfPresent("tildeltRessurs", Optional.ofNullable(oppgaveSearchRequest.getTildeltRessurs()))
                     .queryParamIfPresent("sorteringsfelt", Optional.ofNullable(oppgaveSearchRequest.getSorteringsfelt()))
