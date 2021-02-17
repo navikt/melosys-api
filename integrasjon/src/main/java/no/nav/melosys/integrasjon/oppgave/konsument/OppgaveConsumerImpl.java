@@ -1,9 +1,6 @@
 package no.nav.melosys.integrasjon.oppgave.konsument;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.exception.*;
@@ -20,7 +17,8 @@ import reactor.core.publisher.Mono;
 
 public class OppgaveConsumerImpl implements OppgaveConsumer, RestConsumer {
 
-    private static final int OPPGAVE_ANTALL_LIMIT = 100;
+    // Oppgave (/Abac) kaster feil om svaret på et søk inneholder oppgaver med 50+ unike personer
+    private static final int OPPGAVE_ANTALL_ABAC_LIMIT = 50;
     private static final String CORRELATION_ID = "X-Correlation-ID";
 
     private final WebClient webClient;
@@ -41,8 +39,12 @@ public class OppgaveConsumerImpl implements OppgaveConsumer, RestConsumer {
     }
 
     @Override
-    public List<OppgaveDto> hentOppgaveListe(OppgaveSearchRequest oppgaveSearchRequest) {
-        return webClient.get()
+    public List<OppgaveDto> hentOppgaveListe(OppgaveSearchRequest oppgaveSearchRequest) throws IntegrasjonException {
+        return hentOppgaveListe(oppgaveSearchRequest, 0);
+    }
+
+    private List<OppgaveDto> hentOppgaveListe(OppgaveSearchRequest oppgaveSearchRequest, int offset) throws IntegrasjonException {
+        OppgaveSvar svar = webClient.get()
             .uri(uriBuilder ->
                 uriBuilder
                     .queryParamIfPresent("tildeltEnhetsnr", Optional.ofNullable(oppgaveSearchRequest.getTildeltEnhetsnr()))
@@ -51,7 +53,8 @@ public class OppgaveConsumerImpl implements OppgaveConsumer, RestConsumer {
                     .queryParamIfPresent("tilordnetRessurs", Optional.ofNullable(oppgaveSearchRequest.getTilordnetRessurs()))
                     .queryParamIfPresent("statuskategori", Optional.ofNullable(oppgaveSearchRequest.getStatusKategori()))
                     .queryParamIfPresent("behandlesAvApplikasjon", Optional.ofNullable(oppgaveSearchRequest.getBehandlesAvApplikasjon()))
-                    .queryParam("limit", OPPGAVE_ANTALL_LIMIT)
+                    .queryParam("limit", OPPGAVE_ANTALL_ABAC_LIMIT)
+                    .queryParam("offset", offset)
                     .queryParamIfPresent("behandlingstype", Optional.ofNullable(oppgaveSearchRequest.getBehandlingstype()))
                     .queryParamIfPresent("behandlingstema", Optional.ofNullable(oppgaveSearchRequest.getBehandlingstema()))
                     .queryParamIfPresent("oppgavetype", tilOptionalListe(oppgaveSearchRequest.getOppgavetype()))
@@ -62,8 +65,17 @@ public class OppgaveConsumerImpl implements OppgaveConsumer, RestConsumer {
             .retrieve()
             .onStatus(HttpStatus::isError, this::håndterFeil)
             .bodyToMono(OppgaveSvar.class)
-            .map(OppgaveSvar::getOppgaver)
             .block();
+
+        if (svar == null) {
+            throw new IntegrasjonException("Feil i integrasjon mot Oppgave");
+        }
+
+        List<OppgaveDto> oppgaveListe = new ArrayList<>(svar.getOppgaver());
+        if (svar.getAntallTreffTotalt() > offset + OPPGAVE_ANTALL_ABAC_LIMIT) {
+            oppgaveListe.addAll(hentOppgaveListe(oppgaveSearchRequest, offset + OPPGAVE_ANTALL_ABAC_LIMIT));
+        }
+        return oppgaveListe;
     }
 
     private Optional<Collection<String>> tilOptionalListe(String[] array) {
