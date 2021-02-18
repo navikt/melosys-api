@@ -16,7 +16,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 public class OppgaveConsumerImpl implements OppgaveConsumer, RestConsumer {
-
     // Oppgave (/Abac) kaster feil om svaret på et søk inneholder oppgaver med 50+ unike personer
     private static final int OPPGAVE_ANTALL_ABAC_LIMIT = 40;
     private static final String CORRELATION_ID = "X-Correlation-ID";
@@ -39,12 +38,24 @@ public class OppgaveConsumerImpl implements OppgaveConsumer, RestConsumer {
     }
 
     @Override
-    public List<OppgaveDto> hentOppgaveListe(OppgaveSearchRequest oppgaveSearchRequest) throws IntegrasjonException {
+    public List<OppgaveDto> hentOppgaveListe(OppgaveSearchRequest oppgaveSearchRequest) {
         return hentOppgaveListe(oppgaveSearchRequest, 0);
     }
 
-    private List<OppgaveDto> hentOppgaveListe(OppgaveSearchRequest oppgaveSearchRequest, int offset) throws IntegrasjonException {
-        OppgaveSvar svar = webClient.get()
+    private List<OppgaveDto> hentOppgaveListe(OppgaveSearchRequest oppgaveSearchRequest, int offset) {
+        final OppgaveSvar oppgaveSvar = hentOppgaveSvar(oppgaveSearchRequest, offset);
+        if (oppgaveSvar == null) {
+            return Collections.emptyList();
+        }
+        List<OppgaveDto> oppgaveListe = oppgaveSvar.getOppgaver();
+        if (oppgaveSvar.getAntallTreffTotalt() > offset + OPPGAVE_ANTALL_ABAC_LIMIT) {
+            oppgaveListe.addAll(hentOppgaveListe(oppgaveSearchRequest, offset + OPPGAVE_ANTALL_ABAC_LIMIT));
+        }
+        return oppgaveListe;
+    }
+
+    private OppgaveSvar hentOppgaveSvar(OppgaveSearchRequest oppgaveSearchRequest, int offset) {
+        return webClient.get()
             .uri(uriBuilder ->
                 uriBuilder
                     .queryParamIfPresent("aktoerId", Optional.ofNullable(oppgaveSearchRequest.getAktørId()))
@@ -67,16 +78,6 @@ public class OppgaveConsumerImpl implements OppgaveConsumer, RestConsumer {
             .onStatus(HttpStatus::isError, this::håndterFeil)
             .bodyToMono(OppgaveSvar.class)
             .block();
-
-        if (svar == null) {
-            throw new IntegrasjonException("Feil i integrasjon mot Oppgave");
-        }
-
-        List<OppgaveDto> oppgaveListe = new ArrayList<>(svar.getOppgaver());
-        if (svar.getAntallTreffTotalt() > offset + OPPGAVE_ANTALL_ABAC_LIMIT) {
-            oppgaveListe.addAll(hentOppgaveListe(oppgaveSearchRequest, offset + OPPGAVE_ANTALL_ABAC_LIMIT));
-        }
-        return oppgaveListe;
     }
 
     private Optional<Collection<String>> tilOptionalListe(String[] array) {
