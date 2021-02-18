@@ -132,8 +132,8 @@ public class JsonSchemaValidator {
     }
 
     private String formaterMelding(ValidationMessage validationMessage, String json) {
-        String verdi = JsonPath.read(json, validationMessage.getPath());
+        final Object objekt = JsonPath.read(json, validationMessage.getPath());
         String sti = validationMessage.getPath();
-        return validationMessage.getMessage().replace(sti, sti + " [" + verdi + "]");
+        return validationMessage.getMessage().replace(sti, sti + " [" + objekt.toString() + "]");
     }
 }
