@@ -8,7 +8,6 @@ import no.nav.melosys.tjenester.gui.dto.RepresentantDataDto;
 import no.nav.melosys.tjenester.gui.dto.RepresentantDto;
 import no.nav.melosys.tjenester.gui.dto.ValgtRepresentantDto;
 import no.nav.security.token.support.core.api.Protected;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,7 +31,6 @@ public class RepresentantTjeneste {
         this.representantService = representantService;
     }
 
-    @Cacheable("representantListeCache")
     @GetMapping("/liste")
     public ResponseEntity<List<RepresentantDto>> hentRepresentantListe(){
         return ResponseEntity.ok(
@@ -42,7 +40,6 @@ public class RepresentantTjeneste {
                 .collect(Collectors.toList())
         );
     }
-    @Cacheable("representantDataCache")
     @GetMapping("/{representantnummer}")
     public ResponseEntity<RepresentantDataDto> hentRepresentant(@PathVariable("representantnummer") String representantnummer){
         return ResponseEntity.ok(

@@ -84,7 +84,6 @@
         <springfox.version>3.0.0</springfox.version>
         <swagger.version>1.5.21</swagger.version>
         <unleash.version>3.3.4</unleash.version>
-        <caffeine.version>2.8.8</caffeine.version>
 
         <!-- Transitive avhengiheter -->
         <asm.version>9.0</asm.version>
