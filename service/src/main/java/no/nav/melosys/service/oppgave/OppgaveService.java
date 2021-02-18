@@ -2,12 +2,13 @@ package no.nav.melosys.service.oppgave;
 
 
 import java.util.*;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -157,12 +158,21 @@ public class OppgaveService {
         oppgaveFasade.oppdaterOppgave(oppgaveID, OppgaveOppdatering.builder().tilordnetRessurs(saksbehandler).build());
     }
 
-    private List<OppgaveDto> oppgaverTilDtoer(Collection<Oppgave> oppgaverFraDomain) throws TekniskException, FunksjonellException {
-        List<OppgaveDto> res = new ArrayList<>();
-        for (Oppgave o : oppgaverFraDomain) {
-            res.add(tilOppgaveDto(o));
+    private List<OppgaveDto> oppgaverTilDtoer(Collection<Oppgave> oppgaverFraDomain) {
+        return oppgaverFraDomain.stream()
+            .map(this::tilOppgaveDtoHåndterException)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+    }
+
+    @Nullable
+    private OppgaveDto tilOppgaveDtoHåndterException(Oppgave oppgave) {
+        try {
+            return tilOppgaveDto(oppgave);
+        } catch (Exception e) {
+            log.error("Kan ikke mappe oppgave {}", oppgave.getOppgaveId(), e);
+            return null;
         }
-        return res;
     }
 
     private OppgaveDto tilOppgaveDto(Oppgave oppgave) throws TekniskException, FunksjonellException {

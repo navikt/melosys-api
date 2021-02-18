@@ -40,14 +40,26 @@ public class ProsessinstansAdminTjeneste implements AdminTjeneste {
     }
 
     @GetMapping("/feilede")
-    public ResponseEntity<List<HentProsessinstansDto>> hentFeiledeProsessinstanser(@RequestHeader(API_KEY_HEADER) String apiKey) throws SikkerhetsbegrensningException {
+    public ResponseEntity<List<HentProsessinstansDto>> hentFeiledeProsessinstanser(
+        @RequestHeader(API_KEY_HEADER) String apiKey) throws SikkerhetsbegrensningException {
 
         validerApikey(apiKey);
+        return ResponseEntity.ok(prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET).stream().map(
+            HentProsessinstansDto::new).collect(Collectors.toList()));
+    }
+
+    @PostMapping("/feilede/restart")
+    public ResponseEntity<List<HentProsessinstansDto>> restartAlleFeiledeProsessinstanser(
+        @RequestHeader(API_KEY_HEADER) String apiKey) throws SikkerhetsbegrensningException {
+        validerApikey(apiKey);
+        Collection<Prosessinstans> prosessinstanser = prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET);
+        prosessinstanser.forEach(p -> p.setStatus(ProsessStatus.RESTARTET));
+
+        prosessinstansRepository
+            .saveAll(prosessinstanser)
+            .forEach(saksflytAsyncDelegate::behandleProsessinstans);
         return ResponseEntity.ok(
-            prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET).stream()
-            .map(HentProsessinstansDto::new)
-            .collect(Collectors.toList())
-        );
+            prosessinstanser.stream().map(HentProsessinstansDto::new).collect(Collectors.toList()));
     }
 
     @PostMapping("/restart")

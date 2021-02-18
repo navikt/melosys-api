@@ -1,13 +1,11 @@
 package no.nav.melosys.integrasjon.oppgave.konsument;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.felles.FeilResponseDto;
+import no.nav.melosys.integrasjon.felles.RestConsumer;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSvar;
@@ -17,9 +15,9 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-public class OppgaveConsumerImpl implements OppgaveConsumer {
-
-    private static final int OPPGAVE_ANTALL_LIMIT = 100;
+public class OppgaveConsumerImpl implements OppgaveConsumer, RestConsumer {
+    // Oppgave (/Abac) kaster feil om svaret på et søk inneholder oppgaver med 50+ unike personer
+    private static final int OPPGAVE_ANTALL_ABAC_LIMIT = 40;
     private static final String CORRELATION_ID = "X-Correlation-ID";
 
     private final WebClient webClient;
@@ -41,16 +39,34 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
 
     @Override
     public List<OppgaveDto> hentOppgaveListe(OppgaveSearchRequest oppgaveSearchRequest) {
+        return hentOppgaveListe(oppgaveSearchRequest, 0);
+    }
+
+    private List<OppgaveDto> hentOppgaveListe(OppgaveSearchRequest oppgaveSearchRequest, int offset) {
+        final OppgaveSvar oppgaveSvar = hentOppgaveSvar(oppgaveSearchRequest, offset);
+        if (oppgaveSvar == null) {
+            return Collections.emptyList();
+        }
+        List<OppgaveDto> oppgaveListe = new ArrayList<>(oppgaveSvar.getOppgaver());
+        if (oppgaveSvar.getAntallTreffTotalt() > offset + OPPGAVE_ANTALL_ABAC_LIMIT) {
+            oppgaveListe.addAll(hentOppgaveListe(oppgaveSearchRequest, offset + OPPGAVE_ANTALL_ABAC_LIMIT));
+        }
+        return oppgaveListe;
+    }
+
+    private OppgaveSvar hentOppgaveSvar(OppgaveSearchRequest oppgaveSearchRequest, int offset) {
         return webClient.get()
             .uri(uriBuilder ->
                 uriBuilder
+                    .queryParamIfPresent("aktoerId", Optional.ofNullable(oppgaveSearchRequest.getAktørId()))
                     .queryParamIfPresent("tildeltEnhetsnr", Optional.ofNullable(oppgaveSearchRequest.getTildeltEnhetsnr()))
                     .queryParamIfPresent("tildeltRessurs", Optional.ofNullable(oppgaveSearchRequest.getTildeltRessurs()))
                     .queryParamIfPresent("sorteringsfelt", Optional.ofNullable(oppgaveSearchRequest.getSorteringsfelt()))
                     .queryParamIfPresent("tilordnetRessurs", Optional.ofNullable(oppgaveSearchRequest.getTilordnetRessurs()))
                     .queryParamIfPresent("statuskategori", Optional.ofNullable(oppgaveSearchRequest.getStatusKategori()))
                     .queryParamIfPresent("behandlesAvApplikasjon", Optional.ofNullable(oppgaveSearchRequest.getBehandlesAvApplikasjon()))
-                    .queryParam("limit", OPPGAVE_ANTALL_LIMIT)
+                    .queryParam("limit", OPPGAVE_ANTALL_ABAC_LIMIT)
+                    .queryParam("offset", offset)
                     .queryParamIfPresent("behandlingstype", Optional.ofNullable(oppgaveSearchRequest.getBehandlingstype()))
                     .queryParamIfPresent("behandlingstema", Optional.ofNullable(oppgaveSearchRequest.getBehandlingstema()))
                     .queryParamIfPresent("oppgavetype", tilOptionalListe(oppgaveSearchRequest.getOppgavetype()))
@@ -61,7 +77,6 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
             .retrieve()
             .onStatus(HttpStatus::isError, this::håndterFeil)
             .bodyToMono(OppgaveSvar.class)
-            .map(OppgaveSvar::getOppgaver)
             .block();
     }
 

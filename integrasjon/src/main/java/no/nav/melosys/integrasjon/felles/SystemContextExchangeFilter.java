@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.felles;
 
 import javax.annotation.Nonnull;
 
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.reststs.RestStsClient;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
@@ -26,14 +25,9 @@ public class SystemContextExchangeFilter implements ExchangeFilterFunction {
     public Mono<ClientResponse> filter(@Nonnull final ClientRequest clientRequest,
                                        @Nonnull final ExchangeFunction exchangeFunction) {
         ClientRequest clientRequestWithBearerAuth;
-        try {
-            clientRequestWithBearerAuth = ClientRequest.from(clientRequest)
-                .header(HttpHeaders.AUTHORIZATION, restStsClient.bearerToken())
-                .build();
-        } catch (MelosysException e) {
-            //FIXME: MelosysException -> unchecked
-            throw new RuntimeException(e);
-        }
+        clientRequestWithBearerAuth = ClientRequest.from(clientRequest)
+            .header(HttpHeaders.AUTHORIZATION, restStsClient.basicAuth())
+            .build();
         return exchangeFunction.exchange(clientRequestWithBearerAuth);
     }
 }
