@@ -74,7 +74,7 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
 
     private DoksysBrevbestilling lagBrevBestilling(Prosessinstans prosessinstans) throws IkkeFunnetException {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
-        return new DoksysBrevbestilling.Builder().medProdserbartDokument(Produserbaredokumenter.ANMODNING_UNNTAK)
+        return new DoksysBrevbestilling.Builder().medProduserbartDokument(Produserbaredokumenter.ANMODNING_UNNTAK)
             .medAvsenderNavn(hentSaksbehandler(prosessinstans))
             .medMottakere(Mottaker.av(MYNDIGHET))
             .medBehandling(behandling)

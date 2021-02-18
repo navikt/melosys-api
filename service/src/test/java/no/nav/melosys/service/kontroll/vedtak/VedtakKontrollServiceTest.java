@@ -12,7 +12,7 @@ import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ArbeidUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
@@ -128,7 +128,7 @@ public class VedtakKontrollServiceTest {
     public void utførKontroller_arbeidsstedManglerFelter_returnererKode() throws FunksjonellException, TekniskException {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
-        behandlingsgrunnlagData.arbeidUtland = List.of(new ArbeidUtland());
+        behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidssteder = List.of(new FysiskArbeidssted());
 
         Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
         assertThat(resultat)

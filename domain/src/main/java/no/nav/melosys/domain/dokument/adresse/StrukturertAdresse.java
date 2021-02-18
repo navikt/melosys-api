@@ -14,9 +14,26 @@ public class StrukturertAdresse extends Adresse {
     public String gatenavn;
     // Sammensatt av husnummer og husbokstav
     public String husnummer;
-    public String region;
     public String postnummer;
     public String poststed;
+    public String region;
+
+    public StrukturertAdresse() {
+    }
+
+    public StrukturertAdresse(String gatenavn,
+                              String husnummer,
+                              String postnummer,
+                              String poststed,
+                              String region,
+                              String landkode) {
+        this.gatenavn = gatenavn;
+        this.husnummer = husnummer;
+        this.region = region;
+        this.postnummer = postnummer;
+        this.poststed = poststed;
+        this.landkode = landkode;
+    }
 
     public static StrukturertAdresse av(Bostedsadresse bostedsadresse) {
         Gateadresse gateadresse = bostedsadresse.getGateadresse();

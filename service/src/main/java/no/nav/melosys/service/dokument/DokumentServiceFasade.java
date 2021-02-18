@@ -59,7 +59,7 @@ public class DokumentServiceFasade {
                                  BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
         String saksbehandler = SubjectHandler.getInstance().getUserID();
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
-        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProdserbartDokument(produserbartDokument)
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(produserbartDokument)
             .medAvsenderNavn(saksbehandler)
             .medMottakere(Mottaker.av(brevbestillingDto.mottaker))
             .medBegrunnelseKode(brevbestillingDto.begrunnelseKode)

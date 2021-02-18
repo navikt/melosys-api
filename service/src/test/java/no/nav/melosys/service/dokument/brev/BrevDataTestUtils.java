@@ -12,7 +12,7 @@ import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Gateadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.MaritimtArbeid;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.MaritimtArbeid;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
 import no.nav.melosys.domain.familie.OmfattetFamilie;
@@ -105,8 +105,6 @@ public class BrevDataTestUtils {
 
     public static MaritimtArbeid lagMaritimtArbeid() {
         MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
-        maritimtArbeid.foretakOrgnr = "123456789";
-        maritimtArbeid.foretakNavn = "Equinor GB";
         maritimtArbeid.enhetNavn = "Dunfjæder";
         maritimtArbeid.flaggLandkode = Landkoder.GB.getKode();
         return maritimtArbeid;

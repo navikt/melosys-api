@@ -1,7 +1,11 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
+import java.time.LocalDate;
+
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Kontaktopplysning;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -13,13 +17,14 @@ import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
-import static org.springframework.util.StringUtils.isEmpty;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 
 @Component
 public class DistribuerJournalpost implements StegBehandler {
@@ -29,14 +34,18 @@ public class DistribuerJournalpost implements StegBehandler {
     private final EregFasade eregFasade;
     private final KontaktopplysningService kontaktopplysningService;
     private final BehandlingService behandlingService;
+    private final KodeverkService kodeverkService;
 
     public DistribuerJournalpost(@Qualifier("system") DoksysFasade doksysFasade,
                                  @Qualifier("system") EregFasade eregFasade,
-                                 KontaktopplysningService kontaktopplysningService, BehandlingService behandlingService) {
+                                 KontaktopplysningService kontaktopplysningService,
+                                 BehandlingService behandlingService,
+                                 KodeverkService kodeverkService) {
         this.doksysFasade = doksysFasade;
         this.eregFasade = eregFasade;
         this.kontaktopplysningService = kontaktopplysningService;
         this.behandlingService = behandlingService;
+        this.kodeverkService = kodeverkService;
     }
 
     @Override
@@ -72,7 +81,11 @@ public class DistribuerJournalpost implements StegBehandler {
 
         String bestillingsId;
         if (org != null) {
-            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, org.getPostadresse(), kontaktopplysning);
+            StrukturertAdresse postadresse = org.getPostadresse();
+            if (postadresse.erNorsk() && isEmpty(postadresse.poststed)) {
+                postadresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, postadresse.postnummer, LocalDate.now());
+            }
+            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, postadresse, kontaktopplysning);
         } else {
             bestillingsId = doksysFasade.distribuerJournalpost(journalpostId);
         }

@@ -47,7 +47,7 @@ public class SendOrienteringsbrevVideresendSøknad implements StegBehandler {
 
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
             .medAvsenderNavn(saksbehandler)
-            .medProdserbartDokument(Produserbaredokumenter.ORIENTERING_VIDERESENDT_SOEKNAD)
+            .medProduserbartDokument(Produserbaredokumenter.ORIENTERING_VIDERESENDT_SOEKNAD)
             .medMottakere(Mottaker.av(Aktoersroller.BRUKER))
             .medBehandling(behandling)
             .medFritekst(fritekst)

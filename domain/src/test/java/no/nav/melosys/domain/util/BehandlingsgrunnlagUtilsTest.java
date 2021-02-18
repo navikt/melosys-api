@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ArbeidUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -46,7 +46,7 @@ public class BehandlingsgrunnlagUtilsTest {
     @Test
     public void hentPeriode_opphold() {
         Soeknad soeknad = new Soeknad();
-        leggTilArbeidUtland(soeknad);
+        leggTilFysiskArbeidssted(soeknad);
 
         Periode periode_2 = new Periode(LocalDate.MIN.plusYears(1), LocalDate.MAX);
         soeknad.periode = periode_2;
@@ -73,10 +73,10 @@ public class BehandlingsgrunnlagUtilsTest {
         assertThat(landkoder).isEmpty();
     }
 
-    private void leggTilArbeidUtland(Soeknad soeknad) {
-        ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse = new StrukturertAdresse();
-        arbeidUtland.adresse.landkode = Landkoder.BE.getKode();
-        soeknad.arbeidUtland = Collections.singletonList(arbeidUtland);
+    private void leggTilFysiskArbeidssted(Soeknad soeknad) {
+        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
+        fysiskArbeidssted.adresse = new StrukturertAdresse();
+        fysiskArbeidssted.adresse.landkode = Landkoder.BE.getKode();
+        soeknad.arbeidPaaLand.fysiskeArbeidssteder = Collections.singletonList(fysiskArbeidssted);
     }
 }

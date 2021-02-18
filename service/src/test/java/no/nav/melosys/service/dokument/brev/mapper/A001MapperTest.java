@@ -18,7 +18,7 @@ import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ArbeidUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
@@ -29,8 +29,6 @@ import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import org.jeasy.random.EasyRandom;
 import org.junit.Before;
 import org.junit.Rule;
@@ -98,18 +96,18 @@ public class A001MapperTest {
 
         StrukturertAdresse strukturertAdresse = lagStrukturertAdresse();
 
-        ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse = strukturertAdresse;
+        FysiskArbeidssted arbeidssted = new FysiskArbeidssted();
+        arbeidssted.adresse = strukturertAdresse;
         Soeknad søknad = new Soeknad();
-        søknad.arbeidUtland = Arrays.asList(arbeidUtland);
+        søknad.arbeidPaaLand.fysiskeArbeidssteder = Arrays.asList(arbeidssted);
 
         AvklartVirksomhet virksomhet = new AvklartVirksomhet("JARLSBERG AS",
                                                "123456789",
                                                 strukturertAdresse, Yrkesaktivitetstyper.LOENNET_ARBEID);
 
-        Arbeidssted fysiskArbeidssted = new FysiskArbeidssted("JARLSBERG INTERNATIONAL", "123456789", strukturertAdresse);
+        no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted fysiskArbeidssted = new no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted("JARLSBERG INTERNATIONAL", "123456789", strukturertAdresse);
 
-        Arbeidssted maritimtArbeidssted = lagMaritimtArbeidssted();
+        no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted maritimtArbeidssted = lagMaritimtArbeidssted();
 
         UtenlandskMyndighet myndighet = new UtenlandskMyndighet();
         myndighet.navn = "SAV";

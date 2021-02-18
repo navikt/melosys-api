@@ -3,7 +3,7 @@ package no.nav.melosys.service.kontroll;
 import java.util.List;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ArbeidUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import org.junit.Before;
@@ -19,7 +19,7 @@ public class AdresseUtlandKontrollerTest {
     @Before
     public void setup() {
         behandlingsgrunnlagData = new BehandlingsgrunnlagData();
-        behandlingsgrunnlagData.arbeidUtland = List.of(new ArbeidUtland());
+        behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidssteder = List.of(new FysiskArbeidssted());
         behandlingsgrunnlagData.foretakUtland = List.of(new ForetakUtland());
     }
 
@@ -28,7 +28,7 @@ public class AdresseUtlandKontrollerTest {
         Kontrollfeil kontrollfeil = AdresseUtlandKontroller.arbeidsstedManglerFelter(behandlingsgrunnlagData);
         assertThat(kontrollfeil)
             .extracting(Kontrollfeil::getKode, Kontrollfeil::getFelter)
-            .contains(List.of(String.format(ARBEID_UTLAND_NAVN, 0), String.format(ARBEID_UTLAND_LAND, 0)));
+            .contains(List.of(String.format(ARBEIDSSTED_FIRMANAVN, 0), String.format(ARBEIDSSTED_LAND, 0)));
     }
 
     @Test

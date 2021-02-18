@@ -211,6 +211,12 @@ public class AltinnSoeknadServiceTest {
         innhold.getMidlertidigUtsendt().setArbeidsland("PL");
         innhold.getMidlertidigUtsendt().setUtenlandsoppdraget(new Utenlandsoppdraget());
         innhold.getMidlertidigUtsendt().getUtenlandsoppdraget().setPeriodeUtland(new Tidsrom());
+
+        innhold.getMidlertidigUtsendt().setArbeidssted(new Arbeidssted());
+        innhold.getMidlertidigUtsendt().getArbeidssted().setTypeArbeidssted("LAND");
+        innhold.getMidlertidigUtsendt().getArbeidssted().setArbeidPaaLand(new ArbeidPaaLand());
+        innhold.getMidlertidigUtsendt().getArbeidssted().getArbeidPaaLand().setFastArbeidssted(false);
+        innhold.getMidlertidigUtsendt().getArbeidssted().getArbeidPaaLand().setFysiskeArbeidssteder(new FysiskeArbeidssteder());
         return medlemskapArbeidEOSM;
     }
 

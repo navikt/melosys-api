@@ -97,7 +97,7 @@ public class BrevDataByggerAnmodningUnntakTest {
     }
 
     public BrevDataGrunnlag lagBrevressurser(Behandling behandling) throws TekniskException, FunksjonellException {
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class));
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), kodeverkService);
 
         Set<String> orgSet = new HashSet<>(Collections.singletonList("987654321"));
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId())).thenReturn(orgSet);

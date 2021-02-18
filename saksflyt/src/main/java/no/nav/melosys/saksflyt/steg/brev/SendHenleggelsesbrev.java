@@ -64,7 +64,7 @@ public class SendHenleggelsesbrev implements StegBehandler {
             .findFirst().orElseThrow(() -> new IkkeFunnetException("Finner ingen henleggelsesgrunn"));
 
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
-            .medProdserbartDokument(MELDING_HENLAGT_SAK)
+            .medProduserbartDokument(MELDING_HENLAGT_SAK)
             .medAvsenderNavn(saksbehandler)
             .medMottakere(Mottaker.av(Aktoersroller.BRUKER))
             .medBehandling(behandling)

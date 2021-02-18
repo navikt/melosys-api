@@ -83,7 +83,8 @@ class BehandlingsgrunnlagListenerTest {
     }
 
     private void assertKonvertering(JsonNode jsonNode, BehandlingsgrunnlagData data) {
-        assertThat(data.arbeidUtland.size()).isEqualTo(jsonNode.withArray("arbeidUtland").size());
+        assertThat(data.arbeidPaaLand.fysiskeArbeidssteder.size())
+            .isEqualTo(jsonNode.get("arbeidPaaLand").withArray("fysiskeArbeidssteder").size());
         assertThat(data.foretakUtland.size()).isEqualTo(jsonNode.withArray("foretakUtland").size());
         assertThat(data.maritimtArbeid.size()).isEqualTo(jsonNode.withArray("maritimtArbeid").size());
         assertThat(data.bosted.intensjonOmRetur).isEqualTo(jsonNode.get("bosted").get("intensjonOmRetur").booleanValue());

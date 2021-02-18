@@ -11,7 +11,7 @@ import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.MaritimtArbeid;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.MaritimtArbeid;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
@@ -129,26 +129,10 @@ public class BrevDataGrunnlagTest {
         assertThat(arbeidssteder.size()).isEqualTo(1);
 
         MaritimtArbeidssted arbeidssted = (MaritimtArbeidssted) arbeidssteder.get(0);
-        assertThat(arbeidssted.getForetakNavn()).isEqualTo(maritimtArbeidISøknad.foretakNavn);
         assertThat(arbeidssted.getEnhetNavn()).isEqualTo(maritimtArbeidISøknad.enhetNavn);
-        assertThat(arbeidssted.getIdnummer()).isEqualTo(maritimtArbeidISøknad.foretakOrgnr);
-        assertThat(arbeidssted.getYrkesgruppe().getKode()).isEqualTo(Yrkesgrupper.SOKKEL_ELLER_SKIP.getKode());
-    }
-
-    @Test
-    public void hentArbeidssteder_medMaritimtArbeidUtenForetak_girMaritimeArbeidssteder() {
-        MaritimtArbeid maritimtArbeidISøknad = lagMaritimtArbeid();
-        maritimtArbeidISøknad.foretakOrgnr = null;
-        maritimtArbeidISøknad.foretakNavn = null;
-        this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
-
-        List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder();
-        assertThat(arbeidssteder.size()).isEqualTo(1);
-
-        MaritimtArbeidssted arbeidssted = (MaritimtArbeidssted) arbeidssteder.get(0);
         assertThat(arbeidssted.getForetakNavn()).isNullOrEmpty();
-        assertThat(arbeidssted.getEnhetNavn()).isEqualTo("Dunfjæder");
         assertThat(arbeidssted.getIdnummer()).isNullOrEmpty();
+        assertThat(arbeidssted.getYrkesgruppe().getKode()).isEqualTo(Yrkesgrupper.SOKKEL_ELLER_SKIP.getKode());
     }
 
     @Test

@@ -1,15 +1,18 @@
 package no.nav.melosys.service.avklartefakta;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.adresse.Adresse;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
@@ -18,7 +21,9 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -32,14 +37,16 @@ public class AvklarteVirksomheterService {
     protected final AvklartefaktaService avklartefaktaService;
     protected final RegisterOppslagService registerOppslagService;
     protected final BehandlingService behandlingService;
+    protected final KodeverkService kodeverkService;
 
     @Autowired
     public AvklarteVirksomheterService(AvklartefaktaService avklartefaktaService,
                                        RegisterOppslagService registerOppslagService,
-                                       BehandlingService behandlingService) {
+                                       BehandlingService behandlingService, KodeverkService kodeverkService) {
         this.avklartefaktaService = avklartefaktaService;
         this.registerOppslagService = registerOppslagService;
         this.behandlingService = behandlingService;
+        this.kodeverkService = kodeverkService;
     }
 
     public List<AvklartVirksomhet> hentUtenlandskeVirksomheter(Behandling behandling) {
@@ -73,6 +80,10 @@ public class AvklarteVirksomheterService {
         return arbeidsgivendeOrgnumre;
     }
 
+    public List<AvklartVirksomhet> hentNorskeSelvstendigeForetak(Behandling behandling) throws IkkeFunnetException, TekniskException {
+        return hentNorskeSelvstendigeForetak(behandling, this::utfyllManglendeAdressefelter);
+    }
+
     public List<AvklartVirksomhet> hentNorskeSelvstendigeForetak(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer)
         throws IkkeFunnetException, TekniskException {
         Set<String> selvstendigeForetakOrgnumre = hentNorskeSelvstendigeForetakOrgnumre(behandling);
@@ -81,12 +92,20 @@ public class AvklarteVirksomheterService {
             .collect(Collectors.toList());
     }
 
+    public List<AvklartVirksomhet> hentNorskeArbeidsgivere(Behandling behandling) throws IkkeFunnetException, TekniskException {
+        return hentNorskeArbeidsgivere(behandling, this::utfyllManglendeAdressefelter);
+    }
+
     public List<AvklartVirksomhet> hentNorskeArbeidsgivere(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer)
         throws IkkeFunnetException, TekniskException {
         Set<String> arbeidsgivendeOrgnumre = hentNorskeArbeidsgivendeOrgnumre(behandling);
         return registerOppslagService.hentOrganisasjoner(arbeidsgivendeOrgnumre).stream()
             .map(org -> new AvklartVirksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), adressekonverterer.apply(org), Yrkesaktivitetstyper.LOENNET_ARBEID))
             .collect(Collectors.toList());
+    }
+
+    public List<AvklartVirksomhet> hentAlleNorskeVirksomheter(Behandling behandling) throws IkkeFunnetException, TekniskException {
+        return hentAlleNorskeVirksomheter(behandling, this::utfyllManglendeAdressefelter);
     }
 
     public List<AvklartVirksomhet> hentAlleNorskeVirksomheter(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer)
@@ -139,5 +158,22 @@ public class AvklarteVirksomheterService {
 
     private boolean erVirksomhetArbeidNorge(String orgnr, Behandling behandling) throws TekniskException {
         return behandling.hentArbeidsforholdDokument().hentOrgnumre().contains(orgnr);
+    }
+
+    StrukturertAdresse utfyllManglendeAdressefelter(OrganisasjonDokument org) {
+        StrukturertAdresse adresse = org.getOrganisasjonDetaljer().hentStrukturertForretningsadresse();
+        if (adresse == null || StringUtils.isEmpty(adresse.postnummer)) {
+            adresse = org.getOrganisasjonDetaljer().hentStrukturertPostadresse();
+        }
+        if (StringUtils.isEmpty(adresse.gatenavn)) {
+            adresse.gatenavn = " ";
+        }
+        if (adresse.erNorsk()) {
+            adresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
+        } else if (StringUtils.isEmpty(adresse.postnummer)) {
+            //Utenlandske adresser har ikke alltid postnummer
+            adresse.postnummer = " ";
+        }
+        return adresse;
     }
 }

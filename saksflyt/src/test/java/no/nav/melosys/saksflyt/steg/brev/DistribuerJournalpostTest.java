@@ -5,7 +5,6 @@ import java.util.Optional;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -15,13 +14,13 @@ import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
@@ -38,12 +37,15 @@ class DistribuerJournalpostTest {
     private KontaktopplysningService mockKontaktopplysningService;
     @Mock
     private BehandlingService mockBehandlingService;
+    @Mock
+    private KodeverkService mockKodeverkService;
 
     private DistribuerJournalpost distribuerJournalpost;
 
     @BeforeEach
     void init() {
-        distribuerJournalpost = new DistribuerJournalpost(mockDoksysFasade, mockEregFasade, mockKontaktopplysningService, mockBehandlingService);
+        distribuerJournalpost = new DistribuerJournalpost(mockDoksysFasade, mockEregFasade,
+            mockKontaktopplysningService, mockBehandlingService, mockKodeverkService);
     }
 
     @Test
@@ -92,6 +94,7 @@ class DistribuerJournalpostTest {
 
         when(mockEregFasade.hentOrganisasjon(any())).thenReturn(saksopplysning);
         when(mockKontaktopplysningService.hentKontaktopplysning(any(), any())).thenReturn(Optional.of(kontaktopplysning));
+        when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
 
         distribuerJournalpost.utfør(prosessinstans);
 
