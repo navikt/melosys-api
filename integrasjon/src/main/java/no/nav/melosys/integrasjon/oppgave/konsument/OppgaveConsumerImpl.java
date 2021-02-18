@@ -47,7 +47,7 @@ public class OppgaveConsumerImpl implements OppgaveConsumer, RestConsumer {
         if (oppgaveSvar == null) {
             return Collections.emptyList();
         }
-        List<OppgaveDto> oppgaveListe =  new ArrayList<>(oppgaveSvar.getOppgaver());
+        List<OppgaveDto> oppgaveListe = new ArrayList<>(oppgaveSvar.getOppgaver());
         if (oppgaveSvar.getAntallTreffTotalt() > offset + OPPGAVE_ANTALL_ABAC_LIMIT) {
             oppgaveListe.addAll(hentOppgaveListe(oppgaveSearchRequest, offset + OPPGAVE_ANTALL_ABAC_LIMIT));
         }
