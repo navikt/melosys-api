@@ -10,7 +10,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.*;
 import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriodeRequest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -66,9 +66,9 @@ public class MedlPeriodeKonverterTest {
         assertThat(opprettPeriodeRequest.getIdent().getValue()).isEqualTo(aktørId);
 
         assertThat(medlemsperiode.getLand().getValue()).isEqualTo("BEL");
-        assertThat(medlemsperiode.getFraOgMed().toString()).isEqualTo("2015-01-01");
-        assertThat(medlemsperiode.getTilOgMed().toString()).isEqualTo("2015-06-30");
-        assertThat(medlemsperiode.getDatoRegistrert().toString()).isEqualTo(LocalDate.now().toString());
+        assertThat(medlemsperiode.getFraOgMed().toString()).startsWith("2015-01-01");
+        assertThat(medlemsperiode.getTilOgMed().toString()).startsWith("2015-06-30");
+        assertThat(medlemsperiode.getDatoRegistrert().toString()).startsWith(LocalDate.now().toString());
         assertThat(medlemsperiode.getStatus().getValue()).isEqualTo("GYLD");
         assertThat(medlemsperiode.getLovvalg().getValue()).isEqualTo("ENDL");
         assertThat(medlemsperiode.getTrygdedekning().getValue()).isEqualTo("Full");

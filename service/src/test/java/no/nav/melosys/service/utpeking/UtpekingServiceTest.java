@@ -89,6 +89,7 @@ public class UtpekingServiceTest {
         behandling.setId(behandlingID);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         behandling.setFagsak(fagsak);
+        behandlingsresultat.setId(behandlingID);
 
         when(behandlingService.hentBehandlingUtenSaksopplysninger(eq(behandlingID))).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingID))).thenReturn(behandlingsresultat);

@@ -12,11 +12,11 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagForetakUtland;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagNorskVirksomhet;
@@ -24,8 +24,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AvklarteVirksomheterGrunnlagTest {
+@ExtendWith(MockitoExtension.class)
+class AvklarteVirksomheterGrunnlagTest {
 
     @Mock
     private AvklarteVirksomheterService avklarteVirksomheterService;
@@ -35,24 +35,22 @@ public class AvklarteVirksomheterGrunnlagTest {
 
     private AvklarteVirksomheterGrunnlag dataGrunnlag;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        AvklartVirksomhet arbeidsgiver = lagNorskVirksomhet();
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.singletonList(arbeidsgiver));
-
         dataGrunnlag = new AvklarteVirksomheterGrunnlag(mock(Behandling.class), avklarteVirksomheterService);
     }
 
     @Test
-    public void hentAlleNorskeVirksomheter_foreventerEnVirksomhet() throws IkkeFunnetException, TekniskException {
+    void hentAlleNorskeVirksomheter_foreventerEnVirksomhet() throws IkkeFunnetException, TekniskException {
+        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(lagNorskVirksomhet()));
         Collection<AvklartVirksomhet> norskeVirksomheter = dataGrunnlag.hentAlleNorskeVirksomheterMedAdresse();
         assertThat(norskeVirksomheter).hasSize(1);
         dataGrunnlag.hentAlleNorskeVirksomheterMedAdresse();
-        verify(avklarteVirksomheterService, times(1)).hentAlleNorskeVirksomheter(any(), any());
+        verify(avklarteVirksomheterService, times(1)).hentAlleNorskeVirksomheter(any());
     }
 
     @Test
-    public void hentUtenlandskeArbeidsgivere_medUtenlandskArbeidsgiverOgSelvstendig_henterKunArbeidsgivere() {
+    void hentUtenlandskeArbeidsgivere_medUtenlandskArbeidsgiverOgSelvstendig_henterKunArbeidsgivere() {
         AvklartVirksomhet utenlandskSelvstendigForetak = new AvklartVirksomhet(lagForetakUtland(true));
         AvklartVirksomhet utenlandskArbeidsgiver = new AvklartVirksomhet(lagForetakUtland(false));
 
@@ -64,7 +62,7 @@ public class AvklarteVirksomheterGrunnlagTest {
     }
 
     @Test
-    public void hentUtenlandskeSelvstendige_medUtenlandskArbeidsgiverOgSelvstendig_henterKunSelvstendige() {
+    void hentUtenlandskeSelvstendige_medUtenlandskArbeidsgiverOgSelvstendig_henterKunSelvstendige() {
         AvklartVirksomhet utenlandskSelvstendigForetak = new AvklartVirksomhet(lagForetakUtland(true));
         AvklartVirksomhet utenlandskArbeidsgiver = new AvklartVirksomhet(lagForetakUtland(false));
 
@@ -76,18 +74,18 @@ public class AvklarteVirksomheterGrunnlagTest {
     }
 
     @Test
-    public void hentHovedvirksomhet_medEnNorskVirksomhet_girNorskHovedvirksomhet() throws IkkeFunnetException, TekniskException {
+    void hentHovedvirksomhet_medEnNorskVirksomhet_girNorskHovedvirksomhet() throws IkkeFunnetException, TekniskException {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.singletonList(norskVirksomhet));
+        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(norskVirksomhet));
 
         AvklartVirksomhet avklartVirksomhet = dataGrunnlag.hentHovedvirksomhet();
         assertThat(avklartVirksomhet).isEqualTo(norskVirksomhet);
     }
 
     @Test
-    public void hentHovedvirksomhet_medNorskOgUtenlandskVirksomhet_girNorskHovedvirksomhet() throws IkkeFunnetException, TekniskException {
+    void hentHovedvirksomhet_medNorskOgUtenlandskVirksomhet_girNorskHovedvirksomhet() throws IkkeFunnetException, TekniskException {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.singletonList(norskVirksomhet));
+        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(norskVirksomhet));
 
         AvklartVirksomhet utenlandskAvklartVirksomhet = new AvklartVirksomhet(lagForetakUtland(false));
         when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(utenlandskAvklartVirksomhet));
@@ -98,28 +96,28 @@ public class AvklarteVirksomheterGrunnlagTest {
     }
 
     @Test
-    public void hentHovedvirksomhet_medKunUtenlandskVirksomhet_girUtenlandskVirksomhet() throws IkkeFunnetException, TekniskException {
+    void hentHovedvirksomhet_medKunUtenlandskVirksomhet_girUtenlandskVirksomhet() throws IkkeFunnetException, TekniskException {
         AvklartVirksomhet forventetUtenlandskVirksomhet = new AvklartVirksomhet(lagForetakUtland(false));
         when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(forventetUtenlandskVirksomhet));
 
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.emptyList());
+        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.emptyList());
 
         AvklartVirksomhet hovedvirksomhet = dataGrunnlag.hentHovedvirksomhet();
         assertThat(hovedvirksomhet).isEqualToComparingFieldByField(forventetUtenlandskVirksomhet);
     }
 
     @Test
-    public void hentBivirksomheter_medEnNorskVirksomhet_girIngenBivirksomheter() throws IkkeFunnetException, TekniskException {
+    void hentBivirksomheter_medEnNorskVirksomhet_girIngenBivirksomheter() throws IkkeFunnetException, TekniskException {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.singletonList(norskVirksomhet));
+        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(norskVirksomhet));
 
         Collection<AvklartVirksomhet> bivirksomheter = dataGrunnlag.hentBivirksomheter();
         assertThat(bivirksomheter).isEmpty();
     }
 
     @Test
-    public void hentBivirksomheter_medEnUtenlandskVirksomhet_girIngenBivirksomheter() throws IkkeFunnetException, TekniskException {
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.emptyList());
+    void hentBivirksomheter_medEnUtenlandskVirksomhet_girIngenBivirksomheter() throws IkkeFunnetException, TekniskException {
+        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.emptyList());
 
         AvklartVirksomhet forventetUtenlandskVirksomhet = new AvklartVirksomhet(lagForetakUtland(false));
         when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(forventetUtenlandskVirksomhet));
@@ -129,20 +127,20 @@ public class AvklarteVirksomheterGrunnlagTest {
     }
 
     @Test
-    public void hentBivirksomheter_medToNorskeVirksomheter_girEnNorskBivirksomhet() throws IkkeFunnetException, TekniskException {
+    void hentBivirksomheter_medToNorskeVirksomheter_girEnNorskBivirksomhet() throws IkkeFunnetException, TekniskException {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Arrays.asList(norskVirksomhet, norskVirksomhet));
+        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Arrays.asList(norskVirksomhet, norskVirksomhet));
 
         Collection<AvklartVirksomhet> bivirksomheter = dataGrunnlag.hentBivirksomheter();
         assertThat(bivirksomheter).containsExactly(norskVirksomhet);
     }
 
     @Test
-    public void hentHovedvirksomhet_medNorskOgUtenlandskVirksomhet_girUtenlandskBivirksomhet() throws IkkeFunnetException, TekniskException {
+    void hentHovedvirksomhet_medNorskOgUtenlandskVirksomhet_girUtenlandskBivirksomhet() throws IkkeFunnetException, TekniskException {
         AvklartVirksomhet forventetUtenlandskVirksomhet = new AvklartVirksomhet(lagForetakUtland(false));
 
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any(), any())).thenReturn(Collections.singletonList(norskVirksomhet));
+        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(norskVirksomhet));
         when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(forventetUtenlandskVirksomhet));
 
         Collection<AvklartVirksomhet> bivirksomheter = dataGrunnlag.hentBivirksomheter();
