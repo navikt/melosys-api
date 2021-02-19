@@ -92,17 +92,24 @@ class AdresseMapper {
         return ustrukturertAdresse;
     }
 
-    private static MidlertidigPostadresseNorge mapTilMidlertidigPostadresseNorge(no.nav.tjeneste.virksomhet.person.v3.informasjon.MidlertidigPostadresseNorge midlertidigPostadresseNorge) {
+    private static MidlertidigPostadresseNorge mapTilMidlertidigPostadresseNorge(
+        no.nav.tjeneste.virksomhet.person.v3.informasjon.MidlertidigPostadresseNorge midlertidigPostadresseNorge) {
         MidlertidigPostadresseNorge mpn = new MidlertidigPostadresseNorge();
-        if (midlertidigPostadresseNorge.getStrukturertAdresse() != null) {
-            if (midlertidigPostadresseNorge.getStrukturertAdresse() instanceof no.nav.tjeneste.virksomhet.person.v3.informasjon.Gateadresse) {
-                mpn.gateadresse = mapTilGateadresse((no.nav.tjeneste.virksomhet.person.v3.informasjon.Gateadresse) midlertidigPostadresseNorge.getStrukturertAdresse());
+        final var strukturertAdresse = midlertidigPostadresseNorge.getStrukturertAdresse();
+        if (strukturertAdresse != null) {
+            if (strukturertAdresse instanceof no.nav.tjeneste.virksomhet.person.v3.informasjon.Gateadresse) {
+                mpn.gateadresse = mapTilGateadresse((no.nav.tjeneste.virksomhet.person.v3.informasjon.Gateadresse) strukturertAdresse);
             }
-            if (midlertidigPostadresseNorge.getStrukturertAdresse() instanceof StedsadresseNorge) {
-                StedsadresseNorge stedsadresseNorge = (StedsadresseNorge) midlertidigPostadresseNorge.getStrukturertAdresse();
+            if (strukturertAdresse instanceof Matrikkeladresse) {
+                Matrikkeladresse matrikkeladresse = (Matrikkeladresse) strukturertAdresse;
+                mpn.gateadresse = new Gateadresse();
+                mpn.gateadresse.setGatenavn(matrikkeladresse.getEiendomsnavn());
+            }
+            if (strukturertAdresse instanceof StedsadresseNorge) {
+                StedsadresseNorge stedsadresseNorge = (StedsadresseNorge) strukturertAdresse;
                 mpn.poststed = stedsadresseNorge.getPoststed().getValue();
             }
-            mpn.land = Land.av(midlertidigPostadresseNorge.getStrukturertAdresse().getLandkode().getValue());
+            mpn.land = Land.av(strukturertAdresse.getLandkode().getValue());
         }
         return mpn;
     }
