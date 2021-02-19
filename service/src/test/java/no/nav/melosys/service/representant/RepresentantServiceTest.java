@@ -4,7 +4,6 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Kontaktopplysning;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.folketrygden.ValgtRepresentant;
@@ -14,7 +13,7 @@ import no.nav.melosys.integrasjon.avgiftoverforing.AvgiftOverforingConsumer;
 import no.nav.melosys.repository.AktoerRepository;
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,7 +45,7 @@ public class RepresentantServiceTest {
     @Mock
     private AktoerRepository aktoerRepository;
     @Mock
-    private BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private BehandlingService behandlingService;
     @Mock
     private KontaktopplysningService kontaktopplysningService;
 
@@ -57,7 +56,7 @@ public class RepresentantServiceTest {
 
     @BeforeEach
     void setup(){
-        representantService = new RepresentantService(avgiftOverforingConsumer, medlemAvFolketrygdenRepository, aktoerRepository, behandlingsgrunnlagService, kontaktopplysningService);
+        representantService = new RepresentantService(avgiftOverforingConsumer, medlemAvFolketrygdenRepository, aktoerRepository, behandlingService, kontaktopplysningService);
     }
 
     @Test
@@ -70,9 +69,7 @@ public class RepresentantServiceTest {
         fagsak.setSaksnummer("saknr");
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
-        var behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandling(behandling);
-        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
         representantService.oppdaterValgtRepresentant(1L, new ValgtRepresentant("repnr", true, null, null));
 
@@ -100,9 +97,7 @@ public class RepresentantServiceTest {
         fagsak.getAktører().add(aktoer);
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
-        var behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandling(behandling);
-        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
         representantService.oppdaterValgtRepresentant(1L, new ValgtRepresentant("repnr", true, null, null));
 
@@ -130,9 +125,7 @@ public class RepresentantServiceTest {
         fagsak.setSaksnummer("saknr");
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
-        var behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandling(behandling);
-        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
         representantService.oppdaterValgtRepresentant(1L, new ValgtRepresentant("repnr", false, "orgnr", "kontaktperson"));
 
@@ -172,9 +165,7 @@ public class RepresentantServiceTest {
         fagsak.getAktører().add(aktoer);
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
-        var behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandling(behandling);
-        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
         representantService.oppdaterValgtRepresentant(1L, new ValgtRepresentant("repnr", false, "orgnr", "kontaktperson"));
 

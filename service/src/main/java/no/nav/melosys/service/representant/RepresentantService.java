@@ -14,12 +14,11 @@ import no.nav.melosys.integrasjon.avgiftoverforing.dto.AvgiftOverforingRepresent
 import no.nav.melosys.repository.AktoerRepository;
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -28,14 +27,14 @@ public class RepresentantService {
     private final AvgiftOverforingConsumer avgiftOverforingConsumer;
     private final MedlemAvFolketrygdenRepository medlemAvFolketrygdenRepository;
     private final AktoerRepository aktoerRepository;
-    private final BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private final BehandlingService behandlingService;
     private final KontaktopplysningService kontaktopplysningService;
 
-    public RepresentantService(AvgiftOverforingConsumer avgiftOverforingConsumer, MedlemAvFolketrygdenRepository medlemAvFolketrygdenRepository, AktoerRepository aktoerRepository, BehandlingsgrunnlagService behandlingsgrunnlagService, KontaktopplysningService kontaktopplysningService) {
+    public RepresentantService(AvgiftOverforingConsumer avgiftOverforingConsumer, MedlemAvFolketrygdenRepository medlemAvFolketrygdenRepository, AktoerRepository aktoerRepository, BehandlingService behandlingService, KontaktopplysningService kontaktopplysningService) {
         this.avgiftOverforingConsumer = avgiftOverforingConsumer;
         this.medlemAvFolketrygdenRepository = medlemAvFolketrygdenRepository;
         this.aktoerRepository = aktoerRepository;
-        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
+        this.behandlingService = behandlingService;
         this.kontaktopplysningService = kontaktopplysningService;
     }
 
@@ -55,7 +54,7 @@ public class RepresentantService {
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke medlemAvFolketrygden for behandlingsresultatID " + behandlingID));
 
         var fastsattTrygdeavgift = medlemAvFolketrygden.getFastsattTrygdeavgift();
-        var fagsak = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID).getBehandling().getFagsak();
+        var fagsak = behandlingService.hentBehandling(behandlingID).getFagsak();
         var lagretAktoer = fastsattTrygdeavgift.getBetalesAv();
 
         fastsattTrygdeavgift.setRepresentantNr(valgtRepresentant.getRepresentantnummer());
