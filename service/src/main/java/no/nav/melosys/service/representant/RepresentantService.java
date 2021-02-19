@@ -15,6 +15,7 @@ import no.nav.melosys.repository.AktoerRepository;
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,10 +74,10 @@ public class RepresentantService {
     }
 
     private void validerValgtRepresentantRequest(ValgtRepresentant valgtRepresentant) throws FunksjonellException {
-        if (valgtRepresentant.getRepresentantnummer() == null || valgtRepresentant.getRepresentantnummer().isEmpty()) {
+        if (StringUtils.isEmpty(valgtRepresentant.getRepresentantnummer())) {
             throw new FunksjonellException("Representantnummer må være utfylt");
         }
-        if (!valgtRepresentant.isSelvbetalende() && (valgtRepresentant.getOrgnr() == null || valgtRepresentant.getOrgnr().isEmpty())) {
+        if (!valgtRepresentant.isSelvbetalende() && StringUtils.isEmpty(valgtRepresentant.getOrgnr())) {
             throw new FunksjonellException("Når representant ikke er selvbetalende, må organisasjonsnummer være utfylt");
         }
     }
