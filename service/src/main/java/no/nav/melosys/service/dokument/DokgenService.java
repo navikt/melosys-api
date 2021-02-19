@@ -104,7 +104,8 @@ public class DokgenService {
         return dokgenConsumer.lagPdf(malnavn, dokgenDto, brevbestilling.bestillKopi());
     }
 
-    public void produserOgDistribuerBrev(Produserbaredokumenter produserbartDokument, long behandlingId, BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
+    public void produserOgDistribuerBrev(Produserbaredokumenter produserbartDokument, long behandlingId,
+                                         BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         List<Aktoer> mottakere = brevmottakerService.avklarMottakere(produserbartDokument, Mottaker.av(brevbestillingDto.getMottaker()), behandling);
         //NOTE @Lunde Utvide for å støtte FastMottaker i BrevmottakerService
