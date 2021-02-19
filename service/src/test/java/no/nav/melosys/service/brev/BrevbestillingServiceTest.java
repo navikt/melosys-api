@@ -1,5 +1,6 @@
 package no.nav.melosys.service.brev;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
@@ -10,6 +11,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,8 +25,8 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING
 import static no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper.LOENNET_ARBEID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -71,6 +73,26 @@ class BrevbestillingServiceTest {
         AvklartVirksomhet virksomhet = arbeidsgivere.get(0);
         assertEquals("Advokatene AS", virksomhet.navn);
         assertEquals("123456789", virksomhet.orgnr);
+    }
+
+    @Test
+    void skalBestilleProduseringAvBrev() throws Exception {
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().build();
+        brevbestillingService.produserBrev(MANGELBREV_BRUKER, 123L, brevbestillingDto);
+
+        verify(mockDokgenService).produserOgDistribuerBrev(eq(MANGELBREV_BRUKER), anyLong(), any());
+    }
+
+    @Test
+    void skalReturnereUtkast() throws Exception {
+        byte[] pdf = "UTKAST".getBytes(StandardCharsets.UTF_8);
+        when(mockDokServiceFasade.produserUtkast(any(), anyLong(), any())).thenReturn(pdf);
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().build();
+
+        byte[] utkast = brevbestillingService.produserUtkast(MANGELBREV_BRUKER, 123L, brevbestillingDto);
+
+        assertEquals(pdf, utkast);
+        verify(mockDokServiceFasade).produserUtkast(eq(MANGELBREV_BRUKER), anyLong(), any());
     }
 
 }
