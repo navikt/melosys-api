@@ -40,7 +40,7 @@ public class RepresentantService {
     }
 
     public List<AvgiftOverforingRepresentantDto> hentRepresentantListe() {
-        return Arrays.asList(avgiftOverforingConsumer.hentRepresentantListe());
+        return avgiftOverforingConsumer.hentRepresentantListe();
     }
 
     public AvgiftOverforingRepresentantDataDto hentRepresentant(String representantId) {

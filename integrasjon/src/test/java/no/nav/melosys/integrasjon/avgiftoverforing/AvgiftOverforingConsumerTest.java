@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.avgiftoverforing;
 
+import no.nav.melosys.integrasjon.avgiftoverforing.dto.AvgiftOverforingRepresentantDto;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.BeforeAll;
@@ -14,7 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import static java.lang.String.format;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class AvgiftOverforingConsumerTest {
 
@@ -43,13 +44,10 @@ public class AvgiftOverforingConsumerTest {
 
         var response = avgiftOverforingConsumer.hentRepresentantListe();
 
-        assertThat(response.length).isEqualTo(3);
-        assertThat(response[0].getId()).isEqualTo("99997");
-        assertThat(response[0].getNavn()).isEqualTo("ANDEBYPOSTEN");
-        assertThat(response[1].getId()).isEqualTo("99998");
-        assertThat(response[1].getNavn()).isEqualTo("UNIVERSITETET I ANDEBY");
-        assertThat(response[2].getId()).isEqualTo("99999");
-        assertThat(response[2].getNavn()).isEqualTo("99DUMMYNAVN");
+        assertThat(response)
+            .hasSize(3)
+            .flatExtracting(AvgiftOverforingRepresentantDto::getId, AvgiftOverforingRepresentantDto::getNavn)
+            .containsExactly("99997", "ANDEBYPOSTEN", "99998", "UNIVERSITETET I ANDEBY", "99999", "99DUMMYNAVN");
     }
 
     @Test
@@ -62,10 +60,7 @@ public class AvgiftOverforingConsumerTest {
 
         assertThat(response.getId()).isEqualTo("99999");
         assertThat(response.getNavn()).isEqualTo("99DUMMYNAVN");
-        assertThat(response.getAdresselinjer().size()).isEqualTo(3);
-        assertThat(response.getAdresselinjer().get(0)).isEqualTo("DUMMYADR1");
-        assertThat(response.getAdresselinjer().get(1)).isEqualTo("DUMMYADR2");
-        assertThat(response.getAdresselinjer().get(2)).isEqualTo("DUMMYADR3");
+        assertThat(response.getAdresselinjer()).hasSize(3).containsExactly("DUMMYADR1", "DUMMYADR2", "DUMMYADR3");
         assertThat(response.getPostnummer()).isEqualTo("3601");
         assertThat(response.getTelefon()).isNull();
         assertThat(response.getOrgnr()).isNull();

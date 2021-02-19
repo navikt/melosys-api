@@ -3,9 +3,12 @@ package no.nav.melosys.integrasjon.avgiftoverforing;
 import no.nav.melosys.integrasjon.avgiftoverforing.dto.AvgiftOverforingRepresentantDataDto;
 import no.nav.melosys.integrasjon.avgiftoverforing.dto.AvgiftOverforingRepresentantDto;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.List;
 
 
 @Component
@@ -16,12 +19,12 @@ public class AvgiftOverforingConsumer {
         this.webClient = WebClient.create(url);
     }
 
-    public AvgiftOverforingRepresentantDto[] hentRepresentantListe(){
+    public List<AvgiftOverforingRepresentantDto> hentRepresentantListe(){
         return webClient.get()
             .uri("/v1/hent-representant-liste")
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
-            .bodyToMono(AvgiftOverforingRepresentantDto[].class)
+            .bodyToMono(new ParameterizedTypeReference<List<AvgiftOverforingRepresentantDto>>(){})
             .block();
     }
 
