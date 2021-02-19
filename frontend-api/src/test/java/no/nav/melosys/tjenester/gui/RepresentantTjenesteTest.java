@@ -5,6 +5,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.avgiftoverforing.dto.AvgiftOverforingRepresentantDataDto;
 import no.nav.melosys.integrasjon.avgiftoverforing.dto.AvgiftOverforingRepresentantDto;
 import no.nav.melosys.service.representant.RepresentantService;
+import no.nav.melosys.tjenester.gui.dto.RepresentantDto;
 import no.nav.melosys.tjenester.gui.dto.ValgtRepresentantDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -42,12 +43,10 @@ public class RepresentantTjenesteTest extends JsonSchemaTestParent {
 
         var response = representantTjeneste.hentRepresentantListe().getBody();
 
-        assertThat(response).isNotNull();
-        assertThat(response.size()).isEqualTo(2);
-        assertThat(response.get(0).getNummer()).isEqualTo("id1");
-        assertThat(response.get(0).getNavn()).isEqualTo("navn1");
-        assertThat(response.get(1).getNummer()).isEqualTo("id2");
-        assertThat(response.get(1).getNavn()).isEqualTo("navn2");
+        assertThat(response)
+            .hasSize(2)
+            .flatExtracting(RepresentantDto::getNummer, RepresentantDto::getNavn)
+            .containsExactly("id1", "navn1", "id2", "navn2");
         //TODO valider schema
     }
 
@@ -63,9 +62,7 @@ public class RepresentantTjenesteTest extends JsonSchemaTestParent {
         assertThat(response).isNotNull();
         assertThat(response.getNummer()).isEqualTo("id");
         assertThat(response.getNavn()).isEqualTo("navn");
-        assertThat(response.getAdresselinjer().size()).isEqualTo(2);
-        assertThat(response.getAdresselinjer().get(0)).isEqualTo("adresselinje1");
-        assertThat(response.getAdresselinjer().get(1)).isEqualTo("adresselinje2");
+        assertThat(response.getAdresselinjer()).hasSize(2).containsExactly("adresselinje1", "adresselinje2");
         assertThat(response.getPostnummer()).isEqualTo("postnummer");
         assertThat(response.getTelefon()).isEqualTo("telefon");
         assertThat(response.getOrgnr()).isEqualTo("orgnr");
