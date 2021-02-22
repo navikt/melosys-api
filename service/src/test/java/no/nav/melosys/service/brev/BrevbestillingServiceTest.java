@@ -1,5 +1,6 @@
 package no.nav.melosys.service.brev;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
@@ -8,7 +9,9 @@ import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.dokument.DokgenService;
+import no.nav.melosys.service.dokument.DokumentServiceFasade;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,10 +26,11 @@ import static no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper.LOENNET_
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class BrevmalInnholdServiceTest {
+class BrevbestillingServiceTest {
 
     @Mock
     private BehandlingService mockBehandlingService;
@@ -34,18 +38,24 @@ class BrevmalInnholdServiceTest {
     @Mock
     private AvklarteVirksomheterService mockAvklarteVirksomheterService;
 
-    private BrevmalInnholdService brevmalInnholdService;
+    @Mock
+    private DokumentServiceFasade mockDokServiceFasade;
+
+    @Mock
+    private DokgenService mockDokgenService;
+
+    private BrevbestillingService brevbestillingService;
 
     @BeforeEach
     void init() {
-        brevmalInnholdService = new BrevmalInnholdService(mockBehandlingService, mockAvklarteVirksomheterService);
+        brevbestillingService = new BrevbestillingService(mockBehandlingService, mockAvklarteVirksomheterService, mockDokServiceFasade, mockDokgenService);
     }
 
     @Test
     void gittIkkeAvsluttetBehandlingSkalTilgjengeligeBrevmalerReturneres() throws Exception {
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(new Behandling());
 
-        List<Produserbaredokumenter> brevMaler = brevmalInnholdService.hentBrevMaler(123L);
+        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentBrevMaler(123L);
 
         assertEquals(2, brevMaler.size());
         assertTrue(brevMaler.containsAll(asList(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MANGELBREV_BRUKER)));
@@ -57,12 +67,32 @@ class BrevmalInnholdServiceTest {
         AvklartVirksomhet avklartVirksomhet = new AvklartVirksomhet("Advokatene AS", "123456789", new StrukturertAdresse(), LOENNET_ARBEID);
         when(mockAvklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(singletonList(avklartVirksomhet));
 
-        List<AvklartVirksomhet> arbeidsgivere = brevmalInnholdService.hentArbeidsgivere(123L);
+        List<AvklartVirksomhet> arbeidsgivere = brevbestillingService.hentArbeidsgivere(123L);
 
         assertEquals(1, arbeidsgivere.size());
         AvklartVirksomhet virksomhet = arbeidsgivere.get(0);
         assertEquals("Advokatene AS", virksomhet.navn);
         assertEquals("123456789", virksomhet.orgnr);
+    }
+
+    @Test
+    void skalBestilleProduseringAvBrev() throws Exception {
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().build();
+        brevbestillingService.produserBrev(MANGELBREV_BRUKER, 123L, brevbestillingDto);
+
+        verify(mockDokgenService).produserOgDistribuerBrev(eq(MANGELBREV_BRUKER), anyLong(), any());
+    }
+
+    @Test
+    void skalReturnereUtkast() throws Exception {
+        byte[] pdf = "UTKAST".getBytes(StandardCharsets.UTF_8);
+        when(mockDokServiceFasade.produserUtkast(any(), anyLong(), any())).thenReturn(pdf);
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().build();
+
+        byte[] utkast = brevbestillingService.produserUtkast(MANGELBREV_BRUKER, 123L, brevbestillingDto);
+
+        assertEquals(pdf, utkast);
+        verify(mockDokServiceFasade).produserUtkast(eq(MANGELBREV_BRUKER), anyLong(), any());
     }
 
 }

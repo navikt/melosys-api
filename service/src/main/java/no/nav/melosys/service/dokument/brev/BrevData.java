@@ -15,8 +15,8 @@ public class BrevData {
 
     public BrevData(BrevbestillingDto brevbestillingDto, String saksbehandler) {
         this.saksbehandler = saksbehandler;
-        this.fritekst = brevbestillingDto.fritekst;
-        this.begrunnelseKode = brevbestillingDto.begrunnelseKode;
+        this.fritekst = brevbestillingDto.getFritekst();
+        this.begrunnelseKode = brevbestillingDto.getBegrunnelseKode();
     }
 
     public BrevData() { }

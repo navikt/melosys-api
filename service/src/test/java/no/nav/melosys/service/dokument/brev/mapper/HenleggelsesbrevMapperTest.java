@@ -56,10 +56,11 @@ public class HenleggelsesbrevMapperTest {
     private void testMapTilBrevXml(Behandling behandling, Behandlingsresultat behandlingsresultat) throws Exception {
         FellesType fellesType = lagFellesType();
         MelosysNAVFelles navFelles = LagMelosysNAVFelles();
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.mottaker = Aktoersroller.BRUKER;
-        brevbestillingDto.begrunnelseKode = "ANNET";
-        brevbestillingDto.fritekst = "something";
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+            .medMottaker(Aktoersroller.BRUKER)
+            .medBegrunnelseKode("ANNET")
+            .medFritekst("something")
+            .build();
 
         BrevDataMottattDato brevdata = new BrevDataMottattDato("saksbehandler", brevbestillingDto);
         brevdata.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();

@@ -1,8 +1,5 @@
 package no.nav.melosys.service.dokument;
 
-import java.util.List;
-
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
@@ -12,7 +9,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -26,22 +22,17 @@ public class DokumentServiceFasade {
     private final DokumentSystemService dokumentSystemService;
     private final DokgenService dokgenService;
     private final BehandlingService behandlingService;
-    private final ProsessinstansService prosessinstansService;
-    private final BrevmottakerService brevmottakerService;
     private final ApplicationEventPublisher applicationEventPublisher;
 
 
     @Autowired
     public DokumentServiceFasade(DokumentService dokumentService, DokumentSystemService dokumentSystemService,
                                  DokgenService dokgenService, BehandlingService behandlingService,
-                                 ProsessinstansService prosessinstansService, BrevmottakerService brevmottakerService,
                                  ApplicationEventPublisher applicationEventPublisher) {
         this.dokumentService = dokumentService;
         this.dokumentSystemService = dokumentSystemService;
         this.dokgenService = dokgenService;
         this.behandlingService = behandlingService;
-        this.prosessinstansService = prosessinstansService;
-        this.brevmottakerService = brevmottakerService;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
@@ -49,7 +40,7 @@ public class DokumentServiceFasade {
                                  BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
         if (dokgenService.erTilgjengeligDokgenmal(produserbartDokument)) {
             return dokgenService.produserBrev(produserbartDokument, behandlingId,
-                Mottaker.av(brevbestillingDto.mottaker).getAktør().getOrgnr(), true);
+                Mottaker.av(brevbestillingDto.getMottaker()).getAktør().getOrgnr(), brevbestillingDto, true);
         }
         return dokumentService.produserUtkast(produserbartDokument, behandlingId, brevbestillingDto);
     }
@@ -61,24 +52,19 @@ public class DokumentServiceFasade {
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(produserbartDokument)
             .medAvsenderNavn(saksbehandler)
-            .medMottakere(Mottaker.av(brevbestillingDto.mottaker))
-            .medBegrunnelseKode(brevbestillingDto.begrunnelseKode)
-            .medYtterligereInformasjon(brevbestillingDto.ytterligereInformasjon)
+            .medMottakere(Mottaker.av(brevbestillingDto.getMottaker()))
+            .medBegrunnelseKode(brevbestillingDto.getBegrunnelseKode())
+            .medYtterligereInformasjon(brevbestillingDto.getYtterligereInformasjon())
             .medBehandling(behandling)
-            .medFritekst(brevbestillingDto.fritekst).build();
-        produserDokument(produserbartDokument, Mottaker.av(brevbestillingDto.mottaker), behandlingId, brevbestilling);
+            .medFritekst(brevbestillingDto.getFritekst()).build();
+        produserDokument(produserbartDokument, Mottaker.av(brevbestillingDto.getMottaker()), behandlingId, brevbestilling, brevbestillingDto);
     }
 
     @Transactional
     public void produserDokument(Produserbaredokumenter produserbartDokument, Mottaker mottaker,
-                                 long behandlingID, DoksysBrevbestilling brevbestilling) throws TekniskException, FunksjonellException {
+                                 long behandlingID, DoksysBrevbestilling brevbestilling, BrevbestillingDto brevbestillingDto) throws TekniskException, FunksjonellException {
         if (dokgenService.erTilgjengeligDokgenmal(produserbartDokument)) {
-            Behandling behandling = behandlingService.hentBehandling(behandlingID);
-            //NOTE @Lunde Utvide for å støtte FastMottaker i BrevmottakerService
-            List<Aktoer> mottakere = brevmottakerService.avklarMottakere(produserbartDokument, mottaker, behandling);
-            for (Aktoer aktoer : mottakere) {
-                prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(produserbartDokument, behandling, aktoer);
-            }
+            dokgenService.produserOgDistribuerBrev(produserbartDokument, behandlingID, brevbestillingDto);
         } else {
             dokumentSystemService.produserDokument(produserbartDokument, mottaker, behandlingID, brevbestilling);
         }

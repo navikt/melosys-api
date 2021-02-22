@@ -1,11 +1,16 @@
 package no.nav.melosys.service.dokument;
 
+import java.util.List;
 import java.util.Set;
 
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
+import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
+import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
@@ -15,10 +20,14 @@ import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_BRUKER;
 import static org.springframework.util.StringUtils.hasText;
 
 @Service
@@ -31,13 +40,16 @@ public class DokgenService {
     private final BehandlingService behandlingService;
     private final EregFasade eregFasade;
     private final KontaktopplysningService kontaktopplysningService;
+    private final BrevmottakerService brevmottakerService;
+    private final ProsessinstansService prosessinstansService;
 
     @Autowired
     public DokgenService(DokgenConsumer dokgenConsumer, DokgenMalResolver dokgenMalResolver,
                          @Qualifier("system") JoarkFasade joarkFasade,
                          DokgenMalMapper dokgenMalMapper, BehandlingService behandlingService,
-                         @Qualifier("system")  EregFasade eregFasade,
-                         KontaktopplysningService kontaktopplysningService) {
+                         @Qualifier("system") EregFasade eregFasade,
+                         KontaktopplysningService kontaktopplysningService,
+                         BrevmottakerService brevmottakerService, ProsessinstansService prosessinstansService) {
         this.dokgenConsumer = dokgenConsumer;
         this.dokgenMalResolver = dokgenMalResolver;
         this.joarkFasade = joarkFasade;
@@ -45,31 +57,69 @@ public class DokgenService {
         this.behandlingService = behandlingService;
         this.eregFasade = eregFasade;
         this.kontaktopplysningService = kontaktopplysningService;
+        this.brevmottakerService = brevmottakerService;
+        this.prosessinstansService = prosessinstansService;
     }
 
     public byte[] produserBrev(Produserbaredokumenter produserbartdokument, long behandlingId,
-                               String orgnr) throws FunksjonellException, TekniskException {
-        return produserBrev(produserbartdokument, behandlingId, orgnr, false);
+                               String orgnr, BrevbestillingDto brevbestilling) throws FunksjonellException, TekniskException {
+        return produserBrev(produserbartdokument, behandlingId, orgnr, brevbestilling, false);
     }
 
     public byte[] produserBrev(Produserbaredokumenter produserbartdokument, long behandlingId,
-                               String orgnr, boolean bestillKopi) throws FunksjonellException, TekniskException {
-        Behandling behandling = behandlingService.hentBehandling(behandlingId);
-        String malnavn = dokgenMalResolver.hentMalnavn(produserbartdokument);
+                               String orgnr, BrevbestillingDto brevbestillingDto, boolean bestillKopi) throws FunksjonellException, TekniskException {
+        DokgenBrevbestilling.Builder<?> brevbestilling = new DokgenBrevbestilling.Builder<>();
 
-        DokgenBrevbestilling.Builder<?> brevbestilling = new DokgenBrevbestilling.Builder<>()
-            .medProduserbartdokument(produserbartdokument)
-            .medBehandling(behandling);
-
-        if (hasText(orgnr)) {
-            settOrganisasjonsOpplysninger(behandling, orgnr, brevbestilling);
+        if (MANGELBREV_ARBEIDSGIVER == produserbartdokument || MANGELBREV_BRUKER == produserbartdokument) {
+            brevbestilling = new MangelbrevBrevbestilling.Builder()
+                .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
+                .medManglerInfoFritekst(brevbestillingDto.getManglerFritekst())
+                .medFullmektigNavn(brevbestillingDto.getFullmektigNavn());
         }
 
-        settJournalpostOpplysninger(behandling, brevbestilling);
+        brevbestilling
+            .medProduserbartdokument(produserbartdokument)
+            .medBehandlingId(behandlingId)
+            .medBestillKopi(bestillKopi);
 
-        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling.build());
+        if (hasText(orgnr)) {
+            Aktoer mottaker = new Aktoer();
+            mottaker.setOrgnr(orgnr);
 
-        return dokgenConsumer.lagPdf(malnavn, dokgenDto, bestillKopi);
+            brevbestilling.medMottaker(mottaker);
+        }
+
+
+        return produserBrev(brevbestilling.build());
+    }
+
+    public byte[] produserBrev(DokgenBrevbestilling brevbestilling) throws FunksjonellException, TekniskException {
+        Behandling behandling = behandlingService.hentBehandling(brevbestilling.getBehandlingId());
+        String malnavn = dokgenMalResolver.hentMalnavn(brevbestilling.getProduserbartdokument());
+        String orgnr = brevbestilling.getMottaker() != null ? brevbestilling.getMottaker().getOrgnr() : null;
+        DokgenBrevbestilling.Builder<?> builder = brevbestilling.toBuilder();
+
+        builder.medBehandling(behandling);
+
+        if (hasText(orgnr)) {
+            settOrganisasjonsOpplysninger(behandling, orgnr, builder);
+        }
+
+        settJournalpostOpplysninger(behandling, builder);
+
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(builder.build());
+
+        return dokgenConsumer.lagPdf(malnavn, dokgenDto, brevbestilling.bestillKopi());
+    }
+
+    public void produserOgDistribuerBrev(Produserbaredokumenter produserbartDokument, long behandlingId,
+                                         BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
+        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        List<Aktoer> mottakere = brevmottakerService.avklarMottakere(produserbartDokument, Mottaker.av(brevbestillingDto.getMottaker()), behandling);
+        //NOTE @Lunde Utvide for å støtte FastMottaker i BrevmottakerService
+        for (Aktoer aktoer : mottakere) {
+            prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(produserbartDokument, behandling, aktoer, brevbestillingDto);
+        }
     }
 
     public String hentMalnavn(Produserbaredokumenter produserbartDokument) throws FunksjonellException {
@@ -82,7 +132,7 @@ public class DokgenService {
     }
 
     private void settOrganisasjonsOpplysninger(Behandling behandling, String orgnr,
-                                               DokgenBrevbestilling.Builder brevbestilling)
+                                               DokgenBrevbestilling.Builder<?> brevbestilling)
         throws IkkeFunnetException, IntegrasjonException {
         brevbestilling
             .medOrg((OrganisasjonDokument) eregFasade.hentOrganisasjon(orgnr).getDokument())
@@ -91,7 +141,7 @@ public class DokgenService {
             );
     }
 
-    private void settJournalpostOpplysninger(Behandling behandling, DokgenBrevbestilling.Builder brevbestilling)
+    private void settJournalpostOpplysninger(Behandling behandling, DokgenBrevbestilling.Builder<?> brevbestilling)
         throws SikkerhetsbegrensningException, IntegrasjonException {
         Journalpost journalpost = joarkFasade.hentJournalpost(behandling.getInitierendeJournalpostId());
         brevbestilling

@@ -7,6 +7,7 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,7 @@ public class BrevBestiller {
         Behandling behandling = brevbestilling.getBehandling();
 
         for (Mottaker mottaker : brevbestilling.getMottakere()) {
-            dokumentServiceFasade.produserDokument(dokumentType, mottaker, behandling.getId(), brevbestilling);
+            dokumentServiceFasade.produserDokument(dokumentType, mottaker, behandling.getId(), brevbestilling, new BrevbestillingDto.Builder().build());
             log.info("Brevet '{}' er bestillt for sak {} og behandling {}", dokumentType, behandling.getFagsak().getSaksnummer(), behandling.getId());
         }
     }

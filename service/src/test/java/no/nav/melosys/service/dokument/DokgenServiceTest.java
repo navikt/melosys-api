@@ -13,6 +13,7 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
 import no.nav.melosys.integrasjon.dokgen.DokgenMalResolver;
@@ -22,18 +23,20 @@ import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ATTEST_A1;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -59,6 +62,10 @@ class DokgenServiceTest {
     private KontaktopplysningService mockKontaktOpplysningService;
     @Mock
     private BehandlingsresultatService mockBehandlingsresultatService;
+    @Mock
+    private BrevmottakerService mockBrevMottakerService;
+    @Mock
+    private ProsessinstansService mockProsessinstansService;
 
     private final FakeUnleash unleash = new FakeUnleash();
 
@@ -70,12 +77,13 @@ class DokgenServiceTest {
     void init() {
         dokgenService = new DokgenService(mockDokgenConsumer, new DokgenMalResolver(unleash), mockJoarkFasade,
             new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService, mockEregFasade, mockTpsFasade),
-            mockBehandlingsService, mockEregFasade, mockKontaktOpplysningService);
+            mockBehandlingsService,
+            mockEregFasade, mockKontaktOpplysningService, mockBrevMottakerService, mockProsessinstansService);
     }
 
     @Test
     void produserBrevFeilerUtilgjengeligMal() {
-        assertThrows(FunksjonellException.class, () -> dokgenService.produserBrev(ATTEST_A1, 123L, null));
+        assertThrows(FunksjonellException.class, () -> dokgenService.produserBrev(ATTEST_A1, 123L, null, null));
     }
 
     @Test
@@ -88,7 +96,7 @@ class DokgenServiceTest {
         Aktoer mottaker = new Aktoer();
         mottaker.setRolle(Aktoersroller.BRUKER);
 
-        byte[] pdfResponse = dokgenService.produserBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L, mottaker.getOrgnr());
+        byte[] pdfResponse = dokgenService.produserBrev(MANGELBREV_BRUKER, 123L, mottaker.getOrgnr(), new BrevbestillingDto.Builder().build());
 
         assertNotNull(pdfResponse);
         assertEquals(expectedPdf, pdfResponse);
@@ -110,7 +118,7 @@ class DokgenServiceTest {
         mottaker.setRolle(Aktoersroller.REPRESENTANT);
         mottaker.setOrgnr("123456789");
 
-        byte[] pdfResponse = dokgenService.produserBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L, mottaker.getOrgnr());
+        byte[] pdfResponse = dokgenService.produserBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L, mottaker.getOrgnr(), new BrevbestillingDto.Builder().build());
 
         assertNotNull(pdfResponse);
         assertEquals(expectedPdf, pdfResponse);
@@ -121,11 +129,32 @@ class DokgenServiceTest {
     }
 
     @Test
+    void skalProdusereOgDistribuereBrev() throws Exception {
+        Aktoer bruker = new Aktoer();
+        bruker.setRolle(Aktoersroller.BRUKER);
+
+        when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(new Behandling());
+        when(mockBrevMottakerService.avklarMottakere(any(), any(), any())).thenReturn(asList(bruker));
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().build();
+
+        dokgenService.produserOgDistribuerBrev(MANGELBREV_BRUKER, 123L, brevbestillingDto);
+
+        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(eq(MANGELBREV_BRUKER), any(), eq(bruker), any());
+    }
+
+    @Test
     void erTilgjengeligDokgenmal() {
         unleash.enableAll();
 
         assertTrue(dokgenService.erTilgjengeligDokgenmal(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD));
         assertFalse(dokgenService.erTilgjengeligDokgenmal(ATTEST_A1));
+    }
+
+    @Test
+    void skalHenteMalnavn() throws Exception {
+        String malnavn = dokgenService.hentMalnavn(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
+
+        assertEquals("saksbehandlingstid_soknad", malnavn);
     }
 
     private Journalpost lagJournalpost() {
@@ -139,8 +168,9 @@ class DokgenServiceTest {
     private Behandling lagBehandling() {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
+        behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setSaksopplysninger(singleton(lagPersonopplysning()));
-        behandling.setFagsak(lagFagsak());
+        behandling.setFagsak(lagFagsak(behandling));
         return behandling;
     }
 
@@ -153,9 +183,10 @@ class DokgenServiceTest {
         return saksopplysning;
     }
 
-    private Fagsak lagFagsak() {
+    private Fagsak lagFagsak(Behandling behandling) {
         Fagsak fagsak = new Fagsak();
         fagsak.setGsakSaksnummer(123L);
+        fagsak.setBehandlinger(asList(behandling));
         return fagsak;
     }
 

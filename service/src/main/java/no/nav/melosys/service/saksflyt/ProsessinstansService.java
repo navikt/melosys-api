@@ -25,6 +25,7 @@ import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.sak.OpprettSakDto;
@@ -243,10 +244,11 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansOpprettOgDistribuerBrev(Produserbaredokumenter produserbartDokument, Behandling behandling, Aktoer mottaker) {
+    public void opprettProsessinstansOpprettOgDistribuerBrev(Produserbaredokumenter produserbartDokument, Behandling behandling, Aktoer mottaker, BrevbestillingDto brevbestillingDto) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
         prosessinstans.setData(PRODUSERBART_BREV, produserbartDokument);
+        prosessinstans.setData(BREVBESTILLING, brevbestillingDto);
         prosessinstans.setData(MOTTAKER, mottaker.getRolle());
         if (hasText(mottaker.getAktørId())) {
             prosessinstans.setData(AKTØR_ID, mottaker.getAktørId());
