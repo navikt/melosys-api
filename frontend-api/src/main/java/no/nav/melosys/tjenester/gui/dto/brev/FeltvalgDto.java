@@ -9,6 +9,14 @@ public class FeltvalgDto {
         this.beskrivelse = beskrivelse;
     }
 
+    public String getKode() {
+        return kode;
+    }
+
+    public String getBeskrivelse() {
+        return beskrivelse;
+    }
+
     public static final class Builder {
         private String kode;
         private String beskrivelse;
