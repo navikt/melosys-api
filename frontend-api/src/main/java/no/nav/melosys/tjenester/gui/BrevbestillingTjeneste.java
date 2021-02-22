@@ -36,9 +36,6 @@ import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 @Api(tags = {"dokumenterv2"})
 @RequestScope
 public class BrevbestillingTjeneste {
-
-    private static final String APPLICATION_JSON_UTF8 = APPLICATION_JSON_VALUE + "; charset=UTF-8";
-
     private final BrevbestillingService brevbestillingService;
 
     @Autowired
@@ -46,7 +43,7 @@ public class BrevbestillingTjeneste {
         this.brevbestillingService = brevbestillingService;
     }
 
-    @GetMapping(value = "/tilgjengelige-maler", produces = APPLICATION_JSON_UTF8)
+    @GetMapping(value = "/tilgjengelige-maler", produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Henter alle tilgjengelige brevmaler for en behandling", response = BrevmalDto.class, responseContainer = "List")
     public List<BrevmalDto> hentTilgjengeligeMaler(@RequestParam Long behandlingId) throws IkkeFunnetException, TekniskException {
         return byggBrevmalListe(behandlingId);

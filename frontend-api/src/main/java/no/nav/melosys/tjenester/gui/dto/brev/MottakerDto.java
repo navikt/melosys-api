@@ -19,6 +19,26 @@ public class MottakerDto {
         this.adresselinjer = builder.adresselinjer;
     }
 
+    public String getType() {
+        return type;
+    }
+
+    public Aktoersroller getRolle() {
+        return rolle;
+    }
+
+    public String getOrgnr() {
+        return orgnr;
+    }
+
+    public boolean isKanOverstyres() {
+        return kanOverstyres;
+    }
+
+    public List<String> getAdresselinjer() {
+        return adresselinjer;
+    }
+
     public static final class Builder {
         private String type;
         private Aktoersroller rolle;
