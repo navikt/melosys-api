@@ -27,6 +27,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 
 @Protected
@@ -36,6 +37,8 @@ import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 @RequestScope
 public class BrevbestillingTjeneste {
 
+    private static final String APPLICATION_JSON_UTF8 = APPLICATION_JSON_VALUE + "; charset=UTF-8";
+
     private final BrevbestillingService brevbestillingService;
 
     @Autowired
@@ -43,13 +46,13 @@ public class BrevbestillingTjeneste {
         this.brevbestillingService = brevbestillingService;
     }
 
-    @GetMapping("/tilgjengelige-maler")
+    @GetMapping(value = "/tilgjengelige-maler", produces = APPLICATION_JSON_UTF8)
     @ApiOperation(value = "Henter alle tilgjengelige brevmaler for en behandling", response = BrevmalDto.class, responseContainer = "List")
     public List<BrevmalDto> hentTilgjengeligeMaler(@RequestParam Long behandlingId) throws IkkeFunnetException, TekniskException {
         return byggBrevmalListe(behandlingId);
     }
 
-    @PostMapping(value = "pdf/brev/utkast/{behandlingID}/{produserbartDokument}", consumes = "application/json", produces = {APPLICATION_PDF_VALUE})
+    @PostMapping(value = "pdf/brev/utkast/{behandlingID}/{produserbartDokument}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_PDF_VALUE)
     @ApiOperation(value = "Produser utkast")
     public ResponseEntity<byte[]> produserUtkast(@PathVariable long behandlingID,
                                                  @PathVariable Produserbaredokumenter produserbartDokument,
