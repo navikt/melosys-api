@@ -111,8 +111,7 @@ public class SaksopplysningerTilDtoTest {
     }
 
     @Test
-    public void testKonverteringPersonMedStatsborgerskap() throws Exception {
-
+    public void testKonverteringPersonMedStatsborgerskap() {
         Saksopplysning personDokument = lagDokument("88888888882.xml", PERSOPL, "3.0");
         Saksopplysning personhistorikkDokument = lagDokument("88888888882_historikk.xml", PERSHIST, "3.4");
 

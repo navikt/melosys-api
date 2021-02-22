@@ -54,6 +54,7 @@ public class SaksopplysningerDto {
     public PersonhistorikkDto getPersonhistorikk() {
         return personhistorikk;
     }
+
     public void setPersonhistorikk(PersonhistorikkDto personhistorikk) {
         this.personhistorikk = personhistorikk;
     }
