@@ -11,7 +11,6 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
 public class DokgenBrevbestilling extends Brevbestilling {
     private final OrganisasjonDokument org;
-    private final String orgnrMottaker;
     private final Kontaktopplysning kontaktopplysning;
     private final Instant forsendelseMottatt;
     private final String avsenderId;
@@ -24,7 +23,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
     protected DokgenBrevbestilling(Builder<?> builder) {
         super(builder.produserbartdokument, builder.behandling, builder.avsenderNavn);
         this.org = builder.org;
-        this.orgnrMottaker = builder.orgnrMottaker;
         this.kontaktopplysning = builder.kontaktopplysning;
         this.forsendelseMottatt = builder.forsendelseMottatt;
         this.avsenderId = builder.avsenderId;
@@ -37,10 +35,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
     public OrganisasjonDokument getOrg() {
         return org;
-    }
-
-    public String getOrgnrMottaker() {
-        return orgnrMottaker;
     }
 
     public Kontaktopplysning getKontaktopplysning() {
@@ -83,7 +77,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private Produserbaredokumenter produserbartdokument;
         private Behandling behandling;
         private OrganisasjonDokument org;
-        private String orgnrMottaker;
         private Kontaktopplysning kontaktopplysning;
         private Instant forsendelseMottatt;
         private String avsenderNavn;
@@ -101,7 +94,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.produserbartdokument = brevbestilling.produserbartdokument;
             this.behandling = brevbestilling.behandling;
             this.org = brevbestilling.org;
-            this.orgnrMottaker = brevbestilling.orgnrMottaker;
             this.kontaktopplysning = brevbestilling.kontaktopplysning;
             this.forsendelseMottatt = brevbestilling.forsendelseMottatt;
             this.avsenderNavn = brevbestilling.avsenderNavn;
@@ -125,11 +117,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
         public T medOrg(OrganisasjonDokument org) {
             this.org = org;
-            return (T) this;
-        }
-
-        public T medOrgnrMottaker(String orgnrMottaker) {
-            this.orgnrMottaker = orgnrMottaker;
             return (T) this;
         }
 

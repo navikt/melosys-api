@@ -10,6 +10,7 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
@@ -79,8 +80,15 @@ public class DokgenService {
         brevbestilling
             .medProduserbartdokument(produserbartdokument)
             .medBehandlingId(behandlingId)
-            .medOrgnrMottaker(orgnr)
             .medBestillKopi(bestillKopi);
+
+        if (hasText(orgnr)) {
+            Aktoer mottaker = new Aktoer();
+            mottaker.setOrgnr(orgnr);
+
+            brevbestilling.medMottaker(mottaker);
+        }
+
 
         return produserBrev(brevbestilling.build());
     }
@@ -88,7 +96,7 @@ public class DokgenService {
     public byte[] produserBrev(DokgenBrevbestilling brevbestilling) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandling(brevbestilling.getBehandlingId());
         String malnavn = dokgenMalResolver.hentMalnavn(brevbestilling.getProduserbartdokument());
-        String orgnr = brevbestilling.getMottaker() != null ? brevbestilling.getMottaker().getOrgnr() : brevbestilling.getOrgnrMottaker();
+        String orgnr = brevbestilling.getMottaker() != null ? brevbestilling.getMottaker().getOrgnr() : null;
         DokgenBrevbestilling.Builder<?> builder = brevbestilling.toBuilder();
 
         builder.medBehandling(behandling);

@@ -72,6 +72,7 @@ public class DokumentTjeneste {
     }
 
     //TODO Slettes når nytt endepunkt i 'BrevbestillingTjeneste' er klare
+    @Deprecated
     @PostMapping(value = "pdf/brev/utkast/{behandlingID}/{produserbartDokument}", produces = {APPLICATION_PDF, APPLICATION_JSON_UTF8})
     public ResponseEntity<byte[]> produserUtkastBrev(@PathVariable("behandlingID") long behandlingID,
                                                      @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
@@ -94,6 +95,7 @@ public class DokumentTjeneste {
     }
 
     //TODO Slettes når nytt endepunkt i 'BrevbestillingTjeneste' er klare
+    @Deprecated
     @PostMapping("opprett/{behandlingID}/{produserbartDokument}")
     public ResponseEntity<Void> produserDokument(@PathVariable("behandlingID") long behandlingID,
                                                  @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
