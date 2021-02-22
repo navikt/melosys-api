@@ -295,5 +295,17 @@
                 <husbokstav>A</husbokstav>
             </strukturertAdresse>
         </midlertidigAdressePeriodeListe>
+        <midlertidigAdressePeriodeListe xsi:type="b:MidlertidigPostadresseNorge"  endringstidspunkt="2018-04-04T00:00:00.000+02:00" endretAv="SKD" endringstype="endret" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <postleveringsPeriode>
+                <fom>2020-02-29T00:00:00.000+01:00</fom>
+                <tom>2021-02-28T00:00:00.000+01:00</tom>
+            </postleveringsPeriode>
+            <strukturertAdresse xsi:type="b:Matrikkeladresse">
+                <landkode>NOR</landkode>
+                <poststed>1234</poststed>
+                <kommunenummer>7777</kommunenummer>
+                <eiendomsnavn>Bugstadveien 101</eiendomsnavn>
+            </strukturertAdresse>
+        </midlertidigAdressePeriodeListe>
     </response>
 </a:hentPersonhistorikkResponse>

@@ -63,6 +63,12 @@
         </gateadresse>
     </xsl:template>
 
+    <xsl:template match="strukturertAdresse[contains(@xsi:type,'Matrikkeladresse')]">
+        <gateadresse>
+            <gatenavn><xsl:value-of select="eiendomsnavn"/></gatenavn>
+        </gateadresse>
+    </xsl:template>
+
     <xsl:template match="postadresse">
         <postadresse>
             <xsl:apply-templates/>

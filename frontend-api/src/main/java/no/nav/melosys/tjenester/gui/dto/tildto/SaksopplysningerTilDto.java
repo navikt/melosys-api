@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.FellesKodeverk.POSTNUMMER;
 
 /**
- * Denne klassen konverterer alle SaksopplysningDokumenter til et objekt tre for frontend.
+ * Klassen konverterer alle saksopplysninger til SaksopplysningerDto for visning i frontend.
  */
 @Component
 public class SaksopplysningerTilDto {
