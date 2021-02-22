@@ -69,7 +69,7 @@ public class DokgenService {
                                String orgnr, BrevbestillingDto brevbestillingDto, boolean bestillKopi) throws FunksjonellException, TekniskException {
         DokgenBrevbestilling.Builder<?> brevbestilling = new DokgenBrevbestilling.Builder<>();
 
-        if (MANGELBREV_BRUKER == produserbartdokument || MANGELBREV_ARBEIDSGIVER == produserbartdokument) {
+        if (MANGELBREV_ARBEIDSGIVER == produserbartdokument || MANGELBREV_BRUKER == produserbartdokument) {
             brevbestilling = new MangelbrevBrevbestilling.Builder()
                 .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
                 .medManglerInfoFritekst(brevbestillingDto.getManglerFritekst())
