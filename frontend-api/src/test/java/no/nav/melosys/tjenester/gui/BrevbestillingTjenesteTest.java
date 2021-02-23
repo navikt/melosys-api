@@ -3,7 +3,9 @@ package no.nav.melosys.tjenester.gui;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -26,7 +28,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class BrevbestillingTjenesteTest {
+class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
 
     @Mock
     private BehandlingService mockBehandlingService;
@@ -61,22 +63,34 @@ class BrevbestillingTjenesteTest {
         byte[] forventetPdf = "UTKAST".getBytes(StandardCharsets.UTF_8);
         when(mockDokServiceFasade.produserUtkast(any(), anyLong(), any())).thenReturn(forventetPdf);
 
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().build();
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+            .medMottaker(Aktoersroller.BRUKER)
+            .medInnledningFritekst("Innledning")
+            .medManglerFritekst("Mangler")
+            .build();
         ResponseEntity<byte[]> responseEntity = brevbestillingTjeneste.produserUtkast(123L, MANGELBREV_BRUKER, brevbestillingDto);
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertEquals(forventetPdf, responseEntity.getBody());
 
         verifyNoInteractions(mockDokgenService);
+
+        valider(brevbestillingDto, "brev-post-schema.json", new ObjectMapper());
     }
 
     @Test
     void skalBestilleProduseringAvBrev() throws Exception {
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().build();
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+            .medMottaker(Aktoersroller.BRUKER)
+            .medInnledningFritekst("Innledning")
+            .medManglerFritekst("Mangler")
+            .build();
         brevbestillingTjeneste.produserBrev(123L, MANGELBREV_BRUKER, brevbestillingDto);
 
         verify(mockDokgenService).produserOgDistribuerBrev(eq(MANGELBREV_BRUKER), eq(123L), eq(brevbestillingDto));
         verifyNoInteractions(mockDokServiceFasade);
+
+        valider(brevbestillingDto, "brev-post-schema.json", new ObjectMapper());
     }
 
 }
