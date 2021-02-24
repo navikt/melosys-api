@@ -16,9 +16,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -88,10 +86,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
 
         Set<Vedlegg> vedlegg = new HashSet<>();
         for (DokumentReferanse vedleggReferanse : vedleggReferanser) {
-            Journalpost journalpost = joarkFasade.hentJournalpost(vedleggReferanse.getJournalpostID());
-            byte[] pdf = joarkFasade.hentDokument(vedleggReferanse.getJournalpostID(), vedleggReferanse.getDokumentID());
-            String tittel = journalpost.hentArkivDokument(vedleggReferanse.getDokumentID()).getTittel();
-            vedlegg.add(new Vedlegg(pdf, tittel));
+            vedlegg.add(eessiService.lagEessiVedlegg(vedleggReferanse));
         }
         return vedlegg;
     }

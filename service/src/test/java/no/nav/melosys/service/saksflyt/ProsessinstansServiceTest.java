@@ -110,18 +110,22 @@ class ProsessinstansServiceTest {
 
     @Test
     void opprettProsessinstansAnmodningOmUnntak() {
+        final Behandling behandling = new Behandling();
         final String mottakerInstitusjon = "SE:123";
-        Behandling behandling = new Behandling();
-        prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, Set.of(mottakerInstitusjon), "FRITEKST_SED");
+        final DokumentReferanse dokumentReferanse = new DokumentReferanse("jpID", "dokID");
+
+        prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, Set.of(mottakerInstitusjon),
+            Set.of(dokumentReferanse), "FRITEKST_SED");
 
         verify(prosessinstansRepo).save(piCaptor.capture());
-
         Prosessinstans lagretInstans = piCaptor.getValue();
         assertThat(lagretInstans.getType()).isEqualTo(ProsessType.ANMODNING_OM_UNNTAK);
-        assertThat(lagretInstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED)).isEqualTo("FRITEKST_SED");
-        assertThat(lagretInstans.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<List<String>>() {
-        }).get(0)).isEqualTo(mottakerInstitusjon);
         assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
+        assertThat(lagretInstans.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<List<String>>() {}).get(0))
+            .isEqualTo(mottakerInstitusjon);
+        assertThat(lagretInstans.getData(ProsessDataKey.VEDLEGG_SED, new TypeReference<Set<DokumentReferanse>>() {}))
+            .isEqualTo(Set.of(dokumentReferanse));
+        assertThat(lagretInstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED)).isEqualTo("FRITEKST_SED");
     }
 
     @Test

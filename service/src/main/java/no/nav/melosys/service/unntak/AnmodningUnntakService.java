@@ -64,8 +64,8 @@ public class AnmodningUnntakService {
     }
 
     @Transactional(rollbackFor = MelosysException.class)
-    public void anmodningOmUnntak(long behandlingID, String mottakerinstitusjon, String ytterligereInformasjonSed,
-                                  Collection<DokumentReferanse> vedleggReferanser) throws MelosysException {
+    public void anmodningOmUnntak(long behandlingID, String mottakerinstitusjon,
+                                  Set<DokumentReferanse> vedleggReferanser, String ytterligereInformasjonSed) throws MelosysException {
         Set<String> mottakerinstitusjoner = validerMottakerInstitusjon(behandlingID, mottakerinstitusjon);
 
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
@@ -74,7 +74,8 @@ public class AnmodningUnntakService {
         kontrollerAnmodningOmUnntak(behandlingID);
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
 
-        prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, mottakerinstitusjoner, ytterligereInformasjonSed);
+        prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, mottakerinstitusjoner,
+            vedleggReferanser, ytterligereInformasjonSed);
         oppgaveService.leggTilbakeOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 

@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.sed;
 
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
+import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.bygger.SedDataBygger;
@@ -13,8 +14,10 @@ public class EessiSystemService extends EessiService {
     public EessiSystemService(SedDataBygger sedDataBygger,
                               SedDataGrunnlagFactory dataGrunnlagFactory,
                               @Qualifier("system") EessiConsumer eessiConsumer,
+                              @Qualifier("system") JoarkFasade joarkFasade,
                               BehandlingService behandlingService,
                               BehandlingsresultatService behandlingsresultatService) {
-        super(sedDataBygger, dataGrunnlagFactory, eessiConsumer, behandlingService, behandlingsresultatService);
+        super(behandlingService, behandlingsresultatService, eessiConsumer, joarkFasade, sedDataBygger,
+            dataGrunnlagFactory);
     }
 }

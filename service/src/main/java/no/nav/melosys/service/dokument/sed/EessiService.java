@@ -9,6 +9,8 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.PeriodeType;
+import no.nav.melosys.domain.arkiv.DokumentReferanse;
+import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
 import no.nav.melosys.domain.eessi.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -18,12 +20,11 @@ import no.nav.melosys.domain.eessi.sed.UtpekingAvvisDto;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
+import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.SedPdfData;
@@ -32,6 +33,7 @@ import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag;
 import no.nav.melosys.service.eessi.SedGrunnlagMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,22 +46,30 @@ import static java.util.function.Predicate.not;
 public class EessiService {
     private static final Logger log = LoggerFactory.getLogger(EessiService.class);
 
-    private final SedDataBygger sedDataBygger;
-    private final SedDataGrunnlagFactory dataGrunnlagFactory;
-    private final EessiConsumer eessiConsumer;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
+    private final JoarkFasade joarkFasade;
+    private final EessiConsumer eessiConsumer;
+    private final SedDataBygger sedDataBygger;
+    private final SedDataGrunnlagFactory dataGrunnlagFactory;
 
-    public EessiService(SedDataBygger sedDataBygger,
-                        SedDataGrunnlagFactory dataGrunnlagFactory,
-                        EessiConsumer eessiConsumer,
-                        BehandlingService behandlingService,
-                        BehandlingsresultatService behandlingsresultatService) {
-        this.sedDataBygger = sedDataBygger;
-        this.dataGrunnlagFactory = dataGrunnlagFactory;
-        this.eessiConsumer = eessiConsumer;
+    public EessiService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
+                        EessiConsumer eessiConsumer, @Qualifier("system") JoarkFasade joarkFasade,
+                        SedDataBygger sedDataBygger, SedDataGrunnlagFactory dataGrunnlagFactory) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
+        this.joarkFasade = joarkFasade;
+        this.eessiConsumer = eessiConsumer;
+        this.sedDataBygger = sedDataBygger;
+        this.dataGrunnlagFactory = dataGrunnlagFactory;
+    }
+
+    public Vedlegg lagEessiVedlegg(DokumentReferanse vedleggReferanse) throws IkkeFunnetException,
+        IntegrasjonException, SikkerhetsbegrensningException {
+        Journalpost journalpost = joarkFasade.hentJournalpost(vedleggReferanse.getJournalpostID());
+        byte[] pdf = joarkFasade.hentDokument(vedleggReferanse.getJournalpostID(), vedleggReferanse.getDokumentID());
+        String tittel = journalpost.hentArkivDokument(vedleggReferanse.getDokumentID()).getTittel();
+        return new Vedlegg(pdf, tittel);
     }
 
     public void opprettOgSendSed(long behandlingID, List<String> mottakerInstitusjoner, BucType bucType,

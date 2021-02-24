@@ -1,8 +1,10 @@
-package no.nav.melosys.service.unntaksperiode;
+package no.nav.melosys.service.unntak;
 
 import java.util.Collections;
+import java.util.Set;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
@@ -21,8 +23,6 @@ import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.unntak.AnmodningUnntakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
-import no.nav.melosys.service.unntak.AnmodningUnntakService;
-import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,6 +69,7 @@ class AnmodningUnntakServiceTest {
     void anmodningOmUnntak_erEessiKlarMedMottakerInstitusjon_prosessOpprettet() throws MelosysException {
         final long behandlingID = 1L;
         final String mottakerInstitusjon = "SE:432";
+        final DokumentReferanse dokumentReferanse = new DokumentReferanse("jpID", "dokID");
         final String fritekstSed = "friteksssst";
         Behandling behandling = new Behandling();
         Fagsak fagsak = new Fagsak();
@@ -77,14 +78,15 @@ class AnmodningUnntakServiceTest {
         behandling.getSaksopplysninger().add(lagPersonSaksopplysning());
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID))).thenReturn(Collections.singletonList(Landkoder.SE));
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID)).thenReturn(Collections.singletonList(Landkoder.SE));
 
-        anmodningUnntakService.anmodningOmUnntak(behandlingID, mottakerInstitusjon, fritekstSed, Collections.emptyList());
+        anmodningUnntakService.anmodningOmUnntak(behandlingID, mottakerInstitusjon, Set.of(dokumentReferanse), fritekstSed);
 
         verify(anmodningUnntakKontrollService).utførKontroller(behandlingID);
-        verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), anySet(), eq(fritekstSed));
+        verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class),
+            anySet(), eq(Set.of(dokumentReferanse)), eq(fritekstSed));
         verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
-        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(eq(behandlingID), eq(Behandlingsresultattyper.ANMODNING_OM_UNNTAK));
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
     }
 
     @Test
@@ -98,14 +100,15 @@ class AnmodningUnntakServiceTest {
         behandling.setFagsak(fagsak);
         behandling.getSaksopplysninger().add(lagPersonSaksopplysning());
         when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID))).thenReturn(Collections.singletonList(Landkoder.SE));
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID)).thenReturn(Collections.singletonList(Landkoder.SE));
 
-        anmodningUnntakService.anmodningOmUnntak(behandlingID, null, fritekstSed, Collections.emptyList());
+        anmodningUnntakService.anmodningOmUnntak(behandlingID, null, Collections.emptySet(), fritekstSed);
 
         verify(anmodningUnntakKontrollService).utførKontroller(behandlingID);
-        verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), anySet(), eq(fritekstSed));
+        verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), anySet(),
+            anySet(), eq(fritekstSed));
         verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
-        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(eq(behandlingID), eq(Behandlingsresultattyper.ANMODNING_OM_UNNTAK));
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
     }
 
     @Test
@@ -119,11 +122,11 @@ class AnmodningUnntakServiceTest {
 
         anmodningUnntakService.anmodningOmUnntakSvar(1L);
 
-        verify(behandlingService).hentBehandlingUtenSaksopplysninger(eq(1L));
-        verify(anmodningsperiodeService).hentAnmodningsperiodeSvarForBehandling(eq(1L));
-        verify(lovvalgsperiodeService).hentLovvalgsperioder(eq(1L));
-        verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntakMottakSvar(eq(behandling));
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq("MEL-111"));
+        verify(behandlingService).hentBehandlingUtenSaksopplysninger(1L);
+        verify(anmodningsperiodeService).hentAnmodningsperiodeSvarForBehandling(1L);
+        verify(lovvalgsperiodeService).hentLovvalgsperioder(1L);
+        verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntakMottakSvar(behandling);
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer("MEL-111");
     }
 
     @Test

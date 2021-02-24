@@ -12,6 +12,7 @@ import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
+import no.nav.melosys.domain.eessi.Vedlegg;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -90,19 +91,18 @@ class VideresendSoknadTest {
         behandlingsresultat.setId(behandlingID);
         behandlingsresultat.setBehandling(behandling);
 
-        byte[] vedlegg = new byte[10];
-        prosessinstans.setData(ProsessDataKey.VEDLEGG_SED,
-            Set.of(new DokumentReferanse(behandling.getInitierendeJournalpostId(), journalpost.getHoveddokument().getDokumentId())));
-
-        when(joarkFasade.hentJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(journalpost);
-        when(joarkFasade.hentDokument(behandling.getInitierendeJournalpostId(), journalpost.getHoveddokument().getDokumentId()))
-            .thenReturn(vedlegg);
+        final byte[] vedlegg = new byte[10];
+        final var dokumentReferanse = new DokumentReferanse(behandling.getInitierendeJournalpostId(),
+            journalpost.getHoveddokument().getDokumentId());
+        prosessinstans.setData(ProsessDataKey.VEDLEGG_SED, Set.of(dokumentReferanse));
+        final Vedlegg forventetVedlegg = new Vedlegg(vedlegg, "tittel");
+        when(eessiService.lagEessiVedlegg(dokumentReferanse)).thenReturn(forventetVedlegg);
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         videresendSoknad.utfør(prosessinstans);
 
         verify(eessiService).opprettOgSendSed(eq(behandlingID), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_03),
-            anyCollection(), isNull());
+            argThat(collection -> collection.contains(forventetVedlegg)), isNull());
         assertThat(prosessinstans.getData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID)).isNull();
     }
 

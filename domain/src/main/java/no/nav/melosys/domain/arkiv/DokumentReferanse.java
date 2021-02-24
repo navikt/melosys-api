@@ -39,4 +39,10 @@ public class DokumentReferanse {
     public int hashCode() {
         return Objects.hash(journalpostID, dokumentID);
     }
+
+    @Override
+    public String toString() {
+        return "DokumentReferanse{" + "journalpostID='" + journalpostID
+            + '\'' + ", dokumentID='" + dokumentID + '\'' + '}';
+    }
 }

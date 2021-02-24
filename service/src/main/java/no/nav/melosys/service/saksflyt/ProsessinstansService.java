@@ -147,11 +147,13 @@ public class ProsessinstansService {
         logger.info("Saksbehandler={} har opprettet prosessinstans {} av type {}.", saksbehandler, prosessinstans.getId(), prosessinstans.getType());
     }
 
-    public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling, Set<String> mottakerInstitusjon, String ytterligereInformasjonSed) {
-        Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(ProsessType.ANMODNING_OM_UNNTAK)
+    public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling, Set<String> mottakerInstitusjon,
+                                                       Set<DokumentReferanse> vedleggReferanserTilSed,
+                                                       String ytterligereInformasjonSed) {
+        Prosessinstans prosessinstans = new ProsessinstansBuilder().medType(ProsessType.ANMODNING_OM_UNNTAK)
             .medBehandling(behandling)
             .medEessiMottakere(mottakerInstitusjon)
+            .medVedleggTilSed(vedleggReferanserTilSed)
             .medYtterligereinformasjonSed(ytterligereInformasjonSed)
             .build();
 
