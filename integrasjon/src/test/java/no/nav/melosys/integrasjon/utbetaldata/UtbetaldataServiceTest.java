@@ -8,7 +8,7 @@ import javax.xml.transform.Templates;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamSource;
-import javax.xml.ws.soap.SOAPFaultException;
+import javax.xml.ws.WebServiceException;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
@@ -139,7 +139,7 @@ class UtbetaldataServiceTest {
 
     @Test
     void hentUtbetalingerBarnetrygd_soapFault_forventIntegrasjonException() throws Exception {
-        when(utbetalingConsumer.hentUtbetalingsinformasjon(any())).thenThrow(SOAPFaultException.class);
+        when(utbetalingConsumer.hentUtbetalingsinformasjon(any())).thenThrow(WebServiceException.class);
         assertThatExceptionOfType(IntegrasjonException.class)
             .isThrownBy(() -> utbetaldataService.hentUtbetalingerBarnetrygd("123", LocalDate.now(), LocalDate.now().plusYears(1)));
     }
