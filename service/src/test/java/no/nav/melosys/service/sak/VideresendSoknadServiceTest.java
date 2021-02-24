@@ -9,6 +9,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Bosted;
@@ -86,65 +87,65 @@ class VideresendSoknadServiceTest {
         personOpplysning.setDokument(personDokument);
         behandling.getSaksopplysninger().add(personOpplysning);
 
-        when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsak);
+        when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
     }
 
     @Test
     void henleggOgVideresend_bostedsLandSpaniaErSøknad_prosessinstansBlirOpprettet() throws MelosysException {
         final Set<String> validerteMottakere = Set.of("ES:mottakerID123");
-        when(landvelgerService.hentBostedsland(eq(behandling))).thenReturn(Landkoder.ES);
+        when(landvelgerService.hentBostedsland(behandling)).thenReturn(Landkoder.ES);
         when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), eq(List.of(Landkoder.ES)), eq(BucType.LA_BUC_03)))
             .thenReturn(validerteMottakere);
-
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        DokumentReferanse dokumentReferanse = new DokumentReferanse("jpID", "dokID");
 
-        videresendSoknadService.videresend(saksnummer, "", "fritekst", Collections.emptyList());
+        videresendSoknadService.videresend(saksnummer, "", "fritekst", Set.of(dokumentReferanse));
 
         verify(fagsakService).avsluttFagsakOgBehandling(fagsak, Saksstatuser.VIDERESENDT);
-        verify(prosessinstansService).opprettProsessinstansVideresendSoknad(eq(behandling),
-            eq(validerteMottakere.iterator().next()), eq("fritekst"));
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(saksnummer));
-        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(eq(behandling.getId()), eq(Behandlingsresultattyper.HENLEGGELSE));
+        verify(prosessinstansService).opprettProsessinstansVideresendSoknad(behandling,
+            validerteMottakere.iterator().next(), "fritekst", Set.of(dokumentReferanse));
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(saksnummer);
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
     }
 
     @Test
     void henleggOgVideresend_ikkeSøknad_kasterException() {
-        when(landvelgerService.hentBostedsland(eq(behandling))).thenReturn(Landkoder.ES);
+        when(landvelgerService.hentBostedsland(behandling)).thenReturn(Landkoder.ES);
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> videresendSoknadService.videresend(saksnummer, "", "", Collections.emptyList()))
+            .isThrownBy(() -> videresendSoknadService.videresend(saksnummer, "", "", Collections.emptySet()))
             .withMessageContaining("er ikke behandling av en søknad");
     }
 
     @Test
     void henleggOgVideresend_bostedsLandNorgeErSøknad_kasterException() {
-        when(landvelgerService.hentBostedsland(eq(behandling))).thenReturn(Landkoder.NO);
+        when(landvelgerService.hentBostedsland(behandling)).thenReturn(Landkoder.NO);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> videresendSoknadService.videresend(saksnummer, "", "", Collections.emptyList()))
+            .isThrownBy(() -> videresendSoknadService.videresend(saksnummer, "", "", Collections.emptySet()))
             .withMessageContaining("til Norge");
     }
 
     @Test
-    void henleggOgVideresend_bostedsLanIkkeAvklartErSøknad_kasterException() throws MelosysException {
-        when(landvelgerService.hentBostedsland(eq(behandling))).thenReturn(null);
+    void henleggOgVideresend_bostedsLanIkkeAvklartErSøknad_kasterException() {
+        when(landvelgerService.hentBostedsland(behandling)).thenReturn(null);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> videresendSoknadService.videresend(saksnummer, "", "", Collections.emptyList()))
+            .isThrownBy(() -> videresendSoknadService.videresend(saksnummer, "", "", Collections.emptySet()))
             .withMessageContaining("Bostedsland ikke avklart");
     }
 
     @Test
-    void henleggOgVideresend_ikkeLagretBostedsadresseISøknadEllerTPS_kasterException() throws MelosysException {
-        when(landvelgerService.hentBostedsland(eq(behandling))).thenReturn(Landkoder.SE);
+    void henleggOgVideresend_ikkeLagretBostedsadresseISøknadEllerTPS_kasterException() {
+        when(landvelgerService.hentBostedsland(behandling)).thenReturn(Landkoder.SE);
         behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
         behandlingsgrunnlagData.bosted = new Bosted();
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> videresendSoknadService.videresend(saksnummer, "", "", Collections.emptyList()))
+            .isThrownBy(() -> videresendSoknadService.videresend(saksnummer, "", "", Collections.emptySet()))
             .withMessageContaining("mangler bostedsadresse");
     }
 

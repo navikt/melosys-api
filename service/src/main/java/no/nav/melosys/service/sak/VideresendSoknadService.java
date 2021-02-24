@@ -1,6 +1,5 @@
 package no.nav.melosys.service.sak;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -55,7 +54,7 @@ public class VideresendSoknadService {
     public void videresend(String saksnummer,
                            String mottakerinstitusjon,
                            String fritekst,
-                           Collection<DokumentReferanse> vedleggReferanser) throws MelosysException {
+                           Set<DokumentReferanse> vedleggReferanser) throws MelosysException {
         final Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         final Behandling behandling = fagsak.hentAktivBehandling();
         log.info("Videresender søknad for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandling.getId());
@@ -74,7 +73,8 @@ public class VideresendSoknadService {
 
         prosessinstansService.opprettProsessinstansVideresendSoknad(behandling,
             avklarteEessiMottakere.stream().findFirst().orElse(null),
-            fritekst
+            fritekst,
+            vedleggReferanser
         );
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }

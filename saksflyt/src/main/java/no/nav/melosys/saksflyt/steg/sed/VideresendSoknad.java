@@ -1,13 +1,12 @@
 package no.nav.melosys.saksflyt.steg.sed;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.FysiskDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.BucType;
@@ -32,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import static no.nav.melosys.domain.arkiv.DokumentVariant.lagDokumentVariant;
 
@@ -71,26 +71,29 @@ public class VideresendSoknad extends AbstraktSendUtland {
         SendUtlandStatus sendtStatus = sendUtland(
             BucType.LA_BUC_03,
             prosessinstans,
-            hentSøknadSomVedlegg(prosessinstans.getBehandling())
+            hentVedlegg(prosessinstans)
         );
 
         log.info("Status på sending av søknad til utenlandsk myndighet for behandling {}: {}",
             prosessinstans.getBehandling().getId(), sendtStatus);
     }
 
-    private Collection<Vedlegg> hentSøknadSomVedlegg(Behandling behandling) throws FunksjonellException,
+    private Collection<Vedlegg> hentVedlegg(Prosessinstans prosessinstans) throws FunksjonellException,
         IntegrasjonException {
-        final String journalpostID = behandling.getInitierendeJournalpostId();
-
-        if (StringUtils.isEmpty(journalpostID)) {
-            throw new FunksjonellException("JournalpostID til behandling " + behandling.getId() + " finnes ikke!");
+        final Set<DokumentReferanse> vedleggReferanser = prosessinstans.getData(ProsessDataKey.VEDLEGG_SED,
+            new TypeReference<Set<DokumentReferanse>>() {});
+        if (CollectionUtils.isEmpty(vedleggReferanser)) {
+            throw new FunksjonellException("Kan ikke videresende søknad uten vedlegg!");
         }
 
-        Journalpost journalpost = joarkFasade.hentJournalpost(journalpostID);
-        String tittel = journalpost.getHoveddokument().getTittel();
-        byte[] pdf = joarkFasade.hentDokument(journalpostID, journalpost.getHoveddokument().getDokumentId());
-
-        return Set.of(new Vedlegg(pdf, tittel));
+        Set<Vedlegg> vedlegg = new HashSet<>();
+        for (DokumentReferanse vedleggReferanse : vedleggReferanser) {
+            Journalpost journalpost = joarkFasade.hentJournalpost(vedleggReferanse.getJournalpostID());
+            byte[] pdf = joarkFasade.hentDokument(vedleggReferanse.getJournalpostID(), vedleggReferanse.getDokumentID());
+            String tittel = journalpost.hentArkivDokument(vedleggReferanse.getDokumentID()).getTittel();
+            vedlegg.add(new Vedlegg(pdf, tittel));
+        }
+        return vedlegg;
     }
 
     @Override
@@ -114,23 +117,20 @@ public class VideresendSoknad extends AbstraktSendUtland {
         prosessinstans.setData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, mottakerLandkode);
     }
 
-    private List<FysiskDokument> lagSøknadVedlegg(Behandling behandling) throws FunksjonellException, IntegrasjonException {
-        //FIXME
-        byte[] vedleggData = hentSøknadSomVedlegg(behandling).stream().findFirst().get().getInnhold();
+    private List<FysiskDokument> lagSøknadVedlegg(Behandling behandling) throws FunksjonellException,
+        IntegrasjonException {
+        final String journalpostID = behandling.getInitierendeJournalpostId();
+        if (StringUtils.isEmpty(journalpostID)) {
+            throw new FunksjonellException("JournalpostID til behandling " + behandling.getId() + " finnes ikke!");
+        }
+        Journalpost journalpost = joarkFasade.hentJournalpost(journalpostID);
+        byte[] vedleggData = joarkFasade.hentDokument(journalpostID, journalpost.getHoveddokument().getDokumentId());
 
         FysiskDokument fysiskDokument = new FysiskDokument();
         fysiskDokument.setBrevkode(SedType.A008.name());
         fysiskDokument.setDokumentKategori(DokumentKategoriKode.SOK.getKode());
         fysiskDokument.setDokumentVarianter(Collections.singletonList(lagDokumentVariant(vedleggData)));
-        fysiskDokument.setTittel(hentSøknadTittel(behandling));
+        fysiskDokument.setTittel(journalpost.getHoveddokument().getTittel());
         return Collections.singletonList(fysiskDokument);
-    }
-
-    private String hentSøknadTittel(Behandling behandling) throws FunksjonellException, IntegrasjonException {
-        String journalpostID = behandling.getInitierendeJournalpostId();
-        if (StringUtils.isEmpty(journalpostID)) {
-            throw new FunksjonellException("JournalpostID til behandling " + behandling.getId() + " finnes ikke!");
-        }
-        return joarkFasade.hentJournalpost(journalpostID).getHoveddokument().getTittel();
     }
 }

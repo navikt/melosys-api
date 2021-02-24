@@ -2,14 +2,19 @@ package no.nav.melosys.domain.arkiv;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 // JournalpostID + dokumentID identifiserer et dokument i arkivet.
 public class DokumentReferanse {
     private final String journalpostID;
     private final String dokumentID;
 
-    public DokumentReferanse(String journalpostId, String dokumentId) {
-        this.journalpostID = journalpostId;
-        this.dokumentID = dokumentId;
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public DokumentReferanse(@JsonProperty("journalpostID") String journalpostID,
+                             @JsonProperty("dokumentID") String dokumentID) {
+        this.journalpostID = journalpostID;
+        this.dokumentID = dokumentID;
     }
 
     public String getJournalpostID() {
