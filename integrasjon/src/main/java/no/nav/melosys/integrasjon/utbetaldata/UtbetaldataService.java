@@ -4,6 +4,7 @@ import java.io.StringWriter;
 import java.time.LocalDate;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.ws.soap.SOAPFaultException;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKildesystem;
@@ -60,7 +61,7 @@ public class UtbetaldataService implements UtbetaldataFasade {
         return saksopplysning;
     }
 
-    private HentUtbetalingsinformasjonResponse hentUtbetalingsinformasjon(HentUtbetalingsinformasjonRequest request) throws FunksjonellException {
+    private HentUtbetalingsinformasjonResponse hentUtbetalingsinformasjon(HentUtbetalingsinformasjonRequest request) throws FunksjonellException, IntegrasjonException {
         try {
             return utbetalingConsumer.hentUtbetalingsinformasjon(request);
         } catch (HentUtbetalingsinformasjonPersonIkkeFunnet hentUtbetalingsinformasjonPersonIkkeFunnet) {
@@ -69,6 +70,8 @@ public class UtbetaldataService implements UtbetaldataFasade {
             throw new FunksjonellException("Oppgitt periode er ikke gyldig", hentUtbetalingsinformasjonPeriodeIkkeGyldig);
         } catch (HentUtbetalingsinformasjonIkkeTilgang hentUtbetalingsinformasjonIkkeTilgang) {
             throw new SikkerhetsbegrensningException("Har ikke tilgang til å hente data for person", hentUtbetalingsinformasjonIkkeTilgang);
+        } catch (SOAPFaultException e) {
+            throw new IntegrasjonException(e);
         }
     }
 
