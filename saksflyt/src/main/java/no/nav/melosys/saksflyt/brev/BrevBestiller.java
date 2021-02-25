@@ -37,7 +37,10 @@ public class BrevBestiller {
         Behandling behandling = brevbestilling.getBehandling();
 
         for (Mottaker mottaker : brevbestilling.getMottakere()) {
-            dokumentServiceFasade.produserDokument(dokumentType, mottaker, behandling.getId(), brevbestilling, new BrevbestillingDto.Builder().build());
+            BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+                .medMottaker(mottaker.getRolle())
+                .build();
+            dokumentServiceFasade.produserDokument(dokumentType, mottaker, behandling.getId(), brevbestilling, brevbestillingDto);
             log.info("Brevet '{}' er bestillt for sak {} og behandling {}", dokumentType, behandling.getFagsak().getSaksnummer(), behandling.getId());
         }
     }
