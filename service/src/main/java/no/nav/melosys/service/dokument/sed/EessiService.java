@@ -33,7 +33,6 @@ import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag;
 import no.nav.melosys.service.eessi.SedGrunnlagMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,7 +53,7 @@ public class EessiService {
     private final SedDataGrunnlagFactory dataGrunnlagFactory;
 
     public EessiService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
-                        EessiConsumer eessiConsumer, @Qualifier("system") JoarkFasade joarkFasade,
+                        EessiConsumer eessiConsumer, JoarkFasade joarkFasade,
                         SedDataBygger sedDataBygger, SedDataGrunnlagFactory dataGrunnlagFactory) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;

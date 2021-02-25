@@ -34,7 +34,6 @@ import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.YTTERLIGERE_INFO_SED;
@@ -81,10 +80,7 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
     private Collection<Vedlegg> hentVedlegg(Prosessinstans prosessinstans) throws FunksjonellException,
         IntegrasjonException {
         final Set<DokumentReferanse> vedleggReferanser = prosessinstans.getData(ProsessDataKey.VEDLEGG_SED,
-            new TypeReference<Set<DokumentReferanse>>() {});
-        if (CollectionUtils.isEmpty(vedleggReferanser)) {
-            return Collections.emptySet();
-        }
+            new TypeReference<Set<DokumentReferanse>>() {}, Collections.emptySet());
         Set<Vedlegg> vedlegg = new HashSet<>();
         for (DokumentReferanse vedleggReferanse : vedleggReferanser) {
             vedlegg.add(eessiService.lagEessiVedlegg(vedleggReferanse));

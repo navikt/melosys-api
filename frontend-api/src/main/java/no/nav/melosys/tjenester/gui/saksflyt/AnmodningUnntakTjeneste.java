@@ -39,9 +39,11 @@ public class AnmodningUnntakTjeneste {
         throws MelosysException {
         tilgangService.sjekkTilgang(behandlingID);
         anmodningUnntakService.anmodningOmUnntak(behandlingID,
-            anmodningUnntakDto.getMottakerinstitusjon(), anmodningUnntakDto.getVedlegg().stream()
+            anmodningUnntakDto.getMottakerinstitusjon(),
+            anmodningUnntakDto.getVedlegg().stream()
                 .map(v -> new DokumentReferanse(v.getJournalpostID(), v.getDokumentID()))
-                .collect(Collectors.toUnmodifiableSet()), anmodningUnntakDto.getFritekstSed());
+                .collect(Collectors.toUnmodifiableSet()),
+            anmodningUnntakDto.getFritekstSed());
         return ResponseEntity.ok().build();
     }
 
