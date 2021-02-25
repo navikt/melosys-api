@@ -20,6 +20,30 @@ public class BrevmalFeltDto {
         this.valg = builder.valg;
     }
 
+    public String getKode() {
+        return kode;
+    }
+
+    public String getBeskrivelse() {
+        return beskrivelse;
+    }
+
+    public FeltType getFeltType() {
+        return feltType;
+    }
+
+    public String getHjelpetekst() {
+        return hjelpetekst;
+    }
+
+    public boolean isPaakrevd() {
+        return paakrevd;
+    }
+
+    public List<FeltvalgDto> getValg() {
+        return valg;
+    }
+
     public static final class Builder {
         private String kode;
         private String beskrivelse;

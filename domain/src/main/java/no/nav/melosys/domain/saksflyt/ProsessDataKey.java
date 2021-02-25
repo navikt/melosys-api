@@ -18,6 +18,7 @@ public enum ProsessDataKey {
     BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST("behandlingsresultatBegrunnelseFritekst"),
     BEHANDLINGSTEMA("behandlingstema"),
     BEHANDLINGSTYPE("behandlingstype"),
+    BREVBESTILLING("brevbestilling"),
     BREVDATA("brevData"),
     BRUKER_ID("brukerID"),
     DISTRIBUERBAR_JOURNALPOST_ID("distribuerbarJournalpostID"),

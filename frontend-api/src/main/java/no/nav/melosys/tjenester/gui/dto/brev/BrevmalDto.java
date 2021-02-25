@@ -18,6 +18,22 @@ public class BrevmalDto {
         this.muligeMottakere = muligeMottakere;
     }
 
+    public Produserbaredokumenter getType() {
+        return type;
+    }
+
+    public String getBeskrivelse() {
+        return beskrivelse;
+    }
+
+    public List<BrevmalFeltDto> getFelter() {
+        return felter;
+    }
+
+    public List<MottakerDto> getMuligeMottakere() {
+        return muligeMottakere;
+    }
+
     public static final class Builder {
         private Produserbaredokumenter type;
         private String beskrivelse;

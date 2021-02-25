@@ -8,49 +8,69 @@ import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.brev.BrevmalInnholdService;
+import no.nav.melosys.service.brev.BrevbestillingService;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalDto;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalFeltDto;
 import no.nav.melosys.tjenester.gui.dto.brev.FeltType;
 import no.nav.melosys.tjenester.gui.dto.brev.MottakerDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.annotation.RequestScope;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 
 @Protected
 @RestController
-@RequestMapping("/brev")
-@Api(tags = {"brev"})
+@RequestMapping("/dokumenter/v2") //TODO Endre url når gjennomtestet
+@Api(tags = {"dokumenterv2"})
 @RequestScope
-public class DokgenBrevTjeneste {
-
-    private final BrevmalInnholdService brevmalInnholdService;
+public class BrevbestillingTjeneste {
+    private final BrevbestillingService brevbestillingService;
 
     @Autowired
-    public DokgenBrevTjeneste(BrevmalInnholdService brevmalInnholdService) {
-        this.brevmalInnholdService = brevmalInnholdService;
+    public BrevbestillingTjeneste(BrevbestillingService brevbestillingService) {
+        this.brevbestillingService = brevbestillingService;
     }
 
-    @GetMapping("/tilgjengelige-maler")
+    @GetMapping(value = "/tilgjengelige-maler", produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Henter alle tilgjengelige brevmaler for en behandling", response = BrevmalDto.class, responseContainer = "List")
     public List<BrevmalDto> hentTilgjengeligeMaler(@RequestParam Long behandlingId) throws IkkeFunnetException, TekniskException {
         return byggBrevmalListe(behandlingId);
     }
 
+    @PostMapping(value = "pdf/brev/utkast/{behandlingID}/{produserbartDokument}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_PDF_VALUE)
+    @ApiOperation(value = "Produser utkast")
+    public ResponseEntity<byte[]> produserUtkast(@PathVariable long behandlingID,
+                                                 @PathVariable Produserbaredokumenter produserbartDokument,
+                                                 @RequestBody BrevbestillingDto brevbestillingDto)
+        throws FunksjonellException, TekniskException {
+
+        byte[] pdf = brevbestillingService.produserUtkast(produserbartDokument, behandlingID, brevbestillingDto);
+        return new ResponseEntity<>(pdf, genPdfHeaders("utkast_" + behandlingID, false), HttpStatus.OK);
+    }
+
+    @PostMapping("opprett/{behandlingID}/{produserbartDokument}")
+    @ApiOperation(value = "Produser brev gjennom melosys-dokgen")
+    public void produserBrev(@PathVariable("behandlingID") long behandlingID,
+                             @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
+                             @RequestBody BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
+        brevbestillingService.produserBrev(produserbartDokument, behandlingID, brevbestillingDto);
+    }
+
     private List<BrevmalDto> byggBrevmalListe(long behandlingId) throws IkkeFunnetException, TekniskException {
-        List<Produserbaredokumenter> produserbareDokumenter = brevmalInnholdService.hentBrevMaler(behandlingId);
-        List<AvklartVirksomhet> arbeidsgivere = brevmalInnholdService.hentArbeidsgivere(behandlingId);
+        List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentBrevMaler(behandlingId);
+        List<AvklartVirksomhet> arbeidsgivere = brevbestillingService.hentArbeidsgivere(behandlingId);
 
         List<BrevmalDto> maler = new ArrayList<>();
         produserbareDokumenter.forEach(p -> {
@@ -123,5 +143,17 @@ public class DokgenBrevTjeneste {
             .medFelter(felter)
             .medMuligeMottakere(mottakere)
             .build();
+    }
+
+
+    private HttpHeaders genPdfHeaders(String navn, boolean download) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        String filename = navn + ".pdf";
+        ContentDisposition.Builder contentDisposition = ContentDisposition.builder(download ? "attachment" : "inline");
+        contentDisposition.filename(filename);
+        headers.setContentDisposition(contentDisposition.build());
+        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+        return headers;
     }
 }

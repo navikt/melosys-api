@@ -77,11 +77,12 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
     public void hentBrevForhåndsvisning() throws MelosysException, IOException {
         final byte[] MOCK_PDF = "bytes fra et brev".getBytes();
         when(dokumentServiceFasade.produserUtkast(any(), anyLong(), any())).thenReturn(MOCK_PDF);
-        BrevbestillingDto brevBestillingDto = new BrevbestillingDto();
-        brevBestillingDto.begrunnelseKode = "KODE";
-        brevBestillingDto.fritekst = "Fritekst.";
-        brevBestillingDto.mottaker = Aktoersroller.MYNDIGHET;
-        brevBestillingDto.ytterligereInformasjon = "Ytterligere informasjon";
+        BrevbestillingDto brevBestillingDto = new BrevbestillingDto.Builder()
+            .medBegrunnelseKode("KODE")
+            .medFritekst("Fritekst.")
+            .medMottaker(Aktoersroller.MYNDIGHET)
+            .medYtterligereInformasjon("Ytterligere informasjon")
+            .build();
 
         ResponseEntity response = dokumentTjeneste.produserUtkastBrev(1L, Produserbaredokumenter.ATTEST_A1, brevBestillingDto);
         assertThat(response.getBody()).isEqualTo(MOCK_PDF);
@@ -101,8 +102,9 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void produserDokument() throws Exception {
-        BrevbestillingDto brevBestillingDto = new BrevbestillingDto();
-        brevBestillingDto.mottaker = Aktoersroller.BRUKER;
+        BrevbestillingDto brevBestillingDto = new BrevbestillingDto.Builder()
+            .medMottaker(Aktoersroller.BRUKER)
+            .build();
 
         dokumentTjeneste.produserDokument(1L,
             Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID, brevBestillingDto);

@@ -89,6 +89,17 @@ class PersonMapperTest {
     }
 
     @Test
+    void testMidlertidigPostadresseNorgeMedMatrikkeladresse() {
+        final String kilde = "mock/person/midlertidig_postadresse_norge_matrikkel.xml";
+        HentPersonResponse response = lagHentPersonResponseFraXml(kilde);
+
+        PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson());
+
+        MidlertidigPostadresseNorge midlertidigPostadresseNorge = (MidlertidigPostadresseNorge) dokument.midlertidigPostadresse;
+        Assertions.assertThat(midlertidigPostadresseNorge.gateadresse.getGatenavn()).isEqualTo("Bugstadveien 101");
+    }
+
+    @Test
     void gittBostedsadresseGjeldendeMapGjeldendePostadresse() {
         final String kilde = "mock/person/bostedsadresse.xml";
         HentPersonResponse response = lagHentPersonResponseFraXml(kilde);

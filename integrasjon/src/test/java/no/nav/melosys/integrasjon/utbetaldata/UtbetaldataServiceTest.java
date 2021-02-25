@@ -8,6 +8,7 @@ import javax.xml.transform.Templates;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamSource;
+import javax.xml.ws.WebServiceException;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
@@ -19,6 +20,7 @@ import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.utbetaldata.utbetaling.UtbetalingConsumer;
@@ -133,6 +135,13 @@ class UtbetaldataServiceTest {
         assertThatExceptionOfType(SikkerhetsbegrensningException.class)
             .isThrownBy(() -> utbetaldataService.hentUtbetalingerBarnetrygd("123", LocalDate.now(), LocalDate.now().plusYears(1)))
             .withMessageContaining("Har ikke tilgang");
+    }
+
+    @Test
+    void hentUtbetalingerBarnetrygd_soapFault_forventIntegrasjonException() throws Exception {
+        when(utbetalingConsumer.hentUtbetalingsinformasjon(any())).thenThrow(WebServiceException.class);
+        assertThatExceptionOfType(IntegrasjonException.class)
+            .isThrownBy(() -> utbetaldataService.hentUtbetalingerBarnetrygd("123", LocalDate.now(), LocalDate.now().plusYears(1)));
     }
 
     @Test

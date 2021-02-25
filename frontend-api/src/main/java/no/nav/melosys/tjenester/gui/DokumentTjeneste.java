@@ -71,6 +71,8 @@ public class DokumentTjeneste {
         return ResponseEntity.ok(dokumentListe);
     }
 
+    //TODO Slettes når nytt endepunkt i 'BrevbestillingTjeneste' er klare
+    @Deprecated
     @PostMapping(value = "pdf/brev/utkast/{behandlingID}/{produserbartDokument}", produces = {APPLICATION_PDF, APPLICATION_JSON_UTF8})
     public ResponseEntity<byte[]> produserUtkastBrev(@PathVariable("behandlingID") long behandlingID,
                                                      @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
@@ -92,12 +94,14 @@ public class DokumentTjeneste {
         return lagResponseAvDokument(dokument, sedType.name() + "_utkast.pdf");
     }
 
+    //TODO Slettes når nytt endepunkt i 'BrevbestillingTjeneste' er klare
+    @Deprecated
     @PostMapping("opprett/{behandlingID}/{produserbartDokument}")
     public ResponseEntity<Void> produserDokument(@PathVariable("behandlingID") long behandlingID,
                                                  @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
                                                  @RequestBody BrevbestillingDto brevBestillingDto)
         throws FunksjonellException, TekniskException {
-        if (brevBestillingDto.mottaker == null) {
+        if (brevBestillingDto.getMottaker() == null) {
             throw new FunksjonellException("Mottaker trengs for å bestille.");
         }
         tilgangService.sjekkTilgang(behandlingID);

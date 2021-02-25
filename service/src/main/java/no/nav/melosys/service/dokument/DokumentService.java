@@ -72,15 +72,15 @@ public class DokumentService {
                                  BrevbestillingDto brevbestillingDto)
         throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        Aktoersroller mottakerRolle = brevbestillingDto.mottaker == null ?
-            brevmottakerService.avklarMottakerRolleFraDokument(produserbartDokument) : brevbestillingDto.mottaker;
+        Aktoersroller mottakerRolle = brevbestillingDto.getMottaker() == null ?
+            brevmottakerService.avklarMottakerRolleFraDokument(produserbartDokument) : brevbestillingDto.getMottaker();
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(produserbartDokument)
             .medAvsenderNavn(SubjectHandler.getInstance().getUserID())
             .medMottakerRolle(mottakerRolle)
             .medBehandling(behandling)
-            .medBegrunnelseKode(brevbestillingDto.begrunnelseKode)
-            .medFritekst(brevbestillingDto.fritekst)
-            .medYtterligereInformasjon(brevbestillingDto.ytterligereInformasjon)
+            .medBegrunnelseKode(brevbestillingDto.getBegrunnelseKode())
+            .medFritekst(brevbestillingDto.getFritekst())
+            .medYtterligereInformasjon(brevbestillingDto.getYtterligereInformasjon())
             .build();
         BrevData brevData = lagBrevData(brevbestilling);
 
@@ -139,11 +139,11 @@ public class DokumentService {
     }
 
     private static BrevbestillingDto lagBrevbestillingDto(DoksysBrevbestilling brevbestilling) {
-        final BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.mottaker = brevbestilling.getMottakerRolle();
-        brevbestillingDto.begrunnelseKode = brevbestilling.getBegrunnelseKode();
-        brevbestillingDto.fritekst = brevbestilling.getFritekst();
-        return brevbestillingDto;
+        return new BrevbestillingDto.Builder()
+            .medMottaker(brevbestilling.getMottakerRolle())
+            .medBegrunnelseKode(brevbestilling.getBegrunnelseKode())
+            .medFritekst(brevbestilling.getFritekst())
+            .build();
     }
 
     private void produserIkkeredigerbartDokument(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Behandling behandling, BrevData brevData)
