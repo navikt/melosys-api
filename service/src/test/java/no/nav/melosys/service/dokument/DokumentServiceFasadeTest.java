@@ -73,7 +73,7 @@ class DokumentServiceFasadeTest {
     void skalKalleDokumentServiceProduserDokument() throws Exception {
         when(mockDokgenService.erTilgjengeligDokgenmal(any())).thenReturn(false);
 
-        dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.av(Aktoersroller.BRUKER), 1, new DoksysBrevbestilling.Builder().build(), null);
+        dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.av(Aktoersroller.BRUKER), 123L, new DoksysBrevbestilling.Builder().build());
 
         verify(mockDokumentSystemService).produserDokument(any(), any(), anyLong(), any());
     }
@@ -82,7 +82,7 @@ class DokumentServiceFasadeTest {
     void skalKalleDokgenServiceProduserOgDistribuer() throws Exception {
         when(mockDokgenService.erTilgjengeligDokgenmal(any())).thenReturn(true);
 
-        dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.av(Aktoersroller.BRUKER), 1, new DoksysBrevbestilling.Builder().build(), null);
+        dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.av(Aktoersroller.BRUKER), 123L, new DoksysBrevbestilling.Builder().build());
 
         verify(mockDokgenService).produserOgDistribuerBrev(any(), anyLong(), any());
         verifyNoInteractions(mockDokumentService);
