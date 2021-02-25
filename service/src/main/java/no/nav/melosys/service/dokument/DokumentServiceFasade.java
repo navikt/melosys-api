@@ -61,8 +61,18 @@ public class DokumentServiceFasade {
     }
 
     @Transactional
-    public void produserDokument(Produserbaredokumenter produserbartDokument, Mottaker mottaker,
-                                 long behandlingID, DoksysBrevbestilling brevbestilling, BrevbestillingDto brevbestillingDto) throws TekniskException, FunksjonellException {
+    public void produserDokument(Produserbaredokumenter dokumentType, Mottaker mottaker, Long id, DoksysBrevbestilling brevbestilling)
+        throws FunksjonellException, TekniskException {
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+            .medMottaker(mottaker.getRolle())
+            .build();
+
+        produserDokument(dokumentType, mottaker, id, brevbestilling, brevbestillingDto);
+    }
+
+    private void produserDokument(Produserbaredokumenter produserbartDokument, Mottaker mottaker,
+                                 long behandlingID, DoksysBrevbestilling brevbestilling, BrevbestillingDto brevbestillingDto)
+        throws TekniskException, FunksjonellException {
         if (dokgenService.erTilgjengeligDokgenmal(produserbartDokument)) {
             dokgenService.produserOgDistribuerBrev(produserbartDokument, behandlingID, brevbestillingDto);
         } else {
