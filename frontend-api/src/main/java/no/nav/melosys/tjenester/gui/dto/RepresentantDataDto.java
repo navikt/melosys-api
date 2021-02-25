@@ -10,20 +10,14 @@ public class RepresentantDataDto {
     private final String navn;
     private final List<String> adresselinjer;
     private final String postnummer;
-    private final String telefon;
     private final String orgnr;
-    private final String endretAv;
-    private final LocalDate endretDato;
 
-    public RepresentantDataDto(String nummer, String navn, List<String> adresselinjer, String postnummer, String telefon, String orgnr, String endretAv, LocalDate endretDato) {
+    public RepresentantDataDto(String nummer, String navn, List<String> adresselinjer, String postnummer, String orgnr) {
         this.nummer = nummer;
         this.navn = navn;
         this.adresselinjer = adresselinjer;
         this.postnummer = postnummer;
-        this.telefon = telefon;
         this.orgnr = orgnr;
-        this.endretAv = endretAv;
-        this.endretDato = endretDato;
     }
 
     public String getNummer() {
@@ -42,20 +36,8 @@ public class RepresentantDataDto {
         return postnummer;
     }
 
-    public String getTelefon() {
-        return telefon;
-    }
-
     public String getOrgnr() {
         return orgnr;
-    }
-
-    public String getEndretAv() {
-        return endretAv;
-    }
-
-    public LocalDate getEndretDato() {
-        return endretDato;
     }
 
     public static RepresentantDataDto av(AvgiftOverforingRepresentantDataDto avgiftOverforingRepresentantDataDto) {
@@ -64,9 +46,6 @@ public class RepresentantDataDto {
             avgiftOverforingRepresentantDataDto.getNavn(),
             avgiftOverforingRepresentantDataDto.getAdresselinjer(),
             avgiftOverforingRepresentantDataDto.getPostnummer(),
-            avgiftOverforingRepresentantDataDto.getTelefon(),
-            avgiftOverforingRepresentantDataDto.getOrgnr(),
-            avgiftOverforingRepresentantDataDto.getEndretAv(),
-            avgiftOverforingRepresentantDataDto.getEndretDato());
+            avgiftOverforingRepresentantDataDto.getOrgnr());
     }
 }
