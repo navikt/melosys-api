@@ -61,7 +61,7 @@ public class DokumentServiceFasade {
     }
 
     @Transactional
-    public void produserDokument(Produserbaredokumenter dokumentType, Mottaker mottaker, Long id, DoksysBrevbestilling brevbestilling)
+    public void produserDokument(Produserbaredokumenter dokumentType, Mottaker mottaker, long id, DoksysBrevbestilling brevbestilling)
         throws FunksjonellException, TekniskException {
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
             .medMottaker(mottaker.getRolle())
