@@ -10,7 +10,6 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
@@ -115,8 +114,16 @@ public class DokgenService {
     public void produserOgDistribuerBrev(Produserbaredokumenter produserbartDokument, long behandlingId,
                                          BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
-        List<Aktoer> mottakere = brevmottakerService.avklarMottakere(produserbartDokument, Mottaker.av(brevbestillingDto.getMottaker()), behandling);
-        //NOTE @Lunde Utvide for å støtte FastMottaker i BrevmottakerService
+        List<Aktoer> mottakere;
+        if (hasText(brevbestillingDto.getOrgNr())) {
+            Aktoer mottaker = new Aktoer();
+            mottaker.setRolle(brevbestillingDto.getMottaker());
+            mottaker.setOrgnr(brevbestillingDto.getOrgNr());
+            mottakere = List.of(mottaker);
+        } else {
+            mottakere = brevmottakerService.avklarMottakere(produserbartDokument, Mottaker.av(brevbestillingDto.getMottaker()), behandling);
+        }
+
         for (Aktoer aktoer : mottakere) {
             prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(produserbartDokument, behandling, aktoer, brevbestillingDto);
         }

@@ -5,7 +5,6 @@ import java.util.List;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
@@ -68,9 +67,8 @@ public class BrevbestillingTjeneste {
         brevbestillingService.produserBrev(produserbartDokument, behandlingID, brevbestillingDto);
     }
 
-    private List<BrevmalDto> byggBrevmalListe(long behandlingId) throws IkkeFunnetException, TekniskException {
+    private List<BrevmalDto> byggBrevmalListe(long behandlingId) throws IkkeFunnetException {
         List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentBrevMaler(behandlingId);
-        List<AvklartVirksomhet> arbeidsgivere = brevbestillingService.hentArbeidsgivere(behandlingId);
 
         List<BrevmalDto> maler = new ArrayList<>();
         produserbareDokumenter.forEach(p -> {
@@ -91,23 +89,12 @@ public class BrevbestillingTjeneste {
                             .medRolle(Aktoersroller.BRUKER)
                             .build()
                     );
-
-                    if (arbeidsgivere.size() > 1) {
-                        arbeidsgivere.forEach(a -> mottakere.add(
-                            new MottakerDto.Builder()
-                                .medType(a.navn)
-                                .medRolle(Aktoersroller.ARBEIDSGIVER)
-                                .medOrgnr(a.orgnr)
-                                .build()
-                        ));
-                    } else {
-                        mottakere.add(
-                            new MottakerDto.Builder()
-                                .medType("Arbeidsgiver eller arbeidsgivers fullmektig")
-                                .medRolle(Aktoersroller.ARBEIDSGIVER)
-                                .build()
-                        );
-                    }
+                    mottakere.add(
+                        new MottakerDto.Builder()
+                            .medType("Arbeidsgiver eller arbeidsgivers fullmektig")
+                            .medRolle(Aktoersroller.ARBEIDSGIVER)
+                            .build()
+                    );
 
                     maler.add(lagBrevmalDto(MANGELBREV_BRUKER,
                         asList(

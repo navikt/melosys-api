@@ -6,8 +6,6 @@ import java.util.List;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevbestillingService;
 import no.nav.melosys.service.dokument.DokgenService;
@@ -34,9 +32,6 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     private BehandlingService mockBehandlingService;
 
     @Mock
-    private AvklarteVirksomheterService mockAvklarteVirksomheterService;
-
-    @Mock
     private DokumentServiceFasade mockDokServiceFasade;
 
     @Mock
@@ -46,7 +41,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
 
     @BeforeEach
     void init() {
-        BrevbestillingService brevbestillingService = new BrevbestillingService(mockBehandlingService, mockAvklarteVirksomheterService, mockDokServiceFasade, mockDokgenService);
+        BrevbestillingService brevbestillingService = new BrevbestillingService(mockBehandlingService, mockDokServiceFasade, mockDokgenService);
         brevbestillingTjeneste = new BrevbestillingTjeneste(brevbestillingService);
     }
 
