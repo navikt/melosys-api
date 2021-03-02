@@ -4,24 +4,22 @@ import java.util.*;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.arkiv.ArkivDokument;
+import no.nav.melosys.domain.arkiv.DokumentReferanse;
+import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.eessi.BucInformasjon;
-import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.eessi.Institusjon;
-import no.nav.melosys.domain.eessi.SedType;
+import no.nav.melosys.domain.eessi.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;
 import no.nav.melosys.domain.eessi.sed.UtpekingAvvisDto;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
+import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.SedPdfData;
@@ -55,6 +53,8 @@ class EessiServiceTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
+    private JoarkFasade joarkFasade;
+    @Mock
     private SedDataGrunnlagFactory dokumentdataGrunnlagFactory;
 
     private EessiService eessiService;
@@ -80,8 +80,8 @@ class EessiServiceTest {
 
     @BeforeEach
     void setup() {
-        eessiService = new EessiService(sedDataBygger, dokumentdataGrunnlagFactory,
-            eessiConsumer, behandlingService, behandlingsresultatService);
+        eessiService = new EessiService(behandlingService, behandlingsresultatService, eessiConsumer, joarkFasade,
+            sedDataBygger, dokumentdataGrunnlagFactory);
     }
 
     private Behandling lagBehandling() {
@@ -93,7 +93,7 @@ class EessiServiceTest {
     }
 
     private void mockBehandling() throws IkkeFunnetException {
-        when(behandlingService.hentBehandling(eq(BEHANDLING_ID))).thenReturn(lagBehandling());
+        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(lagBehandling());
     }
 
     private Behandlingsresultat lagBehandlingsresultat() {
@@ -112,7 +112,21 @@ class EessiServiceTest {
     }
 
     private void mockBehandlingsresultat() throws IkkeFunnetException {
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(lagBehandlingsresultat());
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(lagBehandlingsresultat());
+    }
+
+    @Test
+    void lagEessiVedlegg() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+        final Journalpost journalpost = lagJournalpost(List.of(lagArkivDokument("1"), lagArkivDokument("2")));
+        final String journalpostID = journalpost.getJournalpostId();
+        DokumentReferanse dokumentReferanse = new DokumentReferanse(journalpostID, "2");
+        when(joarkFasade.hentDokument(anyString(), anyString())).thenReturn(new byte[8]);
+        when(joarkFasade.hentJournalpost(journalpostID)).thenReturn(journalpost);
+
+        Vedlegg vedlegg = eessiService.lagEessiVedlegg(dokumentReferanse);
+
+        assertThat(vedlegg.getInnhold()).hasSize(8);
+        assertThat(vedlegg.getTittel()).isEqualTo("Tittel 2");
     }
 
     @Test
@@ -159,7 +173,7 @@ class EessiServiceTest {
     void opprettOgSendSed_buc02MedUtpekingsperiode_medlemsperiodeTypeUtpekingsperiode() throws Exception {
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
         behandlingsresultat.getUtpekingsperioder().add(new Utpekingsperiode());
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(behandlingsresultat);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
         when(sedDataBygger.lag(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
         when(eessiConsumer.opprettBucOgSed(any(), any(), any(), eq(true), eq(true))).thenReturn(new OpprettSedDto());
         when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
@@ -241,7 +255,7 @@ class EessiServiceTest {
 
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setLovvalgsland(Landkoder.DE.name());
-        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(eq("123"))).thenReturn(melosysEessiMelding);
+        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID("123")).thenReturn(melosysEessiMelding);
 
         for (String sedType : sedTyperAutomatiskBehandling) {
             melosysEessiMelding.setSedType(sedType);
@@ -265,7 +279,7 @@ class EessiServiceTest {
 
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setLovvalgsland(Landkoder.DE.name());
-        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(eq("123"))).thenReturn(melosysEessiMelding);
+        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID("123")).thenReturn(melosysEessiMelding);
 
         for (String sedType : sedTyperIkkeAutomatiskBehandling) {
             melosysEessiMelding.setSedType(sedType);
@@ -277,7 +291,7 @@ class EessiServiceTest {
     void støtterAutomatiskBehandling_nullVerdi_forventFalse() throws Exception {
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setSedType(null);
-        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(eq("123"))).thenReturn(melosysEessiMelding);
+        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID("123")).thenReturn(melosysEessiMelding);
         assertThat(eessiService.støtterAutomatiskBehandling("123")).isFalse();
     }
 
@@ -286,7 +300,7 @@ class EessiServiceTest {
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setLovvalgsland(Landkoder.SE.name());
         melosysEessiMelding.setSedType("A003");
-        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(eq("123"))).thenReturn(melosysEessiMelding);
+        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID("123")).thenReturn(melosysEessiMelding);
         assertThat(eessiService.støtterAutomatiskBehandling("123")).isTrue();
     }
 
@@ -295,7 +309,7 @@ class EessiServiceTest {
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setLovvalgsland(Landkoder.NO.name());
         melosysEessiMelding.setSedType("A003");
-        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(eq("123"))).thenReturn(melosysEessiMelding);
+        when(eessiConsumer.hentMelosysEessiMeldingFraJournalpostID("123")).thenReturn(melosysEessiMelding);
         assertThat(eessiService.støtterAutomatiskBehandling("123")).isTrue();
     }
 
@@ -336,7 +350,7 @@ class EessiServiceTest {
 
         eessiService.sendAnmodningUnntakSvar(BEHANDLING_ID);
 
-        verify(behandlingService).hentBehandling(eq(BEHANDLING_ID));
+        verify(behandlingService).hentBehandling(BEHANDLING_ID);
         verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.ANMODNINGSPERIODE));
         verify(dokumentdataGrunnlagFactory).av(any());
         verify(eessiConsumer).sendSedPåEksisterendeBuc(any(SedDataDto.class), any(), eq(SedType.A002));
@@ -357,7 +371,7 @@ class EessiServiceTest {
 
         eessiService.sendGodkjenningArbeidFlereLand(BEHANDLING_ID, null);
 
-        verify(behandlingService).hentBehandling(eq(BEHANDLING_ID));
+        verify(behandlingService).hentBehandling(BEHANDLING_ID);
         verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.LOVVALGSPERIODE));
         verify(dokumentdataGrunnlagFactory).av(any());
         verify(eessiConsumer).sendSedPåEksisterendeBuc(any(SedDataDto.class), any(), eq(SedType.A012));
@@ -387,7 +401,7 @@ class EessiServiceTest {
 
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
         behandlingsresultat.getUtpekingsperioder().add(new Utpekingsperiode());
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(behandlingsresultat);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
         byte[] pdf = eessiService.genererSedPdf(BEHANDLING_ID, SedType.A003);
 
@@ -405,7 +419,7 @@ class EessiServiceTest {
 
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
         behandlingsresultat.getUtpekingsperioder().add(new Utpekingsperiode());
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(behandlingsresultat);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
         byte[] pdf = eessiService.genererSedPdf(BEHANDLING_ID, SedType.A009);
 
@@ -428,7 +442,7 @@ class EessiServiceTest {
         sedPdfData.setNyttLovvalgsland("SE");
         byte[] pdf = eessiService.genererSedPdf(BEHANDLING_ID, SedType.A001, sedPdfData);
 
-        verify(behandlingService).hentBehandling(eq(BEHANDLING_ID));
+        verify(behandlingService).hentBehandling(BEHANDLING_ID);
         verify(dokumentdataGrunnlagFactory).av(any());
         verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.ANMODNINGSPERIODE));
         verify(eessiConsumer).genererSedPdf(sedDataDtoCaptor.capture(), any());
@@ -445,7 +459,7 @@ class EessiServiceTest {
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
         behandlingsresultat.hentValidertAnmodningsperiode()
             .getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(behandlingsresultat);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
         SedType sedType = eessiService.hentSedTypeForAnmodningUnntakSvar(BEHANDLING_ID);
 
@@ -457,7 +471,7 @@ class EessiServiceTest {
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
         behandlingsresultat.hentValidertAnmodningsperiode()
             .getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(behandlingsresultat);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
         SedType sedType = eessiService.hentSedTypeForAnmodningUnntakSvar(BEHANDLING_ID);
 
@@ -564,7 +578,7 @@ class EessiServiceTest {
         final BucType bucType = BucType.LA_BUC_01;
         final List<Landkoder> land = List.of(Landkoder.SE, Landkoder.DK);
 
-        when(eessiConsumer.hentMottakerinstitusjoner(eq(bucType.name()), eq(Set.of(Landkoder.SE.getKode()))))
+        when(eessiConsumer.hentMottakerinstitusjoner(bucType.name(), Set.of(Landkoder.SE.getKode())))
             .thenReturn(List.of(new Institusjon("2", "", "")));
 
         assertThat(eessiService.landErEessiReady(bucType.name(), land)).isFalse();
@@ -579,5 +593,20 @@ class EessiServiceTest {
             .thenReturn(List.of(new Institusjon("2", "", "")));
 
         assertThat(eessiService.landErEessiReady(bucType.name(), land)).isTrue();
+    }
+
+    private static Journalpost lagJournalpost(List<ArkivDokument> dokumenter) {
+        Journalpost journalpost = new Journalpost("jpID");
+        journalpost.setHoveddokument(dokumenter.get(0));
+        journalpost.getVedleggListe().clear();
+        journalpost.getVedleggListe().addAll(dokumenter.subList(1, dokumenter.size()));
+        return journalpost;
+    }
+
+    private static ArkivDokument lagArkivDokument(String dokumentID) {
+        ArkivDokument arkivDokument = new ArkivDokument();
+        arkivDokument.setDokumentId(dokumentID);
+        arkivDokument.setTittel("Tittel " + dokumentID);
+        return arkivDokument;
     }
 }

@@ -18,6 +18,7 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.VedleggDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.*;
 import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
