@@ -1,5 +1,6 @@
 package no.nav.melosys.service.altinn;
 
+import java.math.BigDecimal;
 import java.net.URL;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -44,6 +45,24 @@ class SoeknadMapperTest {
         assertThat(fysiskArbeidssted.adresse.poststed).isEqualTo("Stedet");
         assertThat(fysiskArbeidssted.adresse.region).isEqualTo("Region");
         assertThat(fysiskArbeidssted.adresse.landkode).isEqualTo("BE");
+        final var loennOgGodtgjoerelse = soeknad.loennOgGodtgjoerelse;
+        assertThat(loennOgGodtgjoerelse.norskArbgUtbetalerLoenn).isTrue();
+        assertThat(loennOgGodtgjoerelse.erArbeidstakerAnsattHelePerioden).isTrue();
+        assertThat(loennOgGodtgjoerelse.utlArbgUtbetalerLoenn).isTrue();
+        assertThat(loennOgGodtgjoerelse.utlArbTilhoererSammeKonsern).isFalse();
+        assertThat(loennOgGodtgjoerelse.bruttoLoennPerMnd).isEqualTo(new BigDecimal("2000.00"));
+        assertThat(loennOgGodtgjoerelse.bruttoLoennUtlandPerMnd).isEqualTo(new BigDecimal("1000.00"));
+        assertThat(loennOgGodtgjoerelse.mottarNaturalytelser).isFalse();
+        assertThat(loennOgGodtgjoerelse.samletVerdiNaturalytelser).isEqualTo(new BigDecimal("10000.50"));
+        assertThat(loennOgGodtgjoerelse.erArbeidsgiveravgiftHelePerioden).isTrue();
+        assertThat(loennOgGodtgjoerelse.erTrukketTrygdeavgift).isTrue();
+        final var foretakUtland = soeknad.foretakUtland.get(0);
+        assertThat(foretakUtland.navn).isEqualTo("Virskomheten i utlandet");
+        assertThat(foretakUtland.orgnr).isEqualTo("XYZ123456789");
+        assertThat(foretakUtland.adresse.gatenavn).isEqualTo("gatenavn med mer");
+        assertThat(foretakUtland.adresse.poststed).isEqualTo("testbyen");
+        assertThat(foretakUtland.adresse.postnummer).isEqualTo("UTLAND-1234");
+        assertThat(foretakUtland.adresse.landkode).isEqualTo("BE");
     }
 
     @Test

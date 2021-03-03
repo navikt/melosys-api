@@ -1,6 +1,11 @@
 package no.nav.melosys.service.altinn;
 
+import java.net.URL;
 import java.util.List;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -106,7 +111,7 @@ public class AltinnSoeknadServiceTest {
         final Fagsak fagsak = lagFagsak();
         final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
 
-        when(soknadMottakConsumer.hentSøknad(eq(soknadID))).thenReturn(søknad);
+        when(soknadMottakConsumer.hentSøknad(soknadID)).thenReturn(søknad);
         when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
         when(tpsFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
 
@@ -115,7 +120,7 @@ public class AltinnSoeknadServiceTest {
         OpprettSakRequest req = captor.getValue();
         String fullmektigVirksomhetsnummer = søknad.getInnhold().getFullmakt().getFullmektigVirksomhetsnummer();
         assertThat(req.getFullmektig().getRepresentantID()).isEqualTo(fullmektigVirksomhetsnummer);
-        assertThat(req.getFullmektig().getRepresenterer()).isEqualTo(Representerer.ARBEIDSGIVER);
+        assertThat(req.getFullmektig().getRepresenterer()).isEqualTo(Representerer.BEGGE);
     }
 
     @Test
@@ -191,32 +196,16 @@ public class AltinnSoeknadServiceTest {
     }
 
     private MedlemskapArbeidEOSM lagMedlemskapArbeidEOSM() {
-        MedlemskapArbeidEOSM medlemskapArbeidEOSM = new MedlemskapArbeidEOSM();
-        Innhold innhold = new Innhold();
-        medlemskapArbeidEOSM.setInnhold(innhold);
-
-        innhold.setFullmakt(new Fullmakt());
-        innhold.getFullmakt().setFullmektigVirksomhetsnummer("123333");
-
-        innhold.setArbeidsgiver(new Arbeidsgiver());
-        innhold.getArbeidsgiver().setOffentligVirksomhet(Boolean.FALSE);
-        innhold.getArbeidsgiver().setVirksomhetsnummer("53254352");
-        innhold.getArbeidsgiver().setKontaktperson(new Kontaktperson());
-        innhold.getArbeidsgiver().getKontaktperson().setKontaktpersonNavn("Navne Navnesen");
-
-        innhold.setArbeidstaker(new Arbeidstaker());
-        innhold.getArbeidstaker().setFoedselsnummer("12345612345");
-
-        innhold.setMidlertidigUtsendt(new MidlertidigUtsendt());
-        innhold.getMidlertidigUtsendt().setArbeidsland("PL");
-        innhold.getMidlertidigUtsendt().setUtenlandsoppdraget(new Utenlandsoppdraget());
-        innhold.getMidlertidigUtsendt().getUtenlandsoppdraget().setPeriodeUtland(new Tidsrom());
-
-        innhold.getMidlertidigUtsendt().setArbeidssted(new Arbeidssted());
-        innhold.getMidlertidigUtsendt().getArbeidssted().setTypeArbeidssted("LAND");
-        innhold.getMidlertidigUtsendt().getArbeidssted().setArbeidPaaLand(new ArbeidPaaLand());
-        innhold.getMidlertidigUtsendt().getArbeidssted().getArbeidPaaLand().setFastArbeidssted(false);
-        innhold.getMidlertidigUtsendt().getArbeidssted().getArbeidPaaLand().setFysiskeArbeidssteder(new FysiskeArbeidssteder());
+        JAXBContext jaxbContext = null;
+        MedlemskapArbeidEOSM medlemskapArbeidEOSM = null;
+        try {
+            jaxbContext = JAXBContext.newInstance(ObjectFactory.class);
+            URL url = getClass().getClassLoader().getResource("altinn/NAV_MedlemskapArbeidEOS.xml");
+            medlemskapArbeidEOSM = ((JAXBElement<MedlemskapArbeidEOSM>) jaxbContext.createUnmarshaller().unmarshal(
+                url)).getValue();
+        } catch (JAXBException e) {
+            throw new IllegalStateException(e);
+        }
         return medlemskapArbeidEOSM;
     }
 
