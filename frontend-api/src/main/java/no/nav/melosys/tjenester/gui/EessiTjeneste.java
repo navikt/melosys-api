@@ -9,7 +9,6 @@ import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.eessi.Institusjon;
-import no.nav.melosys.domain.eessi.Vedlegg;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -65,14 +64,16 @@ public class EessiTjeneste {
                                                         @PathVariable("behandlingID") long behandlingID)
         throws MelosysException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        Collection<Vedlegg> vedlegg = eessiService.lagEessiVedlegg(
-            behandling.getFagsak().getGsakSaksnummer(),
-            nyBucDto.getVedlegg().stream().map(v -> new DokumentReferanse(v.getJournalpostID(), v.getDokumentID()))
-                .collect(Collectors.toSet())
-        );
 
         OpprettBucSvarDto opprettBucSvarDto = new OpprettBucSvarDto(
-            eessiService.opprettBucOgSed(behandling, nyBucDto.getBucType(), nyBucDto.getMottakerInstitusjoner(), vedlegg)
+            eessiService.opprettBucOgSed(
+                behandling,
+                nyBucDto.getBucType(),
+                nyBucDto.getMottakerInstitusjoner(),
+                nyBucDto.getVedlegg().stream()
+                    .map(v -> new DokumentReferanse(v.getJournalpostID(), v.getDokumentID()))
+                    .collect(Collectors.toSet())
+            )
         );
 
         return ResponseEntity.ok(opprettBucSvarDto);

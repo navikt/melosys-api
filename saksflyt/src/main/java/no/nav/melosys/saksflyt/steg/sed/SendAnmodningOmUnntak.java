@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -81,11 +80,8 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
         IntegrasjonException {
         final Set<DokumentReferanse> vedleggReferanser = prosessinstans.getData(ProsessDataKey.VEDLEGG_SED,
             new TypeReference<Set<DokumentReferanse>>() {}, Collections.emptySet());
-        Set<Vedlegg> vedlegg = new HashSet<>();
-        for (DokumentReferanse vedleggReferanse : vedleggReferanser) {
-            vedlegg.add(eessiService.lagEessiVedlegg(vedleggReferanse));
-        }
-        return vedlegg;
+        return eessiService.lagEessiVedlegg(prosessinstans.getBehandling().getFagsak().getGsakSaksnummer(),
+            vedleggReferanser);
     }
 
     @Override

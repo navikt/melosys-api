@@ -84,11 +84,12 @@ class EessiServiceTest {
             sedDataBygger, dokumentdataGrunnlagFactory);
     }
 
-    private Behandling lagBehandling() {
+    private static Behandling lagBehandling() {
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer("123");
+        behandling.getFagsak().setGsakSaksnummer(123L);
         return behandling;
     }
 
@@ -116,17 +117,17 @@ class EessiServiceTest {
     }
 
     @Test
-    void lagEessiVedlegg() throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    void lagEessiVedlegg() throws IkkeFunnetException, IntegrasjonException, SikkerhetsbegrensningException {
         final Journalpost journalpost = lagJournalpost(List.of(lagArkivDokument("1"), lagArkivDokument("2")));
         final String journalpostID = journalpost.getJournalpostId();
         DokumentReferanse dokumentReferanse = new DokumentReferanse(journalpostID, "2");
+        when(joarkFasade.hentKjerneJournalpostListe(anyLong())).thenReturn(List.of(journalpost));
         when(joarkFasade.hentDokument(anyString(), anyString())).thenReturn(new byte[8]);
-        when(joarkFasade.hentJournalpost(journalpostID)).thenReturn(journalpost);
 
-        Vedlegg vedlegg = eessiService.lagEessiVedlegg(dokumentReferanse);
+        Collection<Vedlegg> vedlegg = eessiService.lagEessiVedlegg(12L, Set.of(dokumentReferanse));
 
-        assertThat(vedlegg.getInnhold()).hasSize(8);
-        assertThat(vedlegg.getTittel()).isEqualTo("Tittel 2");
+        assertThat(vedlegg.iterator().next().getInnhold()).hasSize(8);
+        assertThat(vedlegg.iterator().next().getTittel()).isEqualTo("Tittel 2");
     }
 
     @Test
