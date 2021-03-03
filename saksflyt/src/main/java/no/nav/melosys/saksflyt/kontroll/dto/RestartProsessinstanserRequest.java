@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class RestartProsessinstanserRequest {
     private final List<UUID> uuids;
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public RestartProsessinstanserRequest(@JsonProperty("uuids") List<UUID> uuids) {
         this.uuids = uuids;
     }

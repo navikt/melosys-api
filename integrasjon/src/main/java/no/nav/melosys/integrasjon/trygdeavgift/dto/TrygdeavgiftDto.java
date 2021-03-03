@@ -10,7 +10,7 @@ public class TrygdeavgiftDto {
     private final BigDecimal avgiftssats;
     private final BigDecimal maanedsavgift;
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public TrygdeavgiftDto(@JsonProperty("avgiftskode") String avgiftskode,
                            @JsonProperty("avgiftssats") BigDecimal avgiftssats,
                            @JsonProperty("kvartalsavgift") BigDecimal maanedsavgift) {
