@@ -4,9 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.reststs.RestStsClient;
 import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForGet;
 import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPut;
 import org.junit.jupiter.api.AfterAll;
@@ -15,12 +12,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -29,16 +25,16 @@ class MedlemskapRestConsumerTest {
     private WireMockServer wireMockServer;
     private MedlemskapRestConsumer restConsumer;
 
-    private RestStsClient mockRestStsClient = mock(RestStsClient.class);
-
     @BeforeAll
     public void setup() throws Exception {
         wireMockServer = new WireMockServer(wireMockConfig().dynamicPort());
         wireMockServer.start();
 
-        when(mockRestStsClient.collectToken()).thenReturn("dummyToken");
+        WebClient webClient = WebClient.builder()
+            .baseUrl("http://localhost:" + wireMockServer.port())
+            .build();
 
-        restConsumer = new MedlemskapRestConsumer("http://localhost:" + wireMockServer.port(), mockRestStsClient);
+        restConsumer = new MedlemskapRestConsumer(webClient);
     }
 
     @AfterAll
@@ -86,29 +82,17 @@ class MedlemskapRestConsumerTest {
     }
 
     @Test
-    void skalKasteRuntimeExceptionVedManglendeToken() throws Exception {
-        when(mockRestStsClient.collectToken()).thenThrow(new TekniskException("Feilet"));
-
-        String actual = assertThrows(RuntimeException.class, () -> {
-            restConsumer.hentPeriode("123");
-        }).getMessage();
-
-        assertEquals("Feilet", actual);
-    }
-
-    @Test
     void skalKasteRuntimeExceptionVedOppdatering() {
-        String feilmelding = "Validering feilet";
         wireMockServer.stubFor(put(urlPathEqualTo("/"))
             .willReturn(aResponse()
                 .withStatus(400)
-                .withBody(feilmelding)
+                .withBody("Validering feilet")
             )
         );
 
         String actual = assertThrows(RuntimeException.class, () ->
             restConsumer.oppdaterPeriode(MedlemskapsunntakForPut.builder().build())).getMessage();
 
-        assertEquals(feilmelding, actual);
+        assertTrue(actual.startsWith("400 Bad Request from PUT"));
     }
 }
