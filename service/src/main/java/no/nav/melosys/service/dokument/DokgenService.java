@@ -73,7 +73,7 @@ public class DokgenService {
             brevbestilling = new MangelbrevBrevbestilling.Builder()
                 .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
                 .medManglerInfoFritekst(brevbestillingDto.getManglerFritekst())
-                .medFullmektigNavn(brevbestillingDto.getFullmektigNavn());
+                .medFullmektigNavn(brevbestillingDto.getKontaktperson());
         }
 
         brevbestilling
@@ -120,6 +120,10 @@ public class DokgenService {
             mottaker.setRolle(brevbestillingDto.getMottaker());
             mottaker.setOrgnr(brevbestillingDto.getOrgNr());
             mottakere = List.of(mottaker);
+
+            if (brevbestillingDto.sendKopi()) {
+                mottakere.addAll(brevmottakerService.avklarMottakere(produserbartDokument, Mottaker.av(brevbestillingDto.getMottaker()), behandling));
+            }
         } else {
             mottakere = brevmottakerService.avklarMottakere(produserbartDokument, Mottaker.av(brevbestillingDto.getMottaker()), behandling);
         }

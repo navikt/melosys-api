@@ -10,7 +10,8 @@ public class BrevbestillingDto {
     private String orgNr;
     private String innledningFritekst;
     private String manglerFritekst;
-    private String fullmektigNavn;
+    private String kontaktperson;
+    private boolean sendKopi;
 
     /**
      * @deprecated Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel
@@ -38,7 +39,8 @@ public class BrevbestillingDto {
         this.orgNr = builder.orgNr;
         this.innledningFritekst = builder.innledningFritekst;
         this.manglerFritekst = builder.manglerFritekst;
-        this.fullmektigNavn = builder.fullmektigNavn;
+        this.kontaktperson = builder.kontaktperson;
+        this.sendKopi = builder.sendKopi;
         this.fritekst = builder.fritekst;
         this.begrunnelseKode = builder.begrunnelseKode;
         this.ytterligereInformasjon = builder.ytterligereInformasjon;
@@ -60,8 +62,12 @@ public class BrevbestillingDto {
         return manglerFritekst;
     }
 
-    public String getFullmektigNavn() {
-        return fullmektigNavn;
+    public String getKontaktperson() {
+        return kontaktperson;
+    }
+
+    public boolean sendKopi() {
+        return sendKopi;
     }
 
     public String getFritekst() {
@@ -81,7 +87,8 @@ public class BrevbestillingDto {
         private String orgNr;
         private String innledningFritekst;
         private String manglerFritekst;
-        private String fullmektigNavn;
+        private String kontaktperson;
+        private boolean sendKopi = true;
         private String fritekst;
         private String begrunnelseKode;
         private String ytterligereInformasjon;
@@ -106,8 +113,13 @@ public class BrevbestillingDto {
             return this;
         }
 
-        public Builder medFullmektigNavn(String fullmektigNavn) {
-            this.fullmektigNavn = fullmektigNavn;
+        public Builder medKontaktperson(String kontaktperson) {
+            this.kontaktperson = kontaktperson;
+            return this;
+        }
+
+        public Builder sendKopi(boolean sendKopi) {
+            this.sendKopi = sendKopi;
             return this;
         }
 
@@ -136,15 +148,15 @@ public class BrevbestillingDto {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BrevbestillingDto that = (BrevbestillingDto) o;
-        return mottaker == that.mottaker && Objects.equals(orgNr, that.orgNr) && Objects.equals(innledningFritekst, that.innledningFritekst)
-            && Objects.equals(manglerFritekst, that.manglerFritekst) && Objects.equals(fullmektigNavn, that.fullmektigNavn)
-            && Objects.equals(fritekst, that.fritekst) && Objects.equals(begrunnelseKode, that.begrunnelseKode)
-            && Objects.equals(ytterligereInformasjon, that.ytterligereInformasjon);
+        return sendKopi == that.sendKopi && mottaker == that.mottaker && Objects.equals(orgNr, that.orgNr) &&
+            Objects.equals(innledningFritekst, that.innledningFritekst) && Objects.equals(manglerFritekst, that.manglerFritekst) &&
+            Objects.equals(kontaktperson, that.kontaktperson) && Objects.equals(fritekst, that.fritekst) &&
+            Objects.equals(begrunnelseKode, that.begrunnelseKode) && Objects.equals(ytterligereInformasjon, that.ytterligereInformasjon);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mottaker, orgNr, innledningFritekst, manglerFritekst, fullmektigNavn, fritekst, begrunnelseKode, ytterligereInformasjon);
+        return Objects.hash(mottaker, orgNr, innledningFritekst, manglerFritekst, kontaktperson, sendKopi, fritekst, begrunnelseKode, ytterligereInformasjon);
     }
 
     @Override
@@ -154,7 +166,8 @@ public class BrevbestillingDto {
             ", orgNr='" + orgNr + '\'' +
             ", innledningFritekst='" + innledningFritekst + '\'' +
             ", manglerFritekst='" + manglerFritekst + '\'' +
-            ", fullmektigNavn='" + fullmektigNavn + '\'' +
+            ", kontaktperson='" + kontaktperson + '\'' +
+            ", sendKopi=" + sendKopi +
             ", fritekst='" + fritekst + '\'' +
             ", begrunnelseKode='" + begrunnelseKode + '\'' +
             ", ytterligereInformasjon='" + ytterligereInformasjon + '\'' +
