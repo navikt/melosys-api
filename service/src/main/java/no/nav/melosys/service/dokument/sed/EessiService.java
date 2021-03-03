@@ -63,6 +63,28 @@ public class EessiService {
         this.dataGrunnlagFactory = dataGrunnlagFactory;
     }
 
+    public Collection<Vedlegg> lagEessiVedlegg(long arkivsakID, Collection<DokumentReferanse> vedleggReferanser) throws
+        IkkeFunnetException, IntegrasjonException, SikkerhetsbegrensningException {
+        final List<Journalpost> journalposter = joarkFasade.hentKjerneJournalpostListe(arkivsakID);
+        Collection<Vedlegg> vedlegg = new ArrayList<>();
+        for (DokumentReferanse dokumentReferanse : vedleggReferanser) {
+            Journalpost journalpost = journalposter.stream()
+                .filter(jp -> jp.getJournalpostId().equals(dokumentReferanse.getJournalpostID()))
+                .findFirst()
+                .orElseThrow(() -> new IkkeFunnetException(String.format("Finner ikke journalpost %s i arkivsak %s",
+                        dokumentReferanse.getJournalpostID(), arkivsakID)));
+            vedlegg.add(lagEessiVedlegg(journalpost, dokumentReferanse));
+        }
+        return vedlegg;
+    }
+
+    private Vedlegg lagEessiVedlegg(Journalpost journalpost, DokumentReferanse vedleggReferanse) throws
+        IkkeFunnetException, SikkerhetsbegrensningException {
+        byte[] pdf = joarkFasade.hentDokument(vedleggReferanse.getJournalpostID(), vedleggReferanse.getDokumentID());
+        String tittel = journalpost.hentArkivDokument(vedleggReferanse.getDokumentID()).getTittel();
+        return new Vedlegg(pdf, tittel);
+    }
+
     public Vedlegg lagEessiVedlegg(DokumentReferanse vedleggReferanse) throws IkkeFunnetException,
         IntegrasjonException, SikkerhetsbegrensningException {
         Journalpost journalpost = joarkFasade.hentJournalpost(vedleggReferanse.getJournalpostID());
