@@ -4,11 +4,12 @@ import java.util.List;
 
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.felles.RestConsumer;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto;
 
-public interface OppgaveConsumer {
+public interface OppgaveConsumer extends RestConsumer {
 
     OppgaveDto hentOppgave(String oppgaveId) throws FunksjonellException, TekniskException;
 

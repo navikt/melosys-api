@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.felles.FeilResponseDto;
-import no.nav.melosys.integrasjon.felles.RestConsumer;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSvar;
@@ -15,7 +14,7 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-public class OppgaveConsumerImpl implements OppgaveConsumer, RestConsumer {
+public class OppgaveConsumerImpl implements OppgaveConsumer {
     // Oppgave (/Abac) kaster feil om svaret på et søk inneholder oppgaver med 50+ unike personer
     private static final int OPPGAVE_ANTALL_ABAC_LIMIT = 40;
     private static final String CORRELATION_ID = "X-Correlation-ID";
