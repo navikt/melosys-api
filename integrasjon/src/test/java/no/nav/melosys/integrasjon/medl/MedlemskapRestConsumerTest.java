@@ -1,10 +1,8 @@
 package no.nav.melosys.integrasjon.medl;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForGet;
 import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPut;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -16,7 +14,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @ExtendWith(MockitoExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -60,9 +59,8 @@ class MedlemskapRestConsumerTest {
                 .withBody("[]")
             )
         );
-        List<MedlemskapsunntakForGet> response = restConsumer.hentPeriodeListe(fnr, fom, tom);
 
-        assertTrue(response.isEmpty());
+        assertThat(restConsumer.hentPeriodeListe(fnr, fom, tom)).isEmpty();
     }
 
     @Test
@@ -76,9 +74,8 @@ class MedlemskapRestConsumerTest {
                 .withBody("{}")
             )
         );
-        MedlemskapsunntakForGet medlemskapsunntak = restConsumer.hentPeriode("123");
 
-        assertNotNull(medlemskapsunntak);
+        assertThat(restConsumer.hentPeriode("123")).isNotNull();
     }
 
     @Test
@@ -90,9 +87,8 @@ class MedlemskapRestConsumerTest {
             )
         );
 
-        String actual = assertThrows(RuntimeException.class, () ->
-            restConsumer.oppdaterPeriode(MedlemskapsunntakForPut.builder().build())).getMessage();
-
-        assertTrue(actual.startsWith("400 Bad Request from PUT"));
+        assertThatExceptionOfType(RuntimeException.class)
+            .isThrownBy(() -> restConsumer.oppdaterPeriode(MedlemskapsunntakForPut.builder().build()))
+            .withMessageContaining("400 Bad Request from PUT");
     }
 }
