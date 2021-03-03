@@ -139,6 +139,8 @@
             </arbeidssted>
         </midlertidigUtsendt>
         <fullmakt>
+            <fullmektigVirksomhetsnavn>fullmektigVirksomhetsnavn</fullmektigVirksomhetsnavn>
+            <fullmektigVirksomhetsnummer>fullmektigVirksomhetsnummer</fullmektigVirksomhetsnummer>
             <fullmaktFraArbeidstaker>true</fullmaktFraArbeidstaker>
         </fullmakt>
     </Innhold>
