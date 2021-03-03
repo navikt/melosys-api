@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.sed;
 import java.util.*;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
@@ -46,17 +47,18 @@ public class VideresendSoknad extends AbstraktSendUtland {
     private final JoarkFasade joarkFasade;
     private final FagsakService fagsakService;
     private final SedSomBrevService sedSomBrevService;
+    private final Unleash unleash;
 
     @Autowired
     protected VideresendSoknad(@Qualifier("system") EessiService eessiService,
                                BehandlingsresultatService behandlingsresultatService,
-                               @Qualifier("system") JoarkFasade joarkFasade,
-                               FagsakService fagsakService,
-                               SedSomBrevService sedSomBrevService) {
+                               @Qualifier("system") JoarkFasade joarkFasade, FagsakService fagsakService,
+                               SedSomBrevService sedSomBrevService, Unleash unleash) {
         super(eessiService, behandlingsresultatService);
         this.joarkFasade = joarkFasade;
         this.fagsakService = fagsakService;
         this.sedSomBrevService = sedSomBrevService;
+        this.unleash = unleash;
     }
 
     @Override
@@ -78,6 +80,10 @@ public class VideresendSoknad extends AbstraktSendUtland {
 
     private Collection<Vedlegg> hentVedlegg(Prosessinstans prosessinstans) throws FunksjonellException,
         IntegrasjonException {
+        if (!unleash.isEnabled("melosys.videresending_vedlegg")) {
+            return Set.of(hentSøknadSomVedlegg(prosessinstans.getBehandling()));
+        }
+
         final Set<DokumentReferanse> vedleggReferanser = prosessinstans.getData(ProsessDataKey.VEDLEGG_SED,
             new TypeReference<Set<DokumentReferanse>>() {});
         if (CollectionUtils.isEmpty(vedleggReferanser)) {
@@ -89,6 +95,20 @@ public class VideresendSoknad extends AbstraktSendUtland {
             vedlegg.add(eessiService.lagEessiVedlegg(vedleggReferanse));
         }
         return vedlegg;
+    }
+
+    private Vedlegg hentSøknadSomVedlegg(Behandling behandling) throws FunksjonellException, IntegrasjonException {
+        final String journalpostID = behandling.getInitierendeJournalpostId();
+
+        if (StringUtils.isEmpty(journalpostID)) {
+            throw new FunksjonellException("JournalpostID til behandling " + behandling.getId() + " finnes ikke!");
+        }
+
+        Journalpost journalpost = joarkFasade.hentJournalpost(journalpostID);
+        String tittel = journalpost.getHoveddokument().getTittel();
+        byte[] pdf = joarkFasade.hentDokument(journalpostID, journalpost.getHoveddokument().getDokumentId());
+
+        return new Vedlegg(pdf, tittel);
     }
 
     @Override
