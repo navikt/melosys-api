@@ -9,6 +9,7 @@ import com.google.common.collect.Lists;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.eessi.Periode;
@@ -17,7 +18,6 @@ import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -32,7 +32,10 @@ import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import no.nav.melosys.service.journalforing.dto.*;
+import no.nav.melosys.service.journalforing.dto.DokumentDto;
+import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
+import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
+import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.soknad.SoknadMottatt;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
@@ -75,7 +78,7 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    public void harAktivProsessinstans() {
+    void harAktivProsessinstans() {
         when(prosessinstansRepo.findByBehandling_IdAndStatusIs(anyLong(), eq(ProsessStatus.KLAR)))
             .thenReturn(Optional.of(new Prosessinstans()));
         assertThat(prosessinstansService.harAktivProsessinstans(1L)).isTrue();
@@ -87,7 +90,7 @@ class ProsessinstansServiceTest {
         String saksbehandler = "Z123456";
         prosessinstansService.lagre(prosessinstans, saksbehandler);
 
-        verify(prosessinstans).setStatus(eq(ProsessStatus.KLAR));
+        verify(prosessinstans).setStatus(ProsessStatus.KLAR);
         verify(prosessinstans).setEndretDato(any());
         verify(prosessinstans).setRegistrertDato(any());
         verify(prosessinstans).setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
@@ -107,18 +110,22 @@ class ProsessinstansServiceTest {
 
     @Test
     void opprettProsessinstansAnmodningOmUnntak() {
+        final Behandling behandling = new Behandling();
         final String mottakerInstitusjon = "SE:123";
-        Behandling behandling = new Behandling();
-        prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, Set.of(mottakerInstitusjon), "FRITEKST_SED");
+        final DokumentReferanse dokumentReferanse = new DokumentReferanse("jpID", "dokID");
+
+        prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, Set.of(mottakerInstitusjon),
+            Set.of(dokumentReferanse), "FRITEKST_SED");
 
         verify(prosessinstansRepo).save(piCaptor.capture());
-
         Prosessinstans lagretInstans = piCaptor.getValue();
         assertThat(lagretInstans.getType()).isEqualTo(ProsessType.ANMODNING_OM_UNNTAK);
-        assertThat(lagretInstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED)).isEqualTo("FRITEKST_SED");
-        assertThat(lagretInstans.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<List<String>>() {
-        }).get(0)).isEqualTo(mottakerInstitusjon);
         assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
+        assertThat(lagretInstans.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<List<String>>() {}).get(0))
+            .isEqualTo(mottakerInstitusjon);
+        assertThat(lagretInstans.getData(ProsessDataKey.VEDLEGG_SED, new TypeReference<Set<DokumentReferanse>>() {}))
+            .isEqualTo(Set.of(dokumentReferanse));
+        assertThat(lagretInstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED)).isEqualTo("FRITEKST_SED");
     }
 
     @Test
@@ -126,7 +133,6 @@ class ProsessinstansServiceTest {
         Behandling behandling = new Behandling();
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
         String mottakerInstitusjon = "DE:2332";
-        Vedtakstyper vedtakstype = Vedtakstyper.FØRSTEGANGSVEDTAK;
         prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, resultatType, "FRITEKST", "FRITEKST_SED", Set.of(mottakerInstitusjon), "BEGRUNNELSE");
 
         verify(prosessinstansRepo).save(piCaptor.capture());
@@ -160,7 +166,8 @@ class ProsessinstansServiceTest {
         settInnloggetSaksbehandler();
 
         Behandling behandling = new Behandling();
-        prosessinstansService.opprettProsessinstansVideresendSoknad(behandling, null, "T");
+        DokumentReferanse dokumentReferanse = new DokumentReferanse("jpID", "dokID");
+        prosessinstansService.opprettProsessinstansVideresendSoknad(behandling, null, "T", Set.of(dokumentReferanse));
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
@@ -169,6 +176,8 @@ class ProsessinstansServiceTest {
         assertThat(lagretInstans.getData(ProsessDataKey.EESSI_MOTTAKERE, List.class)).isNull();
         assertThat(lagretInstans.getBehandling()).isEqualTo(behandling);
         assertThat(lagretInstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST)).isNotBlank();
+        assertThat(lagretInstans.getData(ProsessDataKey.VEDLEGG_SED, new TypeReference<Set<DokumentReferanse>>() {}))
+            .isEqualTo(Set.of(dokumentReferanse));
     }
 
     private Behandling lagBehandling() {
@@ -357,7 +366,7 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    public void opprettProsessinstansNySak_behandlingstypeSøknadTemaIkkeYrkesaktiv() {
+    void opprettProsessinstansNySak_behandlingstypeSøknadTemaIkkeYrkesaktiv() {
         OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
         opprettSakDto.setBehandlingstema(Behandlingstema.IKKE_YRKESAKTIV);
         String journalpostID = "journalpostID";
@@ -426,7 +435,7 @@ class ProsessinstansServiceTest {
     @Test
     void opprettProsessinstansSøknadMottatt_finnesFraFør_oppretterIkkeNyProsessinstans() {
         SoknadMottatt søknadMottatt = new SoknadMottatt("søknadID", ZonedDateTime.now());
-        when(behandlingsgrunnlagService.harMottattSøknadMedEksternReferanseID(eq(søknadMottatt.getSoknadID()))).thenReturn(true);
+        when(behandlingsgrunnlagService.harMottattSøknadMedEksternReferanseID(søknadMottatt.getSoknadID())).thenReturn(true);
 
         prosessinstansService.opprettProsessinstansSøknadMottatt(søknadMottatt);
         verify(prosessinstansRepo, never()).save(any(Prosessinstans.class));
@@ -462,12 +471,6 @@ class ProsessinstansServiceTest {
         JournalfoeringOpprettDto journalfoeringOpprettDto = new JournalfoeringOpprettDto();
         journalfoeringOpprettDto.setBehandlingstemaKode(Behandlingstema.UTSENDT_ARBEIDSTAKER.getKode());
         return lagJournalfoeringDto(journalfoeringOpprettDto);
-    }
-
-    private static JournalfoeringTilordneDto lagJournalfoeringTilordneDto() {
-        JournalfoeringTilordneDto journalfoeringTilordneDto = new JournalfoeringTilordneDto();
-        journalfoeringTilordneDto.setBehandlingstypeKode(Behandlingstyper.SOEKNAD.getKode());
-        return lagJournalfoeringDto(journalfoeringTilordneDto);
     }
 
     private static <T extends JournalfoeringDto> T lagJournalfoeringDto(T journalfoeringDto) {

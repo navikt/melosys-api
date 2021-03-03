@@ -16,6 +16,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
+import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -33,13 +34,14 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SendAvslagUtpekingTest {
-
     @Mock
     private SedDataBygger sedDataBygger;
     @Mock
     private SedDataGrunnlagFactory sedDataGrunnlagFactory;
     @Mock
     private EessiConsumer eessiConsumer;
+    @Mock
+    private JoarkFasade joarkFasade;
     @Mock
     private BehandlingService behandlingService;
     @Mock
@@ -51,10 +53,8 @@ class SendAvslagUtpekingTest {
 
     @BeforeEach
     public void settOpp() throws FunksjonellException, TekniskException {
-        eessiService = new EessiService(
-            sedDataBygger, sedDataGrunnlagFactory,
-            eessiConsumer, behandlingService, behandlingsresultatService
-        );
+        eessiService = new EessiService(behandlingService, behandlingsresultatService, eessiConsumer, joarkFasade,
+                sedDataBygger, sedDataGrunnlagFactory);
         sendAvslagUtpeking = new SendAvslagUtpeking(eessiService);
 
         SedDokument sedDokument = new SedDokument();

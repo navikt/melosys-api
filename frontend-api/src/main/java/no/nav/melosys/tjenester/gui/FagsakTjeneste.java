@@ -8,9 +8,10 @@ import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RegistreringsInfo;
+import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.service.SaksopplysningerService;
@@ -89,24 +90,6 @@ public class FagsakTjeneste {
         return ResponseEntity.ok().build();
     }
 
-    @Deprecated
-    @GetMapping("/sok")
-    @ApiOperation(
-        value = "Søk etter saker på fødselsnummer eller d-nummer",
-        notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer."),
-        response = FagsakOppsummeringDto.class,
-        responseContainer = "List")
-    public List<FagsakOppsummeringDto> hentFagsaker(@RequestParam("fnr") String fnr) throws FunksjonellException {
-        //TODO: slettes etter POST-endepunkt under er tatt i bruk
-        Iterable<Fagsak> saker;
-        if (fnr == null) {
-            throw new FunksjonellException("fnr er null");
-        }
-        tilgangService.sjekkFnr(fnr);
-        saker = fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, fnr);
-        return tilFagsakOppsummeringDtoer(saker);
-    }
-
     @PostMapping("/sok")
     @ApiOperation(
         value = "Søk etter saker på ident eller saksnummer",
@@ -146,7 +129,11 @@ public class FagsakTjeneste {
 
         videresendSoknadService.videresend(saksnummer,
             videresendDto.getMottakerinstitusjon(),
-            videresendDto.getFritekst());
+            videresendDto.getFritekst(),
+            videresendDto.getVedlegg().stream().map(
+                v -> new DokumentReferanse(v.getJournalpostID(), v.getDokumentID())).collect(
+                Collectors.toUnmodifiableSet())
+        );
         return ResponseEntity.ok().build();
     }
 

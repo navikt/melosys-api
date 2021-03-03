@@ -2,19 +2,29 @@ package no.nav.melosys.saksflyt.steg.sed;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.BucType;
+import no.nav.melosys.domain.eessi.Vedlegg;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -64,7 +74,18 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
         behandlingService.lagre(behandling);
         anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(behandling.getId());
 
-        sendUtland(BucType.LA_BUC_01, prosessinstans);
+        sendUtland(BucType.LA_BUC_01, prosessinstans, hentVedlegg(prosessinstans));
+    }
+
+    private Collection<Vedlegg> hentVedlegg(Prosessinstans prosessinstans) throws FunksjonellException,
+        IntegrasjonException {
+        final Set<DokumentReferanse> vedleggReferanser = prosessinstans.getData(ProsessDataKey.VEDLEGG_SED,
+            new TypeReference<Set<DokumentReferanse>>() {}, Collections.emptySet());
+        Set<Vedlegg> vedlegg = new HashSet<>();
+        for (DokumentReferanse vedleggReferanse : vedleggReferanser) {
+            vedlegg.add(eessiService.lagEessiVedlegg(vedleggReferanse));
+        }
+        return vedlegg;
     }
 
     @Override
