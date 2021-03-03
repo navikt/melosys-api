@@ -19,6 +19,9 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
     private static final int OPPGAVE_ANTALL_ABAC_LIMIT = 40;
     private static final String CORRELATION_ID = "X-Correlation-ID";
 
+    private static final String OPPGAVE_BASE_URI = "/oppgaver";
+    private static final String OPPGAVE_URI_MED_ID = OPPGAVE_BASE_URI + "/{oppgaveID}";
+
     private final WebClient webClient;
 
     public OppgaveConsumerImpl(WebClient webClient) {
@@ -28,7 +31,7 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
     @Override
     public OppgaveDto hentOppgave(String oppgaveId) {
         return webClient.get()
-            .uri(uri -> uri.path("/{oppgaveID}").build(oppgaveId))
+            .uri(OPPGAVE_URI_MED_ID, oppgaveId)
             .header(CORRELATION_ID, getCallID())
             .retrieve()
             .onStatus(HttpStatus::isError, this::håndterFeil)
@@ -55,7 +58,7 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
 
     private OppgaveSvar hentOppgaveSvar(OppgaveSearchRequest oppgaveSearchRequest, int offset) {
         return webClient.get()
-            .uri(uriBuilder ->
+            .uri(OPPGAVE_BASE_URI, uriBuilder ->
                 uriBuilder
                     .queryParamIfPresent("aktoerId", Optional.ofNullable(oppgaveSearchRequest.getAktørId()))
                     .queryParamIfPresent("tildeltEnhetsnr", Optional.ofNullable(oppgaveSearchRequest.getTildeltEnhetsnr()))
@@ -86,7 +89,7 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
     @Override
     public OppgaveDto oppdaterOppgave(OppgaveDto request) throws FunksjonellException, TekniskException {
         return webClient.put()
-            .uri(uriBuilder -> uriBuilder.path("/{oppgaveID}").build(request.getId()))
+            .uri(OPPGAVE_URI_MED_ID, request.getId())
             .header(CORRELATION_ID, getCallID())
             .bodyValue(request)
             .retrieve()
@@ -98,6 +101,7 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
     @Override
     public String opprettOppgave(OpprettOppgaveDto request) throws FunksjonellException, TekniskException {
         return webClient.post()
+            .uri(OPPGAVE_BASE_URI)
             .header(CORRELATION_ID, getCallID())
             .bodyValue(request)
             .retrieve()
