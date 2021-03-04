@@ -90,11 +90,8 @@ public class VideresendSoknad extends AbstraktSendUtland {
             throw new FunksjonellException("Kan ikke videresende søknad uten vedlegg!");
         }
 
-        Set<Vedlegg> vedlegg = new HashSet<>();
-        for (DokumentReferanse vedleggReferanse : vedleggReferanser) {
-            vedlegg.add(eessiService.lagEessiVedlegg(vedleggReferanse));
-        }
-        return vedlegg;
+        return eessiService.lagEessiVedlegg(prosessinstans.getBehandling().getFagsak().getGsakSaksnummer(),
+            vedleggReferanser);
     }
 
     private Vedlegg hentSøknadSomVedlegg(Behandling behandling) throws FunksjonellException, IntegrasjonException {

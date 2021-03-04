@@ -63,9 +63,26 @@ public class EessiService {
         this.dataGrunnlagFactory = dataGrunnlagFactory;
     }
 
-    public Vedlegg lagEessiVedlegg(DokumentReferanse vedleggReferanse) throws IkkeFunnetException,
-        IntegrasjonException, SikkerhetsbegrensningException {
-        Journalpost journalpost = joarkFasade.hentJournalpost(vedleggReferanse.getJournalpostID());
+    public Collection<Vedlegg> lagEessiVedlegg(long arkivsakID, Collection<DokumentReferanse> vedleggReferanser) throws
+        IkkeFunnetException, IntegrasjonException, SikkerhetsbegrensningException {
+        if (vedleggReferanser.isEmpty()) {
+            return Collections.emptySet();
+        }
+        final List<Journalpost> journalposter = joarkFasade.hentKjerneJournalpostListe(arkivsakID);
+        Collection<Vedlegg> vedlegg = new ArrayList<>();
+        for (DokumentReferanse dokumentReferanse : vedleggReferanser) {
+            Journalpost journalpost = journalposter.stream()
+                .filter(jp -> jp.getJournalpostId().equals(dokumentReferanse.getJournalpostID()))
+                .findFirst()
+                .orElseThrow(() -> new IkkeFunnetException(String.format("Finner ikke journalpost %s i arkivsak %s",
+                        dokumentReferanse.getJournalpostID(), arkivsakID)));
+            vedlegg.add(lagEessiVedlegg(journalpost, dokumentReferanse));
+        }
+        return vedlegg;
+    }
+
+    private Vedlegg lagEessiVedlegg(Journalpost journalpost, DokumentReferanse vedleggReferanse) throws
+        IkkeFunnetException, SikkerhetsbegrensningException {
         byte[] pdf = joarkFasade.hentDokument(vedleggReferanse.getJournalpostID(), vedleggReferanse.getDokumentID());
         String tittel = journalpost.hentArkivDokument(vedleggReferanse.getDokumentID()).getTittel();
         return new Vedlegg(pdf, tittel);
@@ -96,13 +113,17 @@ public class EessiService {
     }
 
     @Transactional(readOnly = true)
-    public String opprettBucOgSed(Behandling behandling, BucType bucType, List<String> mottakerInstitusjoner, Collection<Vedlegg> vedlegg) throws MelosysException {
+    public String opprettBucOgSed(Behandling behandling,
+                                  BucType bucType,
+                                  List<String> mottakerInstitusjoner,
+                                  Collection<DokumentReferanse> vedleggReferanser) throws MelosysException {
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, PeriodeType.fraBucType(bucType, behandlingsresultat));
         sedDataDto.setMottakerIder(mottakerInstitusjoner);
         sedDataDto.setGsakSaksnummer(behandling.getFagsak().getGsakSaksnummer());
 
+        final var vedlegg = lagEessiVedlegg(behandling.getFagsak().getGsakSaksnummer(), vedleggReferanser);
         log.info("Oppretter buc og sed for behandling {} med bucType {}", behandling.getId(), bucType);
         return eessiConsumer.opprettBucOgSed(sedDataDto, vedlegg, bucType, false, false).getRinaUrl();
     }

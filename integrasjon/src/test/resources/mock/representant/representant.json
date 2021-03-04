@@ -1,0 +1,15 @@
+{
+  "id":"99999",
+  "navn":"99DUMMYNAVN",
+  "adresselinjer":
+  [
+    "DUMMYADR1",
+    "DUMMYADR2",
+    "DUMMYADR3"
+  ],
+  "postnummer":"3601",
+  "telefon":null,
+  "orgnr":null,
+  "endretAv":"RTV",
+  "endretDato":"1997-03-14"
+}
