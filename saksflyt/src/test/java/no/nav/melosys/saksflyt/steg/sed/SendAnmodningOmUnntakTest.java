@@ -10,6 +10,7 @@ import com.google.common.collect.Sets;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
@@ -29,20 +30,20 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.YTTERLIGERE_INFO_SED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SendAnmodningOmUnntakTest {
+@ExtendWith(MockitoExtension.class)
+class SendAnmodningOmUnntakTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
@@ -63,25 +64,24 @@ public class SendAnmodningOmUnntakTest {
     private static final long BEHANDLING_ID = 1L;
     private static final String MOTTAKER_INSTITSJON = "SE:123";
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(new Behandling());
-        prosessinstans.getBehandling().setId(BEHANDLING_ID);
-        prosessinstans.getBehandling().setDokumentasjonSvarfristDato(Instant.now());
+        prosessinstans.setBehandling(lagBehandling());
 
-        sendAnmodningOmUnntak = new SendAnmodningOmUnntak(eessiService, brevBestiller, behandlingService, behandlingsresultatService, anmodningsperiodeService);
+        sendAnmodningOmUnntak = new SendAnmodningOmUnntak(eessiService, brevBestiller, behandlingService,
+            behandlingsresultatService, anmodningsperiodeService);
     }
 
     @Test
-    public void utfør_artikkel16_sendSedMedVedlegg() throws Exception {
+    void utfør_artikkel16_sendSedMedVedlegg() throws Exception {
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITSJON));
         final var dokumentReferanse = new DokumentReferanse("", "");
         prosessinstans.setData(ProsessDataKey.VEDLEGG_SED, Set.of(dokumentReferanse));
         final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
         final Vedlegg forventetVedlegg = new Vedlegg(new byte[0], "tittel");
-        when(eessiService.lagEessiVedlegg(dokumentReferanse)).thenReturn(forventetVedlegg);
+        when(eessiService.lagEessiVedlegg(anyLong(), any())).thenReturn(Set.of(forventetVedlegg));
 
         sendAnmodningOmUnntak.utfør(prosessinstans);
 
@@ -91,7 +91,7 @@ public class SendAnmodningOmUnntakTest {
     }
 
     @Test
-    public void utfør_ingenInstitusjonEessiKlar_senderBrev() throws Exception {
+    void utfør_ingenInstitusjonEessiKlar_senderBrev() throws Exception {
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
         prosessinstans.setData(YTTERLIGERE_INFO_SED, "Mer info");
@@ -106,7 +106,7 @@ public class SendAnmodningOmUnntakTest {
     }
 
     @Test
-    public void utfør_ingenBestemmelse_verifiserSedIkkeSendt() throws Exception {
+    void utfør_ingenBestemmelse_verifiserSedIkkeSendt() throws Exception {
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat();
         behandlingsresultat.setAnmodningsperioder(Collections.singleton(new Anmodningsperiode()));
         when(behandlingsresultatService.hentBehandlingsresultat(2L)).thenReturn(behandlingsresultat);
@@ -125,7 +125,7 @@ public class SendAnmodningOmUnntakTest {
     private static Behandlingsresultat hentBehandlingsresultat() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(BEHANDLING_ID);
-        behandlingsresultat.setBehandling(hentBehandling());
+        behandlingsresultat.setBehandling(lagBehandling());
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now(), Landkoder.NO,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5,
             Landkoder.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Trygdedekninger.FULL_DEKNING_EOSFO);
@@ -134,9 +134,14 @@ public class SendAnmodningOmUnntakTest {
         return behandlingsresultat;
     }
 
-    private static Behandling hentBehandling() {
+    private static Behandling lagBehandling() {
         Behandling behandling = new Behandling();
-        behandling.setId(1L);
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("MEL-1");
+        fagsak.setGsakSaksnummer(123L);
+        behandling.setFagsak(fagsak);
+        behandling.setId(BEHANDLING_ID);
+        behandling.setDokumentasjonSvarfristDato(Instant.now());
         return behandling;
     }
 }

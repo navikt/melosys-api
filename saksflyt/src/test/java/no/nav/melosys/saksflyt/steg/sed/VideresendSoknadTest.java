@@ -39,7 +39,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ExtendWith({MockitoExtension.class})
+@ExtendWith(MockitoExtension.class)
 class VideresendSoknadTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
@@ -100,7 +100,7 @@ class VideresendSoknadTest {
             journalpost.getHoveddokument().getDokumentId());
         prosessinstans.setData(ProsessDataKey.VEDLEGG_SED, Set.of(dokumentReferanse));
         final Vedlegg forventetVedlegg = new Vedlegg(vedlegg, "tittel");
-        when(eessiService.lagEessiVedlegg(dokumentReferanse)).thenReturn(forventetVedlegg);
+        when(eessiService.lagEessiVedlegg(anyLong(), anyCollection())).thenReturn(Set.of(forventetVedlegg));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         videresendSoknad.utfør(prosessinstans);
