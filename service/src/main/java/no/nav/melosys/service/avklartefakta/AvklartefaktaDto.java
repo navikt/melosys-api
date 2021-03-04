@@ -82,7 +82,7 @@ public class AvklartefaktaDto {
         this.begrunnelseFritekst = begrunnelseFritekst;
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public AvklartefaktaDto(@JsonProperty("fakta") List<String> fakta,
                             @JsonProperty("referanse") String referanse) {
         this.fakta = fakta;

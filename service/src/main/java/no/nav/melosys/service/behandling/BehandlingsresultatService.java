@@ -38,9 +38,10 @@ public class BehandlingsresultatService {
     public void tømBehandlingsresultat(long behandlingsid) {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandlingsid).orElse(null);
         if (behandlingsresultat != null) {
-            log.info("Fjerner avklarte fakta, lovvalgsperioder og vilkårsresultater fra behandlingsresultat med behandlingsid: {} ", behandlingsid);
+            log.info("Fjerner avklarte fakta, lovvalgsperioder, medlemAvFolketrygden og vilkårsresultater fra behandlingsresultat med behandlingsid: {} ", behandlingsid);
             behandlingsresultat.getAvklartefakta().clear();
             behandlingsresultat.getLovvalgsperioder().clear();
+            behandlingsresultat.setMedlemAvFolketrygden(null);
             vilkaarsresultatService.tømVilkårForBehandlingsresultat(behandlingsresultat);
             behandlingsresultatRepository.save(behandlingsresultat);
         }

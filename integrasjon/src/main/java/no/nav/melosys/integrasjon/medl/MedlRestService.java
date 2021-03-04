@@ -124,7 +124,7 @@ public class MedlRestService implements MedlFasade {
             .statusaarsak(årsak.getKode())
             .dekning(eksisterendePeriode.getDekning())
             .lovvalgsland(eksisterendePeriode.getLovvalgsland())
-            .lovvalg(eksisterendePeriode.getLovvalg())
+            .lovvalg(LovvalgMedl.ENDL.getKode())
             .grunnlag(eksisterendePeriode.getGrunnlag())
             .sporingsinformasjon(sporingsinformasjon)
             .build();

@@ -42,19 +42,32 @@
                 <samletUtsendingsperiode></samletUtsendingsperiode>
                 <sendesUtOppdragIUtlandet>false</sendesUtOppdragIUtlandet>
                 <ansattForOppdragIUtlandet>false</ansattForOppdragIUtlandet>
+                <erArbeidstakerAnsattHelePerioden>true</erArbeidstakerAnsattHelePerioden>
                 <drattPaaEgetInitiativ>false</drattPaaEgetInitiativ>
                 <erstatterTidligereUtsendte>false</erstatterTidligereUtsendte>
                 <naeringsGruppe>2019-08-05</naeringsGruppe>
             </utenlandsoppdraget>
             <loennOgGodtgjoerelse>
                 <norskArbgUtbetalerLoenn>true</norskArbgUtbetalerLoenn>
-                <utlArbgUtbetalerLoenn>false</utlArbgUtbetalerLoenn>
+                <utlArbgUtbetalerLoenn>true</utlArbgUtbetalerLoenn>
+                <utlArbTilhorerSammeKonsern>false</utlArbTilhorerSammeKonsern>
+                <loennUtlArbg>1000.00</loennUtlArbg>
+                <loennNorskArbg>2000.00</loennNorskArbg>
                 <mottarNaturalytelser>false</mottarNaturalytelser>
+                <samletVerdiNaturalytelser>10000.50</samletVerdiNaturalytelser>
                 <trukketTrygdeavgift>true</trukketTrygdeavgift>
                 <betalerArbeidsgiveravgift>true</betalerArbeidsgiveravgift>
             </loennOgGodtgjoerelse>
             <virksomhetIUtlandet>
-                <adresse></adresse>
+                <navn>Virskomheten i utlandet</navn>
+                <registreringsnummer>XYZ123456789</registreringsnummer>
+                <adresse>
+                    <gatenavn>gatenavn med mer</gatenavn>
+                    <by>testbyen</by>
+                    <postkode>UTLAND-1234</postkode>
+                    <region>testregion</region>
+                    <land>BELGIA</land>
+                </adresse>
             </virksomhetIUtlandet>
             <arbeidssted>
                 <typeArbeidssted>land</typeArbeidssted>
@@ -126,6 +139,8 @@
             </arbeidssted>
         </midlertidigUtsendt>
         <fullmakt>
+            <fullmektigVirksomhetsnavn>fullmektigVirksomhetsnavn</fullmektigVirksomhetsnavn>
+            <fullmektigVirksomhetsnummer>fullmektigVirksomhetsnummer</fullmektigVirksomhetsnummer>
             <fullmaktFraArbeidstaker>true</fullmaktFraArbeidstaker>
         </fullmakt>
     </Innhold>
