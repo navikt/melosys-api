@@ -44,7 +44,7 @@ public class BrevbestillingTjeneste {
 
     @GetMapping(value = "/tilgjengelige-maler", produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Henter alle tilgjengelige brevmaler for en behandling", response = BrevmalDto.class, responseContainer = "List")
-    public List<BrevmalDto> hentTilgjengeligeMaler(@RequestParam Long behandlingId) throws IkkeFunnetException, TekniskException {
+    public List<BrevmalDto> hentTilgjengeligeMaler(@RequestParam Long behandlingId) throws IkkeFunnetException {
         return byggBrevmalListe(behandlingId);
     }
 

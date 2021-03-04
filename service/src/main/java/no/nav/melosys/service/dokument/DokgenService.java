@@ -11,6 +11,7 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
@@ -21,6 +22,7 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.KopiMottaker;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -121,16 +123,20 @@ public class DokgenService {
             mottaker.setRolle(brevbestillingDto.getMottaker());
             mottaker.setOrgnr(brevbestillingDto.getOrgNr());
             mottakere.add(mottaker);
-
-            if (brevbestillingDto.sendKopi()) {
-                mottakere.addAll(brevmottakerService.avklarMottakere(produserbartDokument, Mottaker.av(brevbestillingDto.getMottaker()), behandling));
-            }
         } else {
             mottakere = brevmottakerService.avklarMottakere(produserbartDokument, Mottaker.av(brevbestillingDto.getMottaker()), behandling);
         }
 
         for (Aktoer aktoer : mottakere) {
             prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(produserbartDokument, behandling, aktoer, brevbestillingDto);
+        }
+
+        for (KopiMottaker kopiMottaker: brevbestillingDto.getKopiMottakere()) {
+            Aktoer aktoer = new Aktoer();
+            aktoer.setRolle(kopiMottaker.getRolle());
+            aktoer.setOrgnr(kopiMottaker.getOrgnr());
+            aktoer.setAktørId(kopiMottaker.getAktørId());
+            prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(produserbartDokument, behandling, aktoer, brevbestillingDto, true);
         }
     }
 

@@ -245,10 +245,15 @@ public class ProsessinstansService {
     }
 
     public void opprettProsessinstansOpprettOgDistribuerBrev(Produserbaredokumenter produserbartDokument, Behandling behandling, Aktoer mottaker, BrevbestillingDto brevbestillingDto) {
+        opprettProsessinstansOpprettOgDistribuerBrev(produserbartDokument, behandling, mottaker, brevbestillingDto, false);
+    }
+
+    public void opprettProsessinstansOpprettOgDistribuerBrev(Produserbaredokumenter produserbartDokument, Behandling behandling, Aktoer mottaker, BrevbestillingDto brevbestillingDto, boolean brevkopi) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
         prosessinstans.setData(PRODUSERBART_BREV, produserbartDokument);
         prosessinstans.setData(BREVBESTILLING, brevbestillingDto);
+        prosessinstans.setData(BREVKOPI, brevkopi);
         prosessinstans.setData(MOTTAKER, mottaker.getRolle());
         if (hasText(mottaker.getAktørId())) {
             prosessinstans.setData(AKTØR_ID, mottaker.getAktørId());

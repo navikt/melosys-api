@@ -20,6 +20,7 @@ public enum ProsessDataKey {
     BEHANDLINGSTYPE("behandlingstype"),
     BREVBESTILLING("brevbestilling"),
     BREVDATA("brevData"),
+    BREVKOPI("brevkopi"),
     BRUKER_ID("brukerID"),
     DISTRIBUERBAR_JOURNALPOST_ID("distribuerbarJournalpostID"),
     DISTRIBUER_MOTTAKER_LAND("distribuerMottakerLand"),

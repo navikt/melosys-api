@@ -1,5 +1,7 @@
 package no.nav.melosys.service.dokument.brev;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -11,7 +13,7 @@ public class BrevbestillingDto {
     private String innledningFritekst;
     private String manglerFritekst;
     private String kontaktperson;
-    private boolean sendKopi;
+    private List<KopiMottaker> kopiMottakere;
 
     /**
      * @deprecated Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel
@@ -40,7 +42,7 @@ public class BrevbestillingDto {
         this.innledningFritekst = builder.innledningFritekst;
         this.manglerFritekst = builder.manglerFritekst;
         this.kontaktperson = builder.kontaktperson;
-        this.sendKopi = builder.sendKopi;
+        this.kopiMottakere = builder.kopiMottakere;
         this.fritekst = builder.fritekst;
         this.begrunnelseKode = builder.begrunnelseKode;
         this.ytterligereInformasjon = builder.ytterligereInformasjon;
@@ -66,8 +68,11 @@ public class BrevbestillingDto {
         return kontaktperson;
     }
 
-    public boolean sendKopi() {
-        return sendKopi;
+    public List<KopiMottaker> getKopiMottakere() {
+        if (kopiMottakere == null) {
+            kopiMottakere = new ArrayList<>();
+        }
+        return kopiMottakere;
     }
 
     public String getFritekst() {
@@ -88,7 +93,7 @@ public class BrevbestillingDto {
         private String innledningFritekst;
         private String manglerFritekst;
         private String kontaktperson;
-        private boolean sendKopi = true;
+        private List<KopiMottaker> kopiMottakere;
         private String fritekst;
         private String begrunnelseKode;
         private String ytterligereInformasjon;
@@ -118,8 +123,8 @@ public class BrevbestillingDto {
             return this;
         }
 
-        public Builder sendKopi(boolean sendKopi) {
-            this.sendKopi = sendKopi;
+        public Builder medKopiMottakere(List<KopiMottaker> kopiMottakere) {
+            this.kopiMottakere = kopiMottakere;
             return this;
         }
 
@@ -148,7 +153,7 @@ public class BrevbestillingDto {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BrevbestillingDto that = (BrevbestillingDto) o;
-        return sendKopi == that.sendKopi && mottaker == that.mottaker && Objects.equals(orgNr, that.orgNr) &&
+        return mottaker == that.mottaker && Objects.equals(orgNr, that.orgNr) &&
             Objects.equals(innledningFritekst, that.innledningFritekst) && Objects.equals(manglerFritekst, that.manglerFritekst) &&
             Objects.equals(kontaktperson, that.kontaktperson) && Objects.equals(fritekst, that.fritekst) &&
             Objects.equals(begrunnelseKode, that.begrunnelseKode) && Objects.equals(ytterligereInformasjon, that.ytterligereInformasjon);
@@ -156,7 +161,7 @@ public class BrevbestillingDto {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mottaker, orgNr, innledningFritekst, manglerFritekst, kontaktperson, sendKopi, fritekst, begrunnelseKode, ytterligereInformasjon);
+        return Objects.hash(mottaker, orgNr, innledningFritekst, manglerFritekst, kontaktperson, fritekst, begrunnelseKode, ytterligereInformasjon);
     }
 
     @Override
@@ -167,7 +172,6 @@ public class BrevbestillingDto {
             ", innledningFritekst='" + innledningFritekst + '\'' +
             ", manglerFritekst='" + manglerFritekst + '\'' +
             ", kontaktperson='" + kontaktperson + '\'' +
-            ", sendKopi=" + sendKopi +
             ", fritekst='" + fritekst + '\'' +
             ", begrunnelseKode='" + begrunnelseKode + '\'' +
             ", ytterligereInformasjon='" + ytterligereInformasjon + '\'' +
