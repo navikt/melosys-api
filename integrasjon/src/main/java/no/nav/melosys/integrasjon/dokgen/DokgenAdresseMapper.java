@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.dokgen;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import no.nav.melosys.domain.Kontaktopplysning;
@@ -7,29 +8,27 @@ import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
+import static org.springframework.util.StringUtils.hasText;
 
 public final class DokgenAdresseMapper {
 
-    private DokgenAdresseMapper(){}
+    private DokgenAdresseMapper() {
+    }
 
-    public static List<String> mapAdresselinjer(OrganisasjonDokument org, Kontaktopplysning kontaktopplysning, PersonDokument personDokument) {
+    public static List<String> mapAdresselinjer(OrganisasjonDokument org, String kontaktperson, Kontaktopplysning kontaktopplysning, PersonDokument personDokument) {
         List<String> adresselinjer;
         if (org == null) {
             adresselinjer = personDokument.gjeldendePostadresse.adresselinjer();
         } else {
             StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
-            if (kontaktopplysning != null) {
-                adresselinjer = asList(
-                    "v/" + kontaktopplysning.getKontaktNavn(),
-                    orgAdresse.gatenavn +
-                        ((orgAdresse.husnummer == null) ? "" : " " + orgAdresse.husnummer)
-                );
-            } else {
-                adresselinjer = singletonList(orgAdresse.gatenavn +
-                    ((orgAdresse.husnummer == null) ? "" : " " + orgAdresse.husnummer));
+            adresselinjer = new ArrayList<>();
+            if (hasText(kontaktperson)) {
+                adresselinjer.add("v/" + kontaktperson);
+            } else if (kontaktopplysning != null) {
+                adresselinjer.add("v/" + kontaktopplysning.getKontaktNavn());
             }
+            adresselinjer.add(orgAdresse.gatenavn +
+                ((orgAdresse.husnummer == null) ? "" : " " + orgAdresse.husnummer));
         }
         return adresselinjer;
     }

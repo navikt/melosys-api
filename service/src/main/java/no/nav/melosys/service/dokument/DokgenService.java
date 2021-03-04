@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -73,7 +74,7 @@ public class DokgenService {
             brevbestilling = new MangelbrevBrevbestilling.Builder()
                 .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
                 .medManglerInfoFritekst(brevbestillingDto.getManglerFritekst())
-                .medFullmektigNavn(brevbestillingDto.getKontaktperson());
+                .medKontaktperson(brevbestillingDto.getKontaktperson());
         }
 
         brevbestilling
@@ -114,12 +115,12 @@ public class DokgenService {
     public void produserOgDistribuerBrev(Produserbaredokumenter produserbartDokument, long behandlingId,
                                          BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
-        List<Aktoer> mottakere;
+        List<Aktoer> mottakere = new ArrayList<>();
         if (hasText(brevbestillingDto.getOrgNr())) {
             Aktoer mottaker = new Aktoer();
             mottaker.setRolle(brevbestillingDto.getMottaker());
             mottaker.setOrgnr(brevbestillingDto.getOrgNr());
-            mottakere = List.of(mottaker);
+            mottakere.add(mottaker);
 
             if (brevbestillingDto.sendKopi()) {
                 mottakere.addAll(brevmottakerService.avklarMottakere(produserbartDokument, Mottaker.av(brevbestillingDto.getMottaker()), behandling));

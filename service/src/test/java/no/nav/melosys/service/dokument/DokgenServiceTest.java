@@ -147,17 +147,36 @@ class DokgenServiceTest {
     }
 
     @Test
-    void skalProdusereOgDistribuereBrevTilEnkeltOrgnr() throws Exception {
+    void skalProdusereOgDistribuereBrevTilOrgnrUtenKopi() throws Exception {
 
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
             .medMottaker(Aktoersroller.ARBEIDSGIVER)
             .medOrgNr("987654321")
+            .sendKopi(false)
             .build();
 
         dokgenService.produserOgDistribuerBrev(MANGELBREV_BRUKER, 123L, brevbestillingDto);
 
         verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(eq(MANGELBREV_BRUKER), any(), any(), any());
         verifyNoInteractions(mockBrevMottakerService);
+    }
+
+    @Test
+    void skalProdusereOgDistribuereBrevTilOrgnrMedKopi() throws Exception {
+        Aktoer bruker = new Aktoer();
+        bruker.setRolle(Aktoersroller.BRUKER);
+        when(mockBrevMottakerService.avklarMottakere(any(), any(), any())).thenReturn(List.of(bruker));
+
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+            .medMottaker(Aktoersroller.ARBEIDSGIVER)
+            .medOrgNr("987654321")
+            .sendKopi(true)
+            .build();
+
+        dokgenService.produserOgDistribuerBrev(MANGELBREV_BRUKER, 123L, brevbestillingDto);
+
+        verify(mockProsessinstansService, times(2)).opprettProsessinstansOpprettOgDistribuerBrev(eq(MANGELBREV_BRUKER), any(), any(), any());
+        verify(mockBrevMottakerService).avklarMottakere(any(), any(), any());
     }
 
     @Test
