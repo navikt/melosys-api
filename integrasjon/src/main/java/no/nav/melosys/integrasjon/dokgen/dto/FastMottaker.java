@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.brev;
+package no.nav.melosys.integrasjon.dokgen.dto;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.brev.Mottaker;
