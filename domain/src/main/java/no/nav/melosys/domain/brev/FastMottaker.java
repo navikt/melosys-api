@@ -1,7 +1,6 @@
-package no.nav.melosys.integrasjon.dokgen.dto;
+package no.nav.melosys.domain.brev;
 
 import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import org.springframework.util.Assert;
 

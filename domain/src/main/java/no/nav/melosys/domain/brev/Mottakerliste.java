@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.dokgen.dto;
+package no.nav.melosys.domain.brev;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,12 +7,12 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 
 import static java.util.Optional.ofNullable;
 
-public class BrevMottaker {
+public class Mottakerliste {
     private Aktoersroller hovedMottaker;
     private List<Aktoersroller> kopiMottakere;
     private List<FastMottaker> fasteMottakere;
 
-    public BrevMottaker(Builder builder) {
+    public Mottakerliste(Builder builder) {
         this.hovedMottaker = builder.hovedMottaker;
         this.kopiMottakere = builder.kopiMottakere;
         this.fasteMottakere = builder.fasteMottakere;
@@ -66,8 +66,8 @@ public class BrevMottaker {
             return this;
         }
 
-        public BrevMottaker build() {
-            return new BrevMottaker(this);
+        public Mottakerliste build() {
+            return new Mottakerliste(this);
         }
     }
 }
