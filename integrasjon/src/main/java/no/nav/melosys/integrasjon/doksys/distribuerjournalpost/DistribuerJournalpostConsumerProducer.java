@@ -19,8 +19,9 @@ public class DistribuerJournalpostConsumerProducer {
 
     @Bean
     public DistribuerJournalpostConsumer distribuerJournalpostConsumer(
-        SystemContextClientRequestInterceptor systemContextClientRequestInterceptor) {
-        RestTemplate restTemplate = new RestTemplateBuilder()
+        SystemContextClientRequestInterceptor systemContextClientRequestInterceptor,
+        RestTemplateBuilder restTemplateBuilder) {
+        RestTemplate restTemplate = restTemplateBuilder
             .uriTemplateHandler(new DefaultUriBuilderFactory(url))
             .interceptors(systemContextClientRequestInterceptor)
             .build();
