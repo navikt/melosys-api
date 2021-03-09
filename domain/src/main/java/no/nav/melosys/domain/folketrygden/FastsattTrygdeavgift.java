@@ -2,6 +2,7 @@ package no.nav.melosys.domain.folketrygden;
 
 import javax.persistence.*;
 
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer;
 
 @Entity
@@ -19,8 +20,12 @@ public class FastsattTrygdeavgift {
     @Enumerated(EnumType.STRING)
     private Trygdeavgift_typer trygdeavgiftstype;
 
-    @Column(name = "betales_av")
-    private String betalesAv;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "betales_av")
+    private Aktoer betalesAv;
+
+    @Column(name = "representant_nr")
+    private String representantNr;
 
     @Column(name = "avgiftspliktig_norsk_inntekt_md")
     private Long avgiftspliktigNorskInntektMnd;
@@ -52,12 +57,20 @@ public class FastsattTrygdeavgift {
         this.trygdeavgiftstype = trygdeavgiftstype;
     }
 
-    public String getBetalesAv() {
+    public Aktoer getBetalesAv() {
         return betalesAv;
     }
 
-    public void setBetalesAv(String betalesAv) {
+    public void setBetalesAv(Aktoer betalesAv) {
         this.betalesAv = betalesAv;
+    }
+
+    public String getRepresentantNr() {
+        return representantNr;
+    }
+
+    public void setRepresentantNr(String representantNr) {
+        this.representantNr = representantNr;
     }
 
     public Long getAvgiftspliktigNorskInntektMnd() {

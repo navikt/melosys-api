@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.felles.FeilResponseDto;
-import no.nav.melosys.integrasjon.felles.RestConsumer;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSvar;
@@ -15,10 +14,13 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-public class OppgaveConsumerImpl implements OppgaveConsumer, RestConsumer {
+public class OppgaveConsumerImpl implements OppgaveConsumer {
     // Oppgave (/Abac) kaster feil om svaret på et søk inneholder oppgaver med 50+ unike personer
     private static final int OPPGAVE_ANTALL_ABAC_LIMIT = 40;
     private static final String CORRELATION_ID = "X-Correlation-ID";
+
+    private static final String OPPGAVE_BASE_URI = "/oppgaver";
+    private static final String OPPGAVE_URI_MED_ID = OPPGAVE_BASE_URI + "/{oppgaveID}";
 
     private final WebClient webClient;
 
@@ -29,7 +31,7 @@ public class OppgaveConsumerImpl implements OppgaveConsumer, RestConsumer {
     @Override
     public OppgaveDto hentOppgave(String oppgaveId) {
         return webClient.get()
-            .uri(uri -> uri.path("/{oppgaveID}").build(oppgaveId))
+            .uri(OPPGAVE_URI_MED_ID, oppgaveId)
             .header(CORRELATION_ID, getCallID())
             .retrieve()
             .onStatus(HttpStatus::isError, this::håndterFeil)
@@ -56,7 +58,7 @@ public class OppgaveConsumerImpl implements OppgaveConsumer, RestConsumer {
 
     private OppgaveSvar hentOppgaveSvar(OppgaveSearchRequest oppgaveSearchRequest, int offset) {
         return webClient.get()
-            .uri(uriBuilder ->
+            .uri(OPPGAVE_BASE_URI, uriBuilder ->
                 uriBuilder
                     .queryParamIfPresent("aktoerId", Optional.ofNullable(oppgaveSearchRequest.getAktørId()))
                     .queryParamIfPresent("tildeltEnhetsnr", Optional.ofNullable(oppgaveSearchRequest.getTildeltEnhetsnr()))
@@ -87,7 +89,7 @@ public class OppgaveConsumerImpl implements OppgaveConsumer, RestConsumer {
     @Override
     public OppgaveDto oppdaterOppgave(OppgaveDto request) throws FunksjonellException, TekniskException {
         return webClient.put()
-            .uri(uriBuilder -> uriBuilder.path("/{oppgaveID}").build(request.getId()))
+            .uri(OPPGAVE_URI_MED_ID, request.getId())
             .header(CORRELATION_ID, getCallID())
             .bodyValue(request)
             .retrieve()
@@ -99,6 +101,7 @@ public class OppgaveConsumerImpl implements OppgaveConsumer, RestConsumer {
     @Override
     public String opprettOppgave(OpprettOppgaveDto request) throws FunksjonellException, TekniskException {
         return webClient.post()
+            .uri(OPPGAVE_BASE_URI)
             .header(CORRELATION_ID, getCallID())
             .bodyValue(request)
             .retrieve()

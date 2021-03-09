@@ -1,10 +1,10 @@
 package no.nav.melosys.tjenester.gui.dto.eessi;
 
 import java.util.Collection;
+import java.util.List;
 
 import no.nav.melosys.domain.eessi.BucType;
-
-import java.util.List;
+import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.VedleggDto;
 
 public class BucBestillingDto {
 

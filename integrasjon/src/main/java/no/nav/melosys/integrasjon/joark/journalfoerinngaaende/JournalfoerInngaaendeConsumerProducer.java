@@ -20,8 +20,8 @@ public class JournalfoerInngaaendeConsumerProducer {
     }
 
     @Bean
-    public JournalfoerInngaaendeConsumer journalfoerInngaaendeConsumer() {
-        RestTemplate restTemplate = new RestTemplateBuilder()
+    public JournalfoerInngaaendeConsumer journalfoerInngaaendeConsumer(RestTemplateBuilder restTemplateBuilder) {
+        RestTemplate restTemplate = restTemplateBuilder
             .uriTemplateHandler(new DefaultUriBuilderFactory(url))
             .interceptors(systemContextClientRequestInterceptor)
             .build();

@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
-import no.nav.melosys.tjenester.gui.dto.dokument.DokumentDto;
+import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.DokumentDto;
 
 public final class JournalpostDto {
     private Instant mottattDato;

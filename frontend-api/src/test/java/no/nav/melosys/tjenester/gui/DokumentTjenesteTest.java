@@ -19,7 +19,7 @@ import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.SedPdfData;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.tjenester.gui.dto.dokument.JournalpostInfoDto;
+import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.JournalpostInfoDto;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
