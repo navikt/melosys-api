@@ -9,6 +9,7 @@ import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
 import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -27,7 +28,7 @@ public class InngangsvilkaarConsumerTest {
 
     @Before
     public void setup() {
-        RestTemplate restTemplate = new InngangsvilkarConfig().inngangsVilkaarRestTemplate(url);
+        RestTemplate restTemplate = new InngangsvilkarConfig().inngangsVilkaarRestTemplate(url, new RestTemplateBuilder());
         server = MockRestServiceServer.createServer(restTemplate);
         inngangsvilkaarConsumer = new InngangsvilkaarConsumerImpl(restTemplate);
     }

@@ -27,9 +27,8 @@ public class MedlemskapRestConsumer implements RestConsumer {
 
     private MedlemskapsunntakForGet[] hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom, String eksluderteKilder) {
         return requireNonNull(
-            webClient.get().uri(uriBuilder ->
+            webClient.get().uri("", uriBuilder ->
                 uriBuilder
-                    .path("")
                     .queryParam("fraOgMed", fom)
                     .queryParam("tilOgMed", tom)
                     .queryParam("inkluderSporingsinfo", true)
@@ -44,11 +43,8 @@ public class MedlemskapRestConsumer implements RestConsumer {
     }
 
     public MedlemskapsunntakForGet hentPeriode(String periodeId) {
-        return webClient.get().uri(uriBuilder ->
-            uriBuilder
-                .path("/{periodeId}")
-                .queryParam("inkluderSporingsinfo", true)
-                .build(periodeId))
+        return webClient.get()
+            .uri("/{periodeId}?inkluderSporingsinfo={inkluderSporingsinfo}", periodeId, true)
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .bodyToMono(MedlemskapsunntakForGet.class)
