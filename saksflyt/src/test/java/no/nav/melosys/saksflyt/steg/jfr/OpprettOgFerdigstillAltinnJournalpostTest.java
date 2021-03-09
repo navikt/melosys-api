@@ -21,7 +21,7 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.altinn.AltinnSoeknadService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import org.junit.Before;
@@ -48,7 +48,7 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
     @Mock
     private JoarkFasade joarkFasade;
     @Mock
-    private TpsFasade tpsFasade;
+    private PersondataFasade persondataFasade;
 
     private OpprettOgFerdigstillAltinnJournalpost opprettOgFerdigstillAltinnJournalpost;
 
@@ -67,7 +67,7 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
         prosessinstans.setData(ProsessDataKey.MOTTATT_SOKNAD_ID, søknadID);
 
         opprettOgFerdigstillAltinnJournalpost = new OpprettOgFerdigstillAltinnJournalpost(
-            altinnSoeknadService, behandlingService, eregFasade, joarkFasade, tpsFasade);
+            altinnSoeknadService, behandlingService, eregFasade, joarkFasade, persondataFasade);
 
         AltinnDokument søknadDokument = new AltinnDokument(søknadID, "dokumentid1", "tittel1",
             AltinnDokument.AltinnDokumentType.SOKNAD.name(), "pdf", Instant.now());
@@ -93,7 +93,7 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
         dokumenter.add(søknadDokument);
         dokumenter.add(fullmaktDokument);
         when(altinnSoeknadService.hentDokumenterTilknyttetSoknad(eq(søknadID))).thenReturn(dokumenter);
-        when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn(ident);
+        when(persondataFasade.hentIdentForAktørId(anyString())).thenReturn(ident);
         when(eregFasade.hentOrganisasjonNavn(anyString())).thenReturn("Fullmektig Avsender");
         when(joarkFasade.opprettJournalpost(any(OpprettJournalpost.class), anyBoolean())).thenReturn("journalpostid123");
     }
@@ -102,7 +102,7 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
     public void utfør_journalpostBlirOpprettet_verifiser() throws MelosysException {
         opprettOgFerdigstillAltinnJournalpost.utfør(prosessinstans);
 
-        verify(tpsFasade).hentIdentForAktørId(anyString());
+        verify(persondataFasade).hentIdentForAktørId(anyString());
         verify(joarkFasade).opprettJournalpost(captor.capture(), eq(true));
         verify(behandlingService).lagre(eq(behandling));
 
@@ -132,7 +132,7 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
 
         opprettOgFerdigstillAltinnJournalpost.utfør(prosessinstans);
 
-        verify(tpsFasade).hentIdentForAktørId(anyString());
+        verify(persondataFasade).hentIdentForAktørId(anyString());
         verify(joarkFasade).opprettJournalpost(captor.capture(), eq(true));
         verify(behandlingService).lagre(eq(behandling));
 

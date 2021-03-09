@@ -15,7 +15,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.altinn.AltinnSoeknadService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -28,18 +28,18 @@ public class OpprettOgFerdigstillAltinnJournalpost implements StegBehandler {
     private final BehandlingService behandlingService;
     private final EregFasade eregFasade;
     private final JoarkFasade joarkFasade;
-    private final TpsFasade tpsFasade;
+    private final PersondataFasade persondataFasade;
 
     public OpprettOgFerdigstillAltinnJournalpost(AltinnSoeknadService altinnSoeknadService,
                                                  BehandlingService behandlingService,
                                                  @Qualifier("system") EregFasade eregFasade,
                                                  @Qualifier("system") JoarkFasade joarkFasade,
-                                                 @Qualifier("system") TpsFasade tpsFasade) {
+                                                 @Qualifier("system") PersondataFasade persondataFasade) {
         this.altinnSoeknadService = altinnSoeknadService;
         this.behandlingService = behandlingService;
         this.eregFasade = eregFasade;
         this.joarkFasade = joarkFasade;
-        this.tpsFasade = tpsFasade;
+        this.persondataFasade = persondataFasade;
     }
 
     @Override
@@ -52,7 +52,7 @@ public class OpprettOgFerdigstillAltinnJournalpost implements StegBehandler {
         final Behandling behandling = prosessinstans.getBehandling();
         final Fagsak fagsak = behandling.getFagsak();
 
-        String ident = tpsFasade.hentIdentForAktørId(fagsak.hentBruker().getAktørId());
+        String ident = persondataFasade.hentIdentForAktørId(fagsak.hentBruker().getAktørId());
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, ident);
 
         Collection<AltinnDokument> dokumenter = altinnSoeknadService

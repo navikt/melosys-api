@@ -19,7 +19,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.*;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -52,7 +52,7 @@ public class FagsakService {
     private final BehandlingService behandlingService;
     private final KontaktopplysningService kontaktopplysningService;
     private final OppgaveService oppgaveService;
-    private final TpsFasade tpsFasade;
+    private final PersondataFasade persondataFasade;
     private final ProsessinstansService prosessinstansService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
@@ -65,7 +65,7 @@ public class FagsakService {
                          BehandlingService behandlingService,
                          KontaktopplysningService kontaktopplysningService,
                          @Lazy OppgaveService oppgaveService,
-                         TpsFasade tpsFasade,
+                         PersondataFasade persondataFasade,
                          @Lazy ProsessinstansService prosessinstansService,
                          BehandlingsresultatService behandlingsresultatService,
                          MedlPeriodeService medlPeriodeService, Unleash unleash) {
@@ -73,7 +73,7 @@ public class FagsakService {
         this.behandlingService = behandlingService;
         this.kontaktopplysningService = kontaktopplysningService;
         this.oppgaveService = oppgaveService;
-        this.tpsFasade = tpsFasade;
+        this.persondataFasade = persondataFasade;
         this.prosessinstansService = prosessinstansService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
@@ -99,7 +99,7 @@ public class FagsakService {
     }
 
     public List<Fagsak> hentFagsakerMedAktør(Aktoersroller rolleType, String ident) throws IkkeFunnetException {
-        String aktørID = tpsFasade.hentAktørIdForIdent(ident);
+        String aktørID = persondataFasade.hentAktørIdForIdent(ident);
         return fagsakRepository.findByRolleAndAktør(rolleType, aktørID);
     }
 

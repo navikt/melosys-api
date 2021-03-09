@@ -16,7 +16,7 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
@@ -42,7 +42,7 @@ public class OppgaveService {
     private final OppgaveFasade oppgaveFasade;
     private final SaksopplysningerService saksopplysningerService;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
-    private final TpsFasade tpsFasade;
+    private final PersondataFasade persondataFasade;
     private static final String UKJENT = "UKJENT";
 
     @Autowired
@@ -50,17 +50,17 @@ public class OppgaveService {
                           FagsakService fagsakService,
                           OppgaveFasade oppgaveFasade,
                           SaksopplysningerService saksopplysningerService,
-                          BehandlingsgrunnlagService behandlingsgrunnlagService, TpsFasade tpsFasade) {
+                          BehandlingsgrunnlagService behandlingsgrunnlagService, PersondataFasade persondataFasade) {
         this.behandlingService = behandlingService;
         this.fagsakService = fagsakService;
         this.oppgaveFasade = oppgaveFasade;
         this.saksopplysningerService = saksopplysningerService;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
-        this.tpsFasade = tpsFasade;
+        this.persondataFasade = persondataFasade;
     }
 
     public List<Oppgave> finnOppgaverMedBrukerID(String brukerIdent) throws FunksjonellException, TekniskException {
-        String aktørId = tpsFasade.hentAktørIdForIdent(brukerIdent);
+        String aktørId = persondataFasade.hentAktørIdForIdent(brukerIdent);
         if (aktørId == null) {
             throw new IkkeFunnetException("Finner ikke aktørId for ident " + brukerIdent);
         }
@@ -183,10 +183,10 @@ public class OppgaveService {
             jfrOppgaveDto.setJournalpostID(oppgave.getJournalpostId());
             dest = jfrOppgaveDto;
             String aktørId = oppgave.getAktørId();
-            String fnr = aktørId != null ? tpsFasade.hentIdentForAktørId(aktørId) : null;
+            String fnr = aktørId != null ? persondataFasade.hentIdentForAktørId(aktørId) : null;
             if (StringUtils.isNotEmpty(fnr)){
                 dest.setFnr(fnr);
-                dest.setSammensattNavn(tpsFasade.hentSammensattNavn(fnr));
+                dest.setSammensattNavn(persondataFasade.hentSammensattNavn(fnr));
             }
             else {
                 dest.setFnr(UKJENT);
@@ -265,7 +265,7 @@ public class OppgaveService {
             return false;
         }
         for (String fnr : behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().hentFnrMedfølgendeBarn()) {
-            if (tpsFasade.harStrengtFortroligAdresse(fnr)) {
+            if (persondataFasade.harStrengtFortroligAdresse(fnr)) {
                 return true;
             }
         }

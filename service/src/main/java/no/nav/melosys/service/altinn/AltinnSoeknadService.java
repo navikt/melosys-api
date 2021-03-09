@@ -17,7 +17,7 @@ import no.nav.melosys.domain.msm.AltinnDokument;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.altinn.SoknadMottakConsumer;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -33,18 +33,18 @@ public class AltinnSoeknadService {
     private final SoknadMottakConsumer soknadMottakConsumer;
     private final FagsakService fagsakService;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
-    private final TpsFasade tpsFasade;
+    private final PersondataFasade persondataFasade;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
 
     public AltinnSoeknadService(SoknadMottakConsumer soknadMottakConsumer,
                                 FagsakService fagsakService,
                                 BehandlingsgrunnlagService behandlingsgrunnlagService,
-                                @Qualifier("system") TpsFasade tpsFasade,
+                                @Qualifier("system") PersondataFasade persondataFasade,
                                 AvklarteVirksomheterService avklarteVirksomheterService) {
         this.soknadMottakConsumer = soknadMottakConsumer;
         this.fagsakService = fagsakService;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
-        this.tpsFasade = tpsFasade;
+        this.persondataFasade = persondataFasade;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
     }
 
@@ -96,7 +96,7 @@ public class AltinnSoeknadService {
         if (StringUtils.isBlank(søknad.getInnhold().getArbeidstaker().getFoedselsnummer())) {
             throw new FunksjonellException("Søknader fra Altinn må inneholde fnr.");
         }
-        return tpsFasade.hentAktørIdForIdent(søknad.getInnhold().getArbeidstaker().getFoedselsnummer());
+        return persondataFasade.hentAktørIdForIdent(søknad.getInnhold().getArbeidstaker().getFoedselsnummer());
     }
 
     private String hentUtenlandskPersonId(MedlemskapArbeidEOSM søknad) {

@@ -12,7 +12,7 @@ import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,16 +22,16 @@ import org.springframework.stereotype.Service;
 public class SedSomBrevService {
     private final EessiService eessiService;
     private final JoarkFasade joarkFasade;
-    private final TpsFasade tpsFasade;
+    private final PersondataFasade persondataFasade;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
 
     public SedSomBrevService(@Qualifier("system") EessiService eessiService,
                              JoarkFasade joarkFasade,
-                             TpsFasade tpsFasade,
+                             PersondataFasade persondataFasade,
                              UtenlandskMyndighetService utenlandskMyndighetService) {
         this.eessiService = eessiService;
         this.joarkFasade = joarkFasade;
-        this.tpsFasade = tpsFasade;
+        this.persondataFasade = persondataFasade;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
     }
 
@@ -50,7 +50,7 @@ public class SedSomBrevService {
         Fagsak fagsak = behandling.getFagsak();
         UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(mottakerland);
         String institusjonID = utenlandskMyndighetService.lagInstitusjonsId(utenlandskMyndighet);
-        String brukerFnr = tpsFasade.hentIdentForAktørId(fagsak.hentBruker().getAktørId());
+        String brukerFnr = persondataFasade.hentIdentForAktørId(fagsak.hentBruker().getAktørId());
         byte[] sedPdf = eessiService.genererSedPdf(behandling.getId(), sedType);
 
         OpprettJournalpost opprettJournalpost = OpprettJournalpost.lagJournalpostForSendingAvSedSomBrev(

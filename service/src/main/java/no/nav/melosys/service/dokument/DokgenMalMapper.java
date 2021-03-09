@@ -19,7 +19,7 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,17 +35,17 @@ public class DokgenMalMapper {
     private final KodeverkService kodeverkService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final EregFasade eregFasade;
-    private final TpsFasade tpsFasade;
+    private final PersondataFasade persondataFasade;
 
     @Autowired
     public DokgenMalMapper(KodeverkService kodeverkService,
                            BehandlingsresultatService behandlingsresultatService,
                            @Qualifier("system") EregFasade eregFasade,
-                           @Qualifier("system") TpsFasade tpsFasade) {
+                           @Qualifier("system") PersondataFasade persondataFasade) {
         this.kodeverkService = kodeverkService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.eregFasade = eregFasade;
-        this.tpsFasade = tpsFasade;
+        this.persondataFasade = persondataFasade;
     }
 
     public DokgenDto mapBehandling(DokgenBrevbestilling brevbestilling) throws TekniskException, FunksjonellException {
@@ -53,7 +53,7 @@ public class DokgenMalMapper {
         if (brevbestilling.getOrg() == null) {
             String fnr = brevbestilling.getBehandling().hentPersonDokument().fnr;
             //NOTE Henter opplysninger på nytt for å sikre at korrekt adresse benyttes
-            PersonDokument personDokument = (PersonDokument) tpsFasade.hentPerson(fnr, Informasjonsbehov.STANDARD).getDokument();
+            PersonDokument personDokument = (PersonDokument) persondataFasade.hentPerson(fnr, Informasjonsbehov.STANDARD).getDokument();
             brevbestilling.toBuilder().medPersonDokument(personDokument).build();
         }
         switch (brevbestilling.getProduserbartdokument()) {

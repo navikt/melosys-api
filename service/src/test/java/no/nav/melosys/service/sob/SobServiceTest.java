@@ -10,7 +10,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,7 +35,7 @@ class SobServiceTest {
     @Mock
     private SakOgBehandlingFasade sakOgBehandlingFasade;
     @Mock
-    private TpsFasade tpsFasade;
+    private PersondataFasade persondataFasade;
     @Mock
     private BehandlingService behandlingService;
 
@@ -46,7 +46,7 @@ class SobServiceTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        sobService = new SobService(sakOgBehandlingFasade, tpsFasade, behandlingService);
+        sobService = new SobService(sakOgBehandlingFasade, persondataFasade, behandlingService);
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(lagBehandling());
     }
 

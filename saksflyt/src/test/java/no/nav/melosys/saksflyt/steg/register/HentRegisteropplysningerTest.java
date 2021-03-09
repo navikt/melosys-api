@@ -16,7 +16,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
@@ -41,7 +41,7 @@ class HentRegisteropplysningerTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
-    private TpsFasade tpsFasade;
+    private PersondataFasade persondataFasade;
 
     private HentRegisteropplysninger hentRegisteropplysninger;
 
@@ -54,7 +54,7 @@ class HentRegisteropplysningerTest {
 
     @BeforeEach
     public void setUp() throws IkkeFunnetException {
-        hentRegisteropplysninger = new HentRegisteropplysninger(registeropplysningerService, behandlingService, tpsFasade);
+        hentRegisteropplysninger = new HentRegisteropplysninger(registeropplysningerService, behandlingService, persondataFasade);
 
         behandling.setId(222L);
 
@@ -67,7 +67,7 @@ class HentRegisteropplysningerTest {
         behandling.setFagsak(fagsak);
 
         when(behandlingService.hentBehandling(eq(behandling.getId()))).thenReturn(behandling);
-        when(tpsFasade.hentIdentForAktørId(eq(aktørID))).thenReturn(ident);
+        when(persondataFasade.hentIdentForAktørId(eq(aktørID))).thenReturn(ident);
     }
 
     @Test

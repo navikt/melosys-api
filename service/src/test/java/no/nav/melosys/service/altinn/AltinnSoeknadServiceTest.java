@@ -17,7 +17,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.altinn.SoknadMottakConsumer;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -45,7 +45,7 @@ public class AltinnSoeknadServiceTest {
     @Mock
     private BehandlingsgrunnlagService behandlingsgrunnlagService;
     @Mock
-    private TpsFasade tpsFasade;
+    private PersondataFasade persondataFasade;
     @Mock
     private AvklarteVirksomheterService avklarteVirksomheterService;
 
@@ -60,7 +60,7 @@ public class AltinnSoeknadServiceTest {
     @Before
     public void setup() {
         altinnSoeknadService = new AltinnSoeknadService(soknadMottakConsumer, fagsakService,
-            behandlingsgrunnlagService, tpsFasade, avklarteVirksomheterService);
+            behandlingsgrunnlagService, persondataFasade, avklarteVirksomheterService);
     }
 
     @Test
@@ -71,7 +71,7 @@ public class AltinnSoeknadServiceTest {
 
         when(soknadMottakConsumer.hentSøknad(eq(soknadID))).thenReturn(søknad);
         when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
-        when(tpsFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
+        when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
 
         assertThat(altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(soknadID)).isEqualTo(fagsak.hentAktivBehandling());
 
@@ -94,7 +94,7 @@ public class AltinnSoeknadServiceTest {
 
         when(soknadMottakConsumer.hentSøknad(eq(soknadID))).thenReturn(søknad);
         when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
-        when(tpsFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
+        when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
 
         assertThat(altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(soknadID)).isEqualTo(fagsak.hentAktivBehandling());
 
@@ -113,7 +113,7 @@ public class AltinnSoeknadServiceTest {
 
         when(soknadMottakConsumer.hentSøknad(soknadID)).thenReturn(søknad);
         when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
-        when(tpsFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
+        when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
 
         altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(soknadID);
 
@@ -133,7 +133,7 @@ public class AltinnSoeknadServiceTest {
 
         when(soknadMottakConsumer.hentSøknad(eq(soknadID))).thenReturn(søknad);
         when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
-        when(tpsFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
+        when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
 
         altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(soknadID);
 
@@ -152,7 +152,7 @@ public class AltinnSoeknadServiceTest {
 
         when(soknadMottakConsumer.hentSøknad(eq(soknadID))).thenReturn(søknad);
         when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
-        when(tpsFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
+        when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
 
         altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(soknadID);
 
