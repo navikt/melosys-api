@@ -30,6 +30,14 @@ public class Mottakerliste {
         return ofNullable(fasteMottakere).orElse(new ArrayList<>());
     }
 
+    public void setKopiMottakere(List<Aktoersroller> kopiMottakere) {
+        this.kopiMottakere = kopiMottakere;
+    }
+
+    public void setFasteMottakere(List<FastMottaker> fasteMottakere) {
+        this.fasteMottakere = fasteMottakere;
+    }
+
     public static class Builder {
         private Aktoersroller hovedMottaker;
         private List<Aktoersroller> kopiMottakere;
@@ -40,12 +48,18 @@ public class Mottakerliste {
             return this;
         }
 
-        public Builder medKopiMottaker(Aktoersroller kopiMottaker) {
-            if (this.kopiMottakere == null) {
-                this.kopiMottakere = new ArrayList<>();
-            }
-            this.kopiMottakere.add(kopiMottaker);
+        public Builder medKopiMottakere(Aktoersroller... kopiMottakere) {
+            this.kopiMottakere = List.of(kopiMottakere);
             return this;
+        }
+
+        public Builder medFasteMottakere(FastMottaker... fasteMottakere) {
+            this.fasteMottakere = List.of(fasteMottakere);
+            return this;
+        }
+
+        public Mottakerliste build() {
+            return new Mottakerliste(this);
         }
 
         public Builder medKopiMottakere(List<Aktoersroller> kopiMottakere) {
@@ -53,21 +67,9 @@ public class Mottakerliste {
             return this;
         }
 
-        public Builder medFastMottaker(FastMottaker fastMottaker) {
-            if (this.fasteMottakere == null) {
-                this.fasteMottakere = new ArrayList<>();
-            }
-            this.fasteMottakere.add(fastMottaker);
-            return this;
-        }
-
         public Builder medFasteMottakere(List<FastMottaker> fasteMottakere) {
             this.fasteMottakere = fasteMottakere;
             return this;
-        }
-
-        public Mottakerliste build() {
-            return new Mottakerliste(this);
         }
     }
 }
