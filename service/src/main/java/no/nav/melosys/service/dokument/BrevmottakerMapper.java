@@ -20,19 +20,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Optional.ofNullable;
+import static no.nav.melosys.domain.Fagsak.erSakstypeFtrl;
 import static no.nav.melosys.domain.brev.FastMottaker.SKATT;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
-import static no.nav.melosys.domain.kodeverk.Sakstyper.FTRL;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 
 @Component
 public class BrevmottakerMapper {
 
-    private static final Map<Produserbaredokumenter, Mottakerliste> brevMottakerMap;
+    private static final Map<Produserbaredokumenter, Mottakerliste> BREV_MOTTAKER_MAP;
 
     static {
-        brevMottakerMap = Map.of(
+        BREV_MOTTAKER_MAP = Map.of(
             MELDING_FORVENTET_SAKSBEHANDLINGSTID, new Mottakerliste.Builder()
                 .medHovedMottaker(BRUKER).build(),
 
@@ -56,7 +56,7 @@ public class BrevmottakerMapper {
         );
     }
 
-    private static final List<Produserbaredokumenter> infobrev = List.of(
+    private static final List<Produserbaredokumenter> INFOBREV = List.of(
         MELDING_FORVENTET_SAKSBEHANDLINGSTID,
         MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
         MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
@@ -78,7 +78,7 @@ public class BrevmottakerMapper {
     public Mottakerliste finnBrevMottaker(Produserbaredokumenter produserbartdokument, long behandlingId)
         throws FunksjonellException, TekniskException {
 
-        Mottakerliste mottakerliste = ofNullable(brevMottakerMap.get(produserbartdokument))
+        Mottakerliste mottakerliste = ofNullable(BREV_MOTTAKER_MAP.get(produserbartdokument))
             .orElseThrow(() -> new IkkeFunnetException("Mangler mapping av mottakere for " + produserbartdokument));
 
         Mottakerliste mottakerListeKopi = new Mottakerliste.Builder()
@@ -103,13 +103,13 @@ public class BrevmottakerMapper {
             mottakerliste.getKopiMottakere().remove(BRUKER);
         }
 
-        if (FTRL == behandling.getFagsak().getType() && infobrev.stream().noneMatch(i -> i == produserbartdokument)) {
+        if (erSakstypeFtrl(behandling.getFagsak().getType()) && !INFOBREV.contains(produserbartdokument)) {
             MedlemAvFolketrygden medlemAvFolketrygden = medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingId)
                 .orElseThrow(() -> new IkkeFunnetException("Finner ikke medlemAvFolketrygden for behandlingsresultatID " + behandlingId));
 
             FastsattTrygdeavgift fastsattTrygdeavgift = medlemAvFolketrygden.getFastsattTrygdeavgift();
 
-            if (ikkeAvgiftspliktigInntekt(fastsattTrygdeavgift)) {
+            if (fastsattTrygdeavgift.harIkkeAvgiftspliktigInntekt()) {
                 mottakerliste.getFasteMottakere().remove(SKATT);
             }
 
@@ -121,12 +121,7 @@ public class BrevmottakerMapper {
         return mottakerliste;
     }
 
-    private boolean ikkeAvgiftspliktigInntekt(FastsattTrygdeavgift avgift) {
-        return (avgift.getAvgiftspliktigNorskInntektMnd() == null || avgift.getAvgiftspliktigNorskInntektMnd() == 0) &&
-            (avgift.getAvgiftspliktigUtenlandskInntektMnd() == null || avgift.getAvgiftspliktigUtenlandskInntektMnd() == 0);
-    }
-
     private boolean brukerErSelvbetalende(FastsattTrygdeavgift fastsattTrygdeavgift) {
-        return BRUKER == fastsattTrygdeavgift.getBetalesAv().getRolle();
+        return fastsattTrygdeavgift.getBetalesAv().getRolle() == BRUKER;
     }
 }

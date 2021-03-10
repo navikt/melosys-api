@@ -88,4 +88,9 @@ public class FastsattTrygdeavgift {
     public void setAvgiftspliktigUtenlandskInntektMnd(Long avgiftspliktigUtenlandskInntektMnd) {
         this.avgiftspliktigUtenlandskInntektMnd = avgiftspliktigUtenlandskInntektMnd;
     }
+
+    public boolean harIkkeAvgiftspliktigInntekt() {
+        return (this.getAvgiftspliktigNorskInntektMnd() == null || this.getAvgiftspliktigNorskInntektMnd() == 0) &&
+            (this.getAvgiftspliktigUtenlandskInntektMnd() == null || this.getAvgiftspliktigUtenlandskInntektMnd() == 0);
+    }
 }
