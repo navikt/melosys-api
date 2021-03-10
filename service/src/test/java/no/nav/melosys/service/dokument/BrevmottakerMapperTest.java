@@ -8,7 +8,6 @@ import java.util.Optional;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.brev.FastMottaker;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
@@ -25,6 +24,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static java.util.Collections.emptyList;
+import static no.nav.melosys.domain.brev.FastMottaker.SKATT;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,19 +50,8 @@ class BrevmottakerMapperTest {
 
     @BeforeEach
     void init() {
-        reset(mockBehandlingService, mockBrevmottakerService, mockMedlemAvFolketrygdenRepository);
-
         brevmottakerMapper = new BrevmottakerMapper(mockBrevmottakerService, mockBehandlingService,
             mockMedlemAvFolketrygdenRepository);
-    }
-
-    @Test
-    void gittMalErRegistert_skalRetunereBrevmottaker() throws Exception {
-        Mottakerliste mottakerliste = brevmottakerMapper.finnBrevMottaker(MANGELBREV_BRUKER, 123);
-        assertThat(mottakerliste).isNotNull();
-        assertThat(mottakerliste.getHovedMottaker()).isEqualTo(BRUKER);
-        assertThat(mottakerliste.getKopiMottakere()).isEmpty();
-        assertThat(mottakerliste.getFasteMottakere()).isEmpty();
     }
 
     @Test
@@ -74,11 +64,17 @@ class BrevmottakerMapperTest {
     @Test
     @DisplayName("Forvaltningsmelding skal ha BRUKER som hovedmottaker, uten kopier")
     void gittForvaltningsmelding_skalHovedmottakerVæreBruker() throws Exception {
-        Mottakerliste mottakerliste = brevmottakerMapper.finnBrevMottaker(MELDING_FORVENTET_SAKSBEHANDLINGSTID, 123);
-
-        assertThat(mottakerliste.getHovedMottaker()).isEqualTo(BRUKER);
-        assertThat(mottakerliste.getKopiMottakere()).isEmpty();
-        assertThat(mottakerliste.getFasteMottakere()).isEmpty();
+        assertThat(brevmottakerMapper.finnBrevMottaker(MELDING_FORVENTET_SAKSBEHANDLINGSTID, 123))
+            .extracting(
+                Mottakerliste::getHovedMottaker,
+                Mottakerliste::getKopiMottakere,
+                Mottakerliste::getFasteMottakere
+            )
+            .containsExactly(
+                BRUKER,
+                emptyList(),
+                emptyList()
+            );
 
         verifyNoInteractions(mockBehandlingService);
         verifyNoInteractions(mockBrevmottakerService);
@@ -88,11 +84,17 @@ class BrevmottakerMapperTest {
     @Test
     @DisplayName("Mangelbrev til bruker skal ha BRUKER som hovedmottaker, uten kopier")
     void gittMangelbrevBruker_skalHovedmottakerVæreBruker() throws Exception {
-        Mottakerliste mottakerliste = brevmottakerMapper.finnBrevMottaker(MANGELBREV_BRUKER, 123);
-
-        assertThat(mottakerliste.getHovedMottaker()).isEqualTo(BRUKER);
-        assertThat(mottakerliste.getKopiMottakere()).isEmpty();
-        assertThat(mottakerliste.getFasteMottakere()).isEmpty();
+        assertThat(brevmottakerMapper.finnBrevMottaker(MANGELBREV_BRUKER, 123))
+            .extracting(
+                Mottakerliste::getHovedMottaker,
+                Mottakerliste::getKopiMottakere,
+                Mottakerliste::getFasteMottakere
+            )
+            .containsExactly(
+                BRUKER,
+                emptyList(),
+                emptyList()
+            );
 
         verifyNoInteractions(mockBehandlingService);
         verifyNoInteractions(mockBrevmottakerService);
@@ -105,11 +107,17 @@ class BrevmottakerMapperTest {
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Sakstyper.FTRL));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any())).thenReturn(lagMottakerListe(ARBEIDSGIVER));
 
-        Mottakerliste mottakerliste = brevmottakerMapper.finnBrevMottaker(MANGELBREV_ARBEIDSGIVER, 123);
-
-        assertThat(mottakerliste.getHovedMottaker()).isEqualTo(ARBEIDSGIVER);
-        assertThat(mottakerliste.getKopiMottakere()).containsExactlyInAnyOrder(BRUKER);
-        assertThat(mottakerliste.getFasteMottakere()).isEmpty();
+        assertThat(brevmottakerMapper.finnBrevMottaker(MANGELBREV_ARBEIDSGIVER, 123))
+            .extracting(
+                Mottakerliste::getHovedMottaker,
+                Mottakerliste::getKopiMottakere,
+                Mottakerliste::getFasteMottakere
+            )
+            .containsExactly(
+                ARBEIDSGIVER,
+                List.of(BRUKER),
+                emptyList()
+            );
 
         verify(mockBehandlingService).hentBehandling(123);
         verify(mockBrevmottakerService).avklarMottakere(eq(MANGELBREV_ARBEIDSGIVER), eq(Mottaker.av(ARBEIDSGIVER)), any());
@@ -118,15 +126,19 @@ class BrevmottakerMapperTest {
 
     @Test
     void gittVedtakFtrl2_8UtenFullmektigIkkeSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Sakstyper.FTRL));
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any())).thenReturn(lagMottakerListe(BRUKER));
-        when(mockMedlemAvFolketrygdenRepository.findByBehandlingsresultatId(anyLong())).thenReturn(lagMedlemAvFolketrygden(ARBEIDSGIVER, 10000));
+        initMocksForVedtaksbrev(BRUKER, ARBEIDSGIVER, 10000);
 
-        Mottakerliste mottakerliste = brevmottakerMapper.finnBrevMottaker(INNVILGELSE_FOLKETRYGDLOVEN_2_8, 123);
-
-        assertThat(mottakerliste.getHovedMottaker()).isEqualTo(BRUKER);
-        assertThat(mottakerliste.getKopiMottakere()).containsExactlyInAnyOrder(ARBEIDSGIVER);
-        assertThat(mottakerliste.getFasteMottakere()).containsExactlyInAnyOrder(FastMottaker.SKATT);
+        assertThat(brevmottakerMapper.finnBrevMottaker(INNVILGELSE_FOLKETRYGDLOVEN_2_8, 123))
+            .extracting(
+                Mottakerliste::getHovedMottaker,
+                Mottakerliste::getKopiMottakere,
+                Mottakerliste::getFasteMottakere
+            )
+            .containsExactly(
+                BRUKER,
+                List.of(ARBEIDSGIVER),
+                List.of(SKATT)
+            );
 
         verify(mockBehandlingService).hentBehandling(123);
         verify(mockBrevmottakerService).avklarMottakere(eq(INNVILGELSE_FOLKETRYGDLOVEN_2_8), eq(Mottaker.av(BRUKER)), any());
@@ -135,15 +147,20 @@ class BrevmottakerMapperTest {
 
     @Test
     void gittVedtakFtrl2_8UtenFullmektigSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Sakstyper.FTRL));
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any())).thenReturn(lagMottakerListe(BRUKER));
-        when(mockMedlemAvFolketrygdenRepository.findByBehandlingsresultatId(anyLong())).thenReturn(lagMedlemAvFolketrygden(BRUKER, 10000));
+        initMocksForVedtaksbrev(BRUKER, BRUKER, 10000);
 
-        Mottakerliste mottakerliste = brevmottakerMapper.finnBrevMottaker(INNVILGELSE_FOLKETRYGDLOVEN_2_8, 123);
-
-        assertThat(mottakerliste.getHovedMottaker()).isEqualTo(BRUKER);
-        assertThat(mottakerliste.getKopiMottakere()).isEmpty();
-        assertThat(mottakerliste.getFasteMottakere()).containsExactlyInAnyOrder(FastMottaker.SKATT);
+        assertThat(brevmottakerMapper.finnBrevMottaker(INNVILGELSE_FOLKETRYGDLOVEN_2_8, 123))
+            .isNotNull()
+            .extracting(
+                Mottakerliste::getHovedMottaker,
+                Mottakerliste::getKopiMottakere,
+                Mottakerliste::getFasteMottakere
+            )
+            .containsExactly(
+                BRUKER,
+                emptyList(),
+                List.of(SKATT)
+            );
 
         verify(mockBehandlingService).hentBehandling(123);
         verify(mockBrevmottakerService).avklarMottakere(eq(INNVILGELSE_FOLKETRYGDLOVEN_2_8), eq(Mottaker.av(BRUKER)), any());
@@ -152,15 +169,20 @@ class BrevmottakerMapperTest {
 
     @Test
     void gittVedtakFtrl2_8FullmektigIkkeSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Sakstyper.FTRL));
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any())).thenReturn(lagMottakerListe(REPRESENTANT));
-        when(mockMedlemAvFolketrygdenRepository.findByBehandlingsresultatId(anyLong())).thenReturn(lagMedlemAvFolketrygden(ARBEIDSGIVER, 10000));
+        initMocksForVedtaksbrev(REPRESENTANT, ARBEIDSGIVER, 10000);
 
-        Mottakerliste mottakerliste = brevmottakerMapper.finnBrevMottaker(INNVILGELSE_FOLKETRYGDLOVEN_2_8, 123);
-
-        assertThat(mottakerliste.getHovedMottaker()).isEqualTo(BRUKER);
-        assertThat(mottakerliste.getKopiMottakere()).containsExactlyInAnyOrder(BRUKER, ARBEIDSGIVER);
-        assertThat(mottakerliste.getFasteMottakere()).containsExactlyInAnyOrder(FastMottaker.SKATT);
+        assertThat(brevmottakerMapper.finnBrevMottaker(INNVILGELSE_FOLKETRYGDLOVEN_2_8, 123))
+            .isNotNull()
+            .extracting(
+                Mottakerliste::getHovedMottaker,
+                Mottakerliste::getKopiMottakere,
+                Mottakerliste::getFasteMottakere
+            )
+            .containsExactly(
+                BRUKER,
+                List.of(BRUKER, ARBEIDSGIVER),
+                List.of(SKATT)
+            );
 
         verify(mockBehandlingService).hentBehandling(123);
         verify(mockBrevmottakerService).avklarMottakere(eq(INNVILGELSE_FOLKETRYGDLOVEN_2_8), eq(Mottaker.av(BRUKER)), any());
@@ -169,15 +191,20 @@ class BrevmottakerMapperTest {
 
     @Test
     void gittVedtakFtrl2_8FullmektigSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Sakstyper.FTRL));
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any())).thenReturn(lagMottakerListe(REPRESENTANT));
-        when(mockMedlemAvFolketrygdenRepository.findByBehandlingsresultatId(anyLong())).thenReturn(lagMedlemAvFolketrygden(BRUKER, 10000));
+        initMocksForVedtaksbrev(REPRESENTANT, BRUKER, 10000);
 
-        Mottakerliste mottakerliste = brevmottakerMapper.finnBrevMottaker(INNVILGELSE_FOLKETRYGDLOVEN_2_8, 123);
-
-        assertThat(mottakerliste.getHovedMottaker()).isEqualTo(BRUKER);
-        assertThat(mottakerliste.getKopiMottakere()).containsExactlyInAnyOrder(BRUKER);
-        assertThat(mottakerliste.getFasteMottakere()).containsExactlyInAnyOrder(FastMottaker.SKATT);
+        assertThat(brevmottakerMapper.finnBrevMottaker(INNVILGELSE_FOLKETRYGDLOVEN_2_8, 123))
+            .isNotNull()
+            .extracting(
+                Mottakerliste::getHovedMottaker,
+                Mottakerliste::getKopiMottakere,
+                Mottakerliste::getFasteMottakere
+            )
+            .containsExactly(
+                BRUKER,
+                List.of(BRUKER),
+                List.of(SKATT)
+            );
 
         verify(mockBehandlingService).hentBehandling(123);
         verify(mockBrevmottakerService).avklarMottakere(eq(INNVILGELSE_FOLKETRYGDLOVEN_2_8), eq(Mottaker.av(BRUKER)), any());
@@ -186,19 +213,30 @@ class BrevmottakerMapperTest {
 
     @Test
     void gittVedtakFtrl2_8FullmektigIkkeSelvbetalendeIkkeInntekt_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Sakstyper.FTRL));
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any())).thenReturn(lagMottakerListe(REPRESENTANT));
-        when(mockMedlemAvFolketrygdenRepository.findByBehandlingsresultatId(anyLong())).thenReturn(lagMedlemAvFolketrygden(ARBEIDSGIVER, 0));
+        initMocksForVedtaksbrev(REPRESENTANT, ARBEIDSGIVER, 0);
 
-        Mottakerliste mottakerliste = brevmottakerMapper.finnBrevMottaker(INNVILGELSE_FOLKETRYGDLOVEN_2_8, 123);
-
-        assertThat(mottakerliste.getHovedMottaker()).isEqualTo(BRUKER);
-        assertThat(mottakerliste.getKopiMottakere()).containsExactlyInAnyOrder(BRUKER, ARBEIDSGIVER);
-        assertThat(mottakerliste.getFasteMottakere()).isEmpty();
+        assertThat(brevmottakerMapper.finnBrevMottaker(INNVILGELSE_FOLKETRYGDLOVEN_2_8, 123))
+            .isNotNull()
+            .extracting(
+                Mottakerliste::getHovedMottaker,
+                Mottakerliste::getKopiMottakere,
+                Mottakerliste::getFasteMottakere
+            )
+            .containsExactly(
+                BRUKER,
+                List.of(BRUKER, ARBEIDSGIVER),
+                emptyList()
+            );
 
         verify(mockBehandlingService).hentBehandling(123);
         verify(mockBrevmottakerService).avklarMottakere(eq(INNVILGELSE_FOLKETRYGDLOVEN_2_8), eq(Mottaker.av(BRUKER)), any());
         verify(mockMedlemAvFolketrygdenRepository).findByBehandlingsresultatId(123);
+    }
+
+    private void initMocksForVedtaksbrev(Aktoersroller avklartMottaker, Aktoersroller betaler, long norskinntekt) throws Exception {
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Sakstyper.FTRL));
+        when(mockBrevmottakerService.avklarMottakere(any(), any(), any())).thenReturn(lagMottakerListe(avklartMottaker));
+        when(mockMedlemAvFolketrygdenRepository.findByBehandlingsresultatId(anyLong())).thenReturn(lagMedlemAvFolketrygden(betaler, norskinntekt));
     }
 
     private Behandling lagBehandling(Sakstyper sakstype) {
@@ -221,10 +259,6 @@ class BrevmottakerMapperTest {
     }
 
     private Optional<MedlemAvFolketrygden> lagMedlemAvFolketrygden(Aktoersroller betaler, long norskinntekt) {
-        return lagMedlemAvFolketrygden(betaler, norskinntekt, 0);
-    }
-
-    private Optional<MedlemAvFolketrygden> lagMedlemAvFolketrygden(Aktoersroller betaler, long norskinntekt, long utenlandskinntekt) {
         MedlemAvFolketrygden medlemAvFolketrygden = new MedlemAvFolketrygden();
         FastsattTrygdeavgift fastsattTrygdeavgift = new FastsattTrygdeavgift();
         Aktoer betalesAv = new Aktoer();
@@ -232,7 +266,6 @@ class BrevmottakerMapperTest {
 
         fastsattTrygdeavgift.setBetalesAv(betalesAv);
         fastsattTrygdeavgift.setAvgiftspliktigNorskInntektMnd(norskinntekt);
-        fastsattTrygdeavgift.setAvgiftspliktigUtenlandskInntektMnd(utenlandskinntekt);
 
         medlemAvFolketrygden.setFastsattTrygdeavgift(fastsattTrygdeavgift);
         return Optional.of(medlemAvFolketrygden);
