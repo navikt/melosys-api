@@ -15,6 +15,7 @@ import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,8 +66,9 @@ class BrevmottakerMapperTest {
 
     @Test
     void gittMalIkkeRegistret_skalKasteFeil() {
-        assertThatExceptionOfType(RuntimeException.class)
-            .isThrownBy(() -> brevmottakerMapper.finnBrevMottaker(ATTEST_A1, 123));
+        assertThatExceptionOfType(IkkeFunnetException.class)
+            .isThrownBy(() -> brevmottakerMapper.finnBrevMottaker(ATTEST_A1, 123))
+            .withMessage("Mangler mapping av mottakere for ATTEST_A1");
     }
 
     @Test

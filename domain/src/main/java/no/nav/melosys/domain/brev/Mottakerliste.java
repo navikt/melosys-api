@@ -1,16 +1,15 @@
 package no.nav.melosys.domain.brev;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 
-import static java.util.Optional.ofNullable;
-
 public class Mottakerliste {
-    private Aktoersroller hovedMottaker;
-    private List<Aktoersroller> kopiMottakere;
-    private List<FastMottaker> fasteMottakere;
+    private final Aktoersroller hovedMottaker;
+    private final Collection<Aktoersroller> kopiMottakere;
+    private final Collection<FastMottaker> fasteMottakere;
 
     public Mottakerliste(Builder builder) {
         this.hovedMottaker = builder.hovedMottaker;
@@ -22,26 +21,18 @@ public class Mottakerliste {
         return hovedMottaker;
     }
 
-    public List<Aktoersroller> getKopiMottakere() {
-        return ofNullable(kopiMottakere).orElse(new ArrayList<>());
+    public Collection<Aktoersroller> getKopiMottakere() {
+        return kopiMottakere;
     }
 
-    public List<FastMottaker> getFasteMottakere() {
-        return ofNullable(fasteMottakere).orElse(new ArrayList<>());
-    }
-
-    public void setKopiMottakere(List<Aktoersroller> kopiMottakere) {
-        this.kopiMottakere = kopiMottakere;
-    }
-
-    public void setFasteMottakere(List<FastMottaker> fasteMottakere) {
-        this.fasteMottakere = fasteMottakere;
+    public Collection<FastMottaker> getFasteMottakere() {
+        return fasteMottakere;
     }
 
     public static class Builder {
         private Aktoersroller hovedMottaker;
-        private List<Aktoersroller> kopiMottakere;
-        private List<FastMottaker> fasteMottakere;
+        private Collection<Aktoersroller> kopiMottakere = new ArrayList<>();
+        private Collection<FastMottaker> fasteMottakere = new ArrayList<>();
 
         public Builder medHovedMottaker(Aktoersroller hovedMottaker) {
             this.hovedMottaker = hovedMottaker;

@@ -3,16 +3,13 @@ package no.nav.melosys.service.dokument;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.brev.FastMottaker;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -60,11 +57,11 @@ public class BrevmottakerMapper {
     }
 
     private static final List<Produserbaredokumenter> infobrev = List.of(
-      MELDING_FORVENTET_SAKSBEHANDLINGSTID,
-      MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
-      MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
-      MANGELBREV_BRUKER,
-      MANGELBREV_ARBEIDSGIVER
+        MELDING_FORVENTET_SAKSBEHANDLINGSTID,
+        MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
+        MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
+        MANGELBREV_BRUKER,
+        MANGELBREV_ARBEIDSGIVER
     );
 
     private final BrevmottakerService brevmottakerService;
@@ -82,7 +79,7 @@ public class BrevmottakerMapper {
         throws FunksjonellException, TekniskException {
 
         Mottakerliste mottakerliste = ofNullable(brevMottakerMap.get(produserbartdokument))
-            .orElseThrow(() -> new RuntimeException("Mangler mapping av mottakere for " + produserbartdokument));
+            .orElseThrow(() -> new IkkeFunnetException("Mangler mapping av mottakere for " + produserbartdokument));
 
         Mottakerliste mottakerListeKopi = new Mottakerliste.Builder()
             .medHovedMottaker(mottakerliste.getHovedMottaker())
