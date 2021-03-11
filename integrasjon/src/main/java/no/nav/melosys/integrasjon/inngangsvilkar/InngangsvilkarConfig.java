@@ -11,8 +11,9 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 public class InngangsvilkarConfig {
 
     @Bean
-    public RestTemplate inngangsVilkaarRestTemplate(@Value("${Inngangsvilkaar.url}") String url) {
-        return new RestTemplateBuilder()
+    public RestTemplate inngangsVilkaarRestTemplate(@Value("${Inngangsvilkaar.url}") String url,
+                                                    RestTemplateBuilder restTemplateBuilder) {
+        return restTemplateBuilder
             .uriTemplateHandler(new DefaultUriBuilderFactory(url))
             .build();
     }

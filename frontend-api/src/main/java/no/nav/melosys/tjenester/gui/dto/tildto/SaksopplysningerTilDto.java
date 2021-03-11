@@ -25,7 +25,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.PersonUtenAdresseDto;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
-import no.nav.melosys.tjenester.gui.dto.dokument.PersonhistorikkDto;
+import no.nav.melosys.tjenester.gui.dto.PersonhistorikkDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.SedDokumentDto;
 import no.nav.melosys.tjenester.gui.dto.inntekt.InntektDto;
 import org.springframework.beans.factory.annotation.Autowired;

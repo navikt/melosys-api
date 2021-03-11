@@ -121,6 +121,10 @@ public class Prosessinstans {
         }
     }
 
+    public <T> T getData(ProsessDataKey key, Class<T> type, T defaultVerdi) {
+        return Optional.ofNullable(getData(key, type)).orElse(defaultVerdi);
+    }
+
     public <T> T getData(ProsessDataKey key, TypeReference<T> type) {
         String dataString = getData(key);
         if (dataString == null) {
@@ -133,7 +137,7 @@ public class Prosessinstans {
         }
     }
 
-    public <T> T getData(ProsessDataKey key, Class<T> type, T defaultVerdi) {
+    public <T> T getData(ProsessDataKey key, TypeReference<T> type, T defaultVerdi) {
         return Optional.ofNullable(getData(key, type)).orElse(defaultVerdi);
     }
 

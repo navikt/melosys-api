@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import org.apache.cxf.common.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,7 +78,7 @@ public class AvklarteMedfolgendeFamilieService {
             if (!uuidOgRolle.containsKey(ikkeOmfattetFamilie.getUuid())) {
                 throw new FunksjonellException("Medfolgende familie som ikke er omfattet av norsk trygd: " + ikkeOmfattetFamilie.getUuid() + " er ikke lagret i behandlingsgrunnlaget.");
             }
-            if (ikkeOmfattetFamilie.getBegrunnelse() == null || ikkeOmfattetFamilie.getBegrunnelse().isEmpty()) {
+            if (StringUtils.isEmpty(ikkeOmfattetFamilie.getBegrunnelse())) {
                 throw new FunksjonellException("Begrunnelsen til medfolgende familie " + ikkeOmfattetFamilie.getUuid() + ": " + ikkeOmfattetFamilie.getBegrunnelse() + " er ikke satt.");
             }
             if (MedfolgendeFamilie.Relasjonsrolle.BARN.equals(uuidOgRolle.get(ikkeOmfattetFamilie.getUuid())) && !begrunnelserBarn.contains(ikkeOmfattetFamilie.getBegrunnelse())) {

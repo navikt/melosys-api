@@ -10,7 +10,7 @@ public class OppdaterAvgiftsgrunnlagDto {
     private final AvgiftsgrunnlagInfoDto trygdeavgiftsgrunnlagNorge;
     private final AvgiftsgrunnlagInfoDto trygdeavgiftsgrunnlagUtland;
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public OppdaterAvgiftsgrunnlagDto(@JsonProperty("lønnsforhold") Loenn_forhold lønnsforhold,
                                       @JsonProperty("trygdeavgiftsgrunnlagNorge") AvgiftsgrunnlagInfoDto trygdeavgiftsgrunnlagNorge,
                                       @JsonProperty("trygdeavgiftsgrunnlagUtland") AvgiftsgrunnlagInfoDto trygdeavgiftsgrunnlagUtland) {

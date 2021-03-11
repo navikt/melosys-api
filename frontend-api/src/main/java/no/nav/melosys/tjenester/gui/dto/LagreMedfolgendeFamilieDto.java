@@ -12,7 +12,7 @@ import no.nav.melosys.domain.familie.OmfattetFamilie;
 public class LagreMedfolgendeFamilieDto {
     private final Set<MedfolgendeFamilieDto> medfolgendeFamilie;
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public LagreMedfolgendeFamilieDto(@JsonProperty("medfolgendeFamilie") Set<MedfolgendeFamilieDto> medfolgendeFamilie) {
         this.medfolgendeFamilie = medfolgendeFamilie;
     }

@@ -15,6 +15,7 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalDto;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalFeltDto;
 import no.nav.melosys.tjenester.gui.dto.brev.FeltType;
+import no.nav.melosys.tjenester.gui.dto.brev.FeltvalgDto;
 import no.nav.melosys.tjenester.gui.dto.brev.MottakerDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,7 +79,8 @@ public class BrevbestillingTjeneste {
                         singletonList(new MottakerDto.Builder()
                             .medType("Bruker eller brukers fullmektig")
                             .medRolle(Aktoersroller.BRUKER)
-                            .build())
+                            .build()),
+                        null
                     ));
                     break;
                 case MANGELBREV_BRUKER:
@@ -95,6 +97,16 @@ public class BrevbestillingTjeneste {
                             .medRolle(Aktoersroller.ARBEIDSGIVER)
                             .build()
                     );
+                    mottakere.add(
+                        new MottakerDto.Builder()
+                            .medType("Annen organisasjon")
+                            .medRolle(Aktoersroller.ARBEIDSGIVER)
+                            .frittValg()
+                            .build()
+                    );
+
+                    var hjelpetekst = "Hvis arbeidsgiveren du ønsker å sende brev til ikke vises her, må du legge til denne i sidemenyen under «Arbeidsgiver/virksomhet». Det samme gjelder hvis du skal legge til kontaktopplysninger. \n" +
+                        "Hvis arbeidsgiveren ikke er en nåværende arbeidsgiver, kan du velge «Annen organisasjon» som mottaker og legge den til manuelt.";
 
                     maler.add(lagBrevmalDto(MANGELBREV_BRUKER,
                         asList(
@@ -103,6 +115,8 @@ public class BrevbestillingTjeneste {
                                 .medBeskrivelse("Fritekst til innledning")
                                 .medFeltType(FeltType.FRITEKST)
                                 .medHjelpetekst("")
+                                .medValg(new FeltvalgDto.Builder().medKode("STANDARD").medBeskrivelse("Standardtekst søknad/klage").build())
+                                .medValg(new FeltvalgDto.Builder().medKode("FRITEKST").medBeskrivelse("Fritekst (erstatter standardtekst)").build())
                                 .build(),
                             new BrevmalFeltDto.Builder()
                                 .medKode("MANGLER_FRITEKST")
@@ -112,7 +126,8 @@ public class BrevbestillingTjeneste {
                                 .erPåkrevd()
                                 .build()
                         ),
-                        mottakere
+                        mottakere,
+                        hjelpetekst
                     ));
                     break;
                 default:
@@ -123,12 +138,13 @@ public class BrevbestillingTjeneste {
         return maler;
     }
 
-    private BrevmalDto lagBrevmalDto(Produserbaredokumenter dokument, List<BrevmalFeltDto> felter, List<MottakerDto> mottakere) {
+    private BrevmalDto lagBrevmalDto(Produserbaredokumenter dokument, List<BrevmalFeltDto> felter, List<MottakerDto> mottakere, String mottakerHjelpetekst) {
         return new BrevmalDto.Builder()
             .medType(dokument)
             .medBeskrivelse(dokument.getBeskrivelse())
             .medFelter(felter)
             .medMuligeMottakere(mottakere)
+            .medMottakereHjelpetekst(mottakerHjelpetekst)
             .build();
     }
 

@@ -1,22 +1,16 @@
 package no.nav.melosys.tjenester.gui.dto.brev;
 
-import java.util.List;
-
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 
 public class MottakerDto {
     private final String type;
     private final Aktoersroller rolle;
-    private final String orgnr;
-    private final boolean kanOverstyres;
-    private final List<String> adresselinjer;
+    private final boolean frittValg;
 
     private MottakerDto(Builder builder) {
         this.type = builder.type;
         this.rolle = builder.rolle;
-        this.orgnr = builder.orgnr;
-        this.kanOverstyres = builder.kanOverstyres;
-        this.adresselinjer = builder.adresselinjer;
+        this.frittValg = builder.frittValg;
     }
 
     public String getType() {
@@ -27,24 +21,14 @@ public class MottakerDto {
         return rolle;
     }
 
-    public String getOrgnr() {
-        return orgnr;
-    }
-
-    public boolean isKanOverstyres() {
-        return kanOverstyres;
-    }
-
-    public List<String> getAdresselinjer() {
-        return adresselinjer;
+    public boolean isFrittValg() {
+        return frittValg;
     }
 
     public static final class Builder {
         private String type;
         private Aktoersroller rolle;
-        private String orgnr;
-        private boolean kanOverstyres = false;
-        private List<String> adresselinjer;
+        private boolean frittValg = false;
 
         public Builder medType(String type) {
             this.type = type;
@@ -56,18 +40,8 @@ public class MottakerDto {
             return this;
         }
 
-        public Builder medOrgnr(String orgnr) {
-            this.orgnr = orgnr;
-            return this;
-        }
-
-        public Builder kanOverstyres() {
-            this.kanOverstyres = true;
-            return this;
-        }
-
-        public Builder medAdresselinjer(List<String> adresselinjer) {
-            this.adresselinjer = adresselinjer;
+        public Builder frittValg() {
+            this.frittValg = true;
             return this;
         }
 

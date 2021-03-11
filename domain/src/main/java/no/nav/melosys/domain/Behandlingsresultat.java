@@ -77,7 +77,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<BehandlingsresultatBegrunnelse> behandlingsresultatBegrunnelser = new HashSet<>(1);
 
-    @OneToOne(mappedBy = "behandlingsresultat", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private MedlemAvFolketrygden medlemAvFolketrygden;
 
     public Long getId() {

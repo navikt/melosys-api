@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.dto.dokument;
+package no.nav.melosys.tjenester.gui.dto.dokumentarkiv;
 
 import java.time.Instant;
 import java.util.List;

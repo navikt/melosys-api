@@ -6,6 +6,7 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -52,8 +53,8 @@ public class VideresendSoknadService {
     @Transactional(rollbackFor = MelosysException.class)
     public void videresend(String saksnummer,
                            String mottakerinstitusjon,
-                           String fritekst) throws MelosysException {
-
+                           String fritekst,
+                           Set<DokumentReferanse> vedleggReferanser) throws MelosysException {
         final Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         final Behandling behandling = fagsak.hentAktivBehandling();
         log.info("Videresender søknad for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandling.getId());
@@ -72,7 +73,8 @@ public class VideresendSoknadService {
 
         prosessinstansService.opprettProsessinstansVideresendSoknad(behandling,
             avklarteEessiMottakere.stream().findFirst().orElse(null),
-            fritekst
+            fritekst,
+            vedleggReferanser
         );
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }

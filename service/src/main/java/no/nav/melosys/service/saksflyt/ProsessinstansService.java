@@ -11,6 +11,7 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
@@ -148,11 +149,13 @@ public class ProsessinstansService {
         logger.info("Saksbehandler={} har opprettet prosessinstans {} av type {}.", saksbehandler, prosessinstans.getId(), prosessinstans.getType());
     }
 
-    public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling, Set<String> mottakerInstitusjon, String ytterligereInformasjonSed) {
-        Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(ProsessType.ANMODNING_OM_UNNTAK)
+    public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling, Set<String> mottakerInstitusjon,
+                                                       Set<DokumentReferanse> vedleggReferanserTilSed,
+                                                       String ytterligereInformasjonSed) {
+        Prosessinstans prosessinstans = new ProsessinstansBuilder().medType(ProsessType.ANMODNING_OM_UNNTAK)
             .medBehandling(behandling)
             .medEessiMottakere(mottakerInstitusjon)
+            .medVedleggTilSed(vedleggReferanserTilSed)
             .medYtterligereinformasjonSed(ytterligereInformasjonSed)
             .build();
 
@@ -291,13 +294,14 @@ public class ProsessinstansService {
         return prosessinstans;
     }
 
-    public void opprettProsessinstansVideresendSoknad(Behandling behandling,
-                                                      @Nullable String mottakerInstitusjoner,
-                                                      String fritekstBrev) {
+    public void opprettProsessinstansVideresendSoknad(Behandling behandling, @Nullable String mottakerInstitusjon,
+                                                      String fritekstBrev,
+                                                      Set<DokumentReferanse> vedleggReferanser) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.VIDERESEND_SOKNAD)
             .medBehandling(behandling)
-            .medEessiMottakere(mottakerInstitusjoner != null ? Set.of(mottakerInstitusjoner) : null)
+            .medEessiMottakere(mottakerInstitusjon != null ? Set.of(mottakerInstitusjon) : null)
+            .medVedleggTilSed(vedleggReferanser)
             .medBegrunnelseFritekst(fritekstBrev)
             .build();
 
