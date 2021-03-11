@@ -1,6 +1,6 @@
 package no.nav.melosys.service.vedtak;
 
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -24,12 +24,12 @@ public class VedtakSystemService extends VedtakService {
                                ProsessinstansService prosessinstansService,
                                @Qualifier("system") EessiService eessiService,
                                LandvelgerService landvelgerService,
-                               TpsFasade tpsFasade,
+                               PersondataFasade persondataFasade,
                                RegisteropplysningerService registeropplysningerService,
                                VedtakKontrollService vedtakKontrollService,
                                AvklartefaktaService avklartefaktaService,
                                ApplicationEventMulticaster melosysEventMulticaster) {
         super(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService,
-            eessiService, landvelgerService, tpsFasade, registeropplysningerService, vedtakKontrollService, avklartefaktaService, melosysEventMulticaster);
+            eessiService, landvelgerService, persondataFasade, registeropplysningerService, vedtakKontrollService, avklartefaktaService, melosysEventMulticaster);
     }
 }

@@ -16,7 +16,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
@@ -36,13 +36,13 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OpprettFagsakOgBehandling.class);
 
     private final FagsakService fagsakService;
-    private final TpsFasade tpsFasade;
+    private final PersondataFasade persondataFasade;
 
     @Autowired
     public OpprettFagsakOgBehandling(FagsakService fagsakService,
-                                     @Qualifier("system") TpsFasade tpsFasade) {
+                                     @Qualifier("system") PersondataFasade persondataFasade) {
         this.fagsakService = fagsakService;
-        this.tpsFasade = tpsFasade;
+        this.persondataFasade = persondataFasade;
     }
 
     @Override
@@ -90,7 +90,7 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
             return aktørID;
         }
 
-        return tpsFasade.hentAktørIdForIdent(prosessinstans.getData(BRUKER_ID));
+        return persondataFasade.hentAktørIdForIdent(prosessinstans.getData(BRUKER_ID));
     }
 
     private List<Kontaktopplysning> lagKontaktopplysningerForRepresentant(String representant,

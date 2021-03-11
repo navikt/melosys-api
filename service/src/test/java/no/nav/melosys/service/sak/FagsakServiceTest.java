@@ -16,7 +16,7 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -51,7 +51,7 @@ class FagsakServiceTest {
     @Mock
     private OppgaveService oppgaveService;
     @Mock
-    private TpsFasade tps;
+    private PersondataFasade tps;
     @Mock
     private ProsessinstansService prosessinstansService;
     @Mock

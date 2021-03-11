@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Qualifier("system")
-public class TpsSystemService extends TpsService implements TpsFasade {
+public class TpsSystemService extends TpsService {
 
     @Autowired
     public TpsSystemService(AktorConsumer aktorConsumer, @Qualifier("system") PersonConsumer personConsumer,

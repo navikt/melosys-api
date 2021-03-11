@@ -7,7 +7,7 @@ import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.medl.*;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.repository.AnmodningsperiodeRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.repository.UtpekingsperiodeRepository;
@@ -22,7 +22,7 @@ public class MedlPeriodeService {
     public static final String UNLEASH_MEDL = "melosys.medl.rest";
 
     private final Unleash unleash;
-    private final TpsFasade tpsFasade;
+    private final PersondataFasade persondataFasade;
     private final MedlSoapService medlSoapService;
     private final MedlRestService medlRestService;
     private final BehandlingsresultatService behandlingsresultatService;
@@ -33,7 +33,7 @@ public class MedlPeriodeService {
     private static final String FEIL_VED_OPPDATERING_MEDL = "Opprettelse av periode i MEDL feilet med retur av null medlPeriodeID fra MEDL tjeneste for behandling ";
 
     public MedlPeriodeService(Unleash unleash,
-                              TpsFasade tpsFasade,
+                              PersondataFasade persondataFasade,
                               MedlSoapService medlSoapService,
                               MedlRestService medlRestService,
                               BehandlingsresultatService behandlingsresultatService,
@@ -41,7 +41,7 @@ public class MedlPeriodeService {
                               AnmodningsperiodeRepository anmodningsperiodeRepository,
                               UtpekingsperiodeRepository utpekingsperiodeRepository) {
         this.unleash = unleash;
-        this.tpsFasade = tpsFasade;
+        this.persondataFasade = persondataFasade;
         this.medlSoapService = medlSoapService;
         this.medlRestService = medlRestService;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -124,7 +124,7 @@ public class MedlPeriodeService {
         Behandling behandling = behandlingsresultatService.hentBehandlingsresultat(behandlingID).getBehandling();
         Fagsak fagsak = behandling.getFagsak();
         Aktoer bruker = fagsak.hentBruker();
-        return tpsFasade.hentIdentForAktørId(bruker.getAktørId());
+        return persondataFasade.hentIdentForAktørId(bruker.getAktørId());
     }
 
     private Optional<Lovvalgsperiode> finnLovvalgsperiode(Behandling behandling) throws IkkeFunnetException {

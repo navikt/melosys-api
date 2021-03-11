@@ -30,7 +30,7 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -59,7 +59,7 @@ class OppgaveServiceTest {
     @Mock
     private OppgaveFasade oppgaveFasade;
     @Mock
-    private TpsFasade tpsFasade;
+    private PersondataFasade persondataFasade;
     @Mock
     private SaksopplysningerService saksopplysningerService;
     @Mock
@@ -80,7 +80,7 @@ class OppgaveServiceTest {
                 fagsakService,
             oppgaveFasade,
                 saksopplysningerService,
-            behandlingsgrunnlagService, tpsFasade);
+            behandlingsgrunnlagService, persondataFasade);
 
         oppgave = new Oppgave.Builder()
             .setOppgavetype(Oppgavetyper.BEH_SAK_MK)
@@ -216,7 +216,7 @@ class OppgaveServiceTest {
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
         behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().personOpplysninger.medfolgendeFamilie
             = List.of(MedfolgendeFamilie.tilBarnFraFnrOgNavn("fnrBarn", null));
-        when(tpsFasade.harStrengtFortroligAdresse("fnrBarn")).thenReturn(true);
+        when(persondataFasade.harStrengtFortroligAdresse("fnrBarn")).thenReturn(true);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");

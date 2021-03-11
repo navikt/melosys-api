@@ -22,7 +22,7 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.exception.validering.KontrollfeilDto;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -64,7 +64,7 @@ public class VedtakServiceTest {
     @Mock
     private LandvelgerService landvelgerService;
     @Mock
-    private TpsFasade tpsFasade;
+    private PersondataFasade persondataFasade;
     @Mock
     private RegisteropplysningerService registeropplysningerService;
     @Mock
@@ -87,7 +87,7 @@ public class VedtakServiceTest {
     @Before
     public void setUp() throws Exception {
         vedtakService = new VedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService,
-            eessiService, landvelgerService, tpsFasade, registeropplysningerService, vedtakKontrollService, avklartefaktaService, melosysEventMulticaster);
+            eessiService, landvelgerService, persondataFasade, registeropplysningerService, vedtakKontrollService, avklartefaktaService, melosysEventMulticaster);
         SpringSubjectHandler.set(new TestSubjectHandler());
 
         behandlingID = 1L;
@@ -116,7 +116,7 @@ public class VedtakServiceTest {
         when(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
 
-        when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn("123");
+        when(persondataFasade.hentIdentForAktørId(anyString())).thenReturn("123");
     }
 
     @Test

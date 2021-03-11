@@ -18,7 +18,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.journalforing.dto.*;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -46,7 +46,7 @@ public class JournalfoeringService {
     private final ProsessinstansService prosessinstansService;
     private final EessiService eessiService;
     private final FagsakService fagsakService;
-    private final TpsFasade tpsFasade;
+    private final PersondataFasade persondataFasade;
     private final Unleash unleash;
 
     @Autowired
@@ -55,13 +55,13 @@ public class JournalfoeringService {
                                  ProsessinstansService prosessinstansService,
                                  EessiService eessiService,
                                  FagsakService fagsakService,
-                                 TpsFasade tpsFasade, Unleash unleash) {
+                                 PersondataFasade persondataFasade, Unleash unleash) {
         this.joarkFasade = joarkFasade;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.eessiService = eessiService;
         this.fagsakService = fagsakService;
-        this.tpsFasade = tpsFasade;
+        this.persondataFasade = persondataFasade;
         this.unleash = unleash;
     }
 
@@ -287,7 +287,7 @@ public class JournalfoeringService {
     public void journalførSed(JournalfoeringSedDto journalfoeringSedDto) throws MelosysException {
         validerJournalfoerSed(journalfoeringSedDto);
         MelosysEessiMelding eessiMelding = eessiService.hentSedTilknyttetJournalpost(journalfoeringSedDto.getJournalpostID());
-        prosessinstansService.opprettProsessinstansSedMottak(eessiMelding, tpsFasade.hentAktørIdForIdent(journalfoeringSedDto.getBrukerID()));
+        prosessinstansService.opprettProsessinstansSedMottak(eessiMelding, persondataFasade.hentAktørIdForIdent(journalfoeringSedDto.getBrukerID()));
         oppgaveService.ferdigstillOppgave(journalfoeringSedDto.getOppgaveID());
     }
 

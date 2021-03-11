@@ -25,7 +25,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
@@ -54,17 +54,17 @@ public class BrevDataService {
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;
     private final SaksbehandlerService saksbehandlerService;
-    private final TpsFasade tpsFasade;
+    private final PersondataFasade persondataFasade;
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
 
     @Autowired
     public BrevDataService(BehandlingsresultatRepository behandlingsresultatRepository,
                            SaksbehandlerService saksbehandlerService,
-                           @Qualifier("system") TpsFasade tpsFasade,
+                           @Qualifier("system") PersondataFasade persondataFasade,
                            UtenlandskMyndighetRepository utenlandskMyndighetRepository) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.saksbehandlerService = saksbehandlerService;
-        this.tpsFasade = tpsFasade;
+        this.persondataFasade = persondataFasade;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
     }
 
@@ -81,7 +81,7 @@ public class BrevDataService {
         metadata.dokumenttypeID = DokumenttypeIdMapper.hentID(produserbartDokument);
         metadata.mottaker = mottaker;
         metadata.mottakerID = avklarMottakerId(mottaker, kontaktopplysning);
-        metadata.brukerID = tpsFasade.hentIdentForAktørId(fagsak.hentBruker().getAktørId());
+        metadata.brukerID = persondataFasade.hentIdentForAktørId(fagsak.hentBruker().getAktørId());
 
         metadata.journalsakID = Long.toString(fagsak.getGsakSaksnummer());
         // Fagområde=MED for alle dokumenter til bruker/arbeidsgiver, men kan være UFM for papir-SED til ikke-elektroniske land
@@ -96,13 +96,13 @@ public class BrevDataService {
                 if (!oppgittAdresse.erTom()) {
                     metadata.berik = false;
                     metadata.postadresse = oppgittAdresse;
-                    metadata.brukerNavn = tpsFasade.hentSammensattNavn(metadata.brukerID);
+                    metadata.brukerNavn = persondataFasade.hentSammensattNavn(metadata.brukerID);
                 }
             }
         } else if (mottaker.erUtenlandskMyndighet()) {
             metadata.berik = false;
             metadata.utenlandskMyndighet = hentMyndighetFraAktoer(mottaker);
-            metadata.brukerNavn = tpsFasade.hentSammensattNavn(metadata.brukerID);
+            metadata.brukerNavn = persondataFasade.hentSammensattNavn(metadata.brukerID);
         }
         return metadata;
     }
@@ -114,7 +114,7 @@ public class BrevDataService {
             return (kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null) ? kontaktopplysning.getKontaktOrgnr() : mottaker.getOrgnr();
         } else if (mottakerRolle == BRUKER) {
             try {
-                return tpsFasade.hentIdentForAktørId(mottaker.getAktørId());
+                return persondataFasade.hentIdentForAktørId(mottaker.getAktørId());
             } catch (IkkeFunnetException e) {
                 throw new TekniskException(e);
             }
@@ -238,7 +238,7 @@ public class BrevDataService {
         mottakerBrev.setSpraakkode(Spraakkode.NB);
         mottakerBrev.setId(mottakerID);
 
-        String navn = tpsFasade.hentSammensattNavn(mottakerID);
+        String navn = persondataFasade.hentSammensattNavn(mottakerID);
         if (brukerHarIkkeAdresseiTps(behandling)) {
             BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
             StrukturertAdresse oppgittAdresse = grunnlagData.bosted.oppgittAdresse;
@@ -274,7 +274,7 @@ public class BrevDataService {
             throw new TekniskException("Det finnes ingen bruker på sak " + behandling.getFagsak().getSaksnummer());
         }
         try {
-            sakspart.setId(tpsFasade.hentIdentForAktørId(aktør.getAktørId()));
+            sakspart.setId(persondataFasade.hentIdentForAktørId(aktør.getAktørId()));
         } catch (IkkeFunnetException e) {
             throw new TekniskException("Det finnes ingen ident for aktørID " + aktør.getAktørId());
         }

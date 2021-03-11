@@ -10,7 +10,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -20,12 +20,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class RegisterOppslagService {
     private final EregFasade eregFasade;
-    private final TpsFasade tpsFasade;
+    private final PersondataFasade persondataFasade;
 
     @Autowired
-    public  RegisterOppslagService(EregFasade eregFasade, TpsFasade tpsFasade) {
+    public  RegisterOppslagService(EregFasade eregFasade, PersondataFasade persondataFasade) {
         this.eregFasade = eregFasade;
-        this.tpsFasade = tpsFasade;
+        this.persondataFasade = persondataFasade;
     }
 
     /**
@@ -54,7 +54,7 @@ public class RegisterOppslagService {
      * Henter personopplysninger.
      */
     public PersonDokument hentPerson(String personnummer) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        Saksopplysning saksopplysning = tpsFasade.hentPerson(personnummer, Informasjonsbehov.STANDARD);
+        Saksopplysning saksopplysning = persondataFasade.hentPerson(personnummer, Informasjonsbehov.STANDARD);
         return (PersonDokument) saksopplysning.getDokument();
     }
 }
