@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.brev.BrevkopiRegel;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
@@ -19,7 +20,6 @@ import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import static java.util.Optional.ofNullable;
 import static no.nav.melosys.domain.Fagsak.erSakstypeFtrl;
 import static no.nav.melosys.domain.Preferanse.PreferanseEnum.RESERVERT_FRA_A1;
+import static no.nav.melosys.domain.brev.BrevkopiRegel.*;
 import static no.nav.melosys.domain.brev.FastMottaker.SKATT;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
@@ -94,19 +95,17 @@ public class BrevmottakerService {
     }
 
     public Mottakerliste finnBrevMottaker(Produserbaredokumenter produserbartdokument, Behandling behandling)
-        throws FunksjonellException, TekniskException {
+        throws FunksjonellException {
 
         Mottakerliste mottakerliste = ofNullable(BrevmottakerMapper.BREV_MOTTAKER_MAP.get(produserbartdokument))
             .orElseThrow(() -> new IkkeFunnetException("Mangler mapping av mottakere for " + produserbartdokument));
 
         Mottakerliste mottakerListeKopi = new Mottakerliste.Builder()
             .medHovedMottaker(mottakerliste.getHovedMottaker())
-            .medKopiMottakere(new ArrayList<>(mottakerliste.getKopiMottakere()))
-            .medFasteMottakere(new ArrayList<>(mottakerliste.getFasteMottakere()))
             .build();
 
-        if (!mottakerListeKopi.getKopiMottakere().isEmpty()) {
-            avklarKopier(produserbartdokument, behandling, mottakerListeKopi);
+        if (mottakerliste.kanHaKopier()) {
+            leggTilKopier(behandling, mottakerListeKopi, mottakerliste.getBrevkopiRegler());
         }
 
         return mottakerListeKopi;
@@ -227,29 +226,31 @@ public class BrevmottakerService {
         }
     }
 
-    private Mottakerliste avklarKopier(Produserbaredokumenter produserbartdokument, Behandling behandling, Mottakerliste mottakerliste)
-        throws FunksjonellException, TekniskException {
-        Aktoer hovedmottaker = avklarMottakere(produserbartdokument, Mottaker.av(mottakerliste.getHovedMottaker()), behandling).get(0);
+    private void leggTilKopier(Behandling behandling, Mottakerliste mottakerliste, Collection<BrevkopiRegel> brevkopiRegler) throws FunksjonellException {
+        boolean brukerHarFullmektig = behandling.getFagsak().hentRepresentant(Representerer.BRUKER).isPresent();
 
-        if (hovedmottaker.getRolle() == BRUKER) {
-            mottakerliste.getKopiMottakere().remove(BRUKER);
+        if (brevkopiRegler.contains(BRUKER_FÅR_KOPI) ||
+            (brevkopiRegler.contains(BRUKER_FÅR_KOPI_HVIS_FULLMEKTIG_FINNES) && brukerHarFullmektig)) {
+            mottakerliste.getKopiMottakere().add(BRUKER);
         }
 
-        if (erSakstypeFtrl(behandling.getFagsak().getType()) && !BrevmottakerMapper.INFOBREV.contains(produserbartdokument)) {
-            MedlemAvFolketrygden medlemAvFolketrygden = medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandling.getId())
-                .orElseThrow(() -> new IkkeFunnetException("Finner ikke medlemAvFolketrygden for behandlingsresultatID " + behandling.getId()));
+        if (erSakstypeFtrl(behandling.getFagsak().getType())) {
+            FastsattTrygdeavgift fastsattTrygdeavgift = finnFastsattTrygdeavgift(behandling);
 
-            FastsattTrygdeavgift fastsattTrygdeavgift = medlemAvFolketrygden.getFastsattTrygdeavgift();
-
-            if (fastsattTrygdeavgift.harIkkeAvgiftspliktigInntekt()) {
-                mottakerliste.getFasteMottakere().remove(SKATT);
+            if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER) && fastsattTrygdeavgift.ikkeSelvbetalendeBruker()) {
+                mottakerliste.getKopiMottakere().add(ARBEIDSGIVER);
             }
 
-            if (fastsattTrygdeavgift.betalesAvBruker()) {
-                mottakerliste.getKopiMottakere().remove(ARBEIDSGIVER);
+            if (brevkopiRegler.contains(SKATT_FÅR_KOPI_HVIS_AVGIFTSPLIKTIG_INNTEKT) && fastsattTrygdeavgift.harAvgiftspliktigInntekt()) {
+                mottakerliste.getFasteMottakere().add(SKATT);
             }
         }
+    }
 
-        return mottakerliste;
+    private FastsattTrygdeavgift finnFastsattTrygdeavgift(Behandling behandling) throws IkkeFunnetException {
+        MedlemAvFolketrygden medlemAvFolketrygden = medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandling.getId())
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke medlemAvFolketrygden for behandlingsresultatID " + behandling.getId()));
+
+        return medlemAvFolketrygden.getFastsattTrygdeavgift();
     }
 }

@@ -91,12 +91,12 @@ public class FastsattTrygdeavgift {
         this.avgiftspliktigUtenlandskInntektMnd = avgiftspliktigUtenlandskInntektMnd;
     }
 
-    public boolean harIkkeAvgiftspliktigInntekt() {
-        return (this.getAvgiftspliktigNorskInntektMnd() == null || this.getAvgiftspliktigNorskInntektMnd() == 0) &&
-            (this.getAvgiftspliktigUtenlandskInntektMnd() == null || this.getAvgiftspliktigUtenlandskInntektMnd() == 0);
+    public boolean harAvgiftspliktigInntekt() {
+        return !((this.getAvgiftspliktigNorskInntektMnd() == null || this.getAvgiftspliktigNorskInntektMnd() == 0) &&
+            (this.getAvgiftspliktigUtenlandskInntektMnd() == null || this.getAvgiftspliktigUtenlandskInntektMnd() == 0));
     }
 
-    public boolean betalesAvBruker() {
-        return this.getBetalesAv().getRolle() == BRUKER;
+    public boolean ikkeSelvbetalendeBruker() {
+        return this.getBetalesAv().getRolle() != BRUKER;
     }
 }

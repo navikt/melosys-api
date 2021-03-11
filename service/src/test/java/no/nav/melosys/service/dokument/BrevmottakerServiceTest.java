@@ -288,7 +288,8 @@ public class BrevmottakerServiceTest {
     public void gittVedtakFtrl2_8FullmektigSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
         initMocksForFtrlVedtaksbrev(Representerer.BRUKER, BRUKER, 10000);
 
-        assertThat(brevmottakerService.finnBrevMottaker(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling))
+        Mottakerliste actual = brevmottakerService.finnBrevMottaker(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling);
+        assertThat(actual)
             .isNotNull()
             .extracting(
                 Mottakerliste::getHovedMottaker,

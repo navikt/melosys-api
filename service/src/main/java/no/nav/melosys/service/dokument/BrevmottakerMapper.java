@@ -1,12 +1,11 @@
 package no.nav.melosys.service.dokument;
 
-import java.util.List;
 import java.util.Map;
 
 import no.nav.melosys.domain.brev.Mottakerliste;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
-import static no.nav.melosys.domain.brev.FastMottaker.SKATT;
+import static no.nav.melosys.domain.brev.BrevkopiRegel.*;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
@@ -31,20 +30,18 @@ public class BrevmottakerMapper {
 
             MANGELBREV_ARBEIDSGIVER, new Mottakerliste.Builder()
                 .medHovedMottaker(ARBEIDSGIVER)
-                .medKopiMottakere(BRUKER).build(),
+                .medBrevkopiRegler(
+                    BRUKER_FÅR_KOPI
+                )
+                .build(),
 
             INNVILGELSE_FOLKETRYGDLOVEN_2_8, new Mottakerliste.Builder()
                 .medHovedMottaker(BRUKER)
-                .medKopiMottakere(BRUKER, ARBEIDSGIVER)
-                .medFasteMottakere(SKATT).build()
+                .medBrevkopiRegler(
+                    BRUKER_FÅR_KOPI_HVIS_FULLMEKTIG_FINNES,
+                    ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER,
+                    SKATT_FÅR_KOPI_HVIS_AVGIFTSPLIKTIG_INNTEKT
+                ).build()
         );
     }
-
-    public static final List<Produserbaredokumenter> INFOBREV = List.of(
-        MELDING_FORVENTET_SAKSBEHANDLINGSTID,
-        MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
-        MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
-        MANGELBREV_BRUKER,
-        MANGELBREV_ARBEIDSGIVER
-    );
 }

@@ -8,11 +8,13 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 
 public class Mottakerliste {
     private final Aktoersroller hovedMottaker;
+    private final Collection<BrevkopiRegel> brevkopiRegler;
     private final Collection<Aktoersroller> kopiMottakere;
     private final Collection<FastMottaker> fasteMottakere;
 
-    public Mottakerliste(Builder builder) {
+    private Mottakerliste(Builder builder) {
         this.hovedMottaker = builder.hovedMottaker;
+        this.brevkopiRegler = builder.brevkopiRegler;
         this.kopiMottakere = builder.kopiMottakere;
         this.fasteMottakere = builder.fasteMottakere;
     }
@@ -29,8 +31,17 @@ public class Mottakerliste {
         return fasteMottakere;
     }
 
+    public Collection<BrevkopiRegel> getBrevkopiRegler() {
+        return brevkopiRegler;
+    }
+
+    public boolean kanHaKopier() {
+        return !brevkopiRegler.isEmpty();
+    }
+
     public static class Builder {
         private Aktoersroller hovedMottaker;
+        private Collection<BrevkopiRegel> brevkopiRegler = new ArrayList<>();
         private Collection<Aktoersroller> kopiMottakere = new ArrayList<>();
         private Collection<FastMottaker> fasteMottakere = new ArrayList<>();
 
@@ -39,28 +50,18 @@ public class Mottakerliste {
             return this;
         }
 
-        public Builder medKopiMottakere(Aktoersroller... kopiMottakere) {
-            this.kopiMottakere = List.of(kopiMottakere);
+        public Builder medBrevkopiRegler(BrevkopiRegel... brevkopiRegler) {
+            this.brevkopiRegler = List.of(brevkopiRegler);
             return this;
         }
 
-        public Builder medFasteMottakere(FastMottaker... fasteMottakere) {
-            this.fasteMottakere = List.of(fasteMottakere);
+        public Builder medBrevkopiRegler(Collection<BrevkopiRegel> brevkopiRegler) {
+            this.brevkopiRegler = brevkopiRegler;
             return this;
         }
 
         public Mottakerliste build() {
             return new Mottakerliste(this);
-        }
-
-        public Builder medKopiMottakere(List<Aktoersroller> kopiMottakere) {
-            this.kopiMottakere = kopiMottakere;
-            return this;
-        }
-
-        public Builder medFasteMottakere(List<FastMottaker> fasteMottakere) {
-            this.fasteMottakere = fasteMottakere;
-            return this;
         }
     }
 }
