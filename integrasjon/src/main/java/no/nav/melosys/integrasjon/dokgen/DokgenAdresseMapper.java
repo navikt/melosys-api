@@ -23,10 +23,11 @@ public final class DokgenAdresseMapper {
             StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
             adresselinjer = new ArrayList<>();
             if (hasText(kontaktperson)) {
-                adresselinjer.add("v/" + kontaktperson);
+                adresselinjer.add("Att: " + kontaktperson);
             } else if (kontaktopplysning != null) {
-                adresselinjer.add("v/" + kontaktopplysning.getKontaktNavn());
+                adresselinjer.add("Att: " + kontaktopplysning.getKontaktNavn());
             }
+
             adresselinjer.add(orgAdresse.gatenavn +
                 ((orgAdresse.husnummer == null) ? "" : " " + orgAdresse.husnummer));
         }

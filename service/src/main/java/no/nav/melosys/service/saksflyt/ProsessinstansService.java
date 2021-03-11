@@ -1,10 +1,11 @@
 package no.nav.melosys.service.saksflyt;
 
+import javax.annotation.Nullable;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
@@ -40,6 +41,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import static java.util.Optional.ofNullable;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static org.springframework.util.StringUtils.hasText;
 
@@ -255,6 +257,7 @@ public class ProsessinstansService {
         prosessinstans.setData(BREVBESTILLING, brevbestillingDto);
         prosessinstans.setData(BREVKOPI, brevkopi);
         prosessinstans.setData(MOTTAKER, mottaker.getRolle());
+        prosessinstans.setData(KONTAKTPERSON, ofNullable(brevbestillingDto.getKontaktperson()).orElse(""));
         if (hasText(mottaker.getAktørId())) {
             prosessinstans.setData(AKTØR_ID, mottaker.getAktørId());
         }

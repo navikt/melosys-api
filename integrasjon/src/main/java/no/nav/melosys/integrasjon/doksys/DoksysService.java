@@ -1,5 +1,7 @@
 package no.nav.melosys.integrasjon.doksys;
 
+import java.util.Objects;
+
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -32,6 +34,8 @@ import static no.nav.melosys.domain.Fagsystem.GSAK_I_JOARK;
 import static no.nav.melosys.domain.Fagsystem.MELOSYS;
 import static no.nav.melosys.domain.dokument.adresse.Adresse.sammenslå;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
+import static org.springframework.util.StringUtils.hasText;
+import static org.springframework.util.StringUtils.isEmpty;
 
 @Service
 @Primary
@@ -161,12 +165,12 @@ public class DoksysService implements DoksysFasade {
     }
 
     @Override
-    public String distribuerJournalpost(String journalpostId, StrukturertAdresse mottakeradresse, Kontaktopplysning kontaktopplysning) {
+    public String distribuerJournalpost(String journalpostId, StrukturertAdresse mottakeradresse, Kontaktopplysning kontaktopplysning, String kontaktperson) {
         DistribuerJournalpostRequest request = DistribuerJournalpostRequest.builder()
             .journalpostId(journalpostId)
             .bestillendeFagsystem(MELOSYS.getKode())
             .dokumentProdApp(MELOSYS.getKode())
-            .adresse(mapAdresse(mottakeradresse, kontaktopplysning))
+            .adresse(mapAdresse(mottakeradresse, kontaktopplysning, kontaktperson))
             .build();
 
         return distribuerJournalpostConsumer.distribuerJournalpost(request).getBestillingsId();
@@ -204,13 +208,17 @@ public class DoksysService implements DoksysFasade {
             .build();
     }
 
-    private Adresse mapAdresse(StrukturertAdresse strukturertAdresse, Kontaktopplysning kontaktopplysning) {
+    private Adresse mapAdresse(StrukturertAdresse strukturertAdresse, Kontaktopplysning kontaktopplysning, String kontaktperson) {
         Adresse.AdresseBuilder adresseBuilder = Adresse.builder()
             .land(strukturertAdresse.landkode);
 
-        if (kontaktopplysning != null) {
+        if(hasText(kontaktperson)) {
             adresseBuilder
-                .adresselinje1("v/" + kontaktopplysning.getKontaktNavn())
+                .adresselinje1("Att: " + kontaktperson)
+                .adresselinje2(strukturertAdresse.gatenavn + ((strukturertAdresse.husnummer == null) ? "" : " " + strukturertAdresse.husnummer));
+        } else if (kontaktopplysning != null) {
+            adresseBuilder
+                .adresselinje1("Att: " + kontaktopplysning.getKontaktNavn())
                 .adresselinje2(strukturertAdresse.gatenavn + ((strukturertAdresse.husnummer == null) ? "" : " " + strukturertAdresse.husnummer));
         } else {
             adresseBuilder

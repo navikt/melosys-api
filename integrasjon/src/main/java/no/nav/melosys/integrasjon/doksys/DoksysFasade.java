@@ -14,7 +14,7 @@ public interface DoksysFasade {
 
     String distribuerJournalpost(String journalpostId, StrukturertAdresse mottakeradresse);
 
-    String distribuerJournalpost(String journalpostId, StrukturertAdresse mottakeradresse, Kontaktopplysning kontaktopplysning);
+    String distribuerJournalpost(String journalpostId, StrukturertAdresse mottakeradresse, Kontaktopplysning kontaktopplysning, String kontaktperson);
 
     String distribuerJournalpost(String journalpostId);
 }

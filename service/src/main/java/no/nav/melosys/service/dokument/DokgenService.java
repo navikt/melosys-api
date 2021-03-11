@@ -6,6 +6,7 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
@@ -152,10 +153,12 @@ public class DokgenService {
     private void settOrganisasjonsOpplysninger(Behandling behandling, String orgnr,
                                                DokgenBrevbestilling.Builder<?> brevbestilling)
         throws IkkeFunnetException, IntegrasjonException {
+        Kontaktopplysning kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), orgnr).orElse(null);
+        String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : orgnr;
         brevbestilling
-            .medOrg((OrganisasjonDokument) eregFasade.hentOrganisasjon(orgnr).getDokument())
+            .medOrg((OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument())
             .medKontaktopplysning(
-                kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), orgnr).orElse(null)
+                kontaktopplysning
             );
     }
 

@@ -33,6 +33,7 @@ public enum ProsessDataKey {
     HOVEDDOKUMENT_TITTEL("hoveddokumentTittel"),
     JFR_INGEN_VURDERING("ingenVurdering"),
     JOURNALPOST_ID("journalpostID"),
+    KONTAKTPERSON("kontaktperson"),
     LOGISKE_VEDLEGG_TITLER("logiskeVedleggTitler"),
     LOVVALGSBESTEMMELSE("lovvalgsbestemmelse"),
     LOVVALGSLAND("lovvalgsland"),

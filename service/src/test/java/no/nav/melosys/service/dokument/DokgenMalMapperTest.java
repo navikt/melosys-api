@@ -174,7 +174,7 @@ class DokgenMalMapperTest {
         assertTrue(dokgenDto instanceof SaksbehandlingstidSoknad);
         assertEquals(SAMMENSATT_NAVN, dokgenDto.getNavnBruker());
         assertEquals(NAVN_ORG, dokgenDto.getNavnMottaker());
-        assertEquals("v/" + KONTAKT_NAVN, dokgenDto.getAdresselinjer().get(0));
+        assertEquals("Att: " + KONTAKT_NAVN, dokgenDto.getAdresselinjer().get(0));
         assertEquals(POSTBOKS_ORG, dokgenDto.getAdresselinjer().get(1));
         assertEquals(POSTNR_ORG, dokgenDto.getPostnr());
     }
