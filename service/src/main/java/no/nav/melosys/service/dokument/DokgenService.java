@@ -153,12 +153,10 @@ public class DokgenService {
     private void settOrganisasjonsOpplysninger(Behandling behandling, String orgnr,
                                                DokgenBrevbestilling.Builder<?> brevbestilling)
         throws IkkeFunnetException, IntegrasjonException {
-        Kontaktopplysning kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), orgnr).orElse(null);
-        String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : orgnr;
         brevbestilling
-            .medOrg((OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument())
+            .medOrg((OrganisasjonDokument) eregFasade.hentOrganisasjon(orgnr).getDokument())
             .medKontaktopplysning(
-                kontaktopplysning
+                kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), orgnr).orElse(null)
             );
     }
 

@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -46,7 +45,7 @@ class OpprettJournalforBrevTest {
     @BeforeEach
     void init() {
         opprettJournalforBrev = new OpprettJournalforBrev(mockBehandlingService, mockDokgenService,
-            mockJoarkFasade, mockTpsFasade, mockEregFasade);
+            mockJoarkFasade, mockTpsFasade, mockEregFasade, kontaktopplysningService);
     }
 
     @Test
