@@ -27,7 +27,6 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -168,13 +167,13 @@ public class BrevmottakerServiceTest {
     @Test
     public void gittMalIkkeRegistret_skalKasteFeil() {
         assertThatExceptionOfType(IkkeFunnetException.class)
-            .isThrownBy(() -> brevmottakerService.finnBrevMottaker(ATTEST_A1, behandling))
+            .isThrownBy(() -> brevmottakerService.hentMottakerliste(ATTEST_A1, behandling))
             .withMessage("Mangler mapping av mottakere for ATTEST_A1");
     }
 
     @Test
     public void gittForvaltningsmelding_skalHovedmottakerVæreBruker() throws Exception {
-        assertThat(brevmottakerService.finnBrevMottaker(MELDING_FORVENTET_SAKSBEHANDLINGSTID, behandling))
+        assertThat(brevmottakerService.hentMottakerliste(MELDING_FORVENTET_SAKSBEHANDLINGSTID, behandling))
             .extracting(
                 Mottakerliste::getHovedMottaker,
                 Mottakerliste::getKopiMottakere,
@@ -191,7 +190,7 @@ public class BrevmottakerServiceTest {
 
     @Test
     public void gittMangelbrevBruker_skalHovedmottakerVæreBruker() throws Exception {
-        assertThat(brevmottakerService.finnBrevMottaker(MANGELBREV_BRUKER, behandling))
+        assertThat(brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, behandling))
             .extracting(
                 Mottakerliste::getHovedMottaker,
                 Mottakerliste::getKopiMottakere,
@@ -210,7 +209,7 @@ public class BrevmottakerServiceTest {
     public void gittMangelbrevArbeidsgiver_skalHovedmottakerVæreArbeidsgiverMedKopi() throws Exception {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
 
-        assertThat(brevmottakerService.finnBrevMottaker(MANGELBREV_ARBEIDSGIVER, behandling))
+        assertThat(brevmottakerService.hentMottakerliste(MANGELBREV_ARBEIDSGIVER, behandling))
             .extracting(
                 Mottakerliste::getHovedMottaker,
                 Mottakerliste::getKopiMottakere,
@@ -229,7 +228,7 @@ public class BrevmottakerServiceTest {
     public void gittVedtakFtrl2_8UtenFullmektigIkkeSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
         initMocksForFtrlVedtaksbrev(null, ARBEIDSGIVER, 10000);
 
-        assertThat(brevmottakerService.finnBrevMottaker(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling))
+        assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling))
             .extracting(
                 Mottakerliste::getHovedMottaker,
                 Mottakerliste::getKopiMottakere,
@@ -248,7 +247,7 @@ public class BrevmottakerServiceTest {
     public void gittVedtakFtrl2_8UtenFullmektigSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
         initMocksForFtrlVedtaksbrev(null, BRUKER, 10000);
 
-        assertThat(brevmottakerService.finnBrevMottaker(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling))
+        assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling))
             .isNotNull()
             .extracting(
                 Mottakerliste::getHovedMottaker,
@@ -268,7 +267,7 @@ public class BrevmottakerServiceTest {
     public void gittVedtakFtrl2_8FullmektigIkkeSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
         initMocksForFtrlVedtaksbrev(Representerer.BRUKER, ARBEIDSGIVER, 10000);
 
-        assertThat(brevmottakerService.finnBrevMottaker(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling))
+        assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling))
             .isNotNull()
             .extracting(
                 Mottakerliste::getHovedMottaker,
@@ -288,7 +287,7 @@ public class BrevmottakerServiceTest {
     public void gittVedtakFtrl2_8FullmektigSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
         initMocksForFtrlVedtaksbrev(Representerer.BRUKER, BRUKER, 10000);
 
-        Mottakerliste actual = brevmottakerService.finnBrevMottaker(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling);
+        Mottakerliste actual = brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling);
         assertThat(actual)
             .isNotNull()
             .extracting(
@@ -309,7 +308,7 @@ public class BrevmottakerServiceTest {
     public void gittVedtakFtrl2_8FullmektigIkkeSelvbetalendeIkkeInntekt_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
         initMocksForFtrlVedtaksbrev(Representerer.BRUKER, ARBEIDSGIVER, 0);
 
-        assertThat(brevmottakerService.finnBrevMottaker(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling))
+        assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling))
             .isNotNull()
             .extracting(
                 Mottakerliste::getHovedMottaker,

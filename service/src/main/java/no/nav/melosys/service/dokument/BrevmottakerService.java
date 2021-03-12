@@ -94,7 +94,7 @@ public class BrevmottakerService {
         return mottakere;
     }
 
-    public Mottakerliste finnBrevMottaker(Produserbaredokumenter produserbartdokument, Behandling behandling)
+    public Mottakerliste hentMottakerliste(Produserbaredokumenter produserbartdokument, Behandling behandling)
         throws FunksjonellException {
 
         Mottakerliste mottakerliste = ofNullable(BrevmottakerMapper.BREV_MOTTAKER_MAP.get(produserbartdokument))
@@ -235,7 +235,7 @@ public class BrevmottakerService {
         }
 
         if (erSakstypeFtrl(behandling.getFagsak().getType())) {
-            FastsattTrygdeavgift fastsattTrygdeavgift = finnFastsattTrygdeavgift(behandling);
+            FastsattTrygdeavgift fastsattTrygdeavgift = hentFastsattTrygdeavgift(behandling);
 
             if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER) && fastsattTrygdeavgift.ikkeSelvbetalendeBruker()) {
                 mottakerliste.getKopiMottakere().add(ARBEIDSGIVER);
@@ -247,7 +247,7 @@ public class BrevmottakerService {
         }
     }
 
-    private FastsattTrygdeavgift finnFastsattTrygdeavgift(Behandling behandling) throws IkkeFunnetException {
+    private FastsattTrygdeavgift hentFastsattTrygdeavgift(Behandling behandling) throws IkkeFunnetException {
         MedlemAvFolketrygden medlemAvFolketrygden = medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandling.getId())
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke medlemAvFolketrygden for behandlingsresultatID " + behandling.getId()));
 
