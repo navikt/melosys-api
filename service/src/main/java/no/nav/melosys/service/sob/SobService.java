@@ -11,7 +11,7 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,13 +20,13 @@ import org.springframework.stereotype.Service;
 public class SobService {
 
     private final SakOgBehandlingFasade sakOgBehandlingFasade;
-    private final TpsFasade tpsFasade;
+    private final PersondataFasade persondataFasade;
     private final BehandlingService behandlingService;
 
     @Autowired
-    public SobService(SakOgBehandlingFasade sakOgBehandlingFasade, TpsFasade tpsFasade, BehandlingService behandlingService) {
+    public SobService(SakOgBehandlingFasade sakOgBehandlingFasade, PersondataFasade persondataFasade, BehandlingService behandlingService) {
         this.sakOgBehandlingFasade = sakOgBehandlingFasade;
-        this.tpsFasade = tpsFasade;
+        this.persondataFasade = persondataFasade;
         this.behandlingService = behandlingService;
     }
 
@@ -77,6 +77,6 @@ public class SobService {
 
     private String hentAktørIdFraTps(Behandling behandling) throws TekniskException, IkkeFunnetException {
         PersonDokument personDokument = behandling.hentPersonDokument();
-        return tpsFasade.hentAktørIdForIdent(personDokument.fnr);
+        return persondataFasade.hentAktørIdForIdent(personDokument.fnr);
     }
 }

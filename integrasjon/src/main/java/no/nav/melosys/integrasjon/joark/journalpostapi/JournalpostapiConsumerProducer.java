@@ -21,8 +21,9 @@ public class JournalpostapiConsumerProducer {
 
     @Bean
     public JournalpostapiConsumer journalpostapiConsumer(
-        SystemContextClientRequestInterceptor systemContextClientRequestInterceptor) {
-        RestTemplate restTemplate = new RestTemplateBuilder()
+        SystemContextClientRequestInterceptor systemContextClientRequestInterceptor,
+        RestTemplateBuilder restTemplateBuilder) {
+        RestTemplate restTemplate = restTemplateBuilder
             .uriTemplateHandler(new DefaultUriBuilderFactory(url))
             .interceptors(systemContextClientRequestInterceptor)
             .requestFactory(() -> new HttpComponentsClientHttpRequestFactory(HttpClients.createDefault()))

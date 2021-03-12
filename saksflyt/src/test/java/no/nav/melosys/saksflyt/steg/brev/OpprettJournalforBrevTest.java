@@ -8,7 +8,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.DokgenService;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,14 +39,14 @@ class OpprettJournalforBrevTest {
     private EregFasade mockEregFasade;
 
     @Mock
-    private TpsFasade mockTpsFasade;
+    private PersondataFasade mockPersondataFasade;
 
     private OpprettJournalforBrev opprettJournalforBrev;
 
     @BeforeEach
     void init() {
         opprettJournalforBrev = new OpprettJournalforBrev(mockBehandlingService, mockDokgenService,
-            mockJoarkFasade, mockTpsFasade, mockEregFasade);
+            mockJoarkFasade, mockPersondataFasade, mockEregFasade);
     }
 
     @Test

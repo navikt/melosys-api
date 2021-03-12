@@ -18,7 +18,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.KontrollresultatService;
@@ -53,7 +53,7 @@ class OppfriskSaksopplysningerServiceTest {
     @Mock
     private RegisteropplysningerService registeropplysningerService;
     @Mock
-    private TpsFasade tpsFasade;
+    private PersondataFasade persondataFasade;
 
     private OppfriskSaksopplysningerService oppfriskSaksopplysningerService;
 
@@ -65,10 +65,10 @@ class OppfriskSaksopplysningerServiceTest {
             behandlingService, behandlingsresultatService,
             fagsakService, kontrollresultatService,
             inngangsvilkaarService, registeropplysningerService,
-            tpsFasade);
+            persondataFasade);
 
         String brukerID = "322211";
-        when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn(brukerID);
+        when(persondataFasade.hentIdentForAktørId(anyString())).thenReturn(brukerID);
     }
 
     @Test

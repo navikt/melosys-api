@@ -10,7 +10,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Component
 public class DokgenConsumer {
     private static final Logger log = LoggerFactory.getLogger(DokgenConsumer.class);
-    public static final String PATH_TEMPLATE = "/mal/{malNavn}/lag-pdf";
 
     private final WebClient webClient;
 
@@ -20,12 +19,8 @@ public class DokgenConsumer {
 
     public byte[] lagPdf(String malNavn, DokgenDto dokgenDto, boolean bestillKopi) {
         log.info("Produserer PDF i melosys-dokgen. Mal: {}", malNavn);
-
-        return webClient.post().uri(uriBuilder ->
-            uriBuilder
-                .path(PATH_TEMPLATE)
-                .queryParam("somKopi", bestillKopi)
-                .build(malNavn))
+        return webClient.post()
+            .uri("/mal/{malNavn}/lag-pdf?somKopi={somKopi}", malNavn, bestillKopi)
             .bodyValue(dokgenDto)
             .retrieve()
             .bodyToMono(byte[].class)

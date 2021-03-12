@@ -10,7 +10,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +26,7 @@ public class FerdigstillJournalpostSedTest {
     @Mock
     private JoarkFasade joarkFasade;
     @Mock
-    private TpsFasade tpsFasade;
+    private PersondataFasade persondataFasade;
 
     private FerdigstillJournalpostSed ferdigstillJournalpostSed;
 
@@ -39,8 +39,8 @@ public class FerdigstillJournalpostSedTest {
 
     @Before
     public void setUp() throws IkkeFunnetException {
-        ferdigstillJournalpostSed = new FerdigstillJournalpostSed(joarkFasade, tpsFasade);
-        when(tpsFasade.hentIdentForAktørId(eq(AKTØR_ID))).thenReturn(BRUKER_ID);
+        ferdigstillJournalpostSed = new FerdigstillJournalpostSed(joarkFasade, persondataFasade);
+        when(persondataFasade.hentIdentForAktørId(eq(AKTØR_ID))).thenReturn(BRUKER_ID);
     }
 
     @Test

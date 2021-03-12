@@ -39,8 +39,8 @@ import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.*;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.SaksopplysningerService;
@@ -208,7 +208,7 @@ public final class DokumentServiceTest {
         Aktoer aktør = lagAktør(BRUKER);
         Behandling behandling = lagBehandling();
         BehandlingService behandlingService = mockBehandlingService(behandling);
-        TpsFasade tpsFasade = mockTpsFasade(aktør);
+        PersondataFasade persondataFasade = mockPersondataFasade(aktør);
         Avklartefakta arbeidsgiverFaktum = lagAvklarteFakta(VIRKSOMHET, ORGNR);
         Avklartefakta yrkesgruppeFaktum = lagAvklarteFakta(YRKESGRUPPE, AvklartYrkesgruppeType.ORDINAER.name(), null);
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat(Arrays.asList(arbeidsgiverFaktum,
@@ -228,21 +228,21 @@ public final class DokumentServiceTest {
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
         BrevDataService brevDataService = new BrevDataService(behandlingsresultatRepository,
             saksbehandlerService,
-            tpsFasade,
+            persondataFasade,
             utenlandskMyndighetRepository);
         BrevmottakerService brevmottakerService = new BrevmottakerService(mock(KontaktopplysningService.class),
             avklarteVirksomheterService,
             mock(UtenlandskMyndighetService.class),
             behandlingsresultatService, mock(MedlemAvFolketrygdenRepository.class));
-        return new DokumentService(behandlingService, brevDataService, dokSysFasade, brevmottakerService, brevdatabyggervelger, lagBrevinput(tpsFasade, avklartefaktaService));
+        return new DokumentService(behandlingService, brevDataService, dokSysFasade, brevmottakerService, brevdatabyggervelger, lagBrevinput(persondataFasade, avklartefaktaService));
     }
 
-    private BrevdataGrunnlagFactory lagBrevinput(TpsFasade tpsFasade, AvklartefaktaService avklartefaktaService)
+    private BrevdataGrunnlagFactory lagBrevinput(PersondataFasade persondataFasade, AvklartefaktaService avklartefaktaService)
         throws IkkeFunnetException, TekniskException {
         KodeverkRegister kodeverkRegister = mockKodeverkRegister();
         KodeverkService kodeverkService = new KodeverkService(kodeverkRegister);
         EregFasade eregFasade = mockEregFasade();
-        RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(eregFasade, tpsFasade);
+        RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(eregFasade, persondataFasade);
         AvklarteVirksomheterSystemService avklarteVirksomheterSystemService = new AvklarteVirksomheterSystemService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), mock(KodeverkService.class));
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(lagBehandling()).build();
         BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterSystemService, avklartefaktaService);
@@ -321,10 +321,10 @@ public final class DokumentServiceTest {
         UtenlandskMyndighetService utenlandskMyndighetService = mock(UtenlandskMyndighetService.class);
         UtpekingService utpekingService = mock(UtpekingService.class);
         VilkaarsresultatService vilkaarsresultatService = mock(VilkaarsresultatService.class);
-        TpsFasade tpsFasade = mock(TpsFasade.class);
+        PersondataFasade persondataFasade = mock(PersondataFasade.class);
         return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService, joarkService,
             landvelgerService, lovvalgsperiodeService, saksopplysningerService, utenlandskMyndighetService,
-            utpekingService, vilkaarsresultatRepository, vilkaarsresultatService, tpsFasade, behandlingsgrunnlagService);
+            utpekingService, vilkaarsresultatRepository, vilkaarsresultatService, persondataFasade, behandlingsgrunnlagService);
     }
 
     private BrevDataByggerVelger lagBrevdatabyggerVelgerMock() throws FunksjonellException, TekniskException {
@@ -407,11 +407,11 @@ public final class DokumentServiceTest {
         return behandlingsresultatRepository;
     }
 
-    private static TpsFasade mockTpsFasade(Aktoer aktør) throws IkkeFunnetException {
-        TpsFasade tpsFasade = mock(TpsFasade.class);
-        when(tpsFasade.hentIdentForAktørId(anyString()))
+    private static PersondataFasade mockPersondataFasade(Aktoer aktør) throws IkkeFunnetException {
+        PersondataFasade persondataFasade = mock(PersondataFasade.class);
+        when(persondataFasade.hentIdentForAktørId(anyString()))
             .thenReturn(String.format("IDENT%s", aktør.getAktørId()));
-        return tpsFasade;
+        return persondataFasade;
     }
 
     private static BehandlingService mockBehandlingService(Behandling behandling) throws IkkeFunnetException {

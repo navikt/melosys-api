@@ -14,7 +14,7 @@ import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlRestService;
 import no.nav.melosys.integrasjon.medl.MedlSoapService;
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.repository.AnmodningsperiodeRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.repository.UtpekingsperiodeRepository;
@@ -33,7 +33,7 @@ import static org.mockito.Mockito.*;
 public class MedlPeriodeServiceTest {
     private final FakeUnleash fakeUnleash = new FakeUnleash();
     @Mock
-    private TpsFasade tpsFasade;
+    private PersondataFasade persondataFasade;
     @Mock
     private MedlSoapService medlSoapService;
     @Mock
@@ -54,7 +54,7 @@ public class MedlPeriodeServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        medlPeriodeService = new MedlPeriodeService(fakeUnleash, tpsFasade, medlSoapService, medlRestService,
+        medlPeriodeService = new MedlPeriodeService(fakeUnleash, persondataFasade, medlSoapService, medlRestService,
             behandlingsresultatService, lovvalgsperiodeRepository, anmodningsperiodeRepository, utpekingsperiodeRepository);
 
         when(medlSoapService.opprettPeriodeForeløpig(anyString(), any(PeriodeOmLovvalg.class), any(KildedokumenttypeMedl.class)))
@@ -65,7 +65,7 @@ public class MedlPeriodeServiceTest {
             .thenReturn(MEDL_PERIODE_ID);
 
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(lagBehandlingsResultat());
-        when(tpsFasade.hentIdentForAktørId(anyString())).thenReturn(FNR);
+        when(persondataFasade.hentIdentForAktørId(anyString())).thenReturn(FNR);
     }
 
     private Behandlingsresultat lagBehandlingsResultat() {

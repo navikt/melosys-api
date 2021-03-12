@@ -9,7 +9,7 @@ import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.KontrollresultatService;
@@ -34,7 +34,7 @@ public class OppfriskSaksopplysningerService {
     private final KontrollresultatService kontrollresultatService;
     private final InngangsvilkaarService inngangsvilkaarService;
     private final RegisteropplysningerService registeropplysningerService;
-    private final TpsFasade tpsFasade;
+    private final PersondataFasade persondataFasade;
 
     public OppfriskSaksopplysningerService(BehandlingService behandlingService,
                                            BehandlingsresultatService behandlingsresultatService,
@@ -42,14 +42,14 @@ public class OppfriskSaksopplysningerService {
                                            KontrollresultatService kontrollresultatService,
                                            InngangsvilkaarService inngangsvilkaarService,
                                            RegisteropplysningerService registeropplysningerService,
-                                           TpsFasade tpsFasade) {
+                                           PersondataFasade persondataFasade) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.fagsakService = fagsakService;
         this.kontrollresultatService = kontrollresultatService;
         this.inngangsvilkaarService = inngangsvilkaarService;
         this.registeropplysningerService = registeropplysningerService;
-        this.tpsFasade = tpsFasade;
+        this.persondataFasade = persondataFasade;
     }
 
     @Transactional(rollbackFor = MelosysException.class)
@@ -58,7 +58,7 @@ public class OppfriskSaksopplysningerService {
 
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         String aktørID = behandling.getFagsak().hentBruker().getAktørId();
-        String brukerID = tpsFasade.hentIdentForAktørId(aktørID);
+        String brukerID = persondataFasade.hentIdentForAktørId(aktørID);
 
         //OK om perioden er tom. Ikke alle behandlingstema krever periode.
         //Implisitt at perioden eksisterer om behandling kan resultere i vedtak

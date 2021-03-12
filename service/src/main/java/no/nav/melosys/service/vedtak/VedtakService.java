@@ -21,7 +21,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -52,7 +52,7 @@ public class VedtakService {
     private final ProsessinstansService prosessinstansService;
     private final EessiService eessiService;
     private final LandvelgerService landvelgerService;
-    private final TpsFasade tpsFasade;
+    private final PersondataFasade persondataFasade;
     private final RegisteropplysningerService registeropplysningerService;
     private final VedtakKontrollService vedtakKontrollService;
     private final AvklartefaktaService avklartefaktaService;
@@ -64,7 +64,7 @@ public class VedtakService {
     public VedtakService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
                          OppgaveService oppgaveService, ProsessinstansService prosessinstansService,
                          EessiService eessiService, LandvelgerService landvelgerService,
-                         TpsFasade tpsFasade, RegisteropplysningerService registeropplysningerService,
+                         PersondataFasade persondataFasade, RegisteropplysningerService registeropplysningerService,
                          VedtakKontrollService vedtakKontrollService, AvklartefaktaService avklartefaktaService,
                          ApplicationEventMulticaster melosysEventMulticaster) {
         this.behandlingService = behandlingService;
@@ -73,7 +73,7 @@ public class VedtakService {
         this.prosessinstansService = prosessinstansService;
         this.eessiService = eessiService;
         this.landvelgerService = landvelgerService;
-        this.tpsFasade = tpsFasade;
+        this.persondataFasade = persondataFasade;
         this.registeropplysningerService = registeropplysningerService;
         this.vedtakKontrollService = vedtakKontrollService;
         this.avklartefaktaService = avklartefaktaService;
@@ -134,7 +134,7 @@ public class VedtakService {
                                     Behandling behandling,
                                     Behandlingsresultat behandlingsresultat) throws MelosysException {
         Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
-        String fnr = tpsFasade.hentIdentForAktørId(behandling.getFagsak().hentBruker().getAktørId());
+        String fnr = persondataFasade.hentIdentForAktørId(behandling.getFagsak().hentBruker().getAktørId());
 
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
