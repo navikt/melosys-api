@@ -25,8 +25,9 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
+import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
-import no.nav.melosys.saksflyt.brev.FastMottaker;
+import no.nav.melosys.domain.brev.FastMottaker;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
@@ -43,7 +44,7 @@ import org.springframework.context.ApplicationEventPublisher;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static no.nav.melosys.saksflyt.brev.FastMottaker.*;
+import static no.nav.melosys.domain.brev.FastMottaker.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
@@ -142,7 +143,7 @@ class SendVedtaksbrevInnlandTest {
             .thenReturn(Collections.singletonMap(new UtenlandskMyndighet(), new Aktoer()));
         KontaktopplysningService kontaktopplysningService = mock(KontaktopplysningService.class);
         BrevmottakerService brevmottakerService = new BrevmottakerService(kontaktopplysningService,
-            avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService);
+            avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService, mock(MedlemAvFolketrygdenRepository.class));
         return spy(new DokumentSystemService(behandlingService, brevDataService, dokSysFasade,
             brevmottakerService, brevDataByggerVelger, mock(BrevdataGrunnlagFactory.class)));
     }
