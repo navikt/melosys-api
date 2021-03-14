@@ -14,6 +14,6 @@ public interface UtbetaldataFasade {
     @Retryable(
         value = {IntegrasjonException.class},
         maxAttempts = 3,
-        backoff = @Backoff(delay = 120000, maxDelay = 480000, multiplier = 2))
+        backoff = @Backoff(delay = 1_000, multiplier = 1.5))
     Saksopplysning hentUtbetalingerBarnetrygd(String fnr, LocalDate fom, LocalDate tom) throws TekniskException, FunksjonellException;
 }
