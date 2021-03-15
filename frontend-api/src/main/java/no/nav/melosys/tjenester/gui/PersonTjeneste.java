@@ -59,9 +59,9 @@ public class PersonTjeneste {
         return ResponseEntity.ok(new PersonDto(personDokument));
     }
 
-    @GetMapping("{fnr}/gjeldeneAdresse")
-    @ApiOperation(value = "Henter gjeldene adresse for person fra TPS")
-    public ResponseEntity<UstrukturertAdresse> getGjeldeneAdresse(@PathVariable("fnr") String personnummer)
+    @GetMapping("{fnr}/gjeldendeAdresse")
+    @ApiOperation(value = "Henter gjeldende adresse for person fra TPS")
+    public ResponseEntity<UstrukturertAdresse> getGjeldendeAdresse(@PathVariable("fnr") String personnummer)
         throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
         if (personnummer == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
