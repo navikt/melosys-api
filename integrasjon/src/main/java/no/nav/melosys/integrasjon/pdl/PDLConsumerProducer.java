@@ -16,7 +16,7 @@ public class PDLConsumerProducer {
 
     @Bean
     public PDLConsumer pdlConsumer(WebClient.Builder webclientBuilder,
-                                   @Value("${melosys.integrations.pdl-url}") String pdlUrl,
+                                   @Value("${PDL.url}") String pdlUrl,
                                    PDLSystemAuthFilter pdlSystemAuthFilter) {
         return new PDLConsumerImpl(
             webclientBuilder
