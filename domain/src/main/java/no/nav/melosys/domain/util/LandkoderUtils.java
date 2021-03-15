@@ -7,17 +7,17 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 
 public final class LandkoderUtils {
     private static final BiMap<String, String> ISO2_ISO3 = HashBiMap.create();
-    private static final BiMap<String, String> ISO2_LANDNAVN = HashBiMap.create();
+    private static final BiMap<String, String> ISO2_TIL_EU_EOS_LANDNAVN = HashBiMap.create();
 
     static {
         Arrays.stream(Locale.getISOCountries())
             .forEach(c -> ISO2_ISO3.put(c, new Locale("", c).getISO3Country()));
-        Arrays.stream(Locale.getISOCountries())
-            .forEach(
-                c -> ISO2_LANDNAVN.put(c, new Locale("no", c, "nb").getDisplayCountry().toUpperCase()));
+        Arrays.stream(Landkoder.values())
+            .forEach(c -> ISO2_TIL_EU_EOS_LANDNAVN.put(c.getKode(), c.getBeskrivelse().toUpperCase()));
     }
 
     private LandkoderUtils() {
@@ -36,10 +36,10 @@ public final class LandkoderUtils {
         return ISO2_ISO3.inverse().get(iso3Kode);
     }
 
-    public static String tilIso2FraLandnavn(String landnavn) {
+    public static String tilIso2FraEuEosLandnavn(String landnavn) {
         if (landnavn == null) {
             throw new IllegalArgumentException("Landnavn kreves");
         }
-        return ISO2_LANDNAVN.inverse().get(landnavn.trim().toUpperCase());
+        return ISO2_TIL_EU_EOS_LANDNAVN.inverse().get(landnavn.trim().toUpperCase());
     }
 }
