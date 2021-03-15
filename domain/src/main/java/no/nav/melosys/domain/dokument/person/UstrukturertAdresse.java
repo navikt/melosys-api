@@ -30,6 +30,14 @@ public class UstrukturertAdresse {
 
     public Land land;
 
+    public String getPostnr() {
+        return postnr;
+    }
+
+    public void setPoststed(String poststed) {
+        this.poststed = poststed;
+    }
+
     @JsonIgnore
     public boolean erTom() {
         return StringUtils.isAllEmpty(
