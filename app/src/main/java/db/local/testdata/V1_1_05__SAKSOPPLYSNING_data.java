@@ -82,9 +82,6 @@ public class V1_1_05__SAKSOPPLYSNING_data extends BaseJavaMigration {
             case "pershist":
                 generateBatch(conn, dir, SaksopplysningType.PERSHIST, "3.4", SaksopplysningKildesystem.TPS);
                 return;
-            case XsltConfig.MEDL_MAPPE:
-                generateBatch(conn, dir, SaksopplysningType.MEDL, "2.0", SaksopplysningKildesystem.MEDL);
-                return;
             default:
                 throw new IllegalStateException("Unknown xml data directory: " + dir.getFilename());
         }
