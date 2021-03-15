@@ -54,8 +54,6 @@ public class BrevmottakerServiceTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private Behandling behandling;
-    @Mock
-    private MedlemAvFolketrygdenRepository medlemAvFolketrygdenRepository;
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -66,7 +64,7 @@ public class BrevmottakerServiceTest {
     @Before
     public void setup() throws TekniskException, IkkeFunnetException {
         brevmottakerService = new BrevmottakerService(kontaktopplysningService, avklarteVirksomheterService,
-            utenlandskMyndighetService, behandlingsresultatService, medlemAvFolketrygdenRepository);
+            utenlandskMyndighetService, behandlingsresultatService);
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(eq(behandling))).thenReturn(Sets.newHashSet("123456789", "987654321"));
         when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(eq(behandling))).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagAktoerUtenlandskMyndighet()));
 
@@ -160,8 +158,8 @@ public class BrevmottakerServiceTest {
     public void avklarMottakere_A001_CZerReservertFraA1_forventerMyndighetAktør() throws FunksjonellException, TekniskException {
         List<Aktoer> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ANMODNING_UNNTAK, Mottaker.av(MYNDIGHET), behandling);
         assertThat(myndigheter.stream()
-                .map(Aktoer::getInstitusjonId))
-                .containsExactly("CZ:SZUC10416");
+            .map(Aktoer::getInstitusjonId))
+            .containsExactly("CZ:SZUC10416");
     }
 
     @Test
@@ -185,7 +183,7 @@ public class BrevmottakerServiceTest {
                 emptyList()
             );
 
-        verifyNoInteractions(medlemAvFolketrygdenRepository);
+        verifyNoInteractions(behandlingsresultatService);
     }
 
     @Test
@@ -202,7 +200,7 @@ public class BrevmottakerServiceTest {
                 emptyList()
             );
 
-        verifyNoInteractions(medlemAvFolketrygdenRepository);
+        verifyNoInteractions(behandlingsresultatService);
     }
 
     @Test
@@ -221,7 +219,7 @@ public class BrevmottakerServiceTest {
                 emptyList()
             );
 
-        verifyNoInteractions(medlemAvFolketrygdenRepository);
+        verifyNoInteractions(behandlingsresultatService);
     }
 
     @Test
@@ -240,7 +238,7 @@ public class BrevmottakerServiceTest {
                 List.of(SKATT)
             );
 
-        verify(medlemAvFolketrygdenRepository).findByBehandlingsresultatId(anyLong());
+        verify(behandlingsresultatService).hentBehandlingsresultat(anyLong());
     }
 
     @Test
@@ -260,7 +258,7 @@ public class BrevmottakerServiceTest {
                 List.of(SKATT)
             );
 
-        verify(medlemAvFolketrygdenRepository).findByBehandlingsresultatId(anyLong());
+        verify(behandlingsresultatService).hentBehandlingsresultat(anyLong());
     }
 
     @Test
@@ -280,7 +278,7 @@ public class BrevmottakerServiceTest {
                 List.of(SKATT)
             );
 
-        verify(medlemAvFolketrygdenRepository).findByBehandlingsresultatId(anyLong());
+        verify(behandlingsresultatService).hentBehandlingsresultat(anyLong());
     }
 
     @Test
@@ -301,7 +299,7 @@ public class BrevmottakerServiceTest {
                 List.of(SKATT)
             );
 
-        verify(medlemAvFolketrygdenRepository).findByBehandlingsresultatId(anyLong());
+        verify(behandlingsresultatService).hentBehandlingsresultat(anyLong());
     }
 
     @Test
@@ -321,16 +319,17 @@ public class BrevmottakerServiceTest {
                 emptyList()
             );
 
-        verify(medlemAvFolketrygdenRepository).findByBehandlingsresultatId(anyLong());
+        verify(behandlingsresultatService).hentBehandlingsresultat(anyLong());
     }
 
-    private void initMocksForFtrlVedtaksbrev(Representerer representerer, Aktoersroller betaler, long norskinntekt) {
-        when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(anyLong())).thenReturn(lagMedlemAvFolketrygden(betaler, norskinntekt));
+    private void initMocksForFtrlVedtaksbrev(Representerer representerer, Aktoersroller betaler, long norskinntekt) throws Exception {
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setMedlemAvFolketrygden(lagMedlemAvFolketrygden(betaler, norskinntekt));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
         Fagsak fagsak = lagFagsakMedRepresentant(representerer);
         fagsak.setType(Sakstyper.FTRL);
         when(behandling.getFagsak()).thenReturn(fagsak);
     }
-
 
     private Fagsak lagFagsakMedRepresentant(Representerer representerer) {
         Fagsak fagsak = new Fagsak();
@@ -364,15 +363,7 @@ public class BrevmottakerServiceTest {
         return aktoer;
     }
 
-    private Behandling lagBehandling(Sakstyper sakstype, Fagsak fagsak) {
-        Behandling behandling = new Behandling();
-        fagsak.setType(sakstype);
-        behandling.setFagsak(fagsak);
-
-        return behandling;
-    }
-
-    private Optional<MedlemAvFolketrygden> lagMedlemAvFolketrygden(Aktoersroller betaler, long norskinntekt) {
+    private MedlemAvFolketrygden lagMedlemAvFolketrygden(Aktoersroller betaler, long norskinntekt) {
         MedlemAvFolketrygden medlemAvFolketrygden = new MedlemAvFolketrygden();
         FastsattTrygdeavgift fastsattTrygdeavgift = new FastsattTrygdeavgift();
         Aktoer betalesAv = new Aktoer();
@@ -382,6 +373,6 @@ public class BrevmottakerServiceTest {
         fastsattTrygdeavgift.setAvgiftspliktigNorskInntektMnd(norskinntekt);
 
         medlemAvFolketrygden.setFastsattTrygdeavgift(fastsattTrygdeavgift);
-        return Optional.of(medlemAvFolketrygden);
+        return medlemAvFolketrygden;
     }
 }

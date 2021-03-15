@@ -143,7 +143,7 @@ class SendVedtaksbrevInnlandTest {
             .thenReturn(Collections.singletonMap(new UtenlandskMyndighet(), new Aktoer()));
         KontaktopplysningService kontaktopplysningService = mock(KontaktopplysningService.class);
         BrevmottakerService brevmottakerService = new BrevmottakerService(kontaktopplysningService,
-            avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService, mock(MedlemAvFolketrygdenRepository.class));
+            avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService);
         return spy(new DokumentSystemService(behandlingService, brevDataService, dokSysFasade,
             brevmottakerService, brevDataByggerVelger, mock(BrevdataGrunnlagFactory.class)));
     }

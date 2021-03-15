@@ -16,7 +16,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -45,19 +44,16 @@ public class BrevmottakerService {
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final MedlemAvFolketrygdenRepository medlemAvFolketrygdenRepository;
 
     @Autowired
     public BrevmottakerService(KontaktopplysningService kontaktopplysningService,
                                AvklarteVirksomheterService avklarteVirksomheterService,
                                UtenlandskMyndighetService utenlandskMyndighetService,
-                               BehandlingsresultatService behandlingsresultatService,
-                               MedlemAvFolketrygdenRepository medlemAvFolketrygdenRepository) {
+                               BehandlingsresultatService behandlingsresultatService) {
         this.kontaktopplysningService = kontaktopplysningService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.behandlingsresultatService = behandlingsresultatService;
-        this.medlemAvFolketrygdenRepository = medlemAvFolketrygdenRepository;
     }
 
     Aktoersroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) throws TekniskException {
@@ -248,7 +244,8 @@ public class BrevmottakerService {
     }
 
     private FastsattTrygdeavgift hentFastsattTrygdeavgift(Behandling behandling) throws IkkeFunnetException {
-        MedlemAvFolketrygden medlemAvFolketrygden = medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandling.getId())
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+        MedlemAvFolketrygden medlemAvFolketrygden = ofNullable(behandlingsresultat.getMedlemAvFolketrygden())
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke medlemAvFolketrygden for behandlingsresultatID " + behandling.getId()));
 
         return medlemAvFolketrygden.getFastsattTrygdeavgift();

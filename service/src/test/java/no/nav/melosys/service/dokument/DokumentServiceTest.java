@@ -233,7 +233,7 @@ public final class DokumentServiceTest {
         BrevmottakerService brevmottakerService = new BrevmottakerService(mock(KontaktopplysningService.class),
             avklarteVirksomheterService,
             mock(UtenlandskMyndighetService.class),
-            behandlingsresultatService, mock(MedlemAvFolketrygdenRepository.class));
+            behandlingsresultatService);
         return new DokumentService(behandlingService, brevDataService, dokSysFasade, brevmottakerService, brevdatabyggervelger, lagBrevinput(persondataFasade, avklartefaktaService));
     }
 
