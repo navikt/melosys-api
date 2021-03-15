@@ -105,8 +105,7 @@ public class BrevbestillingTjeneste {
                             .build()
                     );
 
-                    var hjelpetekst = "Hvis arbeidsgiveren du ønsker å sende brev til ikke vises her, må du legge til denne i sidemenyen under «Arbeidsgiver/virksomhet». Det samme gjelder hvis du skal legge til kontaktopplysninger. \n" +
-                        "Hvis arbeidsgiveren ikke er en nåværende arbeidsgiver, kan du velge «Annen organisasjon» som mottaker og legge den til manuelt.";
+                    var hjelpetekst = "Hvis bruker eller arbeidsgiver har fullmektig som er lagt inn i sidemenyen, vil brevet automatisk bli sendt til denne.";
 
                     maler.add(lagBrevmalDto(MANGELBREV_BRUKER,
                         asList(
