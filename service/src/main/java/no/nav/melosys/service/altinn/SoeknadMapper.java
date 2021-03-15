@@ -11,11 +11,11 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.LoennOgGodtgjoerelse;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.ArbeidPaaLand;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.LuftfartBase;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.*;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Flyvningstyper;
 import no.nav.melosys.domain.kodeverk.Innretningstyper;
@@ -23,7 +23,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
 import no.nav.melosys.soknad_altinn.*;
 import org.apache.commons.lang3.StringUtils;
 
-import static no.nav.melosys.domain.util.LandkoderUtils.tilIso2FraLandnavn;
+import static no.nav.melosys.domain.util.LandkoderUtils.tilIso2FraEuEosLandnavn;
 
 public final class SoeknadMapper {
     private SoeknadMapper() {
@@ -209,7 +209,7 @@ public final class SoeknadMapper {
         foretakUtland.adresse.postnummer = postadresseUtland.getPostkode();
         foretakUtland.adresse.poststed = postadresseUtland.getBy();
         foretakUtland.adresse.region = postadresseUtland.getRegion();
-        foretakUtland.adresse.landkode = tilIso2FraLandnavn(postadresseUtland.getLand());
+        foretakUtland.adresse.landkode = tilIso2FraEuEosLandnavn(postadresseUtland.getLand());
         return foretakUtland;
     }
 
