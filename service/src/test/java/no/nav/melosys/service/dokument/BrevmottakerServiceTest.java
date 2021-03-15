@@ -1,16 +1,15 @@
 package no.nav.melosys.service.dokument;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.avgift.Trygdeavgiftsberegningsresultat;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
+import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
-import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -19,9 +18,9 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
+import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.junit.Before;
@@ -38,8 +37,8 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -53,6 +52,8 @@ public class BrevmottakerServiceTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
+    private TrygdeavgiftsberegningService trygdeavgiftsberegningService;
+    @Mock
     private Behandling behandling;
 
     @Rule
@@ -64,7 +65,7 @@ public class BrevmottakerServiceTest {
     @Before
     public void setup() throws TekniskException, IkkeFunnetException {
         brevmottakerService = new BrevmottakerService(kontaktopplysningService, avklarteVirksomheterService,
-            utenlandskMyndighetService, behandlingsresultatService);
+            utenlandskMyndighetService, behandlingsresultatService, trygdeavgiftsberegningService);
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(eq(behandling))).thenReturn(Sets.newHashSet("123456789", "987654321"));
         when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(eq(behandling))).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagAktoerUtenlandskMyndighet()));
 
@@ -183,7 +184,7 @@ public class BrevmottakerServiceTest {
                 emptyList()
             );
 
-        verifyNoInteractions(behandlingsresultatService);
+        verifyNoInteractions(trygdeavgiftsberegningService);
     }
 
     @Test
@@ -200,7 +201,7 @@ public class BrevmottakerServiceTest {
                 emptyList()
             );
 
-        verifyNoInteractions(behandlingsresultatService);
+        verifyNoInteractions(trygdeavgiftsberegningService);
     }
 
     @Test
@@ -219,12 +220,12 @@ public class BrevmottakerServiceTest {
                 emptyList()
             );
 
-        verifyNoInteractions(behandlingsresultatService);
+        verify(trygdeavgiftsberegningService).hentBeregningsresultat(anyLong());
     }
 
     @Test
     public void gittVedtakFtrl2_8UtenFullmektigIkkeSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
-        initMocksForFtrlVedtaksbrev(null, ARBEIDSGIVER, 10000);
+        initMocksForFtrlVedtaksbrev(null, 10000, false);
 
         assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling))
             .extracting(
@@ -238,12 +239,12 @@ public class BrevmottakerServiceTest {
                 List.of(SKATT)
             );
 
-        verify(behandlingsresultatService).hentBehandlingsresultat(anyLong());
+        verify(trygdeavgiftsberegningService).hentBeregningsresultat(anyLong());
     }
 
     @Test
     public void gittVedtakFtrl2_8UtenFullmektigSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
-        initMocksForFtrlVedtaksbrev(null, BRUKER, 10000);
+        initMocksForFtrlVedtaksbrev(null, 10000, true);
 
         assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling))
             .isNotNull()
@@ -258,12 +259,12 @@ public class BrevmottakerServiceTest {
                 List.of(SKATT)
             );
 
-        verify(behandlingsresultatService).hentBehandlingsresultat(anyLong());
+        verify(trygdeavgiftsberegningService).hentBeregningsresultat(anyLong());
     }
 
     @Test
     public void gittVedtakFtrl2_8FullmektigIkkeSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
-        initMocksForFtrlVedtaksbrev(Representerer.BRUKER, ARBEIDSGIVER, 10000);
+        initMocksForFtrlVedtaksbrev(Representerer.BRUKER, 10000, false);
 
         assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling))
             .isNotNull()
@@ -278,12 +279,12 @@ public class BrevmottakerServiceTest {
                 List.of(SKATT)
             );
 
-        verify(behandlingsresultatService).hentBehandlingsresultat(anyLong());
+        verify(trygdeavgiftsberegningService).hentBeregningsresultat(anyLong());
     }
 
     @Test
     public void gittVedtakFtrl2_8FullmektigSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
-        initMocksForFtrlVedtaksbrev(Representerer.BRUKER, BRUKER, 10000);
+        initMocksForFtrlVedtaksbrev(Representerer.BRUKER, 10000, true);
 
         Mottakerliste actual = brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling);
         assertThat(actual)
@@ -299,12 +300,12 @@ public class BrevmottakerServiceTest {
                 List.of(SKATT)
             );
 
-        verify(behandlingsresultatService).hentBehandlingsresultat(anyLong());
+        verify(trygdeavgiftsberegningService).hentBeregningsresultat(anyLong());
     }
 
     @Test
     public void gittVedtakFtrl2_8FullmektigIkkeSelvbetalendeIkkeInntekt_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
-        initMocksForFtrlVedtaksbrev(Representerer.BRUKER, ARBEIDSGIVER, 0);
+        initMocksForFtrlVedtaksbrev(Representerer.BRUKER, 0, false);
 
         assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling))
             .isNotNull()
@@ -319,13 +320,13 @@ public class BrevmottakerServiceTest {
                 emptyList()
             );
 
-        verify(behandlingsresultatService).hentBehandlingsresultat(anyLong());
+        verify(trygdeavgiftsberegningService).hentBeregningsresultat(anyLong());
     }
 
-    private void initMocksForFtrlVedtaksbrev(Representerer representerer, Aktoersroller betaler, long norskinntekt) throws Exception {
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setMedlemAvFolketrygden(lagMedlemAvFolketrygden(betaler, norskinntekt));
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+    private void initMocksForFtrlVedtaksbrev(Representerer representerer, long norskinntekt, boolean selvbetalende) throws Exception {
+        Trygdeavgiftsberegningsresultat trygdeavgiftsberegningsresultat = new Trygdeavgiftsberegningsresultat(norskinntekt, null, selvbetalende, emptyList());
+        when(trygdeavgiftsberegningService.hentBeregningsresultat(anyLong())).thenReturn(trygdeavgiftsberegningsresultat);
+
         Fagsak fagsak = lagFagsakMedRepresentant(representerer);
         fagsak.setType(Sakstyper.FTRL);
         when(behandling.getFagsak()).thenReturn(fagsak);
@@ -361,18 +362,5 @@ public class BrevmottakerServiceTest {
         aktoer.setRolle(MYNDIGHET);
         aktoer.setInstitusjonId("CZ:SZUC10416");
         return aktoer;
-    }
-
-    private MedlemAvFolketrygden lagMedlemAvFolketrygden(Aktoersroller betaler, long norskinntekt) {
-        MedlemAvFolketrygden medlemAvFolketrygden = new MedlemAvFolketrygden();
-        FastsattTrygdeavgift fastsattTrygdeavgift = new FastsattTrygdeavgift();
-        Aktoer betalesAv = new Aktoer();
-        betalesAv.setRolle(betaler);
-
-        fastsattTrygdeavgift.setBetalesAv(betalesAv);
-        fastsattTrygdeavgift.setAvgiftspliktigNorskInntektMnd(norskinntekt);
-
-        medlemAvFolketrygden.setFastsattTrygdeavgift(fastsattTrygdeavgift);
-        return medlemAvFolketrygden;
     }
 }

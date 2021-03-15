@@ -82,10 +82,10 @@ class TrygdeavgiftTjenesteTest extends JsonSchemaTestParent {
         return new Trygdeavgiftsberegningsresultat(
             100L,
             null,
+            true,
             Collections.singleton(new Avgiftsperiode(
                 LocalDate.now(), LocalDate.now(), Trygdedekninger.HELSEDEL, new BigDecimal("1.1"), new BigDecimal("1.1"), true)
-            )
-        );
+            ));
     }
 
     private Trygdeavgiftsgrunnlag lagTrygdeavgiftsgrunnlag() {

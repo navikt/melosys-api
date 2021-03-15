@@ -4,11 +4,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.avgift.Trygdeavgiftsberegningsresultat;
 import no.nav.melosys.domain.brev.BrevkopiRegel;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
-import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -18,6 +17,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
+import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.slf4j.Logger;
@@ -44,16 +44,18 @@ public class BrevmottakerService {
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final BehandlingsresultatService behandlingsresultatService;
+    private final TrygdeavgiftsberegningService trygdeavgiftsberegningService;
 
     @Autowired
     public BrevmottakerService(KontaktopplysningService kontaktopplysningService,
                                AvklarteVirksomheterService avklarteVirksomheterService,
                                UtenlandskMyndighetService utenlandskMyndighetService,
-                               BehandlingsresultatService behandlingsresultatService) {
+                               BehandlingsresultatService behandlingsresultatService, TrygdeavgiftsberegningService trygdeavgiftsberegningService) {
         this.kontaktopplysningService = kontaktopplysningService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.behandlingsresultatService = behandlingsresultatService;
+        this.trygdeavgiftsberegningService = trygdeavgiftsberegningService;
     }
 
     Aktoersroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) throws TekniskException {
@@ -222,7 +224,7 @@ public class BrevmottakerService {
         }
     }
 
-    private void leggTilKopier(Behandling behandling, Mottakerliste mottakerliste, Collection<BrevkopiRegel> brevkopiRegler) throws FunksjonellException {
+    private void leggTilKopier(Behandling behandling, Mottakerliste mottakerliste, Collection<BrevkopiRegel> brevkopiRegler) {
         boolean brukerHarFullmektig = behandling.getFagsak().hentRepresentant(Representerer.BRUKER).isPresent();
 
         if (brevkopiRegler.contains(BRUKER_FÅR_KOPI) ||
@@ -230,24 +232,25 @@ public class BrevmottakerService {
             mottakerliste.getKopiMottakere().add(BRUKER);
         }
 
-        if (erSakstypeFtrl(behandling.getFagsak().getType())) {
-            FastsattTrygdeavgift fastsattTrygdeavgift = hentFastsattTrygdeavgift(behandling);
+        Trygdeavgiftsberegningsresultat trygdeavgiftsberegningsresultat = hentTrygdeavgiftresultat(behandling);
 
-            if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER) && fastsattTrygdeavgift.ikkeSelvbetalendeBruker()) {
+        if (erSakstypeFtrl(behandling.getFagsak().getType()) && trygdeavgiftsberegningsresultat != null) {
+            if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER) && trygdeavgiftsberegningsresultat.ikkeSelvbetalendeBruker()) {
                 mottakerliste.getKopiMottakere().add(ARBEIDSGIVER);
             }
 
-            if (brevkopiRegler.contains(SKATT_FÅR_KOPI_HVIS_AVGIFTSPLIKTIG_INNTEKT) && fastsattTrygdeavgift.harAvgiftspliktigInntekt()) {
+            if (brevkopiRegler.contains(SKATT_FÅR_KOPI_HVIS_AVGIFTSPLIKTIG_INNTEKT) && trygdeavgiftsberegningsresultat.harAvgiftspliktigInntekt()) {
                 mottakerliste.getFasteMottakere().add(SKATT);
             }
         }
     }
 
-    private FastsattTrygdeavgift hentFastsattTrygdeavgift(Behandling behandling) throws IkkeFunnetException {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        MedlemAvFolketrygden medlemAvFolketrygden = ofNullable(behandlingsresultat.getMedlemAvFolketrygden())
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke medlemAvFolketrygden for behandlingsresultatID " + behandling.getId()));
-
-        return medlemAvFolketrygden.getFastsattTrygdeavgift();
+    private Trygdeavgiftsberegningsresultat hentTrygdeavgiftresultat(Behandling behandling) {
+        try {
+            return trygdeavgiftsberegningService.hentBeregningsresultat(behandling.getId());
+        } catch (IkkeFunnetException e) {
+            // I dette tilfellet er det ikke vesentlig om noe resultat ikke blir funnet
+            return null;
+        }
     }
 }
