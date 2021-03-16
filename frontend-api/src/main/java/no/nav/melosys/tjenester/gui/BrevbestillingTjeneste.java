@@ -84,13 +84,33 @@ public class BrevbestillingTjeneste {
                     ));
                     break;
                 case MANGELBREV_BRUKER:
-                    List<MottakerDto> mottakere = new ArrayList<>();
-                    mottakere.add(
-                        new MottakerDto.Builder()
+                    maler.add(lagBrevmalDto(MANGELBREV_BRUKER,
+                        asList(
+                            new BrevmalFeltDto.Builder()
+                                .medKode("INNLEDNING_FRITEKST")
+                                .medBeskrivelse("Fritekst til innledning")
+                                .medFeltType(FeltType.FRITEKST)
+                                .medHjelpetekst("")
+                                .medValg(new FeltvalgDto.Builder().medKode("STANDARD").medBeskrivelse("Standardtekst søknad/klage").build())
+                                .medValg(new FeltvalgDto.Builder().medKode("FRITEKST").medBeskrivelse("Fritekst (erstatter standardtekst)").build())
+                                .build(),
+                            new BrevmalFeltDto.Builder()
+                                .medKode("MANGLER_FRITEKST")
+                                .medBeskrivelse("Fritekst om manglende dokumentasjon")
+                                .medFeltType(FeltType.FRITEKST)
+                                .medHjelpetekst("")
+                                .erPåkrevd()
+                                .build()
+                        ),
+                        singletonList(new MottakerDto.Builder()
                             .medType("Bruker eller brukers fullmektig")
                             .medRolle(Aktoersroller.BRUKER)
-                            .build()
-                    );
+                            .build()),
+                        "Hvis bruker eller arbeidsgiver har fullmektig som er lagt inn i sidemenyen, vil brevet automatisk bli sendt til denne."
+                    ));
+                    break;
+                case MANGELBREV_ARBEIDSGIVER:
+                    List<MottakerDto> mottakere = new ArrayList<>();
                     mottakere.add(
                         new MottakerDto.Builder()
                             .medType("Arbeidsgiver eller arbeidsgivers fullmektig")
@@ -104,8 +124,6 @@ public class BrevbestillingTjeneste {
                             .frittValg()
                             .build()
                     );
-
-                    var hjelpetekst = "Hvis bruker eller arbeidsgiver har fullmektig som er lagt inn i sidemenyen, vil brevet automatisk bli sendt til denne.";
 
                     maler.add(lagBrevmalDto(MANGELBREV_BRUKER,
                         asList(
@@ -126,7 +144,7 @@ public class BrevbestillingTjeneste {
                                 .build()
                         ),
                         mottakere,
-                        hjelpetekst
+                        "Hvis bruker eller arbeidsgiver har fullmektig som er lagt inn i sidemenyen, vil brevet automatisk bli sendt til denne."
                     ));
                     break;
                 default:
