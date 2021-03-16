@@ -58,7 +58,7 @@ public class Trygdeavgiftsberegningsresultat {
         return new Trygdeavgiftsberegningsresultat(
             fastsattTrygdeavgift.getAvgiftspliktigNorskInntektMnd(),
             fastsattTrygdeavgift.getAvgiftspliktigUtenlandskInntektMnd(),
-            isEmpty(fastsattTrygdeavgift.getBetalesAv()),
+            fastsattTrygdeavgift.getBetalesAv() == null || fastsattTrygdeavgift.getBetalesAv().getRolle() == BRUKER,
             medlemAvFolketrygden.getMedlemskapsperioder()
                 .stream()
                 .flatMap(m -> Avgiftsperiode.lagAvgiftsperioder(m).stream())
