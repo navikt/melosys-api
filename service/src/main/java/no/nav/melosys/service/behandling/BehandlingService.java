@@ -1,10 +1,5 @@
 package no.nav.melosys.service.behandling;
 
-import java.lang.reflect.InvocationTargetException;
-import java.time.Instant;
-import java.time.Period;
-import java.util.*;
-
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
@@ -30,8 +25,15 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
+import java.time.Period;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import static java.util.stream.Collectors.toList;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.metrics.MetrikkerNavn.*;
 
 @Service
@@ -120,7 +122,7 @@ public class BehandlingService {
 
     /**
      * Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas,
-     *  eller for å avslutte behandling ved behandlingstype VURDER_TRYGDETID
+     * eller for å avslutte behandling ved behandlingstype VURDER_TRYGDETID
      */
     public void brukerOppdaterStatus(long behandlingID, Behandlingsstatus status)
         throws FunksjonellException, TekniskException {
@@ -134,6 +136,25 @@ public class BehandlingService {
 
     private boolean erNesteStatusEtterDokumentVurderingUlovlig(Behandlingsstatus status) {
         return !Set.of(UNDER_BEHANDLING, AVVENT_DOK_PART, AVVENT_DOK_UTL, ANMODNING_UNNTAK_SENDT).contains(status);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Behandlingsstatus> hentMuligeStatuser(long behandlingId) throws IkkeFunnetException {
+        Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingId);
+        return hentMuligeStatuser(behandling);
+    }
+
+    private List<Behandlingsstatus> hentMuligeStatuser(Behandling behandling) {
+        List<Behandlingsstatus> muligeStatuser = List.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING).stream()
+            .filter(status -> status != behandling.getStatus())
+            .collect(Collectors.toList());
+
+        List<Behandlingstema> temaerSomKanAvsluttes = List.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM, TRYGDETID, IKKE_YRKESAKTIV);
+        if (temaerSomKanAvsluttes.contains(behandling.getTema())) {
+            muligeStatuser.add(Behandlingsstatus.AVSLUTTET);
+        }
+
+        return muligeStatuser;
     }
 
     @Transactional

@@ -1,13 +1,11 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.Collections;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.DokumentView;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
@@ -28,10 +26,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.Collections;
+import java.util.List;
+
 @Protected
 @RestController
 @RequestMapping("/behandlinger")
-@Api(tags = { "behandlinger" })
+@Api(tags = {"behandlinger"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class BehandlingTjeneste {
 
@@ -67,6 +68,17 @@ public class BehandlingTjeneste {
         tilgangService.sjekkTilgang(behandlingID);
         behandlingService.brukerOppdaterStatus(behandlingID, status.getBehandlingsstatus());
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("{behandlingID}/muligeStatuser")
+    @ApiOperation("Hent mulige nye behandlingsstatuser for en behandling")
+    public ResponseEntity<List<Behandlingsstatus>> hentMuligeStatuser(@PathVariable("behandlingID") long behandlingID)
+        throws MelosysException {
+        log.info("Saksbehandler {} ber om å hente mulige nye behandlingsstatuser for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
+        tilgangService.sjekkTilgang(behandlingID);
+
+        List<Behandlingsstatus> muligeBehandlingsstatuser = behandlingService.hentMuligeStatuser(behandlingID);
+        return ResponseEntity.ok(muligeBehandlingsstatuser);
     }
 
     @PostMapping("{behandlingID}/tidligeremedlemsperioder")
@@ -113,7 +125,7 @@ public class BehandlingTjeneste {
     @GetMapping("{behandlingID}/muligeBehandlingstema")
     @ApiOperation(value = "Hent mulige nye behandlingstema for en behandling")
     public ResponseEntity<List<Behandlingstema>> hentEndreBehandlingstema(@PathVariable("behandlingID") long behandlingsID)
-        throws MelosysException{
+        throws MelosysException {
         log.debug("Saksbehandler {} ber om å hente mulige nye behandlingstema for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingsID);
         try {
             tilgangService.sjekkRedigerbarOgTilordnetSaksbehandlerOgTilgang(behandlingsID);
@@ -128,7 +140,7 @@ public class BehandlingTjeneste {
     @PostMapping("{behandlingID}/endreBehandlingstema")
     @ApiOperation(value = "Endre behandlingstema for en gitt behandling")
     public ResponseEntity<Void> endreBehandlingstema(@PathVariable("behandlingID") long behandlingsID, @RequestBody EndreBehandlingstemaDto endreBehandlingstemaDto)
-        throws MelosysException{
+        throws MelosysException {
         log.debug("Saksbehandler {} ber om å sette behandlingstema for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingsID, endreBehandlingstemaDto);
         tilgangService.sjekkRedigerbarOgTilordnetSaksbehandlerOgTilgang(behandlingsID);
 
