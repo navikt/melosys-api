@@ -43,7 +43,7 @@ public class BrevbestillingTjeneste {
         this.brevbestillingService = brevbestillingService;
     }
 
-    @GetMapping(value = "/tilgjengelige-maler", produces = APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/tilgjengelige-maler/{behandlingID}", produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Henter alle tilgjengelige brevmaler for en behandling", response = BrevmalDto.class, responseContainer = "List")
     public List<BrevmalDto> hentTilgjengeligeMaler(@RequestParam Long behandlingId) throws IkkeFunnetException {
         return byggBrevmalListe(behandlingId);
