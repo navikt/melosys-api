@@ -21,7 +21,7 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
@@ -45,7 +45,7 @@ public class BrevDataServiceTest {
     @Mock
     private SaksbehandlerService saksbehandlerService;
     @Mock
-    private TpsFasade tpsFasade;
+    private PersondataFasade persondataFasade;
     @Mock
     private UtenlandskMyndighetRepository utenlandskMyndighetRepository;
 
@@ -60,12 +60,12 @@ public class BrevDataServiceTest {
 
     @Before
     public void setUp() throws FunksjonellException, TekniskException {
-        service = spy(new BrevDataService(behandlingsresultatRepository, saksbehandlerService, tpsFasade, utenlandskMyndighetRepository));
+        service = spy(new BrevDataService(behandlingsresultatRepository, saksbehandlerService, persondataFasade, utenlandskMyndighetRepository));
 
         when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(new Behandlingsresultat()));
         when(saksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Joe Moe");
-        when(tpsFasade.hentIdentForAktørId(any())).thenReturn(FNR);
-        when(tpsFasade.hentSammensattNavn(anyString())).thenReturn(sammensattNavn);
+        when(persondataFasade.hentIdentForAktørId(any())).thenReturn(FNR);
+        when(persondataFasade.hentSammensattNavn(anyString())).thenReturn(sammensattNavn);
         lagUtenlandskMyndighet();
     }
 

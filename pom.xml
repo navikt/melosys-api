@@ -34,7 +34,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>11</java.version>
+        <java.version>15</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
@@ -46,7 +46,6 @@
         <!-- NAV -->
         <nav.tjenestespesifikasjoner.version>1.2020.01.09-12.44-3713b7c04e1c</nav.tjenestespesifikasjoner.version>
         <abac.spring.version>1.6.0</abac.spring.version>
-        <behandle-medlemskap-v2.version>2.2.1</behandle-medlemskap-v2.version>
         <behandlingstatus.version>1.1.0</behandlingstatus.version>
         <doksys.dokumentproduksjon.version>3.3.4</doksys.dokumentproduksjon.version>
         <joark.journalfoerinngaaende.version>0.0.21</joark.journalfoerinngaaende.version>
@@ -66,6 +65,7 @@
         <logstash.version>6.6</logstash.version>
         <hikaricp.version>3.3.0</hikaricp.version>
         <ibmmq.version>9.0.5.0</ibmmq.version>
+        <jackson.version>2.12.2</jackson.version>
         <javax.ws.rs-api.version>2.1</javax.ws.rs-api.version>
         <json-smart.version>2.3</json-smart.version>
         <jms-api.version>2.0.1</jms-api.version>
@@ -185,7 +185,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
-                <version>${jackson-bom.version}</version>
+                <version>${jackson.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -474,16 +474,6 @@
             </dependency>
             <!--MEDL2 -->
             <dependency>
-                <groupId>no.nav.tjenestespesifikasjoner</groupId>
-                <artifactId>nav-medlemskap-v2-tjenestespesifikasjon</artifactId>
-                <version>${nav.tjenestespesifikasjoner.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.tjenester</groupId>
-                <artifactId>nav-behandleMedlemskap-v2-tjenestespesifikasjon</artifactId>
-                <version>${behandle-medlemskap-v2.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>no.nav.tjenester</groupId>
                 <artifactId>medlemskapsunntak-api-v1</artifactId>
                 <version>${medlemskapsunntak-api-v1.version}</version>
@@ -637,7 +627,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
                     <configuration>
-                        <argLine>-Xms256m -Dfile.encoding=UTF-8</argLine>
+                        <argLine>-Xms256m -Dfile.encoding=UTF-8 --enable-preview</argLine>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -671,6 +661,7 @@
                 <configuration>
                     <release>${java.version}</release>
                     <encoding>UTF-8</encoding>
+                    <compilerArgs>--enable-preview</compilerArgs>
                 </configuration>
             </plugin>
             <plugin>

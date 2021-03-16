@@ -21,9 +21,8 @@ public class SoknadMottakConsumerProducer {
     }
 
     @Bean
-    public SoknadMottakConsumer soknadMottakConsumer(SystemContextClientRequestInterceptor interceptor,
-                                                     RestTemplateBuilder restTemplateBuilder) {
-        RestTemplate restTemplate = restTemplateBuilder.rootUri(url)
+    public SoknadMottakConsumer soknadMottakConsumer(SystemContextClientRequestInterceptor interceptor) {
+        RestTemplate restTemplate = new RestTemplateBuilder().rootUri(url)
             .additionalMessageConverters(new Jaxb2RootElementHttpMessageConverter(), new MappingJackson2HttpMessageConverter())
             .build();
         restTemplate.setInterceptors(Collections.singletonList(interceptor));

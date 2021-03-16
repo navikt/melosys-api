@@ -3,15 +3,19 @@ package no.nav.melosys.service.medl;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.exception.*;
-import no.nav.melosys.integrasjon.medl.*;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
+import no.nav.melosys.integrasjon.medl.MedlRestService;
+import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.repository.AnmodningsperiodeRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.repository.UtpekingsperiodeRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -19,11 +23,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class MedlPeriodeService {
     private static final Logger log = LoggerFactory.getLogger(MedlPeriodeService.class);
-    public static final String UNLEASH_MEDL = "melosys.medl.rest";
 
-    private final Unleash unleash;
-    private final TpsFasade tpsFasade;
-    private final MedlSoapService medlSoapService;
+    private final PersondataFasade persondataFasade;
     private final MedlRestService medlRestService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final LovvalgsperiodeRepository lovvalgsperiodeRepository;
@@ -32,17 +33,13 @@ public class MedlPeriodeService {
 
     private static final String FEIL_VED_OPPDATERING_MEDL = "Opprettelse av periode i MEDL feilet med retur av null medlPeriodeID fra MEDL tjeneste for behandling ";
 
-    public MedlPeriodeService(Unleash unleash,
-                              TpsFasade tpsFasade,
-                              MedlSoapService medlSoapService,
+    public MedlPeriodeService(PersondataFasade persondataFasade,
                               MedlRestService medlRestService,
                               BehandlingsresultatService behandlingsresultatService,
                               LovvalgsperiodeRepository lovvalgsperiodeRepository,
                               AnmodningsperiodeRepository anmodningsperiodeRepository,
                               UtpekingsperiodeRepository utpekingsperiodeRepository) {
-        this.unleash = unleash;
-        this.tpsFasade = tpsFasade;
-        this.medlSoapService = medlSoapService;
+        this.persondataFasade = persondataFasade;
         this.medlRestService = medlRestService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.lovvalgsperiodeRepository = lovvalgsperiodeRepository;
@@ -50,39 +47,39 @@ public class MedlPeriodeService {
         this.utpekingsperiodeRepository = utpekingsperiodeRepository;
     }
 
-    public Saksopplysning hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
-        return hentMedlFasade().hentPeriodeListe(fnr, fom, tom);
+    public Saksopplysning hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom) throws TekniskException {
+        return medlRestService.hentPeriodeListe(fnr, fom, tom);
     }
 
     public void opprettPeriodeForeløpig(PeriodeOmLovvalg periodeOmLovvalg, Long behandlingID, boolean erSed) throws TekniskException, FunksjonellException {
         log.info("Oppretter foreløpig periode i MEDL for behandling {}", behandlingID);
         String fnr = hentFnr(behandlingID);
-        Long medlPeriodeID = hentMedlFasade().opprettPeriodeForeløpig(fnr, periodeOmLovvalg, hentKildedokumenttype(erSed));
+        Long medlPeriodeID = medlRestService.opprettPeriodeForeløpig(fnr, periodeOmLovvalg, hentKildedokumenttype(erSed));
         lagreMedlPeriodeId(medlPeriodeID, periodeOmLovvalg, behandlingID);
     }
 
     public void opprettPeriodeUnderAvklaring(PeriodeOmLovvalg periodeOmLovvalg, Long behandlingID, boolean erSed) throws TekniskException, FunksjonellException {
         log.info("Oppretter periode under avklaring i MEDL for behandling {}", behandlingID);
         String fnr = hentFnr(behandlingID);
-        Long medlPeriodeID = hentMedlFasade().opprettPeriodeUnderAvklaring(fnr, periodeOmLovvalg, hentKildedokumenttype(erSed));
+        Long medlPeriodeID = medlRestService.opprettPeriodeUnderAvklaring(fnr, periodeOmLovvalg, hentKildedokumenttype(erSed));
         lagreMedlPeriodeId(medlPeriodeID, periodeOmLovvalg, behandlingID);
     }
 
     public void opprettPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, Long behandlingID, boolean erSed) throws TekniskException, FunksjonellException {
         String fnr = hentFnr(behandlingID);
         log.info("Oppretter endelig periode i MEDL for behandling {}", behandlingID);
-        Long medlPeriodeID = hentMedlFasade().opprettPeriodeEndelig(fnr, lovvalgsperiode, hentKildedokumenttype(erSed));
+        Long medlPeriodeID = medlRestService.opprettPeriodeEndelig(fnr, lovvalgsperiode, hentKildedokumenttype(erSed));
         lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandlingID);
     }
 
     public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, boolean erSed) throws FunksjonellException, TekniskException {
         log.info("Oppdaterer MEDL-periode {} til status endelig", lovvalgsperiode.getMedlPeriodeID());
-        hentMedlFasade().oppdaterPeriodeEndelig(lovvalgsperiode, hentKildedokumenttype(erSed));
+        medlRestService.oppdaterPeriodeEndelig(lovvalgsperiode, hentKildedokumenttype(erSed));
     }
 
-    public void oppdaterPeriodeForeløpig(Lovvalgsperiode lovvalgsperiode, boolean erSed) throws FunksjonellException, TekniskException {
+    public void oppdaterPeriodeForeløpig(Lovvalgsperiode lovvalgsperiode, boolean erSed) throws TekniskException {
         log.info("Oppdaterer MEDL-periode {} til status foreløpig", lovvalgsperiode.getMedlPeriodeID());
-        hentMedlFasade().oppdaterPeriodeForeløpig(lovvalgsperiode, hentKildedokumenttype(erSed));
+        medlRestService.oppdaterPeriodeForeløpig(lovvalgsperiode, hentKildedokumenttype(erSed));
     }
 
     public void avvisPeriode(Long medlPeriodeID) throws SikkerhetsbegrensningException, IkkeFunnetException {
@@ -113,18 +110,14 @@ public class MedlPeriodeService {
     }
 
     private void avvisPeriode(long medlPeriodeId, StatusaarsakMedl statusaarsakMedl) throws SikkerhetsbegrensningException, IkkeFunnetException {
-        hentMedlFasade().avvisPeriode(medlPeriodeId, statusaarsakMedl);
-    }
-
-    private MedlFasade hentMedlFasade(){
-        return unleash.isEnabled(UNLEASH_MEDL) ? medlRestService : medlSoapService;
+        medlRestService.avvisPeriode(medlPeriodeId, statusaarsakMedl);
     }
 
     private String hentFnr(Long behandlingID) throws TekniskException, IkkeFunnetException {
         Behandling behandling = behandlingsresultatService.hentBehandlingsresultat(behandlingID).getBehandling();
         Fagsak fagsak = behandling.getFagsak();
         Aktoer bruker = fagsak.hentBruker();
-        return tpsFasade.hentIdentForAktørId(bruker.getAktørId());
+        return persondataFasade.hentIdentForAktørId(bruker.getAktørId());
     }
 
     private Optional<Lovvalgsperiode> finnLovvalgsperiode(Behandling behandling) throws IkkeFunnetException {

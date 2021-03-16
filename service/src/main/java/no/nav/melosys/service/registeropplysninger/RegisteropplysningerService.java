@@ -17,7 +17,7 @@ import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.inntk.InntektService;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -53,7 +53,7 @@ public class RegisteropplysningerService {
             .put(SaksopplysningType.UTBETAL, this::hentUtbetalingsopplysninger)
             .build());
 
-    private final TpsFasade tpsFasade;
+    private final PersondataFasade persondataFasade;
     private final MedlPeriodeService medlPeriodeService;
     private final EregFasade eregFasade;
     private final AaregFasade aaregFasade;
@@ -65,7 +65,7 @@ public class RegisteropplysningerService {
     private final RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory;
 
     @Autowired
-    public RegisteropplysningerService(@Qualifier("system") TpsFasade tpsFasade,
+    public RegisteropplysningerService(@Qualifier("system") PersondataFasade persondataFasade,
                                        MedlPeriodeService medlPeriodeService, @Qualifier("system") EregFasade eregFasade,
                                        AaregFasade aaregFasade,
                                        BehandlingService behandlingService,
@@ -75,7 +75,7 @@ public class RegisteropplysningerService {
                                        SaksopplysningerService saksopplysningerService,
                                        RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory
     ) {
-        this.tpsFasade = tpsFasade;
+        this.persondataFasade = persondataFasade;
         this.medlPeriodeService = medlPeriodeService;
         this.eregFasade = eregFasade;
         this.aaregFasade = aaregFasade;
@@ -144,7 +144,7 @@ public class RegisteropplysningerService {
     }
 
     private List<Saksopplysning> hentPersonopplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
-        Saksopplysning saksopplysning = tpsFasade.hentPerson(registeropplysningerRequest.getFnr(), registeropplysningerRequest.getInformasjonsbehov());
+        Saksopplysning saksopplysning = persondataFasade.hentPerson(registeropplysningerRequest.getFnr(), registeropplysningerRequest.getInformasjonsbehov());
         return List.of(saksopplysning);
     }
 
@@ -206,12 +206,12 @@ public class RegisteropplysningerService {
     }
 
     private List<Saksopplysning> hentPersonhistorikk(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        Saksopplysning saksopplysning = tpsFasade.hentPersonhistorikk(registeropplysningerRequest.getFnr(), registeropplysningerRequest.getFom());
+        Saksopplysning saksopplysning = persondataFasade.hentPersonhistorikk(registeropplysningerRequest.getFnr(), registeropplysningerRequest.getFom());
         return List.of(saksopplysning);
     }
 
     private List<Saksopplysning> hentSakOgBehandlingSaker(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) throws IkkeFunnetException, IntegrasjonException {
-        String aktørId = tpsFasade.hentAktørIdForIdent(registeropplysningerRequest.getFnr());
+        String aktørId = persondataFasade.hentAktørIdForIdent(registeropplysningerRequest.getFnr());
         Saksopplysning saksopplysning = sobService.finnSakOgBehandlingskjedeListe(aktørId);
 
         return List.of(saksopplysning);

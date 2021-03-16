@@ -173,14 +173,6 @@
 
         <!--MEDL2-->
         <dependency>
-            <groupId>no.nav.tjenestespesifikasjoner</groupId>
-            <artifactId>nav-medlemskap-v2-tjenestespesifikasjon</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.tjenester</groupId>
-            <artifactId>nav-behandleMedlemskap-v2-tjenestespesifikasjon</artifactId>
-        </dependency>
-        <dependency>
             <groupId>no.nav.tjenester</groupId>
             <artifactId>medlemskapsunntak-api-v1</artifactId>
         </dependency>

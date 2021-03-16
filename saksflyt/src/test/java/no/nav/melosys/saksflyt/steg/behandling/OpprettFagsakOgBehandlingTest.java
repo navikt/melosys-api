@@ -10,7 +10,7 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +29,7 @@ class OpprettFagsakOgBehandlingTest {
     @Mock
     private FagsakService fagsakService;
     @Mock
-    private TpsFasade tpsFasade;
+    private PersondataFasade persondataFasade;
 
     private OpprettFagsakOgBehandling opprettFagsakOgBehandling;
 
@@ -38,7 +38,7 @@ class OpprettFagsakOgBehandlingTest {
 
     @BeforeEach
     public void setUp() {
-        opprettFagsakOgBehandling = new OpprettFagsakOgBehandling(fagsakService, tpsFasade);
+        opprettFagsakOgBehandling = new OpprettFagsakOgBehandling(fagsakService, persondataFasade);
     }
 
     @Test

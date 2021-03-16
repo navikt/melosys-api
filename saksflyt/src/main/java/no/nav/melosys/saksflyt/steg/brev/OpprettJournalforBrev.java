@@ -14,7 +14,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -38,20 +38,20 @@ public class OpprettJournalforBrev implements StegBehandler {
     private final BehandlingService behandlingService;
     private final DokgenService dokgenService;
     private final JoarkFasade joarkFasade;
-    private final TpsFasade tpsFasade;
+    private final PersondataFasade persondataFasade;
     private final EregFasade eregFasade;
     private final KontaktopplysningService kontaktopplysningService;
 
     @Autowired
     public OpprettJournalforBrev(BehandlingService behandlingService, DokgenService dokgenService,
                                  @Qualifier("system") JoarkFasade joarkFasade,
-                                 @Qualifier("system") TpsFasade tpsFasade,
+                                 @Qualifier("system") PersondataFasade persondataFasade,
                                  @Qualifier("system") EregFasade eregFasade,
                                  KontaktopplysningService kontaktopplysningService) {
         this.behandlingService = behandlingService;
         this.dokgenService = dokgenService;
         this.joarkFasade = joarkFasade;
-        this.tpsFasade = tpsFasade;
+        this.persondataFasade = persondataFasade;
         this.eregFasade = eregFasade;
         this.kontaktopplysningService = kontaktopplysningService;
     }
@@ -82,8 +82,8 @@ public class OpprettJournalforBrev implements StegBehandler {
         }
 
         if (isEmpty(orgnr)) {
-            fnr = tpsFasade.hentIdentForAktørId(aktørId);
-            sammensattNavn = tpsFasade.hentSammensattNavn(fnr);
+            fnr = persondataFasade.hentIdentForAktørId(aktørId);
+            sammensattNavn = persondataFasade.hentSammensattNavn(fnr);
         } else {
             //Hvis tilknyttet kontaktopplysning er en org benyttes denne som mottaker
             Kontaktopplysning kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), orgnr).orElse(null);

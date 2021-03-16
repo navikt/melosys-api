@@ -5,7 +5,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
@@ -25,13 +25,13 @@ public class HentRegisteropplysninger implements StegBehandler {
 
     private final RegisteropplysningerService registeropplysningerService;
     private final BehandlingService behandlingService;
-    private final TpsFasade tpsFasade;
+    private final PersondataFasade persondataFasade;
 
     @Autowired
-    public HentRegisteropplysninger(RegisteropplysningerService registeropplysningerService, BehandlingService behandlingService, TpsFasade tpsFasade) {
+    public HentRegisteropplysninger(RegisteropplysningerService registeropplysningerService, BehandlingService behandlingService, PersondataFasade persondataFasade) {
         this.registeropplysningerService = registeropplysningerService;
         this.behandlingService = behandlingService;
-        this.tpsFasade = tpsFasade;
+        this.persondataFasade = persondataFasade;
     }
 
     @Override
@@ -43,7 +43,7 @@ public class HentRegisteropplysninger implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
 
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
-        String brukerId = tpsFasade.hentIdentForAktørId(behandling.getFagsak().hentBruker().getAktørId());
+        String brukerId = persondataFasade.hentIdentForAktørId(behandling.getFagsak().hentBruker().getAktørId());
 
 
         var registeropplysningerRequestBuilder = RegisteropplysningerRequest.builder()

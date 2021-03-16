@@ -5,6 +5,8 @@ import javax.persistence.*;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer;
 
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
+
 @Entity
 @Table(name = "fastsatt_trygdeavgift")
 public class FastsattTrygdeavgift {
@@ -87,5 +89,14 @@ public class FastsattTrygdeavgift {
 
     public void setAvgiftspliktigUtenlandskInntektMnd(Long avgiftspliktigUtenlandskInntektMnd) {
         this.avgiftspliktigUtenlandskInntektMnd = avgiftspliktigUtenlandskInntektMnd;
+    }
+
+    public boolean harAvgiftspliktigInntekt() {
+        return !((this.getAvgiftspliktigNorskInntektMnd() == null || this.getAvgiftspliktigNorskInntektMnd() == 0) &&
+            (this.getAvgiftspliktigUtenlandskInntektMnd() == null || this.getAvgiftspliktigUtenlandskInntektMnd() == 0));
+    }
+
+    public boolean ikkeSelvbetalendeBruker() {
+        return this.getBetalesAv().getRolle() != BRUKER;
     }
 }

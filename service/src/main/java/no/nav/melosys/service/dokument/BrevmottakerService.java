@@ -4,7 +4,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.brev.BrevkopiRegel;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.brev.Mottakerliste;
+import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -12,6 +16,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -21,7 +26,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import static java.util.Optional.ofNullable;
+import static no.nav.melosys.domain.Fagsak.erSakstypeFtrl;
 import static no.nav.melosys.domain.Preferanse.PreferanseEnum.RESERVERT_FRA_A1;
+import static no.nav.melosys.domain.brev.BrevkopiRegel.*;
+import static no.nav.melosys.domain.brev.FastMottaker.SKATT;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 
@@ -36,15 +45,19 @@ public class BrevmottakerService {
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final BehandlingsresultatService behandlingsresultatService;
+    private final MedlemAvFolketrygdenRepository medlemAvFolketrygdenRepository;
 
     @Autowired
     public BrevmottakerService(KontaktopplysningService kontaktopplysningService,
                                AvklarteVirksomheterService avklarteVirksomheterService,
-                               UtenlandskMyndighetService utenlandskMyndighetService, BehandlingsresultatService behandlingsresultatService) {
+                               UtenlandskMyndighetService utenlandskMyndighetService,
+                               BehandlingsresultatService behandlingsresultatService,
+                               MedlemAvFolketrygdenRepository medlemAvFolketrygdenRepository) {
         this.kontaktopplysningService = kontaktopplysningService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.behandlingsresultatService = behandlingsresultatService;
+        this.medlemAvFolketrygdenRepository = medlemAvFolketrygdenRepository;
     }
 
     Aktoersroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) throws TekniskException {
@@ -79,6 +92,23 @@ public class BrevmottakerService {
             throw new FunksjonellException(mottakerRolle + " støttes ikke.");
         }
         return mottakere;
+    }
+
+    public Mottakerliste hentMottakerliste(Produserbaredokumenter produserbartdokument, Behandling behandling)
+        throws FunksjonellException {
+
+        Mottakerliste mottakerliste = ofNullable(BrevmottakerMapper.BREV_MOTTAKER_MAP.get(produserbartdokument))
+            .orElseThrow(() -> new IkkeFunnetException("Mangler mapping av mottakere for " + produserbartdokument));
+
+        Mottakerliste mottakerListeKopi = new Mottakerliste.Builder()
+            .medHovedMottaker(mottakerliste.getHovedMottaker())
+            .build();
+
+        if (mottakerliste.kanHaKopier()) {
+            leggTilKopier(behandling, mottakerListeKopi, mottakerliste.getBrevkopiRegler());
+        }
+
+        return mottakerListeKopi;
     }
 
     private List<Aktoer> avklarMottakereForBruker(Produserbaredokumenter produserbartDokument, Behandling behandling, boolean forhåndsvisning)
@@ -194,5 +224,33 @@ public class BrevmottakerService {
         } else {
             return null;
         }
+    }
+
+    private void leggTilKopier(Behandling behandling, Mottakerliste mottakerliste, Collection<BrevkopiRegel> brevkopiRegler) throws FunksjonellException {
+        boolean brukerHarFullmektig = behandling.getFagsak().hentRepresentant(Representerer.BRUKER).isPresent();
+
+        if (brevkopiRegler.contains(BRUKER_FÅR_KOPI) ||
+            (brevkopiRegler.contains(BRUKER_FÅR_KOPI_HVIS_FULLMEKTIG_FINNES) && brukerHarFullmektig)) {
+            mottakerliste.getKopiMottakere().add(BRUKER);
+        }
+
+        if (erSakstypeFtrl(behandling.getFagsak().getType())) {
+            FastsattTrygdeavgift fastsattTrygdeavgift = hentFastsattTrygdeavgift(behandling);
+
+            if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER) && fastsattTrygdeavgift.ikkeSelvbetalendeBruker()) {
+                mottakerliste.getKopiMottakere().add(ARBEIDSGIVER);
+            }
+
+            if (brevkopiRegler.contains(SKATT_FÅR_KOPI_HVIS_AVGIFTSPLIKTIG_INNTEKT) && fastsattTrygdeavgift.harAvgiftspliktigInntekt()) {
+                mottakerliste.getFasteMottakere().add(SKATT);
+            }
+        }
+    }
+
+    private FastsattTrygdeavgift hentFastsattTrygdeavgift(Behandling behandling) throws IkkeFunnetException {
+        MedlemAvFolketrygden medlemAvFolketrygden = medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandling.getId())
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke medlemAvFolketrygden for behandlingsresultatID " + behandling.getId()));
+
+        return medlemAvFolketrygden.getFastsattTrygdeavgift();
     }
 }

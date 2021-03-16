@@ -23,7 +23,7 @@ import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -69,7 +69,7 @@ public class BrevDataByggerInnvilgelseTest {
     @Mock
     VilkaarsresultatService vilkaarsresultatService;
     @Mock
-    TpsFasade tpsFasade;
+    PersondataFasade persondataFasade;
     @Mock
     BehandlingsgrunnlagService behandlingsgrunnlagService;
 
@@ -117,7 +117,7 @@ public class BrevDataByggerInnvilgelseTest {
             brevbestillingDto,
             brevDataByggerA1,
             vilkaarsresultatService,
-            tpsFasade,
+            persondataFasade,
             behandlingsgrunnlagService);
     }
 
@@ -210,8 +210,8 @@ public class BrevDataByggerInnvilgelseTest {
             Set.of(new OmfattetFamilie(barn1.uuid)),
             Set.of(new IkkeOmfattetBarn(barn2.uuid, null, null))));
         when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
-        when(tpsFasade.hentSammensattNavn(eq(barn1.fnr))).thenReturn("Navn1");
-        when(tpsFasade.hentSammensattNavn(eq(barn2.fnr))).thenReturn("Navn2");
+        when(persondataFasade.hentSammensattNavn(eq(barn1.fnr))).thenReturn("Navn1");
+        when(persondataFasade.hentSammensattNavn(eq(barn2.fnr))).thenReturn("Navn2");
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
         assertThat(brevData.avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd)
@@ -219,7 +219,7 @@ public class BrevDataByggerInnvilgelseTest {
         assertThat(brevData.avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd)
             .extracting("sammensattNavn").containsExactly("Navn2");
 
-        verify(tpsFasade, times(2)).hentSammensattNavn(anyString());
+        verify(persondataFasade, times(2)).hentSammensattNavn(anyString());
     }
 
     @Test
@@ -242,7 +242,7 @@ public class BrevDataByggerInnvilgelseTest {
         assertThat(brevData.avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd)
             .extracting("sammensattNavn").containsExactly(barn2.navn);
 
-        verify(tpsFasade, never()).hentSammensattNavn(anyString());
+        verify(persondataFasade, never()).hentSammensattNavn(anyString());
     }
 
     @Test

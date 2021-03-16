@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.steg.sed;
 import java.util.List;
 import java.util.Set;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -52,8 +51,6 @@ class VideresendSoknadTest {
     @Mock
     private SedSomBrevService sedSomBrevService;
 
-    private final FakeUnleash fakeUnleash = new FakeUnleash();
-
     private VideresendSoknad videresendSoknad;
 
     private final Behandling behandling = new Behandling();
@@ -63,9 +60,8 @@ class VideresendSoknadTest {
 
     @BeforeEach
     void setup() throws SikkerhetsbegrensningException, IntegrasjonException {
-        fakeUnleash.enable("melosys.videresending_vedlegg");
         videresendSoknad = new VideresendSoknad(eessiService, behandlingsresultatService,
-            joarkFasade, fagsakService, sedSomBrevService, fakeUnleash);
+            joarkFasade, fagsakService, sedSomBrevService);
 
         behandling.setId(1L);
         behandling.setInitierendeJournalpostId("123");

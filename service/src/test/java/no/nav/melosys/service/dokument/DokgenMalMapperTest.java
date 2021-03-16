@@ -25,7 +25,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.MangelbrevArbeidsgiver;
 import no.nav.melosys.integrasjon.dokgen.dto.MangelbrevBruker;
 import no.nav.melosys.integrasjon.dokgen.dto.SaksbehandlingstidSoknad;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,18 +62,18 @@ class DokgenMalMapperTest {
     private EregFasade mockEregFasade;
 
     @Mock
-    private TpsFasade mockTpsFasade;
+    private PersondataFasade mockPersondataFasade;
 
     private DokgenMalMapper dokgenMalMapper;
 
     @BeforeEach
     void init() {
-        dokgenMalMapper = new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService, mockEregFasade, mockTpsFasade);
+        dokgenMalMapper = new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService, mockEregFasade, mockPersondataFasade);
     }
 
     @Test
     void feilerNårProduserbartDokumentIkkeErStøttet() throws Exception {
-        when(mockTpsFasade.hentPerson(any(), any())).thenReturn(lagPersonopplysning());
+        when(mockPersondataFasade.hentPerson(any(), any())).thenReturn(lagPersonopplysning());
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(ATTEST_A1)
@@ -88,7 +88,7 @@ class DokgenMalMapperTest {
     @Test
     void skalMappeMedBrukerAdresse() throws Exception {
         when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
-        when(mockTpsFasade.hentPerson(any(), any())).thenReturn(lagPersonopplysning());
+        when(mockPersondataFasade.hentPerson(any(), any())).thenReturn(lagPersonopplysning());
 
         Behandling behandling = lagBehandling(lagFagsak());
 

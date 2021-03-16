@@ -20,7 +20,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.journalforing.dto.*;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -50,7 +50,7 @@ public class JournalfoeringServiceTest {
     @Mock
     private FagsakService fagsakService;
     @Mock
-    private TpsFasade tpsFasade;
+    private PersondataFasade persondataFasade;
 
     private final FakeUnleash unleash = new FakeUnleash();
 
@@ -69,7 +69,7 @@ public class JournalfoeringServiceTest {
         journalpost.setHoveddokument(new ArkivDokument());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
-        this.journalfoeringService = new JournalfoeringService(joarkFasade, oppgaveService, prosessinstansService, eessiService, fagsakService, tpsFasade, unleash);
+        this.journalfoeringService = new JournalfoeringService(joarkFasade, oppgaveService, prosessinstansService, eessiService, fagsakService, persondataFasade, unleash);
         opprettDto = new JournalfoeringOpprettDto();
         opprettDto.setJournalpostID("setJournalpostID");
         opprettDto.setOppgaveID("setOppgaveID");
@@ -366,7 +366,7 @@ public class JournalfoeringServiceTest {
 
         when(eessiService.støtterAutomatiskBehandling(eq(journalfoeringSedDto.getJournalpostID()))).thenReturn(true);
         when(eessiService.hentSedTilknyttetJournalpost(journalfoeringSedDto.getJournalpostID())).thenReturn(eessiMelding);
-        when(tpsFasade.hentAktørIdForIdent(eq(journalfoeringSedDto.getBrukerID()))).thenReturn(aktørID);
+        when(persondataFasade.hentAktørIdForIdent(eq(journalfoeringSedDto.getBrukerID()))).thenReturn(aktørID);
 
         journalfoeringService.journalførSed(journalfoeringSedDto);
         verify(prosessinstansService).opprettProsessinstansSedMottak(eq(eessiMelding), eq(aktørID));
