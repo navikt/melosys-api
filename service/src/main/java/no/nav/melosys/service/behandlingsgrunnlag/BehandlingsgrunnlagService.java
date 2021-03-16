@@ -19,6 +19,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper.SØKNAD_FOLKETRYGDEN;
+
 @Service
 public class BehandlingsgrunnlagService {
 
@@ -43,57 +45,46 @@ public class BehandlingsgrunnlagService {
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlingsgrunnlag for behandling " + behandlingID));
     }
 
-    public Behandlingsgrunnlag opprettSedGrunnlag(long behandlingID,
-                                                  SedGrunnlag sedGrunnlag) throws FunksjonellException, IntegrasjonException {
-        return opprettBehandlingsgrunnlag(behandlingID, sedGrunnlag, Behandlingsgrunnlagtyper.SED, VERSJON_SED_GRUNNLAG);
+    public void opprettSedGrunnlag(long behandlingID,
+                                   SedGrunnlag sedGrunnlag) throws FunksjonellException {
+        opprettBehandlingsgrunnlag(behandlingID, sedGrunnlag, Behandlingsgrunnlagtyper.SED, VERSJON_SED_GRUNNLAG);
     }
 
-    public Behandlingsgrunnlag opprettSøknadYrkesaktiveEøs(long behandlingID,
-                                                           Soeknad soeknad) throws FunksjonellException, IntegrasjonException {
-        return opprettBehandlingsgrunnlag(behandlingID, soeknad, Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS, VERSJON_SOEKNAD_GRUNNLAG);
+    public void opprettSøknadYrkesaktiveEøs(long behandlingID,
+                                            Soeknad soeknad) throws FunksjonellException {
+        opprettBehandlingsgrunnlag(behandlingID, soeknad, Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS,
+            VERSJON_SOEKNAD_GRUNNLAG);
     }
 
-    public Behandlingsgrunnlag opprettSøknadUtsendteArbeidstakereEøs(long behandlingID,
-                                                                     String orginalData,
-                                                                     Soeknad soeknad,
-                                                                     String eksternReferanseID) throws FunksjonellException, IntegrasjonException {
-        return opprettBehandlingsgrunnlag(
-            behandlingID,
-            orginalData,
-            soeknad,
-            Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS,
-            VERSJON_SOEKNAD_GRUNNLAG,
-            eksternReferanseID
-        );
+    public void opprettSøknadUtsendteArbeidstakereEøs(long behandlingID,
+                                                      String orginalData,
+                                                      Soeknad soeknad,
+                                                      String eksternReferanseID) throws FunksjonellException {
+        opprettBehandlingsgrunnlag(behandlingID, orginalData, soeknad,
+            Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS, VERSJON_SOEKNAD_GRUNNLAG,
+            eksternReferanseID);
     }
 
-    public Behandlingsgrunnlag opprettSøknadFolketrygden(long behandlingID,
-                                                         SoeknadFtrl soeknad) throws FunksjonellException, IntegrasjonException {
-        return opprettBehandlingsgrunnlag(behandlingID, soeknad, Behandlingsgrunnlagtyper.SØKNAD_FOLKETRYGDEN, VERSJON_SOEKNAD_GRUNNLAG);
+    public void opprettSøknadFolketrygden(long behandlingID,
+                                          SoeknadFtrl soeknad) throws FunksjonellException {
+        opprettBehandlingsgrunnlag(behandlingID, soeknad, SØKNAD_FOLKETRYGDEN,
+            VERSJON_SOEKNAD_GRUNNLAG);
     }
 
-    private Behandlingsgrunnlag opprettBehandlingsgrunnlag(long behandlingID,
-                                                           BehandlingsgrunnlagData behandlingsgrunnlagData,
-                                                           Behandlingsgrunnlagtyper type,
-                                                           String versjon) throws FunksjonellException, IntegrasjonException {
+    private void opprettBehandlingsgrunnlag(long behandlingID,
+                                            BehandlingsgrunnlagData behandlingsgrunnlagData,
+                                            Behandlingsgrunnlagtyper type,
+                                            String versjon) throws FunksjonellException {
 
-        return opprettBehandlingsgrunnlag(behandlingID, null, behandlingsgrunnlagData, type, versjon);
+        opprettBehandlingsgrunnlag(behandlingID, null, behandlingsgrunnlagData, type, versjon, null);
     }
 
-    private Behandlingsgrunnlag opprettBehandlingsgrunnlag(long behandlingID,
-                                                           String originalData,
-                                                           BehandlingsgrunnlagData behandlingsgrunnlagData,
-                                                           Behandlingsgrunnlagtyper type,
-                                                           String versjon) throws FunksjonellException, IntegrasjonException {
-        return opprettBehandlingsgrunnlag(behandlingID, originalData, behandlingsgrunnlagData, type, versjon, null);
-    }
-
-    private Behandlingsgrunnlag opprettBehandlingsgrunnlag(long behandlingID,
-                                                           String originalData,
-                                                           BehandlingsgrunnlagData behandlingsgrunnlagData,
-                                                           Behandlingsgrunnlagtyper type,
-                                                           String versjon,
-                                                           String eksternReferanseID) throws FunksjonellException, IntegrasjonException {
+    private void opprettBehandlingsgrunnlag(long behandlingID,
+                                            String originalData,
+                                            BehandlingsgrunnlagData behandlingsgrunnlagData,
+                                            Behandlingsgrunnlagtyper type,
+                                            String versjon,
+                                            String eksternReferanseID) throws FunksjonellException {
 
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         if (behandling.getBehandlingsgrunnlag() != null) {
@@ -110,15 +101,36 @@ public class BehandlingsgrunnlagService {
         behandlingsgrunnlag.setEndretDato(nå);
         behandlingsgrunnlag.setType(type);
         behandlingsgrunnlag.setVersjon(versjon);
-        behandlingsgrunnlag.setMottaksdato(hentMottaksdato(behandling.getInitierendeJournalpostId()));
+        behandlingsgrunnlag.setMottaksdato(hentMottaksdato(type, behandling.getInitierendeJournalpostId()));
         behandlingsgrunnlag.setOriginalData(originalData);
         behandlingsgrunnlag.setEksternReferanseID(eksternReferanseID);
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
-        return behandlingsgrunnlagRepository.save(behandlingsgrunnlag);
+        behandlingsgrunnlagRepository.save(behandlingsgrunnlag);
     }
 
-    private LocalDate hentMottaksdato(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException {
-        return journalpostID != null ? joarkFasade.hentMottaksDatoForJournalpost(journalpostID) : null;
+    // Gjør mottaksdato nødvendig for kun folketrygden da nåværende journalpost-oppslag kun støtter inngående
+    // dokumenter og fordi mottaksdato ikke er like viktig for andre grunnlagstyper.
+    private LocalDate hentMottaksdato(Behandlingsgrunnlagtyper grunnlagtype, String journalpostID) throws
+        FunksjonellException {
+        if (grunnlagtype == SØKNAD_FOLKETRYGDEN) {
+            return finnMottaksdato(journalpostID).orElseThrow(
+                () -> new FunksjonellException("Mottaksdato trenges for " + SØKNAD_FOLKETRYGDEN.getKode()));
+        } else {
+            return finnMottaksdato(journalpostID).orElse(null);
+        }
+    }
+
+    private Optional<LocalDate> finnMottaksdato(String journalpostID) throws SikkerhetsbegrensningException {
+        LocalDate mottaksDatoFraJournalpostID;
+        if (journalpostID == null) {
+            return Optional.empty();
+        }
+        try {
+             mottaksDatoFraJournalpostID = joarkFasade.hentMottaksDatoForJournalpost(journalpostID);
+        } catch (IntegrasjonException e) {
+            return Optional.empty();
+        }
+        return Optional.of(mottaksDatoFraJournalpostID);
     }
 
     @Transactional

@@ -26,13 +26,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class BehandlingsgrunnlagServiceTest {
-
+class BehandlingsgrunnlbagServiceTest {
     @Mock
     private BehandlingsgrunnlagRepository behandlingsgrunnlagRepository;
     @Mock
@@ -46,7 +44,6 @@ class BehandlingsgrunnlagServiceTest {
     private ArgumentCaptor<Behandlingsgrunnlag> behandlingsgrunnlagArgumentCaptor;
 
     private final long behandlingID = 123332211;
-    private final String journalpostID = "123321";
 
     @BeforeEach
     public void setup() {
@@ -70,8 +67,8 @@ class BehandlingsgrunnlagServiceTest {
     @Test
     void opprettSøknadGrunnlag_finnesIkkeFraFør_blirOpprettet() throws FunksjonellException, IntegrasjonException {
         Behandling behandling = lagBehandling();
-        when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
-        when(joarkFasade.hentMottaksDatoForJournalpost(eq(behandling.getInitierendeJournalpostId()))).thenReturn(LocalDate.now());
+        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
+        when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
         Soeknad soeknad = new Soeknad();
         behandlingsgrunnlagService.opprettSøknadYrkesaktiveEøs(behandlingID, soeknad);
 
@@ -106,10 +103,23 @@ class BehandlingsgrunnlagServiceTest {
     }
 
     @Test
+    void opprettSøknadFolketrygden_mottaksdatoIkkeFinnes_feiler() throws FunksjonellException, IntegrasjonException {
+        Behandling behandling = lagBehandling();
+        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
+        when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId()))
+            .thenThrow(new IntegrasjonException("Sorry"));
+        final SoeknadFtrl soeknadFtrl = new SoeknadFtrl();
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> behandlingsgrunnlagService.opprettSøknadFolketrygden(behandlingID, soeknadFtrl))
+            .withMessageContaining("Mottaksdato trenges");
+    }
+
+    @Test
     void opprettSedGrunnlag_harRettType() throws FunksjonellException, IntegrasjonException {
         Behandling behandling = lagBehandling();
-        when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
-        when(joarkFasade.hentMottaksDatoForJournalpost(eq(behandling.getInitierendeJournalpostId()))).thenReturn(LocalDate.now());
+        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
+        when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
         SedGrunnlag sedGrunnlag = new SedGrunnlag();
         behandlingsgrunnlagService.opprettSedGrunnlag(behandlingID, sedGrunnlag);
 
@@ -126,10 +136,10 @@ class BehandlingsgrunnlagServiceTest {
     @Test
     void opprettSøknadFolketrygden_harRettType() throws FunksjonellException, IntegrasjonException {
         Behandling behandling = lagBehandling();
-        when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
-        when(joarkFasade.hentMottaksDatoForJournalpost(eq(behandling.getInitierendeJournalpostId()))).thenReturn(LocalDate.now());
-        SoeknadFtrl sedGrunnlag = new SoeknadFtrl();
-        behandlingsgrunnlagService.opprettSøknadFolketrygden(behandlingID, sedGrunnlag);
+        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
+        when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
+        SoeknadFtrl soeknadFtrl = new SoeknadFtrl();
+        behandlingsgrunnlagService.opprettSøknadFolketrygden(behandlingID, soeknadFtrl);
 
         verify(behandlingsgrunnlagRepository).save(behandlingsgrunnlagArgumentCaptor.capture());
         Behandlingsgrunnlag opprettet = behandlingsgrunnlagArgumentCaptor.getValue();
@@ -144,6 +154,7 @@ class BehandlingsgrunnlagServiceTest {
     private Behandling lagBehandling() {
         Behandling behandling = new Behandling();
         behandling.setId(behandlingID);
+        String journalpostID = "123321";
         behandling.setInitierendeJournalpostId(journalpostID);
         return behandling;
     }
