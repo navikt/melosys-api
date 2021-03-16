@@ -10,7 +10,8 @@ Melosys-api er backenden for selve saksbehandlingsløsningen for prosjektet og i
 
 Melosys-api kan kjøres opp som en ren Spring-applikasjon med profil `local-mock` ved hjelp av 
  [melosys-docker-compose](https://github.com/navikt/melosys-docker-compose), som spinner opp alle avhenigheter applikajsonen
- har, som database, kafka, ldap, oauth-server samt eksterne integrasjoner.
+ har, som database, kafka, ldap, oauth-server samt eksterne integrasjoner. Trenger også naisdevice for å koble til enkelte
+ eksterne tjenester.
 
 ## Arkitektur
 
@@ -28,4 +29,4 @@ Melosys-api har en lagdelt arkitektur og bruker primært spring-boot som rammeve
 - **service**: Service-lag
 - **sikkerhet**: Felles logikk knyttet til sikkerhet. Eks ABAC, OIDC, STS, etc.
 - **soknad-altinn**: maven-modul som genererer POJO's fra XSD som representerer en søknad fra Altinn
-- **statistikk**: Produserer statistikk om utstedte A1 (attester om medlemskap etter EU/EØS-forordning) til dvh.
+- **statistikk**: Produserer statistikk om utstedte A1 (attester om medlemskap etter EU/EØS-forordning) til dvh (datavarehus).
