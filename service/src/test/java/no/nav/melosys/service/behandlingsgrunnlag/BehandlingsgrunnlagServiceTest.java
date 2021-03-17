@@ -11,6 +11,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IkkeInngaaendeJournalpostException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
@@ -103,11 +104,11 @@ class BehandlingsgrunnlbagServiceTest {
     }
 
     @Test
-    void opprettSøknadFolketrygden_mottaksdatoIkkeFinnes_feiler() throws FunksjonellException, IntegrasjonException {
+    void opprettSøknadFolketrygden_mottaksdatoFeiler_feiler() throws FunksjonellException, IntegrasjonException {
         Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId()))
-            .thenThrow(new IntegrasjonException("Sorry"));
+            .thenThrow(new IkkeInngaaendeJournalpostException("Ikke inngående"));
         final SoeknadFtrl soeknadFtrl = new SoeknadFtrl();
 
         assertThatExceptionOfType(FunksjonellException.class)
