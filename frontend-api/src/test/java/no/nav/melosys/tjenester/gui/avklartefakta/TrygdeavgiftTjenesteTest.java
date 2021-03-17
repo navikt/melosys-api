@@ -5,7 +5,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collections;
 
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.avgift.*;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Loenn_forhold;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.exception.FunksjonellException;
@@ -79,10 +81,12 @@ class TrygdeavgiftTjenesteTest extends JsonSchemaTestParent {
     }
 
     private Trygdeavgiftsberegningsresultat lagTrygdeavgiftsberegningresultat() {
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.BRUKER);
         return new Trygdeavgiftsberegningsresultat(
             100L,
             null,
-            true,
+            aktoer,
             Collections.singleton(new Avgiftsperiode(
                 LocalDate.now(), LocalDate.now(), Trygdedekninger.HELSEDEL, new BigDecimal("1.1"), new BigDecimal("1.1"), true)
             ));

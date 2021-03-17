@@ -3,25 +3,24 @@ package no.nav.melosys.domain.avgift;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
-import static org.springframework.util.ObjectUtils.isEmpty;
 
 public class Trygdeavgiftsberegningsresultat {
     private final Long avgiftspliktigLønnNorge;
     private final Long avgiftspliktigLønnUtland;
+    private final Aktoer betalesAv;
     private final Collection<Avgiftsperiode> avgiftsperioder;
-    private final boolean selvbetalendeBruker;
 
     public Trygdeavgiftsberegningsresultat(Long avgiftspliktigLønnNorge,
                                            Long avgiftspliktigLønnUtland,
-                                           boolean selvbetalendeBruker,
-                                           Collection<Avgiftsperiode> avgiftsperioder) {
+                                           Aktoer betalesAv, Collection<Avgiftsperiode> avgiftsperioder) {
         this.avgiftspliktigLønnNorge = avgiftspliktigLønnNorge;
         this.avgiftspliktigLønnUtland = avgiftspliktigLønnUtland;
-        this.selvbetalendeBruker = selvbetalendeBruker;
+        this.betalesAv = betalesAv;
         this.avgiftsperioder = avgiftsperioder;
     }
 
@@ -33,8 +32,8 @@ public class Trygdeavgiftsberegningsresultat {
         return avgiftspliktigLønnUtland;
     }
 
-    public boolean erSelvbetalendeBruker() {
-        return selvbetalendeBruker;
+    public Aktoer getBetalesAv() {
+        return betalesAv;
     }
 
     public Collection<Avgiftsperiode> getAvgiftsperioder() {
@@ -42,12 +41,12 @@ public class Trygdeavgiftsberegningsresultat {
     }
 
     public boolean harAvgiftspliktigInntekt() {
-        return !((this.getAvgiftspliktigLønnNorge() == null || this.getAvgiftspliktigLønnNorge() == 0) &&
-            (this.getAvgiftspliktigLønnUtland() == null || this.getAvgiftspliktigLønnUtland() == 0));
+        return !((getAvgiftspliktigLønnNorge() == null || getAvgiftspliktigLønnNorge() == 0) &&
+            (getAvgiftspliktigLønnUtland() == null || getAvgiftspliktigLønnUtland() == 0));
     }
 
-    public boolean ikkeSelvbetalendeBruker() {
-        return !this.erSelvbetalendeBruker();
+    public boolean erIkkeSelvbetalendeBruker() {
+        return (getBetalesAv() != null && getBetalesAv().getRolle() != BRUKER);
     }
 
     public static Trygdeavgiftsberegningsresultat lag(MedlemAvFolketrygden medlemAvFolketrygden) {
@@ -58,7 +57,7 @@ public class Trygdeavgiftsberegningsresultat {
         return new Trygdeavgiftsberegningsresultat(
             fastsattTrygdeavgift.getAvgiftspliktigNorskInntektMnd(),
             fastsattTrygdeavgift.getAvgiftspliktigUtenlandskInntektMnd(),
-            fastsattTrygdeavgift.getBetalesAv() == null || fastsattTrygdeavgift.getBetalesAv().getRolle() == BRUKER,
+            fastsattTrygdeavgift.getBetalesAv(),
             medlemAvFolketrygden.getMedlemskapsperioder()
                 .stream()
                 .flatMap(m -> Avgiftsperiode.lagAvgiftsperioder(m).stream())

@@ -2,6 +2,7 @@ package no.nav.melosys.service.dokument;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
@@ -220,7 +221,7 @@ public class BrevmottakerServiceTest {
                 emptyList()
             );
 
-        verify(trygdeavgiftsberegningService).hentBeregningsresultat(anyLong());
+        verify(trygdeavgiftsberegningService).finnBeregningsresultat(anyLong());
     }
 
     @Test
@@ -239,7 +240,7 @@ public class BrevmottakerServiceTest {
                 List.of(SKATT)
             );
 
-        verify(trygdeavgiftsberegningService).hentBeregningsresultat(anyLong());
+        verify(trygdeavgiftsberegningService).finnBeregningsresultat(anyLong());
     }
 
     @Test
@@ -259,7 +260,7 @@ public class BrevmottakerServiceTest {
                 List.of(SKATT)
             );
 
-        verify(trygdeavgiftsberegningService).hentBeregningsresultat(anyLong());
+        verify(trygdeavgiftsberegningService).finnBeregningsresultat(anyLong());
     }
 
     @Test
@@ -279,7 +280,7 @@ public class BrevmottakerServiceTest {
                 List.of(SKATT)
             );
 
-        verify(trygdeavgiftsberegningService).hentBeregningsresultat(anyLong());
+        verify(trygdeavgiftsberegningService).finnBeregningsresultat(anyLong());
     }
 
     @Test
@@ -300,7 +301,7 @@ public class BrevmottakerServiceTest {
                 List.of(SKATT)
             );
 
-        verify(trygdeavgiftsberegningService).hentBeregningsresultat(anyLong());
+        verify(trygdeavgiftsberegningService).finnBeregningsresultat(anyLong());
     }
 
     @Test
@@ -320,12 +321,14 @@ public class BrevmottakerServiceTest {
                 emptyList()
             );
 
-        verify(trygdeavgiftsberegningService).hentBeregningsresultat(anyLong());
+        verify(trygdeavgiftsberegningService).finnBeregningsresultat(anyLong());
     }
 
-    private void initMocksForFtrlVedtaksbrev(Representerer representerer, long norskinntekt, boolean selvbetalende) throws Exception {
-        Trygdeavgiftsberegningsresultat trygdeavgiftsberegningsresultat = new Trygdeavgiftsberegningsresultat(norskinntekt, null, selvbetalende, emptyList());
-        when(trygdeavgiftsberegningService.hentBeregningsresultat(anyLong())).thenReturn(trygdeavgiftsberegningsresultat);
+    private void initMocksForFtrlVedtaksbrev(Representerer representerer, long norskinntekt, boolean selvbetalende) {
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(selvbetalende ? BRUKER : REPRESENTANT_TRYGDEAVGIFT);
+        Trygdeavgiftsberegningsresultat trygdeavgiftsberegningsresultat = new Trygdeavgiftsberegningsresultat(norskinntekt, null, aktoer, emptyList());
+        when(trygdeavgiftsberegningService.finnBeregningsresultat(anyLong())).thenReturn(Optional.of(trygdeavgiftsberegningsresultat));
 
         Fagsak fagsak = lagFagsakMedRepresentant(representerer);
         fagsak.setType(Sakstyper.FTRL);

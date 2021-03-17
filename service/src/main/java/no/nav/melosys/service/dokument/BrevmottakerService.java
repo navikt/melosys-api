@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static java.util.Optional.ofNullable;
-import static no.nav.melosys.domain.Fagsak.erSakstypeFtrl;
 import static no.nav.melosys.domain.Preferanse.PreferanseEnum.RESERVERT_FRA_A1;
 import static no.nav.melosys.domain.brev.BrevkopiRegel.*;
 import static no.nav.melosys.domain.brev.FastMottaker.SKATT;
@@ -205,10 +204,10 @@ public class BrevmottakerService {
 
     private boolean myndighetØnskerA1(UtenlandskMyndighet utenlandskMyndighet) {
         return utenlandskMyndighet
-                .preferanser
-                .stream()
-                .map(Preferanse::getPreferanse)
-                .noneMatch(RESERVERT_FRA_A1::equals);
+            .preferanser
+            .stream()
+            .map(Preferanse::getPreferanse)
+            .noneMatch(RESERVERT_FRA_A1::equals);
     }
 
     public Kontaktopplysning hentKontaktopplysning(String saksnumner, Aktoer mottaker) {
@@ -232,25 +231,18 @@ public class BrevmottakerService {
             mottakerliste.getKopiMottakere().add(BRUKER);
         }
 
-        Trygdeavgiftsberegningsresultat trygdeavgiftsberegningsresultat = hentTrygdeavgiftresultat(behandling);
+        Optional<Trygdeavgiftsberegningsresultat> trygdeavgiftsberegningsresultat = trygdeavgiftsberegningService.finnBeregningsresultat(behandling.getId());
 
-        if (erSakstypeFtrl(behandling.getFagsak().getType()) && trygdeavgiftsberegningsresultat != null) {
-            if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER) && trygdeavgiftsberegningsresultat.ikkeSelvbetalendeBruker()) {
+        if (trygdeavgiftsberegningsresultat.isPresent()) {
+            Trygdeavgiftsberegningsresultat beregningsresultat = trygdeavgiftsberegningsresultat.get();
+
+            if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER) && beregningsresultat.erIkkeSelvbetalendeBruker()) {
                 mottakerliste.getKopiMottakere().add(ARBEIDSGIVER);
             }
 
-            if (brevkopiRegler.contains(SKATT_FÅR_KOPI_HVIS_AVGIFTSPLIKTIG_INNTEKT) && trygdeavgiftsberegningsresultat.harAvgiftspliktigInntekt()) {
+            if (brevkopiRegler.contains(SKATT_FÅR_KOPI_HVIS_AVGIFTSPLIKTIG_INNTEKT) && beregningsresultat.harAvgiftspliktigInntekt()) {
                 mottakerliste.getFasteMottakere().add(SKATT);
             }
-        }
-    }
-
-    private Trygdeavgiftsberegningsresultat hentTrygdeavgiftresultat(Behandling behandling) {
-        try {
-            return trygdeavgiftsberegningService.hentBeregningsresultat(behandling.getId());
-        } catch (IkkeFunnetException e) {
-            // I dette tilfellet er det ikke vesentlig om noe resultat ikke blir funnet
-            return null;
         }
     }
 }

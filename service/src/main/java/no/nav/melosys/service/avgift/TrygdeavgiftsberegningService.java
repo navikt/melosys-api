@@ -2,6 +2,7 @@ package no.nav.melosys.service.avgift;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Optional;
 
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfo;
@@ -117,6 +118,15 @@ public class TrygdeavgiftsberegningService {
     @Transactional(readOnly = true)
     public Trygdeavgiftsberegningsresultat hentBeregningsresultat(long behandlingsresultatID) throws IkkeFunnetException {
         return Trygdeavgiftsberegningsresultat.lag(hentMedlemAvFolketrygden(behandlingsresultatID));
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Trygdeavgiftsberegningsresultat> finnBeregningsresultat(long behandlingsresultatID) {
+        try {
+            return Optional.of(hentBeregningsresultat(behandlingsresultatID));
+        } catch (IkkeFunnetException e) {
+            return Optional.empty();
+        }
     }
 
     private MedlemAvFolketrygden hentMedlemAvFolketrygden(long behandlingsresultatID) throws IkkeFunnetException {
