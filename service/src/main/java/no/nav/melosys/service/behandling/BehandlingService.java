@@ -131,6 +131,9 @@ public class BehandlingService {
             && erNesteStatusEtterDokumentVurderingUlovlig(status)) {
             throw new FunksjonellException("Ulovlig behandlingsstatus " + status);
         }
+        if (!hentMuligeStatuser(behandling).contains(status)) {
+            throw new FunksjonellException(String.format("Behandlingen kan ikke endres til status %s. Gyldige statuser er %s", status, hentMuligeStatuser(behandling)));
+        }
         oppdaterStatus(behandling, status);
     }
 
@@ -139,12 +142,14 @@ public class BehandlingService {
     }
 
     @Transactional(readOnly = true)
-    public List<Behandlingsstatus> hentMuligeStatuser(long behandlingId) throws IkkeFunnetException {
+    public Collection<Behandlingsstatus> hentMuligeStatuser(long behandlingId) throws IkkeFunnetException {
         Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingId);
         return hentMuligeStatuser(behandling);
     }
 
-    private List<Behandlingsstatus> hentMuligeStatuser(Behandling behandling) {
+    private Collection<Behandlingsstatus> hentMuligeStatuser(Behandling behandling) {
+        if (behandling.erInaktiv()) return Collections.emptyList();
+
         List<Behandlingsstatus> muligeStatuser = List.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING).stream()
             .filter(status -> status != behandling.getStatus())
             .collect(Collectors.toList());

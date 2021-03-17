@@ -26,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -72,13 +73,12 @@ public class BehandlingTjeneste {
 
     @GetMapping("{behandlingID}/muligeStatuser")
     @ApiOperation("Hent mulige nye behandlingsstatuser for en behandling")
-    public ResponseEntity<List<Behandlingsstatus>> hentMuligeStatuser(@PathVariable("behandlingID") long behandlingID)
+    public ResponseEntity<Collection<Behandlingsstatus>> hentMuligeStatuser(@PathVariable("behandlingID") long behandlingID)
         throws MelosysException {
         log.info("Saksbehandler {} ber om å hente mulige nye behandlingsstatuser for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
         tilgangService.sjekkTilgang(behandlingID);
 
-        List<Behandlingsstatus> muligeBehandlingsstatuser = behandlingService.hentMuligeStatuser(behandlingID);
-        return ResponseEntity.ok(muligeBehandlingsstatuser);
+        return ResponseEntity.ok(behandlingService.hentMuligeStatuser(behandlingID));
     }
 
     @PostMapping("{behandlingID}/tidligeremedlemsperioder")
