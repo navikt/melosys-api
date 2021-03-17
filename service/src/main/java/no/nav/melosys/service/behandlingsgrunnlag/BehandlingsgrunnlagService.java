@@ -8,10 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.*;
 import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -120,15 +117,17 @@ public class BehandlingsgrunnlagService {
         }
     }
 
-    private Optional<LocalDate> finnMottaksdato(String journalpostID) throws SikkerhetsbegrensningException {
+    private Optional<LocalDate> finnMottaksdato(String journalpostID) throws FunksjonellException {
         LocalDate mottaksDatoFraJournalpostID;
         if (journalpostID == null) {
             return Optional.empty();
         }
         try {
              mottaksDatoFraJournalpostID = joarkFasade.hentMottaksDatoForJournalpost(journalpostID);
-        } catch (IntegrasjonException e) {
+        } catch (IkkeInngaaendeJournalpostException e) {
             return Optional.empty();
+        } catch (IntegrasjonException e) {
+            throw new IllegalStateException(e);
         }
         return Optional.of(mottaksDatoFraJournalpostID);
     }

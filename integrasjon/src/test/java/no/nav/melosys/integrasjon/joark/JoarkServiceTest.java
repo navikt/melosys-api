@@ -14,7 +14,6 @@ import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.joark.journal.JournalConsumer;
@@ -280,12 +279,13 @@ class JoarkServiceTest {
     }
 
     @Test
-    void hentMottaksDatoForJournalpost_journalpostFinnes_returnererMottaksdato() throws SikkerhetsbegrensningException, IntegrasjonException {
+    void hentMottaksDatoForJournalpost_journalpostFinnes_returnererMottaksdato() throws FunksjonellException,
+        IntegrasjonException {
         final String journalpostID = "12421";
         GetJournalpostResponse response = new GetJournalpostResponse();
         response.getDokumentListe().add(new Dokument());
         response.setForsendelseMottatt(new Date());
-        when(journalfoerInngaaendeConsumer.hentJournalpost(eq(journalpostID))).thenReturn(response);
+        when(journalfoerInngaaendeConsumer.hentJournalpost(journalpostID)).thenReturn(response);
 
         assertThat(joarkService.hentMottaksDatoForJournalpost(journalpostID))
             .isEqualTo(LocalDate.ofInstant(response.getForsendelseMottatt().toInstant(), ZoneId.systemDefault()));

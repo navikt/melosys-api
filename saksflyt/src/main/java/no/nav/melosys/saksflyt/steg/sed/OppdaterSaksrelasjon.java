@@ -8,6 +8,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IkkeInngaaendeJournalpostException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -55,7 +56,12 @@ public class OppdaterSaksrelasjon implements StegBehandler {
         }
 
         String journalpostID = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
-        Journalpost journalpost = joarkFasade.hentJournalpost(journalpostID);
+        Journalpost journalpost;
+        try {
+            journalpost = joarkFasade.hentJournalpost(journalpostID);
+        } catch (IkkeInngaaendeJournalpostException e) {
+            return Optional.empty();
+        }
         if (journalpost.mottaksKanalErEessi()) {
             return Optional.of(eessiService.hentSedTilknyttetJournalpost(journalpostID));
         }

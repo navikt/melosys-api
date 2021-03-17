@@ -10,9 +10,11 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
 import no.nav.melosys.integrasjon.dokgen.DokgenMalResolver;
 import no.nav.melosys.integrasjon.dokgen.dto.DokgenDto;
@@ -141,8 +143,8 @@ public class DokgenService {
             );
     }
 
-    private void settJournalpostOpplysninger(Behandling behandling, DokgenBrevbestilling.Builder<?> brevbestilling)
-        throws SikkerhetsbegrensningException, IntegrasjonException {
+    private void settJournalpostOpplysninger(Behandling behandling, DokgenBrevbestilling.Builder<?> brevbestilling) throws
+        FunksjonellException, IntegrasjonException {
         Journalpost journalpost = joarkFasade.hentJournalpost(behandling.getInitierendeJournalpostId());
         brevbestilling
             .medForsendelseMottatt(journalpost.getForsendelseMottatt())

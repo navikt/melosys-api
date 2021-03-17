@@ -1,6 +1,5 @@
 package no.nav.melosys.integrasjon.joark;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
@@ -34,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.web.client.HttpStatusCodeException;
 
 import static no.nav.tjeneste.virksomhet.journal.v3.informasjon.Journaltilstand.UTGAAR;
 
@@ -81,9 +81,28 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public Journalpost hentJournalpost(String journalpostID) throws IntegrasjonException, SikkerhetsbegrensningException {
-        GetJournalpostResponse response = journalfoerInngaaendeConsumer.hentJournalpost(journalpostID);
+    public Journalpost hentJournalpost(String journalpostID) throws IntegrasjonException, FunksjonellException {
+        return hentInngåendeJournalpost(journalpostID);
+    }
 
+    private Journalpost hentInngåendeJournalpost(String journalpostID) throws IntegrasjonException,
+        FunksjonellException {
+        GetJournalpostResponse response;
+        try {
+            response = journalfoerInngaaendeConsumer.hentJournalpost(journalpostID);
+        } catch (IntegrasjonException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof HttpStatusCodeException httpException
+                && httpException.getStatusCode().is4xxClientError()
+                && httpException.getResponseBodyAsString().contains("Inngaaende")) {
+                throw new IkkeInngaaendeJournalpostException(e);
+            }
+            throw e;
+        }
+        return lagJournalpostFraResponse(journalpostID, response);
+    }
+
+    private Journalpost lagJournalpostFraResponse(String journalpostID, GetJournalpostResponse response) {
         Journalpost journalpost = new Journalpost(journalpostID);
         journalpost.setErFerdigstilt(response.getJournalTilstand() == GetJournalpostResponse.JournalTilstand.ENDELIG);
         journalpost.setBrukerId(response.getBrukerListe().stream().map(Bruker::getIdentifikator).findFirst().orElse(null));
@@ -115,12 +134,12 @@ public class JoarkService implements JoarkFasade {
         if (response.getArkivSak() != null) {
             journalpost.setArkivSakId(response.getArkivSak().getArkivSakId());
         }
-
         return journalpost;
     }
 
     @Override
-    public LocalDate hentMottaksDatoForJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException {
+    public LocalDate hentMottaksDatoForJournalpost(String journalpostID) throws FunksjonellException,
+        IntegrasjonException {
         return LocalDate.ofInstant(hentJournalpost(journalpostID).getForsendelseMottatt(), ZoneId.systemDefault());
     }
 
