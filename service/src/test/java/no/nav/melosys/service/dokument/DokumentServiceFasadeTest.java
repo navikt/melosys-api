@@ -56,7 +56,7 @@ class DokumentServiceFasadeTest {
             .build();
         dokumentServiceFasade.produserUtkast(MELDING_FORVENTET_SAKSBEHANDLINGSTID, 1, brevbestillingDto);
 
-        verify(mockDokgenService).produserBrev(any(), anyLong(), any(), any(), eq(true));
+        verify(mockDokgenService).produserUtkast(any(), anyLong(), any(), any());
         verifyNoInteractions(mockDokumentService);
     }
 
