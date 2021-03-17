@@ -1,5 +1,9 @@
 package no.nav.melosys.service.behandling;
 
+import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
+import java.util.*;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -20,10 +24,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.lang.reflect.InvocationTargetException;
-import java.time.Instant;
-import java.util.*;
 
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -101,7 +101,8 @@ public class BehandlingServiceTest {
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> behandlingService.oppdaterStatus(BEHANDLING_ID, Behandlingsstatus.AVSLUTTET));
+            .isThrownBy(() -> behandlingService.oppdaterStatus(BEHANDLING_ID, Behandlingsstatus.AVSLUTTET))
+            .withMessage("Finner ikke behandling med id " + BEHANDLING_ID);
     }
 
     @Test
@@ -138,7 +139,7 @@ public class BehandlingServiceTest {
     }
 
     @Test
-    public void hentMuligeStatuser_temaOvrigeSedMed() throws FunksjonellException {
+    public void hentMuligeStatuser_temaOvrigeSedMed_avsluttetErMulig() throws FunksjonellException {
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.ØVRIGE_SED_MED);
         when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
@@ -148,7 +149,7 @@ public class BehandlingServiceTest {
     }
 
     @Test
-    public void hentMuligeStatuser_temaArbeidUtland() throws FunksjonellException {
+    public void hentMuligeStatuser_temaArbeidUtland_avsluttetErIkkeMulig() throws FunksjonellException {
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.ARBEID_I_UTLANDET);
         when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
@@ -186,7 +187,7 @@ public class BehandlingServiceTest {
         when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
 
         behandlingService.knyttMedlemsperioder(BEHANDLING_ID, PERIODE_IDS);
-        verify(tidligereMedlemsperiodeRepo, times(1)).deleteById_BehandlingId(BEHANDLING_ID);
+        verify(tidligereMedlemsperiodeRepo).deleteById_BehandlingId(BEHANDLING_ID);
         verify(tidligereMedlemsperiodeRepo).saveAll(anyList());
     }
 

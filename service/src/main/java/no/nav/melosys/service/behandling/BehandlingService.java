@@ -1,5 +1,11 @@
 package no.nav.melosys.service.behandling;
 
+import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
+import java.time.Period;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
@@ -24,12 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.lang.reflect.InvocationTargetException;
-import java.time.Instant;
-import java.time.Period;
-import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;

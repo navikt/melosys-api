@@ -1,5 +1,9 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,10 +29,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 @Protected
 @RestController
