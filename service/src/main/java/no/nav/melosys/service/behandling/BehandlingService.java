@@ -127,18 +127,10 @@ public class BehandlingService {
     public void brukerOppdaterStatus(long behandlingID, Behandlingsstatus status)
         throws FunksjonellException, TekniskException {
         Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
-        if (behandling.getStatus() == Behandlingsstatus.VURDER_DOKUMENT
-            && erNesteStatusEtterDokumentVurderingUlovlig(status)) {
-            throw new FunksjonellException("Ulovlig behandlingsstatus " + status);
-        }
         if (!hentMuligeStatuser(behandling).contains(status)) {
             throw new FunksjonellException(String.format("Behandlingen kan ikke endres til status %s. Gyldige statuser er %s", status, hentMuligeStatuser(behandling)));
         }
         oppdaterStatus(behandling, status);
-    }
-
-    private boolean erNesteStatusEtterDokumentVurderingUlovlig(Behandlingsstatus status) {
-        return !Set.of(UNDER_BEHANDLING, AVVENT_DOK_PART, AVVENT_DOK_UTL, ANMODNING_UNNTAK_SENDT).contains(status);
     }
 
     @Transactional(readOnly = true)
