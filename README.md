@@ -1,30 +1,34 @@
-# MEDLEMSKAP OG LOVVALG
+# Melosys-api (Medlemskap- og Lovvalgssystem)
 
-Prosjektets wiki-side: [https://confluence.adeo.no/display/TEESSI/Team+MELOSYS](https://confluence.adeo.no/display/TEESSI/Team+MELOSYS)
-Jenkins: [http://eessi2-jenkins.adeo.no/](http://eessi2-jenkins.adeo.no/)
+Melosys er et saksbehandlingssystem for avdelingen Medlemskap og avgift i NAV som behandler søknader om medlemskap
+ i folketrygden, samt registrerer unntak for utenlandske statsborgere som jobber i Norge.
 
+Melosys-api er backenden for selve saksbehandlingsløsningen for prosjektet og inneholder det meste av logikk tilknyttet
+ saksbehandlingsløsningen.
 
-For enklest mulig lokal kjøring under utvikling, kan man gjøre følgende:
-* Overstyre environment-variable for lokal kjøring:
-  * Opprette og definere en .env-fil, gjerne utenfor prosjekt-katalogen, f.eks.:
-    ```
-    spring.profiles.active=local
-    
-    systemuser.password=<passord>
-    melosys.security.melosys_ad_group=0000-ga-Melosys
-    spring.datasource.password=<passord>
-    ldap.password=<passord>
-    com.sun.jndi.ldap.object.disableEndpointIdentification=true
-    ```
-  * Installere IntelliJ-pluginen EnvFile
-  * Gå til *Edit Configurations* for `Application.java` ->
-        fane *EnvFile* -> *Enable EnvFile* og deretter legg til den definerte .env-filen
+## Lokal utvikling
 
-* Legge til NAVs keystore i JVM-en permanent, fordi det ikke virker som det er mulig å få til via .env-filen.
-  * Last ned nyeste keystore-fil (https://fasit.adeo.no/api/v2/resources/8599733/file/keystore)
-  * Flytt filen til *JAVA_HOME/lib/security*
-  * Enten:
-    * Døp om filen til `jssecacerts`. JVM-en bruker denne filen hvis den eksisterer, i stedet for `cacerts`
-    * eller hvis du allerede har andre sertfikater du trenger i `cacerts`, kjør følgende kommando 
-     for å merge keystore-filen inn i `cacerts`:
-    `keytool -importkeystore -noprompt -srcstorepass <passord_for_nav_keystore> -srckeystore nav_truststore_nonproduction_ny2.jts -deststorepass changeit -destkeystore cacerts` 
+Melosys-api kan kjøres opp som en ren Spring-applikasjon med profil `local-mock` ved hjelp av 
+ [melosys-docker-compose](https://github.com/navikt/melosys-docker-compose), som spinner opp alle avhenigheter applikajsonen
+ har, som database, kafka, ldap, oauth-server samt eksterne integrasjoner. Trenger også [naisdevice](https://doc.nais.io/device/install/index.html)
+ for å koble til enkelte eksterne tjenester.
+
+Swagger kan også nås på `localhost:8080/swagger-ui/`
+
+## Arkitektur
+
+Melosys-api har en lagdelt arkitektur og bruker primært spring-boot som rammeverk:
+
+- **app**: Kjører opp spring-applikasjonen, setter miljøvariabler og inneholder flyway-migreringer.
+- **config**: Felles konfigurasjon for applikasjonen
+- **domain**: Inneholder domeneobjekter, for det meste POJOs
+- **feil**: Inneholder interne exception-klasser
+- **frontend-api**: Rest-endepunkter brukt av [melosys-web](https://github.com/navikt/melosys-web)
+- **integrasjon**: SOAP, REST og GraphQL-integrasjon mot andre NAV-interne tjenester
+- **repository**: Database-lag
+- **saksflyt**: Komponent som følger [saga-pattern](https://microservices.io/patterns/data/saga.html) for å orkestere
+ prosesser som utfører flere transaksjoner.
+- **service**: Service-lag
+- **sikkerhet**: Felles logikk knyttet til sikkerhet. Eks ABAC, OIDC, STS, etc.
+- **soknad-altinn**: maven-modul som genererer POJO's fra XSD som representerer en søknad fra Altinn
+- **statistikk**: Produserer statistikk om utstedte A1 (attester om medlemskap etter EU/EØS-forordning) til dvh (datavarehus).
