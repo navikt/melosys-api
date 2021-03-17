@@ -13,15 +13,13 @@ import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
@@ -32,8 +30,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class BehandlingServiceTest {
+
+    private static final String SAKSBEHANDLER = "Z990007";
+    private static final long BEHANDLING_ID = 11L;
+    private static final List<Long> PERIODE_IDS = Arrays.asList(2L, 3L);
+
     @Mock
     private BehandlingRepository behandlingRepo;
     @Mock
@@ -47,17 +50,10 @@ public class BehandlingServiceTest {
 
     private BehandlingService behandlingService;
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     @Captor
     private ArgumentCaptor<Behandling> behandlingCaptor;
 
-    private static final String SAKSBEHANDLER = "Z990007";
-    private static final long BEHANDLING_ID = 11L;
-    private static final List<Long> PERIODE_IDS = Arrays.asList(2L, 3L);
-
-    @Before
+    @BeforeEach
     public void setUp() {
         behandlingService = new BehandlingService(behandlingRepo, behandlingsresultatRepository, tidligereMedlemsperiodeRepo, behandlingsresultatService, oppgaveService);
     }
@@ -89,19 +85,23 @@ public class BehandlingServiceTest {
         verify(behandlingRepo).save(behandling);
     }
 
-    @Test(expected = IkkeFunnetException.class)
-    public void oppdaterStatus_behIkkeFunnet() throws FunksjonellException, TekniskException {
+    @Test
+    public void oppdaterStatus_behIkkeFunnet() {
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
         when(behandlingRepo.findById(anyLong())).thenReturn(Optional.empty());
-        behandlingService.oppdaterStatus(BEHANDLING_ID, Behandlingsstatus.AVVENT_DOK_PART);
+
+        assertThatExceptionOfType(IkkeFunnetException.class)
+            .isThrownBy(() -> behandlingService.oppdaterStatus(BEHANDLING_ID, Behandlingsstatus.AVVENT_DOK_PART));
     }
 
-    @Test(expected = FunksjonellException.class)
-    public void oppdaterStatus_ugyldig() throws FunksjonellException, TekniskException {
+    @Test
+    public void oppdaterStatus_ugyldig() {
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
-        behandlingService.oppdaterStatus(BEHANDLING_ID, Behandlingsstatus.AVSLUTTET);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> behandlingService.oppdaterStatus(BEHANDLING_ID, Behandlingsstatus.AVSLUTTET));
     }
 
     @Test
