@@ -13,6 +13,8 @@ Melosys-api kan kjøres opp som en ren Spring-applikasjon med profil `local-mock
  har, som database, kafka, ldap, oauth-server samt eksterne integrasjoner. Trenger også [naisdevice](https://doc.nais.io/device/install/index.html)
  for å koble til enkelte eksterne tjenester.
 
+Swagger kan også nås på `localhost:8080/swagger-ui/`
+
 ## Arkitektur
 
 Melosys-api har en lagdelt arkitektur og bruker primært spring-boot som rammeverk:
