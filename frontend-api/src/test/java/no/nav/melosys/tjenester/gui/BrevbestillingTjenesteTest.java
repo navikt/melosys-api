@@ -6,11 +6,15 @@ import java.util.List;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.integrasjon.ereg.EregFasade;
+import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevbestillingService;
+import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,8 +45,8 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
 
     @BeforeEach
     void init() {
-        BrevbestillingService brevbestillingService = new BrevbestillingService(mockBehandlingService, mockDokServiceFasade, mockDokgenService);
-        brevbestillingTjeneste = new BrevbestillingTjeneste(brevbestillingService);
+        BrevbestillingService brevbestillingService = new BrevbestillingService(mockBehandlingService, mockDokServiceFasade, mockDokgenService, mock(BrevmottakerService.class), mock(PersondataFasade.class), mock(EregFasade.class), mock(KontaktopplysningService.class));
+        brevbestillingTjeneste = new BrevbestillingTjeneste(brevbestillingService, mock(BehandlingService.class));
     }
 
     @Test

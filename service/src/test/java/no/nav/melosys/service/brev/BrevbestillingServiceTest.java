@@ -5,11 +5,14 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.integrasjon.ereg.EregFasade;
+import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +25,7 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -41,7 +45,7 @@ class BrevbestillingServiceTest {
 
     @BeforeEach
     void init() {
-        brevbestillingService = new BrevbestillingService(mockBehandlingService, mockDokServiceFasade, mockDokgenService);
+        brevbestillingService = new BrevbestillingService(mockBehandlingService, mockDokServiceFasade, mockDokgenService, mock(BrevmottakerService.class), mock(PersondataFasade.class), mock(EregFasade.class), mock(KontaktopplysningService.class));
     }
 
     @Test

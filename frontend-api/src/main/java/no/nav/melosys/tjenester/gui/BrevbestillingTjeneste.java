@@ -2,20 +2,24 @@ package no.nav.melosys.tjenester.gui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevbestillingService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalDto;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalFeltDto;
 import no.nav.melosys.tjenester.gui.dto.brev.FeltType;
 import no.nav.melosys.tjenester.gui.dto.brev.FeltvalgDto;
+import no.nav.melosys.tjenester.gui.dto.brev.MottakerAdresseDto;
 import no.nav.melosys.tjenester.gui.dto.brev.MottakerDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +29,7 @@ import org.springframework.web.context.annotation.RequestScope;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -37,15 +42,17 @@ import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 @RequestScope
 public class BrevbestillingTjeneste {
     private final BrevbestillingService brevbestillingService;
+    private final BehandlingService behandlingService;
 
     @Autowired
-    public BrevbestillingTjeneste(BrevbestillingService brevbestillingService) {
+    public BrevbestillingTjeneste(BrevbestillingService brevbestillingService, BehandlingService behandlingService) {
         this.brevbestillingService = brevbestillingService;
+        this.behandlingService = behandlingService;
     }
 
     @GetMapping(value = "/tilgjengelige-maler/{behandlingID}", produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Henter alle tilgjengelige brevmaler for en behandling", response = BrevmalDto.class, responseContainer = "List")
-    public List<BrevmalDto> hentTilgjengeligeMaler(@RequestParam Long behandlingId) throws IkkeFunnetException {
+    public List<BrevmalDto> hentTilgjengeligeMaler(@RequestParam Long behandlingId) throws FunksjonellException, TekniskException {
         return byggBrevmalListe(behandlingId);
     }
 
@@ -68,22 +75,33 @@ public class BrevbestillingTjeneste {
         brevbestillingService.produserBrev(produserbartDokument, behandlingID, brevbestillingDto);
     }
 
-    private List<BrevmalDto> byggBrevmalListe(long behandlingId) throws IkkeFunnetException {
+    private List<BrevmalDto> byggBrevmalListe(long behandlingId) throws FunksjonellException, TekniskException {
         List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentBrevMaler(behandlingId);
+        Behandling behandling = behandlingService.hentBehandling(behandlingId);
 
         List<BrevmalDto> maler = new ArrayList<>();
-        produserbareDokumenter.forEach(p -> {
+        for(Produserbaredokumenter p : produserbareDokumenter) {
+            MottakerDto.Builder mottakerDto;
             switch (p) {
                 case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD:
+                    mottakerDto = new MottakerDto.Builder()
+                        .medType("Bruker eller brukers fullmektig")
+                        .medRolle(Aktoersroller.BRUKER);
+
+                    leggTilAdresseOgFeilmelding(mottakerDto, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, Aktoersroller.BRUKER, behandling);
+
                     maler.add(lagBrevmalDto(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, null,
-                        singletonList(new MottakerDto.Builder()
-                            .medType("Bruker eller brukers fullmektig")
-                            .medRolle(Aktoersroller.BRUKER)
-                            .build()),
+                        singletonList(mottakerDto.build()),
                         null
                     ));
                     break;
                 case MANGELBREV_BRUKER:
+                    mottakerDto = new MottakerDto.Builder()
+                        .medType("Bruker eller brukers fullmektig")
+                        .medRolle(Aktoersroller.BRUKER);
+
+                    leggTilAdresseOgFeilmelding(mottakerDto, MANGELBREV_BRUKER, Aktoersroller.BRUKER, behandling);
+
                     maler.add(lagBrevmalDto(MANGELBREV_BRUKER,
                         asList(
                             new BrevmalFeltDto.Builder()
@@ -102,21 +120,19 @@ public class BrevbestillingTjeneste {
                                 .erPåkrevd()
                                 .build()
                         ),
-                        singletonList(new MottakerDto.Builder()
-                            .medType("Bruker eller brukers fullmektig")
-                            .medRolle(Aktoersroller.BRUKER)
-                            .build()),
+                        singletonList(mottakerDto.build()),
                         "Hvis bruker eller arbeidsgiver har fullmektig som er lagt inn i sidemenyen, vil brevet automatisk bli sendt til denne."
                     ));
                     break;
                 case MANGELBREV_ARBEIDSGIVER:
                     List<MottakerDto> mottakere = new ArrayList<>();
-                    mottakere.add(
-                        new MottakerDto.Builder()
-                            .medType("Arbeidsgiver eller arbeidsgivers fullmektig")
-                            .medRolle(Aktoersroller.ARBEIDSGIVER)
-                            .build()
-                    );
+                    mottakerDto = new MottakerDto.Builder()
+                        .medType("Arbeidsgiver eller arbeidsgivers fullmektig")
+                        .medRolle(Aktoersroller.ARBEIDSGIVER);
+
+                    leggTilAdresseOgFeilmelding(mottakerDto, MANGELBREV_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER, behandling);
+
+                    mottakere.add(mottakerDto.build());
                     mottakere.add(
                         new MottakerDto.Builder()
                             .medType("Annen organisasjon")
@@ -125,7 +141,7 @@ public class BrevbestillingTjeneste {
                             .build()
                     );
 
-                    maler.add(lagBrevmalDto(MANGELBREV_BRUKER,
+                    maler.add(lagBrevmalDto(MANGELBREV_ARBEIDSGIVER,
                         asList(
                             new BrevmalFeltDto.Builder()
                                 .medKode("INNLEDNING_FRITEKST")
@@ -150,9 +166,24 @@ public class BrevbestillingTjeneste {
                 default:
                     break;
             }
-        });
-
+        }
         return maler;
+    }
+
+
+    private MottakerDto.Builder leggTilAdresseOgFeilmelding(MottakerDto.Builder builder, Produserbaredokumenter produserbaredokumenter, Aktoersroller aktoersroller, Behandling behandling) throws TekniskException, FunksjonellException {
+        try {
+            var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(produserbaredokumenter, aktoersroller, behandling);
+            if (aktoersroller == Aktoersroller.BRUKER && brevAdresser.get(0).adresselinjer.stream().noneMatch(Objects::nonNull)) {
+                return builder.medFeilmelding("Bruker har ingen registrert adresse");
+            }
+            return builder.medAdresse(brevAdresser.stream().map(MottakerAdresseDto::av).collect(Collectors.toList()));
+        } catch (TekniskException e) {
+            if ("Finner ikke arbeidsforholddokument".equals(e.getMessage())) {
+                return builder.medFeilmelding("Finner ingen arbeidsgivere. Hent registeropplysninger.");
+            }
+            throw new TekniskException(e);
+        }
     }
 
     private BrevmalDto lagBrevmalDto(Produserbaredokumenter dokument, List<BrevmalFeltDto> felter, List<MottakerDto> mottakere, String mottakerHjelpetekst) {
