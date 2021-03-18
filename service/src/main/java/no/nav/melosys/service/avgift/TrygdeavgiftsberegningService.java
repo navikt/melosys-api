@@ -127,7 +127,7 @@ public class TrygdeavgiftsberegningService {
     }
 
     private MedlemAvFolketrygden hentMedlemAvFolketrygden(long behandlingsresultatID) throws IkkeFunnetException {
-        return medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID)
+        return finnMedlemAvFolketrygden(behandlingsresultatID)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke medlemAvFolketrygden for behandlingsresultatID " + behandlingsresultatID));
     }
 

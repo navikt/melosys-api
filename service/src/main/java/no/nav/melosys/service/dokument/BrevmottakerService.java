@@ -227,16 +227,14 @@ public class BrevmottakerService {
 
         Optional<Trygdeavgiftsberegningsresultat> trygdeavgiftsberegningsresultat = trygdeavgiftsberegningService.finnBeregningsresultat(behandling.getId());
 
-        if (trygdeavgiftsberegningsresultat.isPresent()) {
-            Trygdeavgiftsberegningsresultat beregningsresultat = trygdeavgiftsberegningsresultat.get();
-
-            if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER) && beregningsresultat.erIkkeSelvbetalendeBruker()) {
+        trygdeavgiftsberegningsresultat.ifPresent(resultat -> {
+            if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER) && resultat.erIkkeSelvbetalendeBruker()) {
                 mottakerliste.getKopiMottakere().add(ARBEIDSGIVER);
             }
 
-            if (brevkopiRegler.contains(SKATT_FÅR_KOPI_HVIS_AVGIFTSPLIKTIG_INNTEKT) && beregningsresultat.harAvgiftspliktigInntekt()) {
+            if (brevkopiRegler.contains(SKATT_FÅR_KOPI_HVIS_AVGIFTSPLIKTIG_INNTEKT) && resultat.harAvgiftspliktigInntekt()) {
                 mottakerliste.getFasteMottakere().add(SKATT);
             }
-        }
+        });
     }
 }
