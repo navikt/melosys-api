@@ -28,6 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.REPRESENTANT;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_BRUKER;
 import static org.springframework.util.StringUtils.hasText;
@@ -61,6 +63,18 @@ public class DokgenService {
         this.kontaktopplysningService = kontaktopplysningService;
         this.brevmottakerService = brevmottakerService;
         this.prosessinstansService = prosessinstansService;
+    }
+
+    public byte[] produserUtkast(Produserbaredokumenter produserbartdokument, long behandlingId,
+                                 String orgnr, BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
+        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        Aktoer mottaker = brevmottakerService.avklarMottakere(produserbartdokument, Mottaker.av(brevbestillingDto.getMottaker()), behandling).get(0);
+
+        if (mottaker.erOrganisasjon() && mottaker.getRolle() == REPRESENTANT) {
+            orgnr = mottaker.getOrgnr();
+        }
+
+        return produserBrev(produserbartdokument, behandlingId, orgnr, brevbestillingDto, true);
     }
 
     public byte[] produserBrev(Produserbaredokumenter produserbartdokument, long behandlingId,

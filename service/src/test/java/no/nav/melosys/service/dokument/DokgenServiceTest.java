@@ -14,17 +14,19 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdress
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
 import no.nav.melosys.integrasjon.dokgen.DokgenMalResolver;
+import no.nav.melosys.integrasjon.dokgen.dto.DokgenDto;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -125,6 +127,93 @@ class DokgenServiceTest {
 
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false));
         verify(mockEregFasade).hentOrganisasjon(any());
+        verify(mockKontaktOpplysningService).hentKontaktopplysning(any(), any());
+    }
+
+    @Test
+    void produserUtkastUtenRepresentantForBrukerOk() throws Exception {
+        when(mockDokgenConsumer.lagPdf(anyString(), any(), anyBoolean())).thenReturn(expectedPdf);
+        when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
+        when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
+        when(mockPersondataFasade.hentPerson(any(), any())).thenReturn(lagPersonopplysning());
+        Aktoer mottaker = new Aktoer();
+        mottaker.setRolle(Aktoersroller.BRUKER);
+        when(mockBrevMottakerService.avklarMottakere(any(), any(), any())).thenReturn(asList(mottaker));
+
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+            .medMottaker(Aktoersroller.BRUKER)
+            .build();
+
+        byte[] pdfResponse = dokgenService.produserUtkast(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L, null, brevbestillingDto);
+
+        assertNotNull(pdfResponse);
+        assertEquals(expectedPdf, pdfResponse);
+
+        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(true));
+        verify(mockPersondataFasade).hentPerson(any(), eq(Informasjonsbehov.STANDARD));
+
+        verifyNoInteractions(mockEregFasade);
+        verifyNoInteractions(mockKontaktOpplysningService);
+    }
+
+    @Test
+    void produserUtkastTilRepresentantForBrukerOk() throws Exception {
+        when(mockDokgenConsumer.lagPdf(anyString(), any(), anyBoolean())).thenReturn(expectedPdf);
+        when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
+        when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
+        when(mockEregFasade.hentOrganisasjon(any())).thenReturn(lagSaksopplysning());
+        when(mockKontaktOpplysningService.hentKontaktopplysning(any(), any())).thenReturn(of(lagKontaktOpplysning()));
+
+        Aktoer representant = new Aktoer();
+        representant.setRolle(Aktoersroller.REPRESENTANT);
+        representant.setOrgnr("987654321");
+        when(mockBrevMottakerService.avklarMottakere(any(), any(), any())).thenReturn(asList(representant));
+
+        Aktoer mottaker = new Aktoer();
+        mottaker.setRolle(Aktoersroller.BRUKER);
+
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+            .medMottaker(Aktoersroller.BRUKER)
+            .build();
+
+        byte[] pdfResponse = dokgenService.produserUtkast(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L, null, brevbestillingDto);
+
+        assertNotNull(pdfResponse);
+        assertEquals(expectedPdf, pdfResponse);
+
+        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(true));
+        verify(mockEregFasade).hentOrganisasjon(eq("987654321"));
+        verify(mockKontaktOpplysningService).hentKontaktopplysning(any(), any());
+    }
+
+    @Test
+    void produserUtkastTilRepresentantForArbeidsgiverOk() throws Exception {
+        when(mockDokgenConsumer.lagPdf(anyString(), any(), anyBoolean())).thenReturn(expectedPdf);
+        when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
+        when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
+        when(mockEregFasade.hentOrganisasjon(any())).thenReturn(lagSaksopplysning());
+        when(mockKontaktOpplysningService.hentKontaktopplysning(any(), any())).thenReturn(of(lagKontaktOpplysning()));
+
+        Aktoer representant = new Aktoer();
+        representant.setRolle(Aktoersroller.REPRESENTANT);
+        representant.setOrgnr("987654321");
+        when(mockBrevMottakerService.avklarMottakere(any(), any(), any())).thenReturn(asList(representant));
+
+        Aktoer mottaker = new Aktoer();
+        mottaker.setRolle(Aktoersroller.ARBEIDSGIVER);
+        mottaker.setOrgnr("123456789");
+
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+            .medMottaker(Aktoersroller.BRUKER)
+            .build();
+
+        byte[] pdfResponse = dokgenService.produserUtkast(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L, mottaker.getOrgnr(), brevbestillingDto);
+
+        assertNotNull(pdfResponse);
+        assertEquals(expectedPdf, pdfResponse);
+
+        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(true));
+        verify(mockEregFasade).hentOrganisasjon(eq("987654321"));
         verify(mockKontaktOpplysningService).hentKontaktopplysning(any(), any());
     }
 
