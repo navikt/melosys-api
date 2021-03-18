@@ -11,6 +11,7 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -24,26 +25,23 @@ import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Collections.emptyList;
 import static no.nav.melosys.domain.brev.FastMottaker.SKATT;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BrevmottakerServiceTest {
+@ExtendWith(MockitoExtension.class)
+class BrevmottakerServiceTest {
     @Mock
     private KontaktopplysningService kontaktopplysningService;
     @Mock
@@ -57,39 +55,70 @@ public class BrevmottakerServiceTest {
     @Mock
     private Behandling behandling;
 
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
-
     private Behandlingsresultat behandlingsresultat;
     private BrevmottakerService brevmottakerService;
 
-    @Before
-    public void setup() throws TekniskException, IkkeFunnetException {
+    @BeforeEach
+    void setup() {
         brevmottakerService = new BrevmottakerService(kontaktopplysningService, avklarteVirksomheterService,
             utenlandskMyndighetService, behandlingsresultatService, trygdeavgiftsberegningService);
-        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(eq(behandling))).thenReturn(Sets.newHashSet("123456789", "987654321"));
-        when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(eq(behandling))).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagAktoerUtenlandskMyndighet()));
 
         behandlingsresultat = new Behandlingsresultat();
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
     }
 
     @Test
-    public void avklarMottakere_medArbeidsgiverRolleOgIngenArbeidsgivere_feiler() throws FunksjonellException, TekniskException {
+    void avklarMottakere_medRolleSomIkkeErStøttet_feiler() {
+        assertThatThrownBy(() -> brevmottakerService.avklarMottakere(null, Mottaker.av(REPRESENTANT), behandling))
+            .isInstanceOf(FunksjonellException.class)
+            .hasMessage("REPRESENTANT støttes ikke.");
+    }
+
+    @Test
+    void avklarMottakere_medBrukerRolleOgIkkeRegistretBruker_feiler() {
+        when(behandling.getFagsak()).thenReturn(new Fagsak());
+
+        assertThatThrownBy(() -> brevmottakerService.avklarMottakere(null, Mottaker.av(BRUKER), behandling))
+            .isInstanceOf(FunksjonellException.class)
+            .hasMessage("Bruker er ikke registrert.");
+    }
+
+    @Test
+    void avklarMottakere_medBrukerRolleUtenRepresentant_girBrukerAktør() throws FunksjonellException, TekniskException {
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
+
+        List<Aktoer> aktoers = brevmottakerService.avklarMottakere(null, Mottaker.av(BRUKER), behandling);
+
+        assertThat(aktoers).hasSize(1);
+        assertThat(aktoers.get(0).getRolle()).isEqualTo(BRUKER);
+    }
+
+    @Test
+    void avklarMottakere_medBrukerRolleMedRepresentant_girRepresentantAktør() throws FunksjonellException, TekniskException {
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(Representerer.BRUKER));
+
+        List<Aktoer> aktoers = brevmottakerService.avklarMottakere(null, Mottaker.av(BRUKER), behandling);
+
+        assertThat(aktoers).hasSize(1);
+        assertThat(aktoers.get(0).getRolle()).isEqualTo(REPRESENTANT);
+    }
+
+    @Test
+    void avklarMottakere_medArbeidsgiverRolleOgIngenArbeidsgivere_feiler() throws TekniskException {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(eq(behandling))).thenReturn(Collections.emptySet());
         when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(eq(behandling))).thenReturn(Collections.emptyList());
-        expectedException.expect(FunksjonellException.class);
 
-        brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
-        expectedException.expectMessage("Arbeidsgiver er ikke registrert");
+        assertThatThrownBy(() -> brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling))
+            .isInstanceOf(FunksjonellException.class)
+            .hasMessage("Arbeidsgiver er ikke registrert.");
     }
 
     @Test
-    public void avklarMottakere_medArbeidsgiverRolle_girArbeidsgiverAktører() throws FunksjonellException, TekniskException {
+    void avklarMottakere_medArbeidsgiverRolle_girArbeidsgiverAktører() throws FunksjonellException, TekniskException {
+        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(eq(behandling))).thenReturn(Sets.newHashSet("123456789", "987654321"));
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
 
         List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
@@ -100,7 +129,7 @@ public class BrevmottakerServiceTest {
     }
 
     @Test
-    public void avklarMottakere_medBareUtenlandskeArbeidsgivere_girIngenMottakere() throws FunksjonellException, TekniskException {
+    void avklarMottakere_medBareUtenlandskeArbeidsgivere_girIngenMottakere() throws FunksjonellException, TekniskException {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(eq(behandling))).thenReturn(Collections.emptySet());
         when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(eq(behandling)))
@@ -111,7 +140,8 @@ public class BrevmottakerServiceTest {
     }
 
     @Test
-    public void avklarMottakere_medArbeidsgiverRolleOgRepresentantForBruker_girArbeidsgiverAktører() throws FunksjonellException, TekniskException {
+    void avklarMottakere_medArbeidsgiverRolleOgRepresentantForBruker_girArbeidsgiverAktører() throws FunksjonellException, TekniskException {
+        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(eq(behandling))).thenReturn(Sets.newHashSet("123456789", "987654321"));
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(Representerer.BRUKER));
 
         List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
@@ -122,7 +152,7 @@ public class BrevmottakerServiceTest {
     }
 
     @Test
-    public void avklarMottakere_medArbeidsgiverRolleOgRepresentantForArbeidsgiver_girRepresentantAktør() throws FunksjonellException, TekniskException {
+    void avklarMottakere_medArbeidsgiverRolleOgRepresentantForArbeidsgiver_girRepresentantAktør() throws FunksjonellException, TekniskException {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(Representerer.ARBEIDSGIVER));
 
         List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
@@ -133,7 +163,7 @@ public class BrevmottakerServiceTest {
     }
 
     @Test
-    public void avklarMottakere_medArbeidsgiverRolleOgRepresentantForBegge_girRepresentantAktør() throws FunksjonellException, TekniskException {
+    void avklarMottakere_medArbeidsgiverRolleOgRepresentantForBegge_girRepresentantAktør() throws FunksjonellException, TekniskException {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(Representerer.BEGGE));
 
         List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
@@ -144,20 +174,28 @@ public class BrevmottakerServiceTest {
     }
 
     @Test
-    public void avklarMottakere_art12_1_CZerReservertFraA1_forventerIngenAktør() throws FunksjonellException, TekniskException {
+    void avklarMottakere_art12_1_CZerReservertFraA1_forventerIngenAktør() throws FunksjonellException, TekniskException {
+        when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(eq(behandling))).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagAktoerUtenlandskMyndighet()));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+
         List<Aktoer> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ATTEST_A1, Mottaker.av(MYNDIGHET), behandling);
         assertThat(myndigheter).isEmpty();
     }
 
     @Test
-    public void avklarMottakere_art_11_4_2_CZerReservertFraA1_forventerIngenAktør() throws FunksjonellException, TekniskException {
+    void avklarMottakere_art_11_4_2_CZerReservertFraA1_forventerIngenAktør() throws FunksjonellException, TekniskException {
+        when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(eq(behandling))).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagAktoerUtenlandskMyndighet()));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+
         behandlingsresultat.hentValidertLovvalgsperiode().setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2);
         List<Aktoer> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ATTEST_A1, Mottaker.av(MYNDIGHET), behandling);
         assertThat(myndigheter).isEmpty();
     }
 
     @Test
-    public void avklarMottakere_A001_CZerReservertFraA1_forventerMyndighetAktør() throws FunksjonellException, TekniskException {
+    void avklarMottakere_A001_CZerReservertFraA1_forventerMyndighetAktør() throws FunksjonellException, TekniskException {
+        when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(eq(behandling))).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagAktoerUtenlandskMyndighet()));
+
         List<Aktoer> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ANMODNING_UNNTAK, Mottaker.av(MYNDIGHET), behandling);
         assertThat(myndigheter.stream()
             .map(Aktoer::getInstitusjonId))
@@ -165,14 +203,14 @@ public class BrevmottakerServiceTest {
     }
 
     @Test
-    public void gittMalIkkeRegistret_skalKasteFeil() {
+    void gittMalIkkeRegistret_skalKasteFeil() {
         assertThatExceptionOfType(IkkeFunnetException.class)
             .isThrownBy(() -> brevmottakerService.hentMottakerliste(ATTEST_A1, behandling))
             .withMessage("Mangler mapping av mottakere for ATTEST_A1");
     }
 
     @Test
-    public void gittForvaltningsmelding_skalHovedmottakerVæreBruker() throws Exception {
+    void gittForvaltningsmelding_skalHovedmottakerVæreBruker() throws Exception {
         assertThat(brevmottakerService.hentMottakerliste(MELDING_FORVENTET_SAKSBEHANDLINGSTID, behandling))
             .extracting(
                 Mottakerliste::getHovedMottaker,
@@ -189,7 +227,7 @@ public class BrevmottakerServiceTest {
     }
 
     @Test
-    public void gittMangelbrevBruker_skalHovedmottakerVæreBruker() throws Exception {
+    void gittMangelbrevBruker_skalHovedmottakerVæreBruker() throws Exception {
         assertThat(brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, behandling))
             .extracting(
                 Mottakerliste::getHovedMottaker,
@@ -206,7 +244,7 @@ public class BrevmottakerServiceTest {
     }
 
     @Test
-    public void gittMangelbrevArbeidsgiver_skalHovedmottakerVæreArbeidsgiverMedKopi() throws Exception {
+    void gittMangelbrevArbeidsgiver_skalHovedmottakerVæreArbeidsgiverMedKopi() throws Exception {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
 
         assertThat(brevmottakerService.hentMottakerliste(MANGELBREV_ARBEIDSGIVER, behandling))
@@ -225,7 +263,7 @@ public class BrevmottakerServiceTest {
     }
 
     @Test
-    public void gittVedtakFtrl2_8UtenFullmektigIkkeSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
+    void gittVedtakFtrl2_8UtenFullmektigIkkeSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
         initMocksForFtrlVedtaksbrev(null, 10000, false);
 
         assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling))
@@ -244,7 +282,7 @@ public class BrevmottakerServiceTest {
     }
 
     @Test
-    public void gittVedtakFtrl2_8UtenFullmektigSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
+    void gittVedtakFtrl2_8UtenFullmektigSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
         initMocksForFtrlVedtaksbrev(null, 10000, true);
 
         assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling))
@@ -264,7 +302,7 @@ public class BrevmottakerServiceTest {
     }
 
     @Test
-    public void gittVedtakFtrl2_8FullmektigIkkeSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
+    void gittVedtakFtrl2_8FullmektigIkkeSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
         initMocksForFtrlVedtaksbrev(Representerer.BRUKER, 10000, false);
 
         assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling))
@@ -284,7 +322,7 @@ public class BrevmottakerServiceTest {
     }
 
     @Test
-    public void gittVedtakFtrl2_8FullmektigSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
+    void gittVedtakFtrl2_8FullmektigSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
         initMocksForFtrlVedtaksbrev(Representerer.BRUKER, 10000, true);
 
         Mottakerliste actual = brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling);
@@ -305,7 +343,7 @@ public class BrevmottakerServiceTest {
     }
 
     @Test
-    public void gittVedtakFtrl2_8FullmektigIkkeSelvbetalendeIkkeInntekt_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
+    void gittVedtakFtrl2_8FullmektigIkkeSelvbetalendeIkkeInntekt_skalHovedmottakerVæreBrukerMedKopier() throws Exception {
         initMocksForFtrlVedtaksbrev(Representerer.BRUKER, 0, false);
 
         assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling))
@@ -324,11 +362,90 @@ public class BrevmottakerServiceTest {
         verify(trygdeavgiftsberegningService).finnBeregningsresultat(anyLong());
     }
 
+    @Test
+    void hentKontaktopplysning_utenMottaker_girTomtResultat() {
+        Kontaktopplysning kontaktopplysning = brevmottakerService.hentKontaktopplysning("MEL-123", null);
+        assertThat(kontaktopplysning).isNull();
+
+        verifyNoInteractions(kontaktopplysningService);
+    }
+
+    @Test
+    void hentKontaktopplysning_mottakerBruker_girTomtResultat() {
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(BRUKER);
+
+        Kontaktopplysning kontaktopplysning = brevmottakerService.hentKontaktopplysning("MEL-123", aktoer);
+        assertThat(kontaktopplysning).isNull();
+
+        verifyNoInteractions(kontaktopplysningService);
+    }
+
+    @Test
+    void hentKontaktopplysning_mottakerArbeidsgiver_returnererKontaktopplysning() {
+        String orgnr = "987654321";
+        when(kontaktopplysningService.hentKontaktopplysning(any(), eq(orgnr))).thenReturn(lagKontaktOpplysning(false));
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(ARBEIDSGIVER);
+        aktoer.setOrgnr(orgnr);
+
+        Kontaktopplysning kontaktopplysning = brevmottakerService.hentKontaktopplysning("MEL-123", aktoer);
+        assertThat(kontaktopplysning).isNotNull();
+        assertThat(kontaktopplysning.getKontaktNavn()).isEqualTo("Kari Arbeidsgiver");
+
+        verify(kontaktopplysningService).hentKontaktopplysning(eq("MEL-123"), eq(orgnr));
+    }
+
+    @Test
+    void hentKontaktopplysning_mottakerRepresentant_returnererKontaktopplysning() {
+        String orgnr = "123456789";
+        when(kontaktopplysningService.hentKontaktopplysning(any(), eq(orgnr))).thenReturn(lagKontaktOpplysning(true));
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(REPRESENTANT);
+        aktoer.setOrgnr(orgnr);
+
+        Kontaktopplysning kontaktopplysning = brevmottakerService.hentKontaktopplysning("MEL-123", aktoer);
+        assertThat(kontaktopplysning).isNotNull();
+        assertThat(kontaktopplysning.getKontaktNavn()).isEqualTo("Ole Fullmektig");
+
+        verify(kontaktopplysningService).hentKontaktopplysning(eq("MEL-123"), eq(orgnr));
+    }
+
+    @Test
+    void avklarMottakerRolleFraDokument_tilBruker_girRolleBruker() throws TekniskException {
+        Aktoersroller mottakerRolle = brevmottakerService.avklarMottakerRolleFraDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
+
+        assertThat(mottakerRolle).isEqualTo(BRUKER);
+    }
+
+    @Test
+    void avklarMottakerRolleFraDokument_tilArbeidsgiver_girRolleArbeidsgiver() throws TekniskException {
+        Aktoersroller mottakerRolle = brevmottakerService.avklarMottakerRolleFraDokument(INNVILGELSE_ARBEIDSGIVER);
+
+        assertThat(mottakerRolle).isEqualTo(ARBEIDSGIVER);
+    }
+
+    @Test
+    void avklarMottakerRolleFraDokument_tilMyndighet_girRolleMyndighet() throws TekniskException {
+        Aktoersroller mottakerRolle = brevmottakerService.avklarMottakerRolleFraDokument(ATTEST_A1);
+
+        assertThat(mottakerRolle).isEqualTo(MYNDIGHET);
+    }
+
+    @Test
+    void avklarMottakerRolleFraDokument_UtenMapping_feiler() {
+        assertThatThrownBy(() -> brevmottakerService.avklarMottakerRolleFraDokument(ORIENTERING_UTPEKING_UTLAND))
+            .isInstanceOf(TekniskException.class)
+            .hasMessage("Valg av mottakerRolle støttes ikke for ORIENTERING_UTPEKING_UTLAND");
+    }
+
     private void initMocksForFtrlVedtaksbrev(Representerer representerer, long norskinntekt, boolean selvbetalende) {
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(selvbetalende ? BRUKER : REPRESENTANT_TRYGDEAVGIFT);
-        Trygdeavgiftsberegningsresultat trygdeavgiftsberegningsresultat = new Trygdeavgiftsberegningsresultat(norskinntekt, null, aktoer, emptyList());
-        when(trygdeavgiftsberegningService.finnBeregningsresultat(anyLong())).thenReturn(Optional.of(trygdeavgiftsberegningsresultat));
+        Optional<Trygdeavgiftsberegningsresultat> trygdeavgiftsberegningsresultat =
+            Optional.of(new Trygdeavgiftsberegningsresultat(norskinntekt, null, aktoer, emptyList()));
+
+        when(trygdeavgiftsberegningService.finnBeregningsresultat(anyLong())).thenReturn(trygdeavgiftsberegningsresultat);
 
         Fagsak fagsak = lagFagsakMedRepresentant(representerer);
         fagsak.setType(Sakstyper.FTRL);
@@ -365,5 +482,12 @@ public class BrevmottakerServiceTest {
         aktoer.setRolle(MYNDIGHET);
         aktoer.setInstitusjonId("CZ:SZUC10416");
         return aktoer;
+    }
+
+
+    private Optional<Kontaktopplysning> lagKontaktOpplysning(boolean representant) {
+        Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
+        kontaktopplysning.setKontaktNavn(representant ? "Ole Fullmektig" : "Kari Arbeidsgiver");
+        return Optional.of(kontaktopplysning);
     }
 }

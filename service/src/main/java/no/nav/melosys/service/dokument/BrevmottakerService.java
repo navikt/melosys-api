@@ -61,9 +61,9 @@ public class BrevmottakerService {
         Aktoersroller mottakerRolle;
         if (DOKUMENTER_TIL_BRUKER.contains(produserbartDokument)) {
             mottakerRolle = BRUKER;
-        } else if (produserbartDokument == INNVILGELSE_ARBEIDSGIVER || produserbartDokument == AVSLAG_ARBEIDSGIVER) {
+        } else if (List.of(INNVILGELSE_ARBEIDSGIVER, AVSLAG_ARBEIDSGIVER).contains(produserbartDokument)) {
             mottakerRolle = ARBEIDSGIVER;
-        } else if (produserbartDokument == ANMODNING_UNNTAK || produserbartDokument == ATTEST_A1) {
+        } else if (List.of(ANMODNING_UNNTAK, ATTEST_A1).contains(produserbartDokument)) {
             mottakerRolle = MYNDIGHET;
         } else {
             throw new TekniskException("Valg av mottakerRolle støttes ikke for " + produserbartDokument);
@@ -210,17 +210,11 @@ public class BrevmottakerService {
             .noneMatch(RESERVERT_FRA_A1::equals);
     }
 
-    public Kontaktopplysning hentKontaktopplysning(String saksnumner, Aktoer mottaker) {
-        if (mottaker == null) {
-            return null;
+    public Kontaktopplysning hentKontaktopplysning(String saksnummer, Aktoer mottaker) {
+        if (mottaker != null && List.of(ARBEIDSGIVER, REPRESENTANT).contains(mottaker.getRolle())) {
+            return kontaktopplysningService.hentKontaktopplysning(saksnummer, mottaker.getOrgnr()).orElse(null);
         }
-
-        Aktoersroller mottakerRolle = mottaker.getRolle();
-        if (mottakerRolle == ARBEIDSGIVER || mottakerRolle == REPRESENTANT) {
-            return kontaktopplysningService.hentKontaktopplysning(saksnumner, mottaker.getOrgnr()).orElse(null);
-        } else {
-            return null;
-        }
+        return null;
     }
 
     private void leggTilKopier(Behandling behandling, Mottakerliste mottakerliste, Collection<BrevkopiRegel> brevkopiRegler) {

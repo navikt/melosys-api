@@ -122,15 +122,16 @@ public class TrygdeavgiftsberegningService {
 
     @Transactional(readOnly = true)
     public Optional<Trygdeavgiftsberegningsresultat> finnBeregningsresultat(long behandlingsresultatID) {
-        try {
-            return Optional.of(hentBeregningsresultat(behandlingsresultatID));
-        } catch (IkkeFunnetException e) {
-            return Optional.empty();
-        }
+        return finnMedlemAvFolketrygden(behandlingsresultatID)
+            .map(Trygdeavgiftsberegningsresultat::lag);
     }
 
     private MedlemAvFolketrygden hentMedlemAvFolketrygden(long behandlingsresultatID) throws IkkeFunnetException {
         return medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke medlemAvFolketrygden for behandlingsresultatID " + behandlingsresultatID));
+    }
+
+    private Optional<MedlemAvFolketrygden> finnMedlemAvFolketrygden(long behandlingsresultatID) {
+        return medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID);
     }
 }
