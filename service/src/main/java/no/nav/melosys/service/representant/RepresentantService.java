@@ -55,15 +55,10 @@ public class RepresentantService {
 
         var fastsattTrygdeavgift = medlemAvFolketrygden.getFastsattTrygdeavgift();
         var fagsak = behandlingService.hentBehandling(behandlingID).getFagsak();
-        var lagretAktoer = fastsattTrygdeavgift.getBetalesAv();
 
         fastsattTrygdeavgift.setRepresentantNr(valgtRepresentant.getRepresentantnummer());
-        fastsattTrygdeavgift.setBetalesAv(valgtRepresentant.isSelvbetalende() ? null : oppdaterAktoer(lagretAktoer, fagsak, valgtRepresentant.getOrgnr()));
+        fastsattTrygdeavgift.setBetalesAv(oppdaterEllerOpprettAktoer(fastsattTrygdeavgift.getBetalesAv(), valgtRepresentant.isSelvbetalende(), fagsak, valgtRepresentant.getOrgnr()));
 
-        if (valgtRepresentant.isSelvbetalende() && lagretAktoer != null) {
-            fagsak.getAktører().remove(lagretAktoer);
-            aktoerRepository.deleteById(lagretAktoer.getId());
-        }
         if (valgtRepresentant.getKontaktperson() != null) {
             kontaktopplysningService.lagEllerOppdaterKontaktopplysning(fagsak.getSaksnummer(), valgtRepresentant.getOrgnr(), null, valgtRepresentant.getKontaktperson(), null);
         }
@@ -81,12 +76,30 @@ public class RepresentantService {
         }
     }
 
-    private Aktoer oppdaterAktoer (Aktoer lagretAktoer, Fagsak fagsak, String orgnr) {
-        var nyAktoer = lagretAktoer != null ? lagretAktoer : new Aktoer();
-        nyAktoer.setFagsak(fagsak);
-        nyAktoer.setOrgnr(orgnr);
-        nyAktoer.setRolle(Aktoersroller.REPRESENTANT_TRYGDEAVGIFT);
-        return aktoerRepository.save(nyAktoer);
+    private Aktoer oppdaterEllerOpprettAktoer(Aktoer lagretAktoer, boolean selvbetalende, Fagsak fagsak, String orgnr) {
+        Aktoersroller rolle = selvbetalende ? Aktoersroller.BRUKER : Aktoersroller.REPRESENTANT_TRYGDEAVGIFT;
+        Aktoer oppdatertAktoer;
+
+        if (lagretAktoer != null && lagretAktoer.getRolle() == rolle) {
+            oppdatertAktoer = lagretAktoer;
+            oppdatertAktoer.setOrgnr(orgnr);
+        } else {
+            slettLagretAktoer(lagretAktoer, fagsak);
+            oppdatertAktoer = new Aktoer();
+            oppdatertAktoer.setRolle(rolle);
+            oppdatertAktoer.setOrgnr(selvbetalende ? null : orgnr);
+        }
+
+        oppdatertAktoer.setFagsak(fagsak);
+
+        return aktoerRepository.save(oppdatertAktoer);
+    }
+
+    private void slettLagretAktoer(Aktoer lagretAktoer, Fagsak fagsak) {
+        if (lagretAktoer != null) {
+            fagsak.getAktører().remove(lagretAktoer);
+            aktoerRepository.deleteById(lagretAktoer.getId());
+        }
     }
 
     public ValgtRepresentant hentValgtRepresentant(long behandlingID) throws IkkeFunnetException {
@@ -95,7 +108,7 @@ public class RepresentantService {
 
         var fastsattTrygdeavgift = medlemAvFolketrygden.getFastsattTrygdeavgift();
 
-        if (fastsattTrygdeavgift.getBetalesAv() == null) {
+        if (fastsattTrygdeavgift.getBetalesAv() == null || fastsattTrygdeavgift.getBetalesAv().getRolle() == Aktoersroller.BRUKER) {
             return new ValgtRepresentant(fastsattTrygdeavgift.getRepresentantNr(), true, null, null);
         }
 
