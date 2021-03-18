@@ -1,0 +1,23 @@
+{
+  "errors": [
+    {
+      "message": "My error message",
+      "locations": [
+        {
+          "line": 1,
+          "column": 3
+        }
+      ],
+      "path": [
+        "hentIdenter"
+      ],
+      "extensions": {
+        "code": "error code",
+        "classification": "classification"
+      }
+    }
+  ],
+  "data": {
+    "hentIdenter": null
+  }
+}
