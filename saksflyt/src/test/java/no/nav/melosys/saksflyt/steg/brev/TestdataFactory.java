@@ -9,6 +9,9 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.integrasjon.dokgen.DokumentInfo;
+import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
@@ -62,5 +65,9 @@ public final class TestdataFactory {
         Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
         kontaktopplysning.setKontaktNavn("Donald Duck");
         return kontaktopplysning;
+    }
+
+    static DokumentInfo lagDokumentInfo() {
+        return new DokumentInfo("dummy_mal", DokumentKategoriKode.IB, "Dummy tittel");
     }
 }

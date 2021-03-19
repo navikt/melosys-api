@@ -3,6 +3,7 @@ package no.nav.melosys.domain.arkiv;
 public final class JournalpostBestilling {
     private final String tittel;
     private final String brevkode;
+    private final String dokumentKategori;
     private final String brukerFnr;
     private final String mottakerNavn;
     private final String mottakerId;
@@ -13,6 +14,7 @@ public final class JournalpostBestilling {
     private JournalpostBestilling(Builder builder) {
         this.tittel = builder.tittel;
         this.brevkode = builder.brevkode;
+        this.dokumentKategori = builder.dokumentKategori;
         this.brukerFnr = builder.brukerFnr;
         this.mottakerNavn = builder.mottakerNavn;
         this.mottakerId = builder.mottakerId;
@@ -27,6 +29,10 @@ public final class JournalpostBestilling {
 
     public String getBrevkode() {
         return brevkode;
+    }
+
+    public String getDokumentKategori() {
+        return dokumentKategori;
     }
 
     public String getBrukerFnr() {
@@ -56,6 +62,7 @@ public final class JournalpostBestilling {
     public static class Builder {
         private String tittel;
         private String brevkode;
+        private String dokumentKategori;
         private String brukerFnr;
         private String mottakerNavn;
         private String mottakerId;
@@ -70,6 +77,11 @@ public final class JournalpostBestilling {
 
         public Builder medBrevkode(String brevkode) {
             this.brevkode = brevkode;
+            return this;
+        }
+
+        public Builder medDokumentKategori(String dokumentKategori) {
+            this.dokumentKategori = dokumentKategori;
             return this;
         }
 

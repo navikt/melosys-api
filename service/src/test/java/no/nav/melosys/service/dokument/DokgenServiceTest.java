@@ -17,8 +17,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
-import no.nav.melosys.integrasjon.dokgen.DokgenMalResolver;
-import no.nav.melosys.integrasjon.dokgen.dto.DokgenDto;
+import no.nav.melosys.integrasjon.dokgen.DokumentInfo;
+import no.nav.melosys.integrasjon.dokgen.DokumentInfoMapper;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
@@ -39,8 +39,8 @@ import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -77,7 +77,7 @@ class DokgenServiceTest {
 
     @BeforeEach
     void init() {
-        dokgenService = new DokgenService(mockDokgenConsumer, new DokgenMalResolver(unleash), mockJoarkFasade,
+        dokgenService = new DokgenService(mockDokgenConsumer, new DokumentInfoMapper(unleash), mockJoarkFasade,
             new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService, mockEregFasade, mockPersondataFasade),
             mockBehandlingsService,
             mockEregFasade, mockKontaktOpplysningService, mockBrevMottakerService, mockProsessinstansService);
@@ -85,7 +85,9 @@ class DokgenServiceTest {
 
     @Test
     void produserBrevFeilerUtilgjengeligMal() {
-        assertThrows(FunksjonellException.class, () -> dokgenService.produserBrev(ATTEST_A1, 123L, null, null));
+        assertThatThrownBy(() -> dokgenService.produserBrev(ATTEST_A1, 123L, null, null))
+            .isInstanceOf(FunksjonellException.class)
+            .hasMessage("ProduserbartDokument ATTEST_A1 er ikke støttet");
     }
 
     @Test
@@ -100,8 +102,8 @@ class DokgenServiceTest {
 
         byte[] pdfResponse = dokgenService.produserBrev(MANGELBREV_BRUKER, 123L, mottaker.getOrgnr(), new BrevbestillingDto.Builder().build());
 
-        assertNotNull(pdfResponse);
-        assertEquals(expectedPdf, pdfResponse);
+        assertThat(pdfResponse).isNotNull();
+        assertThat(pdfResponse).isEqualTo(expectedPdf);
 
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false));
         verifyNoInteractions(mockEregFasade);
@@ -122,8 +124,8 @@ class DokgenServiceTest {
 
         byte[] pdfResponse = dokgenService.produserBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L, mottaker.getOrgnr(), new BrevbestillingDto.Builder().build());
 
-        assertNotNull(pdfResponse);
-        assertEquals(expectedPdf, pdfResponse);
+        assertThat(pdfResponse).isNotNull();
+        assertThat(pdfResponse).isEqualTo(expectedPdf);
 
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false));
         verify(mockEregFasade).hentOrganisasjon(any());
@@ -146,8 +148,8 @@ class DokgenServiceTest {
 
         byte[] pdfResponse = dokgenService.produserUtkast(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L, null, brevbestillingDto);
 
-        assertNotNull(pdfResponse);
-        assertEquals(expectedPdf, pdfResponse);
+        assertThat(pdfResponse).isNotNull();
+        assertThat(pdfResponse).isEqualTo(expectedPdf);
 
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(true));
         verify(mockPersondataFasade).hentPerson(any(), eq(Informasjonsbehov.STANDARD));
@@ -178,8 +180,8 @@ class DokgenServiceTest {
 
         byte[] pdfResponse = dokgenService.produserUtkast(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L, null, brevbestillingDto);
 
-        assertNotNull(pdfResponse);
-        assertEquals(expectedPdf, pdfResponse);
+        assertThat(pdfResponse).isNotNull();
+        assertThat(pdfResponse).isEqualTo(expectedPdf);
 
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(true));
         verify(mockEregFasade).hentOrganisasjon(eq("987654321"));
@@ -209,8 +211,8 @@ class DokgenServiceTest {
 
         byte[] pdfResponse = dokgenService.produserUtkast(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L, mottaker.getOrgnr(), brevbestillingDto);
 
-        assertNotNull(pdfResponse);
-        assertEquals(expectedPdf, pdfResponse);
+        assertThat(pdfResponse).isNotNull();
+        assertThat(pdfResponse).isEqualTo(expectedPdf);
 
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(true));
         verify(mockEregFasade).hentOrganisasjon(eq("987654321"));
@@ -235,15 +237,17 @@ class DokgenServiceTest {
     void erTilgjengeligDokgenmal() {
         unleash.enableAll();
 
-        assertTrue(dokgenService.erTilgjengeligDokgenmal(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD));
-        assertFalse(dokgenService.erTilgjengeligDokgenmal(ATTEST_A1));
+        assertThat(dokgenService.erTilgjengeligDokgenmal(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)).isTrue();
+        assertThat(dokgenService.erTilgjengeligDokgenmal(ATTEST_A1)).isFalse();
     }
 
     @Test
-    void skalHenteMalnavn() throws Exception {
-        String malnavn = dokgenService.hentMalnavn(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
+    void skalHenteDokumentInfo() throws Exception {
+        DokumentInfo dokumentInfo = dokgenService.hentDokumentInfo(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
 
-        assertEquals("saksbehandlingstid_soknad", malnavn);
+        assertThat(dokumentInfo.getDokgenMalnavn()).isEqualTo("saksbehandlingstid_soknad");
+        assertThat(dokumentInfo.getDokumentKategoriKode()).isEqualTo("IB");
+        assertThat(dokumentInfo.getJournalføringsTittel()).isEqualTo("Melding om forventet sakbehandlingstid");
     }
 
     private Journalpost lagJournalpost() {

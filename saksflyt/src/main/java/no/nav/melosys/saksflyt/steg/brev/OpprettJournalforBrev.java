@@ -9,13 +9,14 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.integrasjon.dokgen.DokumentInfo;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +25,8 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_OG_JOURNALFØR_BREV;
-import static org.springframework.util.StringUtils.hasText;
 import static org.springframework.util.ObjectUtils.isEmpty;
+import static org.springframework.util.StringUtils.hasText;
 
 @Component
 public class OpprettJournalforBrev implements StegBehandler {
@@ -81,9 +82,12 @@ public class OpprettJournalforBrev implements StegBehandler {
         byte[] pdf = dokgenService.produserBrev(produserbartDokument, behandling.getId(), orgnr, brevbestilling);
         log.info("Produserbartdokument {} for behandling {} produsert", produserbartDokument, behandling.getId());
 
+        DokumentInfo dokumentInfo = dokgenService.hentDokumentInfo(produserbartDokument);
+
         JournalpostBestilling bestilling = new JournalpostBestilling.Builder()
-            .medTittel(produserbartDokument.getBeskrivelse())
-            .medBrevkode(dokgenService.hentMalnavn(produserbartDokument))
+            .medTittel(dokumentInfo.getJournalføringsTittel())
+            .medBrevkode(dokumentInfo.getDokgenMalnavn())
+            .medDokumentKategori(dokumentInfo.getDokumentKategoriKode())
             .medBrukerFnr(personDokument.fnr)
             .medMottakerNavn(hasText(orgnr) ? eregFasade.hentOrganisasjonNavn(orgnr) : sammensattNavn)
             .medMottakerId(hasText(orgnr) ? orgnr : fnr)
