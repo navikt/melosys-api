@@ -106,18 +106,16 @@ public class BrevbestillingTjeneste {
                         asList(
                             new BrevmalFeltDto.Builder()
                                 .medKode("INNLEDNING_FRITEKST")
-                                .medBeskrivelse("Fritekst til innledning")
+                                .medBeskrivelse("Innledningstekst")
                                 .medFeltType(FeltType.FRITEKST)
                                 .erPåkrevd()
-                                .medHjelpetekst("")
                                 .medValg(new FeltvalgDto.Builder().medKode("STANDARD").medBeskrivelse("Standardtekst søknad/klage").build())
                                 .medValg(new FeltvalgDto.Builder().medKode("FRITEKST").medBeskrivelse("Fritekst (erstatter standardtekst)").build())
                                 .build(),
                             new BrevmalFeltDto.Builder()
                                 .medKode("MANGLER_FRITEKST")
-                                .medBeskrivelse("Fritekst om manglende dokumentasjon")
+                                .medBeskrivelse("Hva skal mottakeren sende inn?")
                                 .medFeltType(FeltType.FRITEKST)
-                                .medHjelpetekst("")
                                 .erPåkrevd()
                                 .build()
                         ),
@@ -146,18 +144,16 @@ public class BrevbestillingTjeneste {
                         asList(
                             new BrevmalFeltDto.Builder()
                                 .medKode("INNLEDNING_FRITEKST")
-                                .medBeskrivelse("Fritekst til innledning")
+                                .medBeskrivelse("Innledningstekst")
                                 .medFeltType(FeltType.FRITEKST)
                                 .erPåkrevd()
-                                .medHjelpetekst("")
                                 .medValg(new FeltvalgDto.Builder().medKode("STANDARD").medBeskrivelse("Standardtekst søknad/klage").build())
                                 .medValg(new FeltvalgDto.Builder().medKode("FRITEKST").medBeskrivelse("Fritekst (erstatter standardtekst)").build())
                                 .build(),
                             new BrevmalFeltDto.Builder()
                                 .medKode("MANGLER_FRITEKST")
-                                .medBeskrivelse("Fritekst om manglende dokumentasjon")
+                                .medBeskrivelse("Hva skal mottakeren sende inn?")
                                 .medFeltType(FeltType.FRITEKST)
-                                .medHjelpetekst("")
                                 .erPåkrevd()
                                 .build()
                         ),
@@ -191,7 +187,6 @@ public class BrevbestillingTjeneste {
     private BrevmalDto lagBrevmalDto(Produserbaredokumenter dokument, List<BrevmalFeltDto> felter, List<MottakerDto> mottakere, String mottakerHjelpetekst) {
         return new BrevmalDto.Builder()
             .medType(dokument)
-            .medBeskrivelse(dokument.getBeskrivelse())
             .medFelter(felter)
             .medMuligeMottakere(mottakere)
             .medMottakereHjelpetekst(mottakerHjelpetekst)
