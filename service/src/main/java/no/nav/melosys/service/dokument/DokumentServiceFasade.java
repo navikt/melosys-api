@@ -40,7 +40,7 @@ public class DokumentServiceFasade {
                                  BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
         if (dokgenService.erTilgjengeligDokgenmal(produserbartDokument)) {
             return dokgenService.produserUtkast(produserbartDokument, behandlingId,
-                Mottaker.av(brevbestillingDto.getMottaker()).getAktør().getOrgnr(), brevbestillingDto);
+                brevbestillingDto.getOrgNr(), brevbestillingDto);
         }
         return dokumentService.produserUtkast(produserbartDokument, behandlingId, brevbestillingDto);
     }
