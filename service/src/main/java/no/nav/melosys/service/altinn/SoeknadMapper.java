@@ -236,23 +236,20 @@ public final class SoeknadMapper {
     }
 
     private static Utenlandsoppdraget lagUtenlandsoppdraget(no.nav.melosys.soknad_altinn.Utenlandsoppdraget utenlandsoppdraget) {
-        if (utenlandsoppdraget != null) {
-            Periode samletUtsendingsperiode = null;
-            if (Boolean.TRUE.equals(utenlandsoppdraget.isErstatterTidligereUtsendte())
-                && utenlandsoppdraget.getSamletUtsendingsperiode() != null) {
-                samletUtsendingsperiode = lagPeriode(utenlandsoppdraget.getSamletUtsendingsperiode());
-            }
-
-            return new Utenlandsoppdraget(
-                samletUtsendingsperiode,
-                utenlandsoppdraget.isSendesUtOppdragIUtlandet(),
-                utenlandsoppdraget.isAnsattEtterOppdraget(),
-                utenlandsoppdraget.isAnsattForOppdragIUtlandet(),
-                utenlandsoppdraget.isDrattPaaEgetInitiativ(),
-                utenlandsoppdraget.isErstatterTidligereUtsendte()
-            );
+        Periode samletUtsendingsperiode = null;
+        if (Boolean.TRUE.equals(utenlandsoppdraget.isErstatterTidligereUtsendte())
+            && utenlandsoppdraget.getSamletUtsendingsperiode() != null) {
+            samletUtsendingsperiode = lagPeriode(utenlandsoppdraget.getSamletUtsendingsperiode());
         }
-        return new Utenlandsoppdraget();
+
+        return new Utenlandsoppdraget(
+            samletUtsendingsperiode,
+            utenlandsoppdraget.isSendesUtOppdragIUtlandet(),
+            utenlandsoppdraget.isAnsattEtterOppdraget(),
+            utenlandsoppdraget.isAnsattForOppdragIUtlandet(),
+            utenlandsoppdraget.isDrattPaaEgetInitiativ(),
+            utenlandsoppdraget.isErstatterTidligereUtsendte()
+        );
     }
 
     private static LocalDate xmlCalTilLocalDate(XMLGregorianCalendar calendar) {

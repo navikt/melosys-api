@@ -138,11 +138,6 @@ class SoeknadMapperTest {
                 LocalDate.of(2019, 8, 1),
                 LocalDate.of(2019, 8, 6)
             );
-
-        assertThat(utenlandsoppdraget.erUtsendelseForOppdragIUtlandet).isFalse();
-        assertThat(utenlandsoppdraget.erFortsattAnsattEtterOppdraget).isNull();
-        assertThat(utenlandsoppdraget.erAnsattForOppdragIUtlandet).isFalse();
-        assertThat(utenlandsoppdraget.erDrattPaaEgetInitiativ).isFalse();
     }
 
     private MedlemskapArbeidEOSM parseSøknadXML() throws JAXBException {
