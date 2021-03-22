@@ -16,8 +16,8 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
-import no.nav.melosys.integrasjon.dokgen.DokumentInfo;
-import no.nav.melosys.integrasjon.dokgen.DokumentInfoMapper;
+import no.nav.melosys.integrasjon.dokgen.DokumentproduksjonsInfo;
+import no.nav.melosys.integrasjon.dokgen.DokumentproduksjonsInfoMapper;
 import no.nav.melosys.integrasjon.dokgen.dto.DokgenDto;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
@@ -38,7 +38,7 @@ import static org.springframework.util.StringUtils.hasText;
 public class DokgenService {
 
     private final DokgenConsumer dokgenConsumer;
-    private final DokumentInfoMapper dokumentInfoMapper;
+    private final DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper;
     private final JoarkFasade joarkFasade;
     private final DokgenMalMapper dokgenMalMapper;
     private final BehandlingService behandlingService;
@@ -48,14 +48,14 @@ public class DokgenService {
     private final ProsessinstansService prosessinstansService;
 
     @Autowired
-    public DokgenService(DokgenConsumer dokgenConsumer, DokumentInfoMapper dokumentInfoMapper,
+    public DokgenService(DokgenConsumer dokgenConsumer, DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper,
                          @Qualifier("system") JoarkFasade joarkFasade,
                          DokgenMalMapper dokgenMalMapper, BehandlingService behandlingService,
                          @Qualifier("system") EregFasade eregFasade,
                          KontaktopplysningService kontaktopplysningService,
                          BrevmottakerService brevmottakerService, ProsessinstansService prosessinstansService) {
         this.dokgenConsumer = dokgenConsumer;
-        this.dokumentInfoMapper = dokumentInfoMapper;
+        this.dokumentproduksjonsInfoMapper = dokumentproduksjonsInfoMapper;
         this.joarkFasade = joarkFasade;
         this.dokgenMalMapper = dokgenMalMapper;
         this.behandlingService = behandlingService;
@@ -111,7 +111,7 @@ public class DokgenService {
 
     public byte[] produserBrev(DokgenBrevbestilling brevbestilling) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandling(brevbestilling.getBehandlingId());
-        String malnavn = dokumentInfoMapper.hentMalnavn(brevbestilling.getProduserbartdokument());
+        String malnavn = dokumentproduksjonsInfoMapper.hentMalnavn(brevbestilling.getProduserbartdokument());
         String orgnr = brevbestilling.getMottaker() != null ? brevbestilling.getMottaker().getOrgnr() : null;
         DokgenBrevbestilling.Builder<?> builder = brevbestilling.toBuilder();
 
@@ -132,18 +132,17 @@ public class DokgenService {
                                          BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         List<Aktoer> mottakere = brevmottakerService.avklarMottakere(produserbartDokument, Mottaker.av(brevbestillingDto.getMottaker()), behandling);
-        //NOTE @Lunde Utvide for å støtte FastMottaker i BrevmottakerService
         for (Aktoer aktoer : mottakere) {
             prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(produserbartDokument, behandling, aktoer, brevbestillingDto);
         }
     }
 
-    public DokumentInfo hentDokumentInfo(Produserbaredokumenter produserbartDokument) throws FunksjonellException {
-        return dokumentInfoMapper.hentDokumentInfo(produserbartDokument);
+    public DokumentproduksjonsInfo hentDokumentInfo(Produserbaredokumenter produserbartDokument) throws FunksjonellException {
+        return dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(produserbartDokument);
     }
 
     boolean erTilgjengeligDokgenmal(Produserbaredokumenter produserbartDokument) {
-        Set<Produserbaredokumenter> tilgjengeligeMaler = dokumentInfoMapper.utledTilgjengeligeMaler();
+        Set<Produserbaredokumenter> tilgjengeligeMaler = dokumentproduksjonsInfoMapper.utledTilgjengeligeMaler();
         return tilgjengeligeMaler.contains(produserbartDokument);
     }
 

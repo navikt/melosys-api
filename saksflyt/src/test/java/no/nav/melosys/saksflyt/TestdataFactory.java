@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.brev;
+package no.nav.melosys.saksflyt;
 
 import java.time.LocalDate;
 
@@ -9,20 +9,36 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.integrasjon.dokgen.DokumentInfo;
+import no.nav.melosys.integrasjon.dokgen.DokumentproduksjonsInfo;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 
 public final class TestdataFactory {
-    static Behandling lagBehandling() {
+    public static Behandling lagBehandling() {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setSaksopplysninger(singleton(lagPersonopplysning()));
         behandling.setFagsak(lagFagsak());
         return behandling;
+    }
+
+    public static OrganisasjonDokument lagOrg() {
+        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
+        organisasjonDokument.setOrgnummer("122344");
+        organisasjonDokument.setOrganisasjonDetaljer(lagOrgDetaljer());
+        return organisasjonDokument;
+    }
+
+    public static Kontaktopplysning lagKontaktOpplysning() {
+        Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
+        kontaktopplysning.setKontaktNavn("Donald Duck");
+        return kontaktopplysning;
+    }
+
+    public static DokumentproduksjonsInfo lagDokumentInfo() {
+        return new DokumentproduksjonsInfo("dummy_mal", DokumentKategoriKode.IB.getKode(), "Dummy tittel");
     }
 
     static Saksopplysning lagPersonopplysning() {
@@ -40,13 +56,6 @@ public final class TestdataFactory {
         return fagsak;
     }
 
-    static OrganisasjonDokument lagOrg() {
-        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
-        organisasjonDokument.setOrgnummer("122344");
-        organisasjonDokument.setOrganisasjonDetaljer(lagOrgDetaljer());
-        return organisasjonDokument;
-    }
-
     static OrganisasjonsDetaljer lagOrgDetaljer() {
         OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
         organisasjonsDetaljer.postadresse = singletonList(lagOrgAdresse());
@@ -59,15 +68,5 @@ public final class TestdataFactory {
         semistrukturertAdresse.setLandkode("NO");
         semistrukturertAdresse.setPostnr("1234");
         return semistrukturertAdresse;
-    }
-
-    static Kontaktopplysning lagKontaktOpplysning() {
-        Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
-        kontaktopplysning.setKontaktNavn("Donald Duck");
-        return kontaktopplysning;
-    }
-
-    static DokumentInfo lagDokumentInfo() {
-        return new DokumentInfo("dummy_mal", DokumentKategoriKode.IB, "Dummy tittel");
     }
 }

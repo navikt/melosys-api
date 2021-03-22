@@ -55,7 +55,7 @@ public class FysiskDokument extends ArkivDokument {
         return fysiskDokument;
     }
 
-    static FysiskDokument lagHoveddokument(JournalpostBestilling bestilling) {
+    static FysiskDokument lagFysiskDokument(JournalpostBestilling bestilling) {
         FysiskDokument fysiskDokument = new FysiskDokument();
         fysiskDokument.setDokumentKategori(bestilling.getDokumentKategori());
         fysiskDokument.setTittel(bestilling.getTittel());

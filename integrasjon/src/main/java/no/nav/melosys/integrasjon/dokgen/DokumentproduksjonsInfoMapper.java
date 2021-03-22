@@ -16,49 +16,50 @@ import static java.util.stream.Collectors.toSet;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 
 @Component
-public class DokumentInfoMapper {
+public class DokumentproduksjonsInfoMapper {
     private final Unleash unleash;
 
-    private static final ImmutableMap<Produserbaredokumenter, DokumentInfo> DOKGEN_MALER =
-        Maps.immutableEnumMap(ImmutableMap.<Produserbaredokumenter, DokumentInfo>builder()
+    private static final ImmutableMap<Produserbaredokumenter, DokumentproduksjonsInfo> DOKUMENTPRODUKSJONS_INFO_MAP;
+
+    static {
+        String infobrevKode = DokumentKategoriKode.IB.getKode();
+
+        DOKUMENTPRODUKSJONS_INFO_MAP = Maps.immutableEnumMap(ImmutableMap.<Produserbaredokumenter, DokumentproduksjonsInfo>builder()
             .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID,
-                new DokumentInfo("saksbehandlingstid_soknad",
-                    DokumentKategoriKode.IB,
+                new DokumentproduksjonsInfo("saksbehandlingstid_soknad",
+                    infobrevKode,
                     "Melding om forventet saksbehandlingstid")
             )
             .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
-                new DokumentInfo("saksbehandlingstid_soknad",
-                    DokumentKategoriKode.IB,
+                new DokumentproduksjonsInfo("saksbehandlingstid_soknad",
+                    infobrevKode,
                     "Melding om forventet saksbehandlingstid")
             )
             .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
-                new DokumentInfo("saksbehandlingstid_klage",
-                    DokumentKategoriKode.IB,
+                new DokumentproduksjonsInfo("saksbehandlingstid_klage",
+                    infobrevKode,
                     "Melding om forventet saksbehandlingstid")
             )
             .put(MANGELBREV_BRUKER,
-                new DokumentInfo("mangelbrev_bruker",
-                    DokumentKategoriKode.IB,
+                new DokumentproduksjonsInfo("mangelbrev_bruker",
+                    infobrevKode,
                     "Melding om manglende opplysninger")
             )
             .put(MANGELBREV_ARBEIDSGIVER,
-                new DokumentInfo("mangelbrev_arbeidsgiver",
-                    DokumentKategoriKode.IB,
+                new DokumentproduksjonsInfo("mangelbrev_arbeidsgiver",
+                    infobrevKode,
                     "Melding om manglende opplysninger")
             )
-// NOTE ikke tatt i bruk enda
-//            .put(INNVILGELSE_FOLKETRYGDLOVEN_2_8,
-//                new DokumentInfo("innvilgelse_ftrl_2_8", DokumentKategoriKode.VB, "Vedtak om frivillig medlemskap")
-//            )
             .build());
+    }
 
     @Autowired
-    public DokumentInfoMapper(Unleash unleash) {
+    public DokumentproduksjonsInfoMapper(Unleash unleash) {
         this.unleash = unleash;
     }
 
     public Set<Produserbaredokumenter> utledTilgjengeligeMaler() {
-        return DOKGEN_MALER.keySet().stream()
+        return DOKUMENTPRODUKSJONS_INFO_MAP.keySet().stream()
             .filter(key -> unleash.isEnabled("melosys.brev." + key.name()))
             .collect(toSet());
     }
@@ -66,18 +67,18 @@ public class DokumentInfoMapper {
     public String hentMalnavn(Produserbaredokumenter produserbartDokument) throws FunksjonellException {
         sjekkOmStøttetDokument(produserbartDokument);
 
-        DokumentInfo dokumentInfo = DOKGEN_MALER.get(produserbartDokument);
-        return dokumentInfo.getDokgenMalnavn();
+        DokumentproduksjonsInfo dokumentproduksjonsInfo = DOKUMENTPRODUKSJONS_INFO_MAP.get(produserbartDokument);
+        return dokumentproduksjonsInfo.dokgenMalnavn();
     }
 
-    public DokumentInfo hentDokumentInfo(Produserbaredokumenter produserbartDokument) throws FunksjonellException {
+    public DokumentproduksjonsInfo hentDokumentproduksjonsInfo(Produserbaredokumenter produserbartDokument) throws FunksjonellException {
         sjekkOmStøttetDokument(produserbartDokument);
 
-        return DOKGEN_MALER.get(produserbartDokument);
+        return DOKUMENTPRODUKSJONS_INFO_MAP.get(produserbartDokument);
     }
 
     private void sjekkOmStøttetDokument(Produserbaredokumenter produserbartDokument) throws FunksjonellException {
-        if (!DOKGEN_MALER.containsKey(produserbartDokument)) {
+        if (!DOKUMENTPRODUKSJONS_INFO_MAP.containsKey(produserbartDokument)) {
             throw new FunksjonellException(format("ProduserbartDokument %s er ikke støttet", produserbartDokument));
         }
     }

@@ -9,7 +9,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.integrasjon.dokgen.DokumentInfo;
+import no.nav.melosys.integrasjon.dokgen.DokumentproduksjonsInfo;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -82,12 +82,12 @@ public class OpprettJournalforBrev implements StegBehandler {
         byte[] pdf = dokgenService.produserBrev(produserbartDokument, behandling.getId(), orgnr, brevbestilling);
         log.info("Produserbartdokument {} for behandling {} produsert", produserbartDokument, behandling.getId());
 
-        DokumentInfo dokumentInfo = dokgenService.hentDokumentInfo(produserbartDokument);
+        DokumentproduksjonsInfo dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(produserbartDokument);
 
         JournalpostBestilling bestilling = new JournalpostBestilling.Builder()
-            .medTittel(dokumentInfo.getJournalføringsTittel())
-            .medBrevkode(dokumentInfo.getDokgenMalnavn())
-            .medDokumentKategori(dokumentInfo.getDokumentKategoriKode())
+            .medTittel(dokumentproduksjonsInfo.journalføringsTittel())
+            .medBrevkode(dokumentproduksjonsInfo.dokgenMalnavn())
+            .medDokumentKategori(dokumentproduksjonsInfo.dokumentKategoriKode())
             .medBrukerFnr(personDokument.fnr)
             .medMottakerNavn(hasText(orgnr) ? eregFasade.hentOrganisasjonNavn(orgnr) : sammensattNavn)
             .medMottakerId(hasText(orgnr) ? orgnr : fnr)

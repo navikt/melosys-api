@@ -17,8 +17,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
-import no.nav.melosys.integrasjon.dokgen.DokumentInfo;
-import no.nav.melosys.integrasjon.dokgen.DokumentInfoMapper;
+import no.nav.melosys.integrasjon.dokgen.DokumentproduksjonsInfo;
+import no.nav.melosys.integrasjon.dokgen.DokumentproduksjonsInfoMapper;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
@@ -77,7 +77,7 @@ class DokgenServiceTest {
 
     @BeforeEach
     void init() {
-        dokgenService = new DokgenService(mockDokgenConsumer, new DokumentInfoMapper(unleash), mockJoarkFasade,
+        dokgenService = new DokgenService(mockDokgenConsumer, new DokumentproduksjonsInfoMapper(unleash), mockJoarkFasade,
             new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService, mockEregFasade, mockPersondataFasade),
             mockBehandlingsService,
             mockEregFasade, mockKontaktOpplysningService, mockBrevMottakerService, mockProsessinstansService);
@@ -243,11 +243,11 @@ class DokgenServiceTest {
 
     @Test
     void skalHenteDokumentInfo() throws Exception {
-        DokumentInfo dokumentInfo = dokgenService.hentDokumentInfo(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
+        DokumentproduksjonsInfo dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
 
-        assertThat(dokumentInfo.getDokgenMalnavn()).isEqualTo("saksbehandlingstid_soknad");
-        assertThat(dokumentInfo.getDokumentKategoriKode()).isEqualTo("IB");
-        assertThat(dokumentInfo.getJournalføringsTittel()).isEqualTo("Melding om forventet saksbehandlingstid");
+        assertThat(dokumentproduksjonsInfo.dokgenMalnavn()).isEqualTo("saksbehandlingstid_soknad");
+        assertThat(dokumentproduksjonsInfo.dokumentKategoriKode()).isEqualTo("IB");
+        assertThat(dokumentproduksjonsInfo.journalføringsTittel()).isEqualTo("Melding om forventet saksbehandlingstid");
     }
 
     private Journalpost lagJournalpost() {

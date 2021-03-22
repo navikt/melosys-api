@@ -11,14 +11,14 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-class DokumentInfoMapperTest {
+class DokumentproduksjonsInfoMapperTest {
     private final FakeUnleash fakeUnleash = new FakeUnleash();
 
-    private final DokumentInfoMapper dokumentInfoMapper = new DokumentInfoMapper(fakeUnleash);
+    private final DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper = new DokumentproduksjonsInfoMapper(fakeUnleash);
 
     @Test
     void feilerNårMalIkkeFinnesIDokgen() {
-        assertThatThrownBy(() -> dokumentInfoMapper.hentDokumentInfo(ATTEST_A1))
+        assertThatThrownBy(() -> dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(ATTEST_A1))
             .isInstanceOf(FunksjonellException.class)
             .hasMessage("ProduserbartDokument ATTEST_A1 er ikke støttet");
     }
@@ -26,7 +26,7 @@ class DokumentInfoMapperTest {
     @Test
     void skalUtledeTilgjengeligeMaler() {
         fakeUnleash.enable("melosys.brev.MELDING_FORVENTET_SAKSBEHANDLINGSTID");
-        Set<Produserbaredokumenter> produserbaredokumenter = dokumentInfoMapper.utledTilgjengeligeMaler();
+        Set<Produserbaredokumenter> produserbaredokumenter = dokumentproduksjonsInfoMapper.utledTilgjengeligeMaler();
 
         assertThat(produserbaredokumenter).hasSize(1);
         assertThat(produserbaredokumenter.iterator().next()).isEqualTo(MELDING_FORVENTET_SAKSBEHANDLINGSTID);
@@ -34,16 +34,16 @@ class DokumentInfoMapperTest {
 
     @Test
     void skalHenteDokumentInfo() throws Exception {
-        DokumentInfo dokumentInfo = dokumentInfoMapper.hentDokumentInfo(MANGELBREV_BRUKER);
+        DokumentproduksjonsInfo dokumentproduksjonsInfo = dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(MANGELBREV_BRUKER);
 
-        assertThat(dokumentInfo.getDokgenMalnavn()).isEqualTo("mangelbrev_bruker");
-        assertThat(dokumentInfo.getDokumentKategoriKode()).isEqualTo("IB");
-        assertThat(dokumentInfo.getJournalføringsTittel()).isEqualTo("Melding om manglende opplysninger");
+        assertThat(dokumentproduksjonsInfo.dokgenMalnavn()).isEqualTo("mangelbrev_bruker");
+        assertThat(dokumentproduksjonsInfo.dokumentKategoriKode()).isEqualTo("IB");
+        assertThat(dokumentproduksjonsInfo.journalføringsTittel()).isEqualTo("Melding om manglende opplysninger");
     }
 
     @Test
     void skalHenteMalnavn() throws Exception {
-        String malnavn = dokumentInfoMapper.hentMalnavn(MELDING_FORVENTET_SAKSBEHANDLINGSTID);
+        String malnavn = dokumentproduksjonsInfoMapper.hentMalnavn(MELDING_FORVENTET_SAKSBEHANDLINGSTID);
         assertThat(malnavn).isEqualTo("saksbehandlingstid_soknad");
     }
 }
