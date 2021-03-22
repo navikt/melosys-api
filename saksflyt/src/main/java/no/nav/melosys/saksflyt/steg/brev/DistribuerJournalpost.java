@@ -77,8 +77,8 @@ public class DistribuerJournalpost implements StegBehandler {
 
         if (mottaker != Aktoersroller.BRUKER) {
             kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), orgnr).orElse(null);
-            org = (OrganisasjonDokument) eregFasade.hentOrganisasjon(orgnr).getDokument();
-        }
+            String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : orgnr;
+            org = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();        }
 
         String bestillingsId;
         if (org != null) {

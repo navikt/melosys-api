@@ -1,9 +1,6 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
-import java.util.Optional;
-
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.arkiv.JournalpostBestilling;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -16,7 +13,6 @@ import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
-import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
@@ -40,20 +36,17 @@ public class OpprettJournalforBrev implements StegBehandler {
     private final JoarkFasade joarkFasade;
     private final PersondataFasade persondataFasade;
     private final EregFasade eregFasade;
-    private final KontaktopplysningService kontaktopplysningService;
 
     @Autowired
     public OpprettJournalforBrev(BehandlingService behandlingService, DokgenService dokgenService,
                                  @Qualifier("system") JoarkFasade joarkFasade,
                                  @Qualifier("system") PersondataFasade persondataFasade,
-                                 @Qualifier("system") EregFasade eregFasade,
-                                 KontaktopplysningService kontaktopplysningService) {
+                                 @Qualifier("system") EregFasade eregFasade) {
         this.behandlingService = behandlingService;
         this.dokgenService = dokgenService;
         this.joarkFasade = joarkFasade;
         this.persondataFasade = persondataFasade;
         this.eregFasade = eregFasade;
-        this.kontaktopplysningService = kontaktopplysningService;
     }
 
     @Override
@@ -84,10 +77,6 @@ public class OpprettJournalforBrev implements StegBehandler {
         if (isEmpty(orgnr)) {
             fnr = persondataFasade.hentIdentForAktørId(aktørId);
             sammensattNavn = persondataFasade.hentSammensattNavn(fnr);
-        } else {
-            //Hvis tilknyttet kontaktopplysning er en org benyttes denne som mottaker
-            Kontaktopplysning kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), orgnr).orElse(null);
-            orgnr = (kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null) ? kontaktopplysning.getKontaktOrgnr() : orgnr;
         }
 
         byte[] pdf = dokgenService.produserBrev(produserbartDokument, behandling.getId(), orgnr, brevbestilling, brevkopi);

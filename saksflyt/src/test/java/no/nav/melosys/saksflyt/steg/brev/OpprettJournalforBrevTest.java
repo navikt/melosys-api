@@ -45,7 +45,7 @@ class OpprettJournalforBrevTest {
     @BeforeEach
     void init() {
         opprettJournalforBrev = new OpprettJournalforBrev(mockBehandlingService, mockDokgenService,
-            mockJoarkFasade, mockPersondataFasade, mockEregFasade, kontaktopplysningService);
+            mockJoarkFasade, mockPersondataFasade, mockEregFasade);
     }
 
     @Test

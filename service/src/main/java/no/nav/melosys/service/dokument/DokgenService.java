@@ -169,11 +169,11 @@ public class DokgenService {
     private void settOrganisasjonsOpplysninger(Behandling behandling, String orgnr,
                                                DokgenBrevbestilling.Builder<?> brevbestilling)
         throws IkkeFunnetException, IntegrasjonException {
+        Kontaktopplysning kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), orgnr).orElse(null);
+        String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : orgnr;
         brevbestilling
-            .medOrg((OrganisasjonDokument) eregFasade.hentOrganisasjon(orgnr).getDokument())
-            .medKontaktopplysning(
-                kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), orgnr).orElse(null)
-            );
+            .medOrg((OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument())
+            .medKontaktopplysning(kontaktopplysning);
     }
 
     private void settJournalpostOpplysninger(Behandling behandling, DokgenBrevbestilling.Builder<?> brevbestilling) throws
