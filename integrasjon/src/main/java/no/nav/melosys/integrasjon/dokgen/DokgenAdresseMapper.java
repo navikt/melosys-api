@@ -24,7 +24,7 @@ public final class DokgenAdresseMapper {
             adresselinjer = new ArrayList<>();
             if (hasText(kontaktperson)) {
                 adresselinjer.add("Att: " + kontaktperson);
-            } else if (kontaktopplysning != null) {
+            } else if (kontaktopplysning != null && hasText(kontaktopplysning.getKontaktNavn())) {
                 adresselinjer.add("Att: " + kontaktopplysning.getKontaktNavn());
             }
 

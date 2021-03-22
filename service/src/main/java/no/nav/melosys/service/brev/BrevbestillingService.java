@@ -83,8 +83,10 @@ public class BrevbestillingService {
                 );
             }
             else if (mottaker.getRolle() == Aktoersroller.ARBEIDSGIVER || mottaker.getRolle() == Aktoersroller.REPRESENTANT) {
-                OrganisasjonDokument organisasjonDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottaker.getOrgnr()).getDokument();
                 Kontaktopplysning kontaktopplysninger = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), mottaker.getOrgnr()).orElse(null);
+                String mottakerOrgnr = kontaktopplysninger != null && kontaktopplysninger.getKontaktOrgnr() != null ? kontaktopplysninger.getKontaktOrgnr() : mottaker.getOrgnr();
+                OrganisasjonDokument organisasjonDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();
+
                 brevAdresser.add(new BrevAdresse(
                     organisasjonDokument.getNavn(),
                     organisasjonDokument.getOrgnummer(),
