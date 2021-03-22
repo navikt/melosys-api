@@ -25,6 +25,7 @@ import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 import no.nav.security.token.support.core.api.Protected;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,6 +127,10 @@ public class FagsakTjeneste {
                                      @RequestBody VideresendDto videresendDto) throws MelosysException {
         Fagsak sak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(sak);
+
+        if (CollectionUtils.isEmpty(videresendDto.getVedlegg())) {
+            throw new FunksjonellException("Kan ikke videresende søknad uten vedlegg!");
+        }
 
         videresendSoknadService.videresend(saksnummer,
             videresendDto.getMottakerinstitusjon(),

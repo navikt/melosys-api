@@ -12,9 +12,11 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
 import no.nav.melosys.integrasjon.dokgen.DokgenMalResolver;
 import no.nav.melosys.integrasjon.dokgen.dto.DokgenDto;
@@ -29,6 +31,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.REPRESENTANT;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_BRUKER;
 import static org.springframework.util.StringUtils.hasText;
@@ -62,6 +66,18 @@ public class DokgenService {
         this.kontaktopplysningService = kontaktopplysningService;
         this.brevmottakerService = brevmottakerService;
         this.prosessinstansService = prosessinstansService;
+    }
+
+    public byte[] produserUtkast(Produserbaredokumenter produserbartdokument, long behandlingId,
+                                 String orgnr, BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
+        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        Aktoer mottaker = brevmottakerService.avklarMottakere(produserbartdokument, Mottaker.av(brevbestillingDto.getMottaker()), behandling).get(0);
+
+        if (mottaker.erOrganisasjon() && mottaker.getRolle() == REPRESENTANT) {
+            orgnr = mottaker.getOrgnr();
+        }
+
+        return produserBrev(produserbartdokument, behandlingId, orgnr, brevbestillingDto, true);
     }
 
     public byte[] produserBrev(Produserbaredokumenter produserbartdokument, long behandlingId,
@@ -160,8 +176,8 @@ public class DokgenService {
             );
     }
 
-    private void settJournalpostOpplysninger(Behandling behandling, DokgenBrevbestilling.Builder<?> brevbestilling)
-        throws SikkerhetsbegrensningException, IntegrasjonException {
+    private void settJournalpostOpplysninger(Behandling behandling, DokgenBrevbestilling.Builder<?> brevbestilling) throws
+        FunksjonellException, IntegrasjonException {
         Journalpost journalpost = joarkFasade.hentJournalpost(behandling.getInitierendeJournalpostId());
         brevbestilling
             .medForsendelseMottatt(journalpost.getForsendelseMottatt())

@@ -1,4 +1,7 @@
 package no.nav.melosys.integrasjon.felles.graphql;
 
-record GraphQLError(String message) {
+public record GraphQLError(String message, GraphQLExtension extensions) {
+    public boolean hasExtension() {
+        return extensions != null;
+    }
 }
