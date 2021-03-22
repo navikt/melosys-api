@@ -24,17 +24,17 @@ public class DokumentInfoMapper {
             .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID,
                 new DokumentInfo("saksbehandlingstid_soknad",
                     DokumentKategoriKode.IB,
-                    "Melding om forventet sakbehandlingstid")
+                    "Melding om forventet saksbehandlingstid")
             )
             .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
                 new DokumentInfo("saksbehandlingstid_soknad",
                     DokumentKategoriKode.IB,
-                    "Melding om forventet sakbehandlingstid")
+                    "Melding om forventet saksbehandlingstid")
             )
             .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
                 new DokumentInfo("saksbehandlingstid_klage",
                     DokumentKategoriKode.IB,
-                    "Melding om forventet sakbehandlingstid")
+                    "Melding om forventet saksbehandlingstid")
             )
             .put(MANGELBREV_BRUKER,
                 new DokumentInfo("mangelbrev_bruker",

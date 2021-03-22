@@ -247,7 +247,7 @@ class DokgenServiceTest {
 
         assertThat(dokumentInfo.getDokgenMalnavn()).isEqualTo("saksbehandlingstid_soknad");
         assertThat(dokumentInfo.getDokumentKategoriKode()).isEqualTo("IB");
-        assertThat(dokumentInfo.getJournalføringsTittel()).isEqualTo("Melding om forventet sakbehandlingstid");
+        assertThat(dokumentInfo.getJournalføringsTittel()).isEqualTo("Melding om forventet saksbehandlingstid");
     }
 
     private Journalpost lagJournalpost() {
