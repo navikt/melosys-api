@@ -66,7 +66,7 @@ public class BrevbestillingService {
     }
 
     public List<BrevAdresse> hentBrevAdresseTilMottakere(Produserbaredokumenter produserbaredokumenter, Aktoersroller aktoersroller, Behandling behandling) throws FunksjonellException, TekniskException {
-        var mottakere = brevmottakerService.avklarMottakere(produserbaredokumenter, Mottaker.av(aktoersroller), behandling);
+        var mottakere = brevmottakerService.avklarMottakere(produserbaredokumenter, Mottaker.av(aktoersroller), behandling, false, false);
         List<BrevAdresse> brevAdresser = new ArrayList<>();
 
         for (Aktoer mottaker : mottakere) {
