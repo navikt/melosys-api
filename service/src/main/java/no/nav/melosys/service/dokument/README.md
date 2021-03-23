@@ -5,7 +5,7 @@ Dette betyr at det er flere ansvarsområder som må håndteres av melosys-api fo
  - Bestilling av produsering
  - Journalføring
  - Distribuering
- - Holde på informasjon som i dag ligger i dokkat
+ - Holde på informasjon som i dag ligger i dokkat hos Team Dokument - dette er malnavn og journalføringsinfo (tittel og kategori)
 
 ## Registere ny brevmal i melosys-api
 Når en ny brevmal skal tas i bruk må følgende på plass:
