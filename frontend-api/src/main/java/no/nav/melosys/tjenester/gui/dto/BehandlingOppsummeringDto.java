@@ -15,6 +15,7 @@ public class BehandlingOppsummeringDto {
     private Instant endretDato;
     private String endretAvNavn;
     private Instant sisteOpplysningerHentetDato;
+    private Instant svarFrist;
 
     public Behandlingsstatus getBehandlingsstatus() {
         return behandlingsstatus;
@@ -70,5 +71,13 @@ public class BehandlingOppsummeringDto {
 
     public void setSisteOpplysningerHentetDato(Instant sisteOpplysningerHentetDato) {
         this.sisteOpplysningerHentetDato = sisteOpplysningerHentetDato;
+    }
+
+    public Instant getSvarFrist() {
+        return svarFrist;
+    }
+
+    public void setSvarFrist(Instant svarFrist) {
+        this.svarFrist = svarFrist;
     }
 }
