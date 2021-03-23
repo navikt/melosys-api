@@ -9,6 +9,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -31,6 +32,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_BRUKER;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
@@ -76,12 +78,13 @@ public class BrevbestillingTjeneste {
     }
 
     private List<BrevmalDto> byggBrevmalListe(long behandlingId) throws FunksjonellException, TekniskException {
-        List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentBrevMaler(behandlingId);
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentBrevMaler(behandling);
 
         List<BrevmalDto> maler = new ArrayList<>();
         for(Produserbaredokumenter p : produserbareDokumenter) {
             MottakerDto.Builder mottakerDto;
+            List<FeltvalgDto> feltvalgDtos = new ArrayList<>();
             switch (p) {
                 case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD:
                     mottakerDto = new MottakerDto.Builder()
@@ -95,12 +98,29 @@ public class BrevbestillingTjeneste {
                         null
                     ));
                     break;
+                case MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE:
+                    mottakerDto = new MottakerDto.Builder()
+                        .medType("Bruker eller brukers fullmektig")
+                        .medRolle(Aktoersroller.BRUKER);
+
+                    leggTilAdresseOgFeilmelding(mottakerDto, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE, Aktoersroller.BRUKER, behandling);
+
+                    maler.add(lagBrevmalDto(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE, null,
+                        singletonList(mottakerDto.build()),
+                        null
+                    ));
+                    break;
                 case MANGELBREV_BRUKER:
                     mottakerDto = new MottakerDto.Builder()
                         .medType("Bruker eller brukers fullmektig")
                         .medRolle(Aktoersroller.BRUKER);
 
                     leggTilAdresseOgFeilmelding(mottakerDto, MANGELBREV_BRUKER, Aktoersroller.BRUKER, behandling);
+
+                    feltvalgDtos.add(new FeltvalgDto.Builder().medKode("FRITEKST").medBeskrivelse("Fritekst (erstatter standardtekst)").build());
+                    if (behandling.getType() == Behandlingstyper.SOEKNAD || behandling.getType() == Behandlingstyper.KLAGE) {
+                        feltvalgDtos.add(new FeltvalgDto.Builder().medKode("STANDARD").medBeskrivelse("Standardtekst søknad/klage").build());
+                    }
 
                     maler.add(lagBrevmalDto(MANGELBREV_BRUKER,
                         asList(
@@ -109,8 +129,7 @@ public class BrevbestillingTjeneste {
                                 .medBeskrivelse("Innledningstekst")
                                 .medFeltType(FeltType.FRITEKST)
                                 .erPåkrevd()
-                                .medValg(new FeltvalgDto.Builder().medKode("STANDARD").medBeskrivelse("Standardtekst søknad/klage").build())
-                                .medValg(new FeltvalgDto.Builder().medKode("FRITEKST").medBeskrivelse("Fritekst (erstatter standardtekst)").build())
+                                .medValg(feltvalgDtos)
                                 .build(),
                             new BrevmalFeltDto.Builder()
                                 .medKode("MANGLER_FRITEKST")
@@ -140,6 +159,11 @@ public class BrevbestillingTjeneste {
                             .build()
                     );
 
+                    feltvalgDtos.add(new FeltvalgDto.Builder().medKode("FRITEKST").medBeskrivelse("Fritekst (erstatter standardtekst)").build());
+                    if (behandling.getType() == Behandlingstyper.SOEKNAD || behandling.getType() == Behandlingstyper.KLAGE) {
+                        feltvalgDtos.add(new FeltvalgDto.Builder().medKode("STANDARD").medBeskrivelse("Standardtekst søknad/klage").build());
+                    }
+
                     maler.add(lagBrevmalDto(MANGELBREV_ARBEIDSGIVER,
                         asList(
                             new BrevmalFeltDto.Builder()
@@ -147,8 +171,7 @@ public class BrevbestillingTjeneste {
                                 .medBeskrivelse("Innledningstekst")
                                 .medFeltType(FeltType.FRITEKST)
                                 .erPåkrevd()
-                                .medValg(new FeltvalgDto.Builder().medKode("STANDARD").medBeskrivelse("Standardtekst søknad/klage").build())
-                                .medValg(new FeltvalgDto.Builder().medKode("FRITEKST").medBeskrivelse("Fritekst (erstatter standardtekst)").build())
+                                .medValg(feltvalgDtos)
                                 .build(),
                             new BrevmalFeltDto.Builder()
                                 .medKode("MANGLER_FRITEKST")

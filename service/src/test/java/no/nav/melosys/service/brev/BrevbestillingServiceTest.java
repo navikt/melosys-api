@@ -18,11 +18,12 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
-import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
@@ -36,6 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_BRUKER;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
@@ -45,8 +47,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class BrevbestillingServiceTest {
 
-    @Mock
-    private BehandlingService mockBehandlingService;
     @Mock
     private DokumentServiceFasade mockDokServiceFasade;
     @Mock
@@ -65,18 +65,47 @@ class BrevbestillingServiceTest {
     @BeforeEach
     void init() {
         brevbestillingService = new BrevbestillingService(
-            mockBehandlingService, mockDokServiceFasade, mockDokgenService, mockBrevmottakerService, mockPersondataFasade, mockEregFasade, mockKontaktopplysningService);
+            mockDokServiceFasade, mockDokgenService, mockBrevmottakerService, mockPersondataFasade, mockEregFasade, mockKontaktopplysningService);
     }
 
     @Test
-    void gittIkkeAvsluttetBehandlingSkalTilgjengeligeBrevmalerReturneres() throws Exception {
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(new Behandling());
+    void hentBrevMaler_behandlingIkkeAvsluttet_returnererMaler() {
+        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentBrevMaler(new Behandling());
 
-        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentBrevMaler(123L);
+        assertThat(brevMaler)
+            .hasSize(2)
+            .containsExactlyInAnyOrder(MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER);
+    }
+
+    @Test
+    void hentBrevMaler_behandlingAvsluttet_returnererTomListe() {
+        var behandling = new Behandling();
+        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentBrevMaler(behandling);
+
+        assertThat(brevMaler).isEmpty();
+    }
+
+    @Test
+    void hentBrevMaler_behandlingErSoeknad_returnererSoeknadMalITillegg() {
+        var behandling = new Behandling();
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentBrevMaler(behandling);
 
         assertThat(brevMaler)
             .hasSize(3)
             .containsExactlyInAnyOrder(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER);
+    }
+
+    @Test
+    void hentBrevMaler_behandlingErKlage_returnererKlageMalITillegg() {
+        var behandling = new Behandling();
+        behandling.setType(Behandlingstyper.KLAGE);
+        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentBrevMaler(behandling);
+
+        assertThat(brevMaler)
+            .hasSize(3)
+            .containsExactlyInAnyOrder(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE, MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER);
     }
 
     @Test

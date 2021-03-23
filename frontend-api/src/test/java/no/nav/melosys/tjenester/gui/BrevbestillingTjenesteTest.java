@@ -53,8 +53,8 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     @BeforeEach
     void init() {
         BrevbestillingService brevbestillingService = new BrevbestillingService(
-            mockBehandlingService, mockDokServiceFasade, mockDokgenService, mockBrevmottakerService, mockPersondataFasade, mockEregFasade, mockKontaktopplysningService);
-        brevbestillingTjeneste = new BrevbestillingTjeneste(brevbestillingService, mock(BehandlingService.class));
+            mockDokServiceFasade, mockDokgenService, mockBrevmottakerService, mockPersondataFasade, mockEregFasade, mockKontaktopplysningService);
+        brevbestillingTjeneste = new BrevbestillingTjeneste(brevbestillingService, mockBehandlingService);
     }
 
     @Test
@@ -63,7 +63,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
         List<BrevmalDto> brevmaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
-        assertThat(brevmaler).hasSize(3);
+        assertThat(brevmaler).hasSize(2);
     }
 
     @Test
