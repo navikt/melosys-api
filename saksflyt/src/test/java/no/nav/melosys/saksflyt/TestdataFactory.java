@@ -9,7 +9,7 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.integrasjon.dokgen.DokumentproduksjonsInfo;
+import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 
 import static java.util.Collections.singleton;
