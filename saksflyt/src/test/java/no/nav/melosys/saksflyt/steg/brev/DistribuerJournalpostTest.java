@@ -98,7 +98,7 @@ class DistribuerJournalpostTest {
 
         distribuerJournalpost.utfør(prosessinstans);
 
-        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), any(StrukturertAdresse.class), any());
+        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), any(StrukturertAdresse.class), any(), any());
     }
 
     private Prosessinstans setupHappypath(String journalpostId, Aktoersroller rolle) throws IkkeFunnetException {

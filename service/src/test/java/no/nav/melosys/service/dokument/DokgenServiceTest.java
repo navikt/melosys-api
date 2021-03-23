@@ -142,7 +142,7 @@ class DokgenServiceTest {
         when(mockPersondataFasade.hentPerson(any(), any())).thenReturn(lagPersonopplysning());
         Aktoer mottaker = new Aktoer();
         mottaker.setRolle(Aktoersroller.BRUKER);
-        when(mockBrevMottakerService.avklarMottakere(any(), any(), any())).thenReturn(asList(mottaker));
+        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false))).thenReturn(asList(mottaker));
 
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
             .medMottaker(Aktoersroller.BRUKER)
@@ -150,8 +150,8 @@ class DokgenServiceTest {
 
         byte[] pdfResponse = dokgenService.produserUtkast(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L, null, brevbestillingDto);
 
-        assertNotNull(pdfResponse);
-        assertEquals(expectedPdf, pdfResponse);
+        assertThat(pdfResponse).isNotNull();
+        assertThat(pdfResponse).isEqualTo(expectedPdf);
 
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(true));
         verify(mockPersondataFasade).hentPerson(any(), eq(Informasjonsbehov.STANDARD));
@@ -171,7 +171,7 @@ class DokgenServiceTest {
         Aktoer representant = new Aktoer();
         representant.setRolle(Aktoersroller.REPRESENTANT);
         representant.setOrgnr("987654321");
-        when(mockBrevMottakerService.avklarMottakere(any(), any(), any())).thenReturn(asList(representant));
+        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false))).thenReturn(asList(representant));
 
         Aktoer mottaker = new Aktoer();
         mottaker.setRolle(Aktoersroller.BRUKER);
@@ -182,8 +182,8 @@ class DokgenServiceTest {
 
         byte[] pdfResponse = dokgenService.produserUtkast(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L, null, brevbestillingDto);
 
-        assertNotNull(pdfResponse);
-        assertEquals(expectedPdf, pdfResponse);
+        assertThat(pdfResponse).isNotNull();
+        assertThat(pdfResponse).isEqualTo(expectedPdf);
 
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(true));
         verify(mockEregFasade).hentOrganisasjon(eq("987654321"));
@@ -201,7 +201,7 @@ class DokgenServiceTest {
         Aktoer representant = new Aktoer();
         representant.setRolle(Aktoersroller.REPRESENTANT);
         representant.setOrgnr("987654321");
-        when(mockBrevMottakerService.avklarMottakere(any(), any(), any())).thenReturn(asList(representant));
+        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false))).thenReturn(asList(representant));
 
         Aktoer mottaker = new Aktoer();
         mottaker.setRolle(Aktoersroller.ARBEIDSGIVER);
@@ -213,8 +213,8 @@ class DokgenServiceTest {
 
         byte[] pdfResponse = dokgenService.produserUtkast(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L, mottaker.getOrgnr(), brevbestillingDto);
 
-        assertNotNull(pdfResponse);
-        assertEquals(expectedPdf, pdfResponse);
+        assertThat(pdfResponse).isNotNull();
+        assertThat(pdfResponse).isEqualTo(expectedPdf);
 
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(true));
         verify(mockEregFasade).hentOrganisasjon(eq("987654321"));
@@ -227,7 +227,7 @@ class DokgenServiceTest {
         bruker.setRolle(Aktoersroller.BRUKER);
 
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(new Behandling());
-        when(mockBrevMottakerService.avklarMottakere(any(), any(), any())).thenReturn(List.of(bruker));
+        when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(bruker));
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
             .medMottaker(Aktoersroller.BRUKER)
             .build();
@@ -235,7 +235,7 @@ class DokgenServiceTest {
         dokgenService.produserOgDistribuerBrev(MANGELBREV_BRUKER, 123L, brevbestillingDto);
 
         verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(eq(MANGELBREV_BRUKER), any(), eq(bruker), any());
-        verify(mockBrevMottakerService).avklarMottakere(any(), any(), any());
+        verify(mockBrevMottakerService).avklarMottakere(any(), any(), any(), eq(false), eq(false));
     }
 
     @Test

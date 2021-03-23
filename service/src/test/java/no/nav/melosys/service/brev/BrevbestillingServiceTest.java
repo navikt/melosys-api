@@ -1,10 +1,25 @@
 package no.nav.melosys.service.brev;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.dokument.felles.Land;
+import no.nav.melosys.domain.dokument.felles.Periode;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
+import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -19,13 +34,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static java.util.Arrays.asList;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,18 +47,25 @@ class BrevbestillingServiceTest {
 
     @Mock
     private BehandlingService mockBehandlingService;
-
     @Mock
     private DokumentServiceFasade mockDokServiceFasade;
-
+    @Mock
+    private BrevmottakerService mockBrevmottakerService;
     @Mock
     private DokgenService mockDokgenService;
+    @Mock
+    private PersondataFasade mockPersondataFasade;
+    @Mock
+    private EregFasade mockEregFasade;
+    @Mock
+    private KontaktopplysningService mockKontaktopplysningService;
 
     private BrevbestillingService brevbestillingService;
 
     @BeforeEach
     void init() {
-        brevbestillingService = new BrevbestillingService(mockBehandlingService, mockDokServiceFasade, mockDokgenService, mock(BrevmottakerService.class), mock(PersondataFasade.class), mock(EregFasade.class), mock(KontaktopplysningService.class));
+        brevbestillingService = new BrevbestillingService(
+            mockBehandlingService, mockDokServiceFasade, mockDokgenService, mockBrevmottakerService, mockPersondataFasade, mockEregFasade, mockKontaktopplysningService);
     }
 
     @Test
@@ -54,9 +74,85 @@ class BrevbestillingServiceTest {
 
         List<Produserbaredokumenter> brevMaler = brevbestillingService.hentBrevMaler(123L);
 
-        assertEquals(2, brevMaler.size());
-        assertTrue(brevMaler.containsAll(asList(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MANGELBREV_BRUKER)));
+        assertThat(brevMaler)
+            .hasSize(3)
+            .containsExactlyInAnyOrder(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER);
     }
+
+    @Test
+    void hentBrevAdresseTilMottakere_brukerSomMottaker_returnererBrukeradresse() throws Exception {
+        var saksbehandling = lagPERSOPLSaksopplysning();
+        var behandling = new Behandling();
+        behandling.setSaksopplysninger(Set.of(saksbehandling));
+
+        when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(), eq(false), eq(false)))
+            .thenReturn(List.of(lagAktoer(Aktoersroller.BRUKER, null)));
+        when(mockPersondataFasade.hentPerson(any(), eq(Informasjonsbehov.STANDARD)))
+            .thenReturn(saksbehandling);
+
+        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_BRUKER, Aktoersroller.BRUKER, behandling);
+
+        assertThat(brevAdresser).hasSize(1);
+        assertThat(brevAdresser.get(0))
+            .extracting("mottakerNavn", "orgnr", "adresselinjer", "postnr", "poststed", "land")
+            .containsExactly("Ola Nordmann", null, List.of("Gateadresse 43A"), "0123", "Oslo", Land.NORGE);
+    }
+
+    @Test
+    void hentBrevAdresseTilMottakere_brukersFullmaktSomMottaker_returnererFullmektigsAdresse() throws Exception {
+        var behandling = new Behandling();
+        behandling.setFagsak(new Fagsak());
+
+        when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(), eq(false), eq(false)))
+            .thenReturn(List.of(lagAktoer(Aktoersroller.REPRESENTANT, "orgNr")));
+        when(mockEregFasade.hentOrganisasjon(eq("orgNr"))).thenReturn(lagORGSaksopplysning("orgNr", "Ola Nordmann Fullmektig"));
+
+        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_BRUKER, Aktoersroller.BRUKER, behandling);
+
+        assertThat(brevAdresser).hasSize(1);
+        assertThat(brevAdresser.get(0))
+            .extracting("mottakerNavn", "orgnr", "adresselinjer", "postnr", "poststed", "land")
+            .containsExactly("Ola Nordmann Fullmektig", "orgNr", List.of("Gateadresse 43A"), "0123", "Oslo", Land.NORGE);
+    }
+
+    @Test
+    void hentBrevAdresseTilMottakere_arbeidsgiverSomMottaker_returnererArbeidsgiverAdresser() throws Exception {
+        var behandling = new Behandling();
+        behandling.setFagsak(new Fagsak());
+
+        when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.ARBEIDSGIVER)), any(), eq(false), eq(false)))
+            .thenReturn(List.of(lagAktoer(Aktoersroller.ARBEIDSGIVER, "orgNr1"), lagAktoer(Aktoersroller.ARBEIDSGIVER, "orgNr2")));
+        when(mockEregFasade.hentOrganisasjon(eq("orgNr1"))).thenReturn(lagORGSaksopplysning("orgNr1", "Ola Nordmann Rørleggerfirma"));
+        when(mockEregFasade.hentOrganisasjon(eq("orgNr2"))).thenReturn(lagORGSaksopplysning("orgNr2", "Ida Nordmann Rørleggerfirma"));
+
+        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER, behandling);
+
+        assertThat(brevAdresser).hasSize(2);
+        assertThat(brevAdresser.get(0))
+            .extracting("mottakerNavn", "orgnr", "adresselinjer", "postnr", "poststed", "land")
+            .containsExactly("Ola Nordmann Rørleggerfirma", "orgNr1", List.of("Gateadresse 43A"), "0123", "Oslo", Land.NORGE);
+        assertThat(brevAdresser.get(1))
+            .extracting("mottakerNavn", "orgnr", "adresselinjer", "postnr", "poststed", "land")
+            .containsExactly("Ida Nordmann Rørleggerfirma", "orgNr2", List.of("Gateadresse 43A"), "0123", "Oslo", Land.NORGE);
+    }
+
+    @Test
+    void hentBrevAdresseTilMottakere_arbeidsgiversFullmaktSomMottaker_returnererFullmektigsAdresse() throws Exception {
+        var behandling = new Behandling();
+        behandling.setFagsak(new Fagsak());
+
+        when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.ARBEIDSGIVER)), any(), eq(false), eq(false)))
+            .thenReturn(List.of(lagAktoer(Aktoersroller.REPRESENTANT, "orgNr")));
+        when(mockEregFasade.hentOrganisasjon(eq("orgNr"))).thenReturn(lagORGSaksopplysning("orgNr", "Ola Nordmann Fullmektig"));
+
+        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER, behandling);
+
+        assertThat(brevAdresser).hasSize(1);
+        assertThat(brevAdresser.get(0))
+            .extracting("mottakerNavn", "orgnr", "adresselinjer", "postnr", "poststed", "land")
+            .containsExactly("Ola Nordmann Fullmektig", "orgNr", List.of("Gateadresse 43A"), "0123", "Oslo", Land.NORGE);
+    }
+
 
     @Test
     void skalBestilleProduseringAvBrev() throws Exception {
@@ -74,8 +170,47 @@ class BrevbestillingServiceTest {
 
         byte[] utkast = brevbestillingService.produserUtkast(MANGELBREV_BRUKER, 123L, brevbestillingDto);
 
-        assertEquals(pdf, utkast);
+        assertThat(utkast).isEqualTo(pdf);
         verify(mockDokServiceFasade).produserUtkast(eq(MANGELBREV_BRUKER), anyLong(), any());
     }
 
+    private Aktoer lagAktoer(Aktoersroller aktoersroller, String orgNummer) {
+        var aktoer = new Aktoer();
+        aktoer.setRolle(aktoersroller);
+        aktoer.setOrgnr(orgNummer);
+        return aktoer;
+    }
+
+    private Saksopplysning lagORGSaksopplysning(String orgNummer, String navn) {
+        var geogragiskAdresse = new SemistrukturertAdresse();
+        geogragiskAdresse.setAdresselinje1("Gateadresse 43A");
+        geogragiskAdresse.setPostnr("0123");
+        geogragiskAdresse.setPoststed("Oslo");
+        geogragiskAdresse.setLandkode(Land.NORGE);
+        geogragiskAdresse.setGyldighetsperiode(new Periode(LocalDate.MIN, LocalDate.MAX));
+        var organisasjonsDetaljer = new OrganisasjonsDetaljer();
+        organisasjonsDetaljer.postadresse.add(geogragiskAdresse);
+        var dokument = new OrganisasjonDokument();
+        dokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
+        dokument.setNavn(List.of(navn));
+        dokument.setOrgnummer(orgNummer);
+        var saksopplysning = new Saksopplysning();
+        saksopplysning.setDokument(dokument);
+        saksopplysning.setType(SaksopplysningType.ORG);
+        return saksopplysning;
+    }
+
+    private Saksopplysning lagPERSOPLSaksopplysning() {
+        var dokument = new PersonDokument();
+        dokument.fnr = "12345678910";
+        dokument.sammensattNavn = "Ola Nordmann";
+        dokument.gjeldendePostadresse.adresselinje1 = "Gateadresse 43A";
+        dokument.gjeldendePostadresse.postnr = "0123";
+        dokument.gjeldendePostadresse.poststed = "Oslo";
+        dokument.gjeldendePostadresse.land = Land.av(Land.NORGE);
+        var saksopplysning = new Saksopplysning();
+        saksopplysning.setDokument(dokument);
+        saksopplysning.setType(SaksopplysningType.PERSOPL);
+        return saksopplysning;
+    }
 }

@@ -79,7 +79,7 @@ class OpprettJournalforBrevTest {
         opprettJournalforBrev.utfør(prosessinstans);
 
         verify(mockBehandlingService).hentBehandling(anyLong());
-        verify(mockDokgenService).produserBrev(eq(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD), eq(behandling.getId()), any(), any());
+        verify(mockDokgenService).produserBrev(eq(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD), eq(behandling.getId()), any(), any(), eq(false));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 
@@ -100,7 +100,7 @@ class OpprettJournalforBrevTest {
         opprettJournalforBrev.utfør(prosessinstans);
 
         verify(mockBehandlingService).hentBehandling(anyLong());
-        verify(mockDokgenService).produserBrev(eq(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD), eq(behandling.getId()), any(), any());
+        verify(mockDokgenService).produserBrev(eq(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD), eq(behandling.getId()), any(), any(), eq(false));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 

@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,7 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_BRUKER;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -34,27 +35,35 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
 
     @Mock
     private BehandlingService mockBehandlingService;
-
     @Mock
     private DokumentServiceFasade mockDokServiceFasade;
-
     @Mock
     private DokgenService mockDokgenService;
+    @Mock
+    private BrevmottakerService mockBrevmottakerService;
+    @Mock
+    private PersondataFasade mockPersondataFasade;
+    @Mock
+    private EregFasade mockEregFasade;
+    @Mock
+    private KontaktopplysningService mockKontaktopplysningService;
 
     private BrevbestillingTjeneste brevbestillingTjeneste;
 
     @BeforeEach
     void init() {
-        BrevbestillingService brevbestillingService = new BrevbestillingService(mockBehandlingService, mockDokServiceFasade, mockDokgenService, mock(BrevmottakerService.class), mock(PersondataFasade.class), mock(EregFasade.class), mock(KontaktopplysningService.class));
+        BrevbestillingService brevbestillingService = new BrevbestillingService(
+            mockBehandlingService, mockDokServiceFasade, mockDokgenService, mockBrevmottakerService, mockPersondataFasade, mockEregFasade, mockKontaktopplysningService);
         brevbestillingTjeneste = new BrevbestillingTjeneste(brevbestillingService, mock(BehandlingService.class));
     }
 
     @Test
     void skalReturnereTilgjengeligeBrevmaler() throws Exception {
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(new Behandling());
+        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
         List<BrevmalDto> brevmaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
-        assertEquals(2, brevmaler.size());
+        assertThat(brevmaler).hasSize(3);
     }
 
     @Test
@@ -69,8 +78,8 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
             .build();
         ResponseEntity<byte[]> responseEntity = brevbestillingTjeneste.produserUtkast(123L, MANGELBREV_BRUKER, brevbestillingDto);
 
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(forventetPdf, responseEntity.getBody());
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isEqualTo(forventetPdf);
 
         verifyNoInteractions(mockDokgenService);
 

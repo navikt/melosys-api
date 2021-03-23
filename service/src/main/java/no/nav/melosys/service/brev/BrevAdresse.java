@@ -1,6 +1,8 @@
 package no.nav.melosys.service.brev;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class BrevAdresse {
     public String mottakerNavn;
@@ -13,7 +15,7 @@ public class BrevAdresse {
     public BrevAdresse(String mottakerNavn, String orgnr, List<String> adresselinjer, String postnr, String poststed, String land) {
         this.mottakerNavn = mottakerNavn;
         this.orgnr = orgnr;
-        this.adresselinjer = adresselinjer;
+        this.adresselinjer = adresselinjer.stream().filter(Objects::nonNull).collect(Collectors.toList());
         this.postnr = postnr;
         this.poststed = poststed;
         this.land = land;
