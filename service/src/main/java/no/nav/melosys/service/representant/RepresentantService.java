@@ -1,5 +1,8 @@
 package no.nav.melosys.service.representant;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Kontaktopplysning;
@@ -9,21 +12,18 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.avgiftoverforing.AvgiftOverforingConsumer;
-import no.nav.melosys.integrasjon.avgiftoverforing.dto.AvgiftOverforingRepresentantDataDto;
-import no.nav.melosys.integrasjon.avgiftoverforing.dto.AvgiftOverforingRepresentantDto;
 import no.nav.melosys.repository.AktoerRepository;
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.representant.dto.RepresentantDataDto;
+import no.nav.melosys.service.representant.dto.RepresentantDto;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Service
 public class RepresentantService {
-
     private final AvgiftOverforingConsumer avgiftOverforingConsumer;
     private final MedlemAvFolketrygdenRepository medlemAvFolketrygdenRepository;
     private final AktoerRepository aktoerRepository;
@@ -38,12 +38,14 @@ public class RepresentantService {
         this.kontaktopplysningService = kontaktopplysningService;
     }
 
-    public List<AvgiftOverforingRepresentantDto> hentRepresentantListe() {
-        return avgiftOverforingConsumer.hentRepresentantListe();
+    public List<RepresentantDto> hentRepresentantListe() {
+        return avgiftOverforingConsumer.hentRepresentantListe().stream()
+            .map(RepresentantDto::av)
+            .collect(Collectors.toList());
     }
 
-    public AvgiftOverforingRepresentantDataDto hentRepresentant(String representantId) {
-        return avgiftOverforingConsumer.hentRepresentant(representantId);
+    public RepresentantDataDto hentRepresentant(String representantId) {
+        return RepresentantDataDto.av(avgiftOverforingConsumer.hentRepresentant(representantId));
     }
 
     @Transactional(rollbackFor = MelosysException.class)

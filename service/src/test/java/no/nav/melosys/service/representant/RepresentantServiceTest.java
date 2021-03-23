@@ -1,5 +1,9 @@
 package no.nav.melosys.service.representant;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -10,10 +14,13 @@ import no.nav.melosys.domain.folketrygden.ValgtRepresentant;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.avgiftoverforing.AvgiftOverforingConsumer;
+import no.nav.melosys.integrasjon.avgiftoverforing.dto.AvgiftOverforingRepresentantDataDto;
+import no.nav.melosys.integrasjon.avgiftoverforing.dto.AvgiftOverforingRepresentantDto;
 import no.nav.melosys.repository.AktoerRepository;
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.representant.dto.RepresentantDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,22 +29,13 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class RepresentantServiceTest {
-
+class RepresentantServiceTest {
     @Mock
     private AvgiftOverforingConsumer avgiftOverforingConsumer;
     @Mock
@@ -60,6 +58,34 @@ public class RepresentantServiceTest {
     @BeforeEach
     void setup(){
         representantService = new RepresentantService(avgiftOverforingConsumer, medlemAvFolketrygdenRepository, aktoerRepository, behandlingService, kontaktopplysningService);
+    }
+
+    @Test
+    void hentRepresentantListe() {
+        when(avgiftOverforingConsumer.hentRepresentantListe()).thenReturn(
+            List.of(new AvgiftOverforingRepresentantDto("id1", "navn1"),
+                new AvgiftOverforingRepresentantDto("id2", "navn2")));
+
+        var representantDtoList = representantService.hentRepresentantListe();
+
+        assertThat(representantDtoList).flatExtracting(RepresentantDto::nummer, RepresentantDto::navn)
+            .containsExactly("id1", "navn1", "id2", "navn2");
+    }
+
+    @Test
+    void hentRepresentant() {
+        final var ID = "ID";
+        when(avgiftOverforingConsumer.hentRepresentant(ID)).thenReturn(
+            new AvgiftOverforingRepresentantDataDto(ID, "navn", List.of("adresselinje1", "adresselinje2"),
+                "postnummer", "telefon", "123456789", "endretAv", LocalDate.now()));
+
+        final var representantDataDto = representantService.hentRepresentant(ID);
+
+        assertThat(representantDataDto.nummer()).isEqualTo(ID);
+        assertThat(representantDataDto.navn()).isEqualTo("navn");
+        assertThat(representantDataDto.adresselinjer()).containsExactly("adresselinje1", "adresselinje2");
+        assertThat(representantDataDto.postnummer()).isEqualTo("postnummer");
+        assertThat(representantDataDto.orgnr()).isEqualTo("123456789");
     }
 
     @Test

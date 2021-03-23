@@ -17,6 +17,6 @@ class ArkitekturTest {
         .layer("Persistence").definedBy("..repository..")
         .whereLayer("Controller").mayNotBeAccessedByAnyLayer()
         .whereLayer("Service").mayOnlyBeAccessedByLayers("Controller")
-        //FIXME .whereLayer("Integrations").mayOnlyBeAccessedByLayers("Service")
+        .whereLayer("Integrations").mayOnlyBeAccessedByLayers("Service")
         .whereLayer("Persistence").mayOnlyBeAccessedByLayers("Service");
 }
