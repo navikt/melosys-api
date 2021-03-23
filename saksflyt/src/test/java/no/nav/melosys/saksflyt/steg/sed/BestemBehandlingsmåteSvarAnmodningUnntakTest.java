@@ -20,7 +20,7 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import no.nav.melosys.service.vedtak.VedtakService;
+import no.nav.melosys.service.vedtak.VedtakServiceFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,7 +40,7 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
-    private VedtakService vedtakService;
+    private VedtakServiceFasade vedtakService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
