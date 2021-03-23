@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.dokgen;
+package no.nav.melosys.service.dokument;
 
 import java.util.Set;
 
