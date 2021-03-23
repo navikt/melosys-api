@@ -16,7 +16,8 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
-import no.nav.melosys.integrasjon.dokgen.DokgenMalResolver;
+import no.nav.melosys.integrasjon.dokgen.DokumentproduksjonsInfo;
+import no.nav.melosys.integrasjon.dokgen.DokumentproduksjonsInfoMapper;
 import no.nav.melosys.integrasjon.dokgen.dto.DokgenDto;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
@@ -28,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.REPRESENTANT;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_BRUKER;
@@ -38,7 +38,7 @@ import static org.springframework.util.StringUtils.hasText;
 public class DokgenService {
 
     private final DokgenConsumer dokgenConsumer;
-    private final DokgenMalResolver dokgenMalResolver;
+    private final DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper;
     private final JoarkFasade joarkFasade;
     private final DokgenMalMapper dokgenMalMapper;
     private final BehandlingService behandlingService;
@@ -48,14 +48,14 @@ public class DokgenService {
     private final ProsessinstansService prosessinstansService;
 
     @Autowired
-    public DokgenService(DokgenConsumer dokgenConsumer, DokgenMalResolver dokgenMalResolver,
+    public DokgenService(DokgenConsumer dokgenConsumer, DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper,
                          @Qualifier("system") JoarkFasade joarkFasade,
                          DokgenMalMapper dokgenMalMapper, BehandlingService behandlingService,
                          @Qualifier("system") EregFasade eregFasade,
                          KontaktopplysningService kontaktopplysningService,
                          BrevmottakerService brevmottakerService, ProsessinstansService prosessinstansService) {
         this.dokgenConsumer = dokgenConsumer;
-        this.dokgenMalResolver = dokgenMalResolver;
+        this.dokumentproduksjonsInfoMapper = dokumentproduksjonsInfoMapper;
         this.joarkFasade = joarkFasade;
         this.dokgenMalMapper = dokgenMalMapper;
         this.behandlingService = behandlingService;
@@ -86,7 +86,7 @@ public class DokgenService {
                                String orgnr, BrevbestillingDto brevbestillingDto, boolean bestillKopi) throws FunksjonellException, TekniskException {
         DokgenBrevbestilling.Builder<?> brevbestilling = new DokgenBrevbestilling.Builder<>();
 
-        if (MANGELBREV_ARBEIDSGIVER == produserbartdokument || MANGELBREV_BRUKER == produserbartdokument) {
+        if (List.of(MANGELBREV_ARBEIDSGIVER, MANGELBREV_BRUKER).contains(produserbartdokument)) {
             brevbestilling = new MangelbrevBrevbestilling.Builder()
                 .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
                 .medManglerInfoFritekst(brevbestillingDto.getManglerFritekst())
@@ -111,7 +111,7 @@ public class DokgenService {
 
     public byte[] produserBrev(DokgenBrevbestilling brevbestilling) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandling(brevbestilling.getBehandlingId());
-        String malnavn = dokgenMalResolver.hentMalnavn(brevbestilling.getProduserbartdokument());
+        String malnavn = dokumentproduksjonsInfoMapper.hentMalnavn(brevbestilling.getProduserbartdokument());
         String orgnr = brevbestilling.getMottaker() != null ? brevbestilling.getMottaker().getOrgnr() : null;
         DokgenBrevbestilling.Builder<?> builder = brevbestilling.toBuilder();
 
@@ -132,18 +132,17 @@ public class DokgenService {
                                          BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         List<Aktoer> mottakere = brevmottakerService.avklarMottakere(produserbartDokument, Mottaker.av(brevbestillingDto.getMottaker()), behandling);
-        //NOTE @Lunde Utvide for å støtte FastMottaker i BrevmottakerService
         for (Aktoer aktoer : mottakere) {
             prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(produserbartDokument, behandling, aktoer, brevbestillingDto);
         }
     }
 
-    public String hentMalnavn(Produserbaredokumenter produserbartDokument) throws FunksjonellException {
-        return dokgenMalResolver.hentMalnavn(produserbartDokument);
+    public DokumentproduksjonsInfo hentDokumentInfo(Produserbaredokumenter produserbartDokument) throws FunksjonellException {
+        return dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(produserbartDokument);
     }
 
     boolean erTilgjengeligDokgenmal(Produserbaredokumenter produserbartDokument) {
-        Set<Produserbaredokumenter> tilgjengeligeMaler = dokgenMalResolver.utledTilgjengeligeMaler();
+        Set<Produserbaredokumenter> tilgjengeligeMaler = dokumentproduksjonsInfoMapper.utledTilgjengeligeMaler();
         return tilgjengeligeMaler.contains(produserbartDokument);
     }
 

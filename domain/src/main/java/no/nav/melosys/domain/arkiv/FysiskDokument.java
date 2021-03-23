@@ -14,7 +14,6 @@ import static no.nav.melosys.domain.arkiv.DokumentVariant.lagDokumentVariant;
 public class FysiskDokument extends ArkivDokument {
     private static final String DOKUMENT_KATEGORI_SED = "SED";
     private static final String DOKUMENT_KATEGORI_SOKNAD = "SOK";
-    private static final String DOKUMENT_KATEGORI_INFOBREV = "IB";
 
     private List<DokumentVariant> dokumentVarianter;
     private String brevkode;
@@ -30,7 +29,7 @@ public class FysiskDokument extends ArkivDokument {
     }
 
     static FysiskDokument lagFysiskHovedDokumentAltinn(AltinnDokument altinnDokument,
-                                                  Behandlingsgrunnlag behandlingsgrunnlag) {
+                                                       Behandlingsgrunnlag behandlingsgrunnlag) {
         FysiskDokument fysiskDokument = new FysiskDokument();
         fysiskDokument.setDokumentKategori(DOKUMENT_KATEGORI_SOKNAD);
         fysiskDokument.setTittel(hentTittelForAltinnDokument(altinnDokument.getDokumentType()));
@@ -56,12 +55,12 @@ public class FysiskDokument extends ArkivDokument {
         return fysiskDokument;
     }
 
-    static FysiskDokument lagInfoBrevPdf(String tittel, String brevkode, byte[] pdf) {
+    static FysiskDokument lagFysiskDokument(JournalpostBestilling bestilling) {
         FysiskDokument fysiskDokument = new FysiskDokument();
-        fysiskDokument.setDokumentKategori(DOKUMENT_KATEGORI_INFOBREV);
-        fysiskDokument.setTittel(tittel);
-        fysiskDokument.setBrevkode(brevkode);
-        fysiskDokument.setDokumentVarianter(Collections.singletonList(lagDokumentVariant(pdf)));
+        fysiskDokument.setDokumentKategori(bestilling.getDokumentKategori());
+        fysiskDokument.setTittel(bestilling.getTittel());
+        fysiskDokument.setBrevkode(bestilling.getBrevkode());
+        fysiskDokument.setDokumentVarianter(Collections.singletonList(lagDokumentVariant(bestilling.getPdf())));
         return fysiskDokument;
     }
 
