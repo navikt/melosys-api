@@ -195,7 +195,7 @@ public class BrevbestillingTjeneste {
     private MottakerDto.Builder leggTilAdresseOgFeilmelding(MottakerDto.Builder builder, Produserbaredokumenter produserbaredokumenter, Aktoersroller aktoersroller, Behandling behandling) throws TekniskException, FunksjonellException {
         try {
             var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(produserbaredokumenter, aktoersroller, behandling);
-            if (aktoersroller == Aktoersroller.BRUKER && brevAdresser.size() > 0 && brevAdresser.get(0).adresselinjer.stream().noneMatch(Objects::nonNull)) {
+            if (aktoersroller == Aktoersroller.BRUKER && (brevAdresser.isEmpty() || brevAdresser.get(0).adresselinjer.stream().noneMatch(Objects::nonNull))) {
                 return builder.medFeilmelding("Bruker har ingen registrert adresse.");
             }
             return builder.medAdresse(brevAdresser.stream().map(MottakerAdresseDto::av).collect(Collectors.toList()));
