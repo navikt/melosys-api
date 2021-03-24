@@ -145,7 +145,7 @@ class EosVedtakServiceTest {
             .containsExactly(FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
-        verify(behandlingService).lagre(eq(behandling));
+        verify(behandlingService).lagre(behandling);
         verify(prosessinstansService).opprettProsessinstansIverksettVedtak(
             any(Behandling.class),
             eq(FASTSATT_LOVVALGSLAND),
@@ -274,9 +274,9 @@ class EosVedtakServiceTest {
         vedtakService.endreVedtak(behandlingID, endretperiodeBegrunnelse, "FRITEKST", "FRITEKST_SED");
 
         verify(avklartefaktaService).leggTilBegrunnelse(
-            eq(behandlingID),
-            eq(Avklartefaktatyper.AARSAK_ENDRING_PERIODE),
-            eq(endretperiodeBegrunnelse.getKode())
+            behandlingID,
+            Avklartefaktatyper.AARSAK_ENDRING_PERIODE,
+            endretperiodeBegrunnelse.getKode()
         );
         verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
         verify(prosessinstansService).opprettProsessinstansForkortPeriode(
@@ -288,7 +288,7 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void endreVedtak_harEksisterendeProsess_kasterException() throws FunksjonellException, TekniskException {
+    void endreVedtak_harEksisterendeProsess_kasterException() throws FunksjonellException {
         mockBehandlingService();
         when(prosessinstansService.harAktivProsessinstans(behandlingID)).thenReturn(true);
 
@@ -319,7 +319,7 @@ class EosVedtakServiceTest {
     private void mockEesiReady() throws MelosysException {
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID)).thenReturn(Collections.singletonList(Landkoder.SE));
         when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(anySet(), anyCollection(), any(BucType.class))).thenCallRealMethod();
-        when(eessiService.hentEessiMottakerinstitusjoner(eq(BucType.LA_BUC_04.name()), eq(Set.of(Landkoder.SE.getKode()))))
+        when(eessiService.hentEessiMottakerinstitusjoner(BucType.LA_BUC_04.name(), Set.of(Landkoder.SE.getKode())))
             .thenReturn(List.of(new Institusjon("AB:CDEF123", "inst", Landkoder.SE.getKode())));
     }
 
