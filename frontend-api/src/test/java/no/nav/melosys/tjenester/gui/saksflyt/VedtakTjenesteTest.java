@@ -22,7 +22,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -69,25 +68,21 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void fattVedtak_dtoManglerBehandlingresultat_girException() throws MelosysException {
+    void fattVedtak_dtoManglerBehandlingresultat_girException() {
         fattVedtakDto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
 
         assertThatThrownBy(() -> vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto))
             .isInstanceOf(FunksjonellException.class)
             .hasMessage("BehandlingsresultatTypeKode eller vedtakstype mangler.");
-
-        verify(tilgangService, never()).sjekkTilgang(behandlingID);
     }
 
     @Test
-    void fattVedtak_dtoManglerVedtakstype_girException() throws MelosysException {
+    void fattVedtak_dtoManglerVedtakstype_girException() {
         fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
 
         assertThatThrownBy(() -> vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto))
             .isInstanceOf(FunksjonellException.class)
             .hasMessage("BehandlingsresultatTypeKode eller vedtakstype mangler.");
-
-        verify(tilgangService, never()).sjekkTilgang(behandlingID);
     }
 
     @Test
@@ -102,12 +97,9 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void endreVedtak_dtoManglerBehandlingresultat_girException() throws FunksjonellException, TekniskException {
-
+    void endreVedtak_dtoManglerBehandlingresultat_girException() {
         assertThatThrownBy(() -> vedtakTjeneste.endreVedtak(behandlingID, endreVedtakDto))
             .isInstanceOf(FunksjonellException.class)
             .hasMessage("BegrunnelseKode mangler.");
-
-        verify(tilgangService, never()).sjekkTilgang(behandlingID);
     }
 }

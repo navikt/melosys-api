@@ -50,7 +50,6 @@ public class VedtakServiceFasade {
 
         Sakstyper sakstype = behandling.getFagsak().getType();
 
-        //NOTE Er det riktig at UKJENT alltid skal gå som EU_EOS?
         if (List.of(UKJENT, EU_EOS).contains(sakstype)) {
             eosVedtakService.fattVedtak(behandlingID, behandlingsresultatType, fritekst, fritekstSed, mottakerinstitusjoner, vedtakstype, revurderBegrunnelse);
         } else {
@@ -63,7 +62,6 @@ public class VedtakServiceFasade {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         Sakstyper sakstype = behandling.getFagsak().getType();
 
-        //NOTE Er det riktig at UKJENT alltid skal gå som EU_EOS?
         if (List.of(UKJENT, EU_EOS).contains(sakstype)) {
             eosVedtakService.endreVedtak(behandlingID, endretperiode, fritekst, fritekstSed);
         } else {
