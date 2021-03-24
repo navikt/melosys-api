@@ -18,8 +18,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
-import no.nav.melosys.integrasjon.dokgen.DokgenMalResolver;
-import no.nav.melosys.integrasjon.dokgen.dto.DokgenDto;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
@@ -41,9 +39,8 @@ import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -80,7 +77,7 @@ class DokgenServiceTest {
 
     @BeforeEach
     void init() {
-        dokgenService = new DokgenService(mockDokgenConsumer, new DokgenMalResolver(unleash), mockJoarkFasade,
+        dokgenService = new DokgenService(mockDokgenConsumer, new DokumentproduksjonsInfoMapper(unleash), mockJoarkFasade,
             new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService, mockEregFasade, mockPersondataFasade),
             mockBehandlingsService,
             mockEregFasade, mockKontaktOpplysningService, mockBrevMottakerService, mockProsessinstansService);
@@ -88,8 +85,9 @@ class DokgenServiceTest {
 
     @Test
     void produserBrevFeilerUtilgjengeligMal() {
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> dokgenService.produserBrev(ATTEST_A1, 123L, null, null));
+        assertThatThrownBy(() -> dokgenService.produserBrev(ATTEST_A1, 123L, null, null))
+            .isInstanceOf(FunksjonellException.class)
+            .hasMessage("ProduserbartDokument ATTEST_A1 er ikke støttet");
     }
 
     @Test
@@ -276,10 +274,12 @@ class DokgenServiceTest {
     }
 
     @Test
-    void skalHenteMalnavn() throws Exception {
-        String malnavn = dokgenService.hentMalnavn(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
+    void skalHenteDokumentInfo() throws Exception {
+        DokumentproduksjonsInfo dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
 
-        assertThat(malnavn).isEqualTo("saksbehandlingstid_soknad");
+        assertThat(dokumentproduksjonsInfo.dokgenMalnavn()).isEqualTo("saksbehandlingstid_soknad");
+        assertThat(dokumentproduksjonsInfo.dokumentKategoriKode()).isEqualTo("IB");
+        assertThat(dokumentproduksjonsInfo.journalføringsTittel()).isEqualTo("Melding om forventet saksbehandlingstid");
     }
 
     private Journalpost lagJournalpost() {

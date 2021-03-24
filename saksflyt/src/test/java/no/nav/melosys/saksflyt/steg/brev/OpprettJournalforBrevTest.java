@@ -7,9 +7,10 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.saksflyt.TestdataFactory;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.DokgenService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -50,8 +51,9 @@ class OpprettJournalforBrevTest {
 
     @Test
     void utførFeilerVedManglendeBehandling() {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        assertThrows(FunksjonellException.class, () -> opprettJournalforBrev.utfør(prosessinstans));
+        assertThatThrownBy(() -> opprettJournalforBrev.utfør(new Prosessinstans()))
+            .isInstanceOf(FunksjonellException.class)
+            .hasMessage("Prosessinstans mangler behandling");
     }
 
     @Test
@@ -60,7 +62,10 @@ class OpprettJournalforBrevTest {
         Behandling behandling = TestdataFactory.lagBehandling();
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         prosessinstans.setBehandling(behandling);
-        assertThrows(FunksjonellException.class, () -> opprettJournalforBrev.utfør(prosessinstans));
+
+        assertThatThrownBy(() -> opprettJournalforBrev.utfør(prosessinstans))
+            .isInstanceOf(FunksjonellException.class)
+            .hasMessage("Mangler mottaker");
     }
 
     @Test
@@ -68,6 +73,7 @@ class OpprettJournalforBrevTest {
         Behandling behandling = TestdataFactory.lagBehandling();
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
+        when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
@@ -88,6 +94,7 @@ class OpprettJournalforBrevTest {
         Behandling behandling = TestdataFactory.lagBehandling();
 
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
         when(mockEregFasade.hentOrganisasjonNavn(any())).thenReturn("Advokatene AS");
 
@@ -103,6 +110,5 @@ class OpprettJournalforBrevTest {
         verify(mockDokgenService).produserBrev(eq(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD), eq(behandling.getId()), any(), any(), eq(false));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
-
 
 }

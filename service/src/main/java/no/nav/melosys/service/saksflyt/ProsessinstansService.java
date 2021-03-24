@@ -22,7 +22,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.*;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
@@ -108,9 +108,9 @@ public class ProsessinstansService {
     private String lagInstitusjonsId(String avsenderID) {
         try {
             return utenlandskMyndighetService.lagInstitusjonsId(Landkoder.valueOf(avsenderID));
-        } catch (TekniskException e) {
+        } catch (IkkeFunnetException e) {
             logger.warn(e.getMessage());
-            logger.warn("Bruker {}: som avsenderID", avsenderID);
+            logger.warn("Utenlandsk myndighet har ikke institusjonsId. Bruker {}: som avsenderID", avsenderID);
             return avsenderID + ":";
         }
     }

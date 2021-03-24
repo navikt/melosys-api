@@ -11,7 +11,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -38,7 +37,7 @@ public class UtenlandskMyndighetService {
         this.fagsakService = fagsakService;
     }
 
-    public void avklarUtenlandskMyndighetSomAktørOgLagre(Behandling behandling) throws IkkeFunnetException, TekniskException {
+    public void avklarUtenlandskMyndighetSomAktørOgLagre(Behandling behandling) throws IkkeFunnetException {
         String saksnummer = behandling.getFagsak().getSaksnummer();
         Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId());
         if (!landkoder.isEmpty()) {
@@ -47,12 +46,17 @@ public class UtenlandskMyndighetService {
         }
     }
 
-    public UtenlandskMyndighet hentUtenlandskMyndighet(Landkoder landkode) throws TekniskException {
+    public UtenlandskMyndighet hentUtenlandskMyndighet(Landkoder landkode) throws IkkeFunnetException {
         return utenlandskMyndighetRepository.findByLandkode(landkode)
-            .orElseThrow(() -> new TekniskException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."));
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."));
     }
 
-    private Collection<String> konverterLandkodeTilInstitusjonsId(Collection<Landkoder> landkoder) throws TekniskException {
+    public List<UtenlandskMyndighet> hentAlleUtenlandskMyndigheter() {
+        return utenlandskMyndighetRepository.findAll();
+    }
+
+    private Collection<String> konverterLandkodeTilInstitusjonsId(Collection<Landkoder> landkoder) throws
+        IkkeFunnetException {
         List<String> institusjonsider = new ArrayList<>();
         for (Landkoder landkode : landkoder) {
             institusjonsider.add(lagInstitusjonsId(landkode));
@@ -80,7 +84,7 @@ public class UtenlandskMyndighetService {
         return aktoer;
     }
 
-    public String lagInstitusjonsId(Landkoder landkode) throws TekniskException {
+    public String lagInstitusjonsId(Landkoder landkode) throws IkkeFunnetException {
         UtenlandskMyndighet myndighet = hentUtenlandskMyndighet(landkode);
         return lagInstitusjonsId(myndighet);
     }
