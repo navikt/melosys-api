@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.kodeverk.Utfallregistreringunntak.GODKJENT;
 
@@ -80,11 +79,10 @@ public class EosVedtakService {
         this.melosysEventMulticaster = melosysEventMulticaster;
     }
 
-    @Transactional(rollbackFor = MelosysException.class, noRollbackFor = {ValideringException.class})
-    public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultatType,
+    public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType,
                            String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner,
                            Vedtakstyper vedtakstype, String revurderBegrunnelse) throws MelosysException {
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        long behandlingID = behandling.getId();
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         behandlingsresultat.setType(behandlingsresultatType);
@@ -107,9 +105,8 @@ public class EosVedtakService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void endreVedtak(Long behandlingID, Endretperiode endretperiode, String fritekst, String fritekstSed) throws FunksjonellException, TekniskException {
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+    public void endreVedtak(Behandling behandling, Endretperiode endretperiode, String fritekst, String fritekstSed) throws FunksjonellException, TekniskException {
+        long behandlingID = behandling.getId();
         log.info("Endrer vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
         avklartefaktaService.leggTilBegrunnelse(behandlingID, Avklartefaktatyper.AARSAK_ENDRING_PERIODE, endretperiode.getKode());
 

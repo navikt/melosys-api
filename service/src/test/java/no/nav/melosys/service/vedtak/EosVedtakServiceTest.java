@@ -100,11 +100,11 @@ class EosVedtakServiceTest {
     @Test
     void fattVedtak_landErEessiReadyInstitusjonErSatt_fatterVedtak() throws MelosysException {
         var mottakerinstitusjoner = Set.of("AB:CDEF123");
-        mockBehandlingOgBehandlingsresultat();
+        mockBehandlingsresultat();
         mockEesiReady();
         leggTilLovvalgsperiode();
 
-        vedtakService.fattVedtak(behandlingID, FASTSATT_LOVVALGSLAND, behandlingsresultatFritekst, "FRITEKST_SED",
+        vedtakService.fattVedtak(behandling, FASTSATT_LOVVALGSLAND, behandlingsresultatFritekst, "FRITEKST_SED",
             mottakerinstitusjoner, FØRSTEGANGSVEDTAK, null);
 
         assertThat(behandlingsresultat)
@@ -115,7 +115,6 @@ class EosVedtakServiceTest {
             .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getRevurderBegrunnelse, VedtakMetadata::getVedtakKlagefrist)
             .containsExactly(FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
-        verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
         verify(behandlingService).lagre(behandling);
         verify(prosessinstansService).opprettProsessinstansIverksettVedtak(
             any(),
@@ -130,10 +129,10 @@ class EosVedtakServiceTest {
 
     @Test
     void fattVedtak_utenMottakerLandErIkkeEessiReady_fatterVedtak() throws MelosysException {
-        mockBehandlingOgBehandlingsresultat();
+        mockBehandlingsresultat();
         leggTilLovvalgsperiode();
 
-        vedtakService.fattVedtak(behandlingID, FASTSATT_LOVVALGSLAND, behandlingsresultatFritekst, "FRITEKST_SED",
+        vedtakService.fattVedtak(behandling, FASTSATT_LOVVALGSLAND, behandlingsresultatFritekst, "FRITEKST_SED",
             null, FØRSTEGANGSVEDTAK, null);
 
         assertThat(behandlingsresultat)
@@ -144,7 +143,6 @@ class EosVedtakServiceTest {
             .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getRevurderBegrunnelse, VedtakMetadata::getVedtakKlagefrist)
             .containsExactly(FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
-        verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
         verify(behandlingService).lagre(behandling);
         verify(prosessinstansService).opprettProsessinstansIverksettVedtak(
             any(Behandling.class),
@@ -158,7 +156,7 @@ class EosVedtakServiceTest {
 
     @Test
     void fattVedtak_mottakerErNullOgErAnmodningOmUnntakSvarMottatt_fatterVedtak() throws MelosysException {
-        mockBehandlingOgBehandlingsresultat();
+        mockBehandlingsresultat();
 
         leggTilLovvalgsperiode();
 
@@ -167,7 +165,7 @@ class EosVedtakServiceTest {
         anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
         behandlingsresultat.setAnmodningsperioder(Collections.singleton(anmodningsperiode));
 
-        vedtakService.fattVedtak(behandlingID, FASTSATT_LOVVALGSLAND, behandlingsresultatFritekst, "FRITEKST_SED",
+        vedtakService.fattVedtak(behandling, FASTSATT_LOVVALGSLAND, behandlingsresultatFritekst, "FRITEKST_SED",
             null, FØRSTEGANGSVEDTAK, null);
 
         assertThat(behandlingsresultat)
@@ -190,12 +188,12 @@ class EosVedtakServiceTest {
 
     @Test
     void fattVedtak_erAvslagManglendeOpplysninger_fatterVedtak() throws MelosysException {
-        mockBehandlingOgBehandlingsresultat();
+        mockBehandlingsresultat();
 
         final Behandlingsresultattyper resultatType = Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL;
         final Vedtakstyper vedtakstype = FØRSTEGANGSVEDTAK;
 
-        vedtakService.fattVedtak(behandlingID, resultatType, null, null, null, vedtakstype, null);
+        vedtakService.fattVedtak(behandling, resultatType, null, null, null, vedtakstype, null);
 
         assertThat(behandlingsresultat)
             .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst)
@@ -217,11 +215,11 @@ class EosVedtakServiceTest {
 
     @Test
     void fattVedtak_erAvslagLovvalgsperiodeIkkeInnvilget_fatterVedtak() throws MelosysException {
-        mockBehandlingOgBehandlingsresultat();
+        mockBehandlingsresultat();
 
         leggTilLovvalgsperiode(InnvilgelsesResultat.AVSLAATT);
 
-        vedtakService.fattVedtak(behandlingID, FASTSATT_LOVVALGSLAND, null, null, null,
+        vedtakService.fattVedtak(behandling, FASTSATT_LOVVALGSLAND, null, null, null,
             FØRSTEGANGSVEDTAK, null);
 
         verify(prosessinstansService).opprettProsessinstansIverksettVedtak(
@@ -236,12 +234,12 @@ class EosVedtakServiceTest {
 
     @Test
     void fattVedtak_prosessinstansFinnes_kasterException() throws Exception {
-        mockBehandlingOgBehandlingsresultat();
+        mockBehandlingsresultat();
         when(prosessinstansService.harVedtakInstans(behandlingID)).thenReturn(true);
 
         leggTilLovvalgsperiode(InnvilgelsesResultat.AVSLAATT);
 
-        assertThatThrownBy(() -> vedtakService.fattVedtak(behandlingID, FASTSATT_LOVVALGSLAND, null, null,
+        assertThatThrownBy(() -> vedtakService.fattVedtak(behandling, FASTSATT_LOVVALGSLAND, null, null,
             null, FØRSTEGANGSVEDTAK, null))
             .isInstanceOf(FunksjonellException.class)
             .hasMessageContaining("vedtak-prosess");
@@ -252,14 +250,14 @@ class EosVedtakServiceTest {
 
     @Test
     void fattVedtak_feilFraKontroller_kasterExceptionMedFeilkode() throws MelosysException {
-        mockBehandlingOgBehandlingsresultat();
+        mockBehandlingsresultat();
         mockFeilendeValidering();
         leggTilLovvalgsperiode(InnvilgelsesResultat.INNVILGET);
 
         Consumer<ValideringException> medFeilkode = v -> assertThat(v.getFeilkoder())
             .extracting(KontrollfeilDto::getKode).containsExactly(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER.getKode());
 
-        assertThatThrownBy(() -> vedtakService.fattVedtak(behandlingID, FASTSATT_LOVVALGSLAND, null, null,
+        assertThatThrownBy(() -> vedtakService.fattVedtak(behandling, FASTSATT_LOVVALGSLAND, null, null,
             null, FØRSTEGANGSVEDTAK, null))
             .isInstanceOfSatisfying(ValideringException.class, medFeilkode)
             .hasMessage("Feil i validering. Kan ikke fatte vedtak.");
@@ -268,17 +266,16 @@ class EosVedtakServiceTest {
     @Test
     void endreVedtak_fungerer() throws FunksjonellException, TekniskException {
         final Endretperiode endretperiodeBegrunnelse = Endretperiode.ENDRINGER_ARBEIDSSITUASJON;
-        mockBehandlingService();
         leggTilMyndighetAktoer();
 
-        vedtakService.endreVedtak(behandlingID, endretperiodeBegrunnelse, "FRITEKST", "FRITEKST_SED");
+        vedtakService.endreVedtak(behandling, endretperiodeBegrunnelse, "FRITEKST", "FRITEKST_SED");
 
         verify(avklartefaktaService).leggTilBegrunnelse(
             behandlingID,
             Avklartefaktatyper.AARSAK_ENDRING_PERIODE,
             endretperiodeBegrunnelse.getKode()
         );
-        verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
+
         verify(prosessinstansService).opprettProsessinstansForkortPeriode(
             any(Behandling.class),
             eq("FRITEKST"),
@@ -289,14 +286,12 @@ class EosVedtakServiceTest {
 
     @Test
     void endreVedtak_harEksisterendeProsess_kasterException() throws FunksjonellException {
-        mockBehandlingService();
         when(prosessinstansService.harAktivProsessinstans(behandlingID)).thenReturn(true);
 
-        assertThatThrownBy(() -> vedtakService.endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, "FRITEKST", "FRITEKST_SED"))
+        assertThatThrownBy(() -> vedtakService.endreVedtak(behandling, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, "FRITEKST", "FRITEKST_SED"))
             .isInstanceOf(FunksjonellException.class)
             .hasMessageContaining("Det finnes allerede en aktiv prosess for behandling");
 
-        verify(behandlingService).hentBehandlingUtenSaksopplysninger(behandlingID);
         verify(avklartefaktaService).leggTilBegrunnelse(
             eq(behandlingID),
             eq(Avklartefaktatyper.AARSAK_ENDRING_PERIODE),
@@ -307,13 +302,8 @@ class EosVedtakServiceTest {
         verifyNoInteractions(oppgaveService);
     }
 
-    private void mockBehandlingOgBehandlingsresultat() throws IkkeFunnetException {
-        mockBehandlingService();
+    private void mockBehandlingsresultat() throws IkkeFunnetException {
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
-    }
-
-    private void mockBehandlingService() throws IkkeFunnetException {
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
     }
 
     private void mockEesiReady() throws MelosysException {

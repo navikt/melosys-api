@@ -3,16 +3,11 @@ package no.nav.melosys.service.vedtak;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,13 +19,14 @@ import static no.nav.melosys.domain.kodeverk.Vedtakstyper.FØRSTEGANGSVEDTAK;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode.ENDRINGER_ARBEIDSSITUASJON;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class VedtakServiceFasadeTest {
 
-    private static long behandlingID = 1L;
+    private static final long behandlingID = 1L;
 
     @Mock
     private BehandlingService mockBehandlingService;
@@ -70,15 +66,25 @@ class VedtakServiceFasadeTest {
         vedtakServiceFasade.fattVedtak(behandlingID, FASTSATT_LOVVALGSLAND,
             null, null, null, FØRSTEGANGSVEDTAK, null);
 
-        verify(mockEosVedtakService).fattVedtak(eq(behandlingID), eq(FASTSATT_LOVVALGSLAND), isNull(), isNull(), isNull(), eq(FØRSTEGANGSVEDTAK), isNull());
+        verify(mockEosVedtakService).fattVedtak(eq(behandling), eq(FASTSATT_LOVVALGSLAND), isNull(), isNull(), isNull(), eq(FØRSTEGANGSVEDTAK), isNull());
         verifyNoInteractions(mockEosVedtakSystemService);
     }
 
     @Test
     void fattVedtak_delvisAutomatisert_skalKalleEosVedtakSystemService() throws Exception {
+        when(mockBehandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
+
         vedtakServiceFasade.fattVedtak(behandlingID, FASTSATT_LOVVALGSLAND);
 
-        verify(mockEosVedtakSystemService).fattVedtak(eq(behandlingID), eq(FASTSATT_LOVVALGSLAND), isNull(), isNull(), isNull(), eq(FØRSTEGANGSVEDTAK), isNull());
+        verify(mockEosVedtakSystemService).fattVedtak(
+            eq(behandling),
+            eq(FASTSATT_LOVVALGSLAND),
+            isNull(),
+            isNull(),
+            isNull(),
+            eq(FØRSTEGANGSVEDTAK),
+            isNull()
+        );
         verifyNoInteractions(mockEosVedtakService);
     }
 
@@ -117,7 +123,7 @@ class VedtakServiceFasadeTest {
 
         vedtakServiceFasade.endreVedtak(behandlingID, ENDRINGER_ARBEIDSSITUASJON, null, null);
 
-        verify(mockEosVedtakService).endreVedtak(eq(behandlingID), eq(ENDRINGER_ARBEIDSSITUASJON), isNull(), isNull());
+        verify(mockEosVedtakService).endreVedtak(eq(behandling), eq(ENDRINGER_ARBEIDSSITUASJON), isNull(), isNull());
         verifyNoInteractions(mockEosVedtakSystemService);
     }
 

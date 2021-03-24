@@ -36,7 +36,9 @@ public class VedtakServiceFasade {
 
     @Transactional(rollbackFor = MelosysException.class, noRollbackFor = {ValideringException.class})
     public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultattype) throws MelosysException {
-        eosVedtakSystemService.fattVedtak(behandlingID, behandlingsresultattype, null, null,
+        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+
+        eosVedtakSystemService.fattVedtak(behandling, behandlingsresultattype, null, null,
             null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
     }
 
@@ -51,7 +53,7 @@ public class VedtakServiceFasade {
         Sakstyper sakstype = behandling.getFagsak().getType();
 
         if (List.of(UKJENT, EU_EOS).contains(sakstype)) {
-            eosVedtakService.fattVedtak(behandlingID, behandlingsresultatType, fritekst, fritekstSed, mottakerinstitusjoner, vedtakstype, revurderBegrunnelse);
+            eosVedtakService.fattVedtak(behandling, behandlingsresultatType, fritekst, fritekstSed, mottakerinstitusjoner, vedtakstype, revurderBegrunnelse);
         } else {
             throw new FunksjonellException("Vedtaksfatting for sakstype " + sakstype + " er ikke støttet.");
         }
@@ -63,7 +65,7 @@ public class VedtakServiceFasade {
         Sakstyper sakstype = behandling.getFagsak().getType();
 
         if (List.of(UKJENT, EU_EOS).contains(sakstype)) {
-            eosVedtakService.endreVedtak(behandlingID, endretperiode, fritekst, fritekstSed);
+            eosVedtakService.endreVedtak(behandling, endretperiode, fritekst, fritekstSed);
         } else {
             throw new FunksjonellException("Vedtaksendring for sakstype " + sakstype + " er ikke støttet.");
         }
