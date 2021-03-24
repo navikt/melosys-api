@@ -133,11 +133,12 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         when(mockDokServiceFasade.produserUtkast(any(), anyLong(), any())).thenReturn(forventetPdf);
 
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+            .medProduserbardokument(MANGELBREV_BRUKER)
             .medMottaker(Aktoersroller.BRUKER)
             .medInnledningFritekst("Innledning")
             .medManglerFritekst("Mangler")
             .build();
-        ResponseEntity<byte[]> responseEntity = brevbestillingTjeneste.produserUtkast(123L, MANGELBREV_BRUKER, brevbestillingDto);
+        ResponseEntity<byte[]> responseEntity = brevbestillingTjeneste.produserUtkast(123L, brevbestillingDto);
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isEqualTo(forventetPdf);
@@ -150,11 +151,12 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     @Test
     void skalBestilleProduseringAvBrev() throws Exception {
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+            .medProduserbardokument(MANGELBREV_BRUKER)
             .medMottaker(Aktoersroller.BRUKER)
             .medInnledningFritekst("Innledning")
             .medManglerFritekst("Mangler")
             .build();
-        brevbestillingTjeneste.produserBrev(123L, MANGELBREV_BRUKER, brevbestillingDto);
+        brevbestillingTjeneste.produserBrev(123L, brevbestillingDto);
 
         verify(mockDokgenService).produserOgDistribuerBrev(eq(MANGELBREV_BRUKER), eq(123L), eq(brevbestillingDto));
         verifyNoInteractions(mockDokServiceFasade);

@@ -61,20 +61,18 @@ public class BrevbestillingTjeneste {
     @PostMapping(value = "pdf/brev/utkast/{behandlingID}/{produserbartDokument}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_PDF_VALUE)
     @ApiOperation(value = "Produser utkast")
     public ResponseEntity<byte[]> produserUtkast(@PathVariable long behandlingID,
-                                                 @PathVariable Produserbaredokumenter produserbartDokument,
                                                  @RequestBody BrevbestillingDto brevbestillingDto)
         throws FunksjonellException, TekniskException {
 
-        byte[] pdf = brevbestillingService.produserUtkast(produserbartDokument, behandlingID, brevbestillingDto);
+        byte[] pdf = brevbestillingService.produserUtkast(behandlingID, brevbestillingDto);
         return new ResponseEntity<>(pdf, genPdfHeaders("utkast_" + behandlingID, false), HttpStatus.OK);
     }
 
     @PostMapping("opprett/{behandlingID}/{produserbartDokument}")
     @ApiOperation(value = "Produser brev gjennom melosys-dokgen")
     public void produserBrev(@PathVariable("behandlingID") long behandlingID,
-                             @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
                              @RequestBody BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
-        brevbestillingService.produserBrev(produserbartDokument, behandlingID, brevbestillingDto);
+        brevbestillingService.produserBrev(behandlingID, brevbestillingDto);
     }
 
     private List<BrevmalDto> byggBrevmalListe(long behandlingId) throws FunksjonellException, TekniskException {

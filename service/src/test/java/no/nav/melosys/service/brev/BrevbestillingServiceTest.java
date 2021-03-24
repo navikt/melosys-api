@@ -185,8 +185,8 @@ class BrevbestillingServiceTest {
 
     @Test
     void skalBestilleProduseringAvBrev() throws Exception {
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().build();
-        brevbestillingService.produserBrev(MANGELBREV_BRUKER, 123L, brevbestillingDto);
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().medProduserbardokument(MANGELBREV_BRUKER).build();
+        brevbestillingService.produserBrev(123L, brevbestillingDto);
 
         verify(mockDokgenService).produserOgDistribuerBrev(eq(MANGELBREV_BRUKER), anyLong(), any());
     }
@@ -195,9 +195,9 @@ class BrevbestillingServiceTest {
     void skalReturnereUtkast() throws Exception {
         byte[] pdf = "UTKAST".getBytes(StandardCharsets.UTF_8);
         when(mockDokServiceFasade.produserUtkast(any(), anyLong(), any())).thenReturn(pdf);
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().build();
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().medProduserbardokument(MANGELBREV_BRUKER).build();
 
-        byte[] utkast = brevbestillingService.produserUtkast(MANGELBREV_BRUKER, 123L, brevbestillingDto);
+        byte[] utkast = brevbestillingService.produserUtkast(123L, brevbestillingDto);
 
         assertThat(utkast).isEqualTo(pdf);
         verify(mockDokServiceFasade).produserUtkast(eq(MANGELBREV_BRUKER), anyLong(), any());

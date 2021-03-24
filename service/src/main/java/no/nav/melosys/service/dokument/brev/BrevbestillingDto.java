@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Objects;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
 public class BrevbestillingDto {
 
+    private Produserbaredokumenter produserbardokument;
     private Aktoersroller mottaker;
     private String orgNr;
     private String innledningFritekst;
@@ -37,6 +39,7 @@ public class BrevbestillingDto {
     }
 
     public BrevbestillingDto(Builder builder) {
+        this.produserbardokument = builder.produserbardokument;
         this.mottaker = builder.mottaker;
         this.orgNr = builder.orgNr;
         this.innledningFritekst = builder.innledningFritekst;
@@ -46,6 +49,10 @@ public class BrevbestillingDto {
         this.fritekst = builder.fritekst;
         this.begrunnelseKode = builder.begrunnelseKode;
         this.ytterligereInformasjon = builder.ytterligereInformasjon;
+    }
+
+    public Produserbaredokumenter getProduserbardokument() {
+        return produserbardokument;
     }
 
     public Aktoersroller getMottaker() {
@@ -88,6 +95,7 @@ public class BrevbestillingDto {
     }
 
     public static class Builder {
+        private Produserbaredokumenter produserbardokument;
         private Aktoersroller mottaker;
         private String orgNr;
         private String innledningFritekst;
@@ -97,6 +105,11 @@ public class BrevbestillingDto {
         private String fritekst;
         private String begrunnelseKode;
         private String ytterligereInformasjon;
+
+        public Builder medProduserbardokument(Produserbaredokumenter produserbardokument) {
+            this.produserbardokument = produserbardokument;
+            return this;
+        }
 
         public Builder medMottaker(Aktoersroller mottaker) {
             this.mottaker = mottaker;
