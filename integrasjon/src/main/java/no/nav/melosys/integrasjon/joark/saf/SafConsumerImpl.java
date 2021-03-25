@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.joark.saf;
 
+import no.nav.melosys.integrasjon.joark.Variantformat;
 import no.nav.melosys.integrasjon.joark.saf.dto.FeilResponseSafDto;
-import no.nav.melosys.integrasjon.joark.saf.dto.VariantFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,7 +22,7 @@ public class SafConsumerImpl implements SafConsumer {
     @Override
     public byte[] hentDokument(String journalpostID, String dokumentID) {
         return webClient.get()
-            .uri(SAF_HENT_DOKUMENT_URL, journalpostID, dokumentID, VariantFormat.ARKIV)
+            .uri(SAF_HENT_DOKUMENT_URL, journalpostID, dokumentID, Variantformat.ARKIV)
             .header(CALL_ID, getCallID())
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_PDF_VALUE)
             .retrieve()
