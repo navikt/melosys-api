@@ -3,7 +3,8 @@ package no.nav.melosys.integrasjon.oppgave.konsument;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.felles.FeilResponseDto;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
@@ -116,17 +117,5 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
         return clientResponse.bodyToMono(FeilResponseDto.class)
             .map(FeilResponseDto::getFeilmelding)
             .map(feilmelding -> tilException(feilmelding, status));
-    }
-
-    private MelosysException tilException(String feilmelding, HttpStatus status) {
-        if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.FORBIDDEN) {
-            return new SikkerhetsbegrensningException(feilmelding);
-        } else if (status == HttpStatus.NOT_FOUND) {
-            return new IkkeFunnetException(feilmelding);
-        } else if (status.is4xxClientError()) {
-            return new FunksjonellException(feilmelding);
-        } else { // 5xx
-            return new TekniskException(feilmelding);
-        }
     }
 }
