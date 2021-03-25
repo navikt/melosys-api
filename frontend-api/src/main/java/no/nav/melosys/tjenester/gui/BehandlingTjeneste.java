@@ -193,6 +193,7 @@ public class BehandlingTjeneste {
         behandlingOppsummeringDto.setRegistrertDato(behandling.getRegistrertDato());
         behandlingOppsummeringDto.setSisteOpplysningerHentetDato(behandling.getSistOpplysningerHentetDato());
         behandlingOppsummeringDto.setSvarFrist(behandling.getDokumentasjonSvarfristDato());
+        behandlingOppsummeringDto.setBehandlingsfrist(behandling.getBehandlingsfrist());
         return behandlingOppsummeringDto;
     }
 }
