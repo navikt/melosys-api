@@ -20,6 +20,7 @@ import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.EndreBehandlingstemaService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.EndreBehandlingstemaDto;
 import no.nav.melosys.tjenester.gui.dto.TidligereMedlemsperioderDto;
@@ -34,6 +35,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 
 import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SØKNAD;
@@ -59,12 +61,16 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     private SaksbehandlerService saksbehandlerService;
     @Mock
     private EndreBehandlingstemaService endreBehandlingstemaService;
+    @Mock
+    private OppgaveService oppgaveService;
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
 
     private EasyRandom random;
 
     @BeforeEach
     void setUp() {
-        behandlingTjeneste = new BehandlingTjeneste(behandlingService, saksopplysningerTilDto, mock(TilgangService.class), saksbehandlerService, endreBehandlingstemaService);
+        behandlingTjeneste = new BehandlingTjeneste(behandlingService, saksopplysningerTilDto, mock(TilgangService.class), saksbehandlerService, endreBehandlingstemaService, oppgaveService, applicationEventPublisher);
 
         random = new EasyRandom(new EasyRandomParameters()
             .overrideDefaultInitialization(true)

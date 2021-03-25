@@ -2,7 +2,9 @@ package no.nav.melosys.service.behandling;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.Period;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -167,6 +169,7 @@ public class BehandlingService {
         behandling.setFagsak(fagsak);
         behandling.setRegistrertDato(nå);
         behandling.setEndretDato(nå);
+        behandling.setBehandlingsfrist(hentBehandlingsfristForBehandlingstemaTema(behandlingstema, nå));
 
         behandling.setStatus(behandlingsstatus);
         behandling.setType(behandlingstype);
@@ -304,6 +307,38 @@ public class BehandlingService {
         } else {
             String tilordnetRessurs = oppgaveOptional.get().getTilordnetRessurs();
             return tilordnetRessurs != null && tilordnetRessurs.equalsIgnoreCase(saksbehandler);
+        }
+    }
+
+    @Transactional
+    public void endreBehandlingsfrist(Behandling behandling, LocalDate behandlingsfrist) {
+        behandling.setBehandlingsfrist(behandlingsfrist);
+        lagre(behandling);
+    }
+
+    private LocalDate hentBehandlingsfristForBehandlingstemaTema(Behandlingstema behandlingstema, Instant nå) {
+        LocalDate idag = LocalDate.ofInstant(nå, ZoneId.systemDefault());
+        switch (behandlingstema) {
+            case UTSENDT_ARBEIDSTAKER:
+            case UTSENDT_SELVSTENDIG:
+            case ARBEID_FLERE_LAND:
+            case ARBEID_ETT_LAND_ØVRIG:
+            case IKKE_YRKESAKTIV:
+            case ARBEID_I_UTLANDET:
+                return idag.plusDays(30);
+            case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING:
+            case REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE:
+                return idag.plusWeeks(2);
+            case BESLUTNING_LOVVALG_NORGE:
+            case BESLUTNING_LOVVALG_ANNET_LAND:
+                return idag.plusWeeks(4);
+            case ANMODNING_OM_UNNTAK_HOVEDREGEL:
+            case ØVRIGE_SED_UFM:
+            case ØVRIGE_SED_MED:
+            case TRYGDETID:
+                return idag.plusWeeks(8);
+            default:
+                throw new IllegalArgumentException("Melosys støtter ikke mapping for behandlingstema  " + behandlingstema);
         }
     }
 }

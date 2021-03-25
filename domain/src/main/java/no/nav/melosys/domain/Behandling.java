@@ -1,6 +1,7 @@
 package no.nav.melosys.domain;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 import javax.persistence.*;
 
@@ -62,6 +63,9 @@ public class Behandling extends RegistreringsInfo {
 
     @Column(name = "initierende_dokument_id")
     private String initierendeDokumentId;
+
+    @Column(name = "behandlingsfrist")
+    private LocalDate behandlingsfrist;
 
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Saksopplysning> saksopplysninger = new HashSet<>(1);
@@ -157,6 +161,14 @@ public class Behandling extends RegistreringsInfo {
 
     public void setInitierendeDokumentId(String initierendeDokumentId) {
         this.initierendeDokumentId = initierendeDokumentId;
+    }
+
+    public LocalDate getBehandlingsfrist() {
+        return behandlingsfrist;
+    }
+
+    public void setBehandlingsfrist(LocalDate behandlingsfrist) {
+        this.behandlingsfrist = behandlingsfrist;
     }
 
     public Behandling getOpprinneligBehandling() {
