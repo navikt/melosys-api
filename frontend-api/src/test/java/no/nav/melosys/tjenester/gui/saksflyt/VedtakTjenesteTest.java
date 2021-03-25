@@ -1,7 +1,6 @@
 package no.nav.melosys.tjenester.gui.saksflyt;
 
 import java.io.IOException;
-import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
@@ -11,10 +10,8 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
-import no.nav.melosys.service.vedtak.VedtakServiceFasade;
+import no.nav.melosys.service.vedtak.*;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
-import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
-import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +25,7 @@ import static org.mockito.Mockito.verify;
 class VedtakTjenesteTest extends JsonSchemaTestParent {
     private static final String FATT_VEDTAK_SCHEMA = "saksflyt-vedtak-fatt-post-schema.json";
     private static final String ENDRE_PERIODE_SCHEMA = "saksflyt-vedtak-endre-post-schema.json";
+    private static final long behandlingID = 3;
 
     @Mock
     private VedtakServiceFasade vedtakServiceFasade;
@@ -35,10 +33,6 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
     private TilgangService tilgangService;
 
     private VedtakTjeneste vedtakTjeneste;
-    private FattVedtakDto fattVedtakDto;
-    private EndreVedtakDto endreVedtakDto;
-
-    private long behandlingID;
 
     @Override
     protected ObjectMapper objectMapper() {
@@ -48,28 +42,47 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
     @BeforeEach
     public void setUp() {
         vedtakTjeneste = new VedtakTjeneste(vedtakServiceFasade, tilgangService);
-        fattVedtakDto = new FattVedtakDto();
-        endreVedtakDto = new EndreVedtakDto();
-        behandlingID = 3;
     }
 
     @Test
-    void fattVedtak_henleggelse_fungerer() throws MelosysException, IOException {
-        fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
-        fattVedtakDto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
-        fattVedtakDto.setMottakerinstitusjoner(Set.of("SE:4343"));
+    void fattVedtakEos_henleggelse_fungerer() throws MelosysException, IOException {
+        EosFattVedtakDto fattVedtakDto = new EosFattVedtakDto.Builder()
+            .medBehandlingsresultat(Behandlingsresultattyper.HENLEGGELSE)
+            .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
+            .medMottakerInstitusjoner("SE:4343")
+            .build();
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
         verify(tilgangService).sjekkTilgang(behandlingID);
-        verify(vedtakServiceFasade).fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode(), null, null,
-            fattVedtakDto.getMottakerinstitusjoner(), fattVedtakDto.getVedtakstype(), null);
+        verify(vedtakServiceFasade).fattVedtak(behandlingID, fattVedtakDto);
 
+        //TODO Bytt schema
         valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
 
     @Test
+    void fattVedtakFtrl_henleggelse_fungerer() throws MelosysException, IOException {
+        FtrlFattVedtakDto fattVedtakDto = new FtrlFattVedtakDto.Builder()
+            .medBehandlingsresultat(Behandlingsresultattyper.HENLEGGELSE)
+            .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
+            .medFritekstInnledning("Innledning")
+            .build();
+
+        vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
+
+        verify(tilgangService).sjekkTilgang(behandlingID);
+        verify(vedtakServiceFasade).fattVedtak(behandlingID, fattVedtakDto);
+
+
+        //TODO Bytt schema
+//        valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
+    }
+
+    @Test
     void fattVedtak_dtoManglerBehandlingresultat_girException() {
-        fattVedtakDto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
+        EosFattVedtakDto fattVedtakDto = new EosFattVedtakDto.Builder()
+            .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
+            .build();
 
         assertThatThrownBy(() -> vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto))
             .isInstanceOf(FunksjonellException.class)
@@ -78,7 +91,9 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void fattVedtak_dtoManglerVedtakstype_girException() {
-        fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
+        FattVedtakDto fattVedtakDto = new EosFattVedtakDto.Builder()
+            .medBehandlingsresultat(Behandlingsresultattyper.HENLEGGELSE)
+            .build();
 
         assertThatThrownBy(() -> vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto))
             .isInstanceOf(FunksjonellException.class)
@@ -87,18 +102,21 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void endreVedtak_fungerer() throws FunksjonellException, TekniskException, IOException {
-        endreVedtakDto.setBegrunnelseKode(Endretperiode.ENDRINGER_ARBEIDSSITUASJON);
+        EndreVedtakDto endreVedtakDto = new EndreVedtakDto.Builder()
+            .medBegrunnelseKode(Endretperiode.ENDRINGER_ARBEIDSSITUASJON)
+            .build();
+
         vedtakTjeneste.endreVedtak(behandlingID, endreVedtakDto);
 
         verify(tilgangService).sjekkTilgang(behandlingID);
-        verify(vedtakServiceFasade).endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, null, endreVedtakDto.getFritekstSed());
+        verify(vedtakServiceFasade).endreVedtak(behandlingID, endreVedtakDto);
 
         valider(endreVedtakDto, ENDRE_PERIODE_SCHEMA);
     }
 
     @Test
     void endreVedtak_dtoManglerBehandlingresultat_girException() {
-        assertThatThrownBy(() -> vedtakTjeneste.endreVedtak(behandlingID, endreVedtakDto))
+        assertThatThrownBy(() -> vedtakTjeneste.endreVedtak(behandlingID, new EndreVedtakDto.Builder().build()))
             .isInstanceOf(FunksjonellException.class)
             .hasMessage("BegrunnelseKode mangler.");
     }

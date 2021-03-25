@@ -129,7 +129,7 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
 
         bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
 
-        verify(vedtakService, never()).fattVedtak(anyLong(), any());
+        verify(vedtakService, never()).fattVedtak(anyLong(), eq(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND));
         verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
     }
 

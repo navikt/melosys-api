@@ -37,13 +37,16 @@ class VedtakServiceFasadeTest {
     @Mock
     private EosVedtakSystemService mockEosVedtakSystemService;
 
+    @Mock
+    private FtrlVedtakService mockFtrlVedtakService;
+
     private VedtakServiceFasade vedtakServiceFasade;
 
     private Behandling behandling;
 
     @BeforeEach
     void init() {
-        vedtakServiceFasade = new VedtakServiceFasade(mockBehandlingService, mockEosVedtakService, mockEosVedtakSystemService);
+        vedtakServiceFasade = new VedtakServiceFasade(mockBehandlingService, mockEosVedtakService, mockEosVedtakSystemService, mockFtrlVedtakService);
         behandling = lagBehandling();
     }
 
@@ -52,8 +55,7 @@ class VedtakServiceFasadeTest {
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         when(mockBehandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
 
-        assertThatThrownBy(() -> vedtakServiceFasade.fattVedtak(behandlingID, FASTSATT_LOVVALGSLAND,
-            null, null, null, FØRSTEGANGSVEDTAK, null))
+        assertThatThrownBy(() -> vedtakServiceFasade.fattVedtak(behandlingID, lagFtrlFattVedtakDto()))
             .isInstanceOf(FunksjonellException.class)
             .hasMessage("Kan ikke fatte vedtak ved behandlingstema UFM: Melding om utstasjonering – A009");
     }
@@ -63,11 +65,11 @@ class VedtakServiceFasadeTest {
         setFagsakPåBehandling(Sakstyper.EU_EOS);
         when(mockBehandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
 
-        vedtakServiceFasade.fattVedtak(behandlingID, FASTSATT_LOVVALGSLAND,
-            null, null, null, FØRSTEGANGSVEDTAK, null);
+        vedtakServiceFasade.fattVedtak(behandlingID, lagEosFattVedtakDto());
 
         verify(mockEosVedtakService).fattVedtak(eq(behandling), eq(FASTSATT_LOVVALGSLAND), isNull(), isNull(), isNull(), eq(FØRSTEGANGSVEDTAK), isNull());
         verifyNoInteractions(mockEosVedtakSystemService);
+        verifyNoInteractions(mockFtrlVedtakService);
     }
 
     @Test
@@ -79,25 +81,26 @@ class VedtakServiceFasadeTest {
         verify(mockEosVedtakSystemService).fattVedtak(
             eq(behandling),
             eq(FASTSATT_LOVVALGSLAND),
-            isNull(),
-            isNull(),
-            isNull(),
-            eq(FØRSTEGANGSVEDTAK),
-            isNull()
+            eq(FØRSTEGANGSVEDTAK)
         );
         verifyNoInteractions(mockEosVedtakService);
+        verifyNoInteractions(mockFtrlVedtakService);
     }
 
     @Test
-    void fattVedtak_FTRL_kasterException() throws Exception {
+    void fattVedtak_FTRL_skalKalleFtrlVedtakService() throws Exception {
         setFagsakPåBehandling(Sakstyper.FTRL);
         when(mockBehandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
 
-        assertThatThrownBy(() -> vedtakServiceFasade.fattVedtak(behandlingID, FASTSATT_LOVVALGSLAND,
-            null, null, null, FØRSTEGANGSVEDTAK, null))
-            .isInstanceOf(FunksjonellException.class)
-            .hasMessage("Vedtaksfatting for sakstype FTRL er ikke støttet.");
+        vedtakServiceFasade.fattVedtak(behandlingID, lagFtrlFattVedtakDto());
 
+        verify(mockFtrlVedtakService).fattVedtak(
+            eq(behandling),
+            eq(FASTSATT_LOVVALGSLAND),
+            eq(FØRSTEGANGSVEDTAK),
+            isNull(),
+            isNull()
+        );
         verifyNoInteractions(mockEosVedtakService);
         verifyNoInteractions(mockEosVedtakSystemService);
     }
@@ -107,8 +110,7 @@ class VedtakServiceFasadeTest {
         setFagsakPåBehandling(Sakstyper.TRYGDEAVTALE);
         when(mockBehandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
 
-        assertThatThrownBy(() -> vedtakServiceFasade.fattVedtak(behandlingID, FASTSATT_LOVVALGSLAND,
-            null, null, null, FØRSTEGANGSVEDTAK, null))
+        assertThatThrownBy(() -> vedtakServiceFasade.fattVedtak(behandlingID, lagFtrlFattVedtakDto()))
             .isInstanceOf(FunksjonellException.class)
             .hasMessage("Vedtaksfatting for sakstype TRYGDEAVTALE er ikke støttet.");
 
@@ -121,7 +123,7 @@ class VedtakServiceFasadeTest {
         setFagsakPåBehandling(Sakstyper.EU_EOS);
         when(mockBehandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
 
-        vedtakServiceFasade.endreVedtak(behandlingID, ENDRINGER_ARBEIDSSITUASJON, null, null);
+        vedtakServiceFasade.endreVedtak(behandlingID, lagEndreVedtakDto());
 
         verify(mockEosVedtakService).endreVedtak(eq(behandling), eq(ENDRINGER_ARBEIDSSITUASJON), isNull(), isNull());
         verifyNoInteractions(mockEosVedtakSystemService);
@@ -132,7 +134,7 @@ class VedtakServiceFasadeTest {
         setFagsakPåBehandling(Sakstyper.FTRL);
         when(mockBehandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
 
-        assertThatThrownBy(() -> vedtakServiceFasade.endreVedtak(behandlingID, ENDRINGER_ARBEIDSSITUASJON, null, null))
+        assertThatThrownBy(() -> vedtakServiceFasade.endreVedtak(behandlingID, lagEndreVedtakDto()))
             .isInstanceOf(FunksjonellException.class)
             .hasMessage("Vedtaksendring for sakstype FTRL er ikke støttet.");
 
@@ -145,7 +147,7 @@ class VedtakServiceFasadeTest {
         setFagsakPåBehandling(Sakstyper.TRYGDEAVTALE);
         when(mockBehandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
 
-        assertThatThrownBy(() -> vedtakServiceFasade.endreVedtak(behandlingID, ENDRINGER_ARBEIDSSITUASJON, null, null))
+        assertThatThrownBy(() -> vedtakServiceFasade.endreVedtak(behandlingID, lagEndreVedtakDto()))
             .isInstanceOf(FunksjonellException.class)
             .hasMessage("Vedtaksendring for sakstype TRYGDEAVTALE er ikke støttet.");
 
@@ -178,5 +180,25 @@ class VedtakServiceFasadeTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setType(sakstype);
         behandling.setFagsak(fagsak);
+    }
+
+    private EosFattVedtakDto lagEosFattVedtakDto() {
+        return new EosFattVedtakDto.Builder()
+            .medBehandlingsresultat(FASTSATT_LOVVALGSLAND)
+            .medVedtakstype(FØRSTEGANGSVEDTAK)
+            .build();
+    }
+
+    private FattVedtakDto lagFtrlFattVedtakDto() {
+        return new FtrlFattVedtakDto.Builder()
+            .medBehandlingsresultat(FASTSATT_LOVVALGSLAND)
+            .medVedtakstype(FØRSTEGANGSVEDTAK)
+            .build();
+    }
+
+    private EndreVedtakDto lagEndreVedtakDto() {
+        return new EndreVedtakDto.Builder()
+            .medBegrunnelseKode(ENDRINGER_ARBEIDSSITUASJON)
+            .build();
     }
 }

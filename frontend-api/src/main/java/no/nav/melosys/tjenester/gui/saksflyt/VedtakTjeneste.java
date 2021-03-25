@@ -7,8 +7,8 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.vedtak.VedtakServiceFasade;
-import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
-import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
+import no.nav.melosys.service.vedtak.EndreVedtakDto;
+import no.nav.melosys.service.vedtak.FattVedtakDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -39,8 +39,7 @@ public class VedtakTjeneste {
             throw new FunksjonellException("BehandlingsresultatTypeKode eller vedtakstype mangler.");
         }
         tilgangService.sjekkTilgang(behandlingID);
-        vedtakServiceFasade.fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode(), fattVedtakDto.getFritekst(), fattVedtakDto.getFritekstSed(),
-            fattVedtakDto.getMottakerinstitusjoner(), fattVedtakDto.getVedtakstype(), fattVedtakDto.getRevurderBegrunnelse());
+        vedtakServiceFasade.fattVedtak(behandlingID, fattVedtakDto);
         return ResponseEntity.ok().build();
     }
 
@@ -53,7 +52,7 @@ public class VedtakTjeneste {
             throw new FunksjonellException("BegrunnelseKode mangler.");
         }
         tilgangService.sjekkTilgang(behandlingID);
-        vedtakServiceFasade.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode(), endreVedtakDto.getFritekst(), endreVedtakDto.getFritekstSed());
+        vedtakServiceFasade.endreVedtak(behandlingID, endreVedtakDto);
         return ResponseEntity.ok().build();
     }
 }
