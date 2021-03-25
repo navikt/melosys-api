@@ -79,6 +79,10 @@ public class EosVedtakService {
         this.melosysEventMulticaster = melosysEventMulticaster;
     }
 
+    public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype) throws MelosysException {
+        fattVedtak(behandling, behandlingsresultattype, null, null, null, vedtakstype, null);
+    }
+
     public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType,
                            String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner,
                            Vedtakstyper vedtakstype, String revurderBegrunnelse) throws MelosysException {
