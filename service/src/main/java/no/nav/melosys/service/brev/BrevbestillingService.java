@@ -111,13 +111,13 @@ public class BrevbestillingService {
     }
 
     public void produserBrev(long behandlingID, BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
-        //TODO Legge til valg av mal basert på brevbestilling.mottaker (rolle)
+
         dokgenService.produserOgDistribuerBrev(brevbestillingDto.getProduserbardokument(), behandlingID, brevbestillingDto);
     }
 
     public byte[] produserUtkast(long behandlingID, BrevbestillingDto brevbestillingDto)
         throws FunksjonellException, TekniskException {
-        //TODO Legge til valg av mal basert på brevbestilling.mottaker (rolle)
+
         return dokumentServiceFasade.produserUtkast(brevbestillingDto.getProduserbardokument(), behandlingID, brevbestillingDto);
     }
 }
