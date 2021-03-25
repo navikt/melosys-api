@@ -7,14 +7,14 @@ import java.util.Collection;
 public class MottakerDto {
     private final String type;
     private final Aktoersroller rolle;
-    private final boolean frittValg;
+    private final boolean egendefinert;
     private final Collection<MottakerAdresseDto> adresser;
     private final String feilmelding;
 
     private MottakerDto(Builder builder) {
         this.type = builder.type;
         this.rolle = builder.rolle;
-        this.frittValg = builder.frittValg;
+        this.egendefinert = builder.egendefinert;
         this.adresser = builder.adresser;
         this.feilmelding = builder.feilmelding;
     }
@@ -27,8 +27,8 @@ public class MottakerDto {
         return rolle;
     }
 
-    public boolean isFrittValg() {
-        return frittValg;
+    public boolean isEgendefinert() {
+        return egendefinert;
     }
 
     public Collection<MottakerAdresseDto> getAdresser() {
@@ -42,7 +42,7 @@ public class MottakerDto {
     public static final class Builder {
         private String type;
         private Aktoersroller rolle;
-        private boolean frittValg = false;
+        private boolean egendefinert = false;
         private Collection<MottakerAdresseDto> adresser;
         private String feilmelding;
 
@@ -56,8 +56,8 @@ public class MottakerDto {
             return this;
         }
 
-        public Builder frittValg() {
-            this.frittValg = true;
+        public Builder egendefinert() {
+            this.egendefinert = true;
             return this;
         }
 
