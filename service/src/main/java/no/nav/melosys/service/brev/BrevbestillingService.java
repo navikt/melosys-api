@@ -1,10 +1,12 @@
 package no.nav.melosys.service.brev;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -21,6 +23,7 @@ import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,15 +48,17 @@ public class BrevbestillingService {
     private final PersondataFasade persondataFasade;
     private final EregFasade eregFasade;
     private final KontaktopplysningService kontaktopplysningService;
+    private final KodeverkService kodeverkService;
 
     @Autowired
-    public BrevbestillingService(DokumentServiceFasade dokumentServiceFasade, DokgenService dokgenService, BrevmottakerService brevmottakerService, PersondataFasade persondataFasade, EregFasade eregFasade, KontaktopplysningService kontaktopplysningService) {
+    public BrevbestillingService(DokumentServiceFasade dokumentServiceFasade, DokgenService dokgenService, BrevmottakerService brevmottakerService, PersondataFasade persondataFasade, EregFasade eregFasade, KontaktopplysningService kontaktopplysningService, KodeverkService kodeverkService) {
         this.dokumentServiceFasade = dokumentServiceFasade;
         this.dokgenService = dokgenService;
         this.brevmottakerService = brevmottakerService;
         this.persondataFasade = persondataFasade;
         this.eregFasade = eregFasade;
         this.kontaktopplysningService = kontaktopplysningService;
+        this.kodeverkService = kodeverkService;
     }
 
     public List<Produserbaredokumenter> hentBrevMaler(Behandling behandling) {
@@ -81,7 +86,7 @@ public class BrevbestillingService {
                     null,
                     mapAdresselinjer(null, null, null, personDokument),
                     mapPostnr(null, personDokument),
-                    mapPoststed(null, personDokument),
+                    kodeverkService.dekod(FellesKodeverk.POSTNUMMER, personDokument.gjeldendePostadresse.postnr, LocalDate.now()),
                     mapLandForAdresse(null, personDokument)
                     )
                 );

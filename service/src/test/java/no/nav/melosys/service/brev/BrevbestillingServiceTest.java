@@ -8,6 +8,7 @@ import java.util.Set;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.brev.Mottaker;
@@ -28,6 +29,7 @@ import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,13 +61,15 @@ class BrevbestillingServiceTest {
     private EregFasade mockEregFasade;
     @Mock
     private KontaktopplysningService mockKontaktopplysningService;
+    @Mock
+    private KodeverkService mockKodeverkService;
 
     private BrevbestillingService brevbestillingService;
 
     @BeforeEach
     void init() {
         brevbestillingService = new BrevbestillingService(
-            mockDokServiceFasade, mockDokgenService, mockBrevmottakerService, mockPersondataFasade, mockEregFasade, mockKontaktopplysningService);
+            mockDokServiceFasade, mockDokgenService, mockBrevmottakerService, mockPersondataFasade, mockEregFasade, mockKontaktopplysningService, mockKodeverkService);
     }
 
     @Test
@@ -118,6 +122,7 @@ class BrevbestillingServiceTest {
             .thenReturn(List.of(lagAktoer(Aktoersroller.BRUKER, null)));
         when(mockPersondataFasade.hentPerson(any(), eq(Informasjonsbehov.STANDARD)))
             .thenReturn(saksbehandling);
+        when(mockKodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), anyString(), any())).thenReturn("Oslo");
 
         var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_BRUKER, Aktoersroller.BRUKER, behandling);
 
@@ -235,7 +240,6 @@ class BrevbestillingServiceTest {
         dokument.sammensattNavn = "Ola Nordmann";
         dokument.gjeldendePostadresse.adresselinje1 = "Gateadresse 43A";
         dokument.gjeldendePostadresse.postnr = "0123";
-        dokument.gjeldendePostadresse.poststed = "Oslo";
         dokument.gjeldendePostadresse.land = Land.av(Land.NORGE);
         var saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(dokument);

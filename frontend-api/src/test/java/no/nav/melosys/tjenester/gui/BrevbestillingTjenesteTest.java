@@ -17,6 +17,7 @@ import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,7 +58,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     @BeforeEach
     void init() {
         BrevbestillingService brevbestillingService = new BrevbestillingService(
-            mockDokServiceFasade, mockDokgenService, mockBrevmottakerService, mockPersondataFasade, mockEregFasade, mockKontaktopplysningService);
+            mockDokServiceFasade, mockDokgenService, mockBrevmottakerService, mockPersondataFasade, mockEregFasade, mockKontaktopplysningService, mock(KodeverkService.class));
         brevbestillingTjeneste = new BrevbestillingTjeneste(brevbestillingService, mockBehandlingService);
     }
 
