@@ -6,12 +6,17 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
+import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.brev.BrevbestillingService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokgenService;
@@ -57,14 +62,14 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
 
     @BeforeEach
     void init() {
-        BrevbestillingService brevbestillingService = new BrevbestillingService(
-            mockDokServiceFasade, mockDokgenService, mockBrevmottakerService, mockPersondataFasade, mockEregFasade, mockKontaktopplysningService, mock(KodeverkService.class));
-        brevbestillingTjeneste = new BrevbestillingTjeneste(brevbestillingService, mockBehandlingService);
+        BrevmottakerService brevmottakerService = new BrevmottakerService(mockKontaktopplysningService, mock(AvklarteVirksomheterService.class), mock(UtenlandskMyndighetService.class), mock(BehandlingsresultatService.class), mock(TrygdeavgiftsberegningService.class));
+        BrevbestillingService brevbestillingService = new BrevbestillingService(mockDokServiceFasade, mockDokgenService, mockBrevmottakerService, mockPersondataFasade, mockEregFasade, mockKontaktopplysningService, mock(KodeverkService.class));
+        brevbestillingTjeneste = new BrevbestillingTjeneste(brevbestillingService, mockBehandlingService, brevmottakerService);
     }
 
     @Test
     void skalReturnereTilgjengeligeBrevmaler() throws Exception {
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(new Behandling());
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(null));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
         List<BrevmalDto> brevmaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
@@ -82,9 +87,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void hentTilgjengeligeMaler_soeknad_returnererSoeknadMalOgEndredeValg() throws Exception {
-        var behandling = new Behandling();
-        behandling.setType(Behandlingstyper.SOEKNAD);
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.SOEKNAD));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
         List<BrevmalDto> brevmaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
@@ -107,7 +110,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void hentTilgjengeligeMaler_brukerAdresseNull_returnererMalMedFeilmelding() throws Exception {
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(new Behandling());
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(null));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
         List<BrevmalDto> brevmaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
@@ -118,7 +121,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void hentTilgjengeligeMaler_registerOpplysningerIkkeHentet_returnererMalMedFeilmelding() throws Exception {
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(new Behandling());
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(null));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean()))
             .thenThrow(new TekniskException("Finner ikke arbeidsforholddokument"));
 
@@ -165,4 +168,11 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         valider(brevbestillingDto, "dokumenter-v2-opprett-post-schema.json", new ObjectMapper());
     }
 
+    private Behandling lagBehandling(Behandlingstyper type) {
+        var behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setFagsak(new Fagsak());
+        behandling.setType(type);
+        return behandling;
+    }
 }

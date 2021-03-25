@@ -15,6 +15,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevbestillingService;
+import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalDto;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalFeltDto;
@@ -45,11 +46,13 @@ import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 public class BrevbestillingTjeneste {
     private final BrevbestillingService brevbestillingService;
     private final BehandlingService behandlingService;
+    private final BrevmottakerService brevmottakerService;
 
     @Autowired
-    public BrevbestillingTjeneste(BrevbestillingService brevbestillingService, BehandlingService behandlingService) {
+    public BrevbestillingTjeneste(BrevbestillingService brevbestillingService, BehandlingService behandlingService, BrevmottakerService brevmottakerService) {
         this.brevbestillingService = brevbestillingService;
         this.behandlingService = behandlingService;
+        this.brevmottakerService = brevmottakerService;
     }
 
     @GetMapping(value = "/tilgjengelige-maler/{behandlingID}", produces = APPLICATION_JSON_VALUE)
@@ -81,15 +84,16 @@ public class BrevbestillingTjeneste {
 
         List<BrevmalDto> maler = new ArrayList<>();
         for(Produserbaredokumenter p : produserbareDokumenter) {
+            Aktoersroller hovedMottaker = brevmottakerService.hentMottakerliste(p, behandling).getHovedMottaker();
             MottakerDto.Builder mottakerDto;
             List<FeltvalgDto> feltvalgDtos = new ArrayList<>();
             switch (p) {
                 case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD:
                     mottakerDto = new MottakerDto.Builder()
                         .medType("Bruker eller brukers fullmektig")
-                        .medRolle(Aktoersroller.BRUKER);
+                        .medRolle(hovedMottaker);
 
-                    leggTilAdresseOgFeilmelding(mottakerDto, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, Aktoersroller.BRUKER, behandling);
+                    leggTilAdresseOgFeilmelding(mottakerDto, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, hovedMottaker, behandling);
 
                     maler.add(lagBrevmalDto(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, null,
                         singletonList(mottakerDto.build()),
@@ -99,9 +103,9 @@ public class BrevbestillingTjeneste {
                 case MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE:
                     mottakerDto = new MottakerDto.Builder()
                         .medType("Bruker eller brukers fullmektig")
-                        .medRolle(Aktoersroller.BRUKER);
+                        .medRolle(hovedMottaker);
 
-                    leggTilAdresseOgFeilmelding(mottakerDto, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE, Aktoersroller.BRUKER, behandling);
+                    leggTilAdresseOgFeilmelding(mottakerDto, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE, hovedMottaker, behandling);
 
                     maler.add(lagBrevmalDto(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE, null,
                         singletonList(mottakerDto.build()),
@@ -111,9 +115,9 @@ public class BrevbestillingTjeneste {
                 case MANGELBREV_BRUKER:
                     mottakerDto = new MottakerDto.Builder()
                         .medType("Bruker eller brukers fullmektig")
-                        .medRolle(Aktoersroller.BRUKER);
+                        .medRolle(hovedMottaker);
 
-                    leggTilAdresseOgFeilmelding(mottakerDto, MANGELBREV_BRUKER, Aktoersroller.BRUKER, behandling);
+                    leggTilAdresseOgFeilmelding(mottakerDto, MANGELBREV_BRUKER, hovedMottaker, behandling);
 
                     feltvalgDtos.add(new FeltvalgDto.Builder().medKode("FRITEKST").medBeskrivelse("Fritekst (erstatter standardtekst)").build());
                     if (behandling.getType() == Behandlingstyper.SOEKNAD || behandling.getType() == Behandlingstyper.KLAGE) {
@@ -144,15 +148,15 @@ public class BrevbestillingTjeneste {
                     List<MottakerDto> mottakere = new ArrayList<>();
                     mottakerDto = new MottakerDto.Builder()
                         .medType("Arbeidsgiver eller arbeidsgivers fullmektig")
-                        .medRolle(Aktoersroller.ARBEIDSGIVER);
+                        .medRolle(hovedMottaker);
 
-                    leggTilAdresseOgFeilmelding(mottakerDto, MANGELBREV_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER, behandling);
+                    leggTilAdresseOgFeilmelding(mottakerDto, MANGELBREV_ARBEIDSGIVER, hovedMottaker, behandling);
 
                     mottakere.add(mottakerDto.build());
                     mottakere.add(
                         new MottakerDto.Builder()
                             .medType("Annen organisasjon")
-                            .medRolle(Aktoersroller.ARBEIDSGIVER)
+                            .medRolle(hovedMottaker)
                             .egendefinert()
                             .build()
                     );
