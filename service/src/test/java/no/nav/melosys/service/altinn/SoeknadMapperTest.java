@@ -63,6 +63,16 @@ class SoeknadMapperTest {
         assertThat(foretakUtland.adresse.poststed).isEqualTo("testbyen");
         assertThat(foretakUtland.adresse.postnummer).isEqualTo("UTLAND-1234");
         assertThat(foretakUtland.adresse.landkode).isEqualTo("BE");
+        final var juridiskArbeidsgiverNorge = soeknad.juridiskArbeidsgiverNorge;
+        assertThat(juridiskArbeidsgiverNorge.erOffentligVirksomhet).isEqualTo(false);
+        assertThat(juridiskArbeidsgiverNorge.antallAnsatte).isEqualTo(100);
+        assertThat(juridiskArbeidsgiverNorge.antallAdmAnsatte).isEqualTo(10);
+        assertThat(juridiskArbeidsgiverNorge.antallUtsendte).isEqualTo(10);
+        assertThat(juridiskArbeidsgiverNorge.andelOmsetningINorge).isEqualTo(new BigDecimal(90));
+        assertThat(juridiskArbeidsgiverNorge.andelOppdragINorge).isEqualTo(new BigDecimal(90));
+        assertThat(juridiskArbeidsgiverNorge.andelKontrakterINorge).isEqualTo(new BigDecimal(90));
+        assertThat(juridiskArbeidsgiverNorge.andelRekruttertINorge).isEqualTo(new BigDecimal(90));
+        assertThat(juridiskArbeidsgiverNorge.ekstraArbeidsgivere).contains("910825569");
     }
 
     @Test

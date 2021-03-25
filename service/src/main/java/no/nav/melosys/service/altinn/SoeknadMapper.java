@@ -225,6 +225,7 @@ public final class SoeknadMapper {
             juridiskArbeidsgiverNorge.andelKontrakterINorge = new BigDecimal(samletVirksomhetINorge.getAndelKontrakterInngaasINorge());
             juridiskArbeidsgiverNorge.andelRekruttertINorge = new BigDecimal(samletVirksomhetINorge.getAndelRekrutteresINorge());
             juridiskArbeidsgiverNorge.ekstraArbeidsgivere = List.of(arbeidsgiver.getVirksomhetsnummer());
+            juridiskArbeidsgiverNorge.erOffentligVirksomhet = arbeidsgiver.isOffentligVirksomhet();
         }
         return juridiskArbeidsgiverNorge;
     }
