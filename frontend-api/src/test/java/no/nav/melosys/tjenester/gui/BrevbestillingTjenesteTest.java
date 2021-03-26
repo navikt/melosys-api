@@ -25,6 +25,7 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalDto;
+import no.nav.melosys.tjenester.gui.dto.brev.FeltvalgDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -95,12 +96,12 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
 
         assertThat(brevmaler.get(0).getFelter()).hasSize(2);
         assertThat(brevmaler.get(0).getFelter().get(0).getValg()).hasSize(2)
-            .extracting("kode")
+            .extracting(FeltvalgDto::getKode)
             .containsExactlyInAnyOrder("FRITEKST", "STANDARD");
 
         assertThat(brevmaler.get(1).getFelter()).hasSize(2);
         assertThat(brevmaler.get(1).getFelter().get(0).getValg()).hasSize(2)
-            .extracting("kode")
+            .extracting(FeltvalgDto::getKode)
             .containsExactlyInAnyOrder("FRITEKST", "STANDARD");
 
         assertThat(brevmaler.get(2).getType()).isEqualTo(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
