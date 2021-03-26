@@ -29,7 +29,7 @@ public class BehandlingEventListener {
     @Qualifier("system")
     private final OppgaveService oppgaveService;
 
-    public BehandlingEventListener(BehandlingService behandlingService, OppgaveService oppgaveService) {
+    public BehandlingEventListener(BehandlingService behandlingService, @Qualifier("system") OppgaveService oppgaveService) {
         this.behandlingService = behandlingService;
         this.oppgaveService = oppgaveService;
     }
