@@ -1,7 +1,7 @@
 package no.nav.melosys.service.sob;
 
 import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;

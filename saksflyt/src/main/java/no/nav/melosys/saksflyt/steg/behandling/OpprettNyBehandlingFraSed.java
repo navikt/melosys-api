@@ -2,7 +2,7 @@ package no.nav.melosys.saksflyt.steg.behandling;
 
 import java.util.Optional;
 
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;

@@ -3,7 +3,7 @@ package no.nav.melosys.service.vilkaar;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.behandling.Behandlingsresultat;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.kodeverk.Kodeverk;

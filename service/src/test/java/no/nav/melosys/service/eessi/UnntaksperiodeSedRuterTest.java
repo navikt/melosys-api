@@ -5,8 +5,8 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Optional;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.behandling.Behandling;
+import no.nav.melosys.domain.behandling.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.eessi.Periode;

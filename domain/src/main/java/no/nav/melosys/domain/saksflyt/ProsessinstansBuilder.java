@@ -2,7 +2,7 @@ package no.nav.melosys.domain.saksflyt;
 
 import java.util.Set;
 
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import org.apache.commons.lang3.StringUtils;

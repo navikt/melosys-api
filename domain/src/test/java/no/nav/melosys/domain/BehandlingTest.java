@@ -1,5 +1,6 @@
 package no.nav.melosys.domain;
 
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import org.junit.Test;
 

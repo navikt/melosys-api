@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.steg.medl;
 import java.time.Instant;
 import java.util.Collections;
 
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;

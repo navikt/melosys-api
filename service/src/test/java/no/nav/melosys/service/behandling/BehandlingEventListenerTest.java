@@ -2,11 +2,12 @@ package no.nav.melosys.service.behandling;
 
 import java.time.Instant;
 
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.dokument.DokumentBestiltEvent;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +21,8 @@ class BehandlingEventListenerTest {
 
     @Mock
     private BehandlingService behandlingService;
+    @Mock
+    private OppgaveService oppgaveService;
 
     private BehandlingEventListener behandlingEventListener;
 
@@ -29,7 +32,7 @@ class BehandlingEventListenerTest {
     @BeforeEach
     public void setup() {
         behandling.setId(123321L);
-        behandlingEventListener = new BehandlingEventListener(behandlingService);
+        behandlingEventListener = new BehandlingEventListener(behandlingService, oppgaveService);
     }
 
     @Test

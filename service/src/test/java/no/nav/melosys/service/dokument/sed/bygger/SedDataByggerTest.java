@@ -5,6 +5,8 @@ import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.behandling.Behandling;
+import no.nav.melosys.domain.behandling.Behandlingsresultat;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Bosted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.LuftfartBase;

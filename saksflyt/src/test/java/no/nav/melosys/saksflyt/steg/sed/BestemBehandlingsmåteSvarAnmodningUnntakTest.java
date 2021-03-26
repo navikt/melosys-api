@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.behandling.Behandling;
+import no.nav.melosys.domain.behandling.Behandlingsmaate;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;

@@ -1,6 +1,6 @@
 package no.nav.melosys.service.behandling;
 
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
@@ -17,10 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.List;
 
-import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SED_FORESPØRSEL;
-import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SØKNAD;
-import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
-import static no.nav.melosys.domain.Behandling.erGyldigBehandlingAvSøknad;
+import static no.nav.melosys.domain.behandling.Behandling.BEHANDLINGSTEMA_SED_FORESPØRSEL;
+import static no.nav.melosys.domain.behandling.Behandling.BEHANDLINGSTEMA_SØKNAD;
+import static no.nav.melosys.domain.behandling.Behandling.erBehandlingAvSedForespørsler;
+import static no.nav.melosys.domain.behandling.Behandling.erGyldigBehandlingAvSøknad;
 
 @Service
 public class EndreBehandlingstemaService {

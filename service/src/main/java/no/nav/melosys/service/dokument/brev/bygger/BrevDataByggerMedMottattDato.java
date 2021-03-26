@@ -2,7 +2,7 @@ package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.time.Instant;
 
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;

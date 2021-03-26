@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
 import com.google.common.collect.Lists;
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Sakstyper;

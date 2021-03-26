@@ -16,6 +16,8 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.behandling.Behandling;
+import no.nav.melosys.domain.behandling.Behandlingsresultat;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.MaritimtArbeid;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;

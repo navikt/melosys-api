@@ -3,8 +3,8 @@ package no.nav.melosys.service;
 import java.util.Collection;
 import java.util.Optional;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsnotat;
+import no.nav.melosys.domain.behandling.Behandling;
+import no.nav.melosys.domain.behandling.Behandlingsnotat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;

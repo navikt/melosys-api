@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;

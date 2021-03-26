@@ -3,7 +3,7 @@ package no.nav.melosys.service.brev;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;

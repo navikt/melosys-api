@@ -1,4 +1,4 @@
-package no.nav.melosys.domain;
+package no.nav.melosys.domain.behandling;
 
 import java.time.LocalDateTime;
 import java.util.Objects;

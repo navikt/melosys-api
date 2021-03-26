@@ -3,7 +3,7 @@ package no.nav.melosys.service.journalforing;
 import java.util.Optional;
 
 import no.finn.unleash.Unleash;
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -32,8 +32,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
-import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
+import static no.nav.melosys.domain.behandling.Behandling.erBehandlingAvSedForespørsler;
+import static no.nav.melosys.domain.behandling.Behandling.erBehandlingAvSøknad;
 import static no.nav.melosys.domain.Fagsak.erSakstypeFtrl;
 import static no.nav.melosys.service.sak.SakstypeBehandlingstemaKobling.erGyldigBehandlingstemaForSakstype;
 

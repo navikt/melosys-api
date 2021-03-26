@@ -5,7 +5,7 @@ import java.time.Instant;
 import no.nav.dok.melosysbrev._000074.Fag;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;

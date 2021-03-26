@@ -1,10 +1,11 @@
-package no.nav.melosys.domain;
+package no.nav.melosys.domain.behandling;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
 import javax.persistence.*;
 
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;

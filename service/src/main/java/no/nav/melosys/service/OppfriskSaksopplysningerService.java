@@ -2,7 +2,7 @@ package no.nav.melosys.service;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.felles.Periode;

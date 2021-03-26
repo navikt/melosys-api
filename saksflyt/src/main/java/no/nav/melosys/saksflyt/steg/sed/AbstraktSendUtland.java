@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.behandling.Behandlingsresultat;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Vedlegg;

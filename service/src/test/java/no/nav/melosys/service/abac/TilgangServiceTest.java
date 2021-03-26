@@ -6,7 +6,7 @@ import no.nav.freg.abac.core.dto.response.Decision;
 import no.nav.freg.abac.core.dto.response.XacmlResponse;
 import no.nav.freg.abac.core.service.AbacService;
 import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;

@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 
-import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SØKNAD;
+import static no.nav.melosys.domain.behandling.Behandling.BEHANDLINGSTEMA_SØKNAD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jeasy.random.FieldPredicates.*;
 import static org.mockito.Mockito.*;

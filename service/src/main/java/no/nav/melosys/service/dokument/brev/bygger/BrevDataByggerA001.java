@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;

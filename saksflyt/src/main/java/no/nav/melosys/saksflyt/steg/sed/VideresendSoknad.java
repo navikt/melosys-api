@@ -3,8 +3,8 @@ package no.nav.melosys.saksflyt.steg.sed;
 import java.util.*;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.behandling.Behandling;
+import no.nav.melosys.domain.behandling.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.FysiskDokument;

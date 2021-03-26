@@ -1,4 +1,4 @@
-package no.nav.melosys.domain;
+package no.nav.melosys.domain.behandling;
 
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 

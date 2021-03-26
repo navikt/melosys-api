@@ -2,7 +2,7 @@ package no.nav.melosys.repository;
 
 import java.util.Optional;
 
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import org.springframework.data.jpa.repository.JpaRepository;

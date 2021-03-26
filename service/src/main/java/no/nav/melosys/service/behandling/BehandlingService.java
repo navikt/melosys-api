@@ -4,19 +4,22 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.behandling.Behandling;
+import no.nav.melosys.domain.behandling.Behandlingsmaate;
+import no.nav.melosys.domain.behandling.Behandlingsresultat;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
+import no.nav.melosys.domain.behandling.BehandlingsfristEndretEvent;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
@@ -29,6 +32,7 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +52,7 @@ public class BehandlingService {
     private final TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository;
     private final BehandlingsresultatService behandlingsresultatService;
     private final OppgaveService oppgaveService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     private final Counter behandlingerAvsluttet = Metrics.counter(BEHANDLINGER_AVSLUTTET);
     private static final String FINNER_IKKE_BEHANDLING = "Finner ikke behandling med id ";
@@ -66,12 +71,14 @@ public class BehandlingService {
                              BehandlingsresultatRepository behandlingsresultatRepository,
                              TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository,
                              BehandlingsresultatService behandlingsresultatService,
-                             @Lazy OppgaveService oppgaveService) {
+                             @Lazy OppgaveService oppgaveService,
+                             ApplicationEventPublisher applicationEventPublisher) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.tidligereMedlemsperiodeRepository = tidligereMedlemsperiodeRepository;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     /**
@@ -169,7 +176,7 @@ public class BehandlingService {
         behandling.setFagsak(fagsak);
         behandling.setRegistrertDato(nå);
         behandling.setEndretDato(nå);
-        behandling.setBehandlingsfrist(hentBehandlingsfristForBehandlingstemaTema(behandlingstema, nå));
+        behandling.setBehandlingsfrist(hentBehandlingsfristForBehandlingstemaTema(behandlingstema));
 
         behandling.setStatus(behandlingsstatus);
         behandling.setType(behandlingstype);
@@ -311,34 +318,26 @@ public class BehandlingService {
     }
 
     @Transactional
-    public void endreBehandlingsfrist(Behandling behandling, LocalDate behandlingsfrist) {
+    public void endreBehandlingsfrist(long behandlingId, LocalDate behandlingsfrist) throws IkkeFunnetException {
+        Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingId);
         behandling.setBehandlingsfrist(behandlingsfrist);
         lagre(behandling);
+
+        applicationEventPublisher.publishEvent(new BehandlingsfristEndretEvent(behandlingId, behandlingsfrist));
     }
 
-    private LocalDate hentBehandlingsfristForBehandlingstemaTema(Behandlingstema behandlingstema, Instant nå) {
-        LocalDate idag = LocalDate.ofInstant(nå, ZoneId.systemDefault());
-        switch (behandlingstema) {
-            case UTSENDT_ARBEIDSTAKER:
-            case UTSENDT_SELVSTENDIG:
-            case ARBEID_FLERE_LAND:
-            case ARBEID_ETT_LAND_ØVRIG:
-            case IKKE_YRKESAKTIV:
-            case ARBEID_I_UTLANDET:
-                return idag.plusDays(30);
-            case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING:
-            case REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE:
-                return idag.plusWeeks(2);
-            case BESLUTNING_LOVVALG_NORGE:
-            case BESLUTNING_LOVVALG_ANNET_LAND:
-                return idag.plusWeeks(4);
-            case ANMODNING_OM_UNNTAK_HOVEDREGEL:
-            case ØVRIGE_SED_UFM:
-            case ØVRIGE_SED_MED:
-            case TRYGDETID:
-                return idag.plusWeeks(8);
-            default:
-                throw new IllegalArgumentException("Melosys støtter ikke mapping for behandlingstema  " + behandlingstema);
-        }
+    private LocalDate hentBehandlingsfristForBehandlingstemaTema(Behandlingstema behandlingstema) {
+        return switch (behandlingstema) {
+            case UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_FLERE_LAND, ARBEID_ETT_LAND_ØVRIG, IKKE_YRKESAKTIV, ARBEID_I_UTLANDET
+                -> LocalDate.now().plusDays(30);
+            case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
+                -> LocalDate.now().plusWeeks(2);
+            case BESLUTNING_LOVVALG_NORGE, BESLUTNING_LOVVALG_ANNET_LAND
+                -> LocalDate.now().plusWeeks(4);
+            case ANMODNING_OM_UNNTAK_HOVEDREGEL, ØVRIGE_SED_UFM, ØVRIGE_SED_MED, TRYGDETID
+                -> LocalDate.now().plusWeeks(8);
+            default
+                -> throw new IllegalArgumentException("Melosys støtter ikke mapping for behandlingstema  " + behandlingstema);
+        };
     }
 }

@@ -1,7 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import no.nav.dok.melosysbrev.felles.melosys_felles.BehandlingstypeKode;
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import org.junit.Test;

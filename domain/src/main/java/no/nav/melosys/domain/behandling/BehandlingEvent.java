@@ -1,4 +1,4 @@
-package no.nav.melosys.domain;
+package no.nav.melosys.domain.behandling;
 
 import org.springframework.context.ApplicationEvent;
 

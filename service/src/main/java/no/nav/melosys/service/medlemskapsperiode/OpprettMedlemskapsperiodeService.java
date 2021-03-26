@@ -2,8 +2,8 @@ package no.nav.melosys.service.medlemskapsperiode;
 
 import java.util.*;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.behandling.Behandling;
+import no.nav.melosys.domain.behandling.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;

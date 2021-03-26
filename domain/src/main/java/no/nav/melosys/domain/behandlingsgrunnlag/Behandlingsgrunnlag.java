@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import javax.persistence.*;
 
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.jpa.BehandlingsgrunnlagListener;
 import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 

@@ -3,7 +3,7 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.time.LocalDate;
 import java.util.List;
 
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;

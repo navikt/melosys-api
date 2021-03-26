@@ -1,7 +1,7 @@
 package no.nav.melosys.service.behandling.jobb;
 
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.service.behandling.BehandlingService;
 import org.slf4j.Logger;

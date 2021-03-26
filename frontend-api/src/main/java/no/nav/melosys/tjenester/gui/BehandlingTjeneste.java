@@ -7,11 +7,10 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.oppgave.OppgaveFristFerdigstillelseEndretEvent;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
@@ -20,7 +19,6 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.EndreBehandlingstemaService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.saksflyt.ProsessinstansOpprettetEvent;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.tildto.SaksopplysningerTilDto;
@@ -48,8 +46,6 @@ public class BehandlingTjeneste {
     private final TilgangService tilgangService;
     private final SaksbehandlerService saksbehandlerService;
     private final EndreBehandlingstemaService endreBehandlingstemaService;
-    private final OppgaveService oppgaveService;
-    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
     public BehandlingTjeneste(BehandlingService behandlingService,
@@ -64,8 +60,6 @@ public class BehandlingTjeneste {
         this.tilgangService = tilgangService;
         this.saksbehandlerService = saksbehandlerService;
         this.endreBehandlingstemaService = endreBehandlingstemaService;
-        this.oppgaveService = oppgaveService;
-        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @PostMapping("{behandlingID}/status")
@@ -158,17 +152,13 @@ public class BehandlingTjeneste {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("{behandlingID}/endreBehandlingsfrist")
+    @PostMapping("{behandlingID}/behandlingsfrist")
     @ApiOperation("Endre behandlingsfristen for en gitt behandling samt tilhørende oppgave i Gosys")
     public ResponseEntity<Void> endreBehandlingsfrist(@PathVariable("behandlingID") long behandlingID, @RequestBody EndreBehandlingsfristDto endreBehandlingsfristDto) throws MelosysException {
         log.debug("Saksbehandler {} ber om å sette behandlingsfrist for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingID, endreBehandlingsfristDto.getBehandlingsfrist());
         tilgangService.sjekkRedigerbarOgTilordnetSaksbehandlerOgTilgang(behandlingID);
 
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        behandlingService.endreBehandlingsfrist(behandling, endreBehandlingsfristDto.getBehandlingsfrist());
-
-        String oppgaveId = oppgaveService.hentOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer()).getOppgaveId();
-        applicationEventPublisher.publishEvent(new OppgaveFristFerdigstillelseEndretEvent(oppgaveId, endreBehandlingsfristDto.getBehandlingsfrist()));
+        behandlingService.endreBehandlingsfrist(behandlingID, endreBehandlingsfristDto.getBehandlingsfrist());
         return ResponseEntity.noContent().build();
     }
 

@@ -3,7 +3,7 @@ package no.nav.melosys.domain.brev;
 import java.util.Arrays;
 import java.util.Collection;
 
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 

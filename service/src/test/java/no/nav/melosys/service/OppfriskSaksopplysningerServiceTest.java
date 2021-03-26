@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;

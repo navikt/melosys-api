@@ -1,7 +1,7 @@
 package no.nav.melosys.service.kontroll.unntak;
 
 import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;

@@ -7,6 +7,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.behandling.Behandling;
+import no.nav.melosys.domain.behandling.Behandlingsresultat;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.kodeverk.*;

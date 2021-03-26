@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.behandling.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;

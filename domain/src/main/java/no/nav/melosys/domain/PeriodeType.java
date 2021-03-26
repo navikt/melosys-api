@@ -1,5 +1,6 @@
 package no.nav.melosys.domain;
 
+import no.nav.melosys.domain.behandling.Behandlingsresultat;
 import no.nav.melosys.domain.eessi.BucType;
 
 public enum PeriodeType {

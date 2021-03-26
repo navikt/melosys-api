@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;

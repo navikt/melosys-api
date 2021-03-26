@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.Behandlingsmaate;
+import no.nav.melosys.domain.behandling.Behandlingsmaate;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;

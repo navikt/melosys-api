@@ -1,6 +1,6 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.arkiv.JournalpostBestilling;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.dokument.person.PersonDokument;

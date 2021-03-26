@@ -3,6 +3,7 @@ package no.nav.melosys.domain;
 import java.util.Objects;
 import javax.persistence.*;
 
+import no.nav.melosys.domain.behandling.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 
 @Entity

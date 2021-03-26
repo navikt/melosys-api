@@ -2,7 +2,7 @@ package no.nav.melosys.saksflyt.steg.brev;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;

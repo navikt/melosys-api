@@ -3,7 +3,7 @@ package no.nav.melosys.service.saksopplysninger;
 import java.time.Instant;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKildesystem;
 import no.nav.melosys.domain.SaksopplysningType;

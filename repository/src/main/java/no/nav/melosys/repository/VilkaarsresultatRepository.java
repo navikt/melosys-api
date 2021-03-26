@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.behandling.Behandlingsresultat;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.steg.sed;
 import java.time.LocalDate;
 import java.util.Collections;
 
-import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Periode;

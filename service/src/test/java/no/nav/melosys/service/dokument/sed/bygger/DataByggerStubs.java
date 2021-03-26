@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.google.common.collect.Lists;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;

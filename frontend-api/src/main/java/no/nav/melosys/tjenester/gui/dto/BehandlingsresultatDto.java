@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
+import no.nav.melosys.domain.behandling.Behandlingsresultat;
+import no.nav.melosys.domain.behandling.BehandlingsresultatBegrunnelse;
 import no.nav.melosys.domain.Kontrollresultat;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
