@@ -1,7 +1,6 @@
 package no.nav.melosys.service.registeropplysninger;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;

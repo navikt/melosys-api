@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;

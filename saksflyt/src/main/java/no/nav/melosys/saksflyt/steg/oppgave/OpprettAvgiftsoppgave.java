@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.steg.oppgave;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
