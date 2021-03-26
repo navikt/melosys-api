@@ -61,6 +61,7 @@ public class DistribuerJournalpost implements StegBehandler {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         String journalpostId = prosessinstans.getData(DISTRIBUERBAR_JOURNALPOST_ID);
         Aktoersroller mottaker = prosessinstans.getData(MOTTAKER, Aktoersroller.class);
+        String kontaktperson = prosessinstans.getData(KONTAKTPERSON, String.class, null);
         String orgnr = prosessinstans.getData(ORGNR, String.class, null);
 
         if (isEmpty(journalpostId)) {
@@ -74,10 +75,10 @@ public class DistribuerJournalpost implements StegBehandler {
         OrganisasjonDokument org = null;
         Kontaktopplysning kontaktopplysning = null;
 
-        if (!Aktoersroller.BRUKER.equals(mottaker)) {
-            org = (OrganisasjonDokument) eregFasade.hentOrganisasjon(orgnr).getDokument();
+        if (mottaker != Aktoersroller.BRUKER) {
             kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), orgnr).orElse(null);
-        }
+            String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : orgnr;
+            org = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();        }
 
         String bestillingsId;
         if (org != null) {
@@ -85,7 +86,7 @@ public class DistribuerJournalpost implements StegBehandler {
             if (postadresse.erNorsk() && isEmpty(postadresse.poststed)) {
                 postadresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, postadresse.postnummer, LocalDate.now());
             }
-            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, postadresse, kontaktopplysning);
+            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, postadresse, kontaktopplysning, kontaktperson);
         } else {
             bestillingsId = doksysFasade.distribuerJournalpost(journalpostId);
         }

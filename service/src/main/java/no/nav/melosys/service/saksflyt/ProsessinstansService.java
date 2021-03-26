@@ -1,10 +1,10 @@
 package no.nav.melosys.service.saksflyt;
 
+import javax.annotation.Nullable;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
@@ -41,6 +41,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import static java.util.Optional.ofNullable;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static org.springframework.util.StringUtils.hasText;
 
@@ -248,11 +249,17 @@ public class ProsessinstansService {
     }
 
     public void opprettProsessinstansOpprettOgDistribuerBrev(Produserbaredokumenter produserbartDokument, Behandling behandling, Aktoer mottaker, BrevbestillingDto brevbestillingDto) {
+        opprettProsessinstansOpprettOgDistribuerBrev(produserbartDokument, behandling, mottaker, brevbestillingDto, false);
+    }
+
+    public void opprettProsessinstansOpprettOgDistribuerBrev(Produserbaredokumenter produserbartDokument, Behandling behandling, Aktoer mottaker, BrevbestillingDto brevbestillingDto, boolean brevkopi) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
         prosessinstans.setData(PRODUSERBART_BREV, produserbartDokument);
         prosessinstans.setData(BREVBESTILLING, brevbestillingDto);
+        prosessinstans.setData(BREVKOPI, brevkopi);
         prosessinstans.setData(MOTTAKER, mottaker.getRolle());
+        prosessinstans.setData(KONTAKTPERSON, ofNullable(brevbestillingDto.getKontaktpersonNavn()).orElse(""));
         if (hasText(mottaker.getAktørId())) {
             prosessinstans.setData(AKTØR_ID, mottaker.getAktørId());
         }

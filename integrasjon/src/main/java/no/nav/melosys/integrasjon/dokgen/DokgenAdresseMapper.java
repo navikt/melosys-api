@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.dokgen;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import no.nav.melosys.domain.Kontaktopplysning;
@@ -7,31 +8,46 @@ import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
+import static org.springframework.util.StringUtils.hasText;
 
 public final class DokgenAdresseMapper {
 
-    private DokgenAdresseMapper(){}
+    private DokgenAdresseMapper() {
+    }
 
-    public static List<String> mapAdresselinjer(OrganisasjonDokument org, Kontaktopplysning kontaktopplysning, PersonDokument personDokument) {
+    public static List<String> mapAdresselinjer(PersonDokument personDokument) {
+        return mapAdresselinjer(null, null, null, personDokument);
+    }
+
+    public static List<String> mapAdresselinjer(OrganisasjonDokument org, Kontaktopplysning kontaktopplysning) {
+        return mapAdresselinjer(org, null, kontaktopplysning, null);
+    }
+
+    public static List<String> mapAdresselinjer(OrganisasjonDokument org, String kontaktperson, Kontaktopplysning kontaktopplysning, PersonDokument personDokument) {
         List<String> adresselinjer;
         if (org == null) {
             adresselinjer = personDokument.gjeldendePostadresse.adresselinjer();
         } else {
             StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
-            if (kontaktopplysning != null) {
-                adresselinjer = asList(
-                    "v/" + kontaktopplysning.getKontaktNavn(),
-                    orgAdresse.gatenavn +
-                        ((orgAdresse.husnummer == null) ? "" : " " + orgAdresse.husnummer)
-                );
-            } else {
-                adresselinjer = singletonList(orgAdresse.gatenavn +
-                    ((orgAdresse.husnummer == null) ? "" : " " + orgAdresse.husnummer));
+            adresselinjer = new ArrayList<>();
+            if (hasText(kontaktperson)) {
+                adresselinjer.add("Att: " + kontaktperson);
+            } else if (kontaktopplysning != null && hasText(kontaktopplysning.getKontaktNavn())) {
+                adresselinjer.add("Att: " + kontaktopplysning.getKontaktNavn());
             }
+
+            adresselinjer.add(orgAdresse.gatenavn +
+                ((orgAdresse.husnummer == null) ? "" : " " + orgAdresse.husnummer));
         }
         return adresselinjer;
+    }
+
+    public static String mapPostnr(OrganisasjonDokument org) {
+        return mapPostnr(org, null);
+    }
+
+    public static String mapPostnr(PersonDokument personDokument) {
+        return mapPostnr(null, personDokument);
     }
 
     public static String mapPostnr(OrganisasjonDokument org, PersonDokument personDokument) {
@@ -45,6 +61,10 @@ public final class DokgenAdresseMapper {
         return postNr;
     }
 
+    public static String mapPoststed(OrganisasjonDokument org) {
+        return mapPoststed(org, null);
+    }
+
     public static String mapPoststed(OrganisasjonDokument org, PersonDokument personDokument) {
         String poststed;
         if (org == null) {
@@ -54,6 +74,14 @@ public final class DokgenAdresseMapper {
             poststed = orgAdresse.poststed;
         }
         return poststed;
+    }
+
+    public static String mapLandForAdresse(OrganisasjonDokument org) {
+        return mapLandForAdresse(org, null);
+    }
+
+    public static String mapLandForAdresse(PersonDokument personDokument) {
+        return mapLandForAdresse(null, personDokument);
     }
 
     public static String mapLandForAdresse(OrganisasjonDokument org, PersonDokument personDokument) {

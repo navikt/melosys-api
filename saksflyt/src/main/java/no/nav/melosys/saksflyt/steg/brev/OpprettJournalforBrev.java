@@ -64,6 +64,7 @@ public class OpprettJournalforBrev implements StegBehandler {
         PersonDokument personDokument = behandling.hentPersonDokument();
         Produserbaredokumenter produserbartDokument = prosessinstans.getData(PRODUSERBART_BREV, Produserbaredokumenter.class);
         BrevbestillingDto brevbestilling = prosessinstans.getData(BREVBESTILLING, BrevbestillingDto.class);
+        boolean brevkopi = Boolean.parseBoolean(prosessinstans.getData(BREVKOPI));
 
         String aktørId = prosessinstans.getData(AKTØR_ID);
         String orgnr = prosessinstans.getData(ORGNR, String.class, null);
@@ -79,7 +80,7 @@ public class OpprettJournalforBrev implements StegBehandler {
             sammensattNavn = persondataFasade.hentSammensattNavn(fnr);
         }
 
-        byte[] pdf = dokgenService.produserBrev(produserbartDokument, behandling.getId(), orgnr, brevbestilling);
+        byte[] pdf = dokgenService.produserBrev(produserbartDokument, behandling.getId(), orgnr, brevbestilling, brevkopi);
         log.info("Produserbartdokument {} for behandling {} produsert", produserbartDokument, behandling.getId());
 
         DokumentproduksjonsInfo dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(produserbartDokument);

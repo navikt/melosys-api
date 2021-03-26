@@ -1,22 +1,22 @@
 package no.nav.melosys.tjenester.gui.dto.brev;
 
-import java.util.List;
-
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+
+import java.util.Collection;
 
 public class MottakerDto {
     private final String type;
     private final Aktoersroller rolle;
-    private final String orgnr;
-    private final boolean kanOverstyres;
-    private final List<String> adresselinjer;
+    private final boolean egendefinert;
+    private final Collection<MottakerAdresseDto> adresser;
+    private final String feilmelding;
 
     private MottakerDto(Builder builder) {
         this.type = builder.type;
         this.rolle = builder.rolle;
-        this.orgnr = builder.orgnr;
-        this.kanOverstyres = builder.kanOverstyres;
-        this.adresselinjer = builder.adresselinjer;
+        this.egendefinert = builder.egendefinert;
+        this.adresser = builder.adresser;
+        this.feilmelding = builder.feilmelding;
     }
 
     public String getType() {
@@ -27,24 +27,24 @@ public class MottakerDto {
         return rolle;
     }
 
-    public String getOrgnr() {
-        return orgnr;
+    public boolean isEgendefinert() {
+        return egendefinert;
     }
 
-    public boolean isKanOverstyres() {
-        return kanOverstyres;
+    public Collection<MottakerAdresseDto> getAdresser() {
+        return adresser;
     }
 
-    public List<String> getAdresselinjer() {
-        return adresselinjer;
+    public String getFeilmelding() {
+        return feilmelding;
     }
 
     public static final class Builder {
         private String type;
         private Aktoersroller rolle;
-        private String orgnr;
-        private boolean kanOverstyres = false;
-        private List<String> adresselinjer;
+        private boolean egendefinert = false;
+        private Collection<MottakerAdresseDto> adresser;
+        private String feilmelding;
 
         public Builder medType(String type) {
             this.type = type;
@@ -56,18 +56,18 @@ public class MottakerDto {
             return this;
         }
 
-        public Builder medOrgnr(String orgnr) {
-            this.orgnr = orgnr;
+        public Builder egendefinert() {
+            this.egendefinert = true;
             return this;
         }
 
-        public Builder kanOverstyres() {
-            this.kanOverstyres = true;
+        public Builder medAdresse(Collection<MottakerAdresseDto> adresser) {
+            this.adresser = adresser;
             return this;
         }
 
-        public Builder medAdresselinjer(List<String> adresselinjer) {
-            this.adresselinjer = adresselinjer;
+        public Builder medFeilmelding(String feilmelding) {
+            this.feilmelding = feilmelding;
             return this;
         }
 

@@ -218,7 +218,8 @@ class ProsessinstansServiceTest {
         mottaker.setAktørId(null);
         mottaker.setOrgnr("987654321");
 
-        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, behandling, mottaker, new BrevbestillingDto.Builder().build());
+        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, behandling,
+            mottaker, new BrevbestillingDto.Builder().build());
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
