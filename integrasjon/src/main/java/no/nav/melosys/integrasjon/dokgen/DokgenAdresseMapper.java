@@ -9,6 +9,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument.hentTilgjengeligAdresse;
 
 public final class DokgenAdresseMapper {
 
@@ -65,9 +66,5 @@ public final class DokgenAdresseMapper {
             land = orgAdresse.landkode != null ? orgAdresse.landkode : null;
         }
         return land;
-    }
-
-    private static StrukturertAdresse hentTilgjengeligAdresse(OrganisasjonDokument org) {
-        return org.getPostadresse() == null ? org.getForretningsadresse() : org.getPostadresse();
     }
 }

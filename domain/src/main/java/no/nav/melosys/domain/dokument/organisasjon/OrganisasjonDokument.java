@@ -14,9 +14,9 @@ import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class OrganisasjonDokument  extends AbstraktOrganisasjon implements SaksopplysningDokument {
-    @XmlElementWrapper(name="navn")
-    @XmlElement(name="navnelinje")
+public class OrganisasjonDokument extends AbstraktOrganisasjon implements SaksopplysningDokument {
+    @XmlElementWrapper(name = "navn")
+    @XmlElement(name = "navnelinje")
     public List<String> navn;
 
     public OrganisasjonsDetaljer organisasjonDetaljer;
@@ -85,5 +85,9 @@ public class OrganisasjonDokument  extends AbstraktOrganisasjon implements Sakso
 
     public void setEnhetstype(String enhetstype) {
         this.enhetstype = enhetstype;
+    }
+
+    public static StrukturertAdresse hentTilgjengeligAdresse(OrganisasjonDokument org) {
+        return org.getPostadresse() == null ? org.getForretningsadresse() : org.getPostadresse();
     }
 }
