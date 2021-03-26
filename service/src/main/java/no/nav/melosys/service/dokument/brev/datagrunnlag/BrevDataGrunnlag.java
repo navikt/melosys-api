@@ -1,6 +1,6 @@
 package no.nav.melosys.service.dokument.brev.datagrunnlag;
 
-import no.nav.melosys.domain.behandling.Behandling;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;

@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.function.Function;
 
 import com.google.common.collect.Lists;
-import no.nav.melosys.domain.behandling.Behandling;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;

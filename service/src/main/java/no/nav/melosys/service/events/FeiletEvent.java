@@ -1,6 +1,6 @@
 package no.nav.melosys.service.events;
 
-import no.nav.melosys.domain.behandling.BehandlingEvent;
+import no.nav.melosys.domain.BehandlingEvent;
 import org.springframework.context.ApplicationEvent;
 
 public class FeiletEvent extends ApplicationEvent {

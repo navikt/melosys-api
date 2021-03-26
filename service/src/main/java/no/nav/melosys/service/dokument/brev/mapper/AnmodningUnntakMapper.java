@@ -13,8 +13,8 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.InngangsvilkaarBegrunnelseKo
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.dok.melosysbrev.felles.melosys_felles.YrkesaktivitetsKode;
 import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.behandling.Behandling;
-import no.nav.melosys.domain.behandling.Behandlingsresultat;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Sakstyper;

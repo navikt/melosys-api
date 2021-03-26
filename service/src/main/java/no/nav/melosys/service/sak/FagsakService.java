@@ -9,8 +9,8 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.behandling.Behandling;
-import no.nav.melosys.domain.behandling.Behandlingsresultat;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -40,8 +40,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.behandling.Behandling.erBehandlingAvSedForespørsler;
-import static no.nav.melosys.domain.behandling.Behandling.erBehandlingAvSøknad;
+import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
+import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
 import static no.nav.melosys.metrics.MetrikkerNavn.SAKER_OPPRETTET;
 import static no.nav.melosys.service.sak.SakstypeBehandlingstemaKobling.erGyldigBehandlingstemaForSakstype;
 

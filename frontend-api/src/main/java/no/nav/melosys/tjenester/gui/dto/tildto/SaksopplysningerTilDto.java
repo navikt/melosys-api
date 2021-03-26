@@ -6,7 +6,7 @@ import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.Set;
 
-import no.nav.melosys.domain.behandling.Behandling;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;

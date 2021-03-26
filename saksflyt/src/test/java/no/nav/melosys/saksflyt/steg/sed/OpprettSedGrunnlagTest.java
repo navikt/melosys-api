@@ -1,6 +1,6 @@
 package no.nav.melosys.saksflyt.steg.sed;
 
-import no.nav.melosys.domain.behandling.Behandling;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;

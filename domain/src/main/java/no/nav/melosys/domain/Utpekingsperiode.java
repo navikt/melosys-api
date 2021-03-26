@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.Objects;
 import javax.persistence.*;
 
-import no.nav.melosys.domain.behandling.Behandlingsresultat;
 import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;

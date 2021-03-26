@@ -6,8 +6,8 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.behandling.Behandling;
-import no.nav.melosys.domain.behandling.Behandlingsresultat;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.VedtakMetadataLagretEvent;
 import no.nav.melosys.domain.eessi.BucType;

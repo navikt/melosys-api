@@ -2,7 +2,7 @@ package no.nav.melosys.repository;
 
 import java.util.Optional;
 
-import no.nav.melosys.domain.behandling.Behandlingsresultat;
+import no.nav.melosys.domain.Behandlingsresultat;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.repository.CrudRepository;
 

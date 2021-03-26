@@ -1,7 +1,7 @@
 package no.nav.melosys.service.behandling;
 
-import static no.nav.melosys.domain.behandling.Behandling.BEHANDLINGSTEMA_SED_FORESPØRSEL;
-import static no.nav.melosys.domain.behandling.Behandling.BEHANDLINGSTEMA_SØKNAD;
+import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SED_FORESPØRSEL;
+import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SØKNAD;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -22,8 +22,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.behandling.Behandling;
-import no.nav.melosys.domain.behandling.Behandlingsresultat;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;

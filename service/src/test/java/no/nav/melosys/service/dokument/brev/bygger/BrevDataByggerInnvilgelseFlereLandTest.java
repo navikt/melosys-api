@@ -3,7 +3,7 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.util.Collections;
 import java.util.Set;
 
-import no.nav.melosys.domain.behandling.Behandling;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;

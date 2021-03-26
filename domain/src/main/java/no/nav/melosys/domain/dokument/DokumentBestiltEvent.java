@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.dokument;
 
-import no.nav.melosys.domain.behandling.BehandlingEvent;
+import no.nav.melosys.domain.BehandlingEvent;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
 public class DokumentBestiltEvent extends BehandlingEvent {

@@ -1,8 +1,8 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
-import no.nav.melosys.domain.behandling.Behandling;
-import no.nav.melosys.domain.behandling.Behandlingsresultat;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;

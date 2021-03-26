@@ -3,7 +3,7 @@ package no.nav.melosys.service.saksopplysninger;
 import java.time.LocalDate;
 import java.util.Collections;
 
-import no.nav.melosys.domain.behandling.Behandling;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.sed.SedDokument;

@@ -2,7 +2,7 @@ package no.nav.melosys.tjenester.gui.dto;
 
 import java.time.Instant;
 
-import no.nav.melosys.domain.behandling.Behandlingsnotat;
+import no.nav.melosys.domain.Behandlingsnotat;
 
 public class BehandlingsnotatGetDto {
 

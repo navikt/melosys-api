@@ -1,6 +1,6 @@
 package no.nav.melosys.service.journalforing.dto;
 
-import no.nav.melosys.domain.behandling.Behandling;
+import no.nav.melosys.domain.Behandling;
 
 public class JournalfoeringOpprettDto extends JournalfoeringDto {
     private String behandlingstemaKode;

@@ -5,7 +5,7 @@ import java.time.Instant;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.behandling.Behandling;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -25,6 +25,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,6 +49,8 @@ public class BehandlingServiceTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private OppgaveService oppgaveService;
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
 
     private BehandlingService behandlingService;
 
@@ -56,7 +59,7 @@ public class BehandlingServiceTest {
 
     @BeforeEach
     public void setUp() {
-        behandlingService = new BehandlingService(behandlingRepo, behandlingsresultatRepository, tidligereMedlemsperiodeRepo, behandlingsresultatService, oppgaveService);
+        behandlingService = new BehandlingService(behandlingRepo, behandlingsresultatRepository, tidligereMedlemsperiodeRepo, behandlingsresultatService, oppgaveService, applicationEventPublisher);
     }
 
     @Test

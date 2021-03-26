@@ -5,7 +5,6 @@ import java.util.Objects;
 import java.util.Set;
 import javax.persistence.*;
 
-import no.nav.melosys.domain.behandling.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 

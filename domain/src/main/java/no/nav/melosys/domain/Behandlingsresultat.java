@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.behandling;
+package no.nav.melosys.domain;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -6,7 +6,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import javax.persistence.*;
 
-import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Landkoder;

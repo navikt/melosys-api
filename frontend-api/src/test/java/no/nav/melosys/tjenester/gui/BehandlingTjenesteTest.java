@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 
-import static no.nav.melosys.domain.behandling.Behandling.BEHANDLINGSTEMA_SØKNAD;
+import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SØKNAD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jeasy.random.FieldPredicates.*;
 import static org.mockito.Mockito.*;
@@ -50,6 +50,8 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     private static final String BEHANDLINGER_SCHEMA = "behandlinger-behandling-schema.json";
     private static final String ENDRE_BEHANDLINGSTEMA_SCHEMA = "behandlinger-endrebehandlingstema-schema.json";
     private static final String ENDRE_BEHANDLINGSTEMA_POST_SCHEMA = "behandlinger-endrebehandlingstema-post-schema.json";
+    private static final long BEHANDLING_ID = 11L;
+    private static final List<Long> PERIODE_IDER = Arrays.asList(2L, 3L, 5L);
 
     private BehandlingTjeneste behandlingTjeneste;
 
@@ -91,7 +93,7 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     @Test
     void behandlingerPerioderValidering() throws Exception {
         TidligereMedlemsperioderDto tidligereMedlemsperioderDto = new TidligereMedlemsperioderDto();
-        tidligereMedlemsperioderDto.periodeIder = Arrays.asList(2L, 3L, 5L);
+        tidligereMedlemsperioderDto.periodeIder = PERIODE_IDER;
         valider(tidligereMedlemsperioderDto, TIDLIGERE_MEDLEMSPERIODER_SCHEMA, log);
     }
 
@@ -107,8 +109,8 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void hentMuligeBehandlinstemaValidering() throws IOException, MelosysException {
-        when(endreBehandlingstemaService.hentMuligeBehandlingstema(11L)).thenReturn(BEHANDLINGSTEMA_SØKNAD);
-        List<Behandlingstema> muligeBehandlingstema = behandlingTjeneste.hentEndreBehandlingstema(11L).getBody();
+        when(endreBehandlingstemaService.hentMuligeBehandlingstema(BEHANDLING_ID)).thenReturn(BEHANDLINGSTEMA_SØKNAD);
+        List<Behandlingstema> muligeBehandlingstema = behandlingTjeneste.hentEndreBehandlingstema(BEHANDLING_ID).getBody();
         validerArray(muligeBehandlingstema, ENDRE_BEHANDLINGSTEMA_SCHEMA, log);
     }
 
@@ -121,28 +123,24 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void knyttMedlemsperioder() throws Exception {
-        long behandlingID = 11L;
-        List<Long> periodeIder = Arrays.asList(2L, 3L, 5L);
         TidligereMedlemsperioderDto tidligereMedlemsperioderDto = new TidligereMedlemsperioderDto();
-        tidligereMedlemsperioderDto.periodeIder = periodeIder;
+        tidligereMedlemsperioderDto.periodeIder = PERIODE_IDER;
 
-        behandlingTjeneste.knyttMedlemsperioder(behandlingID, tidligereMedlemsperioderDto);
-        verify(behandlingService).knyttMedlemsperioder(behandlingID, periodeIder);
+        behandlingTjeneste.knyttMedlemsperioder(BEHANDLING_ID, tidligereMedlemsperioderDto);
+        verify(behandlingService).knyttMedlemsperioder(BEHANDLING_ID, PERIODE_IDER);
     }
 
     @Test
     void hentMedlemsperioder() throws Exception {
-        long behandlingID = 11L;
-        List<Long> periodeIder = Arrays.asList(2L, 3L, 5L);
-        when(behandlingService.hentMedlemsperioder(behandlingID)).thenReturn(periodeIder);
+        when(behandlingService.hentMedlemsperioder(BEHANDLING_ID)).thenReturn(PERIODE_IDER);
 
-        ResponseEntity<TidligereMedlemsperioderDto> response = behandlingTjeneste.hentMedlemsperioder(behandlingID);
+        ResponseEntity<TidligereMedlemsperioderDto> response = behandlingTjeneste.hentMedlemsperioder(BEHANDLING_ID);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody()).isInstanceOf(TidligereMedlemsperioderDto.class);
 
         TidligereMedlemsperioderDto tidligereMedlemsperioderDto = response.getBody();
-        assertThat(tidligereMedlemsperioderDto.periodeIder).containsAll(periodeIder);
+        assertThat(tidligereMedlemsperioderDto.periodeIder).containsAll(PERIODE_IDER);
 
-        verify(behandlingService).hentMedlemsperioder(behandlingID);
+        verify(behandlingService).hentMedlemsperioder(BEHANDLING_ID);
     }
 }

@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.behandling.Behandling;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.kodeverk.Representerer;

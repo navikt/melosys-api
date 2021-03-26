@@ -1,6 +1,6 @@
 package no.nav.melosys.service.dokument.sed.datagrunnlag;
 
-import no.nav.melosys.domain.behandling.Behandling;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.exception.TekniskException;

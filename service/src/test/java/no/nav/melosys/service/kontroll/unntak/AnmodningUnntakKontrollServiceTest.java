@@ -1,7 +1,7 @@
 package no.nav.melosys.service.kontroll.unntak;
 
 import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.behandling.Behandling;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;

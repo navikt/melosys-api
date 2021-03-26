@@ -3,8 +3,8 @@ package no.nav.melosys.tjenester.gui;
 import java.io.IOException;
 
 import com.google.common.collect.Sets;
-import no.nav.melosys.domain.behandling.Behandlingsresultat;
-import no.nav.melosys.domain.behandling.BehandlingsresultatBegrunnelse;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
 import no.nav.melosys.domain.VedtakMetadata;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;

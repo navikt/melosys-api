@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.behandling;
+package no.nav.melosys.domain;
 
 import java.util.Objects;
 import javax.persistence.*;

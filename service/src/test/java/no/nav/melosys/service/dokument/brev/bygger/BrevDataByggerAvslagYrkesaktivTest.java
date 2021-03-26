@@ -3,7 +3,7 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.behandling.Behandling;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;

@@ -1,8 +1,7 @@
-package no.nav.melosys.domain.behandling;
+package no.nav.melosys.domain;
 
 import javax.persistence.*;
 
-import no.nav.melosys.domain.RegistreringsInfo;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity

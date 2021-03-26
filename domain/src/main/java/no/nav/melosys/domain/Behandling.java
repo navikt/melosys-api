@@ -1,11 +1,10 @@
-package no.nav.melosys.domain.behandling;
+package no.nav.melosys.domain;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
 import javax.persistence.*;
 
-import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
@@ -288,13 +287,13 @@ public class Behandling extends RegistreringsInfo {
         if (this.id != 0 && that.id != 0) { // Begge entiteter er persistert. True hvis samme rad i db.
             return this.id.equals(that.getId());
         }
-        return Objects.equals(registrertDato, that.registrertDato)
+        return Objects.equals(this.getRegistrertDato(), that.getRegistrertDato())
             && Objects.equals(this.fagsak, that.fagsak);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(registrertDato, fagsak);
+        return Objects.hash(getRegistrertDato(), fagsak);
     }
 
     public boolean kanAvsluttesManuelt() {

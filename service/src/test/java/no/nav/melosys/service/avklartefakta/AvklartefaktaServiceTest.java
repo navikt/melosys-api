@@ -3,7 +3,7 @@ package no.nav.melosys.service.avklartefakta;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.behandling.Behandlingsresultat;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;

@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import java.util.Collections;
 import java.util.List;
 
-import no.nav.melosys.domain.behandling.Behandling;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Fullmektig;
 import no.nav.melosys.domain.Kontaktopplysning;
@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.behandling.Behandling.erBehandlingAvSøknad;
+import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.JFR_OPPRETT_SAK_OG_BEH;
 

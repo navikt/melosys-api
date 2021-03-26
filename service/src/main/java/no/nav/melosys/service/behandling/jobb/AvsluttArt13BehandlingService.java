@@ -2,8 +2,8 @@ package no.nav.melosys.service.behandling.jobb;
 
 import java.util.Collections;
 
-import no.nav.melosys.domain.behandling.Behandling;
-import no.nav.melosys.domain.behandling.Behandlingsresultat;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;

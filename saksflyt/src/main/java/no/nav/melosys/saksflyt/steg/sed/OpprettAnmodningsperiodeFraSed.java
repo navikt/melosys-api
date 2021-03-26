@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.steg.sed;
 import java.util.Collections;
 
 import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.behandling.Behandling;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;

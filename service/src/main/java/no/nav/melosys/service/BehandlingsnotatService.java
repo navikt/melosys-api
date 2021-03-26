@@ -1,7 +1,7 @@
 package no.nav.melosys.service;
 
-import no.nav.melosys.domain.behandling.Behandling;
-import no.nav.melosys.domain.behandling.Behandlingsnotat;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsnotat;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;

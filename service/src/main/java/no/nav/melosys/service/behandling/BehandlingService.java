@@ -10,16 +10,16 @@ import java.util.stream.Collectors;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.behandling.Behandling;
-import no.nav.melosys.domain.behandling.Behandlingsmaate;
-import no.nav.melosys.domain.behandling.Behandlingsresultat;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsmaate;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.behandling.BehandlingsfristEndretEvent;
+import no.nav.melosys.domain.BehandlingsfristEndretEvent;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
@@ -328,7 +328,7 @@ public class BehandlingService {
 
     private LocalDate hentBehandlingsfristForBehandlingstemaTema(Behandlingstema behandlingstema) {
         return switch (behandlingstema) {
-            case UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_FLERE_LAND, ARBEID_ETT_LAND_ØVRIG, IKKE_YRKESAKTIV, ARBEID_I_UTLANDET
+            case UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_FLERE_LAND, ARBEID_ETT_LAND_ØVRIG, IKKE_YRKESAKTIV, ARBEID_I_UTLANDET, ARBEID_NORGE_BOSATT_ANNET_LAND
                 -> LocalDate.now().plusDays(30);
             case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
                 -> LocalDate.now().plusWeeks(2);
@@ -336,8 +336,6 @@ public class BehandlingService {
                 -> LocalDate.now().plusWeeks(4);
             case ANMODNING_OM_UNNTAK_HOVEDREGEL, ØVRIGE_SED_UFM, ØVRIGE_SED_MED, TRYGDETID
                 -> LocalDate.now().plusWeeks(8);
-            default
-                -> throw new IllegalArgumentException("Melosys støtter ikke mapping for behandlingstema  " + behandlingstema);
         };
     }
 }

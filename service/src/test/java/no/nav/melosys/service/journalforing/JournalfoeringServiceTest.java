@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 import no.finn.unleash.FakeUnleash;
-import no.nav.melosys.domain.behandling.Behandling;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;

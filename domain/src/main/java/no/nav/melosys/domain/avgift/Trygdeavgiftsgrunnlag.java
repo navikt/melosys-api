@@ -3,7 +3,7 @@ package no.nav.melosys.domain.avgift;
 import java.util.Collection;
 import java.util.Optional;
 
-import no.nav.melosys.domain.behandling.Behandlingsresultat;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;

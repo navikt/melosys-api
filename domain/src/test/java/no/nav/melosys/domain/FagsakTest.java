@@ -3,7 +3,6 @@ package no.nav.melosys.domain;
 import java.time.Instant;
 import java.util.*;
 
-import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;

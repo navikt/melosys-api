@@ -6,7 +6,6 @@ import java.util.Objects;
 import java.util.Set;
 import javax.persistence.*;
 
-import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.jpa.SaksopplysningDokumentConverter;
 

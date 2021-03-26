@@ -1,7 +1,7 @@
 package no.nav.melosys.service.abac;
 
 import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.behandling.Behandling;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;

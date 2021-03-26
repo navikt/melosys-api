@@ -8,8 +8,8 @@ import no.nav.dok.melosysbrev._000125.Fag;
 import no.nav.dok.melosysbrev._000125.ObjectFactory;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
-import no.nav.melosys.domain.behandling.Behandling;
-import no.nav.melosys.domain.behandling.Behandlingsresultat;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import org.xml.sax.SAXException;
 

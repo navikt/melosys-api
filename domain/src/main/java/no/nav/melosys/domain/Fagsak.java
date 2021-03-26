@@ -5,7 +5,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import javax.persistence.*;
 
-import no.nav.melosys.domain.behandling.Behandling;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
