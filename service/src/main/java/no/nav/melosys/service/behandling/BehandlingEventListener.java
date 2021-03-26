@@ -5,10 +5,10 @@ import java.time.Period;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.BehandlingsfristEndretEvent;
 import no.nav.melosys.domain.dokument.DokumentBestiltEvent;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.domain.BehandlingsfristEndretEvent;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -54,9 +54,11 @@ public class BehandlingEventListener {
         Behandling behandling = behandlingService.hentBehandling(behandlingsfristEndretEvent.getBehandlingId());
         Optional<Oppgave> oppgave = oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
         if (oppgave.isPresent()) {
-            oppgaveService.oppdaterOppgave(oppgave.get().getOppgaveId(), OppgaveOppdatering.builder()
-                .fristFerdigstillelse(behandlingsfristEndretEvent.getFristFerdigstillelse())
-                .build());
+            oppgaveService.oppdaterOppgave(
+                oppgave.get().getOppgaveId(),
+                OppgaveOppdatering.builder()
+                    .fristFerdigstillelse(behandlingsfristEndretEvent.getFristFerdigstillelse())
+                    .build());
         }
     }
 }

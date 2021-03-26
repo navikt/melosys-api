@@ -2,6 +2,7 @@ package no.nav.melosys.service.behandling;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
@@ -337,6 +338,20 @@ public class BehandlingServiceTest {
         assertThatExceptionOfType(TekniskException.class)
             .isThrownBy(() -> behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER))
             .withMessage("Finner ingen oppgave for fagsak");
+    }
+
+    @Test
+    public final void testEndreBehandlingsfrist_enUkeFrem_fristOppdateres() throws Exception {
+        LocalDate nå = LocalDate.now();
+        Behandling behandling = new Behandling();
+        behandling.setBehandlingsfrist(nå);
+        when(behandlingRepo.findById(eq(BEHANDLING_ID))).thenReturn(Optional.of(behandling));
+
+        behandlingService.endreBehandlingsfrist(BEHANDLING_ID, nå.plusWeeks(1));
+
+        assertThat(behandling.getBehandlingsfrist()).isEqualTo(nå.plusWeeks(1));
+        verify(behandlingRepo).save(behandling);
+        verify(applicationEventPublisher).publishEvent(any(BehandlingsfristEndretEvent.class));
     }
 
     private Behandling opprettBehandlingMedData() {

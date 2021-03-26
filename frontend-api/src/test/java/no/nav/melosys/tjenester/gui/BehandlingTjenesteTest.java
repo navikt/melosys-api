@@ -22,6 +22,7 @@ import no.nav.melosys.service.behandling.EndreBehandlingstemaService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
+import no.nav.melosys.tjenester.gui.dto.EndreBehandlingsfristDto;
 import no.nav.melosys.tjenester.gui.dto.EndreBehandlingstemaDto;
 import no.nav.melosys.tjenester.gui.dto.TidligereMedlemsperioderDto;
 import no.nav.melosys.tjenester.gui.dto.tildto.SaksopplysningerTilDto;
@@ -142,5 +143,15 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
         assertThat(tidligereMedlemsperioderDto.periodeIder).containsAll(PERIODE_IDER);
 
         verify(behandlingService).hentMedlemsperioder(BEHANDLING_ID);
+    }
+
+    @Test
+    void endreBehandlingsfrist() throws Exception {
+        LocalDate frist = LocalDate.now().plusWeeks(1);
+        EndreBehandlingsfristDto endreBehandlingsfristDto = new EndreBehandlingsfristDto();
+        endreBehandlingsfristDto.setBehandlingsfrist(frist);
+
+        behandlingTjeneste.endreBehandlingsfrist(BEHANDLING_ID, endreBehandlingsfristDto);
+        verify(behandlingService).endreBehandlingsfrist(BEHANDLING_ID, frist);
     }
 }
