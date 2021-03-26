@@ -63,7 +63,31 @@ class SoeknadMapperTest {
         assertThat(foretakUtland.adresse.poststed).isEqualTo("testbyen");
         assertThat(foretakUtland.adresse.postnummer).isEqualTo("UTLAND-1234");
         assertThat(foretakUtland.adresse.landkode).isEqualTo("BE");
-        final var juridiskArbeidsgiverNorge = soeknad.juridiskArbeidsgiverNorge;
+    }
+
+    @Test
+    void testMappingArbeidsgiver() throws JAXBException {
+        final MedlemskapArbeidEOSM medlemskapArbeidEOSM = parseSøknadXML();
+        medlemskapArbeidEOSM.getInnhold().getArbeidsgiver().setOffentligVirksomhet(true);
+
+        Soeknad soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM);
+
+        var juridiskArbeidsgiverNorge = soeknad.juridiskArbeidsgiverNorge;
+        assertThat(juridiskArbeidsgiverNorge.erOffentligVirksomhet).isEqualTo(true);
+        assertThat(juridiskArbeidsgiverNorge.antallAnsatte).isNull();
+        assertThat(juridiskArbeidsgiverNorge.antallAdmAnsatte).isNull();
+        assertThat(juridiskArbeidsgiverNorge.antallUtsendte).isNull();
+        assertThat(juridiskArbeidsgiverNorge.andelOmsetningINorge).isNull();
+        assertThat(juridiskArbeidsgiverNorge.andelOppdragINorge).isNull();
+        assertThat(juridiskArbeidsgiverNorge.andelKontrakterINorge).isNull();
+        assertThat(juridiskArbeidsgiverNorge.andelRekruttertINorge).isNull();
+        assertThat(juridiskArbeidsgiverNorge.ekstraArbeidsgivere).isEmpty();
+
+        medlemskapArbeidEOSM.getInnhold().getArbeidsgiver().setOffentligVirksomhet(false);
+
+        soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM);
+
+        juridiskArbeidsgiverNorge = soeknad.juridiskArbeidsgiverNorge;
         assertThat(juridiskArbeidsgiverNorge.erOffentligVirksomhet).isEqualTo(false);
         assertThat(juridiskArbeidsgiverNorge.antallAnsatte).isEqualTo(100);
         assertThat(juridiskArbeidsgiverNorge.antallAdmAnsatte).isEqualTo(10);
