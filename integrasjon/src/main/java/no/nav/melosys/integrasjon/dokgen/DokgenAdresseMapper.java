@@ -15,6 +15,14 @@ public final class DokgenAdresseMapper {
     private DokgenAdresseMapper() {
     }
 
+    public static List<String> mapAdresselinjer(PersonDokument personDokument) {
+        return mapAdresselinjer(null, null, null, personDokument);
+    }
+
+    public static List<String> mapAdresselinjer(OrganisasjonDokument org, Kontaktopplysning kontaktopplysning) {
+        return mapAdresselinjer(org, null, kontaktopplysning, null);
+    }
+
     public static List<String> mapAdresselinjer(OrganisasjonDokument org, String kontaktperson, Kontaktopplysning kontaktopplysning, PersonDokument personDokument) {
         List<String> adresselinjer;
         if (org == null) {
@@ -34,6 +42,14 @@ public final class DokgenAdresseMapper {
         return adresselinjer;
     }
 
+    public static String mapPostnr(OrganisasjonDokument org) {
+        return mapPostnr(org, null);
+    }
+
+    public static String mapPostnr(PersonDokument personDokument) {
+        return mapPostnr(null, personDokument);
+    }
+
     public static String mapPostnr(OrganisasjonDokument org, PersonDokument personDokument) {
         String postNr;
         if (org == null) {
@@ -45,6 +61,10 @@ public final class DokgenAdresseMapper {
         return postNr;
     }
 
+    public static String mapPoststed(OrganisasjonDokument org) {
+        return mapPoststed(org, null);
+    }
+
     public static String mapPoststed(OrganisasjonDokument org, PersonDokument personDokument) {
         String poststed;
         if (org == null) {
@@ -54,6 +74,14 @@ public final class DokgenAdresseMapper {
             poststed = orgAdresse.poststed;
         }
         return poststed;
+    }
+
+    public static String mapLandForAdresse(OrganisasjonDokument org) {
+        return mapLandForAdresse(org, null);
+    }
+
+    public static String mapLandForAdresse(PersonDokument personDokument) {
+        return mapLandForAdresse(null, personDokument);
     }
 
     public static String mapLandForAdresse(OrganisasjonDokument org, PersonDokument personDokument) {

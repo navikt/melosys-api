@@ -81,29 +81,28 @@ public class BrevbestillingService {
         for (Aktoer mottaker : mottakere) {
             if (mottaker.getRolle() == Aktoersroller.BRUKER) {
                 PersonDokument personDokument = (PersonDokument) persondataFasade.hentPerson(behandling.hentPersonDokument().fnr, Informasjonsbehov.STANDARD).getDokument();
-                brevAdresser.add(new BrevAdresse(
-                    personDokument.sammensattNavn,
-                    null,
-                    mapAdresselinjer(null, null, null, personDokument),
-                    mapPostnr(null, personDokument),
-                    kodeverkService.dekod(FellesKodeverk.POSTNUMMER, personDokument.gjeldendePostadresse.postnr, LocalDate.now()),
-                    mapLandForAdresse(null, personDokument)
-                    )
+                brevAdresser.add(new BrevAdresse.Builder()
+                    .medMottakerNavn(personDokument.sammensattNavn)
+                    .medAdresselinjer(mapAdresselinjer(personDokument))
+                    .medPostnr(mapPostnr(personDokument))
+                    .medPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, personDokument.gjeldendePostadresse.postnr, LocalDate.now()))
+                    .medLand(mapLandForAdresse(personDokument))
+                    .build()
                 );
             }
             else if (mottaker.getRolle() == Aktoersroller.ARBEIDSGIVER || mottaker.getRolle() == Aktoersroller.REPRESENTANT) {
-                Kontaktopplysning kontaktopplysninger = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), mottaker.getOrgnr()).orElse(null);
-                String mottakerOrgnr = kontaktopplysninger != null && kontaktopplysninger.getKontaktOrgnr() != null ? kontaktopplysninger.getKontaktOrgnr() : mottaker.getOrgnr();
-                OrganisasjonDokument organisasjonDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();
+                Kontaktopplysning kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), mottaker.getOrgnr()).orElse(null);
+                String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : mottaker.getOrgnr();
+                OrganisasjonDokument orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();
 
-                brevAdresser.add(new BrevAdresse(
-                    organisasjonDokument.getNavn(),
-                    organisasjonDokument.getOrgnummer(),
-                    mapAdresselinjer(organisasjonDokument, null, kontaktopplysninger, null),
-                    mapPostnr(organisasjonDokument, null),
-                    mapPoststed(organisasjonDokument, null),
-                    mapLandForAdresse(organisasjonDokument, null)
-                    )
+                brevAdresser.add(new BrevAdresse.Builder()
+                    .medMottakerNavn(orgDokument.getNavn())
+                    .medOrgnr(orgDokument.getOrgnummer())
+                    .medAdresselinjer(mapAdresselinjer(orgDokument, kontaktopplysning))
+                    .medPostnr(mapPostnr(orgDokument))
+                    .medPoststed(mapPoststed(orgDokument))
+                    .medLand(mapLandForAdresse(orgDokument))
+                    .build()
                 );
             }
         }
