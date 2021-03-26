@@ -91,7 +91,7 @@ public class DokgenService {
             brevbestilling = new MangelbrevBrevbestilling.Builder()
                 .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
                 .medManglerInfoFritekst(brevbestillingDto.getManglerFritekst())
-                .medKontaktperson(brevbestillingDto.getKontaktperson());
+                .medKontaktpersonNavn(brevbestillingDto.getKontaktpersonNavn());
         }
 
         brevbestilling

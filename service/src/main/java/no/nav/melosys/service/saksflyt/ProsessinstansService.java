@@ -3,7 +3,6 @@ package no.nav.melosys.service.saksflyt;
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -260,7 +259,7 @@ public class ProsessinstansService {
         prosessinstans.setData(BREVBESTILLING, brevbestillingDto);
         prosessinstans.setData(BREVKOPI, brevkopi);
         prosessinstans.setData(MOTTAKER, mottaker.getRolle());
-        prosessinstans.setData(KONTAKTPERSON, ofNullable(brevbestillingDto.getKontaktperson()).orElse(""));
+        prosessinstans.setData(KONTAKTPERSON, ofNullable(brevbestillingDto.getKontaktpersonNavn()).orElse(""));
         if (hasText(mottaker.getAktørId())) {
             prosessinstans.setData(AKTØR_ID, mottaker.getAktørId());
         }

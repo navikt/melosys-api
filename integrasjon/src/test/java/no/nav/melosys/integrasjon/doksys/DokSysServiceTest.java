@@ -291,7 +291,7 @@ class DokSysServiceTest {
     }
 
     @Test
-    void distribuerJournalpost_medStrukturertNorskAdresse_medKontaktopplysningOgOverstyrtKontaktperson() {
+    void distribuerJournalpost_medStrukturertNorskAdresse_medKontaktopplysningOgOverstyrtKontaktpersonNavn() {
         String journalpostId = "123456";
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
         strukturertAdresse.gatenavn = "Postboks 222";

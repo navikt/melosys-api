@@ -14,7 +14,7 @@ public class BrevbestillingDto {
     private String orgNr;
     private String innledningFritekst;
     private String manglerFritekst;
-    private String kontaktperson;
+    private String kontaktpersonNavn;
     private List<KopiMottaker> kopiMottakere;
 
     /**
@@ -44,7 +44,7 @@ public class BrevbestillingDto {
         this.orgNr = builder.orgNr;
         this.innledningFritekst = builder.innledningFritekst;
         this.manglerFritekst = builder.manglerFritekst;
-        this.kontaktperson = builder.kontaktperson;
+        this.kontaktpersonNavn = builder.kontaktpersonNavn;
         this.kopiMottakere = builder.kopiMottakere;
         this.fritekst = builder.fritekst;
         this.begrunnelseKode = builder.begrunnelseKode;
@@ -71,8 +71,8 @@ public class BrevbestillingDto {
         return manglerFritekst;
     }
 
-    public String getKontaktperson() {
-        return kontaktperson;
+    public String getKontaktpersonNavn() {
+        return kontaktpersonNavn;
     }
 
     public List<KopiMottaker> getKopiMottakere() {
@@ -100,7 +100,7 @@ public class BrevbestillingDto {
         private String orgNr;
         private String innledningFritekst;
         private String manglerFritekst;
-        private String kontaktperson;
+        private String kontaktpersonNavn;
         private List<KopiMottaker> kopiMottakere;
         private String fritekst;
         private String begrunnelseKode;
@@ -131,8 +131,8 @@ public class BrevbestillingDto {
             return this;
         }
 
-        public Builder medKontaktperson(String kontaktperson) {
-            this.kontaktperson = kontaktperson;
+        public Builder medKontaktpersonNavn(String kontaktpersonNavn) {
+            this.kontaktpersonNavn = kontaktpersonNavn;
             return this;
         }
 
@@ -168,13 +168,13 @@ public class BrevbestillingDto {
         BrevbestillingDto that = (BrevbestillingDto) o;
         return mottaker == that.mottaker && Objects.equals(orgNr, that.orgNr) &&
             Objects.equals(innledningFritekst, that.innledningFritekst) && Objects.equals(manglerFritekst, that.manglerFritekst) &&
-            Objects.equals(kontaktperson, that.kontaktperson) && Objects.equals(fritekst, that.fritekst) &&
+            Objects.equals(kontaktpersonNavn, that.kontaktpersonNavn) && Objects.equals(fritekst, that.fritekst) &&
             Objects.equals(begrunnelseKode, that.begrunnelseKode) && Objects.equals(ytterligereInformasjon, that.ytterligereInformasjon);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mottaker, orgNr, innledningFritekst, manglerFritekst, kontaktperson, fritekst, begrunnelseKode, ytterligereInformasjon);
+        return Objects.hash(mottaker, orgNr, innledningFritekst, manglerFritekst, kontaktpersonNavn, fritekst, begrunnelseKode, ytterligereInformasjon);
     }
 
     @Override
@@ -184,7 +184,7 @@ public class BrevbestillingDto {
             ", orgNr='" + orgNr + '\'' +
             ", innledningFritekst='" + innledningFritekst + '\'' +
             ", manglerFritekst='" + manglerFritekst + '\'' +
-            ", kontaktperson='" + kontaktperson + '\'' +
+            ", kontaktpersonNavn='" + kontaktpersonNavn + '\'' +
             ", fritekst='" + fritekst + '\'' +
             ", begrunnelseKode='" + begrunnelseKode + '\'' +
             ", ytterligereInformasjon='" + ytterligereInformasjon + '\'' +
