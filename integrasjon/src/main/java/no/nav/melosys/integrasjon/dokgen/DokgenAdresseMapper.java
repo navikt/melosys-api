@@ -15,12 +15,8 @@ public final class DokgenAdresseMapper {
     private DokgenAdresseMapper() {
     }
 
-    public static List<String> mapAdresselinjer(PersonDokument personDokument) {
-        return mapAdresselinjer(null, null, null, personDokument);
-    }
-
-    public static List<String> mapAdresselinjer(OrganisasjonDokument org, Kontaktopplysning kontaktopplysning) {
-        return mapAdresselinjer(org, null, kontaktopplysning, null);
+    public static String mapMottakerNavn(OrganisasjonDokument org, PersonDokument personDokument) {
+        return org == null ? personDokument.sammensattNavn : org.getNavn();
     }
 
     public static List<String> mapAdresselinjer(OrganisasjonDokument org, String kontaktperson, Kontaktopplysning kontaktopplysning, PersonDokument personDokument) {
@@ -40,14 +36,6 @@ public final class DokgenAdresseMapper {
                 ((orgAdresse.husnummer == null) ? "" : " " + orgAdresse.husnummer));
         }
         return adresselinjer;
-    }
-
-    public static String mapPostnr(OrganisasjonDokument org) {
-        return mapPostnr(org, null);
-    }
-
-    public static String mapPostnr(PersonDokument personDokument) {
-        return mapPostnr(null, personDokument);
     }
 
     public static String mapPostnr(OrganisasjonDokument org, PersonDokument personDokument) {
@@ -74,14 +62,6 @@ public final class DokgenAdresseMapper {
             poststed = orgAdresse.poststed;
         }
         return poststed;
-    }
-
-    public static String mapLandForAdresse(OrganisasjonDokument org) {
-        return mapLandForAdresse(org, null);
-    }
-
-    public static String mapLandForAdresse(PersonDokument personDokument) {
-        return mapLandForAdresse(null, personDokument);
     }
 
     public static String mapLandForAdresse(OrganisasjonDokument org, PersonDokument personDokument) {
