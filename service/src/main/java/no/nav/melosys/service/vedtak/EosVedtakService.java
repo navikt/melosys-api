@@ -21,7 +21,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -29,6 +28,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -38,13 +38,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.kodeverk.Utfallregistreringunntak.GODKJENT;
 
 @Service
-public class VedtakService {
-    private static final Logger log = LoggerFactory.getLogger(VedtakService.class);
+public class EosVedtakService {
+    private static final Logger log = LoggerFactory.getLogger(EosVedtakService.class);
 
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
@@ -61,12 +60,12 @@ public class VedtakService {
     public static final int FRIST_KLAGE_UKER = 6;
 
     @Autowired
-    public VedtakService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
-                         OppgaveService oppgaveService, ProsessinstansService prosessinstansService,
-                         EessiService eessiService, LandvelgerService landvelgerService,
-                         PersondataFasade persondataFasade, RegisteropplysningerService registeropplysningerService,
-                         VedtakKontrollService vedtakKontrollService, AvklartefaktaService avklartefaktaService,
-                         ApplicationEventMulticaster melosysEventMulticaster) {
+    public EosVedtakService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
+                            OppgaveService oppgaveService, ProsessinstansService prosessinstansService,
+                            EessiService eessiService, LandvelgerService landvelgerService,
+                            PersondataFasade persondataFasade, RegisteropplysningerService registeropplysningerService,
+                            VedtakKontrollService vedtakKontrollService, AvklartefaktaService avklartefaktaService,
+                            ApplicationEventMulticaster melosysEventMulticaster) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
@@ -80,17 +79,10 @@ public class VedtakService {
         this.melosysEventMulticaster = melosysEventMulticaster;
     }
 
-    @Transactional(rollbackFor = MelosysException.class, noRollbackFor = {ValideringException.class})
-    public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultattype) throws MelosysException {
-        fattVedtak(behandlingID, behandlingsresultattype, null, null, null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
-    }
-
-    @Transactional(rollbackFor = MelosysException.class, noRollbackFor = {ValideringException.class})
-    public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultatType,
+    public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType,
                            String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner,
                            Vedtakstyper vedtakstype, String revurderBegrunnelse) throws MelosysException {
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
-        validerKanFattesVedtakAvTema(behandling);
+        long behandlingID = behandling.getId();
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         behandlingsresultat.setType(behandlingsresultatType);
@@ -110,6 +102,22 @@ public class VedtakService {
         behandlingService.lagre(behandling);
         prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType,
             fritekst, fritekstSed, mottakerinstitusjoner, revurderBegrunnelse);
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+    }
+
+    public void endreVedtak(Behandling behandling, Endretperiode endretperiode, String fritekst, String fritekstSed) throws FunksjonellException, TekniskException {
+        long behandlingID = behandling.getId();
+        log.info("Endrer vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
+        avklartefaktaService.leggTilBegrunnelse(behandlingID, Avklartefaktatyper.AARSAK_ENDRING_PERIODE, endretperiode.getKode());
+
+        if (prosessinstansService.harAktivProsessinstans(behandlingID)) {
+            throw new FunksjonellException("Det finnes allerede en aktiv prosess for behandling " + behandling);
+        }
+        prosessinstansService.opprettProsessinstansForkortPeriode(
+            behandling,
+            fritekst,
+            fritekstSed
+        );
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
@@ -179,12 +187,6 @@ public class VedtakService {
         return !behandlingsresultat.erArt16EtterUtlandMedRegistrertSvar();
     }
 
-    private void validerKanFattesVedtakAvTema(Behandling behandling) throws FunksjonellException {
-        if (!behandling.kanResultereIVedtak()) {
-            throw new FunksjonellException("Kan ikke fatte vedtak ved behandlingstema " + behandling.getTema().getBeskrivelse());
-        }
-    }
-
     private void kontrollerFattVedtak(long behandlingID, Vedtakstyper vedtakstype) throws MelosysException {
         Collection<Kontrollfeil> feilValideringer = vedtakKontrollService.utførKontroller(behandlingID, vedtakstype);
         if (!feilValideringer.isEmpty()) {
@@ -197,22 +199,5 @@ public class VedtakService {
         return BucType.fraBestemmelse(
             behandlingsresultat.hentValidertPeriodeOmLovvalg().getBestemmelse()
         );
-    }
-
-    @Transactional(rollbackFor = MelosysException.class)
-    public void endreVedtak(Long behandlingID, Endretperiode endretperiode, String fritekst, String fritekstSed) throws FunksjonellException, TekniskException {
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
-        log.info("Endrer vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
-        avklartefaktaService.leggTilBegrunnelse(behandlingID, Avklartefaktatyper.AARSAK_ENDRING_PERIODE, endretperiode.getKode());
-
-        if (prosessinstansService.harAktivProsessinstans(behandlingID)) {
-            throw new FunksjonellException("Det finnes allerede en aktiv prosess for behandling " + behandling);
-        }
-        prosessinstansService.opprettProsessinstansForkortPeriode(
-            behandling,
-            fritekst,
-            fritekstSed
-        );
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 }

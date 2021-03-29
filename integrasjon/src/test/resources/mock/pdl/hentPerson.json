@@ -1,0 +1,94 @@
+{
+  "data": {
+    "hentPerson": {
+      "adressebeskyttelse": [],
+      "doedsfall": [
+        {
+          "doedsdato": "2021-03-25"
+        }
+      ],
+      "foedsel": [
+        {
+          "foedselsdato": "1991-02-27",
+          "foedselsaar": null,
+          "foedeland": null,
+          "foedested": null,
+          "metadata": {
+            "master": "FREG",
+            "endringer": [
+              {
+                "registrert": "2021-03-25T17:57:28",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        }
+      ],
+      "folkeregisteridentifikator": [
+        {
+          "identifikasjonsnummer": "27429104489",
+          "type": "FNR",
+          "status": "I_BRUK"
+        }
+      ],
+      "folkeregisterpersonstatus": [
+        {
+          "forenkletStatus": "doedIFolkeregisteret",
+          "status": "doed"
+        }
+      ],
+      "forelderBarnRelasjon": [
+        {
+          "relatertPersonsIdent": "22511596061",
+          "relatertPersonsRolle": "BARN",
+          "minRolleForPerson": "MOR"
+        }
+      ],
+      "kjoenn": [
+        {
+          "kjoenn": "KVINNE",
+          "metadata": {
+            "master": "FREG",
+            "endringer": [
+              {
+                "registrert": "2021-03-25T17:57:28",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        }
+      ],
+      "navn": [
+        {
+          "fornavn": "MOLEFONKEN",
+          "mellomnavn": "LEENDE",
+          "etternavn": "KNOTT",
+          "metadata": {
+            "master": "FREG",
+            "endringer": [
+              {
+                "registrert": "2021-03-25T17:57:28",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        }
+      ],
+      "statsborgerskap": [
+        {
+          "land": "NOR",
+          "metadata": {
+            "master": "FREG"
+          }
+        }
+      ],
+      "sivilstand": [
+        {
+          "type": "REGISTRERT_PARTNER",
+          "relatertVedSivilstand": "11466927750",
+          "gyldigFraOgMed": "2021-03-02"
+        }
+      ]
+    }
+  }
+}
