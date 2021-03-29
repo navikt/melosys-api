@@ -45,6 +45,10 @@ public class BrevAdresse {
         return land;
     }
 
+    public boolean isAdresselinjerEmpty() {
+        return adresselinjer.stream().allMatch(String::isBlank);
+    }
+
     public static class Builder {
         public String mottakerNavn;
         public String orgnr;

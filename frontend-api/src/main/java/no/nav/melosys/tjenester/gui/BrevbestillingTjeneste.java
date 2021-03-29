@@ -14,6 +14,7 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.brev.BrevAdresse;
 import no.nav.melosys.service.brev.BrevbestillingService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
@@ -194,18 +195,21 @@ public class BrevbestillingTjeneste {
     }
 
 
-    private MottakerDto.Builder leggTilAdresseOgFeilmelding(MottakerDto.Builder builder, Produserbaredokumenter produserbaredokumenter, Aktoersroller aktoersroller, Behandling behandling) throws TekniskException, FunksjonellException {
+    private void leggTilAdresseOgFeilmelding(MottakerDto.Builder builder, Produserbaredokumenter produserbaredokumenter, Aktoersroller aktoersroller, Behandling behandling)
+        throws TekniskException, FunksjonellException {
         try {
             var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(produserbaredokumenter, aktoersroller, behandling);
-            if (aktoersroller == Aktoersroller.BRUKER && (brevAdresser.isEmpty() || brevAdresser.get(0).adresselinjer.stream().noneMatch(Objects::nonNull))) {
-                return builder.medFeilmelding("Bruker har ingen registrert adresse.");
+            if (aktoersroller == Aktoersroller.BRUKER && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {
+                builder.medFeilmelding("Bruker har ingen registrert adresse.");
+            } else {
+                builder.medAdresse(brevAdresser.stream().map(MottakerAdresseDto::av).collect(Collectors.toList()));
             }
-            return builder.medAdresse(brevAdresser.stream().map(MottakerAdresseDto::av).collect(Collectors.toList()));
         } catch (TekniskException e) {
             if ("Finner ikke arbeidsforholddokument".equals(e.getMessage())) {
-                return builder.medFeilmelding("Finner ingen arbeidsgivere. Hent registeropplysninger.");
+                builder.medFeilmelding("Finner ingen arbeidsgivere. Hent registeropplysninger.");
+            } else {
+                throw new TekniskException(e);
             }
-            throw new TekniskException(e);
         }
     }
 
