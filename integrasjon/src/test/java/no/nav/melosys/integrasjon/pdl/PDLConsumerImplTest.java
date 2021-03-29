@@ -12,10 +12,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
 import no.nav.melosys.integrasjon.pdl.dto.person.*;
-import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Kontaktadresse;
-import no.nav.melosys.integrasjon.pdl.dto.person.adresse.KontaktadresseType;
-import no.nav.melosys.integrasjon.pdl.dto.person.adresse.PostadresseIFrittFormat;
-import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Vegadresse;
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.*;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.BeforeAll;
@@ -109,6 +106,10 @@ class PDLConsumerImplTest {
             new Vegadresse("LANGBERGA", "30", null, null, "6800"));
         assertThat(person.kontaktadresse()).extracting(Kontaktadresse::postadresseIFrittFormat).contains(
             new PostadresseIFrittFormat("POSTLINJE 1", "OG 2", null, "4994"));
+        assertThat(person.bostedsadresse()).extracting(Bostedsadresse::angittFlyttedato)
+            .contains(LocalDate.parse("2020-03-29"));
+        assertThat(person.bostedsadresse()).extracting(Bostedsadresse::vegadresse).contains(
+            new Vegadresse("HALÅSVEGEN", "5", null, null, "6713"));
     }
 
     @Test

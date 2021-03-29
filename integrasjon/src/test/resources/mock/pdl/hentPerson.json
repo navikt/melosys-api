@@ -2,6 +2,21 @@
   "data": {
     "hentPerson": {
       "adressebeskyttelse": [],
+      "bostedsadresse": [
+        {
+          "angittFlyttedato": "2020-03-29",
+          "coAdressenavn": null,
+          "matrikkeladresse": null,
+          "ukjentBosted": null,
+          "vegadresse": {
+            "adressenavn": "HALÅSVEGEN",
+            "husnummer": "5",
+            "husbokstav": null,
+            "tilleggsnavn": null,
+            "postnummer": "6713"
+          }
+        }
+      ],
       "doedsfall": [],
       "foedsel": [
         {

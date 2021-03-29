@@ -7,6 +7,26 @@ query($ident: ID!) {
         adressebeskyttelse {
             gradering
         }
+        bostedsadresse {
+            angittFlyttedato
+            coAdressenavn
+            matrikkeladresse {
+                bruksenhetsnummer
+                kommunenummer
+                tilleggsnavn
+                postnummer
+            }
+            ukjentBosted {
+                bostedskommune
+            }
+            vegadresse {
+                adressenavn
+                husnummer
+                husbokstav
+                tilleggsnavn
+                postnummer
+            }
+        }
         doedsfall {
             doedsdato
         }
@@ -50,7 +70,7 @@ query($ident: ID!) {
         kontaktadresse {
             type
             gyldigFraOgMed
-            gyldigTilOgMed            
+            gyldigTilOgMed
             coAdressenavn
             postboksadresse {
                 postboks

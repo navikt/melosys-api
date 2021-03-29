@@ -2,11 +2,12 @@ package no.nav.melosys.integrasjon.pdl.dto.person;
 
 import java.util.Collection;
 
-import no.nav.melosys.integrasjon.pdl.dto.person.adresse.kontakt.Kontaktadresse;
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Bostedsadresse;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Kontaktadresse;
 
 public record Person(
     Collection<Adressebeskyttelse> adressebeskyttelse,
+    Collection<Bostedsadresse> bostedsadresse,
     Collection<Doedsfall> doedsfall,
     Collection<Foedsel> foedsel,
     Collection<Folkeregisteridentifikator> folkeregisteridentifikator,
