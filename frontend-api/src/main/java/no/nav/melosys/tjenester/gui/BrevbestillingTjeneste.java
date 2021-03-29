@@ -159,7 +159,7 @@ public class BrevbestillingTjeneste {
                         new MottakerDto.Builder()
                             .medType("Annen organisasjon")
                             .medRolle(hovedMottaker)
-                            .egendefinert()
+                            .orgnrSettesAvSaksbehandler()
                             .build()
                     );
 
