@@ -5,12 +5,17 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
 import no.nav.melosys.integrasjon.pdl.dto.person.*;
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Kontaktadresse;
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.KontaktadresseType;
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.PostadresseIFrittFormat;
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Vegadresse;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.BeforeAll;
@@ -69,7 +74,7 @@ class PDLConsumerImplTest {
             .isEmpty();
         assertThat(person.doedsfall())
             .flatExtracting(Doedsfall::doedsdato)
-            .containsExactly(LocalDate.of(2021, 3, 25));
+            .isEmpty();
         assertThat(person.foedsel())
             .flatExtracting(Foedsel::foedselsdato)
             .containsExactly(LocalDate.of(1991, 2, 27));
@@ -79,7 +84,7 @@ class PDLConsumerImplTest {
             .containsExactly("27429104489", "FNR", "I_BRUK");
         assertThat(person.folkeregisterpersonstatus())
             .flatExtracting(Folkeregisterpersonstatus::forenkletStatus)
-            .containsExactly("doedIFolkeregisteret");
+            .containsExactly("bosattEtterFolkeregisterloven");
         assertThat(person.forelderBarnRelasjon())
             .flatExtracting(ForelderBarnRelasjon::relatertPersonsIdent, ForelderBarnRelasjon::relatertPersonsRolle,
                 ForelderBarnRelasjon::minRolleForPerson)
@@ -89,13 +94,21 @@ class PDLConsumerImplTest {
             .containsExactly(KjoennType.KVINNE);
         assertThat(person.navn())
             .flatExtracting(Navn::fornavn, Navn::mellomnavn, Navn::etternavn)
-            .containsExactly("MOLEFONKEN", "LEENDE", "KNOTT");
+            .containsExactly("MOLEFONKEN", "TIKKENDE", "KNOTT");
         assertThat(person.statsborgerskap())
             .flatExtracting(Statsborgerskap::land)
             .containsExactly("NOR");
         assertThat(person.sivilstand())
             .flatExtracting(Sivilstand::type, Sivilstand::relatertVedSivilstand, Sivilstand::gyldigFraOgMed)
             .containsExactly(Sivilstandstype.REGISTRERT_PARTNER, "11466927750", LocalDate.parse("2021-03-02"));
+        assertThat(person.kontaktadresse()).hasSize(2).flatExtracting(Kontaktadresse::type,
+            Kontaktadresse::gyldigFraOgMed, Kontaktadresse::gyldigTilOgMed, Kontaktadresse::coAdressenavn)
+            .contains(KontaktadresseType.Innland, LocalDateTime.parse("2020-03-29T00:00"),
+                LocalDateTime.parse("2021-04-01T00:00"), "C/O RAKRYGGET STAFFELI");
+        assertThat(person.kontaktadresse()).extracting(Kontaktadresse::vegadresse).contains(
+            new Vegadresse("LANGBERGA", "30", null, null, "6800"));
+        assertThat(person.kontaktadresse()).extracting(Kontaktadresse::postadresseIFrittFormat).contains(
+            new PostadresseIFrittFormat("POSTLINJE 1", "OG 2", null, "4994"));
     }
 
     @Test

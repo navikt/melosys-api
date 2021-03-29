@@ -47,6 +47,47 @@ query($ident: ID!) {
                 }
             }
         }
+        kontaktadresse {
+            type
+            gyldigFraOgMed
+            gyldigTilOgMed            
+            coAdressenavn
+            postboksadresse {
+                postboks
+                postbokseier
+                postnummer
+            }
+            postadresseIFrittFormat {
+                adresselinje1
+                adresselinje2
+                adresselinje3
+                postnummer
+            }
+            utenlandskAdresse {
+                adressenavnNummer
+                bygningEtasjeLeilighet
+                postboksNummerNavn
+                postkode
+                bySted
+                regionDistriktOmraade
+                landkode
+            }
+            utenlandskAdresseIFrittFormat {
+                adresselinje1
+                adresselinje2
+                adresselinje3
+                byEllerStedsnavn
+                landkode
+                postkode
+            }
+            vegadresse {
+                adressenavn
+                husnummer
+                husbokstav
+                tilleggsnavn
+                postnummer
+            }
+        }
         navn {
             fornavn
             mellomnavn
