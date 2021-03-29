@@ -8,8 +8,6 @@ import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument.hentTilgjengeligAdresse;
 import static org.springframework.util.StringUtils.hasText;
 
