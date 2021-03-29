@@ -2,7 +2,6 @@ package no.nav.melosys.tjenester.gui;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import io.swagger.annotations.Api;
@@ -45,6 +44,8 @@ import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 @Api(tags = {"dokumenterv2"})
 @RequestScope
 public class BrevbestillingTjeneste {
+    private static final String BRUKER_ELLER_BRUKERS_FULLMEKTIG = "Bruker eller brukers fullmektig";
+
     private final BrevbestillingService brevbestillingService;
     private final BehandlingService behandlingService;
     private final BrevmottakerService brevmottakerService;
@@ -58,8 +59,8 @@ public class BrevbestillingTjeneste {
 
     @GetMapping(value = "/tilgjengelige-maler/{behandlingID}", produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Henter alle tilgjengelige brevmaler for en behandling", response = BrevmalDto.class, responseContainer = "List")
-    public List<BrevmalDto> hentTilgjengeligeMaler(@RequestParam Long behandlingId) throws FunksjonellException, TekniskException {
-        return byggBrevmalListe(behandlingId);
+    public List<BrevmalDto> hentTilgjengeligeMaler(@PathVariable long behandlingID) throws FunksjonellException, TekniskException {
+        return byggBrevmalListe(behandlingID);
     }
 
     @PostMapping(value = "pdf/brev/utkast/{behandlingID}/{produserbartDokument}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_PDF_VALUE)
@@ -81,7 +82,7 @@ public class BrevbestillingTjeneste {
 
     private List<BrevmalDto> byggBrevmalListe(long behandlingId) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
-        List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentBrevMaler(behandling);
+        List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentMuligeProduserbaredokumenter(behandling);
 
         List<BrevmalDto> maler = new ArrayList<>();
         for(Produserbaredokumenter p : produserbareDokumenter) {
@@ -91,7 +92,7 @@ public class BrevbestillingTjeneste {
             switch (p) {
                 case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD:
                     mottakerDto = new MottakerDto.Builder()
-                        .medType("Bruker eller brukers fullmektig")
+                        .medType(BRUKER_ELLER_BRUKERS_FULLMEKTIG)
                         .medRolle(hovedMottaker);
 
                     leggTilAdresseOgFeilmelding(mottakerDto, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, hovedMottaker, behandling);
@@ -103,7 +104,7 @@ public class BrevbestillingTjeneste {
                     break;
                 case MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE:
                     mottakerDto = new MottakerDto.Builder()
-                        .medType("Bruker eller brukers fullmektig")
+                        .medType(BRUKER_ELLER_BRUKERS_FULLMEKTIG)
                         .medRolle(hovedMottaker);
 
                     leggTilAdresseOgFeilmelding(mottakerDto, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE, hovedMottaker, behandling);
@@ -115,7 +116,7 @@ public class BrevbestillingTjeneste {
                     break;
                 case MANGELBREV_BRUKER:
                     mottakerDto = new MottakerDto.Builder()
-                        .medType("Bruker eller brukers fullmektig")
+                        .medType(BRUKER_ELLER_BRUKERS_FULLMEKTIG)
                         .medRolle(hovedMottaker);
 
                     leggTilAdresseOgFeilmelding(mottakerDto, MANGELBREV_BRUKER, hovedMottaker, behandling);
