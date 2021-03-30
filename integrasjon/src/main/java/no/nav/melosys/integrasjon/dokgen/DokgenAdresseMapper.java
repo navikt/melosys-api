@@ -8,19 +8,15 @@ import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 
+import static no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument.hentTilgjengeligAdresse;
 import static org.springframework.util.StringUtils.hasText;
 
 public final class DokgenAdresseMapper {
 
-    private DokgenAdresseMapper() {
-    }
+    private DokgenAdresseMapper(){}
 
-    public static List<String> mapAdresselinjer(PersonDokument personDokument) {
-        return mapAdresselinjer(null, null, null, personDokument);
-    }
-
-    public static List<String> mapAdresselinjer(OrganisasjonDokument org, Kontaktopplysning kontaktopplysning) {
-        return mapAdresselinjer(org, null, kontaktopplysning, null);
+    public static String mapMottakerNavn(OrganisasjonDokument org, PersonDokument personDokument) {
+        return org == null ? personDokument.sammensattNavn : org.getNavn();
     }
 
     public static List<String> mapAdresselinjer(OrganisasjonDokument org, String kontaktperson, Kontaktopplysning kontaktopplysning, PersonDokument personDokument) {
@@ -40,14 +36,6 @@ public final class DokgenAdresseMapper {
                 ((orgAdresse.husnummer == null) ? "" : " " + orgAdresse.husnummer));
         }
         return adresselinjer;
-    }
-
-    public static String mapPostnr(OrganisasjonDokument org) {
-        return mapPostnr(org, null);
-    }
-
-    public static String mapPostnr(PersonDokument personDokument) {
-        return mapPostnr(null, personDokument);
     }
 
     public static String mapPostnr(OrganisasjonDokument org, PersonDokument personDokument) {
@@ -76,14 +64,6 @@ public final class DokgenAdresseMapper {
         return poststed;
     }
 
-    public static String mapLandForAdresse(OrganisasjonDokument org) {
-        return mapLandForAdresse(org, null);
-    }
-
-    public static String mapLandForAdresse(PersonDokument personDokument) {
-        return mapLandForAdresse(null, personDokument);
-    }
-
     public static String mapLandForAdresse(OrganisasjonDokument org, PersonDokument personDokument) {
         String land;
         if (org == null) {
@@ -93,9 +73,5 @@ public final class DokgenAdresseMapper {
             land = orgAdresse.landkode != null ? orgAdresse.landkode : null;
         }
         return land;
-    }
-
-    private static StrukturertAdresse hentTilgjengeligAdresse(OrganisasjonDokument org) {
-        return org.getPostadresse() == null ? org.getForretningsadresse() : org.getPostadresse();
     }
 }

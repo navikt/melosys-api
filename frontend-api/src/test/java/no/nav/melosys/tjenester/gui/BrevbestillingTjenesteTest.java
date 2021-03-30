@@ -163,7 +163,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
             .build();
         brevbestillingTjeneste.produserBrev(123L, brevbestillingDto);
 
-        verify(mockDokgenService).produserOgDistribuerBrev(eq(MANGELBREV_BRUKER), eq(123L), eq(brevbestillingDto));
+        verify(mockDokgenService).produserOgDistribuerBrev(MANGELBREV_BRUKER, 123L, brevbestillingDto);
         verifyNoInteractions(mockDokServiceFasade);
 
         valider(brevbestillingDto, "dokumenter-v2-opprett-post-schema.json", new ObjectMapper());

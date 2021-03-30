@@ -74,7 +74,7 @@ class BrevbestillingServiceTest {
 
     @Test
     void hentBrevMaler_behandlingIkkeAvsluttet_returnererMaler() {
-        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentBrevMaler(new Behandling());
+        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(new Behandling());
 
         assertThat(brevMaler)
             .hasSize(2)
@@ -85,7 +85,7 @@ class BrevbestillingServiceTest {
     void hentBrevMaler_behandlingAvsluttet_returnererTomListe() {
         var behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentBrevMaler(behandling);
+        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(behandling);
 
         assertThat(brevMaler).isEmpty();
     }
@@ -94,7 +94,7 @@ class BrevbestillingServiceTest {
     void hentBrevMaler_behandlingErSoeknad_returnererSoeknadMalITillegg() {
         var behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);
-        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentBrevMaler(behandling);
+        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(behandling);
 
         assertThat(brevMaler)
             .hasSize(3)
@@ -105,7 +105,7 @@ class BrevbestillingServiceTest {
     void hentBrevMaler_behandlingErKlage_returnererKlageMalITillegg() {
         var behandling = new Behandling();
         behandling.setType(Behandlingstyper.KLAGE);
-        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentBrevMaler(behandling);
+        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(behandling);
 
         assertThat(brevMaler)
             .hasSize(3)

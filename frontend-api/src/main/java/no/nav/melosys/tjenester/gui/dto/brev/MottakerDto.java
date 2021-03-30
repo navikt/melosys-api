@@ -7,14 +7,14 @@ import java.util.Collection;
 public class MottakerDto {
     private final String type;
     private final Aktoersroller rolle;
-    private final boolean egendefinert;
+    private final boolean orgnrSettesAvSaksbehandler;
     private final Collection<MottakerAdresseDto> adresser;
     private final String feilmelding;
 
     private MottakerDto(Builder builder) {
         this.type = builder.type;
         this.rolle = builder.rolle;
-        this.egendefinert = builder.egendefinert;
+        this.orgnrSettesAvSaksbehandler = builder.orgnrSettesAvSaksbehandler;
         this.adresser = builder.adresser;
         this.feilmelding = builder.feilmelding;
     }
@@ -27,8 +27,8 @@ public class MottakerDto {
         return rolle;
     }
 
-    public boolean isEgendefinert() {
-        return egendefinert;
+    public boolean orgnrSettesAvSaksbehandler() {
+        return orgnrSettesAvSaksbehandler;
     }
 
     public Collection<MottakerAdresseDto> getAdresser() {
@@ -42,7 +42,7 @@ public class MottakerDto {
     public static final class Builder {
         private String type;
         private Aktoersroller rolle;
-        private boolean egendefinert = false;
+        private boolean orgnrSettesAvSaksbehandler = false;
         private Collection<MottakerAdresseDto> adresser;
         private String feilmelding;
 
@@ -56,8 +56,8 @@ public class MottakerDto {
             return this;
         }
 
-        public Builder egendefinert() {
-            this.egendefinert = true;
+        public Builder orgnrSettesAvSaksbehandler() {
+            this.orgnrSettesAvSaksbehandler = true;
             return this;
         }
 
