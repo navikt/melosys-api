@@ -56,7 +56,6 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         verify(tilgangService).sjekkTilgang(behandlingID);
         verify(vedtakServiceFasade).fattVedtak(behandlingID, fattVedtakDto);
 
-        //TODO Bytt schema
         valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
 
@@ -73,9 +72,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         verify(tilgangService).sjekkTilgang(behandlingID);
         verify(vedtakServiceFasade).fattVedtak(behandlingID, fattVedtakDto);
 
-
-        //TODO Bytt schema
-//        valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
+        valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
 
     @Test

@@ -1,8 +1,12 @@
 package no.nav.melosys.service.vedtak;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,13 +16,23 @@ import org.springframework.stereotype.Service;
 public class FtrlVedtakService {
     private static final Logger log = LoggerFactory.getLogger(FtrlVedtakService.class);
 
-    @Autowired
-    public FtrlVedtakService() {
+    private final BehandlingsresultatService behandlingsresultatService;
 
+    @Autowired
+    public FtrlVedtakService(BehandlingsresultatService behandlingsresultatService) {
+        this.behandlingsresultatService = behandlingsresultatService;
     }
 
-    public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatTypeKode,
-                           Vedtakstyper vedtakstype, String fritekstInnledning, String fritekstBegrunnelse) {
+    public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType,
+                           Vedtakstyper vedtakstype, String fritekstInnledning, String fritekstBegrunnelse) throws MelosysException {
+        long behandlingID = behandling.getId();
+
+        log.info("Fatter vedtak for (FTRL) sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
+
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        behandlingsresultat.setType(behandlingsresultatType);
+
+
 
     }
 }
