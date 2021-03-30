@@ -2,7 +2,6 @@ package no.nav.melosys.domain.brev;
 
 import java.time.Instant;
 
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -16,7 +15,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private Instant forsendelseMottatt;
     private String avsenderId;
     private long behandlingId;
-    private Aktoer mottaker; //NOTE Flytt opp til Brevbestilling
     private boolean bestillKopi;
     private Instant vedtaksdato;
     private PersonDokument persondokument;
@@ -33,7 +31,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
         this.forsendelseMottatt = builder.forsendelseMottatt;
         this.avsenderId = builder.avsenderId;
         this.behandlingId = builder.behandlingId;
-        this.mottaker = builder.mottaker;
         this.bestillKopi = builder.bestillKopi;
         this.vedtaksdato = builder.vedtaksdato;
         this.persondokument = builder.persondokument;
@@ -63,10 +60,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return behandlingId;
     }
 
-    public Aktoer getMottaker() {
-        return mottaker;
-    }
-
     public boolean bestillKopi() {
         return bestillKopi;
     }
@@ -93,7 +86,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private String avsenderNavn;
         private String avsenderId;
         private long behandlingId;
-        private Aktoer mottaker;
         private boolean bestillKopi;
         private Instant vedtaksdato;
         private PersonDokument persondokument;
@@ -111,7 +103,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.avsenderNavn = brevbestilling.avsenderNavn;
             this.avsenderId = brevbestilling.avsenderId;
             this.behandlingId = brevbestilling.behandlingId;
-            this.mottaker = brevbestilling.mottaker;
             this.bestillKopi = brevbestilling.bestillKopi;
             this.vedtaksdato = brevbestilling.vedtaksdato;
             this.persondokument = brevbestilling.persondokument;
@@ -159,11 +150,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
         public T medBehandlingId(long behandlingId) {
             this.behandlingId = behandlingId;
-            return (T) this;
-        }
-
-        public T medMottaker(Aktoer mottaker) {
-            this.mottaker = mottaker;
             return (T) this;
         }
 

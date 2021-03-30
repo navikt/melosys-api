@@ -110,15 +110,13 @@ class DistribuerJournalpostTest {
     private Prosessinstans setupHappypath(String journalpostId, Aktoersroller rolle) throws IkkeFunnetException {
         Behandling behandling = TestdataFactory.lagBehandling();
         Prosessinstans prosessinstans = new Prosessinstans();
-        Aktoer mottaker = new Aktoer();
-        mottaker.setRolle(rolle);
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
-            .medMottaker(mottaker)
             .build();
 
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, journalpostId);
         prosessinstans.setData(ProsessDataKey.BREVBESTILLING, brevbestilling);
+        prosessinstans.setData(ProsessDataKey.MOTTAKER, rolle);
 
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 

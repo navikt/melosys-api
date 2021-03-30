@@ -85,17 +85,18 @@ class OpprettJournalforBrevTest {
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
-            .medMottaker(mottaker)
             .build();
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.BREVBESTILLING, brevbestilling);
+        prosessinstans.setData(ProsessDataKey.MOTTAKER, mottaker.getRolle());
+        prosessinstans.setData(ProsessDataKey.AKTØR_ID, mottaker.getAktørId());
 
         opprettJournalforBrev.utfør(prosessinstans);
 
         verify(mockBehandlingService).hentBehandling(anyLong());
-        verify(mockDokgenService).produserBrev(any(DokgenBrevbestilling.class));
+        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 
@@ -114,17 +115,18 @@ class OpprettJournalforBrevTest {
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
-            .medMottaker(mottaker)
             .build();
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.BREVBESTILLING, brevbestilling);
+        prosessinstans.setData(ProsessDataKey.MOTTAKER, mottaker.getRolle());
+        prosessinstans.setData(ProsessDataKey.ORGNR, mottaker.getOrgnr());
 
         opprettJournalforBrev.utfør(prosessinstans);
 
         verify(mockBehandlingService).hentBehandling(anyLong());
-        verify(mockDokgenService).produserBrev(any(DokgenBrevbestilling.class));
+        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 

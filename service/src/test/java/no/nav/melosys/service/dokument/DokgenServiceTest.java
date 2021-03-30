@@ -91,7 +91,7 @@ class DokgenServiceTest {
             .medProduserbartdokument(ATTEST_A1)
             .build();
 
-        assertThatThrownBy(() -> dokgenService.produserBrev(brevbestilling))
+        assertThatThrownBy(() -> dokgenService.produserBrev(new Aktoer(), brevbestilling))
             .isInstanceOf(FunksjonellException.class)
             .hasMessage("ProduserbartDokument ATTEST_A1 er ikke støttet");
     }
@@ -108,11 +108,10 @@ class DokgenServiceTest {
 
         MangelbrevBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
             .medProduserbartdokument(MANGELBREV_BRUKER)
-            .medMottaker(mottaker)
             .medBehandlingId(123)
             .build();
 
-        byte[] pdfResponse = dokgenService.produserBrev(brevbestilling);
+        byte[] pdfResponse = dokgenService.produserBrev(mottaker, brevbestilling);
 
         assertThat(pdfResponse).isNotNull();
         assertThat(pdfResponse).isEqualTo(expectedPdf);
@@ -136,11 +135,10 @@ class DokgenServiceTest {
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
-            .medMottaker(mottaker)
             .medBehandlingId(123)
             .build();
 
-        byte[] pdfResponse = dokgenService.produserBrev(brevbestilling);
+        byte[] pdfResponse = dokgenService.produserBrev(mottaker, brevbestilling);
 
         assertThat(pdfResponse).isNotNull();
         assertThat(pdfResponse).isEqualTo(expectedPdf);
@@ -254,7 +252,7 @@ class DokgenServiceTest {
 
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
 
-        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(DokgenBrevbestilling.class));
+        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Aktoer.class), any(DokgenBrevbestilling.class));
         verify(mockBrevMottakerService).avklarMottakere(any(), any(), any(), eq(false), eq(false));
     }
 
@@ -270,7 +268,7 @@ class DokgenServiceTest {
 
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
 
-        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(DokgenBrevbestilling.class));
+        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Aktoer.class), any(DokgenBrevbestilling.class));
         verifyNoInteractions(mockBrevMottakerService);
     }
 
@@ -287,7 +285,7 @@ class DokgenServiceTest {
 
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
 
-        verify(mockProsessinstansService, times(2)).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(MangelbrevBrevbestilling.class));
+        verify(mockProsessinstansService, times(2)).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Aktoer.class), any(MangelbrevBrevbestilling.class));
         verifyNoInteractions(mockBrevMottakerService);
     }
 

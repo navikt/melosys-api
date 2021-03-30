@@ -204,18 +204,18 @@ class ProsessinstansServiceTest {
 
         DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
             .medProduserbartdokument(MANGELBREV_BRUKER)
-            .medMottaker(mottaker)
             .build();
 
-        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(behandling, brevbestilling);
+        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(behandling, mottaker, brevbestilling);
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
         Prosessinstans lagretInstans = piCaptor.getValue();
         assertThat(lagretInstans.getType()).isEqualTo(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
+        assertThat(lagretInstans.getData(ProsessDataKey.MOTTAKER, String.class)).isEqualTo(mottaker.getRolle().name());
+        assertThat(lagretInstans.getData(ProsessDataKey.AKTØR_ID)).isEqualTo(mottaker.getAktørId());
         MangelbrevBrevbestilling lagretBrevbestilling = lagretInstans.getData(ProsessDataKey.BREVBESTILLING, MangelbrevBrevbestilling.class);
         assertThat(lagretBrevbestilling.getProduserbartdokument()).isEqualTo(MANGELBREV_BRUKER);
-        assertThat(lagretBrevbestilling.getMottaker()).isEqualTo(mottaker);
         assertThat(lagretInstans.getData(ProsessDataKey.SAKSBEHANDLER)).isEqualTo(saksbehandler);
     }
 
@@ -230,18 +230,18 @@ class ProsessinstansServiceTest {
 
         DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
             .medProduserbartdokument(MANGELBREV_ARBEIDSGIVER)
-            .medMottaker(mottaker)
             .build();
 
-        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(behandling, brevbestilling);
+        prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(behandling, mottaker, brevbestilling);
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
         Prosessinstans lagretInstans = piCaptor.getValue();
         assertThat(lagretInstans.getType()).isEqualTo(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
+        assertThat(lagretInstans.getData(ProsessDataKey.MOTTAKER, String.class)).isEqualTo(mottaker.getRolle().name());
+        assertThat(lagretInstans.getData(ProsessDataKey.ORGNR)).isEqualTo(mottaker.getOrgnr());
         MangelbrevBrevbestilling lagretBrevbestilling = lagretInstans.getData(ProsessDataKey.BREVBESTILLING, MangelbrevBrevbestilling.class);
         assertThat(lagretBrevbestilling.getProduserbartdokument()).isEqualTo(MANGELBREV_ARBEIDSGIVER);
-        assertThat(lagretBrevbestilling.getMottaker()).isEqualTo(mottaker);
         assertThat(lagretInstans.getData(ProsessDataKey.SAKSBEHANDLER)).isEqualTo(saksbehandler);
     }
 

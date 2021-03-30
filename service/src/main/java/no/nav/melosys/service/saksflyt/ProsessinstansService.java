@@ -248,10 +248,17 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansOpprettOgDistribuerBrev(Behandling behandling, DokgenBrevbestilling brevbestilling) {
+    public void opprettProsessinstansOpprettOgDistribuerBrev(Behandling behandling, Aktoer mottaker, DokgenBrevbestilling brevbestilling) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
         prosessinstans.setData(BREVBESTILLING, brevbestilling);
+        prosessinstans.setData(MOTTAKER, mottaker.getRolle());
+        if (hasText(mottaker.getAktørId())) {
+            prosessinstans.setData(AKTØR_ID, mottaker.getAktørId());
+        }
+        if (hasText(mottaker.getOrgnr())) {
+            prosessinstans.setData(ORGNR, mottaker.getOrgnr());
+        }
         prosessinstans.setBehandling(behandling);
         lagre(prosessinstans);
     }

@@ -24,8 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BREVBESTILLING;
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_OG_JOURNALFØR_BREV;
 import static org.springframework.util.ObjectUtils.isEmpty;
 import static org.springframework.util.StringUtils.hasText;
@@ -66,23 +65,27 @@ public class OpprettJournalforBrev implements StegBehandler {
         PersonDokument personDokument = behandling.hentPersonDokument();
         DokgenBrevbestilling brevbestilling = prosessinstans.getData(BREVBESTILLING, DokgenBrevbestilling.class);
         Produserbaredokumenter produserbartDokument = brevbestilling.getProduserbartdokument();
-        Aktoer mottaker = brevbestilling.getMottaker();
 
-        if (mottaker == null || (isEmpty(mottaker.getAktørId()) && isEmpty(mottaker.getOrgnr()))) {
-            throw new FunksjonellException("Mangler mottaker");
-        }
-
-        String aktørId = mottaker.getAktørId();
-        String orgnr = mottaker.getOrgnr();
+        String aktørId = prosessinstans.getData(AKTØR_ID);
+        String orgnr = prosessinstans.getData(ORGNR, String.class, null);
         String fnr = null;
         String sammensattNavn = null;
 
-        if (isEmpty(orgnr)) {
-            fnr = persondataFasade.hentIdentForAktørId(aktørId);
-            sammensattNavn = persondataFasade.hentSammensattNavn(fnr);
+        if (isEmpty(aktørId) && isEmpty(orgnr)) {
+            throw new FunksjonellException("Mangler mottaker");
         }
 
-        byte[] pdf = dokgenService.produserBrev(brevbestilling);
+        Aktoer mottaker = new Aktoer();
+
+        if (isEmpty(orgnr)) {
+            mottaker.setAktørId(aktørId);
+            fnr = persondataFasade.hentIdentForAktørId(aktørId);
+            sammensattNavn = persondataFasade.hentSammensattNavn(fnr);
+        } else {
+            mottaker.setOrgnr(orgnr);
+        }
+
+        byte[] pdf = dokgenService.produserBrev(mottaker, brevbestilling);
         log.info("Produserbartdokument {} for behandling {} produsert", produserbartDokument, behandling.getId());
 
         DokumentproduksjonsInfo dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(produserbartDokument);
