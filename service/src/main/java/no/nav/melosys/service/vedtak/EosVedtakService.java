@@ -88,9 +88,10 @@ public class EosVedtakService {
                            Vedtakstyper vedtakstype, String revurderBegrunnelse) throws MelosysException {
         long behandlingID = behandling.getId();
 
+        log.info("Fatter vedtak for (EU_EØS) sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
+
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         behandlingsresultat.setType(behandlingsresultatType);
-        log.info("Fatter vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
         if (behandlingsresultat.erInnvilgelse()) {
             validerInnvilgelse(vedtakstype, behandling, behandlingsresultat);

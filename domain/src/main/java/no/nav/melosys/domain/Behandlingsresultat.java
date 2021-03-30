@@ -404,6 +404,8 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return vedtakMetadata != null;
     }
 
+
+
     @Override
     public String toString() {
         return "Behandlingsresultat{" +

@@ -82,7 +82,7 @@ public class VedtakServiceFasade {
         );
     }
 
-    private void fattVedtakForFtrl(Behandling behandling, FtrlFattVedtakDto fattVedtakDto) {
+    private void fattVedtakForFtrl(Behandling behandling, FtrlFattVedtakDto fattVedtakDto) throws MelosysException {
         ftrlVedtakService.fattVedtak(
             behandling,
             fattVedtakDto.getBehandlingsresultatTypeKode(),
