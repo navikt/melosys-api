@@ -2,9 +2,11 @@ package no.nav.melosys.saksflyt.steg.brev;
 
 import java.time.LocalDate;
 
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Kontaktopplysning;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -23,7 +25,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.BREVBESTILLING;
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 
 @Component
@@ -60,9 +63,9 @@ public class DistribuerJournalpost implements StegBehandler {
         }
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         String journalpostId = prosessinstans.getData(DISTRIBUERBAR_JOURNALPOST_ID);
-        Aktoersroller mottaker = prosessinstans.getData(MOTTAKER, Aktoersroller.class);
-        String kontaktperson = prosessinstans.getData(KONTAKTPERSON, String.class, null);
-        String orgnr = prosessinstans.getData(ORGNR, String.class, null);
+        DokgenBrevbestilling brevbestilling = prosessinstans.getData(BREVBESTILLING, DokgenBrevbestilling.class);
+        Aktoer mottaker = brevbestilling.getMottaker();
+        String orgnr = brevbestilling.getMottaker() != null ? brevbestilling.getMottaker().getOrgnr() : null;
 
         if (isEmpty(journalpostId)) {
             throw new FunksjonellException("JournalpostId mangler, kan ikke distribuere");
@@ -75,10 +78,11 @@ public class DistribuerJournalpost implements StegBehandler {
         OrganisasjonDokument org = null;
         Kontaktopplysning kontaktopplysning = null;
 
-        if (mottaker != Aktoersroller.BRUKER) {
+        if (mottaker.getRolle() != Aktoersroller.BRUKER) {
             kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), orgnr).orElse(null);
             String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : orgnr;
-            org = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();        }
+            org = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();
+        }
 
         String bestillingsId;
         if (org != null) {
@@ -86,7 +90,7 @@ public class DistribuerJournalpost implements StegBehandler {
             if (postadresse.erNorsk() && isEmpty(postadresse.poststed)) {
                 postadresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, postadresse.postnummer, LocalDate.now());
             }
-            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, postadresse, kontaktopplysning, kontaktperson);
+            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, postadresse, kontaktopplysning, brevbestilling.getKontaktperson());
         } else {
             bestillingsId = doksysFasade.distribuerJournalpost(journalpostId);
         }

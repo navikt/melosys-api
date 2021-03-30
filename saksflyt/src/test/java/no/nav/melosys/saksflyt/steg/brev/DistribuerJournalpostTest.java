@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.brev;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -16,6 +17,7 @@ import no.nav.melosys.saksflyt.TestdataFactory;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,6 +62,8 @@ class DistribuerJournalpostTest {
         Behandling behandling = TestdataFactory.lagBehandling();
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         prosessinstans.setBehandling(behandling);
+        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling());
+
         assertThrows(FunksjonellException.class, () -> distribuerJournalpost.utfør(prosessinstans));
     }
 
@@ -70,6 +74,7 @@ class DistribuerJournalpostTest {
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, "123");
+        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling());
         assertThrows(FunksjonellException.class, () -> distribuerJournalpost.utfør(prosessinstans));
     }
 
@@ -105,10 +110,15 @@ class DistribuerJournalpostTest {
     private Prosessinstans setupHappypath(String journalpostId, Aktoersroller rolle) throws IkkeFunnetException {
         Behandling behandling = TestdataFactory.lagBehandling();
         Prosessinstans prosessinstans = new Prosessinstans();
+        Aktoer mottaker = new Aktoer();
+        mottaker.setRolle(rolle);
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
+            .medMottaker(mottaker)
+            .build();
 
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, journalpostId);
-        prosessinstans.setData(ProsessDataKey.MOTTAKER, rolle);
+        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, brevbestilling);
 
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 

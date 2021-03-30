@@ -1,9 +1,13 @@
 package no.nav.melosys.domain.brev;
 
 public class MangelbrevBrevbestilling extends DokgenBrevbestilling {
-    private final String manglerInfoFritekst;
-    private final String innledningFritekst;
-    private final String fullmektigNavn;
+    private String manglerInfoFritekst;
+    private String innledningFritekst;
+    private String fullmektigNavn;
+
+    public MangelbrevBrevbestilling() {
+        super();
+    }
 
     private MangelbrevBrevbestilling(MangelbrevBrevbestilling.Builder builder) {
         super(builder);

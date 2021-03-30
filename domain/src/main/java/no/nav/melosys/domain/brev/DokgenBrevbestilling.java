@@ -10,16 +10,20 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
 public class DokgenBrevbestilling extends Brevbestilling {
-    private final OrganisasjonDokument org;
-    private final Kontaktopplysning kontaktopplysning;
-    private final String kontaktperson;
-    private final Instant forsendelseMottatt;
-    private final String avsenderId;
-    private final long behandlingId;
-    private final Aktoer mottaker; //NOTE Flytt opp til Brevbestilling
-    private final boolean bestillKopi;
-    private final Instant vedtaksdato;
-    private final PersonDokument persondokument;
+    private OrganisasjonDokument org;
+    private Kontaktopplysning kontaktopplysning;
+    private String kontaktperson;
+    private Instant forsendelseMottatt;
+    private String avsenderId;
+    private long behandlingId;
+    private Aktoer mottaker; //NOTE Flytt opp til Brevbestilling
+    private boolean bestillKopi;
+    private Instant vedtaksdato;
+    private PersonDokument persondokument;
+
+    public DokgenBrevbestilling() {
+        super();
+    }
 
     protected DokgenBrevbestilling(Builder<?> builder) {
         super(builder.produserbartdokument, builder.behandling, builder.avsenderNavn);
@@ -76,7 +80,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
     }
 
     public Builder toBuilder() {
-        return new Builder (this);
+        return new Builder(this);
     }
 
     public static class Builder<T extends Builder<T>> {

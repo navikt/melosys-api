@@ -36,45 +36,44 @@ public class DokumentServiceFasade {
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
-    public byte[] produserUtkast(Produserbaredokumenter produserbartDokument, long behandlingId,
-                                 BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
-        if (dokgenService.erTilgjengeligDokgenmal(produserbartDokument)) {
-            return dokgenService.produserUtkast(produserbartDokument, behandlingId,
-                brevbestillingDto.getOrgNr(), brevbestillingDto);
+    public byte[] produserUtkast(long behandlingId, BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
+        if (dokgenService.erTilgjengeligDokgenmal(brevbestillingDto.getProduserbardokument())) {
+            return dokgenService.produserUtkast(behandlingId, brevbestillingDto);
         }
-        return dokumentService.produserUtkast(produserbartDokument, behandlingId, brevbestillingDto);
+        return dokumentService.produserUtkast(behandlingId, brevbestillingDto);
     }
 
     @Transactional
-    public void produserDokument(Produserbaredokumenter produserbartDokument, long behandlingId,
-                                 BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
+    public void produserDokument(long behandlingId, BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
         String saksbehandler = SubjectHandler.getInstance().getUserID();
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
-        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(produserbartDokument)
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(brevbestillingDto.getProduserbardokument())
             .medAvsenderNavn(saksbehandler)
             .medMottakere(Mottaker.av(brevbestillingDto.getMottaker()))
             .medBegrunnelseKode(brevbestillingDto.getBegrunnelseKode())
             .medYtterligereInformasjon(brevbestillingDto.getYtterligereInformasjon())
             .medBehandling(behandling)
             .medFritekst(brevbestillingDto.getFritekst()).build();
-        produserDokument(produserbartDokument, Mottaker.av(brevbestillingDto.getMottaker()), behandlingId, brevbestilling, brevbestillingDto);
+        produserDokument(behandlingId, brevbestilling, brevbestillingDto, Mottaker.av(brevbestillingDto.getMottaker()));
     }
 
     @Transactional
-    public void produserDokument(Produserbaredokumenter dokumentType, Mottaker mottaker, long id, DoksysBrevbestilling brevbestilling)
+    public void produserDokument(Produserbaredokumenter dokumentType, Mottaker mottaker, long behandlingId, DoksysBrevbestilling brevbestilling)
         throws FunksjonellException, TekniskException {
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+            .medProduserbardokument(dokumentType)
             .medMottaker(mottaker.getRolle())
             .build();
 
-        produserDokument(dokumentType, mottaker, id, brevbestilling, brevbestillingDto);
+        produserDokument(behandlingId, brevbestilling, brevbestillingDto, mottaker);
     }
 
-    private void produserDokument(Produserbaredokumenter produserbartDokument, Mottaker mottaker,
-                                 long behandlingID, DoksysBrevbestilling brevbestilling, BrevbestillingDto brevbestillingDto)
+    private void produserDokument(long behandlingID, DoksysBrevbestilling brevbestilling, BrevbestillingDto brevbestillingDto, Mottaker mottaker)
         throws TekniskException, FunksjonellException {
+        Produserbaredokumenter produserbartDokument = brevbestillingDto.getProduserbardokument();
+
         if (dokgenService.erTilgjengeligDokgenmal(produserbartDokument)) {
-            dokgenService.produserOgDistribuerBrev(produserbartDokument, behandlingID, brevbestillingDto);
+            dokgenService.produserOgDistribuerBrev(behandlingID, brevbestillingDto);
         } else {
             dokumentSystemService.produserDokument(produserbartDokument, mottaker, behandlingID, brevbestilling);
         }
