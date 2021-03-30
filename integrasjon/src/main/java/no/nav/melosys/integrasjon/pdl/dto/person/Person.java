@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Bostedsadresse;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Kontaktadresse;
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Oppholdsadresse;
 
 public record Person(
     Collection<Adressebeskyttelse> adressebeskyttelse,
@@ -16,6 +17,7 @@ public record Person(
     Collection<Kjoenn> kjoenn,
     Collection<Kontaktadresse> kontaktadresse,
     Collection<Navn> navn,
+    Collection<Oppholdsadresse> oppholdsadresse,
     Collection<Sivilstand> sivilstand,
     Collection<Statsborgerskap> statsborgerskap
 ) {

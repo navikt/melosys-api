@@ -120,6 +120,34 @@ query($ident: ID!) {
                 }
             }
         }
+        oppholdsadresse {
+            gyldigFraOgMed
+            gyldigTilOgMed
+            oppholdAnnetSted
+            coAdressenavn
+            matrikkeladresse {
+                bruksenhetsnummer
+                kommunenummer
+                tilleggsnavn
+                postnummer
+            }
+            utenlandskAdresse {
+                adressenavnNummer
+                bygningEtasjeLeilighet
+                postboksNummerNavn
+                postkode
+                bySted
+                regionDistriktOmraade
+                landkode
+            }
+            vegadresse {
+                adressenavn
+                husnummer
+                husbokstav
+                tilleggsnavn
+                postnummer
+            }
+        }
         statsborgerskap {
             land
             metadata {

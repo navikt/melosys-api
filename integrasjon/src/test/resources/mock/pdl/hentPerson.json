@@ -120,6 +120,25 @@
           }
         }
       ],
+      "oppholdsadresse": [
+        {
+          "gyldigFraOgMed": null,
+          "gyldigTilOgMed": null,
+          "oppholdAnnetSted": null,
+          "coAdressenavn": "Estate of",
+          "matrikkeladresse": null,
+          "utenlandskAdresse": {
+            "adressenavnNummer": "Adresse er påkrevd",
+            "bygningEtasjeLeilighet": "Bygning",
+            "postboksNummerNavn": null,
+            "postkode": "Postkode",
+            "bySted": "By",
+            "regionDistriktOmraade": "Region",
+            "landkode": "ABW"
+          },
+          "vegadresse": null
+        }
+      ],
       "statsborgerskap": [
         {
           "land": "NOR",

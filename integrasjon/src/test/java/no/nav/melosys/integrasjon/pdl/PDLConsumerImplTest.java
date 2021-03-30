@@ -110,6 +110,9 @@ class PDLConsumerImplTest {
             .contains(LocalDate.parse("2020-03-29"));
         assertThat(person.bostedsadresse()).extracting(Bostedsadresse::vegadresse).contains(
             new Vegadresse("HALÅSVEGEN", "5", null, null, "6713"));
+        assertThat(person.oppholdsadresse()).extracting(Oppholdsadresse::coAdressenavn).contains("Estate of");
+        assertThat(person.oppholdsadresse()).extracting(Oppholdsadresse::utenlandskAdresse).contains(
+            new UtenlandskAdresse("Adresse er påkrevd", "Bygning", null, "Postkode", "By", "Region", "ABW"));
     }
 
     @Test
