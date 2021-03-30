@@ -86,21 +86,28 @@ class PDLConsumerImplTest {
             .flatExtracting(ForelderBarnRelasjon::relatertPersonsIdent, ForelderBarnRelasjon::relatertPersonsRolle,
                 ForelderBarnRelasjon::minRolleForPerson)
             .containsExactly("22511596061",Familierelasjonsrolle.BARN, Familierelasjonsrolle.MOR);
+        assertThat(person.fullmakt()).flatExtracting(Fullmakt::motpartsPersonident, Fullmakt::motpartsRolle)
+            .contains("18498008107", FullmaktsRolle.FULLMEKTIG);
+        assertThat(person.fullmakt()).flatExtracting(Fullmakt::omraader).contains("MED", "UFM");
         assertThat(person.kjoenn())
             .flatExtracting(Kjoenn::kjoenn)
             .containsExactly(KjoennType.KVINNE);
         assertThat(person.navn())
             .flatExtracting(Navn::fornavn, Navn::mellomnavn, Navn::etternavn)
-            .containsExactly("MOLEFONKEN", "TIKKENDE", "KNOTT");
+            .containsExactly("MOLEFONKEN", "DANSENDE", "KNOTT");
         assertThat(person.statsborgerskap())
             .flatExtracting(Statsborgerskap::land)
             .containsExactly("NOR");
         assertThat(person.sivilstand())
             .flatExtracting(Sivilstand::type, Sivilstand::relatertVedSivilstand, Sivilstand::gyldigFraOgMed)
             .containsExactly(Sivilstandstype.REGISTRERT_PARTNER, "11466927750", LocalDate.parse("2021-03-02"));
+        testAdresser(person);
+    }
+
+    private void testAdresser(Person person) {
         assertThat(person.kontaktadresse()).hasSize(2).flatExtracting(Kontaktadresse::type,
             Kontaktadresse::gyldigFraOgMed, Kontaktadresse::gyldigTilOgMed, Kontaktadresse::coAdressenavn)
-            .contains(KontaktadresseType.Innland, LocalDateTime.parse("2020-03-29T00:00"),
+            .contains(KontaktadresseType.Innland, LocalDateTime.parse("2020-03-30T00:00"),
                 LocalDateTime.parse("2021-04-01T00:00"), "C/O RAKRYGGET STAFFELI");
         assertThat(person.kontaktadresse()).extracting(Kontaktadresse::vegadresse).contains(
             new Vegadresse("LANGBERGA", "30", null, null, "6800"));

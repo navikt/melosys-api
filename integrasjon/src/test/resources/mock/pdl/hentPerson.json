@@ -28,7 +28,7 @@
             "master": "FREG",
             "endringer": [
               {
-                "registrert": "2021-03-29T10:16:32",
+                "registrert": "2021-03-30T12:23:06",
                 "type": "OPPRETT"
               }
             ]
@@ -55,6 +55,20 @@
           "minRolleForPerson": "MOR"
         }
       ],
+      "fullmakt": [
+        {
+          "motpartsPersonident": "18498008107",
+          "motpartsRolle": "FULLMEKTIG",
+          "omraader": [
+            "KLA",
+            "UKJ",
+            "MED",
+            "UFM"
+          ],
+          "gyldigFraOgMed": "2021-04-01",
+          "gyldigTilOgMed": "2023-03-30"
+        }
+      ],
       "kjoenn": [
         {
           "kjoenn": "KVINNE",
@@ -62,7 +76,7 @@
             "master": "FREG",
             "endringer": [
               {
-                "registrert": "2021-03-29T10:16:32",
+                "registrert": "2021-03-30T12:23:06",
                 "type": "OPPRETT"
               }
             ]
@@ -72,8 +86,8 @@
       "kontaktadresse": [
         {
           "type": "Innland",
-          "gyldigFraOgMed": "2020-03-29T00:00",
-          "gyldigTilOgMed": "2031-03-29T23:59:59",
+          "gyldigFraOgMed": "2020-03-30T00:00",
+          "gyldigTilOgMed": "2031-03-30T23:59:59",
           "coAdressenavn": null,
           "postboksadresse": null,
           "postadresseIFrittFormat": {
@@ -88,7 +102,7 @@
         },
         {
           "type": "Innland",
-          "gyldigFraOgMed": "2021-03-29T00:00",
+          "gyldigFraOgMed": "2021-03-30T00:00",
           "gyldigTilOgMed": "2021-04-01T00:00",
           "coAdressenavn": "C/O RAKRYGGET STAFFELI",
           "postboksadresse": null,
@@ -107,13 +121,13 @@
       "navn": [
         {
           "fornavn": "MOLEFONKEN",
-          "mellomnavn": "TIKKENDE",
+          "mellomnavn": "DANSENDE",
           "etternavn": "KNOTT",
           "metadata": {
             "master": "FREG",
             "endringer": [
               {
-                "registrert": "2021-03-29T10:16:32",
+                "registrert": "2021-03-30T12:23:06",
                 "type": "OPPRETT"
               }
             ]

@@ -57,6 +57,13 @@ query($ident: ID!) {
             relatertPersonsRolle
             minRolleForPerson
         }
+        fullmakt {
+            motpartsPersonident
+            motpartsRolle
+            omraader
+            gyldigFraOgMed
+            gyldigTilOgMed
+        }        
         kjoenn {
             kjoenn
             metadata {
