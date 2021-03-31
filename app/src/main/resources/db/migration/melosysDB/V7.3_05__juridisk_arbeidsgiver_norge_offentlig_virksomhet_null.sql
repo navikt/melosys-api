@@ -10,7 +10,6 @@ FOR bg IN bgs
 
             juridiskArbeidsgiverNorge := jsonData.GET_OBJECT('juridiskArbeidsgiverNorge');
             juridiskArbeidsgiverNorge.put_null('erOffentligVirksomhet');
-            jsonData.put('juridiskArbeidsgiverNorge', juridiskArbeidsgiverNorge);
 
             oppdatertJsonData := jsonData.stringify;
             UPDATE BEHANDLINGSGRUNNLAG SET DATA = oppdatertJsonData WHERE CURRENT OF bgs;

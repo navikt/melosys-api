@@ -25,7 +25,6 @@ BEGIN
                 ELSIF erOfv = 'false' THEN
                     juridiskArbeidsgiverNorge.put('erOffentligVirksomhet', false);
                 END IF;
-                jsonData.put('juridiskArbeidsgiverNorge', juridiskArbeidsgiverNorge);
 
                 oppdatertJsonData := jsonData.stringify;
                 UPDATE BEHANDLINGSGRUNNLAG SET DATA = oppdatertJsonData WHERE CURRENT OF bgs;
