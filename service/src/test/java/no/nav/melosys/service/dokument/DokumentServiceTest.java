@@ -235,7 +235,8 @@ public final class DokumentServiceTest {
             avklarteVirksomheterService,
             mock(UtenlandskMyndighetService.class),
             behandlingsresultatService,
-            mock(TrygdeavgiftsberegningService.class));
+            mock(TrygdeavgiftsberegningService.class),
+            mock(EregFasade.class));
         return new DokumentService(behandlingService, brevDataService, dokSysFasade, brevmottakerService, brevdatabyggervelger, lagBrevinput(persondataFasade, avklartefaktaService));
     }
 

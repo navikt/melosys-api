@@ -21,8 +21,10 @@ import no.nav.melosys.tjenester.gui.dto.brev.BrevmalDto;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalFeltDto;
 import no.nav.melosys.tjenester.gui.dto.brev.FeltType;
 import no.nav.melosys.tjenester.gui.dto.brev.FeltvalgDto;
+import no.nav.melosys.tjenester.gui.dto.brev.HentMuligeMottakereRequestDto;
 import no.nav.melosys.tjenester.gui.dto.brev.MottakerAdresseDto;
 import no.nav.melosys.tjenester.gui.dto.brev.MottakerDto;
+import no.nav.melosys.service.dokument.MuligeMottakereDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -57,6 +59,15 @@ public class BrevbestillingTjeneste {
     @ApiOperation(value = "Henter alle tilgjengelige brevmaler for en behandling", response = BrevmalDto.class, responseContainer = "List")
     public List<BrevmalDto> hentTilgjengeligeMaler(@PathVariable long behandlingID) throws FunksjonellException, TekniskException {
         return byggBrevmalListe(behandlingID);
+    }
+
+    @PostMapping(value = "/muligeMottakere/{behandlingID}", produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Henter alle mulige mottakere for valgt type og mottaker")
+    public MuligeMottakereDto hentTilgjengeligeMottakere(@PathVariable Long behandlingID,
+                                                         @RequestBody HentMuligeMottakereRequestDto hentMuligeMottakereRequestDto)
+        throws FunksjonellException, TekniskException {
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        return brevmottakerService.hentMuligeMottakere(hentMuligeMottakereRequestDto.produserbartdokument(), behandling, hentMuligeMottakereRequestDto.orgnr());
     }
 
     @PostMapping(value = "pdf/brev/utkast/{behandlingID}/{produserbartDokument}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_PDF_VALUE)

@@ -9,13 +9,16 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.brev.BrevkopiRegel;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
@@ -45,17 +48,97 @@ public class BrevmottakerService {
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final TrygdeavgiftsberegningService trygdeavgiftsberegningService;
+    private final EregFasade eregFasade;
 
     @Autowired
     public BrevmottakerService(KontaktopplysningService kontaktopplysningService,
                                AvklarteVirksomheterService avklarteVirksomheterService,
                                UtenlandskMyndighetService utenlandskMyndighetService,
-                               BehandlingsresultatService behandlingsresultatService, TrygdeavgiftsberegningService trygdeavgiftsberegningService) {
+                               BehandlingsresultatService behandlingsresultatService,
+                               TrygdeavgiftsberegningService trygdeavgiftsberegningService,
+                               EregFasade eregFasade) {
         this.kontaktopplysningService = kontaktopplysningService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.trygdeavgiftsberegningService = trygdeavgiftsberegningService;
+        this.eregFasade = eregFasade;
+    }
+
+    public MuligeMottakereDto hentMuligeMottakere(Produserbaredokumenter produserbaredokumenter, Behandling behandling, String orgnrTilValgtArbeidsgiver)
+        throws FunksjonellException, TekniskException {
+        var builder = new MuligeMottakereDto.Builder();
+        Mottakerliste mottakerliste = hentMottakerliste(produserbaredokumenter, behandling);
+
+        leggTilHovedMottaker(produserbaredokumenter, behandling, mottakerliste.getHovedMottaker(), orgnrTilValgtArbeidsgiver, builder);
+        leggTilKopiMottakere(produserbaredokumenter, behandling, mottakerliste.getKopiMottakere(), builder);
+        leggTilFasteMottakere();
+
+        return builder.build();
+    }
+
+    private void leggTilHovedMottaker(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller hovedmottaker, String orgnrTilValgtArbeidsgiver, MuligeMottakereDto.Builder builder)
+        throws FunksjonellException, TekniskException {
+        var hovedMottakerBuilder = new MuligMottakerDto.Builder()
+            .medDokumentNavn(produserbaredokumenter.getBeskrivelse())
+            .medAktoerrolle(hovedmottaker);
+
+        if (hovedmottaker == Aktoersroller.BRUKER) {
+            var avklartMottaker = avklarMottakere(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling, false, false)
+                .stream().findFirst()
+                .orElseThrow(() -> new FunksjonellException("Finner ikke avklart mottaker for produserbart dokument " + produserbaredokumenter.getKode() + " og rolle " + hovedmottaker.getKode() + "for behandling " + behandling.getId()));
+
+            if (avklartMottaker.getRolle() == Aktoersroller.BRUKER) {
+                hovedMottakerBuilder.medMottakerNavn(behandling.hentPersonDokument().sammensattNavn);
+            } else {
+                var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartMottaker.getOrgnr());
+                hovedMottakerBuilder.medMottakerNavn(orgDokument.getNavn());
+            }
+        }
+        if (hovedmottaker == Aktoersroller.ARBEIDSGIVER) {
+            var orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(orgnrTilValgtArbeidsgiver).getDokument();
+            hovedMottakerBuilder.medMottakerNavn(orgDokument.getNavn());
+        }
+
+        builder.medHovedMottaker(hovedMottakerBuilder.build());
+    }
+
+    private void leggTilKopiMottakere(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<Aktoersroller> kopiMottakere, MuligeMottakereDto.Builder builder) throws FunksjonellException, TekniskException {
+        for (Aktoersroller kopiMottaker : kopiMottakere) {
+            if (kopiMottaker == Aktoersroller.BRUKER) {
+                var avklartKopi = avklarMottakere(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling, false, false)
+                    .stream().findFirst()
+                    .orElseThrow(() -> new FunksjonellException("Finner ikke avklart mottaker for produserbart dokument " + produserbaredokumenter.getKode() + " og rolle " + kopiMottaker.getKode() + "for behandling " + behandling.getId()));
+
+                if (avklartKopi.getRolle() == Aktoersroller.BRUKER) {
+                    builder.medKopiMottaker(new MuligMottakerDto.Builder()
+                        .medDokumentNavn("Kopi til bruker")
+                        .medMottakerNavn(behandling.hentPersonDokument().sammensattNavn)
+                        .medAktoerrolle(avklartKopi.getRolle())
+                        .medAktørId(behandling.getFagsak().hentBruker().getAktørId())
+                        .build());
+                } else {
+                    var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartKopi.getOrgnr());
+                    builder.medKopiMottaker(new MuligMottakerDto.Builder()
+                        .medDokumentNavn("Kopi til brukers fullmektig")
+                        .medMottakerNavn(orgDokument.getNavn())
+                        .medAktoerrolle(avklartKopi.getRolle())
+                        .medOrgnr(orgDokument.getOrgnummer())
+                        .build());
+                }
+            }
+            // TODO: Legge til støtte for kopi til andre aktørroller når det blir nødvendig
+        }
+    }
+
+    private void leggTilFasteMottakere(){
+        // TODO: Legg til støtte for faste mottakere
+    }
+
+    private OrganisasjonDokument hentRettOrganisasjonsdokument(Behandling behandling, String orgnr) throws IkkeFunnetException, IntegrasjonException {
+        Kontaktopplysning kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), orgnr).orElse(null);
+        String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : orgnr;
+        return (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();
     }
 
     Aktoersroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) throws TekniskException {
