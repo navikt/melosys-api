@@ -53,6 +53,12 @@ public class SvarAnmodningUnntakSedRuter implements SedRuterForSedTyper {
     @Override
     public void rutSedTilBehandling(Prosessinstans prosessinstans, Long arkivsakID) throws TekniskException, FunksjonellException {
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
+
+        if (arkivsakID == null) {
+            oppgaveService.opprettJournalføringsoppgave(melosysEessiMelding.getJournalpostId(), melosysEessiMelding.getAktoerId());
+            return;
+        }
+
         Behandling behandling = hentBehandling(arkivsakID);
         prosessinstans.setBehandling(behandling);
         Optional<Anmodningsperiode> anmodningsperiode = anmodningsperiodeService.hentAnmodningsperioder(behandling.getId())
