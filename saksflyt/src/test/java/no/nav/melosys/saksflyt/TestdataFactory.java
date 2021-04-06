@@ -9,8 +9,8 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
+import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
@@ -24,10 +24,17 @@ public final class TestdataFactory {
         return behandling;
     }
 
-    public static OrganisasjonDokument lagOrg() {
+    public static OrganisasjonDokument lagOrgMedPostadresse() {
         OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
         organisasjonDokument.setOrgnummer("122344");
-        organisasjonDokument.setOrganisasjonDetaljer(lagOrgDetaljer());
+        organisasjonDokument.setOrganisasjonDetaljer(lagOrgDetaljerMedPostadresse());
+        return organisasjonDokument;
+    }
+
+    public static OrganisasjonDokument lagOrgMedForretningsadresse() {
+        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
+        organisasjonDokument.setOrgnummer("122344");
+        organisasjonDokument.setOrganisasjonDetaljer(lagOrgDetaljerMedForretningsadresse());
         return organisasjonDokument;
     }
 
@@ -56,17 +63,23 @@ public final class TestdataFactory {
         return fagsak;
     }
 
-    static OrganisasjonsDetaljer lagOrgDetaljer() {
+    static OrganisasjonsDetaljer lagOrgDetaljerMedPostadresse() {
         OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
-        organisasjonsDetaljer.postadresse = singletonList(lagOrgAdresse());
+        organisasjonsDetaljer.postadresse = singletonList(lagOrgadresse("1234"));
         return organisasjonsDetaljer;
     }
 
-    static GeografiskAdresse lagOrgAdresse() {
+    static OrganisasjonsDetaljer lagOrgDetaljerMedForretningsadresse() {
+        OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
+        organisasjonsDetaljer.forretningsadresse = singletonList(lagOrgadresse("9876"));
+        return organisasjonsDetaljer;
+    }
+
+    static GeografiskAdresse lagOrgadresse(String postnummer) {
         SemistrukturertAdresse semistrukturertAdresse = new SemistrukturertAdresse();
         semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(2), LocalDate.now().plusDays(2)));
         semistrukturertAdresse.setLandkode("NO");
-        semistrukturertAdresse.setPostnr("1234");
+        semistrukturertAdresse.setPostnr(postnummer);
         return semistrukturertAdresse;
     }
 }

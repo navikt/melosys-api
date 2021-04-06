@@ -3,9 +3,11 @@ package no.nav.melosys.integrasjon.felles;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.felles.mdc.MDCOperations;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 
 public interface RestConsumer {
 
@@ -41,5 +43,17 @@ public interface RestConsumer {
 
     default boolean isSystem() {
         return false;
+    }
+
+    default MelosysException tilException(String feilmelding, HttpStatus status) {
+        if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.FORBIDDEN) {
+            return new SikkerhetsbegrensningException(feilmelding);
+        } else if (status == HttpStatus.NOT_FOUND) {
+            return new IkkeFunnetException(feilmelding);
+        } else if (status.is4xxClientError()) {
+            return new FunksjonellException(feilmelding);
+        } else { // 5xx
+            return new TekniskException(feilmelding);
+        }
     }
 }
