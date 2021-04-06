@@ -199,8 +199,84 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void hentMuligeMottakere_innvilgelseFolketrygdenUtenFullmektigIkkeSelvbetalende_returnererBrukerSomHovedMottakerArbeidsgiverSomKopiOgSkattSomFast() {
-        // TODO: Legge til når støtte for arbeidsgivere som kopi er lagt til
+    void hentMuligeMottakere_innvilgelseFolketrygdenUtenFullmektigIkkeSelvbetalende_returnererBrukerSomHovedMottakerArbeidsgiverSomKopiOgSkattSomFast() throws FunksjonellException, TekniskException {
+        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(eq(behandling))).thenReturn(Sets.newHashSet("orgnr1", "orgnr2"));
+        when(eregFasade.hentOrganisasjon("orgnr1")).thenReturn(lagORGSaksopplysning("Avklart Arbeidsgiver 1", "orgnr1"));
+        when(eregFasade.hentOrganisasjon("orgnr2")).thenReturn(lagORGSaksopplysning("Avklart Arbeidsgiver 2", "orgnr2"));
+        when(eregFasade.hentOrganisasjon("974761076")).thenReturn(lagORGSaksopplysning("Skatteetaten", "974761076"));
+        when(behandling.getId()).thenReturn(1L);
+        when(behandling.hentPersonDokument()).thenReturn(lagPersonDokument());
+        initMocksForFtrlVedtaksbrev(null, 10000, false);
+
+        var muligeMottakere = brevmottakerService.hentMuligeMottakere(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling, null);
+
+        assertThat(muligeMottakere.getHovedMottaker())
+            .extracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly(INNVILGELSE_FOLKETRYGDLOVEN_2_8.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
+        assertThat(muligeMottakere.getKopiMottakere())
+            .hasSize(2)
+            .flatExtracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly(
+                "Kopi til arbeidsgiver", "Avklart Arbeidsgiver 1", ARBEIDSGIVER, null, "orgnr1",
+                "Kopi til arbeidsgiver", "Avklart Arbeidsgiver 2", ARBEIDSGIVER, null, "orgnr2");
+        assertThat(muligeMottakere.getFasteMottakere())
+            .hasSize(1)
+            .flatExtracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly("Kopi til Skatteetaten", "Skatteetaten", MYNDIGHET, null, "974761076");
+    }
+
+    @Test
+    void hentMuligeMottakere_innvilgelseFolketrygdenUtenFullmektigForBrukerFullmektigForArbeidsgiverIkkeSelvbetalende_returnererBrukerSomHovedMottakerFullmektigSomKopiOgSkattSomFast() throws FunksjonellException, TekniskException {
+        when(eregFasade.hentOrganisasjon("REP-ORGNR")).thenReturn(lagORGSaksopplysning("Fullmektig organisasjons navn", "REP-ORGNR"));
+        when(eregFasade.hentOrganisasjon("974761076")).thenReturn(lagORGSaksopplysning("Skatteetaten", "974761076"));
+        when(behandling.getId()).thenReturn(1L);
+        when(behandling.hentPersonDokument()).thenReturn(lagPersonDokument());
+        initMocksForFtrlVedtaksbrev(Representerer.ARBEIDSGIVER, 10000, false);
+
+        var muligeMottakere = brevmottakerService.hentMuligeMottakere(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling, null);
+
+        assertThat(muligeMottakere.getHovedMottaker())
+            .extracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly(INNVILGELSE_FOLKETRYGDLOVEN_2_8.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
+        assertThat(muligeMottakere.getKopiMottakere())
+            .hasSize(1)
+            .flatExtracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly(
+                "Kopi til arbeidsgivers fullmektig", "Fullmektig organisasjons navn", REPRESENTANT, null, "REP-ORGNR");
+        assertThat(muligeMottakere.getFasteMottakere())
+            .hasSize(1)
+            .flatExtracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly("Kopi til Skatteetaten", "Skatteetaten", MYNDIGHET, null, "974761076");
     }
 
     @Test
@@ -233,8 +309,47 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void hentMuligeMottakere_innvilgelseFolketrygdenFullmektigIkkeSelvbetalende_returnererFullmektigSomHovedmottakerBrukerSomKopiArbeidsgiverSomKopiOgSkattSomFast() {
-        // TODO: Legge til når støtte for arbeidsgivere som kopi er lagt til
+    void hentMuligeMottakere_innvilgelseFolketrygdenFullmektigIkkeSelvbetalende_returnererFullmektigSomHovedmottakerBrukerSomKopiArbeidsgiverSomKopiOgSkattSomFast() throws TekniskException, FunksjonellException {
+        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(eq(behandling))).thenReturn(Sets.newHashSet("orgnr1", "orgnr2"));
+        when(eregFasade.hentOrganisasjon("orgnr1")).thenReturn(lagORGSaksopplysning("Avklart Arbeidsgiver 1", "orgnr1"));
+        when(eregFasade.hentOrganisasjon("orgnr2")).thenReturn(lagORGSaksopplysning("Avklart Arbeidsgiver 2", "orgnr2"));
+        when(eregFasade.hentOrganisasjon("974761076")).thenReturn(lagORGSaksopplysning("Skatteetaten", "974761076"));
+        when(eregFasade.hentOrganisasjon("REP-ORGNR")).thenReturn(lagORGSaksopplysning("Fullmektig organisasjons navn", "REP-ORGNR"));
+        when(behandling.getId()).thenReturn(1L);
+        when(behandling.hentPersonDokument()).thenReturn(lagPersonDokument());
+        initMocksForFtrlVedtaksbrev(Representerer.BRUKER, 10000, false);
+
+        var muligeMottakere = brevmottakerService.hentMuligeMottakere(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling, null);
+
+        assertThat(muligeMottakere.getHovedMottaker())
+            .extracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly(INNVILGELSE_FOLKETRYGDLOVEN_2_8.getBeskrivelse(), "Fullmektig organisasjons navn", BRUKER, null, null);
+        assertThat(muligeMottakere.getKopiMottakere())
+            .hasSize(3)
+            .flatExtracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly(
+                "Kopi til bruker", "Ola Nordmann", BRUKER, "aktørId", null,
+                "Kopi til arbeidsgiver", "Avklart Arbeidsgiver 1", ARBEIDSGIVER, null, "orgnr1",
+                "Kopi til arbeidsgiver", "Avklart Arbeidsgiver 2", ARBEIDSGIVER, null, "orgnr2");
+        assertThat(muligeMottakere.getFasteMottakere())
+            .hasSize(1)
+            .flatExtracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly("Kopi til Skatteetaten", "Skatteetaten", MYNDIGHET, null, "974761076");
     }
 
     @Test
@@ -276,8 +391,38 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void hentMuligeMottakere_innvilgelseFolketrygdenFullmektigIkkeSelvbetalendeIngenInntekt_returnererFullmektigSomHovedmottakerBrukerSomKopiArbeidsgiverSomKopi() {
-        // TODO: Legge til når støtte for arbeidsgivere som kopi er lagt til
+    void hentMuligeMottakere_innvilgelseFolketrygdenFullmektigIkkeSelvbetalendeIngenInntekt_returnererFullmektigSomHovedmottakerBrukerSomKopiArbeidsgiverSomKopi() throws TekniskException, FunksjonellException {
+        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(eq(behandling))).thenReturn(Sets.newHashSet("orgnr1", "orgnr2"));
+        when(eregFasade.hentOrganisasjon("orgnr1")).thenReturn(lagORGSaksopplysning("Avklart Arbeidsgiver 1", "orgnr1"));
+        when(eregFasade.hentOrganisasjon("orgnr2")).thenReturn(lagORGSaksopplysning("Avklart Arbeidsgiver 2", "orgnr2"));
+        when(eregFasade.hentOrganisasjon("REP-ORGNR")).thenReturn(lagORGSaksopplysning("Fullmektig organisasjons navn", "REP-ORGNR"));
+        when(behandling.getId()).thenReturn(1L);
+        when(behandling.hentPersonDokument()).thenReturn(lagPersonDokument());
+        initMocksForFtrlVedtaksbrev(Representerer.BRUKER, 0, false);
+
+        var muligeMottakere = brevmottakerService.hentMuligeMottakere(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling, null);
+
+        assertThat(muligeMottakere.getHovedMottaker())
+            .extracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly(INNVILGELSE_FOLKETRYGDLOVEN_2_8.getBeskrivelse(), "Fullmektig organisasjons navn", BRUKER, null, null);
+        assertThat(muligeMottakere.getKopiMottakere())
+            .hasSize(3)
+            .flatExtracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly(
+                "Kopi til bruker", "Ola Nordmann", BRUKER, "aktørId", null,
+                "Kopi til arbeidsgiver", "Avklart Arbeidsgiver 1", ARBEIDSGIVER, null, "orgnr1",
+                "Kopi til arbeidsgiver", "Avklart Arbeidsgiver 2", ARBEIDSGIVER, null, "orgnr2");
+        assertThat(muligeMottakere.getFasteMottakere()).isEmpty();
     }
 
     @Test

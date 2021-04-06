@@ -128,7 +128,19 @@ public class BrevmottakerService {
                         .build());
                 }
             }
-            // TODO: Legge til støtte for kopi til andre aktørroller: ARBEIDSGIVER
+            if (kopiMottaker == Aktoersroller.ARBEIDSGIVER) {
+                var avklarteKopier = avklarMottakere(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling, false, true);
+
+                for (Aktoer avklartKopi : avklarteKopier) {
+                    var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartKopi.getOrgnr());
+                    builder.medKopiMottaker(new MuligMottakerDto.Builder()
+                        .medDokumentNavn(avklartKopi.getRolle() == ARBEIDSGIVER ? "Kopi til arbeidsgiver" :  "Kopi til arbeidsgivers fullmektig")
+                        .medMottakerNavn(orgDokument.getNavn())
+                        .medAktoerrolle(avklartKopi.getRolle())
+                        .medOrgnr(orgDokument.getOrgnummer())
+                        .build());
+                }
+            }
         }
     }
 
