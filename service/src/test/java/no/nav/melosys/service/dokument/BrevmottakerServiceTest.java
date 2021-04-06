@@ -81,9 +81,8 @@ class BrevmottakerServiceTest {
 
     @Test
     void hentMuligeMottakere_forventetSaksbehandlingstidSoknad_returnererBrukerSomHovedMottaker() throws FunksjonellException, TekniskException {
-        var behandling = new Behandling();
-        behandling.setFagsak(lagFagsakMedRepresentant(null));
-        behandling.getSaksopplysninger().add(lagPERSOPLSaksopplysning());
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
+        when(behandling.hentPersonDokument()).thenReturn(lagPersonDokument());
 
         var muligeMottakere = brevmottakerService.hentMuligeMottakere(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, behandling, null);
 
@@ -102,9 +101,8 @@ class BrevmottakerServiceTest {
 
     @Test
     void hentMuligeMottakere_forventetSaksbehandlingstidKlage_returnererBrukerSomHovedMottaker() throws FunksjonellException, TekniskException {
-        var behandling = new Behandling();
-        behandling.setFagsak(lagFagsakMedRepresentant(null));
-        behandling.getSaksopplysninger().add(lagPERSOPLSaksopplysning());
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
+        when(behandling.hentPersonDokument()).thenReturn(lagPersonDokument());
 
         var muligeMottakere = brevmottakerService.hentMuligeMottakere(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE, behandling, null);
 
@@ -123,9 +121,8 @@ class BrevmottakerServiceTest {
 
     @Test
     void hentMuligeMottakere_mangelbrevBruker_returnererBrukerSomHovedMottaker() throws FunksjonellException, TekniskException {
-        var behandling = new Behandling();
-        behandling.setFagsak(lagFagsakMedRepresentant(null));
-        behandling.getSaksopplysninger().add(lagPERSOPLSaksopplysning());
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
+        when(behandling.hentPersonDokument()).thenReturn(lagPersonDokument());
 
         var muligeMottakere = brevmottakerService.hentMuligeMottakere(MANGELBREV_BRUKER, behandling, null);
 
@@ -145,11 +142,9 @@ class BrevmottakerServiceTest {
     @Test
     void hentMuligeMottakere_mangelbrevArbeidsgiverIngenBrukerFullmektig_returnererArbeidsgiverSomHovedMottakerOgBrukerSomKopi() throws FunksjonellException, TekniskException {
         when(eregFasade.hentOrganisasjon("orgnr")).thenReturn(lagORGSaksopplysning("Arbeidsgivers navn", "orgnr"));
-
-        var behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setFagsak(lagFagsakMedRepresentant(null));
-        behandling.getSaksopplysninger().add(lagPERSOPLSaksopplysning());
+        when(behandling.getId()).thenReturn(1L);
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
+        when(behandling.hentPersonDokument()).thenReturn(lagPersonDokument());
 
         var muligeMottakere = brevmottakerService.hentMuligeMottakere(MANGELBREV_ARBEIDSGIVER, behandling, "orgnr");
 
@@ -178,11 +173,8 @@ class BrevmottakerServiceTest {
     void hentMuligeMottakere_mangelbrevArbeidsgiverBrukerFullmektig_returnererArbeidsgiverSomHovedMottakerOgFullmektigSomKopi() throws FunksjonellException, TekniskException {
         when(eregFasade.hentOrganisasjon("orgnr")).thenReturn(lagORGSaksopplysning("Arbeidsgivers navn", "orgnr"));
         when(eregFasade.hentOrganisasjon("REP-ORGNR")).thenReturn(lagORGSaksopplysning("Fullmektig organisasjons navn", "REP-ORGNR"));
-
-        var behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setFagsak(lagFagsakMedRepresentant(Representerer.BRUKER));
-        behandling.getSaksopplysninger().add(lagPERSOPLSaksopplysning());
+        when(behandling.getId()).thenReturn(1L);
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(Representerer.BRUKER));
 
         var muligeMottakere = brevmottakerService.hentMuligeMottakere(MANGELBREV_ARBEIDSGIVER, behandling, "orgnr");
 
@@ -204,6 +196,88 @@ class BrevmottakerServiceTest {
                 MuligMottakerDto::getOrgnr)
             .containsExactly("Kopi til brukers fullmektig", "Fullmektig organisasjons navn", REPRESENTANT, null, "REP-ORGNR");
         assertThat(muligeMottakere.getFasteMottakere()).isEmpty();
+    }
+
+    @Test
+    void hentMuligeMottakere_innvilgelseFolketrygdenUtenFullmektigIkkeSelvbetalende_returnererBrukerSomHovedMottakerArbeidsgiverSomKopiOgSkattSomFast() {
+        // TODO: Legge til når støtte for arbeidsgivere som kopi er lagt til
+    }
+
+    @Test
+    void hentMuligeMottakere_innvilgelseFolketrygdenUtenFullmektigSelvbetalende_returnererBrukerSomHovedMottakerOgSkattSomFast() throws FunksjonellException, TekniskException {
+        when(eregFasade.hentOrganisasjon("974761076")).thenReturn(lagORGSaksopplysning("Skatteetaten", "974761076"));
+        when(behandling.getId()).thenReturn(1L);
+        when(behandling.hentPersonDokument()).thenReturn(lagPersonDokument());
+        initMocksForFtrlVedtaksbrev(null, 10000, true);
+
+        var muligeMottakere = brevmottakerService.hentMuligeMottakere(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling, null);
+
+        assertThat(muligeMottakere.getHovedMottaker())
+            .extracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly(INNVILGELSE_FOLKETRYGDLOVEN_2_8.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
+        assertThat(muligeMottakere.getKopiMottakere()).isEmpty();
+        assertThat(muligeMottakere.getFasteMottakere())
+            .hasSize(1)
+            .flatExtracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly("Kopi til Skatteetaten", "Skatteetaten", MYNDIGHET, null, "974761076");
+    }
+
+    @Test
+    void hentMuligeMottakere_innvilgelseFolketrygdenFullmektigIkkeSelvbetalende_returnererFullmektigSomHovedmottakerBrukerSomKopiArbeidsgiverSomKopiOgSkattSomFast() {
+        // TODO: Legge til når støtte for arbeidsgivere som kopi er lagt til
+    }
+
+    @Test
+    void hentMuligeMottakere_innvilgelseFolketrygdenFullmektigSelvbetalende_returnererFullmektigSomHovedmottakerBrukerSomKopiOgSkattSomFast() throws FunksjonellException, TekniskException {
+        when(eregFasade.hentOrganisasjon("974761076")).thenReturn(lagORGSaksopplysning("Skatteetaten", "974761076"));
+        when(eregFasade.hentOrganisasjon("REP-ORGNR")).thenReturn(lagORGSaksopplysning("Fullmektig organisasjons navn", "REP-ORGNR"));
+        when(behandling.getId()).thenReturn(1L);
+        when(behandling.hentPersonDokument()).thenReturn(lagPersonDokument());
+        initMocksForFtrlVedtaksbrev(Representerer.BRUKER, 10000, true);
+
+        var muligeMottakere = brevmottakerService.hentMuligeMottakere(INNVILGELSE_FOLKETRYGDLOVEN_2_8, behandling, null);
+
+        assertThat(muligeMottakere.getHovedMottaker())
+            .extracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly(INNVILGELSE_FOLKETRYGDLOVEN_2_8.getBeskrivelse(), "Fullmektig organisasjons navn", BRUKER, null, null);
+        assertThat(muligeMottakere.getKopiMottakere())
+            .hasSize(1)
+            .flatExtracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly("Kopi til bruker", "Ola Nordmann", BRUKER, "aktørId", null);
+        assertThat(muligeMottakere.getFasteMottakere())
+            .hasSize(1)
+            .flatExtracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly("Kopi til Skatteetaten", "Skatteetaten", MYNDIGHET, null, "974761076");
+    }
+
+    @Test
+    void hentMuligeMottakere_innvilgelseFolketrygdenFullmektigIkkeSelvbetalendeIngenInntekt_returnererFullmektigSomHovedmottakerBrukerSomKopiArbeidsgiverSomKopi() {
+        // TODO: Legge til når støtte for arbeidsgivere som kopi er lagt til
     }
 
     @Test
@@ -623,13 +697,10 @@ class BrevmottakerServiceTest {
         when(behandling.getFagsak()).thenReturn(fagsak);
     }
 
-    private Saksopplysning lagPERSOPLSaksopplysning() {
+    private PersonDokument lagPersonDokument() {
         var dokument = new PersonDokument();
         dokument.sammensattNavn = "Ola Nordmann";
-        var saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(dokument);
-        saksopplysning.setType(SaksopplysningType.PERSOPL);
-        return saksopplysning;
+        return dokument;
     }
 
     private Saksopplysning lagORGSaksopplysning(String navn, String orgnr) {
