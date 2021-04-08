@@ -7,7 +7,7 @@ import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.*;
 
 public interface PersondataFasade {
-    String hentAktørIdForIdent(String fnr) throws IkkeFunnetException;
+    String hentAktørIdForIdent(String ident) throws IkkeFunnetException;
 
     String hentIdentForAktørId(String aktørID) throws IkkeFunnetException;
 
