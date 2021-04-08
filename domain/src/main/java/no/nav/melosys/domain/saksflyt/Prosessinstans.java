@@ -61,6 +61,13 @@ public class Prosessinstans {
     @OneToMany(mappedBy = "prosessinstans", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ProsessinstansHendelse> hendelser = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "laas_type")
+    private ProsessinstansLåsType låsType;
+
+    @Column(name = "laas_referanse")
+    private String låsReferanse;
+
     private static final ObjectMapper dataMapper = new ObjectMapper().registerModule(new JavaTimeModule())
         .registerModule(new SimpleModule().addDeserializer(LovvalgBestemmelse.class, new LovvalgBestemmelseDeserializer()));
 
@@ -187,6 +194,22 @@ public class Prosessinstans {
 
     public List<ProsessinstansHendelse> getHendelser() {
         return hendelser;
+    }
+
+    public void setLåsType(ProsessinstansLåsType låsType) {
+        this.låsType = låsType;
+    }
+
+    public ProsessinstansLåsType getLåsType() {
+        return låsType;
+    }
+
+    public String getLåsReferanse() {
+        return låsReferanse;
+    }
+
+    public void setLåsReferanse(String låsReferanse) {
+        this.låsReferanse = låsReferanse;
     }
 
     public String hentJournalpostID() {
