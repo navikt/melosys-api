@@ -1,7 +1,7 @@
 package no.nav.melosys.domain.behandlingsgrunnlag.data;
 
 public class Utenlandsoppdraget {
-    public Periode samletUtsendingsperiode;
+    public Periode samletUtsendingsperiode = new Periode();
     public Boolean erUtsendelseForOppdragIUtlandet;
     public Boolean erFortsattAnsattEtterOppdraget;
     public Boolean erAnsattForOppdragIUtlandet;
