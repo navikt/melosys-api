@@ -43,7 +43,7 @@ public class HentRegisteropplysninger implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
 
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
-        String brukerId = persondataFasade.hentIdentForAktørId(behandling.getFagsak().hentBruker().getAktørId());
+        String brukerId = persondataFasade.hentFolkeregisterIdent(behandling.getFagsak().hentBruker().getAktørId());
 
 
         var registeropplysningerRequestBuilder = RegisteropplysningerRequest.builder()

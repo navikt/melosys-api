@@ -39,14 +39,14 @@ public class PersondataService implements PersondataFasade {
     }
 
     @Override
-    public String hentIdentForAktørId(String aktørID) throws IkkeFunnetException {
+    public String hentFolkeregisterIdent(String ident) throws IkkeFunnetException {
         if (unleash.isEnabled("melosys.pdl.identer")) {
-            return pdlConsumer.hentIdenter(aktørID).identer()
+            return pdlConsumer.hentIdenter(ident).identer()
                 .stream().filter(Ident::erFolkeregisterIdent)
                 .findFirst().map(Ident::ident)
                 .orElseThrow(() -> new IkkeFunnetException("Finner ikke folkeregisterident!"));
         }
-        return tpsService.hentIdentForAktørId(aktørID);
+        return tpsService.hentIdentForAktørId(ident);
     }
 
     @Override

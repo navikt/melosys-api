@@ -117,7 +117,7 @@ public class MedlPeriodeService {
         Behandling behandling = behandlingsresultatService.hentBehandlingsresultat(behandlingID).getBehandling();
         Fagsak fagsak = behandling.getFagsak();
         Aktoer bruker = fagsak.hentBruker();
-        return persondataFasade.hentIdentForAktørId(bruker.getAktørId());
+        return persondataFasade.hentFolkeregisterIdent(bruker.getAktørId());
     }
 
     private Optional<Lovvalgsperiode> finnLovvalgsperiode(Behandling behandling) throws IkkeFunnetException {

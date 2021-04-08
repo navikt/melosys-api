@@ -68,7 +68,7 @@ class OppfriskSaksopplysningerServiceTest {
             persondataFasade);
 
         String brukerID = "322211";
-        when(persondataFasade.hentIdentForAktørId(anyString())).thenReturn(brukerID);
+        when(persondataFasade.hentFolkeregisterIdent(anyString())).thenReturn(brukerID);
     }
 
     @Test
