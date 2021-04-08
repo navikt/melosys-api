@@ -90,7 +90,7 @@ class BrevmottakerServiceTest {
             .extracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getRolle,
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
             .containsExactly(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
@@ -110,7 +110,7 @@ class BrevmottakerServiceTest {
             .extracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getRolle,
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
             .containsExactly(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
@@ -130,7 +130,7 @@ class BrevmottakerServiceTest {
             .extracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getRolle,
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
             .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
@@ -152,7 +152,7 @@ class BrevmottakerServiceTest {
             .extracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getRolle,
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
             .containsExactly(MANGELBREV_ARBEIDSGIVER.getBeskrivelse(), "Arbeidsgivers navn", ARBEIDSGIVER, null, null);
@@ -161,7 +161,7 @@ class BrevmottakerServiceTest {
             .flatExtracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getRolle,
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
             .containsExactly("Kopi til bruker", "Ola Nordmann", BRUKER, "aktørId", null);
@@ -182,7 +182,7 @@ class BrevmottakerServiceTest {
             .extracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getRolle,
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
             .containsExactly(MANGELBREV_ARBEIDSGIVER.getBeskrivelse(), "Arbeidsgivers navn", ARBEIDSGIVER, null, null);
@@ -191,7 +191,7 @@ class BrevmottakerServiceTest {
             .flatExtracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getRolle,
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
             .containsExactly("Kopi til brukers fullmektig", "Fullmektig organisasjons navn", REPRESENTANT, null, "REP-ORGNR");
@@ -214,7 +214,7 @@ class BrevmottakerServiceTest {
             .extracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getRolle,
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
             .containsExactly(INNVILGELSE_FOLKETRYGDLOVEN_2_8.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
@@ -223,7 +223,7 @@ class BrevmottakerServiceTest {
             .flatExtracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getRolle,
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
             .containsExactly(
@@ -234,7 +234,7 @@ class BrevmottakerServiceTest {
             .flatExtracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getRolle,
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
             .containsExactly("Kopi til Skatteetaten", "Skatteetaten", MYNDIGHET, null, "974761076");
@@ -254,7 +254,7 @@ class BrevmottakerServiceTest {
             .extracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getRolle,
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
             .containsExactly(INNVILGELSE_FOLKETRYGDLOVEN_2_8.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
@@ -263,7 +263,7 @@ class BrevmottakerServiceTest {
             .flatExtracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getRolle,
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
             .containsExactly(
@@ -273,7 +273,7 @@ class BrevmottakerServiceTest {
             .flatExtracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getRolle,
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
             .containsExactly("Kopi til Skatteetaten", "Skatteetaten", MYNDIGHET, null, "974761076");
@@ -292,7 +292,7 @@ class BrevmottakerServiceTest {
             .extracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getRolle,
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
             .containsExactly(INNVILGELSE_FOLKETRYGDLOVEN_2_8.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
@@ -302,7 +302,7 @@ class BrevmottakerServiceTest {
             .flatExtracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getRolle,
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
             .containsExactly("Kopi til Skatteetaten", "Skatteetaten", MYNDIGHET, null, "974761076");
@@ -325,7 +325,7 @@ class BrevmottakerServiceTest {
             .extracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getRolle,
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
             .containsExactly(INNVILGELSE_FOLKETRYGDLOVEN_2_8.getBeskrivelse(), "Fullmektig organisasjons navn", BRUKER, null, null);
@@ -334,7 +334,7 @@ class BrevmottakerServiceTest {
             .flatExtracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getRolle,
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
             .containsExactly(
@@ -346,7 +346,7 @@ class BrevmottakerServiceTest {
             .flatExtracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getRolle,
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
             .containsExactly("Kopi til Skatteetaten", "Skatteetaten", MYNDIGHET, null, "974761076");
@@ -366,7 +366,7 @@ class BrevmottakerServiceTest {
             .extracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getRolle,
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
             .containsExactly(INNVILGELSE_FOLKETRYGDLOVEN_2_8.getBeskrivelse(), "Fullmektig organisasjons navn", BRUKER, null, null);
@@ -375,7 +375,7 @@ class BrevmottakerServiceTest {
             .flatExtracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getRolle,
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
             .containsExactly("Kopi til bruker", "Ola Nordmann", BRUKER, "aktørId", null);
@@ -384,7 +384,7 @@ class BrevmottakerServiceTest {
             .flatExtracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getRolle,
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
             .containsExactly("Kopi til Skatteetaten", "Skatteetaten", MYNDIGHET, null, "974761076");
@@ -406,7 +406,7 @@ class BrevmottakerServiceTest {
             .extracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getRolle,
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
             .containsExactly(INNVILGELSE_FOLKETRYGDLOVEN_2_8.getBeskrivelse(), "Fullmektig organisasjons navn", BRUKER, null, null);
@@ -415,7 +415,7 @@ class BrevmottakerServiceTest {
             .flatExtracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getAktoerrolle,
+                MuligMottakerDto::getRolle,
                 MuligMottakerDto::getAktørId,
                 MuligMottakerDto::getOrgnr)
             .containsExactly(

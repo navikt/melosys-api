@@ -82,7 +82,7 @@ public class BrevmottakerService {
         throws FunksjonellException, TekniskException {
         var hovedMottakerBuilder = new MuligMottakerDto.Builder()
             .medDokumentNavn(produserbaredokumenter.getBeskrivelse())
-            .medAktoerrolle(hovedmottaker);
+            .medRolle(hovedmottaker);
 
         if (hovedmottaker == Aktoersroller.BRUKER) {
             var avklartMottaker = avklarMottakere(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling, false, false)
@@ -115,7 +115,7 @@ public class BrevmottakerService {
                     builder.medKopiMottaker(new MuligMottakerDto.Builder()
                         .medDokumentNavn("Kopi til bruker")
                         .medMottakerNavn(behandling.hentPersonDokument().sammensattNavn)
-                        .medAktoerrolle(BRUKER)
+                        .medRolle(BRUKER)
                         .medAktørId(behandling.getFagsak().hentBruker().getAktørId())
                         .build());
                 } else {
@@ -123,7 +123,7 @@ public class BrevmottakerService {
                     builder.medKopiMottaker(new MuligMottakerDto.Builder()
                         .medDokumentNavn("Kopi til brukers fullmektig")
                         .medMottakerNavn(orgDokument.getNavn())
-                        .medAktoerrolle(avklartKopi.getRolle())
+                        .medRolle(avklartKopi.getRolle())
                         .medOrgnr(orgDokument.getOrgnummer())
                         .build());
                 }
@@ -136,7 +136,7 @@ public class BrevmottakerService {
                     builder.medKopiMottaker(new MuligMottakerDto.Builder()
                         .medDokumentNavn(avklartKopi.getRolle() == ARBEIDSGIVER ? "Kopi til arbeidsgiver" :  "Kopi til arbeidsgivers fullmektig")
                         .medMottakerNavn(orgDokument.getNavn())
-                        .medAktoerrolle(avklartKopi.getRolle())
+                        .medRolle(avklartKopi.getRolle())
                         .medOrgnr(orgDokument.getOrgnummer())
                         .build());
                 }
@@ -153,7 +153,7 @@ public class BrevmottakerService {
             builder.medFastMottaker(new MuligMottakerDto.Builder()
                 .medDokumentNavn("Kopi til " + orgDokument.getNavn())
                 .medMottakerNavn(orgDokument.getNavn())
-                .medAktoerrolle(avklartMottaker.getRolle())
+                .medRolle(avklartMottaker.getRolle())
                 .medOrgnr(orgDokument.getOrgnummer())
                 .build());
         }

@@ -5,14 +5,14 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 public class MuligMottakerDto {
     private final String mottakerNavn;
     private final String dokumentNavn;
-    private final Aktoersroller aktoerrolle;
+    private final Aktoersroller rolle;
     private final String orgnr;
     private final String aktørId;
 
     private MuligMottakerDto(Builder builder) {
         this.mottakerNavn = builder.mottakerNavn;
         this.dokumentNavn = builder.dokumentNavn;
-        this.aktoerrolle = builder.aktoerrolle;
+        this.rolle = builder.rolle;
         this.orgnr = builder.orgnr;
         this.aktørId = builder.aktørId;
     }
@@ -25,8 +25,8 @@ public class MuligMottakerDto {
         return dokumentNavn;
     }
 
-    public Aktoersroller getAktoerrolle() {
-        return aktoerrolle;
+    public Aktoersroller getRolle() {
+        return rolle;
     }
 
     public String getOrgnr() {
@@ -40,7 +40,7 @@ public class MuligMottakerDto {
     public static final class Builder {
         private String mottakerNavn;
         private String dokumentNavn;
-        private Aktoersroller aktoerrolle;
+        private Aktoersroller rolle;
         private String orgnr;
         private String aktørId;
 
@@ -54,8 +54,8 @@ public class MuligMottakerDto {
             return this;
         }
 
-        public Builder medAktoerrolle(Aktoersroller aktoerrolle) {
-            this.aktoerrolle = aktoerrolle;
+        public Builder medRolle(Aktoersroller aktoerrolle) {
+            this.rolle = aktoerrolle;
             return this;
         }
 
