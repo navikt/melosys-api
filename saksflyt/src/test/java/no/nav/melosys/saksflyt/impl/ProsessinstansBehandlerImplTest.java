@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.context.ApplicationEventPublisher;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
@@ -27,6 +28,8 @@ public class ProsessinstansBehandlerImplTest {
     private ProsessinstansRepository prosessinstansRepository;
     @Mock
     private StegBehandler SED_MOTTAK_RUTINGStebehandler;
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
 
     private ProsessinstansBehandler prosessinstansBehandler;
 
@@ -36,7 +39,7 @@ public class ProsessinstansBehandlerImplTest {
     public void setup() {
         when(SED_MOTTAK_RUTINGStebehandler.inngangsSteg()).thenReturn(ProsessSteg.SED_MOTTAK_RUTING);
         when(prosessinstansRepository.save(any(Prosessinstans.class))).thenAnswer(returnsFirstArg());
-        prosessinstansBehandler = new ProsessinstansBehandlerImpl(Collections.singleton(SED_MOTTAK_RUTINGStebehandler), prosessinstansRepository);
+        prosessinstansBehandler = new ProsessinstansBehandlerImpl(Collections.singleton(SED_MOTTAK_RUTINGStebehandler), prosessinstansRepository, applicationEventPublisher);
 
         when(prosessinstans.getId()).thenReturn(UUID.randomUUID());
         prosessinstans.setType(ProsessType.MOTTAK_SED);

@@ -14,10 +14,13 @@ import no.nav.melosys.saksflyt.api.ProsessinstansBehandler;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessFlyt;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessflytDefinisjon;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.service.saksflyt.ProsessinstansFerdigEvent;
 import no.nav.melosys.sikkerhet.context.SaksflytSubjektHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -27,8 +30,11 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
 
     private final Map<ProsessSteg, StegBehandler> stegbehandlerMap = new EnumMap<>(ProsessSteg.class);
     private final ProsessinstansRepository prosessinstansRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
-    public ProsessinstansBehandlerImpl(Collection<StegBehandler> stegbehandlere, ProsessinstansRepository prosessinstansRepository) {
+    public ProsessinstansBehandlerImpl(Collection<StegBehandler> stegbehandlere,
+                                       ProsessinstansRepository prosessinstansRepository,
+                                       ApplicationEventPublisher applicationEventPublisher) {
         stegbehandlere.forEach(s -> stegbehandlerMap.put(s.inngangsSteg(), s));
         this.prosessinstansRepository = prosessinstansRepository;
     }
@@ -83,6 +89,7 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
         log.info("Prosessinstans {} behandlet ferdig", prosessinstans.getId());
         prosessinstans.setStatus(ProsessStatus.FERDIG);
         lagreProsessinstans(prosessinstans);
+        applicationEventPublisher.publishEvent(new ProsessinstansFerdigEvent(prosessinstans));
     }
 
     private void behandleFeil(Prosessinstans prosessinstans, ProsessSteg steg, Exception e) {
