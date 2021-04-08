@@ -53,7 +53,7 @@ public interface RestConsumer {
         } else if (status.is4xxClientError()) {
             return new FunksjonellException(feilmelding);
         } else { // 5xx
-            return new TekniskException(feilmelding);
+            throw new TekniskException(feilmelding);
         }
     }
 }
