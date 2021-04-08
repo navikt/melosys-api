@@ -150,7 +150,8 @@ public class ProsessinstansService {
     public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling, Set<String> mottakerInstitusjon,
                                                        Set<DokumentReferanse> vedleggReferanserTilSed,
                                                        String ytterligereInformasjonSed) {
-        Prosessinstans prosessinstans = new ProsessinstansBuilder().medType(ProsessType.ANMODNING_OM_UNNTAK)
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.ANMODNING_OM_UNNTAK)
             .medBehandling(behandling)
             .medEessiMottakere(mottakerInstitusjon)
             .medVedleggTilSed(vedleggReferanserTilSed)
@@ -277,7 +278,11 @@ public class ProsessinstansService {
     }
 
     private Prosessinstans prosessinstansForSedMottak(MelosysEessiMelding melosysEessiMelding) {
-        Prosessinstans prosessinstans = new Prosessinstans();
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.MOTTAK_SED)
+            .medEessiMelding(melosysEessiMelding)
+            .build();
+
         prosessinstans.setType(ProsessType.MOTTAK_SED);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, melosysEessiMelding.getJournalpostId());
         prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, melosysEessiMelding.getErEndring());

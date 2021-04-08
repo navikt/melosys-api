@@ -80,6 +80,8 @@ public class ProsessinstansBuilder {
         }
         if (eessiMelding != null) {
             prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
+            prosessinstans.setLåsType(ProsessinstansLåsType.SED);
+            prosessinstans.setLåsReferanse(eessiMelding.lagUnikIdentifikator());
         }
         return prosessinstans;
     }
