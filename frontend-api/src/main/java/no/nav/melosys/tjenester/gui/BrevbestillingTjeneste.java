@@ -100,10 +100,8 @@ public class BrevbestillingTjeneste {
                     maler.add(lagBrevMalDtoForForventetSaksbehandlingstid(p, hovedMottaker, behandling));
                     break;
                 case MANGELBREV_BRUKER:
-                    maler.add(lagBrevMalDtoForMangelbrev(p, true, hovedMottaker, behandling));
-                    break;
                 case MANGELBREV_ARBEIDSGIVER:
-                    maler.add(lagBrevMalDtoForMangelbrev(p, false, hovedMottaker, behandling));
+                    maler.add(lagBrevMalDtoForMangelbrev(p, hovedMottaker, behandling));
                     break;
                 default:
                     break;
@@ -112,33 +110,33 @@ public class BrevbestillingTjeneste {
         return maler;
     }
 
-    private BrevmalDto lagBrevMalDtoForForventetSaksbehandlingstid(Produserbaredokumenter p, Aktoersroller hovedMottaker, Behandling behandling)
+    private BrevmalDto lagBrevMalDtoForForventetSaksbehandlingstid(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, Behandling behandling)
         throws FunksjonellException, TekniskException {
         var builder = new MottakerDto.Builder()
             .medType(BRUKER_ELLER_BRUKERS_FULLMEKTIG)
             .medRolle(hovedMottaker);
 
-        leggTilAdresseOgFeilmelding(builder, p, hovedMottaker, behandling);
+        leggTilAdresseOgFeilmelding(builder, produserbartdokument, hovedMottaker, behandling);
 
         return new BrevmalDto.Builder()
-            .medType(p)
+            .medType(produserbartdokument)
             .medMuligeMottakere(singletonList(builder.build()))
             .build();
     }
 
-    private BrevmalDto lagBrevMalDtoForMangelbrev(Produserbaredokumenter p, boolean bruker, Aktoersroller hovedMottaker, Behandling behandling)
+    private BrevmalDto lagBrevMalDtoForMangelbrev(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, Behandling behandling)
         throws FunksjonellException, TekniskException {
         List<MottakerDto> mottakere = new ArrayList<>();
         List<FeltvalgDto> feltvalgDtos = new ArrayList<>();
 
         var builder = new MottakerDto.Builder()
-            .medType(bruker ? BRUKER_ELLER_BRUKERS_FULLMEKTIG : "Arbeidsgiver eller arbeidsgivers fullmektig")
+            .medType(hovedMottaker == Aktoersroller.BRUKER ? BRUKER_ELLER_BRUKERS_FULLMEKTIG : "Arbeidsgiver eller arbeidsgivers fullmektig")
             .medRolle(hovedMottaker);
 
-        leggTilAdresseOgFeilmelding(builder, p, hovedMottaker, behandling);
+        leggTilAdresseOgFeilmelding(builder, produserbartdokument, hovedMottaker, behandling);
 
         mottakere.add(builder.build());
-        if (!bruker) {
+        if (hovedMottaker == Aktoersroller.ARBEIDSGIVER) {
             mottakere.add(
                 new MottakerDto.Builder()
                     .medType("Annen organisasjon")
@@ -154,7 +152,7 @@ public class BrevbestillingTjeneste {
         }
 
         return new BrevmalDto.Builder()
-            .medType(p)
+            .medType(produserbartdokument)
             .medFelter(asList(
                 new BrevmalFeltDto.Builder()
                     .medKode("INNLEDNING_FRITEKST")
