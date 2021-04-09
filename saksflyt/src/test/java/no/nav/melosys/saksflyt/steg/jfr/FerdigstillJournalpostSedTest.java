@@ -40,7 +40,7 @@ public class FerdigstillJournalpostSedTest {
     @Before
     public void setUp() throws IkkeFunnetException {
         ferdigstillJournalpostSed = new FerdigstillJournalpostSed(joarkFasade, persondataFasade);
-        when(persondataFasade.hentIdentForAktørId(eq(AKTØR_ID))).thenReturn(BRUKER_ID);
+        when(persondataFasade.hentFolkeregisterIdent(eq(AKTØR_ID))).thenReturn(BRUKER_ID);
     }
 
     @Test
