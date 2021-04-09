@@ -68,95 +68,102 @@ public class BrevmottakerService {
 
     public MuligeMottakereDto hentMuligeMottakere(Produserbaredokumenter produserbaredokumenter, Behandling behandling, String orgnrTilValgtArbeidsgiver)
         throws FunksjonellException, TekniskException {
-        var builder = new MuligeMottakereDto.Builder();
         Mottakerliste mottakerliste = hentMottakerliste(produserbaredokumenter, behandling);
-
-        leggTilHovedMottaker(produserbaredokumenter, behandling, mottakerliste.getHovedMottaker(), orgnrTilValgtArbeidsgiver, builder);
-        leggTilKopiMottakere(produserbaredokumenter, behandling, mottakerliste.getKopiMottakere(), mottakerliste.getHovedMottaker(), builder);
-        leggTilFasteMottakere(produserbaredokumenter, behandling, mottakerliste.getFasteMottakere(), builder);
-
-        return builder.build();
+        return new MuligeMottakereDto(
+            lagHovedMottakerMuligMottakerDto(produserbaredokumenter, behandling, mottakerliste.getHovedMottaker(), orgnrTilValgtArbeidsgiver),
+            lagKopiMottakereMuligMottakerDtos(produserbaredokumenter, behandling, mottakerliste.getKopiMottakere(), mottakerliste.getHovedMottaker()),
+            lagFasteMottakereMuligMottakerDtos(produserbaredokumenter, behandling, mottakerliste.getFasteMottakere()));
     }
 
-    private void leggTilHovedMottaker(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller hovedmottaker, String orgnrTilValgtArbeidsgiver, MuligeMottakereDto.Builder builder)
+    private MuligMottakerDto lagHovedMottakerMuligMottakerDto(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller hovedmottaker, String orgnrTilValgtArbeidsgiver)
         throws FunksjonellException, TekniskException {
-        var hovedMottakerBuilder = new MuligMottakerDto.Builder()
+        return new MuligMottakerDto.Builder()
             .medDokumentNavn(produserbaredokumenter.getBeskrivelse())
-            .medRolle(hovedmottaker);
+            .medMottakerNavn(hentMottakerNavn(produserbaredokumenter, behandling, hovedmottaker, orgnrTilValgtArbeidsgiver))
+            .medRolle(hovedmottaker)
+            .build();
+    }
 
+    private String hentMottakerNavn(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller hovedmottaker, String orgnrTilValgtArbeidsgiver) throws FunksjonellException, TekniskException {
         if (hovedmottaker == Aktoersroller.BRUKER) {
-            var avklartMottaker = avklarMottakere(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling, false, false)
-                .stream().findFirst()
-                .orElseThrow(() -> new FunksjonellException("Finner ikke avklart mottaker for produserbart dokument " + produserbaredokumenter.getKode() + " og rolle " + hovedmottaker.getKode() + "for behandling " + behandling.getId()));
-
+            var avklartMottaker = avklarMottaker(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling);
             if (avklartMottaker.getRolle() == Aktoersroller.BRUKER) {
-                hovedMottakerBuilder.medMottakerNavn(behandling.hentPersonDokument().sammensattNavn);
+                return behandling.hentPersonDokument().sammensattNavn;
             } else {
                 var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartMottaker.getOrgnr());
-                hovedMottakerBuilder.medMottakerNavn(orgDokument.getNavn());
+                return orgDokument.getNavn();
             }
         }
         if (hovedmottaker == Aktoersroller.ARBEIDSGIVER) {
             var orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(orgnrTilValgtArbeidsgiver).getDokument();
-            hovedMottakerBuilder.medMottakerNavn(orgDokument.getNavn());
+            return orgDokument.getNavn();
         }
-
-        builder.medHovedMottaker(hovedMottakerBuilder.build());
+        return null;
     }
 
-    private void leggTilKopiMottakere(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<Aktoersroller> kopiMottakere, Aktoersroller hovedmottaker, MuligeMottakereDto.Builder builder) throws FunksjonellException, TekniskException {
+    private List<MuligMottakerDto> lagKopiMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<Aktoersroller> kopiMottakere, Aktoersroller hovedmottaker) throws FunksjonellException, TekniskException {
+        List<MuligMottakerDto> muligMottakerDtos = new ArrayList<>();
         for (Aktoersroller kopiMottaker : kopiMottakere) {
             if (kopiMottaker == Aktoersroller.BRUKER) {
-                var avklartKopi = avklarMottakere(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling, false, false)
-                    .stream().findFirst()
-                    .orElseThrow(() -> new FunksjonellException("Finner ikke avklart mottaker for produserbart dokument " + produserbaredokumenter.getKode() + " og rolle " + kopiMottaker.getKode() + "for behandling " + behandling.getId()));
-
-                if (avklartKopi.getRolle() == Aktoersroller.BRUKER || hovedmottaker == kopiMottaker) {
-                    builder.medKopiMottaker(new MuligMottakerDto.Builder()
-                        .medDokumentNavn("Kopi til bruker")
-                        .medMottakerNavn(behandling.hentPersonDokument().sammensattNavn)
-                        .medRolle(BRUKER)
-                        .medAktørId(behandling.getFagsak().hentBruker().getAktørId())
-                        .build());
-                } else {
-                    var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartKopi.getOrgnr());
-                    builder.medKopiMottaker(new MuligMottakerDto.Builder()
-                        .medDokumentNavn("Kopi til brukers fullmektig")
-                        .medMottakerNavn(orgDokument.getNavn())
-                        .medRolle(avklartKopi.getRolle())
-                        .medOrgnr(orgDokument.getOrgnummer())
-                        .build());
-                }
+                muligMottakerDtos.add(lagKopiMottakerForBruker(produserbaredokumenter, behandling, kopiMottaker, hovedmottaker));
             }
             if (kopiMottaker == Aktoersroller.ARBEIDSGIVER) {
-                var avklarteKopier = avklarMottakere(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling, false, true);
-
-                for (Aktoer avklartKopi : avklarteKopier) {
-                    var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartKopi.getOrgnr());
-                    builder.medKopiMottaker(new MuligMottakerDto.Builder()
-                        .medDokumentNavn(avklartKopi.getRolle() == ARBEIDSGIVER ? "Kopi til arbeidsgiver" :  "Kopi til arbeidsgivers fullmektig")
-                        .medMottakerNavn(orgDokument.getNavn())
-                        .medRolle(avklartKopi.getRolle())
-                        .medOrgnr(orgDokument.getOrgnummer())
-                        .build());
-                }
+                muligMottakerDtos.addAll(lagKopiMottakereForArbeidsgiver(produserbaredokumenter, behandling, kopiMottaker));
             }
+        }
+        return muligMottakerDtos;
+    }
+
+    private MuligMottakerDto lagKopiMottakerForBruker(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker, Aktoersroller hovedmottaker) throws FunksjonellException, TekniskException {
+        var avklartKopi = avklarMottaker(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling);
+        if (avklartKopi.getRolle() == Aktoersroller.BRUKER || hovedmottaker == kopiMottaker) {
+            return new MuligMottakerDto.Builder()
+                .medDokumentNavn("Kopi til bruker")
+                .medMottakerNavn(behandling.hentPersonDokument().sammensattNavn)
+                .medRolle(BRUKER)
+                .medAktørId(behandling.getFagsak().hentBruker().getAktørId())
+                .build();
+        } else {
+            var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartKopi.getOrgnr());
+            return new MuligMottakerDto.Builder()
+                .medDokumentNavn("Kopi til brukers fullmektig")
+                .medMottakerNavn(orgDokument.getNavn())
+                .medRolle(avklartKopi.getRolle())
+                .medOrgnr(orgDokument.getOrgnummer())
+                .build();
         }
     }
 
-    private void leggTilFasteMottakere(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<FastMottaker> fasteMottakere, MuligeMottakereDto.Builder builder) throws FunksjonellException, TekniskException {
+    private List<MuligMottakerDto> lagKopiMottakereForArbeidsgiver(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker) throws FunksjonellException, TekniskException {
+        List<MuligMottakerDto> muligMottakerDtos = new ArrayList<>();
+
+        var avklarteKopier = avklarMottakere(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling, false, true);
+        for (Aktoer avklartKopi : avklarteKopier) {
+            var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartKopi.getOrgnr());
+            muligMottakerDtos.add(new MuligMottakerDto.Builder()
+                .medDokumentNavn(avklartKopi.getRolle() == ARBEIDSGIVER ? "Kopi til arbeidsgiver" :  "Kopi til arbeidsgivers fullmektig")
+                .medMottakerNavn(orgDokument.getNavn())
+                .medRolle(avklartKopi.getRolle())
+                .medOrgnr(orgDokument.getOrgnummer())
+                .build());
+        }
+        return muligMottakerDtos;
+    }
+
+    private List<MuligMottakerDto> lagFasteMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<FastMottaker> fasteMottakere) throws FunksjonellException, TekniskException {
+        List<MuligMottakerDto> muligMottakerDtos = new ArrayList<>();
+
         for (FastMottaker fastMottaker : fasteMottakere) {
-            var avklartMottaker = avklarMottakere(produserbaredokumenter, FastMottaker.av(fastMottaker), behandling, false, false)
-                .stream().findFirst()
-                .orElseThrow(() -> new FunksjonellException("Finner ikke avklart mottaker for produserbart dokument " + produserbaredokumenter.getKode() + " og rolle " + fastMottaker.name() + "for behandling " + behandling.getId()));
+            var avklartMottaker = avklarMottaker(produserbaredokumenter, FastMottaker.av(fastMottaker), behandling);
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartMottaker.getOrgnr());
-            builder.medFastMottaker(new MuligMottakerDto.Builder()
+            muligMottakerDtos.add(new MuligMottakerDto.Builder()
                 .medDokumentNavn("Kopi til " + orgDokument.getNavn())
                 .medMottakerNavn(orgDokument.getNavn())
                 .medRolle(avklartMottaker.getRolle())
                 .medOrgnr(orgDokument.getOrgnummer())
                 .build());
         }
+        return muligMottakerDtos;
     }
 
     private OrganisasjonDokument hentRettOrganisasjonsdokument(Behandling behandling, String orgnr) throws IkkeFunnetException, IntegrasjonException {
@@ -177,6 +184,14 @@ public class BrevmottakerService {
             throw new TekniskException("Valg av mottakerRolle støttes ikke for " + produserbartDokument);
         }
         return mottakerRolle;
+    }
+
+    public Aktoer avklarMottaker(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling)
+        throws FunksjonellException, TekniskException {
+        List<Aktoer> mottakere = avklarMottakere(produserbartDokument, mottaker, behandling, false, false);
+        return mottakere.stream()
+            .findFirst()
+            .orElseThrow(() -> new FunksjonellException("Finner ikke avklart mottaker for produserbart dokument " + produserbartDokument.getKode() + " og rolle " + mottaker.getRolle() + "for behandling " + behandling.getId()));
     }
 
     public List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling) throws FunksjonellException, TekniskException {
