@@ -37,15 +37,22 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
                                        ApplicationEventPublisher applicationEventPublisher) {
         stegbehandlere.forEach(s -> stegbehandlerMap.put(s.inngangsSteg(), s));
         this.prosessinstansRepository = prosessinstansRepository;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     public void behandleProsessinstans(@NotNull Prosessinstans prosessinstans) {
-        log.info("Starter behandling av prosessinstans {}", prosessinstans.getId());
+        log.info("Starter behandling av prosessinstans {} med lås {}", prosessinstans.getId(), prosessinstans.getLåsReferanse());
 
-        if (!prosessinstans.statusErKlarEllerRestartet()) {
+        if (prosessinstans.getStatus() == ProsessStatus.FEILET ) {
             log.warn("Prosessinstans {} har status {}. Skal ikke behandles", prosessinstans.getId(), prosessinstans.getStatus());
             return;
+        } else if (prosessinstans.getStatus() == ProsessStatus.UNDER_BEHANDLING) {
+            log.warn("Prosessinstans {} behandles allerede", prosessinstans.getId());
+            return;
         }
+
+        prosessinstans.setStatus(ProsessStatus.UNDER_BEHANDLING);
+        lagreProsessinstans(prosessinstans);
 
         ProsessflytDefinisjon.finnFlytForProsessType(prosessinstans.getType()).ifPresentOrElse(
             prosessFlyt -> this.utførFlyt(prosessinstans, prosessFlyt),
