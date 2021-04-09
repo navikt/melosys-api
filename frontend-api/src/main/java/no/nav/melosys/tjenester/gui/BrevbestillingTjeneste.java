@@ -61,9 +61,9 @@ public class BrevbestillingTjeneste {
         return byggBrevmalListe(behandlingID);
     }
 
-    @PostMapping(value = "/muligeMottakere/{behandlingID}", produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Henter alle mulige mottakere for valgt type og mottaker")
-    public MuligeMottakereDto hentTilgjengeligeMottakere(@PathVariable Long behandlingID,
+    @PostMapping(value = "/mulige-mottakere/{behandlingID}", produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Henter alle mulige mottakere for valgt dokumenttype, og organisasjonsnummer dersom hovedmottaker ikke er bruker")
+    public MuligeMottakereDto hentTilgjengeligeMottakere(@PathVariable long behandlingID,
                                                          @RequestBody HentMuligeMottakereRequestDto hentMuligeMottakereRequestDto)
         throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
