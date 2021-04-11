@@ -9,7 +9,6 @@ import no.nav.melosys.domain.saksflyt.ProsessinstansInfo;
 import no.nav.melosys.domain.saksflyt.ProsessinstansLåsType;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.ProsessinstansBehandler;
-import no.nav.melosys.service.saksflyt.ProsessinstansOpprettetEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,20 +20,20 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ProsessinstansOpprettetListenerTest {
+class BehandleProsessinstansDelegateTest {
 
     @Mock
     private ProsessinstansRepository prosessinstansRepository;
     @Mock
     private ProsessinstansBehandler prosessinstansBehandler;
 
-    private ProsessinstansOpprettetListener prosessinstansOpprettetListener;
+    private BehandleProsessinstansDelegate behandleProsessinstansDelegate;
 
     private Prosessinstans prosessinstans;
 
     @BeforeEach
     void setup() {
-        prosessinstansOpprettetListener = new ProsessinstansOpprettetListener(prosessinstansBehandler, prosessinstansRepository);
+        behandleProsessinstansDelegate = new BehandleProsessinstansDelegate(prosessinstansBehandler, prosessinstansRepository);
         prosessinstans = new Prosessinstans();
         prosessinstans.setId(UUID.randomUUID());
     }
@@ -42,7 +41,7 @@ class ProsessinstansOpprettetListenerTest {
     @Test
     void oppdaterProsessinstansstatus_harIkkeLås_settesIkkePåVent() {
         prosessinstans.setStatus(ProsessStatus.KLAR);
-        prosessinstansOpprettetListener.oppdaterProsessinstansstatus(new ProsessinstansOpprettetEvent(prosessinstans));
+        behandleProsessinstansDelegate.oppdaterStatusOmSkalPåVent(prosessinstans);
         assertThat(prosessinstans.getStatus()).isEqualTo(ProsessStatus.KLAR);
         verifyNoInteractions(prosessinstansRepository, prosessinstansBehandler);
     }
@@ -57,7 +56,7 @@ class ProsessinstansOpprettetListenerTest {
         var eksisterendeProsessinstans = prosessinstans(låsReferanse, ProsessStatus.UNDER_BEHANDLING);
         when(prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(any(), any())).thenReturn(Set.of(new ProsessinstansInfo(eksisterendeProsessinstans)));
 
-        prosessinstansOpprettetListener.oppdaterProsessinstansstatus(new ProsessinstansOpprettetEvent(prosessinstans));
+        behandleProsessinstansDelegate.oppdaterStatusOmSkalPåVent(prosessinstans);
         assertThat(prosessinstans.getStatus()).isEqualTo(ProsessStatus.KLAR);
     }
 
@@ -71,21 +70,21 @@ class ProsessinstansOpprettetListenerTest {
         var eksisterendeProsessinstans = prosessinstans("12_13_1", ProsessStatus.UNDER_BEHANDLING);
         when(prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(any(), any())).thenReturn(Set.of(new ProsessinstansInfo(eksisterendeProsessinstans)));
 
-        prosessinstansOpprettetListener.oppdaterProsessinstansstatus(new ProsessinstansOpprettetEvent(prosessinstans));
+        behandleProsessinstansDelegate.oppdaterStatusOmSkalPåVent(prosessinstans);
         assertThat(prosessinstans.getStatus()).isEqualTo(ProsessStatus.PÅ_VENT);
     }
 
     @Test
     void behandleOpprettetProsessinstans_statusErKlar_behandlesVidere() {
         prosessinstans.setStatus(ProsessStatus.KLAR);
-        prosessinstansOpprettetListener.behandleOpprettetProsessinstans(new ProsessinstansOpprettetEvent(prosessinstans));
+        behandleProsessinstansDelegate.behandleProsessinstansHvisKlar(prosessinstans);
         verify(prosessinstansBehandler).behandleProsessinstans(prosessinstans);
     }
 
     @Test
     void behandleOpprettetProsessinstans_statusErPåVent_behandlesIkke() {
         prosessinstans.setStatus(ProsessStatus.PÅ_VENT);
-        prosessinstansOpprettetListener.behandleOpprettetProsessinstans(new ProsessinstansOpprettetEvent(prosessinstans));
+        behandleProsessinstansDelegate.behandleProsessinstansHvisKlar(prosessinstans);
         verifyNoInteractions(prosessinstansBehandler);
     }
 

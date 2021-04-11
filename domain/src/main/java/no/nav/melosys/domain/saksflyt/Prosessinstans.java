@@ -253,10 +253,9 @@ public class Prosessinstans {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Prosessinstans)) {
+        if (!(o instanceof Prosessinstans that)) {
             return false;
         }
-        Prosessinstans that = (Prosessinstans) o;
         return this.id != null && this.id.equals(that.id);
     }
 
