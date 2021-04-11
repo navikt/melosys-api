@@ -40,6 +40,7 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
+    @Async("saksflytThreadPoolTaskExecutor")
     public void behandleProsessinstans(@NotNull Prosessinstans prosessinstans) {
         log.info("Starter behandling av prosessinstans {} med lås {}", prosessinstans.getId(), prosessinstans.getLåsReferanse());
 
