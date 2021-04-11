@@ -31,6 +31,7 @@
         <module>sikkerhet</module>
         <module>statistikk</module>
         <module>arkitektur</module>
+        <module>integrasjonstest</module>
     </modules>
 
     <properties>
@@ -140,6 +141,11 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>melosys-integrasjon</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>integrasjonstest</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
