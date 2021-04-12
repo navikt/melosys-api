@@ -13,7 +13,6 @@ import no.nav.melosys.saksflyt.TestdataFactory;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

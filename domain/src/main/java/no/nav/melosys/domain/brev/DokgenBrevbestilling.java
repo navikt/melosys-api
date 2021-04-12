@@ -21,6 +21,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
     public DokgenBrevbestilling() {
         super();
+        //Tom constructor på grunn av deserialsering i prosessinstans
     }
 
     protected DokgenBrevbestilling(Builder<?> builder) {

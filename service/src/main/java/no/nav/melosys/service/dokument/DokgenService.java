@@ -69,7 +69,15 @@ public class DokgenService {
     public byte[] produserUtkast(long behandlingId, BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
         Produserbaredokumenter produserbartdokument = brevbestillingDto.getProduserbardokument();
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
-        Aktoer mottaker = brevmottakerService.avklarMottakere(produserbartdokument, Mottaker.av(brevbestillingDto.getMottaker()), behandling, true, false).get(0);
+        Aktoer mottaker;
+        if (hasText(brevbestillingDto.getOrgNr())) {
+            mottaker = new Aktoer();
+            mottaker.setRolle(brevbestillingDto.getMottaker());
+            mottaker.setOrgnr(brevbestillingDto.getOrgNr());
+        } else {
+            mottaker = brevmottakerService.avklarMottakere(produserbartdokument,
+                Mottaker.av(brevbestillingDto.getMottaker()), behandling, true, false).get(0);
+        }
 
         DokgenBrevbestilling.Builder<?> brevbestilling = new DokgenBrevbestilling.Builder<>();
 

@@ -7,6 +7,7 @@ public class MangelbrevBrevbestilling extends DokgenBrevbestilling {
 
     public MangelbrevBrevbestilling() {
         super();
+        //Tom constructor på grunn av deserialsering i prosessinstans
     }
 
     private MangelbrevBrevbestilling(MangelbrevBrevbestilling.Builder builder) {

@@ -9,6 +9,7 @@ public abstract class Brevbestilling {
     protected String avsenderNavn;
 
     protected Brevbestilling() {
+        //Tom constructor på grunn av deserialsering i prosessinstans
     }
 
     protected Brevbestilling(Produserbaredokumenter produserbartdokument, Behandling behandling, String avsenderNavn) {

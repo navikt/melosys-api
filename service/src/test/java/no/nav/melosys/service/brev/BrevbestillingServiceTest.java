@@ -199,7 +199,7 @@ class BrevbestillingServiceTest {
         byte[] utkast = brevbestillingService.produserUtkast(123L, brevbestillingDto);
 
         assertThat(utkast).isEqualTo(pdf);
-        verify(mockDokServiceFasade).produserUtkast(anyLong(), eq(brevbestillingDto));
+        verify(mockDokServiceFasade).produserUtkast(123L, brevbestillingDto);
     }
 
     private Aktoer lagAktoer(Aktoersroller aktoersroller, String orgNummer) {
