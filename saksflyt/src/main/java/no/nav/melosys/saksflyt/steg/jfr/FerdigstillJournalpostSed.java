@@ -57,6 +57,6 @@ public class FerdigstillJournalpostSed implements StegBehandler {
 
     private String hentBrukerID(Prosessinstans prosessinstans) throws IkkeFunnetException, TekniskException {
         String aktørID = prosessinstans.getBehandling().getFagsak().hentBruker().getAktørId();
-        return persondataFasade.hentIdentForAktørId(aktørID);
+        return persondataFasade.hentFolkeregisterIdent(aktørID);
     }
 }

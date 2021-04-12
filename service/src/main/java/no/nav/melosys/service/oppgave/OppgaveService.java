@@ -183,7 +183,7 @@ public class OppgaveService {
             jfrOppgaveDto.setJournalpostID(oppgave.getJournalpostId());
             dest = jfrOppgaveDto;
             String aktørId = oppgave.getAktørId();
-            String fnr = aktørId != null ? persondataFasade.hentIdentForAktørId(aktørId) : null;
+            String fnr = aktørId != null ? persondataFasade.hentFolkeregisterIdent(aktørId) : null;
             if (StringUtils.isNotEmpty(fnr)){
                 dest.setFnr(fnr);
                 dest.setSammensattNavn(persondataFasade.hentSammensattNavn(fnr));

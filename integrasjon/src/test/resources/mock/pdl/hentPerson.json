@@ -1,0 +1,173 @@
+{
+  "data": {
+    "hentPerson": {
+      "adressebeskyttelse": [],
+      "bostedsadresse": [
+        {
+          "angittFlyttedato": "2020-03-29",
+          "coAdressenavn": null,
+          "matrikkeladresse": null,
+          "ukjentBosted": null,
+          "vegadresse": {
+            "adressenavn": "HALÅSVEGEN",
+            "husnummer": "5",
+            "husbokstav": null,
+            "tilleggsnavn": null,
+            "postnummer": "6713"
+          }
+        }
+      ],
+      "doedsfall": [],
+      "foedsel": [
+        {
+          "foedselsdato": "1991-02-27",
+          "foedselsaar": null,
+          "foedeland": null,
+          "foedested": null,
+          "metadata": {
+            "master": "FREG",
+            "endringer": [
+              {
+                "registrert": "2021-03-30T12:23:06",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        }
+      ],
+      "folkeregisteridentifikator": [
+        {
+          "identifikasjonsnummer": "27429104489",
+          "type": "FNR",
+          "status": "I_BRUK"
+        }
+      ],
+      "folkeregisterpersonstatus": [
+        {
+          "forenkletStatus": "bosattEtterFolkeregisterloven",
+          "status": "bosatt"
+        }
+      ],
+      "forelderBarnRelasjon": [
+        {
+          "relatertPersonsIdent": "22511596061",
+          "relatertPersonsRolle": "BARN",
+          "minRolleForPerson": "MOR"
+        }
+      ],
+      "fullmakt": [
+        {
+          "motpartsPersonident": "18498008107",
+          "motpartsRolle": "FULLMEKTIG",
+          "omraader": [
+            "KLA",
+            "UKJ",
+            "MED",
+            "UFM"
+          ],
+          "gyldigFraOgMed": "2021-04-01",
+          "gyldigTilOgMed": "2023-03-30"
+        }
+      ],
+      "kjoenn": [
+        {
+          "kjoenn": "KVINNE",
+          "metadata": {
+            "master": "FREG",
+            "endringer": [
+              {
+                "registrert": "2021-03-30T12:23:06",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        }
+      ],
+      "kontaktadresse": [
+        {
+          "type": "Innland",
+          "gyldigFraOgMed": "2020-03-30T00:00",
+          "gyldigTilOgMed": "2031-03-30T23:59:59",
+          "coAdressenavn": null,
+          "postboksadresse": null,
+          "postadresseIFrittFormat": {
+            "adresselinje1": "POSTLINJE 1",
+            "adresselinje2": "OG 2",
+            "adresselinje3": null,
+            "postnummer": "4994"
+          },
+          "utenlandskAdresse": null,
+          "utenlandskAdresseIFrittFormat": null,
+          "vegadresse": null
+        },
+        {
+          "type": "Innland",
+          "gyldigFraOgMed": "2021-03-30T00:00",
+          "gyldigTilOgMed": "2021-04-01T00:00",
+          "coAdressenavn": "C/O RAKRYGGET STAFFELI",
+          "postboksadresse": null,
+          "postadresseIFrittFormat": null,
+          "utenlandskAdresse": null,
+          "utenlandskAdresseIFrittFormat": null,
+          "vegadresse": {
+            "adressenavn": "LANGBERGA",
+            "husnummer": "30",
+            "husbokstav": null,
+            "tilleggsnavn": null,
+            "postnummer": "6800"
+          }
+        }
+      ],
+      "navn": [
+        {
+          "fornavn": "MOLEFONKEN",
+          "mellomnavn": "DANSENDE",
+          "etternavn": "KNOTT",
+          "metadata": {
+            "master": "FREG",
+            "endringer": [
+              {
+                "registrert": "2021-03-30T12:23:06",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        }
+      ],
+      "oppholdsadresse": [
+        {
+          "gyldigFraOgMed": null,
+          "gyldigTilOgMed": null,
+          "oppholdAnnetSted": null,
+          "coAdressenavn": "Estate of",
+          "matrikkeladresse": null,
+          "utenlandskAdresse": {
+            "adressenavnNummer": "Adresse er påkrevd",
+            "bygningEtasjeLeilighet": "Bygning",
+            "postboksNummerNavn": null,
+            "postkode": "Postkode",
+            "bySted": "By",
+            "regionDistriktOmraade": "Region",
+            "landkode": "ABW"
+          },
+          "vegadresse": null
+        }
+      ],
+      "statsborgerskap": [
+        {
+          "land": "NOR",
+          "metadata": {
+            "master": "FREG"
+          }
+        }
+      ],
+      "sivilstand": [
+        {
+          "type": "REGISTRERT_PARTNER",
+          "relatertVedSivilstand": "11466927750",
+          "gyldigFraOgMed": "2021-03-02"
+        }
+      ]
+    }
+  }
+}

@@ -50,7 +50,7 @@ public class SedSomBrevService {
         Fagsak fagsak = behandling.getFagsak();
         UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(mottakerland);
         String institusjonID = utenlandskMyndighetService.lagInstitusjonsId(utenlandskMyndighet);
-        String brukerFnr = persondataFasade.hentIdentForAktørId(fagsak.hentBruker().getAktørId());
+        String brukerFnr = persondataFasade.hentFolkeregisterIdent(fagsak.hentBruker().getAktørId());
         byte[] sedPdf = eessiService.genererSedPdf(behandling.getId(), sedType);
 
         OpprettJournalpost opprettJournalpost = OpprettJournalpost.lagJournalpostForSendingAvSedSomBrev(

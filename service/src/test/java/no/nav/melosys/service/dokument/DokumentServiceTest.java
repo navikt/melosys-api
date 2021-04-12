@@ -411,7 +411,7 @@ public final class DokumentServiceTest {
 
     private static PersondataFasade mockPersondataFasade(Aktoer aktør) throws IkkeFunnetException {
         PersondataFasade persondataFasade = mock(PersondataFasade.class);
-        when(persondataFasade.hentIdentForAktørId(anyString()))
+        when(persondataFasade.hentFolkeregisterIdent(anyString()))
             .thenReturn(String.format("IDENT%s", aktør.getAktørId()));
         return persondataFasade;
     }
