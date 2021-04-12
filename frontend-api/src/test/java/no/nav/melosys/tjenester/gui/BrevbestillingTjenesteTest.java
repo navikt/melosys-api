@@ -34,9 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_BRUKER;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -135,7 +133,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     @Test
     void skalReturnereUtkast() throws Exception {
         byte[] forventetPdf = "UTKAST".getBytes(StandardCharsets.UTF_8);
-        when(mockDokServiceFasade.produserUtkast(any(), anyLong(), any())).thenReturn(forventetPdf);
+        when(mockDokServiceFasade.produserUtkast(anyLong(), any())).thenReturn(forventetPdf);
 
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
             .medProduserbardokument(MANGELBREV_BRUKER)
@@ -163,7 +161,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
             .build();
         brevbestillingTjeneste.produserBrev(123L, brevbestillingDto);
 
-        verify(mockDokgenService).produserOgDistribuerBrev(MANGELBREV_BRUKER, 123L, brevbestillingDto);
+        verify(mockDokgenService).produserOgDistribuerBrev(123L, brevbestillingDto);
         verifyNoInteractions(mockDokServiceFasade);
 
         valider(brevbestillingDto, "dokumenter-v2-opprett-post-schema.json", new ObjectMapper());

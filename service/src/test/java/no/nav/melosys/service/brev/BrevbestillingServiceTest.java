@@ -5,12 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
-import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.FellesKodeverk;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
@@ -37,10 +32,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_BRUKER;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
@@ -69,7 +61,9 @@ class BrevbestillingServiceTest {
     @BeforeEach
     void init() {
         brevbestillingService = new BrevbestillingService(
-            mockDokServiceFasade, mockDokgenService, mockBrevmottakerService, mockPersondataFasade, mockEregFasade, mockKontaktopplysningService, mockKodeverkService);
+            mockDokServiceFasade, mockDokgenService, mockBrevmottakerService, mockPersondataFasade,
+            mockEregFasade, mockKontaktopplysningService, mockKodeverkService
+        );
     }
 
     @Test
@@ -193,19 +187,19 @@ class BrevbestillingServiceTest {
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().medProduserbardokument(MANGELBREV_BRUKER).build();
         brevbestillingService.produserBrev(123L, brevbestillingDto);
 
-        verify(mockDokgenService).produserOgDistribuerBrev(eq(MANGELBREV_BRUKER), anyLong(), any());
+        verify(mockDokgenService).produserOgDistribuerBrev(anyLong(), eq(brevbestillingDto));
     }
 
     @Test
     void skalReturnereUtkast() throws Exception {
         byte[] pdf = "UTKAST".getBytes(StandardCharsets.UTF_8);
-        when(mockDokServiceFasade.produserUtkast(any(), anyLong(), any())).thenReturn(pdf);
+        when(mockDokServiceFasade.produserUtkast(anyLong(), any())).thenReturn(pdf);
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().medProduserbardokument(MANGELBREV_BRUKER).build();
 
         byte[] utkast = brevbestillingService.produserUtkast(123L, brevbestillingDto);
 
         assertThat(utkast).isEqualTo(pdf);
-        verify(mockDokServiceFasade).produserUtkast(eq(MANGELBREV_BRUKER), anyLong(), any());
+        verify(mockDokServiceFasade).produserUtkast(123L, brevbestillingDto);
     }
 
     private Aktoer lagAktoer(Aktoersroller aktoersroller, String orgNummer) {
