@@ -86,7 +86,7 @@ public class BrevmottakerService {
 
     private String hentMottakerNavn(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller hovedmottaker, String orgnrTilValgtArbeidsgiver) throws FunksjonellException, TekniskException {
         if (hovedmottaker == Aktoersroller.BRUKER) {
-            var avklartMottaker = avklarMottaker(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling);
+            Aktoer avklartMottaker = avklarMottaker(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling);
             if (avklartMottaker.getRolle() == Aktoersroller.BRUKER) {
                 return behandling.hentPersonDokument().sammensattNavn;
             } else {
@@ -98,7 +98,7 @@ public class BrevmottakerService {
             var orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(orgnrTilValgtArbeidsgiver).getDokument();
             return orgDokument.getNavn();
         }
-        return null;
+        throw new FunksjonellException("Melosys støtter ikke hovedmottakere med rollen " + hovedmottaker);
     }
 
     private List<MuligMottakerDto> lagKopiMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<Aktoersroller> kopiMottakere, Aktoersroller hovedmottaker) throws FunksjonellException, TekniskException {
@@ -115,7 +115,7 @@ public class BrevmottakerService {
     }
 
     private MuligMottakerDto lagKopiMottakerForBruker(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker, Aktoersroller hovedmottaker) throws FunksjonellException, TekniskException {
-        var avklartKopi = avklarMottaker(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling);
+        Aktoer avklartKopi = avklarMottaker(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling);
         if (avklartKopi.getRolle() == Aktoersroller.BRUKER || hovedmottaker == kopiMottaker) {
             return new MuligMottakerDto.Builder()
                 .medDokumentNavn("Kopi til bruker")
@@ -137,7 +137,7 @@ public class BrevmottakerService {
     private List<MuligMottakerDto> lagKopiMottakereForArbeidsgiver(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker) throws FunksjonellException, TekniskException {
         List<MuligMottakerDto> muligMottakerDtos = new ArrayList<>();
 
-        var avklarteKopier = avklarMottakere(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling, false, true);
+        List<Aktoer> avklarteKopier = avklarMottakere(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling, false, true);
         for (Aktoer avklartKopi : avklarteKopier) {
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartKopi.getOrgnr());
             muligMottakerDtos.add(new MuligMottakerDto.Builder()
@@ -154,7 +154,7 @@ public class BrevmottakerService {
         List<MuligMottakerDto> muligMottakerDtos = new ArrayList<>();
 
         for (FastMottaker fastMottaker : fasteMottakere) {
-            var avklartMottaker = avklarMottaker(produserbaredokumenter, FastMottaker.av(fastMottaker), behandling);
+            Aktoer avklartMottaker = avklarMottaker(produserbaredokumenter, FastMottaker.av(fastMottaker), behandling);
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartMottaker.getOrgnr());
             muligMottakerDtos.add(new MuligMottakerDto.Builder()
                 .medDokumentNavn("Kopi til " + orgDokument.getNavn())
@@ -186,12 +186,16 @@ public class BrevmottakerService {
         return mottakerRolle;
     }
 
-    public Aktoer avklarMottaker(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling)
+    private Aktoer avklarMottaker(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling)
         throws FunksjonellException, TekniskException {
         List<Aktoer> mottakere = avklarMottakere(produserbartDokument, mottaker, behandling, false, false);
-        return mottakere.stream()
-            .findFirst()
-            .orElseThrow(() -> new FunksjonellException("Finner ikke avklart mottaker for produserbart dokument " + produserbartDokument.getKode() + " og rolle " + mottaker.getRolle() + "for behandling " + behandling.getId()));
+        if (mottakere.size() < 1) {
+            throw new FunksjonellException("Finner ikke avklart mottaker for produserbart dokument " + produserbartDokument.getKode() + " og rolle " + mottaker.getRolle() + " for behandling " + behandling.getId());
+        }
+        if (mottakere.size() > 1) {
+            throw new FunksjonellException("Flere enn én mottaker ble funnet for produserbart dokument " + produserbartDokument.getKode() + " og rolle " + mottaker.getRolle() + " for behandling " + behandling.getId());
+        }
+        return mottakere.get(0);
     }
 
     public List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling) throws FunksjonellException, TekniskException {
