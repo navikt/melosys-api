@@ -78,47 +78,6 @@ class BrevmottakerServiceTest {
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
     }
 
-
-    @Test
-    void hentMuligeMottakere_forventetSaksbehandlingstidSoknad_returnererBrukerSomHovedMottaker() throws FunksjonellException, TekniskException {
-        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
-        when(behandling.hentPersonDokument()).thenReturn(lagPersonDokument());
-
-        var muligeMottakere = brevmottakerService.hentMuligeMottakere(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, behandling, null);
-
-        assertThat(muligeMottakere.getHovedMottaker())
-            .extracting(
-                MuligMottakerDto::getDokumentNavn,
-                MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getRolle,
-                MuligMottakerDto::getAktørId,
-                MuligMottakerDto::getOrgnr)
-            .containsExactly(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
-        assertThat(muligeMottakere)
-            .extracting(MuligeMottakereDto::getKopiMottakere, MuligeMottakereDto::getFasteMottakere)
-            .containsExactly(emptyList(), emptyList());
-    }
-
-    @Test
-    void hentMuligeMottakere_forventetSaksbehandlingstidKlage_returnererBrukerSomHovedMottaker() throws FunksjonellException, TekniskException {
-        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
-        when(behandling.hentPersonDokument()).thenReturn(lagPersonDokument());
-
-        var muligeMottakere = brevmottakerService.hentMuligeMottakere(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE, behandling, null);
-
-        assertThat(muligeMottakere.getHovedMottaker())
-            .extracting(
-                MuligMottakerDto::getDokumentNavn,
-                MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getRolle,
-                MuligMottakerDto::getAktørId,
-                MuligMottakerDto::getOrgnr)
-            .containsExactly(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
-        assertThat(muligeMottakere)
-            .extracting(MuligeMottakereDto::getKopiMottakere, MuligeMottakereDto::getFasteMottakere)
-            .containsExactly(emptyList(), emptyList());
-    }
-
     @Test
     void hentMuligeMottakere_mangelbrevBruker_returnererBrukerSomHovedMottaker() throws FunksjonellException, TekniskException {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
@@ -157,7 +116,6 @@ class BrevmottakerServiceTest {
                 MuligMottakerDto::getOrgnr)
             .containsExactly(MANGELBREV_ARBEIDSGIVER.getBeskrivelse(), "Arbeidsgivers navn", ARBEIDSGIVER, null, null);
         assertThat(muligeMottakere.getKopiMottakere())
-            .hasSize(1)
             .flatExtracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
@@ -187,7 +145,6 @@ class BrevmottakerServiceTest {
                 MuligMottakerDto::getOrgnr)
             .containsExactly(MANGELBREV_ARBEIDSGIVER.getBeskrivelse(), "Arbeidsgivers navn", ARBEIDSGIVER, null, null);
         assertThat(muligeMottakere.getKopiMottakere())
-            .hasSize(1)
             .flatExtracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
@@ -219,7 +176,6 @@ class BrevmottakerServiceTest {
                 MuligMottakerDto::getOrgnr)
             .containsExactly(INNVILGELSE_FOLKETRYGDLOVEN_2_8.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
         assertThat(muligeMottakere.getKopiMottakere())
-            .hasSize(2)
             .flatExtracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
@@ -230,7 +186,6 @@ class BrevmottakerServiceTest {
                 "Kopi til arbeidsgiver", "Avklart Arbeidsgiver 1", ARBEIDSGIVER, null, "orgnr1",
                 "Kopi til arbeidsgiver", "Avklart Arbeidsgiver 2", ARBEIDSGIVER, null, "orgnr2");
         assertThat(muligeMottakere.getFasteMottakere())
-            .hasSize(1)
             .flatExtracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
@@ -259,7 +214,6 @@ class BrevmottakerServiceTest {
                 MuligMottakerDto::getOrgnr)
             .containsExactly(INNVILGELSE_FOLKETRYGDLOVEN_2_8.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
         assertThat(muligeMottakere.getKopiMottakere())
-            .hasSize(1)
             .flatExtracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
@@ -269,7 +223,6 @@ class BrevmottakerServiceTest {
             .containsExactly(
                 "Kopi til arbeidsgivers fullmektig", "Fullmektig organisasjons navn", REPRESENTANT, null, "REP-ORGNR");
         assertThat(muligeMottakere.getFasteMottakere())
-            .hasSize(1)
             .flatExtracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
@@ -298,7 +251,6 @@ class BrevmottakerServiceTest {
             .containsExactly(INNVILGELSE_FOLKETRYGDLOVEN_2_8.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
         assertThat(muligeMottakere.getKopiMottakere()).isEmpty();
         assertThat(muligeMottakere.getFasteMottakere())
-            .hasSize(1)
             .flatExtracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
@@ -330,7 +282,6 @@ class BrevmottakerServiceTest {
                 MuligMottakerDto::getOrgnr)
             .containsExactly(INNVILGELSE_FOLKETRYGDLOVEN_2_8.getBeskrivelse(), "Fullmektig organisasjons navn", BRUKER, null, null);
         assertThat(muligeMottakere.getKopiMottakere())
-            .hasSize(3)
             .flatExtracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
@@ -342,7 +293,6 @@ class BrevmottakerServiceTest {
                 "Kopi til arbeidsgiver", "Avklart Arbeidsgiver 1", ARBEIDSGIVER, null, "orgnr1",
                 "Kopi til arbeidsgiver", "Avklart Arbeidsgiver 2", ARBEIDSGIVER, null, "orgnr2");
         assertThat(muligeMottakere.getFasteMottakere())
-            .hasSize(1)
             .flatExtracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
@@ -371,7 +321,6 @@ class BrevmottakerServiceTest {
                 MuligMottakerDto::getOrgnr)
             .containsExactly(INNVILGELSE_FOLKETRYGDLOVEN_2_8.getBeskrivelse(), "Fullmektig organisasjons navn", BRUKER, null, null);
         assertThat(muligeMottakere.getKopiMottakere())
-            .hasSize(1)
             .flatExtracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
@@ -380,7 +329,6 @@ class BrevmottakerServiceTest {
                 MuligMottakerDto::getOrgnr)
             .containsExactly("Kopi til bruker", "Ola Nordmann", BRUKER, "aktørId", null);
         assertThat(muligeMottakere.getFasteMottakere())
-            .hasSize(1)
             .flatExtracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
@@ -411,7 +359,6 @@ class BrevmottakerServiceTest {
                 MuligMottakerDto::getOrgnr)
             .containsExactly(INNVILGELSE_FOLKETRYGDLOVEN_2_8.getBeskrivelse(), "Fullmektig organisasjons navn", BRUKER, null, null);
         assertThat(muligeMottakere.getKopiMottakere())
-            .hasSize(3)
             .flatExtracting(
                 MuligMottakerDto::getDokumentNavn,
                 MuligMottakerDto::getMottakerNavn,
