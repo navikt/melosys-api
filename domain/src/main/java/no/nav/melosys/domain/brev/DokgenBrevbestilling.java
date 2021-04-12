@@ -11,7 +11,7 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 public class DokgenBrevbestilling extends Brevbestilling {
     private OrganisasjonDokument org;
     private Kontaktopplysning kontaktopplysning;
-    private String kontaktperson;
+    private String kontaktpersonNavn;
     private Instant forsendelseMottatt;
     private String avsenderId;
     private long behandlingId;
@@ -28,7 +28,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         super(builder.produserbartdokument, builder.behandling, builder.avsenderNavn);
         this.org = builder.org;
         this.kontaktopplysning = builder.kontaktopplysning;
-        this.kontaktperson = builder.kontaktperson;
+        this.kontaktpersonNavn = builder.kontaktpersonNavn;
         this.forsendelseMottatt = builder.forsendelseMottatt;
         this.avsenderId = builder.avsenderId;
         this.behandlingId = builder.behandlingId;
@@ -45,8 +45,8 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return kontaktopplysning;
     }
 
-    public String getKontaktperson() {
-        return kontaktperson;
+    public String getKontaktpersonNavn() {
+        return kontaktpersonNavn;
     }
 
     public Instant getForsendelseMottatt() {
@@ -82,7 +82,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private Behandling behandling;
         private OrganisasjonDokument org;
         private Kontaktopplysning kontaktopplysning;
-        private String kontaktperson;
+        private String kontaktpersonNavn;
         private Instant forsendelseMottatt;
         private String avsenderNavn;
         private String avsenderId;
@@ -99,7 +99,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.behandling = brevbestilling.behandling;
             this.org = brevbestilling.org;
             this.kontaktopplysning = brevbestilling.kontaktopplysning;
-            this.kontaktperson = brevbestilling.kontaktperson;
+            this.kontaktpersonNavn = brevbestilling.kontaktpersonNavn;
             this.forsendelseMottatt = brevbestilling.forsendelseMottatt;
             this.avsenderNavn = brevbestilling.avsenderNavn;
             this.avsenderId = brevbestilling.avsenderId;
@@ -129,8 +129,8 @@ public class DokgenBrevbestilling extends Brevbestilling {
             return (T) this;
         }
 
-        public T medKontaktperson(String kontaktperson) {
-            this.kontaktperson = kontaktperson;
+        public T medKontaktpersonNavn(String kontaktpersonNavn) {
+            this.kontaktpersonNavn = kontaktpersonNavn;
             return (T) this;
         }
 

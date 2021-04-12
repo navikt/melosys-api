@@ -68,7 +68,7 @@ class BrevbestillingServiceTest {
 
     @Test
     void hentBrevMaler_behandlingIkkeAvsluttet_returnererMaler() {
-        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentBrevMaler(new Behandling());
+        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(new Behandling());
 
         assertThat(brevMaler)
             .hasSize(2)
@@ -79,7 +79,7 @@ class BrevbestillingServiceTest {
     void hentBrevMaler_behandlingAvsluttet_returnererTomListe() {
         var behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentBrevMaler(behandling);
+        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(behandling);
 
         assertThat(brevMaler).isEmpty();
     }
@@ -88,7 +88,7 @@ class BrevbestillingServiceTest {
     void hentBrevMaler_behandlingErSoeknad_returnererSoeknadMalITillegg() {
         var behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);
-        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentBrevMaler(behandling);
+        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(behandling);
 
         assertThat(brevMaler)
             .hasSize(3)
@@ -99,7 +99,7 @@ class BrevbestillingServiceTest {
     void hentBrevMaler_behandlingErKlage_returnererKlageMalITillegg() {
         var behandling = new Behandling();
         behandling.setType(Behandlingstyper.KLAGE);
-        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentBrevMaler(behandling);
+        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(behandling);
 
         assertThat(brevMaler)
             .hasSize(3)
@@ -122,7 +122,7 @@ class BrevbestillingServiceTest {
 
         assertThat(brevAdresser).hasSize(1);
         assertThat(brevAdresser.get(0))
-            .extracting("mottakerNavn", "orgnr", "adresselinjer", "postnr", "poststed", "land")
+            .extracting(BrevAdresse::getMottakerNavn, BrevAdresse::getOrgnr, BrevAdresse::getAdresselinjer, BrevAdresse::getPostnr, BrevAdresse::getPoststed, BrevAdresse::getLand)
             .containsExactly("Ola Nordmann", null, List.of("Gateadresse 43A"), "0123", "Oslo", Land.NORGE);
     }
 
@@ -139,7 +139,7 @@ class BrevbestillingServiceTest {
 
         assertThat(brevAdresser).hasSize(1);
         assertThat(brevAdresser.get(0))
-            .extracting("mottakerNavn", "orgnr", "adresselinjer", "postnr", "poststed", "land")
+            .extracting(BrevAdresse::getMottakerNavn, BrevAdresse::getOrgnr, BrevAdresse::getAdresselinjer, BrevAdresse::getPostnr, BrevAdresse::getPoststed, BrevAdresse::getLand)
             .containsExactly("Ola Nordmann Fullmektig", "orgNr", List.of("Gateadresse 43A"), "0123", "Oslo", Land.NORGE);
     }
 
@@ -157,10 +157,10 @@ class BrevbestillingServiceTest {
 
         assertThat(brevAdresser).hasSize(2);
         assertThat(brevAdresser.get(0))
-            .extracting("mottakerNavn", "orgnr", "adresselinjer", "postnr", "poststed", "land")
+            .extracting(BrevAdresse::getMottakerNavn, BrevAdresse::getOrgnr, BrevAdresse::getAdresselinjer, BrevAdresse::getPostnr, BrevAdresse::getPoststed, BrevAdresse::getLand)
             .containsExactly("Ola Nordmann Rørleggerfirma", "orgNr1", List.of("Gateadresse 43A"), "0123", "Oslo", Land.NORGE);
         assertThat(brevAdresser.get(1))
-            .extracting("mottakerNavn", "orgnr", "adresselinjer", "postnr", "poststed", "land")
+            .extracting(BrevAdresse::getMottakerNavn, BrevAdresse::getOrgnr, BrevAdresse::getAdresselinjer, BrevAdresse::getPostnr, BrevAdresse::getPoststed, BrevAdresse::getLand)
             .containsExactly("Ida Nordmann Rørleggerfirma", "orgNr2", List.of("Gateadresse 43A"), "0123", "Oslo", Land.NORGE);
     }
 
@@ -177,7 +177,7 @@ class BrevbestillingServiceTest {
 
         assertThat(brevAdresser).hasSize(1);
         assertThat(brevAdresser.get(0))
-            .extracting("mottakerNavn", "orgnr", "adresselinjer", "postnr", "poststed", "land")
+            .extracting(BrevAdresse::getMottakerNavn, BrevAdresse::getOrgnr, BrevAdresse::getAdresselinjer, BrevAdresse::getPostnr, BrevAdresse::getPoststed, BrevAdresse::getLand)
             .containsExactly("Ola Nordmann Fullmektig", "orgNr", List.of("Gateadresse 43A"), "0123", "Oslo", Land.NORGE);
     }
 

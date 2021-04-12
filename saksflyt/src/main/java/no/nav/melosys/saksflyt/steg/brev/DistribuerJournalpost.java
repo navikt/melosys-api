@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument.hentTilgjengeligAdresse;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 
@@ -85,11 +86,11 @@ public class DistribuerJournalpost implements StegBehandler {
 
         String bestillingsId;
         if (org != null) {
-            StrukturertAdresse postadresse = org.getPostadresse();
-            if (postadresse.erNorsk() && isEmpty(postadresse.poststed)) {
-                postadresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, postadresse.postnummer, LocalDate.now());
+            StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
+            if (orgAdresse.erNorsk() && isEmpty(orgAdresse.poststed)) {
+                orgAdresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, orgAdresse.postnummer, LocalDate.now());
             }
-            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, postadresse, kontaktopplysning, brevbestilling.getKontaktperson());
+            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, orgAdresse, kontaktopplysning, brevbestilling.getKontaktpersonNavn());
         } else {
             bestillingsId = doksysFasade.distribuerJournalpost(journalpostId);
         }

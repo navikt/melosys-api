@@ -90,17 +90,32 @@ class DistribuerJournalpostTest {
     }
 
     @Test
-    void utførDistribuerJournalpostMedAdresse() throws Exception {
+    void utførDistribuerJournalpostMedPostadresse() throws Exception {
         String journalpostId = "12345";
-        OrganisasjonDokument organisasjonDokument = TestdataFactory.lagOrg();
-        Kontaktopplysning kontaktopplysning = TestdataFactory.lagKontaktOpplysning();
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(organisasjonDokument);
 
         Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.REPRESENTANT);
 
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setDokument(TestdataFactory.lagOrgMedPostadresse());
+
         when(mockEregFasade.hentOrganisasjon(any())).thenReturn(saksopplysning);
-        when(mockKontaktopplysningService.hentKontaktopplysning(any(), any())).thenReturn(Optional.of(kontaktopplysning));
+        when(mockKontaktopplysningService.hentKontaktopplysning(any(), any())).thenReturn(Optional.of(TestdataFactory.lagKontaktOpplysning()));
+
+        distribuerJournalpost.utfør(prosessinstans);
+
+        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), any(StrukturertAdresse.class), any(), any());
+    }
+
+    @Test
+    void utførDistribuerJournalpostMedForretningsadresse() throws Exception {
+        String journalpostId = "12345";
+        Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.REPRESENTANT);
+
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setDokument(TestdataFactory.lagOrgMedForretningsadresse());
+
+        when(mockEregFasade.hentOrganisasjon(any())).thenReturn(saksopplysning);
+        when(mockKontaktopplysningService.hentKontaktopplysning(any(), any())).thenReturn(Optional.of(TestdataFactory.lagKontaktOpplysning()));
         when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
 
         distribuerJournalpost.utfør(prosessinstans);

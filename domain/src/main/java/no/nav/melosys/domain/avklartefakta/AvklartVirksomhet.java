@@ -29,6 +29,10 @@ public class AvklartVirksomhet {
         this.yrkesaktivitet = yrkesaktivitet;
     }
 
+    public String getOrgnr() {
+        return orgnr;
+    }
+
     public boolean erSelvstendigForetak() {
         return yrkesaktivitet == Yrkesaktivitetstyper.SELVSTENDIG;
     }

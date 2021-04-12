@@ -127,8 +127,8 @@ class BrevmottakerServiceTest {
 
         List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
 
-        assertThat(arbeidsgivere.stream()
-            .map(Aktoer::getOrgnr))
+        assertThat(arbeidsgivere)
+            .flatExtracting(Aktoer::getOrgnr)
             .containsExactlyInAnyOrder("123456789", "987654321");
     }
 
@@ -162,8 +162,8 @@ class BrevmottakerServiceTest {
 
         List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling, false, false);
 
-        assertThat(arbeidsgivere.stream()
-            .map(Aktoer::getOrgnr))
+        assertThat(arbeidsgivere)
+            .flatExtracting(Aktoer::getOrgnr)
             .containsExactlyInAnyOrder("123456789", "987654321");
     }
 
@@ -184,8 +184,8 @@ class BrevmottakerServiceTest {
 
         List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
 
-        assertThat(arbeidsgivere.stream()
-            .map(Aktoer::getOrgnr))
+        assertThat(arbeidsgivere)
+            .flatExtracting(Aktoer::getOrgnr)
             .containsExactlyInAnyOrder("123456789", "987654321");
     }
 
@@ -195,8 +195,8 @@ class BrevmottakerServiceTest {
 
         List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
 
-        assertThat(arbeidsgivere.stream()
-            .map(Aktoer::getOrgnr))
+        assertThat(arbeidsgivere)
+            .flatExtracting(Aktoer::getOrgnr)
             .containsExactly("REP-ORGNR");
     }
 
@@ -206,8 +206,8 @@ class BrevmottakerServiceTest {
 
         List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
 
-        assertThat(arbeidsgivere.stream()
-            .map(Aktoer::getOrgnr))
+        assertThat(arbeidsgivere)
+            .flatExtracting(Aktoer::getOrgnr)
             .containsExactly("REP-ORGNR");
     }
 
@@ -235,8 +235,8 @@ class BrevmottakerServiceTest {
         when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(eq(behandling))).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagAktoerUtenlandskMyndighet()));
 
         List<Aktoer> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ANMODNING_UNNTAK, Mottaker.av(MYNDIGHET), behandling);
-        assertThat(myndigheter.stream()
-            .map(Aktoer::getInstitusjonId))
+        assertThat(myndigheter)
+            .flatExtracting(Aktoer::getInstitusjonId)
             .containsExactly("CZ:SZUC10416");
     }
 

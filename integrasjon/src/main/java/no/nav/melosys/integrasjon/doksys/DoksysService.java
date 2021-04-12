@@ -165,12 +165,12 @@ public class DoksysService implements DoksysFasade {
     }
 
     @Override
-    public String distribuerJournalpost(String journalpostId, StrukturertAdresse mottakeradresse, Kontaktopplysning kontaktopplysning, String kontaktperson) {
+    public String distribuerJournalpost(String journalpostId, StrukturertAdresse mottakeradresse, Kontaktopplysning kontaktopplysning, String kontaktpersonNavn) {
         DistribuerJournalpostRequest request = DistribuerJournalpostRequest.builder()
             .journalpostId(journalpostId)
             .bestillendeFagsystem(MELOSYS.getKode())
             .dokumentProdApp(MELOSYS.getKode())
-            .adresse(mapAdresse(mottakeradresse, kontaktopplysning, kontaktperson))
+            .adresse(mapAdresse(mottakeradresse, kontaktopplysning, kontaktpersonNavn))
             .build();
 
         return distribuerJournalpostConsumer.distribuerJournalpost(request).getBestillingsId();
@@ -208,13 +208,13 @@ public class DoksysService implements DoksysFasade {
             .build();
     }
 
-    private Adresse mapAdresse(StrukturertAdresse strukturertAdresse, Kontaktopplysning kontaktopplysning, String kontaktperson) {
+    private Adresse mapAdresse(StrukturertAdresse strukturertAdresse, Kontaktopplysning kontaktopplysning, String kontaktpersonNavn) {
         Adresse.AdresseBuilder adresseBuilder = Adresse.builder()
             .land(strukturertAdresse.landkode);
 
-        if(hasText(kontaktperson)) {
+        if(hasText(kontaktpersonNavn)) {
             adresseBuilder
-                .adresselinje1("Att: " + kontaktperson)
+                .adresselinje1("Att: " + kontaktpersonNavn)
                 .adresselinje2(strukturertAdresse.gatenavn + ((strukturertAdresse.husnummer == null) ? "" : " " + strukturertAdresse.husnummer));
         } else if (kontaktopplysning != null) {
             adresseBuilder

@@ -6,7 +6,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
-import no.nav.melosys.service.vedtak.VedtakService;
+import no.nav.melosys.service.vedtak.VedtakServiceFasade;
 import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -22,12 +22,12 @@ import org.springframework.web.context.WebApplicationContext;
 @Api(tags = {"saksflyt", "vedtak"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class VedtakTjeneste {
-    private final VedtakService vedtakService;
+    private final VedtakServiceFasade vedtakServiceFasade;
     private final TilgangService tilgangService;
 
     @Autowired
-    public VedtakTjeneste(VedtakService vedtakService, TilgangService tilgangService) {
-        this.vedtakService = vedtakService;
+    public VedtakTjeneste(VedtakServiceFasade vedtakServiceFasade, TilgangService tilgangService) {
+        this.vedtakServiceFasade = vedtakServiceFasade;
         this.tilgangService = tilgangService;
     }
 
@@ -39,7 +39,7 @@ public class VedtakTjeneste {
             throw new FunksjonellException("BehandlingsresultatTypeKode eller vedtakstype mangler.");
         }
         tilgangService.sjekkTilgang(behandlingID);
-        vedtakService.fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode(), fattVedtakDto.getFritekst(), fattVedtakDto.getFritekstSed(),
+        vedtakServiceFasade.fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode(), fattVedtakDto.getFritekst(), fattVedtakDto.getFritekstSed(),
             fattVedtakDto.getMottakerinstitusjoner(), fattVedtakDto.getVedtakstype(), fattVedtakDto.getRevurderBegrunnelse());
         return ResponseEntity.ok().build();
     }
@@ -53,7 +53,7 @@ public class VedtakTjeneste {
             throw new FunksjonellException("BegrunnelseKode mangler.");
         }
         tilgangService.sjekkTilgang(behandlingID);
-        vedtakService.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode(), endreVedtakDto.getFritekst(), endreVedtakDto.getFritekstSed());
+        vedtakServiceFasade.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode(), endreVedtakDto.getFritekst(), endreVedtakDto.getFritekstSed());
         return ResponseEntity.ok().build();
     }
 }

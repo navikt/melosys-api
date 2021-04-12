@@ -58,12 +58,12 @@ public class BrevbestillingService {
         this.kodeverkService = kodeverkService;
     }
 
-    public List<Produserbaredokumenter> hentBrevMaler(Behandling behandling) {
+    public List<Produserbaredokumenter> hentMuligeProduserbaredokumenter(Behandling behandling) {
         List<Produserbaredokumenter> brevmaler = new ArrayList<>(asList(MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER));
 
         if (behandling.getType() == Behandlingstyper.SOEKNAD) {
             brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-        } else if (behandling.getType() == Behandlingstyper.KLAGE) {
+        } else if (behandling.erKlage()) {
             brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE);
         }
 
@@ -75,34 +75,33 @@ public class BrevbestillingService {
         List<BrevAdresse> brevAdresser = new ArrayList<>();
 
         for (Aktoer mottaker : mottakere) {
-            if (mottaker.getRolle() == Aktoersroller.BRUKER) {
-                PersonDokument personDokument = (PersonDokument) persondataFasade.hentPerson(behandling.hentPersonDokument().fnr, Informasjonsbehov.STANDARD).getDokument();
-                brevAdresser.add(new BrevAdresse(
-                        personDokument.sammensattNavn,
-                        null,
-                        mapAdresselinjer(null, null, null, personDokument),
-                        mapPostnr(null, personDokument),
-                        kodeverkService.dekod(FellesKodeverk.POSTNUMMER, personDokument.gjeldendePostadresse.postnr, LocalDate.now()),
-                        mapLandForAdresse(null, personDokument)
-                    )
-                );
-            } else if (mottaker.getRolle() == Aktoersroller.ARBEIDSGIVER || mottaker.getRolle() == Aktoersroller.REPRESENTANT) {
-                Kontaktopplysning kontaktopplysninger = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), mottaker.getOrgnr()).orElse(null);
-                String mottakerOrgnr = kontaktopplysninger != null && kontaktopplysninger.getKontaktOrgnr() != null ? kontaktopplysninger.getKontaktOrgnr() : mottaker.getOrgnr();
-                OrganisasjonDokument organisasjonDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();
-
-                brevAdresser.add(new BrevAdresse(
-                        organisasjonDokument.getNavn(),
-                        organisasjonDokument.getOrgnummer(),
-                        mapAdresselinjer(organisasjonDokument, null, kontaktopplysninger, null),
-                        mapPostnr(organisasjonDokument, null),
-                        mapPoststed(organisasjonDokument, null),
-                        mapLandForAdresse(organisasjonDokument, null)
-                    )
-                );
-            }
+            brevAdresser.add(tilBrevAdresse(mottaker, behandling));
         }
         return brevAdresser;
+    }
+
+    private BrevAdresse tilBrevAdresse(Aktoer mottaker, Behandling behandling) throws TekniskException, FunksjonellException {
+        PersonDokument personDokument = null;
+        Kontaktopplysning kontaktopplysning = null;
+        OrganisasjonDokument orgDokument = null;
+
+        if (mottaker.getRolle() == Aktoersroller.BRUKER) {
+            personDokument = (PersonDokument) persondataFasade.hentPerson(behandling.hentPersonDokument().fnr, Informasjonsbehov.STANDARD).getDokument();
+
+            } else if (mottaker.getRolle() == Aktoersroller.ARBEIDSGIVER || mottaker.getRolle() == Aktoersroller.REPRESENTANT) {
+                kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), mottaker.getOrgnr()).orElse(null);
+            String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : mottaker.getOrgnr();
+            orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();
+        }
+
+        return new BrevAdresse.Builder()
+            .medMottakerNavn(mapMottakerNavn(orgDokument, personDokument))
+            .medOrgnr(orgDokument != null ? orgDokument.getOrgnummer() : null)
+            .medAdresselinjer(mapAdresselinjer(orgDokument, null, kontaktopplysning, personDokument))
+            .medPostnr(mapPostnr(orgDokument, personDokument))
+            .medPoststed(orgDokument != null ? mapPoststed(orgDokument) : kodeverkService.dekod(FellesKodeverk.POSTNUMMER, personDokument.gjeldendePostadresse.postnr, LocalDate.now()))
+            .medLand(mapLandForAdresse(orgDokument, personDokument))
+            .build();
     }
 
     public void produserBrev(long behandlingId, BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {

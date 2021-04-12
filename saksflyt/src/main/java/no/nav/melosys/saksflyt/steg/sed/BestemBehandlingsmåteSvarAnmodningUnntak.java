@@ -27,11 +27,10 @@ import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import no.nav.melosys.service.vedtak.VedtakService;
+import no.nav.melosys.service.vedtak.VedtakServiceFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.metrics.MetrikkerNavn.SVAR_AOU;
@@ -49,19 +48,19 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final VedtakService vedtakService;
+    private final VedtakServiceFasade vedtakServiceFasade;
     private final LovvalgsperiodeService lovvalgsperiodeService;
 
     @Autowired
     public BestemBehandlingsmåteSvarAnmodningUnntak(AnmodningsperiodeService anmodningsperiodeService,
                                                     BehandlingService behandlingService,
                                                     BehandlingsresultatService behandlingsresultatService,
-                                                    @Qualifier("system") VedtakService vedtakService,
+                                                    VedtakServiceFasade vedtakServiceFasade,
                                                     LovvalgsperiodeService lovvalgsperiodeService) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
-        this.vedtakService = vedtakService;
+        this.vedtakServiceFasade = vedtakServiceFasade;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
     }
 
@@ -110,7 +109,7 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
 
     private void fattVedtak(long behandlingID) throws MelosysException {
         try {
-            vedtakService.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+            vedtakServiceFasade.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
             behandlingsresultatService.oppdaterBehandlingsMaate(behandlingID, Behandlingsmaate.DELVIS_AUTOMATISERT);
         } catch (ValideringException e) {
             log.info("Kan ikke fatte vedtak automatisk pga. treff i vedtakkontroller: {}. Endrer behandlingsstatus til {}",
