@@ -10,6 +10,7 @@ import no.nav.melosys.integrasjon.pdl.PDLConsumer;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +22,9 @@ public class PersondataService implements PersondataFasade {
     private final Unleash unleash;
 
     @Autowired
-    public PersondataService(PDLConsumer pdlConsumer, TpsService tpsService, Unleash unleash) {
+    public PersondataService(@Qualifier("saksbehandler") PDLConsumer pdlConsumer,
+                             TpsService tpsService,
+                             Unleash unleash) {
         this.pdlConsumer = pdlConsumer;
         this.tpsService = tpsService;
         this.unleash = unleash;
