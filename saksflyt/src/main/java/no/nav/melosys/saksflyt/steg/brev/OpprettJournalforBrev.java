@@ -79,7 +79,7 @@ public class OpprettJournalforBrev implements StegBehandler {
 
         if (isEmpty(orgnr)) {
             mottaker.setAktørId(aktørId);
-            fnr = persondataFasade.hentIdentForAktørId(aktørId);
+            fnr = persondataFasade.hentFolkeregisterIdent(aktørId);
             sammensattNavn = persondataFasade.hentSammensattNavn(fnr);
         } else {
             mottaker.setOrgnr(orgnr);
