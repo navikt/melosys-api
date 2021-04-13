@@ -4,18 +4,16 @@ import java.time.LocalDate;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ErPeriode;
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.KontrollresultatService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
-import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +28,6 @@ public class OppfriskSaksopplysningerService {
 
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final FagsakService fagsakService;
     private final KontrollresultatService kontrollresultatService;
     private final InngangsvilkaarService inngangsvilkaarService;
     private final RegisteropplysningerService registeropplysningerService;
@@ -38,14 +35,12 @@ public class OppfriskSaksopplysningerService {
 
     public OppfriskSaksopplysningerService(BehandlingService behandlingService,
                                            BehandlingsresultatService behandlingsresultatService,
-                                           FagsakService fagsakService,
                                            KontrollresultatService kontrollresultatService,
                                            InngangsvilkaarService inngangsvilkaarService,
                                            RegisteropplysningerService registeropplysningerService,
                                            PersondataFasade persondataFasade) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
-        this.fagsakService = fagsakService;
         this.kontrollresultatService = kontrollresultatService;
         this.inngangsvilkaarService = inngangsvilkaarService;
         this.registeropplysningerService = registeropplysningerService;
@@ -84,10 +79,8 @@ public class OppfriskSaksopplysningerService {
             kontrollresultatService.utførKontrollerOgRegistrerFeil(behandlingID);
         }
 
-        Fagsak fagsak = behandling.getFagsak();
-        if (behandling.kanResultereIVedtak() && fagsak.getType() == Sakstyper.UKJENT) {
-            boolean kvalifisererForEF_883_2004 = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, behandling.finnSøknadsLand(), periode);
-            fagsakService.oppdaterType(fagsak, kvalifisererForEF_883_2004);
+        if (behandling.kanResultereIVedtak() && behandlingsresultatService.hentBehandlingsresultat(behandlingID).harIkkeOppfyltVilkår(Vilkaar.FO_883_2004_INNGANGSVILKAAR)) {
+            inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, behandling.finnSøknadsLand(), periode);
         }
     }
 }

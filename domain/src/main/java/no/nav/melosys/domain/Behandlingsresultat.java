@@ -363,6 +363,11 @@ public class Behandlingsresultat extends RegistreringsInfo {
             .anyMatch(v -> v.getVilkaar() == vilkår && v.isOppfylt());
     }
 
+    public boolean harIkkeOppfyltVilkår(Vilkaar vilkår) {
+        return vilkaarsresultater.stream()
+            .anyMatch(v -> v.getVilkaar() == vilkår && !v.isOppfylt());
+    }
+
     public boolean erAutomatisert() {
         return behandlingsmåte == Behandlingsmaate.AUTOMATISERT
             || behandlingsmåte == Behandlingsmaate.DELVIS_AUTOMATISERT;
