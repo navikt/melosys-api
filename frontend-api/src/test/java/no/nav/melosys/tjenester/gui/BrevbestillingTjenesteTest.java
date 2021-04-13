@@ -92,19 +92,21 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         List<BrevmalDto> brevmaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
         assertThat(brevmaler).hasSize(3);
 
-        assertThat(brevmaler.get(0).getFelter()).hasSize(2);
-        assertThat(brevmaler.get(0).getFelter().get(0).getValg()).hasSize(2)
-            .extracting(FeltvalgDto::getKode)
-            .containsExactlyInAnyOrder("FRITEKST", "STANDARD");
+        assertThat(brevmaler.get(0).getType()).isEqualTo(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
+        assertThat(brevmaler.get(0).getFelter()).isNull();
+        assertThat(brevmaler.get(0).getMuligeMottakere()).hasSize(1);
 
         assertThat(brevmaler.get(1).getFelter()).hasSize(2);
         assertThat(brevmaler.get(1).getFelter().get(0).getValg()).hasSize(2)
             .extracting(FeltvalgDto::getKode)
             .containsExactlyInAnyOrder("FRITEKST", "STANDARD");
 
-        assertThat(brevmaler.get(2).getType()).isEqualTo(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-        assertThat(brevmaler.get(2).getFelter()).isNull();
-        assertThat(brevmaler.get(2).getMuligeMottakere()).hasSize(1);
+        assertThat(brevmaler.get(2).getFelter()).hasSize(2);
+        assertThat(brevmaler.get(2).getFelter().get(0).getValg()).hasSize(2)
+            .extracting(FeltvalgDto::getKode)
+            .containsExactlyInAnyOrder("FRITEKST", "STANDARD");
+
+
     }
 
     @Test

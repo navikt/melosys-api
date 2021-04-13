@@ -59,13 +59,14 @@ public class BrevbestillingService {
     }
 
     public List<Produserbaredokumenter> hentMuligeProduserbaredokumenter(Behandling behandling) {
-        List<Produserbaredokumenter> brevmaler = new ArrayList<>(asList(MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER));
+        List<Produserbaredokumenter> brevmaler = new ArrayList<>();
 
         if (behandling.getType() == Behandlingstyper.SOEKNAD) {
             brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
         } else if (behandling.erKlage()) {
             brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE);
         }
+        brevmaler.addAll(asList(MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER));
 
         return behandling.erAktiv() ? brevmaler : emptyList();
     }

@@ -135,10 +135,10 @@ public class BrevbestillingTjeneste {
             );
         }
 
-        feltvalgDtos.add(new FeltvalgDto.Builder().medKode("FRITEKST").medBeskrivelse("Fritekst (erstatter standardtekst)").build());
         if (behandling.getType() == Behandlingstyper.SOEKNAD || behandling.erKlage()) {
             feltvalgDtos.add(new FeltvalgDto.Builder().medKode("STANDARD").medBeskrivelse("Standardtekst søknad/klage").build());
         }
+        feltvalgDtos.add(new FeltvalgDto.Builder().medKode("FRITEKST").medBeskrivelse("Fritekst (erstatter standardtekst)").build());
 
         return new BrevmalDto.Builder()
             .medType(produserbartdokument)
