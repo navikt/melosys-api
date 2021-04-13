@@ -1,6 +1,5 @@
 package no.nav.melosys.tjenester.gui.kodeverk;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -39,6 +38,13 @@ import static no.nav.melosys.domain.kodeverk.Trygdedekninger.*;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class MelosysInterntKodeverkTjeneste {
 
+    private static final List<String> definedOrderTrygdedekning = List.of(
+        HELSEDEL.getKode(),
+        HELSEDEL_MED_SYKE_OG_FORELDREPENGER.getKode(),
+        PENSJONSDEL.getKode(),
+        HELSE_OG_PENSJONSDEL.getKode(),
+        HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER.getKode());
+
     private final MedlemskapsperiodeService medlemskapsperiodeService;
 
     public MelosysInterntKodeverkTjeneste(MedlemskapsperiodeService medlemskapsperiodeService) {
@@ -49,7 +55,9 @@ public class MelosysInterntKodeverkTjeneste {
     @ApiOperation(value = "Henter koder fra internt kodeverk til saksbehandling av folketrygden-saker")
     public ResponseEntity<Map<String, Object>> hentKoderTilFolketrygden() {
         Map<String, Object> kodeverdier = new HashMap<>();
-        kodeverdier.put(Trygdedekninger.class.getSimpleName(), tilKodeDtoTrygdedekning(medlemskapsperiodeService.hentGyldigeTrygdedekninger()));
+        kodeverdier.put(Trygdedekninger.class.getSimpleName(), tilKodeDto(
+            medlemskapsperiodeService.hentGyldigeTrygdedekninger(),
+            Comparator.comparingInt(c -> definedOrderTrygdedekning.indexOf(c.getKode()))));
         kodeverdier.put(Vilkaar.class.getSimpleName(), tilKodeDto(Vilkaar.values()));
         kodeverdier.put(InnvilgelsesResultat.class.getSimpleName(), tilKodeDto(InnvilgelsesResultat.values()));
         kodeverdier.put(Saerligeavgiftsgrupper.class.getSimpleName(), tilKodeDto(Saerligeavgiftsgrupper.values()));
@@ -66,22 +74,12 @@ public class MelosysInterntKodeverkTjeneste {
         return begrunnelser;
     }
 
-    private <T extends Kodeverk> Collection<KodeDto> tilKodeDtoTrygdedekning(Collection<T> kodeverk) {
-        List<String> definedOrder = Arrays.asList(
-            HELSEDEL.getKode(),
-            HELSEDEL_MED_SYKE_OG_FORELDREPENGER.getKode(),
-            PENSJONSDEL.getKode(),
-            HELSE_OG_PENSJONSDEL.getKode(),
-            HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER.getKode());
-
-        return tilKodeDto(kodeverk)
-            .stream()
-            .sorted(Comparator.comparingInt(c -> definedOrder.indexOf(c.getKode())))
-            .collect(Collectors.toList());
+    private <T extends Kodeverk> List<KodeDto> tilKodeDto(Collection<T> kodeverk, Comparator<KodeDto> comparator) {
+        return tilKodeDto(kodeverk).stream().sorted(comparator).collect(Collectors.toList());
     }
 
     private <T extends Kodeverk> Collection<KodeDto> tilKodeDto(Collection<T> kodeverk) {
-        return tilKodeDto(kodeverk.toArray(kodeverk.toArray(new Kodeverk[0])));
+        return tilKodeDto(kodeverk.toArray(new Kodeverk[0]));
     }
 
     private Collection<KodeDto> tilKodeDto(Kodeverk... kodeverk) {
