@@ -28,7 +28,7 @@ public class Fagsak extends RegistreringsInfo {
     private Long gsakSaksnummer;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "fagsak_type")
+    @Column(name = "fagsak_type", nullable = false)
     private Sakstyper type;
 
     @Enumerated(EnumType.STRING)
@@ -84,7 +84,7 @@ public class Fagsak extends RegistreringsInfo {
     /**
      * Returnerer den aktive behandlingen knyttet til saken eller {@code null} hvis den ikke finnes.
      */
-    public Behandling hentAktivBehandling() throws TekniskException {
+    public Behandling hentAktivBehandling() {
         List<Behandling> behandlingListe = getBehandlinger().stream()
             .filter(Behandling::erAktiv).collect(Collectors.toList());
         if (behandlingListe.size() > 1) {
@@ -106,11 +106,11 @@ public class Fagsak extends RegistreringsInfo {
             .orElse(null);
     }
 
-    public Behandling hentSistAktiveBehandling() throws TekniskException, FunksjonellException {
+    public Behandling hentSistAktiveBehandling() throws FunksjonellException {
         return Optional.ofNullable(hentAktivBehandling()).orElse(getSistOppdaterteBehandling());
     }
 
-    public Aktoer hentBruker() throws TekniskException {
+    public Aktoer hentBruker() {
         return hentAktørMedRolleType(Aktoersroller.BRUKER);
     }
 
@@ -121,7 +121,7 @@ public class Fagsak extends RegistreringsInfo {
     /**
      * Henter arbeidsgiver i tilfeller hvor det er forventet at det kun finnes en eller ingen
      */
-    public Aktoer hentUnikArbeidsgiver() throws TekniskException {
+    public Aktoer hentUnikArbeidsgiver() {
         return hentAktørMedRolleType(Aktoersroller.ARBEIDSGIVER);
     }
 
@@ -134,7 +134,7 @@ public class Fagsak extends RegistreringsInfo {
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlinger for fagsak " + saksnummer));
     }
 
-    private Aktoer hentAktørMedRolleType(Aktoersroller rolleType) throws TekniskException {
+    private Aktoer hentAktørMedRolleType(Aktoersroller rolleType) {
         Collection<Aktoer> kandidater = hentAktørerMedRolleType(rolleType);
         if (kandidater.size() > 1) {
             throw new TekniskException("Det finnes mer enn en aktør med rollen " + rolleType.getBeskrivelse() + " for sak " + saksnummer);
@@ -158,11 +158,11 @@ public class Fagsak extends RegistreringsInfo {
     /**
      * Henter myndighetens landkode fra institusjonsID som har format landkode:institusjonskode.
      */
-    public Landkoder hentMyndighetLandkode() throws TekniskException {
+    public Landkoder hentMyndighetLandkode() {
         return hentMyndighet().hentMyndighetLandkode();
     }
 
-    public Aktoer hentMyndighet() throws TekniskException {
+    public Aktoer hentMyndighet() {
         List<Aktoer> myndigheter = hentMyndigheter();
         if (myndigheter.isEmpty()) {
             throw new TekniskException("Finner ingen aktør med rolle " + MYNDIGHET + " for fagsak " + saksnummer);
@@ -196,10 +196,9 @@ public class Fagsak extends RegistreringsInfo {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Fagsak)) { // Implisitt nullsjekk
+        if (!(o instanceof Fagsak that)) { // Implisitt nullsjekk
             return false;
         }
-        Fagsak that = (Fagsak) o;
         return saksnummer != null && this.saksnummer.equals(that.saksnummer);
     }
 

@@ -41,7 +41,6 @@ public class OpprettFagsakOgBehandlingFraSed implements StegBehandler {
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(EESSI_MELDING, MelosysEessiMelding.class);
 
         Behandlingstema behandlingstema = prosessinstans.getData(BEHANDLINGSTEMA, Behandlingstema.class);
-        Sakstyper sakstype = behandlingstema == Behandlingstema.BESLUTNING_LOVVALG_NORGE ? Sakstyper.UKJENT : Sakstyper.EU_EOS;
 
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medAktørID(prosessinstans.hentAktørIDFraDataEllerSED())
@@ -49,7 +48,7 @@ public class OpprettFagsakOgBehandlingFraSed implements StegBehandler {
             .medBehandlingstema(behandlingstema)
             .medInitierendeJournalpostId(melosysEessiMelding.getJournalpostId())
             .medInitierendeDokumentId(melosysEessiMelding.getDokumentId())
-            .medSakstype(sakstype)
+            .medSakstype(Sakstyper.EU_EOS)
             .build();
 
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
