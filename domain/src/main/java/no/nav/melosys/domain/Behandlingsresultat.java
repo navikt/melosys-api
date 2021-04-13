@@ -221,10 +221,9 @@ public class Behandlingsresultat extends RegistreringsInfo {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Behandlingsresultat)) {
+        if (!(o instanceof Behandlingsresultat that)) {
             return false;
         }
-        Behandlingsresultat that = (Behandlingsresultat) o;
         return Objects.equals(this.type, that.type)
             && Objects.equals(this.behandling, that.behandling);
     }
@@ -361,11 +360,6 @@ public class Behandlingsresultat extends RegistreringsInfo {
     public boolean oppfyllerVilkår(Vilkaar vilkår) {
         return vilkaarsresultater.stream()
             .anyMatch(v -> v.getVilkaar() == vilkår && v.isOppfylt());
-    }
-
-    public boolean harIkkeOppfyltVilkår(Vilkaar vilkår) {
-        return vilkaarsresultater.stream()
-            .anyMatch(v -> v.getVilkaar() == vilkår && !v.isOppfylt());
     }
 
     public boolean erAutomatisert() {

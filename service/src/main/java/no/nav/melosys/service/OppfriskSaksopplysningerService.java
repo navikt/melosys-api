@@ -79,7 +79,7 @@ public class OppfriskSaksopplysningerService {
             kontrollresultatService.utførKontrollerOgRegistrerFeil(behandlingID);
         }
 
-        if (behandling.kanResultereIVedtak() && behandlingsresultatService.hentBehandlingsresultat(behandlingID).harIkkeOppfyltVilkår(Vilkaar.FO_883_2004_INNGANGSVILKAAR)) {
+        if (behandling.kanResultereIVedtak() && !behandlingsresultatService.hentBehandlingsresultat(behandlingID).oppfyllerVilkår(Vilkaar.FO_883_2004_INNGANGSVILKAAR)) {
             inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, behandling.finnSøknadsLand(), periode);
         }
     }
