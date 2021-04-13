@@ -70,7 +70,6 @@ class OppfriskSaksopplysningerServiceTest {
     @Test
     void oppfriskSaksopplysning() throws MelosysException {
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(new Behandlingsresultat());
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
 
@@ -104,7 +103,6 @@ class OppfriskSaksopplysningerServiceTest {
         behandlingsresultat.getVilkaarsresultater().add(vilkaarsresultat);
 
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
         when(inngangsvilkaarService.vurderOgLagreInngangsvilkår(anyLong(), anyList(), any(Periode.class))).thenReturn(true);
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
@@ -116,7 +114,6 @@ class OppfriskSaksopplysningerServiceTest {
     void oppfriskSaksopplysning_utenFamilierelasjoner_girForventetInformasjonsbehov() throws MelosysException {
         Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(new Behandlingsresultat());
         ArgumentCaptor<RegisteropplysningerRequest> requestCaptor = ArgumentCaptor.forClass(RegisteropplysningerRequest.class);
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
         verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
@@ -127,7 +124,6 @@ class OppfriskSaksopplysningerServiceTest {
     void oppfriskSaksopplysning_medFamilierelasjoner_girForventetInformasjonsbehov() throws MelosysException {
         Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(new Behandlingsresultat());
         ArgumentCaptor<RegisteropplysningerRequest> requestCaptor = ArgumentCaptor.forClass(RegisteropplysningerRequest.class);
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, true);
         verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());

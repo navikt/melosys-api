@@ -8,9 +8,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.ErPeriode;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.StatsborgerskapPeriode;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.inngangsvilkar.Feilmelding;
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Inngangsvilkaar;
@@ -42,6 +42,10 @@ public class InngangsvilkaarService {
         this.saksopplysningerService = saksopplysningerService;
         this.inngangsvilkaarConsumer = inngangsvilkaarConsumer;
         this.vilkaarsresultatService = vilkaarsresultatService;
+    }
+
+    public boolean oppfyllervurderingEF_883_2004(long behandlingID) {
+        return vilkaarsresultatService.oppfyllerVilkaar(behandlingID, FO_883_2004_INNGANGSVILKAAR);
     }
 
     public boolean vurderOgLagreInngangsvilkår(long behandlingID,

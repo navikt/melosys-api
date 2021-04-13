@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -79,7 +79,9 @@ public class OppfriskSaksopplysningerService {
             kontrollresultatService.utførKontrollerOgRegistrerFeil(behandlingID);
         }
 
-        if (behandling.kanResultereIVedtak() && !behandlingsresultatService.hentBehandlingsresultat(behandlingID).oppfyllerVilkår(Vilkaar.FO_883_2004_INNGANGSVILKAAR)) {
+        if (behandling.kanResultereIVedtak()
+            && behandling.getFagsak().getType() == Sakstyper.EU_EOS
+            && !inngangsvilkaarService.oppfyllervurderingEF_883_2004(behandlingID)) {
             inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, behandling.finnSøknadsLand(), periode);
         }
     }
