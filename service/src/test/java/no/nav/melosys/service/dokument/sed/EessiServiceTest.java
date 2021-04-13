@@ -241,7 +241,7 @@ class EessiServiceTest {
     @Test
     void hentTilknyttedeBucer_medFeilIConsumer_forventException() throws MelosysException {
         when(eessiConsumer.hentTilknyttedeBucer(anyLong(), anyList())).thenThrow(new IntegrasjonException("Error!"));
-        assertThatExceptionOfType(MelosysException.class)
+        assertThatExceptionOfType(IntegrasjonException.class)
             .isThrownBy(() ->
                 eessiService.hentTilknyttedeBucer(123L, Collections.singletonList("utkast")));
     }
