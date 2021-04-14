@@ -21,8 +21,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static no.nav.melosys.domain.avklartefakta.Avklartefakta.IKKE_VALGT_FAKTA;
 import static no.nav.melosys.domain.avklartefakta.Avklartefakta.VALGT_FAKTA;
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.*;
+import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_norsk_inntekt.NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV;
 import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_norsk_inntekt.NORSK_INNTEKT_TRYGDEAVGIFT_NAV;
 import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV;
+import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.when;
@@ -68,12 +70,34 @@ class TrygdeavgiftsgrunnlagServiceTest {
     }
 
     @Test
+    void lagreAvgiftsinformasjon_lønnFraNorgeMenUgyldigKombinasjon_kasterFeil() {
+        final var request = new OppdaterTrygdeavgiftsgrunnlagRequest(
+            Loenn_forhold.LØNN_FRA_NORGE,
+            new AvgiftsgrunnlagInfo(true, true, Saerligeavgiftsgrupper.FN),
+            null);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request))
+            .withMessageContaining("Ulovlig kombinasjon for lønn fra Norge");
+    }
+
+    @Test
+    void lagreAvgiftsinformasjon_lønnFraUtlandetMenUgyldigKombinasjon_kasterFeil() {
+        final var request = new OppdaterTrygdeavgiftsgrunnlagRequest(
+            Loenn_forhold.LØNN_FRA_UTLANDET,
+            null,
+            new AvgiftsgrunnlagInfo(true, true, Saerligeavgiftsgrupper.MISJONÆR));
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request))
+            .withMessageContaining("Ulovlig kombinasjon for lønn fra utlandet");
+    }
+
+    @Test
     void lagreAvgiftsinformasjon_kunAvgiftspliktigNorge_lagres() throws FunksjonellException {
         final var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
         final var request = new OppdaterTrygdeavgiftsgrunnlagRequest(
             Loenn_forhold.LØNN_FRA_NORGE,
-            new AvgiftsgrunnlagInfo(true, false, null),
+            new AvgiftsgrunnlagInfo(true, true, null),
             null);
         trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request);
 
@@ -81,7 +105,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
             .containsExactlyInAnyOrder(
                 new Avklartefakta(behandlingsresultat, LØNN_FORHOLD_VIRKSOMHET.getKode(), LØNN_FORHOLD_VIRKSOMHET, null, Loenn_forhold.LØNN_FRA_NORGE.getKode()),
                 new Avklartefakta(behandlingsresultat, LØNN_NORGE_SKATTEPLIKTIG_NORGE.getKode(), LØNN_NORGE_SKATTEPLIKTIG_NORGE, null, VALGT_FAKTA),
-                new Avklartefakta(behandlingsresultat, LØNN_NORGE_ARBEIDSGIVERAVGIFT.getKode(), LØNN_NORGE_ARBEIDSGIVERAVGIFT, null, IKKE_VALGT_FAKTA),
+                new Avklartefakta(behandlingsresultat, LØNN_NORGE_ARBEIDSGIVERAVGIFT.getKode(), LØNN_NORGE_ARBEIDSGIVERAVGIFT, null, VALGT_FAKTA),
                 new Avklartefakta(behandlingsresultat, LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE.getKode(), LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE, null, IKKE_VALGT_FAKTA)
             );
 
@@ -92,8 +116,8 @@ class TrygdeavgiftsgrunnlagServiceTest {
                 m -> m.getFastsattTrygdeavgift().getTrygdeavgiftstype()
             )
             .containsExactly(
-                NORSK_INNTEKT_TRYGDEAVGIFT_NAV,
-                Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV,
+                NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV,
+                UTENLANDSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV,
                 Trygdeavgift_typer.FORELØPIG
             );
     }
@@ -123,7 +147,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
                 m -> m.getFastsattTrygdeavgift().getTrygdeavgiftstype()
             )
             .containsExactly(
-                Vurderingsutfall_trygdeavgift_norsk_inntekt.NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV,
+                NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV,
                 UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV,
                 Trygdeavgift_typer.FORELØPIG
             );
@@ -135,7 +159,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
         final var request = new OppdaterTrygdeavgiftsgrunnlagRequest(
             Loenn_forhold.DELT_LØNN,
-            new AvgiftsgrunnlagInfo(true, false, null),
+            new AvgiftsgrunnlagInfo(true, true, null),
             new AvgiftsgrunnlagInfo(false, false, null));
         trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request);
 
@@ -143,7 +167,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
             .containsExactlyInAnyOrder(
                 new Avklartefakta(behandlingsresultat, LØNN_FORHOLD_VIRKSOMHET.getKode(), LØNN_FORHOLD_VIRKSOMHET, null, Loenn_forhold.DELT_LØNN.getKode()),
                 new Avklartefakta(behandlingsresultat, LØNN_NORGE_SKATTEPLIKTIG_NORGE.getKode(), LØNN_NORGE_SKATTEPLIKTIG_NORGE, null, VALGT_FAKTA),
-                new Avklartefakta(behandlingsresultat, LØNN_NORGE_ARBEIDSGIVERAVGIFT.getKode(), LØNN_NORGE_ARBEIDSGIVERAVGIFT, null, IKKE_VALGT_FAKTA),
+                new Avklartefakta(behandlingsresultat, LØNN_NORGE_ARBEIDSGIVERAVGIFT.getKode(), LØNN_NORGE_ARBEIDSGIVERAVGIFT, null, VALGT_FAKTA),
                 new Avklartefakta(behandlingsresultat, LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE.getKode(), LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE, null, IKKE_VALGT_FAKTA),
                 new Avklartefakta(behandlingsresultat, LØNN_UTL_SKATTEPLIKTIG_NORGE.getKode(), LØNN_UTL_SKATTEPLIKTIG_NORGE, null, IKKE_VALGT_FAKTA),
                 new Avklartefakta(behandlingsresultat, LØNN_UTL_ARBEIDSGIVERAVGIFT.getKode(), LØNN_UTL_ARBEIDSGIVERAVGIFT, null, IKKE_VALGT_FAKTA),
@@ -157,7 +181,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
                 m -> m.getFastsattTrygdeavgift().getTrygdeavgiftstype()
             )
             .containsExactly(
-                NORSK_INNTEKT_TRYGDEAVGIFT_NAV,
+                NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV,
                 UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV,
                 Trygdeavgift_typer.FORELØPIG
             );
@@ -188,8 +212,8 @@ class TrygdeavgiftsgrunnlagServiceTest {
                 m -> m.getFastsattTrygdeavgift().getTrygdeavgiftstype()
             )
             .containsExactly(
-                Vurderingsutfall_trygdeavgift_norsk_inntekt.NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV,
-                Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV,
+                NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV,
+                UTENLANDSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV,
                 Trygdeavgift_typer.FORELØPIG
             );
     }
@@ -214,12 +238,12 @@ class TrygdeavgiftsgrunnlagServiceTest {
         assertThat(trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(behandlingsresultatID))
             .extracting(
                 Trygdeavgiftsgrunnlag::getLønnsforhold,
-                a -> a.getAvgiftsGrunnlagNorge().getBetalerArbeidsgiverAvgift(),
-                a -> a.getAvgiftsGrunnlagNorge().getErSkattepliktig(),
+                a -> a.getAvgiftsGrunnlagNorge().betalerArbeidsgiverAvgift(),
+                a -> a.getAvgiftsGrunnlagNorge().erSkattepliktig(),
                 a -> a.getAvgiftsGrunnlagNorge().getSærligAvgiftsgruppe(),
                 a -> a.getAvgiftsGrunnlagNorge().getVurderingTrygdeavgiftNorskInntekt(),
-                a -> a.getAvgiftsGrunnlagUtland().getBetalerArbeidsgiverAvgift(),
-                a -> a.getAvgiftsGrunnlagUtland().getErSkattepliktig(),
+                a -> a.getAvgiftsGrunnlagUtland().betalerArbeidsgiverAvgift(),
+                a -> a.getAvgiftsGrunnlagUtland().erSkattepliktig(),
                 a -> a.getAvgiftsGrunnlagUtland().getSærligAvgiftsgruppe(),
                 a -> a.getAvgiftsGrunnlagUtland().getVurderingTrygdeavgiftUtenlandskInntekt()
             ).containsExactly(

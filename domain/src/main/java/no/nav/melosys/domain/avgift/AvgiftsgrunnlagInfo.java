@@ -15,11 +15,11 @@ public class AvgiftsgrunnlagInfo {
         this.særligAvgiftsgruppe = særligAvgiftsgruppe;
     }
 
-    public boolean getErSkattepliktig() {
+    public boolean erSkattepliktig() {
         return erSkattepliktig;
     }
 
-    public boolean getBetalerArbeidsgiverAvgift() {
+    public boolean betalerArbeidsgiverAvgift() {
         return betalerArbeidsgiverAvgift;
     }
 
@@ -33,5 +33,12 @@ public class AvgiftsgrunnlagInfo {
         }
 
         return !erSkattepliktig || !betalerArbeidsgiverAvgift;
+    }
+
+    @Override
+    public String toString() {
+        return "Særlig avgiftsgruppe = " + særligAvgiftsgruppe +
+            ", betaler arbeidsgiver avgift = " + (betalerArbeidsgiverAvgift ? "ja": "nei") +
+            ", skattepliktig = " + (erSkattepliktig ? "ja" : "nei");
     }
 }
