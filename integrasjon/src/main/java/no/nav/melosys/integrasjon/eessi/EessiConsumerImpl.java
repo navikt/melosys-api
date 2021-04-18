@@ -118,7 +118,7 @@ public class EessiConsumerImpl implements EessiConsumer, JsonRestIntegrasjon {
         try {
             return restTemplate.exchange(uri, method, entity, responseType, variabler).getBody();
         } catch (RestClientResponseException e) {
-            throw ExceptionMapper.springExTilMelosysEx(e, hentFeilmelding(e));
+            throw ExceptionMapper.tilException(e, hentFeilmelding(e));
         }
     }
 

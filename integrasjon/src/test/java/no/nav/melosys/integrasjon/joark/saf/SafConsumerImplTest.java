@@ -77,7 +77,7 @@ class SafConsumerImplTest {
         );
 
         assertThatThrownBy(() -> safConsumer.hentDokument(JOURNALPOST_ID, DOKUMENT_ID))
-            .hasRootCauseInstanceOf(IkkeFunnetException.class)
+            .isInstanceOf(IkkeFunnetException.class)
             .hasMessageContaining("ikke funnet");
     }
 
@@ -91,7 +91,7 @@ class SafConsumerImplTest {
         );
 
         assertThatThrownBy(() -> safConsumer.hentDokument(JOURNALPOST_ID, DOKUMENT_ID))
-            .hasRootCauseInstanceOf(SikkerhetsbegrensningException.class)
+            .isInstanceOf(SikkerhetsbegrensningException.class)
             .hasMessageContaining("no valid token");
     }
 }
