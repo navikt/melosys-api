@@ -132,44 +132,18 @@ public class TrygdeavgiftsgrunnlagService {
         if (req.getLønnsforhold() == null) {
             throw new FunksjonellException("Lønnsforhold ikke oppgitt");
         }
-        if (req.getLønnsforhold() == LØNN_FRA_NORGE || req.getLønnsforhold() == DELT_LØNN) {
+        if (req.harLønnFraNorge()) {
             if (req.getAvgiftsGrunnlagNorge() == null) {
                 throw new FunksjonellException("Mangler informasjon om lønn fra Norge");
             }
-            validerLovligeKominasjonerLønnFraNorge(req.getAvgiftsGrunnlagNorge());
+            req.getAvgiftsGrunnlagNorge().validerLovligeKominasjonerLønnFraNorge();
         }
-        if (req.getLønnsforhold() == LØNN_FRA_UTLANDET || req.getLønnsforhold() == DELT_LØNN) {
+        if (req.harLønnFraUtlandet()) {
             if (req.getAvgiftsGrunnlagUtland() == null) {
                 throw new FunksjonellException("Mangler informasjon om lønn fra utlandet");
             }
-            validerLovligeKominasjonerLønnFraUtlandet(req.getAvgiftsGrunnlagUtland());
+            req.getAvgiftsGrunnlagUtland().validerLovligeKominasjonerLønnFraUtlandet();
         }
-    }
-
-    private void validerLovligeKominasjonerLønnFraNorge(AvgiftsgrunnlagInfo grunnlag) throws FunksjonellException {
-        if (grunnlag.getSærligAvgiftsgruppe() == null && grunnlag.betalerArbeidsgiverAvgift()) {
-            return;
-        }
-        if (grunnlag.getSærligAvgiftsgruppe() == ARBEIDSTAKER_MALAYSIA && grunnlag.betalerArbeidsgiverAvgift() && !grunnlag.erSkattepliktig()) {
-            return;
-        }
-        if (grunnlag.getSærligAvgiftsgruppe() == MISJONÆR && !grunnlag.betalerArbeidsgiverAvgift()) {
-            return;
-        }
-        throw new FunksjonellException("Ulovlig kombinasjon for lønn fra Norge: " + grunnlag);
-    }
-
-    private void validerLovligeKominasjonerLønnFraUtlandet(AvgiftsgrunnlagInfo grunnlag) throws FunksjonellException {
-        if (grunnlag.getSærligAvgiftsgruppe() == null && !grunnlag.betalerArbeidsgiverAvgift()) {
-            return;
-        }
-        if (grunnlag.getSærligAvgiftsgruppe() == ARBEIDSTAKER_MALAYSIA && !grunnlag.betalerArbeidsgiverAvgift() && !grunnlag.erSkattepliktig()) {
-            return;
-        }
-        if (grunnlag.getSærligAvgiftsgruppe() == FN && !grunnlag.betalerArbeidsgiverAvgift() && !grunnlag.erSkattepliktig()) {
-            return;
-        }
-        throw new FunksjonellException("Ulovlig kombinasjon for lønn fra utlandet: " + grunnlag);
     }
 
     @Transactional(readOnly = true)

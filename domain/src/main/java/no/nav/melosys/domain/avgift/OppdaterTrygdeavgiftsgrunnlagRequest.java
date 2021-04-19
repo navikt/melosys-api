@@ -14,6 +14,7 @@ import no.nav.melosys.exception.FunksjonellException;
 
 import static no.nav.melosys.domain.avklartefakta.Avklartefakta.IKKE_VALGT_FAKTA;
 import static no.nav.melosys.domain.avklartefakta.Avklartefakta.VALGT_FAKTA;
+import static no.nav.melosys.domain.kodeverk.Loenn_forhold.*;
 
 public class OppdaterTrygdeavgiftsgrunnlagRequest extends AbstraktAvgiftsgrunnlag<AvgiftsgrunnlagInfo, AvgiftsgrunnlagInfo> {
 
@@ -21,6 +22,14 @@ public class OppdaterTrygdeavgiftsgrunnlagRequest extends AbstraktAvgiftsgrunnla
                                                 AvgiftsgrunnlagInfo avgiftsGrunnlagNorge,
                                                 AvgiftsgrunnlagInfo avgiftsGrunnlagUtland) {
         super(lønnsforhold, avgiftsGrunnlagNorge, avgiftsGrunnlagUtland);
+    }
+
+    public boolean harLønnFraNorge() {
+        return lønnsforhold == LØNN_FRA_NORGE || lønnsforhold == DELT_LØNN;
+    }
+
+    public boolean harLønnFraUtlandet() {
+        return lønnsforhold == LØNN_FRA_UTLANDET || lønnsforhold == DELT_LØNN;
     }
 
     public Collection<Avklartefakta> tilAvklartefakta() throws FunksjonellException {

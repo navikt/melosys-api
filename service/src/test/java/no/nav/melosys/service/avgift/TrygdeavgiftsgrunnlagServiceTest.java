@@ -70,28 +70,6 @@ class TrygdeavgiftsgrunnlagServiceTest {
     }
 
     @Test
-    void lagreAvgiftsinformasjon_lønnFraNorgeMenUgyldigKombinasjon_kasterFeil() {
-        final var request = new OppdaterTrygdeavgiftsgrunnlagRequest(
-            Loenn_forhold.LØNN_FRA_NORGE,
-            new AvgiftsgrunnlagInfo(true, true, Saerligeavgiftsgrupper.FN),
-            null);
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request))
-            .withMessageContaining("Ulovlig kombinasjon for lønn fra Norge");
-    }
-
-    @Test
-    void lagreAvgiftsinformasjon_lønnFraUtlandetMenUgyldigKombinasjon_kasterFeil() {
-        final var request = new OppdaterTrygdeavgiftsgrunnlagRequest(
-            Loenn_forhold.LØNN_FRA_UTLANDET,
-            null,
-            new AvgiftsgrunnlagInfo(true, true, Saerligeavgiftsgrupper.MISJONÆR));
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request))
-            .withMessageContaining("Ulovlig kombinasjon for lønn fra utlandet");
-    }
-
-    @Test
     void lagreAvgiftsinformasjon_kunAvgiftspliktigNorge_lagres() throws FunksjonellException {
         final var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
