@@ -34,9 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_BRUKER;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -94,19 +92,21 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         List<BrevmalDto> brevmaler = brevbestillingTjeneste.hentTilgjengeligeMaler(123L);
         assertThat(brevmaler).hasSize(3);
 
-        assertThat(brevmaler.get(0).getFelter()).hasSize(2);
-        assertThat(brevmaler.get(0).getFelter().get(0).getValg()).hasSize(2)
-            .extracting(FeltvalgDto::getKode)
-            .containsExactlyInAnyOrder("FRITEKST", "STANDARD");
+        assertThat(brevmaler.get(0).getType()).isEqualTo(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
+        assertThat(brevmaler.get(0).getFelter()).isNull();
+        assertThat(brevmaler.get(0).getMuligeMottakere()).hasSize(1);
 
         assertThat(brevmaler.get(1).getFelter()).hasSize(2);
         assertThat(brevmaler.get(1).getFelter().get(0).getValg()).hasSize(2)
             .extracting(FeltvalgDto::getKode)
             .containsExactlyInAnyOrder("FRITEKST", "STANDARD");
 
-        assertThat(brevmaler.get(2).getType()).isEqualTo(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-        assertThat(brevmaler.get(2).getFelter()).isNull();
-        assertThat(brevmaler.get(2).getMuligeMottakere()).hasSize(1);
+        assertThat(brevmaler.get(2).getFelter()).hasSize(2);
+        assertThat(brevmaler.get(2).getFelter().get(0).getValg()).hasSize(2)
+            .extracting(FeltvalgDto::getKode)
+            .containsExactlyInAnyOrder("FRITEKST", "STANDARD");
+
+
     }
 
     @Test
@@ -135,7 +135,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     @Test
     void skalReturnereUtkast() throws Exception {
         byte[] forventetPdf = "UTKAST".getBytes(StandardCharsets.UTF_8);
-        when(mockDokServiceFasade.produserUtkast(any(), anyLong(), any())).thenReturn(forventetPdf);
+        when(mockDokServiceFasade.produserUtkast(anyLong(), any())).thenReturn(forventetPdf);
 
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
             .medProduserbardokument(MANGELBREV_BRUKER)
@@ -163,7 +163,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
             .build();
         brevbestillingTjeneste.produserBrev(123L, brevbestillingDto);
 
-        verify(mockDokgenService).produserOgDistribuerBrev(MANGELBREV_BRUKER, 123L, brevbestillingDto);
+        verify(mockDokgenService).produserOgDistribuerBrev(123L, brevbestillingDto);
         verifyNoInteractions(mockDokServiceFasade);
 
         valider(brevbestillingDto, "dokumenter-v2-opprett-post-schema.json", new ObjectMapper());

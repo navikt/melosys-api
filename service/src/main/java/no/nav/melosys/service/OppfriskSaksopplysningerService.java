@@ -58,7 +58,7 @@ public class OppfriskSaksopplysningerService {
 
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         String aktørID = behandling.getFagsak().hentBruker().getAktørId();
-        String brukerID = persondataFasade.hentIdentForAktørId(aktørID);
+        String brukerID = persondataFasade.hentFolkeregisterIdent(aktørID);
 
         //OK om perioden er tom. Ikke alle behandlingstema krever periode.
         //Implisitt at perioden eksisterer om behandling kan resultere i vedtak

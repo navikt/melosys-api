@@ -1,6 +1,8 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -62,6 +64,7 @@ class OpprettJournalforBrevTest {
         Behandling behandling = TestdataFactory.lagBehandling();
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         prosessinstans.setBehandling(behandling);
+        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling());
 
         assertThatThrownBy(() -> opprettJournalforBrev.utfør(prosessinstans))
             .isInstanceOf(FunksjonellException.class)
@@ -75,17 +78,24 @@ class OpprettJournalforBrevTest {
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
         when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
 
+        Aktoer mottaker = new Aktoer();
+        mottaker.setRolle(Aktoersroller.BRUKER);
+        mottaker.setAktørId("1234");
+
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
+            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
+            .build();
+
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.PRODUSERBART_BREV, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-
-        prosessinstans.setData(ProsessDataKey.MOTTAKER, Aktoersroller.BRUKER);
-        prosessinstans.setData(ProsessDataKey.AKTØR_ID, "1234");
+        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, brevbestilling);
+        prosessinstans.setData(ProsessDataKey.MOTTAKER, mottaker.getRolle());
+        prosessinstans.setData(ProsessDataKey.AKTØR_ID, mottaker.getAktørId());
 
         opprettJournalforBrev.utfør(prosessinstans);
 
         verify(mockBehandlingService).hentBehandling(anyLong());
-        verify(mockDokgenService).produserBrev(eq(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD), eq(behandling.getId()), any(), any(), eq(false));
+        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 
@@ -98,16 +108,24 @@ class OpprettJournalforBrevTest {
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
         when(mockEregFasade.hentOrganisasjonNavn(any())).thenReturn("Advokatene AS");
 
+        Aktoer mottaker = new Aktoer();
+        mottaker.setRolle(Aktoersroller.REPRESENTANT);
+        mottaker.setOrgnr("987654321");
+
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
+            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
+            .build();
+
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.PRODUSERBART_BREV, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-        prosessinstans.setData(ProsessDataKey.MOTTAKER, Aktoersroller.REPRESENTANT);
-        prosessinstans.setData(ProsessDataKey.ORGNR, "12345");
+        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, brevbestilling);
+        prosessinstans.setData(ProsessDataKey.MOTTAKER, mottaker.getRolle());
+        prosessinstans.setData(ProsessDataKey.ORGNR, mottaker.getOrgnr());
 
         opprettJournalforBrev.utfør(prosessinstans);
 
         verify(mockBehandlingService).hentBehandling(anyLong());
-        verify(mockDokgenService).produserBrev(eq(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD), eq(behandling.getId()), any(), any(), eq(false));
+        verify(mockDokgenService).produserBrev(any(Aktoer.class), any(DokgenBrevbestilling.class));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 

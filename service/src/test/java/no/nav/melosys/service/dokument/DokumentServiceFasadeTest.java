@@ -52,11 +52,12 @@ class DokumentServiceFasadeTest {
         when(mockDokgenService.erTilgjengeligDokgenmal(any(Produserbaredokumenter.class))).thenReturn(true);
 
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+            .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
             .medMottaker(Aktoersroller.BRUKER)
             .build();
-        dokumentServiceFasade.produserUtkast(MELDING_FORVENTET_SAKSBEHANDLINGSTID, 1, brevbestillingDto);
+        dokumentServiceFasade.produserUtkast(1, brevbestillingDto);
 
-        verify(mockDokgenService).produserUtkast(any(), anyLong(), any(), any());
+        verify(mockDokgenService).produserUtkast(anyLong(), any());
         verifyNoInteractions(mockDokumentService);
     }
 
@@ -64,9 +65,13 @@ class DokumentServiceFasadeTest {
     void skalKalleDokumentServiceProduserUtkast() throws Exception {
         when(mockDokgenService.erTilgjengeligDokgenmal(any(Produserbaredokumenter.class))).thenReturn(false);
 
-        dokumentServiceFasade.produserUtkast(MELDING_FORVENTET_SAKSBEHANDLINGSTID, 1, new BrevbestillingDto());
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+            .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
+            .build();
 
-        verify(mockDokumentService).produserUtkast(any(), anyLong(), any());
+        dokumentServiceFasade.produserUtkast(1, brevbestillingDto);
+
+        verify(mockDokumentService).produserUtkast(anyLong(), eq(brevbestillingDto));
     }
 
     @Test
@@ -84,7 +89,7 @@ class DokumentServiceFasadeTest {
 
         dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.av(Aktoersroller.BRUKER), 123L, new DoksysBrevbestilling.Builder().build());
 
-        verify(mockDokgenService).produserOgDistribuerBrev(any(), anyLong(), any());
+        verify(mockDokgenService).produserOgDistribuerBrev(anyLong(), any());
         verifyNoInteractions(mockDokumentService);
     }
 
@@ -92,9 +97,9 @@ class DokumentServiceFasadeTest {
     void skalKalleDokgenServiceProduserOgDistribuer_dto() throws Exception {
         when(mockDokgenService.erTilgjengeligDokgenmal(any())).thenReturn(true);
 
-        dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, 1, new BrevbestillingDto());
+        dokumentServiceFasade.produserDokument(1, new BrevbestillingDto());
 
-        verify(mockDokgenService).produserOgDistribuerBrev(any(), anyLong(), any());
+        verify(mockDokgenService).produserOgDistribuerBrev(anyLong(), any());
         verifyNoInteractions(mockDokumentService);
     }
 }

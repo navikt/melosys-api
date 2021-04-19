@@ -7,6 +7,8 @@ import java.util.List;
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
+import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
@@ -85,7 +87,11 @@ class DokgenServiceTest {
 
     @Test
     void produserBrevFeilerUtilgjengeligMal() {
-        assertThatThrownBy(() -> dokgenService.produserBrev(ATTEST_A1, 123L, null, null))
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
+            .medProduserbartdokument(ATTEST_A1)
+            .build();
+
+        assertThatThrownBy(() -> dokgenService.produserBrev(new Aktoer(), brevbestilling))
             .isInstanceOf(FunksjonellException.class)
             .hasMessage("ProduserbartDokument ATTEST_A1 er ikke støttet");
     }
@@ -100,7 +106,12 @@ class DokgenServiceTest {
         Aktoer mottaker = new Aktoer();
         mottaker.setRolle(Aktoersroller.BRUKER);
 
-        byte[] pdfResponse = dokgenService.produserBrev(MANGELBREV_BRUKER, 123L, mottaker.getOrgnr(), new BrevbestillingDto.Builder().build());
+        MangelbrevBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
+            .medProduserbartdokument(MANGELBREV_BRUKER)
+            .medBehandlingId(123)
+            .build();
+
+        byte[] pdfResponse = dokgenService.produserBrev(mottaker, brevbestilling);
 
         assertThat(pdfResponse).isNotNull();
         assertThat(pdfResponse).isEqualTo(expectedPdf);
@@ -122,7 +133,12 @@ class DokgenServiceTest {
         mottaker.setRolle(Aktoersroller.REPRESENTANT);
         mottaker.setOrgnr("123456789");
 
-        byte[] pdfResponse = dokgenService.produserBrev(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L, mottaker.getOrgnr(), new BrevbestillingDto.Builder().build());
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
+            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
+            .medBehandlingId(123)
+            .build();
+
+        byte[] pdfResponse = dokgenService.produserBrev(mottaker, brevbestilling);
 
         assertThat(pdfResponse).isNotNull();
         assertThat(pdfResponse).isEqualTo(expectedPdf);
@@ -143,10 +159,11 @@ class DokgenServiceTest {
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false))).thenReturn(asList(mottaker));
 
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+            .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
             .medMottaker(Aktoersroller.BRUKER)
             .build();
 
-        byte[] pdfResponse = dokgenService.produserUtkast(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L, null, brevbestillingDto);
+        byte[] pdfResponse = dokgenService.produserUtkast(123L, brevbestillingDto);
 
         assertThat(pdfResponse).isNotNull();
         assertThat(pdfResponse).isEqualTo(expectedPdf);
@@ -175,10 +192,11 @@ class DokgenServiceTest {
         mottaker.setRolle(Aktoersroller.BRUKER);
 
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+            .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
             .medMottaker(Aktoersroller.BRUKER)
             .build();
 
-        byte[] pdfResponse = dokgenService.produserUtkast(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L, null, brevbestillingDto);
+        byte[] pdfResponse = dokgenService.produserUtkast(123L, brevbestillingDto);
 
         assertThat(pdfResponse).isNotNull();
         assertThat(pdfResponse).isEqualTo(expectedPdf);
@@ -206,10 +224,11 @@ class DokgenServiceTest {
         mottaker.setOrgnr("123456789");
 
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+            .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
             .medMottaker(Aktoersroller.BRUKER)
             .build();
 
-        byte[] pdfResponse = dokgenService.produserUtkast(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L, mottaker.getOrgnr(), brevbestillingDto);
+        byte[] pdfResponse = dokgenService.produserUtkast(123L, brevbestillingDto);
 
         assertThat(pdfResponse).isNotNull();
         assertThat(pdfResponse).isEqualTo(expectedPdf);
@@ -227,41 +246,46 @@ class DokgenServiceTest {
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(new Behandling());
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(bruker));
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+            .medProduserbardokument(MANGELBREV_BRUKER)
             .medMottaker(Aktoersroller.BRUKER)
             .build();
 
-        dokgenService.produserOgDistribuerBrev(MANGELBREV_BRUKER, 123L, brevbestillingDto);
+        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
 
-        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(eq(MANGELBREV_BRUKER), any(), eq(bruker), any());
+        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Aktoer.class), any(DokgenBrevbestilling.class));
         verify(mockBrevMottakerService).avklarMottakere(any(), any(), any(), eq(false), eq(false));
     }
 
     @Test
     void skalProdusereOgDistribuereBrevTilOrgnrUtenKopi() throws Exception {
+        when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(new Behandling());
 
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+            .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
             .medMottaker(Aktoersroller.ARBEIDSGIVER)
             .medOrgNr("987654321")
             .build();
 
-        dokgenService.produserOgDistribuerBrev(MANGELBREV_BRUKER, 123L, brevbestillingDto);
+        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
 
-        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(eq(MANGELBREV_BRUKER), any(), any(), any());
+        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Aktoer.class), any(DokgenBrevbestilling.class));
         verifyNoInteractions(mockBrevMottakerService);
     }
 
     @Test
     void skalProdusereOgDistribuereBrevTilOrgnrMedKopi() throws Exception {
+        when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(new Behandling());
+
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+            .medProduserbardokument(MANGELBREV_BRUKER)
             .medMottaker(Aktoersroller.ARBEIDSGIVER)
             .medOrgNr("987654321")
             .medKopiMottakere(List.of(new KopiMottaker(Aktoersroller.BRUKER, null, "1223")))
             .build();
 
-        dokgenService.produserOgDistribuerBrev(MANGELBREV_BRUKER, 123L, brevbestillingDto);
+        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
 
-        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(eq(MANGELBREV_BRUKER), any(), any(), any());
-        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(eq(MANGELBREV_BRUKER), any(), any(), any(), eq(true));
+        verify(mockProsessinstansService, times(2)).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Aktoer.class), any(MangelbrevBrevbestilling.class));
         verifyNoInteractions(mockBrevMottakerService);
     }
 

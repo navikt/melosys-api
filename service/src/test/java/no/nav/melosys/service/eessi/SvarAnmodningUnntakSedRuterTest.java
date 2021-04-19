@@ -12,6 +12,7 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.eessi.ruting.SvarAnmodningUnntakSedRuter;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -119,6 +120,16 @@ class SvarAnmodningUnntakSedRuterTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> svarAnmodningUnntakSedRuter.rutSedTilBehandling(prosessinstans, 1L))
             .withMessageContaining("men behandlingen har ingen anmodningsperiode");
+    }
+
+    @Test
+    void finnSakOgBestemRuting_ingenTilhørendeArkivsak_opprettJfrOppgave() throws FunksjonellException, TekniskException {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        MelosysEessiMelding eessiMelding = melosysEessiMelding();
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
+
+        svarAnmodningUnntakSedRuter.rutSedTilBehandling(prosessinstans, null);
+        verify(oppgaveService).opprettJournalføringsoppgave(eq(melosysEessiMelding().getJournalpostId()), eq(melosysEessiMelding().getAktoerId()));
     }
 
     private Fagsak hentFagsak(Behandlingstema behandlingstema, Behandlingsstatus behandlingsstatus) {

@@ -142,7 +142,7 @@ public class EosVedtakService {
                                     Behandling behandling,
                                     Behandlingsresultat behandlingsresultat) throws MelosysException {
         Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
-        String fnr = persondataFasade.hentIdentForAktørId(behandling.getFagsak().hentBruker().getAktørId());
+        String fnr = persondataFasade.hentFolkeregisterIdent(behandling.getFagsak().hentBruker().getAktørId());
 
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()

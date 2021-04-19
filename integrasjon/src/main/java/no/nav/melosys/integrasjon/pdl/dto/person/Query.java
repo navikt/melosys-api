@@ -7,6 +7,26 @@ query($ident: ID!) {
         adressebeskyttelse {
             gradering
         }
+        bostedsadresse {
+            angittFlyttedato
+            coAdressenavn
+            matrikkeladresse {
+                bruksenhetsnummer
+                kommunenummer
+                tilleggsnavn
+                postnummer
+            }
+            ukjentBosted {
+                bostedskommune
+            }
+            vegadresse {
+                adressenavn
+                husnummer
+                husbokstav
+                tilleggsnavn
+                postnummer
+            }
+        }
         doedsfall {
             doedsdato
         }
@@ -37,6 +57,13 @@ query($ident: ID!) {
             relatertPersonsRolle
             minRolleForPerson
         }
+        fullmakt {
+            motpartsPersonident
+            motpartsRolle
+            omraader
+            gyldigFraOgMed
+            gyldigTilOgMed
+        }        
         kjoenn {
             kjoenn
             metadata {
@@ -45,6 +72,47 @@ query($ident: ID!) {
                     registrert
                     type
                 }
+            }
+        }
+        kontaktadresse {
+            type
+            gyldigFraOgMed
+            gyldigTilOgMed
+            coAdressenavn
+            postboksadresse {
+                postboks
+                postbokseier
+                postnummer
+            }
+            postadresseIFrittFormat {
+                adresselinje1
+                adresselinje2
+                adresselinje3
+                postnummer
+            }
+            utenlandskAdresse {
+                adressenavnNummer
+                bygningEtasjeLeilighet
+                postboksNummerNavn
+                postkode
+                bySted
+                regionDistriktOmraade
+                landkode
+            }
+            utenlandskAdresseIFrittFormat {
+                adresselinje1
+                adresselinje2
+                adresselinje3
+                byEllerStedsnavn
+                landkode
+                postkode
+            }
+            vegadresse {
+                adressenavn
+                husnummer
+                husbokstav
+                tilleggsnavn
+                postnummer
             }
         }
         navn {
@@ -57,6 +125,34 @@ query($ident: ID!) {
                     registrert
                     type
                 }
+            }
+        }
+        oppholdsadresse {
+            gyldigFraOgMed
+            gyldigTilOgMed
+            oppholdAnnetSted
+            coAdressenavn
+            matrikkeladresse {
+                bruksenhetsnummer
+                kommunenummer
+                tilleggsnavn
+                postnummer
+            }
+            utenlandskAdresse {
+                adressenavnNummer
+                bygningEtasjeLeilighet
+                postboksNummerNavn
+                postkode
+                bySted
+                regionDistriktOmraade
+                landkode
+            }
+            vegadresse {
+                adressenavn
+                husnummer
+                husbokstav
+                tilleggsnavn
+                postnummer
             }
         }
         statsborgerskap {

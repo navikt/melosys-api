@@ -39,15 +39,8 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_BRUKER;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
-import static no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper.mapAdresselinjer;
-import static no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper.mapLandForAdresse;
-import static no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper.mapMottakerNavn;
-import static no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper.mapPostnr;
-import static no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper.mapPoststed;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
+import static no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper.*;
 
 @Service
 public class BrevbestillingService {
@@ -61,7 +54,10 @@ public class BrevbestillingService {
     private final KodeverkService kodeverkService;
 
     @Autowired
-    public BrevbestillingService(DokumentServiceFasade dokumentServiceFasade, DokgenService dokgenService, BrevmottakerService brevmottakerService, PersondataFasade persondataFasade, EregFasade eregFasade, KontaktopplysningService kontaktopplysningService, KodeverkService kodeverkService) {
+    public BrevbestillingService(DokumentServiceFasade dokumentServiceFasade, DokgenService dokgenService,
+                                 BrevmottakerService brevmottakerService, PersondataFasade persondataFasade,
+                                 EregFasade eregFasade, KontaktopplysningService kontaktopplysningService,
+                                 KodeverkService kodeverkService) {
         this.dokumentServiceFasade = dokumentServiceFasade;
         this.dokgenService = dokgenService;
         this.brevmottakerService = brevmottakerService;
@@ -179,14 +175,14 @@ public class BrevbestillingService {
     }
 
     public List<Produserbaredokumenter> hentMuligeProduserbaredokumenter(Behandling behandling) {
-        List<Produserbaredokumenter> brevmaler = new ArrayList<>(asList(MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER));
+        List<Produserbaredokumenter> brevmaler = new ArrayList<>();
 
         if (behandling.getType() == Behandlingstyper.SOEKNAD) {
             brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-        }
-        if (behandling.erKlage()) {
+        } else if (behandling.erKlage()) {
             brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE);
         }
+        brevmaler.addAll(asList(MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER));
 
         return behandling.erAktiv() ? brevmaler : emptyList();
     }
@@ -208,9 +204,9 @@ public class BrevbestillingService {
 
         if (mottaker.getRolle() == Aktoersroller.BRUKER) {
             personDokument = (PersonDokument) persondataFasade.hentPerson(behandling.hentPersonDokument().fnr, Informasjonsbehov.STANDARD).getDokument();
-        }
-        else if (mottaker.getRolle() == Aktoersroller.ARBEIDSGIVER || mottaker.getRolle() == Aktoersroller.REPRESENTANT) {
-            kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), mottaker.getOrgnr()).orElse(null);
+
+            } else if (mottaker.getRolle() == Aktoersroller.ARBEIDSGIVER || mottaker.getRolle() == Aktoersroller.REPRESENTANT) {
+                kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), mottaker.getOrgnr()).orElse(null);
             String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : mottaker.getOrgnr();
             orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();
         }
@@ -225,14 +221,12 @@ public class BrevbestillingService {
             .build();
     }
 
-    public void produserBrev(long behandlingID, BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
-
-        dokgenService.produserOgDistribuerBrev(brevbestillingDto.getProduserbardokument(), behandlingID, brevbestillingDto);
+    public void produserBrev(long behandlingId, BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
+        dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto);
     }
 
     public byte[] produserUtkast(long behandlingID, BrevbestillingDto brevbestillingDto)
         throws FunksjonellException, TekniskException {
-
-        return dokumentServiceFasade.produserUtkast(brevbestillingDto.getProduserbardokument(), behandlingID, brevbestillingDto);
+        return dokumentServiceFasade.produserUtkast(behandlingID, brevbestillingDto);
     }
 }

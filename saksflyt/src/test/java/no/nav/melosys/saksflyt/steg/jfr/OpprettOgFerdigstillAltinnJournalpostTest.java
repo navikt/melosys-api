@@ -93,7 +93,7 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
         dokumenter.add(søknadDokument);
         dokumenter.add(fullmaktDokument);
         when(altinnSoeknadService.hentDokumenterTilknyttetSoknad(eq(søknadID))).thenReturn(dokumenter);
-        when(persondataFasade.hentIdentForAktørId(anyString())).thenReturn(ident);
+        when(persondataFasade.hentFolkeregisterIdent(anyString())).thenReturn(ident);
         when(eregFasade.hentOrganisasjonNavn(anyString())).thenReturn("Fullmektig Avsender");
         when(joarkFasade.opprettJournalpost(any(OpprettJournalpost.class), anyBoolean())).thenReturn("journalpostid123");
     }
@@ -102,7 +102,7 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
     public void utfør_journalpostBlirOpprettet_verifiser() throws MelosysException {
         opprettOgFerdigstillAltinnJournalpost.utfør(prosessinstans);
 
-        verify(persondataFasade).hentIdentForAktørId(anyString());
+        verify(persondataFasade).hentFolkeregisterIdent(anyString());
         verify(joarkFasade).opprettJournalpost(captor.capture(), eq(true));
         verify(behandlingService).lagre(eq(behandling));
 
@@ -132,7 +132,7 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
 
         opprettOgFerdigstillAltinnJournalpost.utfør(prosessinstans);
 
-        verify(persondataFasade).hentIdentForAktørId(anyString());
+        verify(persondataFasade).hentFolkeregisterIdent(anyString());
         verify(joarkFasade).opprettJournalpost(captor.capture(), eq(true));
         verify(behandlingService).lagre(eq(behandling));
 
