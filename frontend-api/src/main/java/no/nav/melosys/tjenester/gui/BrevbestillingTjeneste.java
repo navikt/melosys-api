@@ -67,7 +67,7 @@ public class BrevbestillingTjeneste {
                                                          @RequestBody HentMuligeMottakereRequestDto hentMuligeMottakereRequestDto)
         throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        return brevmottakerService.hentMuligeMottakere(hentMuligeMottakereRequestDto.produserbartdokument(), behandling, hentMuligeMottakereRequestDto.orgnr());
+        return brevbestillingService.hentMuligeMottakere(hentMuligeMottakereRequestDto.produserbartdokument(), behandling, hentMuligeMottakereRequestDto.orgnr());
     }
 
     @PostMapping(value = "pdf/brev/utkast/{behandlingID}/{produserbartDokument}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_PDF_VALUE)

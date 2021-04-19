@@ -11,7 +11,9 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.brev.FastMottaker;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.brev.Mottakerliste;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -23,11 +25,17 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.person.Informasjonsbehov;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
+import no.nav.melosys.service.dokument.MuligMottakerDto;
+import no.nav.melosys.service.dokument.MuligeMottakereDto;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -37,6 +45,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static java.util.Collections.emptyList;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.REPRESENTANT;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE;
@@ -63,6 +76,8 @@ class BrevbestillingServiceTest {
     private KontaktopplysningService mockKontaktopplysningService;
     @Mock
     private KodeverkService mockKodeverkService;
+    @Mock
+    private Behandling behandling;
 
     private BrevbestillingService brevbestillingService;
 
@@ -70,6 +85,229 @@ class BrevbestillingServiceTest {
     void init() {
         brevbestillingService = new BrevbestillingService(
             mockDokServiceFasade, mockDokgenService, mockBrevmottakerService, mockPersondataFasade, mockEregFasade, mockKontaktopplysningService, mockKodeverkService);
+    }
+
+    @Test
+    void hentMuligeMottakere_hovedMottakerBruker_returnererBrukerSomHovedMottaker() throws FunksjonellException, TekniskException {
+        leggPersondokumentTilBehandling();
+        when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, behandling))
+            .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).build());
+        when(mockBrevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)))
+            .thenReturn(lagAktoer(BRUKER, null));
+
+        var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, behandling, null);
+
+        assertThat(muligeMottakere.getHovedMottaker())
+            .extracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getRolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
+        assertThat(muligeMottakere)
+            .extracting(MuligeMottakereDto::getKopiMottakere, MuligeMottakereDto::getFasteMottakere)
+            .containsExactly(emptyList(), emptyList());
+    }
+
+    @Test
+    void hentMuligeMottakere_hovedMottakerBrukerMedFullmektig_returnererFullmektigSomHovedMottaker() throws FunksjonellException, TekniskException {
+        leggFagsakTilBehandling();
+        when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, behandling))
+            .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).build());
+        when(mockBrevmottakerService.avklarMottaker(any(Produserbaredokumenter.class), any(), eq(behandling)))
+            .thenReturn(lagAktoer(REPRESENTANT, "orgnr"));
+        mockHentOrganisasjon("orgnr", "Fullmektig virksomhet");
+
+        var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, behandling, null);
+
+        assertThat(muligeMottakere.getHovedMottaker())
+            .extracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getRolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Fullmektig virksomhet", BRUKER, null, null);
+        assertThat(muligeMottakere)
+            .extracting(MuligeMottakereDto::getKopiMottakere, MuligeMottakereDto::getFasteMottakere)
+            .containsExactly(emptyList(), emptyList());
+    }
+
+    @Test
+    void hentMuligeMottakere_hovedMottakerArbeidsgiver_returnererArbeidsgiverSomHovedMottaker() throws FunksjonellException, TekniskException {
+        when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, behandling))
+            .thenReturn(new Mottakerliste.Builder().medHovedMottaker(ARBEIDSGIVER).build());
+        mockHentOrganisasjon("orgnr", "Ola Nordmann Rørleggerfirma");
+
+        var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, behandling, "orgnr");
+
+        assertThat(muligeMottakere.getHovedMottaker())
+            .extracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getRolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Ola Nordmann Rørleggerfirma", ARBEIDSGIVER, null, null);
+        assertThat(muligeMottakere)
+            .extracting(MuligeMottakereDto::getKopiMottakere, MuligeMottakereDto::getFasteMottakere)
+            .containsExactly(emptyList(), emptyList());
+    }
+
+    @Test
+    void hentMuligeMottakere_kopiTilBruker_returnererBrukerSomKopi() throws FunksjonellException, TekniskException {
+        leggPersondokumentTilBehandling();
+        leggFagsakTilBehandling();
+        when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, behandling))
+            .thenReturn(new Mottakerliste.Builder().medHovedMottaker(ARBEIDSGIVER).medKopiMottaker(BRUKER).build());
+        mockHentOrganisasjon("orgnr", "Ola Nordmann Rørleggerfirma");
+
+        when(mockBrevmottakerService.avklarMottaker(any(Produserbaredokumenter.class), any(), eq(behandling)))
+            .thenReturn(lagAktoer(BRUKER, null));
+
+        var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, behandling, "orgnr");
+
+        assertThat(muligeMottakere.getKopiMottakere())
+            .flatExtracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getRolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly("Kopi til bruker", "Ola Nordmann", BRUKER, "aktørId", null);
+    }
+
+    @Test
+    void hentMuligeMottakere_kopiTilBrukerMedFullmektig_returnererFullmektigSomKopi() throws FunksjonellException, TekniskException {
+        leggFagsakTilBehandling();
+        when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, behandling))
+            .thenReturn(new Mottakerliste.Builder().medHovedMottaker(ARBEIDSGIVER).medKopiMottaker(BRUKER).build());
+        when(mockBrevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)))
+            .thenReturn(lagAktoer(REPRESENTANT, "orgnrTilFullmektig"));
+        mockHentOrganisasjon("orgnr", "Ola Nordmann Rørleggerfirma");
+        mockHentOrganisasjon("orgnrTilFullmektig", "Fullmektig Virksomhet");
+
+
+
+        var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, behandling, "orgnr");
+
+        assertThat(muligeMottakere.getKopiMottakere())
+            .flatExtracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getRolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly("Kopi til brukers fullmektig", "Fullmektig Virksomhet", REPRESENTANT, null, "orgnrTilFullmektig");
+    }
+
+    @Test
+    void hentMuligeMottakere_kopiTilBrukerMedFullmektigNårHovedMottakerErBruker_returnererBrukerSomKopi() throws FunksjonellException, TekniskException {
+        leggPersondokumentTilBehandling();
+        leggFagsakTilBehandling();
+        when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, behandling))
+            .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).medKopiMottaker(BRUKER).build());
+        when(mockBrevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)))
+            .thenReturn(lagAktoer(REPRESENTANT, "orgnrTilFullmektig"));
+        mockHentOrganisasjon("orgnrTilFullmektig", "Fullmektig Virksomhet");
+
+        var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, behandling, null);
+
+        assertThat(muligeMottakere.getHovedMottaker())
+            .extracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getRolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Fullmektig Virksomhet", BRUKER, null, null);
+        assertThat(muligeMottakere.getKopiMottakere())
+            .flatExtracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getRolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly("Kopi til bruker", "Ola Nordmann", BRUKER, "aktørId", null);
+    }
+
+    @Test
+    void hentMuligeMottakere_kopiTilArbeidsgiver_returnererArbeidsgiverSomKopi() throws FunksjonellException, TekniskException {
+        leggPersondokumentTilBehandling();
+        leggFagsakTilBehandling();
+        when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, behandling))
+            .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).medKopiMottaker(ARBEIDSGIVER).build());
+        when(mockBrevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)))
+            .thenReturn(lagAktoer(BRUKER, null));
+        when(mockBrevmottakerService.avklarMottakere(eq(MANGELBREV_BRUKER), any(), eq(behandling), anyBoolean(), anyBoolean()))
+            .thenReturn(List.of(lagAktoer(ARBEIDSGIVER, "orgnr1"), lagAktoer(ARBEIDSGIVER, "orgnr2")));
+        mockHentOrganisasjon("orgnr1", "Arbeidsgiver 1");
+        mockHentOrganisasjon("orgnr2", "Arbeidsgiver 2");
+
+
+        var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, behandling, null);
+
+        assertThat(muligeMottakere.getKopiMottakere())
+            .flatExtracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getRolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly(
+                "Kopi til arbeidsgiver", "Arbeidsgiver 1", ARBEIDSGIVER, null, "orgnr1",
+                "Kopi til arbeidsgiver", "Arbeidsgiver 2", ARBEIDSGIVER, null, "orgnr2");
+    }
+
+    @Test
+    void hentMuligeMottakere_kopiTilArbeidsgiverMedFullmektig_returnererFullmektigSomKopi() throws FunksjonellException, TekniskException {
+        leggPersondokumentTilBehandling();
+        leggFagsakTilBehandling();
+        when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, behandling))
+            .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).medKopiMottaker(ARBEIDSGIVER).build());
+        when(mockBrevmottakerService.avklarMottaker(eq(MANGELBREV_BRUKER), any(), eq(behandling)))
+            .thenReturn(lagAktoer(BRUKER, null));
+        when(mockBrevmottakerService.avklarMottakere(eq(MANGELBREV_BRUKER), any(), eq(behandling), anyBoolean(), anyBoolean()))
+            .thenReturn(List.of(lagAktoer(REPRESENTANT, "orgnr")));
+        mockHentOrganisasjon("orgnr", "Fullmektig Virksomhet");
+
+
+        var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, behandling, null);
+
+        assertThat(muligeMottakere.getKopiMottakere())
+            .flatExtracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getRolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly(
+                "Kopi til arbeidsgivers fullmektig", "Fullmektig Virksomhet", REPRESENTANT, null, "orgnr");
+    }
+
+    @Test
+    void hentMuligeMottakere_fastTilSkatt_returnererSkattSomFast() throws FunksjonellException, TekniskException {
+        leggPersondokumentTilBehandling();
+        leggFagsakTilBehandling();
+        when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, behandling))
+            .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).medFastMottaker(FastMottaker.SKATT).build());
+        when(mockBrevmottakerService.avklarMottaker(MANGELBREV_BRUKER, Mottaker.av(BRUKER), behandling))
+            .thenReturn(lagAktoer(BRUKER, null));
+        when(mockBrevmottakerService.avklarMottaker(MANGELBREV_BRUKER, FastMottaker.av(FastMottaker.SKATT), behandling))
+            .thenReturn(FastMottaker.av(FastMottaker.SKATT).getAktør());
+        mockHentOrganisasjon("974761076", "Skatteetaten");
+
+        var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, behandling, null);
+
+        assertThat(muligeMottakere.getFasteMottakere())
+            .flatExtracting(
+                MuligMottakerDto::getDokumentNavn,
+                MuligMottakerDto::getMottakerNavn,
+                MuligMottakerDto::getRolle,
+                MuligMottakerDto::getAktørId,
+                MuligMottakerDto::getOrgnr)
+            .containsExactly("Kopi til Skatteetaten", "Skatteetaten", MYNDIGHET, null, "974761076");
     }
 
     @Test
@@ -213,6 +451,26 @@ class BrevbestillingServiceTest {
         aktoer.setRolle(aktoersroller);
         aktoer.setOrgnr(orgNummer);
         return aktoer;
+    }
+
+    private void leggPersondokumentTilBehandling() throws TekniskException {
+        var dokument = new PersonDokument();
+        dokument.sammensattNavn = "Ola Nordmann";
+        when(behandling.hentPersonDokument()).thenReturn(dokument);
+    }
+
+
+    private void leggFagsakTilBehandling() {
+        Fagsak fagsak = new Fagsak();
+        Aktoer bruker = new Aktoer();
+        bruker.setRolle(BRUKER);
+        bruker.setAktørId("aktørId");
+        fagsak.getAktører().add(bruker);
+        when(behandling.getFagsak()).thenReturn(fagsak);
+    }
+
+    private void mockHentOrganisasjon(String orgnr, String navn) throws IntegrasjonException, IkkeFunnetException {
+        when(mockEregFasade.hentOrganisasjon(orgnr)).thenReturn(lagORGSaksopplysning(orgnr, navn));
     }
 
     private Saksopplysning lagORGSaksopplysning(String orgNummer, String navn) {
