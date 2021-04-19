@@ -17,6 +17,6 @@ public class PDLAuthFilterProducer {
     @Bean
     @Qualifier("saksbehandler")
     public PDLAuthFilter pdlSaksbehandlerAuthFilter(RestStsClient restStsClient) {
-        return new PDLAuthFilter(restStsClient, () -> SubjectHandler.getInstance().getOidcTokenString());
+        return new PDLAuthFilter(restStsClient, () -> "Bearer " + SubjectHandler.getInstance().getOidcTokenString());
     }
 }
