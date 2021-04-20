@@ -39,8 +39,8 @@ public class AvgiftsgrunnlagInfoDto {
 
     public static AvgiftsgrunnlagInfoDto av(AvgiftsgrunnlagInfo avgiftsgrunnlagInfo) {
         return new AvgiftsgrunnlagInfoDto(
-            avgiftsgrunnlagInfo.getErSkattepliktig(),
-            avgiftsgrunnlagInfo.getBetalerArbeidsgiverAvgift(),
+            avgiftsgrunnlagInfo.erSkattepliktig(),
+            avgiftsgrunnlagInfo.betalerArbeidsgiverAvgift(),
             avgiftsgrunnlagInfo.getSærligAvgiftsgruppe()
         );
     }

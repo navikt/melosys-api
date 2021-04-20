@@ -94,8 +94,8 @@ public class TrygdeavgiftsberegningService {
                                     boolean erAvgiftForNorskInntekt) {
         var beregningsresultat = trygdeavgiftConsumer.beregnTrygdeavgift(
             new MelosysTrygdeavgfitBeregningDto(
-                avgiftsgrunnlag.getBetalerArbeidsgiverAvgift(),
-                avgiftsgrunnlag.getErSkattepliktig(),
+                avgiftsgrunnlag.betalerArbeidsgiverAvgift(),
+                avgiftsgrunnlag.erSkattepliktig(),
                 medlemskapsperiode.getTrygdedekning(),
                 medlemskapsperiode.getBestemmelse(),
                 inntektPerMd,
