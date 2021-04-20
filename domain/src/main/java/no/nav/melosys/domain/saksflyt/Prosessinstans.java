@@ -227,8 +227,20 @@ public class Prosessinstans {
         );
     }
 
-    public boolean statusErKlarEllerRestartet() {
-        return status == ProsessStatus.KLAR || status == ProsessStatus.RESTARTET;
+    public boolean erFerdig() {
+        return status == ProsessStatus.FERDIG;
+    }
+
+    public boolean erFeilet() {
+        return status == ProsessStatus.FEILET;
+    }
+
+    public boolean erPåVent() {
+        return status == ProsessStatus.PÅ_VENT;
+    }
+
+    public boolean erUnderBehandling() {
+        return status == ProsessStatus.UNDER_BEHANDLING;
     }
 
     @Override

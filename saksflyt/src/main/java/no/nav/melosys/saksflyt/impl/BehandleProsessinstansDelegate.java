@@ -38,7 +38,7 @@ public class BehandleProsessinstansDelegate {
     }
 
     void behandleProsessinstansHvisKlar(Prosessinstans prosessinstans) {
-        if (prosessinstans.getStatus() != ProsessStatus.PÅ_VENT) {
+        if (!prosessinstans.erPåVent()) {
             prosessinstansBehandler.behandleProsessinstans(prosessinstans);
         }
     }

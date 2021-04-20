@@ -14,6 +14,7 @@ public class ProsessinstansOpprettetListener {
         this.behandleProsessinstansDelegate = behandleProsessinstansDelegate;
     }
 
+    // Oppdatering av entiteten må gjøres før commit, og ikke etter da det ikke finnes en transaksjon da
     @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void oppdaterProsessinstansstatus(ProsessinstansOpprettetEvent event) {
         behandleProsessinstansDelegate.oppdaterStatusOmSkalPåVent(event.hentProsessinstans());

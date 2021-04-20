@@ -44,10 +44,10 @@ public class ProsessinstansBehandlerImpl implements ProsessinstansBehandler {
     public void behandleProsessinstans(@NotNull Prosessinstans prosessinstans) {
         log.info("Starter behandling av prosessinstans {} med lås {}", prosessinstans.getId(), prosessinstans.getLåsReferanse());
 
-        if (prosessinstans.getStatus() == ProsessStatus.FEILET ) {
+        if (prosessinstans.erFerdig() || prosessinstans.erFeilet()) {
             log.warn("Prosessinstans {} har status {}. Skal ikke behandles", prosessinstans.getId(), prosessinstans.getStatus());
             return;
-        } else if (prosessinstans.getStatus() == ProsessStatus.UNDER_BEHANDLING) {
+        } else if (prosessinstans.erUnderBehandling()) {
             log.warn("Prosessinstans {} behandles allerede", prosessinstans.getId());
             return;
         }
