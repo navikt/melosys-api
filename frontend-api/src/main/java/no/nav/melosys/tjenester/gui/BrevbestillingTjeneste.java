@@ -70,7 +70,7 @@ public class BrevbestillingTjeneste {
         return brevbestillingService.hentMuligeMottakere(hentMuligeMottakereRequestDto.produserbartdokument(), behandling, hentMuligeMottakereRequestDto.orgnr());
     }
 
-    @PostMapping(value = "pdf/brev/utkast/{behandlingID}/{produserbartDokument}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_PDF_VALUE)
+    @PostMapping(value = "pdf/brev/utkast/{behandlingID}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_PDF_VALUE)
     @ApiOperation(value = "Produser utkast")
     public ResponseEntity<byte[]> produserUtkast(@PathVariable long behandlingID,
                                                  @RequestBody BrevbestillingDto brevbestillingDto)
@@ -80,7 +80,7 @@ public class BrevbestillingTjeneste {
         return new ResponseEntity<>(pdf, genPdfHeaders("utkast_" + behandlingID, false), HttpStatus.OK);
     }
 
-    @PostMapping("opprett/{behandlingID}/{produserbartDokument}")
+    @PostMapping("opprett/{behandlingID}")
     @ApiOperation(value = "Produser brev gjennom melosys-dokgen")
     public void produserBrev(@PathVariable("behandlingID") long behandlingID,
                              @RequestBody BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {

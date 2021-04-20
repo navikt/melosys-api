@@ -27,7 +27,7 @@ public class MottakerDto {
         return rolle;
     }
 
-    public boolean orgnrSettesAvSaksbehandler() {
+    public boolean getOrgnrSettesAvSaksbehandler() {
         return orgnrSettesAvSaksbehandler;
     }
 
