@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.pdl;
 
 import java.util.Collections;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,16 +16,30 @@ public class PDLConsumerProducer {
     private static final String TEMA_HEADER_MEDLEMSKAP_VERDI = "MED";
 
     @Bean
+    @Qualifier("system")
     public PDLConsumer pdlConsumer(WebClient.Builder webclientBuilder,
                                    @Value("${PDL.url}") String pdlUrl,
-                                   PDLSystemAuthFilter pdlSystemAuthFilter) {
+                                   @Qualifier("system") PDLAuthFilter pdlSystemAuthFilter) {
         return new PDLConsumerImpl(
-            webclientBuilder
-                .baseUrl(pdlUrl)
-                .defaultHeaders(this::defaultHeaders)
+            webclientBuilder(webclientBuilder, pdlUrl)
                 .filter(pdlSystemAuthFilter)
                 .build()
         );
+    }
+
+    @Bean
+    @Qualifier("saksbehandler")
+    public PDLConsumer pdlConsumerForSaksbehandler(WebClient.Builder webclientBuilder,
+                                                   @Value("${PDL.url}") String pdlUrl,
+                                                   @Qualifier("saksbehandler") PDLAuthFilter pdlSaksbehandlerAuthFilter) {
+        return new PDLConsumerImpl(
+            webclientBuilder(webclientBuilder, pdlUrl).filter(pdlSaksbehandlerAuthFilter).build());
+    }
+
+    private WebClient.Builder webclientBuilder(WebClient.Builder webclientBuilder, String pdlUrl) {
+        return webclientBuilder
+            .baseUrl(pdlUrl)
+            .defaultHeaders(this::defaultHeaders);
     }
 
     private void defaultHeaders(HttpHeaders httpHeaders) {

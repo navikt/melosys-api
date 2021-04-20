@@ -114,11 +114,12 @@ public class VilkaarsresultatService {
                                          Vilkaar vilkaar,
                                          boolean oppfylt,
                                          @Nullable Kodeverk begrunnelseKode) throws IkkeFunnetException {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        vilkaarsresultatRepo.deleteByBehandlingsresultat(behandlingsresultat);
+        vilkaarsresultatRepo.deleteByBehandlingsresultatId(behandlingID);
         vilkaarsresultatRepo.flush();
         List<String> begrunnelseKoder = begrunnelseKode == null ? List.of() : List.of(begrunnelseKode.getKode());
-        vilkaarsresultatRepo.save(lagVilkaarsresultat(behandlingsresultat, vilkaar, oppfylt, begrunnelseKoder));
+        vilkaarsresultatRepo.save(
+            lagVilkaarsresultat(behandlingsresultatService.hentBehandlingsresultat(behandlingID), vilkaar, oppfylt, begrunnelseKoder)
+        );
     }
 
     private Vilkaarsresultat lagVilkaarsresultat(Behandlingsresultat behandlingsresultat,
