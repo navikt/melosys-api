@@ -5,7 +5,7 @@ import java.util.Set;
 
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.saksflyt.ProsessinstansLåsReferanse;
+import no.nav.melosys.domain.saksflyt.SedLåsReferanse;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.ProsessinstansBehandler;
 import no.nav.melosys.service.saksflyt.ProsessinstansFerdigEvent;
@@ -42,9 +42,7 @@ public class ProsessinstansFerdigListener {
 
     private void startNesteProsessinstans(ProsessinstansFerdigEvent prosessinstansFerdigEvent) {
         log.info("Forsøker å starte neste prosessinstans, låsreferanse {}", prosessinstansFerdigEvent.getLåsReferanse());
-        var ferdigReferanse = ProsessinstansLåsReferanse.tilReferanseObjekt(
-            prosessinstansFerdigEvent.getProsessinstansLåsType(), prosessinstansFerdigEvent.getLåsReferanse()
-        );
+        var ferdigReferanse = new SedLåsReferanse(prosessinstansFerdigEvent.getLåsReferanse());
 
         var prosessinstanserPåVent = prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT);
 
@@ -61,8 +59,8 @@ public class ProsessinstansFerdigListener {
         prosessinstansBehandler.behandleProsessinstans(prosessinstans);
     }
 
-    private boolean harSammeReferanse(Prosessinstans prosessinstans, ProsessinstansLåsReferanse ferdigLåsreferanse) {
-        var låsReferanse = ProsessinstansLåsReferanse.tilReferanseObjekt(prosessinstans.getLåsType(), prosessinstans.getLåsReferanse());
+    private boolean harSammeReferanse(Prosessinstans prosessinstans, SedLåsReferanse ferdigLåsreferanse) {
+        var låsReferanse = new SedLåsReferanse(prosessinstans.getLåsReferanse());
         return låsReferanse.getReferanse().equals(ferdigLåsreferanse.getReferanse());
     }
 }

@@ -6,7 +6,6 @@ import java.util.UUID;
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.saksflyt.ProsessinstansInfo;
-import no.nav.melosys.domain.saksflyt.ProsessinstansLåsType;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.ProsessinstansBehandler;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,7 +49,6 @@ class BehandleProsessinstansDelegateTest {
     void oppdaterProsessinstansstatus_finnesProsessMedSammeReferanseUnderBehandling_settesIkkePåVent() {
         prosessinstans.setStatus(ProsessStatus.KLAR);
         final var låsReferanse = "12_12_1";
-        prosessinstans.setLåsType(ProsessinstansLåsType.SED);
         prosessinstans.setLåsReferanse(låsReferanse);
 
         var eksisterendeProsessinstans = prosessinstans(låsReferanse, ProsessStatus.UNDER_BEHANDLING);
@@ -64,7 +62,6 @@ class BehandleProsessinstansDelegateTest {
     void oppdaterProsessinstansstatus_finnesProsessMedSammeReferanseUlikId_settesPåVent() {
         prosessinstans.setStatus(ProsessStatus.KLAR);
         final var låsReferanse = "12_12_1";
-        prosessinstans.setLåsType(ProsessinstansLåsType.SED);
         prosessinstans.setLåsReferanse(låsReferanse);
 
         var eksisterendeProsessinstans = prosessinstans("12_13_1", ProsessStatus.UNDER_BEHANDLING);
@@ -91,7 +88,6 @@ class BehandleProsessinstansDelegateTest {
     private Prosessinstans prosessinstans(String låsReferanse, ProsessStatus prosessStatus) {
         var prosessinstans = new Prosessinstans();
         prosessinstans.setId(UUID.randomUUID());
-        prosessinstans.setLåsType(ProsessinstansLåsType.SED);
         prosessinstans.setLåsReferanse(låsReferanse);
         prosessinstans.setStatus(prosessStatus);
         return prosessinstans;

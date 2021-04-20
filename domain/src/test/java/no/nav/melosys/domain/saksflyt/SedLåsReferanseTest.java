@@ -17,10 +17,8 @@ class SedLåsReferanseTest {
         assertThat(new SedLåsReferanse(rinaSaksnummer + "_" + sedID + "_" + versjon))
             .extracting(
                 SedLåsReferanse::getReferanse,
-                SedLåsReferanse::getRinaSaksnummer,
-                SedLåsReferanse::getSedID,
-                SedLåsReferanse::getSedVersjon)
-            .containsExactly(rinaSaksnummer, rinaSaksnummer, sedID, versjon);
+                SedLåsReferanse::getIdentifikator)
+            .containsExactly(rinaSaksnummer, sedID + "_" + versjon);
     }
 
     @Test

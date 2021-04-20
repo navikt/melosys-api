@@ -3,7 +3,7 @@ package no.nav.melosys.domain.saksflyt;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-public class SedLåsReferanse implements ProsessinstansLåsReferanse {
+public class SedLåsReferanse {
 
     private final String rinaSaksnummer;
     private final String sedID;
@@ -22,21 +22,12 @@ public class SedLåsReferanse implements ProsessinstansLåsReferanse {
         this.sedVersjon = ref[2];
     }
 
-    @Override
     public String getReferanse() {
-        return getRinaSaksnummer();
-    }
-
-    public String getRinaSaksnummer() {
         return rinaSaksnummer;
     }
 
-    public String getSedID() {
-        return sedID;
-    }
-
-    public String getSedVersjon() {
-        return sedVersjon;
+    public String getIdentifikator() {
+        return String.format("%s_%s", sedID, sedVersjon);
     }
 
     public static boolean erGyldigReferanse(String referanse) {

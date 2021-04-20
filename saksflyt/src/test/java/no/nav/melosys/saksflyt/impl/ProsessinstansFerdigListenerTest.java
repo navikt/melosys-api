@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.saksflyt.ProsessinstansLåsType;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.ProsessinstansBehandler;
 import no.nav.melosys.service.saksflyt.ProsessinstansFerdigEvent;
@@ -46,7 +45,6 @@ class ProsessinstansFerdigListenerTest {
 
     @Test
     void prosesssinstansFerdig_harLåsFinnesAktiveReferanser_gjørIngenting() {
-        ferdigProsessinstans.setLåsType(ProsessinstansLåsType.SED);
         ferdigProsessinstans.setLåsReferanse("12_12_1");
         when(prosessinstansRepository.existsByStatusNotInAndLåsReferanse(any(), any())).thenReturn(true);
 
@@ -57,7 +55,6 @@ class ProsessinstansFerdigListenerTest {
 
     @Test
     void prosessinstansFerdig_harLåsIngenAktiveReferanser_starterTidligstOpprettetProsessinstans() {
-        ferdigProsessinstans.setLåsType(ProsessinstansLåsType.SED);
         ferdigProsessinstans.setLåsReferanse("12_12_1");
 
         var prosessinstansUlikReferanse = prosessinstans(LocalDateTime.now().minusDays(2), "13_12_1");
@@ -76,7 +73,6 @@ class ProsessinstansFerdigListenerTest {
     private Prosessinstans prosessinstans(LocalDateTime registrertDato, String referanse) {
         var prosessinstans = new Prosessinstans();
         prosessinstans.setStatus(ProsessStatus.PÅ_VENT);
-        prosessinstans.setLåsType(ProsessinstansLåsType.SED);
         prosessinstans.setLåsReferanse(referanse);
         prosessinstans.setRegistrertDato(registrertDato);
         return prosessinstans;

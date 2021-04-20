@@ -21,8 +21,8 @@ public interface ProsessinstansRepository extends JpaRepository<Prosessinstans, 
     Collection<Prosessinstans> findAllByStatus(ProsessStatus status);
 
     @Query("""
-            SELECT NEW no.nav.melosys.domain.saksflyt.ProsessinstansInfo(p.id, p.status, p.registrertDato, p.låsType, p.låsReferanse) FROM Prosessinstans p
-            WHERE p.status NOT IN (?1) AND p.låsReferanse LIKE CONCAT(?2, '%') 
+            SELECT NEW no.nav.melosys.domain.saksflyt.ProsessinstansInfo(p.id, p.status, p.registrertDato, p.låsReferanse) FROM Prosessinstans p
+            WHERE p.status NOT IN (?1) AND p.låsReferanse LIKE CONCAT(?2, '%')
             """)
     Collection<ProsessinstansInfo> findAllByStatusNotInAndLåsReferanseStartingWith(Collection<ProsessStatus> prosessStatus, String låsReferanse);
     Collection<Prosessinstans> findAllByLåsReferanseStartingWith(String låsReferanse);

@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.saksflyt.ProsessinstansLåsReferanse;
+import no.nav.melosys.domain.saksflyt.SedLåsReferanse;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.ProsessinstansBehandler;
 import org.slf4j.Logger;
@@ -44,18 +44,18 @@ public class BehandleProsessinstansDelegate {
     }
 
     private boolean skalSettesPåVent(Prosessinstans prosessinstans) {
-        if (prosessinstans.getLåsType() == null || prosessinstans.getLåsReferanse() == null) {
+        if (prosessinstans.getLåsReferanse() == null) {
             return false;
         }
 
-        final var låsReferanse = ProsessinstansLåsReferanse.tilReferanseObjekt(prosessinstans.getLåsType(), prosessinstans.getLåsReferanse());
+        final var låsReferanse = new SedLåsReferanse(prosessinstans.getLåsReferanse());
 
         final var aktiveLåsReferanser = prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
             Set.of(ProsessStatus.FERDIG), låsReferanse.getReferanse()
         )
             .stream()
             .filter(p -> !p.getUuid().equals(prosessinstans.getId()))
-            .map(p -> ProsessinstansLåsReferanse.tilReferanseObjekt(p.getLåsType(), p.getLåsReferanse()))
+            .map(p -> new SedLåsReferanse(p.getLåsReferanse()))
             .collect(Collectors.toSet());
 
         if (aktiveLåsReferanser.contains(låsReferanse)) {
