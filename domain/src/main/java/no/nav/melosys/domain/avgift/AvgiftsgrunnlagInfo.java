@@ -31,7 +31,7 @@ public class AvgiftsgrunnlagInfo {
     }
 
     public boolean erAvgiftspliktig() {
-        if (erSkattepliktig && !betalerArbeidsgiverAvgift && særligAvgiftsgruppe == Saerligeavgiftsgrupper.MISJONÆR) {
+        if (erSkattepliktig && !betalerArbeidsgiverAvgift && særligAvgiftsgruppe == MISJONÆR) {
             return false;
         }
 
@@ -39,26 +39,26 @@ public class AvgiftsgrunnlagInfo {
     }
 
     public void validerLovligeKominasjonerLønnFraNorge() throws FunksjonellException {
-        if (særligAvgiftsgruppe == null && betalerArbeidsgiverAvgift()) {
+        if (særligAvgiftsgruppe == null && betalerArbeidsgiverAvgift) {
             return;
         }
-        if (særligAvgiftsgruppe == ARBEIDSTAKER_MALAYSIA && betalerArbeidsgiverAvgift() && !erSkattepliktig()) {
+        if (særligAvgiftsgruppe == ARBEIDSTAKER_MALAYSIA && betalerArbeidsgiverAvgift && !erSkattepliktig) {
             return;
         }
-        if (særligAvgiftsgruppe == MISJONÆR && !betalerArbeidsgiverAvgift()) {
+        if (særligAvgiftsgruppe == MISJONÆR && !betalerArbeidsgiverAvgift) {
             return;
         }
         throw new FunksjonellException("Ulovlig kombinasjon for lønn fra Norge: " + this);
     }
 
     public void validerLovligeKominasjonerLønnFraUtlandet() throws FunksjonellException {
-        if (særligAvgiftsgruppe == null && !betalerArbeidsgiverAvgift()) {
+        if (særligAvgiftsgruppe == null && !betalerArbeidsgiverAvgift) {
             return;
         }
-        if (særligAvgiftsgruppe == ARBEIDSTAKER_MALAYSIA && !betalerArbeidsgiverAvgift() && !erSkattepliktig()) {
+        if (særligAvgiftsgruppe == ARBEIDSTAKER_MALAYSIA && !betalerArbeidsgiverAvgift && !erSkattepliktig) {
             return;
         }
-        if (særligAvgiftsgruppe == FN && !betalerArbeidsgiverAvgift() && !erSkattepliktig()) {
+        if (særligAvgiftsgruppe == FN && !betalerArbeidsgiverAvgift && !erSkattepliktig) {
             return;
         }
         throw new FunksjonellException("Ulovlig kombinasjon for lønn fra utlandet: " + this);
