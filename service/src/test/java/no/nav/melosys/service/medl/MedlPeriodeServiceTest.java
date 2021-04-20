@@ -65,21 +65,6 @@ public class MedlPeriodeServiceTest {
         when(persondataFasade.hentFolkeregisterIdent(anyString())).thenReturn(FNR);
     }
 
-    private Behandlingsresultat lagBehandlingsResultat() {
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        Behandling behandling = new Behandling();
-        Fagsak fagsak = new Fagsak();
-
-        Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(Aktoersroller.BRUKER);
-        aktoer.setAktørId("456");
-        fagsak.getAktører().add(aktoer);
-
-        behandling.setFagsak(fagsak);
-        behandlingsresultat.setBehandling(behandling);
-        return behandlingsresultat;
-    }
-
     @Test
     public void hentPeriodeListe() throws TekniskException {
         medlPeriodeService.hentPeriodeListe(FNR, LocalDate.now(), LocalDate.now().plusMonths(2));
@@ -109,6 +94,13 @@ public class MedlPeriodeServiceTest {
 
         verify(medlRestService).opprettPeriodeEndelig(eq(FNR), any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
         verify(lovvalgsperiodeRepository).save(any(Lovvalgsperiode.class));
+    }
+
+    @Test
+    public void opprettPeriodeEndeligFtrl() throws FunksjonellException, TekniskException {
+        medlPeriodeService.opprettPeriodeEndeligFtrl(1L, new Medlemskapsperiode());
+
+        verify(medlRestService).opprettPeriodeEndeligFtrl(eq(FNR), any(Medlemskapsperiode.class));
     }
 
     @Test
@@ -185,5 +177,20 @@ public class MedlPeriodeServiceTest {
 
         verify(behandlingsresultatService).hentBehandlingsresultat(eq(1L));
         verify(medlRestService, never()).avvisPeriode(anyLong(), any(StatusaarsakMedl.class));
+    }
+
+    private Behandlingsresultat lagBehandlingsResultat() {
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        Behandling behandling = new Behandling();
+        Fagsak fagsak = new Fagsak();
+
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.BRUKER);
+        aktoer.setAktørId("456");
+        fagsak.getAktører().add(aktoer);
+
+        behandling.setFagsak(fagsak);
+        behandlingsresultat.setBehandling(behandling);
+        return behandlingsresultat;
     }
 }

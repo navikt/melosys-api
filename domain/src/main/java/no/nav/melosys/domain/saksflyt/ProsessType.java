@@ -16,6 +16,7 @@ public enum ProsessType implements Kodeverk {
     HENLEGG_SAK("HENLEGG_SAK", "Henlegg en sak"),
     IVERKSETT_VEDTAK("IVERKSETT_VEDTAK", "Iverksett vedtak"),
     IVERKSETT_VEDTAK_FORKORT_PERIODE("IVERKSETT_VEDTAK_FORKORT_PERIODE", "Iverksett nytt vedtak etter lovvalgsperioden har blitt forkortet"),
+    IVERKSETT_VEDTAK_FTRL("IVERKSETT_VEDTAK_FTRL", "Iverksett nytt vedtak Folketrygdeloven"),
     JFR_KNYTT("JFR_KNYTT", "Journalføring på eksisterende sak"),
     JFR_NY_BEHANDLING("JFR_NY_BEHANDLING", "Journalføring på eksisterende sak oppretter en ny behandling"),
     JFR_NY_SAK("JFR_NY_SAK", "Journalføring med ny sak og søknad"),
