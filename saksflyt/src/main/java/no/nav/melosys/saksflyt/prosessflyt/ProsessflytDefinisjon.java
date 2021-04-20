@@ -127,6 +127,17 @@ public final class ProsessflytDefinisjon {
             )
         );
 
+        PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK_FTRL,
+            new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_FTRL,
+                LAGRE_MEDLEMSPERIODE_MEDL,
+                // TODO Opprett og journalfør brev
+                // TODO Distribuer journalpost
+                // TODO Publiser på Kafka
+                AVSLUTT_SAK_OG_BEHANDLING,
+                SOB_BEHANDLING_AVSLUTTET
+            )
+        );
+
         PROSESS_FLYT_MAP.put(ProsessType.MOTTAK_SED,
             new ProsessFlyt(ProsessType.MOTTAK_SED,
                 SED_MOTTAK_RUTING

@@ -1,13 +1,18 @@
 package no.nav.melosys.integrasjon.medl;
 
+import java.util.Map;
+
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import no.nav.melosys.domain.PeriodeOmLovvalg;
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.exception.TekniskException;
+
+import static java.util.Optional.ofNullable;
 
 public final class MedlPeriodeKonverter {
 
@@ -16,6 +21,7 @@ public final class MedlPeriodeKonverter {
     }
 
     private static final BiMap<LovvalgBestemmelse, GrunnlagMedl> lovvalgsbestemmelseTilGrunnlagMedlTabell;
+    private static final Map<Folketrygdloven_kap2_bestemmelser, GrunnlagMedl> ftrlKap2BestemmelserGrunnLagMedlTabell;
 
     static {
         BiMap<LovvalgBestemmelse, GrunnlagMedl> tbl = HashBiMap.create();
@@ -42,13 +48,47 @@ public final class MedlPeriodeKonverter {
         tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART15, GrunnlagMedl.FO_15);
         tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1, GrunnlagMedl.FO_16);
         lovvalgsbestemmelseTilGrunnlagMedlTabell = tbl;
+
+
+        ftrlKap2BestemmelserGrunnLagMedlTabell = Map.of(
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8, GrunnlagMedl.FTL_2_8,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A, GrunnlagMedl.FTL_2_8,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_B, GrunnlagMedl.FTL_2_8,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_C, GrunnlagMedl.FTL_2_8,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_D, GrunnlagMedl.FTL_2_8,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD, GrunnlagMedl.FTL_2_8,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_TREDJE_LEDD, GrunnlagMedl.FTL_2_8,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FJERDE_LEDD, GrunnlagMedl.FTL_2_8,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FEMTE_LEDD, GrunnlagMedl.FTL_2_8
+        );
     }
 
-    public static DekningMedl tilMedlTrygdeDekning(Trygdedekninger dekning) throws TekniskException {
+
+    public static DekningMedl tilMedlTrygdeDekningEos(Trygdedekninger dekning) throws TekniskException {
         return switch (dekning) {
-            case FULL_DEKNING_EOSFO -> DekningMedl.FULL;
+            case FULL_DEKNING_EOSFO, FULL_DEKNING_FTRL -> DekningMedl.FULL;
             case UTEN_DEKNING -> DekningMedl.UNNTATT;
-            default -> throw new TekniskException("Dekningstype støttes ikke:" + dekning.getKode());
+            default -> throw new TekniskException("Dekningstype støttes ikke for EØS:" + dekning.getKode());
+        };
+    }
+
+    public static DekningMedl tilMedlTrygdeDekningFtrl(Trygdedekninger dekning, Folketrygdloven_kap2_bestemmelser bestemmelse) throws TekniskException {
+        return switch (bestemmelse) {
+            case FTRL_KAP2_2_8, FTRL_KAP2_2_8_FØRSTE_LEDD_A, FTRL_KAP2_2_8_FØRSTE_LEDD_B,
+                FTRL_KAP2_2_8_FØRSTE_LEDD_C, FTRL_KAP2_2_8_FØRSTE_LEDD_D, FTRL_KAP2_2_8_ANDRE_LEDD,
+                FTRL_KAP2_2_8_TREDJE_LEDD, FTRL_KAP2_2_8_FJERDE_LEDD, FTRL_KAP2_2_8_FEMTE_LEDD -> mapForFtrlKap2_8(dekning);
+            default -> throw new TekniskException("Bestemmelse støttes ikke for FTRL: " + bestemmelse.getKode());
+        };
+    }
+
+    private static DekningMedl mapForFtrlKap2_8(Trygdedekninger dekning) {
+        return switch (dekning) {
+            case HELSEDEL -> DekningMedl.FTRL_2_9_1_LEDD_A;
+            case HELSEDEL_MED_SYKE_OG_FORELDREPENGER -> DekningMedl.FTRL_2_9_2_LEDD_1A;
+            case PENSJONSDEL -> DekningMedl.FTRL_2_9_1_LEDD_B;
+            case HELSE_OG_PENSJONSDEL -> DekningMedl.FTRL_2_9_1_LEDD_C;
+            case HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER -> DekningMedl.FTRL_2_9_2_LEDD_1C;
+            default -> throw new TekniskException("Dekningstype støttes ikke for FTRL:" + dekning.getKode());
         };
     }
 
@@ -65,10 +105,16 @@ public final class MedlPeriodeKonverter {
         return grunnlagMedltype;
     }
 
+    public static GrunnlagMedl tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser bestemmelse) throws TekniskException {
+        return ofNullable(ftrlKap2BestemmelserGrunnLagMedlTabell.get(bestemmelse))
+            .orElseThrow(() -> new TekniskException("Folketrygdloven bestemmelse støttes ikke. Kode: " +
+                bestemmelse.getKode() + " Beskrivelse: " + bestemmelse.getBeskrivelse()));
+    }
+
     public static LovvalgBestemmelse tilLovvalgBestemmelse(GrunnlagMedl grunnlagKode) throws TekniskException {
         LovvalgBestemmelse lovvalgBestemmelse = lovvalgsbestemmelseTilGrunnlagMedlTabell.inverse().get(grunnlagKode);
         if (lovvalgBestemmelse == null) {
-            throw new TekniskException("GrunnlagMedlKode er ukjent. Kode: " + grunnlagKode.getKode() );
+            throw new TekniskException("GrunnlagMedlKode er ukjent. Kode: " + grunnlagKode.getKode());
         }
         return lovvalgBestemmelse;
     }

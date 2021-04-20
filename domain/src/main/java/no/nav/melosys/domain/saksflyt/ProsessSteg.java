@@ -21,6 +21,7 @@ public enum ProsessSteg implements Kodeverk {
     JFR_TILDEL_BEHANDLINGSOPPGAVE("JFR_TILDEL_BEHANDLINGSOPPGAVE", "Tildeler behandlingsoppgave for gjeldende fagsak til en saksbehandler"),
     LAGRE_ANMODNINGSPERIODE_MEDL("LAGRE_ANMODNINGSPERIODE_MEDL", "Lagrer en anmodningsperiode som under avklaring i MEDL"),
     LAGRE_LOVVALGSPERIODE_MEDL("LAGRE_LOVVALGSPERIODE_MEDL", "Lagrer en lovvalgsperiode i MEDL som foreløpig eller endelig"),
+    LAGRE_MEDLEMSPERIODE_MEDL("LAGRE_MEDLEMSPERIODE_MEDL", "Lagrer en medlemsperiode (Folketrygden) i MEDL som foreløpig eller endelig"),
     OPPDATER_OG_FERDIGSTILL_JOURNALPOST("OPPDATER_OG_FERDIGSTILL_JOURNALPOST", "Oppdaterer og ferdigstiller journalposten i Joark"),
     OPPDATER_OPPGAVE_ANMODNING_UNNTAK_SENDT("OPPDATER_OPPGAVE_ANMODNING_UNNTAK_SENDT", "Oppdaterer oppgave med frist og beskrivelse"),
     OPPDATER_SAKSRELASJON("OPPDATER_SAKSRELASJON", "Oppdaterer saksrelasjon mellom melosys-sak og rina-sak"),

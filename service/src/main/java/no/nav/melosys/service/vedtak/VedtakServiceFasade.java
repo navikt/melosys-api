@@ -27,7 +27,8 @@ public class VedtakServiceFasade {
     private final FtrlVedtakService ftrlVedtakService;
 
     @Autowired
-    public VedtakServiceFasade(BehandlingService behandlingService, EosVedtakService eosVedtakService, EosVedtakSystemService eosVedtakSystemService, FtrlVedtakService ftrlVedtakService) {
+    public VedtakServiceFasade(BehandlingService behandlingService, EosVedtakService eosVedtakService,
+                               EosVedtakSystemService eosVedtakSystemService, FtrlVedtakService ftrlVedtakService) {
         this.behandlingService = behandlingService;
         this.eosVedtakService = eosVedtakService;
         this.eosVedtakSystemService = eosVedtakSystemService;
