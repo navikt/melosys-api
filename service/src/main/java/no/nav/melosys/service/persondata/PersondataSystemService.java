@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 @Qualifier("system")
 public class PersondataSystemService extends PersondataService {
     @Autowired
-    public PersondataSystemService(PDLConsumer pdlConsumer, TpsSystemService tpsSystemService, Unleash unleash) {
+    public PersondataSystemService(@Qualifier("system") PDLConsumer pdlConsumer,
+                                   TpsSystemService tpsSystemService,
+                                   Unleash unleash) {
         super(pdlConsumer, tpsSystemService, unleash);
     }
 }

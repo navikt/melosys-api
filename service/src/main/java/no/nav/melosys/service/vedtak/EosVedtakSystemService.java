@@ -23,7 +23,7 @@ public class EosVedtakSystemService extends EosVedtakService {
                                   ProsessinstansService prosessinstansService,
                                   @Qualifier("system") EessiService eessiService,
                                   LandvelgerService landvelgerService,
-                                  PersondataFasade persondataFasade,
+                                  @Qualifier("system") PersondataFasade persondataFasade,
                                   RegisteropplysningerService registeropplysningerService,
                                   VedtakKontrollService vedtakKontrollService,
                                   AvklartefaktaService avklartefaktaService,

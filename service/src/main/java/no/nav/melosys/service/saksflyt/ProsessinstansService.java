@@ -202,6 +202,7 @@ public class ProsessinstansService {
         Prosessinstans prosessinstans = new Prosessinstans();
 
         prosessinstans.setType(ProsessType.OPPRETT_NY_SAK);
+        prosessinstans.setData(ProsessDataKey.SAKSTYPE, opprettSakDto.getSakstype());
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());

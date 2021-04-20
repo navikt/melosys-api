@@ -1,6 +1,5 @@
 package no.nav.melosys.service.vedtak;
 
-import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
@@ -10,7 +9,6 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.kodeverk.Sakstyper.EU_EOS;
-import static no.nav.melosys.domain.kodeverk.Sakstyper.UKJENT;
 
 @Service
 public class VedtakServiceFasade {
@@ -52,7 +49,7 @@ public class VedtakServiceFasade {
 
         Sakstyper sakstype = behandling.getFagsak().getType();
 
-        if (List.of(UKJENT, EU_EOS).contains(sakstype)) {
+        if (sakstype == EU_EOS) {
             eosVedtakService.fattVedtak(behandling, behandlingsresultatType, fritekst, fritekstSed, mottakerinstitusjoner, vedtakstype, revurderBegrunnelse);
         } else {
             throw new FunksjonellException("Vedtaksfatting for sakstype " + sakstype + " er ikke støttet.");
@@ -60,11 +57,11 @@ public class VedtakServiceFasade {
     }
 
     @Transactional(rollbackFor = MelosysException.class, noRollbackFor = {ValideringException.class})
-    public void endreVedtak(long behandlingID, Endretperiode endretperiode, String fritekst, String fritekstSed) throws FunksjonellException, TekniskException {
+    public void endreVedtak(long behandlingID, Endretperiode endretperiode, String fritekst, String fritekstSed) throws FunksjonellException {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         Sakstyper sakstype = behandling.getFagsak().getType();
 
-        if (List.of(UKJENT, EU_EOS).contains(sakstype)) {
+        if (sakstype == EU_EOS) {
             eosVedtakService.endreVedtak(behandling, endretperiode, fritekst, fritekstSed);
         } else {
             throw new FunksjonellException("Vedtaksendring for sakstype " + sakstype + " er ikke støttet.");
