@@ -5,16 +5,21 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsberegningsresultat;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.brev.BrevkopiRegel;
+import no.nav.melosys.domain.brev.FastMottaker;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
@@ -49,7 +54,8 @@ public class BrevmottakerService {
     public BrevmottakerService(KontaktopplysningService kontaktopplysningService,
                                AvklarteVirksomheterService avklarteVirksomheterService,
                                UtenlandskMyndighetService utenlandskMyndighetService,
-                               BehandlingsresultatService behandlingsresultatService, TrygdeavgiftsberegningService trygdeavgiftsberegningService) {
+                               BehandlingsresultatService behandlingsresultatService,
+                               TrygdeavgiftsberegningService trygdeavgiftsberegningService) {
         this.kontaktopplysningService = kontaktopplysningService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
@@ -71,18 +77,34 @@ public class BrevmottakerService {
         return mottakerRolle;
     }
 
+    public Aktoer avklarMottaker(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling)
+        throws FunksjonellException, TekniskException {
+        List<Aktoer> mottakere = avklarMottakere(produserbartDokument, mottaker, behandling, false, false);
+        if (mottakere.size() < 1) {
+            throw new FunksjonellException("Finner ikke avklart mottaker for produserbart dokument " + produserbartDokument.getKode() + " og rolle " + mottaker.getRolle() + " for behandling " + behandling.getId());
+        }
+        if (mottakere.size() > 1) {
+            throw new FunksjonellException("Flere enn én mottaker ble funnet for produserbart dokument " + produserbartDokument.getKode() + " og rolle " + mottaker.getRolle() + " for behandling " + behandling.getId());
+        }
+        return mottakere.get(0);
+    }
+
     public List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling) throws FunksjonellException, TekniskException {
         return avklarMottakere(produserbartDokument, mottaker, behandling, false);
     }
 
-    List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling, boolean forhåndsvisning)
+    public List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling, boolean forhåndsvisning) throws FunksjonellException, TekniskException {
+        return avklarMottakere(produserbartDokument, mottaker, behandling, forhåndsvisning, true);
+    }
+
+    public List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling, boolean forhåndsvisning, boolean kunAvklarteVirksomheter)
         throws FunksjonellException, TekniskException {
         List<Aktoer> mottakere;
         Aktoersroller mottakerRolle = mottaker.getRolle();
         if (mottakerRolle == BRUKER) {
             mottakere = avklarMottakereForBruker(produserbartDokument, behandling, forhåndsvisning);
         } else if (mottakerRolle == ARBEIDSGIVER) {
-            mottakere = avklarMottakereForArbeidsgiver(behandling);
+            mottakere = avklarMottakereForArbeidsgiver(behandling, kunAvklarteVirksomheter);
         } else if (mottakerRolle == MYNDIGHET) {
             mottakere = avklarMottakereForMyndigheter(mottaker, behandling, produserbartDokument);
         } else {
@@ -139,27 +161,40 @@ public class BrevmottakerService {
     }
 
     // Dokumenter til arbeidsgiver sendes bare til representant når representant finnes.
-    private List<Aktoer> avklarMottakereForArbeidsgiver(Behandling behandling) throws FunksjonellException, TekniskException {
+    private List<Aktoer> avklarMottakereForArbeidsgiver(Behandling behandling, boolean kunAvklarteVirksomheter) throws FunksjonellException, TekniskException {
         Fagsak fagsak = behandling.getFagsak();
         Optional<Aktoer> representant = fagsak.hentRepresentant(Representerer.ARBEIDSGIVER);
         if (representant.isPresent()) {
             return Collections.singletonList(representant.get());
         } else {
-            return avklarArbeidsgiver(behandling);
+            return kunAvklarteVirksomheter ? avklarArbeidsgiverFraAvklarteVirksomheter(behandling) : avklarArbeidsgiverFraAlleVirksomheter(behandling);
         }
     }
 
-    private List<Aktoer> avklarArbeidsgiver(Behandling behandling) throws FunksjonellException, TekniskException {
+    private List<Aktoer> avklarArbeidsgiverFraAvklarteVirksomheter(Behandling behandling) throws FunksjonellException, TekniskException {
         Set<String> arbeidsgivendeOrgnumre = avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
-        if (arbeidsgivendeOrgnumre.isEmpty()) {
-            if (avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling).isEmpty()) {
+        List<String> utenlandskeOrgnumre = avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling).stream().map(AvklartVirksomhet::getOrgnr).collect(Collectors.toList());
+        return avklarArbeidsgiver(arbeidsgivendeOrgnumre, utenlandskeOrgnumre);
+    }
+
+    private List<Aktoer> avklarArbeidsgiverFraAlleVirksomheter(Behandling behandling) throws FunksjonellException, TekniskException {
+        var behandlingsgrunnlagdata = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        Set<String> arbeidsgiverOrgnumre = new HashSet<>();
+        arbeidsgiverOrgnumre.addAll(behandling.hentArbeidsforholdDokument().hentOrgnumre());
+        arbeidsgiverOrgnumre.addAll(behandlingsgrunnlagdata.hentAlleOrganisasjonsnumre());
+        return avklarArbeidsgiver(arbeidsgiverOrgnumre, behandlingsgrunnlagdata.hentUtenlandskeArbeidsgivereUuid());
+    }
+
+    private List<Aktoer> avklarArbeidsgiver(Set<String> arbeidsgiverOrgnumre, List<String> utenlandskOrgnumre) throws FunksjonellException {
+        if (arbeidsgiverOrgnumre.isEmpty()) {
+            if (utenlandskOrgnumre.isEmpty()) {
                 throw new FunksjonellException("Arbeidsgiver er ikke registrert.");
             } else {
                 log.debug("Melosys sender ikke brev til utenlandske arbeidsgivere uten orgnr.");
                 return Collections.emptyList();
             }
         } else {
-            return arbeidsgivendeOrgnumre.stream()
+            return arbeidsgiverOrgnumre.stream()
                 .map(BrevmottakerService::lagAktoerForArbeidsgiver)
                 .collect(Collectors.toList());
         }
