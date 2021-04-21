@@ -43,6 +43,7 @@ public class BrevmottakerService {
     private static final Set<Produserbaredokumenter> DOKUMENTER_TIL_BRUKER = Collections.unmodifiableSet(EnumSet.of(MELDING_FORVENTET_SAKSBEHANDLINGSTID,
         MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
         AVSLAG_YRKESAKTIV, ORIENTERING_ANMODNING_UNNTAK, MELDING_MANGLENDE_OPPLYSNINGER, MELDING_HENLAGT_SAK, INNVILGELSE_YRKESAKTIV));
+    public static final String ARBEIDSGIVER_IKKE_REGISTRERT = "Arbeidsgiver er ikke registrert.";
 
     private final KontaktopplysningService kontaktopplysningService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
@@ -188,7 +189,7 @@ public class BrevmottakerService {
     private List<Aktoer> avklarArbeidsgiver(Set<String> arbeidsgiverOrgnumre, List<String> utenlandskOrgnumre) throws FunksjonellException {
         if (arbeidsgiverOrgnumre.isEmpty()) {
             if (utenlandskOrgnumre.isEmpty()) {
-                throw new FunksjonellException("Arbeidsgiver er ikke registrert.");
+                throw new FunksjonellException(ARBEIDSGIVER_IKKE_REGISTRERT);
             } else {
                 log.debug("Melosys sender ikke brev til utenlandske arbeidsgivere uten orgnr.");
                 return Collections.emptyList();

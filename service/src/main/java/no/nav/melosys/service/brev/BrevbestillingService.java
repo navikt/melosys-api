@@ -41,6 +41,7 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper.*;
+import static no.nav.melosys.service.dokument.BrevmottakerService.ARBEIDSGIVER_IKKE_REGISTRERT;
 
 @Service
 public class BrevbestillingService {
@@ -188,7 +189,16 @@ public class BrevbestillingService {
     }
 
     public List<BrevAdresse> hentBrevAdresseTilMottakere(Produserbaredokumenter produserbaredokumenter, Aktoersroller aktoersroller, Behandling behandling) throws FunksjonellException, TekniskException {
-        var mottakere = brevmottakerService.avklarMottakere(produserbaredokumenter, Mottaker.av(aktoersroller), behandling, false, false);
+        var mottakere = new ArrayList<Aktoer>();
+        try {
+            mottakere.addAll(brevmottakerService.avklarMottakere(produserbaredokumenter, Mottaker.av(aktoersroller), behandling, false, false));
+        } catch (FunksjonellException e) {
+            if (ARBEIDSGIVER_IKKE_REGISTRERT.equals(e.getMessage())) {
+                return emptyList();
+            }
+            throw e;
+        }
+
         List<BrevAdresse> brevAdresser = new ArrayList<>();
 
         for (Aktoer mottaker : mottakere) {
