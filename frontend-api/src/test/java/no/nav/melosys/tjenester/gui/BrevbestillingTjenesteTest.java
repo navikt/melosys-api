@@ -75,7 +75,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
 
         verifyNoInteractions(mockDokgenService);
 
-        valider(brevbestillingDto, "brev-post-schema.json", new ObjectMapper());
+        valider(brevbestillingDto, "dokumenter-v2-utkast-post-schema.json", new ObjectMapper());
     }
 
     @Test
@@ -90,7 +90,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         verify(mockDokgenService).produserOgDistribuerBrev(eq(MANGELBREV_BRUKER), eq(123L), eq(brevbestillingDto));
         verifyNoInteractions(mockDokServiceFasade);
 
-        valider(brevbestillingDto, "brev-post-schema.json", new ObjectMapper());
+        valider(brevbestillingDto, "dokumenter-v2-utkast-post-schema.json", new ObjectMapper());
     }
 
 }
