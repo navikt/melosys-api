@@ -383,6 +383,10 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return erInnvilgelse() && !erUtpeking() && harVedtak();
     }
 
+    public void settVedtakMetadata(Vedtakstyper vedtakstype, LocalDate klagefrist) {
+        settVedtakMetadata(vedtakstype, null, klagefrist);
+    }
+
     public void settVedtakMetadata(Vedtakstyper vedtakstype,
                                    String revurderBegrunnelse,
                                    LocalDate klagefrist) {
