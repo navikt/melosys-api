@@ -43,7 +43,6 @@ public class BrevmottakerService {
     private static final Set<Produserbaredokumenter> DOKUMENTER_TIL_BRUKER = Collections.unmodifiableSet(EnumSet.of(MELDING_FORVENTET_SAKSBEHANDLINGSTID,
         MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
         AVSLAG_YRKESAKTIV, ORIENTERING_ANMODNING_UNNTAK, MELDING_MANGLENDE_OPPLYSNINGER, MELDING_HENLAGT_SAK, INNVILGELSE_YRKESAKTIV));
-    public static final String ARBEIDSGIVER_IKKE_REGISTRERT = "Arbeidsgiver er ikke registrert.";
 
     private final KontaktopplysningService kontaktopplysningService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
@@ -174,31 +173,28 @@ public class BrevmottakerService {
 
     private List<Aktoer> avklarArbeidsgiverFraAvklarteVirksomheter(Behandling behandling) throws FunksjonellException, TekniskException {
         Set<String> arbeidsgivendeOrgnumre = avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
-        List<String> utenlandskeOrgnumre = avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling).stream().map(AvklartVirksomhet::getOrgnr).collect(Collectors.toList());
-        return avklarArbeidsgiver(arbeidsgivendeOrgnumre, utenlandskeOrgnumre);
-    }
-
-    private List<Aktoer> avklarArbeidsgiverFraAlleVirksomheter(Behandling behandling) throws FunksjonellException, TekniskException {
-        var behandlingsgrunnlagdata = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
-        Set<String> arbeidsgiverOrgnumre = new HashSet<>();
-        arbeidsgiverOrgnumre.addAll(behandling.hentArbeidsforholdDokument().hentOrgnumre());
-        arbeidsgiverOrgnumre.addAll(behandlingsgrunnlagdata.hentAlleOrganisasjonsnumre());
-        return avklarArbeidsgiver(arbeidsgiverOrgnumre, behandlingsgrunnlagdata.hentUtenlandskeArbeidsgivereUuid());
-    }
-
-    private List<Aktoer> avklarArbeidsgiver(Set<String> arbeidsgiverOrgnumre, List<String> utenlandskOrgnumre) throws FunksjonellException {
-        if (arbeidsgiverOrgnumre.isEmpty()) {
-            if (utenlandskOrgnumre.isEmpty()) {
-                throw new FunksjonellException(ARBEIDSGIVER_IKKE_REGISTRERT);
+        if (arbeidsgivendeOrgnumre.isEmpty()) {
+            if (avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling).isEmpty()) {
+                throw new FunksjonellException("Arbeidsgiver er ikke registrert.");
             } else {
                 log.debug("Melosys sender ikke brev til utenlandske arbeidsgivere uten orgnr.");
                 return Collections.emptyList();
             }
-        } else {
-            return arbeidsgiverOrgnumre.stream()
-                .map(BrevmottakerService::lagAktoerForArbeidsgiver)
-                .collect(Collectors.toList());
         }
+        return avklarArbeidsgiver(arbeidsgivendeOrgnumre);
+    }
+
+    private List<Aktoer> avklarArbeidsgiverFraAlleVirksomheter(Behandling behandling) throws TekniskException {
+        Set<String> arbeidsgiverOrgnumre = new HashSet<>();
+        arbeidsgiverOrgnumre.addAll(behandling.hentArbeidsforholdDokument().hentOrgnumre());
+        arbeidsgiverOrgnumre.addAll(behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().hentAlleOrganisasjonsnumre());
+        return avklarArbeidsgiver(arbeidsgiverOrgnumre);
+    }
+
+    private List<Aktoer> avklarArbeidsgiver(Set<String> arbeidsgiverOrgnumre) {
+        return arbeidsgiverOrgnumre.stream()
+            .map(BrevmottakerService::lagAktoerForArbeidsgiver)
+            .collect(Collectors.toList());
     }
 
     private static Aktoer lagAktoerForArbeidsgiver(String orgnr) {

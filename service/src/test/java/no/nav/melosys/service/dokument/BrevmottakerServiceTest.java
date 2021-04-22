@@ -144,14 +144,14 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_medArbeidsgiverRolleIkkeKunAvklarteVirksomheterOgIngenArbeidsgivere_feiler() throws TekniskException {
+    void avklarMottakere_medArbeidsgiverRolleIkkeKunAvklarteVirksomheterOgIngenArbeidsgivere_girTomListe() throws TekniskException, FunksjonellException {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
         when(behandling.getBehandlingsgrunnlag()).thenReturn(lagBehandlingsgrunnlag(null, null));
         when(behandling.hentArbeidsforholdDokument()).thenReturn(lagArbeidsforholdDokument(null));
 
-        assertThatThrownBy(() -> brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling, false, false))
-            .isInstanceOf(FunksjonellException.class)
-            .hasMessage("Arbeidsgiver er ikke registrert.");
+        List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling, false, false);
+
+        assertThat(arbeidsgivere).isEmpty();
     }
 
     @Test
