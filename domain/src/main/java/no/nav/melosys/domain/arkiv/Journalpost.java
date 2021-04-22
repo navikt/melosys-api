@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 
 /**
  * Journalpostopplysninger fra Joark. Transient for Melosys.
@@ -19,6 +20,7 @@ public class Journalpost {
     private String avsenderNavn;
     private Avsendertyper avsenderType;
     private String brukerId;
+    private BrukerIdType brukerIdType = BrukerIdType.FNR;
     private String korrespondansepartNavn;
     private String korrespondansepartId;
     private Instant forsendelseJournalfoert;
@@ -94,12 +96,34 @@ public class Journalpost {
         this.avsenderType = avsenderType;
     }
 
-    public String getBrukerId() {
-        return brukerId;
+    public Optional<String> finnFnr() {
+        if (brukerIdType == BrukerIdType.FNR) {
+            return Optional.ofNullable(brukerId);
+        }
+        return Optional.empty();
+    }
+
+    public String hentFnr() {
+        return finnFnr().orElseThrow(() -> new TekniskException("FNR finnes ikke for journalpost " + journalpostId));
+    }
+
+    public Optional<String> finnAktørId() {
+        if (brukerIdType == BrukerIdType.AKTØR_ID) {
+            return Optional.ofNullable(brukerId);
+        }
+        return Optional.empty();
+    }
+
+    public String hentAktørId() {
+        return finnAktørId().orElseThrow(() -> new TekniskException("AktørId finnes ikke for journalpost " + journalpostId));
     }
 
     public void setBrukerId(String brukerId) {
         this.brukerId = brukerId;
+    }
+
+    public void setBrukerIdType(BrukerIdType brukerIdType) {
+        this.brukerIdType = brukerIdType;
     }
 
     public String getKorrespondansepartNavn() {

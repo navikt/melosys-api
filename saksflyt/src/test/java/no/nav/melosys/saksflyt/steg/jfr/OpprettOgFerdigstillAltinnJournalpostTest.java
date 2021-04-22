@@ -21,9 +21,9 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.altinn.AltinnSoeknadService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -108,7 +108,7 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
 
         OpprettJournalpost opprettJournalpost = captor.getValue();
         assertThat(opprettJournalpost)
-            .extracting(Journalpost::getTema, Journalpost::getMottaksKanal, Journalpost::getArkivSakId, Journalpost::getBrukerId)
+            .extracting(Journalpost::getTema, Journalpost::getMottaksKanal, Journalpost::getArkivSakId, Journalpost::hentFnr)
             .containsExactly("MED", "ALTINN", "123", ident);
         assertThat(opprettJournalpost.getInnhold()).isNotEmpty();
         assertThat(opprettJournalpost.getHoveddokument())

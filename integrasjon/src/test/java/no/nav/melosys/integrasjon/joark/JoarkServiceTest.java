@@ -264,7 +264,7 @@ class JoarkServiceTest {
         Journalpost journalpost = joarkService.hentJournalpost("1233321");
 
         assertThat(journalpost).isNotNull();
-        assertThat(journalpost.getBrukerId()).isEqualTo(brukerId);
+        assertThat(journalpost.hentFnr()).isEqualTo(brukerId);
         assertThat(journalpost.getAvsenderId()).isEqualTo(avsenderId);
         assertThat(journalpost.isErFerdigstilt()).isTrue();
         assertThat(journalpost.getForsendelseMottatt()).isEqualTo(forsendelseMottatt.toInstant());
