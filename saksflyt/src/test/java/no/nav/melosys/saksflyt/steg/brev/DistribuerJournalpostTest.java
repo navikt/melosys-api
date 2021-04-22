@@ -5,6 +5,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -62,6 +63,8 @@ class DistribuerJournalpostTest {
         Behandling behandling = TestdataFactory.lagBehandling();
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         prosessinstans.setBehandling(behandling);
+        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling());
+
         assertThrows(FunksjonellException.class, () -> distribuerJournalpost.utfør(prosessinstans));
     }
 
@@ -72,6 +75,7 @@ class DistribuerJournalpostTest {
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, "123");
+        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling());
         assertThrows(FunksjonellException.class, () -> distribuerJournalpost.utfør(prosessinstans));
     }
 
@@ -99,7 +103,7 @@ class DistribuerJournalpostTest {
 
         distribuerJournalpost.utfør(prosessinstans);
 
-        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), any(StrukturertAdresse.class), any());
+        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), any(StrukturertAdresse.class), any(), any());
     }
 
     @Test
@@ -116,15 +120,18 @@ class DistribuerJournalpostTest {
 
         distribuerJournalpost.utfør(prosessinstans);
 
-        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), any(StrukturertAdresse.class), any());
+        verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), any(StrukturertAdresse.class), any(), any());
     }
 
     private Prosessinstans setupHappypath(String journalpostId, Aktoersroller rolle) throws IkkeFunnetException {
         Behandling behandling = TestdataFactory.lagBehandling();
         Prosessinstans prosessinstans = new Prosessinstans();
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
+            .build();
 
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, journalpostId);
+        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, brevbestilling);
         prosessinstans.setData(ProsessDataKey.MOTTAKER, rolle);
 
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);

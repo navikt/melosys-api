@@ -2,6 +2,7 @@ package no.nav.melosys.service.behandling;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
@@ -24,6 +25,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,6 +49,8 @@ public class BehandlingServiceTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private OppgaveService oppgaveService;
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
 
     private BehandlingService behandlingService;
 
@@ -55,7 +59,7 @@ public class BehandlingServiceTest {
 
     @BeforeEach
     public void setUp() {
-        behandlingService = new BehandlingService(behandlingRepo, behandlingsresultatRepository, tidligereMedlemsperiodeRepo, behandlingsresultatService, oppgaveService);
+        behandlingService = new BehandlingService(behandlingRepo, behandlingsresultatRepository, tidligereMedlemsperiodeRepo, behandlingsresultatService, oppgaveService, applicationEventPublisher);
     }
 
     @Test
@@ -275,7 +279,7 @@ public class BehandlingServiceTest {
     }
 
     @Test
-    public final void testErBehandlingRedigerbarOgTilordnetSaksbehandler() throws FunksjonellException, TekniskException {
+    public final void erBehandlingRedigerbarOgTilordnetSaksbehandler() throws FunksjonellException, TekniskException {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("12345678901");
         Behandling behandling = new Behandling();
@@ -320,7 +324,7 @@ public class BehandlingServiceTest {
     }
 
     @Test
-    public final void testErBehandlingRedigerbarOgTilordnetSaksbehandler_ingenOppgaveFunnet_kasterException() throws FunksjonellException, TekniskException {
+    public final void erBehandlingRedigerbarOgTilordnetSaksbehandler_ingenOppgaveFunnet_kasterException() throws FunksjonellException, TekniskException {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("12345678901");
         Behandling behandling = new Behandling();
@@ -334,6 +338,20 @@ public class BehandlingServiceTest {
         assertThatExceptionOfType(TekniskException.class)
             .isThrownBy(() -> behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER))
             .withMessage("Finner ingen oppgave for fagsak");
+    }
+
+    @Test
+    public final void endreBehandlingsfrist_enUkeFrem_fristOppdateres() throws Exception {
+        LocalDate nå = LocalDate.now();
+        Behandling behandling = new Behandling();
+        behandling.setBehandlingsfrist(nå);
+        when(behandlingRepo.findById(eq(BEHANDLING_ID))).thenReturn(Optional.of(behandling));
+
+        behandlingService.endreBehandlingsfrist(BEHANDLING_ID, nå.plusWeeks(1));
+
+        assertThat(behandling.getBehandlingsfrist()).isEqualTo(nå.plusWeeks(1));
+        verify(behandlingRepo).save(behandling);
+        verify(applicationEventPublisher).publishEvent(any(BehandlingsfristEndretEvent.class));
     }
 
     private Behandling opprettBehandlingMedData() {

@@ -1,6 +1,7 @@
 package no.nav.melosys.domain;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 import javax.persistence.*;
 
@@ -62,6 +63,9 @@ public class Behandling extends RegistreringsInfo {
 
     @Column(name = "initierende_dokument_id")
     private String initierendeDokumentId;
+
+    @Column(name = "behandlingsfrist")
+    private LocalDate behandlingsfrist;
 
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Saksopplysning> saksopplysninger = new HashSet<>(1);
@@ -157,6 +161,14 @@ public class Behandling extends RegistreringsInfo {
 
     public void setInitierendeDokumentId(String initierendeDokumentId) {
         this.initierendeDokumentId = initierendeDokumentId;
+    }
+
+    public LocalDate getBehandlingsfrist() {
+        return behandlingsfrist;
+    }
+
+    public void setBehandlingsfrist(LocalDate behandlingsfrist) {
+        this.behandlingsfrist = behandlingsfrist;
     }
 
     public Behandling getOpprinneligBehandling() {
@@ -275,13 +287,13 @@ public class Behandling extends RegistreringsInfo {
         if (this.id != 0 && that.id != 0) { // Begge entiteter er persistert. True hvis samme rad i db.
             return this.id.equals(that.getId());
         }
-        return Objects.equals(registrertDato, that.registrertDato)
+        return Objects.equals(this.getRegistrertDato(), that.getRegistrertDato())
             && Objects.equals(this.fagsak, that.fagsak);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(registrertDato, fagsak);
+        return Objects.hash(getRegistrertDato(), fagsak);
     }
 
     public boolean kanAvsluttesManuelt() {
