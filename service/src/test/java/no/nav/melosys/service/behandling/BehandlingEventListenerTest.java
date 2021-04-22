@@ -22,7 +22,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -89,6 +89,6 @@ class BehandlingEventListenerTest {
 
         verify(behandlingService, only()).hentBehandling(BEHANDLING_ID);
         verify(oppgaveService).oppdaterOppgave(eq(OPPGAVE_ID), oppgaveOppdateringCaptor.capture());
-        assertEquals(nå.plusWeeks(1), oppgaveOppdateringCaptor.getValue().getFristFerdigstillelse());
+        assertThat(oppgaveOppdateringCaptor.getValue().getFristFerdigstillelse()).isEqualTo(nå.plusWeeks(1));
     }
 }

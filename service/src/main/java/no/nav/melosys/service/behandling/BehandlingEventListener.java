@@ -26,7 +26,6 @@ public class BehandlingEventListener {
     private static final int DOKUMENTASJON_SVARFRIST_UKER_MANGELBREV = 4;
 
     private final BehandlingService behandlingService;
-    @Qualifier("system")
     private final OppgaveService oppgaveService;
 
     public BehandlingEventListener(BehandlingService behandlingService, @Qualifier("system") OppgaveService oppgaveService) {

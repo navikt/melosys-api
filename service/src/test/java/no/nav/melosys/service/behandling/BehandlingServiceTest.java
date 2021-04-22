@@ -279,7 +279,7 @@ public class BehandlingServiceTest {
     }
 
     @Test
-    public final void testErBehandlingRedigerbarOgTilordnetSaksbehandler() throws FunksjonellException, TekniskException {
+    public final void erBehandlingRedigerbarOgTilordnetSaksbehandler() throws FunksjonellException, TekniskException {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("12345678901");
         Behandling behandling = new Behandling();
@@ -324,7 +324,7 @@ public class BehandlingServiceTest {
     }
 
     @Test
-    public final void testErBehandlingRedigerbarOgTilordnetSaksbehandler_ingenOppgaveFunnet_kasterException() throws FunksjonellException, TekniskException {
+    public final void erBehandlingRedigerbarOgTilordnetSaksbehandler_ingenOppgaveFunnet_kasterException() throws FunksjonellException, TekniskException {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("12345678901");
         Behandling behandling = new Behandling();
@@ -341,7 +341,7 @@ public class BehandlingServiceTest {
     }
 
     @Test
-    public final void testEndreBehandlingsfrist_enUkeFrem_fristOppdateres() throws Exception {
+    public final void endreBehandlingsfrist_enUkeFrem_fristOppdateres() throws Exception {
         LocalDate nå = LocalDate.now();
         Behandling behandling = new Behandling();
         behandling.setBehandlingsfrist(nå);
