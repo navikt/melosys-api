@@ -8,23 +8,23 @@ import java.util.List;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.KontrollresultatService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
-import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,8 +45,6 @@ class OppfriskSaksopplysningerServiceTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
-    private FagsakService fagsakService;
-    @Mock
     private KontrollresultatService kontrollresultatService;
     @Mock
     private InngangsvilkaarService inngangsvilkaarService;
@@ -63,12 +61,10 @@ class OppfriskSaksopplysningerServiceTest {
     public void setUp() throws IkkeFunnetException {
         oppfriskSaksopplysningerService = new OppfriskSaksopplysningerService(
             behandlingService, behandlingsresultatService,
-            fagsakService, kontrollresultatService,
-            inngangsvilkaarService, registeropplysningerService,
-            persondataFasade);
+            kontrollresultatService, inngangsvilkaarService,
+            registeropplysningerService, persondataFasade);
 
-        String brukerID = "322211";
-        when(persondataFasade.hentFolkeregisterIdent(anyString())).thenReturn(brukerID);
+        when(persondataFasade.hentFolkeregisterIdent(anyString())).thenReturn("322211");
     }
 
     @Test
@@ -95,30 +91,23 @@ class OppfriskSaksopplysningerServiceTest {
     }
 
     @Test
-    void oppfriskSaksopplysning_sakstypeUkjentErSøknad_oppdatererType() throws MelosysException {
+    void oppfriskSaksopplysning_harIkkeOppfyltInngangsvilkår_oppdatererType() throws MelosysException {
         Behandling behandling = lagBehandling();
-        behandling.getFagsak().setType(Sakstyper.UKJENT);
+        behandling.getFagsak().setType(Sakstyper.EU_EOS);
+
+        Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
+        vilkaarsresultat.setVilkaar(Vilkaar.FO_883_2004_INNGANGSVILKAAR);
+        vilkaarsresultat.setOppfylt(false);
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.getVilkaarsresultater().add(vilkaarsresultat);
+
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(inngangsvilkaarService.vurderOgLagreInngangsvilkår(anyLong(), anyList(), any(Periode.class))).thenReturn(true);
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
 
-        verify(fagsakService).oppdaterType(eq(behandling.getFagsak()), eq(true));
         verify(inngangsvilkaarService).vurderOgLagreInngangsvilkår(eq(behandling.getId()), eq(List.of("SE")), any(Periode.class));
-    }
-
-    @Test
-    void oppfriskSaksopplysning_sakstypeUkjentNorgeUtpekt_oppdatererType() throws MelosysException {
-        Behandling behandling = lagBehandling();
-        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
-        behandling.getFagsak().setType(Sakstyper.UKJENT);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(inngangsvilkaarService.vurderOgLagreInngangsvilkår(anyLong(), anyList(), any(Periode.class))).thenReturn(true);
-
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
-
-        verify(fagsakService).oppdaterType(eq(behandling.getFagsak()), eq(true));
-        verify(inngangsvilkaarService).vurderOgLagreInngangsvilkår(eq(behandling.getId()), eq(List.of("NO")), any(Periode.class));
     }
 
     @Test
