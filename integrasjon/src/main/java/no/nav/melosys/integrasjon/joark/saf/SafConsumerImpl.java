@@ -1,5 +1,8 @@
 package no.nav.melosys.integrasjon.joark.saf;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -9,9 +12,7 @@ import no.nav.melosys.integrasjon.felles.graphql.GraphQLRequest;
 import no.nav.melosys.integrasjon.felles.graphql.GraphQLResponse;
 import no.nav.melosys.integrasjon.joark.Variantformat;
 import no.nav.melosys.integrasjon.joark.saf.dto.FeilResponseSafDto;
-import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.HentJournalpostResponse;
-import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost;
-import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Query;
+import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.*;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -47,25 +48,66 @@ public class SafConsumerImpl implements SafConsumer {
     @Override
     public Journalpost hentJournalpost(String journalpostID) {
         GraphQLRequest request = new GraphQLRequest(Query.hentJournalpostQuery, Map.of("journalpostId", journalpostID));
-        GraphQLResponse<HentJournalpostResponse> response = webClient.post()
+        HentJournalpostResponse response = webClient.post()
             .uri(SAF_GRAPHQL_URL)
             .bodyValue(request)
             .retrieve()
             .onStatus(HttpStatus::isError, this::håndterFeil)
             .bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentJournalpostResponse>>() {
             })
+            .map(res -> validerGraphQLResponse("henting av journalpost", res))
             .block();
 
+        return response.journalpost();
+    }
+
+    @Override
+    public Collection<Journalpost> hentDokumentoversikt(String saksnummer) {
+        return hentDokumentoversikt(saksnummer, null);
+    }
+
+    private Collection<Journalpost> hentDokumentoversikt(String saksnummer, String sluttpeker) {
+        HentDokumentoversiktResponse response = hentDokumentoversiktResponse(saksnummer, sluttpeker);
+
         if (response == null) {
-            throw new IntegrasjonException("Ingen respons fra Saf ved henting av journalpost");
+            throw new IntegrasjonException("Ingen respons fra Saf ved henting av dokumentoversikt");
+        }
+
+        List<Journalpost> journalposter = new ArrayList<>(response.journalposter());
+        if (response.sideInfo().finnesNesteSide()) {
+            journalposter.addAll(
+                hentDokumentoversikt(saksnummer, response.sideInfo().sluttpeker())
+            );
+        }
+
+        return journalposter;
+    }
+
+    private HentDokumentoversiktResponse hentDokumentoversiktResponse(String saksnummer, String sluttpeker) {
+        GraphQLRequest request = new GraphQLRequest(Query.dokumentoversiktQuery, Query.dokumentoversiktVariabler(saksnummer, sluttpeker));
+        return webClient.post()
+            .uri(SAF_GRAPHQL_URL)
+            .bodyValue(request)
+            .retrieve()
+            .onStatus(HttpStatus::isError, this::håndterFeil)
+            .bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentDokumentoversiktResponseWrapper>>() {
+            })
+            .map(res -> validerGraphQLResponse("henting av dokumentoversikt", res))
+            .map(HentDokumentoversiktResponseWrapper::hentDokumentoversiktResponse)
+            .block();
+    }
+
+    private static <T> T validerGraphQLResponse(String operasjon, GraphQLResponse<T> response) {
+        if (response == null || response.data() == null) {
+            throw new IntegrasjonException("Ingen respons fra Saf ved " + operasjon);
         }
 
         if (!CollectionUtils.isEmpty(response.errors())) {
-            throw new IntegrasjonException("Feil ved henting av journalpost: "
+            throw new IntegrasjonException("Feil ved " + operasjon + ": "
                 + response.errors().stream().map(GraphQLError::message).collect(Collectors.joining(", ")));
         }
 
-        return response.data().journalpost();
+        return response.data();
     }
 
     private Mono<Exception> håndterFeil(ClientResponse clientResponse) {
