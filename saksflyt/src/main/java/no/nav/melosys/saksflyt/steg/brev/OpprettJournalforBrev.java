@@ -63,7 +63,7 @@ public class OpprettJournalforBrev implements StegBehandler {
         }
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         PersonDokument personDokument = behandling.hentPersonDokument();
-        DokgenBrevbestilling brevbestilling = prosessinstans.getData(BREVBESTILLING, DokgenBrevbestilling.class);
+        var brevbestilling = prosessinstans.getDataWithDefaultTyping(BREVBESTILLING, DokgenBrevbestilling.class);
         Produserbaredokumenter produserbartDokument = brevbestilling.getProduserbartdokument();
 
         String aktørId = prosessinstans.getData(AKTØR_ID);

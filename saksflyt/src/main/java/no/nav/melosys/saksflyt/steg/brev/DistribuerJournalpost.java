@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.brev;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Kontaktopplysning;
@@ -63,7 +62,7 @@ public class DistribuerJournalpost implements StegBehandler {
         }
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         String journalpostId = prosessinstans.getData(DISTRIBUERBAR_JOURNALPOST_ID);
-        DokgenBrevbestilling brevbestilling = prosessinstans.getData(BREVBESTILLING, DokgenBrevbestilling.class);
+        var brevbestilling = prosessinstans.getDataWithDefaultTyping(BREVBESTILLING, DokgenBrevbestilling.class);
         Aktoersroller mottaker = prosessinstans.getData(MOTTAKER, Aktoersroller.class);
         String orgnr = prosessinstans.getData(ORGNR, String.class, null);
 

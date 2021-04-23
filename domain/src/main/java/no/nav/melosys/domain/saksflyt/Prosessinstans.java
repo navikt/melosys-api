@@ -8,9 +8,12 @@ import javax.persistence.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.jpa.PropertiesConverter;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
@@ -61,7 +64,18 @@ public class Prosessinstans {
     @OneToMany(mappedBy = "prosessinstans", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ProsessinstansHendelse> hendelser = new ArrayList<>();
 
-    private static final ObjectMapper dataMapper = new ObjectMapper().registerModule(new JavaTimeModule())
+    private static final PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
+        .allowIfBaseType(DokgenBrevbestilling.class)
+        .build();
+
+    private static final ObjectMapper dataMapperDefaultTyping = new ObjectMapper()
+        .activateDefaultTyping(ptv, ObjectMapper.DefaultTyping.NON_FINAL)
+        .registerModule(new JavaTimeModule())
+        .registerModule(new SimpleModule().addDeserializer(LovvalgBestemmelse.class, new LovvalgBestemmelseDeserializer()));
+
+
+    private static final ObjectMapper dataMapper = new ObjectMapper()
+        .registerModule(new JavaTimeModule())
         .registerModule(new SimpleModule().addDeserializer(LovvalgBestemmelse.class, new LovvalgBestemmelseDeserializer()));
 
     public UUID getId() {
@@ -121,6 +135,22 @@ public class Prosessinstans {
         }
     }
 
+    /**
+     * Returnerer et dataelement som et Object som kan være en subtype
+     */
+    public <T> T getDataWithDefaultTyping(ProsessDataKey key, Class<T> type) {
+        String dataString = getData(key);
+        if (dataString == null) {
+            return null;
+        }
+        try {
+            return dataMapperDefaultTyping.readValue(dataString, type);
+        } catch (IOException e) {
+            // Holder med RTE, siden det skal mye til for at en slik feil kommer ut i prod
+            throw new IllegalStateException("Feil ved deserialisering", e);
+        }
+    }
+
     public <T> T getData(ProsessDataKey key, Class<T> type, T defaultVerdi) {
         return Optional.ofNullable(getData(key, type)).orElse(defaultVerdi);
     }
@@ -151,6 +181,18 @@ public class Prosessinstans {
     public void setData(ProsessDataKey key, Object value) {
         try {
             String dataString = dataMapper.writeValueAsString(value);
+            setData(key, dataString);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Feil ved serialisering", e);
+        }
+    }
+
+    /**
+     * Setter et objekt (kan være en subtype) til et dataelement
+     */
+    public void setDataWithDefaultTyping(ProsessDataKey key, Object value) {
+        try {
+            String dataString = dataMapperDefaultTyping.writeValueAsString(value);
             setData(key, dataString);
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Feil ved serialisering", e);

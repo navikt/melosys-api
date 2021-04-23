@@ -20,14 +20,12 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.sak.OpprettSakDto;
@@ -252,7 +250,7 @@ public class ProsessinstansService {
     public void opprettProsessinstansOpprettOgDistribuerBrev(Behandling behandling, Aktoer mottaker, DokgenBrevbestilling brevbestilling) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
-        prosessinstans.setData(BREVBESTILLING, brevbestilling);
+        prosessinstans.setDataWithDefaultTyping(BREVBESTILLING, brevbestilling);
         prosessinstans.setData(MOTTAKER, mottaker.getRolle());
         if (hasText(mottaker.getAktørId())) {
             prosessinstans.setData(AKTØR_ID, mottaker.getAktørId());
