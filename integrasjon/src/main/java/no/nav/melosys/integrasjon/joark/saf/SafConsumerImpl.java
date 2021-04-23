@@ -39,19 +39,19 @@ public class SafConsumerImpl implements SafConsumer {
             .header(CALL_ID, getCallID())
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_PDF_VALUE)
             .retrieve()
-            .onStatus(HttpStatus::isError, this::håndterFeil)
+            .onStatus(HttpStatus::isError, this::håndterHttpFeil)
             .bodyToMono(byte[].class)
             .block();
     }
 
     @Override
     public Journalpost hentJournalpost(String journalpostID) {
-        GraphQLRequest request = new GraphQLRequest(Query.hentJournalpostQuery, Map.of("journalpostId", journalpostID));
+        GraphQLRequest request = new GraphQLRequest(Query.HENT_JOURNALPOST_QUERY, Map.of(Query.JOURNALPOST_ID, journalpostID));
         GraphQLResponse<HentJournalpostResponse> response = webClient.post()
             .uri(SAF_GRAPHQL_URL)
             .bodyValue(request)
             .retrieve()
-            .onStatus(HttpStatus::isError, this::håndterFeil)
+            .onStatus(HttpStatus::isError, this::håndterHttpFeil)
             .bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentJournalpostResponse>>() {
             })
             .block();
@@ -68,7 +68,7 @@ public class SafConsumerImpl implements SafConsumer {
         return response.data().journalpost();
     }
 
-    private Mono<Exception> håndterFeil(ClientResponse clientResponse) {
+    private Mono<Exception> håndterHttpFeil(ClientResponse clientResponse) {
         final HttpStatus status = clientResponse.statusCode();
         return clientResponse.bodyToMono(FeilResponseSafDto.class)
             .map(FeilResponseSafDto::message)

@@ -4,9 +4,11 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.arkiv.ArkivDokument;
+import no.nav.melosys.exception.TekniskException;
 
 public record Journalpost(
     String journalpostId,
@@ -59,12 +61,10 @@ public record Journalpost(
     }
 
     private ArkivDokument hentHoveddokument() {
-        if (dokumenter == null) {
-            return null;
-        }
-        return dokumenter.stream().findFirst()
-            .map(DokumentInfo::tilArkivDokument)
-            .orElse(null);
+        return Optional.ofNullable(dokumenter)
+            .stream().flatMap(Collection::stream)
+            .map(DokumentInfo::tilArkivDokument).findFirst()
+            .orElseThrow(() -> new TekniskException("Journalpost " + journalpostId + " har ingen hoveddokument"));
     }
 
     private Collection<ArkivDokument> hentVedlegg() {
@@ -76,7 +76,7 @@ public record Journalpost(
     private Instant hentForsendelseMottatt() {
         if (erInngående()) {
             return relevanteDatoer.stream()
-                .filter(RelevantDato::erDatotypeRegistrert)
+                .filter(RelevantDato::harDatotypeRegistrert)
                 .map(RelevantDato::dato)
                 .map(Journalpost::tilInstant)
                 .findFirst()
@@ -88,7 +88,7 @@ public record Journalpost(
 
     private Instant hentForsendelseJournalført() {
         return relevanteDatoer.stream()
-            .filter(RelevantDato::erDatotypeJournalført)
+            .filter(RelevantDato::harDatotypeJournalført)
             .map(RelevantDato::dato)
             .map(Journalpost::tilInstant)
             .findFirst()

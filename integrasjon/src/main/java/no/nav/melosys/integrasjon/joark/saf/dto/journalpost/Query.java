@@ -1,7 +1,8 @@
 package no.nav.melosys.integrasjon.joark.saf.dto.journalpost;
 
 public final class Query {
-    public static final String hentJournalpostQuery = """
+    public static final String JOURNALPOST_ID = "journalpostId";
+    public static final String HENT_JOURNALPOST_QUERY = """
           query($journalpostId: String!) {
             query: journalpost(journalpostId: $journalpostId) {
               journalpostId
