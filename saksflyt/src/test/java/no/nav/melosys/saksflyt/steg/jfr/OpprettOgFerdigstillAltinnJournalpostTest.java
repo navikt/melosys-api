@@ -108,7 +108,7 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
 
         OpprettJournalpost opprettJournalpost = captor.getValue();
         assertThat(opprettJournalpost)
-            .extracting(Journalpost::getTema, Journalpost::getMottaksKanal, Journalpost::getArkivSakId, Journalpost::hentFnr)
+            .extracting(Journalpost::getTema, Journalpost::getMottaksKanal, Journalpost::getArkivSakId, Journalpost::getBrukerId)
             .containsExactly("MED", "ALTINN", "123", ident);
         assertThat(opprettJournalpost.getInnhold()).isNotEmpty();
         assertThat(opprettJournalpost.getHoveddokument())

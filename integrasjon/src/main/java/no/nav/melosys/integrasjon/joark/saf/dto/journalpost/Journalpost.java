@@ -32,8 +32,11 @@ public record Journalpost(
 
         if (bruker != null) {
             if (Brukertype.erPerson(bruker.type())) {
-                journalpost.setBrukerId(bruker.id());
-                journalpost.setBrukerIdType(Brukertype.tilDomene(bruker.type()));
+                if (bruker.type() == Brukertype.AKTOERID) {
+                    // todo hent fnr
+                } else {
+                    journalpost.setBrukerId(bruker.id());
+                }
             } else {
                 throw new UnsupportedOperationException("Støtter ikke bruker med type " + bruker.type());
             }

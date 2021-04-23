@@ -33,7 +33,7 @@ public final class JournalpostDto {
 
     public static JournalpostDto av(Journalpost journalpost) {
         Instant mottattDato = journalpost.getForsendelseMottatt();
-        String brukerID = journalpost.hentFnr();
+        String brukerID = journalpost.getBrukerId();
         String avsenderID = journalpost.getAvsenderId();
         String avsenderNavn = journalpost.getAvsenderNavn();
         Avsendertyper avsenderType = journalpost.getAvsenderType();

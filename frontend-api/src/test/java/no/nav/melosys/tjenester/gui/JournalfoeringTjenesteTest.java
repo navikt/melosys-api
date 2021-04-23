@@ -1,6 +1,5 @@
 package no.nav.melosys.tjenester.gui;
 
-import no.nav.melosys.domain.arkiv.BrukerIdType;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -51,7 +50,6 @@ class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     void hentJournalpostValidering() throws Exception {
         Journalpost journalpost = random.nextObject(Journalpost.class);
         journalpost.setBrukerId(SAMPLE_FNR);
-        journalpost.setBrukerIdType(BrukerIdType.FNR);
         journalpost.setAvsenderId(SAMPLE_ORGNR);
         when(journalføringService.hentJournalpost(anyString())).thenReturn(journalpost);
 
