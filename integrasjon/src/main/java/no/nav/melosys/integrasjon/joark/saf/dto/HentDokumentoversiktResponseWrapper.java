@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.joark.saf.dto.journalpost;
+package no.nav.melosys.integrasjon.joark.saf.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

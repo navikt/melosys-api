@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.joark.saf.dto.journalpost;
+package no.nav.melosys.integrasjon.joark.saf.dto;
 
 // Paginering av journalposter
 public record SideInfo(
