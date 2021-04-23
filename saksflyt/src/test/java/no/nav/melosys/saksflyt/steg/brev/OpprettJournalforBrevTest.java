@@ -66,7 +66,7 @@ class OpprettJournalforBrevTest {
         Behandling behandling = TestdataFactory.lagBehandling();
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setDataWithDefaultTyping(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling());
+        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling());
 
         assertThatThrownBy(() -> opprettJournalforBrev.utfør(prosessinstans))
             .isInstanceOf(FunksjonellException.class)
@@ -90,7 +90,7 @@ class OpprettJournalforBrevTest {
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setDataWithDefaultTyping(ProsessDataKey.BREVBESTILLING, brevbestilling);
+        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, brevbestilling);
         prosessinstans.setData(ProsessDataKey.MOTTAKER, mottaker.getRolle());
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, mottaker.getAktørId());
 
@@ -120,7 +120,7 @@ class OpprettJournalforBrevTest {
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setDataWithDefaultTyping(ProsessDataKey.BREVBESTILLING, brevbestilling);
+        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, brevbestilling);
         prosessinstans.setData(ProsessDataKey.MOTTAKER, mottaker.getRolle());
         prosessinstans.setData(ProsessDataKey.ORGNR, mottaker.getOrgnr());
 
@@ -149,7 +149,7 @@ class OpprettJournalforBrevTest {
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setDataWithDefaultTyping(ProsessDataKey.BREVBESTILLING, brevbestilling);
+        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, brevbestilling);
         prosessinstans.setData(ProsessDataKey.MOTTAKER, mottaker.getRolle());
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, mottaker.getAktørId());
 
@@ -159,5 +159,4 @@ class OpprettJournalforBrevTest {
         verify(mockDokgenService).produserBrev(any(Aktoer.class), any(MangelbrevBrevbestilling.class));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
-
 }

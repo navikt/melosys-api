@@ -62,7 +62,7 @@ class DistribuerJournalpostTest {
         Behandling behandling = TestdataFactory.lagBehandling();
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setDataWithDefaultTyping(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling());
+        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling());
 
         assertThrows(FunksjonellException.class, () -> distribuerJournalpost.utfør(prosessinstans));
     }
@@ -74,7 +74,7 @@ class DistribuerJournalpostTest {
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, "123");
-        prosessinstans.setDataWithDefaultTyping(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling());
+        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling());
         assertThrows(FunksjonellException.class, () -> distribuerJournalpost.utfør(prosessinstans));
     }
 
@@ -130,7 +130,7 @@ class DistribuerJournalpostTest {
 
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, journalpostId);
-        prosessinstans.setDataWithDefaultTyping(ProsessDataKey.BREVBESTILLING, brevbestilling);
+        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, brevbestilling);
         prosessinstans.setData(ProsessDataKey.MOTTAKER, rolle);
 
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);

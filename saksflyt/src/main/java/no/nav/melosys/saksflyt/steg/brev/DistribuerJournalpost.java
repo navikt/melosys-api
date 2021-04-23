@@ -62,7 +62,7 @@ public class DistribuerJournalpost implements StegBehandler {
         }
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         String journalpostId = prosessinstans.getData(DISTRIBUERBAR_JOURNALPOST_ID);
-        var brevbestilling = prosessinstans.getDataWithDefaultTyping(BREVBESTILLING, DokgenBrevbestilling.class);
+        var brevbestilling = prosessinstans.getData(BREVBESTILLING, DokgenBrevbestilling.class);
         Aktoersroller mottaker = prosessinstans.getData(MOTTAKER, Aktoersroller.class);
         String orgnr = prosessinstans.getData(ORGNR, String.class, null);
 
