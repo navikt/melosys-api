@@ -53,7 +53,7 @@ public final class Query {
                 "fagsakId", saksnummer,
                 "fagsaksystem", Fagsystem.MELOSYS.getKode()
             ),
-            "foerste", 10,
+            "foerste", 50,
             "sluttpeker", sluttpeker
         );
     }
