@@ -70,7 +70,7 @@ public class OpprettJournalpostRequest {
                 opprettJournalpost.getKorrespondansepartNavn(),
                 opprettJournalpost.getKorrespondansepartIdType(),
                 opprettJournalpost.getKorrespondansepartLand()))
-            .bruker(bruker(opprettJournalpost.hentFnr()))
+            .bruker(bruker(opprettJournalpost.getBrukerId()))
             .tema(opprettJournalpost.getTema())
             .kanal(opprettJournalpost.getMottaksKanal())
             .eksternReferanseId(opprettJournalpost.getEksternReferanseId())
