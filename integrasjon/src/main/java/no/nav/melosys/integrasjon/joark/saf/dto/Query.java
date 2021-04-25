@@ -5,7 +5,8 @@ import java.util.Map;
 import no.nav.melosys.domain.Fagsystem;
 
 public final class Query {
-    public static final String hentJournalpostQuery = """
+    public static final String JOURNALPOST_ID = "journalpostId";
+    public static final String HENT_JOURNALPOST_QUERY = """
           query($journalpostId: String!) {
             query: journalpost(journalpostId: $journalpostId) {
               journalpostId
@@ -57,7 +58,7 @@ public final class Query {
         );
     }
 
-    public static final String dokumentoversiktQuery = """
+    public static final String DOKUMENTOVERSIKT_QUERY = """
         query($fagsak: FagsakInput!, $foerste: Int!, $etter: String) {
           query: dokumentoversiktFagsak(fagsak: $fagsak, foerste: $foerste, etter: $etter) {
             journalposter {

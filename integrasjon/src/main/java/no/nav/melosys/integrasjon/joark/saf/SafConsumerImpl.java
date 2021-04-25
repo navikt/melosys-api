@@ -22,6 +22,8 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import static java.util.Objects.requireNonNull;
+
 public class SafConsumerImpl implements SafConsumer {
     private static final String CALL_ID = "Nav-Callid";
     private static final String SAF_HENT_DOKUMENT_URL = "/rest/hentdokument/{journalpostId}/{dokumentInfoId}/{variantFormat}";
@@ -48,17 +50,17 @@ public class SafConsumerImpl implements SafConsumer {
     @Override
     public Journalpost hentJournalpost(String journalpostID) {
         GraphQLRequest request = new GraphQLRequest(Query.HENT_JOURNALPOST_QUERY, Map.of(Query.JOURNALPOST_ID, journalpostID));
-        HentJournalpostResponse response = webClient.post()
+        var response = webClient.post()
             .uri(SAF_GRAPHQL_URL)
             .bodyValue(request)
             .retrieve()
             .onStatus(HttpStatus::isError, this::håndterHttpFeil)
-            .bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentJournalpostResponse>>() {
-            })
+            .bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentJournalpostResponse>>() {})
             .map(res -> validerGraphQLResponse("henting av journalpost", res))
+            .map(HentJournalpostResponse::journalpost)
             .block();
 
-        return response.journalpost();
+        return requireNonNull(response);
     }
 
     @Override
@@ -84,14 +86,13 @@ public class SafConsumerImpl implements SafConsumer {
     }
 
     private HentDokumentoversiktResponse hentDokumentoversiktResponse(String saksnummer, String sluttpeker) {
-        GraphQLRequest request = new GraphQLRequest(Query.dokumentoversiktQuery, Query.dokumentoversiktVariabler(saksnummer, sluttpeker));
+        GraphQLRequest request = new GraphQLRequest(Query.DOKUMENTOVERSIKT_QUERY, Query.dokumentoversiktVariabler(saksnummer, sluttpeker));
         return webClient.post()
             .uri(SAF_GRAPHQL_URL)
             .bodyValue(request)
             .retrieve()
-            .onStatus(HttpStatus::isError, this::håndterFeil)
-            .bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentDokumentoversiktResponseWrapper>>() {
-            })
+            .onStatus(HttpStatus::isError, this::håndterHttpFeil)
+            .bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentDokumentoversiktResponseWrapper>>() {})
             .map(res -> validerGraphQLResponse("henting av dokumentoversikt", res))
             .map(HentDokumentoversiktResponseWrapper::hentDokumentoversiktResponse)
             .block();
