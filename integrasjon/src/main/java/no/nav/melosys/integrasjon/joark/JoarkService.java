@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import no.finn.unleash.Unleash;
 import no.nav.dok.tjenester.journalfoerinngaaende.Avsender;
 import no.nav.dok.tjenester.journalfoerinngaaende.Bruker;
 import no.nav.dok.tjenester.journalfoerinngaaende.Dokument;
@@ -22,6 +23,7 @@ import no.nav.melosys.integrasjon.joark.journalpostapi.dto.AvsenderMottaker;
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.FerdigstillJournalpostRequest;
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OppdaterJournalpostRequest;
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.OpprettJournalpostRequest;
+import no.nav.melosys.integrasjon.joark.saf.SafConsumer;
 import no.nav.tjeneste.virksomhet.journal.v3.*;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.Variantformater;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.DetaljertDokumentinformasjon;
@@ -43,14 +45,20 @@ public class JoarkService implements JoarkFasade {
     private final JournalConsumer journalConsumer;
     private final JournalfoerInngaaendeConsumer journalfoerInngaaendeConsumer;
     private final JournalpostapiConsumer journalpostapiConsumer;
+    private final SafConsumer safConsumer;
+    private final Unleash unleash;
+
+    private static final String SAF_FEATURE_TOGGLE_NAVN = "melosys.saf";
 
     @Autowired
     public JoarkService(JournalConsumer journal,
                         JournalfoerInngaaendeConsumer journalfoerInngaaendeConsumer,
-                        JournalpostapiConsumer journalpostapiConsumer) {
+                        JournalpostapiConsumer journalpostapiConsumer, SafConsumer safConsumer, Unleash unleash) {
         this.journalConsumer = journal;
         this.journalfoerInngaaendeConsumer = journalfoerInngaaendeConsumer;
         this.journalpostapiConsumer = journalpostapiConsumer;
+        this.safConsumer = safConsumer;
+        this.unleash = unleash;
     }
 
     @Override
@@ -61,6 +69,10 @@ public class JoarkService implements JoarkFasade {
 
     @Override
     public byte[] hentDokument(String journalPostID, String dokumentID) throws SikkerhetsbegrensningException, IkkeFunnetException {
+        if (unleash.isEnabled(SAF_FEATURE_TOGGLE_NAVN)) {
+            return safConsumer.hentDokument(journalPostID, dokumentID);
+        }
+
         HentDokumentRequest request = new HentDokumentRequest();
         request.setDokumentId(dokumentID);
         request.setJournalpostId(journalPostID);
@@ -82,7 +94,11 @@ public class JoarkService implements JoarkFasade {
 
     @Override
     public Journalpost hentJournalpost(String journalpostID) throws IntegrasjonException, FunksjonellException {
-        return hentInngåendeJournalpost(journalpostID);
+        if (unleash.isEnabled(SAF_FEATURE_TOGGLE_NAVN)) {
+            return safConsumer.hentJournalpost(journalpostID).tilDomene();
+        } else {
+            return hentInngåendeJournalpost(journalpostID);
+        }
     }
 
     private Journalpost hentInngåendeJournalpost(String journalpostID) throws IntegrasjonException,
@@ -153,10 +169,18 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public List<Journalpost> hentKjerneJournalpostListe(Long arkivSakID) throws IntegrasjonException, SikkerhetsbegrensningException {
-        Assert.notNull(arkivSakID, "HentKjerneJournalpostListe krever en arkivSakID.");
+    public List<Journalpost> hentKjerneJournalpostListe(HentDokumentoversiktRequest hentDokumentoversiktRequest) throws IntegrasjonException, SikkerhetsbegrensningException {
+
+        if (unleash.isEnabled(SAF_FEATURE_TOGGLE_NAVN)) {
+            return safConsumer.hentDokumentoversikt(hentDokumentoversiktRequest.saksnummer())
+                .stream()
+                .map(no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost::tilDomene)
+                .collect(Collectors.toList());
+        }
+
+        Assert.notNull(hentDokumentoversiktRequest.arkivsakID(), "HentKjerneJournalpostListe krever en arkivSakID.");
         HentKjerneJournalpostListeRequest hentKjerneJournalpostListeRequest = new HentKjerneJournalpostListeRequest();
-        hentKjerneJournalpostListeRequest.getArkivSakListe().add(lagArkivSak(arkivSakID, Fagsystem.GSAK_I_JOARK.getKode()));
+        hentKjerneJournalpostListeRequest.getArkivSakListe().add(lagArkivSak(hentDokumentoversiktRequest.arkivsakID(), Fagsystem.GSAK_I_JOARK.getKode()));
 
         HentKjerneJournalpostListeResponse hentKjerneJournalpostListeResponse;
         try {

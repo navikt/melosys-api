@@ -5,10 +5,12 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.dok.tjenester.journalfoerinngaaende.Bruker;
 import no.nav.dok.tjenester.journalfoerinngaaende.Dokument;
 import no.nav.dok.tjenester.journalfoerinngaaende.LogiskVedlegg;
 import no.nav.dok.tjenester.journalfoerinngaaende.*;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.DokumentVariant;
 import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
@@ -20,6 +22,7 @@ import no.nav.melosys.integrasjon.joark.journal.JournalConsumer;
 import no.nav.melosys.integrasjon.joark.journalfoerinngaaende.JournalfoerInngaaendeConsumer;
 import no.nav.melosys.integrasjon.joark.journalpostapi.JournalpostapiConsumer;
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.*;
+import no.nav.melosys.integrasjon.joark.saf.SafConsumer;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.Journalposttyper;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.ArkivSak;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.DetaljertDokumentinformasjon;
@@ -49,6 +52,11 @@ class JoarkServiceTest {
     private JournalfoerInngaaendeConsumer journalfoerInngaaendeConsumer;
     @Mock
     private JournalpostapiConsumer journalpostapiConsumer;
+    @Mock
+    private SafConsumer safConsumer;
+
+    private final FakeUnleash unleash = new FakeUnleash();
+
     @Captor
     private ArgumentCaptor<FerdigstillJournalpostRequest> ferdigstillJournalpostCaptor;
     @Captor
@@ -58,12 +66,14 @@ class JoarkServiceTest {
 
     @BeforeEach
     public void setUp() {
-        this.joarkService = new JoarkService(journalConsumer, journalfoerInngaaendeConsumer, journalpostapiConsumer);
+        this.joarkService = new JoarkService(journalConsumer, journalfoerInngaaendeConsumer, journalpostapiConsumer, safConsumer, unleash);
     }
 
     @Test
     void hentKjerneJournalpostListe() throws Exception {
-        Long arkivSakID = 1L;
+        final var fagsak = new Fagsak();
+        fagsak.setGsakSaksnummer(1L);
+        fagsak.setSaksnummer("MEL-111");
         HentKjerneJournalpostListeResponse response = new HentKjerneJournalpostListeResponse();
         no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.Journalpost journalpost = new no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.Journalpost();
         ArkivSak arkivSak = new ArkivSak();
@@ -89,7 +99,10 @@ class JoarkServiceTest {
         response.getJournalpostListe().add(journalpost);
         when(journalConsumer.hentKjerneJournalpostListe(any())).thenReturn(response);
 
-        List<Journalpost> journalpostListe = joarkService.hentKjerneJournalpostListe(arkivSakID);
+        List<Journalpost> journalpostListe = joarkService.hentKjerneJournalpostListe(
+            new HentDokumentoversiktRequest(fagsak.getGsakSaksnummer(), fagsak.getSaksnummer())
+        );
+
         assertThat(journalpostListe.size()).isEqualTo(1);
 
         Journalpost journalpost1 = journalpostListe.get(0);

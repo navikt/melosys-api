@@ -27,7 +27,7 @@ public interface JoarkFasade {
     /**
      * Henter en liste med journalposter knyttet til en sak.
      */
-    List<Journalpost> hentKjerneJournalpostListe(Long gsakSakID) throws IntegrasjonException, SikkerhetsbegrensningException;
+    List<Journalpost> hentKjerneJournalpostListe(HentDokumentoversiktRequest hentDokumentoversiktRequest) throws IntegrasjonException, SikkerhetsbegrensningException;
 
     /**
      * Oppretter en journalpost  i Joark

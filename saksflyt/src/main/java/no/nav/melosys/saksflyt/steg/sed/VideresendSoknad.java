@@ -1,6 +1,9 @@
 package no.nav.melosys.saksflyt.steg.sed;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.Behandling;
@@ -16,7 +19,9 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -83,8 +88,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
             throw new FunksjonellException("Kan ikke videresende søknad uten vedlegg!");
         }
 
-        return eessiService.lagEessiVedlegg(prosessinstans.getBehandling().getFagsak().getGsakSaksnummer(),
-            vedleggReferanser);
+        return eessiService.lagEessiVedlegg(prosessinstans.getBehandling().getFagsak(), vedleggReferanser);
     }
 
     @Override

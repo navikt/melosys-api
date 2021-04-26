@@ -96,7 +96,7 @@ class VideresendSoknadTest {
             journalpost.getHoveddokument().getDokumentId());
         prosessinstans.setData(ProsessDataKey.VEDLEGG_SED, Set.of(dokumentReferanse));
         final Vedlegg forventetVedlegg = new Vedlegg(vedlegg, "tittel");
-        when(eessiService.lagEessiVedlegg(anyLong(), anyCollection())).thenReturn(Set.of(forventetVedlegg));
+        when(eessiService.lagEessiVedlegg(any(), anyCollection())).thenReturn(Set.of(forventetVedlegg));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         videresendSoknad.utfør(prosessinstans);

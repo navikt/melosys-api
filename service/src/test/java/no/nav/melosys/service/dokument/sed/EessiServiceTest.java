@@ -121,10 +121,13 @@ class EessiServiceTest {
         final Journalpost journalpost = lagJournalpost(List.of(lagArkivDokument("1"), lagArkivDokument("2")));
         final String journalpostID = journalpost.getJournalpostId();
         DokumentReferanse dokumentReferanse = new DokumentReferanse(journalpostID, "2");
-        when(joarkFasade.hentKjerneJournalpostListe(anyLong())).thenReturn(List.of(journalpost));
+        when(joarkFasade.hentKjerneJournalpostListe(any())).thenReturn(List.of(journalpost));
         when(joarkFasade.hentDokument(anyString(), anyString())).thenReturn(new byte[8]);
+        Fagsak fagsak = new Fagsak();
+        fagsak.setGsakSaksnummer(1233321L);
+        fagsak.setSaksnummer("MEL-0");
 
-        Collection<Vedlegg> vedlegg = eessiService.lagEessiVedlegg(12L, Set.of(dokumentReferanse));
+        Collection<Vedlegg> vedlegg = eessiService.lagEessiVedlegg(fagsak, Set.of(dokumentReferanse));
 
         assertThat(vedlegg.iterator().next().getInnhold()).hasSize(8);
         assertThat(vedlegg.iterator().next().getTittel()).isEqualTo("Tittel 2");
