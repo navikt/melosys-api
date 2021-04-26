@@ -6,9 +6,7 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Kontrollresultat;
-import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
@@ -32,7 +30,6 @@ public class KontrollresultatService {
     private final BehandlingsresultatService behandlingsresultatService;
     private final UfmKontrollService ufmKontrollService;
     private final BehandlingService behandlingService;
-    private final OppgaveService oppgaveService;
 
     @Autowired
     public KontrollresultatService(KontrollresultatRepository kontrollresultatRepository,
@@ -44,7 +41,6 @@ public class KontrollresultatService {
         this.behandlingsresultatService = behandlingsresultatService;
         this.ufmKontrollService = ufmKontrollService;
         this.behandlingService = behandlingService;
-        this.oppgaveService = oppgaveService;
     }
 
     @Transactional(rollbackFor = MelosysException.class)
@@ -54,7 +50,6 @@ public class KontrollresultatService {
 
         log.info("Treff ved validering av periode for behandling {}: {}", behandlingId, registrerteTreff);
         lagreKontrollresultater(behandlingId, registrerteTreff);
-        lagEventuelleOppgaver(behandlingId, registrerteTreff);
     }
 
     private void lagreKontrollresultater(Long behandlingID, List<Kontroll_begrunnelser> kontrollBegrunnelser) throws IkkeFunnetException {
@@ -68,12 +63,6 @@ public class KontrollresultatService {
             .collect(Collectors.toList());
 
         kontrollresultatRepository.saveAll(kontrollresultater);
-    }
-
-    private void lagEventuelleOppgaver(long behandlingId, List<Kontroll_begrunnelser> registrerteTreff) throws FunksjonellException {
-        if (registrerteTreff.contains(Kontroll_begrunnelser.FEIL_I_PERIODEN)) {
-            // TODO: Saken bør deretter gå til manuell behandling hos NAV Medlemskap og avgift slik at saksbehandler selv kan avklare hva som er korrekt periode og følge opp saken
-        }
     }
 
     private Kontrollresultat lagKontrollresultat(Behandlingsresultat behandlingsresultat, Kontroll_begrunnelser kontrollBegrunnelse) {
