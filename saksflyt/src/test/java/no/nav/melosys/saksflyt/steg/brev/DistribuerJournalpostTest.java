@@ -3,11 +3,10 @@ package no.nav.melosys.saksflyt.steg.brev;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
+import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -126,7 +125,7 @@ class DistribuerJournalpostTest {
     private Prosessinstans setupHappypath(String journalpostId, Aktoersroller rolle) throws IkkeFunnetException {
         Behandling behandling = TestdataFactory.lagBehandling();
         Prosessinstans prosessinstans = new Prosessinstans();
-        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
+        DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
             .build();
 
         prosessinstans.setBehandling(behandling);
