@@ -38,7 +38,7 @@ public interface JoarkFasade {
      * Oppdaterer en journalpost og forsøker å ferdigstille hvis forsøkFerdigstill er satt
      */
     void oppdaterJournalpost(String journalpostID, JournalpostOppdatering journalpostOppdatering, boolean forsøkFerdigstill)
-        throws SikkerhetsbegrensningException, TekniskException;
+        throws FunksjonellException, TekniskException;
 
     LocalDate hentMottaksDatoForJournalpost(String journalpostID) throws FunksjonellException, IntegrasjonException;
 }

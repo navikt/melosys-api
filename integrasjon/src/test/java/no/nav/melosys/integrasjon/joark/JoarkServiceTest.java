@@ -66,6 +66,7 @@ class JoarkServiceTest {
 
     @BeforeEach
     public void setUp() {
+        unleash.disableAll();
         this.joarkService = new JoarkService(journalConsumer, journalfoerInngaaendeConsumer, journalpostapiConsumer, safConsumer, unleash);
     }
 
@@ -134,6 +135,7 @@ class JoarkServiceTest {
             .medLogiskeVedleggTitler(Arrays.asList("dok1", "dok2")).build();
 
         GetJournalpostResponse eksisterendeJournalpost = new GetJournalpostResponse();
+        eksisterendeJournalpost.setForsendelseMottatt(new Date());
         eksisterendeJournalpost.getDokumentListe().add(
             new Dokument().withDokumentId("dokID").withLogiskVedleggListe(
                 List.of(new LogiskVedlegg().withLogiskVedleggTittel("tittel1").withLogiskVedleggId("id1"),
@@ -185,7 +187,9 @@ class JoarkServiceTest {
             .medAvsenderID("12").medAvsenderNavn("321").medAvsenderType(Avsendertyper.PERSON).medTittel(tittel).medFysiskeVedlegg(null)
             .medLogiskeVedleggTitler(null).build();
 
-        when(journalfoerInngaaendeConsumer.hentJournalpost(anyString())).thenReturn(new GetJournalpostResponse());
+        when(journalfoerInngaaendeConsumer.hentJournalpost(anyString())).thenReturn(
+            new GetJournalpostResponse().withDokumentListe(List.of(new Dokument().withLogiskVedleggListe(List.of()))).withForsendelseMottatt(new Date())
+        );
         joarkService.oppdaterJournalpost("123", journalpostOppdatering, false);
 
         verify(journalpostapiConsumer, never()).fjernLogiskeVedlegg(any(), any());
@@ -218,7 +222,9 @@ class JoarkServiceTest {
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medArkivSakID(1L)
             .medBrukerID("12345").build();
 
-        when(journalfoerInngaaendeConsumer.hentJournalpost(anyString())).thenReturn(new GetJournalpostResponse());
+        when(journalfoerInngaaendeConsumer.hentJournalpost(anyString())).thenReturn(
+            new GetJournalpostResponse().withDokumentListe(List.of(new Dokument().withLogiskVedleggListe(List.of()))).withForsendelseMottatt(new Date())
+        );
         joarkService.oppdaterJournalpost("123", journalpostOppdatering, true);
 
         verify(journalpostapiConsumer, never()).fjernLogiskeVedlegg(any(), any());

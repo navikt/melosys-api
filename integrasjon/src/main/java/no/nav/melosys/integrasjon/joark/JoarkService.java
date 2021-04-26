@@ -164,7 +164,9 @@ public class JoarkService implements JoarkFasade {
         arkivDokument.setDokumentId(dokument.getDokumentId());
         arkivDokument.setTittel(dokument.getTittel());
         arkivDokument.setNavSkjemaID(dokument.getNavSkjemaId());
-        dokument.getLogiskVedleggListe().forEach(l -> arkivDokument.getLogiskeVedlegg().add(new LogiskVedlegg(l.getLogiskVedleggTittel())));
+        dokument.getLogiskVedleggListe().forEach(
+            l -> arkivDokument.getLogiskeVedlegg().add(new LogiskVedlegg(l.getLogiskVedleggId(), l.getLogiskVedleggTittel()))
+        );
         return arkivDokument;
     }
 
@@ -236,7 +238,7 @@ public class JoarkService implements JoarkFasade {
         arkivDokument.setTittel(detaljertDokumentinformasjon.getTittel());
 
         detaljertDokumentinformasjon.getSkannetInnholdListe()
-            .forEach(vedlegg -> arkivDokument.getLogiskeVedlegg().add(new LogiskVedlegg(vedlegg.getVedleggInnhold())));
+            .forEach(vedlegg -> arkivDokument.getLogiskeVedlegg().add(new LogiskVedlegg(null, vedlegg.getVedleggInnhold())));
         return arkivDokument;
     }
 
@@ -253,7 +255,7 @@ public class JoarkService implements JoarkFasade {
 
     @Override
     public void oppdaterJournalpost(String journalpostID, JournalpostOppdatering journalpostOppdatering, boolean forsøkFerdigstill)
-        throws SikkerhetsbegrensningException, TekniskException {
+        throws FunksjonellException, TekniskException {
 
         fjernEksisterendeLogiskeVedleggPåHovddokument(journalpostID);
 
@@ -296,12 +298,12 @@ public class JoarkService implements JoarkFasade {
         }
     }
 
-    private void fjernEksisterendeLogiskeVedleggPåHovddokument(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException {
-        GetJournalpostResponse journalpost = journalfoerInngaaendeConsumer.hentJournalpost(journalpostID);
-        if (!journalpost.getDokumentListe().isEmpty()) {
-            var hoveddokument = journalpost.getDokumentListe().get(0);
-            for (var logiskVedlegg : hoveddokument.getLogiskVedleggListe()) {
-                journalpostapiConsumer.fjernLogiskeVedlegg(hoveddokument.getDokumentId(), logiskVedlegg.getLogiskVedleggId());
+    private void fjernEksisterendeLogiskeVedleggPåHovddokument(String journalpostID) throws FunksjonellException, IntegrasjonException {
+        var journalpost = hentJournalpost(journalpostID);
+        if (journalpost.getHoveddokument() != null) {
+            var hoveddokument = journalpost.getHoveddokument();
+            for (var logiskVedlegg : hoveddokument.getLogiskeVedlegg()) {
+                journalpostapiConsumer.fjernLogiskeVedlegg(hoveddokument.getDokumentId(), logiskVedlegg.getLogiskVedleggID());
             }
         }
     }
