@@ -12,9 +12,9 @@ import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +27,7 @@ public class SedSomBrevService {
 
     public SedSomBrevService(@Qualifier("system") EessiService eessiService,
                              JoarkFasade joarkFasade,
-                             PersondataFasade persondataFasade,
+                             @Qualifier("system") PersondataFasade persondataFasade,
                              UtenlandskMyndighetService utenlandskMyndighetService) {
         this.eessiService = eessiService;
         this.joarkFasade = joarkFasade;
