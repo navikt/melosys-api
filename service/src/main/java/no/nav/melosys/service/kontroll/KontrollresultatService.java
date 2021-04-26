@@ -15,7 +15,6 @@ import no.nav.melosys.repository.KontrollresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.ufm.UfmKontrollService;
-import no.nav.melosys.service.oppgave.OppgaveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +34,7 @@ public class KontrollresultatService {
     public KontrollresultatService(KontrollresultatRepository kontrollresultatRepository,
                                    BehandlingsresultatService behandlingsresultatService,
                                    UfmKontrollService ufmKontrollService,
-                                   BehandlingService behandlingService,
-                                   OppgaveService oppgaveService) {
+                                   BehandlingService behandlingService) {
         this.kontrollresultatRepository = kontrollresultatRepository;
         this.behandlingsresultatService = behandlingsresultatService;
         this.ufmKontrollService = ufmKontrollService;
