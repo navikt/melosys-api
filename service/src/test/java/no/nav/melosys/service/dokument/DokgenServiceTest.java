@@ -18,6 +18,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.person.Informasjonsbehov;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
@@ -33,6 +34,8 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -70,6 +73,9 @@ class DokgenServiceTest {
     private BrevmottakerService mockBrevMottakerService;
     @Mock
     private ProsessinstansService mockProsessinstansService;
+
+    @Captor
+    private ArgumentCaptor<DokgenBrevbestilling> brevbestillingCaptor;
 
     private final FakeUnleash unleash = new FakeUnleash();
 
@@ -252,8 +258,15 @@ class DokgenServiceTest {
 
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
 
-        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Aktoer.class), any(DokgenBrevbestilling.class));
+        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Aktoer.class), brevbestillingCaptor.capture());
         verify(mockBrevMottakerService).avklarMottakere(any(), any(), any(), eq(false), eq(false));
+
+        MangelbrevBrevbestilling brevbestilling = (MangelbrevBrevbestilling) brevbestillingCaptor.getValue();
+        assertThat(brevbestilling).isNotNull();
+        assertThat(brevbestilling).extracting(
+            DokgenBrevbestilling::getProduserbartdokument,
+            DokgenBrevbestilling::getBehandlingId
+        ).containsExactly(MANGELBREV_BRUKER, 123L);
     }
 
     @Test
@@ -268,8 +281,15 @@ class DokgenServiceTest {
 
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
 
-        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Aktoer.class), any(DokgenBrevbestilling.class));
+        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Aktoer.class), brevbestillingCaptor.capture());
         verifyNoInteractions(mockBrevMottakerService);
+
+        DokgenBrevbestilling brevbestilling = brevbestillingCaptor.getValue();
+        assertThat(brevbestilling).isNotNull();
+        assertThat(brevbestilling).extracting(
+            DokgenBrevbestilling::getProduserbartdokument,
+            DokgenBrevbestilling::getBehandlingId
+        ).containsExactly(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123L);
     }
 
     @Test
@@ -278,6 +298,7 @@ class DokgenServiceTest {
 
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
             .medProduserbardokument(MANGELBREV_BRUKER)
+            .medManglerFritekst("Mangler")
             .medMottaker(Aktoersroller.ARBEIDSGIVER)
             .medOrgNr("987654321")
             .medKopiMottakere(List.of(new KopiMottaker(Aktoersroller.BRUKER, null, "1223")))
@@ -285,8 +306,17 @@ class DokgenServiceTest {
 
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
 
-        verify(mockProsessinstansService, times(2)).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Aktoer.class), any(MangelbrevBrevbestilling.class));
+        verify(mockProsessinstansService, times(2)).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class),
+            any(Aktoer.class), brevbestillingCaptor.capture());
         verifyNoInteractions(mockBrevMottakerService);
+
+        MangelbrevBrevbestilling brevbestilling = (MangelbrevBrevbestilling) brevbestillingCaptor.getValue();
+        assertThat(brevbestilling).isNotNull();
+        assertThat(brevbestilling).extracting(
+            MangelbrevBrevbestilling::getProduserbartdokument,
+            MangelbrevBrevbestilling::getBehandlingId,
+            MangelbrevBrevbestilling::getManglerInfoFritekst
+        ).containsExactly(MANGELBREV_BRUKER, 123L, "Mangler");
     }
 
     @Test
