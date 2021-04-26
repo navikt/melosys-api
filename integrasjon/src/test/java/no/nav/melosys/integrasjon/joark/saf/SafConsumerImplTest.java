@@ -1,13 +1,28 @@
 package no.nav.melosys.integrasjon.joark.saf;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.integrasjon.felles.graphql.GraphQLResponse;
+import no.nav.melosys.integrasjon.joark.saf.dto.HentDokumentoversiktResponse;
+import no.nav.melosys.integrasjon.joark.saf.dto.HentDokumentoversiktResponseWrapper;
+import no.nav.melosys.integrasjon.joark.saf.dto.SideInfo;
+import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.*;
+import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.junit.jupiter.api.BeforeAll;
+import okhttp3.mockwebserver.RecordedRequest;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
@@ -68,18 +83,16 @@ class SafConsumerImplTest {
         }
         """;
 
+    private static final ObjectWriter OBJECT_WRITER = new ObjectMapper().writer();
     private static MockWebServer mockServer;
 
     private SafConsumer safConsumer;
 
-    @BeforeAll
-    static void setupServer() throws IOException {
+    @BeforeEach
+    void setup() throws IOException {
         mockServer = new MockWebServer();
         mockServer.start();
-    }
 
-    @BeforeEach
-    void setup() {
         safConsumer = new SafConsumerImpl(WebClient.builder().baseUrl("http://localhost:" + mockServer.getPort()).build());
     }
 
@@ -149,5 +162,89 @@ class SafConsumerImplTest {
         assertThatThrownBy(() -> safConsumer.hentJournalpost(JOURNALPOST_ID))
             .hasRootCauseInstanceOf(SikkerhetsbegrensningException.class)
             .hasMessageContaining("no valid token");
+    }
+
+    @Test
+    void hentDokumentoversikt_ingenPaginering_forventAntallJournalposterOgKall() {
+        mockServer.enqueue(responseAv("peker", false));
+
+        Collection<Journalpost> journalposter = safConsumer.hentDokumentoversikt("MEL-1");
+        assertThat(journalposter).hasSize(10);
+        assertThat(mockServer.getRequestCount()).isEqualTo(1);
+    }
+
+    @Test
+    void hentDokumentoversikt_medPaginering_forventAntallJournalposterOgKall() {
+        mockServer.setDispatcher(
+            new Dispatcher() {
+                @NotNull
+                @Override
+                public MockResponse dispatch(@NotNull RecordedRequest req) {
+                    if (harPeker(req, "p1")) {
+                        return responseAv("p2", true);
+                    }
+                    if (harPeker(req, "p2")) {
+                        return responseAv("p3", true);
+                    }
+                    if (harPeker(req, "p3")) {
+                        return responseAv("p4", false);
+                    }
+                    return responseAv("p1", true);
+                }
+            }
+        );
+
+        Collection<Journalpost> journalposter = safConsumer.hentDokumentoversikt("MEL-1");
+        assertThat(journalposter).hasSize(40);
+        assertThat(mockServer.getRequestCount()).isEqualTo(4);
+    }
+
+    private static boolean harPeker(RecordedRequest req, String peker) {
+        try {
+            return req.getBody().peek().readUtf8().contains(peker);
+        } catch (IOException e) {
+            throw new RuntimeException("Kunne ikke lese request");
+        }
+    }
+
+    private static MockResponse responseAv(String nestePeker, boolean finnesNeste) {
+        try {
+            return new MockResponse()
+                .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setResponseCode(200)
+                .setBody(OBJECT_WRITER.writeValueAsString(lagHentDokumentoversiktResponse(nestePeker, finnesNeste)));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Kunne ikke serialisere response");
+        }
+    }
+
+    private static GraphQLResponse<HentDokumentoversiktResponseWrapper> lagHentDokumentoversiktResponse(String peker, boolean finnesNeste) {
+        return new GraphQLResponse<>(
+            new HentDokumentoversiktResponseWrapper(
+                new HentDokumentoversiktResponse(
+                    lagJournalposter(10),
+                    new SideInfo(peker, finnesNeste))
+            ), Collections.emptyList()
+        );
+    }
+
+    private static List<Journalpost> lagJournalposter(int antall) {
+        return Stream.generate(SafConsumerImplTest::lagJournalpost).limit(antall).collect(Collectors.toList());
+    }
+
+    private static Journalpost lagJournalpost() {
+        return new Journalpost(
+            "id",
+            "tittel",
+            Journalstatus.JOURNALFOERT,
+            "MED",
+            Journalposttype.I,
+            new Sak("123"),
+            new Bruker("123", Brukertype.FNR),
+            new AvsenderMottaker("123", AvsenderMottakerType.FNR, "navn"),
+            "SED",
+            Collections.emptyList(),
+            Collections.emptyList()
+        );
     }
 }
