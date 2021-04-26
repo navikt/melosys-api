@@ -59,6 +59,12 @@ public class RegisteropplysningerRequest {
         return Objects.requireNonNullElse(informasjonsbehov, Informasjonsbehov.STANDARD);
     }
 
+    public RegisteropplysningerRequest kopiUtenPeriodeOgOpplysningstyperSomKreverPeriode() {
+        Set<SaksopplysningType> opplysningstyper = getOpplysningstyper().stream().collect(Collectors.toSet());
+        opplysningstyper.removeAll(SaksopplysningType.KREVER_PERIODE);
+        return new RegisteropplysningerRequest(getBehandlingID(), opplysningstyper, getFnr(), null, null, getInformasjonsbehov());
+    }
+
     public static class RegisteropplysningerRequestBuilder {
         private Long behandlingID;
         private SaksopplysningTyper saksopplysningTyper = new SaksopplysningTyper(new HashSet<>());
@@ -114,15 +120,15 @@ public class RegisteropplysningerRequest {
                 throw new TekniskException("Krever minst én saksopplysningstype for å hente registeropplysninger");
             }
 
-            if (StringUtils.isEmpty(fnr) && !Collections.disjoint(KREVER_FNR, saksopplysningTyper.getOpplysningstyper())) {
-                String påkrevdeSaksopplysningstyper = intersect(KREVER_FNR, saksopplysningTyper.getOpplysningstyper())
+            if (StringUtils.isEmpty(fnr) && !Collections.disjoint(SaksopplysningType.KREVER_FNR, saksopplysningTyper.getOpplysningstyper())) {
+                String påkrevdeSaksopplysningstyper = intersect(SaksopplysningType.KREVER_FNR, saksopplysningTyper.getOpplysningstyper())
                     .stream().map(SaksopplysningType::getBeskrivelse).collect(Collectors.joining(", "));
 
                 throw new TekniskException(String.format("Krever at fnr er satt ved henting av %s", påkrevdeSaksopplysningstyper));
             }
 
-            if (PeriodeKontroller.feilIPeriode(fom, tom) && !Collections.disjoint(KREVER_PERIODE, saksopplysningTyper.getOpplysningstyper())) {
-                String påkrevdeSaksopplysningstyper = intersect(KREVER_PERIODE, saksopplysningTyper.getOpplysningstyper())
+            if (PeriodeKontroller.feilIPeriode(fom, tom) && !Collections.disjoint(SaksopplysningType.KREVER_PERIODE, saksopplysningTyper.getOpplysningstyper())) {
+                String påkrevdeSaksopplysningstyper = intersect(SaksopplysningType.KREVER_PERIODE, saksopplysningTyper.getOpplysningstyper())
                     .stream().map(SaksopplysningType::getBeskrivelse).collect(Collectors.joining(", "));
 
                 throw new TekniskException(String.format("Feil i periode: %s krever en gyldig periode", påkrevdeSaksopplysningstyper));
@@ -135,24 +141,6 @@ public class RegisteropplysningerRequest {
                 .filter(right::contains)
                 .collect(Collectors.toSet());
         }
-
-        private static final Set<SaksopplysningType> KREVER_FNR = Set.of(
-            SaksopplysningType.ARBFORH,
-            SaksopplysningType.INNTK,
-            SaksopplysningType.MEDL,
-            SaksopplysningType.PERSHIST,
-            SaksopplysningType.PERSOPL,
-            SaksopplysningType.SOB_SAK,
-            SaksopplysningType.UTBETAL
-        );
-
-        private static final Set<SaksopplysningType> KREVER_PERIODE = Set.of(
-            SaksopplysningType.ARBFORH,
-            SaksopplysningType.INNTK,
-            SaksopplysningType.MEDL,
-            SaksopplysningType.PERSHIST,
-            SaksopplysningType.UTBETAL
-        );
     }
 
     public static class SaksopplysningTyper {
