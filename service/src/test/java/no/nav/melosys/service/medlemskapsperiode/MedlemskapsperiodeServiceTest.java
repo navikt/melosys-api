@@ -78,7 +78,7 @@ class MedlemskapsperiodeServiceTest {
         verify(medlemskapsperiodeRepository).save(medlemskapsperiodeCaptor.capture());
         assertThat(medlemskapsperiodeCaptor.getValue()).isNotNull()
             .extracting(Medlemskapsperiode::getArbeidsland, Medlemskapsperiode::getBestemmelse,
-                Medlemskapsperiode::getInnvilgelsesresultat, Medlemskapsperiode::getTrygdedekning, Medlemskapsperiode::getMedlemskapstype)
+                Medlemskapsperiode::getInnvilgelsesresultat, Medlemskapsperiode::getDekning, Medlemskapsperiode::getMedlemskapstype)
             .containsExactly(eksisterende.getArbeidsland(), eksisterende.getBestemmelse(),
                 InnvilgelsesResultat.AVSLAATT, Trygdedekninger.HELSEDEL, eksisterende.getMedlemskapstype());
     }
@@ -96,7 +96,7 @@ class MedlemskapsperiodeServiceTest {
         verify(medlemskapsperiodeRepository).save(eq(medlemskapsperiode));
         assertThat(medlemskapsperiode)
             .extracting(Medlemskapsperiode::getFom, Medlemskapsperiode::getTom,
-                Medlemskapsperiode::getInnvilgelsesresultat, Medlemskapsperiode::getTrygdedekning)
+                Medlemskapsperiode::getInnvilgelsesresultat, Medlemskapsperiode::getDekning)
             .containsExactly(nå, nå, InnvilgelsesResultat.AVSLAATT, Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER);
     }
 

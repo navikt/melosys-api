@@ -197,7 +197,7 @@ class MedlRestServiceTest {
 
         Medlemskapsperiode medlemskapsperiode = lagMedlemskapsPeriode();
 
-        medlRestService.opprettPeriodeEndeligFtrl(FNR, medlemskapsperiode);
+        medlRestService.opprettPeriodeEndelig(FNR, medlemskapsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
 
         ArgumentCaptor<MedlemskapsunntakForPost> captor = ArgumentCaptor.forClass(MedlemskapsunntakForPost.class);
 

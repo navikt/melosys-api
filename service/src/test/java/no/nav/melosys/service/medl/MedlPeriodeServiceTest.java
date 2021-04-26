@@ -7,10 +7,7 @@ import java.util.Set;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlRestService;
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
@@ -89,7 +86,7 @@ public class MedlPeriodeServiceTest {
     }
 
     @Test
-    public void opprettPeriodeEndelig() throws FunksjonellException, TekniskException {
+    public void opprettPeriodeEndelig() throws MelosysException, TekniskException {
         medlPeriodeService.opprettPeriodeEndelig(new Lovvalgsperiode(), 1L, true);
 
         verify(medlRestService).opprettPeriodeEndelig(eq(FNR), any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
@@ -97,10 +94,10 @@ public class MedlPeriodeServiceTest {
     }
 
     @Test
-    public void opprettPeriodeEndeligFtrl() throws FunksjonellException, TekniskException {
+    public void opprettPeriodeEndeligFtrl() throws Exception {
         medlPeriodeService.opprettPeriodeEndeligFtrl(1L, new Medlemskapsperiode());
 
-        verify(medlRestService).opprettPeriodeEndeligFtrl(eq(FNR), any(Medlemskapsperiode.class));
+        verify(medlRestService).opprettPeriodeEndelig(eq(FNR), any(Medlemskapsperiode.class), any(KildedokumenttypeMedl.class));
     }
 
     @Test

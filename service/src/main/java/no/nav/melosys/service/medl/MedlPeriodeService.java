@@ -72,13 +72,13 @@ public class MedlPeriodeService {
         lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandlingID);
     }
 
-    public Long opprettPeriodeEndeligFtrl(long behandlingId, Medlemskapsperiode medlemskapsperiode) throws IkkeFunnetException {
+    public Long opprettPeriodeEndeligFtrl(long behandlingId, Medlemskapsperiode medlemskapsperiode) throws FunksjonellException {
         String fnr = hentFnr(behandlingId);
         log.info("Oppretter endelig medlemskapsperiode i MEDL for behandling {}", behandlingId);
-        return medlRestService.opprettPeriodeEndeligFtrl(fnr, medlemskapsperiode);
+        return medlRestService.opprettPeriodeEndelig(fnr, medlemskapsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
     }
 
-    public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, boolean erSed) throws FunksjonellException, TekniskException {
+    public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, boolean erSed) throws TekniskException {
         log.info("Oppdaterer MEDL-periode {} til status endelig", lovvalgsperiode.getMedlPeriodeID());
         medlRestService.oppdaterPeriodeEndelig(lovvalgsperiode, hentKildedokumenttype(erSed));
     }
