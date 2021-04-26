@@ -5,6 +5,7 @@ import java.util.Map;
 import no.nav.melosys.domain.Fagsystem;
 
 public final class Query {
+    private static final int HENT_ANTALL_JOURNALPOSTER = 50;
     public static final String JOURNALPOST_ID = "journalpostId";
     public static final String HENT_JOURNALPOST_QUERY = """
           query($journalpostId: String!) {
@@ -53,7 +54,7 @@ public final class Query {
                 "fagsakId", saksnummer,
                 "fagsaksystem", Fagsystem.MELOSYS.getKode()
             ),
-            "foerste", 50,
+            "foerste", HENT_ANTALL_JOURNALPOSTER,
             "sluttpeker", sluttpeker
         );
     }

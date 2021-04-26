@@ -50,7 +50,7 @@ public class SafConsumerImpl implements SafConsumer {
     @Override
     public Journalpost hentJournalpost(String journalpostID) {
         GraphQLRequest request = new GraphQLRequest(Query.HENT_JOURNALPOST_QUERY, Map.of(Query.JOURNALPOST_ID, journalpostID));
-        var response = webClient.post()
+        var journalpost = webClient.post()
             .uri(SAF_GRAPHQL_URL)
             .bodyValue(request)
             .retrieve()
@@ -60,7 +60,7 @@ public class SafConsumerImpl implements SafConsumer {
             .map(HentJournalpostResponse::journalpost)
             .block();
 
-        return requireNonNull(response);
+        return requireNonNull(journalpost);
     }
 
     @Override
