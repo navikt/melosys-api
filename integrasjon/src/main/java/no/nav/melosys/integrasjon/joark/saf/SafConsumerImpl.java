@@ -26,8 +26,8 @@ import static java.util.Objects.requireNonNull;
 
 public class SafConsumerImpl implements SafConsumer {
     private static final String CALL_ID = "Nav-Callid";
-    private static final String SAF_HENT_DOKUMENT_URL = "/rest/hentdokument/{journalpostId}/{dokumentInfoId}/{variantFormat}";
-    private static final String SAF_GRAPHQL_URL = "/graphql";
+    private static final String HENT_DOKUMENT_ROOT = "/rest/hentdokument/{journalpostId}/{dokumentInfoId}/{variantFormat}";
+    private static final String GRAPHQL_ROOT = "/graphql";
 
     private final WebClient webClient;
 
@@ -38,7 +38,7 @@ public class SafConsumerImpl implements SafConsumer {
     @Override
     public byte[] hentDokument(String journalpostID, String dokumentID) {
         return webClient.get()
-            .uri(SAF_HENT_DOKUMENT_URL, journalpostID, dokumentID, Variantformat.ARKIV)
+            .uri(HENT_DOKUMENT_ROOT, journalpostID, dokumentID, Variantformat.ARKIV)
             .header(CALL_ID, getCallID())
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_PDF_VALUE)
             .retrieve()
@@ -51,7 +51,7 @@ public class SafConsumerImpl implements SafConsumer {
     public Journalpost hentJournalpost(String journalpostID) {
         GraphQLRequest request = new GraphQLRequest(Query.HENT_JOURNALPOST_QUERY, Map.of(Query.JOURNALPOST_ID, journalpostID));
         var journalpost = webClient.post()
-            .uri(SAF_GRAPHQL_URL)
+            .uri(GRAPHQL_ROOT)
             .bodyValue(request)
             .retrieve()
             .onStatus(HttpStatus::isError, this::håndterHttpFeil)
@@ -88,7 +88,7 @@ public class SafConsumerImpl implements SafConsumer {
     private HentDokumentoversiktResponse hentDokumentoversiktResponse(String saksnummer, String sluttpeker) {
         GraphQLRequest request = new GraphQLRequest(Query.DOKUMENTOVERSIKT_QUERY, Query.dokumentoversiktVariabler(saksnummer, sluttpeker));
         return webClient.post()
-            .uri(SAF_GRAPHQL_URL)
+            .uri(GRAPHQL_ROOT)
             .bodyValue(request)
             .retrieve()
             .onStatus(HttpStatus::isError, this::håndterHttpFeil)
