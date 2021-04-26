@@ -44,8 +44,6 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
     @Override
     @SuppressWarnings("unchecked")
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
-
-        boolean medDokumentkategori = false;
         String journalpostID = prosessinstans.getData(JOURNALPOST_ID);
 
         Long arkivSakID;
