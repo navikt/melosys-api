@@ -35,21 +35,11 @@ public enum SaksopplysningType implements Kodeverk {
     }
 
     public static final Set<SaksopplysningType> KREVER_FNR = Set.of(
-        SaksopplysningType.ARBFORH,
-        SaksopplysningType.INNTK,
-        SaksopplysningType.MEDL,
-        SaksopplysningType.PERSHIST,
-        SaksopplysningType.PERSOPL,
-        SaksopplysningType.SOB_SAK,
-        SaksopplysningType.UTBETAL
+        ARBFORH, INNTK, MEDL, PERSHIST, PERSOPL, SOB_SAK, UTBETAL
     );
 
     public static final Set<SaksopplysningType> KREVER_PERIODE = Set.of(
-        SaksopplysningType.ARBFORH,
-        SaksopplysningType.INNTK,
-        SaksopplysningType.MEDL,
-        SaksopplysningType.PERSHIST,
-        SaksopplysningType.UTBETAL
+        ARBFORH, INNTK, MEDL, PERSHIST, UTBETAL
     );
 }
 

@@ -94,6 +94,7 @@ public class AnmodningsperiodeServiceTest {
 
         AnmodningsperiodeSvar svar = new AnmodningsperiodeSvar();
         svar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
+        svar.setAnmodningsperiode(anmodningsperiode);
         when(anmodningsperiodeRepository.findById(anmodningsperiodeID)).thenReturn(Optional.of(anmodningsperiode));
 
         anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningsperiodeID, svar);
@@ -109,6 +110,7 @@ public class AnmodningsperiodeServiceTest {
 
         AnmodningsperiodeSvar svar = new AnmodningsperiodeSvar();
         svar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.DELVIS_INNVILGELSE);
+        svar.setAnmodningsperiode(anmodningsperiode);
         when(anmodningsperiodeRepository.findById(anmodningsperiodeID)).thenReturn(Optional.of(anmodningsperiode));
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("Periode må være fyllt ut ved " + Anmodningsperiodesvartyper.DELVIS_INNVILGELSE);
@@ -124,6 +126,7 @@ public class AnmodningsperiodeServiceTest {
 
         AnmodningsperiodeSvar svar = new AnmodningsperiodeSvar();
         svar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
+        svar.setAnmodningsperiode(anmodningsperiode);
         when(anmodningsperiodeRepository.findById(anmodningsperiodeID)).thenReturn(Optional.of(anmodningsperiode));
 
         anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningsperiodeID, svar);
@@ -141,6 +144,22 @@ public class AnmodningsperiodeServiceTest {
         when(anmodningsperiodeRepository.findById(anmodningsperiodeID)).thenReturn(Optional.of(anmodningsperiode));
         expectedException.expect(FunksjonellException.class);
         expectedException.expectMessage("Må spesifiseres svarType for svar på anmodningsperiode");
+
+        anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningsperiodeID, svar);
+    }
+
+    @Test
+    public void lagreAnmodningsperiodeSvar_ugyldigPeriode_forventFunksjonellException() throws FunksjonellException {
+        long anmodningsperiodeID = 2;
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now().minusYears(2), Landkoder.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1,
+            null, Landkoder.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, Trygdedekninger.FULL_DEKNING_EOSFO);
+
+        AnmodningsperiodeSvar svar = new AnmodningsperiodeSvar();
+        svar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
+        svar.setAnmodningsperiode(anmodningsperiode);
+        when(anmodningsperiodeRepository.findById(anmodningsperiodeID)).thenReturn(Optional.of(anmodningsperiode));
+        expectedException.expect(FunksjonellException.class);
+        expectedException.expectMessage("Periode er ikke gyldig");
 
         anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningsperiodeID, svar);
     }
