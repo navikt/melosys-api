@@ -24,7 +24,7 @@ import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
-import no.nav.melosys.integrasjon.joark.HentDokumentoversiktRequest;
+import no.nav.melosys.integrasjon.joark.HentJournalposterTilknyttetSakRequest;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -69,8 +69,8 @@ public class EessiService {
         if (vedleggReferanser.isEmpty()) {
             return Collections.emptySet();
         }
-        final List<Journalpost> journalposter = joarkFasade.hentKjerneJournalpostListe(
-            new HentDokumentoversiktRequest(fagsak.getGsakSaksnummer(), fagsak.getSaksnummer())
+        final List<Journalpost> journalposter = joarkFasade.hentJournalposterTilknyttetSak(
+            new HentJournalposterTilknyttetSakRequest(fagsak.getGsakSaksnummer(), fagsak.getSaksnummer())
         );
         final Collection<Vedlegg> vedlegg = new ArrayList<>();
         for (DokumentReferanse dokumentReferanse : vedleggReferanser) {

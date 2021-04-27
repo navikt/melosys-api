@@ -66,7 +66,6 @@ class JoarkServiceTest {
 
     @BeforeEach
     public void setUp() {
-        unleash.disableAll();
         this.joarkService = new JoarkService(journalConsumer, journalfoerInngaaendeConsumer, journalpostapiConsumer, safConsumer, unleash);
     }
 
@@ -100,8 +99,8 @@ class JoarkServiceTest {
         response.getJournalpostListe().add(journalpost);
         when(journalConsumer.hentKjerneJournalpostListe(any())).thenReturn(response);
 
-        List<Journalpost> journalpostListe = joarkService.hentKjerneJournalpostListe(
-            new HentDokumentoversiktRequest(fagsak.getGsakSaksnummer(), fagsak.getSaksnummer())
+        List<Journalpost> journalpostListe = joarkService.hentJournalposterTilknyttetSak(
+            new HentJournalposterTilknyttetSakRequest(fagsak.getGsakSaksnummer(), fagsak.getSaksnummer())
         );
 
         assertThat(journalpostListe.size()).isEqualTo(1);

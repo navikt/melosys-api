@@ -121,7 +121,7 @@ class EessiServiceTest {
         final Journalpost journalpost = lagJournalpost(List.of(lagArkivDokument("1"), lagArkivDokument("2")));
         final String journalpostID = journalpost.getJournalpostId();
         DokumentReferanse dokumentReferanse = new DokumentReferanse(journalpostID, "2");
-        when(joarkFasade.hentKjerneJournalpostListe(any())).thenReturn(List.of(journalpost));
+        when(joarkFasade.hentJournalposterTilknyttetSak(any())).thenReturn(List.of(journalpost));
         when(joarkFasade.hentDokument(anyString(), anyString())).thenReturn(new byte[8]);
         Fagsak fagsak = new Fagsak();
         fagsak.setGsakSaksnummer(1233321L);

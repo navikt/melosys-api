@@ -171,18 +171,18 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public List<Journalpost> hentKjerneJournalpostListe(HentDokumentoversiktRequest hentDokumentoversiktRequest) throws IntegrasjonException, SikkerhetsbegrensningException {
+    public List<Journalpost> hentJournalposterTilknyttetSak(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest) throws IntegrasjonException, SikkerhetsbegrensningException {
 
         if (unleash.isEnabled(SAF_FEATURE_TOGGLE_NAVN)) {
-            return safConsumer.hentDokumentoversikt(hentDokumentoversiktRequest.saksnummer())
+            return safConsumer.hentDokumentoversikt(hentJournalposterTilknyttetSakRequest.saksnummer())
                 .stream()
                 .map(no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost::tilDomene)
                 .collect(Collectors.toList());
         }
 
-        Assert.notNull(hentDokumentoversiktRequest.arkivsakID(), "HentKjerneJournalpostListe krever en arkivSakID.");
+        Assert.notNull(hentJournalposterTilknyttetSakRequest.arkivsakID(), "HentKjerneJournalpostListe krever en arkivSakID.");
         HentKjerneJournalpostListeRequest hentKjerneJournalpostListeRequest = new HentKjerneJournalpostListeRequest();
-        hentKjerneJournalpostListeRequest.getArkivSakListe().add(lagArkivSak(hentDokumentoversiktRequest.arkivsakID(), Fagsystem.GSAK_I_JOARK.getKode()));
+        hentKjerneJournalpostListeRequest.getArkivSakListe().add(lagArkivSak(hentJournalposterTilknyttetSakRequest.arkivsakID(), Fagsystem.GSAK_I_JOARK.getKode()));
 
         HentKjerneJournalpostListeResponse hentKjerneJournalpostListeResponse;
         try {

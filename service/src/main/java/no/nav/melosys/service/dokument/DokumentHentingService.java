@@ -7,7 +7,7 @@ import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.integrasjon.joark.HentDokumentoversiktRequest;
+import no.nav.melosys.integrasjon.joark.HentJournalposterTilknyttetSakRequest;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +37,6 @@ public class DokumentHentingService {
      */
     public List<Journalpost> hentDokumenter(String saksnummer) throws IkkeFunnetException, IntegrasjonException, SikkerhetsbegrensningException {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        return joarkFasade.hentKjerneJournalpostListe(new HentDokumentoversiktRequest(fagsak.getGsakSaksnummer(), saksnummer));
+        return joarkFasade.hentJournalposterTilknyttetSak(new HentJournalposterTilknyttetSakRequest(fagsak.getGsakSaksnummer(), saksnummer));
     }
 }
