@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.familie;
+package no.nav.melosys.domain.person.familie;
 
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
 

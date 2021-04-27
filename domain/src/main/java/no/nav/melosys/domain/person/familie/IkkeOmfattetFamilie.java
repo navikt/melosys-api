@@ -1,6 +1,4 @@
-package no.nav.melosys.domain.familie;
-
-import no.nav.melosys.domain.kodeverk.Kodeverk;
+package no.nav.melosys.domain.person.familie;
 
 public class IkkeOmfattetFamilie {
     private final String uuid;
