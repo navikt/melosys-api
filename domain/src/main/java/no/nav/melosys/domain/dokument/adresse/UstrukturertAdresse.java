@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
+import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
 import org.apache.commons.lang3.StringUtils;
 
 public class UstrukturertAdresse extends Adresse {
@@ -52,7 +52,7 @@ public class UstrukturertAdresse extends Adresse {
                                        sAdresse.getLandkode());
     }
 
-    public static UstrukturertAdresse av(no.nav.melosys.domain.dokument.person.UstrukturertAdresse adresse) {
+    public static UstrukturertAdresse av(no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse adresse) {
         UstrukturertAdresse ustrukturertAdresse =
             new UstrukturertAdresse(adresse.adresselinje1, adresse.adresselinje2,
                                     adresse.adresselinje3, adresse.adresselinje4,
