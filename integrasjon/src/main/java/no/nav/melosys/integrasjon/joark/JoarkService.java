@@ -62,7 +62,7 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public void ferdigstillJournalføring(String journalpostId) throws FunksjonellException, IntegrasjonException {
+    public void ferdigstillJournalføring(String journalpostId) throws FunksjonellException {
         FerdigstillJournalpostRequest request = new FerdigstillJournalpostRequest();
         journalpostapiConsumer.ferdigstillJournalpost(request, journalpostId);
     }
@@ -93,7 +93,7 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public Journalpost hentJournalpost(String journalpostID) throws IntegrasjonException, FunksjonellException {
+    public Journalpost hentJournalpost(String journalpostID) throws FunksjonellException {
         if (unleash.isEnabled(SAF_FEATURE_TOGGLE_NAVN)) {
             return safConsumer.hentJournalpost(journalpostID).tilDomene();
         } else {
@@ -154,8 +154,7 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public LocalDate hentMottaksDatoForJournalpost(String journalpostID) throws FunksjonellException,
-        IntegrasjonException {
+    public LocalDate hentMottaksDatoForJournalpost(String journalpostID) throws FunksjonellException {
         return LocalDate.ofInstant(hentJournalpost(journalpostID).getForsendelseMottatt(), ZoneId.systemDefault());
     }
 
@@ -171,7 +170,7 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public List<Journalpost> hentJournalposterTilknyttetSak(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest) throws IntegrasjonException, SikkerhetsbegrensningException {
+    public List<Journalpost> hentJournalposterTilknyttetSak(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest) throws SikkerhetsbegrensningException {
 
         if (unleash.isEnabled(SAF_FEATURE_TOGGLE_NAVN)) {
             return safConsumer.hentDokumentoversikt(hentJournalposterTilknyttetSakRequest.saksnummer())
@@ -255,7 +254,7 @@ public class JoarkService implements JoarkFasade {
 
     @Override
     public void oppdaterJournalpost(String journalpostID, JournalpostOppdatering journalpostOppdatering, boolean forsøkFerdigstill)
-        throws FunksjonellException, TekniskException {
+        throws FunksjonellException {
 
         fjernEksisterendeLogiskeVedleggPåHovddokument(journalpostID);
 
@@ -298,7 +297,7 @@ public class JoarkService implements JoarkFasade {
         }
     }
 
-    private void fjernEksisterendeLogiskeVedleggPåHovddokument(String journalpostID) throws FunksjonellException, IntegrasjonException {
+    private void fjernEksisterendeLogiskeVedleggPåHovddokument(String journalpostID) throws FunksjonellException {
         var journalpost = hentJournalpost(journalpostID);
         if (journalpost.getHoveddokument() != null) {
             var hoveddokument = journalpost.getHoveddokument();
