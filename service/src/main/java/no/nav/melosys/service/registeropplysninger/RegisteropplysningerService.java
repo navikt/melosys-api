@@ -92,7 +92,7 @@ public class RegisteropplysningerService {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(registeropplysningerRequest.getBehandlingID());
 
         if (PeriodeKontroller.feilIPeriode(registeropplysningerRequest.getFom(), registeropplysningerRequest.getTom())) {
-            log.info("Henter ikke registeropplysninger for behandling {} pga feil i periode. fom={}, tom={}", registeropplysningerRequest.getBehandlingID(), registeropplysningerRequest.getFom(), registeropplysningerRequest.getTom());
+            log.warn("Henter ikke registeropplysninger for behandling {} pga feil i periode. fom={}, tom={}", registeropplysningerRequest.getBehandlingID(), registeropplysningerRequest.getFom(), registeropplysningerRequest.getTom());
             registeropplysningerRequest = registeropplysningerRequest.kopiUtenPeriodeOgOpplysningstyperSomKreverPeriode();
         }
 
