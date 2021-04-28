@@ -1,20 +1,25 @@
 package no.nav.melosys.service.registeropplysninger;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.List;
+import java.util.Optional;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.inntk.InntektService;
-import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sob.SobService;
 import org.junit.Before;
 import org.junit.Rule;
@@ -24,11 +29,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.util.List;
-import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -137,16 +137,7 @@ public class RegisteropplysningerServiceTest {
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
                 .behandlingID(2L)
-                .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
-                    .sakOgBehandlingopplysninger()
-                    .medlemskapsopplysninger()
-                    .personhistorikkopplysninger()
-                    .organisasjonsopplysninger()
-                    .utbetalingsopplysninger()
-                    .arbeidsforholdopplysninger()
-                    .personopplysninger()
-                    .inntektsopplysninger()
-                    .build())
+                .saksopplysningTyper(alleOpplysningstyper())
                 .fom(LocalDate.now().minusYears(1))
                 .tom(LocalDate.now().plusYears(1))
                 .fnr(FNR)
@@ -261,6 +252,27 @@ public class RegisteropplysningerServiceTest {
     }
 
     @Test
+    public void hentOgLagreOpplysninger_feilIPeriode_kanIkkeHenteOpplysningerSomBrukerPeriode() throws MelosysException {
+        LocalDate fom = LocalDate.now().plusYears(2);
+        LocalDate tom = LocalDate.now();
+
+        registeropplysningerService.hentOgLagreOpplysninger(new RegisteropplysningerRequest(
+            2L, alleOpplysningstyper().getOpplysningstyper(), FNR, fom, tom, null
+        ));
+
+        verify(aaregFasade, never()).finnArbeidsforholdPrArbeidstaker(anyString(), any(), any());
+        verify(inntektService, never()).hentInntektListe(anyString(), any(), any());
+        verify(medlPeriodeService, never()).hentPeriodeListe(anyString(), any(), any());
+        verify(persondataFasade, never()).hentPersonhistorikk(anyString(), any());
+        verify(utbetaldataService, never()).hentUtbetalingerBarnetrygd(anyString(), any(), any());
+
+        verify(eregFasade).hentOrganisasjon(anyString());
+        verify(persondataFasade).hentPerson(anyString(), eq(Informasjonsbehov.STANDARD));
+        verify(sobService).finnSakOgBehandlingskjedeListe(eq(AKTØR_ID));
+        verify(behandlingService).lagre(any(Behandling.class));
+    }
+
+    @Test
     public void hentOgLagreOpplysninger_kunBehandlingID_forventHentBehandling() throws MelosysException {
         registeropplysningerService.hentOgLagreOpplysninger(RegisteropplysningerRequest.builder()
             .fnr(FNR)
@@ -277,6 +289,19 @@ public class RegisteropplysningerServiceTest {
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
 
         return behandling;
+    }
+
+    private RegisteropplysningerRequest.SaksopplysningTyper alleOpplysningstyper() {
+        return RegisteropplysningerRequest.SaksopplysningTyper.builder()
+            .sakOgBehandlingopplysninger()
+            .medlemskapsopplysninger()
+            .personhistorikkopplysninger()
+            .organisasjonsopplysninger()
+            .utbetalingsopplysninger()
+            .arbeidsforholdopplysninger()
+            .personopplysninger()
+            .inntektsopplysninger()
+            .build();
     }
 
     private Behandling hentBehandling(Saksopplysning saksopplysning) {
