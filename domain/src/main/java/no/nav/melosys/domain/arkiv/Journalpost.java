@@ -26,13 +26,12 @@ public class Journalpost {
     private ArkivDokument hoveddokument;
     private String innhold;
     private Journalposttype journalposttype;
-    private List<ArkivDokument> vedleggListe;
+    private final List<ArkivDokument> vedleggListe = new ArrayList<>();
     private String mottaksKanal;
     private String tema;
 
     public Journalpost(String journalpostId) {
         this.journalpostId = journalpostId;
-        this.vedleggListe = new ArrayList<>();
     }
 
     public Optional<ArkivDokument> finnArkivDokument(String dokumentID) {

@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.joark.saf.dto.journalpost;
 
-public record LogiskVedlegg(String tittel) {
+public record LogiskVedlegg(String logiskVedleggId, String tittel) {
     public no.nav.melosys.domain.arkiv.LogiskVedlegg tilDomene() {
-        return new no.nav.melosys.domain.arkiv.LogiskVedlegg(tittel);
+        return new no.nav.melosys.domain.arkiv.LogiskVedlegg(logiskVedleggId, tittel);
     }
 }

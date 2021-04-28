@@ -37,6 +37,7 @@ public final class Query {
                 tittel
                 brevkode
                 logiskeVedlegg {
+                  logiskVedleggId
                   tittel
                 }
               }
@@ -90,6 +91,7 @@ public final class Query {
                 tittel
                 brevkode
                 logiskeVedlegg {
+                  logiskVedleggId
                   tittel
                 }
               }
