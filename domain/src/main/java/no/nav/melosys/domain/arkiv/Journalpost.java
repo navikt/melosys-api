@@ -19,6 +19,7 @@ public class Journalpost {
     private String avsenderNavn;
     private Avsendertyper avsenderType;
     private String brukerId;
+    private BrukerIdType brukerIdType;
     private String korrespondansepartNavn;
     private String korrespondansepartId;
     private Instant forsendelseJournalfoert;
@@ -99,6 +100,14 @@ public class Journalpost {
 
     public void setBrukerId(String brukerId) {
         this.brukerId = brukerId;
+    }
+
+    public BrukerIdType getBrukerIdType() {
+        return brukerIdType;
+    }
+
+    public void setBrukerIdType(BrukerIdType brukerIdType) {
+        this.brukerIdType = brukerIdType;
     }
 
     public String getKorrespondansepartNavn() {

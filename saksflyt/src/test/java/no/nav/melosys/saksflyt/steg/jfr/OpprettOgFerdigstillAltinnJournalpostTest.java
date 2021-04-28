@@ -8,6 +8,7 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
+import no.nav.melosys.domain.arkiv.BrukerIdType;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -92,7 +93,7 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
         var dokumenter = new ArrayList<AltinnDokument>();
         dokumenter.add(søknadDokument);
         dokumenter.add(fullmaktDokument);
-        when(altinnSoeknadService.hentDokumenterTilknyttetSoknad(eq(søknadID))).thenReturn(dokumenter);
+        when(altinnSoeknadService.hentDokumenterTilknyttetSoknad(søknadID)).thenReturn(dokumenter);
         when(persondataFasade.hentFolkeregisterIdent(anyString())).thenReturn(ident);
         when(eregFasade.hentOrganisasjonNavn(anyString())).thenReturn("Fullmektig Avsender");
         when(joarkFasade.opprettJournalpost(any(OpprettJournalpost.class), anyBoolean())).thenReturn("journalpostid123");
@@ -104,12 +105,13 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
 
         verify(persondataFasade).hentFolkeregisterIdent(anyString());
         verify(joarkFasade).opprettJournalpost(captor.capture(), eq(true));
-        verify(behandlingService).lagre(eq(behandling));
+        verify(behandlingService).lagre(behandling);
 
         OpprettJournalpost opprettJournalpost = captor.getValue();
         assertThat(opprettJournalpost)
-            .extracting(Journalpost::getTema, Journalpost::getMottaksKanal, Journalpost::getArkivSakId, Journalpost::getBrukerId)
-            .containsExactly("MED", "ALTINN", "123", ident);
+            .extracting(Journalpost::getTema, Journalpost::getMottaksKanal,
+                Journalpost::getArkivSakId, Journalpost::getBrukerId, Journalpost::getBrukerIdType)
+            .containsExactly("MED", "ALTINN", "123", ident, BrukerIdType.FOLKEREGISTERIDENT);
         assertThat(opprettJournalpost.getInnhold()).isNotEmpty();
         assertThat(opprettJournalpost.getHoveddokument())
             .extracting(ArkivDokument::getDokumentId, ArkivDokument::getTittel)
@@ -128,13 +130,13 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
         arbeidsgiver.setOrgnr("arbOrgnr");
         behandling.getFagsak().setAktører(Set.of(bruker, arbeidsgiver));
 
-        when(eregFasade.hentOrganisasjonNavn(eq(arbeidsgiver.getOrgnr()))).thenReturn("Arbeidsgiver");
+        when(eregFasade.hentOrganisasjonNavn(arbeidsgiver.getOrgnr())).thenReturn("Arbeidsgiver");
 
         opprettOgFerdigstillAltinnJournalpost.utfør(prosessinstans);
 
         verify(persondataFasade).hentFolkeregisterIdent(anyString());
         verify(joarkFasade).opprettJournalpost(captor.capture(), eq(true));
-        verify(behandlingService).lagre(eq(behandling));
+        verify(behandlingService).lagre(behandling);
 
         OpprettJournalpost opprettJournalpost = captor.getValue();
 

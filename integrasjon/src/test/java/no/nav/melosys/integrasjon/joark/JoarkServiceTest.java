@@ -310,6 +310,7 @@ class JoarkServiceTest {
 
         assertThat(journalpost).isNotNull();
         assertThat(journalpost.getBrukerId()).isEqualTo(brukerId);
+        assertThat(journalpost.getBrukerIdType()).isEqualTo(BrukerIdType.FOLKEREGISTERIDENT);
         assertThat(journalpost.getAvsenderId()).isEqualTo(avsenderId);
         assertThat(journalpost.isErFerdigstilt()).isTrue();
         assertThat(journalpost.getForsendelseMottatt()).isEqualTo(forsendelseMottatt.toInstant());
@@ -336,6 +337,7 @@ class JoarkServiceTest {
             Journalpost::getJournalpostId,
             Journalpost::getJournalposttype,
             Journalpost::getBrukerId,
+            Journalpost::getBrukerIdType,
             Journalpost::getAvsenderId,
             Journalpost::getAvsenderNavn,
             Journalpost::getAvsenderType,
@@ -350,6 +352,7 @@ class JoarkServiceTest {
             safJournalpost.journalpostId(),
             Journalposttype.INN,
             safJournalpost.bruker().id(),
+            BrukerIdType.FOLKEREGISTERIDENT,
             safJournalpost.avsenderMottaker().id(),
             safJournalpost.avsenderMottaker().navn(),
             Avsendertyper.ORGANISASJON,
@@ -473,6 +476,7 @@ class JoarkServiceTest {
         opprettJournalpost.setInnhold("innhold");
         opprettJournalpost.setArkivSakId("12345");
         opprettJournalpost.setBrukerId("12345678901");
+        opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
         opprettJournalpost.setKorrespondansepartNavn("navn");
         opprettJournalpost.setKorrespondansepartId("id");
         opprettJournalpost.setKorrespondansepartIdType("UTL_ORG");

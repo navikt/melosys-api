@@ -9,6 +9,7 @@ import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringSedDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.tjenester.gui.dto.journalforing.BehandlingsInformasjon;
 import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -29,10 +30,12 @@ public class JournalfoeringTjeneste {
     private static final Logger log = LoggerFactory.getLogger(JournalfoeringTjeneste.class);
 
     private final JournalfoeringService journalføringService;
+    private final PersondataFasade persondataFasade;
 
     @Autowired
-    public JournalfoeringTjeneste(JournalfoeringService journalføringService) {
+    public JournalfoeringTjeneste(JournalfoeringService journalføringService, PersondataFasade persondataFasade) {
         this.journalføringService = journalføringService;
+        this.persondataFasade = persondataFasade;
     }
 
     @GetMapping("{journalpostID}")
@@ -40,7 +43,7 @@ public class JournalfoeringTjeneste {
     public ResponseEntity<JournalpostDto> hentJournalpostOpplysninger(@PathVariable("journalpostID") String journalpostID) throws MelosysException {
         log.debug("Journalpost med ID {} hentes.", journalpostID);
         Journalpost journalpost = journalføringService.hentJournalpost(journalpostID);
-        JournalpostDto journalpostDto = JournalpostDto.av(journalpost);
+        JournalpostDto journalpostDto = JournalpostDto.av(journalpost, persondataFasade);
 
         if (journalpost.mottaksKanalErEessi()) {
             journalføringService.finnBehandlingstemaForSedTilknyttetJournalpost(journalpostID)
