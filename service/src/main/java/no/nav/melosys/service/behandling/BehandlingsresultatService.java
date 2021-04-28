@@ -75,6 +75,8 @@ public class BehandlingsresultatService {
         behandlingsresultatsreplika.setBehandling(behandlingsreplika);
         behandlingsresultatsreplika.setId(null);
         behandlingsresultatsreplika.setVedtakMetadata(null);
+        behandlingsresultat.setUtfallRegistreringUnntak(null);
+        behandlingsresultat.setUtfallUtpeking(null);
 
         replikerAvklartefakta(behandlingsresultat, behandlingsresultatsreplika);
         replikerLovvalgsperioder(behandlingsresultat, behandlingsresultatsreplika);

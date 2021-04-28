@@ -174,6 +174,9 @@ public class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultatreplika.getKontrollresultater()).allMatch(a -> a.getId() == null);
         assertThat(behandlingsresultatreplika.getKontrollresultater()).allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
         assertThat(behandlingsresultatreplika.getKontrollresultater()).allMatch(a -> a.getBegrunnelse() == Kontroll_begrunnelser.FEIL_I_PERIODEN);
+
+        assertThat(behandlingsresultatreplika.getUtfallRegistreringUnntak()).isNull();
+        assertThat(behandlingsresultatreplika.getUtfallUtpeking()).isNull();
     }
 
     @Test
@@ -329,6 +332,9 @@ public class BehandlingsresultatServiceTest {
         behandlingsresultat.setAvklartefakta(new LinkedHashSet<>());
         behandlingsresultat.setLovvalgsperioder(new LinkedHashSet<>());
         behandlingsresultat.setVilkaarsresultater(new LinkedHashSet<>());
+
+        behandlingsresultat.setUtfallUtpeking(Utfallregistreringunntak.IKKE_GODKJENT);
+        behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.IKKE_GODKJENT);
 
         return behandlingsresultat;
     }
