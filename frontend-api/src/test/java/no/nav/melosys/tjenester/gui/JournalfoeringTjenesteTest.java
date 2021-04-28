@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
-import no.nav.melosys.domain.arkiv.BrukerIdType;
+import java.util.Optional;
+
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -8,7 +9,6 @@ import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringSedDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.tjenester.gui.dto.journalforing.JournalpostDto;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
@@ -39,14 +39,12 @@ class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
 
     @Mock
     private JournalfoeringService journalføringService;
-    @Mock
-    private PersondataFasade persondataFasade;
 
     private JournalfoeringTjeneste tjeneste;
 
     @BeforeEach
     public void setUp() {
-        tjeneste = new JournalfoeringTjeneste(journalføringService, persondataFasade);
+        tjeneste = new JournalfoeringTjeneste(journalføringService);
 
         random = new EasyRandom(new EasyRandomParameters().collectionSizeRange(1, 4));
     }
@@ -54,10 +52,9 @@ class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     @Test
     void hentJournalpostValidering() throws Exception {
         Journalpost journalpost = random.nextObject(Journalpost.class);
-        journalpost.setBrukerId(SAMPLE_FNR);
-        journalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
         journalpost.setAvsenderId(SAMPLE_ORGNR);
         when(journalføringService.hentJournalpost(anyString())).thenReturn(journalpost);
+        when(journalføringService.finnBrukerIdent(journalpost)).thenReturn(Optional.of(SAMPLE_FNR));
 
         ResponseEntity<JournalpostDto> response = tjeneste.hentJournalpostOpplysninger(anyString());
         JournalpostDto journalpostDto = response.getBody();

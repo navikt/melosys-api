@@ -7,8 +7,6 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.DokumentDto;
 
 public final class JournalpostDto {
@@ -33,17 +31,8 @@ public final class JournalpostDto {
         this.erBrukerAvsender = erBrukerAvsender;
     }
 
-    public static JournalpostDto av(Journalpost journalpost, PersondataFasade persondataFasade) throws IkkeFunnetException {
+    public static JournalpostDto av(Journalpost journalpost, String brukerID) {
         Instant mottattDato = journalpost.getForsendelseMottatt();
-
-        String brukerID = null;
-        if (journalpost.getBrukerIdType() != null) {
-            brukerID = switch (journalpost.getBrukerIdType()) {
-                case FOLKEREGISTERIDENT -> journalpost.getBrukerId();
-                case AKTØR_ID -> persondataFasade.hentFolkeregisterIdent(journalpost.getBrukerId());
-                case ORGNR -> null;
-            };
-        }
 
         String avsenderID = journalpost.getAvsenderId();
         String avsenderNavn = journalpost.getAvsenderNavn();
