@@ -20,19 +20,19 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BehandlingsresultatServiceTest {
+@ExtendWith(MockitoExtension.class)
+class BehandlingsresultatServiceTest {
     @Mock
     private BehandlingsresultatRepository behandlingsresultatRepo;
     @Mock
@@ -40,13 +40,13 @@ public class BehandlingsresultatServiceTest {
 
     private BehandlingsresultatService behandlingsresultatService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         behandlingsresultatService = spy(new BehandlingsresultatService(behandlingsresultatRepo, vilkaarsresultatService));
     }
 
     @Test
-    public void tømBehandlingsresultat() {
+    void tømBehandlingsresultat() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setAvklartefakta(new HashSet<>(Collections.singletonList(new Avklartefakta())));
         behandlingsresultat.setLovvalgsperioder(new HashSet<>(Collections.singletonList(new Lovvalgsperiode())));
@@ -58,17 +58,19 @@ public class BehandlingsresultatServiceTest {
 
         assertThat(behandlingsresultat.getAvklartefakta()).isEmpty();
         assertThat(behandlingsresultat.getLovvalgsperioder()).isEmpty();
-        verify(vilkaarsresultatService).tømVilkårForBehandlingsresultat(eq(behandlingsresultat));
-    }
-
-    @Test(expected = IkkeFunnetException.class)
-    public void hentBehandlingsresultat_medTomtResultat_forventerException() throws IkkeFunnetException {
-        when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.empty());
-        behandlingsresultatService.hentBehandlingsresultat(4L);
+        verify(vilkaarsresultatService).tømVilkårForBehandlingsresultat(behandlingsresultat);
     }
 
     @Test
-    public void hentBehandlingsresultat_returnererBehandlingsresultat() throws IkkeFunnetException {
+    void hentBehandlingsresultat_medTomtResultat_forventerException() {
+        when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.empty());
+        assertThatExceptionOfType(IkkeFunnetException.class)
+            .isThrownBy(() -> behandlingsresultatService.hentBehandlingsresultat(4L))
+            .withMessageContaining("Kan ikke finne");
+    }
+
+    @Test
+    void hentBehandlingsresultat_returnererBehandlingsresultat() throws IkkeFunnetException {
         Behandlingsresultat resultat = new Behandlingsresultat();
         BehandlingsresultatBegrunnelse begrunnelse = new BehandlingsresultatBegrunnelse();
         begrunnelse.setKode(Henleggelsesgrunner.ANNET.getKode());
@@ -87,7 +89,7 @@ public class BehandlingsresultatServiceTest {
     }
 
     @Test
-    public void replikerBehandlingOgBehandlingsresultat_replikererBehandlingsresultatObjekterOgCollections()
+    void replikerBehandlingOgBehandlingsresultat_replikererBehandlingsresultatObjekterOgCollections()
         throws NoSuchMethodException, InstantiationException, IkkeFunnetException, IllegalAccessException, InvocationTargetException {
         Behandling tidligsteInaktiveBehandling = new Behandling();
         tidligsteInaktiveBehandling.setId(1L);
@@ -174,10 +176,13 @@ public class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultatreplika.getKontrollresultater()).allMatch(a -> a.getId() == null);
         assertThat(behandlingsresultatreplika.getKontrollresultater()).allMatch(a -> a.getBehandlingsresultat() == behandlingsresultatreplika);
         assertThat(behandlingsresultatreplika.getKontrollresultater()).allMatch(a -> a.getBegrunnelse() == Kontroll_begrunnelser.FEIL_I_PERIODEN);
+
+        assertThat(behandlingsresultatreplika.getUtfallRegistreringUnntak()).isNull();
+        assertThat(behandlingsresultatreplika.getUtfallUtpeking()).isNull();
     }
 
     @Test
-    public void oppdaterBehandlingsresultattype_idEksisterer_oppdatererBehandlingsresultattype() {
+    void oppdaterBehandlingsresultattype_idEksisterer_oppdatererBehandlingsresultattype() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
         doReturn(Optional.of(behandlingsresultat)).when(behandlingsresultatRepo).findById(1L);
@@ -189,14 +194,14 @@ public class BehandlingsresultatServiceTest {
     }
 
     @Test
-    public void oppdaterBehandlingsresultattype_idEksistererIkke_gjørIngenting() {
+    void oppdaterBehandlingsresultattype_idEksistererIkke_gjørIngenting() {
         behandlingsresultatService.oppdaterBehandlingsresultattype(1L, Behandlingsresultattyper.IKKE_FASTSATT);
         verify(behandlingsresultatRepo).findById(1L);
         verify(behandlingsresultatRepo, never()).save(any());
     }
 
     @Test
-    public void oppdaterBehandlingsmaate_bhmåteUdefinert_verifiserOppdatert() throws FunksjonellException {
+    void oppdaterBehandlingsmaate_bhmåteUdefinert_verifiserOppdatert() throws FunksjonellException {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.UDEFINERT);
         when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
@@ -206,35 +211,34 @@ public class BehandlingsresultatServiceTest {
     }
 
     @Test
-    public void oppdaterUtfallRegistreringUnntak_ikkeSatt_lagres() throws FunksjonellException {
+    void oppdaterUtfallRegistreringUnntak_ikkeSatt_lagres() throws FunksjonellException {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        when(behandlingsresultatRepo.findById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
+        when(behandlingsresultatRepo.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
         behandlingsresultatService.oppdaterUtfallRegistreringUnntak(1, Utfallregistreringunntak.GODKJENT);
         verify(behandlingsresultatRepo).save(behandlingsresultat);
     }
 
     @Test
-    public void oppdaterUtfallRegistreringUnntak_alleredeSatt_kasterException() {
+    void oppdaterUtfallRegistreringUnntak_alleredeSatt_kasterException() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.GODKJENT);
-        when(behandlingsresultatRepo.findById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
+        when(behandlingsresultatRepo.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> behandlingsresultatService.oppdaterUtfallRegistreringUnntak(1, Utfallregistreringunntak.GODKJENT))
             .withMessageContaining("Utfall for registrering av unntak er allerede satt for behandlingsresultat");
-
     }
 
     @Test
-    public void oppdaterBegrunnelser_enBegrunnelse_blirLagret() throws IkkeFunnetException {
+    void oppdaterBegrunnelser_enBegrunnelse_blirLagret() throws IkkeFunnetException {
         var behandlingsresultatBegrunnelse = new BehandlingsresultatBegrunnelse();
         behandlingsresultatBegrunnelse.setKode("koden");
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        when(behandlingsresultatRepo.findById(eq(1L))).thenReturn(Optional.of(behandlingsresultat));
+        when(behandlingsresultatRepo.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
 
         behandlingsresultatService.oppdaterBegrunnelser(1L, Set.of(behandlingsresultatBegrunnelse), "fri");
 
-        verify(behandlingsresultatRepo).save(eq(behandlingsresultat));
+        verify(behandlingsresultatRepo).save(behandlingsresultat);
         assertThat(behandlingsresultatBegrunnelse.getBehandlingsresultat()).isEqualTo(behandlingsresultat);
     }
 
@@ -329,6 +333,9 @@ public class BehandlingsresultatServiceTest {
         behandlingsresultat.setAvklartefakta(new LinkedHashSet<>());
         behandlingsresultat.setLovvalgsperioder(new LinkedHashSet<>());
         behandlingsresultat.setVilkaarsresultater(new LinkedHashSet<>());
+
+        behandlingsresultat.setUtfallUtpeking(Utfallregistreringunntak.IKKE_GODKJENT);
+        behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.IKKE_GODKJENT);
 
         return behandlingsresultat;
     }
