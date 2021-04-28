@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.joark;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 
@@ -11,18 +12,24 @@ import no.nav.dok.tjenester.journalfoerinngaaende.Dokument;
 import no.nav.dok.tjenester.journalfoerinngaaende.LogiskVedlegg;
 import no.nav.dok.tjenester.journalfoerinngaaende.*;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.arkiv.DokumentVariant;
+import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.joark.journal.JournalConsumer;
 import no.nav.melosys.integrasjon.joark.journalfoerinngaaende.JournalfoerInngaaendeConsumer;
 import no.nav.melosys.integrasjon.joark.journalpostapi.JournalpostapiConsumer;
+import no.nav.melosys.integrasjon.joark.journalpostapi.dto.AvsenderMottaker;
 import no.nav.melosys.integrasjon.joark.journalpostapi.dto.*;
 import no.nav.melosys.integrasjon.joark.saf.SafConsumer;
+import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.*;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.Journalposttyper;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.ArkivSak;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.DetaljertDokumentinformasjon;
@@ -70,7 +77,9 @@ class JoarkServiceTest {
     }
 
     @Test
-    void hentKjerneJournalpostListe() throws Exception {
+    void hentJournalposterTilknyttetSak_brukerGammelIntegrasjon_verifiserMapping() throws Exception {
+        unleash.disable(JoarkService.SAF_FEATURE_TOGGLE_NAVN);
+
         final var fagsak = new Fagsak();
         fagsak.setGsakSaksnummer(1L);
         fagsak.setSaksnummer("MEL-111");
@@ -116,10 +125,22 @@ class JoarkServiceTest {
         assertThat(journalpost1.getKorrespondansepartNavn()).isEqualTo(partNavn);
     }
 
+    @Test
+    void hentJournalposterTilknyttetSak_brukerSaf_mapperAlleSafJournalposter() throws SikkerhetsbegrensningException {
+        unleash.enable(JoarkService.SAF_FEATURE_TOGGLE_NAVN);
+
+        final var saksnummer = "191919";
+        when(safConsumer.hentDokumentoversikt(saksnummer)).thenReturn(List.of(safJournalpost("111"), safJournalpost("222")));
+
+        var journalposter = joarkService.hentJournalposterTilknyttetSak(new HentJournalposterTilknyttetSakRequest(null, saksnummer));
+        assertThat(journalposter).hasSize(2);
+    }
 
 
     @Test
     void oppdaterJournalpost_påkrevdeVerdierUtfylt() throws Exception {
+        unleash.disable(JoarkService.SAF_FEATURE_TOGGLE_NAVN);
+
         String tittel = "tittel";
         String hovedDokumentID = "1234";
         Map<String, String> vedleggMedTitler = new HashMap<>();
@@ -179,6 +200,8 @@ class JoarkServiceTest {
 
     @Test
     void oppdaterJournalpost_utenVedlegg_fungerer() throws Exception {
+        unleash.disable(JoarkService.SAF_FEATURE_TOGGLE_NAVN);
+
         String tittel = "tittel";
         String hovedDokumentID = "1234";
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medArkivSakID(1L)
@@ -218,6 +241,8 @@ class JoarkServiceTest {
 
     @Test
     void oppdaterJournalpost_skalFerdigstilles_ferdigstillJournalpostBlirKalt() throws Exception {
+        unleash.disable(JoarkService.SAF_FEATURE_TOGGLE_NAVN);
+
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medArkivSakID(1L)
             .medBrukerID("12345").build();
 
@@ -233,6 +258,8 @@ class JoarkServiceTest {
 
     @Test
     void hentJournalpost_forventJournalpost() throws Exception {
+        unleash.disable(JoarkService.SAF_FEATURE_TOGGLE_NAVN);
+
         String arkivsakId = "123arkivsak";
         GetJournalpostResponse getJournalpostResponse = new GetJournalpostResponse();
         getJournalpostResponse.setJournalTilstand(GetJournalpostResponse.JournalTilstand.ENDELIG);
@@ -297,8 +324,69 @@ class JoarkServiceTest {
     }
 
     @Test
+    void hentJournalpost_brukerSaf_verifiserMapping() throws FunksjonellException {
+        unleash.enable(JoarkService.SAF_FEATURE_TOGGLE_NAVN);
+        final var journalpostID = "1112233";
+        final var safJournalpost = safJournalpost(journalpostID);
+        when(safConsumer.hentJournalpost(journalpostID)).thenReturn(safJournalpost);
+
+        var journalpost = joarkService.hentJournalpost(journalpostID);
+
+        assertThat(journalpost).extracting(
+            Journalpost::getJournalpostId,
+            Journalpost::getJournalposttype,
+            Journalpost::getBrukerId,
+            Journalpost::getAvsenderId,
+            Journalpost::getAvsenderNavn,
+            Journalpost::getAvsenderType,
+            Journalpost::getForsendelseJournalfoert,
+            Journalpost::getForsendelseMottatt,
+            Journalpost::getInnhold,
+            Journalpost::getKorrespondansepartId,
+            Journalpost::getKorrespondansepartNavn,
+            Journalpost::getMottaksKanal,
+            Journalpost::getTema
+        ).containsExactly(
+            safJournalpost.journalpostId(),
+            Journalposttype.INN,
+            safJournalpost.bruker().id(),
+            safJournalpost.avsenderMottaker().id(),
+            safJournalpost.avsenderMottaker().navn(),
+            Avsendertyper.ORGANISASJON,
+            null,
+            safJournalpost.relevanteDatoer().stream().filter(RelevantDato::harDatotypeRegistrert)
+                .map(RelevantDato::dato).map(this::tilInstant).findFirst().orElseThrow(),
+            safJournalpost.tittel(),
+            safJournalpost.avsenderMottaker().id(),
+            safJournalpost.avsenderMottaker().navn(),
+            safJournalpost.kanal(),
+            safJournalpost.tema()
+        );
+
+        final var safHovedDokument = safJournalpost.dokumenter().iterator().next();
+        final var safLogiskVedlegg = safHovedDokument.logiskeVedlegg().get(0);
+        assertThat(journalpost.getHoveddokument())
+            .extracting(ArkivDokument::getDokumentId, ArkivDokument::getTittel, ArkivDokument::getNavSkjemaID)
+            .containsExactly(safHovedDokument.dokumentInfoId(), safHovedDokument.tittel(), safHovedDokument.brevkode());
+
+        assertThat(journalpost.getHoveddokument().getLogiskeVedlegg())
+            .flatExtracting(
+                no.nav.melosys.domain.arkiv.LogiskVedlegg::getLogiskVedleggID,
+                no.nav.melosys.domain.arkiv.LogiskVedlegg::getTittel)
+            .containsExactly(
+                safLogiskVedlegg.logiskVedleggId(),
+                safLogiskVedlegg.tittel());
+    }
+
+    private Instant tilInstant(LocalDateTime localDateTime) {
+        return localDateTime.atZone(ZoneId.systemDefault()).toInstant();
+    }
+
+    @Test
     void hentMottaksDatoForJournalpost_journalpostFinnes_returnererMottaksdato() throws FunksjonellException,
         IntegrasjonException {
+        unleash.disable(JoarkService.SAF_FEATURE_TOGGLE_NAVN);
+
         final String journalpostID = "12421";
         GetJournalpostResponse response = new GetJournalpostResponse();
         response.getDokumentListe().add(new Dokument());
@@ -400,5 +488,27 @@ class JoarkServiceTest {
         opprettJournalpost.setHoveddokument(hoveddokument);
 
         return opprettJournalpost;
+    }
+
+    private no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost safJournalpost(String journalpostID) {
+        var logiskVedlegg = new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.LogiskVedlegg("4143", "Tittel logisk vedlegg");
+        return new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost(
+            journalpostID,
+            "Tittel",
+            Journalstatus.MOTTATT,
+            Tema.MED.getKode(),
+            no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalposttype.I,
+            new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Sak("MEL-123"),
+            new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Bruker("123123", Brukertype.FNR),
+            new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.AvsenderMottaker("010101", AvsenderMottakerType.ORGNR, "Org AS"),
+            "SKAN_NETS",
+            Set.of(
+                new RelevantDato(LocalDateTime.now(), Datotype.DATO_REGISTRERT)
+            ),
+            List.of(
+                new DokumentInfo("123", "hoveddokument kommer først", null, List.of(logiskVedlegg)),
+                new DokumentInfo("123", "vedlegg kommer etterpå", null, List.of())
+            )
+        );
     }
 }

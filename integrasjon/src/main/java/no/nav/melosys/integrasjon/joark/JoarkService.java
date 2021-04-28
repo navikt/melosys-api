@@ -48,7 +48,7 @@ public class JoarkService implements JoarkFasade {
     private final SafConsumer safConsumer;
     private final Unleash unleash;
 
-    private static final String SAF_FEATURE_TOGGLE_NAVN = "melosys.saf";
+    static final String SAF_FEATURE_TOGGLE_NAVN = "melosys.saf";
 
     @Autowired
     public JoarkService(JournalConsumer journal,
