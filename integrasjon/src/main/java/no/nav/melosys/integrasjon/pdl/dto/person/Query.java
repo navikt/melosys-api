@@ -9,6 +9,8 @@ query($ident: ID!) {
         }
         bostedsadresse {
             angittFlyttedato
+            gyldigFraOgMed
+            gyldigTilOgMed
             coAdressenavn
             matrikkeladresse {
                 bruksenhetsnummer
@@ -25,6 +27,15 @@ query($ident: ID!) {
                 husbokstav
                 tilleggsnavn
                 postnummer
+            }
+            utenlandskAdresse {
+                adressenavnNummer
+                bygningEtasjeLeilighet
+                postboksNummerNavn
+                postkode
+                bySted
+                regionDistriktOmraade
+                landkode
             }
         }
         doedsfall {
@@ -57,13 +68,6 @@ query($ident: ID!) {
             relatertPersonsRolle
             minRolleForPerson
         }
-        fullmakt {
-            motpartsPersonident
-            motpartsRolle
-            omraader
-            gyldigFraOgMed
-            gyldigTilOgMed
-        }        
         kjoenn {
             kjoenn
             metadata {
