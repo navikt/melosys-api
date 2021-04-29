@@ -34,6 +34,7 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -221,6 +222,7 @@ public class BrevbestillingService {
             .build();
     }
 
+    @Transactional
     public void produserBrev(long behandlingId, BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
         dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto);
     }

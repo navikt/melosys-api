@@ -53,6 +53,7 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setKorrespondansepartLand(institusjonLand);
         opprettJournalpost.setKorrespondansepartIdType(UTENLANDSK_ORGANISASJON);
         opprettJournalpost.setBrukerId(brukerFnr);
+        opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
 
         opprettJournalpost.setInnhold(opprettJournalpost.getHoveddokument().getTittel());
 
@@ -61,7 +62,7 @@ public class OpprettJournalpost extends Journalpost {
 
     public static OpprettJournalpost lagJournalpostForMottakAltinnSøknad(Fagsak fagsak,
                                                                          Collection<AltinnDokument> dokumenter,
-                                                                         String brukerID,
+                                                                         String brukerFnr,
                                                                          String avsenderNavn)
         throws FunksjonellException, TekniskException {
         AltinnDokument hovedDokument = dokumenter.stream().filter(AltinnDokument::erSøknad)
@@ -79,7 +80,8 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setJournalposttype(Journalposttype.INN);
         opprettJournalpost.setJournalførendeEnhet(MEDLEMSKAP_OG_AVGIFT);
         opprettJournalpost.setTema(MEDLEMSKAP);
-        opprettJournalpost.setBrukerId(brukerID);
+        opprettJournalpost.setBrukerId(brukerFnr);
+        opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
         opprettJournalpost.setForsendelseMottatt(hovedDokument.getInnsendtTidspunkt());
 
         fagsak.hentRepresentant(Representerer.BRUKER).ifPresentOrElse(
@@ -89,7 +91,7 @@ public class OpprettJournalpost extends Journalpost {
                 opprettJournalpost.setKorrespondansepartIdType(ORGNR);
             },
             () -> {
-                opprettJournalpost.setKorrespondansepartId(brukerID);
+                opprettJournalpost.setKorrespondansepartId(brukerFnr);
                 opprettJournalpost.setKorrespondansepartNavn(avsenderNavn);
                 opprettJournalpost.setKorrespondansepartIdType(FNR);
             }
@@ -106,6 +108,7 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setTema(MEDLEMSKAP);
         opprettJournalpost.setArkivSakId(bestilling.getArkivSakId());
         opprettJournalpost.setBrukerId(bestilling.getBrukerFnr());
+        opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
         opprettJournalpost.setKorrespondansepartId(bestilling.getMottakerId());
         opprettJournalpost.setKorrespondansepartNavn(bestilling.getMottakerNavn());
         opprettJournalpost.setKorrespondansepartIdType(bestilling.erMottakerOrg() ? ORGNR : FNR);

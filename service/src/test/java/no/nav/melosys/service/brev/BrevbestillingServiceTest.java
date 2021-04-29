@@ -398,6 +398,16 @@ class BrevbestillingServiceTest {
     }
 
     @Test
+    void hentBrevAdresseTilMottakere_arbeidsgiverSomMottakerMenIngenArbeidsgivere_returnererTomListe() throws Exception {
+        when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.ARBEIDSGIVER)), any(), eq(false), eq(false)))
+            .thenReturn(emptyList());
+
+        var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER, new Behandling());
+
+        assertThat(brevAdresser).isEmpty();
+    }
+
+    @Test
     void hentBrevAdresseTilMottakere_arbeidsgiversFullmaktSomMottaker_returnererFullmektigsAdresse() throws Exception {
         var behandling = new Behandling();
         behandling.setFagsak(new Fagsak());

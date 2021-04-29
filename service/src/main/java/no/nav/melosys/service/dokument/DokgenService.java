@@ -121,16 +121,16 @@ public class DokgenService {
 
         DokgenBrevbestilling.Builder<?> brevbestilling = new DokgenBrevbestilling.Builder<>();
 
-        brevbestilling
-            .medProduserbartdokument(produserbartDokument)
-            .medBehandlingId(behandlingId);
-
         if (List.of(MANGELBREV_ARBEIDSGIVER, MANGELBREV_BRUKER).contains(produserbartDokument)) {
             brevbestilling = new MangelbrevBrevbestilling.Builder()
                 .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
                 .medManglerInfoFritekst(brevbestillingDto.getManglerFritekst())
                 .medKontaktpersonNavn(brevbestillingDto.getKontaktpersonNavn());
         }
+
+        brevbestilling
+            .medProduserbartdokument(produserbartDokument)
+            .medBehandlingId(behandlingId);
 
         List<Aktoer> mottakere = new ArrayList<>();
         if (hasText(brevbestillingDto.getOrgNr())) {

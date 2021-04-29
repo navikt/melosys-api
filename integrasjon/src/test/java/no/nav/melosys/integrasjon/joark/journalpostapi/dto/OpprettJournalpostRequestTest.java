@@ -3,9 +3,7 @@ package no.nav.melosys.integrasjon.joark.journalpostapi.dto;
 import java.util.Collections;
 
 import no.nav.melosys.domain.arkiv.DokumentVariant;
-import no.nav.melosys.domain.arkiv.FysiskDokument;
-import no.nav.melosys.domain.arkiv.Journalposttype;
-import no.nav.melosys.domain.arkiv.OpprettJournalpost;
+import no.nav.melosys.domain.arkiv.*;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,6 +24,7 @@ public class OpprettJournalpostRequestTest {
         opprettJournalpost.setMottaksKanal("S");
         opprettJournalpost.setTema("MED");
         opprettJournalpost.setBrukerId("12345678901");
+        opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
         opprettJournalpost.setKorrespondansepartNavn("Trygdemyndighet");
         opprettJournalpost.setKorrespondansepartId("id123");
         opprettJournalpost.setKorrespondansepartIdType("UTL_ORG");
