@@ -113,6 +113,22 @@ class SoeknadMapperTest {
         assertThat(luftfartBase.typeFlyvninger).isEqualTo(INTERNASJONAL);
     }
 
+    @Test
+    void testArbeidssituasjonOgOevrig() throws JAXBException {
+        final MedlemskapArbeidEOSM medlemskapArbeidEOSM = parseSøknadXML();
+
+        final Soeknad soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM);
+
+        final ArbeidssituasjonOgOevrig arbeidssituasjonOgOevrig = soeknad.arbeidssituasjonOgOevrig;
+        assertThat(arbeidssituasjonOgOevrig.harLoennetArbeidMinstEnMndFoerUtsending).isTrue();
+        assertThat(arbeidssituasjonOgOevrig.beskrivelseArbeidSisteMnd).isEqualTo("Arbeid siste mnd");
+        assertThat(arbeidssituasjonOgOevrig.harAndreArbeidsgivereIUtsendingsperioden).isFalse();
+        assertThat(arbeidssituasjonOgOevrig.beskrivelseAnnetArbeid).isEqualTo("Annet arbeid");
+        assertThat(arbeidssituasjonOgOevrig.erSkattepliktig).isTrue();
+        assertThat(arbeidssituasjonOgOevrig.mottarYtelserNorge).isFalse();
+        assertThat(arbeidssituasjonOgOevrig.mottarYtelserUtlandet).isFalse();
+    }
+
     private MedlemskapArbeidEOSM parseSøknadXML() throws JAXBException {
         JAXBContext jaxbContext = JAXBContext.newInstance(ObjectFactory.class);
         URL url = getClass().getClassLoader().getResource("altinn/NAV_MedlemskapArbeidEOS.xml");
