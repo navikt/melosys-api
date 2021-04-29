@@ -49,13 +49,13 @@ class LagreMedlemsperiodeMedlTest {
     }
 
     @Test
-    void utfør_erInnvilgelse() throws Exception {
+    void utfør_erInnvilgelse_oppretterMedlPeriode() throws Exception {
         MedlemAvFolketrygden medlemAvFolketrygden = lagMedlemAvFolketrygden(true);
         when(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(anyLong())).thenReturn(medlemAvFolketrygden);
 
         lagreMedlemsperiodeMedl.utfør(lagProsessInstans());
 
-        verify(medlPeriodeService).opprettPeriodeEndeligFtrl(BEHANDLING_ID, medlemAvFolketrygden.getMedlemskapsperioder().iterator().next());
+        verify(medlPeriodeService).opprettPeriodeEndelig(BEHANDLING_ID, medlemAvFolketrygden.getMedlemskapsperioder().iterator().next());
     }
 
     private Prosessinstans lagProsessInstans() {

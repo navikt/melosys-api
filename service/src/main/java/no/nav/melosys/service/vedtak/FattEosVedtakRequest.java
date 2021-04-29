@@ -1,17 +1,14 @@
 package no.nav.melosys.service.vedtak;
 
-import java.util.HashSet;
 import java.util.Set;
 
-import static java.util.Arrays.asList;
-
-public class EosFattVedtakDto extends FattVedtakDto {
+public class FattEosVedtakRequest extends FattVedtakRequest {
     private final String fritekst;
     private final String fritekstSed;
     private final Set<String> mottakerinstitusjoner;
     private final String revurderBegrunnelse;
 
-    private EosFattVedtakDto(Builder builder) {
+    private FattEosVedtakRequest(Builder builder) {
         super(builder);
         this.fritekst = builder.fritekst;
         this.fritekstSed = builder.fritekstSed;
@@ -35,7 +32,7 @@ public class EosFattVedtakDto extends FattVedtakDto {
         return revurderBegrunnelse;
     }
 
-    public static class Builder extends FattVedtakDto.Builder<Builder> {
+    public static class Builder extends FattVedtakRequest.Builder<Builder> {
         private String fritekst;
         private String fritekstSed;
         private Set<String> mottakerinstitusjoner;
@@ -56,11 +53,8 @@ public class EosFattVedtakDto extends FattVedtakDto {
             return this;
         }
 
-        public Builder medMottakerInstitusjoner(String... mottakerInstituisjon) {
-            if (this.mottakerinstitusjoner == null) {
-                this.mottakerinstitusjoner = new HashSet<>();
-            }
-            this.mottakerinstitusjoner.addAll(asList(mottakerInstituisjon));
+        public Builder medMottakerInstitusjoner(Set<String> mottakerInstitusjoner) {
+            this.mottakerinstitusjoner = mottakerInstitusjoner;
             return this;
         }
 
@@ -69,8 +63,8 @@ public class EosFattVedtakDto extends FattVedtakDto {
             return this;
         }
 
-        public EosFattVedtakDto build() {
-            return new EosFattVedtakDto(this);
+        public FattEosVedtakRequest build() {
+            return new FattEosVedtakRequest(this);
         }
     }
 }

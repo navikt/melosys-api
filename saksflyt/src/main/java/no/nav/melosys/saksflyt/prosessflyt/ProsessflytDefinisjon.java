@@ -100,8 +100,8 @@ public final class ProsessflytDefinisjon {
             )
         );
 
-        PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK,
-            new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK,
+        PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK_EOS,
+            new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_EOS,
                 AVKLAR_MYNDIGHET,
                 AVKLAR_ARBEIDSGIVER,
                 LAGRE_LOVVALGSPERIODE_MEDL,
@@ -127,9 +127,9 @@ public final class ProsessflytDefinisjon {
             )
         );
 
-        PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK_FTRL,
-            new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_FTRL,
-                LAGRE_MEDLEMSPERIODE_MEDL,
+        PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK,
+            new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK,
+                LAGRE_MEDLEMSKAPSPERIODE_MEDL,
                 OPPRETT_OG_JOURNALFØR_BREV,
                 DISTRIBUER_JOURNALPOST,
                 PUBLISER_VEDTAK,

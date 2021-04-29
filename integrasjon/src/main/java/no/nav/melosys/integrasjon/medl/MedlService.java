@@ -24,15 +24,15 @@ import org.springframework.stereotype.Service;
 import static no.nav.melosys.integrasjon.medl.MedlPeriodeKonverter.*;
 
 @Service
-public class MedlRestService {
+public class MedlService {
     private static final String MEDLEMSKAP_VERSJON = "2.0";
 
     private final MedlemskapRestConsumer medlemskapRestConsumer;
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public MedlRestService(MedlemskapRestConsumer medlemskapRestConsumer,
-                           ObjectMapper objectMapper) {
+    public MedlService(MedlemskapRestConsumer medlemskapRestConsumer,
+                       ObjectMapper objectMapper) {
         this.medlemskapRestConsumer = medlemskapRestConsumer;
         this.objectMapper = objectMapper;
 
@@ -127,8 +127,8 @@ public class MedlRestService {
 
         MedlemskapsunntakForPost.MedlemskapsunntakForPostBuilder request = null;
 
-        if (bestemmelse instanceof Lovvalgsperiode lovvalgsperiode) {
-            request = lovvalgRequest(lovvalgsperiode);
+        if (bestemmelse instanceof PeriodeOmLovvalg periodeOmLovvalg) {
+            request = lovvalgRequest(periodeOmLovvalg);
         } else if (bestemmelse instanceof Medlemskapsperiode medlemskapsperiode) {
             request = medlemskapsperiodeRequest(medlemskapsperiode);
         }

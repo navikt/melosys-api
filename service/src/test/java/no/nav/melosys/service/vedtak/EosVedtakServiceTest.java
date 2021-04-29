@@ -104,8 +104,8 @@ class EosVedtakServiceTest {
         mockEesiReady();
         leggTilLovvalgsperiode();
 
-        vedtakService.fattVedtak(behandling, FASTSATT_LOVVALGSLAND, behandlingsresultatFritekst, "FRITEKST_SED",
-            mottakerinstitusjoner, FØRSTEGANGSVEDTAK, null);
+        vedtakService.fattVedtak(behandling, lagRequest(FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK,
+            behandlingsresultatFritekst, "FRITEKST_SED", mottakerinstitusjoner));
 
         assertThat(behandlingsresultat)
             .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst)
@@ -132,8 +132,8 @@ class EosVedtakServiceTest {
         mockBehandlingsresultat();
         leggTilLovvalgsperiode();
 
-        vedtakService.fattVedtak(behandling, FASTSATT_LOVVALGSLAND, behandlingsresultatFritekst, "FRITEKST_SED",
-            null, FØRSTEGANGSVEDTAK, null);
+        vedtakService.fattVedtak(behandling, lagRequest(FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK,
+            behandlingsresultatFritekst, "FRITEKST_SED", null));
 
         assertThat(behandlingsresultat)
             .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst)
@@ -165,8 +165,8 @@ class EosVedtakServiceTest {
         anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
         behandlingsresultat.setAnmodningsperioder(Collections.singleton(anmodningsperiode));
 
-        vedtakService.fattVedtak(behandling, FASTSATT_LOVVALGSLAND, behandlingsresultatFritekst, "FRITEKST_SED",
-            null, FØRSTEGANGSVEDTAK, null);
+        vedtakService.fattVedtak(behandling, lagRequest(FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK,
+            behandlingsresultatFritekst, "FRITEKST_SED", null));
 
         assertThat(behandlingsresultat)
             .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst)
@@ -193,7 +193,7 @@ class EosVedtakServiceTest {
         final Behandlingsresultattyper resultatType = Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL;
         final Vedtakstyper vedtakstype = FØRSTEGANGSVEDTAK;
 
-        vedtakService.fattVedtak(behandling, resultatType, null, null, null, vedtakstype, null);
+        vedtakService.fattVedtak(behandling, lagRequest(resultatType, vedtakstype, null, null, null));
 
         assertThat(behandlingsresultat)
             .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst)
@@ -219,8 +219,7 @@ class EosVedtakServiceTest {
 
         leggTilLovvalgsperiode(InnvilgelsesResultat.AVSLAATT);
 
-        vedtakService.fattVedtak(behandling, FASTSATT_LOVVALGSLAND, null, null, null,
-            FØRSTEGANGSVEDTAK, null);
+        vedtakService.fattVedtak(behandling, lagRequest(FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK, null, null, null));
 
         verify(prosessinstansService).opprettProsessinstansIverksettVedtak(
             eq(behandling),
@@ -239,8 +238,8 @@ class EosVedtakServiceTest {
 
         leggTilLovvalgsperiode(InnvilgelsesResultat.AVSLAATT);
 
-        assertThatThrownBy(() -> vedtakService.fattVedtak(behandling, FASTSATT_LOVVALGSLAND, null, null,
-            null, FØRSTEGANGSVEDTAK, null))
+        assertThatThrownBy(() -> vedtakService.fattVedtak(behandling, lagRequest(FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK, null, null,
+            null)))
             .isInstanceOf(FunksjonellException.class)
             .hasMessageContaining("vedtak-prosess");
 
@@ -257,8 +256,8 @@ class EosVedtakServiceTest {
         Consumer<ValideringException> medFeilkode = v -> assertThat(v.getFeilkoder())
             .extracting(KontrollfeilDto::getKode).containsExactly(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER.getKode());
 
-        assertThatThrownBy(() -> vedtakService.fattVedtak(behandling, FASTSATT_LOVVALGSLAND, null, null,
-            null, FØRSTEGANGSVEDTAK, null))
+        assertThatThrownBy(() -> vedtakService.fattVedtak(behandling, lagRequest(FASTSATT_LOVVALGSLAND,
+            FØRSTEGANGSVEDTAK, null, null, null)))
             .isInstanceOfSatisfying(ValideringException.class, medFeilkode)
             .hasMessage("Feil i validering. Kan ikke fatte vedtak.");
     }
@@ -348,5 +347,16 @@ class EosVedtakServiceTest {
         myndighet.setRolle(Aktoersroller.MYNDIGHET);
         myndighet.setInstitusjonId("SE:SE001");
         behandling.getFagsak().setAktører(Set.of(myndighet));
+    }
+
+    private FattEosVedtakRequest lagRequest(Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype,
+                                            String behandlingsresultatFritekst, String fritekstSed, Set<String> mottakerinstitusjoner) {
+        return new FattEosVedtakRequest.Builder()
+            .medBehandlingsresultat(behandlingsresultattype)
+            .medVedtakstype(vedtakstype)
+            .medFritekst(behandlingsresultatFritekst)
+            .medFritekstSed(fritekstSed)
+            .medMottakerInstitusjoner(mottakerinstitusjoner)
+            .build();
     }
 }

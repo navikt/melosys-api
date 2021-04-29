@@ -1,9 +1,6 @@
 package no.nav.melosys.service.vedtak;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.slf4j.Logger;
@@ -22,15 +19,13 @@ public class FtrlVedtakService {
         this.behandlingsresultatService = behandlingsresultatService;
     }
 
-    public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType,
-                           Vedtakstyper vedtakstype, String fritekstInnledning, String fritekstBegrunnelse) throws MelosysException {
+    public void fattVedtak(Behandling behandling, FattFtrlVedtakRequest request) throws MelosysException {
         long behandlingID = behandling.getId();
 
         log.info("Fatter vedtak for (FTRL) sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        behandlingsresultat.setType(behandlingsresultatType);
-
+        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
 
 
     }

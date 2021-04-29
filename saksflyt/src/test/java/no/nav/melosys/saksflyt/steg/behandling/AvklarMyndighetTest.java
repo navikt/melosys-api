@@ -48,7 +48,7 @@ class AvklarMyndighetTest {
         Behandling behandling = lagBehandling(fagsak);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK);
+        prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_EOS);
     }
 
     @Test
