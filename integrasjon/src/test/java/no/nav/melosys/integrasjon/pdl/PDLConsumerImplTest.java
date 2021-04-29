@@ -101,6 +101,10 @@ class PDLConsumerImplTest {
         assertThat(person.sivilstand())
             .flatExtracting(Sivilstand::type, Sivilstand::relatertVedSivilstand, Sivilstand::gyldigFraOgMed)
             .containsExactly(Sivilstandstype.REGISTRERT_PARTNER, "11466927750", LocalDate.parse("2021-03-02"));
+        assertThat(person.utenlandskIdentifikasjonsnummer())
+            .flatExtracting(UtenlandskIdentifikasjonsnummer::identifikasjonsnummer,
+                UtenlandskIdentifikasjonsnummer::utstederland, UtenlandskIdentifikasjonsnummer::opphoert)
+            .containsExactly("ABAVDSPDS1234", "AIA", false, "JA_ODER_NEIN", "DEU", true);
         testAdresser(person);
     }
 

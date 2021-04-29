@@ -167,6 +167,18 @@
           "relatertVedSivilstand": "11466927750",
           "gyldigFraOgMed": "2021-03-02"
         }
+      ],
+      "utenlandskIdentifikasjonsnummer": [
+        {
+          "identifikasjonsnummer": "ABAVDSPDS1234",
+          "utstederland": "AIA",
+          "opphoert": false
+        },
+        {
+          "identifikasjonsnummer": "JA_ODER_NEIN",
+          "utstederland": "DEU",
+          "opphoert": true
+        }
       ]
     }
   }
