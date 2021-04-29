@@ -170,6 +170,11 @@ query($ident: ID!) {
             relatertVedSivilstand
             gyldigFraOgMed
         }
+        utenlandskIdentifikasjonsnummer {
+          identifikasjonsnummer
+          utstederland
+          opphoert
+        }
     }
 }
         """;
