@@ -7,6 +7,7 @@ import java.util.UUID;
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessinstansInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -18,4 +19,12 @@ public interface ProsessinstansRepository extends JpaRepository<Prosessinstans, 
     Optional<Prosessinstans> findByBehandling_IdAndStatusIs(long id, ProsessStatus prosessStatus);
     Optional<Prosessinstans> findByTypeAndBehandling_Id(ProsessType prosessType, long id);
     Collection<Prosessinstans> findAllByStatus(ProsessStatus status);
+
+    @Query("""
+            SELECT NEW no.nav.melosys.domain.saksflyt.ProsessinstansInfo(p.id, p.status, p.registrertDato, p.låsReferanse) FROM Prosessinstans p
+            WHERE p.status NOT IN (?1) AND p.låsReferanse LIKE CONCAT(?2, '%')
+            """)
+    Collection<ProsessinstansInfo> findAllByStatusNotInAndLåsReferanseStartingWith(Collection<ProsessStatus> prosessStatus, String låsReferanse);
+    Collection<Prosessinstans> findAllByLåsReferanseStartingWith(String låsReferanse);
+    boolean existsByStatusNotInAndLåsReferanse(Collection<ProsessStatus> prosessStatus, String låsreferanse);
 }
