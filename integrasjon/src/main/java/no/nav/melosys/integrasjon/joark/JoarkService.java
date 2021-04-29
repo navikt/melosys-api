@@ -31,7 +31,6 @@ import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentDokumentRequest;
 import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentDokumentResponse;
 import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentKjerneJournalpostListeRequest;
 import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentKjerneJournalpostListeResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -50,7 +49,6 @@ public class JoarkService implements JoarkFasade {
 
     static final String SAF_FEATURE_TOGGLE_NAVN = "melosys.saf";
 
-    @Autowired
     public JoarkService(JournalConsumer journal,
                         JournalfoerInngaaendeConsumer journalfoerInngaaendeConsumer,
                         JournalpostapiConsumer journalpostapiConsumer, SafConsumer safConsumer, Unleash unleash) {
@@ -121,7 +119,10 @@ public class JoarkService implements JoarkFasade {
     private Journalpost lagJournalpostFraResponse(String journalpostID, GetJournalpostResponse response) {
         Journalpost journalpost = new Journalpost(journalpostID);
         journalpost.setErFerdigstilt(response.getJournalTilstand() == GetJournalpostResponse.JournalTilstand.ENDELIG);
-        journalpost.setBrukerId(response.getBrukerListe().stream().map(Bruker::getIdentifikator).findFirst().orElse(null));
+        response.getBrukerListe().stream().findFirst().ifPresent(b -> {
+            journalpost.setBrukerId(b.getIdentifikator());
+            journalpost.setBrukerIdType(tilBrukerIdType(b.getBrukerType()));
+        });
         journalpost.setForsendelseMottatt(response.getForsendelseMottatt().toInstant());
         journalpost.setMottaksKanal(response.getMottaksKanal());
 
@@ -151,6 +152,13 @@ public class JoarkService implements JoarkFasade {
             journalpost.setArkivSakId(response.getArkivSak().getArkivSakId());
         }
         return journalpost;
+    }
+
+    private BrukerIdType tilBrukerIdType(Bruker.BrukerType brukerType) {
+        return switch (brukerType){
+            case PERSON -> BrukerIdType.FOLKEREGISTERIDENT;
+            case ORGANISASJON -> BrukerIdType.ORGNR;
+        };
     }
 
     @Override

@@ -4,11 +4,12 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.exception.TekniskException;
+
+import static java.util.Optional.ofNullable;
 
 public record Journalpost(
     String journalpostId,
@@ -30,17 +31,10 @@ public record Journalpost(
             journalpost.setArkivSakId(sak.arkivsaksnummer());
         }
 
-        if (bruker != null) {
-            if (Brukertype.erPerson(bruker.type())) {
-                if (bruker.type() == Brukertype.AKTOERID) {
-                    // todo hent fnr
-                } else {
-                    journalpost.setBrukerId(bruker.id());
-                }
-            } else {
-                throw new UnsupportedOperationException("Støtter ikke bruker med type " + bruker.type());
-            }
-        }
+        ofNullable(bruker).ifPresent(b -> {
+            journalpost.setBrukerId(b.id());
+            journalpost.setBrukerIdType(b.type().tilDomene());
+        });
 
         if (avsenderMottaker != null) {
             journalpost.setAvsenderId(avsenderMottaker.id());
@@ -64,7 +58,7 @@ public record Journalpost(
     }
 
     private ArkivDokument hentHoveddokument() {
-        return Optional.ofNullable(dokumenter)
+        return ofNullable(dokumenter)
             .stream().flatMap(Collection::stream)
             .map(DokumentInfo::tilArkivDokument).findFirst()
             .orElseThrow(() -> new TekniskException("Journalpost " + journalpostId + " har ingen hoveddokument"));
