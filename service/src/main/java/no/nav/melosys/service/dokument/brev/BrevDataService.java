@@ -81,7 +81,7 @@ public class BrevDataService {
         metadata.dokumenttypeID = DokumenttypeIdMapper.hentID(produserbartDokument);
         metadata.mottaker = mottaker;
         metadata.mottakerID = avklarMottakerId(mottaker, kontaktopplysning);
-        metadata.brukerID = persondataFasade.hentIdentForAktørId(fagsak.hentBruker().getAktørId());
+        metadata.brukerID = persondataFasade.hentFolkeregisterIdent(fagsak.hentBruker().getAktørId());
 
         metadata.journalsakID = Long.toString(fagsak.getGsakSaksnummer());
         // Fagområde=MED for alle dokumenter til bruker/arbeidsgiver, men kan være UFM for papir-SED til ikke-elektroniske land
@@ -114,7 +114,7 @@ public class BrevDataService {
             return (kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null) ? kontaktopplysning.getKontaktOrgnr() : mottaker.getOrgnr();
         } else if (mottakerRolle == BRUKER) {
             try {
-                return persondataFasade.hentIdentForAktørId(mottaker.getAktørId());
+                return persondataFasade.hentFolkeregisterIdent(mottaker.getAktørId());
             } catch (IkkeFunnetException e) {
                 throw new TekniskException(e);
             }
@@ -274,7 +274,7 @@ public class BrevDataService {
             throw new TekniskException("Det finnes ingen bruker på sak " + behandling.getFagsak().getSaksnummer());
         }
         try {
-            sakspart.setId(persondataFasade.hentIdentForAktørId(aktør.getAktørId()));
+            sakspart.setId(persondataFasade.hentFolkeregisterIdent(aktør.getAktørId()));
         } catch (IkkeFunnetException e) {
             throw new TekniskException("Det finnes ingen ident for aktørID " + aktør.getAktørId());
         }

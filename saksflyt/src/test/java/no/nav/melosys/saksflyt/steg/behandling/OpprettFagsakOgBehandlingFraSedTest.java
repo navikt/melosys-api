@@ -43,29 +43,20 @@ public class OpprettFagsakOgBehandlingFraSedTest {
     }
 
     @Test
-    public void utfør_prosessTypeAnmodningsUnntak_verifiserNyFagsakOgBehandlingBlirOpprettet() throws Exception {
-        Prosessinstans prosessinstans = hentProsessinstans(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
+    public void utfør_verifiserNyFagsakOgBehandlingBlirOpprettet() throws Exception {
+        Prosessinstans prosessinstans = hentProsessinstans();
         prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
         opprettFagsakOgBehandlingFraSed.utfør(prosessinstans);
         verify(fagsakService).nyFagsakOgBehandling(opprettSakRequestArgumentCaptor.capture());
         assertThat(opprettSakRequestArgumentCaptor.getValue().getSakstype()).isEqualTo(Sakstyper.EU_EOS);
     }
 
-    @Test
-    public void utfør__verifiserNyFagsakOgBehandlingBlirOpprettet() throws Exception {
-        Prosessinstans prosessinstans = hentProsessinstans(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
-        prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
-        opprettFagsakOgBehandlingFraSed.utfør(prosessinstans);
-        verify(fagsakService).nyFagsakOgBehandling(opprettSakRequestArgumentCaptor.capture());
-        assertThat(opprettSakRequestArgumentCaptor.getValue().getSakstype()).isEqualTo(Sakstyper.UKJENT);
-    }
-
-    private Prosessinstans hentProsessinstans(Behandlingstema behandlingstema) {
+    private Prosessinstans hentProsessinstans() {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, "123");
         prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, "321");
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, 123);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.BESLUTNING_LOVVALG_NORGE);
 
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setRinaSaksnummer("123rina");

@@ -10,6 +10,7 @@ import no.nav.dok.melosysbrev._000081.Fag;
 import no.nav.dok.melosysbrev._000081.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000081.ObjectFactory;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;

@@ -37,12 +37,10 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>15</java.version>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <!-- Melosys -->
-        <melosys.jsonschema.version>1.35.103</melosys.jsonschema.version>
-        <melosys.internt.kodeverk.version>5.15.62</melosys.internt.kodeverk.version>
+        <melosys.jsonschema.version>1.35.109</melosys.jsonschema.version>
+        <melosys.internt.kodeverk.version>5.15.63</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.67</melosys.brev.version>
 
         <!-- NAV -->
@@ -610,6 +608,11 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <release>${java.version}</release>
+                        <encoding>UTF-8</encoding>
+                        <compilerArgs>--enable-preview</compilerArgs>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -670,15 +673,6 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <release>${java.version}</release>
-                    <encoding>UTF-8</encoding>
-                    <compilerArgs>--enable-preview</compilerArgs>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
             </plugin>
             <plugin>
@@ -688,3 +682,4 @@
         </plugins>
     </build>
 </project>
+

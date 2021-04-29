@@ -7,6 +7,37 @@ query($ident: ID!) {
         adressebeskyttelse {
             gradering
         }
+        bostedsadresse {
+            angittFlyttedato
+            gyldigFraOgMed
+            gyldigTilOgMed
+            coAdressenavn
+            matrikkeladresse {
+                bruksenhetsnummer
+                kommunenummer
+                tilleggsnavn
+                postnummer
+            }
+            ukjentBosted {
+                bostedskommune
+            }
+            vegadresse {
+                adressenavn
+                husnummer
+                husbokstav
+                tilleggsnavn
+                postnummer
+            }
+            utenlandskAdresse {
+                adressenavnNummer
+                bygningEtasjeLeilighet
+                postboksNummerNavn
+                postkode
+                bySted
+                regionDistriktOmraade
+                landkode
+            }
+        }
         doedsfall {
             doedsdato
         }
@@ -47,6 +78,47 @@ query($ident: ID!) {
                 }
             }
         }
+        kontaktadresse {
+            type
+            gyldigFraOgMed
+            gyldigTilOgMed
+            coAdressenavn
+            postboksadresse {
+                postboks
+                postbokseier
+                postnummer
+            }
+            postadresseIFrittFormat {
+                adresselinje1
+                adresselinje2
+                adresselinje3
+                postnummer
+            }
+            utenlandskAdresse {
+                adressenavnNummer
+                bygningEtasjeLeilighet
+                postboksNummerNavn
+                postkode
+                bySted
+                regionDistriktOmraade
+                landkode
+            }
+            utenlandskAdresseIFrittFormat {
+                adresselinje1
+                adresselinje2
+                adresselinje3
+                byEllerStedsnavn
+                landkode
+                postkode
+            }
+            vegadresse {
+                adressenavn
+                husnummer
+                husbokstav
+                tilleggsnavn
+                postnummer
+            }
+        }
         navn {
             fornavn
             mellomnavn
@@ -59,6 +131,34 @@ query($ident: ID!) {
                 }
             }
         }
+        oppholdsadresse {
+            gyldigFraOgMed
+            gyldigTilOgMed
+            oppholdAnnetSted
+            coAdressenavn
+            matrikkeladresse {
+                bruksenhetsnummer
+                kommunenummer
+                tilleggsnavn
+                postnummer
+            }
+            utenlandskAdresse {
+                adressenavnNummer
+                bygningEtasjeLeilighet
+                postboksNummerNavn
+                postkode
+                bySted
+                regionDistriktOmraade
+                landkode
+            }
+            vegadresse {
+                adressenavn
+                husnummer
+                husbokstav
+                tilleggsnavn
+                postnummer
+            }
+        }
         statsborgerskap {
             land
             metadata {
@@ -69,6 +169,11 @@ query($ident: ID!) {
             type
             relatertVedSivilstand
             gyldigFraOgMed
+        }
+        utenlandskIdentifikasjonsnummer {
+          identifikasjonsnummer
+          utstederland
+          opphoert
         }
     }
 }

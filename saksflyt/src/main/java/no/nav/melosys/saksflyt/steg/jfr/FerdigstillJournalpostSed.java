@@ -10,11 +10,12 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -26,7 +27,7 @@ public class FerdigstillJournalpostSed implements StegBehandler {
     private final PersondataFasade persondataFasade;
 
     @Autowired
-    public FerdigstillJournalpostSed(JoarkFasade joarkFasade, PersondataFasade persondataFasade) {
+    public FerdigstillJournalpostSed(JoarkFasade joarkFasade, @Qualifier("system") PersondataFasade persondataFasade) {
         this.joarkFasade = joarkFasade;
         this.persondataFasade = persondataFasade;
     }
@@ -57,6 +58,6 @@ public class FerdigstillJournalpostSed implements StegBehandler {
 
     private String hentBrukerID(Prosessinstans prosessinstans) throws IkkeFunnetException, TekniskException {
         String aktørID = prosessinstans.getBehandling().getFagsak().hentBruker().getAktørId();
-        return persondataFasade.hentIdentForAktørId(aktørID);
+        return persondataFasade.hentFolkeregisterIdent(aktørID);
     }
 }

@@ -1,16 +1,17 @@
 package no.nav.melosys.service.saksflyt;
 
+import javax.annotation.Nullable;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
@@ -19,14 +20,12 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.sak.OpprettSakDto;
@@ -202,6 +201,7 @@ public class ProsessinstansService {
         Prosessinstans prosessinstans = new Prosessinstans();
 
         prosessinstans.setType(ProsessType.OPPRETT_NY_SAK);
+        prosessinstans.setData(ProsessDataKey.SAKSTYPE, opprettSakDto.getSakstype());
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
@@ -248,11 +248,10 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansOpprettOgDistribuerBrev(Produserbaredokumenter produserbartDokument, Behandling behandling, Aktoer mottaker, BrevbestillingDto brevbestillingDto) {
+    public void opprettProsessinstansOpprettOgDistribuerBrev(Behandling behandling, Aktoer mottaker, DokgenBrevbestilling brevbestilling) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
-        prosessinstans.setData(PRODUSERBART_BREV, produserbartDokument);
-        prosessinstans.setData(BREVBESTILLING, brevbestillingDto);
+        prosessinstans.setData(BREVBESTILLING, brevbestilling);
         prosessinstans.setData(MOTTAKER, mottaker.getRolle());
         if (hasText(mottaker.getAktørId())) {
             prosessinstans.setData(AKTØR_ID, mottaker.getAktørId());

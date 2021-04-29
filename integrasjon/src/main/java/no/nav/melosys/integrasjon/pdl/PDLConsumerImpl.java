@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.pdl;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Predicate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -28,6 +29,7 @@ import static no.nav.melosys.integrasjon.pdl.dto.person.Query.HENT_PERSON_QUERY;
 public class PDLConsumerImpl implements PDLConsumer {
     private static final Logger log = LoggerFactory.getLogger(PDLConsumerImpl.class);
     private static final ObjectWriter JSON_WRITER = new ObjectMapper().writer();
+    private static final String CALL_ID = "Nav-Call-Id";
     private static final String IDENT = "ident";
 
     private final WebClient webClient;
@@ -41,6 +43,7 @@ public class PDLConsumerImpl implements PDLConsumer {
         GraphQLRequest request = new GraphQLRequest(HENT_IDENTER_QUERY, Map.of(IDENT, ident));
 
         GraphQLResponse<HentIdenterResponse> response = webClient.post()
+            .header(CALL_ID, UUID.randomUUID().toString())
             .bodyValue(request)
             .retrieve().bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentIdenterResponse>>() {})
             .block();
@@ -54,6 +57,7 @@ public class PDLConsumerImpl implements PDLConsumer {
         GraphQLRequest request = new GraphQLRequest(HENT_PERSON_QUERY, Map.of(IDENT, ident));
 
         GraphQLResponse<HentPersonResponse> response = webClient.post()
+            .header(CALL_ID, UUID.randomUUID().toString())
             .bodyValue(request)
             .retrieve().bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentPersonResponse>>() {})
             .block();

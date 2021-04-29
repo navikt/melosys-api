@@ -115,28 +115,29 @@ public final class DokumentServiceTest {
 
     @Test
     public final void produserUtkast_innvilgelsesBrev_funker() throws Exception {
-        BrevbestillingDto brevbestilling = lagBrevBestillingDto(BRUKER);
+        BrevbestillingDto brevbestilling = lagBrevBestillingDto(INNVILGELSE_YRKESAKTIV, BRUKER);
 
         DokumentService dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock(brevbestilling));
-        byte[] resultat = dokumentServiceMedMockVelger.produserUtkast(INNVILGELSE_YRKESAKTIV, BEHANDLINGSID, brevbestilling);
+        byte[] resultat = dokumentServiceMedMockVelger.produserUtkast(BEHANDLINGSID, brevbestilling);
         assertThat(resultat).isNull();
         verify(dokSysFasade).produserDokumentutkast(any(Dokumentbestilling.class));
     }
 
     @Test
     public final void produserUtkast_avslagArbeidsgiver_funker() throws Exception {
-        BrevbestillingDto brevbestilling = lagBrevBestillingDto(ARBEIDSGIVER);
+        BrevbestillingDto brevbestilling = lagBrevBestillingDto(AVSLAG_ARBEIDSGIVER, ARBEIDSGIVER);
         Set<String> arbeidsgivendeOrgnumre = Collections.singleton("987654321");
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any(Behandling.class))).thenReturn(arbeidsgivendeOrgnumre);
 
         DokumentService dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock(brevbestilling));
-        byte[] resultat = dokumentServiceMedMockVelger.produserUtkast(AVSLAG_ARBEIDSGIVER, BEHANDLINGSID, brevbestilling);
+        byte[] resultat = dokumentServiceMedMockVelger.produserUtkast(BEHANDLINGSID, brevbestilling);
         assertThat(resultat).isNull();
         verify(dokSysFasade).produserDokumentutkast(any(Dokumentbestilling.class));
     }
 
-    private static BrevbestillingDto lagBrevBestillingDto(Aktoersroller rolle) {
+    private static BrevbestillingDto lagBrevBestillingDto(Produserbaredokumenter produserbartdokument, Aktoersroller rolle) {
         return new BrevbestillingDto.Builder()
+            .medProduserbardokument(produserbartdokument)
             .medMottaker(rolle)
             .build();
     }
@@ -411,7 +412,7 @@ public final class DokumentServiceTest {
 
     private static PersondataFasade mockPersondataFasade(Aktoer aktør) throws IkkeFunnetException {
         PersondataFasade persondataFasade = mock(PersondataFasade.class);
-        when(persondataFasade.hentIdentForAktørId(anyString()))
+        when(persondataFasade.hentFolkeregisterIdent(anyString()))
             .thenReturn(String.format("IDENT%s", aktør.getAktørId()));
         return persondataFasade;
     }

@@ -62,7 +62,7 @@ public class MedlPeriodeServiceTest {
             .thenReturn(MEDL_PERIODE_ID);
 
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(lagBehandlingsResultat());
-        when(persondataFasade.hentIdentForAktørId(anyString())).thenReturn(FNR);
+        when(persondataFasade.hentFolkeregisterIdent(anyString())).thenReturn(FNR);
     }
 
     private Behandlingsresultat lagBehandlingsResultat() {

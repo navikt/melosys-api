@@ -8,9 +8,13 @@ import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsberegningsresultat;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
+import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
+import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
@@ -123,8 +127,8 @@ class BrevmottakerServiceTest {
 
         List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
 
-        assertThat(arbeidsgivere.stream()
-            .map(Aktoer::getOrgnr))
+        assertThat(arbeidsgivere)
+            .flatExtracting(Aktoer::getOrgnr)
             .containsExactlyInAnyOrder("123456789", "987654321");
     }
 
@@ -140,14 +144,48 @@ class BrevmottakerServiceTest {
     }
 
     @Test
+    void avklarMottakere_medArbeidsgiverRolleIkkeKunAvklarteVirksomheterOgIngenArbeidsgivere_girTomListe() throws TekniskException, FunksjonellException {
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
+        when(behandling.getBehandlingsgrunnlag()).thenReturn(lagBehandlingsgrunnlag(null, null));
+        when(behandling.hentArbeidsforholdDokument()).thenReturn(lagArbeidsforholdDokument(null));
+
+        List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling, false, false);
+
+        assertThat(arbeidsgivere).isEmpty();
+    }
+
+    @Test
+    void avklarMottakere_medArbeidsgiverRolleIkkeKunAvklarteVirksomheter_girArbeidsgiverAktører() throws FunksjonellException, TekniskException {
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
+        when(behandling.getBehandlingsgrunnlag()).thenReturn(lagBehandlingsgrunnlag("987654321", null));
+        when(behandling.hentArbeidsforholdDokument()).thenReturn(lagArbeidsforholdDokument("123456789"));
+
+        List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling, false, false);
+
+        assertThat(arbeidsgivere)
+            .flatExtracting(Aktoer::getOrgnr)
+            .containsExactlyInAnyOrder("123456789", "987654321");
+    }
+
+    @Test
+    void avklarMottakere_medBareUtenlandskeArbeidsgivereIkkeKunAvklarteVirksomheter_girIngenMottakere() throws FunksjonellException, TekniskException {
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
+        when(behandling.getBehandlingsgrunnlag()).thenReturn(lagBehandlingsgrunnlag(null, "uuid"));
+        when(behandling.hentArbeidsforholdDokument()).thenReturn(lagArbeidsforholdDokument(null));
+
+        List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling, false, false);
+        assertThat(arbeidsgivere).isEmpty();
+    }
+
+    @Test
     void avklarMottakere_medArbeidsgiverRolleOgRepresentantForBruker_girArbeidsgiverAktører() throws FunksjonellException, TekniskException {
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(eq(behandling))).thenReturn(Sets.newHashSet("123456789", "987654321"));
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(Representerer.BRUKER));
 
         List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
 
-        assertThat(arbeidsgivere.stream()
-            .map(Aktoer::getOrgnr))
+        assertThat(arbeidsgivere)
+            .flatExtracting(Aktoer::getOrgnr)
             .containsExactlyInAnyOrder("123456789", "987654321");
     }
 
@@ -157,8 +195,8 @@ class BrevmottakerServiceTest {
 
         List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
 
-        assertThat(arbeidsgivere.stream()
-            .map(Aktoer::getOrgnr))
+        assertThat(arbeidsgivere)
+            .flatExtracting(Aktoer::getOrgnr)
             .containsExactly("REP-ORGNR");
     }
 
@@ -168,8 +206,8 @@ class BrevmottakerServiceTest {
 
         List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
 
-        assertThat(arbeidsgivere.stream()
-            .map(Aktoer::getOrgnr))
+        assertThat(arbeidsgivere)
+            .flatExtracting(Aktoer::getOrgnr)
             .containsExactly("REP-ORGNR");
     }
 
@@ -197,8 +235,8 @@ class BrevmottakerServiceTest {
         when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(eq(behandling))).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagAktoerUtenlandskMyndighet()));
 
         List<Aktoer> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ANMODNING_UNNTAK, Mottaker.av(MYNDIGHET), behandling);
-        assertThat(myndigheter.stream()
-            .map(Aktoer::getInstitusjonId))
+        assertThat(myndigheter)
+            .flatExtracting(Aktoer::getInstitusjonId)
             .containsExactly("CZ:SZUC10416");
     }
 
@@ -466,6 +504,25 @@ class BrevmottakerServiceTest {
             fagsak.getAktører().add(representant);
         }
         return fagsak;
+    }
+
+    private Behandlingsgrunnlag lagBehandlingsgrunnlag(String ekstraArbeidsgivereOrgnr, String foretakUtlandUuid) {
+        var behandlingsgrunnlagData = new BehandlingsgrunnlagData();
+        behandlingsgrunnlagData.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.add(ekstraArbeidsgivereOrgnr);
+        var foretakUtland = new ForetakUtland();
+        foretakUtland.uuid = foretakUtlandUuid;
+        behandlingsgrunnlagData.foretakUtland.add(foretakUtland);
+        var behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+        return behandlingsgrunnlag;
+    }
+
+    private ArbeidsforholdDokument lagArbeidsforholdDokument(String arbeidsgiverIDOrgNr) {
+        var arbeidsforhold = new Arbeidsforhold();
+        arbeidsforhold.arbeidsgiverID = arbeidsgiverIDOrgNr;
+        var arbeidsforholdDokument = new ArbeidsforholdDokument();
+        arbeidsforholdDokument.arbeidsforhold.add(arbeidsforhold);
+        return arbeidsforholdDokument;
     }
 
     private UtenlandskMyndighet lagUtenlandskMyndighet() {

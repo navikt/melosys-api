@@ -228,7 +228,7 @@ class DokSysServiceTest {
         when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
             .thenReturn(new DistribuerJournalpostResponse("123"));
 
-        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, null);
+        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, null, null);
 
         ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
         verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
@@ -251,7 +251,7 @@ class DokSysServiceTest {
         when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
             .thenReturn(new DistribuerJournalpostResponse("123"));
 
-        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, null);
+        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, null, null);
 
         ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
         verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
@@ -277,7 +277,7 @@ class DokSysServiceTest {
         when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
             .thenReturn(new DistribuerJournalpostResponse("123"));
 
-        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, kontaktopplysning);
+        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, kontaktopplysning, null);
 
         ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
         verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
@@ -285,7 +285,34 @@ class DokSysServiceTest {
         DistribuerJournalpostRequest request = captor.getValue();
         assertEquals(journalpostId, request.getJournalpostId());
         assertEquals("norskPostadresse", request.getAdresse().getAdresseType());
-        assertEquals("v/Fetter Anton", request.getAdresse().getAdresselinje1());
+        assertEquals("Att: Fetter Anton", request.getAdresse().getAdresselinje1());
+        assertEquals(strukturertAdresse.gatenavn, request.getAdresse().getAdresselinje2());
+        assertEquals(strukturertAdresse.postnummer, request.getAdresse().getPostnummer());
+    }
+
+    @Test
+    void distribuerJournalpost_medStrukturertNorskAdresse_medKontaktopplysningOgOverstyrtKontaktpersonNavn() {
+        String journalpostId = "123456";
+        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
+        strukturertAdresse.gatenavn = "Postboks 222";
+        strukturertAdresse.postnummer = "9999";
+        strukturertAdresse.landkode = "NO";
+
+        Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
+        kontaktopplysning.setKontaktNavn("Fetter Anton");
+
+        when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
+            .thenReturn(new DistribuerJournalpostResponse("123"));
+
+        dokSysService.distribuerJournalpost(journalpostId, strukturertAdresse, kontaktopplysning, "Kari Kontakt");
+
+        ArgumentCaptor<DistribuerJournalpostRequest> captor = ArgumentCaptor.forClass(DistribuerJournalpostRequest.class);
+        verify(distribuerJournalpostConsumer).distribuerJournalpost(captor.capture());
+
+        DistribuerJournalpostRequest request = captor.getValue();
+        assertEquals(journalpostId, request.getJournalpostId());
+        assertEquals("norskPostadresse", request.getAdresse().getAdresseType());
+        assertEquals("Att: Kari Kontakt", request.getAdresse().getAdresselinje1());
         assertEquals(strukturertAdresse.gatenavn, request.getAdresse().getAdresselinje2());
         assertEquals(strukturertAdresse.postnummer, request.getAdresse().getPostnummer());
     }

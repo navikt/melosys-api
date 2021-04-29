@@ -18,6 +18,7 @@ import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.EndreBehandlingstemaService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.tildto.SaksopplysningerTilDto;
@@ -25,6 +26,7 @@ import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -50,7 +52,9 @@ public class BehandlingTjeneste {
                               SaksopplysningerTilDto saksopplysningerTilDto,
                               TilgangService tilgangService,
                               SaksbehandlerService saksbehandlerService,
-                              EndreBehandlingstemaService endreBehandlingstemaService) {
+                              EndreBehandlingstemaService endreBehandlingstemaService,
+                              OppgaveService oppgaveService,
+                              ApplicationEventPublisher applicationEventPublisher) {
         this.behandlingService = behandlingService;
         this.saksopplysningerTilDto = saksopplysningerTilDto;
         this.tilgangService = tilgangService;
@@ -148,6 +152,16 @@ public class BehandlingTjeneste {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("{behandlingID}/behandlingsfrist")
+    @ApiOperation("Endre behandlingsfristen for en gitt behandling samt tilhørende oppgave i Gosys")
+    public ResponseEntity<Void> endreBehandlingsfrist(@PathVariable("behandlingID") long behandlingID, @RequestBody EndreBehandlingsfristDto endreBehandlingsfristDto) throws MelosysException {
+        log.debug("Saksbehandler {} ber om å sette behandlingsfrist for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingID, endreBehandlingsfristDto.getBehandlingsfrist());
+        tilgangService.sjekkRedigerbarOgTilordnetSaksbehandlerOgTilgang(behandlingID);
+
+        behandlingService.endreBehandlingsfrist(behandlingID, endreBehandlingsfristDto.getBehandlingsfrist());
+        return ResponseEntity.noContent().build();
+    }
+
 
     private BehandlingDto tilBehandlingDto(Behandling behandling, String saksbehandler) throws MelosysException {
         BehandlingDto behandlingDto = new BehandlingDto();
@@ -169,6 +183,7 @@ public class BehandlingTjeneste {
         behandlingOppsummeringDto.setRegistrertDato(behandling.getRegistrertDato());
         behandlingOppsummeringDto.setSisteOpplysningerHentetDato(behandling.getSistOpplysningerHentetDato());
         behandlingOppsummeringDto.setSvarFrist(behandling.getDokumentasjonSvarfristDato());
+        behandlingOppsummeringDto.setBehandlingsfrist(behandling.getBehandlingsfrist());
         return behandlingOppsummeringDto;
     }
 }

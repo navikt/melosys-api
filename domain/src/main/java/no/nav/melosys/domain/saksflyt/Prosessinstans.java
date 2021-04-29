@@ -64,7 +64,8 @@ public class Prosessinstans {
     @Column(name = "sed_laas_referanse")
     private String låsReferanse;
 
-    private static final ObjectMapper dataMapper = new ObjectMapper().registerModule(new JavaTimeModule())
+    private static final ObjectMapper dataMapper = new ObjectMapper()
+        .registerModule(new JavaTimeModule())
         .registerModule(new SimpleModule().addDeserializer(LovvalgBestemmelse.class, new LovvalgBestemmelseDeserializer()));
 
     public UUID getId() {
@@ -103,7 +104,9 @@ public class Prosessinstans {
         return data;
     }
 
-    /** Returnerer et dataelement som String */
+    /**
+     * Returnerer et dataelement som String
+     */
     public String getData(ProsessDataKey key) {
         return data.getProperty(key.getKode());
     }
@@ -149,7 +152,7 @@ public class Prosessinstans {
     }
 
     /**
-     * Setter et dataelement til et objet (ved json serialisering)
+     * Setter et dataelement til et object (ved json serialisering)
      */
     public void setData(ProsessDataKey key, Object value) {
         try {
