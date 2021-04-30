@@ -137,7 +137,7 @@ public class RegisteropplysningerServiceTest {
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
                 .behandlingID(2L)
-                .saksopplysningTyper(alleOpplysningstyper())
+                .saksopplysningTyper(RegisteropplysningerRequest.hentAlleSaksopplysningTyper())
                 .fom(LocalDate.now().minusYears(1))
                 .tom(LocalDate.now().plusYears(1))
                 .fnr(FNR)
@@ -257,7 +257,7 @@ public class RegisteropplysningerServiceTest {
         LocalDate tom = LocalDate.now();
 
         registeropplysningerService.hentOgLagreOpplysninger(new RegisteropplysningerRequest(
-            2L, alleOpplysningstyper().getOpplysningstyper(), FNR, fom, tom, null
+            2L, RegisteropplysningerRequest.hentAlleSaksopplysningTyper().getOpplysningstyper(), FNR, fom, tom, null
         ));
 
         verify(aaregFasade, never()).finnArbeidsforholdPrArbeidstaker(anyString(), any(), any());
@@ -289,19 +289,6 @@ public class RegisteropplysningerServiceTest {
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
 
         return behandling;
-    }
-
-    private RegisteropplysningerRequest.SaksopplysningTyper alleOpplysningstyper() {
-        return RegisteropplysningerRequest.SaksopplysningTyper.builder()
-            .sakOgBehandlingopplysninger()
-            .medlemskapsopplysninger()
-            .personhistorikkopplysninger()
-            .organisasjonsopplysninger()
-            .utbetalingsopplysninger()
-            .arbeidsforholdopplysninger()
-            .personopplysninger()
-            .inntektsopplysninger()
-            .build();
     }
 
     private Behandling hentBehandling(Saksopplysning saksopplysning) {
