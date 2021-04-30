@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.dokument.person;
+package no.nav.melosys.domain.dokument.person.adresse;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;

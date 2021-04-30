@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.familie;
+package no.nav.melosys.domain.person.familie;
 
 public class OmfattetFamilie {
 

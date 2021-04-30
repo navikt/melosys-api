@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;

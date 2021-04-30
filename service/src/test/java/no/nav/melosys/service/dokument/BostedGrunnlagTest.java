@@ -4,7 +4,8 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.Gateadresse;
+import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
+import no.nav.melosys.domain.dokument.person.adresse.Gateadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Bosted;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
@@ -61,7 +62,7 @@ public class BostedGrunnlagTest {
 
     @Test
     public void finnBostedsadresse_harBostedsadresseIRegister_forventBostedsadresse() {
-        personDokument.bostedsadresse = new no.nav.melosys.domain.dokument.person.Bostedsadresse();
+        personDokument.bostedsadresse = new Bostedsadresse();
         personDokument.bostedsadresse.setLand(new Land("SWE"));
         personDokument.bostedsadresse.setGateadresse(new Gateadresse());
         personDokument.bostedsadresse.getGateadresse().setGatenavn("gate");

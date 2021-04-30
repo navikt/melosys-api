@@ -10,9 +10,9 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.LuftfartBase;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.Bostedsadresse;
+import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.Diskresjonskode;
-import no.nav.melosys.domain.dokument.person.Gateadresse;
+import no.nav.melosys.domain.dokument.person.adresse.Gateadresse;
 import no.nav.melosys.domain.eessi.sed.Adresse;
 import no.nav.melosys.domain.eessi.sed.Arbeidssted;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;
@@ -369,7 +369,7 @@ public class SedDataByggerTest {
     @Test
     public void lagUtkast_ingenAdresse_forventTomAdresse() throws MelosysException {
         SedDataGrunnlagMedSoknad dataGrunnlag = lagDokumentressurser();
-        dataGrunnlag.getPerson().bostedsadresse = new no.nav.melosys.domain.dokument.person.Bostedsadresse();
+        dataGrunnlag.getPerson().bostedsadresse = new Bostedsadresse();
 
         SedDataDto sedData = dataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 

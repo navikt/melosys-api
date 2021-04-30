@@ -12,6 +12,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
+import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
+import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
+import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
 
 
 /**
