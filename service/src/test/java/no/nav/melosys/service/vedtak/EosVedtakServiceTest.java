@@ -116,7 +116,7 @@ class EosVedtakServiceTest {
             .containsExactly(FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
         verify(behandlingService).lagre(behandling);
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
             any(),
             eq(FASTSATT_LOVVALGSLAND),
             eq(behandlingsresultatFritekst),
@@ -144,7 +144,7 @@ class EosVedtakServiceTest {
             .containsExactly(FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
         verify(behandlingService).lagre(behandling);
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
             any(Behandling.class),
             eq(FASTSATT_LOVVALGSLAND),
             eq(behandlingsresultatFritekst),
@@ -176,7 +176,7 @@ class EosVedtakServiceTest {
             .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getRevurderBegrunnelse, VedtakMetadata::getVedtakKlagefrist)
             .containsExactly(FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
             eq(behandling),
             eq(FASTSATT_LOVVALGSLAND),
             eq(behandlingsresultatFritekst),
@@ -203,7 +203,7 @@ class EosVedtakServiceTest {
             .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getRevurderBegrunnelse, VedtakMetadata::getVedtakKlagefrist)
             .containsExactly(vedtakstype, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
             eq(behandling),
             eq(resultatType),
             isNull(),
@@ -221,7 +221,7 @@ class EosVedtakServiceTest {
 
         vedtakService.fattVedtak(behandling, lagRequest(FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK, null, null, null));
 
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
             eq(behandling),
             eq(FASTSATT_LOVVALGSLAND),
             isNull(),

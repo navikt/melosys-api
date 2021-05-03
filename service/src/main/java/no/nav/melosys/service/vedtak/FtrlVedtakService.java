@@ -7,12 +7,13 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,12 +28,17 @@ public class FtrlVedtakService {
     private final BehandlingsresultatService behandlingsresultatService;
     private final BehandlingService behandlingService;
     private final ProsessinstansService prosessinstansService;
+    private final OppgaveService oppgaveService;
 
     @Autowired
-    public FtrlVedtakService(BehandlingsresultatService behandlingsresultatService, BehandlingService behandlingService, ProsessinstansService prosessinstansService) {
+    public FtrlVedtakService(BehandlingsresultatService behandlingsresultatService,
+                             BehandlingService behandlingService,
+                             ProsessinstansService prosessinstansService,
+                             OppgaveService oppgaveService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.behandlingService = behandlingService;
         this.prosessinstansService = prosessinstansService;
+        this.oppgaveService = oppgaveService;
     }
 
     public void fattVedtak(Behandling behandling, FattFtrlVedtakRequest request) throws MelosysException {
@@ -40,11 +46,9 @@ public class FtrlVedtakService {
 
         log.info("Fatter vedtak for (FTRL) sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
+        oppdaterBehandlingsresultat(behandlingID, request);
 
-        oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), request.getFritekstBegrunnelse());
-
+        //NOTE Burde ikke denne ligge før `oppdaterBehandlingsresultat`?
         if (prosessinstansService.harVedtakInstans(behandlingID)) {
             throw new FunksjonellException("Det finnes allerede en vedtak-prosess for behandling " + behandling);
         }
@@ -52,14 +56,18 @@ public class FtrlVedtakService {
         behandling.getFagsak().setStatus(Saksstatuser.MEDLEMSKAP_AVKLART);
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
         behandlingService.lagre(behandling);
+
+        prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, request);
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private void oppdaterBehandlingsresultat(Behandlingsresultat behandlingsresultat,
-                                             Vedtakstyper vedtakstype,
-                                             String behandlingresultatBegrunnelseFritekst) {
-        behandlingsresultat.settVedtakMetadata(vedtakstype, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
-        behandlingsresultat.setBegrunnelseFritekst(behandlingresultatBegrunnelseFritekst);
+    private void oppdaterBehandlingsresultat(long behandlingID, FattFtrlVedtakRequest request) throws IkkeFunnetException {
+        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
+        behandlingsresultat.settVedtakMetadata(request.getVedtakstype(), LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+        behandlingsresultat.setBegrunnelseFritekst(request.getFritekstBegrunnelse());
         behandlingsresultat.setFastsattAvLand(Landkoder.NO);
+
         behandlingsresultatService.lagre(behandlingsresultat);
     }
 }
