@@ -34,7 +34,6 @@ class PersondataServiceTest {
     @BeforeEach
     public void setup() {
         persondataService = new PersondataService(pdlConsumer, tpsService, fakeUnleash);
-        fakeUnleash.enable("melosys.pdl.identer");
     }
 
     @Test

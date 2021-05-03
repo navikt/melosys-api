@@ -32,24 +32,18 @@ public class PersondataService implements PersondataFasade {
 
     @Override
     public String hentAktørIdForIdent(String ident) throws IkkeFunnetException {
-        if (unleash.isEnabled("melosys.pdl.identer")) {
-            return pdlConsumer.hentIdenter(ident).identer()
-                .stream().filter(Ident::erAktørID)
-                .findFirst().map(Ident::ident)
-                .orElseThrow(() -> new IkkeFunnetException("Finner ikke aktørID!"));
-        }
-        return tpsService.hentAktørIdForIdent(ident);
+        return pdlConsumer.hentIdenter(ident).identer()
+            .stream().filter(Ident::erAktørID)
+            .findFirst().map(Ident::ident)
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke aktørID!"));
     }
 
     @Override
     public String hentFolkeregisterIdent(String ident) throws IkkeFunnetException {
-        if (unleash.isEnabled("melosys.pdl.identer")) {
-            return pdlConsumer.hentIdenter(ident).identer()
-                .stream().filter(Ident::erFolkeregisterIdent)
-                .findFirst().map(Ident::ident)
-                .orElseThrow(() -> new IkkeFunnetException("Finner ikke folkeregisterident!"));
-        }
-        return tpsService.hentIdentForAktørId(ident);
+        return pdlConsumer.hentIdenter(ident).identer()
+            .stream().filter(Ident::erFolkeregisterIdent)
+            .findFirst().map(Ident::ident)
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke folkeregisterident!"));
     }
 
     @Override
