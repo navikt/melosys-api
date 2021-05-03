@@ -35,7 +35,7 @@ public class MedlPeriodeService {
     private static final String FEIL_VED_OPPDATERING_MEDL = "Opprettelse av periode i MEDL feilet med retur av null medlPeriodeID fra MEDL tjeneste for behandling ";
 
     public MedlPeriodeService(@Qualifier("system") PersondataFasade persondataFasade,
-                              MedlRestService medlRestService,
+                              MedlService medlService,
                               BehandlingsresultatService behandlingsresultatService,
                               LovvalgsperiodeRepository lovvalgsperiodeRepository,
                               AnmodningsperiodeRepository anmodningsperiodeRepository,
