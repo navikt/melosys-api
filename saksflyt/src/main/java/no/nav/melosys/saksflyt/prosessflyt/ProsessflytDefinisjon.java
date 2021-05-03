@@ -114,8 +114,8 @@ public final class ProsessflytDefinisjon {
             )
         );
 
-        PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE,
-            new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE,
+        PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK_EOS_FORKORT_PERIODE,
+            new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_EOS_FORKORT_PERIODE,
                 HENT_MOTTAKERINSTITUSJON_FORKORTET_PERIODE,
                 LAGRE_LOVVALGSPERIODE_MEDL,
                 SEND_VEDTAKSBREV_INNLAND,
