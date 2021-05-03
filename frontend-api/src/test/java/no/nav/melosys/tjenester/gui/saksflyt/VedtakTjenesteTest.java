@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.saksflyt;
 
 import java.io.IOException;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
@@ -10,8 +11,14 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
-import no.nav.melosys.service.vedtak.*;
+import no.nav.melosys.service.vedtak.FattEosVedtakRequest;
+import no.nav.melosys.service.vedtak.FattFtrlVedtakRequest;
+import no.nav.melosys.service.vedtak.VedtakServiceFasade;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
+import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
+import no.nav.melosys.tjenester.gui.dto.FattEosVedtakDto;
+import no.nav.melosys.tjenester.gui.dto.FattFtrlVedtakDto;
+import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +26,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,41 +54,38 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void fattVedtakEos_henleggelse_fungerer() throws MelosysException, IOException {
-        EosFattVedtakDto fattVedtakDto = new EosFattVedtakDto.Builder()
-            .medBehandlingsresultat(Behandlingsresultattyper.HENLEGGELSE)
-            .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
-            .medMottakerInstitusjoner("SE:4343")
-            .build();
+    void fattVedtak_henleggelse_fungerer() throws MelosysException, IOException {
+        FattEosVedtakDto fattVedtakDto = new FattEosVedtakDto();
+        fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
+        fattVedtakDto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
+        fattVedtakDto.setMottakerinstitusjoner(Set.of("SE:4343"));
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
         verify(tilgangService).sjekkTilgang(behandlingID);
-        verify(vedtakServiceFasade).fattVedtak(behandlingID, fattVedtakDto);
+        verify(vedtakServiceFasade).fattVedtak(eq(behandlingID), any(FattEosVedtakRequest.class));
 
         valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
 
     @Test
     void fattVedtakFtrl_henleggelse_fungerer() throws MelosysException, IOException {
-        FtrlFattVedtakDto fattVedtakDto = new FtrlFattVedtakDto.Builder()
-            .medBehandlingsresultat(Behandlingsresultattyper.HENLEGGELSE)
-            .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
-            .medFritekstInnledning("Innledning")
-            .build();
+        FattFtrlVedtakDto fattVedtakDto = new FattFtrlVedtakDto();
+        fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
+        fattVedtakDto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
+        fattVedtakDto.setFritekstInnledning("Innledning");
 
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
         verify(tilgangService).sjekkTilgang(behandlingID);
-        verify(vedtakServiceFasade).fattVedtak(behandlingID, fattVedtakDto);
+        verify(vedtakServiceFasade).fattVedtak(eq(behandlingID), any(FattFtrlVedtakRequest.class));
 
         valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
 
     @Test
     void fattVedtak_dtoManglerBehandlingresultat_girException() {
-        EosFattVedtakDto fattVedtakDto = new EosFattVedtakDto.Builder()
-            .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
-            .build();
+        FattVedtakDto fattVedtakDto = new FattVedtakDto();
+        fattVedtakDto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
 
         assertThatThrownBy(() -> vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto))
             .isInstanceOf(FunksjonellException.class)
@@ -88,9 +94,8 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void fattVedtak_dtoManglerVedtakstype_girException() {
-        FattVedtakDto fattVedtakDto = new EosFattVedtakDto.Builder()
-            .medBehandlingsresultat(Behandlingsresultattyper.HENLEGGELSE)
-            .build();
+        FattVedtakDto fattVedtakDto = new FattVedtakDto();
+        fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
 
         assertThatThrownBy(() -> vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto))
             .isInstanceOf(FunksjonellException.class)
@@ -99,21 +104,19 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void endreVedtak_fungerer() throws FunksjonellException, TekniskException, IOException {
-        EndreVedtakDto endreVedtakDto = new EndreVedtakDto.Builder()
-            .medBegrunnelseKode(Endretperiode.ENDRINGER_ARBEIDSSITUASJON)
-            .build();
-
+        EndreVedtakDto endreVedtakDto = new EndreVedtakDto();
+        endreVedtakDto.setBegrunnelseKode(Endretperiode.ENDRINGER_ARBEIDSSITUASJON);
         vedtakTjeneste.endreVedtak(behandlingID, endreVedtakDto);
 
         verify(tilgangService).sjekkTilgang(behandlingID);
-        verify(vedtakServiceFasade).endreVedtak(behandlingID, endreVedtakDto);
+        verify(vedtakServiceFasade).endreVedtak(behandlingID, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, null, endreVedtakDto.getFritekstSed());
 
         valider(endreVedtakDto, ENDRE_PERIODE_SCHEMA);
     }
 
     @Test
     void endreVedtak_dtoManglerBehandlingresultat_girException() {
-        assertThatThrownBy(() -> vedtakTjeneste.endreVedtak(behandlingID, new EndreVedtakDto.Builder().build()))
+        assertThatThrownBy(() -> vedtakTjeneste.endreVedtak(behandlingID, new EndreVedtakDto()))
             .isInstanceOf(FunksjonellException.class)
             .hasMessage("BegrunnelseKode mangler.");
     }

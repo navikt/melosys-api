@@ -1,10 +1,10 @@
 package no.nav.melosys.service.vedtak;
 
-public class FtrlFattVedtakDto extends FattVedtakDto {
+public class FattFtrlVedtakRequest extends FattVedtakRequest {
     private final String fritekstInnledning;
     private final String fritekstBegrunnelse;
 
-    private FtrlFattVedtakDto(Builder builder) {
+    private FattFtrlVedtakRequest(Builder builder) {
         super(builder);
         this.fritekstInnledning = builder.fritekstInnledning;
         this.fritekstBegrunnelse = builder.fritekstBegrunnelse;
@@ -18,7 +18,7 @@ public class FtrlFattVedtakDto extends FattVedtakDto {
         return fritekstBegrunnelse;
     }
 
-    public static class Builder extends FattVedtakDto.Builder<Builder> {
+    public static class Builder extends FattVedtakRequest.Builder<Builder> {
         private String fritekstInnledning;
         private String fritekstBegrunnelse;
 
@@ -37,8 +37,8 @@ public class FtrlFattVedtakDto extends FattVedtakDto {
             return this;
         }
 
-        public FtrlFattVedtakDto build() {
-            return new FtrlFattVedtakDto(this);
+        public FattFtrlVedtakRequest build() {
+            return new FattFtrlVedtakRequest(this);
         }
     }
 }

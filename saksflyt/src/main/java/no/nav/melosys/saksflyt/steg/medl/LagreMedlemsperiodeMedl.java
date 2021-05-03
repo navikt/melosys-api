@@ -31,7 +31,7 @@ public class LagreMedlemsperiodeMedl implements StegBehandler {
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return ProsessSteg.LAGRE_MEDLEMSPERIODE_MEDL;
+        return ProsessSteg.LAGRE_MEDLEMSKAPSPERIODE_MEDL;
     }
 
     @Override
@@ -53,7 +53,7 @@ public class LagreMedlemsperiodeMedl implements StegBehandler {
     }
 
     private long opprettMedlPeriode(long behandlingId, Medlemskapsperiode medlemskapsperiode) throws FunksjonellException {
-        return ofNullable(medlPeriodeService.opprettPeriodeEndeligFtrl(behandlingId, medlemskapsperiode))
+        return ofNullable(medlPeriodeService.opprettPeriodeEndelig(behandlingId, medlemskapsperiode))
             .orElseThrow(() -> new FunksjonellException(format("Oppretting av medlemskapsperiode %s i MEDL feilet for behandling %s", medlemskapsperiode.getId(), behandlingId)));
     }
 }

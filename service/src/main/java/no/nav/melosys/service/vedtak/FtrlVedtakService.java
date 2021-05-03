@@ -35,16 +35,15 @@ public class FtrlVedtakService {
         this.prosessinstansService = prosessinstansService;
     }
 
-    public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType,
-                           Vedtakstyper vedtakstype, String fritekstInnledning, String fritekstBegrunnelse) throws MelosysException {
+    public void fattVedtak(Behandling behandling, FattFtrlVedtakRequest request) throws MelosysException {
         long behandlingID = behandling.getId();
 
         log.info("Fatter vedtak for (FTRL) sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        behandlingsresultat.setType(behandlingsresultatType);
+        behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
 
-        oppdaterBehandlingsresultat(behandlingsresultat, vedtakstype, fritekstBegrunnelse);
+        oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), request.getFritekstBegrunnelse());
 
         if (prosessinstansService.harVedtakInstans(behandlingID)) {
             throw new FunksjonellException("Det finnes allerede en vedtak-prosess for behandling " + behandling);

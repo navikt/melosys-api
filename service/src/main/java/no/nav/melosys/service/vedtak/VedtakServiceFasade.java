@@ -3,6 +3,7 @@ package no.nav.melosys.service.vedtak;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
@@ -33,33 +34,33 @@ public class VedtakServiceFasade {
 
     @Transactional(rollbackFor = MelosysException.class, noRollbackFor = {ValideringException.class})
     public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultattype) throws MelosysException {
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
 
         eosVedtakSystemService.fattVedtak(behandling, behandlingsresultattype, Vedtakstyper.FØRSTEGANGSVEDTAK);
     }
 
     @Transactional(rollbackFor = MelosysException.class, noRollbackFor = {ValideringException.class})
-    public void fattVedtak(long behandlingID, FattVedtakDto fattVedtakDto) throws MelosysException {
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+    public void fattVedtak(long behandlingID, FattVedtakRequest fattVedtakRequest) throws MelosysException {
+        var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
 
         validerKanFattesVedtakAvTema(behandling);
 
         Sakstyper sakstype = behandling.getFagsak().getType();
 
         switch (sakstype) {
-            case EU_EOS -> fattVedtakForEos(behandling, (EosFattVedtakDto) fattVedtakDto);
-            case FTRL -> fattVedtakForFtrl(behandling, (FtrlFattVedtakDto) fattVedtakDto);
+            case EU_EOS -> eosVedtakService.fattVedtak(behandling, (FattEosVedtakRequest) fattVedtakRequest);
+            case FTRL -> ftrlVedtakService.fattVedtak(behandling, (FattFtrlVedtakRequest) fattVedtakRequest);
             default -> throw new FunksjonellException("Vedtaksfatting for sakstype " + sakstype + " er ikke støttet.");
         }
     }
 
     @Transactional(rollbackFor = MelosysException.class, noRollbackFor = {ValideringException.class})
-    public void endreVedtak(long behandlingID, EndreVedtakDto endreVedtakDto) throws FunksjonellException {
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+    public void endreVedtak(long behandlingID, Endretperiode endretperiode, String fritekst, String fritekstSed) throws FunksjonellException {
+        var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         Sakstyper sakstype = behandling.getFagsak().getType();
 
         if (sakstype == EU_EOS) {
-            eosVedtakService.endreVedtak(behandling, endreVedtakDto.getBegrunnelseKode(), endreVedtakDto.getFritekst(), endreVedtakDto.getFritekstSed());
+            eosVedtakService.endreVedtak(behandling, endretperiode, fritekst, fritekstSed);
         } else {
             throw new FunksjonellException("Vedtaksendring for sakstype " + sakstype + " er ikke støttet.");
         }
@@ -69,27 +70,5 @@ public class VedtakServiceFasade {
         if (!behandling.kanResultereIVedtak()) {
             throw new FunksjonellException("Kan ikke fatte vedtak ved behandlingstema " + behandling.getTema().getBeskrivelse());
         }
-    }
-
-    private void fattVedtakForEos(Behandling behandling, EosFattVedtakDto fattVedtakDto) throws MelosysException {
-        eosVedtakService.fattVedtak(
-            behandling,
-            fattVedtakDto.getBehandlingsresultatTypeKode(),
-            fattVedtakDto.getFritekst(),
-            fattVedtakDto.getFritekstSed(),
-            fattVedtakDto.getMottakerinstitusjoner(),
-            fattVedtakDto.getVedtakstype(),
-            fattVedtakDto.getRevurderBegrunnelse()
-        );
-    }
-
-    private void fattVedtakForFtrl(Behandling behandling, FtrlFattVedtakDto fattVedtakDto) throws MelosysException {
-        ftrlVedtakService.fattVedtak(
-            behandling,
-            fattVedtakDto.getBehandlingsresultatTypeKode(),
-            fattVedtakDto.getVedtakstype(),
-            fattVedtakDto.getFritekstInnledning(),
-            fattVedtakDto.getFritekstBegrunnelse()
-        );
     }
 }

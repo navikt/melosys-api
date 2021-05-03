@@ -1,10 +1,10 @@
 package no.nav.melosys.service.saksflyt;
 
-import javax.annotation.Nullable;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
@@ -20,14 +20,12 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.sak.OpprettSakDto;
@@ -125,7 +123,8 @@ public class ProsessinstansService {
     }
 
     public boolean harVedtakInstans(Long behandlingID) {
-        return prosessinstansRepo.findByTypeAndBehandling_Id(ProsessType.IVERKSETT_VEDTAK, behandlingID).isPresent();
+        return prosessinstansRepo.findByTypeAndBehandling_Id(ProsessType.IVERKSETT_VEDTAK, behandlingID).isPresent() ||
+            prosessinstansRepo.findByTypeAndBehandling_Id(ProsessType.IVERKSETT_VEDTAK_EOS, behandlingID).isPresent();
     }
 
     public void lagre(Prosessinstans prosessinstans) {
@@ -183,7 +182,7 @@ public class ProsessinstansService {
                                                      String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner,
                                                      String revurderBegrunnelse) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(ProsessType.IVERKSETT_VEDTAK)
+            .medType(ProsessType.IVERKSETT_VEDTAK_EOS)
             .medBehandling(behandling)
             .medBegrunnelseFritekst(fritekst)
             .medEessiMottakere(mottakerinstitusjoner)
@@ -307,7 +306,7 @@ public class ProsessinstansService {
                                                     String ytterligereInformasjonSed,
                                                     String fritekstBrev) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(ProsessType.IVERKSETT_VEDTAK)
+            .medType(ProsessType.IVERKSETT_VEDTAK_EOS)
             .medBehandling(behandling)
             .medEessiMottakere(mottakerinstitusjoner)
             .medYtterligereinformasjonSed(ytterligereInformasjonSed)

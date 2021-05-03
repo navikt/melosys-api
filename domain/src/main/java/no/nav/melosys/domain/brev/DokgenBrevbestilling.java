@@ -2,12 +2,20 @@ package no.nav.melosys.domain.brev;
 
 import java.time.Instant;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
+@JsonSubTypes(
+    {
+        @JsonSubTypes.Type(value = MangelbrevBrevbestilling.class, name = "MangelbrevBrevbestilling")
+    }
+)
 public class DokgenBrevbestilling extends Brevbestilling {
     private OrganisasjonDokument org;
     private Kontaktopplysning kontaktopplysning;

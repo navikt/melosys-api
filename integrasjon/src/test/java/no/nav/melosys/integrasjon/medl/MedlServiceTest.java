@@ -34,9 +34,9 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class MedlRestServiceTest {
+class MedlServiceTest {
 
-    private MedlRestService medlRestService;
+    private MedlService medlService;
 
     private final String FNR = "77777777773";
 
@@ -49,7 +49,7 @@ class MedlRestServiceTest {
         objectMapper.registerModule(new JavaTimeModule());
 
         mockRestConsumer = mock(MedlemskapRestConsumer.class);
-        medlRestService = new MedlRestService(mockRestConsumer, objectMapper);
+        medlService = new MedlService(mockRestConsumer, objectMapper);
     }
 
     @BeforeEach
@@ -63,7 +63,7 @@ class MedlRestServiceTest {
             asList(hentJsonResponse("gyldigPeriodelisteResponse", MedlemskapsunntakForGet[].class))
         );
 
-        Saksopplysning saksopplysning = medlRestService.hentPeriodeListe(FNR, null, null);
+        Saksopplysning saksopplysning = medlService.hentPeriodeListe(FNR, null, null);
         assertThat(saksopplysning).isNotNull();
         assertThat(saksopplysning.getKilder()).isNotEmpty();
         assertThat(saksopplysning.getKilder().iterator().next().getMottattDokument()).isNotNull();
@@ -88,7 +88,7 @@ class MedlRestServiceTest {
         );
 
         Lovvalgsperiode lovvalgsperiode = lagLovvalgsPeriode();
-        medlRestService.opprettPeriodeEndelig(FNR, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
+        medlService.opprettPeriodeEndelig(FNR, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
 
         ArgumentCaptor<MedlemskapsunntakForPost> captor = ArgumentCaptor.forClass(MedlemskapsunntakForPost.class);
 
@@ -114,7 +114,7 @@ class MedlRestServiceTest {
         );
 
         Lovvalgsperiode lovvalgsperiode = lagLovvalgsPeriode();
-        medlRestService.opprettPeriodeUnderAvklaring(FNR, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
+        medlService.opprettPeriodeUnderAvklaring(FNR, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
 
         ArgumentCaptor<MedlemskapsunntakForPost> captor = ArgumentCaptor.forClass(MedlemskapsunntakForPost.class);
 
@@ -140,7 +140,7 @@ class MedlRestServiceTest {
         );
 
         Lovvalgsperiode lovvalgsperiode = lagLovvalgsPeriode();
-        medlRestService.opprettPeriodeForeløpig(FNR, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
+        medlService.opprettPeriodeForeløpig(FNR, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
 
         ArgumentCaptor<MedlemskapsunntakForPost> captor = ArgumentCaptor.forClass(MedlemskapsunntakForPost.class);
 
@@ -170,7 +170,7 @@ class MedlRestServiceTest {
 
         Lovvalgsperiode lovvalgsperiode = lagLovvalgsPeriode();
         lovvalgsperiode.setMedlPeriodeID(123456L);
-        medlRestService.oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
+        medlService.oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
 
         ArgumentCaptor<MedlemskapsunntakForPut> captor = ArgumentCaptor.forClass(MedlemskapsunntakForPut.class);
 
@@ -197,7 +197,7 @@ class MedlRestServiceTest {
 
         Medlemskapsperiode medlemskapsperiode = lagMedlemskapsPeriode();
 
-        medlRestService.opprettPeriodeEndelig(FNR, medlemskapsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
+        medlService.opprettPeriodeEndelig(FNR, medlemskapsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
 
         ArgumentCaptor<MedlemskapsunntakForPost> captor = ArgumentCaptor.forClass(MedlemskapsunntakForPost.class);
 
@@ -226,7 +226,7 @@ class MedlRestServiceTest {
 
         Lovvalgsperiode lovvalgsperiode = lagLovvalgsPeriode();
         lovvalgsperiode.setMedlPeriodeID(123456L);
-        medlRestService.oppdaterPeriodeForeløpig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
+        medlService.oppdaterPeriodeForeløpig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
 
         ArgumentCaptor<MedlemskapsunntakForPut> captor = ArgumentCaptor.forClass(MedlemskapsunntakForPut.class);
 
@@ -248,7 +248,7 @@ class MedlRestServiceTest {
     @Test
     void oppdaterePeriodeFeilerMedManglendePeriodeId() {
         assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(() -> medlRestService.oppdaterPeriodeForeløpig(lagLovvalgsPeriode(), KildedokumenttypeMedl.HENV_SOKNAD))
+            .isThrownBy(() -> medlService.oppdaterPeriodeForeløpig(lagLovvalgsPeriode(), KildedokumenttypeMedl.HENV_SOKNAD))
             .withMessageContaining("Det er ikke lagret noen medlPeriodeID på lovvalgsperiode som skal oppdateres i MEDL");
     }
 
@@ -263,7 +263,7 @@ class MedlRestServiceTest {
 
         Lovvalgsperiode lovvalgsperiode = lagLovvalgsPeriode();
         lovvalgsperiode.setMedlPeriodeID(123456L);
-        medlRestService.avvisPeriode(123456L, AVVIST);
+        medlService.avvisPeriode(123456L, AVVIST);
 
         ArgumentCaptor<MedlemskapsunntakForPut> captor = ArgumentCaptor.forClass(MedlemskapsunntakForPut.class);
 

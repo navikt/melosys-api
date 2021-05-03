@@ -236,7 +236,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
     public boolean erAvslag() {
         return erAvslagManglendeOpplysninger() ||
             (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            && hentValidertLovvalgsperiode().erAvslått());
+                && hentValidertLovvalgsperiode().erAvslått());
     }
 
     public boolean erAvslagManglendeOpplysninger() {
@@ -301,9 +301,9 @@ public class Behandlingsresultat extends RegistreringsInfo {
     public PeriodeOmLovvalg hentValidertPeriodeOmLovvalg() {
         if (!lovvalgsperioder.isEmpty()) {
             return hentValidertLovvalgsperiode();
-        } else if (!anmodningsperioder.isEmpty()){
+        } else if (!anmodningsperioder.isEmpty()) {
             return hentValidertAnmodningsperiode();
-        } else if (!utpekingsperioder.isEmpty()){
+        } else if (!utpekingsperioder.isEmpty()) {
             return hentValidertUtpekingsperiode();
         }
 
@@ -370,7 +370,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
     public boolean erInnvilgetArbeidPåSkipOmfattetAvArbeidsland() {
         return finnValidertLovvalgsperiode().stream()
             .anyMatch(l -> l.erInnvilget()
-                &&  l.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
+                && l.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
                 && l.getTilleggsbestemmelse() == Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
     }
 
@@ -407,8 +407,6 @@ public class Behandlingsresultat extends RegistreringsInfo {
     public boolean harVedtak() {
         return vedtakMetadata != null;
     }
-
-
 
     @Override
     public String toString() {

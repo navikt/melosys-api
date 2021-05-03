@@ -24,6 +24,7 @@ import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
+import no.nav.melosys.integrasjon.joark.HentJournalposterTilknyttetSakRequest;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -63,19 +64,21 @@ public class EessiService {
         this.dataGrunnlagFactory = dataGrunnlagFactory;
     }
 
-    public Collection<Vedlegg> lagEessiVedlegg(long arkivsakID, Collection<DokumentReferanse> vedleggReferanser) throws
+    public Collection<Vedlegg> lagEessiVedlegg(Fagsak fagsak, Collection<DokumentReferanse> vedleggReferanser) throws
         IkkeFunnetException, IntegrasjonException, SikkerhetsbegrensningException {
         if (vedleggReferanser.isEmpty()) {
             return Collections.emptySet();
         }
-        final List<Journalpost> journalposter = joarkFasade.hentKjerneJournalpostListe(arkivsakID);
-        Collection<Vedlegg> vedlegg = new ArrayList<>();
+        final List<Journalpost> journalposter = joarkFasade.hentJournalposterTilknyttetSak(
+            new HentJournalposterTilknyttetSakRequest(fagsak.getGsakSaksnummer(), fagsak.getSaksnummer())
+        );
+        final Collection<Vedlegg> vedlegg = new ArrayList<>();
         for (DokumentReferanse dokumentReferanse : vedleggReferanser) {
             Journalpost journalpost = journalposter.stream()
                 .filter(jp -> jp.getJournalpostId().equals(dokumentReferanse.getJournalpostID()))
                 .findFirst()
-                .orElseThrow(() -> new IkkeFunnetException(String.format("Finner ikke journalpost %s i arkivsak %s",
-                        dokumentReferanse.getJournalpostID(), arkivsakID)));
+                .orElseThrow(() -> new IkkeFunnetException(String.format("Finner ikke journalpost %s for sak %s",
+                        dokumentReferanse.getJournalpostID(), fagsak.getSaksnummer())));
             vedlegg.add(lagEessiVedlegg(journalpost, dokumentReferanse));
         }
         return vedlegg;
@@ -123,7 +126,7 @@ public class EessiService {
         sedDataDto.setMottakerIder(mottakerInstitusjoner);
         sedDataDto.setGsakSaksnummer(behandling.getFagsak().getGsakSaksnummer());
 
-        final var vedlegg = lagEessiVedlegg(behandling.getFagsak().getGsakSaksnummer(), vedleggReferanser);
+        final var vedlegg = lagEessiVedlegg(behandling.getFagsak(), vedleggReferanser);
         log.info("Oppretter buc og sed for behandling {} med bucType {}", behandling.getId(), bucType);
         return eessiConsumer.opprettBucOgSed(sedDataDto, vedlegg, bucType, false, false).getRinaUrl();
     }

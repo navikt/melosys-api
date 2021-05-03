@@ -3,11 +3,11 @@ package no.nav.melosys.service.vedtak;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 
-public class FattVedtakDto {
+public class FattVedtakRequest {
     private final Behandlingsresultattyper behandlingsresultatTypeKode;
     private final Vedtakstyper vedtakstype;
 
-    protected FattVedtakDto(Builder<?> builder) {
+    protected FattVedtakRequest(Builder<?> builder) {
         this.behandlingsresultatTypeKode = builder.behandlingsresultatTypeKode;
         this.vedtakstype = builder.vedtakstype;
     }
@@ -36,8 +36,8 @@ public class FattVedtakDto {
             return this.getThis();
         }
 
-        public FattVedtakDto build() {
-            return new FattVedtakDto(this);
+        public FattVedtakRequest build() {
+            return new FattVedtakRequest(this);
         }
     }
 }
