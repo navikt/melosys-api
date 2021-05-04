@@ -23,10 +23,6 @@ public class MedlemAvFolketrygdenService {
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke medlemAvFolketrygden for behandlingsresultatID " + behandlingsresultatID));
     }
 
-    public void lagreMedlemAvFolketrygden(MedlemAvFolketrygden medlemAvFolketrygden) {
-        medlemAvFolketrygdenRepository.save(medlemAvFolketrygden);
-    }
-
     public Optional<MedlemAvFolketrygden> finnMedlemAvFolketrygden(long behandlingsresultatID) {
         return medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID);
     }

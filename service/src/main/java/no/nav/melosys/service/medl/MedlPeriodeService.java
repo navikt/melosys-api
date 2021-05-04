@@ -13,6 +13,7 @@ import no.nav.melosys.integrasjon.medl.MedlService;
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.repository.AnmodningsperiodeRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
+import no.nav.melosys.repository.MedlemskapsperiodeRepository;
 import no.nav.melosys.repository.UtpekingsperiodeRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -20,6 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class MedlPeriodeService {
@@ -31,6 +34,7 @@ public class MedlPeriodeService {
     private final LovvalgsperiodeRepository lovvalgsperiodeRepository;
     private final AnmodningsperiodeRepository anmodningsperiodeRepository;
     private final UtpekingsperiodeRepository utpekingsperiodeRepository;
+    private final MedlemskapsperiodeRepository medlemskapsperiodeRepository;
 
     private static final String FEIL_VED_OPPDATERING_MEDL = "Opprettelse av periode i MEDL feilet med retur av null medlPeriodeID fra MEDL tjeneste for behandling ";
 
@@ -39,13 +43,15 @@ public class MedlPeriodeService {
                               BehandlingsresultatService behandlingsresultatService,
                               LovvalgsperiodeRepository lovvalgsperiodeRepository,
                               AnmodningsperiodeRepository anmodningsperiodeRepository,
-                              UtpekingsperiodeRepository utpekingsperiodeRepository) {
+                              UtpekingsperiodeRepository utpekingsperiodeRepository,
+                              MedlemskapsperiodeRepository medlemskapsperiodeRepository) {
         this.persondataFasade = persondataFasade;
         this.medlService = medlService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.lovvalgsperiodeRepository = lovvalgsperiodeRepository;
         this.anmodningsperiodeRepository = anmodningsperiodeRepository;
         this.utpekingsperiodeRepository = utpekingsperiodeRepository;
+        this.medlemskapsperiodeRepository = medlemskapsperiodeRepository;
     }
 
     public Saksopplysning hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom) throws TekniskException {
@@ -73,10 +79,17 @@ public class MedlPeriodeService {
         lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandlingID);
     }
 
-    public Long opprettPeriodeEndelig(long behandlingId, Medlemskapsperiode medlemskapsperiode) throws FunksjonellException {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void opprettPeriodeEndelig(long behandlingId, Medlemskapsperiode medlemskapsperiode) throws FunksjonellException {
         String fnr = hentFnr(behandlingId);
         log.info("Oppretter endelig medlemskapsperiode i MEDL for behandling {}", behandlingId);
-        return medlService.opprettPeriodeEndelig(fnr, medlemskapsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
+        Long medlPeriodeId = medlService.opprettPeriodeEndelig(fnr, medlemskapsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
+
+        if (medlPeriodeId == null) {
+            throw new FunksjonellException(FEIL_VED_OPPDATERING_MEDL + behandlingId);
+        }
+
+        lagreMedlPeriodeId(medlPeriodeId, medlemskapsperiode);
     }
 
     public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, boolean erSed) throws TekniskException {
@@ -164,6 +177,11 @@ public class MedlPeriodeService {
     private void lagreMedlPeriodeId(Long medlPeriodeID, Utpekingsperiode utpekingsperiode) {
         utpekingsperiode.setMedlPeriodeID(medlPeriodeID);
         utpekingsperiodeRepository.save(utpekingsperiode);
+    }
+
+    private void lagreMedlPeriodeId(Long medlPeriodeId, Medlemskapsperiode medlemskapsperiode) {
+        medlemskapsperiode.setMedlPeriodeID(medlPeriodeId);
+        medlemskapsperiodeRepository.save(medlemskapsperiode);
     }
 
     private KildedokumenttypeMedl hentKildedokumenttype(boolean erSed) {

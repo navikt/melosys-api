@@ -1,6 +1,8 @@
 package no.nav.melosys.tjenester.gui.saksflyt;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,6 +27,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -84,7 +87,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void fattVedtak_dtoManglerBehandlingresultat_girException() {
-        FattVedtakDto fattVedtakDto = new FattVedtakDto();
+        FattVedtakDto fattVedtakDto = new FattEosVedtakDto();
         fattVedtakDto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
 
         assertThatThrownBy(() -> vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto))
@@ -94,7 +97,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void fattVedtak_dtoManglerVedtakstype_girException() {
-        FattVedtakDto fattVedtakDto = new FattVedtakDto();
+        FattVedtakDto fattVedtakDto = new FattFtrlVedtakDto();
         fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
 
         assertThatThrownBy(() -> vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto))
@@ -119,5 +122,29 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         assertThatThrownBy(() -> vedtakTjeneste.endreVedtak(behandlingID, new EndreVedtakDto()))
             .isInstanceOf(FunksjonellException.class)
             .hasMessage("BegrunnelseKode mangler.");
+    }
+
+    @Test
+    void skalMappeTilDto_EOS() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        FattVedtakDto eosVedtakDto = objectMapper.readValue(hentJsonRequest("fatteosvedtak.json"), FattVedtakDto.class);
+
+        assertThat(eosVedtakDto)
+            .isInstanceOf(FattEosVedtakDto.class)
+            .extracting("mottakerinstitusjoner", "fritekstSed")
+            .containsExactly(Set.of("NO:NAVT003"), "Fritekst til SED");
+    }
+
+    @Test
+    void skalMappeTilDto_FTRL() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        FattVedtakDto ftrlVedtakDto = objectMapper.readValue(hentJsonRequest("fattftrlvedtak.json"), FattVedtakDto.class);
+
+        //TODO Utvide assert
+        assertThat(ftrlVedtakDto).isNotNull().isInstanceOf(FattFtrlVedtakDto.class);
+    }
+
+    private InputStream hentJsonRequest(String filnavn) {
+        return getClass().getClassLoader().getResourceAsStream(filnavn);
     }
 }

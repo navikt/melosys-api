@@ -13,20 +13,22 @@ import no.nav.melosys.integrasjon.medl.MedlService;
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
 import no.nav.melosys.repository.AnmodningsperiodeRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
+import no.nav.melosys.repository.MedlemskapsperiodeRepository;
 import no.nav.melosys.repository.UtpekingsperiodeRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class MedlPeriodeServiceTest {
+@ExtendWith(MockitoExtension.class)
+class MedlPeriodeServiceTest {
 
     @Mock
     private PersondataFasade persondataFasade;
@@ -40,37 +42,31 @@ public class MedlPeriodeServiceTest {
     private AnmodningsperiodeRepository anmodningsperiodeRepository;
     @Mock
     private UtpekingsperiodeRepository utpekingsperiodeRepository;
+    @Mock
+    private MedlemskapsperiodeRepository medlemskapsperiodeRepository;
 
     private MedlPeriodeService medlPeriodeService;
 
     private static final String FNR = "12345678901";
     private static final Long MEDL_PERIODE_ID = 99L;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         medlPeriodeService = new MedlPeriodeService(persondataFasade, medlService, behandlingsresultatService,
-            lovvalgsperiodeRepository, anmodningsperiodeRepository, utpekingsperiodeRepository);
-
-        when(medlService.opprettPeriodeForeløpig(anyString(), any(PeriodeOmLovvalg.class), any(KildedokumenttypeMedl.class)))
-            .thenReturn(MEDL_PERIODE_ID);
-        when(medlService.opprettPeriodeUnderAvklaring(anyString(), any(PeriodeOmLovvalg.class), any(KildedokumenttypeMedl.class)))
-            .thenReturn(MEDL_PERIODE_ID);
-        when(medlService.opprettPeriodeEndelig(anyString(), any(Lovvalgsperiode.class), any(KildedokumenttypeMedl.class)))
-            .thenReturn(MEDL_PERIODE_ID);
-
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(lagBehandlingsResultat());
-        when(persondataFasade.hentFolkeregisterIdent(anyString())).thenReturn(FNR);
+            lovvalgsperiodeRepository, anmodningsperiodeRepository, utpekingsperiodeRepository, medlemskapsperiodeRepository);
     }
 
     @Test
-    public void hentPeriodeListe() throws TekniskException {
+    void hentPeriodeListe() {
         medlPeriodeService.hentPeriodeListe(FNR, LocalDate.now(), LocalDate.now().plusMonths(2));
 
         verify(medlService).hentPeriodeListe(eq(FNR), any(LocalDate.class), any(LocalDate.class));
     }
 
     @Test
-    public void opprettPeriodeForeløpig() throws FunksjonellException, TekniskException {
+    void opprettPeriodeForeløpig() throws FunksjonellException, TekniskException {
+        setupPeriodeForeløpig();
+
         medlPeriodeService.opprettPeriodeForeløpig(new Utpekingsperiode(), 1L, true);
 
         verify(medlService).opprettPeriodeForeløpig(eq(FNR), any(Utpekingsperiode.class), eq(KildedokumenttypeMedl.SED));
@@ -78,7 +74,9 @@ public class MedlPeriodeServiceTest {
     }
 
     @Test
-    public void opprettPeriodeUnderAvklaring() throws FunksjonellException, TekniskException {
+    void opprettPeriodeUnderAvklaring() throws FunksjonellException, TekniskException {
+        setupPeriodeUnderAvklaring();
+
         medlPeriodeService.opprettPeriodeUnderAvklaring(new Anmodningsperiode(), 1L, false);
 
         verify(medlService).opprettPeriodeUnderAvklaring(eq(FNR), any(Anmodningsperiode.class), eq(KildedokumenttypeMedl.HENV_SOKNAD));
@@ -86,7 +84,9 @@ public class MedlPeriodeServiceTest {
     }
 
     @Test
-    public void opprettPeriodeEndelig() throws MelosysException, TekniskException {
+    void opprettPeriodeEndelig() throws MelosysException, TekniskException {
+        setupPeriodeEndelig();
+
         medlPeriodeService.opprettPeriodeEndelig(new Lovvalgsperiode(), 1L, true);
 
         verify(medlService).opprettPeriodeEndelig(eq(FNR), any(Lovvalgsperiode.class), eq(KildedokumenttypeMedl.SED));
@@ -94,50 +94,66 @@ public class MedlPeriodeServiceTest {
     }
 
     @Test
-    public void opprettPeriodeEndeligFtrl() throws Exception {
-        medlPeriodeService.opprettPeriodeEndelig(1L, new Medlemskapsperiode());
+    void opprettPeriodeEndeligFtrl_feiler() throws Exception {
+        setupHappyPathBehandling();
+        when(medlService.opprettPeriodeEndelig(eq(FNR), any(Medlemskapsperiode.class), any(KildedokumenttypeMedl.class)))
+            .thenReturn(null);
 
-        verify(medlService).opprettPeriodeEndelig(eq(FNR), any(Medlemskapsperiode.class), any(KildedokumenttypeMedl.class));
+        assertThatThrownBy(() -> medlPeriodeService.opprettPeriodeEndelig(1L, new Medlemskapsperiode()))
+            .isInstanceOf(FunksjonellException.class)
+            .hasMessageContaining("Opprettelse av periode i MEDL feilet med retur av null medlPeriodeID");
+
+        verifyNoInteractions(medlemskapsperiodeRepository);
     }
 
     @Test
-    public void oppdaterPeriodeEndelig() throws FunksjonellException, TekniskException {
+    void opprettPeriodeEndeligFtrl() throws Exception {
+        setupHappyPathBehandling();
+
+        medlPeriodeService.opprettPeriodeEndelig(1L, new Medlemskapsperiode());
+
+        verify(medlService).opprettPeriodeEndelig(eq(FNR), any(Medlemskapsperiode.class), any(KildedokumenttypeMedl.class));
+        verify(medlemskapsperiodeRepository).save(any(Medlemskapsperiode.class));
+    }
+
+    @Test
+    void oppdaterPeriodeEndelig() {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setMedlPeriodeID(MEDL_PERIODE_ID);
         medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode, false);
 
-        verify(medlService).oppdaterPeriodeEndelig(eq(lovvalgsperiode), eq(KildedokumenttypeMedl.HENV_SOKNAD));
+        verify(medlService).oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
     }
 
     @Test
-    public void oppdaterPeriodeForeløpig() throws TekniskException {
+    void oppdaterPeriodeForeløpig() {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setMedlPeriodeID(MEDL_PERIODE_ID);
         medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode, false);
 
-        verify(medlService).oppdaterPeriodeForeløpig(eq(lovvalgsperiode), eq(KildedokumenttypeMedl.HENV_SOKNAD));
+        verify(medlService).oppdaterPeriodeForeløpig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
     }
 
     @Test
-    public void avvisPeriode() throws SikkerhetsbegrensningException, IkkeFunnetException {
+    void avvisPeriode() throws SikkerhetsbegrensningException, IkkeFunnetException {
         medlPeriodeService.avvisPeriode(MEDL_PERIODE_ID);
-        verify(medlService).avvisPeriode(eq(MEDL_PERIODE_ID), eq(StatusaarsakMedl.AVVIST));
+        verify(medlService).avvisPeriode(MEDL_PERIODE_ID, StatusaarsakMedl.AVVIST);
     }
 
     @Test
-    public void avvisPeriodeFeilregistrert() throws SikkerhetsbegrensningException, IkkeFunnetException {
+    void avvisPeriodeFeilregistrert() throws SikkerhetsbegrensningException, IkkeFunnetException {
         medlPeriodeService.avvisPeriodeFeilregistrert(MEDL_PERIODE_ID);
-        verify(medlService).avvisPeriode(eq(MEDL_PERIODE_ID), eq(StatusaarsakMedl.FEILREGISTRERT));
+        verify(medlService).avvisPeriode(MEDL_PERIODE_ID, StatusaarsakMedl.FEILREGISTRERT);
     }
 
     @Test
-    public void avvisPeriodeOpphørt() throws SikkerhetsbegrensningException, IkkeFunnetException {
+    void avvisPeriodeOpphørt() throws SikkerhetsbegrensningException, IkkeFunnetException {
         medlPeriodeService.avvisPeriodeOpphørt(MEDL_PERIODE_ID);
-        verify(medlService).avvisPeriode(eq(MEDL_PERIODE_ID), eq(StatusaarsakMedl.OPPHORT));
+        verify(medlService).avvisPeriode(MEDL_PERIODE_ID, StatusaarsakMedl.OPPHORT);
     }
 
     @Test
-    public void avsluttTidligereMedlPeriode_behandlingOgPeriodeFinnes_avviserPeriode() throws FunksjonellException {
+    void avsluttTidligereMedlPeriode_behandlingOgPeriodeFinnes_avviserPeriode() throws FunksjonellException {
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandling.setId(1L);
@@ -149,16 +165,16 @@ public class MedlPeriodeServiceTest {
         lovvalgsperiode.setMedlPeriodeID(MEDL_PERIODE_ID);
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(1L))).thenReturn(behandlingsresultat);
+        when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat);
 
         medlPeriodeService.avsluttTidligerMedlPeriode(fagsak);
 
-        verify(behandlingsresultatService).hentBehandlingsresultat(eq(1L));
-        verify(medlService).avvisPeriode(eq(MEDL_PERIODE_ID), eq(StatusaarsakMedl.AVVIST));
+        verify(behandlingsresultatService).hentBehandlingsresultat(1L);
+        verify(medlService).avvisPeriode(MEDL_PERIODE_ID, StatusaarsakMedl.AVVIST);
     }
 
     @Test
-    public void avsluttTidligereMedlPeriode_ingenEksisterendePeriode_ingenPeriodeBlirAvvist() throws FunksjonellException {
+    void avsluttTidligereMedlPeriode_ingenEksisterendePeriode_ingenPeriodeBlirAvvist() throws FunksjonellException {
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandling.setId(1L);
@@ -168,12 +184,35 @@ public class MedlPeriodeServiceTest {
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setLovvalgsperioder(Set.of());
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(1L))).thenReturn(behandlingsresultat);
+        when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat);
 
         medlPeriodeService.avsluttTidligerMedlPeriode(fagsak);
 
-        verify(behandlingsresultatService).hentBehandlingsresultat(eq(1L));
+        verify(behandlingsresultatService).hentBehandlingsresultat(1L);
         verify(medlService, never()).avvisPeriode(anyLong(), any(StatusaarsakMedl.class));
+    }
+
+    private void setupPeriodeForeløpig() throws IkkeFunnetException {
+        when(medlService.opprettPeriodeForeløpig(anyString(), any(PeriodeOmLovvalg.class), any(KildedokumenttypeMedl.class)))
+            .thenReturn(MEDL_PERIODE_ID);
+        setupHappyPathBehandling();
+    }
+
+    private void setupPeriodeUnderAvklaring() throws IkkeFunnetException {
+        when(medlService.opprettPeriodeUnderAvklaring(anyString(), any(PeriodeOmLovvalg.class), any(KildedokumenttypeMedl.class)))
+            .thenReturn(MEDL_PERIODE_ID);
+        setupHappyPathBehandling();
+    }
+
+    private void setupPeriodeEndelig() throws IkkeFunnetException {
+        when(medlService.opprettPeriodeEndelig(anyString(), any(Lovvalgsperiode.class), any(KildedokumenttypeMedl.class)))
+            .thenReturn(MEDL_PERIODE_ID);
+        setupHappyPathBehandling();
+    }
+
+    private void setupHappyPathBehandling() throws IkkeFunnetException {
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(lagBehandlingsResultat());
+        when(persondataFasade.hentFolkeregisterIdent(anyString())).thenReturn(FNR);
     }
 
     private Behandlingsresultat lagBehandlingsResultat() {

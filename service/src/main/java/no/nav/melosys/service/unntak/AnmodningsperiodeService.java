@@ -16,6 +16,7 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.AnmodningsperiodeRepository;
 import no.nav.melosys.repository.AnmodningsperiodeSvarRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -123,11 +124,27 @@ public class AnmodningsperiodeService {
     }
 
     private void validerSvar(AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
+        validerSvartype(anmodningsperiodeSvar);
+        validerPeriode(anmodningsperiodeSvar);
+        validerDelvisInnvilgelse(anmodningsperiodeSvar);
+    }
+
+    private void validerSvartype(AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
         if (anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == null) {
             throw new FunksjonellException("Må spesifiseres svarType for svar på anmodningsperiode");
+        }
+    }
 
-        } else if (anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == Anmodningsperiodesvartyper.DELVIS_INNVILGELSE
-                        && !anmodningsperiodeSvar.erGyldigDelvisInnvilgelse()) {
+    private void validerPeriode(AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
+        Anmodningsperiode anmodningsperiode = anmodningsperiodeSvar.getAnmodningsperiode();
+        if (PeriodeKontroller.feilIPeriode(anmodningsperiode.getFom(), anmodningsperiode.getTom())) {
+            throw new FunksjonellException("Periode er ikke gyldig");
+        }
+    }
+
+    private void validerDelvisInnvilgelse(AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
+        if (anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == Anmodningsperiodesvartyper.DELVIS_INNVILGELSE
+            && !anmodningsperiodeSvar.erGyldigDelvisInnvilgelse()) {
             throw new FunksjonellException("Periode må være fyllt ut ved " + Anmodningsperiodesvartyper.DELVIS_INNVILGELSE);
         }
     }

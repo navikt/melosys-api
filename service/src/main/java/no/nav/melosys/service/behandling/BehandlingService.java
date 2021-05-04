@@ -253,6 +253,10 @@ public class BehandlingService {
 
     private Behandlingsgrunnlag repolikerBehandlingsgrunnlag(Behandling behandlingsreplika, Behandlingsgrunnlag opprinneligBehandlingsgrunnlag)
         throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        if (opprinneligBehandlingsgrunnlag == null) {
+            return null;
+        }
+
         Behandlingsgrunnlag replikertBehandlingsgrunnlag = (Behandlingsgrunnlag) BeanUtils.cloneBean(opprinneligBehandlingsgrunnlag);
         replikertBehandlingsgrunnlag.setId(null);
         replikertBehandlingsgrunnlag.setBehandling(behandlingsreplika);

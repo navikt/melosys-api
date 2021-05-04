@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.familie;
+package no.nav.melosys.domain.person.familie;
 
 import java.util.Objects;
 import java.util.Optional;

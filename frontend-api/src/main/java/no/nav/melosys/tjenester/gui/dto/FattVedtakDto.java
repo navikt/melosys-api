@@ -12,7 +12,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
         @JsonSubTypes.Type(value = FattFtrlVedtakDto.class)
     }
 )
-public class FattVedtakDto {
+public abstract class FattVedtakDto {
     private Behandlingsresultattyper behandlingsresultatTypeKode;
     private Vedtakstyper vedtakstype;
 

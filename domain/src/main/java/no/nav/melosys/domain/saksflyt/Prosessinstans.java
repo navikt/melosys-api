@@ -61,6 +61,9 @@ public class Prosessinstans {
     @OneToMany(mappedBy = "prosessinstans", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ProsessinstansHendelse> hendelser = new ArrayList<>();
 
+    @Column(name = "sed_laas_referanse")
+    private String låsReferanse;
+
     private static final ObjectMapper dataMapper = new ObjectMapper()
         .registerModule(new JavaTimeModule())
         .registerModule(new SimpleModule().addDeserializer(LovvalgBestemmelse.class, new LovvalgBestemmelseDeserializer()));
@@ -192,6 +195,14 @@ public class Prosessinstans {
         return hendelser;
     }
 
+    public String getLåsReferanse() {
+        return låsReferanse;
+    }
+
+    public void setLåsReferanse(String låsReferanse) {
+        this.låsReferanse = låsReferanse;
+    }
+
     public String hentJournalpostID() {
         return Optional.ofNullable(getData(ProsessDataKey.JOURNALPOST_ID))
             .orElse(behandling.getInitierendeJournalpostId());
@@ -219,8 +230,20 @@ public class Prosessinstans {
         );
     }
 
-    public boolean statusErKlarEllerRestartet() {
-        return status == ProsessStatus.KLAR || status == ProsessStatus.RESTARTET;
+    public boolean erFerdig() {
+        return status == ProsessStatus.FERDIG;
+    }
+
+    public boolean erFeilet() {
+        return status == ProsessStatus.FEILET;
+    }
+
+    public boolean erPåVent() {
+        return status == ProsessStatus.PÅ_VENT;
+    }
+
+    public boolean erUnderBehandling() {
+        return status == ProsessStatus.UNDER_BEHANDLING;
     }
 
     @Override
@@ -233,10 +256,9 @@ public class Prosessinstans {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Prosessinstans)) {
+        if (!(o instanceof Prosessinstans that)) {
             return false;
         }
-        Prosessinstans that = (Prosessinstans) o;
         return this.id != null && this.id.equals(that.id);
     }
 

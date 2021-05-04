@@ -124,8 +124,7 @@ public class ProsessinstansService {
     }
 
     public boolean harVedtakInstans(Long behandlingID) {
-        return prosessinstansRepo.findByTypeAndBehandling_Id(ProsessType.IVERKSETT_VEDTAK, behandlingID).isPresent() ||
-            prosessinstansRepo.findByTypeAndBehandling_Id(ProsessType.IVERKSETT_VEDTAK_EOS, behandlingID).isPresent();
+        return prosessinstansRepo.findByBehandling_IdAndTypeIn(behandlingID, ProsessType.IVERKSETT_VEDTAK, ProsessType.IVERKSETT_VEDTAK_EOS).isPresent();
     }
 
     public void lagre(Prosessinstans prosessinstans) {
@@ -151,7 +150,8 @@ public class ProsessinstansService {
     public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling, Set<String> mottakerInstitusjon,
                                                        Set<DokumentReferanse> vedleggReferanserTilSed,
                                                        String ytterligereInformasjonSed) {
-        Prosessinstans prosessinstans = new ProsessinstansBuilder().medType(ProsessType.ANMODNING_OM_UNNTAK)
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.ANMODNING_OM_UNNTAK)
             .medBehandling(behandling)
             .medEessiMottakere(mottakerInstitusjon)
             .medVedleggTilSed(vedleggReferanserTilSed)
@@ -230,7 +230,7 @@ public class ProsessinstansService {
                                                     String fritekstSed) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
-            .medType(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE)
+            .medType(ProsessType.IVERKSETT_VEDTAK_EOS_FORKORT_PERIODE)
             .medBegrunnelseFritekst(fritekst)
             .medYtterligereinformasjonSed(fritekstSed)
             .build();
@@ -288,7 +288,11 @@ public class ProsessinstansService {
     }
 
     private Prosessinstans prosessinstansForSedMottak(MelosysEessiMelding melosysEessiMelding) {
-        Prosessinstans prosessinstans = new Prosessinstans();
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.MOTTAK_SED)
+            .medEessiMelding(melosysEessiMelding)
+            .build();
+
         prosessinstans.setType(ProsessType.MOTTAK_SED);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, melosysEessiMelding.getJournalpostId());
         prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, melosysEessiMelding.getErEndring());

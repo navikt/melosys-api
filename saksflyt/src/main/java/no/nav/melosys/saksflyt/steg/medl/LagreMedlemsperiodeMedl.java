@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.steg.medl;
 import java.util.Collection;
 
 import no.nav.melosys.domain.Medlemskapsperiode;
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -14,8 +13,7 @@ import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static java.lang.String.format;
-import static java.util.Optional.ofNullable;
+import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Component
 public class LagreMedlemsperiodeMedl implements StegBehandler {
@@ -37,7 +35,7 @@ public class LagreMedlemsperiodeMedl implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         long behandlingId = prosessinstans.getBehandling().getId();
-        MedlemAvFolketrygden medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingId);
+        var medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingId);
         Collection<Medlemskapsperiode> medlemskapsperioder = medlemAvFolketrygden.getMedlemskapsperioder();
 
         if (medlemskapsperioder.isEmpty()) {
@@ -45,15 +43,13 @@ public class LagreMedlemsperiodeMedl implements StegBehandler {
         }
 
         for (Medlemskapsperiode medlemskapsperiode : medlemskapsperioder) {
-            long medlPeriodeId = opprettMedlPeriode(behandlingId, medlemskapsperiode);
-            medlemskapsperiode.setMedlPeriodeID(medlPeriodeId);
+            opprettMedlPeriode(behandlingId, medlemskapsperiode);
         }
-
-        medlemAvFolketrygdenService.lagreMedlemAvFolketrygden(medlemAvFolketrygden);
     }
 
-    private long opprettMedlPeriode(long behandlingId, Medlemskapsperiode medlemskapsperiode) throws FunksjonellException {
-        return ofNullable(medlPeriodeService.opprettPeriodeEndelig(behandlingId, medlemskapsperiode))
-            .orElseThrow(() -> new FunksjonellException(format("Oppretting av medlemskapsperiode %s i MEDL feilet for behandling %s", medlemskapsperiode.getId(), behandlingId)));
+    private void opprettMedlPeriode(long behandlingId, Medlemskapsperiode medlemskapsperiode) throws FunksjonellException {
+        if (isEmpty(medlemskapsperiode.getMedlPeriodeID())) {
+            medlPeriodeService.opprettPeriodeEndelig(behandlingId, medlemskapsperiode);
+        }
     }
 }

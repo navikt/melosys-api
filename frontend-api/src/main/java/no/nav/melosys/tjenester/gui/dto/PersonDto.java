@@ -6,6 +6,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.*;
+import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 
 public class PersonDto {
 

@@ -7,7 +7,7 @@ import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
  * Opplysninger om foretak i utlandet
  */
 public class ForetakUtland {
-    // Settes av frontend for hvert foretak fordi orgnr ikke er påkrevd,
+    // Settes av frontend eller ved mapping fra SED for hvert foretak fordi orgnr ikke er påkrevd,
     // og defor ikke kan brukes som nøkkel
     public String uuid;
 
