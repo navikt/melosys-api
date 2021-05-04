@@ -35,8 +35,8 @@ final class JournalpostRequestValidator {
         if (StringUtils.isEmpty(sak.getFagsakId())) {
             feil.add("Saksnummer mangler");
         }
-        if (StringUtils.isEmpty(sak.getArkivsaksystem())) {
-            feil.add("Arkivsaksystem mangler");
+        if (StringUtils.isEmpty(sak.getFagsaksystem())) {
+            feil.add("Fagsaksystem mangler");
         }
         return feil;
     }

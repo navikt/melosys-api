@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.joark.journalpostapi.dto;
 
 public class Sak {
-    private static final String ARKIVSAKSYSTEM = "GSAK";
     private static final String SAKSTYPE = "FAGSAK";
     private static final String FAGSAKSYSTEM = "FS38";
     private String fagsakId;
@@ -23,10 +22,6 @@ public class Sak {
 
     public String getSakstype() {
         return SAKSTYPE;
-    }
-
-    public String getArkivsaksystem() {
-        return ARKIVSAKSYSTEM;
     }
 
     public String getFagsaksystem() {

@@ -184,7 +184,7 @@ class JoarkServiceTest {
         assertThat(request.sak).isNotNull();
         assertThat(request.sak.getFagsakId()).isEqualTo(journalpostOppdatering.getSaksnummer());
         assertThat(request.sak.getSakstype()).isEqualTo("FAGSAK");
-        assertThat(request.sak.getArkivsaksystem()).isNotNull();
+        assertThat(request.sak.getFagsaksystem()).isNotNull();
 
         assertThat(request.dokumenter.size()).isEqualTo(2);
         assertThat(request.dokumenter.get(0).tittel).isEqualTo(tittel);
@@ -233,7 +233,7 @@ class JoarkServiceTest {
         assertThat(request.sak).isNotNull();
         assertThat(request.sak.getFagsakId()).isEqualTo(journalpostOppdatering.getSaksnummer());
         assertThat(request.sak.getSakstype()).isEqualTo("FAGSAK");
-        assertThat(request.sak.getArkivsaksystem()).isNotNull();
+        assertThat(request.sak.getFagsaksystem()).isNotNull();
 
         assertThat(request.dokumenter).hasSize(1);
         Dokumentoppdatering hovedDokument = request.dokumenter.iterator().next();
