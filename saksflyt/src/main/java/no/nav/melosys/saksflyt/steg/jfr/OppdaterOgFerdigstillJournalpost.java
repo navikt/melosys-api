@@ -9,11 +9,9 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
-import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +27,10 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterOgFerdigstillJournalpost.class);
 
     private final JoarkFasade joarkFasade;
-    private final FagsakService fagsakService;
 
     @Autowired
-    public OppdaterOgFerdigstillJournalpost(JoarkFasade joarkFasade, FagsakService fagsakService) {
+    public OppdaterOgFerdigstillJournalpost(JoarkFasade joarkFasade) {
         this.joarkFasade = joarkFasade;
-        this.fagsakService = fagsakService;
     }
 
     @Override
@@ -47,16 +43,7 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         String journalpostID = prosessinstans.getData(JOURNALPOST_ID);
 
-        String saksnummer;
-        if (prosessinstans.getBehandling() == null) {
-            saksnummer = prosessinstans.getData(SAKSNUMMER);
-        } else {
-            saksnummer = prosessinstans.getBehandling().getFagsak().getSaksnummer();
-        }
-        if (saksnummer == null) {
-            throw new TekniskException("Prosessinstansen er ikke knyttet til en nav-sak");
-        }
-
+        var behandling = prosessinstans.getBehandling();
         String brukerID = prosessinstans.getData(BRUKER_ID);
         String avsenderID = prosessinstans.getData(AVSENDER_ID);
         String avsenderNavn = prosessinstans.getData(AVSENDER_NAVN);
@@ -76,7 +63,7 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
         Map<String, String> fysiskeVedleggMedTitler = prosessinstans.getData(FYSISKE_VEDLEGG, Map.class);
 
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
-            .medSaksnummer(saksnummer)
+            .medSaksnummer(behandling.getFagsak().getSaksnummer())
             .medBrukerID(brukerID)
             .medHovedDokumentID(hovedDokumentID)
             .medAvsenderID(avsenderID)
@@ -86,9 +73,9 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
             .medMottattDato(mottattDato)
             .medFysiskeVedlegg(fysiskeVedleggMedTitler)
             .medLogiskeVedleggTitler(logiskeVedleggTitler)
-            .medTema(fraBehandlingstema(prosessinstans.getBehandling().getTema()).getKode())
+            .medTema(fraBehandlingstema(behandling.getTema()).getKode())
             .build();
         joarkFasade.oppdaterJournalpost(journalpostID, journalpostOppdatering, true);
-        log.info("Oppdatert og ferdigstilt journalpost {} for fagsak: {}", journalpostID, saksnummer);
+        log.info("Oppdatert og ferdigstilt journalpost {} for fagsak: {}", journalpostID, behandling.getFagsak().getSaksnummer());
     }
 }

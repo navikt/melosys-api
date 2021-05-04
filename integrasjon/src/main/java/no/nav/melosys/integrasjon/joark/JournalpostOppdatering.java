@@ -130,15 +130,15 @@ public final class JournalpostOppdatering {
         return brukerID;
     }
 
-    String getAvsenderID() {
+    public String getAvsenderID() {
         return avsenderID;
     }
 
-    String getAvsenderNavn() {
+    public String getAvsenderNavn() {
         return avsenderNavn;
     }
 
-    Avsendertyper getAvsenderType() {
+    public Avsendertyper getAvsenderType() {
         return avsenderType;
     }
 
@@ -156,7 +156,7 @@ public final class JournalpostOppdatering {
         return mottattDato;
     }
 
-    Map<String, String> getFysiskeVedlegg() {
+    public Map<String, String> getFysiskeVedlegg() {
         return fysiskeVedlegg;
     }
 
@@ -165,7 +165,7 @@ public final class JournalpostOppdatering {
     }
 
 
-    List<String> getLogiskeVedleggTitler() {
+    public List<String> getLogiskeVedleggTitler() {
         return logiskeVedleggTitler;
     }
 
@@ -180,8 +180,7 @@ public final class JournalpostOppdatering {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof JournalpostOppdatering)) return false;
-        JournalpostOppdatering that = (JournalpostOppdatering) o;
+        if (!(o instanceof JournalpostOppdatering that)) return false;
         return Objects.equals(getSaksnummer(), that.getSaksnummer()) &&
             Objects.equals(getHovedDokumentID(), that.getHovedDokumentID()) &&
             Objects.equals(getBrukerID(), that.getBrukerID()) &&
