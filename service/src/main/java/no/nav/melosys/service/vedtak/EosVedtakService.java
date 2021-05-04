@@ -79,29 +79,36 @@ public class EosVedtakService {
         this.melosysEventMulticaster = melosysEventMulticaster;
     }
 
-    public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType,
-                           String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner,
-                           Vedtakstyper vedtakstype, String revurderBegrunnelse) throws MelosysException {
+    public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype) throws MelosysException {
+        FattEosVedtakRequest request = new FattEosVedtakRequest.Builder()
+            .medBehandlingsresultat(behandlingsresultattype)
+            .medVedtakstype(vedtakstype)
+            .build();
+        fattVedtak(behandling, request);
+    }
+
+    public void fattVedtak(Behandling behandling, FattEosVedtakRequest request) throws MelosysException {
         long behandlingID = behandling.getId();
 
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        behandlingsresultat.setType(behandlingsresultatType);
-        log.info("Fatter vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
+        log.info("Fatter vedtak for (EU_EØS) sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
+
+        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
 
         if (behandlingsresultat.erInnvilgelse()) {
-            validerInnvilgelse(vedtakstype, behandling, behandlingsresultat);
+            validerInnvilgelse(request.getVedtakstype(), behandling, behandlingsresultat);
         }
 
-        oppdaterBehandlingsresultat(behandlingsresultat, vedtakstype, fritekst, revurderBegrunnelse);
-        mottakerinstitusjoner = validerOgAvklarMottakerInstitusjoner(behandling, mottakerinstitusjoner, behandlingsresultat);
+        oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), request.getFritekst(), request.getRevurderBegrunnelse());
+        Set<String> mottakerinstitusjoner = validerOgAvklarMottakerInstitusjoner(behandling, request.getMottakerinstitusjoner(), behandlingsresultat);
 
         if (prosessinstansService.harVedtakInstans(behandlingID)) {
             throw new FunksjonellException("Det finnes allerede en vedtak-prosess for behandling " + behandling);
         }
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
         behandlingService.lagre(behandling);
-        prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType,
-            fritekst, fritekstSed, mottakerinstitusjoner, revurderBegrunnelse);
+        prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, request.getBehandlingsresultatTypeKode(),
+            request.getFritekst(), request.getFritekstSed(), mottakerinstitusjoner, request.getRevurderBegrunnelse());
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 

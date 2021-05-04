@@ -1,10 +1,10 @@
 package no.nav.melosys.service.saksflyt;
 
-import javax.annotation.Nullable;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
@@ -123,7 +123,7 @@ public class ProsessinstansService {
     }
 
     public boolean harVedtakInstans(Long behandlingID) {
-        return prosessinstansRepo.findByTypeAndBehandling_Id(ProsessType.IVERKSETT_VEDTAK, behandlingID).isPresent();
+        return prosessinstansRepo.findByBehandling_IdAndTypeIn(behandlingID, ProsessType.IVERKSETT_VEDTAK, ProsessType.IVERKSETT_VEDTAK_EOS).isPresent();
     }
 
     public void lagre(Prosessinstans prosessinstans) {
@@ -182,7 +182,7 @@ public class ProsessinstansService {
                                                      String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner,
                                                      String revurderBegrunnelse) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(ProsessType.IVERKSETT_VEDTAK)
+            .medType(ProsessType.IVERKSETT_VEDTAK_EOS)
             .medBehandling(behandling)
             .medBegrunnelseFritekst(fritekst)
             .medEessiMottakere(mottakerinstitusjoner)
@@ -219,7 +219,7 @@ public class ProsessinstansService {
                                                     String fritekstSed) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
-            .medType(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE)
+            .medType(ProsessType.IVERKSETT_VEDTAK_EOS_FORKORT_PERIODE)
             .medBegrunnelseFritekst(fritekst)
             .medYtterligereinformasjonSed(fritekstSed)
             .build();
@@ -310,7 +310,7 @@ public class ProsessinstansService {
                                                     String ytterligereInformasjonSed,
                                                     String fritekstBrev) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(ProsessType.IVERKSETT_VEDTAK)
+            .medType(ProsessType.IVERKSETT_VEDTAK_EOS)
             .medBehandling(behandling)
             .medEessiMottakere(mottakerinstitusjoner)
             .medYtterligereinformasjonSed(ytterligereInformasjonSed)

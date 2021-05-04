@@ -16,8 +16,11 @@ public interface ProsessinstansRepository extends JpaRepository<Prosessinstans, 
         + "WHERE p.status <> no.nav.melosys.domain.saksflyt.ProsessStatus.FERDIG "
         + "AND p.type IN (?1) GROUP BY p.type, p.status")
     Collection<ProsessinstansAntall> antallAktiveOgFeiletPerTypeOgStatus(Collection<ProsessType> typer);
+
     Optional<Prosessinstans> findByBehandling_IdAndStatusIs(long id, ProsessStatus prosessStatus);
-    Optional<Prosessinstans> findByTypeAndBehandling_Id(ProsessType prosessType, long id);
+
+    Optional<Prosessinstans> findByBehandling_IdAndTypeIn(long id, ProsessType... prosessTypes);
+
     Collection<Prosessinstans> findAllByStatus(ProsessStatus status);
 
     @Query("""

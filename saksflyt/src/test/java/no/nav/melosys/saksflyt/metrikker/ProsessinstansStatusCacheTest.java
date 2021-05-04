@@ -31,7 +31,7 @@ public class ProsessinstansStatusCacheTest {
         cache = new ProsessinstansStatusCache(prosessinstansRepository, 100);
         ProsessinstansAntall prosessinstansAntall_1 = new ProsessinstansAntall(JFR_NY_BEHANDLING, FERDIG, 2);
         ProsessinstansAntall prosessinstansAntall_2 = new ProsessinstansAntall(JFR_KNYTT, FEILET, 1);
-        ProsessinstansAntall prosessinstansAntall_3 = new ProsessinstansAntall(IVERKSETT_VEDTAK, FEILET, 2);
+        ProsessinstansAntall prosessinstansAntall_3 = new ProsessinstansAntall(IVERKSETT_VEDTAK_EOS, FEILET, 2);
         prosessinstansMetrikkerList = Arrays.asList(prosessinstansAntall_1, prosessinstansAntall_2, prosessinstansAntall_3);
     }
 
@@ -41,6 +41,6 @@ public class ProsessinstansStatusCacheTest {
             .thenReturn(prosessinstansMetrikkerList);
         assertThat(cache.antallProsessinstanserFeilet(JFR_NY_BEHANDLING)).isEqualTo(0.0);
         assertThat(cache.antallProsessinstanserFeilet(JFR_KNYTT)).isEqualTo(1.0);
-        assertThat(cache.antallProsessinstanserFeilet(IVERKSETT_VEDTAK)).isEqualTo(2.0);
+        assertThat(cache.antallProsessinstanserFeilet(IVERKSETT_VEDTAK_EOS)).isEqualTo(2.0);
     }
 }

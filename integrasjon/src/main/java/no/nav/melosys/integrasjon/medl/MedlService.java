@@ -13,9 +13,6 @@ import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.util.LandkoderUtils;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForGet;
 import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPost;
@@ -27,22 +24,21 @@ import org.springframework.stereotype.Service;
 import static no.nav.melosys.integrasjon.medl.MedlPeriodeKonverter.*;
 
 @Service
-public class MedlRestService implements MedlFasade {
+public class MedlService {
     private static final String MEDLEMSKAP_VERSJON = "2.0";
 
     private final MedlemskapRestConsumer medlemskapRestConsumer;
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public MedlRestService(MedlemskapRestConsumer medlemskapRestConsumer,
-                           ObjectMapper objectMapper) {
+    public MedlService(MedlemskapRestConsumer medlemskapRestConsumer,
+                       ObjectMapper objectMapper) {
         this.medlemskapRestConsumer = medlemskapRestConsumer;
         this.objectMapper = objectMapper;
 
         this.objectMapper.registerModule(new JavaTimeModule());
     }
 
-    @Override
     public Saksopplysning hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom) throws TekniskException {
         List<MedlemskapsunntakForGet> periodeListeResponse = medlemskapRestConsumer.hentPeriodeListe(fnr, fom, tom);
 
@@ -82,33 +78,27 @@ public class MedlRestService implements MedlFasade {
         return saksopplysning;
     }
 
-    @Override
-    public Long opprettPeriodeEndelig(String fnr, Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
-        return opprettPeriode(fnr, lovvalgsperiode, PeriodestatusMedl.GYLD, LovvalgMedl.ENDL, kildedokumenttypeMedl);
+    public Long opprettPeriodeEndelig(String fnr, HarBestemmelse<?> bestemmelse, KildedokumenttypeMedl kildedokumenttypeMedl) {
+        return opprettPeriode(fnr, bestemmelse, PeriodestatusMedl.GYLD, LovvalgMedl.ENDL, kildedokumenttypeMedl);
     }
 
-    @Override
     public Long opprettPeriodeUnderAvklaring(String fnr, PeriodeOmLovvalg periodeOmLovvalg, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
         return opprettPeriode(fnr, periodeOmLovvalg, PeriodestatusMedl.UAVK, LovvalgMedl.UAVK, kildedokumenttypeMedl);
     }
 
-    @Override
     public Long opprettPeriodeForeløpig(String fnr, PeriodeOmLovvalg periodeOmLovvalg, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
         return opprettPeriode(fnr, periodeOmLovvalg, PeriodestatusMedl.UAVK, LovvalgMedl.FORL, kildedokumenttypeMedl);
     }
 
-    @Override
-    public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException, FunksjonellException {
+    public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
         oppdaterPeriode(lovvalgsperiode, PeriodestatusMedl.GYLD, LovvalgMedl.ENDL, kildedokumenttypeMedl);
     }
 
-    @Override
     public void oppdaterPeriodeForeløpig(Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
         oppdaterPeriode(lovvalgsperiode, PeriodestatusMedl.UAVK, LovvalgMedl.FORL, kildedokumenttypeMedl);
     }
 
-    @Override
-    public void avvisPeriode(Long medlPeriodeID, StatusaarsakMedl årsak) throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public void avvisPeriode(Long medlPeriodeID, StatusaarsakMedl årsak) {
         MedlemskapsunntakForGet eksisterendePeriode = hentEksisterendePeriode(medlPeriodeID);
 
         MedlemskapsunntakForPut.SporingsinformasjonForPut sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut.builder()
@@ -132,28 +122,50 @@ public class MedlRestService implements MedlFasade {
         medlemskapRestConsumer.oppdaterPeriode(request);
     }
 
-    private Long opprettPeriode(String fnr, PeriodeOmLovvalg periodeOmLovvalg, PeriodestatusMedl periodestatusMedl,
+    private Long opprettPeriode(String fnr, HarBestemmelse<?> bestemmelse, PeriodestatusMedl periodestatusMedl,
                                 LovvalgMedl lovvalgMedl, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
+
+        MedlemskapsunntakForPost.MedlemskapsunntakForPostBuilder request = null;
+
+        if (bestemmelse instanceof PeriodeOmLovvalg periodeOmLovvalg) {
+            request = lovvalgRequest(periodeOmLovvalg);
+        } else if (bestemmelse instanceof Medlemskapsperiode medlemskapsperiode) {
+            request = medlemskapsperiodeRequest(medlemskapsperiode);
+        }
+
+        if (request == null) {
+            throw new TekniskException("Oppretting av periode i MEDL feilet");
+        }
 
         MedlemskapsunntakForPost.SporingsinformasjonForPost sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost.builder()
             .kildedokument(kildedokumenttypeMedl.getKode())
             .build();
 
-        LovvalgBestemmelse bestemmelse = hentLovvalgBestemmelse(periodeOmLovvalg);
-
-        MedlemskapsunntakForPost request = MedlemskapsunntakForPost.builder()
+        request
+            .sporingsinformasjon(sporingsinformasjon)
             .ident(fnr)
+            .status(periodestatusMedl.getKode())
+            .lovvalg(lovvalgMedl.getKode());
+
+        return medlemskapRestConsumer.opprettPeriode(request.build()).getUnntakId();
+    }
+
+    private MedlemskapsunntakForPost.MedlemskapsunntakForPostBuilder lovvalgRequest(PeriodeOmLovvalg periodeOmLovvalg) throws TekniskException {
+        return MedlemskapsunntakForPost.builder()
             .fraOgMed(periodeOmLovvalg.getFom())
             .tilOgMed(periodeOmLovvalg.getTom())
-            .status(periodestatusMedl.getKode())
-            .dekning(tilMedlTrygdeDekning(periodeOmLovvalg.getDekning()).getKode())
+            .dekning(tilMedlTrygdeDekningEos(periodeOmLovvalg.getDekning()).getKode())
             .lovvalgsland(LandkoderUtils.tilIso3(periodeOmLovvalg.getLovvalgsland().getKode()))
-            .lovvalg(lovvalgMedl.getKode())
-            .grunnlag(tilGrunnlagMedltype(bestemmelse).getKode())
-            .sporingsinformasjon(sporingsinformasjon)
-            .build();
+            .grunnlag(tilGrunnlagMedltype(hentLovvalgBestemmelse(periodeOmLovvalg)).getKode());
+    }
 
-        return medlemskapRestConsumer.opprettPeriode(request).getUnntakId();
+    private MedlemskapsunntakForPost.MedlemskapsunntakForPostBuilder medlemskapsperiodeRequest(Medlemskapsperiode medlemskapsperiode) throws TekniskException {
+        return MedlemskapsunntakForPost.builder()
+            .fraOgMed(medlemskapsperiode.getFom())
+            .tilOgMed(medlemskapsperiode.getTom())
+            .dekning(tilMedlTrygdeDekningFtrl(medlemskapsperiode.getDekning(), medlemskapsperiode.getBestemmelse()).getKode())
+            .lovvalgsland(LandkoderUtils.tilIso3(medlemskapsperiode.getArbeidsland()))
+            .grunnlag(tilGrunnlagMedltype(medlemskapsperiode.getBestemmelse()).getKode());
     }
 
     private void oppdaterPeriode(Lovvalgsperiode lovvalgsperiode, PeriodestatusMedl periodestatusMedl,
@@ -178,7 +190,7 @@ public class MedlRestService implements MedlFasade {
             .fraOgMed(lovvalgsperiode.getFom())
             .tilOgMed(lovvalgsperiode.getTom())
             .status(periodestatusMedl.getKode())
-            .dekning(tilMedlTrygdeDekning(lovvalgsperiode.getDekning()).getKode())
+            .dekning(tilMedlTrygdeDekningEos(lovvalgsperiode.getDekning()).getKode())
             .lovvalgsland(LandkoderUtils.tilIso3(lovvalgsperiode.getLovvalgsland().getKode()))
             .lovvalg(lovvalgMedl.getKode())
             .grunnlag(tilGrunnlagMedltype(bestemmelse).getKode())
