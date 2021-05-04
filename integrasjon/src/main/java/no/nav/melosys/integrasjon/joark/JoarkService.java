@@ -265,7 +265,8 @@ public class JoarkService implements JoarkFasade {
             .medDatoMottatt(journalpostOppdatering.getMottattDato())
             .medTittel(journalpostOppdatering.getTittel())
             .medBruker(journalpostOppdatering.getBrukerID())
-            .medSaksnummer(journalpostOppdatering.getSaksnummer());
+            .medSaksnummer(journalpostOppdatering.getSaksnummer())
+            .medTema(journalpostOppdatering.getTema());
 
         final String hovedDokumentID = journalpostOppdatering.getHovedDokumentID();
         if (hovedDokumentID != null) {

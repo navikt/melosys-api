@@ -18,6 +18,7 @@ public final class JournalpostOppdatering {
     private final Map<String, String> fysiskeVedlegg;
     private final List<String> logiskeVedleggTitler;
     private final LocalDate mottattDato;
+    private final String tema;
 
     public static class Builder {
         private String saksnummer;
@@ -31,6 +32,7 @@ public final class JournalpostOppdatering {
         private LocalDate mottattDato;
         private Map<String, String> fysiskeVedlegg = new HashMap<>();
         private List<String> logiskeVedleggTitler = new ArrayList<>();
+        private String tema;
 
         public Builder medSaksnummer(String saksnummer) {
             this.saksnummer = saksnummer;
@@ -91,6 +93,11 @@ public final class JournalpostOppdatering {
             return this;
         }
 
+        public Builder medTema(String tema) {
+            this.tema = tema;
+            return this;
+        }
+
         public JournalpostOppdatering build() {
             return new JournalpostOppdatering(this);
         }
@@ -108,6 +115,7 @@ public final class JournalpostOppdatering {
         this.logiskeVedleggTitler = builder.logiskeVedleggTitler;
         this.mottattDato = builder.mottattDato;
         this.avsenderLand = builder.avsenderLand;
+        this.tema = builder.tema;
     }
 
     public String getSaksnummer() {
@@ -163,6 +171,10 @@ public final class JournalpostOppdatering {
 
     boolean harLogiskeVedlegg() {
         return !CollectionUtils.isEmpty(logiskeVedleggTitler);
+    }
+
+    public String getTema() {
+        return tema;
     }
 
     @Override

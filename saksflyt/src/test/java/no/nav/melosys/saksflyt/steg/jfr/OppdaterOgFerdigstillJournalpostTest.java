@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.jfr;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
@@ -44,6 +45,7 @@ class OppdaterOgFerdigstillJournalpostTest {
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
         prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, "navn");
         prosessinstans.setBehandling(new Behandling());
+        prosessinstans.getBehandling().setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         prosessinstans.getBehandling().setFagsak(new Fagsak());
         prosessinstans.getBehandling().getFagsak().setSaksnummer("MEL-123");
         oppdaterOgFerdigstillJournalpost.utfør(prosessinstans);

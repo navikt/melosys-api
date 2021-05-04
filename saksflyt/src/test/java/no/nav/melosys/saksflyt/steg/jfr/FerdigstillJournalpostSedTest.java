@@ -5,6 +5,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -64,6 +65,7 @@ class FerdigstillJournalpostSedTest {
         fagsak.getAktører().add(bruker);
 
         Behandling behandling = new Behandling();
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setFagsak(fagsak);
 
         MelosysEessiMelding eessiMelding = new MelosysEessiMelding();

@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -17,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import static no.nav.melosys.domain.TemaFactory.fraBehandlingstema;
 
 @Component
 public class FerdigstillJournalpostSed implements StegBehandler {
@@ -40,7 +41,7 @@ public class FerdigstillJournalpostSed implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
 
-        final Behandling behandling = prosessinstans.getBehandling();
+        final var behandling = prosessinstans.getBehandling();
 
         final String saksnummer = behandling.getFagsak().getSaksnummer();
         final String brukerID = hentBrukerID(prosessinstans);
@@ -50,6 +51,7 @@ public class FerdigstillJournalpostSed implements StegBehandler {
             .medBrukerID(brukerID)
             .medSaksnummer(saksnummer)
             .medTittel(tittel)
+            .medTema(fraBehandlingstema(behandling.getTema()).getKode())
             .build();
 
         joarkFasade.oppdaterJournalpost(eessiMelding.getJournalpostId(), journalpostOppdatering, true);

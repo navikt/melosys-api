@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.TemaFactory.fraBehandlingstema;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPDATER_OG_FERDIGSTILL_JOURNALPOST;
 
@@ -76,12 +77,17 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
 
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
             .medSaksnummer(saksnummer)
-            .medBrukerID(brukerID).medHovedDokumentID(hovedDokumentID)
-            .medAvsenderID(avsenderID).medAvsenderNavn(avsenderNavn).medAvsenderType(avsenderType).medAvsenderLand(avsenderLand)
+            .medBrukerID(brukerID)
+            .medHovedDokumentID(hovedDokumentID)
+            .medAvsenderID(avsenderID)
+            .medAvsenderNavn(avsenderNavn)
+            .medAvsenderType(avsenderType).medAvsenderLand(avsenderLand)
             .medTittel(tittel)
             .medMottattDato(mottattDato)
             .medFysiskeVedlegg(fysiskeVedleggMedTitler)
-            .medLogiskeVedleggTitler(logiskeVedleggTitler).build();
+            .medLogiskeVedleggTitler(logiskeVedleggTitler)
+            .medTema(fraBehandlingstema(prosessinstans.getBehandling().getTema()).getKode())
+            .build();
         joarkFasade.oppdaterJournalpost(journalpostID, journalpostOppdatering, true);
         log.info("Oppdatert og ferdigstilt journalpost {} for fagsak: {}", journalpostID, saksnummer);
     }
