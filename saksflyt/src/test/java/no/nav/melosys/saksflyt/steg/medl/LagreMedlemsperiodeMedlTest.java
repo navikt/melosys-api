@@ -18,9 +18,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class LagreMedlemsperiodeMedlTest {
@@ -41,7 +41,7 @@ class LagreMedlemsperiodeMedlTest {
 
     @Test
     void utfør_feilerUtenMedlemskapsperiode() throws Exception {
-        when(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(anyLong())).thenReturn(lagMedlemAvFolketrygden(false));
+        when(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(anyLong())).thenReturn(lagMedlemAvFolketrygden());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> lagreMedlemsperiodeMedl.utfør(lagProsessInstans()))
@@ -49,13 +49,26 @@ class LagreMedlemsperiodeMedlTest {
     }
 
     @Test
-    void utfør_erInnvilgelse_oppretterMedlPeriode() throws Exception {
-        MedlemAvFolketrygden medlemAvFolketrygden = lagMedlemAvFolketrygden(true);
+    void utfør_erInnvilgelse_oppretterMedlPerioder() throws Exception {
+        MedlemAvFolketrygden medlemAvFolketrygden = lagMedlemAvFolketrygden(new Medlemskapsperiode(), new Medlemskapsperiode());
         when(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(anyLong())).thenReturn(medlemAvFolketrygden);
 
         lagreMedlemsperiodeMedl.utfør(lagProsessInstans());
 
-        verify(medlPeriodeService).opprettPeriodeEndelig(BEHANDLING_ID, medlemAvFolketrygden.getMedlemskapsperioder().iterator().next());
+        verify(medlPeriodeService, times(2)).opprettPeriodeEndelig(BEHANDLING_ID, medlemAvFolketrygden.getMedlemskapsperioder().iterator().next());
+    }
+
+    @Test
+    void utfør_erInnvilgelse_opprettPerioder_Idempotent() throws Exception {
+        Medlemskapsperiode lagretPeriode = new Medlemskapsperiode();
+        lagretPeriode.setMedlPeriodeID(123L);
+        MedlemAvFolketrygden medlemAvFolketrygden = lagMedlemAvFolketrygden(lagretPeriode, new Medlemskapsperiode());
+
+        when(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(anyLong())).thenReturn(medlemAvFolketrygden);
+
+        lagreMedlemsperiodeMedl.utfør(lagProsessInstans());
+
+        verify(medlPeriodeService, times(1)).opprettPeriodeEndelig(eq(BEHANDLING_ID), any(Medlemskapsperiode.class));
     }
 
     private Prosessinstans lagProsessInstans() {
@@ -70,13 +83,9 @@ class LagreMedlemsperiodeMedlTest {
         return behandling;
     }
 
-    private MedlemAvFolketrygden lagMedlemAvFolketrygden(boolean medPeriode) {
+    private MedlemAvFolketrygden lagMedlemAvFolketrygden(Medlemskapsperiode... medlemskapsperioder) {
         MedlemAvFolketrygden medlemAvFolketrygden = new MedlemAvFolketrygden();
-        medlemAvFolketrygden.setMedlemskapsperioder(medPeriode ? lagMedlemskapsperiode() : emptyList());
+        medlemAvFolketrygden.setMedlemskapsperioder(medlemskapsperioder.length > 0 ? List.of(medlemskapsperioder) : emptyList());
         return medlemAvFolketrygden;
-    }
-
-    private Collection<Medlemskapsperiode> lagMedlemskapsperiode() {
-        return List.of(new Medlemskapsperiode());
     }
 }
