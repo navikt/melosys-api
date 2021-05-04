@@ -65,7 +65,7 @@ class UnntaksperiodeServiceTest {
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L, false))
+            .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L, false, null))
             .withMessageContaining("er inaktiv");
     }
 
@@ -73,7 +73,7 @@ class UnntaksperiodeServiceTest {
     void godkjennPeriode_feilBehandlingstype_forventException() {
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L, false))
+            .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L, false, null))
             .withMessageContaining("ikke av tema");
     }
 
@@ -88,7 +88,7 @@ class UnntaksperiodeServiceTest {
 
         when(behandlingsresultatService.hentBehandlingsresultat(eq(behandling.getId()))).thenReturn(new Behandlingsresultat());
 
-        unntaksperiodeService.godkjennPeriode(1L, false);
+        unntaksperiodeService.godkjennPeriode(1L, false, null);
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(behandling.getFagsak().getSaksnummer()));
     }
 
@@ -102,7 +102,7 @@ class UnntaksperiodeServiceTest {
         behandling.getSaksopplysninger().add(sedSaksopplysning);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L, false))
+            .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L, false, null))
             .withMessageContaining("har feil i perioden");
     }
 

@@ -30,6 +30,7 @@ public class UnntakTjeneste {
 
     @PostMapping("{behandlingID}/ikkegodkjenn")
     public ResponseEntity<Void> ikkeGodkjennUnntaksperiode(@PathVariable("behandlingID") Long behandlingId, @RequestBody VurderUnntaksperiodeDto vurderUnntaksperiodeDto) throws FunksjonellException, TekniskException {
+        System.out.println("ostekake");
         unntaksperiodeService.ikkeGodkjennPeriode(behandlingId, vurderUnntaksperiodeDto.getIkkeGodkjentBegrunnelseKoder(), vurderUnntaksperiodeDto.getBegrunnelseFritekst());
         return ResponseEntity.noContent().build();
     }
@@ -39,7 +40,7 @@ public class UnntakTjeneste {
         @PathVariable("behandlingID") Long behandlingId,
         @RequestBody GodkjennUnntaksperiodeDto godkjennUnntaksperiodeDto
     ) throws FunksjonellException, TekniskException {
-        unntaksperiodeService.godkjennPeriode(behandlingId, godkjennUnntaksperiodeDto.isVarsleUtland());
+        unntaksperiodeService.godkjennPeriode(behandlingId, godkjennUnntaksperiodeDto.isVarsleUtland(), godkjennUnntaksperiodeDto.getFritekst());
         return ResponseEntity.noContent().build();
     }
 }
