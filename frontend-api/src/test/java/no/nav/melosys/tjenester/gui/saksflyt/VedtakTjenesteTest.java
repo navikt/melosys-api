@@ -2,6 +2,7 @@ package no.nav.melosys.tjenester.gui.saksflyt;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -126,17 +127,21 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
     @Test
     void skalMappeTilDto_EOS() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
-        FattEosVedtakDto eosVedtakDto = objectMapper.readValue(hentJsonRequest("fatteosvedtak.json"), FattEosVedtakDto.class);
+        FattVedtakDto eosVedtakDto = objectMapper.readValue(hentJsonRequest("fatteosvedtak.json"), FattVedtakDto.class);
 
-        assertThat(eosVedtakDto).isNotNull();
+        assertThat(eosVedtakDto)
+            .isInstanceOf(FattEosVedtakDto.class)
+            .extracting("mottakerinstitusjoner", "fritekstSed")
+            .containsExactly(Set.of("NO:NAVT003"), "Fritekst til SED");
     }
 
     @Test
     void skalMappeTilDto_FTRL() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
-        FattFtrlVedtakDto ftrlVedtakDto = objectMapper.readValue(hentJsonRequest("fattftrlvedtak.json"), FattFtrlVedtakDto.class);
+        FattVedtakDto ftrlVedtakDto = objectMapper.readValue(hentJsonRequest("fattftrlvedtak.json"), FattVedtakDto.class);
 
-        assertThat(ftrlVedtakDto).isNotNull();
+        //TODO Utvide assert
+        assertThat(ftrlVedtakDto).isNotNull().isInstanceOf(FattFtrlVedtakDto.class);
     }
 
     private InputStream hentJsonRequest(String filnavn) {

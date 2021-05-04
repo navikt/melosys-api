@@ -21,6 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class MedlPeriodeService {
@@ -77,6 +79,7 @@ public class MedlPeriodeService {
         lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandlingID);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void opprettPeriodeEndelig(long behandlingId, Medlemskapsperiode medlemskapsperiode) throws FunksjonellException {
         String fnr = hentFnr(behandlingId);
         log.info("Oppretter endelig medlemskapsperiode i MEDL for behandling {}", behandlingId);
