@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.saksflyt;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -119,5 +121,25 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         assertThatThrownBy(() -> vedtakTjeneste.endreVedtak(behandlingID, new EndreVedtakDto()))
             .isInstanceOf(FunksjonellException.class)
             .hasMessage("BegrunnelseKode mangler.");
+    }
+
+    @Test
+    void skalMappeTilDto_EOS() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        FattEosVedtakDto eosVedtakDto = objectMapper.readValue(hentJsonRequest("fatteosvedtak.json"), FattEosVedtakDto.class);
+
+        assertThat(eosVedtakDto).isNotNull();
+    }
+
+    @Test
+    void skalMappeTilDto_FTRL() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        FattFtrlVedtakDto ftrlVedtakDto = objectMapper.readValue(hentJsonRequest("fattftrlvedtak.json"), FattFtrlVedtakDto.class);
+
+        assertThat(ftrlVedtakDto).isNotNull();
+    }
+
+    private InputStream hentJsonRequest(String filnavn) {
+        return getClass().getClassLoader().getResourceAsStream(filnavn);
     }
 }
