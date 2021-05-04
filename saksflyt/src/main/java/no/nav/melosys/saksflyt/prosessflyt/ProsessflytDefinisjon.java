@@ -100,8 +100,8 @@ public final class ProsessflytDefinisjon {
             )
         );
 
-        PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK,
-            new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK,
+        PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK_EOS,
+            new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_EOS,
                 AVKLAR_MYNDIGHET,
                 AVKLAR_ARBEIDSGIVER,
                 LAGRE_LOVVALGSPERIODE_MEDL,
@@ -114,14 +114,25 @@ public final class ProsessflytDefinisjon {
             )
         );
 
-        PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE,
-            new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE,
+        PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK_EOS_FORKORT_PERIODE,
+            new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_EOS_FORKORT_PERIODE,
                 HENT_MOTTAKERINSTITUSJON_FORKORTET_PERIODE,
                 LAGRE_LOVVALGSPERIODE_MEDL,
                 SEND_VEDTAKSBREV_INNLAND,
                 SEND_VEDTAK_UTLAND,
                 DISTRIBUER_JOURNALPOST_UTLAND,
                 OPPRETT_AVGIFTSOPPGAVE,
+                AVSLUTT_SAK_OG_BEHANDLING,
+                SOB_BEHANDLING_AVSLUTTET
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK,
+            new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK,
+                LAGRE_MEDLEMSKAPSPERIODE_MEDL,
+                OPPRETT_OG_JOURNALFØR_BREV,
+                DISTRIBUER_JOURNALPOST,
+                PUBLISER_VEDTAK,
                 AVSLUTT_SAK_OG_BEHANDLING,
                 SOB_BEHANDLING_AVSLUTTET
             )

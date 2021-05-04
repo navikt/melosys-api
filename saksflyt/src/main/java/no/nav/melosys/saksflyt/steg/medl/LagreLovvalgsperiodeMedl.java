@@ -39,7 +39,7 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
 
         if (lovvalgsperiode.isPresent()) {
             oppdaterLovvalgsperiode(prosessinstans.getBehandling(), lovvalgsperiode.get());
-        } else if (!behandlingsresultat.erAvslagManglendeOpplysninger()){
+        } else if (!behandlingsresultat.erAvslagManglendeOpplysninger()) {
             throw new FunksjonellException("Finner ingen lovvalgsperiode for behandling " + behandlingID);
         }
     }
@@ -72,7 +72,7 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
         }
     }
 
-    private void oppdaterMedlPeriode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) throws FunksjonellException, TekniskException {
+    private void oppdaterMedlPeriode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) throws TekniskException {
         if (lovvalgsperiode.erArtikkel13()) {
             medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode, !behandling.erBehandlingAvSøknad());
         } else {

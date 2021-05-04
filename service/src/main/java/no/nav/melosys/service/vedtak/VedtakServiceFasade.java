@@ -1,7 +1,5 @@
 package no.nav.melosys.service.vedtak;
 
-import java.util.Set;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
@@ -23,42 +21,42 @@ public class VedtakServiceFasade {
     private final BehandlingService behandlingService;
     private final EosVedtakService eosVedtakService;
     private final EosVedtakSystemService eosVedtakSystemService;
+    private final FtrlVedtakService ftrlVedtakService;
 
     @Autowired
-    public VedtakServiceFasade(BehandlingService behandlingService, EosVedtakService eosVedtakService, EosVedtakSystemService eosVedtakSystemService) {
+    public VedtakServiceFasade(BehandlingService behandlingService, EosVedtakService eosVedtakService,
+                               EosVedtakSystemService eosVedtakSystemService, FtrlVedtakService ftrlVedtakService) {
         this.behandlingService = behandlingService;
         this.eosVedtakService = eosVedtakService;
         this.eosVedtakSystemService = eosVedtakSystemService;
+        this.ftrlVedtakService = ftrlVedtakService;
     }
 
     @Transactional(rollbackFor = MelosysException.class, noRollbackFor = {ValideringException.class})
     public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultattype) throws MelosysException {
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
 
-        eosVedtakSystemService.fattVedtak(behandling, behandlingsresultattype, null, null,
-            null, Vedtakstyper.FØRSTEGANGSVEDTAK, null);
+        eosVedtakSystemService.fattVedtak(behandling, behandlingsresultattype, Vedtakstyper.FØRSTEGANGSVEDTAK);
     }
 
     @Transactional(rollbackFor = MelosysException.class, noRollbackFor = {ValideringException.class})
-    public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultatType,
-                           String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner,
-                           Vedtakstyper vedtakstype, String revurderBegrunnelse) throws MelosysException {
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+    public void fattVedtak(long behandlingID, FattVedtakRequest fattVedtakRequest) throws MelosysException {
+        var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
 
         validerKanFattesVedtakAvTema(behandling);
 
         Sakstyper sakstype = behandling.getFagsak().getType();
 
-        if (sakstype == EU_EOS) {
-            eosVedtakService.fattVedtak(behandling, behandlingsresultatType, fritekst, fritekstSed, mottakerinstitusjoner, vedtakstype, revurderBegrunnelse);
-        } else {
-            throw new FunksjonellException("Vedtaksfatting for sakstype " + sakstype + " er ikke støttet.");
+        switch (sakstype) {
+            case EU_EOS -> eosVedtakService.fattVedtak(behandling, (FattEosVedtakRequest) fattVedtakRequest);
+            case FTRL -> ftrlVedtakService.fattVedtak(behandling, (FattFtrlVedtakRequest) fattVedtakRequest);
+            default -> throw new FunksjonellException("Vedtaksfatting for sakstype " + sakstype + " er ikke støttet.");
         }
     }
 
     @Transactional(rollbackFor = MelosysException.class, noRollbackFor = {ValideringException.class})
     public void endreVedtak(long behandlingID, Endretperiode endretperiode, String fritekst, String fritekstSed) throws FunksjonellException {
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         Sakstyper sakstype = behandling.getFagsak().getType();
 
         if (sakstype == EU_EOS) {
