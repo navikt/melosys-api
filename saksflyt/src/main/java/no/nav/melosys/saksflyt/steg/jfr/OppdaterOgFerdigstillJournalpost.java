@@ -46,13 +46,13 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) throws MelosysException {
         String journalpostID = prosessinstans.getData(JOURNALPOST_ID);
 
-        Long arkivSakID;
+        String saksnummer;
         if (prosessinstans.getBehandling() == null) {
-            arkivSakID = fagsakService.hentFagsak(prosessinstans.getData(SAKSNUMMER)).getGsakSaksnummer();
+            saksnummer = prosessinstans.getData(SAKSNUMMER);
         } else {
-            arkivSakID = prosessinstans.getBehandling().getFagsak().getGsakSaksnummer();
+            saksnummer = prosessinstans.getBehandling().getFagsak().getSaksnummer();
         }
-        if (arkivSakID == null) {
+        if (saksnummer == null) {
             throw new TekniskException("Prosessinstansen er ikke knyttet til en nav-sak");
         }
 
@@ -74,7 +74,8 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
         List<String> logiskeVedleggTitler = prosessinstans.getData(LOGISKE_VEDLEGG_TITLER, List.class);
         Map<String, String> fysiskeVedleggMedTitler = prosessinstans.getData(FYSISKE_VEDLEGG, Map.class);
 
-        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medArkivSakID(arkivSakID)
+        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
+            .medSaksnummer(saksnummer)
             .medBrukerID(brukerID).medHovedDokumentID(hovedDokumentID)
             .medAvsenderID(avsenderID).medAvsenderNavn(avsenderNavn).medAvsenderType(avsenderType).medAvsenderLand(avsenderLand)
             .medTittel(tittel)
@@ -82,6 +83,6 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
             .medFysiskeVedlegg(fysiskeVedleggMedTitler)
             .medLogiskeVedleggTitler(logiskeVedleggTitler).build();
         joarkFasade.oppdaterJournalpost(journalpostID, journalpostOppdatering, true);
-        log.info("Oppdatert og ferdigstilt journalpost {}. ArkivsakID: {}", journalpostID, arkivSakID);
+        log.info("Oppdatert og ferdigstilt journalpost {} for fagsak: {}", journalpostID, saksnummer);
     }
 }

@@ -31,8 +31,8 @@ public class JournalpostapiConsumerImpl implements JournalpostapiConsumer, JsonR
     @Override
     public OpprettJournalpostResponse opprettJournalpost(OpprettJournalpostRequest request, boolean forsøkEndeligJfr) {
         if (log.isInfoEnabled()) {
-            log.info("Oppretter journalpost av type {} for arkivsakid {}",
-                request.getJournalpostType().name(), request.getSak() != null ? request.getSak().getArkivsaksnummer() : "ukjent");
+            log.info("Oppretter journalpost av type {} for sak {}",
+                request.getJournalpostType().name(), request.getSak() != null ? request.getSak().getFagsakId() : "ukjent");
         }
 
         return restTemplate.postForObject("/journalpost?forsoekFerdigstill={forsoekFerdigstill}", new HttpEntity<>(request, getDefaultHeaders()), OpprettJournalpostResponse.class, forsøkEndeligJfr);

@@ -36,13 +36,13 @@ public class OpprettJournalpost extends Journalpost {
     }
 
     public static OpprettJournalpost lagJournalpostForSendingAvSedSomBrev(
-        Long arkivsakID, String brukerFnr, SedType sedType, byte[] sedPdf,
+        String saksnummer, String brukerFnr, SedType sedType, byte[] sedPdf,
         String institusjonID, String institusjonNavn, String institusjonLand, List<FysiskDokument> vedlegg) {
 
         OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
         opprettJournalpost.setHoveddokument(lagFysiskDokumentSed(sedType, sedPdf));
         opprettJournalpost.setVedlegg(vedlegg);
-        opprettJournalpost.setArkivSakId(arkivsakID.toString());
+        opprettJournalpost.setSaksnummer(saksnummer);
         opprettJournalpost.setMottaksKanal(SENTRAL_UTSKRIFT);
         opprettJournalpost.setJournalposttype(Journalposttype.UT);
         opprettJournalpost.setJournalførendeEnhet(MEDLEMSKAP_OG_AVGIFT);
@@ -74,7 +74,7 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setHoveddokument(lagFysiskHovedDokumentAltinn(hovedDokument, behandlingsgrunnlag));
         opprettJournalpost.setInnhold(opprettJournalpost.getHoveddokument().getTittel());
         opprettJournalpost.setVedlegg(dokumenter.stream().map(FysiskDokument::lagFysiskDokumentAltinn).collect(Collectors.toList()));
-        opprettJournalpost.setArkivSakId(fagsak.getGsakSaksnummer().toString());
+        opprettJournalpost.setSaksnummer(fagsak.getSaksnummer());
         opprettJournalpost.setMottaksKanal(ALTINN);
         opprettJournalpost.setEksternReferanseId(hovedDokument.getSoknadID());
         opprettJournalpost.setJournalposttype(Journalposttype.INN);
@@ -106,7 +106,7 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setJournalposttype(Journalposttype.UT);
         opprettJournalpost.setJournalførendeEnhet(MEDLEMSKAP_OG_AVGIFT);
         opprettJournalpost.setTema(MEDLEMSKAP);
-        opprettJournalpost.setArkivSakId(bestilling.getArkivSakId());
+        opprettJournalpost.setSaksnummer(bestilling.getSaksnummer());
         opprettJournalpost.setBrukerId(bestilling.getBrukerFnr());
         opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
         opprettJournalpost.setKorrespondansepartId(bestilling.getMottakerId());

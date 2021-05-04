@@ -28,14 +28,14 @@ class OppdaterOgFerdigstillJournalpostTest {
     @Mock
     private FagsakService fagsakService;
 
-    private OppdaterOgFerdigstillJournalpost agent;
+    private OppdaterOgFerdigstillJournalpost oppdaterOgFerdigstillJournalpost;
 
     @Captor
     private ArgumentCaptor<JournalpostOppdatering> oppdateringArgumentCaptor;
 
     @BeforeEach
     public void setUp() {
-        agent = new OppdaterOgFerdigstillJournalpost(joarkFasade, fagsakService);
+        oppdaterOgFerdigstillJournalpost = new OppdaterOgFerdigstillJournalpost(joarkFasade, fagsakService);
     }
 
     @Test
@@ -45,27 +45,27 @@ class OppdaterOgFerdigstillJournalpostTest {
         prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, "navn");
         prosessinstans.setBehandling(new Behandling());
         prosessinstans.getBehandling().setFagsak(new Fagsak());
-        prosessinstans.getBehandling().getFagsak().setGsakSaksnummer(123321L);
-        agent.utfør(prosessinstans);
+        prosessinstans.getBehandling().getFagsak().setSaksnummer("MEL-123");
+        oppdaterOgFerdigstillJournalpost.utfør(prosessinstans);
 
         verify(joarkFasade).oppdaterJournalpost(any(), oppdateringArgumentCaptor.capture(), eq(true));
     }
 
     @Test
-    void utfoerSteg_behandlingIkkeSatt_henterFagsakVedSaksnummerFraData() throws MelosysException {
+    void utfoerSteg_behandlingIkkeSatt_henterSaksnummerFraData() throws MelosysException {
         Fagsak fagsak = new Fagsak();
         long gsakSaksnummer = 10L;
         String saksnummer = "saksnummer";
         fagsak.setGsakSaksnummer(gsakSaksnummer);
-        when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsak);
+        fagsak.setSaksnummer(saksnummer);
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_NY_BEHANDLING);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
         prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, "navn");
-        agent.utfør(prosessinstans);
+        oppdaterOgFerdigstillJournalpost.utfør(prosessinstans);
 
         verify(joarkFasade).oppdaterJournalpost(any(), oppdateringArgumentCaptor.capture(), eq(true));
-        assertThat(oppdateringArgumentCaptor.getValue().getArkivSakID()).isEqualTo(gsakSaksnummer);
+        assertThat(oppdateringArgumentCaptor.getValue().getSaksnummer()).isEqualTo(saksnummer);
     }
 }

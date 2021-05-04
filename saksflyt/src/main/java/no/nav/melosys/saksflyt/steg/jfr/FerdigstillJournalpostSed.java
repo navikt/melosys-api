@@ -42,13 +42,13 @@ public class FerdigstillJournalpostSed implements StegBehandler {
 
         final Behandling behandling = prosessinstans.getBehandling();
 
-        Long arkivSakID = behandling.getFagsak().getGsakSaksnummer();
-        String brukerID = hentBrukerID(prosessinstans);
-        MelosysEessiMelding eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
-        String tittel = prosessinstans.getData(ProsessDataKey.HOVEDDOKUMENT_TITTEL);
+        final String saksnummer = behandling.getFagsak().getSaksnummer();
+        final String brukerID = hentBrukerID(prosessinstans);
+        final MelosysEessiMelding eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
+        final String tittel = prosessinstans.getData(ProsessDataKey.HOVEDDOKUMENT_TITTEL);
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
             .medBrukerID(brukerID)
-            .medArkivSakID(arkivSakID)
+            .medSaksnummer(saksnummer)
             .medTittel(tittel)
             .build();
 

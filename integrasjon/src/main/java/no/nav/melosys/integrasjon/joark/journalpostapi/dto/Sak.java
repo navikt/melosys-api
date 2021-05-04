@@ -2,10 +2,11 @@ package no.nav.melosys.integrasjon.joark.journalpostapi.dto;
 
 public class Sak {
     private static final String ARKIVSAKSYSTEM = "GSAK";
-    private String arkivsaksnummer;
+    private static final String SAKSTYPE = "FAGSAK";
+    private String fagsakId;
 
-    public Sak(String arkivsaksnummer) {
-        this.arkivsaksnummer = arkivsaksnummer;
+    public Sak(String saksnummer) {
+        this.fagsakId = saksnummer;
     }
 
     public Sak() {
@@ -15,8 +16,12 @@ public class Sak {
         return new SakBuilder();
     }
 
-    public String getArkivsaksnummer() {
-        return this.arkivsaksnummer;
+    public String getFagsakId() {
+        return fagsakId;
+    }
+
+    public String getSakstype() {
+        return SAKSTYPE;
     }
 
     public String getArkivsaksystem() {
@@ -24,18 +29,18 @@ public class Sak {
     }
 
     public static class SakBuilder {
-        private String arkivsaksnummer;
+        private String fagsakId;
 
         SakBuilder() {
         }
 
-        public Sak.SakBuilder arkivsaksnummer(String arkivsaksnummer) {
-            this.arkivsaksnummer = arkivsaksnummer;
+        public Sak.SakBuilder fagsakId(String saksnummer) {
+            this.fagsakId = saksnummer;
             return this;
         }
 
         public Sak build() {
-            return new Sak(arkivsaksnummer);
+            return new Sak(fagsakId);
         }
     }
 }

@@ -115,7 +115,7 @@ class JoarkServiceTest {
         assertThat(journalpostListe.size()).isEqualTo(1);
 
         Journalpost journalpost1 = journalpostListe.get(0);
-        assertThat(journalpost1.getArkivSakId()).isEqualTo("123");
+        assertThat(journalpost1.getSaksnummer()).isEqualTo(fagsak.getSaksnummer());
         assertThat(journalpost1.getHoveddokument().getDokumentId()).isEqualTo(dokID);
         assertThat(journalpost1.getHoveddokument().getTittel()).isEqualTo(tittel);
         assertThat(journalpost1.getJournalposttype()).isEqualTo(Journalposttype.INN);
@@ -148,7 +148,8 @@ class JoarkServiceTest {
         String fysiskVedleggID = "vedleggDokID";
         vedleggMedTitler.put(fysiskVedleggID, fysiskVedleggTittel);
 
-        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medArkivSakID(1L)
+        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
+            .medSaksnummer("MEL-9")
             .medHovedDokumentID(hovedDokumentID).medBrukerID("12345")
             .medAvsenderID("12").medAvsenderNavn("321").medAvsenderType(Avsendertyper.ORGANISASJON)
             .medTittel(tittel).medFysiskeVedlegg(vedleggMedTitler)
@@ -181,7 +182,8 @@ class JoarkServiceTest {
         assertThat(request.bruker.getIdType()).isEqualTo(no.nav.melosys.integrasjon.joark.journalpostapi.dto.Bruker.BrukerIdType.FNR);
 
         assertThat(request.sak).isNotNull();
-        assertThat(request.sak.getArkivsaksnummer()).isNotNull();
+        assertThat(request.sak.getFagsakId()).isEqualTo(journalpostOppdatering.getSaksnummer());
+        assertThat(request.sak.getSakstype()).isEqualTo("FAGSAK");
         assertThat(request.sak.getArkivsaksystem()).isNotNull();
 
         assertThat(request.dokumenter.size()).isEqualTo(2);
@@ -204,7 +206,8 @@ class JoarkServiceTest {
 
         String tittel = "tittel";
         String hovedDokumentID = "1234";
-        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medArkivSakID(1L)
+        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
+            .medSaksnummer("MEL-8")
             .medBrukerID("12345").medHovedDokumentID(hovedDokumentID)
             .medAvsenderID("12").medAvsenderNavn("321").medAvsenderType(Avsendertyper.PERSON).medTittel(tittel).medFysiskeVedlegg(null)
             .medLogiskeVedleggTitler(null).build();
@@ -228,7 +231,8 @@ class JoarkServiceTest {
         assertThat(request.bruker.getIdType()).isNotNull();
 
         assertThat(request.sak).isNotNull();
-        assertThat(request.sak.getArkivsaksnummer()).isNotNull();
+        assertThat(request.sak.getFagsakId()).isEqualTo(journalpostOppdatering.getSaksnummer());
+        assertThat(request.sak.getSakstype()).isEqualTo("FAGSAK");
         assertThat(request.sak.getArkivsaksystem()).isNotNull();
 
         assertThat(request.dokumenter).hasSize(1);
@@ -243,7 +247,8 @@ class JoarkServiceTest {
     void oppdaterJournalpost_skalFerdigstilles_ferdigstillJournalpostBlirKalt() throws Exception {
         unleash.disable(JoarkService.SAF_FEATURE_TOGGLE_NAVN);
 
-        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medArkivSakID(1L)
+        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
+            .medSaksnummer("MEL-1111")
             .medBrukerID("12345").build();
 
         when(journalfoerInngaaendeConsumer.hentJournalpost(anyString())).thenReturn(
@@ -319,7 +324,7 @@ class JoarkServiceTest {
         assertThat(journalpost.getHoveddokument().getNavSkjemaID()).isEqualTo(navSkjemaID);
         assertThat(journalpost.getHoveddokument().getLogiskeVedlegg().size()).isEqualTo(1);
         assertThat(journalpost.getHoveddokument().getLogiskeVedlegg().get(0).getTittel()).isEqualTo(hovedDokLogiskVedlegg);
-        assertThat(journalpost.getArkivSakId()).isEqualTo(arkivsakId);
+        //assertThat(journalpost.getArkivSakId()).isEqualTo(arkivsakId); -> arkivsakId fjernet, støtter ikke saksnummer til fagsak
         assertThat(journalpost.getVedleggListe().size()).isEqualTo(2);
         assertThat(journalpost.getMottaksKanal()).isEqualTo(mottaksKanal);
     }
@@ -441,10 +446,11 @@ class JoarkServiceTest {
     @Test
     void opprettJournalpost_validerFelt_forventException() {
         OpprettJournalpost opprettJournalpost = lagOpprettJournalpost();
-        opprettJournalpost.setArkivSakId(null);
+        opprettJournalpost.setSaksnummer(null);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> joarkService.opprettJournalpost(opprettJournalpost, true));
+            .isThrownBy(() -> joarkService.opprettJournalpost(opprettJournalpost, true))
+            .withMessageContaining("Saksnummer mangler");
 
         verify(journalpostapiConsumer, never()).opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean());
     }
@@ -474,7 +480,7 @@ class JoarkServiceTest {
         opprettJournalpost.setTema("tema");
         opprettJournalpost.setMottaksKanal("kanal");
         opprettJournalpost.setInnhold("innhold");
-        opprettJournalpost.setArkivSakId("12345");
+        opprettJournalpost.setSaksnummer("MEL-111");
         opprettJournalpost.setBrukerId("12345678901");
         opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
         opprettJournalpost.setKorrespondansepartNavn("navn");

@@ -72,8 +72,8 @@ public class OppdaterJournalpostRequest {
             return this;
         }
 
-        public Builder medArkivsaksnummer(String arkivsaknummer) {
-             this.sak = new Sak(arkivsaknummer);
+        public Builder medSaksnummer(String saksnummer) {
+             this.sak = new Sak(saksnummer);
              return this;
         }
 

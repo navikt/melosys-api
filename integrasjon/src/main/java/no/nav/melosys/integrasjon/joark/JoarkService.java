@@ -148,9 +148,6 @@ public class JoarkService implements JoarkFasade {
                 }
             }
         }
-        if (response.getArkivSak() != null) {
-            journalpost.setArkivSakId(response.getArkivSak().getArkivSakId());
-        }
         return journalpost;
     }
 
@@ -188,7 +185,7 @@ public class JoarkService implements JoarkFasade {
         }
 
         Assert.notNull(hentJournalposterTilknyttetSakRequest.arkivsakID(), "HentKjerneJournalpostListe krever en arkivSakID.");
-        HentKjerneJournalpostListeRequest hentKjerneJournalpostListeRequest = new HentKjerneJournalpostListeRequest();
+        var hentKjerneJournalpostListeRequest = new HentKjerneJournalpostListeRequest();
         hentKjerneJournalpostListeRequest.getArkivSakListe().add(lagArkivSak(hentJournalposterTilknyttetSakRequest.arkivsakID(), Fagsystem.GSAK_I_JOARK.getKode()));
 
         HentKjerneJournalpostListeResponse hentKjerneJournalpostListeResponse;
@@ -204,6 +201,7 @@ public class JoarkService implements JoarkFasade {
             .stream()
             .filter(journalpost -> !UTGAAR.equals(journalpost.getJournaltilstand()))
             .map(this::lagJournalpost)
+            .peek(j -> j.setSaksnummer(hentJournalposterTilknyttetSakRequest.saksnummer()))
             .collect(Collectors.toList());
     }
 
@@ -218,9 +216,6 @@ public class JoarkService implements JoarkFasade {
 
     private Journalpost lagJournalpost(no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.Journalpost j) {
         Journalpost journalpost = new Journalpost(j.getJournalpostId());
-        if (j.getGjelderArkivSak() != null) {
-            journalpost.setArkivSakId(j.getGjelderArkivSak().getArkivSakId());
-        }
         if (j.getForsendelseMottatt() != null) {
             journalpost.setForsendelseMottatt(KonverteringsUtils.xmlGregorianCalendarToInstant(j.getForsendelseMottatt()));
         }
@@ -270,7 +265,7 @@ public class JoarkService implements JoarkFasade {
             .medDatoMottatt(journalpostOppdatering.getMottattDato())
             .medTittel(journalpostOppdatering.getTittel())
             .medBruker(journalpostOppdatering.getBrukerID())
-            .medArkivsaksnummer(Long.toString(journalpostOppdatering.getArkivSakID()));
+            .medSaksnummer(journalpostOppdatering.getSaksnummer());
 
         final String hovedDokumentID = journalpostOppdatering.getHovedDokumentID();
         if (hovedDokumentID != null) {

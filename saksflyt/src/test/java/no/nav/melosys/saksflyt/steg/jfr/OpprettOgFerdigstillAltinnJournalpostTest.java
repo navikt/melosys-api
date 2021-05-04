@@ -58,6 +58,7 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
 
     private final Aktoer bruker = new Aktoer();
     private final String ident = "00000000000";
+    private final String saksnummer = "MEL-1231";
 
     @Captor
     private ArgumentCaptor<OpprettJournalpost> captor;
@@ -84,6 +85,7 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
         representant.setRepresenterer(Representerer.BEGGE);
 
         Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer(saksnummer);
         fagsak.setGsakSaksnummer(123L);
         fagsak.setAktører(Set.of(bruker, representant));
         behandling.setFagsak(fagsak);
@@ -110,8 +112,8 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
         OpprettJournalpost opprettJournalpost = captor.getValue();
         assertThat(opprettJournalpost)
             .extracting(Journalpost::getTema, Journalpost::getMottaksKanal,
-                Journalpost::getArkivSakId, Journalpost::getBrukerId, Journalpost::getBrukerIdType)
-            .containsExactly("MED", "ALTINN", "123", ident, BrukerIdType.FOLKEREGISTERIDENT);
+                Journalpost::getSaksnummer, Journalpost::getBrukerId, Journalpost::getBrukerIdType)
+            .containsExactly("MED", "ALTINN", saksnummer, ident, BrukerIdType.FOLKEREGISTERIDENT);
         assertThat(opprettJournalpost.getInnhold()).isNotEmpty();
         assertThat(opprettJournalpost.getHoveddokument())
             .extracting(ArkivDokument::getDokumentId, ArkivDokument::getTittel)

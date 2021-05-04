@@ -7,7 +7,7 @@ import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import org.springframework.util.CollectionUtils;
 
 public final class JournalpostOppdatering {
-    private final Long arkivSakID;
+    private final String saksnummer;
     private final String hovedDokumentID;
     private final String brukerID;
     private final String avsenderID;
@@ -20,7 +20,7 @@ public final class JournalpostOppdatering {
     private final LocalDate mottattDato;
 
     public static class Builder {
-        private Long arkivSakID;
+        private String saksnummer;
         private String hovedDokumentID;
         private String brukerID;
         private String avsenderID;
@@ -32,8 +32,8 @@ public final class JournalpostOppdatering {
         private Map<String, String> fysiskeVedlegg = new HashMap<>();
         private List<String> logiskeVedleggTitler = new ArrayList<>();
 
-        public Builder medArkivSakID(Long arkivSakID) {
-            this.arkivSakID = arkivSakID;
+        public Builder medSaksnummer(String saksnummer) {
+            this.saksnummer = saksnummer;
             return this;
         }
 
@@ -97,7 +97,7 @@ public final class JournalpostOppdatering {
     }
 
     private JournalpostOppdatering(Builder builder) {
-        this.arkivSakID = builder.arkivSakID;
+        this.saksnummer = builder.saksnummer;
         this.hovedDokumentID = builder.hovedDokumentID;
         this.brukerID = builder.brukerID;
         this.avsenderID = builder.avsenderID;
@@ -110,8 +110,8 @@ public final class JournalpostOppdatering {
         this.avsenderLand = builder.avsenderLand;
     }
 
-    public Long getArkivSakID() {
-        return arkivSakID;
+    public String getSaksnummer() {
+        return saksnummer;
     }
 
     public String getHovedDokumentID() {
@@ -170,7 +170,7 @@ public final class JournalpostOppdatering {
         if (this == o) return true;
         if (!(o instanceof JournalpostOppdatering)) return false;
         JournalpostOppdatering that = (JournalpostOppdatering) o;
-        return Objects.equals(getArkivSakID(), that.getArkivSakID()) &&
+        return Objects.equals(getSaksnummer(), that.getSaksnummer()) &&
             Objects.equals(getHovedDokumentID(), that.getHovedDokumentID()) &&
             Objects.equals(getBrukerID(), that.getBrukerID()) &&
             Objects.equals(getAvsenderID(), that.getAvsenderID()) &&
@@ -183,7 +183,7 @@ public final class JournalpostOppdatering {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getArkivSakID(), getHovedDokumentID(), getBrukerID(), getAvsenderID(), getAvsenderNavn(),
+        return Objects.hash(getSaksnummer(), getHovedDokumentID(), getBrukerID(), getAvsenderID(), getAvsenderNavn(),
             getAvsenderType(), getTittel(), getFysiskeVedlegg(), getLogiskeVedleggTitler());
     }
 }

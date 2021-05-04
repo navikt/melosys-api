@@ -16,7 +16,7 @@ public final class Query {
               tema
               journalposttype
               sak {
-                arkivsaksnummer
+                fagsakId
               }
               bruker {
                 id
