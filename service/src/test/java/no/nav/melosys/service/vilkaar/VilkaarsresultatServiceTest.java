@@ -17,7 +17,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -69,19 +68,8 @@ public class VilkaarsresultatServiceTest {
         vilkaarDto.setBegrunnelseKoder(koder);
         vilkaarsresultatService.registrerVilkår(behandlingID, Collections.singletonList(vilkaarDto));
 
-        verify(vilkaarsresultatRepo).deleteByBehandlingsresultatAndVilkaarNotIn(
-            eq(behandlingsresultat), eq(Collections.singleton(Vilkaar.FO_883_2004_INNGANGSVILKAAR))
-        );
+        verify(vilkaarsresultatRepo).deleteByBehandlingsresultat(eq(behandlingsresultat));
         verify(vilkaarsresultatRepo).flush();
         verify(vilkaarsresultatRepo).save(any(Vilkaarsresultat.class));
-    }
-
-    @Test
-    public void registrer_inngangsvilkår_feiler() {
-        VilkaarDto vilkaarDto = new VilkaarDto();
-        vilkaarDto.setVilkaar(Vilkaar.FO_883_2004_INNGANGSVILKAAR.getKode());
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> vilkaarsresultatService.registrerVilkår(1L, Collections.singletonList(vilkaarDto)))
-            .withMessageContaining("Kan ikke endre vilkår " + Vilkaar.FO_883_2004_INNGANGSVILKAAR);
     }
 }

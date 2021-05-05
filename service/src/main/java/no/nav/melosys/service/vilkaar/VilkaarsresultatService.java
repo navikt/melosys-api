@@ -25,8 +25,6 @@ public class VilkaarsresultatService {
     private final BehandlingsresultatService behandlingsresultatService;
     private final VilkaarsresultatRepository vilkaarsresultatRepo;
 
-    private static final Collection<Vilkaar> IMMUTABLE_VILKAAR = Collections.singleton(FO_883_2004_INNGANGSVILKAAR);
-
     @Autowired
     public VilkaarsresultatService(BehandlingsresultatService behandlingsresultatService,
                                    VilkaarsresultatRepository vilkaarsresultatRepo) {
@@ -77,7 +75,6 @@ public class VilkaarsresultatService {
 
     @Transactional(rollbackFor = MelosysException.class)
     public void registrerVilkår(long behandlingID, List<VilkaarDto> vilkaarDtoer) throws FunksjonellException {
-        validerVilkår(vilkaarDtoer);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         tømVilkårForBehandlingsresultat(behandlingsresultat);
         vilkaarsresultatRepo.flush();
@@ -95,18 +92,7 @@ public class VilkaarsresultatService {
 
     @Transactional(rollbackFor = MelosysException.class)
     public void tømVilkårForBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
-        vilkaarsresultatRepo.deleteByBehandlingsresultatAndVilkaarNotIn(behandlingsresultat, IMMUTABLE_VILKAAR);
-    }
-
-    private void validerVilkår(List<VilkaarDto> vilkaarDtoer) throws FunksjonellException {
-
-        final Collection<String> nyeVilkår = vilkaarDtoer.stream().map(VilkaarDto::getVilkaar).collect(Collectors.toList());
-
-        for (Vilkaar immutableVilkår : IMMUTABLE_VILKAAR) {
-            if (nyeVilkår.contains(immutableVilkår.getKode())) {
-                throw new FunksjonellException("Kan ikke endre vilkår " + immutableVilkår);
-            }
-        }
+        vilkaarsresultatRepo.deleteByBehandlingsresultat(behandlingsresultat);
     }
 
     @Transactional(rollbackFor = MelosysException.class)

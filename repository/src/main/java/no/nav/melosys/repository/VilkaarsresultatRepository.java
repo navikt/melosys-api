@@ -1,6 +1,5 @@
 package no.nav.melosys.repository;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,5 +18,5 @@ public interface VilkaarsresultatRepository extends JpaRepository<Vilkaarsresult
 
     void deleteByBehandlingsresultatId(long behandlingsresultatID);
 
-    void deleteByBehandlingsresultatAndVilkaarNotIn(Behandlingsresultat behandlingsresultat, Collection<Vilkaar> vilkaar);
+    void deleteByBehandlingsresultat(Behandlingsresultat behandlingsresultat);
 }
