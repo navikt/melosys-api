@@ -11,6 +11,7 @@ import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +32,7 @@ public class PersondataService implements PersondataFasade {
     }
 
     @Override
+    @Cacheable("aktoerID")
     public String hentAktørIdForIdent(String ident) throws IkkeFunnetException {
         return pdlConsumer.hentIdenter(ident).identer()
             .stream().filter(Ident::erAktørID)
@@ -39,6 +41,7 @@ public class PersondataService implements PersondataFasade {
     }
 
     @Override
+    @Cacheable("folkeregisterIdent")
     public String hentFolkeregisterIdent(String ident) throws IkkeFunnetException {
         return pdlConsumer.hentIdenter(ident).identer()
             .stream().filter(Ident::erFolkeregisterIdent)
