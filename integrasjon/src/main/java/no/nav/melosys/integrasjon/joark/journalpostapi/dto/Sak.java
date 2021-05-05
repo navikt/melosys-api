@@ -12,10 +12,6 @@ public class Sak {
     public Sak() {
     }
 
-    public static SakBuilder builder() {
-        return new SakBuilder();
-    }
-
     public String getFagsakId() {
         return fagsakId;
     }
@@ -26,21 +22,5 @@ public class Sak {
 
     public String getFagsaksystem() {
         return FAGSAKSYSTEM;
-    }
-
-    public static class SakBuilder {
-        private String fagsakId;
-
-        SakBuilder() {
-        }
-
-        public Sak.SakBuilder fagsakId(String saksnummer) {
-            this.fagsakId = saksnummer;
-            return this;
-        }
-
-        public Sak build() {
-            return new Sak(fagsakId);
-        }
     }
 }

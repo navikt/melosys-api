@@ -75,7 +75,7 @@ public class OpprettJournalpostRequest {
             .tema(opprettJournalpost.getTema())
             .kanal(opprettJournalpost.getMottaksKanal())
             .eksternReferanseId(opprettJournalpost.getEksternReferanseId())
-            .sak(sak(opprettJournalpost.getSaksnummer()))
+            .sak(new Sak(opprettJournalpost.getSaksnummer()))
             .journalfoerendeEnhet(opprettJournalpost.getJournalførendeEnhet())
             .journalpostType(JournalpostType.av(opprettJournalpost.getJournalposttype()))
             .tittel(opprettJournalpost.getInnhold())
@@ -107,10 +107,6 @@ public class OpprettJournalpostRequest {
             case AKTØR_ID -> Bruker.BrukerIdType.AKTOERID;
             case ORGNR -> Bruker.BrukerIdType.ORGNR;
         };
-    }
-
-    private static Sak sak(String saksnummer) {
-        return Sak.builder().fagsakId(saksnummer).build();
     }
 
     private static List<Dokument> dokumenter(OpprettJournalpost opprettJournalpost) {
