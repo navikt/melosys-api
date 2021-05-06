@@ -28,7 +28,7 @@ public record Journalpost(
         var journalpost = new no.nav.melosys.domain.arkiv.Journalpost(journalpostId);
 
         if (sak != null) {
-            journalpost.setArkivSakId(sak.arkivsaksnummer());
+            journalpost.setSaksnummer(sak.fagsakId());
         }
 
         ofNullable(bruker).ifPresent(b -> {

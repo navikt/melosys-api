@@ -28,7 +28,7 @@ public class OpprettJournalpostRequestTest {
         opprettJournalpost.setKorrespondansepartNavn("Trygdemyndighet");
         opprettJournalpost.setKorrespondansepartId("id123");
         opprettJournalpost.setKorrespondansepartIdType("UTL_ORG");
-        opprettJournalpost.setArkivSakId("123321");
+        opprettJournalpost.setSaksnummer("MEL-1231");
         opprettJournalpost.setInnhold("Tittel som beskriver innholdet");
         opprettJournalpost.setJournalførendeEnhet("MEDLEMSKAP_OG_AVGIFT");
         opprettJournalpost.setJournalposttype(Journalposttype.UT);
