@@ -24,7 +24,7 @@ public class SedSomBrevService {
     private final UtenlandskMyndighetService utenlandskMyndighetService;
 
     public SedSomBrevService(@Qualifier("system") EessiService eessiService,
-                             JoarkFasade joarkFasade,
+                             @Qualifier("system") JoarkFasade joarkFasade,
                              @Qualifier("system") PersondataFasade persondataFasade,
                              UtenlandskMyndighetService utenlandskMyndighetService) {
         this.eessiService = eessiService;
