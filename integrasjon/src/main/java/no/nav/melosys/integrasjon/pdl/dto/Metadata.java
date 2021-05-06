@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon.pdl.dto;
 
-import java.util.Collection;
+import java.util.List;
 
-public record Metadata(String opplysningsId, String master, Collection<Endring> endringer) {
+public record Metadata(String master, boolean historisk, List<Endring> endringer) {
 }

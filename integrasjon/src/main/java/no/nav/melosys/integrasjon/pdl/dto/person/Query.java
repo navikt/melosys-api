@@ -179,6 +179,28 @@ query($ident: ID!) {
 }
         """;
 
+    public static final String HENT_STATSBORGERSKAP_QUERY = """
+        query($ident: ID!, $historikk: Boolean!) {
+            hentPerson(ident: $ident) {
+                statsborgerskap(historikk: $historikk) {
+                    land
+                    bekreftelsesdato
+                    gyldigFraOgMed
+                    gyldigTilOgMed
+                    metadata {
+                        master
+                        historisk
+                        endringer {
+                            type
+                            registrert
+                            kilde
+                        }
+                    }
+                }
+            }
+        }
+        """;
+
     private Query() {
         throw new UnsupportedOperationException();
     }

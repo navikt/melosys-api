@@ -1,13 +1,20 @@
 package no.nav.melosys.service.persondata;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
+import no.nav.melosys.integrasjon.pdl.dto.Endring;
+import no.nav.melosys.integrasjon.pdl.dto.Metadata;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste;
+import no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,6 +69,21 @@ class PersondataServiceTest {
         assertThatExceptionOfType(IkkeFunnetException.class)
             .isThrownBy(() -> persondataService.hentFolkeregisterIdent("123"))
             .withMessageContaining("Finner ikke folkeregisterident");
+    }
+
+    @Test
+    void hentStatsborgerskap() throws IkkeFunnetException {
+        when(pdlConsumer.hentStatsborgerskap("ident")).thenReturn(Set.of(
+            new Statsborgerskap("AIA", LocalDate.parse("2021-05-08"), LocalDate.parse("1979-11-18"),
+                LocalDate.parse("1980-11-18"), new Metadata("PDL", false,
+                List.of(new Endring("OPPRETT", LocalDateTime.parse("2021-05-07T10:04:52"), "Dolly")))))
+        );
+
+        assertThat(persondataService.hentStatsborgerskap("ident")).containsExactly(
+            new no.nav.melosys.domain.person.Statsborgerskap(
+                "AIA", LocalDate.parse("2021-05-08"), LocalDate.parse("1979-11-18"), LocalDate.parse("1980-11-18"),
+                "PDL", "Dolly", false)
+            );
     }
 
     private Identliste lagIdentliste() {

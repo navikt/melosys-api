@@ -1,0 +1,42 @@
+{
+  "data": {
+    "hentPerson": {
+      "statsborgerskap": [
+        {
+          "land": "ALB",
+          "bekreftelsesdato": null,
+          "gyldigFraOgMed": "1961-02-01",
+          "gyldigTilOgMed": "1981-09-07",
+          "metadata": {
+            "master": "FREG",
+            "historisk": true,
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2021-05-07T10:04:52",
+                "kilde": "Dolly"
+              }
+            ]
+          }
+        },
+        {
+          "land": "AIA",
+          "bekreftelsesdato": "2021-05-08",
+          "gyldigFraOgMed": "1979-11-18",
+          "gyldigTilOgMed": null,
+          "metadata": {
+            "master": "PDL",
+            "historisk": false,
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2021-05-07T10:04:52",
+                "kilde": "PDL"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

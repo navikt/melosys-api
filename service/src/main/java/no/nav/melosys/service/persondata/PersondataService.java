@@ -1,11 +1,14 @@
 package no.nav.melosys.service.persondata;
 
 import java.time.LocalDate;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.person.Informasjonsbehov;
-import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.domain.person.Statsborgerskap;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
 import no.nav.melosys.integrasjon.tps.TpsService;
@@ -62,6 +65,13 @@ public class PersondataService implements PersondataFasade {
     @Override
     public String hentSammensattNavn(String fnr) {
         return tpsService.hentSammensattNavn(fnr);
+    }
+
+    public Set<Statsborgerskap> hentStatsborgerskap(String ident) {
+        return pdlConsumer.hentStatsborgerskap(ident).stream()
+            .filter(s -> !s.erOpphørt())
+            .map(StasborgerskapOversetter::oversett)
+            .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
