@@ -73,7 +73,6 @@ public class VedtakTjeneste {
                 .medRevurderBegrunnelse(eosVedtakDto.getRevurderBegrunnelse());
         } else if (fattVedtakDto instanceof FattFtrlVedtakDto ftrlVedtakDto) {
             fattVedtakRequest = new FattFtrlVedtakRequest.Builder()
-                .medFritekstInnledning(ftrlVedtakDto.getFritekstInnledning())
                 .medFritekstBegrunnelse(ftrlVedtakDto.getFritekstBegrunnelse());
         } else {
             throw new FunksjonellException("Vedtakstype er ikke støttet");

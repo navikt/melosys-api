@@ -3,10 +3,8 @@ package no.nav.melosys.service.vedtak;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -48,7 +46,6 @@ public class FtrlVedtakService {
 
         oppdaterBehandlingsresultat(behandlingID, request);
 
-        //NOTE Burde ikke denne ligge før `oppdaterBehandlingsresultat`?
         if (prosessinstansService.harVedtakInstans(behandlingID)) {
             throw new FunksjonellException("Det finnes allerede en vedtak-prosess for behandling " + behandling);
         }
