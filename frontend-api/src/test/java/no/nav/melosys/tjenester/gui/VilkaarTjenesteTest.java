@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.service.abac.TilgangService;
+import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import no.nav.melosys.service.vilkaar.VilkaarDto;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,13 +27,15 @@ class VilkaarTjenesteTest extends JsonSchemaTestParent {
     @Mock
     private VilkaarsresultatService vilkaarsresultatService;
     @Mock
+    private InngangsvilkaarService inngangsvilkaarService;
+    @Mock
     private TilgangService tilgangService;
 
     private VilkaarTjeneste vilkaarTjeneste;
 
     @BeforeEach
     public void setUp() {
-        vilkaarTjeneste = new VilkaarTjeneste(vilkaarsresultatService, tilgangService);
+        vilkaarTjeneste = new VilkaarTjeneste(vilkaarsresultatService, inngangsvilkaarService, tilgangService);
     }
 
     @Test

@@ -116,4 +116,8 @@ public class InngangsvilkaarService {
                 .map(p -> p.statsborgerskap).orElse(null);
         }
     }
+
+    public void overstyrInngangsvilkår(long behandlingID) throws IkkeFunnetException {
+        vilkaarsresultatService.oppdaterVilkaarsresultat(behandlingID, FO_883_2004_INNGANGSVILKAAR, true, Inngangsvilkaar.OVERSTYRT_AV_SAKSBEHANDLER);
+    }
 }
