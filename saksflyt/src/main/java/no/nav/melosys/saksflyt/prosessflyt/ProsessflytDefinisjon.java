@@ -71,9 +71,9 @@ public final class ProsessflytDefinisjon {
 
         PROSESS_FLYT_MAP.put(ProsessType.JFR_NY_BEHANDLING,
             new ProsessFlyt(ProsessType.JFR_NY_BEHANDLING,
+                REPLIKER_BEHANDLING,
                 OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
                 OPPDATER_SAKSRELASJON,
-                REPLIKER_BEHANDLING,
                 OPPRETT_OPPGAVE
             )
         );
