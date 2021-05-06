@@ -1,4 +1,4 @@
-package no.nav.melosys.service.vedtak;
+package no.nav.melosys.service.vedtak.dto;
 
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;

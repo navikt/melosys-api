@@ -1,4 +1,4 @@
-package no.nav.melosys.service.vedtak;
+package no.nav.melosys.service.vedtak.dto;
 
 import java.util.Set;
 

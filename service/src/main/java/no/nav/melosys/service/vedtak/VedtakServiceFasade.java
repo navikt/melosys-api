@@ -6,14 +6,19 @@ import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.vedtak.dto.FattEosVedtakRequest;
+import no.nav.melosys.service.vedtak.dto.FattFtrlVedtakRequest;
+import no.nav.melosys.service.vedtak.dto.FattVedtakRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.kodeverk.Sakstyper.EU_EOS;
+import static no.nav.melosys.domain.kodeverk.Sakstyper.FTRL;
 
 @Service
 public class VedtakServiceFasade {
@@ -63,6 +68,17 @@ public class VedtakServiceFasade {
             eosVedtakService.endreVedtak(behandling, endretperiode, fritekst, fritekstSed);
         } else {
             throw new FunksjonellException("Vedtaksendring for sakstype " + sakstype + " er ikke støttet.");
+        }
+    }
+
+    @Transactional
+    public void publiserFattetVedtak(long behandlingId) throws FunksjonellException {
+        var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingId);
+        Sakstyper sakstype = behandling.getFagsak().getType();
+
+        switch (sakstype) {
+            case FTRL -> ftrlVedtakService.publiserFattetVedtak(behandling);
+            default -> throw new FunksjonellException("Publisering av fattet vedtak for sakstype " + sakstype + " er ikke støttet");
         }
     }
 
