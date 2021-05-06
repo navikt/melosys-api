@@ -84,7 +84,7 @@ class UnntakTjenesteIT {
         assertThat(prosessinstanser.get(0).getType()).isEqualTo(ProsessType.REGISTRERING_UNNTAK_AVVIS);
         assertThat(prosessinstanser.get(0).getBehandling()).isEqualTo(behandling);
         assertThat(prosessinstanser.get(0).getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSER, Set.class)).containsExactlyInAnyOrder(ikkeGodkjentBegrunnelseKoder.stream().toArray());
-        assertThat(prosessinstanser.get(0).getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST)).isEqualTo(FRITEKST);
+        assertThat(prosessinstanser.get(0).getData(ProsessDataKey.YTTERLIGERE_INFO_SED)).isEqualTo(FRITEKST);
     }
 
     @Test
@@ -103,7 +103,7 @@ class UnntakTjenesteIT {
         assertThat(prosessinstanser.get(0).getType()).isEqualTo(ProsessType.REGISTRERING_UNNTAK_GODKJENN);
         assertThat(prosessinstanser.get(0).getBehandling()).isEqualTo(behandling);
         assertThat(prosessinstanser.get(0).getData(ProsessDataKey.VARSLE_UTLAND, boolean.class)).isEqualTo(varsleUtland);
-        assertThat(prosessinstanser.get(0).getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST)).isEqualTo(FRITEKST);
+        assertThat(prosessinstanser.get(0).getData(ProsessDataKey.YTTERLIGERE_INFO_SED)).isEqualTo(FRITEKST);
     }
 
     private Fagsak opprettFagsak() {
