@@ -1,18 +1,18 @@
 package no.nav.melosys.service.vilkaar;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import no.nav.melosys.domain.ErPeriode;
+import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.StatsborgerskapPeriode;
 import no.nav.melosys.domain.inngangsvilkar.Feilmelding;
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
+import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Inngangsvilkaar;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -55,7 +55,8 @@ public class InngangsvilkaarService {
         final boolean erEF_883_2004 = vurderingEF_883_2004.isOppfylt();
 
         vilkaarsresultatService.oppdaterVilkaarsresultat(behandlingID, FO_883_2004_INNGANGSVILKAAR,
-            erEF_883_2004, vurderingEF_883_2004.getBegrunnelseKode());
+            erEF_883_2004,
+            vurderingEF_883_2004.getBegrunnelseKode() == null ? List.of() : List.of(vurderingEF_883_2004.getBegrunnelseKode()));
         return erEF_883_2004;
     }
 
@@ -118,6 +119,20 @@ public class InngangsvilkaarService {
     }
 
     public void overstyrInngangsvilkår(long behandlingID) throws IkkeFunnetException {
-        vilkaarsresultatService.oppdaterVilkaarsresultat(behandlingID, FO_883_2004_INNGANGSVILKAAR, true, Inngangsvilkaar.OVERSTYRT_AV_SAKSBEHANDLER);
+        final var inngangsvilkaar = vilkaarsresultatService.finnVilkaarsresultat(behandlingID, FO_883_2004_INNGANGSVILKAAR);
+        if (inngangsvilkaar.isEmpty()) {
+            throw new IkkeFunnetException("Finner ikke inngangsvilkår med behandlingID " + behandlingID);
+        }
+        final var inngangsvilkaarBegrunnelseKoder = inngangsvilkaar.get().getBegrunnelser().stream()
+            .map(VilkaarBegrunnelse::getKode)
+            .map(Inngangsvilkaar::valueOf)
+            .collect(Collectors.toList());
+
+        final List<Kodeverk> begrunnelseKoder = Stream.concat(
+            List.of(Inngangsvilkaar.OVERSTYRT_AV_SAKSBEHANDLER).stream(),
+            inngangsvilkaarBegrunnelseKoder.stream()
+        ).collect(Collectors.toList());
+
+        vilkaarsresultatService.oppdaterVilkaarsresultat(behandlingID, FO_883_2004_INNGANGSVILKAAR, true, begrunnelseKoder);
     }
 }

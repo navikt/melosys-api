@@ -14,7 +14,6 @@ import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -113,12 +112,16 @@ public class VilkaarsresultatService {
     public void oppdaterVilkaarsresultat(long behandlingID,
                                          Vilkaar vilkaar,
                                          boolean oppfylt,
-                                         @Nullable Kodeverk begrunnelseKode) throws IkkeFunnetException {
+                                         List<Kodeverk> begrunnelseKoder) throws IkkeFunnetException {
         vilkaarsresultatRepo.deleteByBehandlingsresultatId(behandlingID);
         vilkaarsresultatRepo.flush();
-        List<String> begrunnelseKoder = begrunnelseKode == null ? List.of() : List.of(begrunnelseKode.getKode());
         vilkaarsresultatRepo.save(
-            lagVilkaarsresultat(behandlingsresultatService.hentBehandlingsresultat(behandlingID), vilkaar, oppfylt, begrunnelseKoder)
+            lagVilkaarsresultat(
+                behandlingsresultatService.hentBehandlingsresultat(behandlingID),
+                vilkaar,
+                oppfylt,
+                begrunnelseKoder.stream().map(Kodeverk::getKode).collect(Collectors.toList())
+            )
         );
     }
 
