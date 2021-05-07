@@ -24,7 +24,7 @@ public class OppdaterSaksrelasjon implements StegBehandler {
     private final EessiService eessiService;
     private final FagsakService fagsakService;
 
-    public OppdaterSaksrelasjon(JoarkFasade joarkFasade, @Qualifier("system") EessiService eessiService, FagsakService fagsakService) {
+    public OppdaterSaksrelasjon(@Qualifier("system") JoarkFasade joarkFasade, @Qualifier("system") EessiService eessiService, FagsakService fagsakService) {
         this.joarkFasade = joarkFasade;
         this.eessiService = eessiService;
         this.fagsakService = fagsakService;

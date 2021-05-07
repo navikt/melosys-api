@@ -78,18 +78,20 @@ public class RepresentantService {
         }
     }
 
-    private Aktoer oppdaterEllerOpprettAktoer(Aktoer lagretAktoer, boolean selvbetalende, Fagsak fagsak, String orgnr) {
+    private Aktoer oppdaterEllerOpprettAktoer(Aktoer gammelAktoer, boolean selvbetalende, Fagsak fagsak, String orgnr) {
         Aktoersroller rolle = selvbetalende ? Aktoersroller.BRUKER : Aktoersroller.REPRESENTANT_TRYGDEAVGIFT;
         Aktoer oppdatertAktoer;
 
-        if (lagretAktoer != null && lagretAktoer.getRolle() == rolle) {
-            oppdatertAktoer = lagretAktoer;
-            oppdatertAktoer.setOrgnr(orgnr);
+        if (gammelAktoer != null && gammelAktoer.getRolle() == rolle) {
+            oppdatertAktoer = gammelAktoer;
+            oppdatertAktoer.setOrgnr(selvbetalende ? null : orgnr);
+        } else if (rolle == Aktoersroller.BRUKER) {
+            slettLagretAktoer(gammelAktoer, fagsak);
+            oppdatertAktoer = fagsak.hentBruker();
         } else {
-            slettLagretAktoer(lagretAktoer, fagsak);
             oppdatertAktoer = new Aktoer();
             oppdatertAktoer.setRolle(rolle);
-            oppdatertAktoer.setOrgnr(selvbetalende ? null : orgnr);
+            oppdatertAktoer.setOrgnr(orgnr);
         }
 
         oppdatertAktoer.setFagsak(fagsak);
@@ -97,10 +99,10 @@ public class RepresentantService {
         return aktoerRepository.save(oppdatertAktoer);
     }
 
-    private void slettLagretAktoer(Aktoer lagretAktoer, Fagsak fagsak) {
-        if (lagretAktoer != null) {
-            fagsak.getAktører().remove(lagretAktoer);
-            aktoerRepository.deleteById(lagretAktoer.getId());
+    private void slettLagretAktoer(Aktoer aktoer, Fagsak fagsak) {
+        if (aktoer != null) {
+            fagsak.getAktører().remove(aktoer);
+            aktoerRepository.deleteById(aktoer.getId());
         }
     }
 

@@ -1,41 +1,26 @@
 package no.nav.melosys.integrasjon.joark.journalpostapi.dto;
 
 public class Sak {
-    private static final String ARKIVSAKSYSTEM = "GSAK";
-    private String arkivsaksnummer;
+    private static final String SAKSTYPE = "FAGSAK";
+    private static final String FAGSAKSYSTEM = "FS38";
+    private String fagsakId;
 
-    public Sak(String arkivsaksnummer) {
-        this.arkivsaksnummer = arkivsaksnummer;
+    public Sak(String saksnummer) {
+        this.fagsakId = saksnummer;
     }
 
     public Sak() {
     }
 
-    public static SakBuilder builder() {
-        return new SakBuilder();
+    public String getFagsakId() {
+        return fagsakId;
     }
 
-    public String getArkivsaksnummer() {
-        return this.arkivsaksnummer;
+    public String getSakstype() {
+        return SAKSTYPE;
     }
 
-    public String getArkivsaksystem() {
-        return ARKIVSAKSYSTEM;
-    }
-
-    public static class SakBuilder {
-        private String arkivsaksnummer;
-
-        SakBuilder() {
-        }
-
-        public Sak.SakBuilder arkivsaksnummer(String arkivsaksnummer) {
-            this.arkivsaksnummer = arkivsaksnummer;
-            return this;
-        }
-
-        public Sak build() {
-            return new Sak(arkivsaksnummer);
-        }
+    public String getFagsaksystem() {
+        return FAGSAKSYSTEM;
     }
 }

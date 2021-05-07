@@ -94,8 +94,7 @@ class RepresentantServiceTest {
         medlemAvFolketrygden.setFastsattTrygdeavgift(new FastsattTrygdeavgift());
         when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(anyLong())).thenReturn(java.util.Optional.of(medlemAvFolketrygden));
 
-        var fagsak = new Fagsak();
-        fagsak.setSaksnummer("saknr");
+        var fagsak = lagFagsak(lagAktoer(Aktoersroller.BRUKER, 1L));
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
@@ -116,18 +115,15 @@ class RepresentantServiceTest {
     }
 
     @Test
-    void oppdaterValgtRepresentant_selvbetalendeTidligereInfo_lagresKorrekt() throws FunksjonellException {
-        var aktoer = new Aktoer();
-        aktoer.setId(2L);
+    void oppdaterValgtRepresentant_selvbetalendeTidligereInfoErSelvbetalende_lagresKorrekt() throws FunksjonellException {
+        var aktoer = lagAktoer(Aktoersroller.BRUKER, 1L);
         var fastsattTrygdeavgift = new FastsattTrygdeavgift();
         fastsattTrygdeavgift.setBetalesAv(aktoer);
         var medlemAvFolketrygden = new MedlemAvFolketrygden();
         medlemAvFolketrygden.setFastsattTrygdeavgift(fastsattTrygdeavgift);
         when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(anyLong())).thenReturn(java.util.Optional.of(medlemAvFolketrygden));
 
-        var fagsak = new Fagsak();
-        fagsak.setSaksnummer("saknr");
-        fagsak.getAktører().add(aktoer);
+        var fagsak = lagFagsak(aktoer);
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
@@ -136,7 +132,36 @@ class RepresentantServiceTest {
 
         verify(medlemAvFolketrygdenRepository, times(1)).save(medlemAvFolketrygdenArgumentCaptor.capture());
         verify(aktoerRepository).save(aktoerArgumentCaptor.capture());
-        verify(aktoerRepository, times(1)).deleteById(2L);
+        verify(aktoerRepository, never()).deleteById(anyLong());
+        verify(kontaktopplysningService, never()).lagEllerOppdaterKontaktopplysning(anyString(), anyString(), anyString(), anyString(), anyString());
+
+        assertThat(medlemAvFolketrygdenArgumentCaptor.getValue().getFastsattTrygdeavgift().getRepresentantNr()).isEqualTo("repnr");
+        assertThat(medlemAvFolketrygdenArgumentCaptor.getValue().getFastsattTrygdeavgift().getBetalesAv()).isNull();
+
+        assertThat(aktoerArgumentCaptor.getValue().getRolle()).isEqualTo(Aktoersroller.BRUKER);
+        assertThat(aktoerArgumentCaptor.getValue().getFagsak()).isEqualTo(fagsak);
+        assertThat(aktoerArgumentCaptor.getValue().getOrgnr()).isNull();
+    }
+
+    @Test
+    void oppdaterValgtRepresentant_selvbetalendeTidligereInfoErIkkeSelvbetalende_lagresKorrekt() throws FunksjonellException {
+        var aktoer = lagAktoer(Aktoersroller.REPRESENTANT_TRYGDEAVGIFT, 1L);
+        var fastsattTrygdeavgift = new FastsattTrygdeavgift();
+        fastsattTrygdeavgift.setBetalesAv(aktoer);
+        var medlemAvFolketrygden = new MedlemAvFolketrygden();
+        medlemAvFolketrygden.setFastsattTrygdeavgift(fastsattTrygdeavgift);
+        when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(anyLong())).thenReturn(java.util.Optional.of(medlemAvFolketrygden));
+
+        var fagsak = lagFagsak(aktoer, lagAktoer(Aktoersroller.BRUKER, 2L));
+        var behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+
+        representantService.oppdaterValgtRepresentant(1L, new ValgtRepresentant("repnr", true, null, null));
+
+        verify(medlemAvFolketrygdenRepository, times(1)).save(medlemAvFolketrygdenArgumentCaptor.capture());
+        verify(aktoerRepository).save(aktoerArgumentCaptor.capture());
+        verify(aktoerRepository).deleteById(1L);
         verify(kontaktopplysningService, never()).lagEllerOppdaterKontaktopplysning(anyString(), anyString(), anyString(), anyString(), anyString());
 
         assertThat(medlemAvFolketrygdenArgumentCaptor.getValue().getFastsattTrygdeavgift().getRepresentantNr()).isEqualTo("repnr");
@@ -157,8 +182,7 @@ class RepresentantServiceTest {
         medlemAvFolketrygden.setFastsattTrygdeavgift(new FastsattTrygdeavgift());
         when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(anyLong())).thenReturn(java.util.Optional.of(medlemAvFolketrygden));
 
-        var fagsak = new Fagsak();
-        fagsak.setSaksnummer("saknr");
+        var fagsak = lagFagsak();
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
@@ -182,14 +206,12 @@ class RepresentantServiceTest {
     }
 
     @Test
-    void oppdaterValgtRepresentant_ikkeSelvbetalendeTidligereInfo_lagresKorrekt() throws FunksjonellException {
+    void oppdaterValgtRepresentant_ikkeSelvbetalendeTidligereInfoErSelvbetalende_lagresKorrekt() throws FunksjonellException {
         var saksnummerCaptor = ArgumentCaptor.forClass(String.class);
         var orgnrCaptor = ArgumentCaptor.forClass(String.class);
         var kontaktNavnCaptor = ArgumentCaptor.forClass(String.class);
 
-        var aktoer = new Aktoer();
-        aktoer.setId(2L);
-        aktoer.setRolle(Aktoersroller.BRUKER);
+        var aktoer = lagAktoer(Aktoersroller.BRUKER, 1L);
 
         var fastsattTrygdeavgift = new FastsattTrygdeavgift();
         fastsattTrygdeavgift.setBetalesAv(aktoer);
@@ -197,50 +219,7 @@ class RepresentantServiceTest {
         medlemAvFolketrygden.setFastsattTrygdeavgift(fastsattTrygdeavgift);
         when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(anyLong())).thenReturn(java.util.Optional.of(medlemAvFolketrygden));
 
-        var fagsak = new Fagsak();
-        fagsak.setSaksnummer("saknr");
-        fagsak.getAktører().add(aktoer);
-        var behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-
-        representantService.oppdaterValgtRepresentant(1L, new ValgtRepresentant("repnr", false, "orgnr", "kontaktperson"));
-
-        verify(medlemAvFolketrygdenRepository, times(1)).save(medlemAvFolketrygdenArgumentCaptor.capture());
-        verify(aktoerRepository, times(1)).deleteById(anyLong());
-        verify(aktoerRepository, times(1)).save(aktoerArgumentCaptor.capture());
-        verify(kontaktopplysningService, times(1)).lagEllerOppdaterKontaktopplysning(saksnummerCaptor.capture(), orgnrCaptor.capture(), isNull(), kontaktNavnCaptor.capture(), isNull());
-
-        assertThat(medlemAvFolketrygdenArgumentCaptor.getValue().getFastsattTrygdeavgift().getRepresentantNr()).isEqualTo("repnr");
-        assertThat(medlemAvFolketrygdenArgumentCaptor.getValue().getFastsattTrygdeavgift().getBetalesAv()).isNull();
-        assertThat(aktoerArgumentCaptor.getValue().getFagsak()).isEqualTo(fagsak);
-        assertThat(aktoerArgumentCaptor.getValue().getOrgnr()).isEqualTo("orgnr");
-        assertThat(aktoerArgumentCaptor.getValue().getRolle()).isEqualTo(Aktoersroller.REPRESENTANT_TRYGDEAVGIFT);
-        assertThat(aktoerArgumentCaptor.getValue().getId()).isNull();
-        assertThat(saksnummerCaptor.getValue()).isEqualTo("saknr");
-        assertThat(orgnrCaptor.getValue()).isEqualTo("orgnr");
-        assertThat(kontaktNavnCaptor.getValue()).isEqualTo("kontaktperson");
-    }
-
-    @Test
-    void oppdaterValgtRepresentant_sammeBetalesAvRolle_lagresKorrekt() throws FunksjonellException {
-        var saksnummerCaptor = ArgumentCaptor.forClass(String.class);
-        var orgnrCaptor = ArgumentCaptor.forClass(String.class);
-        var kontaktNavnCaptor = ArgumentCaptor.forClass(String.class);
-
-        var aktoer = new Aktoer();
-        aktoer.setId(2L);
-        aktoer.setRolle(Aktoersroller.REPRESENTANT_TRYGDEAVGIFT);
-
-        var fastsattTrygdeavgift = new FastsattTrygdeavgift();
-        fastsattTrygdeavgift.setBetalesAv(aktoer);
-        var medlemAvFolketrygden = new MedlemAvFolketrygden();
-        medlemAvFolketrygden.setFastsattTrygdeavgift(fastsattTrygdeavgift);
-        when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(anyLong())).thenReturn(java.util.Optional.of(medlemAvFolketrygden));
-
-        var fagsak = new Fagsak();
-        fagsak.setSaksnummer("saknr");
-        fagsak.getAktører().add(aktoer);
+        var fagsak = lagFagsak(aktoer);
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
@@ -257,7 +236,44 @@ class RepresentantServiceTest {
         assertThat(aktoerArgumentCaptor.getValue().getFagsak()).isEqualTo(fagsak);
         assertThat(aktoerArgumentCaptor.getValue().getOrgnr()).isEqualTo("orgnr");
         assertThat(aktoerArgumentCaptor.getValue().getRolle()).isEqualTo(Aktoersroller.REPRESENTANT_TRYGDEAVGIFT);
-        assertThat(aktoerArgumentCaptor.getValue().getId()).isEqualTo(2L);
+        assertThat(aktoerArgumentCaptor.getValue().getId()).isNull();
+        assertThat(saksnummerCaptor.getValue()).isEqualTo("saknr");
+        assertThat(orgnrCaptor.getValue()).isEqualTo("orgnr");
+        assertThat(kontaktNavnCaptor.getValue()).isEqualTo("kontaktperson");
+    }
+
+    @Test
+    void oppdaterValgtRepresentant_ikkeSelvbetalendeTidligereInfoErIkkeSelvbetalende_lagresKorrekt() throws FunksjonellException {
+        var saksnummerCaptor = ArgumentCaptor.forClass(String.class);
+        var orgnrCaptor = ArgumentCaptor.forClass(String.class);
+        var kontaktNavnCaptor = ArgumentCaptor.forClass(String.class);
+
+        var aktoer = lagAktoer(Aktoersroller.REPRESENTANT_TRYGDEAVGIFT, 1L);
+
+        var fastsattTrygdeavgift = new FastsattTrygdeavgift();
+        fastsattTrygdeavgift.setBetalesAv(aktoer);
+        var medlemAvFolketrygden = new MedlemAvFolketrygden();
+        medlemAvFolketrygden.setFastsattTrygdeavgift(fastsattTrygdeavgift);
+        when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(anyLong())).thenReturn(java.util.Optional.of(medlemAvFolketrygden));
+
+        var fagsak = lagFagsak(aktoer);
+        var behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+
+        representantService.oppdaterValgtRepresentant(1L, new ValgtRepresentant("repnr", false, "orgnr", "kontaktperson"));
+
+        verify(medlemAvFolketrygdenRepository, times(1)).save(medlemAvFolketrygdenArgumentCaptor.capture());
+        verify(aktoerRepository, never()).deleteById(anyLong());
+        verify(aktoerRepository, times(1)).save(aktoerArgumentCaptor.capture());
+        verify(kontaktopplysningService, times(1)).lagEllerOppdaterKontaktopplysning(saksnummerCaptor.capture(), orgnrCaptor.capture(), isNull(), kontaktNavnCaptor.capture(), isNull());
+
+        assertThat(medlemAvFolketrygdenArgumentCaptor.getValue().getFastsattTrygdeavgift().getRepresentantNr()).isEqualTo("repnr");
+        assertThat(medlemAvFolketrygdenArgumentCaptor.getValue().getFastsattTrygdeavgift().getBetalesAv()).isNull();
+        assertThat(aktoerArgumentCaptor.getValue().getFagsak()).isEqualTo(fagsak);
+        assertThat(aktoerArgumentCaptor.getValue().getOrgnr()).isEqualTo("orgnr");
+        assertThat(aktoerArgumentCaptor.getValue().getRolle()).isEqualTo(Aktoersroller.REPRESENTANT_TRYGDEAVGIFT);
+        assertThat(aktoerArgumentCaptor.getValue().getId()).isEqualTo(1L);
         assertThat(saksnummerCaptor.getValue()).isEqualTo("saknr");
         assertThat(orgnrCaptor.getValue()).isEqualTo("orgnr");
         assertThat(kontaktNavnCaptor.getValue()).isEqualTo("kontaktperson");
@@ -298,8 +314,7 @@ class RepresentantServiceTest {
 
     @Test
     void hentValgtRepresentant_ikkeSelvbetalendeKontaktpersonSatt_hentesKorrekt() throws FunksjonellException {
-        var fagsak = new Fagsak();
-        fagsak.setSaksnummer("saknr");
+        var fagsak = lagFagsak();
         var aktoer = new Aktoer();
         aktoer.setOrgnr("orgnr");
         aktoer.setFagsak(fagsak);
@@ -325,8 +340,7 @@ class RepresentantServiceTest {
 
     @Test
     void hentValgtRepresentant_ikkeSelvbetalendeKontaktpersonIkkeSatt_hentesKorrekt() throws FunksjonellException {
-        var fagsak = new Fagsak();
-        fagsak.setSaksnummer("saknr");
+        var fagsak = lagFagsak();
         var aktoer = new Aktoer();
         aktoer.setOrgnr("orgnr");
         aktoer.setFagsak(fagsak);
@@ -346,5 +360,19 @@ class RepresentantServiceTest {
         assertThat(response.isSelvbetalende()).isFalse();
         assertThat(response.getOrgnr()).isEqualTo("orgnr");
         assertThat(response.getKontaktperson()).isNull();
+    }
+
+    private Aktoer lagAktoer(Aktoersroller rolle, long id) {
+        var aktoer = new Aktoer();
+        aktoer.setRolle(rolle);
+        aktoer.setId(id);
+        return aktoer;
+    }
+
+    private Fagsak lagFagsak(Aktoer... aktoerer) {
+        var fagsak = new Fagsak();
+        fagsak.setSaksnummer("saknr");
+        fagsak.getAktører().addAll(List.of(aktoerer));
+        return fagsak;
     }
 }
