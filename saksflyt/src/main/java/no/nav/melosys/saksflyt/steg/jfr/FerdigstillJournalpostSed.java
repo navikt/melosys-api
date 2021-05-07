@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -17,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import static no.nav.melosys.domain.TemaFactory.fraBehandlingstema;
 
 @Component
 public class FerdigstillJournalpostSed implements StegBehandler {
@@ -40,16 +41,17 @@ public class FerdigstillJournalpostSed implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
 
-        final Behandling behandling = prosessinstans.getBehandling();
+        final var behandling = prosessinstans.getBehandling();
 
-        Long arkivSakID = behandling.getFagsak().getGsakSaksnummer();
-        String brukerID = hentBrukerID(prosessinstans);
-        MelosysEessiMelding eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
-        String tittel = prosessinstans.getData(ProsessDataKey.HOVEDDOKUMENT_TITTEL);
+        final String saksnummer = behandling.getFagsak().getSaksnummer();
+        final String brukerID = hentBrukerID(prosessinstans);
+        final MelosysEessiMelding eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
+        final String tittel = prosessinstans.getData(ProsessDataKey.HOVEDDOKUMENT_TITTEL);
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
             .medBrukerID(brukerID)
-            .medArkivSakID(arkivSakID)
+            .medSaksnummer(saksnummer)
             .medTittel(tittel)
+            .medTema(fraBehandlingstema(behandling.getTema()).getKode())
             .build();
 
         joarkFasade.oppdaterJournalpost(eessiMelding.getJournalpostId(), journalpostOppdatering, true);

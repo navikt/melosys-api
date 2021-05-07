@@ -60,7 +60,7 @@ class BestemBehandlingsmåteSedTest {
     void utfør_temaRegistreringUnntakIngenTreffIRegister_prosessOpprettes() throws Exception {
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         bestemBehandlingsmåteSed.utfør(prosessinstans);
-        verify(unntaksperiodeService).godkjennPeriode(eq(behandling.getId()), eq(false));
+        verify(unntaksperiodeService).godkjennPeriode(eq(behandling.getId()), eq(false), eq(null));
     }
 
     @Test

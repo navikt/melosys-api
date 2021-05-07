@@ -1,15 +1,19 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.Avsendertyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
-import no.nav.melosys.service.sak.FagsakService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,47 +29,101 @@ import static org.mockito.Mockito.*;
 class OppdaterOgFerdigstillJournalpostTest {
     @Mock
     private JoarkFasade joarkFasade;
-    @Mock
-    private FagsakService fagsakService;
 
-    private OppdaterOgFerdigstillJournalpost agent;
+    private OppdaterOgFerdigstillJournalpost oppdaterOgFerdigstillJournalpost;
 
     @Captor
     private ArgumentCaptor<JournalpostOppdatering> oppdateringArgumentCaptor;
 
     @BeforeEach
     public void setUp() {
-        agent = new OppdaterOgFerdigstillJournalpost(joarkFasade, fagsakService);
+        oppdaterOgFerdigstillJournalpost = new OppdaterOgFerdigstillJournalpost(joarkFasade);
     }
 
     @Test
-    void utfoerSteg() throws MelosysException {
-        Prosessinstans prosessinstans = new Prosessinstans();
+    void utfør_avsenderNavnErNull_setterAvsenderNavnTilAvsenderId() throws MelosysException {
+        var prosessinstans = prosessinstans(false);
+        oppdaterOgFerdigstillJournalpost.utfør(prosessinstans);
+
+        verify(joarkFasade).oppdaterJournalpost(any(), oppdateringArgumentCaptor.capture(), eq(true));
+
+        assertOppdatering(oppdateringArgumentCaptor.getValue(), false);
+    }
+
+    @Test
+    void utfør_avsenderNavnErSatt_brukerAvsenderNavn() throws MelosysException {
+        var prosessinstans = prosessinstans(true);
+        oppdaterOgFerdigstillJournalpost.utfør(prosessinstans);
+
+        verify(joarkFasade).oppdaterJournalpost(any(), oppdateringArgumentCaptor.capture(), eq(true));
+
+        assertOppdatering(oppdateringArgumentCaptor.getValue(), true);
+    }
+
+    private Prosessinstans prosessinstans(boolean medAvsenderNavn) {
+        var prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
-        prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, "navn");
         prosessinstans.setBehandling(new Behandling());
+        prosessinstans.getBehandling().setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         prosessinstans.getBehandling().setFagsak(new Fagsak());
-        prosessinstans.getBehandling().getFagsak().setGsakSaksnummer(123321L);
-        agent.utfør(prosessinstans);
+        prosessinstans.getBehandling().getFagsak().setSaksnummer("MEL-123");
 
-        verify(joarkFasade).oppdaterJournalpost(any(), oppdateringArgumentCaptor.capture(), eq(true));
+        if (medAvsenderNavn) {
+            prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, avsenderNavn);
+
+        }
+        prosessinstans.setData(ProsessDataKey.BRUKER_ID, brukerID);
+        prosessinstans.setData(ProsessDataKey.AVSENDER_ID, avsenderID);
+        prosessinstans.setData(ProsessDataKey.AVSENDER_LAND, avsenderLand);
+        prosessinstans.setData(ProsessDataKey.AVSENDER_TYPE, avsendertype);
+        prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, tittel);
+        prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, hovedDokId);
+        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, mottattDato);
+        prosessinstans.setData(ProsessDataKey.LOGISKE_VEDLEGG_TITLER, logiskVedleggTitler);
+        prosessinstans.setData(ProsessDataKey.FYSISKE_VEDLEGG, fysiskVedleggTitler);
+
+        return prosessinstans;
     }
 
-    @Test
-    void utfoerSteg_behandlingIkkeSatt_henterFagsakVedSaksnummerFraData() throws MelosysException {
-        Fagsak fagsak = new Fagsak();
-        long gsakSaksnummer = 10L;
-        String saksnummer = "saksnummer";
-        fagsak.setGsakSaksnummer(gsakSaksnummer);
-        when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsak);
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.JFR_NY_BEHANDLING);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
-        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
-        prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, "navn");
-        agent.utfør(prosessinstans);
+    private void assertOppdatering(JournalpostOppdatering oppdatering, boolean medAvsenderNavn) {
+        if (medAvsenderNavn) {
+            assertThat(oppdatering.getAvsenderNavn()).isEqualTo(avsenderNavn);
+        } else {
+            assertThat(oppdatering.getAvsenderNavn()).isEqualTo(avsenderID);
+        }
 
-        verify(joarkFasade).oppdaterJournalpost(any(), oppdateringArgumentCaptor.capture(), eq(true));
-        assertThat(oppdateringArgumentCaptor.getValue().getArkivSakID()).isEqualTo(gsakSaksnummer);
+        assertThat(oppdatering)
+            .extracting(
+                JournalpostOppdatering::getAvsenderLand,
+                JournalpostOppdatering::getBrukerID,
+                JournalpostOppdatering::getAvsenderID,
+                JournalpostOppdatering::getAvsenderType,
+                JournalpostOppdatering::getTittel,
+                JournalpostOppdatering::getHovedDokumentID,
+                JournalpostOppdatering::getMottattDato,
+                JournalpostOppdatering::getLogiskeVedleggTitler,
+                JournalpostOppdatering::getFysiskeVedlegg
+            ).containsExactly(
+                avsenderLand,
+            brukerID,
+            avsenderID,
+            avsendertype,
+            tittel,
+            hovedDokId,
+            mottattDato,
+            logiskVedleggTitler,
+            fysiskVedleggTitler
+        );
     }
+
+    private final String brukerID = "231";
+    private final String avsenderNavn = "avsendernavn";
+    private final String avsenderID = "avsenderID";
+    private final Avsendertyper avsendertype = Avsendertyper.ORGANISASJON;
+    private final String avsenderLand = "SE";
+    private final String tittel = "Tittelei";
+    private final String hovedDokId = "4424224";
+    private final LocalDate mottattDato = LocalDate.now().minusYears(1);
+    private final List<String> logiskVedleggTitler = List.of("tittelen", "tittelto");
+    private final Map<String, String> fysiskVedleggTitler = Map.of("id", "doktittel");
 }
