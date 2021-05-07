@@ -69,7 +69,7 @@ public class InngangsvilkaarServiceTest {
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, periode);
 
         verify(inngangsvilkaarConsumer).vurderInngangsvilkår(eq(personDokument.statsborgerskap), eq(Set.copyOf(tilIso3(landkoder))), eq(periode));
-        verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR, true, List.of());
+        verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR, true, Collections.emptySet());
     }
 
     @Test
@@ -83,7 +83,7 @@ public class InngangsvilkaarServiceTest {
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, periode);
 
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR,
-            false, List.of(Inngangsvilkaar.MANGLER_STATSBORGERSKAP));
+            false, Set.of(Inngangsvilkaar.MANGLER_STATSBORGERSKAP));
     }
 
     @Test
@@ -125,7 +125,7 @@ public class InngangsvilkaarServiceTest {
 
         verify(inngangsvilkaarConsumer).vurderInngangsvilkår(eq(personDokument.statsborgerskap), eq(Set.copyOf(tilIso3(landkoder))), eq(periode));
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR,
-            false, List.of(Inngangsvilkaar.TEKNISK_FEIL));
+            false, Set.of(Inngangsvilkaar.TEKNISK_FEIL));
     }
 
     @Test
@@ -235,7 +235,7 @@ public class InngangsvilkaarServiceTest {
 
         inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(1L);
 
-        verify(vilkaarsresultatService).oppdaterVilkaarsresultat(eq(1L), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR), eq(true), anyList());
+        verify(vilkaarsresultatService).oppdaterVilkaarsresultat(eq(1L), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR), eq(true), anySet());
     }
 
     @Test
@@ -248,7 +248,7 @@ public class InngangsvilkaarServiceTest {
 
         inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(1L);
 
-        verify(vilkaarsresultatService).oppdaterVilkaarsresultat(eq(1L), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR), anyBoolean(), eq(List.of(
+        verify(vilkaarsresultatService).oppdaterVilkaarsresultat(eq(1L), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR), anyBoolean(), eq(Set.of(
             Inngangsvilkaar.OVERSTYRT_AV_SAKSBEHANDLER, Inngangsvilkaar.MANGLER_STATSBORGERSKAP
         )));
     }

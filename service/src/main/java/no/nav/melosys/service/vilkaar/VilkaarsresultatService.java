@@ -42,7 +42,7 @@ public class VilkaarsresultatService {
             VilkaarDto vilkaarDto = new VilkaarDto();
             vilkaarDto.setVilkaar(vilkaarsresultat.getVilkaar().getKode());
             vilkaarDto.setOppfylt(vilkaarsresultat.isOppfylt());
-            vilkaarDto.setBegrunnelseKoder(vilkaarsresultat.getBegrunnelser().stream().map(VilkaarBegrunnelse::getKode).collect(Collectors.toList()));
+            vilkaarDto.setBegrunnelseKoder(vilkaarsresultat.getBegrunnelser().stream().map(VilkaarBegrunnelse::getKode).collect(Collectors.toSet()));
             vilkaarDto.setBegrunnelseFritekst(vilkaarsresultat.getBegrunnelseFritekst());
             vilkaarDto.setBegrunnelseFritekstEngelsk(vilkaarsresultat.getBegrunnelseFritekstEessi());
             vilkaarDtoListe.add(vilkaarDto);
@@ -112,7 +112,7 @@ public class VilkaarsresultatService {
     public void oppdaterVilkaarsresultat(long behandlingID,
                                          Vilkaar vilkaar,
                                          boolean oppfylt,
-                                         List<Kodeverk> begrunnelseKoder) throws IkkeFunnetException {
+                                         Set<Kodeverk> begrunnelseKoder) throws IkkeFunnetException {
         vilkaarsresultatRepo.deleteByBehandlingsresultatId(behandlingID);
         vilkaarsresultatRepo.flush();
         vilkaarsresultatRepo.save(
@@ -120,7 +120,7 @@ public class VilkaarsresultatService {
                 behandlingsresultatService.hentBehandlingsresultat(behandlingID),
                 vilkaar,
                 oppfylt,
-                begrunnelseKoder.stream().map(Kodeverk::getKode).collect(Collectors.toList())
+                begrunnelseKoder.stream().map(Kodeverk::getKode).collect(Collectors.toSet())
             )
         );
     }
@@ -128,7 +128,7 @@ public class VilkaarsresultatService {
     private Vilkaarsresultat lagVilkaarsresultat(Behandlingsresultat behandlingsresultat,
                                                  Vilkaar vilkaar,
                                                  boolean oppfylt,
-                                                 List<String> begrunnelseKoder) {
+                                                 Set<String> begrunnelseKoder) {
         return lagVilkaarsresultat(behandlingsresultat, vilkaar, oppfylt, begrunnelseKoder,
             null, null);
     }
@@ -136,7 +136,7 @@ public class VilkaarsresultatService {
     private Vilkaarsresultat lagVilkaarsresultat(Behandlingsresultat behandlingsresultat,
                                                  Vilkaar vilkaar,
                                                  boolean oppfylt,
-                                                 List<String> begrunnelseKoder,
+                                                 Set<String> begrunnelseKoder,
                                                  String begrunnelseFritekst,
                                                  String begrunnelseFritekstEngelsk) {
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();

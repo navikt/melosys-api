@@ -56,7 +56,7 @@ public class InngangsvilkaarService {
 
         vilkaarsresultatService.oppdaterVilkaarsresultat(behandlingID, FO_883_2004_INNGANGSVILKAAR,
             erEF_883_2004,
-            vurderingEF_883_2004.getBegrunnelseKode() == null ? List.of() : List.of(vurderingEF_883_2004.getBegrunnelseKode()));
+            vurderingEF_883_2004.getBegrunnelseKode() == null ? Collections.emptySet() : Set.of(vurderingEF_883_2004.getBegrunnelseKode()));
         return erEF_883_2004;
     }
 
@@ -126,12 +126,12 @@ public class InngangsvilkaarService {
         final var inngangsvilkaarBegrunnelseKoder = inngangsvilkaar.get().getBegrunnelser().stream()
             .map(VilkaarBegrunnelse::getKode)
             .map(Inngangsvilkaar::valueOf)
-            .collect(Collectors.toList());
+            .collect(Collectors.toSet());
 
-        final List<Kodeverk> begrunnelseKoder = Stream.concat(
-            List.of(Inngangsvilkaar.OVERSTYRT_AV_SAKSBEHANDLER).stream(),
+        final Set<Kodeverk> begrunnelseKoder = Stream.concat(
+            Set.of(Inngangsvilkaar.OVERSTYRT_AV_SAKSBEHANDLER).stream(),
             inngangsvilkaarBegrunnelseKoder.stream()
-        ).collect(Collectors.toList());
+        ).collect(Collectors.toSet());
 
         vilkaarsresultatService.oppdaterVilkaarsresultat(behandlingID, FO_883_2004_INNGANGSVILKAAR, true, begrunnelseKoder);
     }

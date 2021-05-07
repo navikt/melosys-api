@@ -64,7 +64,7 @@ public class VilkaarsresultatServiceTest {
 
         VilkaarDto vilkaarDto = new VilkaarDto();
         vilkaarDto.setVilkaar(Vilkaar.FO_883_2004_ART12_1.getKode());
-        List<String> koder = new ArrayList<>();
+        Set<String> koder = new HashSet<>();
         koder.add(Art12_1_begrunnelser.ERSTATTER_ANNEN.getKode());
         vilkaarDto.setBegrunnelseKoder(koder);
         vilkaarsresultatService.registrerVilkår(behandlingID, Collections.singletonList(vilkaarDto));
