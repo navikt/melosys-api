@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.vedtak.FattEosVedtakRequest;
 import no.nav.melosys.service.vedtak.FattFtrlVedtakRequest;
@@ -39,7 +40,7 @@ public class VedtakTjeneste {
     @PostMapping("{behandlingID}/fatt")
     @ApiOperation(value = "Fatter et vedtak for en gitt behandling")
     public ResponseEntity<Void> fattVedtak(@PathVariable("behandlingID") long behandlingID,
-                                           @RequestBody FattVedtakDto fattVedtakDto) throws MelosysException {
+                                           @RequestBody FattVedtakDto fattVedtakDto) throws MelosysException, ValideringException {
         if (fattVedtakDto == null || fattVedtakDto.getBehandlingsresultatTypeKode() == null || fattVedtakDto.getVedtakstype() == null) {
             throw new FunksjonellException("BehandlingsresultatTypeKode eller vedtakstype mangler.");
         }

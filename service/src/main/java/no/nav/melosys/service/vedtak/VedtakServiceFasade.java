@@ -33,14 +33,14 @@ public class VedtakServiceFasade {
     }
 
     @Transactional(rollbackFor = MelosysException.class, noRollbackFor = {ValideringException.class})
-    public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultattype) throws MelosysException {
+    public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultattype) throws MelosysException, ValideringException {
         var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
 
         eosVedtakSystemService.fattVedtak(behandling, behandlingsresultattype, Vedtakstyper.FØRSTEGANGSVEDTAK);
     }
 
     @Transactional(rollbackFor = MelosysException.class, noRollbackFor = {ValideringException.class})
-    public void fattVedtak(long behandlingID, FattVedtakRequest fattVedtakRequest) throws MelosysException {
+    public void fattVedtak(long behandlingID, FattVedtakRequest fattVedtakRequest) throws MelosysException, ValideringException {
         var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
 
         validerKanFattesVedtakAvTema(behandling);

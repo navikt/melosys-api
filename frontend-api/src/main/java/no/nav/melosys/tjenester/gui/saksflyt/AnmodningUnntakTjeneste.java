@@ -6,6 +6,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
 import no.nav.melosys.tjenester.gui.dto.AnmodningUnntakDto;
@@ -36,7 +37,7 @@ public class AnmodningUnntakTjeneste {
     @ApiOperation(value = "Anmodning om unntak for en gitt behandling")
     public ResponseEntity<Void> anmodningOmUnntak(@PathVariable("behandlingID") long behandlingID,
                                                   @RequestBody AnmodningUnntakDto anmodningUnntakDto)
-        throws MelosysException {
+        throws MelosysException, ValideringException {
         tilgangService.sjekkTilgang(behandlingID);
         anmodningUnntakService.anmodningOmUnntak(behandlingID,
             anmodningUnntakDto.getMottakerinstitusjon(),

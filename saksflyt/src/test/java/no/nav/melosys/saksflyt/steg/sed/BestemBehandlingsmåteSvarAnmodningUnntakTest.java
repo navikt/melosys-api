@@ -13,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.exception.validering.KontrollfeilDto;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -158,7 +157,7 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
     }
 
     @Test
-    void utfør_valideringsfeilFattVedtak_statusSvarAouMottattBehandling() throws MelosysException {
+    void utfør_valideringsfeilFattVedtak_statusSvarAouMottattBehandling() throws Exception {
         KontrollfeilDto kontrollfeilDto = new KontrollfeilDto();
         kontrollfeilDto.setKode(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER.getKode());
 
@@ -181,8 +180,8 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
 
         bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
 
-        verify(vedtakService).fattVedtak(eq(123L), eq(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND));
-        verify(behandlingsresultatService, never()).oppdaterBehandlingsMaate(eq(123L), eq(Behandlingsmaate.DELVIS_AUTOMATISERT));
+        verify(vedtakService).fattVedtak(123L, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        verify(behandlingsresultatService, never()).oppdaterBehandlingsMaate(123L, Behandlingsmaate.DELVIS_AUTOMATISERT);
         verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(anyLong(), captor.capture());
 

@@ -65,7 +65,7 @@ public class AnmodningUnntakService {
 
     @Transactional(rollbackFor = MelosysException.class)
     public void anmodningOmUnntak(long behandlingID, String mottakerinstitusjon,
-                                  Set<DokumentReferanse> vedleggReferanser, String ytterligereInformasjonSed) throws MelosysException {
+                                  Set<DokumentReferanse> vedleggReferanser, String ytterligereInformasjonSed) throws MelosysException, ValideringException {
         Set<String> mottakerinstitusjoner = validerMottakerInstitusjon(behandlingID, mottakerinstitusjon);
 
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
@@ -127,7 +127,7 @@ public class AnmodningUnntakService {
         }
     }
 
-    private void kontrollerAnmodningOmUnntak(long behandlingID) throws MelosysException {
+    private void kontrollerAnmodningOmUnntak(long behandlingID) throws ValideringException {
         Collection<Kontrollfeil> feilValideringer = anmodningUnntakKontrollService.utførKontroller(behandlingID);
         if (!feilValideringer.isEmpty()) {
             throw new ValideringException("Feil i validering. Kan ikke sende anmodning om unntak.",

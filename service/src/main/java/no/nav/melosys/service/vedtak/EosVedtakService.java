@@ -79,7 +79,7 @@ public class EosVedtakService {
         this.melosysEventMulticaster = melosysEventMulticaster;
     }
 
-    public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype) throws MelosysException {
+    public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype) throws MelosysException, ValideringException {
         FattEosVedtakRequest request = new FattEosVedtakRequest.Builder()
             .medBehandlingsresultat(behandlingsresultattype)
             .medVedtakstype(vedtakstype)
@@ -87,7 +87,7 @@ public class EosVedtakService {
         fattVedtak(behandling, request);
     }
 
-    public void fattVedtak(Behandling behandling, FattEosVedtakRequest request) throws MelosysException {
+    public void fattVedtak(Behandling behandling, FattEosVedtakRequest request) throws MelosysException, ValideringException {
         long behandlingID = behandling.getId();
 
         log.info("Fatter vedtak for (EU_EØS) sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
@@ -147,7 +147,7 @@ public class EosVedtakService {
 
     private void validerInnvilgelse(Vedtakstyper vedtakstype,
                                     Behandling behandling,
-                                    Behandlingsresultat behandlingsresultat) throws MelosysException {
+                                    Behandlingsresultat behandlingsresultat) throws MelosysException, ValideringException {
         Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
         String fnr = persondataFasade.hentFolkeregisterIdent(behandling.getFagsak().hentBruker().getAktørId());
 
@@ -194,7 +194,7 @@ public class EosVedtakService {
         return !behandlingsresultat.erArt16EtterUtlandMedRegistrertSvar();
     }
 
-    private void kontrollerFattVedtak(long behandlingID, Vedtakstyper vedtakstype) throws MelosysException {
+    private void kontrollerFattVedtak(long behandlingID, Vedtakstyper vedtakstype) throws ValideringException {
         Collection<Kontrollfeil> feilValideringer = vedtakKontrollService.utførKontroller(behandlingID, vedtakstype);
         if (!feilValideringer.isEmpty()) {
             throw new ValideringException("Feil i validering. Kan ikke fatte vedtak.",
