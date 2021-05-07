@@ -121,7 +121,7 @@ public class InngangsvilkaarService {
     public void overstyrInngangsvilkårTilOppfylt(long behandlingID) throws IkkeFunnetException {
         final var inngangsvilkaar = vilkaarsresultatService.finnVilkaarsresultat(behandlingID, FO_883_2004_INNGANGSVILKAAR);
         if (inngangsvilkaar.isEmpty()) {
-            throw new IkkeFunnetException("Finner ikke inngangsvilkår med behandlingID " + behandlingID);
+            throw new IkkeFunnetException("Finner ikke inngangsvilkår for behandlingID " + behandlingID);
         }
         final var inngangsvilkaarBegrunnelseKoder = inngangsvilkaar.get().getBegrunnelser().stream()
             .map(VilkaarBegrunnelse::getKode)

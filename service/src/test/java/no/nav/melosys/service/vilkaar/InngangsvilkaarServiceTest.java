@@ -225,7 +225,7 @@ public class InngangsvilkaarServiceTest {
 
         assertThatExceptionOfType(IkkeFunnetException.class)
             .isThrownBy(() -> inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(1L))
-            .withMessage("Finner ikke inngangsvilkår med behandlingID 1");
+            .withMessage("Finner ikke inngangsvilkår for behandlingID 1");
     }
 
     @Test
