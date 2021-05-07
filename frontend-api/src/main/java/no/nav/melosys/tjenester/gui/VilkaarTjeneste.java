@@ -66,11 +66,11 @@ public class VilkaarTjeneste {
     }
 
     @PutMapping("{behandlingID}/inngangsvilkaar/overstyr")
-    @ApiOperation(value = "Overstyr vurdering av inngangsvilkår")
-    public ResponseEntity<Void> overstyrInngangsvilkår(@PathVariable("behandlingID") long behandlingID)
+    @ApiOperation(value = "Overstyr vurdering av inngangsvilkår til oppfylt")
+    public ResponseEntity<Void> overstyrInngangsvilkårTilOppfylt(@PathVariable("behandlingID") long behandlingID)
         throws FunksjonellException, TekniskException {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
-        inngangsvilkaarService.overstyrInngangsvilkår(behandlingID);
+        inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(behandlingID);
 
         return ResponseEntity.ok().build();
     }

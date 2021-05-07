@@ -220,33 +220,33 @@ public class InngangsvilkaarServiceTest {
     }
 
     @Test
-    public void overstyrInngangsvilkår_ingenInngangsvilkårFunnet_kasterIkkeFunnetException() {
+    public void overstyrInngangsvilkårTilOppfylt_ingenInngangsvilkårFunnet_kasterIkkeFunnetException() {
         when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(Optional.empty());
 
         assertThatExceptionOfType(IkkeFunnetException.class)
-            .isThrownBy(() -> inngangsvilkaarService.overstyrInngangsvilkår(1L))
+            .isThrownBy(() -> inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(1L))
             .withMessage("Finner ikke inngangsvilkår med behandlingID 1");
     }
 
     @Test
-    public void overstyrInngangsvilkår_inngangsvilkårFunnet_oppfyllerVilkår() throws IkkeFunnetException {
+    public void overstyrInngangsvilkårTilOppfylt_inngangsvilkårFunnet_oppfyllerVilkår() throws IkkeFunnetException {
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
         when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(Optional.of(vilkaarsresultat));
 
-        inngangsvilkaarService.overstyrInngangsvilkår(1L);
+        inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(1L);
 
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(eq(1L), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR), eq(true), anyList());
     }
 
     @Test
-    public void overstyrInngangsvilkår_inngangsvilkårFunnet_beholderGamleBegrunnelserOgLeggerTilOverstyringsbegrunnelse() throws IkkeFunnetException {
+    public void overstyrInngangsvilkårTilOppfylt_inngangsvilkårFunnet_beholderGamleBegrunnelserOgLeggerTilOverstyringsbegrunnelse() throws IkkeFunnetException {
         VilkaarBegrunnelse vilkaarBegrunnelse = new VilkaarBegrunnelse();
         vilkaarBegrunnelse.setKode(Inngangsvilkaar.MANGLER_STATSBORGERSKAP.getKode());
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
         vilkaarsresultat.setBegrunnelser(Set.of(vilkaarBegrunnelse));
         when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(Optional.of(vilkaarsresultat));
 
-        inngangsvilkaarService.overstyrInngangsvilkår(1L);
+        inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(1L);
 
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(eq(1L), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR), anyBoolean(), eq(List.of(
             Inngangsvilkaar.OVERSTYRT_AV_SAKSBEHANDLER, Inngangsvilkaar.MANGLER_STATSBORGERSKAP
