@@ -147,16 +147,6 @@ class MedlemskapsperiodeServiceTest {
     }
 
     @Test
-    void slettMedlemskapsperiode_erEnesteMedlemskapsperiode_kasterException() {
-        when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID))
-            .thenReturn(Optional.of(lagMedlemAvFolketrygden(lagMedlemskapsperiode())));
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> medlemskapsperiodeService.slettMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID))
-            .withMessageContaining("minst en medlemskapsperiode");
-    }
-
-    @Test
     void slettMedlemskapsperiode_finnerIkkeMedlemskapsperiode_kasterException() {
         when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID))
             .thenReturn(Optional.of(lagMedlemAvFolketrygden()));

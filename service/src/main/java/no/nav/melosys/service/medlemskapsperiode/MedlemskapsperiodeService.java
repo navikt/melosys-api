@@ -111,10 +111,6 @@ public class MedlemskapsperiodeService {
         MedlemAvFolketrygden medlemAvFolketrygden = hentMedlemAvFolketrygden(behandlingsresultatID);
         Collection<Medlemskapsperiode> medlemskapsperioder = medlemAvFolketrygden.getMedlemskapsperioder();
 
-        if (medlemskapsperioder.size() == 1) {
-            throw new FunksjonellException("Behandlingen må ha minst en medlemskapsperiode");
-        }
-
         var medlemskapsperiode = medlemskapsperioder.stream()
             .filter(m -> m.getId() == medlemskapsperiodeID)
             .findFirst()
