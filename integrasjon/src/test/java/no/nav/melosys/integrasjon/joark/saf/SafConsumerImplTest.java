@@ -160,7 +160,7 @@ class SafConsumerImplTest {
         );
 
         assertThatThrownBy(() -> safConsumer.hentJournalpost(JOURNALPOST_ID))
-            .hasRootCauseInstanceOf(SikkerhetsbegrensningException.class)
+            .isInstanceOf(SikkerhetsbegrensningException.class)
             .hasMessageContaining("no valid token");
     }
 
