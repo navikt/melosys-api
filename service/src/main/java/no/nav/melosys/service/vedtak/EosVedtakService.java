@@ -18,7 +18,6 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.LandvelgerService;
@@ -79,7 +78,7 @@ public class EosVedtakService {
         this.melosysEventMulticaster = melosysEventMulticaster;
     }
 
-    public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype) throws MelosysException, ValideringException {
+    public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype) throws ValideringException {
         FattEosVedtakRequest request = new FattEosVedtakRequest.Builder()
             .medBehandlingsresultat(behandlingsresultattype)
             .medVedtakstype(vedtakstype)
@@ -87,7 +86,7 @@ public class EosVedtakService {
         fattVedtak(behandling, request);
     }
 
-    public void fattVedtak(Behandling behandling, FattEosVedtakRequest request) throws MelosysException, ValideringException {
+    public void fattVedtak(Behandling behandling, FattEosVedtakRequest request) throws ValideringException {
         long behandlingID = behandling.getId();
 
         log.info("Fatter vedtak for (EU_EØS) sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
@@ -147,7 +146,7 @@ public class EosVedtakService {
 
     private void validerInnvilgelse(Vedtakstyper vedtakstype,
                                     Behandling behandling,
-                                    Behandlingsresultat behandlingsresultat) throws MelosysException, ValideringException {
+                                    Behandlingsresultat behandlingsresultat) throws ValideringException {
         Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
         String fnr = persondataFasade.hentFolkeregisterIdent(behandling.getFagsak().hentBruker().getAktørId());
 
@@ -166,7 +165,7 @@ public class EosVedtakService {
 
     private Set<String> validerOgAvklarMottakerInstitusjoner(Behandling behandling,
                                                              Set<String> mottakerinstitusjoner,
-                                                             Behandlingsresultat behandlingsresultat) throws MelosysException {
+                                                             Behandlingsresultat behandlingsresultat) {
         Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId());
         if (mottakereTrenges(behandling) && skalSedSendes(behandlingsresultat, landkoder)) {
             mottakerinstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(

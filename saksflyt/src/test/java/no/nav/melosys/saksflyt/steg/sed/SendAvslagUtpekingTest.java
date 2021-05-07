@@ -13,7 +13,6 @@ import no.nav.melosys.domain.eessi.sed.SedDataDto;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
@@ -74,7 +73,7 @@ class SendAvslagUtpekingTest {
     }
 
     @Test
-    void utfør() throws MelosysException {
+    void utfør() {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.UTPEKING_AVVIS, new UtpekingAvvis(

@@ -88,7 +88,7 @@ public class DokumentTjeneste {
         produces = {MediaType.APPLICATION_PDF_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<byte[]> produserUtkastSed(@PathVariable("behandlingID") long behandlingID,
                                                     @PathVariable("sedType") SedType sedType,
-                                                    @RequestBody SedPdfData sedPdfData) throws MelosysException {
+                                                    @RequestBody SedPdfData sedPdfData) {
         tilgangService.sjekkTilgang(behandlingID);
         byte[] dokument = eessiService.genererSedPdf(behandlingID, sedType, sedPdfData);
         return lagResponseAvDokument(dokument, sedType.name() + "_utkast.pdf");

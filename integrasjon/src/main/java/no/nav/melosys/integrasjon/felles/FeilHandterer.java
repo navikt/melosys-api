@@ -12,7 +12,7 @@ import static javax.ws.rs.core.Response.Status.Family.SERVER_ERROR;
 
 public interface FeilHandterer {
 
-    default void httpStatusTilMelosysException(int status, String feilmelding) throws TekniskException, FunksjonellException {
+    default void httpStatusTilException(int status, String feilmelding) throws TekniskException, FunksjonellException {
         if (status == 401 || status == 403) {
             throw new SikkerhetsbegrensningException(feilmelding);
         } else if (status == 404) {

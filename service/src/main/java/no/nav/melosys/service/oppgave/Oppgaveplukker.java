@@ -14,7 +14,6 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
@@ -55,7 +54,7 @@ public class Oppgaveplukker {
      * 3) Neste oppgave velges basert på prioritet (først) og frist.
      * 4) Oppgaven tildeles til saksbehandleren.
      */
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) throws FunksjonellException, TekniskException {
         validerPlukkOppgave(plukkDto);
 
@@ -105,7 +104,7 @@ public class Oppgaveplukker {
         }
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public synchronized void leggTilbakeOppgave(String saksbehandlerID, TilbakeleggingDto tilbakelegging) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(tilbakelegging.getBehandlingID());
 

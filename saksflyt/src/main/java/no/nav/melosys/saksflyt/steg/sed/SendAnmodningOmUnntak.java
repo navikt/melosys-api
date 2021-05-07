@@ -24,7 +24,6 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -64,7 +63,7 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) {
 
         Behandling behandling = prosessinstans.getBehandling();
         LocalDateTime svarFristDato = LocalDateTime.now().plusMonths(SVARFRIST_MÅNEDER);
@@ -85,7 +84,7 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
     }
 
     @Override
-    protected void sendBrev(Prosessinstans prosessinstans) throws MelosysException {
+    protected void sendBrev(Prosessinstans prosessinstans) {
         brevBestiller.bestill(lagBrevBestilling(prosessinstans));
     }
 

@@ -7,7 +7,10 @@ import java.util.Set;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlService;
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
@@ -84,7 +87,7 @@ class MedlPeriodeServiceTest {
     }
 
     @Test
-    void opprettPeriodeEndelig() throws MelosysException, TekniskException {
+    void opprettPeriodeEndelig() throws TekniskException {
         setupPeriodeEndelig();
 
         medlPeriodeService.opprettPeriodeEndelig(new Lovvalgsperiode(), 1L, true);

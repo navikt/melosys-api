@@ -4,7 +4,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,7 +28,7 @@ class SendGodkjenningRegistreringUnntakTest {
     }
 
     @Test
-    void varsleUtland_skalVarslesOgRettBehandlingstema_forventSedSendt() throws MelosysException {
+    void varsleUtland_skalVarslesOgRettBehandlingstema_forventSedSendt() {
         Prosessinstans prosessinstans = lagProsessinstans();
         prosessinstans.setData(ProsessDataKey.VARSLE_UTLAND, true);
 
@@ -39,7 +38,7 @@ class SendGodkjenningRegistreringUnntakTest {
     }
 
     @Test
-    void varsleUtland_sendA012IkkeValgtAvSaksbehandler_forventIngenSedSendt() throws MelosysException {
+    void varsleUtland_sendA012IkkeValgtAvSaksbehandler_forventIngenSedSendt() {
         Prosessinstans prosessinstans = lagProsessinstans();
         prosessinstans.setData(ProsessDataKey.VARSLE_UTLAND, false);
 
@@ -49,7 +48,7 @@ class SendGodkjenningRegistreringUnntakTest {
     }
 
     @Test
-    void varsleUtland_utlandIkkeUtpekt_forventIngenSedSendt() throws MelosysException {
+    void varsleUtland_utlandIkkeUtpekt_forventIngenSedSendt() {
         Prosessinstans prosessinstans = lagProsessinstans();
         prosessinstans.getBehandling().setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
 

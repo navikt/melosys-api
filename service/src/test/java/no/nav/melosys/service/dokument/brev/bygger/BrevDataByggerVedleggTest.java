@@ -2,7 +2,6 @@ package no.nav.melosys.service.dokument.brev.bygger;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
@@ -24,7 +23,7 @@ public class BrevDataByggerVedleggTest {
     private BrevDataA1 brevDataA1;
     private BrevDataA001 brevDataA001;
 
-    public BrevDataByggerVedleggTest() throws MelosysException {
+    public BrevDataByggerVedleggTest() {
         brevDatabyggerA1 = mock(BrevDataByggerA1.class);
         brevDatabyggerA001 = mock(BrevDataByggerA001.class);
 

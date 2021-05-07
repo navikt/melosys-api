@@ -12,7 +12,6 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -50,11 +49,11 @@ public class VideresendSoknadService {
         this.oppgaveService = oppgaveService;
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public void videresend(String saksnummer,
                            String mottakerinstitusjon,
                            String fritekst,
-                           Set<DokumentReferanse> vedleggReferanser) throws MelosysException {
+                           Set<DokumentReferanse> vedleggReferanser) {
         final Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         final Behandling behandling = fagsak.hentAktivBehandling();
         log.info("Videresender søknad for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandling.getId());

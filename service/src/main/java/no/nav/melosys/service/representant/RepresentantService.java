@@ -10,7 +10,6 @@ import no.nav.melosys.domain.folketrygden.ValgtRepresentant;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.avgiftoverforing.AvgiftOverforingConsumer;
 import no.nav.melosys.repository.AktoerRepository;
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
@@ -48,7 +47,7 @@ public class RepresentantService {
         return RepresentantDataDto.av(avgiftOverforingConsumer.hentRepresentant(representantId));
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public ValgtRepresentant oppdaterValgtRepresentant(long behandlingID, ValgtRepresentant valgtRepresentant) throws FunksjonellException {
         validerValgtRepresentantRequest(valgtRepresentant);
 

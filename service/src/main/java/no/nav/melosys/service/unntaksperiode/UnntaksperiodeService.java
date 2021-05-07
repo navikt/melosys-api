@@ -13,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -49,7 +48,7 @@ public class UnntaksperiodeService {
         this.prosessinstansService = prosessinstansService;
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public void godkjennPeriode(long behandlingID, boolean varsleUtland) throws FunksjonellException, TekniskException {
         Behandling behandling = hentOgValiderBehandling(behandlingID);
         opprettLovvalgsperiodeHvisIkkeEksisterer(behandling);
@@ -69,7 +68,7 @@ public class UnntaksperiodeService {
         }
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public void ikkeGodkjennPeriode(long behandlingID, Set<String> begrunnelser, String fritekst) throws FunksjonellException, TekniskException {
         Behandling behandling = hentOgValiderBehandling(behandlingID);
         Set<Ikke_godkjent_begrunnelser> ikkeGodkjentBegrunnelser = tilIkkeGodkjentBegrunnelser(begrunnelser);

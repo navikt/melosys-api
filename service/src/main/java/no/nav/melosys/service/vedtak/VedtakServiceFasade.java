@@ -6,7 +6,6 @@ import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,15 +31,15 @@ public class VedtakServiceFasade {
         this.ftrlVedtakService = ftrlVedtakService;
     }
 
-    @Transactional(rollbackFor = MelosysException.class, noRollbackFor = {ValideringException.class})
-    public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultattype) throws MelosysException, ValideringException {
+    @Transactional(noRollbackFor = {ValideringException.class})
+    public void fattVedtak(long behandlingID, Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
         var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
 
         eosVedtakSystemService.fattVedtak(behandling, behandlingsresultattype, Vedtakstyper.FØRSTEGANGSVEDTAK);
     }
 
-    @Transactional(rollbackFor = MelosysException.class, noRollbackFor = {ValideringException.class})
-    public void fattVedtak(long behandlingID, FattVedtakRequest fattVedtakRequest) throws MelosysException, ValideringException {
+    @Transactional(noRollbackFor = {ValideringException.class})
+    public void fattVedtak(long behandlingID, FattVedtakRequest fattVedtakRequest) throws ValideringException {
         var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
 
         validerKanFattesVedtakAvTema(behandling);
@@ -54,7 +53,7 @@ public class VedtakServiceFasade {
         }
     }
 
-    @Transactional(rollbackFor = MelosysException.class, noRollbackFor = {ValideringException.class})
+    @Transactional(noRollbackFor = {ValideringException.class})
     public void endreVedtak(long behandlingID, Endretperiode endretperiode, String fritekst, String fritekstSed) throws FunksjonellException {
         var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         Sakstyper sakstype = behandling.getFagsak().getType();

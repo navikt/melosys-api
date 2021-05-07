@@ -1,7 +1,6 @@
 package no.nav.melosys.service.vedtak;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +18,7 @@ public class FtrlVedtakService {
         this.behandlingsresultatService = behandlingsresultatService;
     }
 
-    public void fattVedtak(Behandling behandling, FattFtrlVedtakRequest request) throws MelosysException {
+    public void fattVedtak(Behandling behandling, FattFtrlVedtakRequest request) {
         long behandlingID = behandling.getId();
 
         log.info("Fatter vedtak for (FTRL) sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);

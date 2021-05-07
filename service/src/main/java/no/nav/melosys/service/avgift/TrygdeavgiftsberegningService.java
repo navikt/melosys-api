@@ -11,7 +11,6 @@ import no.nav.melosys.domain.avgift.Trygdeavgift;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsberegningsresultat;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer;
 import no.nav.melosys.integrasjon.trygdeavgift.dto.MelosysTrygdeavgfitBeregningDto;
 import no.nav.melosys.service.MedlemAvFolketrygdenService;
@@ -35,7 +34,7 @@ public class TrygdeavgiftsberegningService {
         this.trygdeavgiftConsumer = trygdeavgiftConsumer;
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public void oppdaterBeregningsgrunnlag(long behandlingsresultatID, OppdaterTrygdeavgiftsberegningRequest request) throws FunksjonellException {
         final var medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID);
 
@@ -54,7 +53,7 @@ public class TrygdeavgiftsberegningService {
         beregnAvgift(behandlingsresultatID);
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public void beregnAvgift(long behandlingsresultatID) throws IkkeFunnetException {
         final var medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID);
         final var medlemskapsperioder = medlemAvFolketrygden.getMedlemskapsperioder();

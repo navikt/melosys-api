@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
@@ -37,7 +36,7 @@ public class AnmodningUnntakTjeneste {
     @ApiOperation(value = "Anmodning om unntak for en gitt behandling")
     public ResponseEntity<Void> anmodningOmUnntak(@PathVariable("behandlingID") long behandlingID,
                                                   @RequestBody AnmodningUnntakDto anmodningUnntakDto)
-        throws MelosysException, ValideringException {
+        throws ValideringException {
         tilgangService.sjekkTilgang(behandlingID);
         anmodningUnntakService.anmodningOmUnntak(behandlingID,
             anmodningUnntakDto.getMottakerinstitusjon(),
@@ -50,7 +49,7 @@ public class AnmodningUnntakTjeneste {
 
     @PutMapping(value = "{behandlingID}/svar", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
     @ApiOperation(value = "Sender et svar på anmodning om unntak basert på AnmodningsperiodeSvar som er registrert på behandlingen")
-    public ResponseEntity<Void> svar(@PathVariable("behandlingID") long behandlingID) throws MelosysException {
+    public ResponseEntity<Void> svar(@PathVariable("behandlingID") long behandlingID) {
         tilgangService.sjekkTilgang(behandlingID);
         anmodningUnntakService.anmodningOmUnntakSvar(behandlingID);
         return ResponseEntity.ok().build();

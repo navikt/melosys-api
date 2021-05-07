@@ -16,7 +16,6 @@ import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -51,7 +50,7 @@ public class HentMottakerinstitusjonerForkortetPeriodeTest {
     public ExpectedException expectedException = ExpectedException.none();
 
     @Before
-    public void setUp() throws MelosysException {
+    public void setUp() {
         hentMottakerinstitusjonerForkortetPeriode = new HentMottakerinstitusjonerForkortetPeriode(behandlingsresultatService, eessiService, landvelgerService);
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
@@ -63,7 +62,7 @@ public class HentMottakerinstitusjonerForkortetPeriodeTest {
     }
 
     @Test
-    public void utfør_harTidligereBUC_setterMottakerInstitusjoner() throws MelosysException {
+    public void utfør_harTidligereBUC_setterMottakerInstitusjoner() {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(lagBehandling());
         Set<String> mottakerInstitusjoner = Set.of("SE:123");
@@ -79,7 +78,7 @@ public class HentMottakerinstitusjonerForkortetPeriodeTest {
     }
 
     @Test
-    public void utfør_ikkeEessiReady_ingenMottakerInstitusjoner() throws MelosysException {
+    public void utfør_ikkeEessiReady_ingenMottakerInstitusjoner() {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(lagBehandling());
         Set<String> mottakerInstitusjoner = Collections.emptySet();
@@ -95,7 +94,7 @@ public class HentMottakerinstitusjonerForkortetPeriodeTest {
     }
 
     @Test
-    public void utfør_erEessiReadyFinnerIngenBuc_kasterException() throws MelosysException {
+    public void utfør_erEessiReadyFinnerIngenBuc_kasterException() {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(lagBehandling());
 
