@@ -239,7 +239,7 @@ public class InngangsvilkaarServiceTest {
     }
 
     @Test
-    public void overstyrInngangsvilkår_inngangsvilkårFunnet_BeholderGamleBegrunnelserOgLeggerTilOverstyringsbegrunnelse() throws IkkeFunnetException {
+    public void overstyrInngangsvilkår_inngangsvilkårFunnet_beholderGamleBegrunnelserOgLeggerTilOverstyringsbegrunnelse() throws IkkeFunnetException {
         VilkaarBegrunnelse vilkaarBegrunnelse = new VilkaarBegrunnelse();
         vilkaarBegrunnelse.setKode(Inngangsvilkaar.MANGLER_STATSBORGERSKAP.getKode());
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
