@@ -141,7 +141,7 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
         this.medlemskapstype = medlemskapstype;
     }
 
-    public Trygdedekninger getTrygdedekning() {
+    public Trygdedekninger getDekning() {
         return trygdedekning;
     }
 

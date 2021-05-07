@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Kontaktopplysning;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -61,6 +62,7 @@ public class DistribuerJournalpost implements StegBehandler {
         }
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         String journalpostId = prosessinstans.getData(DISTRIBUERBAR_JOURNALPOST_ID);
+        var brevbestilling = prosessinstans.getData(BREVBESTILLING, DokgenBrevbestilling.class);
         Aktoersroller mottaker = prosessinstans.getData(MOTTAKER, Aktoersroller.class);
         String orgnr = prosessinstans.getData(ORGNR, String.class, null);
 
@@ -75,9 +77,10 @@ public class DistribuerJournalpost implements StegBehandler {
         OrganisasjonDokument org = null;
         Kontaktopplysning kontaktopplysning = null;
 
-        if (!Aktoersroller.BRUKER.equals(mottaker)) {
-            org = (OrganisasjonDokument) eregFasade.hentOrganisasjon(orgnr).getDokument();
+        if (mottaker != Aktoersroller.BRUKER) {
             kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), orgnr).orElse(null);
+            String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : orgnr;
+            org = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();
         }
 
         String bestillingsId;
@@ -86,7 +89,7 @@ public class DistribuerJournalpost implements StegBehandler {
             if (orgAdresse.erNorsk() && isEmpty(orgAdresse.poststed)) {
                 orgAdresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, orgAdresse.postnummer, LocalDate.now());
             }
-            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, orgAdresse, kontaktopplysning);
+            bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, orgAdresse, kontaktopplysning, brevbestilling.getKontaktpersonNavn());
         } else {
             bestillingsId = doksysFasade.distribuerJournalpost(journalpostId);
         }

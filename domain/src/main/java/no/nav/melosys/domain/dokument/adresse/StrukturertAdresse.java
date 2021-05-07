@@ -4,8 +4,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import no.nav.melosys.domain.dokument.person.Bostedsadresse;
-import no.nav.melosys.domain.dokument.person.Gateadresse;
+import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
+import no.nav.melosys.domain.dokument.person.adresse.Gateadresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import org.apache.commons.lang3.StringUtils;

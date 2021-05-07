@@ -17,13 +17,15 @@ public class OppdaterJournalpostRequest {
     public final AvsenderMottaker avsenderMottaker;
     public final List<Dokumentoppdatering> dokumenter;
     public final Sak sak;
+    public final String tema;
 
     public OppdaterJournalpostRequest(LocalDate datoMottatt,
                                       String tittel,
                                       Bruker bruker,
                                       AvsenderMottaker avsenderMottaker,
                                       List<Dokumentoppdatering> dokumenter,
-                                      Sak sak) {
+                                      Sak sak,
+                                      String tema) {
         this.datoMottatt = datoMottatt;
         this.tittel = tittel;
         this.bruker = bruker;
@@ -31,6 +33,7 @@ public class OppdaterJournalpostRequest {
         this.sak = sak;
         this.dokumenter = dokumenter;
         this.journalfoerendeEnhet = String.valueOf(Konstanter.MELOSYS_ENHET_ID);
+        this.tema = tema;
     }
 
      public static class Builder {
@@ -40,6 +43,7 @@ public class OppdaterJournalpostRequest {
          private AvsenderMottaker avsenderMottaker;
          private Sak sak;
          private List<Dokumentoppdatering> dokumenter = new ArrayList<>();
+         private String tema;
 
          public Builder() {}
 
@@ -72,13 +76,18 @@ public class OppdaterJournalpostRequest {
             return this;
         }
 
-        public Builder medArkivsaksnummer(String arkivsaknummer) {
-             this.sak = new Sak(arkivsaknummer);
+        public Builder medSaksnummer(String saksnummer) {
+             this.sak = new Sak(saksnummer);
+             return this;
+        }
+
+        public Builder medTema(String tema) {
+             this.tema = tema;
              return this;
         }
 
         public OppdaterJournalpostRequest build() {
-             return new OppdaterJournalpostRequest(datoMottat, tittel, bruker, avsenderMottaker, dokumenter, sak);
+             return new OppdaterJournalpostRequest(datoMottat, tittel, bruker, avsenderMottaker, dokumenter, sak, tema);
         }
     }
 }

@@ -2,6 +2,7 @@ package no.nav.melosys.service.behandling;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,6 +28,7 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +48,7 @@ public class BehandlingService {
     private final TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository;
     private final BehandlingsresultatService behandlingsresultatService;
     private final OppgaveService oppgaveService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     private final Counter behandlingerAvsluttet = Metrics.counter(BEHANDLINGER_AVSLUTTET);
     private static final String FINNER_IKKE_BEHANDLING = "Finner ikke behandling med id ";
@@ -64,12 +67,14 @@ public class BehandlingService {
                              BehandlingsresultatRepository behandlingsresultatRepository,
                              TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository,
                              BehandlingsresultatService behandlingsresultatService,
-                             @Lazy OppgaveService oppgaveService) {
+                             @Lazy OppgaveService oppgaveService,
+                             ApplicationEventPublisher applicationEventPublisher) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.tidligereMedlemsperiodeRepository = tidligereMedlemsperiodeRepository;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     /**
@@ -167,6 +172,7 @@ public class BehandlingService {
         behandling.setFagsak(fagsak);
         behandling.setRegistrertDato(nå);
         behandling.setEndretDato(nå);
+        behandling.setBehandlingsfrist(hentBehandlingsfristForBehandlingstemaTema(behandlingstema));
 
         behandling.setStatus(behandlingsstatus);
         behandling.setType(behandlingstype);
@@ -247,6 +253,10 @@ public class BehandlingService {
 
     private Behandlingsgrunnlag repolikerBehandlingsgrunnlag(Behandling behandlingsreplika, Behandlingsgrunnlag opprinneligBehandlingsgrunnlag)
         throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        if (opprinneligBehandlingsgrunnlag == null) {
+            return null;
+        }
+
         Behandlingsgrunnlag replikertBehandlingsgrunnlag = (Behandlingsgrunnlag) BeanUtils.cloneBean(opprinneligBehandlingsgrunnlag);
         replikertBehandlingsgrunnlag.setId(null);
         replikertBehandlingsgrunnlag.setBehandling(behandlingsreplika);
@@ -305,5 +315,27 @@ public class BehandlingService {
             String tilordnetRessurs = oppgaveOptional.get().getTilordnetRessurs();
             return tilordnetRessurs != null && tilordnetRessurs.equalsIgnoreCase(saksbehandler);
         }
+    }
+
+    @Transactional
+    public void endreBehandlingsfrist(long behandlingId, LocalDate behandlingsfrist) throws IkkeFunnetException {
+        Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingId);
+        behandling.setBehandlingsfrist(behandlingsfrist);
+        lagre(behandling);
+
+        applicationEventPublisher.publishEvent(new BehandlingsfristEndretEvent(behandlingId, behandlingsfrist));
+    }
+
+    private LocalDate hentBehandlingsfristForBehandlingstemaTema(Behandlingstema behandlingstema) {
+        return switch (behandlingstema) {
+            case UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_FLERE_LAND, ARBEID_ETT_LAND_ØVRIG, IKKE_YRKESAKTIV, ARBEID_I_UTLANDET, ARBEID_NORGE_BOSATT_ANNET_LAND
+                -> LocalDate.now().plusDays(30);
+            case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
+                -> LocalDate.now().plusWeeks(2);
+            case BESLUTNING_LOVVALG_NORGE, BESLUTNING_LOVVALG_ANNET_LAND
+                -> LocalDate.now().plusWeeks(4);
+            case ANMODNING_OM_UNNTAK_HOVEDREGEL, ØVRIGE_SED_UFM, ØVRIGE_SED_MED, TRYGDETID
+                -> LocalDate.now().plusWeeks(8);
+        };
     }
 }

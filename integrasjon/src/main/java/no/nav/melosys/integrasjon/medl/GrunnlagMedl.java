@@ -25,9 +25,10 @@ public enum GrunnlagMedl {
     FO_15("FO_15"),
     FO_16("FO_16"),
     MEDFT("MEDFT"),
-    IMEDEOS("IMEDEOS");
+    IMEDEOS("IMEDEOS"),
+    FTL_2_8("FTL_2-8");
 
-    private String kode;
+    private final String kode;
 
     GrunnlagMedl(String kode) {
         this.kode = kode;

@@ -83,6 +83,6 @@ public class MelosysInterntKodeverkTjeneste {
     }
 
     private Collection<KodeDto> tilKodeDto(Kodeverk... kodeverk) {
-        return Stream.of(kodeverk).map(k -> new KodeDto(k.getKode(), k.getBeskrivelse())).collect(Collectors.toSet());
+        return Stream.of(kodeverk).map(k -> new KodeDto(k.getKode(), k.getBeskrivelse())).collect(Collectors.toList());
     }
 }

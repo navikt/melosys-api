@@ -10,6 +10,7 @@ import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.KonverteringTest;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
+import no.nav.melosys.domain.dokument.person.adresse.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;

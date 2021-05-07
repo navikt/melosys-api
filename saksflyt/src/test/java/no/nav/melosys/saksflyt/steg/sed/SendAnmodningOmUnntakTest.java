@@ -81,7 +81,7 @@ class SendAnmodningOmUnntakTest {
         final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
         final Vedlegg forventetVedlegg = new Vedlegg(new byte[0], "tittel");
-        when(eessiService.lagEessiVedlegg(anyLong(), any())).thenReturn(Set.of(forventetVedlegg));
+        when(eessiService.lagEessiVedlegg(any(), any())).thenReturn(Set.of(forventetVedlegg));
 
         sendAnmodningOmUnntak.utfør(prosessinstans);
 

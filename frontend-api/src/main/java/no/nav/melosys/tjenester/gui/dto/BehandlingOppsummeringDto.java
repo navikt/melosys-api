@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.dto;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -16,6 +17,7 @@ public class BehandlingOppsummeringDto {
     private String endretAvNavn;
     private Instant sisteOpplysningerHentetDato;
     private Instant svarFrist;
+    private LocalDate behandlingsfrist;
 
     public Behandlingsstatus getBehandlingsstatus() {
         return behandlingsstatus;
@@ -79,5 +81,13 @@ public class BehandlingOppsummeringDto {
 
     public void setSvarFrist(Instant svarFrist) {
         this.svarFrist = svarFrist;
+    }
+
+    public LocalDate getBehandlingsfrist() {
+        return behandlingsfrist;
+    }
+
+    public void setBehandlingsfrist(LocalDate behandlingsfrist) {
+        this.behandlingsfrist = behandlingsfrist;
     }
 }

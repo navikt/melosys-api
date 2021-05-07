@@ -2,32 +2,44 @@ package no.nav.melosys.domain.brev;
 
 import java.time.Instant;
 
-import no.nav.melosys.domain.Aktoer;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
+@JsonSubTypes(
+    {
+        @JsonSubTypes.Type(value = MangelbrevBrevbestilling.class, name = "MangelbrevBrevbestilling")
+    }
+)
 public class DokgenBrevbestilling extends Brevbestilling {
-    private final OrganisasjonDokument org;
-    private final Kontaktopplysning kontaktopplysning;
-    private final Instant forsendelseMottatt;
-    private final String avsenderId;
-    private final long behandlingId;
-    private final Aktoer mottaker; //NOTE Flytt opp til Brevbestilling
-    private final boolean bestillKopi;
-    private final Instant vedtaksdato;
-    private final PersonDokument persondokument;
+    private OrganisasjonDokument org;
+    private Kontaktopplysning kontaktopplysning;
+    private String kontaktpersonNavn;
+    private Instant forsendelseMottatt;
+    private String avsenderId;
+    private long behandlingId;
+    private boolean bestillKopi;
+    private Instant vedtaksdato;
+    private PersonDokument persondokument;
+
+    public DokgenBrevbestilling() {
+        super();
+        //Tom constructor på grunn av deserialsering i prosessinstans
+    }
 
     protected DokgenBrevbestilling(Builder<?> builder) {
         super(builder.produserbartdokument, builder.behandling, builder.avsenderNavn);
         this.org = builder.org;
         this.kontaktopplysning = builder.kontaktopplysning;
+        this.kontaktpersonNavn = builder.kontaktpersonNavn;
         this.forsendelseMottatt = builder.forsendelseMottatt;
         this.avsenderId = builder.avsenderId;
         this.behandlingId = builder.behandlingId;
-        this.mottaker = builder.mottaker;
         this.bestillKopi = builder.bestillKopi;
         this.vedtaksdato = builder.vedtaksdato;
         this.persondokument = builder.persondokument;
@@ -41,6 +53,10 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return kontaktopplysning;
     }
 
+    public String getKontaktpersonNavn() {
+        return kontaktpersonNavn;
+    }
+
     public Instant getForsendelseMottatt() {
         return forsendelseMottatt;
     }
@@ -51,10 +67,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
     public long getBehandlingId() {
         return behandlingId;
-    }
-
-    public Aktoer getMottaker() {
-        return mottaker;
     }
 
     public boolean bestillKopi() {
@@ -70,7 +82,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
     }
 
     public Builder toBuilder() {
-        return new Builder (this);
+        return new Builder(this);
     }
 
     public static class Builder<T extends Builder<T>> {
@@ -78,11 +90,11 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private Behandling behandling;
         private OrganisasjonDokument org;
         private Kontaktopplysning kontaktopplysning;
+        private String kontaktpersonNavn;
         private Instant forsendelseMottatt;
         private String avsenderNavn;
         private String avsenderId;
         private long behandlingId;
-        private Aktoer mottaker;
         private boolean bestillKopi;
         private Instant vedtaksdato;
         private PersonDokument persondokument;
@@ -95,11 +107,11 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.behandling = brevbestilling.behandling;
             this.org = brevbestilling.org;
             this.kontaktopplysning = brevbestilling.kontaktopplysning;
+            this.kontaktpersonNavn = brevbestilling.kontaktpersonNavn;
             this.forsendelseMottatt = brevbestilling.forsendelseMottatt;
             this.avsenderNavn = brevbestilling.avsenderNavn;
             this.avsenderId = brevbestilling.avsenderId;
             this.behandlingId = brevbestilling.behandlingId;
-            this.mottaker = brevbestilling.mottaker;
             this.bestillKopi = brevbestilling.bestillKopi;
             this.vedtaksdato = brevbestilling.vedtaksdato;
             this.persondokument = brevbestilling.persondokument;
@@ -125,6 +137,11 @@ public class DokgenBrevbestilling extends Brevbestilling {
             return (T) this;
         }
 
+        public T medKontaktpersonNavn(String kontaktpersonNavn) {
+            this.kontaktpersonNavn = kontaktpersonNavn;
+            return (T) this;
+        }
+
         public T medForsendelseMottatt(Instant forsendelseMottatt) {
             this.forsendelseMottatt = forsendelseMottatt;
             return (T) this;
@@ -142,11 +159,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
         public T medBehandlingId(long behandlingId) {
             this.behandlingId = behandlingId;
-            return (T) this;
-        }
-
-        public T medMottaker(Aktoer mottaker) {
-            this.mottaker = mottaker;
             return (T) this;
         }
 

@@ -12,16 +12,16 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
-import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.inntk.InntektService;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import no.nav.melosys.service.medl.MedlPeriodeService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sob.SobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,6 +90,12 @@ public class RegisteropplysningerService {
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = MelosysException.class)
     public void hentOgLagreOpplysninger(RegisteropplysningerRequest registeropplysningerRequest) throws MelosysException {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(registeropplysningerRequest.getBehandlingID());
+
+        if (PeriodeKontroller.feilIPeriode(registeropplysningerRequest.getFom(), registeropplysningerRequest.getTom())) {
+            log.warn("Henter ikke registeropplysninger for behandling {} pga feil i periode. fom={}, tom={}", registeropplysningerRequest.getBehandlingID(), registeropplysningerRequest.getFom(), registeropplysningerRequest.getTom());
+            registeropplysningerRequest = registeropplysningerRequest.lagKopiUtenPeriodeOgOpplysningstyperSomKreverPeriode();
+        }
+
         hentOgLagreOpplysninger(registeropplysningerRequest, behandling);
     }
 

@@ -15,13 +15,14 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.journalforing.dto.*;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -67,6 +68,17 @@ public class JournalfoeringService {
 
     public Journalpost hentJournalpost(String journalpostID) throws FunksjonellException, IntegrasjonException {
         return joarkFasade.hentJournalpost(journalpostID);
+    }
+
+    public Optional<String> finnBrukerIdent(Journalpost journalpost) throws IkkeFunnetException {
+        if (journalpost.getBrukerIdType() == null || journalpost.getBrukerId() == null) {
+            return Optional.empty();
+        }
+        return switch (journalpost.getBrukerIdType()) {
+            case FOLKEREGISTERIDENT -> Optional.of(journalpost.getBrukerId());
+            case AKTØR_ID -> Optional.of(persondataFasade.hentFolkeregisterIdent(journalpost.getBrukerId()));
+            case ORGNR -> Optional.empty();
+        };
     }
 
     @Transactional(rollbackFor = MelosysException.class)
@@ -197,6 +209,9 @@ public class JournalfoeringService {
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessType, journalfoeringDto);
 
+        if (prosessType == ProsessType.JFR_KNYTT) {
+            prosessinstans.setBehandling(fagsak.hentSistAktiveBehandling());
+        }
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringDto.isIngenVurdering());

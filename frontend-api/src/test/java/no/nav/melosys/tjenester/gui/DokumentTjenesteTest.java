@@ -76,7 +76,7 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void hentBrevForhåndsvisning() throws MelosysException, IOException {
         final byte[] MOCK_PDF = "bytes fra et brev".getBytes();
-        when(dokumentServiceFasade.produserUtkast(any(), anyLong(), any())).thenReturn(MOCK_PDF);
+        when(dokumentServiceFasade.produserUtkast(anyLong(), any())).thenReturn(MOCK_PDF);
         BrevbestillingDto brevBestillingDto = new BrevbestillingDto.Builder()
             .medBegrunnelseKode("KODE")
             .medFritekst("Fritekst.")
@@ -109,8 +109,8 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
         dokumentTjeneste.produserDokument(1L,
             Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID, brevBestillingDto);
 
-        verify(dokumentServiceFasade).produserUtkast(any(), anyLong(), any());
-        verify(dokumentServiceFasade).produserDokument(any(), anyLong(), any());
+        verify(dokumentServiceFasade).produserUtkast(anyLong(), any());
+        verify(dokumentServiceFasade).produserDokument(anyLong(), any());
     }
 
     @Test

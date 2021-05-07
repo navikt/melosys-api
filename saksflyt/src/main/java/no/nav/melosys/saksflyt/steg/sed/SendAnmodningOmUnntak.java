@@ -80,7 +80,7 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
         IntegrasjonException {
         final Set<DokumentReferanse> vedleggReferanser = prosessinstans.getData(ProsessDataKey.VEDLEGG_SED,
             new TypeReference<Set<DokumentReferanse>>() {}, Collections.emptySet());
-        return eessiService.lagEessiVedlegg(prosessinstans.getBehandling().getFagsak().getGsakSaksnummer(),
+        return eessiService.lagEessiVedlegg(prosessinstans.getBehandling().getFagsak(),
             vedleggReferanser);
     }
 

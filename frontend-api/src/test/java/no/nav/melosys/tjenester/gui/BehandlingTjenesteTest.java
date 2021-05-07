@@ -10,9 +10,9 @@ import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.MidlertidigPostadresse;
-import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
-import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
+import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
+import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
+import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.MelosysException;
@@ -20,7 +20,9 @@ import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.EndreBehandlingstemaService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
+import no.nav.melosys.tjenester.gui.dto.EndreBehandlingsfristDto;
 import no.nav.melosys.tjenester.gui.dto.EndreBehandlingstemaDto;
 import no.nav.melosys.tjenester.gui.dto.TidligereMedlemsperioderDto;
 import no.nav.melosys.tjenester.gui.dto.tildto.SaksopplysningerTilDto;
@@ -34,6 +36,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 
 import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SØKNAD;
@@ -48,6 +51,8 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     private static final String BEHANDLINGER_SCHEMA = "behandlinger-behandling-schema.json";
     private static final String ENDRE_BEHANDLINGSTEMA_SCHEMA = "behandlinger-endrebehandlingstema-schema.json";
     private static final String ENDRE_BEHANDLINGSTEMA_POST_SCHEMA = "behandlinger-endrebehandlingstema-post-schema.json";
+    private static final long BEHANDLING_ID = 11L;
+    private static final List<Long> PERIODE_IDER = Arrays.asList(2L, 3L, 5L);
 
     private BehandlingTjeneste behandlingTjeneste;
 
@@ -59,12 +64,16 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     private SaksbehandlerService saksbehandlerService;
     @Mock
     private EndreBehandlingstemaService endreBehandlingstemaService;
+    @Mock
+    private OppgaveService oppgaveService;
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
 
     private EasyRandom random;
 
     @BeforeEach
     void setUp() {
-        behandlingTjeneste = new BehandlingTjeneste(behandlingService, saksopplysningerTilDto, mock(TilgangService.class), saksbehandlerService, endreBehandlingstemaService);
+        behandlingTjeneste = new BehandlingTjeneste(behandlingService, saksopplysningerTilDto, mock(TilgangService.class), saksbehandlerService, endreBehandlingstemaService, oppgaveService, applicationEventPublisher);
 
         random = new EasyRandom(new EasyRandomParameters()
             .overrideDefaultInitialization(true)
@@ -85,7 +94,7 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     @Test
     void behandlingerPerioderValidering() throws Exception {
         TidligereMedlemsperioderDto tidligereMedlemsperioderDto = new TidligereMedlemsperioderDto();
-        tidligereMedlemsperioderDto.periodeIder = Arrays.asList(2L, 3L, 5L);
+        tidligereMedlemsperioderDto.periodeIder = PERIODE_IDER;
         valider(tidligereMedlemsperioderDto, TIDLIGERE_MEDLEMSPERIODER_SCHEMA, log);
     }
 
@@ -101,8 +110,8 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void hentMuligeBehandlinstemaValidering() throws IOException, MelosysException {
-        when(endreBehandlingstemaService.hentMuligeBehandlingstema(11L)).thenReturn(BEHANDLINGSTEMA_SØKNAD);
-        List<Behandlingstema> muligeBehandlingstema = behandlingTjeneste.hentEndreBehandlingstema(11L).getBody();
+        when(endreBehandlingstemaService.hentMuligeBehandlingstema(BEHANDLING_ID)).thenReturn(BEHANDLINGSTEMA_SØKNAD);
+        List<Behandlingstema> muligeBehandlingstema = behandlingTjeneste.hentEndreBehandlingstema(BEHANDLING_ID).getBody();
         validerArray(muligeBehandlingstema, ENDRE_BEHANDLINGSTEMA_SCHEMA, log);
     }
 
@@ -115,28 +124,34 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void knyttMedlemsperioder() throws Exception {
-        long behandlingID = 11L;
-        List<Long> periodeIder = Arrays.asList(2L, 3L, 5L);
         TidligereMedlemsperioderDto tidligereMedlemsperioderDto = new TidligereMedlemsperioderDto();
-        tidligereMedlemsperioderDto.periodeIder = periodeIder;
+        tidligereMedlemsperioderDto.periodeIder = PERIODE_IDER;
 
-        behandlingTjeneste.knyttMedlemsperioder(behandlingID, tidligereMedlemsperioderDto);
-        verify(behandlingService).knyttMedlemsperioder(behandlingID, periodeIder);
+        behandlingTjeneste.knyttMedlemsperioder(BEHANDLING_ID, tidligereMedlemsperioderDto);
+        verify(behandlingService).knyttMedlemsperioder(BEHANDLING_ID, PERIODE_IDER);
     }
 
     @Test
     void hentMedlemsperioder() throws Exception {
-        long behandlingID = 11L;
-        List<Long> periodeIder = Arrays.asList(2L, 3L, 5L);
-        when(behandlingService.hentMedlemsperioder(behandlingID)).thenReturn(periodeIder);
+        when(behandlingService.hentMedlemsperioder(BEHANDLING_ID)).thenReturn(PERIODE_IDER);
 
-        ResponseEntity<TidligereMedlemsperioderDto> response = behandlingTjeneste.hentMedlemsperioder(behandlingID);
+        ResponseEntity<TidligereMedlemsperioderDto> response = behandlingTjeneste.hentMedlemsperioder(BEHANDLING_ID);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody()).isInstanceOf(TidligereMedlemsperioderDto.class);
 
         TidligereMedlemsperioderDto tidligereMedlemsperioderDto = response.getBody();
-        assertThat(tidligereMedlemsperioderDto.periodeIder).containsAll(periodeIder);
+        assertThat(tidligereMedlemsperioderDto.periodeIder).containsAll(PERIODE_IDER);
 
-        verify(behandlingService).hentMedlemsperioder(behandlingID);
+        verify(behandlingService).hentMedlemsperioder(BEHANDLING_ID);
+    }
+
+    @Test
+    void endreBehandlingsfrist() throws Exception {
+        LocalDate frist = LocalDate.now().plusWeeks(1);
+        EndreBehandlingsfristDto endreBehandlingsfristDto = new EndreBehandlingsfristDto();
+        endreBehandlingsfristDto.setBehandlingsfrist(frist);
+
+        behandlingTjeneste.endreBehandlingsfrist(BEHANDLING_ID, endreBehandlingsfristDto);
+        verify(behandlingService).endreBehandlingsfrist(BEHANDLING_ID, frist);
     }
 }

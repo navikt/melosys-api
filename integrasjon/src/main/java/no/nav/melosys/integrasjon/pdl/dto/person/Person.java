@@ -20,6 +20,7 @@ public record Person(
     Collection<Navn> navn,
     Collection<Oppholdsadresse> oppholdsadresse,
     Collection<Sivilstand> sivilstand,
-    Collection<Statsborgerskap> statsborgerskap
+    Collection<Statsborgerskap> statsborgerskap,
+    Collection<UtenlandskIdentifikasjonsnummer> utenlandskIdentifikasjonsnummer
 ) {
 }

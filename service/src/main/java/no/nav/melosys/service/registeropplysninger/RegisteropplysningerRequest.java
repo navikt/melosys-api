@@ -1,15 +1,12 @@
 package no.nav.melosys.service.registeropplysninger;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.domain.person.Informasjonsbehov;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import org.apache.commons.lang3.StringUtils;
 
@@ -57,6 +54,19 @@ public class RegisteropplysningerRequest {
 
     public Informasjonsbehov getInformasjonsbehov() {
         return Objects.requireNonNullElse(informasjonsbehov, Informasjonsbehov.STANDARD);
+    }
+
+    RegisteropplysningerRequest lagKopiUtenPeriodeOgOpplysningstyperSomKreverPeriode() {
+        Set<SaksopplysningType> opplysningstyperSet = getOpplysningstyper().stream().collect(Collectors.toSet());
+        opplysningstyperSet.removeAll(SaksopplysningType.KREVER_PERIODE);
+        return new RegisteropplysningerRequest(getBehandlingID(), opplysningstyperSet, getFnr(), null, null, getInformasjonsbehov());
+    }
+
+    // Støtter ikke type SEDOPPL
+    public static SaksopplysningTyper hentAlleSaksopplysningTyper() {
+        return new SaksopplysningTyper(
+            Arrays.stream(SaksopplysningType.values()).filter(s -> !SaksopplysningType.SEDOPPL.equals(s)).collect(Collectors.toSet())
+        );
     }
 
     public static class RegisteropplysningerRequestBuilder {
@@ -114,15 +124,15 @@ public class RegisteropplysningerRequest {
                 throw new TekniskException("Krever minst én saksopplysningstype for å hente registeropplysninger");
             }
 
-            if (StringUtils.isEmpty(fnr) && !Collections.disjoint(KREVER_FNR, saksopplysningTyper.getOpplysningstyper())) {
-                String påkrevdeSaksopplysningstyper = intersect(KREVER_FNR, saksopplysningTyper.getOpplysningstyper())
+            if (StringUtils.isEmpty(fnr) && !Collections.disjoint(SaksopplysningType.KREVER_FNR, saksopplysningTyper.getOpplysningstyper())) {
+                String påkrevdeSaksopplysningstyper = intersect(SaksopplysningType.KREVER_FNR, saksopplysningTyper.getOpplysningstyper())
                     .stream().map(SaksopplysningType::getBeskrivelse).collect(Collectors.joining(", "));
 
                 throw new TekniskException(String.format("Krever at fnr er satt ved henting av %s", påkrevdeSaksopplysningstyper));
             }
 
-            if (PeriodeKontroller.feilIPeriode(fom, tom) && !Collections.disjoint(KREVER_PERIODE, saksopplysningTyper.getOpplysningstyper())) {
-                String påkrevdeSaksopplysningstyper = intersect(KREVER_PERIODE, saksopplysningTyper.getOpplysningstyper())
+            if (PeriodeKontroller.feilIPeriode(fom, tom) && !Collections.disjoint(SaksopplysningType.KREVER_PERIODE, saksopplysningTyper.getOpplysningstyper())) {
+                String påkrevdeSaksopplysningstyper = intersect(SaksopplysningType.KREVER_PERIODE, saksopplysningTyper.getOpplysningstyper())
                     .stream().map(SaksopplysningType::getBeskrivelse).collect(Collectors.joining(", "));
 
                 throw new TekniskException(String.format("Feil i periode: %s krever en gyldig periode", påkrevdeSaksopplysningstyper));
@@ -135,24 +145,6 @@ public class RegisteropplysningerRequest {
                 .filter(right::contains)
                 .collect(Collectors.toSet());
         }
-
-        private static final Set<SaksopplysningType> KREVER_FNR = Set.of(
-            SaksopplysningType.ARBFORH,
-            SaksopplysningType.INNTK,
-            SaksopplysningType.MEDL,
-            SaksopplysningType.PERSHIST,
-            SaksopplysningType.PERSOPL,
-            SaksopplysningType.SOB_SAK,
-            SaksopplysningType.UTBETAL
-        );
-
-        private static final Set<SaksopplysningType> KREVER_PERIODE = Set.of(
-            SaksopplysningType.ARBFORH,
-            SaksopplysningType.INNTK,
-            SaksopplysningType.MEDL,
-            SaksopplysningType.PERSHIST,
-            SaksopplysningType.UTBETAL
-        );
     }
 
     public static class SaksopplysningTyper {

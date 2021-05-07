@@ -55,7 +55,7 @@ class AvklarArbeidsgiverTest {
 
         prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK);
+        prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_EOS);
 
         fagsak = new Fagsak();
         fagsak.setSaksnummer("saksnr");

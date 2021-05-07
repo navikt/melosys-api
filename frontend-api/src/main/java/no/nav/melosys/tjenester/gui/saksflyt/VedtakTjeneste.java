@@ -6,8 +6,13 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
+import no.nav.melosys.service.vedtak.FattEosVedtakRequest;
+import no.nav.melosys.service.vedtak.FattFtrlVedtakRequest;
+import no.nav.melosys.service.vedtak.FattVedtakRequest;
 import no.nav.melosys.service.vedtak.VedtakServiceFasade;
 import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
+import no.nav.melosys.tjenester.gui.dto.FattEosVedtakDto;
+import no.nav.melosys.tjenester.gui.dto.FattFtrlVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +44,8 @@ public class VedtakTjeneste {
             throw new FunksjonellException("BehandlingsresultatTypeKode eller vedtakstype mangler.");
         }
         tilgangService.sjekkTilgang(behandlingID);
-        vedtakServiceFasade.fattVedtak(behandlingID, fattVedtakDto.getBehandlingsresultatTypeKode(), fattVedtakDto.getFritekst(), fattVedtakDto.getFritekstSed(),
-            fattVedtakDto.getMottakerinstitusjoner(), fattVedtakDto.getVedtakstype(), fattVedtakDto.getRevurderBegrunnelse());
+
+        vedtakServiceFasade.fattVedtak(behandlingID, lagFattVedtakRequest(fattVedtakDto));
         return ResponseEntity.ok().build();
     }
 
@@ -55,5 +60,29 @@ public class VedtakTjeneste {
         tilgangService.sjekkTilgang(behandlingID);
         vedtakServiceFasade.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode(), endreVedtakDto.getFritekst(), endreVedtakDto.getFritekstSed());
         return ResponseEntity.ok().build();
+    }
+
+    private FattVedtakRequest lagFattVedtakRequest(FattVedtakDto fattVedtakDto) throws FunksjonellException {
+        FattVedtakRequest.Builder<?> fattVedtakRequest;
+
+        if (fattVedtakDto instanceof FattEosVedtakDto eosVedtakDto) {
+            fattVedtakRequest = new FattEosVedtakRequest.Builder()
+                .medFritekst(eosVedtakDto.getFritekst())
+                .medFritekstSed(eosVedtakDto.getFritekstSed())
+                .medMottakerInstitusjoner(eosVedtakDto.getMottakerinstitusjoner())
+                .medRevurderBegrunnelse(eosVedtakDto.getRevurderBegrunnelse());
+        } else if (fattVedtakDto instanceof FattFtrlVedtakDto ftrlVedtakDto) {
+            fattVedtakRequest = new FattFtrlVedtakRequest.Builder()
+                .medFritekstInnledning(ftrlVedtakDto.getFritekstInnledning())
+                .medFritekstBegrunnelse(ftrlVedtakDto.getFritekstBegrunnelse());
+        } else {
+            throw new FunksjonellException("Vedtakstype er ikke støttet");
+        }
+
+        fattVedtakRequest
+            .medBehandlingsresultat(fattVedtakDto.getBehandlingsresultatTypeKode())
+            .medVedtakstype(fattVedtakDto.getVedtakstype());
+
+        return fattVedtakRequest.build();
     }
 }

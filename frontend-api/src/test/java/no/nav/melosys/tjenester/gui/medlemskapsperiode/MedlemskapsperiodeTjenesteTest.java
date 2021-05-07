@@ -73,7 +73,7 @@ class MedlemskapsperiodeTjenesteTest extends JsonSchemaTestParent {
                 MedlemskapsperiodeDto::getInnvilgelsesResultat, MedlemskapsperiodeDto::getMedlemskapstype)
             .containsExactly(
                 medlemskapsperiode.getId(), medlemskapsperiode.getArbeidsland(), medlemskapsperiode.getBestemmelse(),
-                medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getTrygdedekning(),
+                medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getDekning(),
                 medlemskapsperiode.getInnvilgelsesresultat(), medlemskapsperiode.getMedlemskapstype()
             );
 

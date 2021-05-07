@@ -8,7 +8,7 @@ public final class JournalpostBestilling {
     private final String mottakerNavn;
     private final String mottakerId;
     private final boolean erMottakerOrg;
-    private final String arkivSakId;
+    private final String saksnummer;
     private final byte[] pdf;
 
     private JournalpostBestilling(Builder builder) {
@@ -19,7 +19,7 @@ public final class JournalpostBestilling {
         this.mottakerNavn = builder.mottakerNavn;
         this.mottakerId = builder.mottakerId;
         this.erMottakerOrg = builder.erMottakerOrg;
-        this.arkivSakId = builder.arkivSakId;
+        this.saksnummer = builder.saksnummer;
         this.pdf = builder.pdf;
     }
 
@@ -51,8 +51,8 @@ public final class JournalpostBestilling {
         return erMottakerOrg;
     }
 
-    public String getArkivSakId() {
-        return arkivSakId;
+    public String getSaksnummer() {
+        return saksnummer;
     }
 
     public byte[] getPdf() {
@@ -67,7 +67,7 @@ public final class JournalpostBestilling {
         private String mottakerNavn;
         private String mottakerId;
         private boolean erMottakerOrg;
-        private String arkivSakId;
+        private String saksnummer;
         private byte[] pdf;
 
         public Builder medTittel(String tittel) {
@@ -105,8 +105,8 @@ public final class JournalpostBestilling {
             return this;
         }
 
-        public Builder medArkivSakId(String arkivSakId) {
-            this.arkivSakId = arkivSakId;
+        public Builder medSaksnummer(String saksnummer) {
+            this.saksnummer = saksnummer;
             return this;
         }
 

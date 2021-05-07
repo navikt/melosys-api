@@ -7,6 +7,9 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import no.nav.melosys.domain.dokument.person.adresse.BostedsadressePeriode;
+import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
+import no.nav.melosys.domain.dokument.person.adresse.PostadressePeriode;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
