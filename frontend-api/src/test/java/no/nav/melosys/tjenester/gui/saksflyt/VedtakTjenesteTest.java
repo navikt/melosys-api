@@ -2,7 +2,6 @@ package no.nav.melosys.tjenester.gui.saksflyt;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -72,7 +71,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    @Ignore("Skjema er oppdatert")
+    @Ignore
     void fattVedtakFtrl_henleggelse_fungerer() throws MelosysException, IOException {
         FattFtrlVedtakDto fattVedtakDto = new FattFtrlVedtakDto();
         fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
