@@ -63,7 +63,7 @@ public class RestStsClient implements RestConsumer {
             return (String) responseBody.get(ACCESS_TOKEN_KEY);
 
         } catch (HttpStatusCodeException e) {
-            throw new IllegalStateException(ExceptionMapper.tilException(e));
+            throw new IllegalStateException(ExceptionMapper.mapException(e));
         } catch (Exception ex) {
             throw new IllegalStateException("Ukjent feil ved henting av OIDC-token fra STS", ex);
         }

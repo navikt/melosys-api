@@ -30,11 +30,11 @@ public final class ExceptionMapper {
         }
     }
 
-    public static RuntimeException tilException(RestClientException ex) {
-        return tilException(ex, ex.getMessage());
+    public static RuntimeException mapException(RestClientException ex) {
+        return mapException(ex, ex.getMessage());
     }
 
-    public static RuntimeException tilException(RestClientException ex, String feilmelding) {
+    public static RuntimeException mapException(RestClientException ex, String feilmelding) {
         if (ex instanceof HttpStatusCodeException httpStatusCodeException) {
             return switch (httpStatusCodeException.getStatusCode()) {
                 case FORBIDDEN, UNAUTHORIZED -> new SikkerhetsbegrensningException(feilmelding, ex);
