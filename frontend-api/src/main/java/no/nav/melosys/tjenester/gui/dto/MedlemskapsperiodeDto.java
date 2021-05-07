@@ -76,7 +76,7 @@ public class MedlemskapsperiodeDto {
             medlemskapsperiode.getTom(),
             medlemskapsperiode.getBestemmelse(),
             medlemskapsperiode.getInnvilgelsesresultat(),
-            medlemskapsperiode.getTrygdedekning(),
+            medlemskapsperiode.getDekning(),
             medlemskapsperiode.getMedlemskapstype()
         );
     }

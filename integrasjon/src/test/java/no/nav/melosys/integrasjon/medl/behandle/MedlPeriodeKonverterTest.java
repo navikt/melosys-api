@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.medl.behandle;
 
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.TekniskException;
@@ -28,6 +29,15 @@ class MedlPeriodeKonverterTest {
     }
 
     @Test
+    void tilGrunnlagMedltype_Ftrl() {
+        assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8)).isEqualTo(GrunnlagMedl.FTL_2_8);
+
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(() -> MedlPeriodeKonverter.tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1))
+            .withMessageContaining("Folketrygdloven bestemmelse støttes ikke. Kode: FTRL_KAP2_2_1");
+    }
+
+    @Test
     void tilLovvalgBestemmelse() throws TekniskException {
         assertThat(MedlPeriodeKonverter.tilLovvalgBestemmelse(GrunnlagMedl.FO_12_2))
             .isEqualTo(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2);
@@ -42,7 +52,7 @@ class MedlPeriodeKonverterTest {
     @Test
     void hentFellesKodeForDekningtype() throws TekniskException {
         Trygdedekninger trygdeDekning = Trygdedekninger.UTEN_DEKNING;
-        DekningMedl dekningMedl = MedlPeriodeKonverter.tilMedlTrygdeDekning(trygdeDekning);
+        DekningMedl dekningMedl = MedlPeriodeKonverter.tilMedlTrygdeDekningEos(trygdeDekning);
         assertThat(dekningMedl).isEqualTo(DekningMedl.UNNTATT);
     }
 }

@@ -11,6 +11,7 @@ import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -31,25 +32,21 @@ public class PersondataService implements PersondataFasade {
     }
 
     @Override
+    @Cacheable("aktoerID")
     public String hentAktørIdForIdent(String ident) throws IkkeFunnetException {
-        if (unleash.isEnabled("melosys.pdl.identer")) {
-            return pdlConsumer.hentIdenter(ident).identer()
-                .stream().filter(Ident::erAktørID)
-                .findFirst().map(Ident::ident)
-                .orElseThrow(() -> new IkkeFunnetException("Finner ikke aktørID!"));
-        }
-        return tpsService.hentAktørIdForIdent(ident);
+        return pdlConsumer.hentIdenter(ident).identer()
+            .stream().filter(Ident::erAktørID)
+            .findFirst().map(Ident::ident)
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke aktørID!"));
     }
 
     @Override
+    @Cacheable("folkeregisterIdent")
     public String hentFolkeregisterIdent(String ident) throws IkkeFunnetException {
-        if (unleash.isEnabled("melosys.pdl.identer")) {
-            return pdlConsumer.hentIdenter(ident).identer()
-                .stream().filter(Ident::erFolkeregisterIdent)
-                .findFirst().map(Ident::ident)
-                .orElseThrow(() -> new IkkeFunnetException("Finner ikke folkeregisterident!"));
-        }
-        return tpsService.hentIdentForAktørId(ident);
+        return pdlConsumer.hentIdenter(ident).identer()
+            .stream().filter(Ident::erFolkeregisterIdent)
+            .findFirst().map(Ident::ident)
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke folkeregisterident!"));
     }
 
     @Override

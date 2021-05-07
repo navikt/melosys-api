@@ -98,7 +98,7 @@ public class OpprettJournalforBrev implements StegBehandler {
             .medMottakerNavn(hasText(orgnr) ? eregFasade.hentOrganisasjonNavn(orgnr) : sammensattNavn)
             .medMottakerId(hasText(orgnr) ? orgnr : fnr)
             .medErMottakerOrg(hasText(orgnr))
-            .medArkivSakId(behandling.getFagsak().getGsakSaksnummer().toString())
+            .medSaksnummer(behandling.getFagsak().getSaksnummer())
             .medPdf(pdf)
             .build();
 
