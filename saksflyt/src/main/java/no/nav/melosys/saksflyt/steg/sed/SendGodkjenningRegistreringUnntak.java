@@ -31,7 +31,7 @@ public class SendGodkjenningRegistreringUnntak implements StegBehandler {
         Boolean varsleUtland = prosessinstans.getData(ProsessDataKey.VARSLE_UTLAND, Boolean.class);
 
         if (behandling.erBeslutningLovvalgAnnetLand() && Boolean.TRUE.equals(varsleUtland)) {
-            eessiService.sendGodkjenningArbeidFlereLand(behandling.getId(), null);
+            eessiService.sendGodkjenningArbeidFlereLand(behandling.getId(), prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
         }
     }
 }

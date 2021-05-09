@@ -20,6 +20,7 @@ import no.nav.melosys.tjenester.gui.dto.FattEosVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.FattFtrlVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -68,6 +69,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
 
+    @Disabled
     @Test
     void fattVedtakFtrl_henleggelse_fungerer() throws Exception {
         FattFtrlVedtakDto fattVedtakDto = new FattFtrlVedtakDto();

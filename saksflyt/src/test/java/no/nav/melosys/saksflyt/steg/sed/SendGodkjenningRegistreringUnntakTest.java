@@ -17,6 +17,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class SendGodkjenningRegistreringUnntakTest {
 
+    private static final String FRITEKST = "Fritekst her";
+
     @Mock
     private EessiService eessiService;
 
@@ -34,7 +36,7 @@ class SendGodkjenningRegistreringUnntakTest {
 
         sendGodkjenningRegistreringUnntak.utfør(prosessinstans);
 
-        verify(eessiService).sendGodkjenningArbeidFlereLand(anyLong(), isNull());
+        verify(eessiService).sendGodkjenningArbeidFlereLand(anyLong(), eq(FRITEKST));
     }
 
     @Test
@@ -44,7 +46,7 @@ class SendGodkjenningRegistreringUnntakTest {
 
         sendGodkjenningRegistreringUnntak.utfør(prosessinstans);
 
-        verify(eessiService, never()).sendGodkjenningArbeidFlereLand(anyLong(), isNull());
+        verify(eessiService, never()).sendGodkjenningArbeidFlereLand(anyLong(), eq(FRITEKST));
     }
 
     @Test
@@ -54,7 +56,7 @@ class SendGodkjenningRegistreringUnntakTest {
 
         sendGodkjenningRegistreringUnntak.utfør(prosessinstans);
 
-        verify(eessiService, never()).sendGodkjenningArbeidFlereLand(anyLong(), isNull());
+        verify(eessiService, never()).sendGodkjenningArbeidFlereLand(anyLong(), eq(FRITEKST));
     }
 
     private static Prosessinstans lagProsessinstans() {
@@ -64,6 +66,7 @@ class SendGodkjenningRegistreringUnntakTest {
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
+        prosessinstans.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, FRITEKST);
 
         return prosessinstans;
     }
