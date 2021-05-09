@@ -18,7 +18,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.UtpekingsperiodeRepository;
 import no.nav.melosys.service.LandvelgerService;
@@ -97,7 +96,7 @@ public class UtpekingServiceTest {
 
     @Test
     public void utpekLovvalgsland_harUtpekingsperiode_lovvalgsperiodeOgProsessinstansOpprettes()
-        throws MelosysException {
+        {
         behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
         Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.MIN, LocalDate.MAX, Landkoder.SE,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
@@ -151,7 +150,7 @@ public class UtpekingServiceTest {
     }
 
     @Test
-    public void utpekLovvalgsland_lovvalgslandValideres() throws MelosysException {
+    public void utpekLovvalgsland_lovvalgslandValideres() {
         behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
         Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.MIN, LocalDate.MAX, Landkoder.SE,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);

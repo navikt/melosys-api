@@ -19,7 +19,6 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.altinn.AltinnSoeknadService;
@@ -102,7 +101,7 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
     }
 
     @Test
-    public void utfør_journalpostBlirOpprettet_verifiser() throws MelosysException {
+    public void utfør_journalpostBlirOpprettet_verifiser() {
         opprettOgFerdigstillAltinnJournalpost.utfør(prosessinstans);
 
         verify(persondataFasade).hentFolkeregisterIdent(anyString());
@@ -126,7 +125,7 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
     }
 
     @Test
-    public void utfør_ingenRepresentantForBruker_avsenderNavnErArbeidsgiverOrganisasjonNavn() throws MelosysException {
+    public void utfør_ingenRepresentantForBruker_avsenderNavnErArbeidsgiverOrganisasjonNavn() {
         Aktoer arbeidsgiver = new Aktoer();
         arbeidsgiver.setRolle(Aktoersroller.ARBEIDSGIVER);
         arbeidsgiver.setOrgnr("arbOrgnr");

@@ -12,7 +12,6 @@ import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumer;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
@@ -120,7 +119,7 @@ public final class OppgaveFasadeImplTest {
     }
 
     @Test
-    void testMappingMellomDTOogDomainForOppgave() throws MelosysException {
+    void testMappingMellomDTOogDomainForOppgave() {
         OppgaveDto oppgaveDto = new OppgaveDto();
         oppgaveDto.setId("1234");
         oppgaveDto.setSaksreferanse("456");

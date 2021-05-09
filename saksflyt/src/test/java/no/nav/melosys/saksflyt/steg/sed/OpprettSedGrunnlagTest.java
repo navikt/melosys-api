@@ -5,7 +5,6 @@ import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.junit.Before;
@@ -34,7 +33,7 @@ public class OpprettSedGrunnlagTest {
     }
 
     @Test
-    public void utfør() throws MelosysException {
+    public void utfør() {
         final String aktørID = "123";
         final Behandling behandling = new Behandling();
         behandling.setId(123321L);

@@ -18,7 +18,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -80,7 +79,7 @@ public class BehandlingService {
     /**
      * Knytt medlemsperioder fra MEDL til behandlingen.
      */
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public void knyttMedlemsperioder(long behandlingID, List<Long> periodeIder) throws FunksjonellException {
         Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
 

@@ -14,7 +14,6 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.springframework.stereotype.Service;
@@ -36,7 +35,7 @@ public class OpprettMedlemskapsperiodeService {
         this.behandlingsresultatService = behandlingsresultatService;
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public Collection<Medlemskapsperiode> utledMedlemskapsperioderFraSøknad(long behandlingID, Folketrygdloven_kap2_bestemmelser bestemmelse) throws FunksjonellException {
         if (!støtterBestemmelse(bestemmelse)) {
             throw new FunksjonellException("Støtter ikke perioder med bestemmelse " + bestemmelse);

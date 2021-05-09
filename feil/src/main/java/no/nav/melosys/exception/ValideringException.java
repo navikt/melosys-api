@@ -1,10 +1,10 @@
 package no.nav.melosys.exception;
 
-import no.nav.melosys.exception.validering.KontrollfeilDto;
-
 import java.util.Collection;
 
-public class ValideringException extends MelosysException {
+import no.nav.melosys.exception.validering.KontrollfeilDto;
+
+public class ValideringException extends Exception {
 
     private final Collection<KontrollfeilDto> feilkoder;
 

@@ -8,7 +8,6 @@ import no.nav.melosys.domain.arkiv.FysiskDokument;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -36,14 +35,14 @@ public class SedSomBrevService {
     public String lagJournalpostForSendingAvSedSomBrev(SedType sedType,
                                                        Landkoder mottakerland,
                                                        Behandling behandling)
-        throws MelosysException {
+        {
         return lagJournalpostForSendingAvSedSomBrev(sedType, mottakerland, behandling, Collections.emptyList());
     }
 
     public String lagJournalpostForSendingAvSedSomBrev(SedType sedType,
                                                        Landkoder mottakerland,
                                                        Behandling behandling,
-                                                       List<FysiskDokument> vedlegg) throws MelosysException {
+                                                       List<FysiskDokument> vedlegg) {
         var fagsak = behandling.getFagsak();
         var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(mottakerland);
         String institusjonID = utenlandskMyndighetService.lagInstitusjonsId(utenlandskMyndighet);

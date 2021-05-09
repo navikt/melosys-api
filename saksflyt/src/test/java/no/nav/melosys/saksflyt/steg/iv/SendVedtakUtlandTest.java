@@ -18,7 +18,6 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.sed.SendVedtakUtland;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -121,7 +120,7 @@ class SendVedtakUtlandTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    void utfør_utenOppgittMottakerinstitusjon_forventHenterMottakerinstitusjonFraTidligereBuc() throws MelosysException {
+    void utfør_utenOppgittMottakerinstitusjon_forventHenterMottakerinstitusjonFraTidligereBuc() {
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
 
         Aktoer myndighet = new Aktoer();
@@ -142,7 +141,7 @@ class SendVedtakUtlandTest {
     }
 
     @Test
-    void utfør_utpekAnnetLandUtenEessiMottakere_lagerBrev() throws MelosysException {
+    void utfør_utpekAnnetLandUtenEessiMottakere_lagerBrev() {
         behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
@@ -162,7 +161,7 @@ class SendVedtakUtlandTest {
     }
 
     @Test
-    void utfør_norgeErUtpektElektronisk_senderA012() throws MelosysException {
+    void utfør_norgeErUtpektElektronisk_senderA012() {
         prosessinstans.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, "Hei");
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         sendVedtakUtland.utfør(prosessinstans);

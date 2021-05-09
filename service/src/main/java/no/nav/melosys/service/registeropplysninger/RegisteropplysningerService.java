@@ -87,8 +87,8 @@ public class RegisteropplysningerService {
         this.registeropplysningerPeriodeFactory = registeropplysningerPeriodeFactory;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = MelosysException.class)
-    public void hentOgLagreOpplysninger(RegisteropplysningerRequest registeropplysningerRequest) throws MelosysException {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void hentOgLagreOpplysninger(RegisteropplysningerRequest registeropplysningerRequest) {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(registeropplysningerRequest.getBehandlingID());
 
         if (PeriodeKontroller.feilIPeriode(registeropplysningerRequest.getFom(), registeropplysningerRequest.getTom())) {
@@ -99,7 +99,7 @@ public class RegisteropplysningerService {
         hentOgLagreOpplysninger(registeropplysningerRequest, behandling);
     }
 
-    private void hentOgLagreOpplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) throws MelosysException {
+    private void hentOgLagreOpplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {
         for (var opplysningstype : sorterteSaksopplysningstyper(registeropplysningerRequest.getOpplysningstyper())) {
             if (!SAKSOPPLYSNING_TYPE_FUNCTION_MAP.containsKey(opplysningstype)) {
                 throw new TekniskException("Støtter ikke å hente opplysninger for saksopplysningType " + opplysningstype);
@@ -120,7 +120,7 @@ public class RegisteropplysningerService {
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    private List<Saksopplysning> hentSaksopplysninger(SaksopplysningType opplysningstype, RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) throws MelosysException {
+    private List<Saksopplysning> hentSaksopplysninger(SaksopplysningType opplysningstype, RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {
         return SAKSOPPLYSNING_TYPE_FUNCTION_MAP.get(opplysningstype).hent(registeropplysningerRequest, behandling);
     }
 
@@ -225,6 +225,6 @@ public class RegisteropplysningerService {
 
     @FunctionalInterface
     private interface HentRegisteropplysninger {
-        List<Saksopplysning> hent(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) throws MelosysException;
+        List<Saksopplysning> hent(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling);
     }
 }

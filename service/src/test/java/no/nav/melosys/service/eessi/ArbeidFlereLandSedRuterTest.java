@@ -16,7 +16,6 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.eessi.ruting.ArbeidFlereLandSedRuter;
@@ -83,7 +82,7 @@ public class ArbeidFlereLandSedRuterTest {
     }
 
     @Test
-    public void finnsakOgBestemRuting_utenArkivsaknummer_forventNySakRuting() throws MelosysException {
+    public void finnsakOgBestemRuting_utenArkivsaknummer_forventNySakRuting() {
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, null);
@@ -100,7 +99,7 @@ public class ArbeidFlereLandSedRuterTest {
     }
 
     @Test
-    public void finnSakOgBestemRuting_norgeUtpektNyttTemaAnnetLandUtpektVedtakIkkeFattet_forventNyBehandling() throws MelosysException {
+    public void finnSakOgBestemRuting_norgeUtpektNyttTemaAnnetLandUtpektVedtakIkkeFattet_forventNyBehandling() {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         melosysEessiMelding.setLovvalgsland(Landkoder.SE.getKode());
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
@@ -125,7 +124,7 @@ public class ArbeidFlereLandSedRuterTest {
     }
 
     @Test
-    public void finnSakOgBestemRuting_annetLandUtpektNyttTemaNorgeUtpekt_forventNyBehandling() throws MelosysException {
+    public void finnSakOgBestemRuting_annetLandUtpektNyttTemaNorgeUtpekt_forventNyBehandling() {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
         melosysEessiMelding.setLovvalgsland(Landkoder.NO.getKode());
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
@@ -138,7 +137,7 @@ public class ArbeidFlereLandSedRuterTest {
     }
 
     @Test
-    public void finnSakOgBestemRuting_norgeUtpektNyttTemaNorgeUtpektBehandlingInaktiv_forventOppgaveOpprettetOgProsessinstansJfr() throws MelosysException {
+    public void finnSakOgBestemRuting_norgeUtpektNyttTemaNorgeUtpektBehandlingInaktiv_forventOppgaveOpprettetOgProsessinstansJfr() {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         melosysEessiMelding.setLovvalgsland(Landkoder.NO.getKode());
@@ -151,7 +150,7 @@ public class ArbeidFlereLandSedRuterTest {
     }
 
     @Test
-    public void finnSakOgBestemRuting_norgeUtpektNyttTemaNorgeUtpektBehandlingAktiv_forventIngenBehandlingStatusVurderDokument() throws MelosysException {
+    public void finnSakOgBestemRuting_norgeUtpektNyttTemaNorgeUtpektBehandlingAktiv_forventIngenBehandlingStatusVurderDokument() {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         melosysEessiMelding.setLovvalgsland(Landkoder.NO.getKode());
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
@@ -163,7 +162,7 @@ public class ArbeidFlereLandSedRuterTest {
     }
 
     @Test
-    public void finnSakOgBestemRuting_annetLandUtpektNyttTemaAnnetLandUtpektSammePeriode_forventIngenBehandling() throws MelosysException {
+    public void finnSakOgBestemRuting_annetLandUtpektNyttTemaAnnetLandUtpektSammePeriode_forventIngenBehandling() {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
@@ -182,7 +181,7 @@ public class ArbeidFlereLandSedRuterTest {
     }
 
     @Test
-    public void finnSakOgBestemRuting_annetLandUtpektNyttTemaAnnetLandUtpektEndretPeriode_forventNyBehandling() throws MelosysException {
+    public void finnSakOgBestemRuting_annetLandUtpektNyttTemaAnnetLandUtpektEndretPeriode_forventNyBehandling() {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
