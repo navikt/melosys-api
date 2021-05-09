@@ -4,6 +4,7 @@ public class OmfattetFamilie {
 
     private final String uuid;
     private String sammensattNavn;
+    private String ident;
 
     public OmfattetFamilie(String uuid) {
         this.uuid = uuid;
@@ -19,5 +20,13 @@ public class OmfattetFamilie {
 
     public void setSammensattNavn(String sammensattNavn) {
         this.sammensattNavn = sammensattNavn;
+    }
+
+    public String getIdent() {
+        return ident;
+    }
+
+    public void setIdent(String ident) {
+        this.ident = ident;
     }
 }
