@@ -11,22 +11,17 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.jeasy.random.EasyRandom;
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-public class MangelbrevMapperTest {
+class MangelbrevMapperTest {
 
     private MangelbrevMapper mapper;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     private EasyRandom easyRandom;
 
@@ -82,9 +77,6 @@ public class MangelbrevMapperTest {
     void mapFag_manglerFritekst() {
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
-
-        expectedException.expect(IntegrasjonException.class);
-        expectedException.expectMessage("Mangelbrev mangler informasjon");
 
         assertThatExceptionOfType(IntegrasjonException.class)
             .isThrownBy(() -> mapper.mapFag(brevData, new Behandling()))

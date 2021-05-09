@@ -20,11 +20,9 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sob.SobService;
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.rules.ExpectedException;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -61,8 +59,6 @@ class RegisteropplysningerServiceTest {
     private SaksopplysningerService saksopplysningerService;
     @Mock
     private RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory;
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     private RegisteropplysningerService registeropplysningerService;
 
@@ -119,7 +115,7 @@ class RegisteropplysningerServiceTest {
         verify(eregFasade).hentOrganisasjon(anyString());
         verify(persondataFasade).hentPersonhistorikk(anyString(), anyLocalDate());
         verify(persondataFasade).hentPerson(anyString(), eq(Informasjonsbehov.STANDARD));
-        verify(sobService).finnSakOgBehandlingskjedeListe(eq(AKTØR_ID));
+        verify(sobService).finnSakOgBehandlingskjedeListe(AKTØR_ID);
         verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
     }
 

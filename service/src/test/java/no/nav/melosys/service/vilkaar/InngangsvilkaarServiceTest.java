@@ -31,14 +31,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static no.nav.melosys.domain.dokument.felles.Land.*;
 import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("resource")
 @ExtendWith(MockitoExtension.class)
-public class InngangsvilkaarServiceTest {
+class InngangsvilkaarServiceTest {
     @Mock
     private SaksopplysningerService saksopplysningerService;
     @Mock
@@ -54,7 +53,7 @@ public class InngangsvilkaarServiceTest {
     }
 
     @Test
-    public void vurderOgLagreInngangsvilkår() throws TekniskException, FunksjonellException {
+    void vurderOgLagreInngangsvilkår() throws TekniskException, FunksjonellException {
         final List<String> landkoder = List.of("FR", "DK", "NO");
         final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
         PersonDokument personDokument = new PersonDokument();
@@ -72,7 +71,7 @@ public class InngangsvilkaarServiceTest {
     }
 
     @Test
-    public void vurderOgLagreInngangsvilkår_manglerStatsborgerskap_girBegrunnelse() throws TekniskException, FunksjonellException {
+    void vurderOgLagreInngangsvilkår_manglerStatsborgerskap_girBegrunnelse() throws TekniskException, FunksjonellException {
         final List<String> landkoder = List.of("FR", "DK", "NO");
         final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().minusYears(2), LocalDate.now().minusYears(1));
         final var personhistorikkDokument = new PersonhistorikkDokument();
@@ -86,7 +85,7 @@ public class InngangsvilkaarServiceTest {
     }
 
     @Test
-    public void vurderOgLagreInngangsvilkår_tomDatoErNull_tomDatoSettesTilEttÅrEtterFomDato() throws FunksjonellException, TekniskException {
+    void vurderOgLagreInngangsvilkår_tomDatoErNull_tomDatoSettesTilEttÅrEtterFomDato() throws FunksjonellException, TekniskException {
         ArgumentCaptor<no.nav.melosys.domain.behandlingsgrunnlag.data.Periode> søknadsperiodeCaptor = ArgumentCaptor.forClass(no.nav.melosys.domain.behandlingsgrunnlag.data.Periode.class);
 
         final List<String> landkoder = List.of("FR", "DK", "NO");
@@ -106,7 +105,7 @@ public class InngangsvilkaarServiceTest {
     }
 
     @Test
-    public void vurderOgLagreInngangsvilkår_feil_girBegrunnelse() throws TekniskException, FunksjonellException {
+    void vurderOgLagreInngangsvilkår_feil_girBegrunnelse() throws TekniskException, FunksjonellException {
         final List<String> landkoder = List.of("FR", "DK", "NO");
         final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
         PersonDokument personDokument = new PersonDokument();
@@ -128,13 +127,13 @@ public class InngangsvilkaarServiceTest {
     }
 
     @Test
-    public void avgjørStatsborgerskapPåStartDato_tomListe_girNull() {
+    void avgjørStatsborgerskapPåStartDato_tomListe_girNull() {
         Land stastborgerskap = inngangsvilkaarService.avgjørStatsborgerskapPåStartDato(new ArrayList<>(), null);
-        assertNull(stastborgerskap);
+        assertThat(stastborgerskap).isNull();
     }
 
     @Test
-    public void avgjørStatsborgerskapPåStartDato_ingenGyldige_girNull() {
+    void avgjørStatsborgerskapPåStartDato_ingenGyldige_girNull() {
         List<StatsborgerskapPeriode> statsborgerskapPerioder = new ArrayList<>();
         StatsborgerskapPeriode p1 = new StatsborgerskapPeriode();
         p1.statsborgerskap = av(BELGIA);
@@ -145,11 +144,11 @@ public class InngangsvilkaarServiceTest {
         p2.periode = new Periode(LocalDate.of(2018, 4, 1), LocalDate.of(2018, 5, 2));
         statsborgerskapPerioder.add(p2);
         Land stastborgerskap = inngangsvilkaarService.avgjørStatsborgerskapPåStartDato(statsborgerskapPerioder, LocalDate.of(2019, 2, 1));
-        assertNull(stastborgerskap);
+        assertThat(stastborgerskap).isNull();
     }
 
     @Test
-    public void avgjørStatsborgerskapPåStartDato_flerePerioder_girPeriodenSomInkludererStartdato() {
+    void avgjørStatsborgerskapPåStartDato_flerePerioder_girPeriodenSomInkludererStartdato() {
         List<StatsborgerskapPeriode> statsborgerskapPerioder = new ArrayList<>();
         StatsborgerskapPeriode p1 = new StatsborgerskapPeriode();
         p1.statsborgerskap = av(BELGIA);
@@ -164,7 +163,7 @@ public class InngangsvilkaarServiceTest {
     }
 
     @Test
-    public void avgjørStatsborgerskapPåStartDato_flerePerioder_filtererSkd() {
+    void avgjørStatsborgerskapPåStartDato_flerePerioder_filtererSkd() {
         List<StatsborgerskapPeriode> statsborgerskapPerioder = new ArrayList<>();
         StatsborgerskapPeriode p1 = new StatsborgerskapPeriode();
         p1.statsborgerskap = av(BELGIA);
@@ -181,7 +180,7 @@ public class InngangsvilkaarServiceTest {
     }
 
     @Test
-    public void avgjørStatsborgerskapPåStartDato_flereGyldige_filtrererUkjent() {
+    void avgjørStatsborgerskapPåStartDato_flereGyldige_filtrererUkjent() {
         List<StatsborgerskapPeriode> statsborgerskapPerioder = new ArrayList<>();
         StatsborgerskapPeriode p1 = new StatsborgerskapPeriode();
         p1.statsborgerskap = av(BELGIA);
@@ -200,7 +199,7 @@ public class InngangsvilkaarServiceTest {
     }
 
     @Test
-    public void avgjørStatsborgerskapPåStartDato_flereGyldige_girSistEndret() {
+    void avgjørStatsborgerskapPåStartDato_flereGyldige_girSistEndret() {
         List<StatsborgerskapPeriode> statsborgerskapPerioder = new ArrayList<>();
         StatsborgerskapPeriode p1 = new StatsborgerskapPeriode();
         p1.statsborgerskap = av(BELGIA);

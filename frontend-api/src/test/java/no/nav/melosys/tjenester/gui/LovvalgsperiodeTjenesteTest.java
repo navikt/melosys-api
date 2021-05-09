@@ -29,7 +29,6 @@ import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 final class LovvalgsperiodeTjenesteTest extends JsonSchemaTestParent {
@@ -101,7 +100,7 @@ final class LovvalgsperiodeTjenesteTest extends JsonSchemaTestParent {
                 .when(tilgangService).sjekkTilgang(eq(BEHANDLING_MED_TEKNISK_FEIL));
         LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, tilgangService);
         ResponseEntity resultat = instans.hentLovvalgsperioder(behandlingsid);
-        assertEquals(HttpStatus.OK, resultat.getStatusCode());
+        assertThat(resultat.getStatusCode()).isEqualTo(HttpStatus.OK);
         @SuppressWarnings("unchecked")
         Collection<LovvalgsperiodeDto> resultatliste = (Collection<LovvalgsperiodeDto>) resultat.getBody();
         assertThat(resultatliste.size()).isEqualTo(forventet.size());

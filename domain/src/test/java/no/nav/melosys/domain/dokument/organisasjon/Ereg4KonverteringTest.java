@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
 // Denne konverteringen testes også i DokumentFactoryTest, uten strukturert adresse
 class Ereg4KonverteringTest implements KonverteringTest {
@@ -39,9 +38,9 @@ class Ereg4KonverteringTest implements KonverteringTest {
         // Test semistrukturert adresse...
         OrganisasjonDokument dokument = (OrganisasjonDokument) test.getDokument();
         SemistrukturertAdresse postadresse = (SemistrukturertAdresse) dokument.getOrganisasjonDetaljer().getPostadresse().get(0);
-        assertEquals("Skuteviksbodene 1", postadresse.getAdresselinje1());
-        assertEquals("5035", postadresse.getPostnr());
-        assertEquals("1201", postadresse.getKommunenr());
+        assertThat(postadresse.getAdresselinje1()).isEqualTo("Skuteviksbodene 1");
+        assertThat(postadresse.getPostnr()).isEqualTo("5035");
+        assertThat(postadresse.getKommunenr()).isEqualTo("1201");
 
         // Test strukturert adresse...
         Gateadresse forretningsadresse = (Gateadresse) dokument.getOrganisasjonDetaljer().getForretningsadresser().get(0);
@@ -79,7 +78,7 @@ class Ereg4KonverteringTest implements KonverteringTest {
         assertThat(dokument.getSektorkode()).isNotBlank();
         assertThat(dokument.getOrganisasjonDetaljer().getNaering()).isNotEmpty();
         assertThat(dokument.getOppstartsdato()).isNull();
-        assertThat(dokument.getEnhetstype()).isEqualTo("");
+        assertThat(dokument.getEnhetstype()).isEmpty();
     }
 
     @Test
@@ -88,10 +87,10 @@ class Ereg4KonverteringTest implements KonverteringTest {
         Saksopplysning saksopplysning = getSaksopplysning(ressurs);
         OrganisasjonDokument dokument = (OrganisasjonDokument) saksopplysning.getDokument();
 
-        assertThat(dokument.getSektorkode()).isEqualTo("");
+        assertThat(dokument.getSektorkode()).isEmpty();
         assertThat(dokument.getOrganisasjonDetaljer().getNaering()).isNotEmpty();
         assertThat(dokument.getOppstartsdato()).isNotNull();
-        assertThat(dokument.getEnhetstype()).isEqualTo("");
+        assertThat(dokument.getEnhetstype()).isEmpty();
     }
 
     @Override

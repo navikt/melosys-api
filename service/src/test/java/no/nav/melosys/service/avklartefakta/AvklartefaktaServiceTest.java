@@ -26,7 +26,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,13 +59,13 @@ class AvklartefaktaServiceTest {
         assertThat(dtoOpt).isPresent();
 
         AvklartefaktaDto dto = dtoOpt.get();
-        assertEquals(avklartefakta.getReferanse(), dto.getReferanse());
-        assertEquals(avklartefakta.getSubjekt(), dto.getSubjektID());
-        assertEquals(List.of(avklartefakta.getFakta()), dto.getFakta());
-        assertEquals(avklartefakta.getType(), dto.getAvklartefaktaType());
-        assertEquals(avklartefakta.getRegistreringer().stream().map(AvklartefaktaRegistrering::getBegrunnelseKode)
-            .collect(Collectors.toList()), dto.getBegrunnelseKoder());
-        assertEquals(avklartefakta.getBegrunnelseFritekst(), dto.getBegrunnelseFritekst());
+        assertThat(avklartefakta.getReferanse()).isEqualTo(dto.getReferanse());
+        assertThat(avklartefakta.getSubjekt()).isEqualTo(dto.getSubjektID());
+        assertThat(List.of(avklartefakta.getFakta())).isEqualTo(dto.getFakta());
+        assertThat(avklartefakta.getType()).isEqualTo(dto.getAvklartefaktaType());
+        assertThat(avklartefakta.getRegistreringer().stream().map(AvklartefaktaRegistrering::getBegrunnelseKode).collect(Collectors.toList()))
+            .isEqualTo(dto.getBegrunnelseKoder());
+        assertThat(avklartefakta.getBegrunnelseFritekst()).isEqualTo(dto.getBegrunnelseFritekst());
     }
 
     @Test

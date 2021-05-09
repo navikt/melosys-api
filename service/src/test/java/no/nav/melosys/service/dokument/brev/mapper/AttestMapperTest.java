@@ -27,10 +27,8 @@ import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataVedlegg;
 import org.jeasy.random.EasyRandom;
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagMaritimtArbeidssted;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
@@ -42,9 +40,6 @@ import static org.mockito.Mockito.when;
 public class AttestMapperTest {
 
     private AttestMapper mapper;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     private EasyRandom easyRandom;
 

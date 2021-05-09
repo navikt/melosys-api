@@ -33,10 +33,8 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import org.jeasy.random.EasyRandom;
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning.UTSENDELSE_MELLOM_24_MN_OG_5_AAR;
@@ -51,9 +49,6 @@ import static org.mockito.Mockito.when;
 public class A001MapperTest {
 
     private A001Mapper mapper;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     private EasyRandom easyRandom;
 

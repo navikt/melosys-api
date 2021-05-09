@@ -16,11 +16,9 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.AnmodningsperiodeRepository;
 import no.nav.melosys.repository.AnmodningsperiodeSvarRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -29,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class AnmodningsperiodeServiceTest {
+class AnmodningsperiodeServiceTest {
     @Mock
     private AnmodningsperiodeRepository anmodningsperiodeRepository;
     @Mock
@@ -38,9 +36,6 @@ public class AnmodningsperiodeServiceTest {
     private AnmodningsperiodeSvarRepository anmodningsperiodeSvarRepository;
 
     private AnmodningsperiodeService anmodningsperiodeService;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     @BeforeEach
     public void setUp() {
