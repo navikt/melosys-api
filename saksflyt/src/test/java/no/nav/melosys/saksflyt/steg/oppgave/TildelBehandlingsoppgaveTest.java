@@ -14,12 +14,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class TildelBehandlingsoppgaveTest {
+class TildelBehandlingsoppgaveTest {
     private static final String SAKSBEHANDLER = "Z998877";
     private static final String SAKSNUMMER = "MEL-1234";
     private static final String OPPGAVE_ID = "123123";
@@ -47,10 +46,10 @@ public class TildelBehandlingsoppgaveTest {
     }
 
     @Test
-    public void utfør_finnerOppgave_forventTildelingAvOppgave() throws FunksjonellException, TekniskException {
+    void utfør_finnerOppgave_forventTildelingAvOppgave() throws FunksjonellException, TekniskException {
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, true);
         tildelBehandlingsoppgave.utfør(prosessinstans);
 
-        verify(oppgaveService).tildelOppgave(OPPGAVE_ID, eq(SAKSBEHANDLER));
+        verify(oppgaveService).tildelOppgave(OPPGAVE_ID, SAKSBEHANDLER);
     }
 }
