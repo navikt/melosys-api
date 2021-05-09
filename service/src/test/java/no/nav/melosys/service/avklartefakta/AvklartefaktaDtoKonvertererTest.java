@@ -1,24 +1,26 @@
 package no.nav.melosys.service.avklartefakta;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AvklartefaktaDtoKonvertererTest {
 
     private AvklartefaktaDtoKonverterer avklartefaktaDtoKonverterer;
 
     private AvklartefaktaDto avklartefaktaDto;
 
-    @Before
+    @BeforeEach
     public void setup() {
         avklartefaktaDtoKonverterer = new AvklartefaktaDtoKonverterer();
 

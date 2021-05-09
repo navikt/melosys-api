@@ -8,19 +8,19 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class TildelBehandlingsoppgaveTest {
     private static final String SAKSBEHANDLER = "Z998877";
     private static final String SAKSNUMMER = "MEL-1234";
@@ -36,7 +36,7 @@ public class TildelBehandlingsoppgaveTest {
 
     private Prosessinstans prosessinstans;
 
-    @Before
+    @BeforeEach
     public void setUp() throws FunksjonellException, TekniskException {
         tildelBehandlingsoppgave = new TildelBehandlingsoppgave(oppgaveService);
 

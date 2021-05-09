@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
@@ -12,25 +11,26 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AvklartefaktaServiceTest {
+@ExtendWith(MockitoExtension.class)
+class AvklartefaktaServiceTest {
     @Mock
     private AvklarteFaktaRepository avklarteFaktaRepository;
     @Mock
@@ -43,13 +43,13 @@ public class AvklartefaktaServiceTest {
     @Captor
     private ArgumentCaptor<Avklartefakta> captor;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         avklartefaktaService = new AvklartefaktaService(avklarteFaktaRepository, behandlingsresultatRepository, avklartefaktaDtoKonverterer);
     }
 
     @Test
-    public void hentAvklartefakta() {
+    void hentAvklartefakta() {
         Avklartefakta avklartefakta = lagAvklartefakta(Avklartefaktatyper.ARBEIDSLAND, "NO", "TRUE");
         Set<Avklartefakta> avklartefaktaSet = new HashSet<>(List.of(avklartefakta));
 
@@ -70,7 +70,7 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void lagreAvklarteFakta() throws IkkeFunnetException {
+    void lagreAvklarteFakta() throws IkkeFunnetException {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
         Avklartefakta avklartefakta = new Avklartefakta();
@@ -85,7 +85,7 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void hentAlleAvklarteArbeidsland() {
+    void hentAlleAvklarteArbeidsland() {
         when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(anyLong(), eq(Avklartefaktatyper.ARBEIDSLAND)))
             .thenReturn(Set.of(lagAvklartefakta(Avklartefaktatyper.ARBEIDSLAND, null, "NO"),
                 lagAvklartefakta(Avklartefaktatyper.ARBEIDSLAND, null, "SE")));
@@ -95,7 +95,7 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void hentBostedsland() {
+    void hentBostedsland() {
         when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(anyLong(), eq(Avklartefaktatyper.BOSTEDSLAND)))
             .thenReturn(Set.of(lagAvklartefakta(Avklartefaktatyper.BOSTEDSLAND, null, "NO")));
 
@@ -104,7 +104,7 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void hentYrkesgruppe_forventerOrdinær() throws TekniskException {
+    void hentYrkesgruppe_forventerOrdinær() throws TekniskException {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("ORDINAER");
         Optional<Avklartefakta> avklartefaktaSet = Optional.of(avklartefakta);
@@ -115,7 +115,7 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void hentYrkesgruppe_forventerFlyende() throws TekniskException {
+    void hentYrkesgruppe_forventerFlyende() throws TekniskException {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("YRKESAKTIV_FLYVENDE");
         Optional<Avklartefakta> avklartefaktaSet = Optional.of(avklartefakta);
@@ -126,7 +126,7 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void hentYrkesgruppe_forventerSokkelSkip() throws TekniskException {
+    void hentYrkesgruppe_forventerSokkelSkip() throws TekniskException {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("SOKKEL_ELLER_SKIP");
         Optional<Avklartefakta> avklartefaktaFraDb = Optional.of(avklartefakta);
@@ -136,18 +136,20 @@ public class AvklartefaktaServiceTest {
         assertThat(yrkesgruppeType).isPresent().get().isEqualTo(Yrkesgrupper.SOKKEL_ELLER_SKIP);
     }
 
-    @Test(expected = TekniskException.class)
-    public void hentYrkesgruppe_utenYrkesgruppe_forventerFeil() throws TekniskException {
+    @Test
+    void hentYrkesgruppe_utenYrkesgruppe_forventerFeil() throws TekniskException {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("IKKE_YRKESAKTIV");
         Optional<Avklartefakta> avklartefaktaFraDb = Optional.of(avklartefakta);
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any())).thenReturn(avklartefaktaFraDb);
 
-        avklartefaktaService.finnYrkesGruppe(1L);
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(() -> avklartefaktaService.finnYrkesGruppe(1L))
+            .withMessageContaining("Finner ingen yrkesgruppe");
     }
 
     @Test
-    public void hentMarginaltArbeid_medEttLandMedMarginaltArbeid_girMarginaltArbeid() {
+    void hentMarginaltArbeid_medEttLandMedMarginaltArbeid_girMarginaltArbeid() {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("MARGINALT_ARBEID");
         Set<Avklartefakta> avklartefaktaFraDb = Collections.singleton(avklartefakta);
@@ -158,7 +160,7 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void hentMarginaltArbeid_ingenLandMedMarginaltArbeid_girIkkeMarginaltArbeid() {
+    void hentMarginaltArbeid_ingenLandMedMarginaltArbeid_girIkkeMarginaltArbeid() {
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(anyLong(), any(), any())).thenReturn(Collections.emptySet());
 
         boolean harMarginaltArbeid = avklartefaktaService.harMarginaltArbeid(1L);
@@ -166,7 +168,7 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void hentMaritimType_medSokkelTekst_foventerSokkelType() {
+    void hentMaritimType_medSokkelTekst_foventerSokkelType() {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("SOKKEL");
         Set<Avklartefakta> avklartefaktaFraDb = Set.of(avklartefakta);
@@ -178,7 +180,7 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void hentMaritimType_medSkipTekst_foventerSkipType() {
+    void hentMaritimType_medSkipTekst_foventerSkipType() {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("SKIP");
         Set<Avklartefakta> avklartefaktaFraDb = Set.of(avklartefakta);
@@ -190,7 +192,7 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void hentInformertMyndighet_avklartFaktaErSverige_forventSverige() {
+    void hentInformertMyndighet_avklartFaktaErSverige_forventSverige() {
         Avklartefakta valgtMyndighetFakta = new Avklartefakta();
         valgtMyndighetFakta.setSubjekt(Landkoder.SE.getKode());
         valgtMyndighetFakta.setType(Avklartefaktatyper.INFORMERT_MYNDIGHET);
@@ -208,7 +210,7 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void hentAvklartMaritimeAvklartfakta_medAvklartSokkel_girAvklartMaritimtArbeid() {
+    void hentAvklartMaritimeAvklartfakta_medAvklartSokkel_girAvklartMaritimtArbeid() {
         Set<Avklartefakta> alleMaritimeFakta = lagAlleMaritimeAvklartefakta("Stena Don", "SOKKEL", "GB");
         when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(anyLong(), anySet())).thenReturn(alleMaritimeFakta);
         Map<String, AvklartMaritimtArbeid> avklarteMaritimeArbeid = avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(1L);
@@ -222,7 +224,7 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void hentAvklartMaritimeAvklartfakta_medAvklartSkip_girAvklartMaritimtArbeid() {
+    void hentAvklartMaritimeAvklartfakta_medAvklartSkip_girAvklartMaritimtArbeid() {
         Set<Avklartefakta> alleMaritimeFakta = lagAlleMaritimeAvklartefakta("Stena Don", "SOKKEL", "SE");
         alleMaritimeFakta.addAll(lagAlleMaritimeAvklartefakta("Seven Kestrel", "SKIP", "GB"));
         when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndTypeIn(anyLong(), anySet())).thenReturn(alleMaritimeFakta);
@@ -232,7 +234,7 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void testAvklarteOrganisasjoner() {
+    void testAvklarteOrganisasjoner() {
         String orgnr1 = "12345678910";
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setType(Avklartefaktatyper.VIRKSOMHET);
@@ -247,7 +249,7 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void leggTilRegistrering_forventLagret() throws Exception {
+    void leggTilRegistrering_forventLagret() throws Exception {
 
         when(avklarteFaktaRepository.findByBehandlingsresultatIdAndType(anyLong(), any(Avklartefaktatyper.class)))
             .thenReturn(Optional.of(new Avklartefakta()));
@@ -265,7 +267,7 @@ public class AvklartefaktaServiceTest {
     }
 
     @Test
-    public void hentAvklarteMedfølgendeBarn_medOgUtenMedfølgendeBarn_girForventedeVerdier() {
+    void hentAvklarteMedfølgendeBarn_medOgUtenMedfølgendeBarn_girForventedeVerdier() {
         Avklartefakta barnOmfattet = lagAvklartefakta(Avklartefaktatyper.VURDERING_LOVVALG_BARN,
             "omfattet", "TRUE");
         Avklartefakta barnIkkeOmfattet1 = lagAvklartIkkeOmfattetBarn(

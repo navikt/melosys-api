@@ -2,8 +2,8 @@ package no.nav.melosys.integrasjon.joark.journalfoerinngaaende;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.dok.tjenester.journalfoerinngaaende.GetJournalpostResponse;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
@@ -20,7 +20,7 @@ public class JournalfoerInngaaendeConsumerTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Before
+    @BeforeEach
     public void setup() {
         journalfoerInngaaendeConsumer = new JournalfoerInngaaendeConsumer(restTemplate);
         server = MockRestServiceServer.createServer(restTemplate);

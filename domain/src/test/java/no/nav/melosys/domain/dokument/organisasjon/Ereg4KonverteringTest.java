@@ -13,19 +13,19 @@ import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.Gateadresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 // Denne konverteringen testes også i DokumentFactoryTest, uten strukturert adresse
-public class Ereg4KonverteringTest implements KonverteringTest {
+class Ereg4KonverteringTest implements KonverteringTest {
     private static final String EREG_4_0_MOCK = "organisasjon/org_med_strukturert_adresse.xml";
     private static DokumentFactory factory;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUp() {
         Jaxb2Marshaller marshaller = JaxbConfig.jaxb2Marshaller();
         XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();
@@ -33,7 +33,7 @@ public class Ereg4KonverteringTest implements KonverteringTest {
     }
 
     @Test
-    public void testAdresse() throws Exception {
+    void testAdresse() throws Exception {
         Saksopplysning test = getSaksopplysning(EREG_4_0_MOCK);
 
         // Test semistrukturert adresse...
@@ -45,53 +45,53 @@ public class Ereg4KonverteringTest implements KonverteringTest {
 
         // Test strukturert adresse...
         Gateadresse forretningsadresse = (Gateadresse) dokument.getOrganisasjonDetaljer().getForretningsadresser().get(0);
-        assertEquals("Gatenavn", forretningsadresse.getGatenavn());
-        assertEquals("NO", forretningsadresse.getLandkode());
-        
-        // Test perioder: 
+        assertThat(forretningsadresse.getGatenavn()).isEqualTo("Gatenavn");
+        assertThat(forretningsadresse.getLandkode()).isEqualTo("NO");
+
+        // Test perioder:
         // Forretningsadresse har ingen perioder satt...
-        assertNull(forretningsadresse.getBruksperiode());
-        assertNull(forretningsadresse.getGyldighetsperiode());
+        assertThat(forretningsadresse.getBruksperiode()).isNull();
+        assertThat(forretningsadresse.getGyldighetsperiode()).isNull();
         // Postadresse har fom-dato på begge periodene, men ikke tom-dato...
-        assertEquals(LocalDate.of(2011, 9, 14), postadresse.getGyldighetsperiode().getFom());
-        assertNull(postadresse.getGyldighetsperiode().getTom());
-        assertEquals(LocalDate.of(2015, 2, 23), postadresse.getBruksperiode().getFom());
-        assertNull(postadresse.getBruksperiode().getTom());
+        assertThat(postadresse.getGyldighetsperiode().getFom()).isEqualTo(LocalDate.of(2011, 9, 14));
+        assertThat(postadresse.getGyldighetsperiode().getTom()).isNull();
+        assertThat(postadresse.getBruksperiode().getFom()).isEqualTo(LocalDate.of(2015, 2, 23));
+        assertThat(postadresse.getBruksperiode().getTom()).isNull();
     }
 
     @Test
-    public void testJuridiskEnhet() throws IOException {
+    void testJuridiskEnhet() throws IOException {
         Saksopplysning saksopplysning = getSaksopplysning(EREG_4_0_MOCK);
         OrganisasjonDokument dokument = (OrganisasjonDokument) saksopplysning.getDokument();
 
         assertThat(dokument.getSektorkode()).isNotBlank();
-        assertFalse(dokument.getOrganisasjonDetaljer().getNaering().isEmpty());
-        assertNull(dokument.getOppstartsdato());
+        assertThat(dokument.getOrganisasjonDetaljer().getNaering().isEmpty()).isFalse();
+        assertThat(dokument.getOppstartsdato()).isNull();
         assertThat(dokument.getEnhetstype()).isNotBlank();
     }
 
     @Test
-    public void testOrgledd() throws IOException {
+    void testOrgledd() throws IOException {
         final String ressurs = "organisasjon/974652366.xml";
         Saksopplysning saksopplysning = getSaksopplysning(ressurs);
         OrganisasjonDokument dokument = (OrganisasjonDokument) saksopplysning.getDokument();
 
         assertThat(dokument.getSektorkode()).isNotBlank();
-        assertFalse(dokument.getOrganisasjonDetaljer().getNaering().isEmpty());
-        assertNull(dokument.getOppstartsdato());
-        assertEquals("", dokument.getEnhetstype());
+        assertThat(dokument.getOrganisasjonDetaljer().getNaering()).isNotEmpty();
+        assertThat(dokument.getOppstartsdato()).isNull();
+        assertThat(dokument.getEnhetstype()).isEqualTo("");
     }
 
     @Test
-    public void testVirksomhet() throws IOException {
+    void testVirksomhet() throws IOException {
         final String ressurs = "organisasjon/975270211.xml";
         Saksopplysning saksopplysning = getSaksopplysning(ressurs);
         OrganisasjonDokument dokument = (OrganisasjonDokument) saksopplysning.getDokument();
 
-        assertEquals("", dokument.getSektorkode());
-        assertFalse(dokument.getOrganisasjonDetaljer().getNaering().isEmpty());
-        assertNotNull(dokument.getOppstartsdato());
-        assertEquals("", dokument.getEnhetstype());
+        assertThat(dokument.getSektorkode()).isEqualTo("");
+        assertThat(dokument.getOrganisasjonDetaljer().getNaering()).isNotEmpty();
+        assertThat(dokument.getOppstartsdato()).isNotNull();
+        assertThat(dokument.getEnhetstype()).isEqualTo("");
     }
 
     @Override

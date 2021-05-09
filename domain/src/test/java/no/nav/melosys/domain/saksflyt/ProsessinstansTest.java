@@ -7,7 +7,7 @@ import java.util.List;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.jpa.PropertiesConverter;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 

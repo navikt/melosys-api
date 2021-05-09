@@ -1,7 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -12,7 +11,6 @@ import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
@@ -21,26 +19,23 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.tjenester.gui.dto.AvklartefaktaOppsummeringDto;
 import no.nav.melosys.tjenester.gui.dto.LagreMedfolgendeFamilieDto;
-
 import no.nav.melosys.tjenester.gui.dto.MedfolgendeFamilieDto;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.SAMBOER_UTEN_FELLES_BARN;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
+@ExtendWith(MockitoExtension.class)
+class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
     private static final Logger log = LoggerFactory.getLogger(AvklartefaktaTjenesteTest.class);
 
     private static final String AVKLARTEFAKTA_SCHEMA = "avklartefakta-schema.json";
@@ -63,13 +58,13 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
     @Mock
     private AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         avklartefaktaTjeneste = new AvklartefaktaTjeneste(avklartefaktaService, tilgangService, avklarteVirksomheterService, avklarteMedfolgendeFamilieService);
     }
 
     @Test
-    public void hentAvklartefakta() throws Exception {
+    void hentAvklartefakta() throws Exception {
         Set<AvklartefaktaDto> mockliste = defaultEasyRandom().objects(AvklartefaktaDto.class, 4).collect(Collectors.toSet());
         when(avklartefaktaService.hentAlleAvklarteFakta(1L)).thenReturn(mockliste);
 
@@ -78,7 +73,7 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void lagreAvklartefaktaGirKopiAvInput() throws Exception {
+    void lagreAvklartefaktaGirKopiAvInput() {
         Set<AvklartefaktaDto> avklartefaktaDtoer = defaultEasyRandom().objects(AvklartefaktaDto.class, 4).collect(Collectors.toSet());
         when(avklartefaktaService.hentAlleAvklarteFakta(1L)).thenReturn(avklartefaktaDtoer);
         Set<AvklartefaktaDto> resultat = avklartefaktaTjeneste.lagreAvklarteFakta(1, avklartefaktaDtoer);
@@ -86,7 +81,7 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void lagreMedfolgendeFamilieSomAvklarteFakta_énAvHverMuligInput_returnererKorrekt() throws FunksjonellException, TekniskException, IOException {
+    void lagreMedfolgendeFamilieSomAvklarteFakta_énAvHverMuligInput_returnererKorrekt() throws FunksjonellException, TekniskException, IOException {
         LagreMedfolgendeFamilieDto lagreMedfolgendeFamilieDto = new LagreMedfolgendeFamilieDto(Set.of(
             new MedfolgendeFamilieDto(uuid1, true, null, null),
             new MedfolgendeFamilieDto(uuid2, false, OVER_18_AR.getKode(), "fritekstForUuid2"),
@@ -127,20 +122,6 @@ public class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
         assertThat(medFolgendeFamilieFraResponse.get(3).getUuid()).isEqualTo(forventetMedfolgendeFamilie.get(3).getUuid());
         assertThat(medFolgendeFamilieFraResponse.get(3).getBegrunnelseKode()).isEqualTo(forventetMedfolgendeFamilie.get(3).getBegrunnelseKode());
         assertThat(medFolgendeFamilieFraResponse.get(3).getBegrunnelseFritekst()).isEqualTo(forventetMedfolgendeFamilie.get(3).getBegrunnelseFritekst());
-    }
-
-    @Test(expected = FunksjonellException.class)
-    public void lagreAvklartefakta_ikkeRedigerbarBehandling_girFeil() throws FunksjonellException, TekniskException {
-        doThrow(FunksjonellException.class).when(tilgangService).sjekkRedigerbarOgTilgang(anyLong());
-
-        avklartefaktaTjeneste.lagreAvklarteFakta(1, Collections.emptySet());
-    }
-
-    @Test(expected = SikkerhetsbegrensningException.class)
-    public void hentAvklartefakta_ikkeTilgang_girFeil() throws FunksjonellException, TekniskException {
-        doThrow(SikkerhetsbegrensningException.class).when(tilgangService).sjekkTilgang(anyLong());
-
-        avklartefaktaTjeneste.hentAvklarteFakta(1);
     }
 
     private static AvklartefaktaDto lagAvklartefaktaDto(String subjektID, Avklartefaktatyper type, boolean fakta, String begrunnelseFritekst, String begrunnelsekode) {

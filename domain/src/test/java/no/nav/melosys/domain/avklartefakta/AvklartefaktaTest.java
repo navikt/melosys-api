@@ -4,16 +4,14 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AvklartefaktaTest {
+@ExtendWith(MockitoExtension.class)
+class AvklartefaktaTest {
 
     private AvklartefaktaRegistrering lagRegistrering(String begrunnelse, Avklartefakta avklartefakta) {
         AvklartefaktaRegistrering registrering = new AvklartefaktaRegistrering();
@@ -24,7 +22,7 @@ public class AvklartefaktaTest {
     }
 
     @Test
-    public void testOppdaterMedEkstraRegistrering() {
+    void testOppdaterMedEkstraRegistrering() {
         String opphold1 = "Opphold";
         String opphold2 = "Opphold";
         String familie = "Familie";
@@ -40,7 +38,7 @@ public class AvklartefaktaTest {
 
         avklartefakta.oppdaterRegistreringer(nyeRegistreringer);
 
-        assertEquals(2, avklartefakta.getRegistreringer().size());
-        assertTrue(avklartefakta.getRegistreringer().contains(førsteRegistrering));
+        assertThat(avklartefakta.getRegistreringer()).hasSize(2);
+        assertThat(avklartefakta.getRegistreringer()).contains(førsteRegistrering);
     }
 }

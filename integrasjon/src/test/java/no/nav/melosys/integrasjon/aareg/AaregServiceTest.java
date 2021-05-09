@@ -10,8 +10,8 @@ import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumer;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdMock;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.HentArbeidsforholdHistorikkSikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.HentArbeidsforholdHistorikkRequest;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -26,7 +26,7 @@ public class AaregServiceTest {
     private AaregService aaregService;
     private Jaxb2Marshaller marshaller;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         marshaller = JaxbConfig.jaxb2Marshaller();
         aaregService = lagAaregService(new ArbeidsforholdMock());

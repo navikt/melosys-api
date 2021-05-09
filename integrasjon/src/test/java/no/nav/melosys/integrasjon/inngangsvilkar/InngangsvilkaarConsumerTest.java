@@ -7,8 +7,8 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
 import org.hamcrest.core.StringContains;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -26,7 +26,7 @@ public class InngangsvilkaarConsumerTest {
     private final String url = "http://melosys-inngangsvilkar/api";
     private InngangsvilkaarConsumerImpl inngangsvilkaarConsumer;
 
-    @Before
+    @BeforeEach
     public void setup() {
         RestTemplate restTemplate = new InngangsvilkarConfig().inngangsVilkaarRestTemplate(url, new RestTemplateBuilder());
         server = MockRestServiceServer.createServer(restTemplate);
