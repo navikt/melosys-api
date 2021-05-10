@@ -80,6 +80,9 @@ public class DokumentTjeneste {
         throws TekniskException, FunksjonellException {
         byte[] dokument;
         tilgangService.sjekkTilgang(behandlingID);
+
+        brevBestillingDto.setProduserbardokument(produserbartDokument);
+
         dokument = dokumentServiceFasade.produserUtkast(behandlingID, brevBestillingDto);
         return lagResponseAvDokument(dokument, produserbartDokument.getKode() + "_utkast.pdf");
     }
@@ -105,6 +108,9 @@ public class DokumentTjeneste {
             throw new FunksjonellException("Mottaker trengs for å bestille.");
         }
         tilgangService.sjekkTilgang(behandlingID);
+
+        brevBestillingDto.setProduserbardokument(produserbartDokument);
+
         // Produserer utkast for å få eventuelle feil før bestilling i saksflyt.
         dokumentServiceFasade.produserUtkast(behandlingID, brevBestillingDto);
         dokumentServiceFasade.produserDokument(behandlingID, brevBestillingDto);

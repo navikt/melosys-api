@@ -38,6 +38,11 @@ public class BrevbestillingDto {
     public BrevbestillingDto() {
     }
 
+    // Må ha mulighet for å sette produserbartdokument pga bakoverkompabilitet
+    public void setProduserbardokument(Produserbaredokumenter produserbardokument) {
+        this.produserbardokument = produserbardokument;
+    }
+
     public BrevbestillingDto(Builder builder) {
         this.produserbardokument = builder.produserbardokument;
         this.mottaker = builder.mottaker;
