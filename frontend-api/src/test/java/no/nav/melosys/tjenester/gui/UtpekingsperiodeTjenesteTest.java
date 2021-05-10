@@ -19,13 +19,13 @@ import no.nav.melosys.tjenester.gui.dto.utpeking.UtpekingsperioderDto;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.jeasy.random.randomizers.misc.EnumRandomizer;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +34,8 @@ import static org.jeasy.random.FieldPredicates.ofType;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class UtpekingsperiodeTjenesteTest extends JsonSchemaTestParent {
+@ExtendWith(MockitoExtension.class)
+class UtpekingsperiodeTjenesteTest extends JsonSchemaTestParent {
 
     private static final Logger log = LoggerFactory.getLogger(UtpekingsperiodeTjenesteTest.class);
     private static final String UTPEKINGSPERIODER_SCHEMA = "utpekingsperioder-schema.json";
@@ -51,15 +51,15 @@ public class UtpekingsperiodeTjenesteTest extends JsonSchemaTestParent {
     private UtpekingService utpekingService;
     private UtpekingsperiodeTjeneste utpekingsperiodeTjeneste;
 
-    @Before
+    @BeforeEach
     public void settOpp() {
         utpekingsperiodeTjeneste = new UtpekingsperiodeTjeneste(tilgangService, utpekingService);
-
-        when(utpekingService.hentUtpekingsperioder(anyLong())).thenReturn(lagUtpekingsperioder());
     }
 
     @Test
-    public void hentUtpekingsperioder() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, IOException {
+    void hentUtpekingsperioder() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, IOException {
+        when(utpekingService.hentUtpekingsperioder(anyLong())).thenReturn(lagUtpekingsperioder());
+
         UtpekingsperioderDto utpekingsperioderDto = utpekingsperiodeTjeneste.hentUtpekingsperioder(123L);
 
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(utpekingsperioderDto);
@@ -70,7 +70,7 @@ public class UtpekingsperiodeTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void lagreUtpekingsperioder() throws IOException, FunksjonellException, TekniskException {
+    void lagreUtpekingsperioder() throws IOException, FunksjonellException, TekniskException {
         UtpekingsperioderDto utpekingsperioderDto = new UtpekingsperioderDto(lagUtpekingsperioder());
 
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(utpekingsperioderDto);

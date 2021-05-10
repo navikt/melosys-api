@@ -22,8 +22,8 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Telefonnu
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,7 +32,7 @@ public class DokumentFactoryTest {
 
     DokumentFactory factory;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         Jaxb2Marshaller marshaller = JaxbConfig.jaxb2Marshaller();
 

@@ -7,18 +7,18 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.sak.FagsakService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AvklarMyndighetServiceTest {
 
     @Mock
@@ -35,10 +35,13 @@ public class AvklarMyndighetServiceTest {
     private String forventetInstitusjonIdIT;
     private String forventetInstitusjonIdCZ;
 
+    private UtenlandskMyndighet utenlandskMyndighet;
+    private UtenlandskMyndighet utenlandskMyndighetReservert;
+
     @Captor
     ArgumentCaptor<List<String>> stringListArgumentCaptor;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         utenlandskMyndighetService = new UtenlandskMyndighetService(utenlandskMyndighetRepository, landvelgerService, fagsakService);
 
@@ -49,14 +52,9 @@ public class AvklarMyndighetServiceTest {
         behandling.setId(1L);
         behandling.setFagsak(fagsak);
 
-        UtenlandskMyndighet utenlandskMyndighet = lagUtenlandskMyndighet(Landkoder.IT, "IT123", null);
-        UtenlandskMyndighet utenlandskMyndighetReservert = lagUtenlandskMyndighet(Landkoder.CZ, "CZ123", Preferanse.PreferanseEnum.RESERVERT_FRA_A1);
+        utenlandskMyndighet = lagUtenlandskMyndighet(Landkoder.IT, "IT123", null);
+        utenlandskMyndighetReservert = lagUtenlandskMyndighet(Landkoder.CZ, "CZ123", Preferanse.PreferanseEnum.RESERVERT_FRA_A1);
 
-        when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.IT))).thenReturn(Optional.of(utenlandskMyndighet));
-        when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.CZ))).thenReturn(Optional.of(utenlandskMyndighetReservert));
-        
-        when(utenlandskMyndighetRepository.findByLandkodeIsIn(any(Collection.class))).thenReturn(Arrays.asList(utenlandskMyndighet, utenlandskMyndighetReservert));
-        
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Arrays.asList(Landkoder.IT, Landkoder.CZ));
 
         forventetInstitusjonIdIT = Landkoder.IT + ":" + utenlandskMyndighet.institusjonskode;
@@ -74,14 +72,19 @@ public class AvklarMyndighetServiceTest {
     }
 
     @Test
-    public void lagUtenlandskMyndighetFraBehandling_forventAktoerMedGyldigInstitusjonsId() throws Exception {
+    public void lagUtenlandskMyndighetFraBehandling_forventAktoerMedGyldigInstitusjonsId() {
+        when(utenlandskMyndighetRepository.findByLandkodeIsIn(any(Collection.class))).thenReturn(Arrays.asList(utenlandskMyndighet, utenlandskMyndighetReservert));
+
         Map<UtenlandskMyndighet, Aktoer> aktoerer = utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling);
         assertThat(aktoerer).isNotEmpty();
         assertThat(aktoerer.values().iterator().next().getInstitusjonId()).isEqualTo(forventetInstitusjonIdIT);
     }
 
     @Test
-    public void avklarMyndighetSomAktørOgLagre_forventkorrektInstitusjonsId() throws Exception {
+    public void avklarMyndighetSomAktørOgLagre_forventkorrektInstitusjonsId() {
+        when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.IT))).thenReturn(Optional.of(utenlandskMyndighet));
+        when(utenlandskMyndighetRepository.findByLandkode(eq(Landkoder.CZ))).thenReturn(Optional.of(utenlandskMyndighetReservert));
+
         utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling);
 
         verify(fagsakService).oppdaterMyndigheter(eq(behandling.getFagsak().getSaksnummer()), stringListArgumentCaptor.capture());

@@ -37,11 +37,13 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagSystemService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser.UTSENDELSE_OVER_24_MN;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Art12_2_begrunnelser.NORMALT_IKKE_DRIFT_NORGE;
@@ -54,8 +56,9 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BrevDataByggerA001Test {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class BrevDataByggerA001Test {
     @Mock
     private AnmodningsperiodeService anmodningsperiodeService;
     @Mock
@@ -82,7 +85,7 @@ public class BrevDataByggerA001Test {
     private final String orgnr1 = "12345678910";
     private final String orgnr2 = "10987654321";
 
-    @Before
+    @BeforeEach
     public void setUp() throws IkkeFunnetException, TekniskException {
         behandling = new Behandling();
         behandling.setId(123L);
@@ -185,7 +188,7 @@ public class BrevDataByggerA001Test {
     }
 
     @Test
-    public void testHentAvklarteSelvstendigeForetak() {
+    void testHentAvklarteSelvstendigeForetak() {
         avklarteOrganisasjoner.add("12345678910");
 
         SelvstendigForetak foretak = new SelvstendigForetak();
@@ -202,7 +205,7 @@ public class BrevDataByggerA001Test {
     }
 
     @Test
-    public void testHentAvklarteNorskeForetak() {
+    void testHentAvklarteNorskeForetak() {
         avklarteOrganisasjoner.add(orgnr1);
 
         SelvstendigForetak foretak = new SelvstendigForetak();
@@ -219,7 +222,7 @@ public class BrevDataByggerA001Test {
     }
 
     @Test
-    public void testIngenAvklarteforetak() {
+    void testIngenAvklarteforetak() {
         SelvstendigForetak foretak = new SelvstendigForetak();
         foretak.orgnr = orgnr1;
         søknad.selvstendigArbeid.selvstendigForetak.add(foretak);
@@ -229,7 +232,7 @@ public class BrevDataByggerA001Test {
     }
 
     @Test
-    public void lag_art16MedArt121_harKunArt16Begrunnelser() {
+    void lag_art16MedArt121_harKunArt16Begrunnelser() {
         lagVilkårResultat(Vilkaar.FO_883_2004_ART12_1, false, UTSENDELSE_OVER_24_MN);
         lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
 
@@ -242,7 +245,7 @@ public class BrevDataByggerA001Test {
     }
 
     @Test
-    public void lag_art16MedArt122_harKunArt16Begrunnelser() {
+    void lag_art16MedArt122_harKunArt16Begrunnelser() {
         lagVilkårResultat(Vilkaar.FO_883_2004_ART12_2, false, NORMALT_IKKE_DRIFT_NORGE);
         lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
 
@@ -255,7 +258,7 @@ public class BrevDataByggerA001Test {
     }
 
     @Test
-    public void lag_art16UtenArt12_harKunArt16UtenArt12Begrunnelser() {
+    void lag_art16UtenArt12_harKunArt16UtenArt12Begrunnelser() {
         lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, SJOEMANNSKIRKEN);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
@@ -268,7 +271,7 @@ public class BrevDataByggerA001Test {
 
 
     @Test
-    public void testAnsettelsesperiode() {
+    void testAnsettelsesperiode() {
         avklarteOrganisasjoner.add(orgnr1);
 
         lagArbeidsforhold(orgnr1,
@@ -289,7 +292,7 @@ public class BrevDataByggerA001Test {
     }
 
     @Test
-    public void testIngenAnsettelsePeriode() {
+    void testIngenAnsettelsePeriode() {
         avklarteOrganisasjoner.add(orgnr1);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
@@ -297,7 +300,7 @@ public class BrevDataByggerA001Test {
     }
 
     @Test
-    public void lagBrevdata_ytterligereInfoFraBestilling_infoFinnes() {
+    void lagBrevdata_ytterligereInfoFraBestilling_infoFinnes() {
         final String forventetInfo = "By the way...";
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
             .medBehandling(behandling)

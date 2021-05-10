@@ -6,8 +6,8 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -18,7 +18,7 @@ public class ExceptionMapperTest {
 
     private ExceptionMapper exceptionMapper;
 
-    @Before
+    @BeforeEach
     public void setup() {
         exceptionMapper = new ExceptionMapper();
     }

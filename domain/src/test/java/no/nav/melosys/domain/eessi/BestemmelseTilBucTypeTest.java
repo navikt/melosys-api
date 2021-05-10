@@ -3,20 +3,16 @@ package no.nav.melosys.domain.eessi;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 
-public class BestemmelseTilBucTypeTest {
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+class BestemmelseTilBucTypeTest {
 
     @Test
-    public void fraBestemmelse_art11_LABUC05() {
+    void fraBestemmelse_art11_LABUC05() {
         assertThat(BucType.fraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B)).isEqualTo(BucType.LA_BUC_05);
         assertThat(BucType.fraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3C)).isEqualTo(BucType.LA_BUC_05);
         assertThat(BucType.fraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E)).isEqualTo(BucType.LA_BUC_05);
@@ -25,13 +21,13 @@ public class BestemmelseTilBucTypeTest {
     }
 
     @Test
-    public void fraBestemmelse_art12_LABUC04() {
+    void fraBestemmelse_art12_LABUC04() {
         assertThat(BucType.fraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1)).isEqualTo(BucType.LA_BUC_04);
         assertThat(BucType.fraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2)).isEqualTo(BucType.LA_BUC_04);
     }
 
     @Test
-    public void fraBestemmelse_art13_LABUC02() {
+    void fraBestemmelse_art13_LABUC02() {
         assertThat(BucType.fraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A)).isEqualTo(BucType.LA_BUC_02);
         assertThat(BucType.fraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1)).isEqualTo(BucType.LA_BUC_02);
         assertThat(BucType.fraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B2)).isEqualTo(BucType.LA_BUC_02);
@@ -47,17 +43,15 @@ public class BestemmelseTilBucTypeTest {
     }
 
     @Test
-    public void fraBestemmelse_art16_LABUC04() {
+    void fraBestemmelse_art16_LABUC04() {
         assertThat(BucType.fraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1)).isEqualTo(BucType.LA_BUC_01);
         assertThat(BucType.fraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2)).isEqualTo(BucType.LA_BUC_01);
     }
 
     @Test
-    public void fraBestemmelse_ikkeStøtteBestemmelse_forventException() {
-
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("kan ikke mappes til en BucType!");
-        BucType.fraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ANNET);
+    void fraBestemmelse_ikkeStøtteBestemmelse_forventException() {
+        assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(() -> BucType.fraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ANNET))
+            .withMessageContaining("kan ikke mappes til en BucType");
     }
-
 }

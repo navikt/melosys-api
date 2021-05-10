@@ -7,15 +7,15 @@ import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonConsumer;
 import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonMock;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class EregServiceTest {
     private EregService eregService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         OrganisasjonConsumer organisasjonMock = new OrganisasjonMock();
         DokumentFactory dokumentFactory = new DokumentFactory(JaxbConfig.jaxb2Marshaller(), new XsltTemplatesFactory());

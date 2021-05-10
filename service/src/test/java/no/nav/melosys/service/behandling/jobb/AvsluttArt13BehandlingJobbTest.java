@@ -8,16 +8,16 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AvsluttArt13BehandlingJobbTest {
 
     @Mock
@@ -27,7 +27,7 @@ public class AvsluttArt13BehandlingJobbTest {
 
     private AvsluttArt13BehandlingJobb avsluttArt13BehandlingJobb;
 
-    @Before
+    @BeforeEach
     public void setup() {
         avsluttArt13BehandlingJobb = new AvsluttArt13BehandlingJobb(behandlingService, avsluttArt13BehandlingService);
     }

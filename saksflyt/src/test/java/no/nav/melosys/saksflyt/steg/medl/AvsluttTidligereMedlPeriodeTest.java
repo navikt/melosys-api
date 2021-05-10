@@ -9,16 +9,16 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.service.medl.MedlPeriodeService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AvsluttTidligereMedlPeriodeTest {
 
     @Mock
@@ -26,7 +26,7 @@ public class AvsluttTidligereMedlPeriodeTest {
 
     private AvsluttTidligereMedlPeriode avsluttTidligereMedlPeriode;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         avsluttTidligereMedlPeriode = new AvsluttTidligereMedlPeriode(medlPeriodeService);
     }

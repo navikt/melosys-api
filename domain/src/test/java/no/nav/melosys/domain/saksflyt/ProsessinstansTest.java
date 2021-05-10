@@ -6,32 +6,33 @@ import java.util.List;
 
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.jpa.PropertiesConverter;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public class ProsessinstansTest {
+class ProsessinstansTest {
 
     @Test
-    public void testDataString() {
+    void testDataString() {
         String s = "Problematisk streng med # og = skal tåles";
         Prosessinstans pi1 = new Prosessinstans(), pi2 = new Prosessinstans();
         pi1.setData(AVSENDER_NAVN, s);
         pi2.setData(new PropertiesConverter().convertToEntityAttribute(new PropertiesConverter().convertToDatabaseColumn(pi1.getData())));
 
-        Assert.assertEquals(s, pi2.getData(AVSENDER_NAVN));
+        assertThat(pi2.getData(AVSENDER_NAVN)).isEqualTo(s);
     }
 
     @Test
-    public void testDataPeriode() {
+    void testDataPeriode() {
         Periode fraNå = new Periode(LocalDate.now(), null);
         Prosessinstans pi1 = new Prosessinstans(), pi2 = new Prosessinstans();
         pi1.setData(SØKNADSPERIODE, fraNå);
         pi2.setData(new PropertiesConverter().convertToEntityAttribute(new PropertiesConverter().convertToDatabaseColumn(pi1.getData())));
 
-        Assert.assertEquals(pi1.getData(SØKNADSPERIODE, Periode.class).getFom(), pi2.getData(SØKNADSPERIODE, Periode.class).getFom());
-        Assert.assertEquals(pi1.getData(SØKNADSPERIODE, Periode.class).getTom(), pi2.getData(SØKNADSPERIODE, Periode.class).getTom());
+
+        assertThat(pi2.getData(SØKNADSPERIODE, Periode.class).getFom()).isEqualTo(pi1.getData(SØKNADSPERIODE, Periode.class).getFom());
+        assertThat(pi2.getData(SØKNADSPERIODE, Periode.class).getTom()).isEqualTo(pi1.getData(SØKNADSPERIODE, Periode.class).getTom());
     }
 
     @Test
@@ -41,7 +42,7 @@ public class ProsessinstansTest {
         pi1.setData(OPPHOLDSLAND, bareHoppeland);
         pi2.setData(new PropertiesConverter().convertToEntityAttribute(new PropertiesConverter().convertToDatabaseColumn(pi1.getData())));
 
-        Assert.assertEquals(1, pi2.getData(OPPHOLDSLAND, List.class).size());
-        Assert.assertEquals(pi1.getData(OPPHOLDSLAND, List.class).get(0), pi2.getData(OPPHOLDSLAND, List.class).get(0));
+        assertThat(pi2.getData(OPPHOLDSLAND, List.class)).hasSize(1);
+        assertThat(pi1.getData(OPPHOLDSLAND, List.class).get(0)).isEqualTo(pi2.getData(OPPHOLDSLAND, List.class).get(0));
     }
 }
