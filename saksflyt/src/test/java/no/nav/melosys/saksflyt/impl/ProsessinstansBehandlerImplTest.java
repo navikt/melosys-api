@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.api.ProsessinstansBehandler;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -46,7 +45,7 @@ class ProsessinstansBehandlerImplTest {
     }
 
     @Test
-    void behandleProsessinstans_nyProsessinstansStegNull_blirBehandlet() throws MelosysException {
+    void behandleProsessinstans_nyProsessinstansStegNull_blirBehandlet() {
         when(prosessinstansRepository.save(any(Prosessinstans.class))).thenAnswer(returnsFirstArg());
         prosessinstansBehandler.behandleProsessinstans(prosessinstans);
         assertThat(prosessinstans.getSistFullførtSteg()).isEqualTo(ProsessSteg.SED_MOTTAK_RUTING);
@@ -56,7 +55,7 @@ class ProsessinstansBehandlerImplTest {
     }
 
     @Test
-    void behandleProsessinstans_nyProsessinstansStegNullStegbehandlerKasterFeil_statusFeiletBlirLagretMedHendelse() throws MelosysException {
+    void behandleProsessinstans_nyProsessinstansStegNullStegbehandlerKasterFeil_statusFeiletBlirLagretMedHendelse() {
         when(prosessinstansRepository.save(any(Prosessinstans.class))).thenAnswer(returnsFirstArg());
         doThrow(new FunksjonellException("FEIL!")).when(stegbehandler).utfør(eq(prosessinstans));
 
@@ -70,7 +69,7 @@ class ProsessinstansBehandlerImplTest {
     }
 
     @Test
-    void behandleProsessinstans_prosessinstansMedStatusFeilet_blirIkkeBehandlet() throws MelosysException {
+    void behandleProsessinstans_prosessinstansMedStatusFeilet_blirIkkeBehandlet() {
         prosessinstans.setStatus(ProsessStatus.FEILET);
         prosessinstansBehandler.behandleProsessinstans(prosessinstans);
         verify(stegbehandler, never()).utfør(any());

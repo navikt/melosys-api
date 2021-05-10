@@ -12,7 +12,6 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.AnmodningsperiodeRepository;
 import no.nav.melosys.repository.AnmodningsperiodeSvarRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -55,7 +54,7 @@ public class AnmodningsperiodeService {
             .collect(Collectors.toList());
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public Collection<Anmodningsperiode> lagreAnmodningsperioder(long behandlingID, Collection<Anmodningsperiode> anmodningsperioder) throws FunksjonellException {
         List<Anmodningsperiode> eksisterende = anmodningsperiodeRepository.findByBehandlingsresultatId(behandlingID);
 
@@ -74,7 +73,7 @@ public class AnmodningsperiodeService {
         return anmodningsperiodeRepository.saveAll(anmodningsperioder);
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public AnmodningsperiodeSvar lagreAnmodningsperiodeSvar(long anmodningsperiodeId, AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
         Anmodningsperiode anmodningsperiode = anmodningsperiodeRepository.findById(anmodningsperiodeId)
             .orElseThrow(() -> new IkkeFunnetException("Anmodningsperiode med id " + anmodningsperiodeId + " finnes ikke"));

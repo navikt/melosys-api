@@ -9,7 +9,6 @@ import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.vedtak.dto.FattEosVedtakRequest;
@@ -57,7 +56,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void fattVedtak_henleggelse_fungerer() throws MelosysException, IOException {
+    void fattVedtak_henleggelse_fungerer() throws Exception {
         FattEosVedtakDto fattVedtakDto = new FattEosVedtakDto();
         fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
         fattVedtakDto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
@@ -72,7 +71,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
 
     @Disabled
     @Test
-    void fattVedtakFtrl_henleggelse_fungerer() throws MelosysException, IOException {
+    void fattVedtakFtrl_henleggelse_fungerer() throws Exception {
         FattFtrlVedtakDto fattVedtakDto = new FattFtrlVedtakDto();
         fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
         fattVedtakDto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);

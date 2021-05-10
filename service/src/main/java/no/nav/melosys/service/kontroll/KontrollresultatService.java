@@ -9,7 +9,6 @@ import no.nav.melosys.domain.Kontrollresultat;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.KontrollresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -41,7 +40,7 @@ public class KontrollresultatService {
         this.behandlingService = behandlingService;
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public void utførKontrollerOgRegistrerFeil(long behandlingId) throws TekniskException, FunksjonellException {
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         List<Kontroll_begrunnelser> registrerteTreff = ufmKontrollService.utførKontroller(behandling);

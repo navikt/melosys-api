@@ -4,7 +4,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.OppfriskSaksopplysningerService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.security.token.support.core.api.Protected;
@@ -37,7 +36,7 @@ public class SaksopplysningTjeneste {
         @ApiResponse(code = 404, message = "Behandling ikke funnet"),
         @ApiResponse(code = 500, message = "Uventet teknisk Feil")
     })
-    public ResponseEntity<Void> oppfriskSaksopplysning(@PathVariable("behandlingID") long behandlingID, @RequestParam(required = false) boolean medFamilierelasjoner) throws MelosysException {
+    public ResponseEntity<Void> oppfriskSaksopplysning(@PathVariable("behandlingID") long behandlingID, @RequestParam(required = false) boolean medFamilierelasjoner) {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandlingID, medFamilierelasjoner);
         return ResponseEntity.noContent().build();

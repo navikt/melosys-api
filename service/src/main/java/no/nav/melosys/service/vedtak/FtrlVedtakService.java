@@ -9,7 +9,6 @@ import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -45,7 +44,7 @@ public class FtrlVedtakService {
         this.fattetVedtakProducer = fattetVedtakProducer;
     }
 
-    public void fattVedtak(Behandling behandling, FattFtrlVedtakRequest request) throws MelosysException {
+    public void fattVedtak(Behandling behandling, FattFtrlVedtakRequest request) {
         long behandlingID = behandling.getId();
 
         log.info("Fatter vedtak for (FTRL) sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);

@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.sed;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,7 +26,7 @@ public class SendSvarAnmodningUnntakTest {
     }
 
     @Test
-    public void utfør() throws MelosysException {
+    public void utfør() {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         Prosessinstans prosessinstans = new Prosessinstans();

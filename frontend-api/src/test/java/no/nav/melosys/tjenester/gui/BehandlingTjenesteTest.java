@@ -15,7 +15,6 @@ import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.EndreBehandlingstemaService;
@@ -109,7 +108,7 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentMuligeBehandlinstemaValidering() throws IOException, MelosysException {
+    void hentMuligeBehandlinstemaValidering() throws IOException {
         when(endreBehandlingstemaService.hentMuligeBehandlingstema(BEHANDLING_ID)).thenReturn(BEHANDLINGSTEMA_SØKNAD);
         List<Behandlingstema> muligeBehandlingstema = behandlingTjeneste.hentEndreBehandlingstema(BEHANDLING_ID).getBody();
         validerArray(muligeBehandlingstema, ENDRE_BEHANDLINGSTEMA_SCHEMA, log);

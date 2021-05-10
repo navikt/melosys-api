@@ -4,7 +4,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.altinn.AltinnSoeknadService;
 import org.junit.Before;
@@ -40,7 +39,7 @@ public class OpprettFagsakOgBehandlingFraAltinnSøknadTest {
     }
 
     @Test
-    public void utfør_behandlingBlirOpprettetVerifiserNesteSteg() throws MelosysException {
+    public void utfør_behandlingBlirOpprettetVerifiserNesteSteg() {
         opprettFagsakOgBehandlingFraAltinnSøknad.utfør(prosessinstans);
         verify(altinnSoeknadService).opprettFagsakOgBehandlingFraAltinnSøknad(eq(soeknadID));
         assertThat(prosessinstans.getBehandling()).isEqualTo(behandling);

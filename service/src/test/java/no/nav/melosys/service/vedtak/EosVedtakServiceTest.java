@@ -17,7 +17,10 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.exception.validering.KontrollfeilDto;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -99,7 +102,7 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_landErEessiReadyInstitusjonErSatt_fatterVedtak() throws MelosysException {
+    void fattVedtak_landErEessiReadyInstitusjonErSatt_fatterVedtak() throws Exception {
         var mottakerinstitusjoner = Set.of("AB:CDEF123");
         mockBehandlingsresultat();
         mockEesiReady();
@@ -129,7 +132,7 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_utenMottakerLandErIkkeEessiReady_fatterVedtak() throws MelosysException {
+    void fattVedtak_utenMottakerLandErIkkeEessiReady_fatterVedtak() throws Exception {
         mockBehandlingsresultat();
         leggTilLovvalgsperiode();
 
@@ -156,7 +159,7 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_mottakerErNullOgErAnmodningOmUnntakSvarMottatt_fatterVedtak() throws MelosysException {
+    void fattVedtak_mottakerErNullOgErAnmodningOmUnntakSvarMottatt_fatterVedtak() throws Exception {
         mockBehandlingsresultat();
 
         leggTilLovvalgsperiode();
@@ -188,7 +191,7 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_erAvslagManglendeOpplysninger_fatterVedtak() throws MelosysException {
+    void fattVedtak_erAvslagManglendeOpplysninger_fatterVedtak() throws Exception {
         mockBehandlingsresultat();
 
         final Behandlingsresultattyper resultatType = Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL;
@@ -215,7 +218,7 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_erAvslagLovvalgsperiodeIkkeInnvilget_fatterVedtak() throws MelosysException {
+    void fattVedtak_erAvslagLovvalgsperiodeIkkeInnvilget_fatterVedtak() throws Exception {
         mockBehandlingsresultat();
 
         leggTilLovvalgsperiode(InnvilgelsesResultat.AVSLAATT);
@@ -249,7 +252,7 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_feilFraKontroller_kasterExceptionMedFeilkode() throws MelosysException {
+    void fattVedtak_feilFraKontroller_kasterExceptionMedFeilkode() throws Exception {
         mockBehandlingsresultat();
         mockFeilendeValidering();
         leggTilLovvalgsperiode(InnvilgelsesResultat.INNVILGET);
@@ -306,7 +309,7 @@ class EosVedtakServiceTest {
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
     }
 
-    private void mockEesiReady() throws MelosysException {
+    private void mockEesiReady() throws Exception {
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID)).thenReturn(Collections.singletonList(Landkoder.SE));
         when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(anySet(), anyCollection(), any(BucType.class))).thenCallRealMethod();
         when(eessiService.hentEessiMottakerinstitusjoner(BucType.LA_BUC_04.name(), Set.of(Landkoder.SE.getKode())))

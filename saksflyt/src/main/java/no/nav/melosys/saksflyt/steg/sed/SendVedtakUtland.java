@@ -13,7 +13,6 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -60,7 +59,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) {
         final var behandling = prosessinstans.getBehandling();
         final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
 
@@ -76,7 +75,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
 
     }
 
-    private SendUtlandStatus sendSedA003(Prosessinstans prosessinstans) throws MelosysException {
+    private SendUtlandStatus sendSedA003(Prosessinstans prosessinstans) {
         log.info("Sender A003 for utpeking til {}, i behandling {}",
             prosessinstans.getData(ProsessDataKey.UTPEKT_LAND), prosessinstans.getBehandling().getId());
         return sendUtland(BucType.LA_BUC_02, prosessinstans);
@@ -94,7 +93,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     }
 
     @Override
-    protected void sendBrev(Prosessinstans prosessinstans) throws MelosysException {
+    protected void sendBrev(Prosessinstans prosessinstans) {
         Behandling behandling = prosessinstans.getBehandling();
         if (prosessinstans.getData(ProsessDataKey.UTPEKT_LAND) != null) {
             Landkoder utpektLand = prosessinstans.getData(ProsessDataKey.UTPEKT_LAND, Landkoder.class);

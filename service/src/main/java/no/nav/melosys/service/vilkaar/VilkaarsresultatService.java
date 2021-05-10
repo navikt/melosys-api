@@ -10,7 +10,6 @@ import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +74,7 @@ public class VilkaarsresultatService {
         return art161Vilkaar.isPresent();
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public void registrerVilkår(long behandlingID, List<VilkaarDto> vilkaarDtoer) throws FunksjonellException {
         validerVilkår(vilkaarDtoer);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
@@ -93,7 +92,7 @@ public class VilkaarsresultatService {
         }
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public void tømVilkårForBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
         vilkaarsresultatRepo.deleteByBehandlingsresultatAndVilkaarNotIn(behandlingsresultat, IMMUTABLE_VILKAAR);
     }
@@ -109,7 +108,7 @@ public class VilkaarsresultatService {
         }
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public void oppdaterVilkaarsresultat(long behandlingID,
                                          Vilkaar vilkaar,
                                          boolean oppfylt,
