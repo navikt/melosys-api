@@ -218,7 +218,7 @@ class InngangsvilkaarServiceTest {
     }
 
     @Test
-    public void overstyrInngangsvilkårTilOppfylt_ingenInngangsvilkårFunnet_kasterFunksjonellException() {
+    void overstyrInngangsvilkårTilOppfylt_ingenInngangsvilkårFunnet_kasterFunksjonellException() {
         when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(Optional.empty());
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -227,7 +227,7 @@ class InngangsvilkaarServiceTest {
     }
 
     @Test
-    public void overstyrInngangsvilkårTilOppfylt_inngangsvilkårFunnet_oppfyllerVilkår() throws FunksjonellException {
+    void overstyrInngangsvilkårTilOppfylt_inngangsvilkårFunnet_oppfyllerVilkår() throws FunksjonellException {
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
         when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(Optional.of(vilkaarsresultat));
 
@@ -237,7 +237,7 @@ class InngangsvilkaarServiceTest {
     }
 
     @Test
-    public void overstyrInngangsvilkårTilOppfylt_inngangsvilkårFunnet_beholderGamleBegrunnelserOgLeggerTilOverstyringsbegrunnelse() throws FunksjonellException {
+    void overstyrInngangsvilkårTilOppfylt_inngangsvilkårFunnet_beholderGamleBegrunnelserOgLeggerTilOverstyringsbegrunnelse() throws FunksjonellException {
         VilkaarBegrunnelse vilkaarBegrunnelse = new VilkaarBegrunnelse();
         vilkaarBegrunnelse.setKode(Inngangsvilkaar.MANGLER_STATSBORGERSKAP.getKode());
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
