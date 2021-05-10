@@ -2,26 +2,26 @@ package no.nav.melosys.tjenester.gui;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.repository.UtenlandskMyndighetRepository;
-import org.junit.Before;
-import org.junit.Test;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class AdresseTjenesteTest {
-
+class AdresseTjenesteTest {
     private AdresseTjeneste adresseTjeneste;
 
-    @Before
-    public void setUp() {
-        UtenlandskMyndighetRepository utenlandskMyndighetRepo = mock(UtenlandskMyndighetRepository.class);
+    @BeforeEach
+    void setUp() throws IkkeFunnetException {
+        UtenlandskMyndighetService utenlandskMyndighetRepo = mock(UtenlandskMyndighetService.class);
         adresseTjeneste = new AdresseTjeneste(utenlandskMyndighetRepo);
 
         UtenlandskMyndighet danmark = new UtenlandskMyndighet();
@@ -32,13 +32,13 @@ public class AdresseTjenesteTest {
         sverige.land = "Sweden";
         sverige.landkode = Landkoder.SE;
 
-        when(utenlandskMyndighetRepo.findByLandkode(Landkoder.DK)).thenReturn(Optional.of(danmark));
-        when(utenlandskMyndighetRepo.findByLandkode(Landkoder.SE)).thenReturn(Optional.of(sverige));
-        when(utenlandskMyndighetRepo.findAll()).thenReturn(Arrays.asList(sverige, danmark));
+        when(utenlandskMyndighetRepo.hentUtenlandskMyndighet(Landkoder.DK)).thenReturn(danmark);
+        when(utenlandskMyndighetRepo.hentUtenlandskMyndighet(Landkoder.SE)).thenReturn(sverige);
+        when(utenlandskMyndighetRepo.hentAlleUtenlandskMyndigheter()).thenReturn(Arrays.asList(sverige, danmark));
     }
 
     @Test
-    public void hentMyndighet_gyldigLandkode() {
+    public void hentMyndighet_gyldigLandkode() throws FunksjonellException {
         ResponseEntity response = adresseTjeneste.hentMyndighet(Landkoder.DK);
         assertThat(response).isNotNull();
         assertThat(response.getBody()).isNotNull();
@@ -50,7 +50,7 @@ public class AdresseTjenesteTest {
     }
 
     @Test
-    public void hentMyndighet_ikkeGyldigLandkode() {
+    public void hentMyndighet_ikkeGyldigLandkode() throws FunksjonellException {
         ResponseEntity response = adresseTjeneste.hentMyndighet(Landkoder.NO);
         assertThat(response).isNotNull();
         assertThat(response.getBody()).isNull();

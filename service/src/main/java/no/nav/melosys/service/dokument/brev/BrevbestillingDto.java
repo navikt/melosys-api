@@ -1,16 +1,21 @@
 package no.nav.melosys.service.dokument.brev;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
 public class BrevbestillingDto {
 
+    private Produserbaredokumenter produserbardokument;
     private Aktoersroller mottaker;
     private String orgNr;
     private String innledningFritekst;
     private String manglerFritekst;
-    private String fullmektigNavn;
+    private String kontaktpersonNavn;
+    private List<KopiMottaker> kopiMottakere;
 
     /**
      * @deprecated Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel
@@ -33,15 +38,26 @@ public class BrevbestillingDto {
     public BrevbestillingDto() {
     }
 
+    // Må ha mulighet for å sette produserbartdokument pga bakoverkompabilitet
+    public void setProduserbardokument(Produserbaredokumenter produserbardokument) {
+        this.produserbardokument = produserbardokument;
+    }
+
     public BrevbestillingDto(Builder builder) {
+        this.produserbardokument = builder.produserbardokument;
         this.mottaker = builder.mottaker;
         this.orgNr = builder.orgNr;
         this.innledningFritekst = builder.innledningFritekst;
         this.manglerFritekst = builder.manglerFritekst;
-        this.fullmektigNavn = builder.fullmektigNavn;
+        this.kontaktpersonNavn = builder.kontaktpersonNavn;
+        this.kopiMottakere = builder.kopiMottakere;
         this.fritekst = builder.fritekst;
         this.begrunnelseKode = builder.begrunnelseKode;
         this.ytterligereInformasjon = builder.ytterligereInformasjon;
+    }
+
+    public Produserbaredokumenter getProduserbardokument() {
+        return produserbardokument;
     }
 
     public Aktoersroller getMottaker() {
@@ -60,8 +76,15 @@ public class BrevbestillingDto {
         return manglerFritekst;
     }
 
-    public String getFullmektigNavn() {
-        return fullmektigNavn;
+    public String getKontaktpersonNavn() {
+        return kontaktpersonNavn;
+    }
+
+    public List<KopiMottaker> getKopiMottakere() {
+        if (kopiMottakere == null) {
+            kopiMottakere = new ArrayList<>();
+        }
+        return kopiMottakere;
     }
 
     public String getFritekst() {
@@ -77,14 +100,21 @@ public class BrevbestillingDto {
     }
 
     public static class Builder {
+        private Produserbaredokumenter produserbardokument;
         private Aktoersroller mottaker;
         private String orgNr;
         private String innledningFritekst;
         private String manglerFritekst;
-        private String fullmektigNavn;
+        private String kontaktpersonNavn;
+        private List<KopiMottaker> kopiMottakere;
         private String fritekst;
         private String begrunnelseKode;
         private String ytterligereInformasjon;
+
+        public Builder medProduserbardokument(Produserbaredokumenter produserbardokument) {
+            this.produserbardokument = produserbardokument;
+            return this;
+        }
 
         public Builder medMottaker(Aktoersroller mottaker) {
             this.mottaker = mottaker;
@@ -106,8 +136,13 @@ public class BrevbestillingDto {
             return this;
         }
 
-        public Builder medFullmektigNavn(String fullmektigNavn) {
-            this.fullmektigNavn = fullmektigNavn;
+        public Builder medKontaktpersonNavn(String kontaktpersonNavn) {
+            this.kontaktpersonNavn = kontaktpersonNavn;
+            return this;
+        }
+
+        public Builder medKopiMottakere(List<KopiMottaker> kopiMottakere) {
+            this.kopiMottakere = kopiMottakere;
             return this;
         }
 
@@ -136,15 +171,15 @@ public class BrevbestillingDto {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BrevbestillingDto that = (BrevbestillingDto) o;
-        return mottaker == that.mottaker && Objects.equals(orgNr, that.orgNr) && Objects.equals(innledningFritekst, that.innledningFritekst)
-            && Objects.equals(manglerFritekst, that.manglerFritekst) && Objects.equals(fullmektigNavn, that.fullmektigNavn)
-            && Objects.equals(fritekst, that.fritekst) && Objects.equals(begrunnelseKode, that.begrunnelseKode)
-            && Objects.equals(ytterligereInformasjon, that.ytterligereInformasjon);
+        return mottaker == that.mottaker && Objects.equals(orgNr, that.orgNr) &&
+            Objects.equals(innledningFritekst, that.innledningFritekst) && Objects.equals(manglerFritekst, that.manglerFritekst) &&
+            Objects.equals(kontaktpersonNavn, that.kontaktpersonNavn) && Objects.equals(fritekst, that.fritekst) &&
+            Objects.equals(begrunnelseKode, that.begrunnelseKode) && Objects.equals(ytterligereInformasjon, that.ytterligereInformasjon);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mottaker, orgNr, innledningFritekst, manglerFritekst, fullmektigNavn, fritekst, begrunnelseKode, ytterligereInformasjon);
+        return Objects.hash(mottaker, orgNr, innledningFritekst, manglerFritekst, kontaktpersonNavn, fritekst, begrunnelseKode, ytterligereInformasjon);
     }
 
     @Override
@@ -154,7 +189,7 @@ public class BrevbestillingDto {
             ", orgNr='" + orgNr + '\'' +
             ", innledningFritekst='" + innledningFritekst + '\'' +
             ", manglerFritekst='" + manglerFritekst + '\'' +
-            ", fullmektigNavn='" + fullmektigNavn + '\'' +
+            ", kontaktpersonNavn='" + kontaktpersonNavn + '\'' +
             ", fritekst='" + fritekst + '\'' +
             ", begrunnelseKode='" + begrunnelseKode + '\'' +
             ", ytterligereInformasjon='" + ytterligereInformasjon + '\'' +

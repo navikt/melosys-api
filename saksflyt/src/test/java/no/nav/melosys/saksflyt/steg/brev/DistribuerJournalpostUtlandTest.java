@@ -6,7 +6,6 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +37,7 @@ class DistribuerJournalpostUtlandTest {
     }
 
     @Test
-    void utfør_distribuerbarJournalpostOgMottakerSatt_distribuererJournalpost() throws MelosysException {
+    void utfør_distribuerbarJournalpostOgMottakerSatt_distribuererJournalpost() {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, "12345");
         prosessinstans.setData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, Landkoder.SE);
@@ -67,7 +66,7 @@ class DistribuerJournalpostUtlandTest {
     }
 
     @Test
-    void utfør_distribuerJournalpostIkkeSatt_distribuererIkkeJournalpost() throws MelosysException {
+    void utfør_distribuerJournalpostIkkeSatt_distribuererIkkeJournalpost() {
         distribuerJournalpostUtland.utfør(new Prosessinstans());
         verify(doksysFasade, never()).distribuerJournalpost(any(), any());
     }

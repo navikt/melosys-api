@@ -29,9 +29,9 @@ import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
-import no.nav.melosys.domain.familie.AvklarteMedfolgendeFamilie;
-import no.nav.melosys.domain.familie.IkkeOmfattetFamilie;
-import no.nav.melosys.domain.familie.OmfattetFamilie;
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
+import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
+import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
@@ -55,7 +55,7 @@ public class AvklarteMedfolgendeFamilieServiceTest {
 
     @Captor
     private ArgumentCaptor<Avklartefakta> captor;
-    
+
     private static final String uuidBarn = "uuidBarn";
     private static final String uuidEktefelleSamboer = "uuidEktefelleSamboer";
     private static final String fritekstBarn = "fritekstBarn";

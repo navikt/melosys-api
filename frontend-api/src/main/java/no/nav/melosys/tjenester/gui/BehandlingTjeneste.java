@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -8,14 +9,15 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.DokumentView;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.EndreBehandlingstemaService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.tildto.SaksopplysningerTilDto;
@@ -23,6 +25,7 @@ import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +34,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Protected
 @RestController
 @RequestMapping("/behandlinger")
-@Api(tags = { "behandlinger" })
+@Api(tags = {"behandlinger"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class BehandlingTjeneste {
 
@@ -48,7 +51,9 @@ public class BehandlingTjeneste {
                               SaksopplysningerTilDto saksopplysningerTilDto,
                               TilgangService tilgangService,
                               SaksbehandlerService saksbehandlerService,
-                              EndreBehandlingstemaService endreBehandlingstemaService) {
+                              EndreBehandlingstemaService endreBehandlingstemaService,
+                              OppgaveService oppgaveService,
+                              ApplicationEventPublisher applicationEventPublisher) {
         this.behandlingService = behandlingService;
         this.saksopplysningerTilDto = saksopplysningerTilDto;
         this.tilgangService = tilgangService;
@@ -61,7 +66,7 @@ public class BehandlingTjeneste {
         "Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas.")
     public ResponseEntity<Void> oppdaterStatus(@PathVariable("behandlingID") long behandlingID,
                                                @RequestBody BehandlingsstatusDto status)
-        throws MelosysException {
+        {
         log.info("Saksbehandler {} ber om å endre status for behandling {} til {}.", SubjectHandler.getInstance().getUserID(),
             behandlingID, status.getBehandlingsstatus().getKode());
         tilgangService.sjekkTilgang(behandlingID);
@@ -69,12 +74,22 @@ public class BehandlingTjeneste {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("{behandlingID}/muligeStatuser")
+    @ApiOperation("Hent mulige nye behandlingsstatuser for en behandling")
+    public ResponseEntity<Collection<Behandlingsstatus>> hentMuligeStatuser(@PathVariable("behandlingID") long behandlingID)
+        {
+        log.info("Saksbehandler {} ber om å hente mulige nye behandlingsstatuser for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
+        tilgangService.sjekkTilgang(behandlingID);
+
+        return ResponseEntity.ok(behandlingService.hentMuligeStatuser(behandlingID));
+    }
+
     @PostMapping("{behandlingID}/tidligeremedlemsperioder")
     @ApiOperation(value = "Knytt medlemsperioder fra MEDL til oppholdsland fra søknaden",
         response = TidligereMedlemsperioderDto.class)
     public ResponseEntity<TidligereMedlemsperioderDto> knyttMedlemsperioder(@PathVariable("behandlingID") long behandlingID,
                                                                             @RequestBody TidligereMedlemsperioderDto tidligereMedlemsperioder)
-        throws MelosysException {
+        {
         log.info("Saksbehandler {} ber om å knytte medlemsperioder for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
         tilgangService.sjekkTilgang(behandlingID);
 
@@ -86,7 +101,7 @@ public class BehandlingTjeneste {
     @ApiOperation(value = "Hent medlemsperioder knyttet til oppholdsland fra søknaden",
         response = TidligereMedlemsperioderDto.class)
     public ResponseEntity<TidligereMedlemsperioderDto> hentMedlemsperioder(@PathVariable("behandlingID") long behandlingID)
-        throws MelosysException {
+        {
         log.debug("Saksbehandler {} ber om å hente medlemsperioder for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
         tilgangService.sjekkTilgang(behandlingID);
 
@@ -99,7 +114,7 @@ public class BehandlingTjeneste {
     @JsonView(DokumentView.FrontendApi.class)
     @ApiOperation(value = "Hent en spesifikk behandling", response = BehandlingDto.class)
     public ResponseEntity<BehandlingDto> hentBehandling(@PathVariable("behandlingID") long behandlingID)
-        throws MelosysException {
+        {
         String saksbehandler = SubjectHandler.getInstance().getUserID();
         log.debug("Saksbehandler {} ber om å hente behandling {}.", saksbehandler, behandlingID);
         tilgangService.sjekkTilgang(behandlingID);
@@ -113,7 +128,7 @@ public class BehandlingTjeneste {
     @GetMapping("{behandlingID}/muligeBehandlingstema")
     @ApiOperation(value = "Hent mulige nye behandlingstema for en behandling")
     public ResponseEntity<List<Behandlingstema>> hentEndreBehandlingstema(@PathVariable("behandlingID") long behandlingsID)
-        throws MelosysException{
+        {
         log.debug("Saksbehandler {} ber om å hente mulige nye behandlingstema for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingsID);
         try {
             tilgangService.sjekkRedigerbarOgTilordnetSaksbehandlerOgTilgang(behandlingsID);
@@ -128,7 +143,7 @@ public class BehandlingTjeneste {
     @PostMapping("{behandlingID}/endreBehandlingstema")
     @ApiOperation(value = "Endre behandlingstema for en gitt behandling")
     public ResponseEntity<Void> endreBehandlingstema(@PathVariable("behandlingID") long behandlingsID, @RequestBody EndreBehandlingstemaDto endreBehandlingstemaDto)
-        throws MelosysException{
+        {
         log.debug("Saksbehandler {} ber om å sette behandlingstema for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingsID, endreBehandlingstemaDto);
         tilgangService.sjekkRedigerbarOgTilordnetSaksbehandlerOgTilgang(behandlingsID);
 
@@ -136,8 +151,18 @@ public class BehandlingTjeneste {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("{behandlingID}/behandlingsfrist")
+    @ApiOperation("Endre behandlingsfristen for en gitt behandling samt tilhørende oppgave i Gosys")
+    public ResponseEntity<Void> endreBehandlingsfrist(@PathVariable("behandlingID") long behandlingID, @RequestBody EndreBehandlingsfristDto endreBehandlingsfristDto) {
+        log.debug("Saksbehandler {} ber om å sette behandlingsfrist for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingID, endreBehandlingsfristDto.getBehandlingsfrist());
+        tilgangService.sjekkRedigerbarOgTilordnetSaksbehandlerOgTilgang(behandlingID);
 
-    private BehandlingDto tilBehandlingDto(Behandling behandling, String saksbehandler) throws MelosysException {
+        behandlingService.endreBehandlingsfrist(behandlingID, endreBehandlingsfristDto.getBehandlingsfrist());
+        return ResponseEntity.noContent().build();
+    }
+
+
+    private BehandlingDto tilBehandlingDto(Behandling behandling, String saksbehandler) {
         BehandlingDto behandlingDto = new BehandlingDto();
         behandlingDto.setBehandlingID(behandling.getId());
         behandlingDto.setRedigerbart(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, saksbehandler));
@@ -156,6 +181,8 @@ public class BehandlingTjeneste {
         behandlingOppsummeringDto.setEndretAvNavn(saksbehandlerService.finnNavnForIdent(behandling.getEndretAv()).orElse(behandling.getEndretAv()));
         behandlingOppsummeringDto.setRegistrertDato(behandling.getRegistrertDato());
         behandlingOppsummeringDto.setSisteOpplysningerHentetDato(behandling.getSistOpplysningerHentetDato());
+        behandlingOppsummeringDto.setSvarFrist(behandling.getDokumentasjonSvarfristDato());
+        behandlingOppsummeringDto.setBehandlingsfrist(behandling.getBehandlingsfrist());
         return behandlingOppsummeringDto;
     }
 }

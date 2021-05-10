@@ -1,20 +1,20 @@
 package no.nav.melosys.integrasjon.joark;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
-import no.nav.dok.tjenester.journalfoerinngaaende.Avsender;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 
 public interface JoarkFasade {
 
     /**
      * Ferdigstiller journalføring
      */
-    void ferdigstillJournalføring(String journalpostId) throws FunksjonellException, IntegrasjonException;
+    void ferdigstillJournalføring(String journalpostId) throws FunksjonellException;
 
     /**
      * Henter et dokument fra Joark
@@ -24,12 +24,12 @@ public interface JoarkFasade {
     /**
      * Henter en journalpost fra Joark
      */
-    Journalpost hentJournalpost(String journalpostID) throws IntegrasjonException, SikkerhetsbegrensningException;
+    Journalpost hentJournalpost(String journalpostID) throws FunksjonellException;
 
     /**
      * Henter en liste med journalposter knyttet til en sak.
      */
-    List<Journalpost> hentKjerneJournalpostListe(Long gsakSakID) throws IntegrasjonException, SikkerhetsbegrensningException;
+    List<Journalpost> hentJournalposterTilknyttetSak(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest) throws SikkerhetsbegrensningException;
 
     /**
      * Oppretter en journalpost  i Joark
@@ -40,7 +40,7 @@ public interface JoarkFasade {
      * Oppdaterer en journalpost og forsøker å ferdigstille hvis forsøkFerdigstill er satt
      */
     void oppdaterJournalpost(String journalpostID, JournalpostOppdatering journalpostOppdatering, boolean forsøkFerdigstill)
-        throws SikkerhetsbegrensningException, TekniskException;
+        throws FunksjonellException;
 
-    LocalDate hentMottaksDatoForJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException;
+    LocalDate hentMottaksDatoForJournalpost(String journalpostID) throws FunksjonellException;
 }

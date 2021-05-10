@@ -8,7 +8,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.IkkeInngaaendeJournalpostException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -23,7 +23,7 @@ public class OppdaterSaksrelasjon implements StegBehandler {
     private final EessiService eessiService;
     private final FagsakService fagsakService;
 
-    public OppdaterSaksrelasjon(JoarkFasade joarkFasade, @Qualifier("system") EessiService eessiService, FagsakService fagsakService) {
+    public OppdaterSaksrelasjon(@Qualifier("system") JoarkFasade joarkFasade, @Qualifier("system") EessiService eessiService, FagsakService fagsakService) {
         this.joarkFasade = joarkFasade;
         this.eessiService = eessiService;
         this.fagsakService = fagsakService;
@@ -35,7 +35,7 @@ public class OppdaterSaksrelasjon implements StegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) {
 
         Optional<MelosysEessiMelding> eessiMelding = finnEessiMelding(prosessinstans);
         if (eessiMelding.isPresent()) {
@@ -47,7 +47,7 @@ public class OppdaterSaksrelasjon implements StegBehandler {
         }
     }
 
-    private Optional<MelosysEessiMelding> finnEessiMelding(Prosessinstans prosessinstans) throws MelosysException {
+    private Optional<MelosysEessiMelding> finnEessiMelding(Prosessinstans prosessinstans) {
         MelosysEessiMelding eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
 
         if (eessiMelding != null) {
@@ -55,7 +55,12 @@ public class OppdaterSaksrelasjon implements StegBehandler {
         }
 
         String journalpostID = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
-        Journalpost journalpost = joarkFasade.hentJournalpost(journalpostID);
+        Journalpost journalpost;
+        try {
+            journalpost = joarkFasade.hentJournalpost(journalpostID);
+        } catch (IkkeInngaaendeJournalpostException e) {
+            return Optional.empty();
+        }
         if (journalpost.mottaksKanalErEessi()) {
             return Optional.of(eessiService.hentSedTilknyttetJournalpost(journalpostID));
         }

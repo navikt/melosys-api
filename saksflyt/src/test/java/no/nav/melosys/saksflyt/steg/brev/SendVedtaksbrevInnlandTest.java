@@ -9,6 +9,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
+import no.nav.melosys.domain.brev.FastMottaker;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -25,12 +26,11 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
-import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
-import no.nav.melosys.domain.brev.FastMottaker;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
+import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -42,9 +42,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.context.ApplicationEventPublisher;
 
+import static no.nav.melosys.domain.brev.FastMottaker.*;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static no.nav.melosys.domain.brev.FastMottaker.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
@@ -143,7 +143,7 @@ class SendVedtaksbrevInnlandTest {
             .thenReturn(Collections.singletonMap(new UtenlandskMyndighet(), new Aktoer()));
         KontaktopplysningService kontaktopplysningService = mock(KontaktopplysningService.class);
         BrevmottakerService brevmottakerService = new BrevmottakerService(kontaktopplysningService,
-            avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService, mock(MedlemAvFolketrygdenRepository.class));
+            avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService, mock(TrygdeavgiftsberegningService.class));
         return spy(new DokumentSystemService(behandlingService, brevDataService, dokSysFasade,
             brevmottakerService, brevDataByggerVelger, mock(BrevdataGrunnlagFactory.class)));
     }
@@ -518,7 +518,7 @@ class SendVedtaksbrevInnlandTest {
         Prosessinstans resultat = new Prosessinstans();
         Behandling behandling = lagBehandling(behandlingsid);
         resultat.setBehandling(behandling);
-        resultat.setType(ProsessType.IVERKSETT_VEDTAK);
+        resultat.setType(ProsessType.IVERKSETT_VEDTAK_EOS);
         BrevData brevdata = new BrevData();
         resultat.setData(ProsessDataKey.BREVDATA, brevdata);
         return resultat;

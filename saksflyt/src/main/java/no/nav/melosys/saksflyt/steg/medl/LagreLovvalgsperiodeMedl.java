@@ -8,7 +8,6 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -32,14 +31,14 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) {
         final long behandlingID = prosessinstans.getBehandling().getId();
         final Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         final Optional<Lovvalgsperiode> lovvalgsperiode = behandlingsresultat.finnValidertLovvalgsperiode();
 
         if (lovvalgsperiode.isPresent()) {
             oppdaterLovvalgsperiode(prosessinstans.getBehandling(), lovvalgsperiode.get());
-        } else if (!behandlingsresultat.erAvslagManglendeOpplysninger()){
+        } else if (!behandlingsresultat.erAvslagManglendeOpplysninger()) {
             throw new FunksjonellException("Finner ingen lovvalgsperiode for behandling " + behandlingID);
         }
     }
@@ -72,7 +71,7 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
         }
     }
 
-    private void oppdaterMedlPeriode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) throws FunksjonellException, TekniskException {
+    private void oppdaterMedlPeriode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) throws TekniskException {
         if (lovvalgsperiode.erArtikkel13()) {
             medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode, !behandling.erBehandlingAvSøknad());
         } else {

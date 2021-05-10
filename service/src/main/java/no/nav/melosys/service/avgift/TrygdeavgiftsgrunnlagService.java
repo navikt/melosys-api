@@ -16,7 +16,6 @@ import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,7 +41,7 @@ public class TrygdeavgiftsgrunnlagService {
         this.behandlingsresultatService = behandlingsresultatService;
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public Trygdeavgiftsgrunnlag oppdaterAvgiftsgrunnlag(long behandlingsresultatID, OppdaterTrygdeavgiftsgrunnlagRequest req) throws FunksjonellException {
         valider(req);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID);
@@ -130,12 +129,17 @@ public class TrygdeavgiftsgrunnlagService {
         if (req.getLønnsforhold() == null) {
             throw new FunksjonellException("Lønnsforhold ikke oppgitt");
         }
-
-        if ((req.getLønnsforhold() == LØNN_FRA_NORGE || req.getLønnsforhold() == DELT_LØNN) && req.getAvgiftsGrunnlagNorge() == null) {
-            throw new FunksjonellException("Mangler informasjon om lønn fra Norge");
+        if (req.harLønnFraNorge()) {
+            if (req.getAvgiftsGrunnlagNorge() == null) {
+                throw new FunksjonellException("Mangler informasjon om lønn fra Norge");
+            }
+            req.getAvgiftsGrunnlagNorge().validerLovligeKominasjonerLønnFraNorge();
         }
-        if ((req.getLønnsforhold() == LØNN_FRA_UTLANDET || req.getLønnsforhold() == DELT_LØNN) && req.getAvgiftsGrunnlagUtland() == null) {
-            throw new FunksjonellException("Mangler informasjon om lønn fra utlandet");
+        if (req.harLønnFraUtlandet()) {
+            if (req.getAvgiftsGrunnlagUtland() == null) {
+                throw new FunksjonellException("Mangler informasjon om lønn fra utlandet");
+            }
+            req.getAvgiftsGrunnlagUtland().validerLovligeKominasjonerLønnFraUtlandet();
         }
     }
 

@@ -25,6 +25,7 @@ public class MelosysEessiMelding {
     private String ytterligereInformasjon;
     private String bucType;
     private String sedType;
+    private String sedVersjon;
 
     private SvarAnmodningUnntak svarAnmodningUnntak;
     private AnmodningUnntak anmodningUnntak;
@@ -181,6 +182,14 @@ public class MelosysEessiMelding {
         this.anmodningUnntak = anmodningUnntak;
     }
 
+    public void setSedVersjon(String sedVersjon) {
+        this.sedVersjon = sedVersjon;
+    }
+
+    public String getSedVersjon() {
+        return sedVersjon;
+    }
+
     @Override
     public String toString() {
         return "MelosysEessiMelding{" +
@@ -234,5 +243,9 @@ public class MelosysEessiMelding {
 
     public boolean inneholderYtterligereInformasjon() {
         return StringUtils.isNotEmpty(getYtterligereInformasjon());
+    }
+
+    public String lagUnikIdentifikator() {
+        return String.format("%s_%s_%s", rinaSaksnummer, sedId, sedVersjon);
     }
 }

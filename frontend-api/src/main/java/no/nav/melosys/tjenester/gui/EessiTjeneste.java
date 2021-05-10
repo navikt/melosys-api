@@ -9,7 +9,6 @@ import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.eessi.Institusjon;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucBestillingDto;
@@ -49,8 +48,7 @@ public class EessiTjeneste {
         responseContainer = "List"
     )
     public ResponseEntity<List<Institusjon>> hentMottakerinstitusjoner(@PathVariable("bucType") String bucType,
-                                                                       @RequestParam(value = "landkoder", required = false) Collection<String> landkoder)
-        throws MelosysException {
+                                                                       @RequestParam(value = "landkoder", required = false) Collection<String> landkoder) {
         log.info("Henter mottakerinstitusjoner for BUC {}", bucType);
         return ResponseEntity.ok(eessiService.hentEessiMottakerinstitusjoner(bucType, landkoder));
     }
@@ -61,8 +59,7 @@ public class EessiTjeneste {
         response = OpprettBucSvarDto.class
     )
     public ResponseEntity<OpprettBucSvarDto> opprettBuc(@RequestBody BucBestillingDto nyBucDto,
-                                                        @PathVariable("behandlingID") long behandlingID)
-        throws MelosysException {
+                                                        @PathVariable("behandlingID") long behandlingID) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
         OpprettBucSvarDto opprettBucSvarDto = new OpprettBucSvarDto(
@@ -85,8 +82,7 @@ public class EessiTjeneste {
         response = BucerTilknyttetBehandlingDto.class
     )
     public ResponseEntity<BucerTilknyttetBehandlingDto> hentBucer(@PathVariable("behandlingID") long behandlingID,
-                                                                  @RequestParam(value = "statuser", required = false) List<String> statuser)
-        throws MelosysException {
+                                                                  @RequestParam(value = "statuser", required = false) List<String> statuser) {
 
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         long gsakSaksnummer = behandling.getFagsak().getGsakSaksnummer();

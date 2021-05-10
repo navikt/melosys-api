@@ -1,5 +1,8 @@
 package no.nav.melosys.service.representant;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Kontaktopplysning;
@@ -7,23 +10,19 @@ import no.nav.melosys.domain.folketrygden.ValgtRepresentant;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.avgiftoverforing.AvgiftOverforingConsumer;
-import no.nav.melosys.integrasjon.avgiftoverforing.dto.AvgiftOverforingRepresentantDataDto;
-import no.nav.melosys.integrasjon.avgiftoverforing.dto.AvgiftOverforingRepresentantDto;
 import no.nav.melosys.repository.AktoerRepository;
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.representant.dto.RepresentantDataDto;
+import no.nav.melosys.service.representant.dto.RepresentantDto;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Service
 public class RepresentantService {
-
     private final AvgiftOverforingConsumer avgiftOverforingConsumer;
     private final MedlemAvFolketrygdenRepository medlemAvFolketrygdenRepository;
     private final AktoerRepository aktoerRepository;
@@ -38,15 +37,17 @@ public class RepresentantService {
         this.kontaktopplysningService = kontaktopplysningService;
     }
 
-    public List<AvgiftOverforingRepresentantDto> hentRepresentantListe() {
-        return avgiftOverforingConsumer.hentRepresentantListe();
+    public List<RepresentantDto> hentRepresentantListe() {
+        return avgiftOverforingConsumer.hentRepresentantListe().stream()
+            .map(RepresentantDto::av)
+            .collect(Collectors.toList());
     }
 
-    public AvgiftOverforingRepresentantDataDto hentRepresentant(String representantId) {
-        return avgiftOverforingConsumer.hentRepresentant(representantId);
+    public RepresentantDataDto hentRepresentant(String representantId) {
+        return RepresentantDataDto.av(avgiftOverforingConsumer.hentRepresentant(representantId));
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public ValgtRepresentant oppdaterValgtRepresentant(long behandlingID, ValgtRepresentant valgtRepresentant) throws FunksjonellException {
         validerValgtRepresentantRequest(valgtRepresentant);
 
@@ -55,15 +56,10 @@ public class RepresentantService {
 
         var fastsattTrygdeavgift = medlemAvFolketrygden.getFastsattTrygdeavgift();
         var fagsak = behandlingService.hentBehandling(behandlingID).getFagsak();
-        var lagretAktoer = fastsattTrygdeavgift.getBetalesAv();
 
         fastsattTrygdeavgift.setRepresentantNr(valgtRepresentant.getRepresentantnummer());
-        fastsattTrygdeavgift.setBetalesAv(valgtRepresentant.isSelvbetalende() ? null : oppdaterAktoer(lagretAktoer, fagsak, valgtRepresentant.getOrgnr()));
+        fastsattTrygdeavgift.setBetalesAv(oppdaterEllerOpprettAktoer(fastsattTrygdeavgift.getBetalesAv(), valgtRepresentant.isSelvbetalende(), fagsak, valgtRepresentant.getOrgnr()));
 
-        if (valgtRepresentant.isSelvbetalende() && lagretAktoer != null) {
-            fagsak.getAktører().remove(lagretAktoer);
-            aktoerRepository.deleteById(lagretAktoer.getId());
-        }
         if (valgtRepresentant.getKontaktperson() != null) {
             kontaktopplysningService.lagEllerOppdaterKontaktopplysning(fagsak.getSaksnummer(), valgtRepresentant.getOrgnr(), null, valgtRepresentant.getKontaktperson(), null);
         }
@@ -81,12 +77,32 @@ public class RepresentantService {
         }
     }
 
-    private Aktoer oppdaterAktoer (Aktoer lagretAktoer, Fagsak fagsak, String orgnr) {
-        var nyAktoer = lagretAktoer != null ? lagretAktoer : new Aktoer();
-        nyAktoer.setFagsak(fagsak);
-        nyAktoer.setOrgnr(orgnr);
-        nyAktoer.setRolle(Aktoersroller.REPRESENTANT_TRYGDEAVGIFT);
-        return aktoerRepository.save(nyAktoer);
+    private Aktoer oppdaterEllerOpprettAktoer(Aktoer gammelAktoer, boolean selvbetalende, Fagsak fagsak, String orgnr) {
+        Aktoersroller rolle = selvbetalende ? Aktoersroller.BRUKER : Aktoersroller.REPRESENTANT_TRYGDEAVGIFT;
+        Aktoer oppdatertAktoer;
+
+        if (gammelAktoer != null && gammelAktoer.getRolle() == rolle) {
+            oppdatertAktoer = gammelAktoer;
+            oppdatertAktoer.setOrgnr(selvbetalende ? null : orgnr);
+        } else if (rolle == Aktoersroller.BRUKER) {
+            slettLagretAktoer(gammelAktoer, fagsak);
+            oppdatertAktoer = fagsak.hentBruker();
+        } else {
+            oppdatertAktoer = new Aktoer();
+            oppdatertAktoer.setRolle(rolle);
+            oppdatertAktoer.setOrgnr(orgnr);
+        }
+
+        oppdatertAktoer.setFagsak(fagsak);
+
+        return aktoerRepository.save(oppdatertAktoer);
+    }
+
+    private void slettLagretAktoer(Aktoer aktoer, Fagsak fagsak) {
+        if (aktoer != null) {
+            fagsak.getAktører().remove(aktoer);
+            aktoerRepository.deleteById(aktoer.getId());
+        }
     }
 
     public ValgtRepresentant hentValgtRepresentant(long behandlingID) throws IkkeFunnetException {
@@ -95,7 +111,7 @@ public class RepresentantService {
 
         var fastsattTrygdeavgift = medlemAvFolketrygden.getFastsattTrygdeavgift();
 
-        if (fastsattTrygdeavgift.getBetalesAv() == null) {
+        if (fastsattTrygdeavgift.getBetalesAv() == null || fastsattTrygdeavgift.getBetalesAv().getRolle() == Aktoersroller.BRUKER) {
             return new ValgtRepresentant(fastsattTrygdeavgift.getRepresentantNr(), true, null, null);
         }
 

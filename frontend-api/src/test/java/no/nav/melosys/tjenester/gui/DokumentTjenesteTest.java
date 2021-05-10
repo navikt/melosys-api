@@ -12,7 +12,6 @@ import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
@@ -74,9 +73,9 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void hentBrevForhåndsvisning() throws MelosysException, IOException {
+    public void hentBrevForhåndsvisning() throws IOException {
         final byte[] MOCK_PDF = "bytes fra et brev".getBytes();
-        when(dokumentServiceFasade.produserUtkast(any(), anyLong(), any())).thenReturn(MOCK_PDF);
+        when(dokumentServiceFasade.produserUtkast(anyLong(), any())).thenReturn(MOCK_PDF);
         BrevbestillingDto brevBestillingDto = new BrevbestillingDto.Builder()
             .medBegrunnelseKode("KODE")
             .medFritekst("Fritekst.")
@@ -90,7 +89,7 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void hentSedForhåndsvisning() throws MelosysException, IOException {
+    public void hentSedForhåndsvisning() throws IOException {
         final byte[] MOCK_PDF = "bytes fra en pdf".getBytes();
         when(eessiService.genererSedPdf(anyLong(), any(), any())).thenReturn(MOCK_PDF);
         SedPdfData sedPdfData = new SedPdfData("tada", null, "DK", "neida");
@@ -109,8 +108,8 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
         dokumentTjeneste.produserDokument(1L,
             Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID, brevBestillingDto);
 
-        verify(dokumentServiceFasade).produserUtkast(any(), anyLong(), any());
-        verify(dokumentServiceFasade).produserDokument(any(), anyLong(), any());
+        verify(dokumentServiceFasade).produserUtkast(anyLong(), any());
+        verify(dokumentServiceFasade).produserDokument(anyLong(), any());
     }
 
     @Test

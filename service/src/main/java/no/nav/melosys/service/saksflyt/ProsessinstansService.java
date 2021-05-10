@@ -11,6 +11,7 @@ import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
@@ -19,14 +20,12 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.*;
-import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.sak.OpprettSakDto;
@@ -106,9 +105,9 @@ public class ProsessinstansService {
     private String lagInstitusjonsId(String avsenderID) {
         try {
             return utenlandskMyndighetService.lagInstitusjonsId(Landkoder.valueOf(avsenderID));
-        } catch (TekniskException e) {
+        } catch (IkkeFunnetException e) {
             logger.warn(e.getMessage());
-            logger.warn("Bruker {}: som avsenderID", avsenderID);
+            logger.warn("Utenlandsk myndighet har ikke institusjonsId. Bruker {}: som avsenderID", avsenderID);
             return avsenderID + ":";
         }
     }
@@ -124,7 +123,7 @@ public class ProsessinstansService {
     }
 
     public boolean harVedtakInstans(Long behandlingID) {
-        return prosessinstansRepo.findByTypeAndBehandling_Id(ProsessType.IVERKSETT_VEDTAK, behandlingID).isPresent();
+        return prosessinstansRepo.findByBehandling_IdAndTypeIn(behandlingID, ProsessType.IVERKSETT_VEDTAK, ProsessType.IVERKSETT_VEDTAK_EOS).isPresent();
     }
 
     public void lagre(Prosessinstans prosessinstans) {
@@ -150,7 +149,8 @@ public class ProsessinstansService {
     public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling, Set<String> mottakerInstitusjon,
                                                        Set<DokumentReferanse> vedleggReferanserTilSed,
                                                        String ytterligereInformasjonSed) {
-        Prosessinstans prosessinstans = new ProsessinstansBuilder().medType(ProsessType.ANMODNING_OM_UNNTAK)
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.ANMODNING_OM_UNNTAK)
             .medBehandling(behandling)
             .medEessiMottakere(mottakerInstitusjon)
             .medVedleggTilSed(vedleggReferanserTilSed)
@@ -182,7 +182,7 @@ public class ProsessinstansService {
                                                      String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner,
                                                      String revurderBegrunnelse) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(ProsessType.IVERKSETT_VEDTAK)
+            .medType(ProsessType.IVERKSETT_VEDTAK_EOS)
             .medBehandling(behandling)
             .medBegrunnelseFritekst(fritekst)
             .medEessiMottakere(mottakerinstitusjoner)
@@ -201,6 +201,7 @@ public class ProsessinstansService {
         Prosessinstans prosessinstans = new Prosessinstans();
 
         prosessinstans.setType(ProsessType.OPPRETT_NY_SAK);
+        prosessinstans.setData(ProsessDataKey.SAKSTYPE, opprettSakDto.getSakstype());
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
@@ -218,7 +219,7 @@ public class ProsessinstansService {
                                                     String fritekstSed) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
-            .medType(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE)
+            .medType(ProsessType.IVERKSETT_VEDTAK_EOS_FORKORT_PERIODE)
             .medBegrunnelseFritekst(fritekst)
             .medYtterligereinformasjonSed(fritekstSed)
             .build();
@@ -226,10 +227,11 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansGodkjennUnntaksperiode(Behandling behandling, boolean varsleUtland) {
+    public void opprettProsessinstansGodkjennUnntaksperiode(Behandling behandling, boolean varsleUtland, String fritekst) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
             .medType(ProsessType.REGISTRERING_UNNTAK_GODKJENN)
+            .medYtterligereinformasjonSed(fritekst)
             .build();
 
         prosessinstans.setData(ProsessDataKey.VARSLE_UTLAND, varsleUtland);
@@ -247,11 +249,10 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansOpprettOgDistribuerBrev(Produserbaredokumenter produserbartDokument, Behandling behandling, Aktoer mottaker, BrevbestillingDto brevbestillingDto) {
+    public void opprettProsessinstansOpprettOgDistribuerBrev(Behandling behandling, Aktoer mottaker, DokgenBrevbestilling brevbestilling) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
-        prosessinstans.setData(PRODUSERBART_BREV, produserbartDokument);
-        prosessinstans.setData(BREVBESTILLING, brevbestillingDto);
+        prosessinstans.setData(BREVBESTILLING, brevbestilling);
         prosessinstans.setData(MOTTAKER, mottaker.getRolle());
         if (hasText(mottaker.getAktørId())) {
             prosessinstans.setData(AKTØR_ID, mottaker.getAktørId());
@@ -277,7 +278,11 @@ public class ProsessinstansService {
     }
 
     private Prosessinstans prosessinstansForSedMottak(MelosysEessiMelding melosysEessiMelding) {
-        Prosessinstans prosessinstans = new Prosessinstans();
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.MOTTAK_SED)
+            .medEessiMelding(melosysEessiMelding)
+            .build();
+
         prosessinstans.setType(ProsessType.MOTTAK_SED);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, melosysEessiMelding.getJournalpostId());
         prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, melosysEessiMelding.getErEndring());
@@ -306,7 +311,7 @@ public class ProsessinstansService {
                                                     String ytterligereInformasjonSed,
                                                     String fritekstBrev) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(ProsessType.IVERKSETT_VEDTAK)
+            .medType(ProsessType.IVERKSETT_VEDTAK_EOS)
             .medBehandling(behandling)
             .medEessiMottakere(mottakerinstitusjoner)
             .medYtterligereinformasjonSed(ytterligereInformasjonSed)

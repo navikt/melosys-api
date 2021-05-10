@@ -37,9 +37,9 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void godkjennUnntaksperiode() throws FunksjonellException, TekniskException, IOException {
-        GodkjennUnntaksperiodeDto dto = new GodkjennUnntaksperiodeDto(true);
+        GodkjennUnntaksperiodeDto dto = new GodkjennUnntaksperiodeDto(true, "tekst");
         unntakTjeneste.godkjennUnntaksperiode(1L, dto);
-        verify(unntaksperiodeService).godkjennPeriode(anyLong(), eq(true));
+        verify(unntaksperiodeService).godkjennPeriode(anyLong(), eq(true), eq("tekst"));
         valider(dto, UNNTAKSPERIODE_GODKJENN_SCHEMA);
     }
 

@@ -4,7 +4,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +17,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class SendGodkjenningRegistreringUnntakTest {
 
+    private static final String FRITEKST = "Fritekst her";
+
     @Mock
     private EessiService eessiService;
 
@@ -29,33 +30,33 @@ class SendGodkjenningRegistreringUnntakTest {
     }
 
     @Test
-    void varsleUtland_skalVarslesOgRettBehandlingstema_forventSedSendt() throws MelosysException {
+    void varsleUtland_skalVarslesOgRettBehandlingstema_forventSedSendt() {
         Prosessinstans prosessinstans = lagProsessinstans();
         prosessinstans.setData(ProsessDataKey.VARSLE_UTLAND, true);
 
         sendGodkjenningRegistreringUnntak.utfør(prosessinstans);
 
-        verify(eessiService).sendGodkjenningArbeidFlereLand(anyLong(), isNull());
+        verify(eessiService).sendGodkjenningArbeidFlereLand(anyLong(), eq(FRITEKST));
     }
 
     @Test
-    void varsleUtland_sendA012IkkeValgtAvSaksbehandler_forventIngenSedSendt() throws MelosysException {
+    void varsleUtland_sendA012IkkeValgtAvSaksbehandler_forventIngenSedSendt() {
         Prosessinstans prosessinstans = lagProsessinstans();
         prosessinstans.setData(ProsessDataKey.VARSLE_UTLAND, false);
 
         sendGodkjenningRegistreringUnntak.utfør(prosessinstans);
 
-        verify(eessiService, never()).sendGodkjenningArbeidFlereLand(anyLong(), isNull());
+        verify(eessiService, never()).sendGodkjenningArbeidFlereLand(anyLong(), eq(FRITEKST));
     }
 
     @Test
-    void varsleUtland_utlandIkkeUtpekt_forventIngenSedSendt() throws MelosysException {
+    void varsleUtland_utlandIkkeUtpekt_forventIngenSedSendt() {
         Prosessinstans prosessinstans = lagProsessinstans();
         prosessinstans.getBehandling().setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
 
         sendGodkjenningRegistreringUnntak.utfør(prosessinstans);
 
-        verify(eessiService, never()).sendGodkjenningArbeidFlereLand(anyLong(), isNull());
+        verify(eessiService, never()).sendGodkjenningArbeidFlereLand(anyLong(), eq(FRITEKST));
     }
 
     private static Prosessinstans lagProsessinstans() {
@@ -65,6 +66,7 @@ class SendGodkjenningRegistreringUnntakTest {
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
+        prosessinstans.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, FRITEKST);
 
         return prosessinstans;
     }

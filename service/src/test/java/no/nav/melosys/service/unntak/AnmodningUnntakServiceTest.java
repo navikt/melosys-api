@@ -13,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -66,7 +65,7 @@ class AnmodningUnntakServiceTest {
     }
 
     @Test
-    void anmodningOmUnntak_erEessiKlarMedMottakerInstitusjon_prosessOpprettet() throws MelosysException {
+    void anmodningOmUnntak_erEessiKlarMedMottakerInstitusjon_prosessOpprettet() throws Exception {
         final long behandlingID = 1L;
         final String mottakerInstitusjon = "SE:432";
         final DokumentReferanse dokumentReferanse = new DokumentReferanse("jpID", "dokID");
@@ -90,7 +89,7 @@ class AnmodningUnntakServiceTest {
     }
 
     @Test
-    void anmodningOmUnntak_ikkeEessiReadyMottakerInstitusjonNull_prosessOpprettet() throws MelosysException {
+    void anmodningOmUnntak_ikkeEessiReadyMottakerInstitusjonNull_prosessOpprettet() throws Exception {
         final long behandlingID = 1L;
         final String fritekstSed = "friteksssst";
         Behandling behandling = new Behandling();

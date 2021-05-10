@@ -12,9 +12,7 @@ public final class Query {
             }
             """;
 
-    public static final String IDENT = "ident";
-
     private Query() {
-        throw new IllegalStateException();
+        throw new UnsupportedOperationException();
     }
 }

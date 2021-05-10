@@ -2,6 +2,7 @@ package no.nav.melosys.service.behandling;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
@@ -17,21 +18,27 @@ import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BehandlingServiceTest {
+@ExtendWith(MockitoExtension.class)
+class BehandlingServiceTest {
+
+    private static final String SAKSBEHANDLER = "Z990007";
+    private static final long BEHANDLING_ID = 11L;
+    private static final List<Long> PERIODE_IDS = Arrays.asList(2L, 3L);
+
     @Mock
     private BehandlingRepository behandlingRepo;
     @Mock
@@ -42,158 +49,172 @@ public class BehandlingServiceTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private OppgaveService oppgaveService;
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
 
     private BehandlingService behandlingService;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     @Captor
     private ArgumentCaptor<Behandling> behandlingCaptor;
 
-    private static final String SAKSBEHANDLER = "Z990007";
-
-    @Before
+    @BeforeEach
     public void setUp() {
-        behandlingService = new BehandlingService(behandlingRepo, behandlingsresultatRepository, tidligereMedlemsperiodeRepo, behandlingsresultatService, oppgaveService);
+        behandlingService = new BehandlingService(behandlingRepo, behandlingsresultatRepository, tidligereMedlemsperiodeRepo, behandlingsresultatService, oppgaveService, applicationEventPublisher);
     }
 
     @Test
-    public void hentBehandling() throws FunksjonellException {
-        long behandlingID = 11L;
-        when(behandlingRepo.findWithSaksopplysningerById(eq(behandlingID))).thenReturn(null);
+    void hentBehandling()  {
+        when(behandlingRepo.findWithSaksopplysningerById(BEHANDLING_ID)).thenReturn(null);
 
-        expectedException.expect(IkkeFunnetException.class);
-        expectedException.expectMessage("Finner ikke behandling med id " + behandlingID);
-
-        behandlingService.hentBehandling(behandlingID);
+        assertThatExceptionOfType(IkkeFunnetException.class)
+            .isThrownBy(() -> behandlingService.hentBehandling(BEHANDLING_ID))
+            .withMessage("Finner ikke behandling med id " + BEHANDLING_ID);
     }
 
     @Test
-    public void oppdaterStatus_statusAvventDok_dokumentasjonSvarfristOppdatert() throws FunksjonellException, TekniskException {
-        long behandlingID = 11L;
+    void oppdaterStatus_statusAvventDok_dokumentasjonSvarfristOppdatert() throws FunksjonellException, TekniskException {
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
         when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
-        behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.AVVENT_DOK_PART);
+        behandlingService.oppdaterStatus(BEHANDLING_ID, Behandlingsstatus.AVVENT_DOK_PART);
         assertThat(behandling.getDokumentasjonSvarfristDato()).isNotNull();
     }
 
     @Test
-    public void oppdaterStatus_statusAnmodningUnntakSendt_behandlingLagret() throws FunksjonellException, TekniskException {
-        long behandlingID = 11L;
+    void oppdaterStatus_statusAnmodningUnntakSendt_behandlingLagret() throws FunksjonellException, TekniskException {
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
         when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
-        behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
+        behandlingService.oppdaterStatus(BEHANDLING_ID, Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
         verify(behandlingRepo).save(behandling);
     }
 
-    @Test(expected = IkkeFunnetException.class)
-    public void oppdaterStatus_behIkkeFunnet() throws FunksjonellException, TekniskException {
-        long behandlingID = 11L;
+    @Test
+    void oppdaterStatus_behIkkeFunnet() {
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
         when(behandlingRepo.findById(anyLong())).thenReturn(Optional.empty());
-        behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.AVVENT_DOK_PART);
-    }
 
-    @Test(expected = FunksjonellException.class)
-    public void oppdaterStatus_ugyldig() throws FunksjonellException, TekniskException {
-        long behandlingID = 11L;
-        Behandling behandling = new Behandling();
-        behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
-        behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.AVSLUTTET);
+        assertThatExceptionOfType(IkkeFunnetException.class)
+            .isThrownBy(() -> behandlingService.oppdaterStatus(BEHANDLING_ID, Behandlingsstatus.AVVENT_DOK_PART));
     }
 
     @Test
-    public void oppdaterStatus_statusAvsluttet_ferdigstillOppgave() throws FunksjonellException, TekniskException {
+    void oppdaterStatus_ugyldig() {
+        Behandling behandling = new Behandling();
+        behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> behandlingService.oppdaterStatus(BEHANDLING_ID, Behandlingsstatus.AVSLUTTET))
+            .withMessage("Finner ikke behandling med id " + BEHANDLING_ID);
+    }
+
+    @Test
+    void oppdaterStatus_statusAvsluttet_ferdigstillOppgave() throws FunksjonellException, TekniskException {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("23132");
-        long behandlingID = 11L;
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         behandling.setFagsak(fagsak);
         when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
-        behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.AVSLUTTET);
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(fagsak.getSaksnummer()));
+        behandlingService.oppdaterStatus(BEHANDLING_ID, Behandlingsstatus.AVSLUTTET);
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 
     @Test
-    public void oppdaterStatus_statusErAlleredeVurderDokument_ingentingSkjer() throws FunksjonellException, TekniskException {
-        long behandlingID = 11L;
+    void oppdaterStatus_statusErAlleredeVurderDokument_ingentingSkjer() throws FunksjonellException, TekniskException {
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
 
         when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
-        behandlingService.oppdaterStatus(behandlingID, Behandlingsstatus.VURDER_DOKUMENT);
+        behandlingService.oppdaterStatus(BEHANDLING_ID, Behandlingsstatus.VURDER_DOKUMENT);
         verify(behandlingRepo, never()).save(any());
     }
 
     @Test
-    public void knyttMedlemsperioder_ingenBehandling() throws FunksjonellException {
-        long behandlingID = 11L;
-        List<Long> periodeIder = Arrays.asList(2L, 3L);
-        when(behandlingRepo.findById(anyLong())).thenReturn(Optional.empty());
+    void brukerOppdaterStatus_nyStatusErIkkeGyldig() {
+        Behandling behandling = new Behandling();
+        behandling.setTema(Behandlingstema.ARBEID_I_UTLANDET);
+        when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
 
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("Finner ikke behandling med id " + behandlingID);
-
-        behandlingService.knyttMedlemsperioder(behandlingID, periodeIder);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> behandlingService.brukerOppdaterStatus(BEHANDLING_ID, AVSLUTTET))
+            .withMessage("Behandlingen kan ikke endres til status AVSLUTTET. Gyldige statuser er [AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING]");
     }
 
     @Test
-    public void knyttMedlemsperioder_avsluttetBehandling() throws FunksjonellException {
-        long behandlingID = 11L;
+    void hentMuligeStatuser_temaOvrigeSedMed_avsluttetErMulig() throws FunksjonellException {
+        Behandling behandling = new Behandling();
+        behandling.setTema(Behandlingstema.ØVRIGE_SED_MED);
+        when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
+
+        Collection<Behandlingsstatus> muligeStatuser = behandlingService.hentMuligeStatuser(BEHANDLING_ID);
+        assertThat(muligeStatuser).containsExactly(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVSLUTTET);
+    }
+
+    @Test
+    void hentMuligeStatuser_temaArbeidUtland_avsluttetErIkkeMulig() throws FunksjonellException {
+        Behandling behandling = new Behandling();
+        behandling.setTema(Behandlingstema.ARBEID_I_UTLANDET);
+        when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
+
+        Collection<Behandlingsstatus> muligeStatuser = behandlingService.hentMuligeStatuser(BEHANDLING_ID);
+        assertThat(muligeStatuser).containsExactly(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING);
+    }
+
+    @Test
+    void knyttMedlemsperioder_ingenBehandling() {
+        when(behandlingRepo.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> behandlingService.knyttMedlemsperioder(BEHANDLING_ID, PERIODE_IDS))
+            .withMessage("Finner ikke behandling med id " + BEHANDLING_ID);
+    }
+
+    @Test
+    void knyttMedlemsperioder_avsluttetBehandling() {
         Behandlingsstatus behandlingsstatus = Behandlingsstatus.AVSLUTTET;
         Behandling behandling = new Behandling();
         behandling.setStatus(behandlingsstatus);
-        List<Long> periodeIder = Arrays.asList(2L, 3L);
         when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
 
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("Medlemsperioder kan ikke lagres på behandling med status " + behandlingsstatus);
-
-        behandlingService.knyttMedlemsperioder(behandlingID, periodeIder);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> behandlingService.knyttMedlemsperioder(BEHANDLING_ID, PERIODE_IDS))
+            .withMessage("Medlemsperioder kan ikke lagres på behandling med status " + behandlingsstatus);
     }
 
     @Test
-    public void knyttMedlemsperioder() throws FunksjonellException {
-        long behandlingID = 11L;
-        Behandlingsstatus behandlingsstatus = Behandlingsstatus.UNDER_BEHANDLING;
+    void knyttMedlemsperioder() throws FunksjonellException {
         Behandling behandling = new Behandling();
-        behandling.setStatus(behandlingsstatus);
-        List<Long> periodeIder = Arrays.asList(2L, 3L);
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
 
-        behandlingService.knyttMedlemsperioder(behandlingID, periodeIder);
-        verify(tidligereMedlemsperiodeRepo, times(1)).deleteById_BehandlingId(behandlingID);
+        behandlingService.knyttMedlemsperioder(BEHANDLING_ID, PERIODE_IDS);
+        verify(tidligereMedlemsperiodeRepo).deleteById_BehandlingId(BEHANDLING_ID);
         verify(tidligereMedlemsperiodeRepo).saveAll(anyList());
     }
 
     @Test
-    public void finnMedlemsperioder_ingenTidligereMedlemsperioder() {
-        long behandlingID = 11L;
+    void finnMedlemsperioder_ingenTidligereMedlemsperioder() {
         when(tidligereMedlemsperiodeRepo.findById_BehandlingId(anyLong())).thenReturn(new ArrayList<>());
 
-        List<Long> periodeIder = behandlingService.hentMedlemsperioder(behandlingID);
+        List<Long> periodeIder = behandlingService.hentMedlemsperioder(BEHANDLING_ID);
         assertThat(periodeIder).isEmpty();
     }
 
     @Test
-    public void hentMedlemsperioder() {
-        long behandlingID = 11L;
+    void hentMedlemsperioder() {
         List<TidligereMedlemsperiode> tidligereMedlemsperioder = Arrays.asList(
-            new TidligereMedlemsperiode(behandlingID, 2L),
-            new TidligereMedlemsperiode(behandlingID, 3L));
+            new TidligereMedlemsperiode(BEHANDLING_ID, 2L),
+            new TidligereMedlemsperiode(BEHANDLING_ID, 3L));
         when(tidligereMedlemsperiodeRepo.findById_BehandlingId(anyLong())).thenReturn(tidligereMedlemsperioder);
 
-        List<Long> periodeIder = behandlingService.hentMedlemsperioder(behandlingID);
+        List<Long> periodeIder = behandlingService.hentMedlemsperioder(BEHANDLING_ID);
         assertThat(periodeIder).containsExactly(2L, 3L);
     }
 
     @Test
-    public void nyBehandling() {
+    void nyBehandling() {
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
         Behandling behandling = behandlingService.nyBehandling(new Fagsak(), Behandlingsstatus.OPPRETTET, Behandlingstyper.SOEKNAD, Behandlingstema.UTSENDT_ARBEIDSTAKER, initierendeJournalpostId, initierendeDokumentId);
@@ -205,12 +226,12 @@ public class BehandlingServiceTest {
     }
 
     @Test
-    public void replikerBehandling_replikererObjekterOgCollections() throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+    void replikerBehandling_replikererObjekterOgCollections() throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
         Behandling tidligsteInaktiveBehandling = opprettBehandlingMedData();
-        Behandling replikertBehandling = behandlingService.replikerBehandling(tidligsteInaktiveBehandling, Behandlingsstatus.OPPRETTET, Behandlingstyper.ENDRET_PERIODE);
+        Behandling replikertBehandling = behandlingService.replikerBehandling(tidligsteInaktiveBehandling, OPPRETTET, Behandlingstyper.ENDRET_PERIODE);
 
         assertThat(replikertBehandling.getId()).isNull();
-        assertThat(replikertBehandling.getStatus()).isEqualTo(Behandlingsstatus.OPPRETTET);
+        assertThat(replikertBehandling.getStatus()).isEqualTo(OPPRETTET);
         assertThat(replikertBehandling.getDokumentasjonSvarfristDato()).isEqualTo(tidligsteInaktiveBehandling.getDokumentasjonSvarfristDato());
         assertThat(replikertBehandling.getInitierendeJournalpostId()).isEqualTo(tidligsteInaktiveBehandling.getInitierendeJournalpostId());
 
@@ -224,12 +245,21 @@ public class BehandlingServiceTest {
     }
 
     @Test
-    public void avsluttBehandling() throws Exception {
-        long behandlingID = 1L;
-        Behandling behandling = new Behandling();
-        when(behandlingRepo.findById(eq(behandlingID))).thenReturn(Optional.of(behandling));
+    void replikerBehandling_utenBehandlingsgrunnlag_blirReplikert() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        Behandling tidligsteInaktiveBehandling = opprettBehandlingMedData();
+        tidligsteInaktiveBehandling.setBehandlingsgrunnlag(null);
 
-        behandlingService.avsluttBehandling(behandlingID);
+        assertThat(behandlingService.replikerBehandling(tidligsteInaktiveBehandling, OPPRETTET, Behandlingstyper.NY_VURDERING))
+            .extracting(Behandling::getBehandlingsgrunnlag).isNull();
+
+    }
+
+    @Test
+    void avsluttBehandling() throws Exception {
+        Behandling behandling = new Behandling();
+        when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+
+        behandlingService.avsluttBehandling(BEHANDLING_ID);
 
         verify(behandlingRepo).save(behandlingCaptor.capture());
         Behandling lagretBehandling = behandlingCaptor.getValue();
@@ -237,7 +267,7 @@ public class BehandlingServiceTest {
     }
 
     @Test
-    public void endreBehandlingsstatusFraOpprettetTilUnderBehandling_harStatusOpprettet_statusBlirSattTilUnderBehandling() {
+    void endreBehandlingsstatusFraOpprettetTilUnderBehandling_harStatusOpprettet_statusBlirSattTilUnderBehandling() {
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
 
@@ -248,7 +278,7 @@ public class BehandlingServiceTest {
     }
 
     @Test
-    public void endreBehandlingsstatusFraOpprettetTilUnderBehandling_harStatusAvventerSvar_ingenStatusendring() {
+    void endreBehandlingsstatusFraOpprettetTilUnderBehandling_harStatusAvventerSvar_ingenStatusendring() {
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.AVVENT_DOK_PART);
 
@@ -258,7 +288,7 @@ public class BehandlingServiceTest {
     }
 
     @Test
-    public final void testErBehandlingRedigerbarOgTilordnetSaksbehandler() throws FunksjonellException, TekniskException {
+    void erBehandlingRedigerbarOgTilordnetSaksbehandler() throws FunksjonellException, TekniskException {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("12345678901");
         Behandling behandling = new Behandling();
@@ -303,7 +333,7 @@ public class BehandlingServiceTest {
     }
 
     @Test
-    public final void testErBehandlingRedigerbarOgTilordnetSaksbehandler_ingenOppgaveFunnet_kasterException() throws FunksjonellException, TekniskException {
+    void erBehandlingRedigerbarOgTilordnetSaksbehandler_ingenOppgaveFunnet_kasterException() throws FunksjonellException, TekniskException {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("12345678901");
         Behandling behandling = new Behandling();
@@ -314,8 +344,23 @@ public class BehandlingServiceTest {
         when(oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer()))
             .thenThrow(new TekniskException("Finner ingen oppgave for fagsak"));
 
-        expectedException.expect(TekniskException.class);
-        behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER);
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(() -> behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER))
+            .withMessage("Finner ingen oppgave for fagsak");
+    }
+
+    @Test
+    void endreBehandlingsfrist_enUkeFrem_fristOppdateres() throws Exception {
+        LocalDate nå = LocalDate.now();
+        Behandling behandling = new Behandling();
+        behandling.setBehandlingsfrist(nå);
+        when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+
+        behandlingService.endreBehandlingsfrist(BEHANDLING_ID, nå.plusWeeks(1));
+
+        assertThat(behandling.getBehandlingsfrist()).isEqualTo(nå.plusWeeks(1));
+        verify(behandlingRepo).save(behandling);
+        verify(applicationEventPublisher).publishEvent(any(BehandlingsfristEndretEvent.class));
     }
 
     private Behandling opprettBehandlingMedData() {

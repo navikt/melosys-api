@@ -12,14 +12,14 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.exception.*;
-import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -27,6 +27,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.collections4.CollectionUtils;
@@ -111,8 +112,8 @@ public class FagsakService {
         fagsakRepository.save(sak);
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void bestillNySakOgBehandling(OpprettSakDto opprettSakDto) throws FunksjonellException, TekniskException {
+    @Transactional
+    public void bestillNySakOgBehandling(OpprettSakDto opprettSakDto) throws FunksjonellException {
         validerOpprettSakDto(opprettSakDto);
         final Oppgave oppgave = validerOppgave(opprettSakDto.getOppgaveID());
         prosessinstansService.opprettProsessinstansNySak(
@@ -162,7 +163,7 @@ public class FagsakService {
         }
     }
 
-    private Oppgave validerOppgave(String oppgaveID) throws FunksjonellException, TekniskException {
+    private Oppgave validerOppgave(String oppgaveID) throws FunksjonellException {
         if (StringUtils.isEmpty(oppgaveID)) {
             throw new FunksjonellException("OppgaveID mangler.");
         }
@@ -233,7 +234,7 @@ public class FagsakService {
      * - Oppretter bruker, arbeidsgiver og representanter.
      * - Oppretter tom behandlingsresultat.
      */
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public Fagsak nyFagsakOgBehandling(OpprettSakRequest opprettSakRequest) {
         Fagsak fagsak = new Fagsak();
         String saksnummer = hentNesteSaksnummer();
@@ -269,7 +270,7 @@ public class FagsakService {
 
         Instant nå = Instant.now();
 
-        fagsak.setType(opprettSakRequest.getSakstype() == null ? Sakstyper.UKJENT : opprettSakRequest.getSakstype());
+        fagsak.setType(opprettSakRequest.getSakstype());
         fagsak.setAktører(aktører);
         fagsak.setRegistrertDato(nå);
         fagsak.setEndretDato(nå);
@@ -301,8 +302,8 @@ public class FagsakService {
         return FAGSAKID_PREFIX + fagsakRepository.hentNesteSekvensVerdi();
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void avsluttSakSomBortfalt(Fagsak fagsak) throws FunksjonellException, TekniskException {
+    @Transactional
+    public void avsluttSakSomBortfalt(Fagsak fagsak) throws FunksjonellException {
         fagsak.getBehandlinger().forEach(behandling -> behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE));
 
         fagsak.getBehandlinger().forEach(behandling -> {
@@ -316,8 +317,8 @@ public class FagsakService {
     }
 
     //Brukes for å avslutte behandling (og dermed fagsak) fra frontend i manuelle sed-behandlinger
-    @Transactional(rollbackFor = MelosysException.class)
-    public void avsluttFagsakOgBehandlingValiderBehandlingstype(Fagsak fagsak, Behandling behandling) throws FunksjonellException, TekniskException {
+    @Transactional
+    public void avsluttFagsakOgBehandlingValiderBehandlingstype(Fagsak fagsak, Behandling behandling) throws FunksjonellException {
         Behandlingstema behandlingstema = behandling.getTema();
         if (!behandling.kanAvsluttesManuelt()) {
             throw new FunksjonellException("Behandlingstema " + behandlingstema + " kan ikke avsluttes manuelt");
@@ -329,8 +330,7 @@ public class FagsakService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 
-    public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus)
-        throws FunksjonellException, TekniskException {
+    public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus) throws FunksjonellException {
         Behandling aktivBehandling = fagsak.hentAktivBehandling();
         if (aktivBehandling == null) {
             throw new FunksjonellException("Fagsak " + fagsak.getSaksnummer() + " har ingen aktiv behandling");
@@ -356,24 +356,8 @@ public class FagsakService {
         fagsakRepository.save(fagsak);
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void oppdaterType(Fagsak fagsak, boolean kvalifisererForEF_883_2004) throws FunksjonellException {
-        Sakstyper nyFagsakstype;
-        if (kvalifisererForEF_883_2004) {
-            nyFagsakstype = Sakstyper.EU_EOS;
-        } else {
-            nyFagsakstype = Sakstyper.UKJENT;
-        }
-        if (fagsak.getType() != null && Sakstyper.UKJENT != fagsak.getType() && fagsak.getType() != nyFagsakstype) {
-            throw new FunksjonellException("Forsøk på å endre fagsakType fra " + fagsak.getType() + " til " + nyFagsakstype);
-        }
-        fagsak.setType(nyFagsakstype);
-        lagre(fagsak);
-        log.info("Satt type på fagsak {} til {}", fagsak.getSaksnummer(), nyFagsakstype);
-    }
-
-    @Transactional(rollbackFor = MelosysException.class)
-    public long opprettNyVurderingBehandling(String saksnummer) throws FunksjonellException, TekniskException {
+    @Transactional
+    public long opprettNyVurderingBehandling(String saksnummer) throws FunksjonellException {
         Fagsak fagsak = hentFagsak(saksnummer);
         Behandling behandling = fagsak.hentSistAktiveBehandling();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());

@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.sed;
 
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.slf4j.Logger;
@@ -28,7 +27,7 @@ public class SendSvarAnmodningUnntak implements StegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) {
         long behandlingId = prosessinstans.getBehandling().getId();
         eessiService.sendAnmodningUnntakSvar(behandlingId);
         log.info("Svar på anmodning om unntak sendt for behandling {}", behandlingId);

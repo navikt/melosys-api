@@ -1,6 +1,9 @@
 package no.nav.melosys.saksflyt.steg.sed;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.Behandling;
@@ -16,7 +19,8 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -64,7 +68,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) {
         SendUtlandStatus sendtStatus = sendUtland(
             BucType.LA_BUC_03,
             prosessinstans,
@@ -83,8 +87,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
             throw new FunksjonellException("Kan ikke videresende søknad uten vedlegg!");
         }
 
-        return eessiService.lagEessiVedlegg(prosessinstans.getBehandling().getFagsak().getGsakSaksnummer(),
-            vedleggReferanser);
+        return eessiService.lagEessiVedlegg(prosessinstans.getBehandling().getFagsak(), vedleggReferanser);
     }
 
     @Override
@@ -93,7 +96,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
     }
 
     @Override
-    protected void sendBrev(Prosessinstans prosessinstans) throws MelosysException {
+    protected void sendBrev(Prosessinstans prosessinstans) {
         Behandling behandling = prosessinstans.getBehandling();
 
         // Fagsak må hentes på nytt fra db da den har blitt oppdatert i AvklarMyndighet

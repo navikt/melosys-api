@@ -4,12 +4,12 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.person.Bostedsadresse;
-import no.nav.melosys.domain.dokument.person.Gateadresse;
-import no.nav.melosys.domain.dokument.person.MidlertidigPostadresse;
-import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
-import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
-import no.nav.melosys.domain.dokument.person.UstrukturertAdresse;
+import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
+import no.nav.melosys.domain.dokument.person.adresse.Gateadresse;
+import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
+import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
+import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
+import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.*;
 
@@ -154,7 +154,7 @@ class AdresseMapper {
                 + " "
                 + (gateadresse.getHusnummer() == null ? "" : gateadresse.getHusnummer().toString())
                 + (gateadresse.getHusbokstav() == null ? "" : gateadresse.getHusbokstav());
-            
+
         } else if (person.getBostedsadresse().getStrukturertAdresse() instanceof Matrikkeladresse) {
             Matrikkeladresse matrikkeladresse = (Matrikkeladresse) person.getBostedsadresse().getStrukturertAdresse();
             postadresse.adresselinje1 = matrikkeladresse.getEiendomsnavn();

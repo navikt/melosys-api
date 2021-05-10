@@ -4,21 +4,25 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.avgift.Trygdeavgiftsberegningsresultat;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.brev.BrevkopiRegel;
+import no.nav.melosys.domain.brev.FastMottaker;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
-import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
+import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
+import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.slf4j.Logger;
@@ -27,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static java.util.Optional.ofNullable;
-import static no.nav.melosys.domain.Fagsak.erSakstypeFtrl;
 import static no.nav.melosys.domain.Preferanse.PreferanseEnum.RESERVERT_FRA_A1;
 import static no.nav.melosys.domain.brev.BrevkopiRegel.*;
 import static no.nav.melosys.domain.brev.FastMottaker.SKATT;
@@ -45,28 +48,28 @@ public class BrevmottakerService {
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final MedlemAvFolketrygdenRepository medlemAvFolketrygdenRepository;
+    private final TrygdeavgiftsberegningService trygdeavgiftsberegningService;
 
     @Autowired
     public BrevmottakerService(KontaktopplysningService kontaktopplysningService,
                                AvklarteVirksomheterService avklarteVirksomheterService,
                                UtenlandskMyndighetService utenlandskMyndighetService,
                                BehandlingsresultatService behandlingsresultatService,
-                               MedlemAvFolketrygdenRepository medlemAvFolketrygdenRepository) {
+                               TrygdeavgiftsberegningService trygdeavgiftsberegningService) {
         this.kontaktopplysningService = kontaktopplysningService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.behandlingsresultatService = behandlingsresultatService;
-        this.medlemAvFolketrygdenRepository = medlemAvFolketrygdenRepository;
+        this.trygdeavgiftsberegningService = trygdeavgiftsberegningService;
     }
 
     Aktoersroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) throws TekniskException {
         Aktoersroller mottakerRolle;
         if (DOKUMENTER_TIL_BRUKER.contains(produserbartDokument)) {
             mottakerRolle = BRUKER;
-        } else if (produserbartDokument == INNVILGELSE_ARBEIDSGIVER || produserbartDokument == AVSLAG_ARBEIDSGIVER) {
+        } else if (List.of(INNVILGELSE_ARBEIDSGIVER, AVSLAG_ARBEIDSGIVER).contains(produserbartDokument)) {
             mottakerRolle = ARBEIDSGIVER;
-        } else if (produserbartDokument == ANMODNING_UNNTAK || produserbartDokument == ATTEST_A1) {
+        } else if (List.of(ANMODNING_UNNTAK, ATTEST_A1).contains(produserbartDokument)) {
             mottakerRolle = MYNDIGHET;
         } else {
             throw new TekniskException("Valg av mottakerRolle støttes ikke for " + produserbartDokument);
@@ -74,18 +77,34 @@ public class BrevmottakerService {
         return mottakerRolle;
     }
 
+    public Aktoer avklarMottaker(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling)
+        throws FunksjonellException, TekniskException {
+        List<Aktoer> mottakere = avklarMottakere(produserbartDokument, mottaker, behandling, false, false);
+        if (mottakere.size() < 1) {
+            throw new FunksjonellException("Finner ikke avklart mottaker for produserbart dokument " + produserbartDokument.getKode() + " og rolle " + mottaker.getRolle() + " for behandling " + behandling.getId());
+        }
+        if (mottakere.size() > 1) {
+            throw new FunksjonellException("Flere enn én mottaker ble funnet for produserbart dokument " + produserbartDokument.getKode() + " og rolle " + mottaker.getRolle() + " for behandling " + behandling.getId());
+        }
+        return mottakere.get(0);
+    }
+
     public List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling) throws FunksjonellException, TekniskException {
         return avklarMottakere(produserbartDokument, mottaker, behandling, false);
     }
 
-    List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling, boolean forhåndsvisning)
+    public List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling, boolean forhåndsvisning) throws FunksjonellException, TekniskException {
+        return avklarMottakere(produserbartDokument, mottaker, behandling, forhåndsvisning, true);
+    }
+
+    public List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling, boolean forhåndsvisning, boolean kunAvklarteVirksomheter)
         throws FunksjonellException, TekniskException {
         List<Aktoer> mottakere;
         Aktoersroller mottakerRolle = mottaker.getRolle();
         if (mottakerRolle == BRUKER) {
             mottakere = avklarMottakereForBruker(produserbartDokument, behandling, forhåndsvisning);
         } else if (mottakerRolle == ARBEIDSGIVER) {
-            mottakere = avklarMottakereForArbeidsgiver(behandling);
+            mottakere = avklarMottakereForArbeidsgiver(behandling, kunAvklarteVirksomheter);
         } else if (mottakerRolle == MYNDIGHET) {
             mottakere = avklarMottakereForMyndigheter(mottaker, behandling, produserbartDokument);
         } else {
@@ -142,17 +161,17 @@ public class BrevmottakerService {
     }
 
     // Dokumenter til arbeidsgiver sendes bare til representant når representant finnes.
-    private List<Aktoer> avklarMottakereForArbeidsgiver(Behandling behandling) throws FunksjonellException, TekniskException {
+    private List<Aktoer> avklarMottakereForArbeidsgiver(Behandling behandling, boolean kunAvklarteVirksomheter) throws FunksjonellException, TekniskException {
         Fagsak fagsak = behandling.getFagsak();
         Optional<Aktoer> representant = fagsak.hentRepresentant(Representerer.ARBEIDSGIVER);
         if (representant.isPresent()) {
             return Collections.singletonList(representant.get());
         } else {
-            return avklarArbeidsgiver(behandling);
+            return kunAvklarteVirksomheter ? avklarArbeidsgiverFraAvklarteVirksomheter(behandling) : avklarArbeidsgiverFraAlleVirksomheter(behandling);
         }
     }
 
-    private List<Aktoer> avklarArbeidsgiver(Behandling behandling) throws FunksjonellException, TekniskException {
+    private List<Aktoer> avklarArbeidsgiverFraAvklarteVirksomheter(Behandling behandling) throws FunksjonellException, TekniskException {
         Set<String> arbeidsgivendeOrgnumre = avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
         if (arbeidsgivendeOrgnumre.isEmpty()) {
             if (avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling).isEmpty()) {
@@ -161,11 +180,21 @@ public class BrevmottakerService {
                 log.debug("Melosys sender ikke brev til utenlandske arbeidsgivere uten orgnr.");
                 return Collections.emptyList();
             }
-        } else {
-            return arbeidsgivendeOrgnumre.stream()
-                .map(BrevmottakerService::lagAktoerForArbeidsgiver)
-                .collect(Collectors.toList());
         }
+        return avklarArbeidsgiver(arbeidsgivendeOrgnumre);
+    }
+
+    private List<Aktoer> avklarArbeidsgiverFraAlleVirksomheter(Behandling behandling) throws TekniskException {
+        Set<String> arbeidsgiverOrgnumre = new HashSet<>();
+        arbeidsgiverOrgnumre.addAll(behandling.hentArbeidsforholdDokument().hentOrgnumre());
+        arbeidsgiverOrgnumre.addAll(behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().hentAlleOrganisasjonsnumre());
+        return avklarArbeidsgiver(arbeidsgiverOrgnumre);
+    }
+
+    private List<Aktoer> avklarArbeidsgiver(Set<String> arbeidsgiverOrgnumre) {
+        return arbeidsgiverOrgnumre.stream()
+            .map(BrevmottakerService::lagAktoerForArbeidsgiver)
+            .collect(Collectors.toList());
     }
 
     private static Aktoer lagAktoerForArbeidsgiver(String orgnr) {
@@ -207,26 +236,20 @@ public class BrevmottakerService {
 
     private boolean myndighetØnskerA1(UtenlandskMyndighet utenlandskMyndighet) {
         return utenlandskMyndighet
-                .preferanser
-                .stream()
-                .map(Preferanse::getPreferanse)
-                .noneMatch(RESERVERT_FRA_A1::equals);
+            .preferanser
+            .stream()
+            .map(Preferanse::getPreferanse)
+            .noneMatch(RESERVERT_FRA_A1::equals);
     }
 
-    public Kontaktopplysning hentKontaktopplysning(String saksnumner, Aktoer mottaker) {
-        if (mottaker == null) {
-            return null;
+    public Kontaktopplysning hentKontaktopplysning(String saksnummer, Aktoer mottaker) {
+        if (mottaker != null && List.of(ARBEIDSGIVER, REPRESENTANT).contains(mottaker.getRolle())) {
+            return kontaktopplysningService.hentKontaktopplysning(saksnummer, mottaker.getOrgnr()).orElse(null);
         }
-
-        Aktoersroller mottakerRolle = mottaker.getRolle();
-        if (mottakerRolle == ARBEIDSGIVER || mottakerRolle == REPRESENTANT) {
-            return kontaktopplysningService.hentKontaktopplysning(saksnumner, mottaker.getOrgnr()).orElse(null);
-        } else {
-            return null;
-        }
+        return null;
     }
 
-    private void leggTilKopier(Behandling behandling, Mottakerliste mottakerliste, Collection<BrevkopiRegel> brevkopiRegler) throws FunksjonellException {
+    private void leggTilKopier(Behandling behandling, Mottakerliste mottakerliste, Collection<BrevkopiRegel> brevkopiRegler) {
         boolean brukerHarFullmektig = behandling.getFagsak().hentRepresentant(Representerer.BRUKER).isPresent();
 
         if (brevkopiRegler.contains(BRUKER_FÅR_KOPI) ||
@@ -234,23 +257,16 @@ public class BrevmottakerService {
             mottakerliste.getKopiMottakere().add(BRUKER);
         }
 
-        if (erSakstypeFtrl(behandling.getFagsak().getType())) {
-            FastsattTrygdeavgift fastsattTrygdeavgift = hentFastsattTrygdeavgift(behandling);
+        Optional<Trygdeavgiftsberegningsresultat> trygdeavgiftsberegningsresultat = trygdeavgiftsberegningService.finnBeregningsresultat(behandling.getId());
 
-            if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER) && fastsattTrygdeavgift.ikkeSelvbetalendeBruker()) {
+        trygdeavgiftsberegningsresultat.ifPresent(resultat -> {
+            if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER) && resultat.erIkkeSelvbetalendeBruker()) {
                 mottakerliste.getKopiMottakere().add(ARBEIDSGIVER);
             }
 
-            if (brevkopiRegler.contains(SKATT_FÅR_KOPI_HVIS_AVGIFTSPLIKTIG_INNTEKT) && fastsattTrygdeavgift.harAvgiftspliktigInntekt()) {
+            if (brevkopiRegler.contains(SKATT_FÅR_KOPI_HVIS_AVGIFTSPLIKTIG_INNTEKT) && resultat.harAvgiftspliktigInntekt()) {
                 mottakerliste.getFasteMottakere().add(SKATT);
             }
-        }
-    }
-
-    private FastsattTrygdeavgift hentFastsattTrygdeavgift(Behandling behandling) throws IkkeFunnetException {
-        MedlemAvFolketrygden medlemAvFolketrygden = medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandling.getId())
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke medlemAvFolketrygden for behandlingsresultatID " + behandling.getId()));
-
-        return medlemAvFolketrygden.getFastsattTrygdeavgift();
+        });
     }
 }

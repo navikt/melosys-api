@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.kontroll;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,7 +10,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.impl.SaksflytAsyncDelegate;
+import no.nav.melosys.saksflyt.impl.BehandleProsessinstansDelegate;
 import no.nav.melosys.saksflyt.kontroll.dto.HentProsessinstansDto;
 import no.nav.melosys.saksflyt.kontroll.dto.RestartProsessinstanserRequest;
 import no.nav.melosys.service.AdminTjeneste;
@@ -27,14 +28,14 @@ public class ProsessinstansAdminTjeneste implements AdminTjeneste {
 
     private final Logger log = LoggerFactory.getLogger(ProsessinstansAdminTjeneste.class);
 
-    private final SaksflytAsyncDelegate saksflytAsyncDelegate;
+    private final BehandleProsessinstansDelegate behandleProsessinstansDelegate;
     private final ProsessinstansRepository prosessinstansRepository;
     private final String apiKey;
 
-    public ProsessinstansAdminTjeneste(SaksflytAsyncDelegate saksflytAsyncDelegate,
+    public ProsessinstansAdminTjeneste(BehandleProsessinstansDelegate behandleProsessinstansDelegate,
                                        ProsessinstansRepository prosessinstansRepository,
                                        @Value("${Melosys-admin.apikey}") String apiKey) {
-        this.saksflytAsyncDelegate = saksflytAsyncDelegate;
+        this.behandleProsessinstansDelegate = behandleProsessinstansDelegate;
         this.prosessinstansRepository = prosessinstansRepository;
         this.apiKey = apiKey;
     }
@@ -44,8 +45,9 @@ public class ProsessinstansAdminTjeneste implements AdminTjeneste {
         @RequestHeader(API_KEY_HEADER) String apiKey) throws SikkerhetsbegrensningException {
 
         validerApikey(apiKey);
-        return ResponseEntity.ok(prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET).stream().map(
-            HentProsessinstansDto::new).collect(Collectors.toList()));
+        return ResponseEntity.ok(prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET).stream()
+            .map(HentProsessinstansDto::new)
+            .collect(Collectors.toList()));
     }
 
     @PostMapping("/feilede/restart")
@@ -53,11 +55,7 @@ public class ProsessinstansAdminTjeneste implements AdminTjeneste {
         @RequestHeader(API_KEY_HEADER) String apiKey) throws SikkerhetsbegrensningException {
         validerApikey(apiKey);
         Collection<Prosessinstans> prosessinstanser = prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET);
-        prosessinstanser.forEach(p -> p.setStatus(ProsessStatus.RESTARTET));
-
-        prosessinstansRepository
-            .saveAll(prosessinstanser)
-            .forEach(saksflytAsyncDelegate::behandleProsessinstans);
+        restartProsessinstanser(prosessinstanser);
         return ResponseEntity.ok(
             prosessinstanser.stream().map(HentProsessinstansDto::new).collect(Collectors.toList()));
     }
@@ -76,13 +74,19 @@ public class ProsessinstansAdminTjeneste implements AdminTjeneste {
             }
         }
 
+        restartProsessinstanser(prosessinstanser);
+
+        return ResponseEntity.ok().build();
+    }
+
+    private void restartProsessinstanser(Collection<Prosessinstans> prosessinstanser) {
         prosessinstanser.forEach(p -> p.setStatus(ProsessStatus.RESTARTET));
 
         prosessinstansRepository
             .saveAll(prosessinstanser)
-            .forEach(saksflytAsyncDelegate::behandleProsessinstans);
-
-        return ResponseEntity.ok().build();
+            .stream()
+            .sorted(Comparator.comparing(Prosessinstans::getRegistrertDato))
+            .forEach(behandleProsessinstansDelegate::behandleProsessinstans);
     }
 
     @Override

@@ -52,7 +52,7 @@ class AvsluttFagsakOgBehandlingTest {
         avsluttFagsakOgBehandling = new AvsluttFagsakOgBehandling(fagsakService, behandlingService, behandlingsresultatService);
 
         prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK);
+        prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_EOS);
 
         behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);

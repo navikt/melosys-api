@@ -8,17 +8,16 @@ import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
-import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.TemaFactory.fraBehandlingstema;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPDATER_OG_FERDIGSTILL_JOURNALPOST;
 
@@ -28,12 +27,10 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterOgFerdigstillJournalpost.class);
 
     private final JoarkFasade joarkFasade;
-    private final FagsakService fagsakService;
 
     @Autowired
-    public OppdaterOgFerdigstillJournalpost(JoarkFasade joarkFasade, FagsakService fagsakService) {
+    public OppdaterOgFerdigstillJournalpost(@Qualifier("system") JoarkFasade joarkFasade) {
         this.joarkFasade = joarkFasade;
-        this.fagsakService = fagsakService;
     }
 
     @Override
@@ -43,21 +40,10 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
-
-        boolean medDokumentkategori = false;
+    public void utfør(Prosessinstans prosessinstans) {
         String journalpostID = prosessinstans.getData(JOURNALPOST_ID);
 
-        Long arkivSakID;
-        if (prosessinstans.getBehandling() == null) {
-            arkivSakID = fagsakService.hentFagsak(prosessinstans.getData(SAKSNUMMER)).getGsakSaksnummer();
-        } else {
-            arkivSakID = prosessinstans.getBehandling().getFagsak().getGsakSaksnummer();
-        }
-        if (arkivSakID == null) {
-            throw new TekniskException("Prosessinstansen er ikke knyttet til en nav-sak");
-        }
-
+        var behandling = prosessinstans.getBehandling();
         String brukerID = prosessinstans.getData(BRUKER_ID);
         String avsenderID = prosessinstans.getData(AVSENDER_ID);
         String avsenderNavn = prosessinstans.getData(AVSENDER_NAVN);
@@ -76,14 +62,20 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
         List<String> logiskeVedleggTitler = prosessinstans.getData(LOGISKE_VEDLEGG_TITLER, List.class);
         Map<String, String> fysiskeVedleggMedTitler = prosessinstans.getData(FYSISKE_VEDLEGG, Map.class);
 
-        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder().medArkivSakID(arkivSakID)
-            .medBrukerID(brukerID).medHovedDokumentID(hovedDokumentID)
-            .medAvsenderID(avsenderID).medAvsenderNavn(avsenderNavn).medAvsenderType(avsenderType).medAvsenderLand(avsenderLand)
+        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
+            .medSaksnummer(behandling.getFagsak().getSaksnummer())
+            .medBrukerID(brukerID)
+            .medHovedDokumentID(hovedDokumentID)
+            .medAvsenderID(avsenderID)
+            .medAvsenderNavn(avsenderNavn)
+            .medAvsenderType(avsenderType).medAvsenderLand(avsenderLand)
             .medTittel(tittel)
             .medMottattDato(mottattDato)
             .medFysiskeVedlegg(fysiskeVedleggMedTitler)
-            .medLogiskeVedleggTitler(logiskeVedleggTitler).build();
+            .medLogiskeVedleggTitler(logiskeVedleggTitler)
+            .medTema(fraBehandlingstema(behandling.getTema()).getKode())
+            .build();
         joarkFasade.oppdaterJournalpost(journalpostID, journalpostOppdatering, true);
-        log.info("Oppdatert og ferdigstilt journalpost {}. ArkivsakID: {}", journalpostID, arkivSakID);
+        log.info("Oppdatert og ferdigstilt journalpost {} for fagsak: {}", journalpostID, behandling.getFagsak().getSaksnummer());
     }
 }

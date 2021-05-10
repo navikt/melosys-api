@@ -1,20 +1,24 @@
 package no.nav.melosys.service.registeropplysninger;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.List;
+import java.util.Optional;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.inntk.InntektService;
-import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sob.SobService;
 import org.junit.Before;
 import org.junit.Rule;
@@ -24,11 +28,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.util.List;
-import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -89,7 +88,7 @@ public class RegisteropplysningerServiceTest {
     }
 
     @Test
-    public void hentOgLagreOpplysninger_medAlleOpplysninger_alleBlirHentetOgLagret() throws MelosysException {
+    public void hentOgLagreOpplysninger_medAlleOpplysninger_alleBlirHentetOgLagret() {
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
                 .behandlingID(2L)
@@ -122,7 +121,7 @@ public class RegisteropplysningerServiceTest {
     }
 
     @Test
-    public void hentOgLagreOpplysninger_medAlleOpplysningerIVilkårligRekkefølge_alleBlirHentetOgLagretIRettRekkefølge() throws MelosysException {
+    public void hentOgLagreOpplysninger_medAlleOpplysningerIVilkårligRekkefølge_alleBlirHentetOgLagretIRettRekkefølge() {
         Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
         arbeidsforhold.arbeidsgiverID = "123456789";
 
@@ -137,16 +136,7 @@ public class RegisteropplysningerServiceTest {
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
                 .behandlingID(2L)
-                .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
-                    .sakOgBehandlingopplysninger()
-                    .medlemskapsopplysninger()
-                    .personhistorikkopplysninger()
-                    .organisasjonsopplysninger()
-                    .utbetalingsopplysninger()
-                    .arbeidsforholdopplysninger()
-                    .personopplysninger()
-                    .inntektsopplysninger()
-                    .build())
+                .saksopplysningTyper(RegisteropplysningerRequest.hentAlleSaksopplysningTyper())
                 .fom(LocalDate.now().minusYears(1))
                 .tom(LocalDate.now().plusYears(1))
                 .fnr(FNR)
@@ -172,7 +162,7 @@ public class RegisteropplysningerServiceTest {
     }
 
     @Test
-    public void hentArbeidsforholdopplysninger() throws MelosysException {
+    public void hentArbeidsforholdopplysninger() {
         LocalDate fom = LocalDate.now().minusMonths(1);
         LocalDate tom = LocalDate.now();
         when(aaregFasade.finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.ARBFORH));
@@ -187,7 +177,7 @@ public class RegisteropplysningerServiceTest {
 
 
     @Test
-    public void hentPersonopplysninger() throws MelosysException {
+    public void hentPersonopplysninger() {
         Behandling behandling = new Behandling();
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("123");
@@ -202,7 +192,7 @@ public class RegisteropplysningerServiceTest {
     }
 
     @Test
-    public void hentMedlemskapsopplysninger() throws MelosysException {
+    public void hentMedlemskapsopplysninger() {
         LocalDate fom = LocalDate.now().minusYears(1);
         LocalDate tom = LocalDate.now().plusYears(1);
         Saksopplysning saksopplysning = hentSedSaksopplysning(fom, tom);
@@ -217,7 +207,7 @@ public class RegisteropplysningerServiceTest {
     }
 
     @Test
-    public void hentInntektsopplysninger() throws MelosysException {
+    public void hentInntektsopplysninger() {
         LocalDate fom = LocalDate.now().minusYears(3);
         LocalDate tom = LocalDate.now().minusYears(2);
         Saksopplysning saksopplysning = hentSedSaksopplysning(fom, tom);
@@ -233,7 +223,7 @@ public class RegisteropplysningerServiceTest {
 
 
     @Test
-    public void hentUtbetalingsopplysninger() throws MelosysException {
+    public void hentUtbetalingsopplysninger() {
         LocalDate fom = LocalDate.now().minusYears(1);
         LocalDate tom = LocalDate.now().plusYears(1);
         Saksopplysning saksopplysning = hentSedSaksopplysning(fom, tom);
@@ -248,7 +238,7 @@ public class RegisteropplysningerServiceTest {
     }
 
     @Test
-    public void hentUtbetalingsopplysninger_periode5ÅrTilbakeITid_kanIkkeHenteUtbetalOpplysninger() throws MelosysException {
+    public void hentUtbetalingsopplysninger_periode5ÅrTilbakeITid_kanIkkeHenteUtbetalOpplysninger() {
         LocalDate fom = LocalDate.now().minusYears(5);
         LocalDate tom = LocalDate.now().minusYears(4);
 
@@ -261,7 +251,28 @@ public class RegisteropplysningerServiceTest {
     }
 
     @Test
-    public void hentOgLagreOpplysninger_kunBehandlingID_forventHentBehandling() throws MelosysException {
+    public void hentOgLagreOpplysninger_feilIPeriode_kanIkkeHenteOpplysningerSomBrukerPeriode() {
+        LocalDate fom = LocalDate.now().plusYears(2);
+        LocalDate tom = LocalDate.now();
+
+        registeropplysningerService.hentOgLagreOpplysninger(new RegisteropplysningerRequest(
+            2L, RegisteropplysningerRequest.hentAlleSaksopplysningTyper().getOpplysningstyper(), FNR, fom, tom, null
+        ));
+
+        verify(aaregFasade, never()).finnArbeidsforholdPrArbeidstaker(anyString(), any(), any());
+        verify(inntektService, never()).hentInntektListe(anyString(), any(), any());
+        verify(medlPeriodeService, never()).hentPeriodeListe(anyString(), any(), any());
+        verify(persondataFasade, never()).hentPersonhistorikk(anyString(), any());
+        verify(utbetaldataService, never()).hentUtbetalingerBarnetrygd(anyString(), any(), any());
+
+        verify(eregFasade).hentOrganisasjon(anyString());
+        verify(persondataFasade).hentPerson(anyString(), eq(Informasjonsbehov.STANDARD));
+        verify(sobService).finnSakOgBehandlingskjedeListe(eq(AKTØR_ID));
+        verify(behandlingService).lagre(any(Behandling.class));
+    }
+
+    @Test
+    public void hentOgLagreOpplysninger_kunBehandlingID_forventHentBehandling() {
         registeropplysningerService.hentOgLagreOpplysninger(RegisteropplysningerRequest.builder()
             .fnr(FNR)
             .behandlingID(1L)

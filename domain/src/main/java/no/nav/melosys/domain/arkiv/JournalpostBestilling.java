@@ -3,21 +3,23 @@ package no.nav.melosys.domain.arkiv;
 public final class JournalpostBestilling {
     private final String tittel;
     private final String brevkode;
+    private final String dokumentKategori;
     private final String brukerFnr;
     private final String mottakerNavn;
     private final String mottakerId;
     private final boolean erMottakerOrg;
-    private final String arkivSakId;
+    private final String saksnummer;
     private final byte[] pdf;
 
     private JournalpostBestilling(Builder builder) {
         this.tittel = builder.tittel;
         this.brevkode = builder.brevkode;
+        this.dokumentKategori = builder.dokumentKategori;
         this.brukerFnr = builder.brukerFnr;
         this.mottakerNavn = builder.mottakerNavn;
         this.mottakerId = builder.mottakerId;
         this.erMottakerOrg = builder.erMottakerOrg;
-        this.arkivSakId = builder.arkivSakId;
+        this.saksnummer = builder.saksnummer;
         this.pdf = builder.pdf;
     }
 
@@ -27,6 +29,10 @@ public final class JournalpostBestilling {
 
     public String getBrevkode() {
         return brevkode;
+    }
+
+    public String getDokumentKategori() {
+        return dokumentKategori;
     }
 
     public String getBrukerFnr() {
@@ -45,8 +51,8 @@ public final class JournalpostBestilling {
         return erMottakerOrg;
     }
 
-    public String getArkivSakId() {
-        return arkivSakId;
+    public String getSaksnummer() {
+        return saksnummer;
     }
 
     public byte[] getPdf() {
@@ -56,11 +62,12 @@ public final class JournalpostBestilling {
     public static class Builder {
         private String tittel;
         private String brevkode;
+        private String dokumentKategori;
         private String brukerFnr;
         private String mottakerNavn;
         private String mottakerId;
         private boolean erMottakerOrg;
-        private String arkivSakId;
+        private String saksnummer;
         private byte[] pdf;
 
         public Builder medTittel(String tittel) {
@@ -70,6 +77,11 @@ public final class JournalpostBestilling {
 
         public Builder medBrevkode(String brevkode) {
             this.brevkode = brevkode;
+            return this;
+        }
+
+        public Builder medDokumentKategori(String dokumentKategori) {
+            this.dokumentKategori = dokumentKategori;
             return this;
         }
 
@@ -93,8 +105,8 @@ public final class JournalpostBestilling {
             return this;
         }
 
-        public Builder medArkivSakId(String arkivSakId) {
-            this.arkivSakId = arkivSakId;
+        public Builder medSaksnummer(String saksnummer) {
+            this.saksnummer = saksnummer;
             return this;
         }
 

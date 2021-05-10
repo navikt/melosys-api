@@ -80,7 +80,10 @@ public class DokumentTjeneste {
         throws TekniskException, FunksjonellException {
         byte[] dokument;
         tilgangService.sjekkTilgang(behandlingID);
-        dokument = dokumentServiceFasade.produserUtkast(produserbartDokument, behandlingID, brevBestillingDto);
+
+        brevBestillingDto.setProduserbardokument(produserbartDokument);
+
+        dokument = dokumentServiceFasade.produserUtkast(behandlingID, brevBestillingDto);
         return lagResponseAvDokument(dokument, produserbartDokument.getKode() + "_utkast.pdf");
     }
 
@@ -88,7 +91,7 @@ public class DokumentTjeneste {
         produces = {MediaType.APPLICATION_PDF_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<byte[]> produserUtkastSed(@PathVariable("behandlingID") long behandlingID,
                                                     @PathVariable("sedType") SedType sedType,
-                                                    @RequestBody SedPdfData sedPdfData) throws MelosysException {
+                                                    @RequestBody SedPdfData sedPdfData) {
         tilgangService.sjekkTilgang(behandlingID);
         byte[] dokument = eessiService.genererSedPdf(behandlingID, sedType, sedPdfData);
         return lagResponseAvDokument(dokument, sedType.name() + "_utkast.pdf");
@@ -105,9 +108,12 @@ public class DokumentTjeneste {
             throw new FunksjonellException("Mottaker trengs for å bestille.");
         }
         tilgangService.sjekkTilgang(behandlingID);
+
+        brevBestillingDto.setProduserbardokument(produserbartDokument);
+
         // Produserer utkast for å få eventuelle feil før bestilling i saksflyt.
-        dokumentServiceFasade.produserUtkast(produserbartDokument, behandlingID, brevBestillingDto);
-        dokumentServiceFasade.produserDokument(produserbartDokument, behandlingID, brevBestillingDto);
+        dokumentServiceFasade.produserUtkast(behandlingID, brevBestillingDto);
+        dokumentServiceFasade.produserDokument(behandlingID, brevBestillingDto);
         return ResponseEntity.noContent().build();
     }
 

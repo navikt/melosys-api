@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import no.nav.melosys.domain.arkiv.BrukerIdType;
 import no.nav.melosys.domain.arkiv.FysiskDokument;
 import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
@@ -25,7 +26,7 @@ public class OpprettJournalpostRequest {
     private String journalfoerendeEnhet;
     private String eksternReferanseId;
 
-    private List<Tilleggsopplysning> tilleggsopplysninger = new ArrayList<>();
+    private List<Tilleggsopplysning> tilleggsopplysninger;
 
     private Sak sak;
 
@@ -70,11 +71,11 @@ public class OpprettJournalpostRequest {
                 opprettJournalpost.getKorrespondansepartNavn(),
                 opprettJournalpost.getKorrespondansepartIdType(),
                 opprettJournalpost.getKorrespondansepartLand()))
-            .bruker(bruker(opprettJournalpost.getBrukerId()))
+            .bruker(bruker(opprettJournalpost.getBrukerId(), opprettJournalpost.getBrukerIdType()))
             .tema(opprettJournalpost.getTema())
             .kanal(opprettJournalpost.getMottaksKanal())
             .eksternReferanseId(opprettJournalpost.getEksternReferanseId())
-            .sak(arkivsak(opprettJournalpost.getArkivSakId()))
+            .sak(new Sak(opprettJournalpost.getSaksnummer()))
             .journalfoerendeEnhet(opprettJournalpost.getJournalførendeEnhet())
             .journalpostType(JournalpostType.av(opprettJournalpost.getJournalposttype()))
             .tittel(opprettJournalpost.getInnhold())
@@ -94,14 +95,18 @@ public class OpprettJournalpostRequest {
             .build();
     }
 
-    private static Bruker bruker(String fnr) {
-        return Bruker.builder()
-            .id(fnr).idType(Bruker.BrukerIdType.FNR)
-            .build();
+    private static Bruker bruker(String brukerID, BrukerIdType brukerIdType) {
+        return (brukerID != null && brukerIdType != null)
+            ? Bruker.builder().id(brukerID).idType(tilBrukerIdType(brukerIdType)).build()
+            : null;
     }
 
-    private static Sak arkivsak(String gsakSaksnummer) {
-        return Sak.builder().arkivsaksnummer(gsakSaksnummer).build();
+    private static Bruker.BrukerIdType tilBrukerIdType(BrukerIdType brukerIdType) {
+        return switch (brukerIdType) {
+            case FOLKEREGISTERIDENT -> Bruker.BrukerIdType.FNR;
+            case AKTØR_ID -> Bruker.BrukerIdType.AKTOERID;
+            case ORGNR -> Bruker.BrukerIdType.ORGNR;
+        };
     }
 
     private static List<Dokument> dokumenter(OpprettJournalpost opprettJournalpost) {
@@ -198,15 +203,11 @@ public class OpprettJournalpostRequest {
         NOTAT;
 
         public static JournalpostType av(Journalposttype journalposttype) {
-            switch (journalposttype) {
-                case INN:
-                    return INNGAAENDE;
-                case UT:
-                    return UTGAAENDE;
-                case NOTAT:
-                    return NOTAT;
-            }
-            throw new IllegalArgumentException("Finner ikke journalposttype " + journalposttype);
+            return switch (journalposttype) {
+                case INN -> INNGAAENDE;
+                case UT -> UTGAAENDE;
+                case NOTAT -> NOTAT;
+            };
         }
     }
 
@@ -224,9 +225,6 @@ public class OpprettJournalpostRequest {
         private Sak sak;
         private List<Dokument> dokumenter;
         private LocalDate datoMottatt;
-
-        public OpprettJournalpostRequestBuilder() {
-        }
 
         public OpprettJournalpostRequest.OpprettJournalpostRequestBuilder journalpostType(JournalpostType journalpostType) {
             this.journalpostType = journalpostType;

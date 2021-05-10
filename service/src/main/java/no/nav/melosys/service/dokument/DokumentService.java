@@ -67,10 +67,8 @@ public class DokumentService {
     // være påkrevd for Hibernate å finne en sesjon via Spring-transaksjonen
     // for å kunne laste lazy collections i objektgrafen.
     @Transactional(readOnly = true)
-    public byte[] produserUtkast(Produserbaredokumenter produserbartDokument,
-                                 long behandlingID,
-                                 BrevbestillingDto brevbestillingDto)
-        throws TekniskException, FunksjonellException {
+    public byte[] produserUtkast(long behandlingID, BrevbestillingDto brevbestillingDto) throws TekniskException, FunksjonellException {
+        Produserbaredokumenter produserbartDokument = brevbestillingDto.getProduserbardokument();
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Aktoersroller mottakerRolle = brevbestillingDto.getMottaker() == null ?
             brevmottakerService.avklarMottakerRolleFraDokument(produserbartDokument) : brevbestillingDto.getMottaker();

@@ -13,14 +13,13 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.exception.validering.KontrollfeilDto;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
-import no.nav.melosys.service.vedtak.VedtakService;
+import no.nav.melosys.service.vedtak.VedtakServiceFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,7 +39,7 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
-    private VedtakService vedtakService;
+    private VedtakServiceFasade vedtakService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
@@ -129,7 +128,7 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
 
         bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
 
-        verify(vedtakService, never()).fattVedtak(anyLong(), any());
+        verify(vedtakService, never()).fattVedtak(anyLong(), eq(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND));
         verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
     }
 
@@ -158,7 +157,7 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
     }
 
     @Test
-    void utfør_valideringsfeilFattVedtak_statusSvarAouMottattBehandling() throws MelosysException {
+    void utfør_valideringsfeilFattVedtak_statusSvarAouMottattBehandling() throws Exception {
         KontrollfeilDto kontrollfeilDto = new KontrollfeilDto();
         kontrollfeilDto.setKode(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER.getKode());
 
@@ -181,8 +180,8 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
 
         bestemBehandlingsmåteSvarAnmodningUnntak.utfør(prosessinstans);
 
-        verify(vedtakService).fattVedtak(eq(123L), eq(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND));
-        verify(behandlingsresultatService, never()).oppdaterBehandlingsMaate(eq(123L), eq(Behandlingsmaate.DELVIS_AUTOMATISERT));
+        verify(vedtakService).fattVedtak(123L, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        verify(behandlingsresultatService, never()).oppdaterBehandlingsMaate(123L, Behandlingsmaate.DELVIS_AUTOMATISERT);
         verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.SVAR_ANMODNING_MOTTATT));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(anyLong(), captor.capture());
 

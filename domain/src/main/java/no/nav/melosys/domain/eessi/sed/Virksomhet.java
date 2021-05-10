@@ -1,5 +1,7 @@
 package no.nav.melosys.domain.eessi.sed;
 
+import java.util.UUID;
+
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.eessi.SedOrganisasjon;
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +33,7 @@ public class Virksomhet {
     private ForetakUtland tilForetakUtland(boolean erSelvstendig) {
         ForetakUtland foretakUtland = new ForetakUtland();
 
+        foretakUtland.uuid = UUID.randomUUID().toString();
         foretakUtland.navn = navn;
         foretakUtland.orgnr = orgnr;
         foretakUtland.adresse = adresse.tilStrukturertAdresse();
