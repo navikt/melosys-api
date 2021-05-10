@@ -17,7 +17,6 @@ import no.nav.melosys.domain.inngangsvilkar.Kategori;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Inngangsvilkaar;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarConsumerImpl;
 import no.nav.melosys.service.SaksopplysningerService;
@@ -220,16 +219,16 @@ public class InngangsvilkaarServiceTest {
     }
 
     @Test
-    public void overstyrInngangsvilkårTilOppfylt_ingenInngangsvilkårFunnet_kasterIkkeFunnetException() {
+    public void overstyrInngangsvilkårTilOppfylt_ingenInngangsvilkårFunnet_kasterFunksjonellException() {
         when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(Optional.empty());
 
-        assertThatExceptionOfType(IkkeFunnetException.class)
+        assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(1L))
-            .withMessage("Finner ikke inngangsvilkår for behandlingID 1");
+            .withMessage("Inngangsvilkår er ikke vurdert for behandling 1");
     }
 
     @Test
-    public void overstyrInngangsvilkårTilOppfylt_inngangsvilkårFunnet_oppfyllerVilkår() throws IkkeFunnetException {
+    public void overstyrInngangsvilkårTilOppfylt_inngangsvilkårFunnet_oppfyllerVilkår() throws FunksjonellException {
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
         when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(Optional.of(vilkaarsresultat));
 
@@ -239,7 +238,7 @@ public class InngangsvilkaarServiceTest {
     }
 
     @Test
-    public void overstyrInngangsvilkårTilOppfylt_inngangsvilkårFunnet_beholderGamleBegrunnelserOgLeggerTilOverstyringsbegrunnelse() throws IkkeFunnetException {
+    public void overstyrInngangsvilkårTilOppfylt_inngangsvilkårFunnet_beholderGamleBegrunnelserOgLeggerTilOverstyringsbegrunnelse() throws FunksjonellException {
         VilkaarBegrunnelse vilkaarBegrunnelse = new VilkaarBegrunnelse();
         vilkaarBegrunnelse.setKode(Inngangsvilkaar.MANGLER_STATSBORGERSKAP.getKode());
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();

@@ -118,10 +118,10 @@ public class InngangsvilkaarService {
         }
     }
 
-    public void overstyrInngangsvilkårTilOppfylt(long behandlingID) throws IkkeFunnetException {
+    public void overstyrInngangsvilkårTilOppfylt(long behandlingID) throws FunksjonellException {
         final var inngangsvilkaar = vilkaarsresultatService.finnVilkaarsresultat(behandlingID, FO_883_2004_INNGANGSVILKAAR);
         if (inngangsvilkaar.isEmpty()) {
-            throw new IkkeFunnetException("Finner ikke inngangsvilkår for behandlingID " + behandlingID);
+            throw new FunksjonellException("Inngangsvilkår er ikke vurdert for behandling " + behandlingID);
         }
         final var inngangsvilkaarBegrunnelseKoder = inngangsvilkaar.get().getBegrunnelser().stream()
             .map(VilkaarBegrunnelse::getKode)
