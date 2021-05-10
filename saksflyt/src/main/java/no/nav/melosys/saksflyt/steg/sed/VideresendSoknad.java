@@ -21,7 +21,6 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -69,7 +68,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) {
         SendUtlandStatus sendtStatus = sendUtland(
             BucType.LA_BUC_03,
             prosessinstans,
@@ -97,7 +96,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
     }
 
     @Override
-    protected void sendBrev(Prosessinstans prosessinstans) throws MelosysException {
+    protected void sendBrev(Prosessinstans prosessinstans) {
         Behandling behandling = prosessinstans.getBehandling();
 
         // Fagsak må hentes på nytt fra db da den har blitt oppdatert i AvklarMyndighet

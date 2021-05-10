@@ -7,7 +7,6 @@ import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.person.Informasjonsbehov;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.KontrollresultatService;
@@ -47,8 +46,8 @@ public class OppfriskSaksopplysningerService {
         this.persondataFasade = persondataFasade;
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void oppfriskSaksopplysning(long behandlingID, boolean medFamilierelasjoner) throws MelosysException {
+    @Transactional
+    public void oppfriskSaksopplysning(long behandlingID, boolean medFamilierelasjoner) {
         log.info("Starter oppfrisking av behandlingID: {} ", behandlingID);
 
         Behandling behandling = behandlingService.hentBehandling(behandlingID);

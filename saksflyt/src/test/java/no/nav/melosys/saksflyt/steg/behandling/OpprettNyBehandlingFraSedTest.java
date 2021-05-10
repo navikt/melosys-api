@@ -11,7 +11,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -71,7 +70,7 @@ class OpprettNyBehandlingFraSedTest {
 
 
     @Test
-    void utfør_harTidligereBehandlingOgOppgave_nyBehandlingOpprettet() throws MelosysException {
+    void utfør_harTidligereBehandlingOgOppgave_nyBehandlingOpprettet() {
         final long gsakSaksnummer = 123L;
         final Behandlingstema behandlingstema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
         final String journalpostID = "jp123";

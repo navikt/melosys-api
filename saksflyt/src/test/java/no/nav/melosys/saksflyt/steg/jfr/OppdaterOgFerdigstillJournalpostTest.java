@@ -11,7 +11,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +40,7 @@ class OppdaterOgFerdigstillJournalpostTest {
     }
 
     @Test
-    void utfør_avsenderNavnErNull_setterAvsenderNavnTilAvsenderId() throws MelosysException {
+    void utfør_avsenderNavnErNull_setterAvsenderNavnTilAvsenderId() {
         var prosessinstans = prosessinstans(false);
         oppdaterOgFerdigstillJournalpost.utfør(prosessinstans);
 
@@ -51,7 +50,7 @@ class OppdaterOgFerdigstillJournalpostTest {
     }
 
     @Test
-    void utfør_avsenderNavnErSatt_brukerAvsenderNavn() throws MelosysException {
+    void utfør_avsenderNavnErSatt_brukerAvsenderNavn() {
         var prosessinstans = prosessinstans(true);
         oppdaterOgFerdigstillJournalpost.utfør(prosessinstans);
 

@@ -17,7 +17,6 @@ import no.nav.melosys.domain.eessi.sed.SedDataDto;
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagA003Dto;
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto;
 import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -76,7 +75,7 @@ class EessiConsumerTest {
     }
 
     @Test
-    void hentTilknyttedeBucer_medEnStatus_forventBucer() throws MelosysException, IOException, URISyntaxException {
+    void hentTilknyttedeBucer_medEnStatus_forventBucer() throws IOException, URISyntaxException {
         URI uri = Objects.requireNonNull(getClass().getClassLoader().getResource("mock/eux/bucer.json")).toURI();
         String json = new String(Files.readAllBytes(Paths.get(uri)));
 
@@ -104,7 +103,7 @@ class EessiConsumerTest {
     }
 
     @Test
-    void hentTilknyttedeBucer_medFlereStatuser_forventRettSti() throws MelosysException {
+    void hentTilknyttedeBucer_medFlereStatuser_forventRettSti() {
         server.expect(requestTo("/sak/1/bucer?statuser=UTKAST,MOTTATT,SENDT"))
             .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON));
 
@@ -112,7 +111,7 @@ class EessiConsumerTest {
     }
 
     @Test
-    void hentTilknyttedeBucer_medIngenStatuser_forventRettSti() throws MelosysException {
+    void hentTilknyttedeBucer_medIngenStatuser_forventRettSti() {
         server.expect(requestTo("/sak/1/bucer?statuser=SENDT,UTKAST"))
             .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON));
 
@@ -120,7 +119,7 @@ class EessiConsumerTest {
     }
 
     @Test
-    void hentMottakerinstitusjoner_forventInstitusjoner() throws MelosysException {
+    void hentMottakerinstitusjoner_forventInstitusjoner() {
         server.expect(requestTo("/buc/LA_BUC_01/institusjoner?land=DE,PL"))
             .andRespond(withSuccess("[{\"id\":\"NO:NAVT002\",\"navn\":\"NAVT002\",\"landkode\":\"NO\"}]",
                 MediaType.APPLICATION_JSON));
@@ -141,14 +140,14 @@ class EessiConsumerTest {
     }
 
     @Test
-    void lagreSaksrelasjon_validerUrl() throws MelosysException {
+    void lagreSaksrelasjon_validerUrl() {
         server.expect(requestTo("/sak"))
             .andRespond(withSuccess());
         eessiConsumer.lagreSaksrelasjon(new SaksrelasjonDto(123L, "123", "123"));
     }
 
     @Test
-    void hentSakForRinaSaksnummer_validerUrlOgResponse() throws MelosysException {
+    void hentSakForRinaSaksnummer_validerUrlOgResponse() {
         final String rinaSaksnummer = "114422";
         final long gsakSaksnummer = 123L;
         final String bucType = "LA_BUC_04";
@@ -169,7 +168,7 @@ class EessiConsumerTest {
     }
 
     @Test
-    void hentMelosysEessiMeldingFraJournalpostID_validerResponse() throws MelosysException, JsonProcessingException {
+    void hentMelosysEessiMeldingFraJournalpostID_validerResponse() throws JsonProcessingException {
         final String journalpostID = "115314";
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setSedType("A009");
@@ -185,7 +184,7 @@ class EessiConsumerTest {
     }
 
     @Test
-    void genererSedForhåndsvisning() throws MelosysException {
+    void genererSedForhåndsvisning() {
         final byte[] PDF = "pdf".getBytes();
         server.expect(requestTo("/sed/A001/pdf"))
             .andRespond(withSuccess(PDF, MediaType.APPLICATION_PDF));
@@ -195,7 +194,7 @@ class EessiConsumerTest {
     }
 
     @Test
-    void hentSedGrunnlag_medSedType_rettInstans() throws MelosysException {
+    void hentSedGrunnlag_medSedType_rettInstans() {
         server.expect(requestTo("/buc/1234/sed/abcdef/grunnlag"))
             .andRespond(withSuccess("{\"sedType\": \"A003\"}", MediaType.APPLICATION_JSON));
 

@@ -107,6 +107,6 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
         if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) return;
         FeilResponseDto feilResponseDto = response.readEntity(FeilResponseDto.class);
         log.error("Feil oppstod. Uuid={}, Response Kode={}, Feilmelding={}", feilResponseDto.getUuid(), response.getStatus(), feilResponseDto.getFeilmelding());
-        httpStatusTilMelosysException(response.getStatus(), feilResponseDto.getFeilmelding());
+        httpStatusTilException(response.getStatus(), feilResponseDto.getFeilmelding());
     }
 }

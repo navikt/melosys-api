@@ -80,7 +80,7 @@ class OppgaveConsumerImplTest {
         );
 
         assertThatThrownBy(() -> oppgaveConsumer.hentOppgave("1"))
-            .hasRootCauseInstanceOf(IkkeFunnetException.class)
+            .isInstanceOf(IkkeFunnetException.class)
             .hasMessageContaining("Fant ingen oppgave");
     }
 

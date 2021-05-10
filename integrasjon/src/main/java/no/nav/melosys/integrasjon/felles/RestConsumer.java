@@ -3,7 +3,10 @@ package no.nav.melosys.integrasjon.felles;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.felles.mdc.MDCOperations;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.core.env.Environment;
@@ -45,7 +48,7 @@ public interface RestConsumer {
         return false;
     }
 
-    default MelosysException tilException(String feilmelding, HttpStatus status) {
+    default RuntimeException tilException(String feilmelding, HttpStatus status) {
         if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.FORBIDDEN) {
             return new SikkerhetsbegrensningException(feilmelding);
         } else if (status == HttpStatus.NOT_FOUND) {

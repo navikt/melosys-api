@@ -12,7 +12,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.LandvelgerService;
@@ -63,9 +62,9 @@ public class AnmodningUnntakService {
         this.anmodningUnntakKontrollService = anmodningUnntakKontrollService;
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public void anmodningOmUnntak(long behandlingID, String mottakerinstitusjon,
-                                  Set<DokumentReferanse> vedleggReferanser, String ytterligereInformasjonSed) throws MelosysException {
+                                  Set<DokumentReferanse> vedleggReferanser, String ytterligereInformasjonSed) throws ValideringException {
         Set<String> mottakerinstitusjoner = validerMottakerInstitusjon(behandlingID, mottakerinstitusjon);
 
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
@@ -79,7 +78,7 @@ public class AnmodningUnntakService {
         oppgaveService.leggTilbakeOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private Set<String> validerMottakerInstitusjon(long behandlingID, String mottakerinstitusjon) throws MelosysException {
+    private Set<String> validerMottakerInstitusjon(long behandlingID, String mottakerinstitusjon) {
         Landkoder landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream().findFirst()
             .orElseThrow(() -> new FunksjonellException("Finner ikke utenlandsk myndighet for behandling " + behandlingID));
 
@@ -88,7 +87,7 @@ public class AnmodningUnntakService {
             List.of(landkode), BucType.LA_BUC_01);
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public void anmodningOmUnntakSvar(long behandlingID) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         validerBehandlingstemaUnntak(behandling);
@@ -127,7 +126,7 @@ public class AnmodningUnntakService {
         }
     }
 
-    private void kontrollerAnmodningOmUnntak(long behandlingID) throws MelosysException {
+    private void kontrollerAnmodningOmUnntak(long behandlingID) throws ValideringException {
         Collection<Kontrollfeil> feilValideringer = anmodningUnntakKontrollService.utførKontroller(behandlingID);
         if (!feilValideringer.isEmpty()) {
             throw new ValideringException("Feil i validering. Kan ikke sende anmodning om unntak.",
