@@ -11,6 +11,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.LoennOgGodtgjoerelse;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Utenlandsoppdraget;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.ArbeidPaaLand;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
@@ -47,6 +48,7 @@ public final class SoeknadMapper {
             soeknad.foretakUtland.add(lagUtenlandskVirksomhet(virksomhetIUtlandet));
         }
         soeknad.juridiskArbeidsgiverNorge = lagJuridiskArbeidsgiverNorge(innhold.getArbeidsgiver());
+        soeknad.utenlandsoppdraget = lagUtenlandsoppdraget(innhold.getMidlertidigUtsendt().getUtenlandsoppdraget());
         return soeknad;
     }
 
@@ -58,8 +60,12 @@ public final class SoeknadMapper {
     private static Periode lagPeriode(Innhold innhold) {
         Tidsrom utsendingsperiode = innhold.getMidlertidigUtsendt().getUtenlandsoppdraget()
             .getPeriodeUtland();
-        LocalDate periodeFra = xmlCalTilLocalDate(utsendingsperiode.getPeriodeFra());
-        LocalDate periodeTil = xmlCalTilLocalDate(utsendingsperiode.getPeriodeTil());
+        return lagPeriode(utsendingsperiode);
+    }
+
+    private static Periode lagPeriode(Tidsrom tidsrom) {
+        LocalDate periodeFra = xmlCalTilLocalDate(tidsrom.getPeriodeFra());
+        LocalDate periodeTil = xmlCalTilLocalDate(tidsrom.getPeriodeTil());
         return new Periode(periodeFra, periodeTil);
     }
 
@@ -227,6 +233,23 @@ public final class SoeknadMapper {
             juridiskArbeidsgiverNorge.ekstraArbeidsgivere = List.of(arbeidsgiver.getVirksomhetsnummer());
         }
         return juridiskArbeidsgiverNorge;
+    }
+
+    private static Utenlandsoppdraget lagUtenlandsoppdraget(no.nav.melosys.soknad_altinn.Utenlandsoppdraget utenlandsoppdraget) {
+        Periode samletUtsendingsperiode = null;
+        if (Boolean.TRUE.equals(utenlandsoppdraget.isErstatterTidligereUtsendte())
+            && utenlandsoppdraget.getSamletUtsendingsperiode() != null) {
+            samletUtsendingsperiode = lagPeriode(utenlandsoppdraget.getSamletUtsendingsperiode());
+        }
+
+        return new Utenlandsoppdraget(
+            samletUtsendingsperiode,
+            utenlandsoppdraget.isSendesUtOppdragIUtlandet(),
+            utenlandsoppdraget.isAnsattEtterOppdraget(),
+            utenlandsoppdraget.isAnsattForOppdragIUtlandet(),
+            utenlandsoppdraget.isDrattPaaEgetInitiativ(),
+            utenlandsoppdraget.isErstatterTidligereUtsendte()
+        );
     }
 
     private static LocalDate xmlCalTilLocalDate(XMLGregorianCalendar calendar) {
