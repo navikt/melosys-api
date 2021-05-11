@@ -14,18 +14,19 @@ import no.nav.melosys.service.dokument.brev.BrevDataUtpekingAnnetLand;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.utpeking.UtpekingService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BrevDataByggerUtpekingAnnetLandTest {
+@ExtendWith(MockitoExtension.class)
+class BrevDataByggerUtpekingAnnetLandTest {
     @Mock
     UtpekingService utpekingService;
     @Mock
@@ -33,7 +34,7 @@ public class BrevDataByggerUtpekingAnnetLandTest {
 
     private BrevDataByggerUtpekingAnnetLand brevDataByggerUtpekingAnnetLand;
 
-    @Before
+    @BeforeEach
     public void setUp() throws FunksjonellException, TekniskException {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
@@ -42,7 +43,7 @@ public class BrevDataByggerUtpekingAnnetLandTest {
     }
 
     @Test
-    public void lag_medUtpekingPeriode_girBrevdata() throws FunksjonellException {
+    void lag_medUtpekingPeriode_girBrevdata() throws FunksjonellException {
         Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.now(), null, Landkoder.CY,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
         when(utpekingService.hentUtpekingsperioder(eq(1L))).thenReturn(List.of(utpekingsperiode));
@@ -51,8 +52,10 @@ public class BrevDataByggerUtpekingAnnetLandTest {
         assertThat(((BrevDataUtpekingAnnetLand)brevData).utpekingsperiode).isEqualTo(utpekingsperiode);
     }
 
-    @Test(expected = FunksjonellException.class)
-    public void lag_utenUtpekingPeriode_kasterException() throws FunksjonellException {
-        brevDataByggerUtpekingAnnetLand.lag(brevDataGrunnlag, "sb");
+    @Test
+    void lag_utenUtpekingPeriode_kasterException() throws FunksjonellException {
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> brevDataByggerUtpekingAnnetLand.lag(brevDataGrunnlag, "sb"))
+            .withMessageContaining("uten utpekingsperiode");
     }
 }

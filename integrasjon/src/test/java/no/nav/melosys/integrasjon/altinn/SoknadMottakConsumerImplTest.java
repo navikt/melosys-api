@@ -14,8 +14,8 @@ import no.nav.melosys.domain.msm.AltinnDokument;
 import no.nav.melosys.soknad_altinn.Innhold;
 import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM;
 import no.nav.melosys.soknad_altinn.MidlertidigUtsendt;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -36,7 +36,7 @@ public class SoknadMottakConsumerImplTest {
 
     private final String søknadID = "grj304iht";
 
-    @Before
+    @BeforeEach
     public void setup() {
         server = MockRestServiceServer.createServer(restTemplate);
         soknadMottakConsumer = new SoknadMottakConsumerImpl(restTemplate);

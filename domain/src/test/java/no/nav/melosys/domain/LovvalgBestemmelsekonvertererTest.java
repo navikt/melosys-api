@@ -5,7 +5,7 @@ import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 public final class LovvalgBestemmelsekonvertererTest {
 
     private final LovvalgBestemmelsekonverterer instans;
-    
+
     public LovvalgBestemmelsekonvertererTest() {
         instans = new LovvalgBestemmelsekonverterer();
     }
@@ -22,7 +22,7 @@ public final class LovvalgBestemmelsekonvertererTest {
     public void konverterFra883_2004TilDbKolonneGirStreng() {
         testConvertToDatabseColumn(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2, "ART16_2");
     }
-    
+
     @Test
     public void konverterFra987_2009TilDbKolonneGirStreng() {
         testConvertToDatabseColumn(Lovvalgbestemmelser_987_2009.FO_987_2009_ART14_11, "ART14_11");

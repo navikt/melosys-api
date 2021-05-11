@@ -1,65 +1,63 @@
 package no.nav.melosys.service.avklartefakta;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AvklartefaktaDtoKonvertererTest {
+@ExtendWith(MockitoExtension.class)
+class AvklartefaktaDtoKonvertererTest {
 
     private AvklartefaktaDtoKonverterer avklartefaktaDtoKonverterer;
 
     private AvklartefaktaDto avklartefaktaDto;
 
-    @Before
+    @BeforeEach
     public void setup() {
         avklartefaktaDtoKonverterer = new AvklartefaktaDtoKonverterer();
-
-        Avklartefakta avklartefakta = new Avklartefakta();
-
-        avklartefaktaDto = new AvklartefaktaDto(new ArrayList<>(Arrays.asList("Bosted")),"yrkestypevalgliste");
+        avklartefaktaDto = new AvklartefaktaDto(new ArrayList<>(Collections.singletonList("Bosted")),"yrkestypevalgliste");
         avklartefaktaDto.setSubjektID("123456789");
     }
 
     @Test
-    public void testOppdaterAvklartefaktaInnhold() {
+    void testOppdaterAvklartefaktaInnhold() {
         Avklartefakta avklartefakta = avklartefaktaDtoKonverterer.opprettAvklartefaktaFraDto(avklartefaktaDto, null);
 
-        assertEquals(avklartefakta.getSubjekt(), avklartefaktaDto.getSubjektID());
-        assertEquals(avklartefakta.getType(), avklartefaktaDto.getAvklartefaktaType());
-        assertEquals(avklartefakta.getFakta(), avklartefaktaDto.getFakta().stream().collect(Collectors.joining(" ")));
-        assertEquals(avklartefakta.getBegrunnelseFritekst(), avklartefaktaDto.getBegrunnelseFritekst());
+        assertThat(avklartefakta.getSubjekt()).isEqualTo(avklartefaktaDto.getSubjektID());
+        assertThat(avklartefakta.getType()).isEqualTo(avklartefaktaDto.getAvklartefaktaType());
+        assertThat(avklartefakta.getFakta()).isEqualTo(String.join(" ", avklartefaktaDto.getFakta()));
+        assertThat(avklartefakta.getBegrunnelseFritekst()).isEqualTo(avklartefaktaDto.getBegrunnelseFritekst());
     }
 
     @Test
-    public void testOppdaterAvklartefaktaUtenBegrunnelse() {
+    void testOppdaterAvklartefaktaUtenBegrunnelse() {
         Avklartefakta avklartefakta = avklartefaktaDtoKonverterer.opprettAvklartefaktaFraDto(avklartefaktaDto, null);
 
-        assertEquals(0, avklartefakta.getRegistreringer().size());
+        assertThat(avklartefakta.getRegistreringer()).isEmpty();
     }
 
     @Test
-    public void testOppdaterAvklarteFaktaBegrunnelser() {
+    void testOppdaterAvklarteFaktaBegrunnelser() {
         avklartefaktaDto.setBegrunnelseKoder(new ArrayList<>(Arrays.asList("Opphold", "Familie")));
         Avklartefakta avklartefakta = avklartefaktaDtoKonverterer.opprettAvklartefaktaFraDto(avklartefaktaDto, null);
 
-        assertEquals(2, avklartefakta.getRegistreringer().size());
-        avklartefakta.getRegistreringer().forEach(r -> assertFalse(r.getBegrunnelseKode().isEmpty()));
+        assertThat(avklartefakta.getRegistreringer()).hasSize(2);
+        assertThat(avklartefakta.getRegistreringer()).noneMatch(r -> r.getBegrunnelseKode() == null);
     }
 
     @Test
-    public void testOppdaterAvklartefaktaBegrunnelseFritekst() {
+    void testOppdaterAvklartefaktaBegrunnelseFritekst() {
         String fritekst = "Fritekst som beskriver begrunnelse";
         avklartefaktaDto.setBegrunnelseFritekst(fritekst);
         Avklartefakta avklartefakta = avklartefaktaDtoKonverterer.opprettAvklartefaktaFraDto(avklartefaktaDto, null);
 
-        assertEquals(0, avklartefakta.getRegistreringer().size());
+        assertThat(avklartefakta.getRegistreringer()).isEmpty();
     }
 }

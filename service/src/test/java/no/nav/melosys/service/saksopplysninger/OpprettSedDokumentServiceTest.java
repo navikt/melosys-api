@@ -16,16 +16,16 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.repository.SaksopplysningRepository;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class OpprettSedDokumentServiceTest {
 
     @Mock
@@ -35,7 +35,7 @@ public class OpprettSedDokumentServiceTest {
 
     private OpprettSedDokumentService opprettSedDokumentService;
 
-    @Before
+    @BeforeEach
     public void setup() {
         opprettSedDokumentService = new OpprettSedDokumentService(dokumentFactory, saksopplysningRepository);
     }

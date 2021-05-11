@@ -13,8 +13,8 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataUtpekingAnnetLand;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagFellesType;
@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class UtpekingAnnetLandMapperTest {
     private UtpekingAnnetLandMapper utpekingAnnetLandMapper;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         utpekingAnnetLandMapper = new UtpekingAnnetLandMapper();
     }

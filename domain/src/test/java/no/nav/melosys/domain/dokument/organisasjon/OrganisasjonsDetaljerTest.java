@@ -6,8 +6,8 @@ import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -24,7 +24,7 @@ public class OrganisasjonsDetaljerTest {
     private String poststed = "poststed";
     private String poststedUtland = "poststedUtland";
 
-    @Before
+    @BeforeEach
     public void setUp() {
 
         Periode periode = mock(Periode.class);

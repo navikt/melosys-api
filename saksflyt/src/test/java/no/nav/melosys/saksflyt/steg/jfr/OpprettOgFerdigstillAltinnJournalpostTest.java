@@ -24,20 +24,20 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.altinn.AltinnSoeknadService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class OpprettOgFerdigstillAltinnJournalpostTest {
     @Mock
     private AltinnSoeknadService altinnSoeknadService;
@@ -62,7 +62,7 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
     @Captor
     private ArgumentCaptor<OpprettJournalpost> captor;
 
-    @Before
+    @BeforeEach
     public void setup() throws FunksjonellException, IntegrasjonException {
         final String søknadID = "soknadid1";
         prosessinstans.setData(ProsessDataKey.MOTTATT_SOKNAD_ID, søknadID);

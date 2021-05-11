@@ -19,10 +19,8 @@ import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -30,9 +28,6 @@ import static org.mockito.Mockito.*;
 class LovvalgsperiodeServiceTest {
 
     private final BehandlingRepository behandlingRepositoryMock = mock(BehandlingRepository.class);
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     private LovvalgsperiodeService instanse;
 
@@ -55,7 +50,7 @@ class LovvalgsperiodeServiceTest {
         TidligereMedlemsperiode tidligerePeriode = new TidligereMedlemsperiode();
         tidligerePeriode.setId(medlemsperiodeId);
 
-        when(tidligereMedlemsperiodeRepository.findById_BehandlingId(eq(1L))).thenReturn(Collections.singletonList(tidligerePeriode));
+        when(tidligereMedlemsperiodeRepository.findById_BehandlingId(1L)).thenReturn(Collections.singletonList(tidligerePeriode));
         return tidligereMedlemsperiodeRepository;
     }
 
@@ -69,7 +64,7 @@ class LovvalgsperiodeServiceTest {
 
     private static BehandlingsresultatRepository mockBehandlingsresultatRepo() {
         BehandlingsresultatRepository mock = mock(BehandlingsresultatRepository.class);
-        when(mock.findById(eq(13L))).thenReturn(Optional.of(new Behandlingsresultat()));
+        when(mock.findById(13L)).thenReturn(Optional.of(new Behandlingsresultat()));
         return mock;
     }
 

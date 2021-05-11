@@ -16,18 +16,18 @@ import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class UfmKontrollServiceTest {
+@ExtendWith(MockitoExtension.class)
+class UfmKontrollServiceTest {
 
     @Mock
     private KontrollFactory kontrollFactory;
@@ -40,7 +40,7 @@ public class UfmKontrollServiceTest {
     private Function<UfmKontrollData, Kontroll_begrunnelser> f2 = (o) -> Kontroll_begrunnelser.INGEN_SLUTTDATO;
     private Function<UfmKontrollData, Kontroll_begrunnelser> f3 = (o) -> Kontroll_begrunnelser.MOTTAR_YTELSER;
 
-    @Before
+    @BeforeEach
     public void setup() {
         ufmKontrollService = new UfmKontrollService(kontrollFactory);
         SedDokument sedDokument = new SedDokument();
@@ -51,12 +51,10 @@ public class UfmKontrollServiceTest {
         behandling.getSaksopplysninger().add(lagSaksopplysning(new InntektDokument(), SaksopplysningType.INNTK));
         behandling.getSaksopplysninger().add(lagSaksopplysning(new PersonDokument(), SaksopplysningType.PERSOPL));
         behandling.getSaksopplysninger().add(lagSaksopplysning(new UtbetalingDokument(), SaksopplysningType.UTBETAL));
-
-        when(kontrollFactory.hentKontrollerForSedType(any())).thenReturn(Lists.newArrayList(f1, f2, f3));
     }
 
     @Test
-    public void utførKontroller_periodeIkkeGyldig_forventEttTreff() throws Exception {
+    void utførKontroller_periodeIkkeGyldig_forventEttTreff() {
         SedDokument sedDokument = behandling.hentSedDokument();
         sedDokument.setLovvalgsperiode(new Periode(LocalDate.now(), LocalDate.now().minusYears(1)));
         assertThat(ufmKontrollService.utførKontroller(behandling))
@@ -64,7 +62,9 @@ public class UfmKontrollServiceTest {
     }
 
     @Test
-    public void utførKontroller_periodeGyldig_forventTreTreff() throws Exception {
+    void utførKontroller_periodeGyldig_forventTreTreff() {
+        when(kontrollFactory.hentKontrollerForSedType(any())).thenReturn(Lists.newArrayList(f1, f2, f3));
+
         assertThat(ufmKontrollService.utførKontroller(behandling))
             .containsExactly(
                 Kontroll_begrunnelser.BOSATT_I_NORGE,
