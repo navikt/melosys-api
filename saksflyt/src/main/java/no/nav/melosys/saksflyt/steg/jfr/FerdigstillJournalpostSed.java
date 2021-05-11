@@ -28,7 +28,7 @@ public class FerdigstillJournalpostSed implements StegBehandler {
     private final PersondataFasade persondataFasade;
 
     @Autowired
-    public FerdigstillJournalpostSed(JoarkFasade joarkFasade, @Qualifier("system") PersondataFasade persondataFasade) {
+    public FerdigstillJournalpostSed(@Qualifier("system") JoarkFasade joarkFasade, @Qualifier("system") PersondataFasade persondataFasade) {
         this.joarkFasade = joarkFasade;
         this.persondataFasade = persondataFasade;
     }
