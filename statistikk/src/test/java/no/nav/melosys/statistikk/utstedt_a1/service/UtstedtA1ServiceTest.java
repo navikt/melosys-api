@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -32,7 +31,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,8 +42,6 @@ class UtstedtA1ServiceTest {
     @Mock
     private LandvelgerService landvelgerService;
 
-    private final FakeUnleash unleash = new FakeUnleash();
-
     @Captor
     private ArgumentCaptor<UtstedtA1Melding> captor;
 
@@ -55,20 +51,19 @@ class UtstedtA1ServiceTest {
 
     @BeforeEach
     void setUp() {
-        utstedtA1Service = new UtstedtA1Service(utstedtA1Producer, behandlingsresultatService, landvelgerService, unleash);
-        unleash.enableAll();
+        utstedtA1Service = new UtstedtA1Service(utstedtA1Producer, behandlingsresultatService, landvelgerService);
     }
 
     @Test
-    void sendMeldingOmUtstedtA1() throws Exception {
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(lagBehandlingsresultat());
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(BEHANDLING_ID))).thenReturn(List.of(Landkoder.SE));
+    void sendMeldingOmUtstedtA1() {
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(lagBehandlingsresultat());
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Landkoder.SE));
         when(utstedtA1Producer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());
 
         utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID);
 
-        verify(behandlingsresultatService).hentBehandlingsresultat(eq(BEHANDLING_ID));
-        verify(landvelgerService).hentUtenlandskTrygdemyndighetsland(eq(BEHANDLING_ID));
+        verify(behandlingsresultatService).hentBehandlingsresultat(BEHANDLING_ID);
+        verify(landvelgerService).hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID);
         verify(utstedtA1Producer).produserMelding(captor.capture());
 
         UtstedtA1Melding melding = captor.getValue();
@@ -80,24 +75,24 @@ class UtstedtA1ServiceTest {
     }
 
     @Test
-    void sendMeldingOmUtstedtA1_avslag_forventIngenMelding() throws Exception {
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(lagBehandlingsresultat(true, lagBehandling()));
+    void sendMeldingOmUtstedtA1_avslag_forventIngenMelding() {
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(lagBehandlingsresultat(true, lagBehandling()));
 
         utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID);
 
-        verify(behandlingsresultatService).hentBehandlingsresultat(eq(BEHANDLING_ID));
+        verify(behandlingsresultatService).hentBehandlingsresultat(BEHANDLING_ID);
         verify(landvelgerService, never()).hentUtenlandskTrygdemyndighetsland(anyLong());
         verify(utstedtA1Producer, never()).produserMelding(any(UtstedtA1Melding.class));
     }
 
     @Test
-    void sendMeldingOmUtstedtA1_art13_forventTomLandkode() throws Exception {
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(lagBehandlingsresultat(false, lagBehandling(), Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A));
+    void sendMeldingOmUtstedtA1_art13_forventTomLandkode() {
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(lagBehandlingsresultat(false, lagBehandling(), Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A));
         when(utstedtA1Producer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());
 
         utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID);
 
-        verify(behandlingsresultatService).hentBehandlingsresultat(eq(BEHANDLING_ID));
+        verify(behandlingsresultatService).hentBehandlingsresultat(BEHANDLING_ID);
         verify(landvelgerService, never()).hentUtenlandskTrygdemyndighetsland(anyLong());
         verify(utstedtA1Producer).produserMelding(captor.capture());
 
@@ -110,13 +105,13 @@ class UtstedtA1ServiceTest {
     }
 
     @Test
-    void sendMeldingOmUtstedtA1_art11_forventTomLandkode() throws Exception {
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(lagBehandlingsresultat(false, lagBehandling(), Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A));
+    void sendMeldingOmUtstedtA1_art11_forventTomLandkode() {
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(lagBehandlingsresultat(false, lagBehandling(), Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A));
         when(utstedtA1Producer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());
 
         utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID);
 
-        verify(behandlingsresultatService).hentBehandlingsresultat(eq(BEHANDLING_ID));
+        verify(behandlingsresultatService).hentBehandlingsresultat(BEHANDLING_ID);
         verify(landvelgerService, never()).hentUtenlandskTrygdemyndighetsland(anyLong());
         verify(utstedtA1Producer).produserMelding(captor.capture());
 
@@ -129,18 +124,18 @@ class UtstedtA1ServiceTest {
     }
 
     @Test
-    void sendMeldingOmUtstedtA1_art12MedTilleggsbestemmelseArt11_forventLandkode() throws Exception {
+    void sendMeldingOmUtstedtA1_art12MedTilleggsbestemmelseArt11_forventLandkode() {
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat(false, lagBehandling(), Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        behandlingsresultat.getLovvalgsperioder().stream().findFirst().get().setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5);
+        behandlingsresultat.getLovvalgsperioder().iterator().next().setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5);
 
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(BEHANDLING_ID))).thenReturn(behandlingsresultat);
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(BEHANDLING_ID))).thenReturn(List.of(Landkoder.SE));
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(List.of(Landkoder.SE));
         when(utstedtA1Producer.produserMelding(any(UtstedtA1Melding.class))).thenAnswer(returnsFirstArg());
 
         utstedtA1Service.sendMeldingOmUtstedtA1(BEHANDLING_ID);
 
-        verify(behandlingsresultatService).hentBehandlingsresultat(eq(BEHANDLING_ID));
-        verify(landvelgerService).hentUtenlandskTrygdemyndighetsland(eq(BEHANDLING_ID));
+        verify(behandlingsresultatService).hentBehandlingsresultat(BEHANDLING_ID);
+        verify(landvelgerService).hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID);
         verify(utstedtA1Producer).produserMelding(captor.capture());
 
         UtstedtA1Melding melding = captor.getValue();
