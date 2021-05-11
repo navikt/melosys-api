@@ -62,15 +62,14 @@ public class BehandlingTjeneste {
     }
 
     @PostMapping("{behandlingID}/status")
-    @ApiOperation("Oppdaterer status for en behandling. " +
-        "Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas.")
-    public ResponseEntity<Void> oppdaterStatus(@PathVariable("behandlingID") long behandlingID,
-                                               @RequestBody EndreBehandlingsstatusDto status)
+    @ApiOperation("Endre status for en gitt behandling.")
+    public ResponseEntity<Void> endreStatus(@PathVariable("behandlingID") long behandlingID,
+                                            @RequestBody EndreBehandlingsstatusDto status)
         {
         log.info("Saksbehandler {} ber om å endre status for behandling {} til {}.", SubjectHandler.getInstance().getUserID(),
-            behandlingID, status.getBehandlingsstatus());
+            behandlingID, status.behandlingsstatus());
         tilgangService.sjekkTilgang(behandlingID);
-        behandlingService.brukerOppdaterStatus(behandlingID, Behandlingsstatus.valueOf(status.getBehandlingsstatus()));
+        behandlingService.brukerOppdaterStatus(behandlingID, Behandlingsstatus.valueOf(status.behandlingsstatus()));
         return ResponseEntity.noContent().build();
     }
 

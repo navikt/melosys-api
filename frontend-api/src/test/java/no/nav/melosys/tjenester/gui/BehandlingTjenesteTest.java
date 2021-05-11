@@ -130,8 +130,7 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void endreBehandlinsstatusValidering() throws Exception {
-        EndreBehandlingsstatusDto behandlingsstatusDto = new EndreBehandlingsstatusDto();
-        behandlingsstatusDto.setBehandlingsstatus(Behandlingsstatus.AVVENT_FAGLIG_AVKLARING.getKode());
+        EndreBehandlingsstatusDto behandlingsstatusDto = new EndreBehandlingsstatusDto(Behandlingsstatus.AVVENT_FAGLIG_AVKLARING.getKode());
         valider(behandlingsstatusDto, ENDRE_BEHANDLINGSSTATUS_POST_SCHEMA, log);
     }
 
