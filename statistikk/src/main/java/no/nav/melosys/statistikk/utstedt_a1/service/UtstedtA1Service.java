@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collection;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.FunksjonellException;
@@ -29,25 +28,18 @@ public class UtstedtA1Service {
     private final UtstedtA1Producer utstedtA1Producer;
     private final BehandlingsresultatService behandlingsresultatService;
     private final LandvelgerService landvelgerService;
-    private final Unleash unleash;
 
     @Autowired
     public UtstedtA1Service(UtstedtA1Producer utstedtA1Producer,
                             BehandlingsresultatService behandlingsresultatService,
-                            LandvelgerService landvelgerService,
-                            Unleash unleash) {
+                            LandvelgerService landvelgerService) {
         this.utstedtA1Producer = utstedtA1Producer;
         this.behandlingsresultatService = behandlingsresultatService;
         this.landvelgerService = landvelgerService;
-        this.unleash = unleash;
     }
 
     @Transactional(readOnly = true)
     public void sendMeldingOmUtstedtA1(Long behandlingID) throws TekniskException, FunksjonellException {
-        if (!unleash.isEnabled("melosys.statistikkA1")) {
-            return;
-        }
-
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         if (behandlingsresultat.a1Produseres()) {
             log.info("Produserer melding om utstedt A1 for behandling {}", behandlingID);
