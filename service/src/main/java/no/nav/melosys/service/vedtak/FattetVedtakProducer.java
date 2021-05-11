@@ -45,12 +45,12 @@ public class FattetVedtakProducer {
             SendResult<String, FattetVedtak> res = sendt.get(15L, TimeUnit.SECONDS);
             log.info("Melding publisert på topic {} for behandling {}. Record.value: {}, offset: {}",
                 topicName,
-                res.getProducerRecord().value().behandlingId(),
+                res.getProducerRecord().value().sak().behandlingId(),
                 res.getProducerRecord().value(),
                 res.getRecordMetadata().offset()
             );
         } catch (ExecutionException | TimeoutException e) {
-            throw new IntegrasjonException("Kunne ikke publisere melding om fattet vedtak for behandling " + fattetVedtak.behandlingId(), e);
+            throw new IntegrasjonException("Kunne ikke publisere melding om fattet vedtak for behandling " + fattetVedtak.sak().behandlingId(), e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IntegrasjonException("Avbrutt ved publisering av fattet vedtak");

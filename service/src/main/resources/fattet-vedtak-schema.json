@@ -2,12 +2,431 @@
   "$schema": "http://json-schema.org/draft-07/schema",
   "type": "object",
   "description": "Skjema for melding om fattet vedtak fra Melosys",
-  "examples": [
-    {}
-  ],
+  "definitions": {
+    "dato": {
+      "type": "string",
+      "format": "date"
+    },
+    "dekning": {
+      "type": "string",
+      "enum": [
+        "UTEN_DEKNING",
+        "FULL_DEKNING_EOSFO",
+        "HELSEDEL",
+        "HELSEDEL_MED_SYKE_OG_FORELDREPENGER",
+        "PENSJONSDEL",
+        "HELSE_OG_PENSJONSDEL",
+        "HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER",
+        "FULL_DEKNING_FTRL"
+      ]
+    },
+    "periode": {
+      "type": "object",
+      "properties": {
+        "fom": {
+          "type": "string",
+          "format": "date"
+        },
+        "tom": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "required": [
+        "fom",
+        "tom"
+      ]
+    },
+    "trygdeavgift": {
+      "type": "object",
+      "properties": {
+        "avgiftspliktigInntekt": {
+          "type": "integer"
+        },
+        "avgiftsbeløpMd": {
+          "type": "integer"
+        },
+        "trygdesats": {
+          "type": "number"
+        },
+        "avgiftskode": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "avgiftspliktigInntekt",
+        "avgiftsbeløpMd",
+        "trygdesats",
+        "avgiftskode"
+      ]
+    }
+  },
   "required": [
-
+    "sak",
+    "vedtak",
+    "soknad",
+    "saksopplysninger",
+    "lovvalgOgMedlemskapsperioder"
   ],
   "properties": {
+    "sak": {
+      "type": "object",
+      "properties": {
+        "fnr": {
+          "type": "string"
+        },
+        "behandlingId": {
+          "type": "string"
+        },
+        "saksnummer": {
+          "type": "string"
+        },
+        "sakstype": {
+          "type": "string",
+          "enum": [
+            "EU_EOS",
+            "TRYGDEAVTALE",
+            "FTRL"
+          ]
+        },
+        "registreringsdato": {
+          "$ref": "#/definitions/dato"
+        }
+      },
+      "required": [
+        "fnr",
+        "behandlingId",
+        "saksnummer",
+        "sakstype",
+        "registreringsdato"
+      ]
+    },
+    "vedtak": {
+      "type": "object",
+      "properties": {
+        "vedtaksDato": {
+          "$ref": "#/definitions/dato"
+        },
+        "klagefristDato": {
+          "$ref": "#/definitions/dato"
+        },
+        "vedtakstype": {
+          "type": "null",
+          "enum":[
+            "FØRSTEGANGSVEDTAK",
+            "KORRIGERT_VEDTAK",
+            "OMGJØRINGSVEDTAK",
+            "ENDRINGSVEDTAK"
+          ]
+        },
+        "saksbehandler": {
+          "type": "string"
+        },
+        "kontrollertAvSaksbehandler": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "vedtaksDato",
+        "klagefristDato",
+        "vedtakstype",
+        "saksbehandler"
+      ]
+    },
+    "soknad": {
+      "type": "object",
+      "properties": {
+        "dekning": {
+          "$ref": "#/definitions/dekning"
+        },
+        "lonnOgGodtgjorelse": {
+          "type": "object",
+          "properties": {
+            "norskArbgUtbetalerLoenn": {
+              "type": "boolean"
+            },
+            "erArbeidstakerAnsattHelePerioden": {
+              "type": "boolean"
+            },
+            "utlArbgUtbetalerLoenn": {
+              "type": "boolean"
+            },
+            "utlArbTilhoererSammeKonsern": {
+              "type": "boolean"
+            },
+            "bruttoLoennPerMnd": {
+              "type": "string"
+            },
+            "bruttoLoennUtlandPerMnd": {
+              "type": "string"
+            },
+            "mottarNaturalytelser": {
+              "type": "boolean"
+            },
+            "samletVerdiNaturalytelser": {
+              "type": "string"
+            },
+            "erArbeidsgiveravgiftHelePerioden": {
+              "type": "boolean"
+            },
+            "erTrukketTrygdeavgift": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "norskArbgUtbetalerLoenn",
+            "erArbeidstakerAnsattHelePerioden",
+            "utlArbgUtbetalerLoenn",
+            "utlArbTilhoererSammeKonsern",
+            "bruttoLoennPerMnd",
+            "bruttoLoennUtlandPerMnd",
+            "mottarNaturalytelser",
+            "samletVerdiNaturalytelser",
+            "erArbeidsgiveravgiftHelePerioden",
+            "erTrukketTrygdeavgift"
+          ]
+        },
+        "arbeidsgiver": {
+          "type": "object",
+          "properties": {
+            "antallAdmAnsatte": {
+              "type": "integer"
+            },
+            "antallAnsatte": {
+              "type": "integer"
+            },
+            "antallUtsendte": {
+              "type": "integer"
+            },
+            "andelOmsetningINorge": {
+              "type": "string"
+            },
+            "andelOppdragINorge": {
+              "type": "string"
+            },
+            "andelKontrakterINorge": {
+              "type": "string"
+            },
+            "andelRekruttertINorge": {
+              "type": "string"
+            },
+            "ekstraArbeidsgivere": {
+              "type": "array",
+              "items": {}
+            }
+          },
+          "required": [
+            "antallAdmAnsatte",
+            "antallAnsatte",
+            "antallUtsendte",
+            "andelOmsetningINorge",
+            "andelOppdragINorge",
+            "andelKontrakterINorge",
+            "andelRekruttertINorge",
+            "ekstraArbeidsgivere"
+          ]
+        },
+        "arbeidssteder": {
+          "type": "array",
+          "items": {}
+        },
+        "mottaksDato": {
+          "$ref": "#/definitions/dato"
+        },
+        "periode": {
+          "$ref": "#/definitions/periode"
+        }
+      },
+      "required": [
+        "dekning",
+        "mottaksDato",
+        "periode"
+      ]
+    },
+    "saksopplysninger": {
+      "type": "object",
+      "properties": {
+        "person": {
+          "type": "object",
+          "properties": {
+            "ident": {
+              "type": "string"
+            },
+            "navn": {
+              "type": "object",
+              "properties": {
+                "fornavn": {
+                  "type": "string"
+                },
+                "mellomnavn": {
+                  "type": "string"
+                },
+                "etternavn": {
+                  "type": "string"
+                },
+                "metadata": {
+                  "type": "null"
+                }
+              },
+              "required": [
+                "fornavn",
+                "mellomnavn",
+                "etternavn"
+              ]
+            },
+            "statsborgerskap": {
+              "type": "object",
+              "properties": {
+                "land": {
+                  "type": "string"
+                },
+                "metadata": {
+                  "type": "null"
+                }
+              },
+              "required": [
+                "land"
+              ]
+            },
+            "sivilstand": {
+              "type": "null"
+            },
+            "adresser": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "ident",
+            "navn",
+            "statsborgerskap"
+          ]
+        },
+        "hentetDato": {
+          "$ref": "#/definitions/dato"
+        },
+        "hentetPeriode": {
+          "$ref": "#/definitions/periode"
+        }
+      },
+      "required": [
+        "person",
+        "hentetDato",
+        "hentetPeriode"
+      ]
+    },
+    "avklarteFakta": {
+      "type": "null"
+    },
+    "lovvalgOgMedlemskapsperioder": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "bestemmelse": {
+              "type": "string"
+            },
+            "tilleggsbestemmelse": {
+              "type": "string"
+            },
+            "lovvalgslandKode": {
+              "type": "string"
+            },
+            "periode": {
+              "$ref": "#/definitions/periode"
+            },
+            "innvilgelsesResultat": {
+              "type": "string",
+              "enum": [
+                "INNVILGET",
+                "DELVIS_INNVILGET",
+                "AVSLAATT"
+              ]
+            },
+            "dekning": {
+              "$ref": "#/definitions/dekning"
+            },
+            "medlemskapstype": {
+              "type": "string",
+              "enum": [
+                "PLIKTIG",
+                "FRIVILLIG",
+                "UNNTATT"
+              ]
+            },
+            "fastsattTrygdeavgift": {
+              "type": "object",
+              "properties": {
+                "betalesAv": {
+                  "type": "object",
+                  "properties": {
+                    "orgnr": {
+                      "type": "string"
+                    },
+                    "rolle": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "orgnr",
+                    "rolle"
+                  ]
+                },
+                "forNorskInntekt": {
+                  "$ref": "#/definitions/trygdeavgift"
+                },
+                "forUtenlandskInntekt": {
+                  "$ref": "#/definitions/trygdeavgift"
+                }
+              },
+              "required": [
+                "betalesAv"
+              ]
+            }
+          },
+          "required": [
+            "bestemmelse",
+            "periode",
+            "innvilgelsesResultat",
+            "dekning",
+            "medlemskapstype"
+          ]
+        }
+      ]
+    },
+    "fullmektig": {
+      "type": "object",
+      "properties": {
+        "ident": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "ident",
+        "type"
+      ]
+    },
+    "representantAvgift": {
+      "type": "object",
+      "properties": {
+        "ident": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "representantNrAvgiftssystem": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "ident",
+        "type",
+        "representantNrAvgiftssystem"
+      ]
+    }
   }
 }

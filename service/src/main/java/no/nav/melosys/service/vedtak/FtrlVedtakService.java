@@ -3,7 +3,6 @@ package no.nav.melosys.service.vedtak;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -14,34 +13,31 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.vedtak.dto.FattFtrlVedtakRequest;
-import no.nav.melosys.service.vedtak.dto.FattetVedtak;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import static no.nav.melosys.service.vedtak.VedtakServiceFasade.FRIST_KLAGE_UKER;
+
 @Service
 public class FtrlVedtakService {
     private static final Logger log = LoggerFactory.getLogger(FtrlVedtakService.class);
-    private static final int FRIST_KLAGE_UKER = 6;
 
     private final BehandlingsresultatService behandlingsresultatService;
     private final BehandlingService behandlingService;
     private final ProsessinstansService prosessinstansService;
     private final OppgaveService oppgaveService;
-    private final FattetVedtakProducer fattetVedtakProducer;
 
     @Autowired
     public FtrlVedtakService(BehandlingsresultatService behandlingsresultatService,
                              BehandlingService behandlingService,
                              ProsessinstansService prosessinstansService,
-                             OppgaveService oppgaveService,
-                             FattetVedtakProducer fattetVedtakProducer) {
+                             OppgaveService oppgaveService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.behandlingService = behandlingService;
         this.prosessinstansService = prosessinstansService;
         this.oppgaveService = oppgaveService;
-        this.fattetVedtakProducer = fattetVedtakProducer;
     }
 
     public void fattVedtak(Behandling behandling, FattFtrlVedtakRequest request) {
@@ -59,12 +55,9 @@ public class FtrlVedtakService {
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
         behandlingService.lagre(behandling);
 
+        //NOTE Mangler foreløpig bestilling av brev
         prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, request);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
-    }
-
-    public void publiserFattetVedtak(Behandling behandling) throws IkkeFunnetException {
-        fattetVedtakProducer.publiserMelding(lagMelding(behandling));
     }
 
     private void oppdaterBehandlingsresultat(long behandlingID, FattFtrlVedtakRequest request) throws IkkeFunnetException {
@@ -75,11 +68,5 @@ public class FtrlVedtakService {
         behandlingsresultat.setFastsattAvLand(Landkoder.NO);
 
         behandlingsresultatService.lagre(behandlingsresultat);
-    }
-
-    private FattetVedtak lagMelding(Behandling behandling) throws IkkeFunnetException {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        //TODO Fyll på...
-        return new FattetVedtak(behandling.getId());
     }
 }

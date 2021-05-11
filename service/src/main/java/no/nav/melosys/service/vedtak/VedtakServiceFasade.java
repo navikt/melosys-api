@@ -25,6 +25,8 @@ public class VedtakServiceFasade {
     private final EosVedtakSystemService eosVedtakSystemService;
     private final FtrlVedtakService ftrlVedtakService;
 
+    public static final int FRIST_KLAGE_UKER = 6;
+
     @Autowired
     public VedtakServiceFasade(BehandlingService behandlingService, EosVedtakService eosVedtakService,
                                EosVedtakSystemService eosVedtakSystemService, FtrlVedtakService ftrlVedtakService) {
@@ -65,17 +67,6 @@ public class VedtakServiceFasade {
             eosVedtakService.endreVedtak(behandling, endretperiode, fritekst, fritekstSed);
         } else {
             throw new FunksjonellException("Vedtaksendring for sakstype " + sakstype + " er ikke støttet.");
-        }
-    }
-
-    @Transactional
-    public void publiserFattetVedtak(long behandlingId) throws FunksjonellException {
-        var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingId);
-        Sakstyper sakstype = behandling.getFagsak().getType();
-
-        switch (sakstype) {
-            case FTRL -> ftrlVedtakService.publiserFattetVedtak(behandling);
-            default -> throw new FunksjonellException("Publisering av fattet vedtak for sakstype " + sakstype + " er ikke støttet");
         }
     }
 

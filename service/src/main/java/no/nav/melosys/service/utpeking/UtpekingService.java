@@ -26,6 +26,7 @@ import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.vedtak.EosVedtakService;
+import no.nav.melosys.service.vedtak.VedtakServiceFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.ApplicationEventMulticaster;
@@ -128,7 +129,7 @@ public class UtpekingService {
     private void oppdaterBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
         behandlingsresultat.setType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
         behandlingsresultat.setFastsattAvLand(Landkoder.NO);
-        behandlingsresultat.settVedtakMetadata(Vedtakstyper.FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(EosVedtakService.FRIST_KLAGE_UKER));
+        behandlingsresultat.settVedtakMetadata(Vedtakstyper.FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(VedtakServiceFasade.FRIST_KLAGE_UKER));
         behandlingsresultatService.lagre(behandlingsresultat);
 
         melosysEventMulticaster.multicastEvent(new VedtakMetadataLagretEvent(behandlingsresultat.getId()));
