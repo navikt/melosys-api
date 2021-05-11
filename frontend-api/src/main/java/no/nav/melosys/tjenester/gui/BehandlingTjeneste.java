@@ -65,12 +65,12 @@ public class BehandlingTjeneste {
     @ApiOperation("Oppdaterer status for en behandling. " +
         "Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas.")
     public ResponseEntity<Void> oppdaterStatus(@PathVariable("behandlingID") long behandlingID,
-                                               @RequestBody BehandlingsstatusDto status)
+                                               @RequestBody EndreBehandlingsstatusDto status)
         {
         log.info("Saksbehandler {} ber om å endre status for behandling {} til {}.", SubjectHandler.getInstance().getUserID(),
-            behandlingID, status.getBehandlingsstatus().getKode());
+            behandlingID, status.getBehandlingsstatus());
         tilgangService.sjekkTilgang(behandlingID);
-        behandlingService.brukerOppdaterStatus(behandlingID, status.getBehandlingsstatus());
+        behandlingService.brukerOppdaterStatus(behandlingID, Behandlingsstatus.valueOf(status.getBehandlingsstatus()));
         return ResponseEntity.noContent().build();
     }
 
