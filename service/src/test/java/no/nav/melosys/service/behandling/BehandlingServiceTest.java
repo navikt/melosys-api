@@ -139,7 +139,7 @@ class BehandlingServiceTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> behandlingService.brukerOppdaterStatus(BEHANDLING_ID, AVSLUTTET))
-            .withMessageContaining("Behandlingen kan ikke endres til status AVSLUTTET. Gyldige statuser er ");
+            .withMessageContaining("Behandlingen kan ikke endres til status AVSLUTTET. Gyldige statuser for ");
     }
 
     @Test
