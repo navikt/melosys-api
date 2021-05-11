@@ -1,26 +1,8 @@
 package no.nav.melosys.service.avklartefakta;
 
-import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR;
-import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.SAMBOER_UTEN_FELLES_BARN;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
-
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -29,16 +11,30 @@ import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
-import no.nav.melosys.domain.familie.AvklarteMedfolgendeFamilie;
-import no.nav.melosys.domain.familie.IkkeOmfattetFamilie;
-import no.nav.melosys.domain.familie.OmfattetFamilie;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
+import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
+import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR;
+import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.SAMBOER_UTEN_FELLES_BARN;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 public class AvklarteMedfolgendeFamilieServiceTest {
     @Mock
     private AvklarteFaktaRepository avklarteFaktaRepository;
@@ -55,13 +51,13 @@ public class AvklarteMedfolgendeFamilieServiceTest {
 
     @Captor
     private ArgumentCaptor<Avklartefakta> captor;
-    
+
     private static final String uuidBarn = "uuidBarn";
     private static final String uuidEktefelleSamboer = "uuidEktefelleSamboer";
     private static final String fritekstBarn = "fritekstBarn";
     private static final String fritekstEktefelleSamboer = "fritekstEktefelleSamboer";
 
-    @Before
+    @BeforeEach
     public void setUp() {
         AvklartefaktaService avklartefaktaService = new AvklartefaktaService(avklarteFaktaRepository, behandlingsresultatRepository, avklartefaktaDtoKonverterer);
         avklarteMedfolgendeFamilieService = new AvklarteMedfolgendeFamilieService(behandlingService, behandlingsresultatService, avklartefaktaService);

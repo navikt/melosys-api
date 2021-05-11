@@ -34,3 +34,6 @@ spec:
     path: /internal/prometheus
   ingresses:
   - "https://{{ URL }}"
+  env:
+  - name: SPRING_PROFILES_ACTIVE
+    value: nais

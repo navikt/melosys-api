@@ -66,7 +66,7 @@ public class Avgiftsperiode {
         return new Avgiftsperiode(
             medlemskapsperiode.getFom(),
             medlemskapsperiode.getTom(),
-            medlemskapsperiode.getTrygdedekning(),
+            medlemskapsperiode.getDekning(),
             trygdeavgift.getTrygdesats(),
             trygdeavgift.getTrygdeavgiftsbeløpMd(),
             trygdeavgift.erAvgiftForNorskInntekt()

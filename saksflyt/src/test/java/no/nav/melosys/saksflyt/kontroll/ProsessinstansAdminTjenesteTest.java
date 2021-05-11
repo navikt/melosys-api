@@ -1,8 +1,7 @@
 package no.nav.melosys.saksflyt.kontroll;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -11,13 +10,15 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.repository.ProsessinstansRepository;
-import no.nav.melosys.saksflyt.impl.SaksflytAsyncDelegate;
+import no.nav.melosys.saksflyt.impl.BehandleProsessinstansDelegate;
 import no.nav.melosys.saksflyt.kontroll.dto.HentProsessinstansDto;
 import no.nav.melosys.saksflyt.kontroll.dto.RestartProsessinstanserRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
@@ -34,14 +35,14 @@ class ProsessinstansAdminTjenesteTest {
     @Mock
     private ProsessinstansRepository prosessinstansRepository;
     @Mock
-    private SaksflytAsyncDelegate saksflytAsyncDelegate;
+    private BehandleProsessinstansDelegate behandleProsessinstansDelegate;
     private final String apiKey = "dummy";
 
     private ProsessinstansAdminTjeneste prosessinstansAdminTjeneste;
 
     @BeforeEach
     public void setup() {
-        prosessinstansAdminTjeneste = new ProsessinstansAdminTjeneste(saksflytAsyncDelegate, prosessinstansRepository, apiKey);
+        prosessinstansAdminTjeneste = new ProsessinstansAdminTjeneste(behandleProsessinstansDelegate, prosessinstansRepository, apiKey);
     }
 
     @Test
@@ -60,6 +61,24 @@ class ProsessinstansAdminTjenesteTest {
                 HentProsessinstansDto::getProsessType, HentProsessinstansDto::getSistFullførtSteg)
             .containsExactly(prosessinstans.getId(), prosessinstans.getEndretDato(),
                 prosessinstans.getType().getKode(), prosessinstans.getSistFullførtSteg().getKode());
+    }
+
+    @Test
+    void restartAlleFeiledeProsessinstanser_treFeilet_restarterIRekkefølge() throws SikkerhetsbegrensningException {
+        Prosessinstans tidligstFeilet = lagProsessinstans(LocalDateTime.now().minusDays(3));
+        Prosessinstans nestTidligstFeilet = lagProsessinstans(LocalDateTime.now().minusDays(2));
+        Prosessinstans senestFeilet = lagProsessinstans(LocalDateTime.now());
+
+        when(prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET))
+            .thenReturn(Set.of(tidligstFeilet, nestTidligstFeilet, senestFeilet));
+        when(prosessinstansRepository.saveAll(any())).thenAnswer(a -> new ArrayList<>((Collection<?>) a.getArgument(0)));
+
+        prosessinstansAdminTjeneste.restartAlleFeiledeProsessinstanser(apiKey);
+
+        InOrder inOrder = Mockito.inOrder(behandleProsessinstansDelegate);
+        inOrder.verify(behandleProsessinstansDelegate).behandleProsessinstans(tidligstFeilet);
+        inOrder.verify(behandleProsessinstansDelegate).behandleProsessinstans(nestTidligstFeilet);
+        inOrder.verify(behandleProsessinstansDelegate).behandleProsessinstans(senestFeilet);
     }
 
     @Test
@@ -89,7 +108,7 @@ class ProsessinstansAdminTjenesteTest {
 
         assertThat(prosessinstans.getStatus()).isEqualTo(ProsessStatus.RESTARTET);
         verify(prosessinstansRepository).saveAll(eq(singletonList(prosessinstans)));
-        verify(saksflytAsyncDelegate).behandleProsessinstans(eq(prosessinstans));
+        verify(behandleProsessinstansDelegate).behandleProsessinstans(eq(prosessinstans));
     }
 
     @Test
@@ -102,13 +121,19 @@ class ProsessinstansAdminTjenesteTest {
             .withMessageContaining("apikey");
     }
 
+
     private Prosessinstans lagProsessinstans() {
+        return lagProsessinstans(LocalDateTime.now());
+    }
+
+    private Prosessinstans lagProsessinstans(LocalDateTime registrertDato) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setId(UUID.randomUUID());
         prosessinstans.setStatus(ProsessStatus.FEILET);
         prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
         prosessinstans.setSistFullførtSteg(ProsessSteg.AVKLAR_ARBEIDSGIVER);
-        prosessinstans.setEndretDato(LocalDateTime.now());
+        prosessinstans.setRegistrertDato(registrertDato);
+        prosessinstans.setEndretDato(registrertDato);
         return prosessinstans;
     }
 }

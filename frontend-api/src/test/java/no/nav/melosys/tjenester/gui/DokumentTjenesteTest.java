@@ -12,7 +12,6 @@ import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
@@ -20,24 +19,23 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.SedPdfData;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.JournalpostInfoDto;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DokumentTjenesteTest extends JsonSchemaTestParent {
     private static final Logger log = LoggerFactory.getLogger(DokumentTjenesteTest.class);
 
@@ -51,16 +49,14 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
     private EessiService eessiService;
     @Mock
     private TilgangService tilgangService;
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         dokumentTjeneste = new DokumentTjeneste(dokumentServiceFasade, dokumentHentingService, eessiService, tilgangService);
     }
 
     @Test
-    public void hentDokumenter() throws Exception {
+    void hentDokumenter() throws Exception {
         List<Journalpost> journalposter = defaultEasyRandom().objects(Journalpost.class, 3).collect(Collectors.toList());
         given(dokumentHentingService.hentDokumenter(anyString())).willReturn(journalposter);
 
@@ -74,9 +70,9 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void hentBrevForhåndsvisning() throws MelosysException, IOException {
+    void hentBrevForhåndsvisning() throws IOException {
         final byte[] MOCK_PDF = "bytes fra et brev".getBytes();
-        when(dokumentServiceFasade.produserUtkast(any(), anyLong(), any())).thenReturn(MOCK_PDF);
+        when(dokumentServiceFasade.produserUtkast(anyLong(), any())).thenReturn(MOCK_PDF);
         BrevbestillingDto brevBestillingDto = new BrevbestillingDto.Builder()
             .medBegrunnelseKode("KODE")
             .medFritekst("Fritekst.")
@@ -90,7 +86,7 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void hentSedForhåndsvisning() throws MelosysException, IOException {
+    void hentSedForhåndsvisning() throws IOException {
         final byte[] MOCK_PDF = "bytes fra en pdf".getBytes();
         when(eessiService.genererSedPdf(anyLong(), any(), any())).thenReturn(MOCK_PDF);
         SedPdfData sedPdfData = new SedPdfData("tada", null, "DK", "neida");
@@ -101,7 +97,7 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void produserDokument() throws Exception {
+    void produserDokument() {
         BrevbestillingDto brevBestillingDto = new BrevbestillingDto.Builder()
             .medMottaker(Aktoersroller.BRUKER)
             .build();
@@ -109,16 +105,15 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
         dokumentTjeneste.produserDokument(1L,
             Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID, brevBestillingDto);
 
-        verify(dokumentServiceFasade).produserUtkast(any(), anyLong(), any());
-        verify(dokumentServiceFasade).produserDokument(any(), anyLong(), any());
+        verify(dokumentServiceFasade).produserUtkast(anyLong(), any());
+        verify(dokumentServiceFasade).produserDokument(anyLong(), any());
     }
 
     @Test
-    public void produserDokumentFeilerMedManglendeMottaker() throws Exception {
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("Mottaker trengs for å bestille.");
-
-        dokumentTjeneste.produserDokument(1L,
-            Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID, new BrevbestillingDto());
+    void produserDokumentFeilerMedManglendeMottaker() {
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> dokumentTjeneste.produserDokument(1L,
+                Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID, new BrevbestillingDto()))
+            .withMessageContaining("Mottaker trengs for å bestille");
     }
 }

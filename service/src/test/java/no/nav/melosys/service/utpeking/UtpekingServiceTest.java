@@ -18,7 +18,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.UtpekingsperiodeRepository;
 import no.nav.melosys.service.LandvelgerService;
@@ -29,13 +28,15 @@ import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.context.event.ApplicationEventMulticaster;
 
 import static no.nav.melosys.service.vedtak.EosVedtakService.FRIST_KLAGE_UKER;
@@ -45,8 +46,9 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class UtpekingServiceTest {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class UtpekingServiceTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
@@ -80,7 +82,7 @@ public class UtpekingServiceTest {
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
     private final Fagsak fagsak = new Fagsak();
 
-    @Before
+    @BeforeEach
     public void setup() throws FunksjonellException {
         utpekingService = new UtpekingService(behandlingService, behandlingsresultatService, eessiService, landvelgerService,
             lovvalgsperiodeService, oppgaveService, prosessinstansService, utpekingsperiodeRepository, vedtakKontrollService, melosysEventMulticaster);
@@ -96,8 +98,8 @@ public class UtpekingServiceTest {
     }
 
     @Test
-    public void utpekLovvalgsland_harUtpekingsperiode_lovvalgsperiodeOgProsessinstansOpprettes()
-        throws MelosysException {
+    void utpekLovvalgsland_harUtpekingsperiode_lovvalgsperiodeOgProsessinstansOpprettes()
+        {
         behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
         Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.MIN, LocalDate.MAX, Landkoder.SE,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
@@ -139,7 +141,7 @@ public class UtpekingServiceTest {
     }
 
     @Test
-    public void utpekLovvalgsland_feilBehandlingstema_kasterException() {
+    void utpekLovvalgsland_feilBehandlingstema_kasterException() {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.now(), LocalDate.now(), Landkoder.SE,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
@@ -151,7 +153,7 @@ public class UtpekingServiceTest {
     }
 
     @Test
-    public void utpekLovvalgsland_lovvalgslandValideres() throws MelosysException {
+    void utpekLovvalgsland_lovvalgslandValideres() {
         behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
         Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.MIN, LocalDate.MAX, Landkoder.SE,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
@@ -179,7 +181,7 @@ public class UtpekingServiceTest {
     }
 
     @Test
-    public void avvisUtpeking_utpekingAvAnnetLand_oppdaterUtfallRegistreringUnntak() throws FunksjonellException, TekniskException {
+    void avvisUtpeking_utpekingAvAnnetLand_oppdaterUtfallRegistreringUnntak() throws FunksjonellException, TekniskException {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
 
         utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis());
@@ -189,7 +191,7 @@ public class UtpekingServiceTest {
     }
 
     @Test
-    public void avvisUtpeking_utpekingAvNorge_oppdaterUtfallUtpeking() throws FunksjonellException, TekniskException {
+    void avvisUtpeking_utpekingAvNorge_oppdaterUtfallUtpeking() throws FunksjonellException, TekniskException {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
 
         utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis());
@@ -200,7 +202,7 @@ public class UtpekingServiceTest {
     }
 
     @Test
-    public void avvisUtpeking_utsendtArbeidtaker_ikkeStøttetKasterException() {
+    void avvisUtpeking_utsendtArbeidtaker_ikkeStøttetKasterException() {
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -209,14 +211,14 @@ public class UtpekingServiceTest {
     }
 
     @Test
-    public void avvisUtpeking_utenBegrunnelse_begrunnelsePåkrevdKasterException() {
+    void avvisUtpeking_utenBegrunnelse_begrunnelsePåkrevdKasterException() {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> utpekingService.avvisUtpeking(behandlingID, new UtpekingAvvis()))
             .withMessageContaining("Du må oppgi en begrunnelse for å kunne avslå en utpeking");
     }
 
     @Test
-    public void avvisUtpeking_utenEtterspørInformasjon_etterspørInfoPåkrevdKasterException() {
+    void avvisUtpeking_utenEtterspørInformasjon_etterspørInfoPåkrevdKasterException() {
         UtpekingAvvis utpekingAvvis = new UtpekingAvvis();
         utpekingAvvis.setBegrunnelse("fordi og derfor");
 
@@ -226,7 +228,7 @@ public class UtpekingServiceTest {
     }
 
     @Test
-    public void avvisUtpeking_behandlingInaktiv_kasterException() {
+    void avvisUtpeking_behandlingInaktiv_kasterException() {
         behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -235,7 +237,7 @@ public class UtpekingServiceTest {
     }
 
     @Test
-    public void oppdaterSendtUtland_ikkeSattFraFør_oppdateres() throws FunksjonellException, TekniskException {
+    void oppdaterSendtUtland_ikkeSattFraFør_oppdateres() throws FunksjonellException, TekniskException {
         Utpekingsperiode utpekingsperiode = new Utpekingsperiode();
         utpekingsperiode.setId(1L);
 
@@ -245,14 +247,14 @@ public class UtpekingServiceTest {
     }
 
     @Test
-    public void oppdaterSendtUtland_ikkePersistert_kasterException() {
+    void oppdaterSendtUtland_ikkePersistert_kasterException() {
         assertThatExceptionOfType(TekniskException.class)
             .isThrownBy(() -> utpekingService.oppdaterSendtUtland(new Utpekingsperiode()))
             .withMessageContaining("Forsøk på å oppdatere en ikke-persistert utpekingsperiode");
     }
 
     @Test
-    public void oppdaterSendtUtland_alleredeSendtUtland_kasterException() {
+    void oppdaterSendtUtland_alleredeSendtUtland_kasterException() {
         Utpekingsperiode utpekingsperiode = new Utpekingsperiode();
         utpekingsperiode.setId(1L);
         utpekingsperiode.setSendtUtland(LocalDate.now());

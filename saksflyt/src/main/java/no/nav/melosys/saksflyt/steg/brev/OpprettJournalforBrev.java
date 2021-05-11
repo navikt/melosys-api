@@ -1,21 +1,21 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.JournalpostBestilling;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.DokgenService;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,14 +56,14 @@ public class OpprettJournalforBrev implements StegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) {
         if (prosessinstans.getBehandling() == null) {
             throw new FunksjonellException("Prosessinstans mangler behandling");
         }
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         PersonDokument personDokument = behandling.hentPersonDokument();
-        Produserbaredokumenter produserbartDokument = prosessinstans.getData(PRODUSERBART_BREV, Produserbaredokumenter.class);
-        BrevbestillingDto brevbestilling = prosessinstans.getData(BREVBESTILLING, BrevbestillingDto.class);
+        var brevbestilling = prosessinstans.getData(BREVBESTILLING, DokgenBrevbestilling.class);
+        Produserbaredokumenter produserbartDokument = brevbestilling.getProduserbartdokument();
 
         String aktørId = prosessinstans.getData(AKTØR_ID);
         String orgnr = prosessinstans.getData(ORGNR, String.class, null);
@@ -74,12 +74,17 @@ public class OpprettJournalforBrev implements StegBehandler {
             throw new FunksjonellException("Mangler mottaker");
         }
 
+        Aktoer mottaker = new Aktoer();
+
         if (isEmpty(orgnr)) {
-            fnr = persondataFasade.hentIdentForAktørId(aktørId);
+            mottaker.setAktørId(aktørId);
+            fnr = persondataFasade.hentFolkeregisterIdent(aktørId);
             sammensattNavn = persondataFasade.hentSammensattNavn(fnr);
+        } else {
+            mottaker.setOrgnr(orgnr);
         }
 
-        byte[] pdf = dokgenService.produserBrev(produserbartDokument, behandling.getId(), orgnr, brevbestilling);
+        byte[] pdf = dokgenService.produserBrev(mottaker, brevbestilling);
         log.info("Produserbartdokument {} for behandling {} produsert", produserbartDokument, behandling.getId());
 
         DokumentproduksjonsInfo dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(produserbartDokument);
@@ -92,7 +97,7 @@ public class OpprettJournalforBrev implements StegBehandler {
             .medMottakerNavn(hasText(orgnr) ? eregFasade.hentOrganisasjonNavn(orgnr) : sammensattNavn)
             .medMottakerId(hasText(orgnr) ? orgnr : fnr)
             .medErMottakerOrg(hasText(orgnr))
-            .medArkivSakId(behandling.getFagsak().getGsakSaksnummer().toString())
+            .medSaksnummer(behandling.getFagsak().getSaksnummer())
             .medPdf(pdf)
             .build();
 

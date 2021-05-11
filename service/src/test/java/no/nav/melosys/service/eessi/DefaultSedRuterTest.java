@@ -12,26 +12,25 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.eessi.ruting.DefaultSedRuter;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DefaultSedRuterTest {
 
     @Mock
@@ -48,13 +47,13 @@ public class DefaultSedRuterTest {
     private static final String SAKSNUMMER = "MEL-!!!";
     private static final Long GSAK_SAKSNUMMER = 123L;
 
-    @Before
+    @BeforeEach
     public void setup() {
         defaultSedRuter = new DefaultSedRuter(prosessinstansService, fagsakService, behandlingService, oppgaveService);
     }
 
     @Test
-    public void bestemManuellBehandling_saksnummerFinnesIkkeErNySedINyBehandling_nesteStegOppretJfrOppg() throws MelosysException {
+    public void bestemManuellBehandling_saksnummerFinnesIkkeErNySedINyBehandling_nesteStegOppretJfrOppg() {
         Prosessinstans prosessinstans = new Prosessinstans();
         MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(SedType.A005);
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
@@ -65,7 +64,7 @@ public class DefaultSedRuterTest {
     }
 
     @Test
-    public void bestemManuellBehandling_X009PurringSaksnummerOgFagsakEksisterer_oppdatererPrioritet() throws MelosysException {
+    public void bestemManuellBehandling_X009PurringSaksnummerOgFagsakEksisterer_oppdatererPrioritet() {
 
         final String oppgaveId = "333";
         Prosessinstans prosessinstans = new Prosessinstans();
@@ -87,7 +86,7 @@ public class DefaultSedRuterTest {
     }
 
     @Test
-    public void bestemManuellBehandling_A012SaksnummerOgFagsakEksistererStatusMidlertidigLovvalgsbeslutning_ikkeOppdaterStatusEllerOppgave() throws MelosysException {
+    public void bestemManuellBehandling_A012SaksnummerOgFagsakEksistererStatusMidlertidigLovvalgsbeslutning_ikkeOppdaterStatusEllerOppgave() {
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER);
@@ -107,7 +106,7 @@ public class DefaultSedRuterTest {
     }
 
     @Test
-    public void bestemManuellBehandling_behandlingAvsluttetOgSkalBehandleSED_opprettOppgave() throws MelosysException {
+    public void bestemManuellBehandling_behandlingAvsluttetOgSkalBehandleSED_opprettOppgave() {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER);
         MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(SedType.A004);

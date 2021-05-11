@@ -2,7 +2,7 @@ package no.nav.melosys.service.dokument.brev;
 
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.dokument.brev.mapper.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

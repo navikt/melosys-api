@@ -39,14 +39,16 @@ import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
-import no.nav.melosys.repository.*;
-import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
-import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.repository.AvklarteFaktaRepository;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.repository.UtenlandskMyndighetRepository;
+import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
+import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDtoKonverterer;
@@ -62,11 +64,12 @@ import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagSystemService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.*;
@@ -115,28 +118,29 @@ public final class DokumentServiceTest {
 
     @Test
     public final void produserUtkast_innvilgelsesBrev_funker() throws Exception {
-        BrevbestillingDto brevbestilling = lagBrevBestillingDto(BRUKER);
+        BrevbestillingDto brevbestilling = lagBrevBestillingDto(INNVILGELSE_YRKESAKTIV, BRUKER);
 
         DokumentService dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock(brevbestilling));
-        byte[] resultat = dokumentServiceMedMockVelger.produserUtkast(INNVILGELSE_YRKESAKTIV, BEHANDLINGSID, brevbestilling);
+        byte[] resultat = dokumentServiceMedMockVelger.produserUtkast(BEHANDLINGSID, brevbestilling);
         assertThat(resultat).isNull();
         verify(dokSysFasade).produserDokumentutkast(any(Dokumentbestilling.class));
     }
 
     @Test
     public final void produserUtkast_avslagArbeidsgiver_funker() throws Exception {
-        BrevbestillingDto brevbestilling = lagBrevBestillingDto(ARBEIDSGIVER);
+        BrevbestillingDto brevbestilling = lagBrevBestillingDto(AVSLAG_ARBEIDSGIVER, ARBEIDSGIVER);
         Set<String> arbeidsgivendeOrgnumre = Collections.singleton("987654321");
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any(Behandling.class))).thenReturn(arbeidsgivendeOrgnumre);
 
         DokumentService dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock(brevbestilling));
-        byte[] resultat = dokumentServiceMedMockVelger.produserUtkast(AVSLAG_ARBEIDSGIVER, BEHANDLINGSID, brevbestilling);
+        byte[] resultat = dokumentServiceMedMockVelger.produserUtkast(BEHANDLINGSID, brevbestilling);
         assertThat(resultat).isNull();
         verify(dokSysFasade).produserDokumentutkast(any(Dokumentbestilling.class));
     }
 
-    private static BrevbestillingDto lagBrevBestillingDto(Aktoersroller rolle) {
+    private static BrevbestillingDto lagBrevBestillingDto(Produserbaredokumenter produserbartdokument, Aktoersroller rolle) {
         return new BrevbestillingDto.Builder()
+            .medProduserbardokument(produserbartdokument)
             .medMottaker(rolle)
             .build();
     }
@@ -411,7 +415,7 @@ public final class DokumentServiceTest {
 
     private static PersondataFasade mockPersondataFasade(Aktoer aktør) throws IkkeFunnetException {
         PersondataFasade persondataFasade = mock(PersondataFasade.class);
-        when(persondataFasade.hentIdentForAktørId(anyString()))
+        when(persondataFasade.hentFolkeregisterIdent(anyString()))
             .thenReturn(String.format("IDENT%s", aktør.getAktørId()));
         return persondataFasade;
     }

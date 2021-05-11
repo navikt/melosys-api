@@ -19,7 +19,6 @@ import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
@@ -27,18 +26,22 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.service.oppgave.dto.TilbakeleggingDto;
 import no.nav.melosys.service.sak.FagsakService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class OppgaveplukkerTest {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class OppgaveplukkerTest {
 
     @Mock
     private OppgaveFasade oppgaveFasade;
@@ -58,7 +61,7 @@ public class OppgaveplukkerTest {
     private final static long GSAK_SAKSNUMMER = 42L;
     private final static String SAKSNUMMER = "MOCK-1";
 
-    @Before
+    @BeforeEach
     public void setUp() throws IkkeFunnetException {
         this.oppgaveplukker = new Oppgaveplukker(oppgaveFasade, oppgaveTilbakkeleggingRepo, fagsakService, behandlingService, oppgaveService);
 
@@ -72,7 +75,7 @@ public class OppgaveplukkerTest {
     }
 
     @Test
-    public void plukkOppgave_toOppgaverMedPriHOYForskjelligFrist_plukkoppgaveHøyestFrist() throws MelosysException {
+    void plukkOppgave_toOppgaverMedPriHOYForskjelligFrist_plukkoppgaveHøyestFrist() {
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1"));
         oppgaver.add(opprettOppgave("2", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-12"));
@@ -102,7 +105,7 @@ public class OppgaveplukkerTest {
     }
 
     @Test
-    public void plukkOppgave_toOppgaverMedPriHOYSammeFristForskjelligAktivDato_plukkoppgaveOpprettetSenest() throws MelosysException {
+    void plukkOppgave_toOppgaverMedPriHOYSammeFristForskjelligAktivDato_plukkoppgaveOpprettetSenest() {
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.LAV,  LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-1"));
         oppgaver.add(opprettOppgave("2", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-12"));
@@ -132,7 +135,7 @@ public class OppgaveplukkerTest {
     }
 
     @Test
-    public void plukkOppgave_avventerDokumentast_og_med_utløptsvarfrist() throws MelosysException {
+    void plukkOppgave_avventerDokumentast_og_med_utløptsvarfrist() {
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2019, 8, 7), LocalDate.now(), "MEL-1"));
         oppgaver.add(opprettOppgave("2", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-1"));
@@ -163,7 +166,7 @@ public class OppgaveplukkerTest {
     }
 
     @Test
-    public void plukkOppgave_1_tilbakelagt() throws MelosysException {
+    void plukkOppgave_1_tilbakelagt() {
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.NORM, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-1"));
         oppgaver.add(opprettOppgave("2", Oppgavetyper.BEH_SAK_MK, PrioritetType.NORM, LocalDate.of(2018, 8, 8), LocalDate.now(), "MEL-2"));
@@ -196,7 +199,7 @@ public class OppgaveplukkerTest {
     }
 
     @Test
-    public void plukkOppgave_alle_tilbakelagt() throws MelosysException{
+    void plukkOppgave_alle_tilbakelagt() {
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.LAV, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-1"));
         oppgaver.add(opprettOppgave("2", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 7), LocalDate.now(), "MEL-2"));
@@ -228,7 +231,7 @@ public class OppgaveplukkerTest {
     }
 
     @Test
-    public void leggTilbakeOppgave_medBegrunnelse() throws MelosysException {
+    void leggTilbakeOppgave_medBegrunnelse() {
         final String oppgaveId = String.valueOf(GSAK_SAKSNUMMER);
         final Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setOppgaveId(oppgaveId);
@@ -256,7 +259,7 @@ public class OppgaveplukkerTest {
     }
 
     @Test
-    public void leggTilbakeOppgave_venterPåDokumentasjon() throws MelosysException {
+    void leggTilbakeOppgave_venterPåDokumentasjon() {
         final String oppgaveId = String.valueOf(GSAK_SAKSNUMMER);
         final Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
         oppgaveBuilder.setOppgaveId(oppgaveId);
@@ -276,7 +279,7 @@ public class OppgaveplukkerTest {
 
 
     @Test
-    public void plukkOppgave_brukerBehandlingstema_finnerOppgave() throws MelosysException {
+    void plukkOppgave_brukerBehandlingstema_finnerOppgave() {
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1"));
 
@@ -304,7 +307,7 @@ public class OppgaveplukkerTest {
     }
 
     @Test
-    public void plukkOppgave_behandlingSomVenterHarSvarfristSomikkeHarGåttUt_plukkerIkkeBehandlingen() throws MelosysException {
+    void plukkOppgave_behandlingSomVenterHarSvarfristSomikkeHarGåttUt_plukkerIkkeBehandlingen() {
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1"));
 
@@ -331,7 +334,7 @@ public class OppgaveplukkerTest {
     }
 
     @Test
-    public void plukkOppgave_oppgaveSomVenterHarIkkeSvarfrist_plukkerIkkeBehandlingen() throws MelosysException {
+    void plukkOppgave_oppgaveSomVenterHarIkkeSvarfrist_plukkerIkkeBehandlingen() {
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1"));
 
@@ -356,7 +359,7 @@ public class OppgaveplukkerTest {
     }
 
     @Test
-    public void plukkOppgave_søknadStatusSvarAou_oppdaterStatus() throws FunksjonellException, TekniskException {
+    void plukkOppgave_søknadStatusSvarAou_oppdaterStatus() throws FunksjonellException, TekniskException {
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1"));
 
@@ -386,10 +389,12 @@ public class OppgaveplukkerTest {
         assertThat(behandlingCaptor.getValue().getStatus()).isEqualTo(Behandlingsstatus.UNDER_BEHANDLING);
     }
 
-    @Test(expected = FunksjonellException.class)
-    public void plukkOppgave_utenBehandlingstype_forventException() throws FunksjonellException, TekniskException {
+    @Test
+    void plukkOppgave_utenBehandlingstema_forventException() throws FunksjonellException, TekniskException {
         PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto("");
-        oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto))
+            .withMessageContaining("Behandlingstema er påkrevd");
     }
 
     private Oppgave opprettOppgave(String oppgaveId, Oppgavetyper oppgavetype, PrioritetType prioritet, LocalDate fristFerdigstillelse, LocalDate aktivDato, String saksnummer) {

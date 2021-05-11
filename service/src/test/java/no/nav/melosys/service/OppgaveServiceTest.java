@@ -26,17 +26,16 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto;
 import no.nav.melosys.service.oppgave.dto.JournalfoeringsoppgaveDto;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -90,7 +89,7 @@ class OppgaveServiceTest {
     }
 
     @Test
-    void hentOppgaverMedAnsvarlig() throws MelosysException {
+    void hentOppgaverMedAnsvarlig() {
         final String behOppgID = "1";
         final String jfrOppgID = "2";
 
@@ -141,7 +140,7 @@ class OppgaveServiceTest {
     }
 
     @Test
-    void hentOppgaveForFagsaksnummer_oppgaveEksisterer_forventOppgave() throws MelosysException {
+    void hentOppgaveForFagsaksnummer_oppgaveEksisterer_forventOppgave() {
         when(oppgaveFasade.finnOppgaverMedSaksnummer(eq(saksnummer))).thenReturn(List.of(oppgave));
 
         Oppgave oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(saksnummer);

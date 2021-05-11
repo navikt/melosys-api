@@ -8,15 +8,16 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
+import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.apache.commons.lang3.StringUtils;
@@ -47,12 +48,12 @@ public class UnntaksperiodeService {
         this.prosessinstansService = prosessinstansService;
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void godkjennPeriode(long behandlingID, boolean varsleUtland) throws FunksjonellException, TekniskException {
+    @Transactional
+    public void godkjennPeriode(long behandlingID, boolean varsleUtland, String fritekst) throws FunksjonellException, TekniskException {
         Behandling behandling = hentOgValiderBehandling(behandlingID);
         opprettLovvalgsperiodeHvisIkkeEksisterer(behandling);
         behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.GODKJENT);
-        prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(behandling, varsleUtland);
+        prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(behandling, varsleUtland, fritekst);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
@@ -67,7 +68,7 @@ public class UnntaksperiodeService {
         }
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public void ikkeGodkjennPeriode(long behandlingID, Set<String> begrunnelser, String fritekst) throws FunksjonellException, TekniskException {
         Behandling behandling = hentOgValiderBehandling(behandlingID);
         Set<Ikke_godkjent_begrunnelser> ikkeGodkjentBegrunnelser = tilIkkeGodkjentBegrunnelser(begrunnelser);
@@ -103,10 +104,13 @@ public class UnntaksperiodeService {
         } else if (behandling.erInaktiv()) {
             throw new FunksjonellException(String.format("Behandling %s er inaktiv", behandling.getId()));
         }
+        ErPeriode periode = behandling.hentPeriode();
+        if (PeriodeKontroller.feilIPeriode(periode.getFom(), periode.getTom())) {
+            throw new FunksjonellException(String.format("Behandling %s har feil i perioden", behandling.getId()));
+        }
     }
 
     private void validerBegrunnelser(Set<Ikke_godkjent_begrunnelser> begrunnelser, String fritekst) throws FunksjonellException {
-
         if (begrunnelser.isEmpty()) {
             throw new FunksjonellException("Ingen begrunnelser for avlag av periode");
         } else if (begrunnelser.contains(Ikke_godkjent_begrunnelser.ANNET) && StringUtils.isEmpty(fritekst)) {

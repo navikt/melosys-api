@@ -11,8 +11,8 @@ import no.nav.dok.brevdata.felles.v1.navfelles.Person;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
@@ -21,15 +21,17 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import no.nav.melosys.service.persondata.PersondataFasade;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.w3c.dom.Element;
 
 import static java.util.Arrays.asList;
@@ -38,8 +40,9 @@ import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BrevDataServiceTest {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class BrevDataServiceTest {
     @Mock
     private BehandlingsresultatRepository behandlingsresultatRepository;
     @Mock
@@ -58,13 +61,13 @@ public class BrevDataServiceTest {
 
     private static final String sammensattNavn = "ALTFOR SAMMENSATT";
 
-    @Before
+    @BeforeEach
     public void setUp() throws FunksjonellException, TekniskException {
         service = spy(new BrevDataService(behandlingsresultatRepository, saksbehandlerService, persondataFasade, utenlandskMyndighetRepository));
 
         when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(new Behandlingsresultat()));
         when(saksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Joe Moe");
-        when(persondataFasade.hentIdentForAktørId(any())).thenReturn(FNR);
+        when(persondataFasade.hentFolkeregisterIdent(any())).thenReturn(FNR);
         when(persondataFasade.hentSammensattNavn(anyString())).thenReturn(sammensattNavn);
         lagUtenlandskMyndighet();
     }
@@ -79,7 +82,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagA1_tilUtenlandskMyndighet() throws TekniskException, FunksjonellException {
+    void lagA1_tilUtenlandskMyndighet() throws TekniskException, FunksjonellException {
         Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
         String institusjonID = "HR:Zxcd";
         Aktoer aktoerMyndighet = lagAktoerMyndighet(institusjonID);
@@ -106,7 +109,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagMyndighetFraAktoer() throws TekniskException {
+    void lagMyndighetFraAktoer() throws TekniskException {
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.MYNDIGHET);
         aktoer.setInstitusjonId("DE:TEST");
@@ -120,7 +123,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagForvaltningsmelding_representantErNull_tilBruker() throws TekniskException, FunksjonellException {
+    void lagForvaltningsmelding_representantErNull_tilBruker() throws TekniskException, FunksjonellException {
         Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
@@ -150,7 +153,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagForvaltningsmelding_representantIkkeNull_tilRepresentant() throws TekniskException, FunksjonellException {
+    void lagForvaltningsmelding_representantIkkeNull_tilRepresentant() throws TekniskException, FunksjonellException {
 
         Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
         behandling.getFagsak().getAktører().add(hentRepresentantAktør());
@@ -171,7 +174,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagMangelbrevXml_mottakerErbrukerID() throws TekniskException, FunksjonellException {
+    void lagMangelbrevXml_mottakerErbrukerID() throws TekniskException, FunksjonellException {
         Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
@@ -197,7 +200,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagMangelbrevXml_mottakerErArbeidsgiver() throws TekniskException, FunksjonellException {
+    void lagMangelbrevXml_mottakerErArbeidsgiver() throws TekniskException, FunksjonellException {
         Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
@@ -222,7 +225,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagBrevXml_medBrukerMedAdresseIRegister_skalBerikes() throws TekniskException, FunksjonellException {
+    void lagBrevXml_medBrukerMedAdresseIRegister_skalBerikes() throws TekniskException, FunksjonellException {
         Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
 
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
@@ -235,7 +238,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagBrevXml_medBrukerUtenAdresseIRegister_skalIkkeBerikes() throws TekniskException, FunksjonellException {
+    void lagBrevXml_medBrukerUtenAdresseIRegister_skalIkkeBerikes() throws TekniskException, FunksjonellException {
         Behandling behandling = lagBehandling(lagSaksopplysningerUtenAdresseIRegister(), lagSøknadDokument());
 
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
@@ -248,27 +251,27 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagMetadataForInnvilgelsesbrevAngirDokTypeLikInnvilgelseYrkesaktiv() throws Exception {
+    void lagMetadataForInnvilgelsesbrevAngirDokTypeLikInnvilgelseYrkesaktiv() throws Exception {
         testLagDokumentMetadata(INNVILGELSE_YRKESAKTIV, Aktoersroller.BRUKER);
     }
 
     @Test
-    public void lagMetadataForMangelbrevAngirDokTypeLikMangelbrev() throws Exception {
+    void lagMetadataForMangelbrevAngirDokTypeLikMangelbrev() throws Exception {
         testLagDokumentMetadata(MELDING_MANGLENDE_OPPLYSNINGER, Aktoersroller.ARBEIDSGIVER);
     }
 
     @Test
-    public void lagMetadataForMangelbrevAngirDokTypeLikHenleggelse() throws Exception {
+    void lagMetadataForMangelbrevAngirDokTypeLikHenleggelse() throws Exception {
         testLagDokumentMetadata(MELDING_HENLAGT_SAK, Aktoersroller.BRUKER);
     }
 
     @Test
-    public void lagMetadataForInnvilgelseArbeidsgiverBrevAngirDokTypeLikArbeidsgiver() throws Exception {
+    void lagMetadataForInnvilgelseArbeidsgiverBrevAngirDokTypeLikArbeidsgiver() throws Exception {
         testLagDokumentMetadata(INNVILGELSE_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER);
     }
 
     @Test
-    public final void avklarMottakerId_representantOgKontaktOpplysningFinnes_kontaktOpplysningForRepresentantBrukes() throws TekniskException, FunksjonellException {
+    void avklarMottakerId_representantOgKontaktOpplysningFinnes_kontaktOpplysningForRepresentantBrukes() throws TekniskException, FunksjonellException {
         Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
         behandling.getFagsak().getAktører().add(hentRepresentantAktør());
 
@@ -299,7 +302,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagBestillingMetadata_medBrukerMottakerOgBrukerUtenAdresseIRegister_skalHaBrukernavnOgPostadresse() throws FunksjonellException, TekniskException {
+    void lagBestillingMetadata_medBrukerMottakerOgBrukerUtenAdresseIRegister_skalHaBrukernavnOgPostadresse() throws FunksjonellException, TekniskException {
         Collection<Saksopplysning> saksopplysninger = lagSaksopplysningerUtenAdresseIRegister();
 
         Behandling behandling = lagBehandling(saksopplysninger, lagSøknadDokument());
@@ -313,7 +316,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagBestillingMetadata_medBrukerMedAdresseIRegister_skalIkkeHaBrukerNavnEllerPostAdresse() throws FunksjonellException, TekniskException {
+    void lagBestillingMetadata_medBrukerMedAdresseIRegister_skalIkkeHaBrukerNavnEllerPostAdresse() throws FunksjonellException, TekniskException {
         Collection<Saksopplysning> saksopplysninger = lagSaksopplysninger();
         Behandling behandling = lagBehandling(saksopplysninger, lagSøknadDokument());
         BrevData brevData = new BrevData("Z123456");
@@ -326,7 +329,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public void lagBestillingMetadata_medUtenlandskMyndighet_skalUtfyllesMedBrukerNavn() throws FunksjonellException, TekniskException {
+    void lagBestillingMetadata_medUtenlandskMyndighet_skalUtfyllesMedBrukerNavn() throws FunksjonellException, TekniskException {
         Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
         BrevData brevData = new BrevData("Z123456");
 
@@ -339,7 +342,7 @@ public class BrevDataServiceTest {
     }
 
     @Test
-    public final void avklarMottakerId_ingenRepresentantForArbeidsgiverOgKontaktOpplysningFinnes_kontaktOpplysningBrukes() throws TekniskException, FunksjonellException {
+    void avklarMottakerId_ingenRepresentantForArbeidsgiverOgKontaktOpplysningFinnes_kontaktOpplysningBrukes() throws TekniskException, FunksjonellException {
         Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
         kontaktopplysning.setKontaktopplysningID(new KontaktopplysningID("MELTEST-1", "999"));
         kontaktopplysning.setKontaktNavn("brev motakker");

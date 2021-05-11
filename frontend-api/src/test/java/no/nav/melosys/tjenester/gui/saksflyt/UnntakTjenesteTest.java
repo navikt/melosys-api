@@ -10,17 +10,17 @@ import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
 import no.nav.melosys.tjenester.gui.dto.GodkjennUnntaksperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.VurderUnntaksperiodeDto;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class UnntakTjenesteTest extends JsonSchemaTestParent {
     private static final String UNNTAKSPERIODE_GODKJENN_SCHEMA = "saksflyt-unntaksperioder-godkjenn-post-schema.json";
     private static final String UNNTAKSPERIODE_IKKEGODKJENN_SCHEMA = "saksflyt-unntaksperioder-ikkegodkjenn-post-schema.json";
@@ -30,16 +30,16 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
 
     private UnntakTjeneste unntakTjeneste;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         unntakTjeneste = new UnntakTjeneste(unntaksperiodeService);
     }
 
     @Test
     public void godkjennUnntaksperiode() throws FunksjonellException, TekniskException, IOException {
-        GodkjennUnntaksperiodeDto dto = new GodkjennUnntaksperiodeDto(true);
+        GodkjennUnntaksperiodeDto dto = new GodkjennUnntaksperiodeDto(true, "tekst");
         unntakTjeneste.godkjennUnntaksperiode(1L, dto);
-        verify(unntaksperiodeService).godkjennPeriode(anyLong(), eq(true));
+        verify(unntaksperiodeService).godkjennPeriode(anyLong(), eq(true), eq("tekst"));
         valider(dto, UNNTAKSPERIODE_GODKJENN_SCHEMA);
     }
 

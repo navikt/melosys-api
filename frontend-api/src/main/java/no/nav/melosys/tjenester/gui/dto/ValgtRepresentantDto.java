@@ -13,7 +13,7 @@ public class ValgtRepresentantDto {
     @JsonCreator
     public ValgtRepresentantDto(@JsonProperty("representantnummer") String representantnummer,
                                 @JsonProperty("selvbetalende") boolean selvbetalende,
-                                @JsonProperty("orgnr") String organisasjonsnummer,
+                                @JsonProperty("organisasjonsnummer") String organisasjonsnummer,
                                 @JsonProperty("kontaktperson") String kontaktperson) {
         this.representantnummer = representantnummer;
         this.selvbetalende = selvbetalende;

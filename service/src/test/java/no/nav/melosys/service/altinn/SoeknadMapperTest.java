@@ -2,12 +2,14 @@ package no.nav.melosys.service.altinn;
 
 import java.math.BigDecimal;
 import java.net.URL;
+import java.time.LocalDate;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.UtenlandskIdent;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.ArbeidsstedType;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.LuftfartBase;
@@ -63,6 +65,13 @@ class SoeknadMapperTest {
         assertThat(foretakUtland.adresse.poststed).isEqualTo("testbyen");
         assertThat(foretakUtland.adresse.postnummer).isEqualTo("UTLAND-1234");
         assertThat(foretakUtland.adresse.landkode).isEqualTo("BE");
+        final var utenlandsoppdraget = soeknad.utenlandsoppdraget;
+        assertThat(utenlandsoppdraget.erErstatningTidligereUtsendte).isFalse();
+        assertThat(utenlandsoppdraget.samletUtsendingsperiode).isNull();
+        assertThat(utenlandsoppdraget.erUtsendelseForOppdragIUtlandet).isFalse();
+        assertThat(utenlandsoppdraget.erFortsattAnsattEtterOppdraget).isNull();
+        assertThat(utenlandsoppdraget.erAnsattForOppdragIUtlandet).isFalse();
+        assertThat(utenlandsoppdraget.erDrattPaaEgetInitiativ).isFalse();
     }
 
     @Test
@@ -145,6 +154,24 @@ class SoeknadMapperTest {
         assertThat(luftfartBase.hjemmebaseNavn).isEqualTo("koti");
         assertThat(luftfartBase.hjemmebaseLand).isEqualTo("FI");
         assertThat(luftfartBase.typeFlyvninger).isEqualTo(INTERNASJONAL);
+    }
+
+    @Test
+    void testMappingSamletUtsendingsperiode() throws JAXBException {
+        MedlemskapArbeidEOSM medlemskapArbeidEOSM = parseSøknadXML();
+        medlemskapArbeidEOSM.getInnhold().getMidlertidigUtsendt().getUtenlandsoppdraget()
+            .setErstatterTidligereUtsendte(Boolean.TRUE);
+
+        Soeknad soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM);
+
+        final var utenlandsoppdraget = soeknad.utenlandsoppdraget;
+        assertThat(utenlandsoppdraget.erErstatningTidligereUtsendte).isTrue();
+        assertThat(utenlandsoppdraget.samletUtsendingsperiode)
+            .extracting(Periode::getFom, Periode::getTom)
+            .containsExactly(
+                LocalDate.of(2019, 8, 1),
+                LocalDate.of(2019, 8, 6)
+            );
     }
 
     private MedlemskapArbeidEOSM parseSøknadXML() throws JAXBException {

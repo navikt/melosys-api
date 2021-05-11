@@ -4,6 +4,7 @@ public class Bruker {
 
     public enum BrukerIdType {
         FNR,
+        AKTOERID,
         ORGNR
     }
 

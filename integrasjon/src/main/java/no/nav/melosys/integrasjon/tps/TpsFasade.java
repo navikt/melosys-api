@@ -7,10 +7,6 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.exception.*;
 
 public interface TpsFasade {
-    String hentAktørIdForIdent(String fnr) throws IkkeFunnetException;
-
-    String hentIdentForAktørId(String aktørID) throws IkkeFunnetException;
-
     Saksopplysning hentPerson(String ident, Informasjonsbehov behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException;
 
     /**

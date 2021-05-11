@@ -10,7 +10,8 @@ import org.springframework.stereotype.Service;
 public class RegisterOppslagSystemService extends RegisterOppslagService {
 
     @Autowired
-    public RegisterOppslagSystemService(@Qualifier("system") EregFasade eregFasade, PersondataFasade persondataFasade) {
+    public RegisterOppslagSystemService(@Qualifier("system") EregFasade eregFasade,
+                                        @Qualifier("system") PersondataFasade persondataFasade) {
         super(eregFasade, persondataFasade);
     }
 }

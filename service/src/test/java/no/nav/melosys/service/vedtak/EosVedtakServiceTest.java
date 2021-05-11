@@ -17,7 +17,10 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.exception.validering.KontrollfeilDto;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -98,14 +101,14 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_landErEessiReadyInstitusjonErSatt_fatterVedtak() throws MelosysException {
+    void fattVedtak_landErEessiReadyInstitusjonErSatt_fatterVedtak() throws Exception {
         var mottakerinstitusjoner = Set.of("AB:CDEF123");
         mockBehandlingsresultat();
         mockEesiReady();
         leggTilLovvalgsperiode();
 
-        vedtakService.fattVedtak(behandling, FASTSATT_LOVVALGSLAND, behandlingsresultatFritekst, "FRITEKST_SED",
-            mottakerinstitusjoner, FØRSTEGANGSVEDTAK, null);
+        vedtakService.fattVedtak(behandling, lagRequest(FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK,
+            behandlingsresultatFritekst, "FRITEKST_SED", mottakerinstitusjoner));
 
         assertThat(behandlingsresultat)
             .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst)
@@ -128,12 +131,12 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_utenMottakerLandErIkkeEessiReady_fatterVedtak() throws MelosysException {
+    void fattVedtak_utenMottakerLandErIkkeEessiReady_fatterVedtak() throws Exception {
         mockBehandlingsresultat();
         leggTilLovvalgsperiode();
 
-        vedtakService.fattVedtak(behandling, FASTSATT_LOVVALGSLAND, behandlingsresultatFritekst, "FRITEKST_SED",
-            null, FØRSTEGANGSVEDTAK, null);
+        vedtakService.fattVedtak(behandling, lagRequest(FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK,
+            behandlingsresultatFritekst, "FRITEKST_SED", null));
 
         assertThat(behandlingsresultat)
             .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst)
@@ -155,7 +158,7 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_mottakerErNullOgErAnmodningOmUnntakSvarMottatt_fatterVedtak() throws MelosysException {
+    void fattVedtak_mottakerErNullOgErAnmodningOmUnntakSvarMottatt_fatterVedtak() throws Exception {
         mockBehandlingsresultat();
 
         leggTilLovvalgsperiode();
@@ -165,8 +168,8 @@ class EosVedtakServiceTest {
         anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
         behandlingsresultat.setAnmodningsperioder(Collections.singleton(anmodningsperiode));
 
-        vedtakService.fattVedtak(behandling, FASTSATT_LOVVALGSLAND, behandlingsresultatFritekst, "FRITEKST_SED",
-            null, FØRSTEGANGSVEDTAK, null);
+        vedtakService.fattVedtak(behandling, lagRequest(FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK,
+            behandlingsresultatFritekst, "FRITEKST_SED", null));
 
         assertThat(behandlingsresultat)
             .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst)
@@ -187,13 +190,13 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_erAvslagManglendeOpplysninger_fatterVedtak() throws MelosysException {
+    void fattVedtak_erAvslagManglendeOpplysninger_fatterVedtak() throws Exception {
         mockBehandlingsresultat();
 
         final Behandlingsresultattyper resultatType = Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL;
         final Vedtakstyper vedtakstype = FØRSTEGANGSVEDTAK;
 
-        vedtakService.fattVedtak(behandling, resultatType, null, null, null, vedtakstype, null);
+        vedtakService.fattVedtak(behandling, lagRequest(resultatType, vedtakstype, null, null, null));
 
         assertThat(behandlingsresultat)
             .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst)
@@ -214,13 +217,12 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_erAvslagLovvalgsperiodeIkkeInnvilget_fatterVedtak() throws MelosysException {
+    void fattVedtak_erAvslagLovvalgsperiodeIkkeInnvilget_fatterVedtak() throws Exception {
         mockBehandlingsresultat();
 
         leggTilLovvalgsperiode(InnvilgelsesResultat.AVSLAATT);
 
-        vedtakService.fattVedtak(behandling, FASTSATT_LOVVALGSLAND, null, null, null,
-            FØRSTEGANGSVEDTAK, null);
+        vedtakService.fattVedtak(behandling, lagRequest(FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK, null, null, null));
 
         verify(prosessinstansService).opprettProsessinstansIverksettVedtak(
             eq(behandling),
@@ -239,8 +241,8 @@ class EosVedtakServiceTest {
 
         leggTilLovvalgsperiode(InnvilgelsesResultat.AVSLAATT);
 
-        assertThatThrownBy(() -> vedtakService.fattVedtak(behandling, FASTSATT_LOVVALGSLAND, null, null,
-            null, FØRSTEGANGSVEDTAK, null))
+        assertThatThrownBy(() -> vedtakService.fattVedtak(behandling, lagRequest(FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK, null, null,
+            null)))
             .isInstanceOf(FunksjonellException.class)
             .hasMessageContaining("vedtak-prosess");
 
@@ -249,7 +251,7 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_feilFraKontroller_kasterExceptionMedFeilkode() throws MelosysException {
+    void fattVedtak_feilFraKontroller_kasterExceptionMedFeilkode() throws Exception {
         mockBehandlingsresultat();
         mockFeilendeValidering();
         leggTilLovvalgsperiode(InnvilgelsesResultat.INNVILGET);
@@ -257,8 +259,8 @@ class EosVedtakServiceTest {
         Consumer<ValideringException> medFeilkode = v -> assertThat(v.getFeilkoder())
             .extracting(KontrollfeilDto::getKode).containsExactly(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER.getKode());
 
-        assertThatThrownBy(() -> vedtakService.fattVedtak(behandling, FASTSATT_LOVVALGSLAND, null, null,
-            null, FØRSTEGANGSVEDTAK, null))
+        assertThatThrownBy(() -> vedtakService.fattVedtak(behandling, lagRequest(FASTSATT_LOVVALGSLAND,
+            FØRSTEGANGSVEDTAK, null, null, null)))
             .isInstanceOfSatisfying(ValideringException.class, medFeilkode)
             .hasMessage("Feil i validering. Kan ikke fatte vedtak.");
     }
@@ -306,7 +308,7 @@ class EosVedtakServiceTest {
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
     }
 
-    private void mockEesiReady() throws MelosysException {
+    private void mockEesiReady() throws Exception {
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID)).thenReturn(Collections.singletonList(Landkoder.SE));
         when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(anySet(), anyCollection(), any(BucType.class))).thenCallRealMethod();
         when(eessiService.hentEessiMottakerinstitusjoner(BucType.LA_BUC_04.name(), Set.of(Landkoder.SE.getKode())))
@@ -314,7 +316,7 @@ class EosVedtakServiceTest {
     }
 
     private void mockFeilendeValidering() throws FunksjonellException, TekniskException {
-        when(persondataFasade.hentIdentForAktørId(anyString())).thenReturn("123");
+        when(persondataFasade.hentFolkeregisterIdent(anyString())).thenReturn("123");
         when(vedtakKontrollService.utførKontroller(anyLong(), any(Vedtakstyper.class)))
             .thenReturn(Collections.singletonList(new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)));
     }
@@ -348,5 +350,16 @@ class EosVedtakServiceTest {
         myndighet.setRolle(Aktoersroller.MYNDIGHET);
         myndighet.setInstitusjonId("SE:SE001");
         behandling.getFagsak().setAktører(Set.of(myndighet));
+    }
+
+    private FattEosVedtakRequest lagRequest(Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype,
+                                            String behandlingsresultatFritekst, String fritekstSed, Set<String> mottakerinstitusjoner) {
+        return new FattEosVedtakRequest.Builder()
+            .medBehandlingsresultat(behandlingsresultattype)
+            .medVedtakstype(vedtakstype)
+            .medFritekst(behandlingsresultatFritekst)
+            .medFritekstSed(fritekstSed)
+            .medMottakerInstitusjoner(mottakerinstitusjoner)
+            .build();
     }
 }

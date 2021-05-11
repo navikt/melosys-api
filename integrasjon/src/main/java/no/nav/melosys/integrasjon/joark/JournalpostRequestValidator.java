@@ -32,11 +32,11 @@ final class JournalpostRequestValidator {
 
     private static Collection<String> validerSak(Sak sak) {
         Collection<String> feil = new ArrayList<>();
-        if (StringUtils.isEmpty(sak.getArkivsaksnummer())) {
-            feil.add("Arkivsaksnummer mangler");
+        if (StringUtils.isEmpty(sak.getFagsakId())) {
+            feil.add("Saksnummer mangler");
         }
-        if (StringUtils.isEmpty(sak.getArkivsaksystem())) {
-            feil.add("Arkivsaksystem mangler");
+        if (StringUtils.isEmpty(sak.getFagsaksystem())) {
+            feil.add("Fagsaksystem mangler");
         }
         return feil;
     }

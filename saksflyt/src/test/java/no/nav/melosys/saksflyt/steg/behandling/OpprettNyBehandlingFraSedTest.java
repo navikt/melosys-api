@@ -11,16 +11,13 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -42,9 +39,6 @@ class OpprettNyBehandlingFraSedTest {
     private OppgaveService oppgaveFasade;
 
     private OpprettNyBehandlingFraSed opprettNyBehandlingFraSed;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     @BeforeEach
     public void setup() {
@@ -71,7 +65,7 @@ class OpprettNyBehandlingFraSedTest {
 
 
     @Test
-    void utfør_harTidligereBehandlingOgOppgave_nyBehandlingOpprettet() throws MelosysException {
+    void utfør_harTidligereBehandlingOgOppgave_nyBehandlingOpprettet() {
         final long gsakSaksnummer = 123L;
         final Behandlingstema behandlingstema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
         final String journalpostID = "jp123";

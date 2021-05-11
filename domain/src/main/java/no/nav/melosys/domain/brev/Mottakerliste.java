@@ -60,6 +60,16 @@ public class Mottakerliste {
             return this;
         }
 
+        public Builder medKopiMottaker(Aktoersroller kopiMottaker) {
+            this.kopiMottakere.add(kopiMottaker);
+            return this;
+        }
+
+        public Builder medFastMottaker(FastMottaker fastMottaker) {
+            this.fasteMottakere.add(fastMottaker);
+            return this;
+        }
+
         public Mottakerliste build() {
             return new Mottakerliste(this);
         }

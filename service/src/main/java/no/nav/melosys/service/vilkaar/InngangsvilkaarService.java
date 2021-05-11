@@ -1,18 +1,18 @@
 package no.nav.melosys.service.vilkaar;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import no.nav.melosys.domain.ErPeriode;
+import no.nav.melosys.domain.VilkaarBegrunnelse;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.StatsborgerskapPeriode;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.inngangsvilkar.Feilmelding;
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
+import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Inngangsvilkaar;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -44,6 +44,10 @@ public class InngangsvilkaarService {
         this.vilkaarsresultatService = vilkaarsresultatService;
     }
 
+    public boolean oppfyllervurderingEF_883_2004(long behandlingID) {
+        return vilkaarsresultatService.oppfyllerVilkaar(behandlingID, FO_883_2004_INNGANGSVILKAAR);
+    }
+
     public boolean vurderOgLagreInngangsvilkår(long behandlingID,
                                                Collection<String> søknadsland,
                                                ErPeriode søknadsperiode) throws FunksjonellException {
@@ -51,7 +55,8 @@ public class InngangsvilkaarService {
         final boolean erEF_883_2004 = vurderingEF_883_2004.isOppfylt();
 
         vilkaarsresultatService.oppdaterVilkaarsresultat(behandlingID, FO_883_2004_INNGANGSVILKAAR,
-            erEF_883_2004, vurderingEF_883_2004.getBegrunnelseKode());
+            erEF_883_2004,
+            vurderingEF_883_2004.getBegrunnelseKode() == null ? Collections.emptySet() : Set.of(vurderingEF_883_2004.getBegrunnelseKode()));
         return erEF_883_2004;
     }
 
@@ -111,5 +116,23 @@ public class InngangsvilkaarService {
                 .max(Comparator.comparing(p -> p.endringstidspunkt))
                 .map(p -> p.statsborgerskap).orElse(null);
         }
+    }
+
+    public void overstyrInngangsvilkårTilOppfylt(long behandlingID) throws FunksjonellException {
+        final var inngangsvilkaar = vilkaarsresultatService.finnVilkaarsresultat(behandlingID, FO_883_2004_INNGANGSVILKAAR);
+        if (inngangsvilkaar.isEmpty()) {
+            throw new FunksjonellException("Inngangsvilkår er ikke vurdert for behandling " + behandlingID);
+        }
+        final var inngangsvilkaarBegrunnelseKoder = inngangsvilkaar.get().getBegrunnelser().stream()
+            .map(VilkaarBegrunnelse::getKode)
+            .map(Inngangsvilkaar::valueOf)
+            .collect(Collectors.toSet());
+
+        final Set<Kodeverk> begrunnelseKoder = Stream.concat(
+            Set.of(Inngangsvilkaar.OVERSTYRT_AV_SAKSBEHANDLER).stream(),
+            inngangsvilkaarBegrunnelseKoder.stream()
+        ).collect(Collectors.toSet());
+
+        vilkaarsresultatService.oppdaterVilkaarsresultat(behandlingID, FO_883_2004_INNGANGSVILKAAR, true, begrunnelseKoder);
     }
 }

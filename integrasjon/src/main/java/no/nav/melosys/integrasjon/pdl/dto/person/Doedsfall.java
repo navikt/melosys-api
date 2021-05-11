@@ -1,0 +1,6 @@
+package no.nav.melosys.integrasjon.pdl.dto.person;
+
+import java.time.LocalDate;
+
+public record Doedsfall(LocalDate doedsdato) {
+}

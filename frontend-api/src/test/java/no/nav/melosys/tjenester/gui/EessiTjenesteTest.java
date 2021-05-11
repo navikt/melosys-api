@@ -16,7 +16,6 @@ import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedInformasjon;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -61,7 +60,7 @@ class EessiTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentMottakerInstitusjoner() throws IOException, MelosysException {
+    void hentMottakerInstitusjoner() throws IOException {
         when(eessiService.hentEessiMottakerinstitusjoner(anyString(), anyList()))
             .thenReturn(Arrays.asList(
                 defaultEasyRandom().nextObject(Institusjon.class),
@@ -78,7 +77,7 @@ class EessiTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void opprettBuc() throws IOException, MelosysException {
+    void opprettBuc() throws IOException {
         when(behandlingService.hentBehandling(123L)).thenReturn(lagBehandling());
         when(eessiService.opprettBucOgSed(any(), any(BucType.class), anyList(), anyCollection())).thenReturn(MOCK_RINA_URL);
 
@@ -97,7 +96,7 @@ class EessiTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentBucer() throws IOException, MelosysException {
+    void hentBucer() throws IOException {
         when(behandlingService.hentBehandlingUtenSaksopplysninger(123L)).thenReturn(lagBehandling());
         when(eessiService.hentTilknyttedeBucer(anyLong(), anyList()))
             .thenReturn(Arrays.asList(

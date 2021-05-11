@@ -8,7 +8,6 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -43,7 +42,7 @@ public class AvsluttArt13BehandlingService {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public void avsluttBehandlingHvisToMndPassert(long behandlingID) throws FunksjonellException, TekniskException {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());

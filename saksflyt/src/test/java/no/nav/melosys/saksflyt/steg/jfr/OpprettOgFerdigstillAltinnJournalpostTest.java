@@ -8,6 +8,7 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
+import no.nav.melosys.domain.arkiv.BrukerIdType;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -18,26 +19,25 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.altinn.AltinnSoeknadService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import no.nav.melosys.service.persondata.PersondataFasade;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class OpprettOgFerdigstillAltinnJournalpostTest {
     @Mock
     private AltinnSoeknadService altinnSoeknadService;
@@ -57,11 +57,12 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
 
     private final Aktoer bruker = new Aktoer();
     private final String ident = "00000000000";
+    private final String saksnummer = "MEL-1231";
 
     @Captor
     private ArgumentCaptor<OpprettJournalpost> captor;
 
-    @Before
+    @BeforeEach
     public void setup() throws FunksjonellException, IntegrasjonException {
         final String søknadID = "soknadid1";
         prosessinstans.setData(ProsessDataKey.MOTTATT_SOKNAD_ID, søknadID);
@@ -83,6 +84,7 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
         representant.setRepresenterer(Representerer.BEGGE);
 
         Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer(saksnummer);
         fagsak.setGsakSaksnummer(123L);
         fagsak.setAktører(Set.of(bruker, representant));
         behandling.setFagsak(fagsak);
@@ -92,24 +94,25 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
         var dokumenter = new ArrayList<AltinnDokument>();
         dokumenter.add(søknadDokument);
         dokumenter.add(fullmaktDokument);
-        when(altinnSoeknadService.hentDokumenterTilknyttetSoknad(eq(søknadID))).thenReturn(dokumenter);
-        when(persondataFasade.hentIdentForAktørId(anyString())).thenReturn(ident);
+        when(altinnSoeknadService.hentDokumenterTilknyttetSoknad(søknadID)).thenReturn(dokumenter);
+        when(persondataFasade.hentFolkeregisterIdent(anyString())).thenReturn(ident);
         when(eregFasade.hentOrganisasjonNavn(anyString())).thenReturn("Fullmektig Avsender");
         when(joarkFasade.opprettJournalpost(any(OpprettJournalpost.class), anyBoolean())).thenReturn("journalpostid123");
     }
 
     @Test
-    public void utfør_journalpostBlirOpprettet_verifiser() throws MelosysException {
+    public void utfør_journalpostBlirOpprettet_verifiser() {
         opprettOgFerdigstillAltinnJournalpost.utfør(prosessinstans);
 
-        verify(persondataFasade).hentIdentForAktørId(anyString());
+        verify(persondataFasade).hentFolkeregisterIdent(anyString());
         verify(joarkFasade).opprettJournalpost(captor.capture(), eq(true));
-        verify(behandlingService).lagre(eq(behandling));
+        verify(behandlingService).lagre(behandling);
 
         OpprettJournalpost opprettJournalpost = captor.getValue();
         assertThat(opprettJournalpost)
-            .extracting(Journalpost::getTema, Journalpost::getMottaksKanal, Journalpost::getArkivSakId, Journalpost::getBrukerId)
-            .containsExactly("MED", "ALTINN", "123", ident);
+            .extracting(Journalpost::getTema, Journalpost::getMottaksKanal,
+                Journalpost::getSaksnummer, Journalpost::getBrukerId, Journalpost::getBrukerIdType)
+            .containsExactly("MED", "ALTINN", saksnummer, ident, BrukerIdType.FOLKEREGISTERIDENT);
         assertThat(opprettJournalpost.getInnhold()).isNotEmpty();
         assertThat(opprettJournalpost.getHoveddokument())
             .extracting(ArkivDokument::getDokumentId, ArkivDokument::getTittel)
@@ -122,19 +125,19 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
     }
 
     @Test
-    public void utfør_ingenRepresentantForBruker_avsenderNavnErArbeidsgiverOrganisasjonNavn() throws MelosysException {
+    public void utfør_ingenRepresentantForBruker_avsenderNavnErArbeidsgiverOrganisasjonNavn() {
         Aktoer arbeidsgiver = new Aktoer();
         arbeidsgiver.setRolle(Aktoersroller.ARBEIDSGIVER);
         arbeidsgiver.setOrgnr("arbOrgnr");
         behandling.getFagsak().setAktører(Set.of(bruker, arbeidsgiver));
 
-        when(eregFasade.hentOrganisasjonNavn(eq(arbeidsgiver.getOrgnr()))).thenReturn("Arbeidsgiver");
+        when(eregFasade.hentOrganisasjonNavn(arbeidsgiver.getOrgnr())).thenReturn("Arbeidsgiver");
 
         opprettOgFerdigstillAltinnJournalpost.utfør(prosessinstans);
 
-        verify(persondataFasade).hentIdentForAktørId(anyString());
+        verify(persondataFasade).hentFolkeregisterIdent(anyString());
         verify(joarkFasade).opprettJournalpost(captor.capture(), eq(true));
-        verify(behandlingService).lagre(eq(behandling));
+        verify(behandlingService).lagre(behandling);
 
         OpprettJournalpost opprettJournalpost = captor.getValue();
 

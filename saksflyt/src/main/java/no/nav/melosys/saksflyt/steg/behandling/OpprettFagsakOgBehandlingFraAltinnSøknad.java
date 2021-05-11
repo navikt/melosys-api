@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.altinn.AltinnSoeknadService;
 import org.slf4j.Logger;
@@ -29,7 +28,7 @@ public class OpprettFagsakOgBehandlingFraAltinnSøknad implements StegBehandler 
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) {
 
         final String søknadID = prosessinstans.getData(MOTTATT_SOKNAD_ID);
         log.info("Oppretter fagsak og behandling for Altinn-søknad med referanse {}", søknadID);

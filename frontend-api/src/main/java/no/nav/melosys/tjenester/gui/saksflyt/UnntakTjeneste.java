@@ -39,7 +39,7 @@ public class UnntakTjeneste {
         @PathVariable("behandlingID") Long behandlingId,
         @RequestBody GodkjennUnntaksperiodeDto godkjennUnntaksperiodeDto
     ) throws FunksjonellException, TekniskException {
-        unntaksperiodeService.godkjennPeriode(behandlingId, godkjennUnntaksperiodeDto.isVarsleUtland());
+        unntaksperiodeService.godkjennPeriode(behandlingId, godkjennUnntaksperiodeDto.isVarsleUtland(), godkjennUnntaksperiodeDto.getFritekst());
         return ResponseEntity.noContent().build();
     }
 }

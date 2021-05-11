@@ -5,24 +5,24 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class FerdigstillJournalpostSedTest {
+@ExtendWith(MockitoExtension.class)
+class FerdigstillJournalpostSedTest {
     @Mock
     private JoarkFasade joarkFasade;
     @Mock
@@ -33,24 +33,23 @@ public class FerdigstillJournalpostSedTest {
     private static final String JOURNALPOST_ID = "jp123";
     private static final String BRUKER_ID = "bruker123";
     private static final String AKTØR_ID = "aktør123";
-    private static final Long GSAK_SAKSNUMMER = 123L;
+    private static final String SAKSNUMMER = "MEL-1223";
     private static final String TITTEL = "tittel123";
-    private static final String DOKUMENT_ID = "dokID123";
 
-    @Before
+    @BeforeEach
     public void setUp() throws IkkeFunnetException {
         ferdigstillJournalpostSed = new FerdigstillJournalpostSed(joarkFasade, persondataFasade);
-        when(persondataFasade.hentIdentForAktørId(eq(AKTØR_ID))).thenReturn(BRUKER_ID);
+        when(persondataFasade.hentFolkeregisterIdent(AKTØR_ID)).thenReturn(BRUKER_ID);
     }
 
     @Test
-    public void utfør() throws Exception {
+    void utfør() throws Exception {
         Prosessinstans prosessinstans = hentProsessinstans();
         ferdigstillJournalpostSed.utfør(prosessinstans);
 
         JournalpostOppdatering forventetOppdatering = new JournalpostOppdatering.Builder()
-            .medBrukerID(BRUKER_ID).medArkivSakID(GSAK_SAKSNUMMER).medTittel(TITTEL).build();
-        verify(joarkFasade).oppdaterJournalpost(eq(JOURNALPOST_ID), eq(forventetOppdatering), eq(true));
+            .medBrukerID(BRUKER_ID).medSaksnummer(SAKSNUMMER).medTittel(TITTEL).build();
+        verify(joarkFasade).oppdaterJournalpost(JOURNALPOST_ID, forventetOppdatering, true);
     }
 
 
@@ -62,9 +61,11 @@ public class FerdigstillJournalpostSedTest {
 
         Fagsak fagsak = new Fagsak();
         fagsak.setGsakSaksnummer(123L);
+        fagsak.setSaksnummer(SAKSNUMMER);
         fagsak.getAktører().add(bruker);
 
         Behandling behandling = new Behandling();
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setFagsak(fagsak);
 
         MelosysEessiMelding eessiMelding = new MelosysEessiMelding();

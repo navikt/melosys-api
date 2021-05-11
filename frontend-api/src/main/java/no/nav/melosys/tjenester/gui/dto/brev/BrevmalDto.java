@@ -7,23 +7,19 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
 public class BrevmalDto {
     private final Produserbaredokumenter type;
-    private final String beskrivelse;
     private final List<BrevmalFeltDto> felter;
     private final List<MottakerDto> muligeMottakere;
+    private final String mottakereHjelpetekst;
 
-    private BrevmalDto(Produserbaredokumenter type, String beskrivelse, List<BrevmalFeltDto> felter, List<MottakerDto> muligeMottakere) {
+    private BrevmalDto(Produserbaredokumenter type, List<BrevmalFeltDto> felter, List<MottakerDto> muligeMottakere, String mottakereHjelpetekst) {
         this.type = type;
-        this.beskrivelse = beskrivelse;
         this.felter = felter;
         this.muligeMottakere = muligeMottakere;
+        this.mottakereHjelpetekst = mottakereHjelpetekst;
     }
 
     public Produserbaredokumenter getType() {
         return type;
-    }
-
-    public String getBeskrivelse() {
-        return beskrivelse;
     }
 
     public List<BrevmalFeltDto> getFelter() {
@@ -34,19 +30,18 @@ public class BrevmalDto {
         return muligeMottakere;
     }
 
+    public String getMottakereHjelpetekst() {
+        return mottakereHjelpetekst;
+    }
+
     public static final class Builder {
         private Produserbaredokumenter type;
-        private String beskrivelse;
         private List<BrevmalFeltDto> felter;
         private List<MottakerDto> muligeMottakere;
+        private String mottakereHjelpetekst;
 
         public Builder medType(Produserbaredokumenter type) {
             this.type = type;
-            return this;
-        }
-
-        public Builder medBeskrivelse(String beskrivelse) {
-            this.beskrivelse = beskrivelse;
             return this;
         }
 
@@ -77,8 +72,13 @@ public class BrevmalDto {
             return this;
         }
 
+        public Builder medMottakereHjelpetekst(String mottakereHjelpetekst) {
+            this.mottakereHjelpetekst = mottakereHjelpetekst;
+            return this;
+        }
+
         public BrevmalDto build() {
-            return new BrevmalDto(type, beskrivelse, felter, muligeMottakere);
+            return new BrevmalDto(type, felter, muligeMottakere, mottakereHjelpetekst);
         }
     }
 }
