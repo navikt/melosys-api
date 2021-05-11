@@ -221,16 +221,20 @@ public final class SoeknadMapper {
 
     private static JuridiskArbeidsgiverNorge lagJuridiskArbeidsgiverNorge(Arbeidsgiver arbeidsgiver) {
         JuridiskArbeidsgiverNorge juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
-        if (arbeidsgiver != null && !arbeidsgiver.isOffentligVirksomhet() && arbeidsgiver.getSamletVirksomhetINorge() != null) {
-            SamletVirksomhetINorge samletVirksomhetINorge = arbeidsgiver.getSamletVirksomhetINorge();
-            juridiskArbeidsgiverNorge.antallAnsatte = samletVirksomhetINorge.getAntallAnsatte().intValue();
-            juridiskArbeidsgiverNorge.antallAdmAnsatte = samletVirksomhetINorge.getAntallAdministrativeAnsatteINorge().intValue();
-            juridiskArbeidsgiverNorge.antallUtsendte = samletVirksomhetINorge.getAntallUtsendte().intValue();
-            juridiskArbeidsgiverNorge.andelOmsetningINorge = new BigDecimal(samletVirksomhetINorge.getAndelOmsetningINorge());
-            juridiskArbeidsgiverNorge.andelOppdragINorge = new BigDecimal(samletVirksomhetINorge.getAndelOppdragINorge());
-            juridiskArbeidsgiverNorge.andelKontrakterINorge = new BigDecimal(samletVirksomhetINorge.getAndelKontrakterInngaasINorge());
-            juridiskArbeidsgiverNorge.andelRekruttertINorge = new BigDecimal(samletVirksomhetINorge.getAndelRekrutteresINorge());
-            juridiskArbeidsgiverNorge.ekstraArbeidsgivere = List.of(arbeidsgiver.getVirksomhetsnummer());
+        if (arbeidsgiver != null) {
+            juridiskArbeidsgiverNorge.erOffentligVirksomhet = arbeidsgiver.isOffentligVirksomhet();
+
+            if (!arbeidsgiver.isOffentligVirksomhet() && arbeidsgiver.getSamletVirksomhetINorge() != null) {
+                SamletVirksomhetINorge samletVirksomhetINorge = arbeidsgiver.getSamletVirksomhetINorge();
+                juridiskArbeidsgiverNorge.antallAnsatte = samletVirksomhetINorge.getAntallAnsatte().intValue();
+                juridiskArbeidsgiverNorge.antallAdmAnsatte = samletVirksomhetINorge.getAntallAdministrativeAnsatteINorge().intValue();
+                juridiskArbeidsgiverNorge.antallUtsendte = samletVirksomhetINorge.getAntallUtsendte().intValue();
+                juridiskArbeidsgiverNorge.andelOmsetningINorge = new BigDecimal(samletVirksomhetINorge.getAndelOmsetningINorge());
+                juridiskArbeidsgiverNorge.andelOppdragINorge = new BigDecimal(samletVirksomhetINorge.getAndelOppdragINorge());
+                juridiskArbeidsgiverNorge.andelKontrakterINorge = new BigDecimal(samletVirksomhetINorge.getAndelKontrakterInngaasINorge());
+                juridiskArbeidsgiverNorge.andelRekruttertINorge = new BigDecimal(samletVirksomhetINorge.getAndelRekrutteresINorge());
+                juridiskArbeidsgiverNorge.ekstraArbeidsgivere = List.of(arbeidsgiver.getVirksomhetsnummer());
+            }
         }
         return juridiskArbeidsgiverNorge;
     }

@@ -75,6 +75,40 @@ class SoeknadMapperTest {
     }
 
     @Test
+    void testMappingArbeidsgiver() throws JAXBException {
+        final MedlemskapArbeidEOSM medlemskapArbeidEOSM = parseSøknadXML();
+        medlemskapArbeidEOSM.getInnhold().getArbeidsgiver().setOffentligVirksomhet(true);
+
+        Soeknad soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM);
+
+        var juridiskArbeidsgiverNorge = soeknad.juridiskArbeidsgiverNorge;
+        assertThat(juridiskArbeidsgiverNorge.erOffentligVirksomhet).isEqualTo(true);
+        assertThat(juridiskArbeidsgiverNorge.antallAnsatte).isNull();
+        assertThat(juridiskArbeidsgiverNorge.antallAdmAnsatte).isNull();
+        assertThat(juridiskArbeidsgiverNorge.antallUtsendte).isNull();
+        assertThat(juridiskArbeidsgiverNorge.andelOmsetningINorge).isNull();
+        assertThat(juridiskArbeidsgiverNorge.andelOppdragINorge).isNull();
+        assertThat(juridiskArbeidsgiverNorge.andelKontrakterINorge).isNull();
+        assertThat(juridiskArbeidsgiverNorge.andelRekruttertINorge).isNull();
+        assertThat(juridiskArbeidsgiverNorge.ekstraArbeidsgivere).isEmpty();
+
+        medlemskapArbeidEOSM.getInnhold().getArbeidsgiver().setOffentligVirksomhet(false);
+
+        soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM);
+
+        juridiskArbeidsgiverNorge = soeknad.juridiskArbeidsgiverNorge;
+        assertThat(juridiskArbeidsgiverNorge.erOffentligVirksomhet).isEqualTo(false);
+        assertThat(juridiskArbeidsgiverNorge.antallAnsatte).isEqualTo(100);
+        assertThat(juridiskArbeidsgiverNorge.antallAdmAnsatte).isEqualTo(10);
+        assertThat(juridiskArbeidsgiverNorge.antallUtsendte).isEqualTo(10);
+        assertThat(juridiskArbeidsgiverNorge.andelOmsetningINorge).isEqualTo(new BigDecimal(90));
+        assertThat(juridiskArbeidsgiverNorge.andelOppdragINorge).isEqualTo(new BigDecimal(90));
+        assertThat(juridiskArbeidsgiverNorge.andelKontrakterINorge).isEqualTo(new BigDecimal(90));
+        assertThat(juridiskArbeidsgiverNorge.andelRekruttertINorge).isEqualTo(new BigDecimal(90));
+        assertThat(juridiskArbeidsgiverNorge.ekstraArbeidsgivere).contains("910825569");
+    }
+
+    @Test
     void testMappingOffshoreArbeidssteder() throws JAXBException {
         MedlemskapArbeidEOSM medlemskapArbeidEOSM = parseSøknadXML();
         medlemskapArbeidEOSM.getInnhold().getMidlertidigUtsendt().getArbeidssted()
