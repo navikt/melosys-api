@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
@@ -39,7 +38,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 
 import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SØKNAD;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.UNDER_BEHANDLING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jeasy.random.FieldPredicates.*;
 import static org.mockito.Mockito.*;
@@ -126,7 +124,6 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void hentMuligeBehandlinsstatuserValidering() throws IOException {
-        //when(behandlingService.hentBehandlingUtenSaksopplysninger(BEHANDLING_ID)).thenReturn(opprettBehandling());
         Collection<Behandlingsstatus> muligeStatuser = behandlingTjeneste.hentMuligeStatuser(BEHANDLING_ID).getBody();
         validerArray(muligeStatuser, ENDRE_BEHANDLINGSSTATUS_SCHEMA, log);
     }
@@ -169,11 +166,5 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
 
         behandlingTjeneste.endreBehandlingsfrist(BEHANDLING_ID, endreBehandlingsfristDto);
         verify(behandlingService).endreBehandlingsfrist(BEHANDLING_ID, frist);
-    }
-
-    private Behandling opprettBehandling() {
-        Behandling behandling = new Behandling();
-        behandling.setStatus(UNDER_BEHANDLING);
-        return behandling;
     }
 }
