@@ -139,7 +139,7 @@ class BehandlingServiceTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> behandlingService.brukerOppdaterStatus(BEHANDLING_ID, AVSLUTTET))
-            .withMessage("Behandlingen kan ikke endres til status AVSLUTTET. Gyldige statuser er [AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING]");
+            .withMessageContaining("Behandlingen kan ikke endres til status AVSLUTTET. Gyldige statuser er ");
     }
 
     @Test
@@ -149,7 +149,7 @@ class BehandlingServiceTest {
         when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
 
         Collection<Behandlingsstatus> muligeStatuser = behandlingService.hentMuligeStatuser(BEHANDLING_ID);
-        assertThat(muligeStatuser).containsExactly(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVSLUTTET);
+        assertThat(muligeStatuser).containsExactlyInAnyOrder(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING, AVSLUTTET);
     }
 
     @Test
@@ -159,7 +159,7 @@ class BehandlingServiceTest {
         when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
 
         Collection<Behandlingsstatus> muligeStatuser = behandlingService.hentMuligeStatuser(BEHANDLING_ID);
-        assertThat(muligeStatuser).containsExactly(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING);
+        assertThat(muligeStatuser).containsExactlyInAnyOrder(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING);
     }
 
     @Test

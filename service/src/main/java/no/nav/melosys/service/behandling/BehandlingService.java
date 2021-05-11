@@ -146,7 +146,7 @@ public class BehandlingService {
     private Collection<Behandlingsstatus> hentMuligeStatuser(Behandling behandling) {
         if (behandling.erInaktiv()) return Collections.emptyList();
 
-        List<Behandlingsstatus> muligeStatuser = List.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING).stream()
+        List<Behandlingsstatus> muligeStatuser = List.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING).stream()
             .filter(status -> status != behandling.getStatus())
             .collect(Collectors.toList());
 
