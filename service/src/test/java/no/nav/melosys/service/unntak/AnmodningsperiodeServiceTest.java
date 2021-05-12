@@ -147,15 +147,13 @@ class AnmodningsperiodeServiceTest {
     }
 
     @Test
-    void lagreAnmodningsperiodeSvar_ugyldigPeriode_forventFunksjonellException() {
+    void lagreAnmodningsperiodeSvar_ugyldigPeriodeForDelvisInnvilgelse_forventFunksjonellException() {
         long anmodningsperiodeID = 2;
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now().minusYears(2), Landkoder.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1,
-            null, Landkoder.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, Trygdedekninger.FULL_DEKNING_EOSFO);
-
         AnmodningsperiodeSvar svar = new AnmodningsperiodeSvar();
-        svar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
-        svar.setAnmodningsperiode(anmodningsperiode);
-        when(anmodningsperiodeRepository.findById(anmodningsperiodeID)).thenReturn(Optional.of(anmodningsperiode));
+        svar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.DELVIS_INNVILGELSE);
+        svar.setInnvilgetFom(LocalDate.now());
+        svar.setInnvilgetTom(LocalDate.now().minusYears(2));
+        when(anmodningsperiodeRepository.findById(anmodningsperiodeID)).thenReturn(Optional.of(new Anmodningsperiode()));
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> anmodningsperiodeService.lagreAnmodningsperiodeSvar(anmodningsperiodeID, svar))
