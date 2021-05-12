@@ -17,11 +17,11 @@ public class Aktoer extends RegistreringsInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @ManyToOne(optional = false)
     @JoinColumn(name="saksnummer", updatable = false)
     private Fagsak fagsak;
-    
+
     @Column(name = "aktoer_id", updatable = false)
     private String aktørId;
 
@@ -45,7 +45,7 @@ public class Aktoer extends RegistreringsInfo {
     public Long getId() {
         return id;
     }
-    
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -114,7 +114,7 @@ public class Aktoer extends RegistreringsInfo {
         return !Aktoersroller.BRUKER.equals(rolle);
     }
 
-    public Landkoder hentMyndighetLandkode() throws TekniskException {
+    public Landkoder hentMyndighetLandkode() {
         if (erUtenlandskMyndighet()) {
             String[] split = institusjonId.split(":");
             return Landkoder.valueOf(split[0]);

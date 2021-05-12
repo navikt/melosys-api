@@ -10,21 +10,21 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class RegisteropplysningerRequestTest {
 
     @Test
-    void valider_ingenBehandlingID_forventException() throws TekniskException {
+    void valider_ingenBehandlingID_forventException() {
         assertThatExceptionOfType(TekniskException.class)
             .isThrownBy(() -> RegisteropplysningerRequest.builder().build())
             .withMessageContaining("BehandlingID er påkrevd for å hente registeropplysninger");
     }
 
     @Test
-    void valider_ingenSaksopplysningstype_forventException() throws TekniskException {
+    void valider_ingenSaksopplysningstype_forventException() {
         assertThatExceptionOfType(TekniskException.class)
             .isThrownBy(() -> RegisteropplysningerRequest.builder().behandlingID(1L).build())
             .withMessageContaining("Krever minst én saksopplysningstype for å hente registeropplysninger");
     }
 
     @Test
-    void valider_ingenFnrMenPåkrevd_forventException() throws TekniskException {
+    void valider_ingenFnrMenPåkrevd_forventException() {
         assertThatExceptionOfType(TekniskException.class)
             .isThrownBy(() -> RegisteropplysningerRequest.builder()
                 .behandlingID(1L)
@@ -40,7 +40,7 @@ class RegisteropplysningerRequestTest {
     }
 
     @Test
-    void valider_ingenFnrMenIkkePåkrevd_forventFnrLikNull() throws TekniskException {
+    void valider_ingenFnrMenIkkePåkrevd_forventFnrLikNull() {
         RegisteropplysningerRequest registeropplysningerRequest = RegisteropplysningerRequest.builder()
             .behandlingID(1L)
             .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
@@ -52,7 +52,7 @@ class RegisteropplysningerRequestTest {
     }
 
     @Test
-    void valider_feilIPeriode_forventException() throws TekniskException {
+    void valider_feilIPeriode_forventException() {
         assertThatExceptionOfType(TekniskException.class)
             .isThrownBy(() -> RegisteropplysningerRequest.builder()
                 .behandlingID(1L)
@@ -71,7 +71,7 @@ class RegisteropplysningerRequestTest {
     }
 
     @Test
-    void valider_feilIPeriodeMenIkkePåkrevd_forventPeriodeLikNull() throws TekniskException {
+    void valider_feilIPeriodeMenIkkePåkrevd_forventPeriodeLikNull() {
         RegisteropplysningerRequest registeropplysningerRequest = RegisteropplysningerRequest.builder()
             .behandlingID(1L)
             .fnr("123")

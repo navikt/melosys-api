@@ -13,8 +13,6 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -99,7 +97,7 @@ class BrevDataByggerAnmodningUnntakTest {
         return behandling;
     }
 
-    public BrevDataGrunnlag lagBrevressurser(Behandling behandling) throws TekniskException, FunksjonellException {
+    public BrevDataGrunnlag lagBrevressurser(Behandling behandling) {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), kodeverkService);
 
         Set<String> orgSet = new HashSet<>(Collections.singletonList("987654321"));
@@ -118,7 +116,7 @@ class BrevDataByggerAnmodningUnntakTest {
     }
 
     @Test
-    void lag_brevDataUtenArt12_girAnmodningUtenArt12Begrunnelser() throws TekniskException, FunksjonellException {
+    void lag_brevDataUtenArt12_girAnmodningUtenArt12Begrunnelser() {
         Behandling behandling = lagBehandling();
         BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);
         assertThat(brevData.anmodningBegrunnelser).isEmpty();
@@ -126,7 +124,7 @@ class BrevDataByggerAnmodningUnntakTest {
     }
 
     @Test
-    void lag_brevDataMedArt121_girAnmodningBegrunnelser() throws TekniskException, FunksjonellException {
+    void lag_brevDataMedArt121_girAnmodningBegrunnelser() {
         when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART12_2)))
             .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, false, UTSENDELSE_OVER_24_MN)));
 
@@ -137,7 +135,7 @@ class BrevDataByggerAnmodningUnntakTest {
     }
 
     @Test
-    void lag_brevDataMedArt122_girAnmodningBegrunnelser() throws TekniskException, FunksjonellException {
+    void lag_brevDataMedArt122_girAnmodningBegrunnelser() {
         when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART12_2)))
             .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, false, UTSENDELSE_OVER_24_MN)));
 
@@ -148,7 +146,7 @@ class BrevDataByggerAnmodningUnntakTest {
     }
 
     @Test
-    void lag_brevDataMedOppfyltArt121_girAnmodningBegrunnelser() throws TekniskException, FunksjonellException {
+    void lag_brevDataMedOppfyltArt121_girAnmodningBegrunnelser() {
         when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART12_2)))
             .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, true)));
 
@@ -159,7 +157,7 @@ class BrevDataByggerAnmodningUnntakTest {
     }
 
     @Test
-    void lag_brevDataMedFritekst() throws TekniskException, FunksjonellException {
+    void lag_brevDataMedFritekst() {
         Vilkaarsresultat vilkaar = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, KORT_OPPDRAG_RETUR_NORSK_AG);
         vilkaar.setBegrunnelseFritekst("FRITEKST");
         when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART16_1))).thenReturn(Optional.of(vilkaar));

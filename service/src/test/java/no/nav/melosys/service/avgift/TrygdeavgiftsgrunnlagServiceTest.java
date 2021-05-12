@@ -8,9 +8,10 @@ import no.nav.melosys.domain.avgift.OppdaterTrygdeavgiftsgrunnlagRequest;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Loenn_forhold;
+import no.nav.melosys.domain.kodeverk.Saerligeavgiftsgrupper;
+import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,8 +24,8 @@ import static no.nav.melosys.domain.avklartefakta.Avklartefakta.VALGT_FAKTA;
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.*;
 import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_norsk_inntekt.NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV;
 import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_norsk_inntekt.NORSK_INNTEKT_TRYGDEAVGIFT_NAV;
-import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV;
 import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV;
+import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.when;
@@ -70,7 +71,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     }
 
     @Test
-    void lagreAvgiftsinformasjon_kunAvgiftspliktigNorge_lagres() throws FunksjonellException {
+    void lagreAvgiftsinformasjon_kunAvgiftspliktigNorge_lagres() {
         final var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
         final var request = new OppdaterTrygdeavgiftsgrunnlagRequest(
@@ -101,7 +102,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     }
 
     @Test
-    void lagreAvgiftsinformasjon_kunAvgiftspliktigUtland_lagres() throws FunksjonellException {
+    void lagreAvgiftsinformasjon_kunAvgiftspliktigUtland_lagres() {
         final var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
         final var request = new OppdaterTrygdeavgiftsgrunnlagRequest(
@@ -132,7 +133,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     }
 
     @Test
-    void lagreAvgiftsinformasjon_deltLønn_lagres() throws FunksjonellException {
+    void lagreAvgiftsinformasjon_deltLønn_lagres() {
         final var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
         final var request = new OppdaterTrygdeavgiftsgrunnlagRequest(
@@ -166,7 +167,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     }
 
     @Test
-    void lagreAvgiftsinformasjon_lønnFraNorgeErMisjonær_ikkeAvgiftspliktig() throws FunksjonellException {
+    void lagreAvgiftsinformasjon_lønnFraNorgeErMisjonær_ikkeAvgiftspliktig() {
         final var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
         final var request = new OppdaterTrygdeavgiftsgrunnlagRequest(
@@ -197,7 +198,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     }
 
     @Test
-    void hentAvgiftsgrunnlag_medAvklarteFakta_validerMapping() throws IkkeFunnetException {
+    void hentAvgiftsgrunnlag_medAvklarteFakta_validerMapping() {
         final var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
         behandlingsresultat.getAvklartefakta().addAll(Set.of(

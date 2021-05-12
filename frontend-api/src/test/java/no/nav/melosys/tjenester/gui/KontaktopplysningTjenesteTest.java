@@ -3,7 +3,6 @@ package no.nav.melosys.tjenester.gui;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Kontaktopplysning;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.tjenester.gui.dto.KontaktInfoDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,7 +61,7 @@ public class KontaktopplysningTjenesteTest {
     }
 
     @Test
-    public void slettKontaktopplysning_kallerPåService() throws FunksjonellException {
+    public void slettKontaktopplysning_kallerPåService() {
         ResponseEntity response = kontaktopplysningTjeneste.slettKontaktopplysning(SAK_NUMMER, ORG_NUMMER);
 
         verify(kontaktopplysningService).slettKontaktopplysning(SAK_NUMMER, ORG_NUMMER);

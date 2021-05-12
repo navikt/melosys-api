@@ -35,7 +35,7 @@ public class BrevDataByggerAvslagYrkesaktiv implements BrevDataBygger {
     }
 
     @Override
-    public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
+    public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) {
         BrevDataAvslagYrkesaktiv brevData = new BrevDataAvslagYrkesaktiv(brevbestilling, saksbehandler);
         long behandlingID = dataGrunnlag.getBehandling().getId();
         if (dataGrunnlag.getAvklarteVirksomheterGrunnlag().antallVirksomheter() != 1) {
@@ -66,7 +66,7 @@ public class BrevDataByggerAvslagYrkesaktiv implements BrevDataBygger {
             .map(Anmodningsperiode::getAnmodningsperiodeSvar);
     }
 
-    private Vilkaarsresultat hentFørsteGyldigeVilkaarsresultatForArt16(long behandlingID) throws FunksjonellException {
+    private Vilkaarsresultat hentFørsteGyldigeVilkaarsresultatForArt16(long behandlingID) {
         return vilkaarsresultatService.finnVilkaarsresultat(behandlingID, FO_883_2004_ART16_1)
             .filter(v -> !v.getBegrunnelser().isEmpty()).orElseThrow(() -> new FunksjonellException("Avslag yrkesaktiv må ha vilkår for art16"));
     }

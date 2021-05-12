@@ -1,14 +1,11 @@
 package no.nav.melosys.integrasjon.doksys;
 
-import java.util.Objects;
-
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.DistribuerJournalpostConsumer;
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.Adresse;
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostRequest;
@@ -35,7 +32,6 @@ import static no.nav.melosys.domain.Fagsystem.MELOSYS;
 import static no.nav.melosys.domain.dokument.adresse.Adresse.sammenslå;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
 import static org.springframework.util.StringUtils.hasText;
-import static org.springframework.util.StringUtils.isEmpty;
 
 @Service
 @Primary
@@ -59,7 +55,7 @@ public class DoksysService implements DoksysFasade {
     }
 
     @Override
-    public byte[] produserDokumentutkast(Dokumentbestilling dokumentbestilling) throws IntegrasjonException {
+    public byte[] produserDokumentutkast(Dokumentbestilling dokumentbestilling) {
         ProduserDokumentutkastRequest wsRequest = new ProduserDokumentutkastRequest();
         DokumentbestillingMetadata metadata = dokumentbestilling.getMetadata();
 
@@ -79,8 +75,7 @@ public class DoksysService implements DoksysFasade {
     }
 
     @Override
-    public DokumentbestillingResponse produserIkkeredigerbartDokument(Dokumentbestilling dokumentbestilling)
-        throws FunksjonellException, TekniskException {
+    public DokumentbestillingResponse produserIkkeredigerbartDokument(Dokumentbestilling dokumentbestilling) {
         ProduserIkkeredigerbartDokumentRequest wsRequest = new ProduserIkkeredigerbartDokumentRequest();
         Dokumentbestillingsinformasjon info = new Dokumentbestillingsinformasjon();
 
@@ -245,7 +240,7 @@ public class DoksysService implements DoksysFasade {
         return utenlandskPostadresse;
     }
 
-    private Aktoer lagMottaker(DokumentbestillingMetadata metadata) throws FunksjonellException {
+    private Aktoer lagMottaker(DokumentbestillingMetadata metadata) {
         if (metadata.mottaker == null) {
             throw new FunksjonellException("Brev kan ikke sendes, mottaker er ikke satt.");
         }

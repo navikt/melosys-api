@@ -40,13 +40,13 @@ class PepTest {
     }
 
     @Test
-    void testSjekkTilgangTilFnr() throws SikkerhetsbegrensningException {
+    void testSjekkTilgangTilFnr() {
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
         pep.sjekkTilgangTilFnr("12345678910");
     }
 
     @Test
-    void testSjekkTilgangTilFnrResponsDeny() throws SikkerhetsbegrensningException {
+    void testSjekkTilgangTilFnrResponsDeny() {
         when(abacResponse.getDecision()).thenReturn(Decision.DENY);
         assertThatExceptionOfType(SikkerhetsbegrensningException.class)
             .isThrownBy(() -> pep.sjekkTilgangTilFnr("12345678910"))
@@ -54,7 +54,7 @@ class PepTest {
     }
 
     @Test
-    void testSjekkTilgangTilFnrResponsIndeterminate() throws SikkerhetsbegrensningException {
+    void testSjekkTilgangTilFnrResponsIndeterminate() {
         when(abacResponse.getDecision()).thenReturn(Decision.INDETERMINATE);
         assertThatExceptionOfType(SikkerhetsbegrensningException.class)
             .isThrownBy(() -> pep.sjekkTilgangTilFnr("12345678910"))
@@ -62,7 +62,7 @@ class PepTest {
     }
 
     @Test
-    void testSjekkTilgangTilFnrResponsNotApplicable() throws SikkerhetsbegrensningException {
+    void testSjekkTilgangTilFnrResponsNotApplicable() {
         when(abacResponse.getDecision()).thenReturn(Decision.NOT_APPLICABLE);
         assertThatExceptionOfType(SikkerhetsbegrensningException.class)
             .isThrownBy(() -> pep.sjekkTilgangTilFnr("12345678910"))
@@ -71,13 +71,13 @@ class PepTest {
 
 
     @Test
-    void testSjekkTilgangTilAktor() throws SikkerhetsbegrensningException {
+    void testSjekkTilgangTilAktor() {
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
         pep.sjekkTilgangTilAktoerId("12345678910");
     }
 
     @Test
-    void testSjekkTilgangTilAktorIdResponseDeny() throws SikkerhetsbegrensningException {
+    void testSjekkTilgangTilAktorIdResponseDeny() {
         when(abacResponse.getDecision()).thenReturn(Decision.DENY);
         assertThatExceptionOfType(SikkerhetsbegrensningException.class)
             .isThrownBy(() -> pep.sjekkTilgangTilFnr("12345678910"))
@@ -85,7 +85,7 @@ class PepTest {
     }
 
     @Test
-    void testSjekkTilgangTilAktorIdResponseIndeterminate() throws SikkerhetsbegrensningException {
+    void testSjekkTilgangTilAktorIdResponseIndeterminate() {
         when(abacResponse.getDecision()).thenReturn(Decision.INDETERMINATE);
         assertThatExceptionOfType(SikkerhetsbegrensningException.class)
             .isThrownBy(() -> pep.sjekkTilgangTilFnr("12345678910"))
@@ -93,7 +93,7 @@ class PepTest {
     }
 
     @Test
-    void testSjekkTilgangTilAktorIdResponseNotApplicable() throws SikkerhetsbegrensningException {
+    void testSjekkTilgangTilAktorIdResponseNotApplicable() {
         when(abacResponse.getDecision()).thenReturn(Decision.NOT_APPLICABLE);
         assertThatExceptionOfType(SikkerhetsbegrensningException.class)
             .isThrownBy(() -> pep.sjekkTilgangTilFnr("12345678910"))

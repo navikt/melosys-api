@@ -2,7 +2,6 @@ package no.nav.melosys.service.dokument.brev.bygger;
 
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.brev.BrevData;
@@ -24,7 +23,7 @@ public class BrevDataByggerVideresend implements BrevDataBygger {
     }
 
     @Override
-    public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
+    public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) {
         long behandlingID = dataGrunnlag.getBehandling().getId();
 
         Landkoder bostedsland = landvelgerService.hentBostedsland(behandlingID, dataGrunnlag.getBehandlingsgrunnlagData());

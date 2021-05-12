@@ -10,8 +10,6 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -81,7 +79,7 @@ class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void lagreMedfolgendeFamilieSomAvklarteFakta_énAvHverMuligInput_returnererKorrekt() throws FunksjonellException, TekniskException, IOException {
+    void lagreMedfolgendeFamilieSomAvklarteFakta_énAvHverMuligInput_returnererKorrekt() throws IOException {
         LagreMedfolgendeFamilieDto lagreMedfolgendeFamilieDto = new LagreMedfolgendeFamilieDto(Set.of(
             new MedfolgendeFamilieDto(uuid1, true, null, null),
             new MedfolgendeFamilieDto(uuid2, false, OVER_18_AR.getKode(), "fritekstForUuid2"),

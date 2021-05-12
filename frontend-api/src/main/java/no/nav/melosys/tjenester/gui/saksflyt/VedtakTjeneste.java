@@ -3,7 +3,6 @@ package no.nav.melosys.tjenester.gui.saksflyt;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.vedtak.FattEosVedtakRequest;
@@ -52,8 +51,7 @@ public class VedtakTjeneste {
     @PostMapping("{behandlingID}/endre")
     @ApiOperation(value = "Endrer et vedtak for en gitt behandling")
     public ResponseEntity<Void> endreVedtak(@PathVariable("behandlingID") long behandlingID,
-                                            @RequestBody EndreVedtakDto endreVedtakDto)
-        throws FunksjonellException, TekniskException {
+                                            @RequestBody EndreVedtakDto endreVedtakDto) {
         if (endreVedtakDto.getBegrunnelseKode() == null) {
             throw new FunksjonellException("BegrunnelseKode mangler.");
         }
@@ -62,7 +60,7 @@ public class VedtakTjeneste {
         return ResponseEntity.ok().build();
     }
 
-    private FattVedtakRequest lagFattVedtakRequest(FattVedtakDto fattVedtakDto) throws FunksjonellException {
+    private FattVedtakRequest lagFattVedtakRequest(FattVedtakDto fattVedtakDto) {
         FattVedtakRequest.Builder<?> fattVedtakRequest;
 
         if (fattVedtakDto instanceof FattEosVedtakDto eosVedtakDto) {

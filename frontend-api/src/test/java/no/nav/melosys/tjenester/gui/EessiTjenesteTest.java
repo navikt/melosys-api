@@ -15,8 +15,6 @@ import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedInformasjon;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.VedleggDto;
@@ -55,7 +53,7 @@ class EessiTjenesteTest extends JsonSchemaTestParent {
     private EessiTjeneste eessiTjeneste;
 
     @BeforeEach
-    void setup() throws IkkeFunnetException, SikkerhetsbegrensningException {
+    void setup() {
         eessiTjeneste = new EessiTjeneste(eessiService, behandlingService);
     }
 

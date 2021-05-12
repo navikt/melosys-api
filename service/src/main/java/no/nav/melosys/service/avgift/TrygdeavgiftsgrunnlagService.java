@@ -15,7 +15,6 @@ import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,7 +41,7 @@ public class TrygdeavgiftsgrunnlagService {
     }
 
     @Transactional
-    public Trygdeavgiftsgrunnlag oppdaterAvgiftsgrunnlag(long behandlingsresultatID, OppdaterTrygdeavgiftsgrunnlagRequest req) throws FunksjonellException {
+    public Trygdeavgiftsgrunnlag oppdaterAvgiftsgrunnlag(long behandlingsresultatID, OppdaterTrygdeavgiftsgrunnlagRequest req) {
         valider(req);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID);
         oppdaterAvklartefakta(behandlingsresultat, req.tilAvklartefakta());
@@ -125,7 +124,7 @@ public class TrygdeavgiftsgrunnlagService {
             req.getAvgiftsGrunnlagUtland().erAvgiftspliktig();
     }
 
-    private void valider(OppdaterTrygdeavgiftsgrunnlagRequest req) throws FunksjonellException {
+    private void valider(OppdaterTrygdeavgiftsgrunnlagRequest req) {
         if (req.getLønnsforhold() == null) {
             throw new FunksjonellException("Lønnsforhold ikke oppgitt");
         }
@@ -144,7 +143,7 @@ public class TrygdeavgiftsgrunnlagService {
     }
 
     @Transactional(readOnly = true)
-    public Trygdeavgiftsgrunnlag hentAvgiftsgrunnlag(long behandlingresultatID) throws IkkeFunnetException {
+    public Trygdeavgiftsgrunnlag hentAvgiftsgrunnlag(long behandlingresultatID) {
         return Trygdeavgiftsgrunnlag.av(behandlingsresultatService.hentBehandlingsresultat(behandlingresultatID));
 
     }

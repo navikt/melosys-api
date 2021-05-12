@@ -11,9 +11,6 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,13 +39,13 @@ class SendHenleggelsesbrevTest {
     private final long behandlingID = 12314;
 
     @BeforeEach
-    public void setUp() throws IkkeFunnetException {
+    public void setUp() {
         sendHenleggelsesbrev = new SendHenleggelsesbrev(brevBestiller, behandlingsresultatService);
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
     }
 
     @Test
-    void utfør_sendHenleggelsesbrev_produserDokument() throws FunksjonellException, TekniskException {
+    void utfør_sendHenleggelsesbrev_produserDokument() {
         String saksbehandler = "Z097";
         Fagsak fagsak = new Fagsak();
         Prosessinstans prosessinstans = new Prosessinstans();

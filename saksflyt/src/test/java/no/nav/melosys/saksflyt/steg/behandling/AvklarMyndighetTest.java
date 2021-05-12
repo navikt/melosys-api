@@ -2,17 +2,14 @@ package no.nav.melosys.saksflyt.steg.behandling;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -38,7 +35,7 @@ class AvklarMyndighetTest {
     private Prosessinstans prosessinstans;
 
     @BeforeEach
-    public void setUp() throws IkkeFunnetException {
+    public void setUp() {
         avklarMyndighet = new AvklarMyndighet(behandlingService, behandlingsresultatService, utenlandskMyndighetService);
 
         prosessinstans = new Prosessinstans();
@@ -52,7 +49,7 @@ class AvklarMyndighetTest {
     }
 
     @Test
-    void utfør_utenMyndighet_myndighetOpprettes() throws FunksjonellException, TekniskException {
+    void utfør_utenMyndighet_myndighetOpprettes() {
 
         Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
         when(behandlingsresultatService.hentBehandlingsresultat(eq(1L))).thenReturn(behandlingsresultat);

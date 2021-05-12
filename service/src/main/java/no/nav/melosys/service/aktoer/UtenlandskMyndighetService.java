@@ -37,7 +37,7 @@ public class UtenlandskMyndighetService {
         this.fagsakService = fagsakService;
     }
 
-    public void avklarUtenlandskMyndighetSomAktørOgLagre(Behandling behandling) throws IkkeFunnetException {
+    public void avklarUtenlandskMyndighetSomAktørOgLagre(Behandling behandling) {
         String saksnummer = behandling.getFagsak().getSaksnummer();
         Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId());
         if (!landkoder.isEmpty()) {
@@ -46,7 +46,7 @@ public class UtenlandskMyndighetService {
         }
     }
 
-    public UtenlandskMyndighet hentUtenlandskMyndighet(Landkoder landkode) throws IkkeFunnetException {
+    public UtenlandskMyndighet hentUtenlandskMyndighet(Landkoder landkode) {
         return utenlandskMyndighetRepository.findByLandkode(landkode)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."));
     }
@@ -55,8 +55,7 @@ public class UtenlandskMyndighetService {
         return utenlandskMyndighetRepository.findAll();
     }
 
-    private Collection<String> konverterLandkodeTilInstitusjonsId(Collection<Landkoder> landkoder) throws
-        IkkeFunnetException {
+    private Collection<String> konverterLandkodeTilInstitusjonsId(Collection<Landkoder> landkoder) {
         List<String> institusjonsider = new ArrayList<>();
         for (Landkoder landkode : landkoder) {
             institusjonsider.add(lagInstitusjonsId(landkode));
@@ -84,7 +83,7 @@ public class UtenlandskMyndighetService {
         return aktoer;
     }
 
-    public String lagInstitusjonsId(Landkoder landkode) throws IkkeFunnetException {
+    public String lagInstitusjonsId(Landkoder landkode) {
         UtenlandskMyndighet myndighet = hentUtenlandskMyndighet(landkode);
         return lagInstitusjonsId(myndighet);
     }

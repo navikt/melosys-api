@@ -19,8 +19,6 @@ import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.Konstanter;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.joark.journal.JournalConsumer;
@@ -126,7 +124,7 @@ class JoarkServiceTest {
     }
 
     @Test
-    void hentJournalposterTilknyttetSak_brukerSaf_mapperAlleSafJournalposter() throws SikkerhetsbegrensningException {
+    void hentJournalposterTilknyttetSak_brukerSaf_mapperAlleSafJournalposter() {
         unleash.enable(JoarkService.SAF_FEATURE_TOGGLE_NAVN);
 
         final var saksnummer = "191919";
@@ -330,7 +328,7 @@ class JoarkServiceTest {
     }
 
     @Test
-    void hentJournalpost_brukerSaf_verifiserMapping() throws FunksjonellException {
+    void hentJournalpost_brukerSaf_verifiserMapping() {
         unleash.enable(JoarkService.SAF_FEATURE_TOGGLE_NAVN);
         final var journalpostID = "1112233";
         final var safJournalpost = safJournalpost(journalpostID);
@@ -391,8 +389,7 @@ class JoarkServiceTest {
     }
 
     @Test
-    void hentMottaksDatoForJournalpost_journalpostFinnes_returnererMottaksdato() throws FunksjonellException,
-        IntegrasjonException {
+    void hentMottaksDatoForJournalpost_journalpostFinnes_returnererMottaksdato() {
         unleash.disable(JoarkService.SAF_FEATURE_TOGGLE_NAVN);
 
         final String journalpostID = "12421";
@@ -422,7 +419,7 @@ class JoarkServiceTest {
     }
 
     @Test
-    void opprettJournalpost_ikkeValider_forventMetodekall() throws FunksjonellException {
+    void opprettJournalpost_ikkeValider_forventMetodekall() {
         when(journalpostapiConsumer.opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean()))
             .thenReturn(OpprettJournalpostResponse.builder().journalpostId("1234").build());
 
@@ -433,7 +430,7 @@ class JoarkServiceTest {
     }
 
     @Test
-    void opprettJournalpost_validerFelt_forventValidert() throws FunksjonellException {
+    void opprettJournalpost_validerFelt_forventValidert() {
         when(journalpostapiConsumer.opprettJournalpost(any(OpprettJournalpostRequest.class), anyBoolean()))
             .thenReturn(OpprettJournalpostResponse.builder().journalpostId("1234").build());
 
@@ -456,7 +453,7 @@ class JoarkServiceTest {
     }
 
     @Test
-    void opprettJournalpost_forsendelseMottattErSatt_forventDatoMottatt() throws FunksjonellException {
+    void opprettJournalpost_forsendelseMottattErSatt_forventDatoMottatt() {
         OpprettJournalpost opprettJournalpost = lagOpprettJournalpost();
         opprettJournalpost.setForsendelseMottatt(Instant.now());
 

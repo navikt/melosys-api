@@ -11,8 +11,6 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
@@ -84,7 +82,7 @@ public class DefaultSedRuter implements SedRuter {
         return sedType != SedType.A012 && sedType != SedType.X001 && sedType != SedType.X007;
     }
 
-    private void oppdaterOppgave(Behandling behandling, Prosessinstans prosessinstans, SedType sedType) throws FunksjonellException, TekniskException {
+    private void oppdaterOppgave(Behandling behandling, Prosessinstans prosessinstans, SedType sedType) {
         Optional<Oppgave> oppgave = oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         String oppgaveID;
@@ -99,7 +97,7 @@ public class DefaultSedRuter implements SedRuter {
         }
     }
 
-    private void oppdaterOppgavePrioritet(String oppgaveID) throws FunksjonellException, TekniskException {
+    private void oppdaterOppgavePrioritet(String oppgaveID) {
         log.info("Setter prioritet til HØY for oppgave {}", oppgaveID);
         oppgaveService.oppdaterOppgave(oppgaveID,
             OppgaveOppdatering.builder()
@@ -109,7 +107,7 @@ public class DefaultSedRuter implements SedRuter {
         );
     }
 
-    private String opprettBehandlingsoppgave(Behandling behandling, String aktørID, SedType sedType) throws FunksjonellException, TekniskException {
+    private String opprettBehandlingsoppgave(Behandling behandling, String aktørID, SedType sedType) {
         Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType())
             .setAktørId(aktørID)
             .setSaksnummer(behandling.getFagsak().getSaksnummer())

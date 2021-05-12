@@ -4,7 +4,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
@@ -32,7 +31,7 @@ public class VurderInngangsvilkaar implements StegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) {
         final long behandlingID = prosessinstans.getBehandling().getId();
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
 

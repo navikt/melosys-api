@@ -15,8 +15,6 @@ import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.dokument.BostedGrunnlag;
@@ -48,20 +46,20 @@ public class SedDataBygger {
 
     public SedDataDto lag(SedDataGrunnlag dataGrunnlag,
                           Behandlingsresultat behandlingsresultat,
-                          PeriodeType periodeType) throws TekniskException, FunksjonellException {
+                          PeriodeType periodeType) {
         return lagSedDataDto(dataGrunnlag, behandlingsresultat, periodeType, false);
     }
 
     public SedDataDto lagUtkast(SedDataGrunnlag dataGrunnlag,
                                 Behandlingsresultat behandlingsresultat,
-                                PeriodeType periodeType) throws FunksjonellException, TekniskException {
+                                PeriodeType periodeType) {
         return lagSedDataDto(dataGrunnlag, behandlingsresultat, periodeType, true);
     }
 
     private SedDataDto lagSedDataDto(SedDataGrunnlag dataGrunnlag,
                                      Behandlingsresultat behandlingsresultat,
                                      PeriodeType periodeType,
-                                     boolean erUtkast) throws FunksjonellException, TekniskException {
+                                     boolean erUtkast) {
         SedDataDto sedDataDto = lagPersonopplysninger(dataGrunnlag);
         validerArbeidsstederOgVirksomheter(sedDataDto);
         if (erUtkast) {
@@ -77,7 +75,7 @@ public class SedDataBygger {
         return sedDataDto;
     }
 
-    private SedDataDto lagPersonopplysninger(SedDataGrunnlag dataGrunnlag) throws FunksjonellException, TekniskException {
+    private SedDataDto lagPersonopplysninger(SedDataGrunnlag dataGrunnlag) {
         if (dataGrunnlag instanceof SedDataGrunnlagMedSoknad) {
             return lagPersonopplysninger((SedDataGrunnlagMedSoknad) dataGrunnlag);
         } else if (dataGrunnlag instanceof SedDataGrunnlagUtenSoknad) {
@@ -98,7 +96,7 @@ public class SedDataBygger {
         return sedDataDto;
     }
 
-    private SedDataDto lagPersonopplysninger(SedDataGrunnlagMedSoknad dataGrunnlag) throws TekniskException, FunksjonellException {
+    private SedDataDto lagPersonopplysninger(SedDataGrunnlagMedSoknad dataGrunnlag) {
         SedDataDto sedDataDto = new SedDataDto();
 
         sedDataDto.setArbeidsgivendeVirksomheter(lagArbeidsgivendeVirksomheter(dataGrunnlag));
@@ -122,7 +120,7 @@ public class SedDataBygger {
         return sedDataDto;
     }
 
-    private List<Arbeidssted> hentArbeidssteder(SedDataGrunnlagMedSoknad dataGrunnlag) throws IkkeFunnetException {
+    private List<Arbeidssted> hentArbeidssteder(SedDataGrunnlagMedSoknad dataGrunnlag) {
         List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder().stream()
             .map(SedDataBygger::mapArbeidssted).collect(Collectors.toList());
 
@@ -138,8 +136,7 @@ public class SedDataBygger {
         return arbeidssteder;
     }
 
-    private List<Virksomhet> lagArbeidsgivendeVirksomheter(SedDataGrunnlagMedSoknad dataGrunnlag)
-        throws IkkeFunnetException, TekniskException {
+    private List<Virksomhet> lagArbeidsgivendeVirksomheter(SedDataGrunnlagMedSoknad dataGrunnlag) {
         Collection<AvklartVirksomhet> avklarteVirksomheter = new ArrayList<>();
         avklarteVirksomheter.addAll(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere());
         avklarteVirksomheter.addAll(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeArbeidsgivere());
@@ -149,8 +146,7 @@ public class SedDataBygger {
             .collect(Collectors.toList());
     }
 
-    private static List<Virksomhet> lagSelvstendigeVirksomheter(SedDataGrunnlagMedSoknad dataGrunnlagMedSoknad)
-        throws IkkeFunnetException, TekniskException {
+    private static List<Virksomhet> lagSelvstendigeVirksomheter(SedDataGrunnlagMedSoknad dataGrunnlagMedSoknad) {
         Collection<AvklartVirksomhet> avklarteSelvstendigeVirksomheter = new ArrayList<>();
         avklarteSelvstendigeVirksomheter.addAll(dataGrunnlagMedSoknad.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige());
         avklarteSelvstendigeVirksomheter.addAll(dataGrunnlagMedSoknad.getAvklarteVirksomheterGrunnlag().hentUtenlandskeSelvstendige());
@@ -268,8 +264,7 @@ public class SedDataBygger {
         return lovvalgsperiodeDto;
     }
 
-    private List<no.nav.melosys.domain.eessi.sed.Lovvalgsperiode> lagTidligereLovvalgsperioderDto(Behandling behandling)
-        throws TekniskException {
+    private List<no.nav.melosys.domain.eessi.sed.Lovvalgsperiode> lagTidligereLovvalgsperioderDto(Behandling behandling) {
 
         Collection<no.nav.melosys.domain.Lovvalgsperiode> tidligereLovvalgsperioder =
             lovvalgsperiodeService.hentTidligereLovvalgsperioder(behandling);
@@ -315,7 +310,7 @@ public class SedDataBygger {
         return familieMedlem;
     }
 
-    private static void validerArbeidsstederOgVirksomheter(SedDataDto dataGrunnlag) throws FunksjonellException {
+    private static void validerArbeidsstederOgVirksomheter(SedDataDto dataGrunnlag) {
         for (Arbeidssted arbeidssted : dataGrunnlag.getArbeidssteder()) {
             if (StringUtils.isEmpty(arbeidssted.getAdresse().getLand())) {
                 throw new FunksjonellException("Feltet land er ikke utfylt for arbeidssted " + arbeidssted.getNavn());

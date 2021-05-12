@@ -1,8 +1,6 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataVedlegg;
@@ -35,21 +33,21 @@ public class BrevDataByggerVedleggTest {
     }
 
     @Test
-    public void testByggA1() throws FunksjonellException, TekniskException {
+    public void testByggA1() {
         BrevDataBygger brevDataByggerVedlegg = new BrevDataByggerVedlegg(brevDatabyggerA1, null);
         BrevDataVedlegg brevData = (BrevDataVedlegg) brevDataByggerVedlegg.lag(mock(BrevDataGrunnlag.class), "Z123456");
         assertThat(brevData.brevDataA1).isEqualTo(brevDataA1);
     }
 
     @Test
-    public void testByggA001() throws FunksjonellException, TekniskException {
+    public void testByggA001() {
         BrevDataBygger brevDataByggerVedlegg = new BrevDataByggerVedlegg(brevDatabyggerA001, null);
         BrevDataVedlegg brevData = (BrevDataVedlegg) brevDataByggerVedlegg.lag(mock(BrevDataGrunnlag.class), "Z123456");
         assertThat(brevData.brevDataA001).isEqualTo(brevDataA001);
     }
 
     @Test
-    public void testByggA1FraForhåndsvisning() throws FunksjonellException, TekniskException {
+    public void testByggA1FraForhåndsvisning() {
         BrevbestillingDto brevbestilling = new BrevbestillingDto.Builder()
             .medMottaker(Aktoersroller.BRUKER)
             .medFritekst("FRITEKST")

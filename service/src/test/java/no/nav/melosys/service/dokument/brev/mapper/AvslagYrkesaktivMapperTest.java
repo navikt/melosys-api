@@ -22,7 +22,6 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_avslag;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagYrkesaktiv;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,7 +59,7 @@ public class AvslagYrkesaktivMapperTest {
     }
 
     @Test
-    public void mapTilBrevXML() throws JAXBException, SAXException, TekniskException {
+    public void mapTilBrevXML() throws JAXBException, SAXException {
 
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
         fysiskArbeidssted.adresse = new StrukturertAdresse();
@@ -113,7 +112,7 @@ public class AvslagYrkesaktivMapperTest {
     }
 
     @Test
-    public void mapTilBrevXML_medOppfyltArt16OgAnmodningsperiode_brukerAnmodningsperiode() throws JAXBException, SAXException, TekniskException {
+    public void mapTilBrevXML_medOppfyltArt16OgAnmodningsperiode_brukerAnmodningsperiode() throws JAXBException, SAXException {
         AvslagYrkesaktivMapper spy = Mockito.spy(new AvslagYrkesaktivMapper());
 
         BrevDataAvslagYrkesaktiv brevData = new BrevDataAvslagYrkesaktiv(new BrevbestillingDto(), "Z999999");

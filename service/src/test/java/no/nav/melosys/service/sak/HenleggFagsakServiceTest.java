@@ -5,8 +5,6 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -50,7 +48,7 @@ class HenleggFagsakServiceTest {
     private final long behandlingID = 11;
 
     @BeforeEach
-    public void setup() throws IkkeFunnetException {
+    public void setup() {
         henleggFagsakService = new HenleggFagsakService(fagsakService, behandlingsresultatService, prosessinstansService, oppgaveService);
 
         behandling.setId(behandlingID);
@@ -63,7 +61,7 @@ class HenleggFagsakServiceTest {
     }
 
     @Test
-    void henleggFagsak_gyldigHenleggelsesgrunn_behandlingsresultatBlirOppdatert() throws TekniskException, FunksjonellException {
+    void henleggFagsak_gyldigHenleggelsesgrunn_behandlingsresultatBlirOppdatert() {
         String fritekst = "Fri tale";
         when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingID))).thenReturn(behandlingsresultat);
 

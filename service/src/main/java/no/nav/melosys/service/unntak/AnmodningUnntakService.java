@@ -12,7 +12,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -88,7 +87,7 @@ public class AnmodningUnntakService {
     }
 
     @Transactional
-    public void anmodningOmUnntakSvar(long behandlingID) throws FunksjonellException, TekniskException {
+    public void anmodningOmUnntakSvar(long behandlingID) {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         validerBehandlingstemaUnntak(behandling);
         validerSvar(behandling);
@@ -96,7 +95,7 @@ public class AnmodningUnntakService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private static void validerBehandlingstemaUnntak(Behandling behandling) throws FunksjonellException {
+    private static void validerBehandlingstemaUnntak(Behandling behandling) {
         if (behandling.getTema() != Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL) {
             throw new FunksjonellException("Behandling er ikke av tema ANMODNING_OM_UNNTAK_HOVEDREGEL");
         } else if (behandling.getStatus() == Behandlingsstatus.AVSLUTTET) {
@@ -104,7 +103,7 @@ public class AnmodningUnntakService {
         }
     }
 
-    private void validerSvar(Behandling behandling) throws FunksjonellException {
+    private void validerSvar(Behandling behandling) {
         Optional<AnmodningsperiodeSvar> anmodningsperiodeSvar = anmodningsperiodeService
             .hentAnmodningsperiodeSvarForBehandling(behandling.getId()).stream().findFirst();
         if (anmodningsperiodeSvar.isEmpty()) {
@@ -120,7 +119,7 @@ public class AnmodningUnntakService {
         }
     }
 
-    private void validerFritekstLengde(AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
+    private void validerFritekstLengde(AnmodningsperiodeSvar anmodningsperiodeSvar) {
         if (anmodningsperiodeSvar.getBegrunnelseFritekst() != null && anmodningsperiodeSvar.getBegrunnelseFritekst().length() > 255) {
             throw new FunksjonellException("Kan ikke ha fritekst lengre enn 255 for avslag på anmodning om unntak");
         }

@@ -7,8 +7,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Kontrollresultat;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.KontrollresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -42,7 +40,7 @@ public class KontrollresultatServiceTest {
     private KontrollresultatService kontrollresultatService;
 
     @BeforeEach
-    public void setUp() throws IkkeFunnetException, TekniskException {
+    public void setUp() {
         kontrollresultatService = new KontrollresultatService(kontrollresultatRepository, behandlingsresultatService, ufmKontrollService, behandlingService);
 
         when(kontrollresultatRepository.saveAll(anyCollection())).thenReturn(List.of());

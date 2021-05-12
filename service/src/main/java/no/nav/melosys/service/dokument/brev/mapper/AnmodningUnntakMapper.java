@@ -51,14 +51,14 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat,
-                                BrevData brevDataFelles) throws JAXBException, SAXException, TekniskException {
+                                BrevData brevDataFelles) throws JAXBException, SAXException {
         BrevDataAnmodningUnntak brevdata = (BrevDataAnmodningUnntak) brevDataFelles;
         Fag fag = mapFag(behandling, resultat, brevdata);
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataAnmodningUnntak brevData) throws TekniskException {
+    Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataAnmodningUnntak brevData) {
         Fag fag = new Fag();
         if (behandling.getFagsak().getType() == Sakstyper.EU_EOS) {
             // Respons fra regelmodulen skiller ikke mellom begrunnelser for 883/2004 (MELOSYS-1863)

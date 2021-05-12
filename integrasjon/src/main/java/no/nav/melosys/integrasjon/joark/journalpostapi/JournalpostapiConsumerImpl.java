@@ -39,7 +39,7 @@ public class JournalpostapiConsumerImpl implements JournalpostapiConsumer, JsonR
     }
 
     @Override
-    public void oppdaterJournalpost(OppdaterJournalpostRequest request, String journalpostId) throws SikkerhetsbegrensningException, IntegrasjonException {
+    public void oppdaterJournalpost(OppdaterJournalpostRequest request, String journalpostId) {
         if (log.isInfoEnabled()) {
             log.info("Oppdaterer journalpost med id {}", journalpostId);
         }
@@ -47,7 +47,7 @@ public class JournalpostapiConsumerImpl implements JournalpostapiConsumer, JsonR
     }
 
     @Override
-    public void leggTilLogiskVedlegg(String dokumentInfoId, String tittel) throws SikkerhetsbegrensningException, IntegrasjonException {
+    public void leggTilLogiskVedlegg(String dokumentInfoId, String tittel) {
         if (log.isInfoEnabled()) {
             log.info("Legger til logisk vedlegg for dokument med id {}", dokumentInfoId);
         }
@@ -57,7 +57,7 @@ public class JournalpostapiConsumerImpl implements JournalpostapiConsumer, JsonR
     }
 
     @Override
-    public void fjernLogiskeVedlegg(String dokumentInfoId, String logiskVedleggId) throws SikkerhetsbegrensningException, IntegrasjonException {
+    public void fjernLogiskeVedlegg(String dokumentInfoId, String logiskVedleggId) {
         if (log.isInfoEnabled()) {
             log.info("Fjerner logisk vedlegg {} for dokument med id {}", logiskVedleggId, dokumentInfoId);
         }
@@ -66,14 +66,14 @@ public class JournalpostapiConsumerImpl implements JournalpostapiConsumer, JsonR
     }
 
     @Override
-    public void ferdigstillJournalpost(FerdigstillJournalpostRequest request, String journalpostId) throws SikkerhetsbegrensningException, IntegrasjonException {
+    public void ferdigstillJournalpost(FerdigstillJournalpostRequest request, String journalpostId) {
         if (log.isInfoEnabled()) {
             log.info("Ferdigstill journalpost med id {}", journalpostId);
         }
         exchange("/journalpost/{journalpostID}/ferdigstill", HttpMethod.PATCH, new HttpEntity<>(request, getDefaultHeaders()), journalpostId);
     }
 
-    private void exchange(String uri, HttpMethod method, HttpEntity<?> entity, Object... variabler) throws SikkerhetsbegrensningException, IntegrasjonException {
+    private void exchange(String uri, HttpMethod method, HttpEntity<?> entity, Object... variabler) {
         try {
             restTemplate.exchange(uri, method, entity, Void.class, variabler).getBody();
         } catch (HttpStatusCodeException ex) {

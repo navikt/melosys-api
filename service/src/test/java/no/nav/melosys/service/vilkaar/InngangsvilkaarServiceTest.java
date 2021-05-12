@@ -17,7 +17,6 @@ import no.nav.melosys.domain.inngangsvilkar.Kategori;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Inngangsvilkaar;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarConsumerImpl;
 import no.nav.melosys.service.SaksopplysningerService;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,7 +52,7 @@ class InngangsvilkaarServiceTest {
     }
 
     @Test
-    void vurderOgLagreInngangsvilkår() throws TekniskException, FunksjonellException {
+    void vurderOgLagreInngangsvilkår() {
         final List<String> landkoder = List.of("FR", "DK", "NO");
         final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
         PersonDokument personDokument = new PersonDokument();
@@ -71,7 +70,7 @@ class InngangsvilkaarServiceTest {
     }
 
     @Test
-    void vurderOgLagreInngangsvilkår_manglerStatsborgerskap_girBegrunnelse() throws TekniskException, FunksjonellException {
+    void vurderOgLagreInngangsvilkår_manglerStatsborgerskap_girBegrunnelse() {
         final List<String> landkoder = List.of("FR", "DK", "NO");
         final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().minusYears(2), LocalDate.now().minusYears(1));
         final var personhistorikkDokument = new PersonhistorikkDokument();
@@ -85,7 +84,7 @@ class InngangsvilkaarServiceTest {
     }
 
     @Test
-    void vurderOgLagreInngangsvilkår_tomDatoErNull_tomDatoSettesTilEttÅrEtterFomDato() throws FunksjonellException, TekniskException {
+    void vurderOgLagreInngangsvilkår_tomDatoErNull_tomDatoSettesTilEttÅrEtterFomDato() {
         ArgumentCaptor<no.nav.melosys.domain.behandlingsgrunnlag.data.Periode> søknadsperiodeCaptor = ArgumentCaptor.forClass(no.nav.melosys.domain.behandlingsgrunnlag.data.Periode.class);
 
         final List<String> landkoder = List.of("FR", "DK", "NO");
@@ -105,7 +104,7 @@ class InngangsvilkaarServiceTest {
     }
 
     @Test
-    void vurderOgLagreInngangsvilkår_feil_girBegrunnelse() throws TekniskException, FunksjonellException {
+    void vurderOgLagreInngangsvilkår_feil_girBegrunnelse() {
         final List<String> landkoder = List.of("FR", "DK", "NO");
         final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
         PersonDokument personDokument = new PersonDokument();
@@ -227,7 +226,7 @@ class InngangsvilkaarServiceTest {
     }
 
     @Test
-    void overstyrInngangsvilkårTilOppfylt_inngangsvilkårFunnet_oppfyllerVilkår() throws FunksjonellException {
+    void overstyrInngangsvilkårTilOppfylt_inngangsvilkårFunnet_oppfyllerVilkår() {
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();
         when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(Optional.of(vilkaarsresultat));
 
@@ -237,7 +236,7 @@ class InngangsvilkaarServiceTest {
     }
 
     @Test
-    void overstyrInngangsvilkårTilOppfylt_inngangsvilkårFunnet_beholderGamleBegrunnelserOgLeggerTilOverstyringsbegrunnelse() throws FunksjonellException {
+    void overstyrInngangsvilkårTilOppfylt_inngangsvilkårFunnet_beholderGamleBegrunnelserOgLeggerTilOverstyringsbegrunnelse() {
         VilkaarBegrunnelse vilkaarBegrunnelse = new VilkaarBegrunnelse();
         vilkaarBegrunnelse.setKode(Inngangsvilkaar.MANGLER_STATSBORGERSKAP.getKode());
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();

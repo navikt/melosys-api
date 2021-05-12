@@ -10,7 +10,6 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataUtpekingAnnetLand;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +30,7 @@ public class UtpekingAnnetLandMapperTest {
     }
 
     @Test
-    public void mapTilBrevXML() throws JAXBException, SAXException, TekniskException {
+    public void mapTilBrevXML() throws JAXBException, SAXException {
         FellesType fellesType = lagFellesType();
         MelosysNAVFelles navFelles = lagNAVFelles();
         BrevDataUtpekingAnnetLand brevDataUtpekingAnnetLand = lagDataUtpekingAnnetLand();

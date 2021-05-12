@@ -9,8 +9,6 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.msm.AltinnDokument;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 
 import static no.nav.melosys.domain.arkiv.FysiskDokument.*;
 
@@ -63,8 +61,7 @@ public class OpprettJournalpost extends Journalpost {
     public static OpprettJournalpost lagJournalpostForMottakAltinnSøknad(Fagsak fagsak,
                                                                          Collection<AltinnDokument> dokumenter,
                                                                          String brukerFnr,
-                                                                         String avsenderNavn)
-        throws FunksjonellException, TekniskException {
+                                                                         String avsenderNavn) {
         AltinnDokument hovedDokument = dokumenter.stream().filter(AltinnDokument::erSøknad)
             .collect(MoreCollectors.onlyElement());
         dokumenter.remove(hovedDokument);

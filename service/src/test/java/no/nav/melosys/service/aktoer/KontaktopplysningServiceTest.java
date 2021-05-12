@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.KontaktopplysningID;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.KontaktopplysningRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -87,7 +86,7 @@ public class KontaktopplysningServiceTest {
     }
 
     @Test
-    public void slettKontaktopplysning_kallerDeleteByIdMedGittSaksnummerOgOrgNummer() throws FunksjonellException {
+    public void slettKontaktopplysning_kallerDeleteByIdMedGittSaksnummerOgOrgNummer() {
         kontaktopplysningService.slettKontaktopplysning(SAK_NUMMER, ORG_NUMMER);
 
         ArgumentCaptor<KontaktopplysningID> captor = ArgumentCaptor.forClass(KontaktopplysningID.class);

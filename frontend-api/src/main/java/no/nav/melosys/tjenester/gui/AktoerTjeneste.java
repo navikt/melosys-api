@@ -8,10 +8,6 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.aktoer.AktoerService;
@@ -50,8 +46,7 @@ public class AktoerTjeneste {
         responseContainer = "List")
     public List<AktoerDto> hentAktoerer(@PathVariable("saksnummer") String saksnummer,
                                         @RequestParam(value = "rolleKode", required = false) String rolleKode,
-                                        @RequestParam(value = "representerer", required = false) String representerer)
-        throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
+                                        @RequestParam(value = "representerer", required = false) String representerer) {
 
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         tilgangService.sjekkSak(fagsak);
@@ -87,8 +82,7 @@ public class AktoerTjeneste {
     @ApiOperation(
         value = "Sletter aktøren med en gitt database-id.",
         response = AktoerDto.class)
-    public ResponseEntity<Void> slettAktoer(@PathVariable("databaseID") long databaseID)
-        throws TekniskException, FunksjonellException {
+    public ResponseEntity<Void> slettAktoer(@PathVariable("databaseID") long databaseID) {
         aktoerService.slettAktoer(databaseID);
         return ResponseEntity.ok().build();
     }

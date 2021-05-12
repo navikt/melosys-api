@@ -8,9 +8,6 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlService;
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
@@ -67,7 +64,7 @@ class MedlPeriodeServiceTest {
     }
 
     @Test
-    void opprettPeriodeForeløpig() throws FunksjonellException, TekniskException {
+    void opprettPeriodeForeløpig() {
         setupPeriodeForeløpig();
 
         medlPeriodeService.opprettPeriodeForeløpig(new Utpekingsperiode(), 1L, true);
@@ -77,7 +74,7 @@ class MedlPeriodeServiceTest {
     }
 
     @Test
-    void opprettPeriodeUnderAvklaring() throws FunksjonellException, TekniskException {
+    void opprettPeriodeUnderAvklaring() {
         setupPeriodeUnderAvklaring();
 
         medlPeriodeService.opprettPeriodeUnderAvklaring(new Anmodningsperiode(), 1L, false);
@@ -87,7 +84,7 @@ class MedlPeriodeServiceTest {
     }
 
     @Test
-    void opprettPeriodeEndelig() throws TekniskException {
+    void opprettPeriodeEndelig() {
         setupPeriodeEndelig();
 
         medlPeriodeService.opprettPeriodeEndelig(new Lovvalgsperiode(), 1L, true);
@@ -138,25 +135,25 @@ class MedlPeriodeServiceTest {
     }
 
     @Test
-    void avvisPeriode() throws SikkerhetsbegrensningException, IkkeFunnetException {
+    void avvisPeriode() {
         medlPeriodeService.avvisPeriode(MEDL_PERIODE_ID);
         verify(medlService).avvisPeriode(MEDL_PERIODE_ID, StatusaarsakMedl.AVVIST);
     }
 
     @Test
-    void avvisPeriodeFeilregistrert() throws SikkerhetsbegrensningException, IkkeFunnetException {
+    void avvisPeriodeFeilregistrert() {
         medlPeriodeService.avvisPeriodeFeilregistrert(MEDL_PERIODE_ID);
         verify(medlService).avvisPeriode(MEDL_PERIODE_ID, StatusaarsakMedl.FEILREGISTRERT);
     }
 
     @Test
-    void avvisPeriodeOpphørt() throws SikkerhetsbegrensningException, IkkeFunnetException {
+    void avvisPeriodeOpphørt() {
         medlPeriodeService.avvisPeriodeOpphørt(MEDL_PERIODE_ID);
         verify(medlService).avvisPeriode(MEDL_PERIODE_ID, StatusaarsakMedl.OPPHORT);
     }
 
     @Test
-    void avsluttTidligereMedlPeriode_behandlingOgPeriodeFinnes_avviserPeriode() throws FunksjonellException {
+    void avsluttTidligereMedlPeriode_behandlingOgPeriodeFinnes_avviserPeriode() {
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandling.setId(1L);
@@ -177,7 +174,7 @@ class MedlPeriodeServiceTest {
     }
 
     @Test
-    void avsluttTidligereMedlPeriode_ingenEksisterendePeriode_ingenPeriodeBlirAvvist() throws FunksjonellException {
+    void avsluttTidligereMedlPeriode_ingenEksisterendePeriode_ingenPeriodeBlirAvvist() {
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandling.setId(1L);
@@ -195,25 +192,25 @@ class MedlPeriodeServiceTest {
         verify(medlService, never()).avvisPeriode(anyLong(), any(StatusaarsakMedl.class));
     }
 
-    private void setupPeriodeForeløpig() throws IkkeFunnetException {
+    private void setupPeriodeForeløpig() {
         when(medlService.opprettPeriodeForeløpig(anyString(), any(PeriodeOmLovvalg.class), any(KildedokumenttypeMedl.class)))
             .thenReturn(MEDL_PERIODE_ID);
         setupHappyPathBehandling();
     }
 
-    private void setupPeriodeUnderAvklaring() throws IkkeFunnetException {
+    private void setupPeriodeUnderAvklaring() {
         when(medlService.opprettPeriodeUnderAvklaring(anyString(), any(PeriodeOmLovvalg.class), any(KildedokumenttypeMedl.class)))
             .thenReturn(MEDL_PERIODE_ID);
         setupHappyPathBehandling();
     }
 
-    private void setupPeriodeEndelig() throws IkkeFunnetException {
+    private void setupPeriodeEndelig() {
         when(medlService.opprettPeriodeEndelig(anyString(), any(Lovvalgsperiode.class), any(KildedokumenttypeMedl.class)))
             .thenReturn(MEDL_PERIODE_ID);
         setupHappyPathBehandling();
     }
 
-    private void setupHappyPathBehandling() throws IkkeFunnetException {
+    private void setupHappyPathBehandling() {
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(lagBehandlingsResultat());
         when(persondataFasade.hentFolkeregisterIdent(anyString())).thenReturn(FNR);
     }

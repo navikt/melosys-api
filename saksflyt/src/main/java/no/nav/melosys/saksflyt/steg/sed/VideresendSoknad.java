@@ -20,7 +20,6 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -79,8 +78,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
             prosessinstans.getBehandling().getId(), sendtStatus);
     }
 
-    private Collection<Vedlegg> hentVedlegg(Prosessinstans prosessinstans) throws FunksjonellException,
-        IntegrasjonException {
+    private Collection<Vedlegg> hentVedlegg(Prosessinstans prosessinstans) {
         final Set<DokumentReferanse> vedleggReferanser = prosessinstans.getData(ProsessDataKey.VEDLEGG_SED,
             new TypeReference<Set<DokumentReferanse>>() {});
         if (CollectionUtils.isEmpty(vedleggReferanser)) {
@@ -111,8 +109,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
         prosessinstans.setData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, mottakerLandkode);
     }
 
-    private List<FysiskDokument> lagSøknadVedlegg(Behandling behandling) throws FunksjonellException,
-        IntegrasjonException {
+    private List<FysiskDokument> lagSøknadVedlegg(Behandling behandling) {
         final String journalpostID = behandling.getInitierendeJournalpostId();
         if (StringUtils.isEmpty(journalpostID)) {
             throw new FunksjonellException("JournalpostID til behandling " + behandling.getId() + " finnes ikke!");

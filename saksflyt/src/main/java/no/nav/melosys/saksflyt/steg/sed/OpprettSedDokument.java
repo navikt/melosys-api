@@ -4,8 +4,6 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.saksopplysninger.OpprettSedDokumentService;
 import org.slf4j.Logger;
@@ -30,7 +28,7 @@ public class OpprettSedDokument implements StegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) {
         opprettSedDokumentService.opprettSedSaksopplysning(
             prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class), prosessinstans.getBehandling()
         );

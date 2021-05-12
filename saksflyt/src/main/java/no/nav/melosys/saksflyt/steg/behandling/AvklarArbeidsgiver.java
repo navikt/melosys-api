@@ -13,8 +13,6 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.aktoer.AktoerService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -54,7 +52,7 @@ public class AvklarArbeidsgiver implements StegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
+    public void utfør(Prosessinstans prosessinstans) {
 
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(prosessinstans.getBehandling().getId());
         if (arbeidsgiverAvklares(resultat)) {

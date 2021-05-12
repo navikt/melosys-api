@@ -10,7 +10,7 @@ public final class RegisteropplysningerFactory {
 
     private RegisteropplysningerFactory() {}
 
-    public static RegisteropplysningerRequest.SaksopplysningTyper utledSaksopplysningTyper(Behandlingstema behandlingstema) throws TekniskException {
+    public static RegisteropplysningerRequest.SaksopplysningTyper utledSaksopplysningTyper(Behandlingstema behandlingstema) {
         switch (behandlingstema) {
             case UTSENDT_ARBEIDSTAKER:
             case UTSENDT_SELVSTENDIG:

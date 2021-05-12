@@ -17,8 +17,6 @@ import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.msm.AltinnDokument;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.altinn.AltinnSoeknadService;
@@ -63,7 +61,7 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
     private ArgumentCaptor<OpprettJournalpost> captor;
 
     @BeforeEach
-    public void setup() throws FunksjonellException, IntegrasjonException {
+    public void setup() {
         final String søknadID = "soknadid1";
         prosessinstans.setData(ProsessDataKey.MOTTATT_SOKNAD_ID, søknadID);
 

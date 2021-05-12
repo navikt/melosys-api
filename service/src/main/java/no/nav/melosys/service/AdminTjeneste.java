@@ -7,7 +7,7 @@ public interface AdminTjeneste {
 
     String getApiKey();
 
-    default void validerApikey(String value) throws SikkerhetsbegrensningException {
+    default void validerApikey(String value) {
         if (!getApiKey().equals(value)) {
             throw new SikkerhetsbegrensningException("Trenger gyldig apikey");
         }

@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class FagsakTest {
 
     @Test
-    void getAktivBehandling() throws TekniskException {
+    void getAktivBehandling() {
         Fagsak fagsak = new Fagsak();
         Behandling b1 = new Behandling();
         b1.setStatus(Behandlingsstatus.AVSLUTTET);
@@ -64,7 +64,7 @@ class FagsakTest {
     }
 
     @Test
-    void getSistOppdaterteBehandling_medEnBehandling() throws FunksjonellException {
+    void getSistOppdaterteBehandling_medEnBehandling() {
         Fagsak fagsak = new Fagsak();
 
         Behandling behandling = new Behandling();
@@ -75,7 +75,7 @@ class FagsakTest {
     }
 
     @Test
-    void getSistOppdaterteBehandling_medTreBehandlinger() throws FunksjonellException {
+    void getSistOppdaterteBehandling_medTreBehandlinger() {
         Fagsak fagsak = new Fagsak();
 
         Behandling sistOppdaterteBehandling = new Behandling();
@@ -97,7 +97,7 @@ class FagsakTest {
     }
 
     @Test
-    void getSistOppdaterteBehandling_ingenBehandlinger_kasterException() throws FunksjonellException {
+    void getSistOppdaterteBehandling_ingenBehandlinger_kasterException() {
         var fagsak = new Fagsak();
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(fagsak::getSistOppdaterteBehandling)
@@ -105,7 +105,7 @@ class FagsakTest {
     }
 
     @Test
-    void getAktivBehandling_ingenAktive() throws TekniskException {
+    void getAktivBehandling_ingenAktive() {
         Fagsak fagsak = new Fagsak();
         Behandling b1 = new Behandling();
         b1.setStatus(Behandlingsstatus.AVSLUTTET);
@@ -124,7 +124,7 @@ class FagsakTest {
     }
 
     @Test
-    void getAktivBehandling_feilTilstand() throws TekniskException {
+    void getAktivBehandling_feilTilstand() {
         Fagsak fagsak = new Fagsak();
         Behandling b1 = new Behandling();
         b1.setStatus(Behandlingsstatus.AVVENT_DOK_PART);
@@ -143,7 +143,7 @@ class FagsakTest {
     }
 
     @Test
-    void getBruker() throws TekniskException {
+    void getBruker() {
         Fagsak fagsak = new Fagsak();
         fagsak.setAktører(new HashSet<>());
         Aktoer a1 = new Aktoer();
@@ -161,7 +161,7 @@ class FagsakTest {
     }
 
     @Test
-    void getBruker_ingen() throws TekniskException {
+    void getBruker_ingen() {
         Fagsak fagsak = new Fagsak();
         fagsak.setAktører(new HashSet<>());
         Aktoer a2 = new Aktoer();
@@ -175,7 +175,7 @@ class FagsakTest {
     }
 
     @Test
-    void getBruker_flere() throws TekniskException {
+    void getBruker_flere() {
         Fagsak fagsak = new Fagsak();
         fagsak.setAktører(new HashSet<>());
         Aktoer a1 = new Aktoer();

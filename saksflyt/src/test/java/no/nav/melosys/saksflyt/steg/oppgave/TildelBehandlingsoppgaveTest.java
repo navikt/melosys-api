@@ -5,8 +5,6 @@ import java.util.Optional;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +29,7 @@ class TildelBehandlingsoppgaveTest {
     private Prosessinstans prosessinstans;
 
     @BeforeEach
-    public void setUp() throws FunksjonellException, TekniskException {
+    public void setUp() {
         tildelBehandlingsoppgave = new TildelBehandlingsoppgave(oppgaveService);
 
         prosessinstans = new Prosessinstans();
@@ -46,7 +44,7 @@ class TildelBehandlingsoppgaveTest {
     }
 
     @Test
-    void utfør_finnerOppgave_forventTildelingAvOppgave() throws FunksjonellException, TekniskException {
+    void utfør_finnerOppgave_forventTildelingAvOppgave() {
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, true);
         tildelBehandlingsoppgave.utfør(prosessinstans);
 

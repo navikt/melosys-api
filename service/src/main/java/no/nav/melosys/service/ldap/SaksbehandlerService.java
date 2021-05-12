@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.Saksbehandler;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.ldap.LdapService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,7 +23,7 @@ public class SaksbehandlerService {
         this.melosysAdGruppe = melosysAdGruppe;
     }
 
-    public boolean harTilgangTilMelosys() throws TekniskException, IkkeFunnetException {
+    public boolean harTilgangTilMelosys() {
         return harTilgangTilMelosys(hentBrukerinformasjon());
     }
 
@@ -33,20 +32,20 @@ public class SaksbehandlerService {
             .anyMatch(group -> group.equalsIgnoreCase(melosysAdGruppe));
     }
 
-    public Saksbehandler hentBrukerinformasjon() throws TekniskException, IkkeFunnetException {
+    public Saksbehandler hentBrukerinformasjon() {
         return hentBrukerinformasjon(SubjectHandler.getInstance().getUserID());
     }
 
-    private Saksbehandler hentBrukerinformasjon(String ident) throws TekniskException, IkkeFunnetException {
+    private Saksbehandler hentBrukerinformasjon(String ident) {
         return finnBrukerinformasjon(ident).orElseThrow(() -> new IkkeFunnetException("Finner ikke ident " + ident));
     }
 
-    private Optional<Saksbehandler> finnBrukerinformasjon(String ident) throws TekniskException {
+    private Optional<Saksbehandler> finnBrukerinformasjon(String ident) {
         return ldapService.finnBrukerinformasjon(ident)
             .map(l -> new Saksbehandler(ident, l.getDisplayName(), l.getGroups()));
     }
 
-    public Optional<String> finnNavnForIdent(String ident) throws TekniskException {
+    public Optional<String> finnNavnForIdent(String ident) {
         if (identTilNavnCache.containsKey(ident)) {
             return Optional.of(identTilNavnCache.get(ident));
         }
@@ -57,7 +56,7 @@ public class SaksbehandlerService {
 
     }
 
-    public String hentNavnForIdent(String ident) throws IkkeFunnetException, TekniskException {
+    public String hentNavnForIdent(String ident) {
         return finnNavnForIdent(ident)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke navn for ident " + ident));
     }

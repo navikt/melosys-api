@@ -14,7 +14,6 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
@@ -52,7 +51,7 @@ class HentRegisteropplysningerTest {
     private final String ident = "143545";
 
     @BeforeEach
-    public void setUp() throws IkkeFunnetException {
+    public void setUp() {
         hentRegisteropplysninger = new HentRegisteropplysninger(registeropplysningerService, behandlingService, persondataFasade);
 
         behandling.setId(222L);

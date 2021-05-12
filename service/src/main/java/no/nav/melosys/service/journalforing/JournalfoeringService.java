@@ -15,8 +15,6 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.journalforing.dto.*;
@@ -65,11 +63,11 @@ public class JournalfoeringService {
         this.unleash = unleash;
     }
 
-    public Journalpost hentJournalpost(String journalpostID) throws FunksjonellException, IntegrasjonException {
+    public Journalpost hentJournalpost(String journalpostID) {
         return joarkFasade.hentJournalpost(journalpostID);
     }
 
-    public Optional<String> finnBrukerIdent(Journalpost journalpost) throws IkkeFunnetException {
+    public Optional<String> finnBrukerIdent(Journalpost journalpost) {
         if (journalpost.getBrukerIdType() == null || journalpost.getBrukerId() == null) {
             return Optional.empty();
         }
@@ -119,7 +117,7 @@ public class JournalfoeringService {
         return tilknyttetArkivsak.flatMap(fagsakService::finnFagsakFraArkivsakID);
     }
 
-    private void validerSkalIkkeBehandlesAutomatisk(MelosysEessiMelding melosysEessiMelding) throws FunksjonellException {
+    private void validerSkalIkkeBehandlesAutomatisk(MelosysEessiMelding melosysEessiMelding) {
         if (eessiService.støtterAutomatiskBehandling(melosysEessiMelding)) {
             throw new FunksjonellException("Journalpost med id " + melosysEessiMelding.getJournalpostId() + " skal ikke journalføres manuelt");
         }
@@ -229,7 +227,7 @@ public class JournalfoeringService {
         }
     }
 
-    private void valider(JournalfoeringDto journalfoeringDto) throws FunksjonellException {
+    private void valider(JournalfoeringDto journalfoeringDto) {
         if (StringUtils.isEmpty(journalfoeringDto.getJournalpostID())) {
             throw new FunksjonellException("JournalpostID mangler");
         }
@@ -262,7 +260,7 @@ public class JournalfoeringService {
         }
     }
 
-    private void validerOpprettSakForSøknadBehandlingFelter(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
+    private void validerOpprettSakForSøknadBehandlingFelter(JournalfoeringOpprettDto journalfoeringDto) {
         if (journalfoeringDto.getFagsak() == null) {
             throw new FunksjonellException("Opplysninger for å opprette en søknad mangler");
         }
@@ -285,7 +283,7 @@ public class JournalfoeringService {
         validerAntallLand(journalfoeringDto);
     }
 
-    private void validerAntallLand(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
+    private void validerAntallLand(JournalfoeringOpprettDto journalfoeringDto) {
         String behandlingstemaKode = journalfoeringDto.getBehandlingstemaKode();
         int antallLand = journalfoeringDto.getFagsak().getLand().size();
 

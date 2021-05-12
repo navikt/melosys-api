@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -106,7 +105,7 @@ public class Fagsak extends RegistreringsInfo {
             .orElse(null);
     }
 
-    public Behandling hentSistAktiveBehandling() throws FunksjonellException {
+    public Behandling hentSistAktiveBehandling() {
         return Optional.ofNullable(hentAktivBehandling()).orElse(getSistOppdaterteBehandling());
     }
 
@@ -128,7 +127,7 @@ public class Fagsak extends RegistreringsInfo {
     /**
      * Returnerer den sist oppdaterte behandlingen knyttet til saken
      */
-    public Behandling getSistOppdaterteBehandling() throws IkkeFunnetException {
+    public Behandling getSistOppdaterteBehandling() {
         return getBehandlinger().stream()
             .max(Comparator.comparing(Behandling::getEndretDato))
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlinger for fagsak " + saksnummer));

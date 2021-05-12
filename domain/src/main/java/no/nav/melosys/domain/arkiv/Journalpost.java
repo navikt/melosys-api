@@ -45,7 +45,7 @@ public class Journalpost {
             .findFirst();
     }
 
-    public ArkivDokument hentArkivDokument(String dokumentID) throws IkkeFunnetException {
+    public ArkivDokument hentArkivDokument(String dokumentID) {
         return finnArkivDokument(dokumentID).orElseThrow(() ->
             new IkkeFunnetException(String.format("Finner ikke dokument %s i journalpost %s", dokumentID, journalpostId)));
     }

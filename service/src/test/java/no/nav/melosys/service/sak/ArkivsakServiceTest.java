@@ -2,8 +2,6 @@ package no.nav.melosys.service.sak;
 
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.sak.SakConsumer;
 import no.nav.melosys.integrasjon.sak.dto.SakDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,7 +34,7 @@ public class ArkivsakServiceTest {
     }
 
     @Test
-    public void opprettSak_behandlingstypeSøknad_temaMed() throws FunksjonellException, TekniskException {
+    public void opprettSak_behandlingstypeSøknad_temaMed() {
         final String saksnummer = "MEL-123";
         final Behandlingstema behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER;
         final String aktørID = "123123123";
@@ -56,7 +54,7 @@ public class ArkivsakServiceTest {
     }
 
     @Test
-    public void opprettSak_behandlingstypeRegistreringUnntak_temaUfm() throws FunksjonellException, TekniskException {
+    public void opprettSak_behandlingstypeRegistreringUnntak_temaUfm() {
         final String saksnummer = "MEL-123";
         final Behandlingstema behandlingstema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
         final String aktørID = "123123123";
@@ -76,7 +74,7 @@ public class ArkivsakServiceTest {
     }
 
     @Test
-    public void hentTemaFraSak_temaErUfm_forventUfm() throws FunksjonellException, TekniskException {
+    public void hentTemaFraSak_temaErUfm_forventUfm() {
         final Long sakID = 11111L;
         SakDto sakDto = new SakDto();
         sakDto.setTema(Tema.UFM.getKode());

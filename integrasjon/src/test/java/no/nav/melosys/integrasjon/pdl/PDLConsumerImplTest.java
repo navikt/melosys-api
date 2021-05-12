@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
 import no.nav.melosys.integrasjon.pdl.dto.person.*;
@@ -46,7 +45,7 @@ class PDLConsumerImplTest {
     }
 
     @Test
-    void hentIdenter_medIdent_mottarOgMapperResponseUtenFeil() throws IkkeFunnetException, IntegrasjonException {
+    void hentIdenter_medIdent_mottarOgMapperResponseUtenFeil() {
         mockServer.enqueue(
             new MockResponse()
                 .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -58,7 +57,7 @@ class PDLConsumerImplTest {
     }
 
     @Test
-    void hentPerson_medIdent_mottarPersonResponseUtenFeil() throws IkkeFunnetException, IntegrasjonException {
+    void hentPerson_medIdent_mottarPersonResponseUtenFeil() {
         mockServer.enqueue(
             new MockResponse()
                 .setBody(lastFil("mock/pdl/hentPerson.json"))

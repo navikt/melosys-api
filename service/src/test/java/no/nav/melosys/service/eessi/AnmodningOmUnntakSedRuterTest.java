@@ -9,7 +9,6 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.eessi.ruting.AnmodningOmUnntakSedRuter;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -39,7 +38,7 @@ public class AnmodningOmUnntakSedRuterTest {
     }
 
     @Test
-    public void finnSakOgBestemRuting_gsakSaksnummerErNull_NySak() throws FunksjonellException {
+    public void finnSakOgBestemRuting_gsakSaksnummerErNull_NySak() {
         Prosessinstans prosessinstans = new Prosessinstans();
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setAktoerId("13412");
@@ -50,7 +49,7 @@ public class AnmodningOmUnntakSedRuterTest {
     }
 
     @Test
-    public void finnSakOgBestemRuting_sakEksistererStatusOpprettet_nyBehandling() throws FunksjonellException {
+    public void finnSakOgBestemRuting_sakEksistererStatusOpprettet_nyBehandling() {
         final Long gsakSaksnummer = 123L;
 
         Prosessinstans prosessinstans = new Prosessinstans();
@@ -66,7 +65,7 @@ public class AnmodningOmUnntakSedRuterTest {
     }
 
     @Test
-    public void finnSakOgBestemRuting_sakEksistererStatusLovvalgAvklart_nyBehandling() throws FunksjonellException {
+    public void finnSakOgBestemRuting_sakEksistererStatusLovvalgAvklart_nyBehandling() {
         final Long gsakSaksnummer = 123L;
 
         Prosessinstans prosessinstans = new Prosessinstans();
@@ -84,7 +83,7 @@ public class AnmodningOmUnntakSedRuterTest {
     }
 
     @Test
-    public void finnSakOgBestemRuting_sakEksistererIkke_nySak() throws FunksjonellException {
+    public void finnSakOgBestemRuting_sakEksistererIkke_nySak() {
         final Long gsakSaksnummer = 123L;
         final String aktørID = "1352";
         Prosessinstans prosessinstans = new Prosessinstans();

@@ -17,8 +17,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.eessi.ruting.UnntaksperiodeSedRuter;
 import no.nav.melosys.service.sak.FagsakService;
@@ -53,7 +51,7 @@ public class UnntaksperiodeSedRuterTest {
     }
 
     @Test
-    public void finnSakOgBestemRuting_nySak_verifiserResultatNySak() throws FunksjonellException, TekniskException {
+    public void finnSakOgBestemRuting_nySak_verifiserResultatNySak() {
         Prosessinstans prosessinstans = hentProsessinstans(LocalDate.now(), LocalDate.now().plusYears(1));
 
         unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, 1L);

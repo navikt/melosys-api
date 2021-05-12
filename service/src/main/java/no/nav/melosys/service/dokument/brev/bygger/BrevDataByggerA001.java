@@ -43,7 +43,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
     }
 
     @Override
-    public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
+    public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) {
         this.dataGrunnlag = dataGrunnlag;
         this.behandling = dataGrunnlag.getBehandling();
 
@@ -93,7 +93,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
             .anyMatch("SAERLIG_GRUNN"::equals);
     }
 
-    private Vilkaarsresultat hentVilkårsresultat() throws TekniskException {
+    private Vilkaarsresultat hentVilkårsresultat() {
         Optional<Vilkaarsresultat> vilkårsresultat = vilkaarsresultatService.finnVilkaarsresultat(behandling.getId(), Vilkaar.FO_883_2004_ART16_1);
         Vilkaarsresultat resultat = vilkårsresultat.orElseThrow(() ->
             new TekniskException("Fant ingen vilkårbegrunnelse for FO_883_2004_ART16_1"));
@@ -111,13 +111,12 @@ public class BrevDataByggerA001 implements BrevDataBygger {
                 .findFirst();
     }
 
-    private Collection<Anmodningsperiode> hentAnmodningsperioder() throws FunksjonellException {
+    private Collection<Anmodningsperiode> hentAnmodningsperioder() {
         Collection<Anmodningsperiode> anmodningsperioder = anmodningsperiodeService.hentAnmodningsperioder(behandling.getId());
         return validerAnmodningsperioder(anmodningsperioder);
     }
 
-    private Collection<Anmodningsperiode> validerAnmodningsperioder(Collection<Anmodningsperiode> anmodningsperioder)
-        throws FunksjonellException {
+    private Collection<Anmodningsperiode> validerAnmodningsperioder(Collection<Anmodningsperiode> anmodningsperioder) {
         if (CollectionUtils.isEmpty(anmodningsperioder)) {
             throw new FunksjonellException("Minst en anmodningsperiode trengs for å kunne sende A001.");
         }
@@ -130,7 +129,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
         return anmodningsperioder;
     }
 
-    private Optional<Periode> hentAnsettelsesperiode() throws TekniskException {
+    private Optional<Periode> hentAnsettelsesperiode() {
         ArbeidsforholdDokument arbeidsforholdDok = behandling.hentArbeidsforholdDokument();
 
         Set<String> avklarteOrgnumre = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivendeOrgnumre();

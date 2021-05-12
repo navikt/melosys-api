@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.List;
 
 import no.nav.melosys.domain.folketrygden.ValgtRepresentant;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.representant.RepresentantService;
 import no.nav.melosys.service.representant.dto.RepresentantDataDto;
 import no.nav.melosys.service.representant.dto.RepresentantDto;
@@ -43,7 +41,7 @@ class RepresentantTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentRepresentantListe_validerSchema() throws IOException, TekniskException {
+    void hentRepresentantListe_validerSchema() throws IOException {
         when(representantService.hentRepresentantListe())
             .thenReturn(List.of(
                 new RepresentantDto("id1", "navn1"),
@@ -55,7 +53,7 @@ class RepresentantTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentRepresentant_validerSchema() throws IOException, TekniskException {
+    void hentRepresentant_validerSchema() throws IOException {
         when(representantService.hentRepresentant("id")).thenReturn(
             new RepresentantDataDto("id", "navn", List.of("adresselinje1", "adresselinje2"), "postnummer", "123456789"));
 
@@ -65,7 +63,7 @@ class RepresentantTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void oppdaterValgtRepresentant_validerResponse() throws FunksjonellException, IOException, TekniskException {
+    void oppdaterValgtRepresentant_validerResponse() throws IOException {
         var request = new ValgtRepresentantDto("repnr", true, "123456789", "kontaktperson");
 
         valider(request, VALGTREPRESENTANT_POST_SCHEMA, log);
@@ -83,7 +81,7 @@ class RepresentantTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentValgtRepresentant_validerResponse() throws FunksjonellException, IOException, TekniskException {
+    void hentValgtRepresentant_validerResponse() throws IOException {
         var forventetResponse = new ValgtRepresentantDto("repnr", true, "123456789", "kontaktperson");
 
         when(representantService.hentValgtRepresentant(anyLong())).thenReturn(forventetResponse.til());

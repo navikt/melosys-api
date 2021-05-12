@@ -12,7 +12,7 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.inntk.InntektService;
@@ -139,7 +139,7 @@ public class RegisteropplysningerService {
         return saksopplysning;
     }
 
-    private List<Saksopplysning> hentArbeidsforholdopplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) throws TekniskException, SikkerhetsbegrensningException {
+    private List<Saksopplysning> hentArbeidsforholdopplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {
         LocalDate fom = registeropplysningerRequest.getFom();
         LocalDate tom = registeropplysningerRequest.getTom();
 
@@ -149,12 +149,12 @@ public class RegisteropplysningerService {
         return List.of(saksopplysning);
     }
 
-    private List<Saksopplysning> hentPersonopplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    private List<Saksopplysning> hentPersonopplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {
         Saksopplysning saksopplysning = persondataFasade.hentPerson(registeropplysningerRequest.getFnr(), registeropplysningerRequest.getInformasjonsbehov());
         return List.of(saksopplysning);
     }
 
-    private List<Saksopplysning> hentMedlemskapsopplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) throws TekniskException, IkkeFunnetException, SikkerhetsbegrensningException {
+    private List<Saksopplysning> hentMedlemskapsopplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {
         LocalDate fom = registeropplysningerRequest.getFom();
         LocalDate tom = registeropplysningerRequest.getTom();
 
@@ -164,7 +164,7 @@ public class RegisteropplysningerService {
         return List.of(saksopplysning);
     }
 
-    private List<Saksopplysning> hentInntektsopplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) throws TekniskException, FunksjonellException {
+    private List<Saksopplysning> hentInntektsopplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {
         LocalDate fom = registeropplysningerRequest.getFom();
         LocalDate tom = registeropplysningerRequest.getTom();
 
@@ -174,7 +174,7 @@ public class RegisteropplysningerService {
         return List.of(saksopplysning);
     }
 
-    private List<Saksopplysning> hentUtbetalingsopplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) throws FunksjonellException, TekniskException {
+    private List<Saksopplysning> hentUtbetalingsopplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {
         LocalDate fom = registeropplysningerRequest.getFom();
         LocalDate tom = registeropplysningerRequest.getTom();
 
@@ -194,7 +194,7 @@ public class RegisteropplysningerService {
         return List.of(saksopplysning);
     }
 
-    private List<Saksopplysning> hentOrganisasjonsopplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) throws IkkeFunnetException, IntegrasjonException {
+    private List<Saksopplysning> hentOrganisasjonsopplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {
         Set<String> orgnumre = new HashSet<>();
 
         Optional<ArbeidsforholdDokument> arbeidsforholdDokument = saksopplysningerService.finnArbeidsforholdsopplysninger(behandling.getId());
@@ -211,12 +211,12 @@ public class RegisteropplysningerService {
         return saksopplysninger;
     }
 
-    private List<Saksopplysning> hentPersonhistorikk(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    private List<Saksopplysning> hentPersonhistorikk(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {
         Saksopplysning saksopplysning = persondataFasade.hentPersonhistorikk(registeropplysningerRequest.getFnr(), registeropplysningerRequest.getFom());
         return List.of(saksopplysning);
     }
 
-    private List<Saksopplysning> hentSakOgBehandlingSaker(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) throws IkkeFunnetException, IntegrasjonException {
+    private List<Saksopplysning> hentSakOgBehandlingSaker(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {
         String aktørId = persondataFasade.hentAktørIdForIdent(registeropplysningerRequest.getFnr());
         Saksopplysning saksopplysning = sobService.finnSakOgBehandlingskjedeListe(aktørId);
 
