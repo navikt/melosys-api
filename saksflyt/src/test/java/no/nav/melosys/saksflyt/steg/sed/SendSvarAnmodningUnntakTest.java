@@ -3,16 +3,16 @@ package no.nav.melosys.saksflyt.steg.sed;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SendSvarAnmodningUnntakTest {
 
     @Mock
@@ -20,7 +20,7 @@ public class SendSvarAnmodningUnntakTest {
 
     private SendSvarAnmodningUnntak sendSvarAnmodningUnntak;
 
-    @Before
+    @BeforeEach
     public void setup() {
         sendSvarAnmodningUnntak = new SendSvarAnmodningUnntak(eessiService);
     }

@@ -6,13 +6,13 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.MaritimtArbeid;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.MaritimtArbeid;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.exception.FunksjonellException;
@@ -25,18 +25,22 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BrevDataGrunnlagTest {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class BrevDataGrunnlagTest {
     @Mock
     private KodeverkService kodeverkService;
     @Mock
@@ -48,7 +52,7 @@ public class BrevDataGrunnlagTest {
     private Soeknad søknad;
     private BrevDataGrunnlag dataGrunnlag;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         AvklartMaritimtArbeid maritimtArbeid = lagAvklartMaritimtArbeid();
         when(avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(anyLong()))
@@ -83,15 +87,19 @@ public class BrevDataGrunnlagTest {
         return behandling;
     }
 
-    @Test(expected = FunksjonellException.class)
-    public void hentBostedsadresse_manglerOppgittOgTpsBostedsadresse_girUnntak() throws FunksjonellException {
+    @Test
+    void hentBostedsadresse_manglerOppgittOgTpsBostedsadresse_girUnntak() throws FunksjonellException {
         person.bostedsadresse = new Bostedsadresse();
         søknad.bosted.oppgittAdresse = new StrukturertAdresse();
-        dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
+        var bostedsgrunnlag = dataGrunnlag.getBostedGrunnlag();
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(bostedsgrunnlag::hentBostedsadresse)
+            .withMessageContaining("finnes ikke");
     }
 
     @Test
-    public void hentBostedsadresse_brukerBostedFraPersonDokument() throws FunksjonellException {
+    void hentBostedsadresse_brukerBostedFraPersonDokument() throws FunksjonellException {
         StrukturertAdresse bostedsadresse = dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
         assertThat(bostedsadresse.gatenavn).isEqualTo("Hjemgata");
         assertThat(bostedsadresse.husnummer).isEqualTo("23");
@@ -101,7 +109,7 @@ public class BrevDataGrunnlagTest {
     }
 
     @Test
-    public void hentBostedsadresse_oppgittAdresseOverstyrerTPS_nårOppgittAdresseISøknad() throws FunksjonellException {
+    void hentBostedsadresse_oppgittAdresseOverstyrerTPS_nårOppgittAdresseISøknad() throws FunksjonellException {
         StrukturertAdresse oppgittBosted = new StrukturertAdresse();
         oppgittBosted.gatenavn = "HerBorJegGata";
         oppgittBosted.husnummer = "123";
@@ -121,7 +129,7 @@ public class BrevDataGrunnlagTest {
     }
 
     @Test
-    public void hentArbeidssteder_medMaritimtArbeid_girMaritimeArbeidssteder() {
+    void hentArbeidssteder_medMaritimtArbeid_girMaritimeArbeidssteder() {
         MaritimtArbeid maritimtArbeidISøknad = lagMaritimtArbeid();
         this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
 
@@ -136,7 +144,7 @@ public class BrevDataGrunnlagTest {
     }
 
     @Test
-    public void hentArbeidssteder_medMaritimtArbeidUtenAvklartMaritimtArbeid_girTomListe() throws TekniskException {
+    void hentArbeidssteder_medMaritimtArbeidUtenAvklartMaritimtArbeid_girTomListe() throws TekniskException {
         MaritimtArbeid maritimtArbeidISøknad = lagMaritimtArbeid();
         this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
 

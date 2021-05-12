@@ -19,11 +19,11 @@ import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeSvarDto;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.jeasy.random.randomizers.misc.EnumRandomizer;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +33,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
     private static final Logger logger = LoggerFactory.getLogger(AnmodningsperiodeTjenesteTest.class);
     private static final String ANMODNINGSPERIODER_GET_SCHEMA = "anmodningsperioder-schema.json";
@@ -53,7 +53,7 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
         .excludeField(ofType(Behandlingsresultat.class))
         .randomize(ofType(LovvalgBestemmelse.class), () -> new EnumRandomizer<>(Lovvalgbestemmelser_883_2004.class).getRandomValue()));
 
-    @Before
+    @BeforeEach
     public void setUp() {
         anmodningsperiodeTjeneste = new AnmodningsperiodeTjeneste(anmodningsperiodeService, lovvalgsperiodeService, tilgangService);
     }

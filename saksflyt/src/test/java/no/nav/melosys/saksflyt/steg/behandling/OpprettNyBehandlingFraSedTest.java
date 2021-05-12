@@ -15,11 +15,9 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -41,9 +39,6 @@ class OpprettNyBehandlingFraSedTest {
     private OppgaveService oppgaveFasade;
 
     private OpprettNyBehandlingFraSed opprettNyBehandlingFraSed;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     @BeforeEach
     public void setup() {

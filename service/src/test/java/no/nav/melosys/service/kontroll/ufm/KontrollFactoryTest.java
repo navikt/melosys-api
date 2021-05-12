@@ -5,40 +5,42 @@ import java.util.function.Function;
 
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-public class KontrollFactoryTest {
+class KontrollFactoryTest {
     private final KontrollFactory kontrollFactory = new KontrollFactory();
 
     @Test
-    public void hentKontrollerA001_verifiserKontroller() {
+    void hentKontrollerA001_verifiserKontroller() {
         List<Function<UfmKontrollData, Kontroll_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A001);
         assertThat(kontroller).hasSize(11);
     }
 
     @Test
-    public void hentKontrollerA003_verifiserKontroller() {
+    void hentKontrollerA003_verifiserKontroller() {
         List<Function<UfmKontrollData, Kontroll_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A003);
         assertThat(kontroller).hasSize(11);
     }
 
     @Test
-    public void hentKontrollerA009_verifiserKontroller() {
+    void hentKontrollerA009_verifiserKontroller() {
         List<Function<UfmKontrollData, Kontroll_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A009);
         assertThat(kontroller).hasSize(11);
     }
 
     @Test
-    public void hentKontrollerA010_verifiserKontroller() {
+    void hentKontrollerA010_verifiserKontroller() {
         List<Function<UfmKontrollData, Kontroll_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A010);
         assertThat(kontroller).hasSize(11);
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void hentKontrollerA008_verifiserIngenKontroller() {
-        List<Function<UfmKontrollData, Kontroll_begrunnelser>> kontroller = kontrollFactory.hentKontrollerForSedType(SedType.A008);
-        assertThat(kontroller).isEmpty();
+    @Test
+    void hentKontrollerA008_verifiserIngenKontroller() {
+        assertThatExceptionOfType(UnsupportedOperationException.class)
+            .isThrownBy(() ->kontrollFactory.hentKontrollerForSedType(SedType.A008))
+            .withMessageContaining("A008 er ikke støttet");
     }
 }

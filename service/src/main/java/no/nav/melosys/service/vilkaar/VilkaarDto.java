@@ -1,17 +1,17 @@
 package no.nav.melosys.service.vilkaar;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class VilkaarDto {
     private String vilkaar;
     private boolean oppfylt;
-    private List<String> begrunnelseKoder;
+    private Set<String> begrunnelseKoder;
     private String begrunnelseFritekst;
     private String begrunnelseFritekstEngelsk;
 
     public VilkaarDto() {
-        this.begrunnelseKoder = new ArrayList<>();
+        this.begrunnelseKoder = new HashSet<>();
     }
 
     public String getVilkaar() {
@@ -30,11 +30,11 @@ public class VilkaarDto {
         this.oppfylt = oppfylt;
     }
 
-    public List<String> getBegrunnelseKoder() {
+    public Set<String> getBegrunnelseKoder() {
         return begrunnelseKoder;
     }
 
-    public void setBegrunnelseKoder(List<String> begrunnelseKoder) {
+    public void setBegrunnelseKoder(Set<String> begrunnelseKoder) {
         this.begrunnelseKoder = begrunnelseKoder;
     }
 

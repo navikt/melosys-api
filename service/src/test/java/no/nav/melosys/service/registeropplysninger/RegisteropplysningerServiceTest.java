@@ -20,20 +20,21 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sob.SobService;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class RegisteropplysningerServiceTest {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class RegisteropplysningerServiceTest {
 
     private static final String AKTØR_ID = "123321";
     private static final String FNR = "432234";
@@ -58,12 +59,10 @@ public class RegisteropplysningerServiceTest {
     private SaksopplysningerService saksopplysningerService;
     @Mock
     private RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory;
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     private RegisteropplysningerService registeropplysningerService;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         registeropplysningerService = new RegisteropplysningerService(persondataFasade, medlPeriodeService, eregFasade, aaregFasade, behandlingService,
             sobService, inntektService, utbetaldataService, saksopplysningerService, registeropplysningerPeriodeFactory);
@@ -88,7 +87,7 @@ public class RegisteropplysningerServiceTest {
     }
 
     @Test
-    public void hentOgLagreOpplysninger_medAlleOpplysninger_alleBlirHentetOgLagret() {
+    void hentOgLagreOpplysninger_medAlleOpplysninger_alleBlirHentetOgLagret() {
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
                 .behandlingID(2L)
@@ -116,12 +115,12 @@ public class RegisteropplysningerServiceTest {
         verify(eregFasade).hentOrganisasjon(anyString());
         verify(persondataFasade).hentPersonhistorikk(anyString(), anyLocalDate());
         verify(persondataFasade).hentPerson(anyString(), eq(Informasjonsbehov.STANDARD));
-        verify(sobService).finnSakOgBehandlingskjedeListe(eq(AKTØR_ID));
+        verify(sobService).finnSakOgBehandlingskjedeListe(AKTØR_ID);
         verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
     }
 
     @Test
-    public void hentOgLagreOpplysninger_medAlleOpplysningerIVilkårligRekkefølge_alleBlirHentetOgLagretIRettRekkefølge() {
+    void hentOgLagreOpplysninger_medAlleOpplysningerIVilkårligRekkefølge_alleBlirHentetOgLagretIRettRekkefølge() {
         Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
         arbeidsforhold.arbeidsgiverID = "123456789";
 
@@ -162,7 +161,7 @@ public class RegisteropplysningerServiceTest {
     }
 
     @Test
-    public void hentArbeidsforholdopplysninger() {
+    void hentArbeidsforholdopplysninger() {
         LocalDate fom = LocalDate.now().minusMonths(1);
         LocalDate tom = LocalDate.now();
         when(aaregFasade.finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.ARBFORH));
@@ -177,7 +176,7 @@ public class RegisteropplysningerServiceTest {
 
 
     @Test
-    public void hentPersonopplysninger() {
+    void hentPersonopplysninger() {
         Behandling behandling = new Behandling();
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("123");
@@ -192,7 +191,7 @@ public class RegisteropplysningerServiceTest {
     }
 
     @Test
-    public void hentMedlemskapsopplysninger() {
+    void hentMedlemskapsopplysninger() {
         LocalDate fom = LocalDate.now().minusYears(1);
         LocalDate tom = LocalDate.now().plusYears(1);
         Saksopplysning saksopplysning = hentSedSaksopplysning(fom, tom);
@@ -207,7 +206,7 @@ public class RegisteropplysningerServiceTest {
     }
 
     @Test
-    public void hentInntektsopplysninger() {
+    void hentInntektsopplysninger() {
         LocalDate fom = LocalDate.now().minusYears(3);
         LocalDate tom = LocalDate.now().minusYears(2);
         Saksopplysning saksopplysning = hentSedSaksopplysning(fom, tom);
@@ -223,7 +222,7 @@ public class RegisteropplysningerServiceTest {
 
 
     @Test
-    public void hentUtbetalingsopplysninger() {
+    void hentUtbetalingsopplysninger() {
         LocalDate fom = LocalDate.now().minusYears(1);
         LocalDate tom = LocalDate.now().plusYears(1);
         Saksopplysning saksopplysning = hentSedSaksopplysning(fom, tom);
@@ -238,7 +237,7 @@ public class RegisteropplysningerServiceTest {
     }
 
     @Test
-    public void hentUtbetalingsopplysninger_periode5ÅrTilbakeITid_kanIkkeHenteUtbetalOpplysninger() {
+    void hentUtbetalingsopplysninger_periode5ÅrTilbakeITid_kanIkkeHenteUtbetalOpplysninger() {
         LocalDate fom = LocalDate.now().minusYears(5);
         LocalDate tom = LocalDate.now().minusYears(4);
 
@@ -251,7 +250,7 @@ public class RegisteropplysningerServiceTest {
     }
 
     @Test
-    public void hentOgLagreOpplysninger_feilIPeriode_kanIkkeHenteOpplysningerSomBrukerPeriode() {
+    void hentOgLagreOpplysninger_feilIPeriode_kanIkkeHenteOpplysningerSomBrukerPeriode() {
         LocalDate fom = LocalDate.now().plusYears(2);
         LocalDate tom = LocalDate.now();
 
@@ -272,7 +271,7 @@ public class RegisteropplysningerServiceTest {
     }
 
     @Test
-    public void hentOgLagreOpplysninger_kunBehandlingID_forventHentBehandling() {
+    void hentOgLagreOpplysninger_kunBehandlingID_forventHentBehandling() {
         registeropplysningerService.hentOgLagreOpplysninger(RegisteropplysningerRequest.builder()
             .fnr(FNR)
             .behandlingID(1L)

@@ -19,6 +19,7 @@ public class JuridiskArbeidsgiverNorge {
     public BigDecimal andelKontrakterINorge;
     public BigDecimal andelRekruttertINorge;
     public List<String> ekstraArbeidsgivere = new ArrayList<>();
+    public Boolean erOffentligVirksomhet;
 
     public Stream<String> hentManueltRegistrerteArbeidsgiverOrgnumre() {
         return ekstraArbeidsgivere.stream();

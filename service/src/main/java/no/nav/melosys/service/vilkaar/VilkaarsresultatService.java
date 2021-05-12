@@ -13,7 +13,6 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,7 +41,7 @@ public class VilkaarsresultatService {
             VilkaarDto vilkaarDto = new VilkaarDto();
             vilkaarDto.setVilkaar(vilkaarsresultat.getVilkaar().getKode());
             vilkaarDto.setOppfylt(vilkaarsresultat.isOppfylt());
-            vilkaarDto.setBegrunnelseKoder(vilkaarsresultat.getBegrunnelser().stream().map(VilkaarBegrunnelse::getKode).collect(Collectors.toList()));
+            vilkaarDto.setBegrunnelseKoder(vilkaarsresultat.getBegrunnelser().stream().map(VilkaarBegrunnelse::getKode).collect(Collectors.toSet()));
             vilkaarDto.setBegrunnelseFritekst(vilkaarsresultat.getBegrunnelseFritekst());
             vilkaarDto.setBegrunnelseFritekstEngelsk(vilkaarsresultat.getBegrunnelseFritekstEessi());
             vilkaarDtoListe.add(vilkaarDto);
@@ -112,19 +111,23 @@ public class VilkaarsresultatService {
     public void oppdaterVilkaarsresultat(long behandlingID,
                                          Vilkaar vilkaar,
                                          boolean oppfylt,
-                                         @Nullable Kodeverk begrunnelseKode) throws IkkeFunnetException {
+                                         Set<Kodeverk> begrunnelseKoder) throws IkkeFunnetException {
         vilkaarsresultatRepo.deleteByBehandlingsresultatId(behandlingID);
         vilkaarsresultatRepo.flush();
-        List<String> begrunnelseKoder = begrunnelseKode == null ? List.of() : List.of(begrunnelseKode.getKode());
         vilkaarsresultatRepo.save(
-            lagVilkaarsresultat(behandlingsresultatService.hentBehandlingsresultat(behandlingID), vilkaar, oppfylt, begrunnelseKoder)
+            lagVilkaarsresultat(
+                behandlingsresultatService.hentBehandlingsresultat(behandlingID),
+                vilkaar,
+                oppfylt,
+                begrunnelseKoder.stream().map(Kodeverk::getKode).collect(Collectors.toSet())
+            )
         );
     }
 
     private Vilkaarsresultat lagVilkaarsresultat(Behandlingsresultat behandlingsresultat,
                                                  Vilkaar vilkaar,
                                                  boolean oppfylt,
-                                                 List<String> begrunnelseKoder) {
+                                                 Set<String> begrunnelseKoder) {
         return lagVilkaarsresultat(behandlingsresultat, vilkaar, oppfylt, begrunnelseKoder,
             null, null);
     }
@@ -132,7 +135,7 @@ public class VilkaarsresultatService {
     private Vilkaarsresultat lagVilkaarsresultat(Behandlingsresultat behandlingsresultat,
                                                  Vilkaar vilkaar,
                                                  boolean oppfylt,
-                                                 List<String> begrunnelseKoder,
+                                                 Set<String> begrunnelseKoder,
                                                  String begrunnelseFritekst,
                                                  String begrunnelseFritekstEngelsk) {
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();

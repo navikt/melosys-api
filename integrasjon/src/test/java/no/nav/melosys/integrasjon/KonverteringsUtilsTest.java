@@ -1,9 +1,9 @@
 package no.nav.melosys.integrasjon;
 
-import org.junit.Test;
-
-import javax.xml.datatype.XMLGregorianCalendar;
 import java.time.LocalDate;
+import javax.xml.datatype.XMLGregorianCalendar;
+
+import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

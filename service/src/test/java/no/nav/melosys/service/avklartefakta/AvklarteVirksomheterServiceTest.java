@@ -29,11 +29,13 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VIRKSOMHET;
 import static no.nav.melosys.service.BehandlingsgrunnlagStub.lagBehandlingsgrunnlag;
@@ -44,8 +46,9 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AvklarteVirksomheterServiceTest {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class AvklarteVirksomheterServiceTest {
 
     @Mock
     private AvklartefaktaService avklartefaktaService;
@@ -75,7 +78,7 @@ public class AvklarteVirksomheterServiceTest {
 
     Function<OrganisasjonDokument, Adresse> ingenAdresse = org -> null;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         behandling = new Behandling();
         behandling.setId(1L);
@@ -87,7 +90,7 @@ public class AvklarteVirksomheterServiceTest {
     }
 
     @Test
-    public void hentUtenlandskeVirksomheter_girListeMedKunAvklarteForetak() throws TekniskException {
+    void hentUtenlandskeVirksomheter_girListeMedKunAvklarteForetak() throws TekniskException {
         ForetakUtland foretak1 = lagForetakUtland("Utland1", uuid1, null);
         ForetakUtland foretak2 = lagForetakUtland("Utland2", uuid2, "SE-123456789");
         behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(Collections.emptyList(), Arrays.asList(foretak1, foretak2), Collections.emptyList()));
@@ -97,7 +100,7 @@ public class AvklarteVirksomheterServiceTest {
     }
 
     @Test
-    public void hentUtenlandskeVirksomheter_girListeAvklartVirksomhetMedOrgnrIkkeUuid() throws TekniskException {
+    void hentUtenlandskeVirksomheter_girListeAvklartVirksomhetMedOrgnrIkkeUuid() throws TekniskException {
         ForetakUtland foretak1 = lagForetakUtland("Utland1", uuid1, "SE-123456789");
         behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(Collections.emptyList(), Collections.singletonList(foretak1), Collections.emptyList()));
 
@@ -114,7 +117,7 @@ public class AvklarteVirksomheterServiceTest {
     }
 
     @Test
-    public void hentSelvstendigeForetakOrgnumre_girListeMedKunAvklarteOrgnumre() throws TekniskException {
+    void hentSelvstendigeForetakOrgnumre_girListeMedKunAvklarteOrgnumre() throws TekniskException {
         List<String> selvstendigeForetak = Arrays.asList(orgnr1, orgnr2);
         behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(selvstendigeForetak, Collections.emptyList(), Collections.emptyList()));
 
@@ -123,7 +126,7 @@ public class AvklarteVirksomheterServiceTest {
     }
 
     @Test
-    public void hentArbeidsgivendeEkstraOrgnumre_girListeMedKunAvklarteOrgnumre() throws TekniskException {
+    void hentArbeidsgivendeEkstraOrgnumre_girListeMedKunAvklarteOrgnumre() throws TekniskException {
         List<String> arbeidgivendeEkstraOrgnumre = Arrays.asList(orgnr2, orgnr1);
         Set<Saksopplysning> saksopplysninger =
             lagArbeidsforholdOpplysninger(Collections.emptyList());
@@ -135,7 +138,7 @@ public class AvklarteVirksomheterServiceTest {
     }
 
     @Test
-    public void hentArbeidsgivendeRegistreOrgnumre_girListeMedKunAvklarteOrgnumre() throws TekniskException {
+    void hentArbeidsgivendeRegistreOrgnumre_girListeMedKunAvklarteOrgnumre() throws TekniskException {
         List<String> arbeidgivendeOrgnumreEkstra = Arrays.asList(orgnr1, orgnr2, orgnr3);
         Set<Saksopplysning> saksopplysninger =
             lagArbeidsforholdOpplysninger(arbeidgivendeOrgnumreEkstra);
@@ -147,7 +150,7 @@ public class AvklarteVirksomheterServiceTest {
     }
 
     @Test
-    public void testHentAvklarteNorskeForetak_girAvklarteArbeidsgivere() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    void testHentAvklarteNorskeForetak_girAvklarteArbeidsgivere() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         List<String> arbeidsgivereEkstra = Collections.singletonList(orgnr2);
         List<String> arbeidsgivereRegister = Collections.singletonList(orgnr3);
 
@@ -169,7 +172,7 @@ public class AvklarteVirksomheterServiceTest {
     }
 
     @Test
-    public void testHentAvklarteNorskeForetak_girAvklarteSelvstendigeForetak() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    void testHentAvklarteNorskeForetak_girAvklarteSelvstendigeForetak() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
         List<String> selvstendigeForetak = Collections.singletonList(orgnr1);
 
         Set<Saksopplysning> saksopplysninger =
@@ -190,7 +193,7 @@ public class AvklarteVirksomheterServiceTest {
     }
 
     @Test
-    public void lagreVirksomheterSomAvklartefakta_virksomhetErForetakUtland_valideringOKOgVirksomhetLagret() throws FunksjonellException, TekniskException {
+    void lagreVirksomheterSomAvklartefakta_virksomhetErForetakUtland_valideringOKOgVirksomhetLagret() throws FunksjonellException, TekniskException {
         List<String> virksomhetIDer = List.of(uuid1);
         forberedValidering();
 
@@ -199,7 +202,7 @@ public class AvklarteVirksomheterServiceTest {
     }
 
     @Test
-    public void lagreVirksomheterSomAvklartefakta_virksomhetErSelvstendigForetak_valideringOKOgVirksomhetLagret() throws FunksjonellException, TekniskException {
+    void lagreVirksomheterSomAvklartefakta_virksomhetErSelvstendigForetak_valideringOKOgVirksomhetLagret() throws FunksjonellException, TekniskException {
         List<String> virksomhetIDer = List.of(orgnr1);
         forberedValidering();
 
@@ -208,7 +211,7 @@ public class AvklarteVirksomheterServiceTest {
     }
 
     @Test
-    public void lagreVirksomheterSomAvklartefakta_virksomhetErLagtInnManuelt_valideringOKOgVirksomhetLagret() throws FunksjonellException, TekniskException {
+    void lagreVirksomheterSomAvklartefakta_virksomhetErLagtInnManuelt_valideringOKOgVirksomhetLagret() throws FunksjonellException, TekniskException {
         List<String> virksomhetIDer = List.of(orgnr2);
         forberedValidering();
 
@@ -217,7 +220,7 @@ public class AvklarteVirksomheterServiceTest {
     }
 
     @Test
-    public void lagreVirksomheterSomAvklartefakta_virksomhetErArbeidNorge_valideringOKOgVirksomhetLagret() throws FunksjonellException, TekniskException {
+    void lagreVirksomheterSomAvklartefakta_virksomhetErArbeidNorge_valideringOKOgVirksomhetLagret() throws FunksjonellException, TekniskException {
         List<String> virksomhetIDer = List.of(orgnr3);
         forberedValidering();
 
@@ -226,7 +229,7 @@ public class AvklarteVirksomheterServiceTest {
     }
 
     @Test
-    public void lagreVirksomheterSomAvklartefakta_virksomhetErUgyldig_valideringFailerOgVirksomhetIkkeLagret() throws FunksjonellException, TekniskException {
+    void lagreVirksomheterSomAvklartefakta_virksomhetErUgyldig_valideringFailerOgVirksomhetIkkeLagret() throws FunksjonellException, TekniskException {
         List<String> virksomhetIDer = List.of(orgnr4);
         forberedValidering();
 
@@ -237,7 +240,7 @@ public class AvklarteVirksomheterServiceTest {
     }
 
     @Test
-    public void utfyllManglendeAdressefelter_gyldigForretningsadresse_girForretningsadresse() {
+    void utfyllManglendeAdressefelter_gyldigForretningsadresse_girForretningsadresse() {
         StrukturertAdresse adresse = avklarteVirksomheterService.utfyllManglendeAdressefelter(lagOrganisasjonDokument("2345", "Forretningsgatenavn"));
 
         assertThat(adresse.gatenavn).isEqualTo("Forretningsgatenavn");
@@ -249,7 +252,7 @@ public class AvklarteVirksomheterServiceTest {
     }
 
     @Test
-    public void utfyllManglendeAdressefelter_forretningsadresseManglerGatenavn_girForretningsadresseMedBlanktGatenavn() {
+    void utfyllManglendeAdressefelter_forretningsadresseManglerGatenavn_girForretningsadresseMedBlanktGatenavn() {
         StrukturertAdresse adresse = avklarteVirksomheterService.utfyllManglendeAdressefelter(lagOrganisasjonDokument("2345", null));
 
         assertThat(adresse.gatenavn).isEqualTo(" ");
@@ -261,7 +264,7 @@ public class AvklarteVirksomheterServiceTest {
     }
 
     @Test
-    public void utfyllManglendeAdressefelter_utenlandskIngenForretningsadressePostadresseUtenPostnummer_postnummerTomString() {
+    void utfyllManglendeAdressefelter_utenlandskIngenForretningsadressePostadresseUtenPostnummer_postnummerTomString() {
         var organisasjonDokument = lagOrganisasjonDokument(null, null, null, "DK");
         organisasjonDokument.organisasjonDetaljer.forretningsadresse = Collections.emptyList();
         organisasjonDokument.organisasjonDetaljer.postadresse.stream().findFirst().ifPresent(a -> ((SemistrukturertAdresse)a).setPostnr(null));
@@ -276,7 +279,7 @@ public class AvklarteVirksomheterServiceTest {
     }
 
     @Test
-    public void utfyllManglendeAdressefelter_forretningsadresseManglerPostnr_girPostadresse() {
+    void utfyllManglendeAdressefelter_forretningsadresseManglerPostnr_girPostadresse() {
         StrukturertAdresse adresse = avklarteVirksomheterService.utfyllManglendeAdressefelter(lagOrganisasjonDokument(null, null));
 
         assertThat(adresse.gatenavn).isEqualTo("Postgatenavn");

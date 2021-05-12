@@ -124,15 +124,11 @@ public class BehandlingService {
         }
     }
 
-    /**
-     * Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas,
-     * eller for å avslutte behandling ved behandlingstype VURDER_TRYGDETID
-     */
     public void brukerOppdaterStatus(long behandlingID, Behandlingsstatus status)
         throws FunksjonellException, TekniskException {
         Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
         if (!hentMuligeStatuser(behandling).contains(status)) {
-            throw new FunksjonellException(String.format("Behandlingen kan ikke endres til status %s. Gyldige statuser er %s", status, hentMuligeStatuser(behandling)));
+            throw new FunksjonellException(String.format("Behandlingen kan ikke endres til status %s. Gyldige statuser for behandling %s er %s", status, behandlingID, hentMuligeStatuser(behandling)));
         }
         oppdaterStatus(behandling, status);
     }
@@ -146,7 +142,7 @@ public class BehandlingService {
     private Collection<Behandlingsstatus> hentMuligeStatuser(Behandling behandling) {
         if (behandling.erInaktiv()) return Collections.emptyList();
 
-        List<Behandlingsstatus> muligeStatuser = List.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING).stream()
+        List<Behandlingsstatus> muligeStatuser = List.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING).stream()
             .filter(status -> status != behandling.getStatus())
             .collect(Collectors.toList());
 

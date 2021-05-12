@@ -34,13 +34,13 @@ import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagMedSoknad
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagUtenSoknad;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import static no.nav.melosys.domain.eessi.sed.Adresse.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,8 +48,9 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SedDataByggerTest {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class SedDataByggerTest {
     @Mock
     private KodeverkService kodeverkService;
     @Mock
@@ -61,9 +62,6 @@ public class SedDataByggerTest {
     @Mock
     private LandvelgerService landvelgerService;
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     private SedDataBygger dataBygger;
     private Behandling behandling;
     private Behandlingsresultat behandlingsresultat;
@@ -71,7 +69,7 @@ public class SedDataByggerTest {
     private Anmodningsperiode anmodningsperiode;
     private Utpekingsperiode utpekingsperiode;
 
-    @Before
+    @BeforeEach
     public void setup() throws IkkeFunnetException, TekniskException {
 
         doReturn(DataByggerStubs.hentOrganisasjonDokumentSetStub()).when(registerOppslagService).hentOrganisasjoner(anySet());
@@ -434,28 +432,28 @@ public class SedDataByggerTest {
 
     @Test
     public void lag_arbeidsstedManglerLandkode_kasterFeil() throws TekniskException, FunksjonellException {
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("land er ikke utfylt for arbeidssted");
-        dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(true, false, false),
-            behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(true, false, false),
+                behandlingsresultat, PeriodeType.LOVVALGSPERIODE))
+            .withMessageContaining("land er ikke utfylt for arbeidssted");
     }
 
     @Test
     public void lag_arbeidsgivendeVirksomhetManglerLandkode_kasterFeil() throws TekniskException, FunksjonellException {
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of("uuid"));
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("land er ikke utfylt for virksomhet");
-        dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(false, true, false),
-            behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(false, true, false),
+                behandlingsresultat, PeriodeType.LOVVALGSPERIODE))
+            .withMessageContaining("land er ikke utfylt for virksomhet");
     }
 
     @Test
     public void lag_selvstendigVirksomhetManglerLandkode_kasterFeil() throws TekniskException, FunksjonellException {
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of("uuid"));
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("land er ikke utfylt for selvstendig virksomhet");
-        dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(false, false, true),
-            behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(false, false, true),
+                behandlingsresultat, PeriodeType.LOVVALGSPERIODE))
+            .withMessageContaining("land er ikke utfylt for selvstendig virksomhet");
     }
 
     @Test

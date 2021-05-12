@@ -11,20 +11,20 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.service.behandling.BehandlingService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SendOrienteringsbrevVideresendSøknadTest {
 
     @Mock
@@ -40,7 +40,7 @@ public class SendOrienteringsbrevVideresendSøknadTest {
     private ArgumentCaptor<DoksysBrevbestilling> captor;
 
 
-    @Before
+    @BeforeEach
     public void setup() throws IkkeFunnetException {
         steg = new SendOrienteringsbrevVideresendSøknad(behandlingService , brevBestiller);
 
