@@ -124,8 +124,10 @@ public class AnmodningsperiodeService {
 
     private void validerSvar(AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
         validerSvartype(anmodningsperiodeSvar);
-        validerPeriode(anmodningsperiodeSvar);
-        validerDelvisInnvilgelse(anmodningsperiodeSvar);
+
+        if (anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == Anmodningsperiodesvartyper.DELVIS_INNVILGELSE) {
+            validerDelvisInnvilgelse(anmodningsperiodeSvar);
+        }
     }
 
     private void validerSvartype(AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
@@ -134,17 +136,12 @@ public class AnmodningsperiodeService {
         }
     }
 
-    private void validerPeriode(AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
-        Anmodningsperiode anmodningsperiode = anmodningsperiodeSvar.getAnmodningsperiode();
-        if (PeriodeKontroller.feilIPeriode(anmodningsperiode.getFom(), anmodningsperiode.getTom())) {
-            throw new FunksjonellException("Periode er ikke gyldig");
-        }
-    }
-
     private void validerDelvisInnvilgelse(AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
-        if (anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == Anmodningsperiodesvartyper.DELVIS_INNVILGELSE
-            && !anmodningsperiodeSvar.erGyldigDelvisInnvilgelse()) {
+        if (!anmodningsperiodeSvar.erGyldigDelvisInnvilgelse()) {
             throw new FunksjonellException("Periode må være fyllt ut ved " + Anmodningsperiodesvartyper.DELVIS_INNVILGELSE);
+        }
+        if (PeriodeKontroller.feilIPeriode(anmodningsperiodeSvar.getInnvilgetFom(), anmodningsperiodeSvar.getInnvilgetTom())) {
+            throw new FunksjonellException("Periode er ikke gyldig");
         }
     }
 }
