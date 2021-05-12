@@ -51,12 +51,10 @@ public class AnmodningOmUnntakSedRuter implements SedRuterForSedTyper {
             prosessinstans.setBehandling(behandling);
             Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
             if (periodeErEndret(melosysEessiMelding, behandlingsresultat)) {
-                log.info("Mottatt ny {} i {} hvor periode er endret. Oppretter ny behandling",
-                    melosysEessiMelding.getSedType(), fagsak.get().getSaksnummer());
+                log.info("Mottatt ny A001 i {} hvor periode er endret. Oppretter ny behandling", fagsak.get().getSaksnummer());
                 opprettNyBehandling(melosysEessiMelding, arkivsakID);
             } else {
-                log.info("Mottatt ny {} i {} periode er ikke endret. Oppretter ikke ny behandling",
-                    melosysEessiMelding.getSedType(), fagsak.get().getSaksnummer());
+                log.info("Mottatt ny A001 i {}, periode er ikke endret. Oppretter ikke ny behandling", fagsak.get().getSaksnummer());
                 opprettJournalføringProsess(melosysEessiMelding, behandling);
             }
         } else {
