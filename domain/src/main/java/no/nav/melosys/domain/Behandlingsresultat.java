@@ -214,8 +214,8 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return medlemAvFolketrygden;
     }
 
-    public Optional<MedlemAvFolketrygden> hentMedlemAvFolketrygden() {
-        return ofNullable(medlemAvFolketrygden);
+    public Optional<MedlemAvFolketrygden> finnMedlemAvFolketrygden() {
+        return ofNullable(getMedlemAvFolketrygden());
     }
 
     public void setMedlemAvFolketrygden(MedlemAvFolketrygden medlemAvFolketrygden) {

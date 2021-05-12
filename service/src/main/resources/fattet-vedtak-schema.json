@@ -60,11 +60,20 @@
         "avgiftskode"
       ]
     },
-    "identifikatorType": {
-      "type": "string",
-      "enum": [
-        "BRUKER",
-        "ORGANISASJON"
+    "identifikator": {
+      "ident": {
+        "type": "string"
+      },
+      "gjelder": {
+        "type": "string",
+        "enum": [
+          "BRUKER",
+          "ORGANISASJON"
+        ]
+      },
+      "required": [
+        "ident",
+        "identifikatorType"
       ]
     }
   },
@@ -146,7 +155,7 @@
         "dekning": {
           "$ref": "#/definitions/dekning"
         },
-        "lonnOgGodtgjorelse": {
+        "loennOgGodtgjoerelse": {
           "type": "object",
           "properties": {
             "norskArbgUtbetalerLoenn": {
@@ -404,34 +413,27 @@
     "fullmektig": {
       "type": "object",
       "properties": {
-        "ident": {
-          "type": "string"
-        },
-        "type": {
-          "$ref": "#/definitions/identifikatorType"
+        "identifikator": {
+          "$ref": "#/definitions/identifikator"
         }
       },
       "required": [
-        "ident",
+        "identifikator",
         "type"
       ]
     },
     "representantAvgift": {
       "type": "object",
       "properties": {
-        "ident": {
-          "type": "string"
-        },
-        "type": {
-          "$ref": "#/definitions/identifikatorType"
+        "identifikator": {
+          "$ref": "#/definitions/identifikator"
         },
         "representantNrAvgiftssystem": {
           "type": "string"
         }
       },
       "required": [
-        "ident",
-        "type",
+        "identifikator",
         "representantNrAvgiftssystem"
       ]
     }

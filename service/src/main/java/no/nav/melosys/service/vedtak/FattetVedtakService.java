@@ -11,6 +11,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.pdl.dto.person.Navn;
@@ -28,6 +29,7 @@ import static java.time.LocalDate.ofInstant;
 import static java.util.Collections.emptyList;
 import static no.nav.melosys.service.vedtak.dto.IdentifikatorType.BRUKER;
 import static no.nav.melosys.service.vedtak.dto.IdentifikatorType.ORGANISASJON;
+import static org.springframework.util.ObjectUtils.isEmpty;
 import static org.springframework.util.StringUtils.hasText;
 
 @Service
@@ -60,7 +62,7 @@ public class FattetVedtakService {
         return new FattetVedtak(
             lagSak(behandling, behandling.getFagsak(), behandling.hentPersonDokument()),
             lagVedtak(behandlingsresultat.getVedtakMetadata()),
-            lagSoknad(behandling.getBehandlingsgrunnlag()),
+            lagSoeknad(behandling.getBehandlingsgrunnlag()),
             lagSaksopplysninger(behandling.hentPersonDokument()),
             null,
             lagPerioder(behandlingsresultat),
@@ -89,9 +91,9 @@ public class FattetVedtakService {
         );
     }
 
-    private Soknad lagSoknad(Behandlingsgrunnlag behandlingsgrunnlag) {
+    private Soeknad lagSoeknad(Behandlingsgrunnlag behandlingsgrunnlag) {
         SoeknadFtrl behandlingsgrunnlagdata = (SoeknadFtrl) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
-        return new Soknad(
+        return new Soeknad(
             behandlingsgrunnlagdata.getTrygdedekning(),
             behandlingsgrunnlagdata.loennOgGodtgjoerelse,
             behandlingsgrunnlagdata.juridiskArbeidsgiverNorge,
@@ -124,7 +126,7 @@ public class FattetVedtakService {
     }
 
     private Collection<LovvalgOgMedlemskapsperiode> lagPerioder(Behandlingsresultat behandlingsresultat) {
-        Optional<MedlemAvFolketrygden> medlemAvFolketrygden = behandlingsresultat.hentMedlemAvFolketrygden();
+        Optional<MedlemAvFolketrygden> medlemAvFolketrygden = behandlingsresultat.finnMedlemAvFolketrygden();
 
         //NOTE Ikke støtte for EØS foreløpig
         return medlemAvFolketrygden.map(this::lagMedlemskapsperioder).orElse(emptyList());
@@ -173,26 +175,32 @@ public class FattetVedtakService {
     private Fullmektig lagFullmektig(Fagsak fagsak) {
         return fagsak.hentRepresentant(Representerer.BRUKER)
             .map(f -> {
-                String fnr = persondataFasade.hentFolkeregisterIdent(f.getAktørId());
-                boolean erBruker = hasText(fnr);
-                return new Fullmektig(erBruker ? fnr : f.getOrgnr(), erBruker ? BRUKER : ORGANISASJON);
+                String fnr = null;
+                if (isEmpty(f.getOrgnr())) {
+                    fnr = persondataFasade.hentFolkeregisterIdent(f.getAktørId());
+                }
+                return new Fullmektig(new Identifikator(hasText(fnr) ? fnr : f.getOrgnr(), hasText(fnr) ? BRUKER : ORGANISASJON));
             }).orElse(null);
     }
 
     private RepresentantAvgift lagRepresentantAvgift(Behandlingsresultat behandlingsresultat) {
-        return behandlingsresultat.hentMedlemAvFolketrygden().map(m -> {
+        return behandlingsresultat.finnMedlemAvFolketrygden().map(m -> {
             var fastsattTrygdeavgift = m.getFastsattTrygdeavgift();
             Aktoer betalesAv = fastsattTrygdeavgift.getBetalesAv();
 
-            String fnr = persondataFasade.hentFolkeregisterIdent(betalesAv.getAktørId());
-            boolean erBruker = hasText(fnr);
+            String fnr = null;
+
+            if (betalesAv.getRolle() == Aktoersroller.BRUKER) {
+                fnr = persondataFasade.hentFolkeregisterIdent(betalesAv.getAktørId());
+            }
 
             return new RepresentantAvgift(
-                erBruker ? fnr : betalesAv.getOrgnr(),
-                erBruker ? BRUKER : ORGANISASJON,
+                new Identifikator(
+                    hasText(fnr) ? fnr : betalesAv.getOrgnr(),
+                    hasText(fnr) ? BRUKER : ORGANISASJON
+                ),
                 fastsattTrygdeavgift.getRepresentantNr()
             );
         }).orElse(null);
     }
-
 }
