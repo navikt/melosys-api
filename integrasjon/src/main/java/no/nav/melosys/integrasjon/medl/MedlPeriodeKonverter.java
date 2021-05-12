@@ -1,6 +1,8 @@
 package no.nav.melosys.integrasjon.medl;
 
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -22,6 +24,12 @@ public final class MedlPeriodeKonverter {
 
     private static final BiMap<LovvalgBestemmelse, GrunnlagMedl> lovvalgsbestemmelseTilGrunnlagMedlTabell;
     private static final Map<Folketrygdloven_kap2_bestemmelser, GrunnlagMedl> ftrlKap2BestemmelserGrunnLagMedlTabell;
+
+    private static final Collection<LovvalgBestemmelse> TILLEGGSBESTEMMELSER_MAPPES_TIL_MEDL = Set.of(
+        Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_2,
+        Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1,
+        Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5
+    );
 
     static {
         BiMap<LovvalgBestemmelse, GrunnlagMedl> tbl = HashBiMap.create();
@@ -120,11 +128,12 @@ public final class MedlPeriodeKonverter {
     }
 
     public static LovvalgBestemmelse hentLovvalgBestemmelse(PeriodeOmLovvalg lovvalgsperiode) {
-        final boolean harTilleggsbestemmelseART11_4_1 = lovvalgsperiode.getTilleggsbestemmelse() != null && lovvalgsperiode.getTilleggsbestemmelse().equals(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
+        final boolean tilleggsbestemmelseSkalMappes = lovvalgsperiode.getTilleggsbestemmelse() != null
+            && TILLEGGSBESTEMMELSER_MAPPES_TIL_MEDL.contains(lovvalgsperiode.getTilleggsbestemmelse());
 
         LovvalgBestemmelse bestemmelse;
-        if (harTilleggsbestemmelseART11_4_1) {
-            bestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1;
+        if (tilleggsbestemmelseSkalMappes) {
+            bestemmelse = lovvalgsperiode.getTilleggsbestemmelse();
         } else {
             bestemmelse = lovvalgsperiode.getBestemmelse();
         }
