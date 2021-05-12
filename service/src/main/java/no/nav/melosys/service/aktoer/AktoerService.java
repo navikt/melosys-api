@@ -34,7 +34,7 @@ public class AktoerService {
     }
 
     @Transactional
-    public Long lagEllerOppdaterAktoer(Fagsak fagsak, AktoerDto aktoerDto) throws FunksjonellException {
+    public Long lagEllerOppdaterAktoer(Fagsak fagsak, AktoerDto aktoerDto) {
         if (aktoerDto.getRolleKode() == null) {
             throw new FunksjonellException("Kan ikke lagre aktør uten rolle. Saksnummer: " + fagsak.getSaksnummer());
         }
@@ -63,7 +63,7 @@ public class AktoerService {
     }
 
     @Transactional
-    public void slettAktoer(long databaseID) throws TekniskException, FunksjonellException {
+    public void slettAktoer(long databaseID) {
         Aktoer aktoer = aktørRepository.findById(databaseID).
             orElseThrow(() -> new TekniskException("Klarte ikke slette aktøren. Fant ingen aktør på id: " + databaseID));
 

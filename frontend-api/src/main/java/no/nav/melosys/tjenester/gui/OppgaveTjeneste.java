@@ -11,7 +11,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.*;
@@ -46,7 +45,7 @@ public class OppgaveTjeneste {
 
     @PostMapping("/plukk")
     @ApiOperation(value = "Plukker neste oppgave fra Oppgave som saksbehandler skal arbeide med.", response = PlukketOppgaveDto.class)
-    public ResponseEntity plukkOppgave(@RequestBody PlukkOppgaveInnDto plukkDto) throws FunksjonellException, TekniskException {
+    public ResponseEntity plukkOppgave(@RequestBody PlukkOppgaveInnDto plukkDto) {
         String ident = SubjectHandler.getInstance().getUserID();
 
         Optional<Oppgave> plukket = oppgaveplukker.plukkOppgave(ident, plukkDto);
@@ -74,7 +73,7 @@ public class OppgaveTjeneste {
 
     @PostMapping("/tilbakelegg")
     @ApiOperation(value = "Legger tilbake oppgave knyttet til gitt behandlingID i GSAK.")
-    public ResponseEntity leggTilbakeOppgave(@RequestBody TilbakeleggingDto tilbakelegging) throws FunksjonellException, TekniskException {
+    public ResponseEntity leggTilbakeOppgave(@RequestBody TilbakeleggingDto tilbakelegging) {
         String ident = SubjectHandler.getInstance().getUserID();
         oppgaveplukker.leggTilbakeOppgave(ident, tilbakelegging);
         return ResponseEntity.ok().build();
@@ -84,7 +83,7 @@ public class OppgaveTjeneste {
     @ApiOperation(
         value = "Henter alle oppgaver som er tildelt innlogget saksbehandler.",
         response = OppgaveOversiktDto.class)
-    public ResponseEntity mineOppgaver() throws TekniskException, FunksjonellException {
+    public ResponseEntity mineOppgaver() {
         String ident = SubjectHandler.getInstance().getUserID();
         List<OppgaveDto> oppgaveDtoListe;
         oppgaveDtoListe = oppgaveService.hentOppgaverMedAnsvarlig(ident);
@@ -111,8 +110,7 @@ public class OppgaveTjeneste {
         value = "Søk etter oppgaver knyttet til et fødselsnummer eller d-nummer",
         response = no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto.class,
         responseContainer = "List")
-    public ResponseEntity søkOppgaverMedBrukerID(@RequestParam("fnr") String fnr)
-        throws FunksjonellException, TekniskException {
+    public ResponseEntity søkOppgaverMedBrukerID(@RequestParam("fnr") String fnr) {
         if (fnr == null) {
             throw new FunksjonellException("Fødselsnummer eller D-nummer mangler.");
         }

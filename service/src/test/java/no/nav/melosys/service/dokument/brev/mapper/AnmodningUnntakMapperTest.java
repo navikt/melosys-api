@@ -26,7 +26,6 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntak;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -86,7 +85,7 @@ public class AnmodningUnntakMapperTest {
     }
 
     @Test
-    public void mapFag_unntakFraBestemmelseArtikkel13_forventIkkeNull() throws TekniskException {
+    public void mapFag_unntakFraBestemmelseArtikkel13_forventIkkeNull() {
         Behandling behandling = lagBehandling();
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
         BrevDataAnmodningUnntak brevData = lagBrevData(behandlingsresultat, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B3);
@@ -96,7 +95,7 @@ public class AnmodningUnntakMapperTest {
     }
 
     @Test
-    public void mapFag_unntakFraBestemmelseIkkeArtikkel13_forventNull() throws TekniskException {
+    public void mapFag_unntakFraBestemmelseIkkeArtikkel13_forventNull() {
         Behandling behandling = lagBehandling();
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
         BrevDataAnmodningUnntak brevData = lagBrevData(behandlingsresultat, Lovvalgbestemmelser_987_2009.FO_987_2009_ART14_11);
@@ -106,7 +105,7 @@ public class AnmodningUnntakMapperTest {
     }
 
     @Test
-    public void mapFag_unntakFraBestemmelseNull_forventNull() throws TekniskException {
+    public void mapFag_unntakFraBestemmelseNull_forventNull() {
         Behandling behandling = lagBehandling();
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
         BrevDataAnmodningUnntak brevData = lagBrevData(behandlingsresultat);

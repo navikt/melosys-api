@@ -2,8 +2,6 @@ package no.nav.melosys.saksflyt.steg.oppgave;
 
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +25,7 @@ public class OpprettOppgave implements StegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
+    public void utfør(Prosessinstans prosessinstans) {
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
             prosessinstans.getBehandling(),
             prosessinstans.hentJournalpostID(),

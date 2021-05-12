@@ -20,8 +20,6 @@ import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -52,7 +50,7 @@ public class VedtakKontrollServiceTest {
     private VedtakKontrollService vedtakKontrollService;
 
     @BeforeEach
-    public void setup() throws FunksjonellException {
+    public void setup() {
         Saksopplysning medlSaksopplysning = new Saksopplysning();
         medlSaksopplysning.setType(SaksopplysningType.MEDL);
         medlSaksopplysning.setDokument(medlemskapDokument);
@@ -74,7 +72,7 @@ public class VedtakKontrollServiceTest {
     }
 
     @Test
-    public void utførKontroller_periodeUnder24MndArt12IkkeOverlappendePeriode_returnererTomCollection() throws TekniskException, FunksjonellException {
+    public void utførKontroller_periodeUnder24MndArt12IkkeOverlappendePeriode_returnererTomCollection() {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
@@ -83,7 +81,7 @@ public class VedtakKontrollServiceTest {
     }
 
     @Test
-    public void utførKontroller_periodeOver24MndArt16IkkeOverlappendePeriode_returnererTomCollection() throws TekniskException, FunksjonellException {
+    public void utførKontroller_periodeOver24MndArt16IkkeOverlappendePeriode_returnererTomCollection() {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(3));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
@@ -92,7 +90,7 @@ public class VedtakKontrollServiceTest {
     }
 
     @Test
-    public void utførKontroller_periodeOver24MndArt12MedOverlappendePeriode_returnererCollectionMedToKoder() throws TekniskException, FunksjonellException {
+    public void utførKontroller_periodeOver24MndArt12MedOverlappendePeriode_returnererCollectionMedToKoder() {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(2));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
@@ -107,7 +105,7 @@ public class VedtakKontrollServiceTest {
     }
 
     @Test
-    public void utførKontroller_manglerBostedsadresse_returnererKode() throws TekniskException, FunksjonellException {
+    public void utførKontroller_manglerBostedsadresse_returnererKode() {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
@@ -118,7 +116,7 @@ public class VedtakKontrollServiceTest {
     }
 
     @Test
-    public void utførKontroller_periodeManglerSluttdato_returnererKode() throws FunksjonellException, TekniskException {
+    public void utførKontroller_periodeManglerSluttdato_returnererKode() {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(null);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
@@ -128,7 +126,7 @@ public class VedtakKontrollServiceTest {
     }
 
     @Test
-    public void utførKontroller_arbeidsstedManglerFelter_returnererKode() throws FunksjonellException, TekniskException {
+    public void utførKontroller_arbeidsstedManglerFelter_returnererKode() {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
         behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidssteder = List.of(new FysiskArbeidssted());
@@ -140,7 +138,7 @@ public class VedtakKontrollServiceTest {
     }
 
     @Test
-    public void utførKontroller_foretakUtlandManglerFelter_returnererKode() throws FunksjonellException, TekniskException {
+    public void utførKontroller_foretakUtlandManglerFelter_returnererKode() {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
         behandlingsgrunnlagData.foretakUtland = List.of(new ForetakUtland());

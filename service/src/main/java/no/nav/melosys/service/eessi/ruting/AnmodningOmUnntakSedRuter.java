@@ -11,7 +11,6 @@ import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -38,7 +37,7 @@ public class AnmodningOmUnntakSedRuter implements SedRuterForSedTyper {
     }
 
     @Override
-    public void rutSedTilBehandling(Prosessinstans prosessinstans, Long arkivsakID) throws FunksjonellException {
+    public void rutSedTilBehandling(Prosessinstans prosessinstans, Long arkivsakID) {
         final MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
         if (arkivsakID == null) {
             opprettNySak(prosessinstans, melosysEessiMelding);

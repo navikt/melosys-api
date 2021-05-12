@@ -8,8 +8,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
@@ -42,7 +40,7 @@ class OpprettFagsakOgBehandlingTest {
     }
 
     @Test
-    void utfør_typeJfrNySak_fagsakBliropprettet() throws FunksjonellException, TekniskException {
+    void utfør_typeJfrNySak_fagsakBliropprettet() {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
         String aktørId = "1000104568393";

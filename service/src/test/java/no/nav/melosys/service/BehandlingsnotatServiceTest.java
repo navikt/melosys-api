@@ -8,8 +8,6 @@ import no.nav.melosys.domain.Behandlingsnotat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingsnotatRepository;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
@@ -46,14 +44,14 @@ class BehandlingsnotatServiceTest {
     private final String saksnummer = "MEL-123";
 
     @BeforeEach
-    public void setup() throws IkkeFunnetException {
+    public void setup() {
         behandlingsnotatService = new BehandlingsnotatService(behandlingsnotatRepository, fagsakService);
         fagsak = new Fagsak();
         SpringSubjectHandler.set(new TestSubjectHandler());
     }
 
     @Test
-    void opprettNotat_fagsakHarIkkeAktivBehandling_forventException() throws FunksjonellException, TekniskException {
+    void opprettNotat_fagsakHarIkkeAktivBehandling_forventException() {
         when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsak);
         lagBehandling(fagsak, Behandlingsstatus.AVSLUTTET);
 
@@ -63,7 +61,7 @@ class BehandlingsnotatServiceTest {
     }
 
     @Test
-    void opprettNotat_fagsakHarAktivBehandling_blirLagret() throws FunksjonellException, TekniskException {
+    void opprettNotat_fagsakHarAktivBehandling_blirLagret() {
         when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsak);
         Behandling behandling = lagBehandling(fagsak, Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
 
@@ -75,7 +73,7 @@ class BehandlingsnotatServiceTest {
     }
 
     @Test
-    void hentNotaterForFagsak_enBehandlingErAvsluttet_verifiserRedigerbareOgIkkeRedigerbareNotater() throws IkkeFunnetException {
+    void hentNotaterForFagsak_enBehandlingErAvsluttet_verifiserRedigerbareOgIkkeRedigerbareNotater() {
         when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsak);
         Behandling avsluttetBehandling = lagBehandling(fagsak, Behandlingsstatus.AVSLUTTET);
         Behandlingsnotat ikkeAktivBehandlingsnotat = new Behandlingsnotat();
@@ -97,7 +95,7 @@ class BehandlingsnotatServiceTest {
     }
 
     @Test
-    void oppdaterNotat_behandlingIkkeRedigerbar_kasterException() throws FunksjonellException {
+    void oppdaterNotat_behandlingIkkeRedigerbar_kasterException() {
         final long notatID = 111L;
         Behandling behandling = lagBehandling(fagsak, Behandlingsstatus.AVSLUTTET);
         Behandlingsnotat behandlingsnotat = new Behandlingsnotat();
@@ -113,7 +111,7 @@ class BehandlingsnotatServiceTest {
     }
 
     @Test
-    void oppdaterNotat_behandlingSaksbehandlerIkkeTilgang_kasterException() throws FunksjonellException {
+    void oppdaterNotat_behandlingSaksbehandlerIkkeTilgang_kasterException() {
         final long notatID = 111L;
         Behandling behandling = lagBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING);
         Behandlingsnotat behandlingsnotat = new Behandlingsnotat();

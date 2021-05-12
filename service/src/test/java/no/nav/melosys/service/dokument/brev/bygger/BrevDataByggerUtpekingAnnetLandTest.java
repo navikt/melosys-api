@@ -8,7 +8,6 @@ import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataUtpekingAnnetLand;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
@@ -35,7 +34,7 @@ class BrevDataByggerUtpekingAnnetLandTest {
     private BrevDataByggerUtpekingAnnetLand brevDataByggerUtpekingAnnetLand;
 
     @BeforeEach
-    public void setUp() throws FunksjonellException, TekniskException {
+    public void setUp() {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         when(brevDataGrunnlag.getBehandling()).thenReturn(behandling);
@@ -43,7 +42,7 @@ class BrevDataByggerUtpekingAnnetLandTest {
     }
 
     @Test
-    void lag_medUtpekingPeriode_girBrevdata() throws FunksjonellException {
+    void lag_medUtpekingPeriode_girBrevdata() {
         Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.now(), null, Landkoder.CY,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
         when(utpekingService.hentUtpekingsperioder(eq(1L))).thenReturn(List.of(utpekingsperiode));
@@ -53,7 +52,7 @@ class BrevDataByggerUtpekingAnnetLandTest {
     }
 
     @Test
-    void lag_utenUtpekingPeriode_kasterException() throws FunksjonellException {
+    void lag_utenUtpekingPeriode_kasterException() {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> brevDataByggerUtpekingAnnetLand.lag(brevDataGrunnlag, "sb"))
             .withMessageContaining("uten utpekingsperiode");

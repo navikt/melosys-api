@@ -9,10 +9,6 @@ import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.utpeking.UtpekingsperioderDto;
@@ -57,7 +53,7 @@ class UtpekingsperiodeTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentUtpekingsperioder() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, IOException {
+    void hentUtpekingsperioder() throws IOException {
         when(utpekingService.hentUtpekingsperioder(anyLong())).thenReturn(lagUtpekingsperioder());
 
         UtpekingsperioderDto utpekingsperioderDto = utpekingsperiodeTjeneste.hentUtpekingsperioder(123L);
@@ -70,7 +66,7 @@ class UtpekingsperiodeTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void lagreUtpekingsperioder() throws IOException, FunksjonellException, TekniskException {
+    void lagreUtpekingsperioder() throws IOException {
         UtpekingsperioderDto utpekingsperioderDto = new UtpekingsperioderDto(lagUtpekingsperioder());
 
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(utpekingsperioderDto);

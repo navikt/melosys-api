@@ -9,7 +9,6 @@ import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.vedtak.FattEosVedtakRequest;
 import no.nav.melosys.service.vedtak.FattFtrlVedtakRequest;
@@ -106,7 +105,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void endreVedtak_fungerer() throws FunksjonellException, TekniskException, IOException {
+    void endreVedtak_fungerer() throws IOException {
         EndreVedtakDto endreVedtakDto = new EndreVedtakDto();
         endreVedtakDto.setBegrunnelseKode(Endretperiode.ENDRINGER_ARBEIDSSITUASJON);
         vedtakTjeneste.endreVedtak(behandlingID, endreVedtakDto);

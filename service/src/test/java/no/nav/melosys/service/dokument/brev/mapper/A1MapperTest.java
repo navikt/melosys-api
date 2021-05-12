@@ -32,7 +32,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
@@ -177,7 +176,7 @@ class A1MapperTest {
     }
 
     @Test
-    void mapBrevTilXML_arbeidslandUtenFysiskArbeidssted_fyllerPåMedArbeidsland() throws TekniskException, JAXBException, SAXException {
+    void mapBrevTilXML_arbeidslandUtenFysiskArbeidssted_fyllerPåMedArbeidsland() throws JAXBException, SAXException {
         brevData.arbeidsland = List.of(Landkoder.SE, Landkoder.DK, Landkoder.GB);
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
 
@@ -191,7 +190,7 @@ class A1MapperTest {
     }
 
     @Test
-    void mapBrevTilXML_harFlyvendeArbeidssted_fyllerUtHjemmebaseNavnOgLand() throws TekniskException {
+    void mapBrevTilXML_harFlyvendeArbeidssted_fyllerUtHjemmebaseNavnOgLand() {
         Landkoder landkode = Landkoder.FI;
         LuftfartBase luftfartBase = new LuftfartBase();
         luftfartBase.hjemmebaseNavn = "hjemmebaseNavn";
@@ -209,7 +208,7 @@ class A1MapperTest {
     }
 
     @Test
-    void mapTilBrevXML_harKortAdressePåArbeidssted_brekkerIkkeAdresseOverFlereLinjer() throws TekniskException {
+    void mapTilBrevXML_harKortAdressePåArbeidssted_brekkerIkkeAdresseOverFlereLinjer() {
         StrukturertAdresse adresse = lagStrukturertAdresse();
         Arbeidssted fysiskArbeidssted = new FysiskArbeidssted("", "", adresse);
 
@@ -228,7 +227,7 @@ class A1MapperTest {
     }
 
     @Test
-    void mapTilBrevXML_harLangAdressePåArbeidssted_brekkerAdresseOverFlereLinjer() throws TekniskException {
+    void mapTilBrevXML_harLangAdressePåArbeidssted_brekkerAdresseOverFlereLinjer() {
         StrukturertAdresse adresse = lagStrukturertAdresse();
         adresse.gatenavn = "Lorem ipsumdolorsitamet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua-veien";
         adresse.husnummer = "47";
@@ -249,13 +248,13 @@ class A1MapperTest {
     }
 
     @Test
-    void mapTilBrevXML_brukerErStatsløs_forventStatløsTekst() throws TekniskException {
+    void mapTilBrevXML_brukerErStatsløs_forventStatløsTekst() {
         brevData.person.statsborgerskap = Land.av(Land.STATSLØS);
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
         assertThat(a1.getPerson().getStatsborgerskap()).isEqualTo("Stateless");
     }
 
-    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException, TekniskException {
+    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException {
         final String XSD_LOCATION = "melosysbrev/melosys_000116.xsd";
 
         Fag fag = mapFag();

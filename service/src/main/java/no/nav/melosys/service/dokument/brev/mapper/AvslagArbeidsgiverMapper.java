@@ -12,7 +12,6 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagArbeidsgiver;
 import org.xml.sax.SAXException;
@@ -27,7 +26,7 @@ public class AvslagArbeidsgiverMapper implements BrevDataMapper {
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData)
-        throws JAXBException, SAXException, TekniskException {
+        throws JAXBException, SAXException {
         BrevDataAvslagArbeidsgiver brevDataAvslagArbeidsgiver = (BrevDataAvslagArbeidsgiver) brevData;
         Fag fag = mapFag(brevDataAvslagArbeidsgiver);
 
@@ -35,7 +34,7 @@ public class AvslagArbeidsgiverMapper implements BrevDataMapper {
         return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    Fag mapFag(BrevDataAvslagArbeidsgiver brevData) throws TekniskException {
+    Fag mapFag(BrevDataAvslagArbeidsgiver brevData) {
         Fag fag = new Fag();
 
         fag.setNavn(brevData.person.sammensattNavn);

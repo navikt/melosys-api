@@ -11,8 +11,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -52,7 +50,7 @@ class AvsluttArt13BehandlingServiceTest {
     private final long behandlingID = 11L;
 
     @BeforeEach
-    public void setup() throws IkkeFunnetException {
+    public void setup() {
         avsluttArt13BehandlingService = new AvsluttArt13BehandlingService(behandlingService, fagsakService,
             behandlingsresultatService, medlPeriodeService, lovvalgsperiodeService);
 
@@ -75,7 +73,7 @@ class AvsluttArt13BehandlingServiceTest {
     }
 
     @Test
-    void avsluttBehandlingArt13_ikkeArt13_kasterException() throws FunksjonellException, TekniskException {
+    void avsluttBehandlingArt13_ikkeArt13_kasterException() {
         vedtakMetadata.setVedtaksdato(månederOgDagerSiden(2, 1));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
 
@@ -85,7 +83,7 @@ class AvsluttArt13BehandlingServiceTest {
     }
 
     @Test
-    void avsluttBehandlingArt13_søknad1MndSidenVedtak_behandlingIkkeAvlsuttet() throws FunksjonellException, TekniskException {
+    void avsluttBehandlingArt13_søknad1MndSidenVedtak_behandlingIkkeAvlsuttet() {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         vedtakMetadata.setVedtaksdato(månederOgDagerSiden(1, 0));
 
@@ -94,7 +92,7 @@ class AvsluttArt13BehandlingServiceTest {
     }
 
     @Test
-    void avsluttBehandlingArt13_norgeUtpekt2Mnd1DagSidenVedtak_behandlingBlirAvlsuttet() throws FunksjonellException, TekniskException {
+    void avsluttBehandlingArt13_norgeUtpekt2Mnd1DagSidenVedtak_behandlingBlirAvlsuttet() {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         vedtakMetadata.setVedtaksdato(månederOgDagerSiden(2, 1));
 
@@ -104,7 +102,7 @@ class AvsluttArt13BehandlingServiceTest {
     }
 
     @Test
-    void avsluttBehandlingArt13_norgeUtpektVedtakIkkeLagret_kasterException() throws FunksjonellException, TekniskException {
+    void avsluttBehandlingArt13_norgeUtpektVedtakIkkeLagret_kasterException() {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         behandlingsresultat.setVedtakMetadata(null);
 
@@ -114,8 +112,7 @@ class AvsluttArt13BehandlingServiceTest {
     }
 
     @Test
-    void avsluttBehandlingArt13_søknad2Mnd1DagSidenEndretDato_medlOppdatertOgBehandlingBlirAvsluttet()
-        throws FunksjonellException, TekniskException {
+    void avsluttBehandlingArt13_søknad2Mnd1DagSidenEndretDato_medlOppdatertOgBehandlingBlirAvsluttet() {
         behandlingsresultat.setEndretDato(månederOgDagerSiden(2, 1));
         vedtakMetadata.setVedtaksdato(månederOgDagerSiden(2, 1));
 
@@ -125,8 +122,7 @@ class AvsluttArt13BehandlingServiceTest {
     }
 
     @Test
-    void avsluttBehandlingArt13_søknad3MndSidenEndretDatoUtpekingUtenVedtak_lovvalgsperiodeOpprettetOgBehandlingAvsluttet()
-        throws FunksjonellException, TekniskException {
+    void avsluttBehandlingArt13_søknad3MndSidenEndretDatoUtpekingUtenVedtak_lovvalgsperiodeOpprettetOgBehandlingAvsluttet() {
 
         Utpekingsperiode utpekingsperiode = new Utpekingsperiode(
             LocalDate.now(), LocalDate.now(), Landkoder.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);

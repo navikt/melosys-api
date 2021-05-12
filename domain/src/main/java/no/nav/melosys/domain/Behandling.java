@@ -195,7 +195,7 @@ public class Behandling extends RegistreringsInfo {
         this.behandlingsgrunnlag = behandlingsgrunnlag;
     }
 
-    public PersonDokument hentPersonDokument() throws TekniskException {
+    public PersonDokument hentPersonDokument() {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.PERSOPL);
         return (PersonDokument) saksopplysning
             .orElseThrow(() -> new TekniskException("Finner ikke persondokument"));
@@ -205,19 +205,19 @@ public class Behandling extends RegistreringsInfo {
         return hentDokument(SaksopplysningType.PERSOPL).map(s -> (PersonDokument) s);
     }
 
-    public MedlemskapDokument hentMedlemskapDokument() throws TekniskException {
+    public MedlemskapDokument hentMedlemskapDokument() {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.MEDL);
         return (MedlemskapDokument) saksopplysning
             .orElseThrow(() -> new TekniskException("Finner ikke medlemskapdokument"));
     }
 
-    public ArbeidsforholdDokument hentArbeidsforholdDokument() throws TekniskException {
+    public ArbeidsforholdDokument hentArbeidsforholdDokument() {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.ARBFORH);
         return (ArbeidsforholdDokument) saksopplysning
             .orElseThrow(() -> new TekniskException("Finner ikke arbeidsforholddokument"));
     }
 
-    public SedDokument hentSedDokument() throws TekniskException {
+    public SedDokument hentSedDokument() {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.SEDOPPL);
         return (SedDokument) saksopplysning
             .orElseThrow(() -> new TekniskException("Finner ikke seddokument"));
@@ -227,7 +227,7 @@ public class Behandling extends RegistreringsInfo {
         return hentDokument(SaksopplysningType.SEDOPPL).map(s -> (SedDokument) s);
     }
 
-    public InntektDokument hentInntektDokument() throws TekniskException {
+    public InntektDokument hentInntektDokument() {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.INNTK);
         return (InntektDokument) saksopplysning
             .orElseThrow(() -> new TekniskException("Finner ikke inntektdokument"));
@@ -243,7 +243,7 @@ public class Behandling extends RegistreringsInfo {
             .findFirst().map(Saksopplysning::getDokument);
     }
 
-    public ErPeriode hentPeriode() throws IkkeFunnetException {
+    public ErPeriode hentPeriode() {
         return finnPeriode()
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke periode for behandling " + id));
     }

@@ -22,7 +22,6 @@ import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetBarn;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -80,7 +79,7 @@ public class BrevDataByggerInnvilgelseTest {
     private BrevDataByggerInnvilgelse brevDataByggerInnvilgelse;
 
     @BeforeEach
-    public void setUp() throws FunksjonellException, TekniskException {
+    public void setUp() {
         behandling = new Behandling();
         behandling.setId(1L);
         behandling.setFagsak(new Fagsak());
@@ -121,13 +120,13 @@ public class BrevDataByggerInnvilgelseTest {
             behandlingsgrunnlagService);
     }
 
-    public BrevDataGrunnlag lagBrevdataGrunnlag() throws TekniskException {
+    public BrevDataGrunnlag lagBrevdataGrunnlag() {
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
         return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 
     @Test
-    public void lag_medSokkel_setterMaritimtypeSokkel() throws FunksjonellException, TekniskException {
+    public void lag_medSokkel_setterMaritimtypeSokkel() {
         Maritimtyper maritimType = Maritimtyper.SOKKEL;
         when(avklartefaktaService.hentMaritimTyper(anyLong())).thenReturn(Set.of(maritimType));
 
@@ -137,7 +136,7 @@ public class BrevDataByggerInnvilgelseTest {
     }
 
     @Test
-    public void lag_utenMaritimtArbeid_setterMaritimtypeTilNull() throws FunksjonellException, TekniskException {
+    public void lag_utenMaritimtArbeid_setterMaritimtypeTilNull() {
         when(avklartefaktaService.hentMaritimTyper(anyLong())).thenReturn(Collections.emptySet());
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
@@ -145,7 +144,7 @@ public class BrevDataByggerInnvilgelseTest {
     }
 
     @Test
-    public void lag_medFtrl2_12_setterTuristSkipTrue() throws FunksjonellException, TekniskException {
+    public void lag_medFtrl2_12_setterTuristSkipTrue() {
         when(vilkaarsresultatService.oppfyllerVilkaar(eq(behandling.getId()), eq(Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP)))
             .thenReturn(true);
 
@@ -154,14 +153,14 @@ public class BrevDataByggerInnvilgelseTest {
     }
 
     @Test
-    public void lag_innvilgelsesBrev_harBestillingsinformasjon() throws FunksjonellException, TekniskException {
+    public void lag_innvilgelsesBrev_harBestillingsinformasjon() {
         BrevData brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
         assertThat(brevData).isEqualToComparingOnlyGivenFields(brevbestillingDto, "begrunnelseKode", "fritekst");
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
     }
 
     @Test
-    public void lag_medAnmodningsperiode_girAnmodningsperiodeSvar() throws FunksjonellException, TekniskException {
+    public void lag_medAnmodningsperiode_girAnmodningsperiodeSvar() {
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
         AnmodningsperiodeSvar anmodningsperiodeSvar = lagAnmodningsperiodeSvarInnvilgelse();
         anmodningsperiode.setSendtUtland(true);
@@ -173,14 +172,14 @@ public class BrevDataByggerInnvilgelseTest {
     }
 
     @Test
-    public void lag_utenAnmodningsperiode_erMulig() throws FunksjonellException, TekniskException {
+    public void lag_utenAnmodningsperiode_erMulig() {
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.emptyList());
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
         assertThat(brevData.getAnmodningsperiodesvar()).isNotPresent();
     }
 
     @Test
-    public void lag_erArt12_art16UtenArt12False() throws FunksjonellException, TekniskException {
+    public void lag_erArt12_art16UtenArt12False() {
         when(vilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenReturn(true);
         when(vilkaarsresultatService.harVilkaarForArtikkel16(anyLong())).thenReturn(true);
 
@@ -189,7 +188,7 @@ public class BrevDataByggerInnvilgelseTest {
     }
 
     @Test
-    public void lag_erArt16UtenArt12_art16UtenArt12True() throws FunksjonellException, TekniskException {
+    public void lag_erArt16UtenArt12_art16UtenArt12True() {
         when(vilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenReturn(false);
         when(vilkaarsresultatService.harVilkaarForArtikkel16(anyLong())).thenReturn(true);
 
@@ -198,7 +197,7 @@ public class BrevDataByggerInnvilgelseTest {
     }
 
     @Test
-    public void lag_medfølgendeBarnHarFnr_henterNavnFraTps() throws TekniskException, FunksjonellException {
+    public void lag_medfølgendeBarnHarFnr_henterNavnFraTps() {
         MedfolgendeFamilie barn1 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), "fnr1", null, MedfolgendeFamilie.Relasjonsrolle.BARN);
         MedfolgendeFamilie barn2 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), "fnr2", null, MedfolgendeFamilie.Relasjonsrolle.BARN);
         BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
@@ -223,7 +222,7 @@ public class BrevDataByggerInnvilgelseTest {
     }
 
     @Test
-    public void lag_medfølgendeBarnHarUuid_henterNavnFraBehandlingsgrunnlag() throws TekniskException, FunksjonellException {
+    public void lag_medfølgendeBarnHarUuid_henterNavnFraBehandlingsgrunnlag() {
         MedfolgendeFamilie barn1 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn1", MedfolgendeFamilie.Relasjonsrolle.BARN);
         MedfolgendeFamilie barn2 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn2", MedfolgendeFamilie.Relasjonsrolle.BARN);
         BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();

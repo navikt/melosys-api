@@ -3,8 +3,6 @@ package no.nav.melosys.tjenester.gui;
 import java.util.List;
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.representant.RepresentantService;
 import no.nav.melosys.service.representant.dto.RepresentantDataDto;
 import no.nav.melosys.service.representant.dto.RepresentantDto;
@@ -38,7 +36,7 @@ public class RepresentantTjeneste {
 
     @PostMapping("/valgt/{behandlingID}")
     public ResponseEntity<ValgtRepresentantDto> lagreValgtRepresentant(@PathVariable("behandlingID") long behandlingID,
-                                                                       @RequestBody ValgtRepresentantDto valgtRepresentantDto) throws FunksjonellException {
+                                                                       @RequestBody ValgtRepresentantDto valgtRepresentantDto) {
         return ResponseEntity.ok(
             ValgtRepresentantDto.av(
                 representantService.oppdaterValgtRepresentant(behandlingID, valgtRepresentantDto.til())
@@ -47,7 +45,7 @@ public class RepresentantTjeneste {
     }
 
     @GetMapping("/valgt/{behandlingID}")
-    public ResponseEntity<ValgtRepresentantDto> hentValgtRepresentant(@PathVariable("behandlingID") long behandlingID) throws IkkeFunnetException {
+    public ResponseEntity<ValgtRepresentantDto> hentValgtRepresentant(@PathVariable("behandlingID") long behandlingID) {
         return ResponseEntity.ok(
             ValgtRepresentantDto.av(
                 representantService.hentValgtRepresentant(behandlingID)

@@ -5,21 +5,16 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsberegningsresultat;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.brev.BrevkopiRegel;
-import no.nav.melosys.domain.brev.FastMottaker;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
@@ -63,7 +58,7 @@ public class BrevmottakerService {
         this.trygdeavgiftsberegningService = trygdeavgiftsberegningService;
     }
 
-    Aktoersroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) throws TekniskException {
+    Aktoersroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) {
         Aktoersroller mottakerRolle;
         if (DOKUMENTER_TIL_BRUKER.contains(produserbartDokument)) {
             mottakerRolle = BRUKER;
@@ -77,8 +72,7 @@ public class BrevmottakerService {
         return mottakerRolle;
     }
 
-    public Aktoer avklarMottaker(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling)
-        throws FunksjonellException, TekniskException {
+    public Aktoer avklarMottaker(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling) {
         List<Aktoer> mottakere = avklarMottakere(produserbartDokument, mottaker, behandling, false, false);
         if (mottakere.size() < 1) {
             throw new FunksjonellException("Finner ikke avklart mottaker for produserbart dokument " + produserbartDokument.getKode() + " og rolle " + mottaker.getRolle() + " for behandling " + behandling.getId());
@@ -89,16 +83,15 @@ public class BrevmottakerService {
         return mottakere.get(0);
     }
 
-    public List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling) throws FunksjonellException, TekniskException {
+    public List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling) {
         return avklarMottakere(produserbartDokument, mottaker, behandling, false);
     }
 
-    public List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling, boolean forhåndsvisning) throws FunksjonellException, TekniskException {
+    public List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling, boolean forhåndsvisning) {
         return avklarMottakere(produserbartDokument, mottaker, behandling, forhåndsvisning, true);
     }
 
-    public List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling, boolean forhåndsvisning, boolean kunAvklarteVirksomheter)
-        throws FunksjonellException, TekniskException {
+    public List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling, boolean forhåndsvisning, boolean kunAvklarteVirksomheter) {
         List<Aktoer> mottakere;
         Aktoersroller mottakerRolle = mottaker.getRolle();
         if (mottakerRolle == BRUKER) {
@@ -113,8 +106,7 @@ public class BrevmottakerService {
         return mottakere;
     }
 
-    public Mottakerliste hentMottakerliste(Produserbaredokumenter produserbartdokument, Behandling behandling)
-        throws FunksjonellException {
+    public Mottakerliste hentMottakerliste(Produserbaredokumenter produserbartdokument, Behandling behandling) {
 
         Mottakerliste mottakerliste = ofNullable(BrevmottakerMapper.BREV_MOTTAKER_MAP.get(produserbartdokument))
             .orElseThrow(() -> new IkkeFunnetException("Mangler mapping av mottakere for " + produserbartdokument));
@@ -130,8 +122,7 @@ public class BrevmottakerService {
         return mottakerListeKopi;
     }
 
-    private List<Aktoer> avklarMottakereForBruker(Produserbaredokumenter produserbartDokument, Behandling behandling, boolean forhåndsvisning)
-        throws FunksjonellException, TekniskException {
+    private List<Aktoer> avklarMottakereForBruker(Produserbaredokumenter produserbartDokument, Behandling behandling, boolean forhåndsvisning) {
         Fagsak fagsak = behandling.getFagsak();
         Aktoer bruker = fagsak.hentBruker();
         if (bruker == null) {
@@ -161,7 +152,7 @@ public class BrevmottakerService {
     }
 
     // Dokumenter til arbeidsgiver sendes bare til representant når representant finnes.
-    private List<Aktoer> avklarMottakereForArbeidsgiver(Behandling behandling, boolean kunAvklarteVirksomheter) throws FunksjonellException, TekniskException {
+    private List<Aktoer> avklarMottakereForArbeidsgiver(Behandling behandling, boolean kunAvklarteVirksomheter) {
         Fagsak fagsak = behandling.getFagsak();
         Optional<Aktoer> representant = fagsak.hentRepresentant(Representerer.ARBEIDSGIVER);
         if (representant.isPresent()) {
@@ -171,7 +162,7 @@ public class BrevmottakerService {
         }
     }
 
-    private List<Aktoer> avklarArbeidsgiverFraAvklarteVirksomheter(Behandling behandling) throws FunksjonellException, TekniskException {
+    private List<Aktoer> avklarArbeidsgiverFraAvklarteVirksomheter(Behandling behandling) {
         Set<String> arbeidsgivendeOrgnumre = avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
         if (arbeidsgivendeOrgnumre.isEmpty()) {
             if (avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling).isEmpty()) {
@@ -184,7 +175,7 @@ public class BrevmottakerService {
         return avklarArbeidsgiver(arbeidsgivendeOrgnumre);
     }
 
-    private List<Aktoer> avklarArbeidsgiverFraAlleVirksomheter(Behandling behandling) throws TekniskException {
+    private List<Aktoer> avklarArbeidsgiverFraAlleVirksomheter(Behandling behandling) {
         Set<String> arbeidsgiverOrgnumre = new HashSet<>();
         arbeidsgiverOrgnumre.addAll(behandling.hentArbeidsforholdDokument().hentOrgnumre());
         arbeidsgiverOrgnumre.addAll(behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().hentAlleOrganisasjonsnumre());
@@ -206,7 +197,7 @@ public class BrevmottakerService {
 
     private List<Aktoer> avklarMottakereForMyndigheter(Mottaker mottaker,
                                                        Behandling behandling,
-                                                       Produserbaredokumenter produserbartDokument) throws IkkeFunnetException {
+                                                       Produserbaredokumenter produserbartDokument) {
         if (mottaker.getAktør().getOrgnr() != null) {
             // Norsk myndighet har orgnummer.
             return Collections.singletonList(mottaker.getAktør());
@@ -227,7 +218,7 @@ public class BrevmottakerService {
         }
     }
 
-    private boolean kanReservereMotA1(Behandling behandling) throws IkkeFunnetException {
+    private boolean kanReservereMotA1(Behandling behandling) {
         Lovvalgsperiode lovvalgsperiode =
             behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).hentValidertLovvalgsperiode();
         return lovvalgsperiode.erArtikkel12() || lovvalgsperiode.erArtikkel11_4()

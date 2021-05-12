@@ -17,7 +17,6 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.person.Informasjonsbehov;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.KontrollresultatService;
@@ -57,7 +56,7 @@ class OppfriskSaksopplysningerServiceTest {
     private static final long BEHANDLING_ID = 11L;
 
     @BeforeEach
-    public void setUp() throws IkkeFunnetException {
+    public void setUp() {
         oppfriskSaksopplysningerService = new OppfriskSaksopplysningerService(
             behandlingService, behandlingsresultatService,
             kontrollresultatService, inngangsvilkaarService,

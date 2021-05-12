@@ -15,8 +15,6 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_vesentlig_virksomhet;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -62,7 +60,7 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
     private BrevDataByggerAvslagArbeidsgiver brevDataByggerAvslagArbeidsgiver;
 
     @BeforeEach
-    public void setUp() throws FunksjonellException, TekniskException {
+    public void setUp() {
         when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Landkoder.AT);
 
         brevDataByggerAvslagArbeidsgiver = new BrevDataByggerAvslagArbeidsgiver(landvelgerService,
@@ -71,7 +69,7 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
     }
 
     @Test
-    public void lag_avslagArbeidsgiverBrev_harVilkaarBegrunnelser() throws FunksjonellException, TekniskException {
+    public void lag_avslagArbeidsgiverBrev_harVilkaarBegrunnelser() {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.getSaksopplysninger().add(lagPersonsaksopplysning(new PersonDokument()));

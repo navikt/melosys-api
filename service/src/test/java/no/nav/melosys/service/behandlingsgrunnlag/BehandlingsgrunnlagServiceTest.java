@@ -12,7 +12,6 @@ import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IkkeInngaaendeJournalpostException;
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -52,7 +51,7 @@ class BehandlingsgrunnlbagServiceTest {
     }
 
     @Test
-    void hentBehandlingsgrunnlagForBehandlingID_finnes_returnerBehandlingsgrunnlag() throws IkkeFunnetException {
+    void hentBehandlingsgrunnlagForBehandlingID_finnes_returnerBehandlingsgrunnlag() {
         when(behandlingsgrunnlagRepository.findByBehandling_Id(behandlingID))
             .thenReturn(Optional.of(new Behandlingsgrunnlag()));
         assertThat(behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID)).isNotNull();
@@ -66,7 +65,7 @@ class BehandlingsgrunnlbagServiceTest {
     }
 
     @Test
-    void opprettSøknadGrunnlag_finnesIkkeFraFør_blirOpprettet() throws FunksjonellException, IntegrasjonException {
+    void opprettSøknadGrunnlag_finnesIkkeFraFør_blirOpprettet() {
         Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
@@ -84,7 +83,7 @@ class BehandlingsgrunnlbagServiceTest {
     }
 
     @Test
-    void oppdaterBehandlingsgrunnlag_eksisterer_oppdatererBehandlingsgrunnlagData() throws IkkeFunnetException, JsonProcessingException {
+    void oppdaterBehandlingsgrunnlag_eksisterer_oppdatererBehandlingsgrunnlagData() throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
 
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
@@ -104,7 +103,7 @@ class BehandlingsgrunnlbagServiceTest {
     }
 
     @Test
-    void opprettSøknadFolketrygden_mottaksdatoFeiler_feiler() throws FunksjonellException, IntegrasjonException {
+    void opprettSøknadFolketrygden_mottaksdatoFeiler_feiler() {
         Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId()))
@@ -117,7 +116,7 @@ class BehandlingsgrunnlbagServiceTest {
     }
 
     @Test
-    void opprettSedGrunnlag_harRettType() throws FunksjonellException, IntegrasjonException {
+    void opprettSedGrunnlag_harRettType() {
         Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
@@ -135,7 +134,7 @@ class BehandlingsgrunnlbagServiceTest {
     }
 
     @Test
-    void opprettSøknadFolketrygden_harRettType() throws FunksjonellException, IntegrasjonException {
+    void opprettSøknadFolketrygden_harRettType() {
         Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());

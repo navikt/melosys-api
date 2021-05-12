@@ -11,7 +11,6 @@ import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.GrunnlagMedl;
 import no.nav.melosys.integrasjon.medl.MedlPeriodeKonverter;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -92,7 +91,7 @@ class LovvalgsperiodeServiceTest {
     }
 
     @Test
-    void tidligereLovvalgsperioder_enValgtMedlemsperiode_returnererEnTidligerLovvalgsperiode() throws TekniskException {
+    void tidligereLovvalgsperioder_enValgtMedlemsperiode_returnererEnTidligerLovvalgsperiode() {
         Medlemsperiode medlemsperiode = lagMedlemsperiode(23L, GrunnlagMedl.FO_12_2.getKode());
         Medlemsperiode medlemsperiodeFeilId = lagMedlemsperiode(46L, GrunnlagMedl.FO_12_2.getKode());
 
@@ -117,7 +116,7 @@ class LovvalgsperiodeServiceTest {
     }
 
     @Test
-    void tidligerePerioder_ukjentGrunnlagskodeMedl_grunnlagMappetTilAnnet() throws TekniskException {
+    void tidligerePerioder_ukjentGrunnlagskodeMedl_grunnlagMappetTilAnnet() {
         Medlemsperiode medlemsperiode = lagMedlemsperiode(23L, "AV_ANNET"); // Eksempel på mapping som ikke melosys kjenner til
 
         MedlemskapDokument medlDokument = new MedlemskapDokument();
@@ -132,14 +131,14 @@ class LovvalgsperiodeServiceTest {
     }
 
     @Test
-    void tidligerePerioder_ingenPerioderValgt_returnererTomCollection() throws TekniskException {
+    void tidligerePerioder_ingenPerioderValgt_returnererTomCollection() {
         Behandling behandling = new Behandling();
         behandling.setId(2L);
         assertThat(instanse.hentTidligereLovvalgsperioder(behandling)).isEmpty();
     }
 
     @Test
-    void hentOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingMedTidligerePeriode_returnererPeriode() throws IkkeFunnetException {
+    void hentOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingMedTidligerePeriode_returnererPeriode() {
         Behandling behandling = new Behandling();
         Behandling opprinneligBehandling = new Behandling();
         opprinneligBehandling.setId(5L);

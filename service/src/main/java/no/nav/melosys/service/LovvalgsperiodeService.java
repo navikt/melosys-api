@@ -12,7 +12,6 @@ import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.GrunnlagMedl;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -45,7 +44,7 @@ public class LovvalgsperiodeService {
         return lovvalgsperiodeRepo.findByBehandlingsresultatId(behandlingsid);
     }
 
-    public Lovvalgsperiode hentValidertLovvalgsperiode(long behandlingsid) throws FunksjonellException {
+    public Lovvalgsperiode hentValidertLovvalgsperiode(long behandlingsid) {
         Collection<Lovvalgsperiode> lovvalgsperioder = hentLovvalgsperioder(behandlingsid);
         if (lovvalgsperioder.size() != 1) {
             throw new FunksjonellException("Forventer minst én og kun én lovvalgsperiode!");
@@ -81,7 +80,7 @@ public class LovvalgsperiodeService {
         return kopi;
     }
 
-    public Collection<Lovvalgsperiode> hentTidligereLovvalgsperioder(Behandling behandling) throws TekniskException {
+    public Collection<Lovvalgsperiode> hentTidligereLovvalgsperioder(Behandling behandling) {
         Set<Long> utvalgtePeriodeIDer = tidligereMedlemsperiodeRepository.findById_BehandlingId(behandling.getId()).stream()
             .map(utvalgtPeriode -> utvalgtPeriode.getId().getPeriodeId())
             .collect(Collectors.toSet());
@@ -113,7 +112,7 @@ public class LovvalgsperiodeService {
         return tidligereLovvalgsperioder;
     }
 
-    public Lovvalgsperiode hentOpprinneligLovvalgsperiode(long behandlingId) throws IkkeFunnetException {
+    public Lovvalgsperiode hentOpprinneligLovvalgsperiode(long behandlingId) {
         Behandling behandling = behandlingRepository.findById(behandlingId)
             .orElseThrow(() -> new IkkeFunnetException("Fant ingen behandling for " + behandlingId));
 

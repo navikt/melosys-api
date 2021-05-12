@@ -22,8 +22,6 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
@@ -70,7 +68,7 @@ class SedDataByggerTest {
     private Utpekingsperiode utpekingsperiode;
 
     @BeforeEach
-    public void setup() throws IkkeFunnetException, TekniskException {
+    public void setup() {
 
         doReturn(DataByggerStubs.hentOrganisasjonDokumentSetStub()).when(registerOppslagService).hentOrganisasjoner(anySet());
 
@@ -110,18 +108,18 @@ class SedDataByggerTest {
         when(lovvalgsperiodeService.hentTidligereLovvalgsperioder(any())).thenReturn(List.of(lovvalgsperiode));
     }
 
-    private SedDataGrunnlagMedSoknad lagDokumentressurser() throws TekniskException {
+    private SedDataGrunnlagMedSoknad lagDokumentressurser() {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), kodeverkService);
         return new SedDataGrunnlagMedSoknad(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 
-    private SedDataGrunnlagUtenSoknad lagDokumentressurserUtenSøknad() throws TekniskException {
+    private SedDataGrunnlagUtenSoknad lagDokumentressurserUtenSøknad() {
         return new SedDataGrunnlagUtenSoknad(behandling, kodeverkService);
     }
 
     private SedDataGrunnlagMedSoknad lagDokumentressurserMedManglendeAdressefelter(boolean arbeidsstedManglerLandkode,
                                                                                    boolean arbeidsgivendeForetakUtlandManglerLandkode,
-                                                                                   boolean selvstendigForetakUtlandManglerLandkode) throws TekniskException {
+                                                                                   boolean selvstendigForetakUtlandManglerLandkode) {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), kodeverkService);
         return new SedDataGrunnlagMedSoknad(DataByggerStubs.hentBehandlingMedManglendeAdressefelterStub(
             arbeidsstedManglerLandkode, arbeidsgivendeForetakUtlandManglerLandkode, selvstendigForetakUtlandManglerLandkode),
@@ -129,7 +127,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lag_medlemsperiodeTypeLovvalgsperiodeMedSøknad_forventLovvalgsperiodeBrukt() throws FunksjonellException, TekniskException {
+    public void lag_medlemsperiodeTypeLovvalgsperiodeMedSøknad_forventLovvalgsperiodeBrukt() {
         SedDataDto sedData = dataBygger.lag(lagDokumentressurser(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 
         assertThat(sedData).isNotNull();
@@ -151,7 +149,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lag_medlemsperiodeTypeAnmodningsperiodeMedSøknad_forventAnmodningsperiode() throws FunksjonellException, TekniskException {
+    public void lag_medlemsperiodeTypeAnmodningsperiodeMedSøknad_forventAnmodningsperiode() {
         SedDataDto sedData = dataBygger.lag(lagDokumentressurser(), behandlingsresultat, PeriodeType.ANMODNINGSPERIODE);
 
         assertThat(sedData).isNotNull();
@@ -163,7 +161,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lag_medlemsperiodeTypeUtpekingsperiodeMedSøknad_forventUtpekingsperiode() throws FunksjonellException, TekniskException {
+    public void lag_medlemsperiodeTypeUtpekingsperiodeMedSøknad_forventUtpekingsperiode() {
         SedDataDto sedData = dataBygger.lag(lagDokumentressurser(), behandlingsresultat, PeriodeType.UTPEKINGSPERIODE);
 
         assertThat(sedData).isNotNull();
@@ -175,7 +173,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lag_medlemsperiodeTypeAnmodningsperiodeUtenSøknad_forventAnmodningsperiode() throws FunksjonellException, TekniskException {
+    public void lag_medlemsperiodeTypeAnmodningsperiodeUtenSøknad_forventAnmodningsperiode() {
         SedDataDto sedData = dataBygger.lag(lagDokumentressurserUtenSøknad(), behandlingsresultat, PeriodeType.ANMODNINGSPERIODE);
 
         assertThat(sedData).isNotNull();
@@ -184,7 +182,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lag_medlemsperiodeTypeIngenMedSøknad_forventAnmodningsperiode() throws FunksjonellException, TekniskException {
+    public void lag_medlemsperiodeTypeIngenMedSøknad_forventAnmodningsperiode() {
         SedDataDto sedData = dataBygger.lag(lagDokumentressurser(), behandlingsresultat, PeriodeType.INGEN);
 
         assertThat(sedData).isNotNull();
@@ -192,7 +190,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lag_bostedsadresseUtenGateadresse_gatenavnBlirNA() throws TekniskException, FunksjonellException {
+    public void lag_bostedsadresseUtenGateadresse_gatenavnBlirNA() {
         Bostedsadresse bostedsadresse = new Bostedsadresse();
         bostedsadresse.setGateadresse(null);
         bostedsadresse.setLand(new Land(Land.SVERIGE));
@@ -206,7 +204,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lag_bostedsadresseUtenGatenavn_gatenavnBlirNA() throws TekniskException, FunksjonellException {
+    public void lag_bostedsadresseUtenGatenavn_gatenavnBlirNA() {
         Gateadresse gateadresse = new Gateadresse();
         gateadresse.setGatenavn("");
         gateadresse.setHusnummer(123);
@@ -224,7 +222,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lag_bostedsadresseMedBlanktGatenavn_gatenavnBlirNA() throws TekniskException, FunksjonellException {
+    public void lag_bostedsadresseMedBlanktGatenavn_gatenavnBlirNA() {
         Gateadresse gateadresse = new Gateadresse();
         gateadresse.setGatenavn(" ");
         gateadresse.setHusnummer(123);
@@ -242,7 +240,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lag_bostedsadresseMedGatenavnOgHusnummer_rettFormatertGateadresse() throws TekniskException, FunksjonellException {
+    public void lag_bostedsadresseMedGatenavnOgHusnummer_rettFormatertGateadresse() {
         Gateadresse gateadresse = new Gateadresse();
         gateadresse.setGatenavn("gate");
         gateadresse.setHusnummer(123);
@@ -260,7 +258,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lag_bostedsadresseFinnesIkke_kasterException() throws TekniskException {
+    public void lag_bostedsadresseFinnesIkke_kasterException() {
 
         SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagDokumentressurser();
         sedDataGrunnlagMedSoknad.getBehandlingsgrunnlagData().bosted = new Bosted();
@@ -272,7 +270,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lag_medMaritimtArbeid_gatenavnBlirNA() throws TekniskException, FunksjonellException {
+    public void lag_medMaritimtArbeid_gatenavnBlirNA() {
         Map<String, AvklartMaritimtArbeid> alleAvklarteMaritimeArbeid = new HashMap<>();
         Avklartefakta maritimtFakta = new Avklartefakta();
         maritimtFakta.setFakta("SE");
@@ -291,7 +289,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lag_brukerErKode6_forventHarSensitiveOpplysninger() throws TekniskException, FunksjonellException {
+    public void lag_brukerErKode6_forventHarSensitiveOpplysninger() {
         SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagDokumentressurser();
         sedDataGrunnlagMedSoknad.getPerson().diskresjonskode = new Diskresjonskode("SPSF");
         SedDataDto sedData = dataBygger.lagUtkast(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
@@ -302,7 +300,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lag_brukerHarKode7_forventHarIkkeSensitiveOpplysninger() throws TekniskException, FunksjonellException {
+    public void lag_brukerHarKode7_forventHarIkkeSensitiveOpplysninger() {
         SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagDokumentressurser();
         sedDataGrunnlagMedSoknad.getPerson().diskresjonskode = new Diskresjonskode("SPSO");
         SedDataDto sedData = dataBygger.lagUtkast(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
@@ -313,7 +311,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lag_brukerHarIngenDiskresjonskode_forventHarIkkeSensitiveOpplysninger() throws TekniskException, FunksjonellException {
+    public void lag_brukerHarIngenDiskresjonskode_forventHarIkkeSensitiveOpplysninger() {
         SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagDokumentressurser();
         sedDataGrunnlagMedSoknad.getPerson().diskresjonskode = null;
         SedDataDto sedData = dataBygger.lagUtkast(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
@@ -324,7 +322,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lagUtkast_medlemsperiodeTypeIngenMedSøknad_forventAnmodningsperiode() throws FunksjonellException, TekniskException {
+    public void lagUtkast_medlemsperiodeTypeIngenMedSøknad_forventAnmodningsperiode() {
         SedDataDto sedData = dataBygger.lagUtkast(lagDokumentressurser(), behandlingsresultat, PeriodeType.ANMODNINGSPERIODE);
 
         assertThat(sedData).isNotNull();
@@ -333,8 +331,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lagUtkast_medlemsperiodeTypeIngenMedSøknad_utenLovvalgsperioder()
-        throws FunksjonellException, TekniskException {
+    public void lagUtkast_medlemsperiodeTypeIngenMedSøknad_utenLovvalgsperioder() {
         SedDataDto sedData = dataBygger.lagUtkast(lagDokumentressurser(), behandlingsresultat, PeriodeType.INGEN);
 
         lagUtkastAssertions(sedData, true);
@@ -342,8 +339,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lagUtkast_medlemsperiodeTypeIngenUtenSøknad_utenLovvalgsperioder()
-        throws FunksjonellException, TekniskException {
+    public void lagUtkast_medlemsperiodeTypeIngenUtenSøknad_utenLovvalgsperioder() {
         SedDataDto sedData = dataBygger.lagUtkast(lagDokumentressurserUtenSøknad(), behandlingsresultat, PeriodeType.INGEN);
 
         assertThat(sedData.getBruker()).isNotNull();
@@ -352,8 +348,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lagUtkast_medlemsperiodeTypeLovvalgsperiodeMedSøknad_medLovvalgsperioder()
-        throws FunksjonellException, TekniskException {
+    public void lagUtkast_medlemsperiodeTypeLovvalgsperiodeMedSøknad_medLovvalgsperioder() {
         SedDataDto sedData = dataBygger.lagUtkast(lagDokumentressurser(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 
         lagUtkastAssertions(sedData, true);
@@ -373,7 +368,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lagUtkast_harIkkeFastArbeidsstedForArbeidsland_arbeidsstedBlirSatt() throws TekniskException, FunksjonellException {
+    public void lagUtkast_harIkkeFastArbeidsstedForArbeidsland_arbeidsstedBlirSatt() {
         when(landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(anyLong())).thenReturn(List.of(Landkoder.SE));
         SedDataGrunnlagMedSoknad dataGrunnlag = lagDokumentressurser();
         SedDataDto sedData = dataBygger.lag(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
@@ -387,7 +382,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lagUtkast_medLuftfartBase_arbeidsstedBlirSatt() throws TekniskException, FunksjonellException {
+    public void lagUtkast_medLuftfartBase_arbeidsstedBlirSatt() {
         LuftfartBase luftfartBase = new LuftfartBase();
         luftfartBase.hjemmebaseNavn = "hjemmebaseNavn";
         luftfartBase.hjemmebaseLand = "GB";
@@ -406,7 +401,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lagUtkast_medUtenlandskSelvstendigForetak_forventAtUtenlandskSelvstendigForetakIkkeSendesSomArbeidsgivendeVirksomhet() throws TekniskException, FunksjonellException {
+    public void lagUtkast_medUtenlandskSelvstendigForetak_forventAtUtenlandskSelvstendigForetakIkkeSendesSomArbeidsgivendeVirksomhet() {
         ForetakUtland utenlandskSelvstendigForetak = new ForetakUtland();
         utenlandskSelvstendigForetak.adresse = new StrukturertAdresse();
         utenlandskSelvstendigForetak.adresse.landkode = Landkoder.DE.getKode();
@@ -431,7 +426,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lag_arbeidsstedManglerLandkode_kasterFeil() throws TekniskException, FunksjonellException {
+    public void lag_arbeidsstedManglerLandkode_kasterFeil() {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(true, false, false),
                 behandlingsresultat, PeriodeType.LOVVALGSPERIODE))
@@ -439,7 +434,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lag_arbeidsgivendeVirksomhetManglerLandkode_kasterFeil() throws TekniskException, FunksjonellException {
+    public void lag_arbeidsgivendeVirksomhetManglerLandkode_kasterFeil() {
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of("uuid"));
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(false, true, false),
@@ -448,7 +443,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lag_selvstendigVirksomhetManglerLandkode_kasterFeil() throws TekniskException, FunksjonellException {
+    public void lag_selvstendigVirksomhetManglerLandkode_kasterFeil() {
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of("uuid"));
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(false, false, true),
@@ -457,7 +452,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lagArbeidssted_manglerObligatoriskeFelter_blirUnknown() throws TekniskException, FunksjonellException {
+    public void lagArbeidssted_manglerObligatoriskeFelter_blirUnknown() {
         SedDataDto sedData = dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(false, false, false),
             behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 
@@ -468,7 +463,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lagVirksomhet_manglerObligatoriskeFelter_blirUnknown() throws TekniskException, FunksjonellException {
+    public void lagVirksomhet_manglerObligatoriskeFelter_blirUnknown() {
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of("uuid"));
         SedDataDto sedData = dataBygger.lag(lagDokumentressurserMedManglendeAdressefelter(false, false, false),
             behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
@@ -481,7 +476,7 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lagVirksomhet_harObligatoriskeFelter_blirSatt() throws TekniskException, FunksjonellException {
+    public void lagVirksomhet_harObligatoriskeFelter_blirSatt() {
         SedDataDto sedData = dataBygger.lag(lagDokumentressurser(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 
         assertThat(sedData.getArbeidsgivendeVirksomheter())

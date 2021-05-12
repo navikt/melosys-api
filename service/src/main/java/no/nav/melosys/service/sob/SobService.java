@@ -5,14 +5,10 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.TemaFactory;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +26,7 @@ public class SobService {
         this.behandlingService = behandlingService;
     }
 
-    private static BehandlingStatusMapper lagBehandlingStatusMapper(String saksnummer, Behandling behandling, String aktørID) throws FunksjonellException {
+    private static BehandlingStatusMapper lagBehandlingStatusMapper(String saksnummer, Behandling behandling, String aktørID) {
         return new BehandlingStatusMapper.Builder()
             .medBehandlingsId(behandling.getId())
             .medSaksnummer(saksnummer)
@@ -39,11 +35,11 @@ public class SobService {
             .build();
     }
 
-    public Saksopplysning finnSakOgBehandlingskjedeListe(String aktørID) throws IntegrasjonException {
+    public Saksopplysning finnSakOgBehandlingskjedeListe(String aktørID) {
         return sakOgBehandlingFasade.finnSakOgBehandlingskjedeListe(aktørID);
     }
 
-    public void sakOgBehandlingOpprettet(long behandlingID) throws TekniskException, FunksjonellException {
+    public void sakOgBehandlingOpprettet(long behandlingID) {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         Fagsak fagsak = behandling.getFagsak();
         sakOgBehandlingFasade.sendBehandlingOpprettet(
@@ -52,12 +48,12 @@ public class SobService {
     }
 
     @Deprecated(forRemoval = true)
-    public void sakOgBehandlingOpprettet(String saksnummer, Long behandlingId, String aktørID) throws IntegrasjonException, FunksjonellException {
+    public void sakOgBehandlingOpprettet(String saksnummer, Long behandlingId, String aktørID) {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingId);
         sakOgBehandlingFasade.sendBehandlingOpprettet(lagBehandlingStatusMapper(saksnummer, behandling, aktørID));
     }
 
-    public void sakOgBehandlingAvsluttet(long behandlingID) throws FunksjonellException, TekniskException {
+    public void sakOgBehandlingAvsluttet(long behandlingID) {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         Fagsak fagsak = behandling.getFagsak();
         sakOgBehandlingFasade.sendBehandlingAvsluttet(
@@ -66,7 +62,7 @@ public class SobService {
     }
 
     @Deprecated(forRemoval = true)
-    public void sakOgBehandlingAvsluttet(String saksnummer, Long behandlingId, String aktørID) throws TekniskException, FunksjonellException {
+    public void sakOgBehandlingAvsluttet(String saksnummer, Long behandlingId, String aktørID) {
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         if (aktørID == null) {
             aktørID = hentAktørIdFraTps(behandling);
@@ -75,7 +71,7 @@ public class SobService {
         sakOgBehandlingFasade.sendBehandlingAvsluttet(lagBehandlingStatusMapper(saksnummer, behandling, aktørID));
     }
 
-    private String hentAktørIdFraTps(Behandling behandling) throws TekniskException, IkkeFunnetException {
+    private String hentAktørIdFraTps(Behandling behandling) {
         PersonDokument personDokument = behandling.hentPersonDokument();
         return persondataFasade.hentAktørIdForIdent(personDokument.fnr);
     }

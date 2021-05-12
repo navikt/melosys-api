@@ -64,20 +64,20 @@ public class DokumentproduksjonsInfoMapper {
             .collect(toSet());
     }
 
-    public String hentMalnavn(Produserbaredokumenter produserbartDokument) throws FunksjonellException {
+    public String hentMalnavn(Produserbaredokumenter produserbartDokument) {
         sjekkOmStøttetDokument(produserbartDokument);
 
         DokumentproduksjonsInfo dokumentproduksjonsInfo = DOKUMENTPRODUKSJONS_INFO_MAP.get(produserbartDokument);
         return dokumentproduksjonsInfo.dokgenMalnavn();
     }
 
-    public DokumentproduksjonsInfo hentDokumentproduksjonsInfo(Produserbaredokumenter produserbartDokument) throws FunksjonellException {
+    public DokumentproduksjonsInfo hentDokumentproduksjonsInfo(Produserbaredokumenter produserbartDokument) {
         sjekkOmStøttetDokument(produserbartDokument);
 
         return DOKUMENTPRODUKSJONS_INFO_MAP.get(produserbartDokument);
     }
 
-    private void sjekkOmStøttetDokument(Produserbaredokumenter produserbartDokument) throws FunksjonellException {
+    private void sjekkOmStøttetDokument(Produserbaredokumenter produserbartDokument) {
         if (!DOKUMENTPRODUKSJONS_INFO_MAP.containsKey(produserbartDokument)) {
             throw new FunksjonellException(format("ProduserbartDokument %s er ikke støttet", produserbartDokument));
         }

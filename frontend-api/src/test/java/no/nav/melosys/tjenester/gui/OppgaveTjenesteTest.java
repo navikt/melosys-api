@@ -11,8 +11,6 @@ import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.*;
@@ -57,7 +55,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void mineOppgaver() throws FunksjonellException, TekniskException, IOException {
+    public void mineOppgaver() throws IOException {
         List<OppgaveDto> oppgaver = new ArrayList<>();
         int oppgaveNr = 1 + defaultEasyRandom().nextInt(2);
         for (int i = 0; i < oppgaveNr; i++) {
@@ -73,7 +71,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void plukkOppgave() throws FunksjonellException, TekniskException, IOException {
+    public void plukkOppgave() throws IOException {
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
@@ -108,7 +106,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void søkOppgaverMedBrukerID() throws FunksjonellException, TekniskException, IOException {
+    public void søkOppgaverMedBrukerID() throws IOException {
         List<Oppgave> oppgaver = defaultEasyRandom().objects(Oppgave.class, 3).collect(Collectors.toList());
         when(oppgaveService.finnOppgaverMedBrukerID(anyString())).thenReturn(oppgaver);
 

@@ -16,9 +16,6 @@ import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -53,7 +50,7 @@ class BrevDataGrunnlagTest {
     private BrevDataGrunnlag dataGrunnlag;
 
     @BeforeEach
-    public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void setUp() {
         AvklartMaritimtArbeid maritimtArbeid = lagAvklartMaritimtArbeid();
         when(avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(anyLong()))
             .thenReturn(Collections.singletonMap("Dunfjæder", maritimtArbeid));
@@ -88,7 +85,7 @@ class BrevDataGrunnlagTest {
     }
 
     @Test
-    void hentBostedsadresse_manglerOppgittOgTpsBostedsadresse_girUnntak() throws FunksjonellException {
+    void hentBostedsadresse_manglerOppgittOgTpsBostedsadresse_girUnntak() {
         person.bostedsadresse = new Bostedsadresse();
         søknad.bosted.oppgittAdresse = new StrukturertAdresse();
         var bostedsgrunnlag = dataGrunnlag.getBostedGrunnlag();
@@ -99,7 +96,7 @@ class BrevDataGrunnlagTest {
     }
 
     @Test
-    void hentBostedsadresse_brukerBostedFraPersonDokument() throws FunksjonellException {
+    void hentBostedsadresse_brukerBostedFraPersonDokument() {
         StrukturertAdresse bostedsadresse = dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
         assertThat(bostedsadresse.gatenavn).isEqualTo("Hjemgata");
         assertThat(bostedsadresse.husnummer).isEqualTo("23");
@@ -109,7 +106,7 @@ class BrevDataGrunnlagTest {
     }
 
     @Test
-    void hentBostedsadresse_oppgittAdresseOverstyrerTPS_nårOppgittAdresseISøknad() throws FunksjonellException {
+    void hentBostedsadresse_oppgittAdresseOverstyrerTPS_nårOppgittAdresseISøknad() {
         StrukturertAdresse oppgittBosted = new StrukturertAdresse();
         oppgittBosted.gatenavn = "HerBorJegGata";
         oppgittBosted.husnummer = "123";
@@ -144,7 +141,7 @@ class BrevDataGrunnlagTest {
     }
 
     @Test
-    void hentArbeidssteder_medMaritimtArbeidUtenAvklartMaritimtArbeid_girTomListe() throws TekniskException {
+    void hentArbeidssteder_medMaritimtArbeidUtenAvklartMaritimtArbeid_girTomListe() {
         MaritimtArbeid maritimtArbeidISøknad = lagMaritimtArbeid();
         this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
 

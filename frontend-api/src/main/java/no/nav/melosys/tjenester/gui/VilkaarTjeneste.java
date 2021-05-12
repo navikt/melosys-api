@@ -4,14 +4,10 @@ import java.util.List;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
+import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import no.nav.melosys.service.vilkaar.VilkaarDto;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
-import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -44,7 +40,7 @@ public class VilkaarTjeneste {
     }
 
     @GetMapping("{behandlingID}")
-    public List<VilkaarDto> hentVilkår(@PathVariable("behandlingID") long behandlingID) throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException {
+    public List<VilkaarDto> hentVilkår(@PathVariable("behandlingID") long behandlingID) {
         List<VilkaarDto> vilkaarDtoListe;
 
         tilgangService.sjekkTilgang(behandlingID);
@@ -56,7 +52,7 @@ public class VilkaarTjeneste {
     @PostMapping("{behandlingID}")
     @ApiOperation(value = "Lagre vilkår")
     public List<VilkaarDto> registrerVilkår(@PathVariable("behandlingID") long behandlingID,
-            @RequestBody List<VilkaarDto> vilkaarDtoer) throws FunksjonellException, TekniskException {
+            @RequestBody List<VilkaarDto> vilkaarDtoer) {
         List<VilkaarDto> vilkaarDtoListe;
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         vilkaarsresultatService.registrerVilkår(behandlingID, vilkaarDtoer);
@@ -67,8 +63,7 @@ public class VilkaarTjeneste {
 
     @PutMapping("{behandlingID}/inngangsvilkaar/overstyr")
     @ApiOperation(value = "Overstyr vurdering av inngangsvilkår til oppfylt")
-    public ResponseEntity<Void> overstyrInngangsvilkårTilOppfylt(@PathVariable("behandlingID") long behandlingID)
-        throws FunksjonellException, TekniskException {
+    public ResponseEntity<Void> overstyrInngangsvilkårTilOppfylt(@PathVariable("behandlingID") long behandlingID) {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(behandlingID);
 

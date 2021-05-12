@@ -3,8 +3,6 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.altinn.AltinnSoeknadService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +28,7 @@ public class OpprettFagsakOgBehandlingFraAltinnSøknadTest {
     private final Prosessinstans prosessinstans = new Prosessinstans();
 
     @BeforeEach
-    public void setup() throws FunksjonellException, TekniskException {
+    public void setup() {
         opprettFagsakOgBehandlingFraAltinnSøknad = new OpprettFagsakOgBehandlingFraAltinnSøknad(altinnSoeknadService);
 
         prosessinstans.setData(ProsessDataKey.MOTTATT_SOKNAD_ID, soeknadID);

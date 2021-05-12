@@ -13,7 +13,6 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.exception.TekniskException;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
@@ -33,7 +32,7 @@ public class SaksbehandlingstidSoknad extends DokgenDto {
     private final String avsenderSoknad;
     private final String avsenderLand;
 
-    public SaksbehandlingstidSoknad(DokgenBrevbestilling brevbestilling) throws TekniskException {
+    public SaksbehandlingstidSoknad(DokgenBrevbestilling brevbestilling) {
         super(brevbestilling);
 
         Behandling behandling = brevbestilling.getBehandling();
@@ -48,7 +47,7 @@ public class SaksbehandlingstidSoknad extends DokgenDto {
         this.avsenderLand = null; //NOTE Mangler inntil vi kan avgjøre om avsender == MYNDIGHET
     }
 
-    public static SaksbehandlingstidSoknad av(DokgenBrevbestilling brevbestilling) throws TekniskException {
+    public static SaksbehandlingstidSoknad av(DokgenBrevbestilling brevbestilling) {
         return new SaksbehandlingstidSoknad(brevbestilling);
     }
 

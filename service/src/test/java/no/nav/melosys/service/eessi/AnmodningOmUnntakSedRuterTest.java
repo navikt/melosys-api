@@ -16,7 +16,6 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.eessi.ruting.AnmodningOmUnntakSedRuter;
 import no.nav.melosys.service.sak.FagsakService;
@@ -54,7 +53,7 @@ public class AnmodningOmUnntakSedRuterTest {
     }
 
     @Test
-    public void finnSakOgBestemRuting_gsakSaksnummerErNull_NySak() throws FunksjonellException {
+    public void finnSakOgBestemRuting_gsakSaksnummerErNull_NySak() {
         Prosessinstans prosessinstans = new Prosessinstans();
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setAktoerId(AKTØR_ID);
@@ -65,7 +64,7 @@ public class AnmodningOmUnntakSedRuterTest {
     }
 
     @Test
-    public void finnSakOgBestemRuting_sakEksistererPeriodeEndret_nyBehandling() throws FunksjonellException {
+    public void finnSakOgBestemRuting_sakEksistererPeriodeEndret_nyBehandling() {
         Fagsak fagsak = opprettFagsak();
         Prosessinstans prosessinstans = new Prosessinstans();
         MelosysEessiMelding melosysEessiMelding = opprettMelosysEessiMelding(NÅ, NESTE_ÅR);
@@ -80,7 +79,7 @@ public class AnmodningOmUnntakSedRuterTest {
     }
 
     @Test
-    public void finnSakOgBestemRuting_sakEksistererPeriodeIkkeEndret_ikkeNyBehandling() throws FunksjonellException {
+    public void finnSakOgBestemRuting_sakEksistererPeriodeIkkeEndret_ikkeNyBehandling() {
         Fagsak fagsak = opprettFagsak();
         Prosessinstans prosessinstans = new Prosessinstans();
         MelosysEessiMelding melosysEessiMelding = opprettMelosysEessiMelding(NÅ, NESTE_ÅR);
@@ -96,7 +95,7 @@ public class AnmodningOmUnntakSedRuterTest {
     }
 
     @Test
-    public void finnSakOgBestemRuting_sakEksistererIkke_nySak() throws FunksjonellException {
+    public void finnSakOgBestemRuting_sakEksistererIkke_nySak() {
         Prosessinstans prosessinstans = new Prosessinstans();
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);

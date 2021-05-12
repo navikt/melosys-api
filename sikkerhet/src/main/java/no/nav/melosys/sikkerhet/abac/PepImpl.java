@@ -38,19 +38,19 @@ public class PepImpl implements Pep {
 
     @Override
     @Abac(bias = Decision.DENY, actions = @Abac.Attr(key = ACTION_ID, value = PepImpl.READ))
-    public void sjekkTilgangTilFnr(String fnr) throws SikkerhetsbegrensningException {
+    public void sjekkTilgangTilFnr(String fnr) {
         abacContext.getRequest().resource(NavAttributter.RESOURCE_FELLES_PERSON_FNR, fnr);
         evaluer(abacContext.getRequest(), fnr);
     }
 
     @Override
     @Abac(bias = Decision.DENY, actions = @Abac.Attr(key = ACTION_ID, value = PepImpl.READ))
-    public void sjekkTilgangTilAktoerId(String aktoerId) throws SikkerhetsbegrensningException {
+    public void sjekkTilgangTilAktoerId(String aktoerId) {
         abacContext.getRequest().resource(NavAttributter.RESOURCE_FELLES_PERSON_AKTOERID_RESOURCE, aktoerId);
         evaluer(abacContext.getRequest(), aktoerId);
     }
 
-    private void evaluer(XacmlRequest request, String id) throws SikkerhetsbegrensningException {
+    private void evaluer(XacmlRequest request, String id) {
         XacmlResponse accessResponse = abacService.evaluate(request);
 
         if (accessResponse.getDecision() != Decision.PERMIT) {

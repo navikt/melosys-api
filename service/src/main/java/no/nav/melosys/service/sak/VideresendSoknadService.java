@@ -12,7 +12,6 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -78,7 +77,7 @@ public class VideresendSoknadService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private void validerBehandlingOgBosted(Behandling behandling, Landkoder bostedsland) throws FunksjonellException, TekniskException {
+    private void validerBehandlingOgBosted(Behandling behandling, Landkoder bostedsland) {
         if (!behandling.erBehandlingAvSøknad()) {
             throw new FunksjonellException("Behandling " + behandling.getId() + " er ikke behandling av en søknad!");
         }

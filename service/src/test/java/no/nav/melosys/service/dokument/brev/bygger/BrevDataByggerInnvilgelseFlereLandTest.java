@@ -15,8 +15,6 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.SaksopplysningerService;
@@ -60,7 +58,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     private BrevDataBygger brevDataByggerInnvilgelse;
 
     @BeforeEach
-    public void setUp() throws FunksjonellException, TekniskException {
+    public void setUp() {
         behandling = new Behandling();
         behandling.setId(1L);
         behandling.getSaksopplysninger().add(lagPersonsopplysning());
@@ -89,7 +87,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
             brevDataByggerA1);
     }
 
-    private BrevDataGrunnlag lagBrevressurser() throws TekniskException {
+    private BrevDataGrunnlag lagBrevressurser() {
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
         return new BrevDataGrunnlag(brevbestilling, null, avklarteVirksomheterService, avklartefaktaService);
     }
@@ -100,7 +98,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     }
 
     @Test
-    public void lag_medSokkel_setterMaritimtypeSokkel() throws FunksjonellException, TekniskException {
+    public void lag_medSokkel_setterMaritimtypeSokkel() {
         Maritimtyper maritimType = Maritimtyper.SOKKEL;
         when(avklartefaktaService.hentMaritimTyper(anyLong())).thenReturn(Set.of(maritimType));
 
@@ -112,7 +110,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     }
 
     @Test
-    public void lag_utenMaritimtArbeid_setterMaritimtypeTilNull() throws FunksjonellException, TekniskException {
+    public void lag_utenMaritimtArbeid_setterMaritimtypeTilNull() {
         when(avklartefaktaService.hentMaritimTyper(anyLong())).thenReturn(Collections.emptySet());
 
         BrevDataGrunnlag brevdataressurser = lagBrevressurser();
@@ -123,7 +121,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     }
 
     @Test
-    public void lag_utpekingAnnetLand_setterTrydemyndighetsland() throws FunksjonellException, TekniskException {
+    public void lag_utpekingAnnetLand_setterTrydemyndighetsland() {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         SedDokument sedDokument = new SedDokument();
         sedDokument.setAvsenderLandkode(Landkoder.DE);
@@ -135,7 +133,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     }
 
     @Test
-    public void lag_innvilgelsesBrev_harBestillingsinformasjon() throws FunksjonellException, TekniskException {
+    public void lag_innvilgelsesBrev_harBestillingsinformasjon() {
         BrevData brevData = brevDataByggerInnvilgelse.lag(lagBrevressurser(), saksbehandler);
 
         assertThat(brevData).isEqualToComparingOnlyGivenFields(brevbestillingDto, "begrunnelseKode", "fritekst");

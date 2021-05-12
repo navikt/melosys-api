@@ -57,7 +57,7 @@ public class VilkaarsresultatServiceTest {
     }
 
     @Test
-    public void registrerVilkår() throws FunksjonellException {
+    public void registrerVilkår() {
         long behandlingID = 1L;
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);

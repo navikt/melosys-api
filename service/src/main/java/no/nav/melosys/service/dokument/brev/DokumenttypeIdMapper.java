@@ -31,7 +31,7 @@ public enum DokumenttypeIdMapper {
             .put(ORIENTERING_VIDERESENDT_SOEKNAD, "000146")
             .build());
 
-    public static String hentID(Produserbaredokumenter produserbartDokument) throws TekniskException {
+    public static String hentID(Produserbaredokumenter produserbartDokument) {
         if (DOKUMENTTYPE_ID_MAP.containsKey(produserbartDokument)) {
             return DOKUMENTTYPE_ID_MAP.get(produserbartDokument);
         } else {

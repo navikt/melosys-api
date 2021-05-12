@@ -6,7 +6,6 @@ import javax.annotation.Nullable;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.A1TypeUtstedelse;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Lovvalgsbestemmelse;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.Periode;
@@ -37,7 +36,7 @@ class UtstedtA1ProducerTest {
     }
 
     @Test
-    void produserMelding_forventMelding() throws TekniskException {
+    void produserMelding_forventMelding() {
         UtstedtA1Melding sendtMelding = utstedtA1Producer.produserMelding(lagMelding());
         assertThat(sendtMelding).isNotNull();
     }

@@ -21,9 +21,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -75,8 +72,7 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
         sendUtland(BucType.LA_BUC_01, prosessinstans, hentVedlegg(prosessinstans));
     }
 
-    private Collection<Vedlegg> hentVedlegg(Prosessinstans prosessinstans) throws FunksjonellException,
-        IntegrasjonException {
+    private Collection<Vedlegg> hentVedlegg(Prosessinstans prosessinstans) {
         final Set<DokumentReferanse> vedleggReferanser = prosessinstans.getData(ProsessDataKey.VEDLEGG_SED,
             new TypeReference<Set<DokumentReferanse>>() {}, Collections.emptySet());
         return eessiService.lagEessiVedlegg(prosessinstans.getBehandling().getFagsak(),
@@ -88,7 +84,7 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
         brevBestiller.bestill(lagBrevBestilling(prosessinstans));
     }
 
-    private DoksysBrevbestilling lagBrevBestilling(Prosessinstans prosessinstans) throws IkkeFunnetException {
+    private DoksysBrevbestilling lagBrevBestilling(Prosessinstans prosessinstans) {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         return new DoksysBrevbestilling.Builder().medProduserbartDokument(Produserbaredokumenter.ANMODNING_UNNTAK)
             .medAvsenderNavn(hentSaksbehandler(prosessinstans))

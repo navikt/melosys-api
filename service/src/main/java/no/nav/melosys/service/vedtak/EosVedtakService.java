@@ -18,7 +18,6 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -111,7 +110,7 @@ public class EosVedtakService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    public void endreVedtak(Behandling behandling, Endretperiode endretperiode, String fritekst, String fritekstSed) throws FunksjonellException, TekniskException {
+    public void endreVedtak(Behandling behandling, Endretperiode endretperiode, String fritekst, String fritekstSed) {
         long behandlingID = behandling.getId();
         log.info("Endrer vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
         avklartefaktaService.leggTilBegrunnelse(behandlingID, Avklartefaktatyper.AARSAK_ENDRING_PERIODE, endretperiode.getKode());
@@ -130,7 +129,7 @@ public class EosVedtakService {
     private void oppdaterBehandlingsresultat(Behandlingsresultat behandlingsresultat,
                                              Vedtakstyper vedtakstype,
                                              String behandlingresultatBegrunnelseFritekst,
-                                             String revurderBegrunnelse) throws FunksjonellException {
+                                             String revurderBegrunnelse) {
         final Behandling behandling = behandlingsresultat.getBehandling();
         if (behandling.erNorgeUtpekt()) {
             behandlingsresultatService.oppdaterUtfallUtpeking(behandling.getId(), GODKJENT);

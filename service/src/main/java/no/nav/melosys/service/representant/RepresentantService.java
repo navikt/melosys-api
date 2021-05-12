@@ -48,7 +48,7 @@ public class RepresentantService {
     }
 
     @Transactional
-    public ValgtRepresentant oppdaterValgtRepresentant(long behandlingID, ValgtRepresentant valgtRepresentant) throws FunksjonellException {
+    public ValgtRepresentant oppdaterValgtRepresentant(long behandlingID, ValgtRepresentant valgtRepresentant) {
         validerValgtRepresentantRequest(valgtRepresentant);
 
         var medlemAvFolketrygden = medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingID)
@@ -68,7 +68,7 @@ public class RepresentantService {
         return valgtRepresentant;
     }
 
-    private void validerValgtRepresentantRequest(ValgtRepresentant valgtRepresentant) throws FunksjonellException {
+    private void validerValgtRepresentantRequest(ValgtRepresentant valgtRepresentant) {
         if (StringUtils.isEmpty(valgtRepresentant.getRepresentantnummer())) {
             throw new FunksjonellException("Representantnummer må være utfylt");
         }
@@ -105,7 +105,7 @@ public class RepresentantService {
         }
     }
 
-    public ValgtRepresentant hentValgtRepresentant(long behandlingID) throws IkkeFunnetException {
+    public ValgtRepresentant hentValgtRepresentant(long behandlingID) {
         var medlemAvFolketrygden = medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke medlemAvFolketrygden for behandlingsresultatID " + behandlingID));
 

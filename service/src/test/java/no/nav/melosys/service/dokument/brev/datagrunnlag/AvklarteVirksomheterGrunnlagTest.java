@@ -7,9 +7,6 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,12 +33,12 @@ class AvklarteVirksomheterGrunnlagTest {
     private AvklarteVirksomheterGrunnlag dataGrunnlag;
 
     @BeforeEach
-    public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void setUp() {
         dataGrunnlag = new AvklarteVirksomheterGrunnlag(mock(Behandling.class), avklarteVirksomheterService);
     }
 
     @Test
-    void hentAlleNorskeVirksomheter_foreventerEnVirksomhet() throws IkkeFunnetException, TekniskException {
+    void hentAlleNorskeVirksomheter_foreventerEnVirksomhet() {
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(lagNorskVirksomhet()));
         Collection<AvklartVirksomhet> norskeVirksomheter = dataGrunnlag.hentAlleNorskeVirksomheterMedAdresse();
         assertThat(norskeVirksomheter).hasSize(1);
@@ -74,7 +71,7 @@ class AvklarteVirksomheterGrunnlagTest {
     }
 
     @Test
-    void hentHovedvirksomhet_medEnNorskVirksomhet_girNorskHovedvirksomhet() throws IkkeFunnetException, TekniskException {
+    void hentHovedvirksomhet_medEnNorskVirksomhet_girNorskHovedvirksomhet() {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(norskVirksomhet));
 
@@ -83,7 +80,7 @@ class AvklarteVirksomheterGrunnlagTest {
     }
 
     @Test
-    void hentHovedvirksomhet_medNorskOgUtenlandskVirksomhet_girNorskHovedvirksomhet() throws IkkeFunnetException, TekniskException {
+    void hentHovedvirksomhet_medNorskOgUtenlandskVirksomhet_girNorskHovedvirksomhet() {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(norskVirksomhet));
 
@@ -96,7 +93,7 @@ class AvklarteVirksomheterGrunnlagTest {
     }
 
     @Test
-    void hentHovedvirksomhet_medKunUtenlandskVirksomhet_girUtenlandskVirksomhet() throws IkkeFunnetException, TekniskException {
+    void hentHovedvirksomhet_medKunUtenlandskVirksomhet_girUtenlandskVirksomhet() {
         AvklartVirksomhet forventetUtenlandskVirksomhet = new AvklartVirksomhet(lagForetakUtland(false));
         when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(forventetUtenlandskVirksomhet));
 
@@ -107,7 +104,7 @@ class AvklarteVirksomheterGrunnlagTest {
     }
 
     @Test
-    void hentBivirksomheter_medEnNorskVirksomhet_girIngenBivirksomheter() throws IkkeFunnetException, TekniskException {
+    void hentBivirksomheter_medEnNorskVirksomhet_girIngenBivirksomheter() {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(norskVirksomhet));
 
@@ -116,7 +113,7 @@ class AvklarteVirksomheterGrunnlagTest {
     }
 
     @Test
-    void hentBivirksomheter_medEnUtenlandskVirksomhet_girIngenBivirksomheter() throws IkkeFunnetException, TekniskException {
+    void hentBivirksomheter_medEnUtenlandskVirksomhet_girIngenBivirksomheter() {
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.emptyList());
 
         AvklartVirksomhet forventetUtenlandskVirksomhet = new AvklartVirksomhet(lagForetakUtland(false));
@@ -127,7 +124,7 @@ class AvklarteVirksomheterGrunnlagTest {
     }
 
     @Test
-    void hentBivirksomheter_medToNorskeVirksomheter_girEnNorskBivirksomhet() throws IkkeFunnetException, TekniskException {
+    void hentBivirksomheter_medToNorskeVirksomheter_girEnNorskBivirksomhet() {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
         when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Arrays.asList(norskVirksomhet, norskVirksomhet));
 
@@ -136,7 +133,7 @@ class AvklarteVirksomheterGrunnlagTest {
     }
 
     @Test
-    void hentHovedvirksomhet_medNorskOgUtenlandskVirksomhet_girUtenlandskBivirksomhet() throws IkkeFunnetException, TekniskException {
+    void hentHovedvirksomhet_medNorskOgUtenlandskVirksomhet_girUtenlandskBivirksomhet() {
         AvklartVirksomhet forventetUtenlandskVirksomhet = new AvklartVirksomhet(lagForetakUtland(false));
 
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();

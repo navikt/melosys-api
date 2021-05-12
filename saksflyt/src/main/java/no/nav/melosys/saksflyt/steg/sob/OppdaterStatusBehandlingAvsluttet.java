@@ -2,8 +2,6 @@ package no.nav.melosys.saksflyt.steg.sob;
 
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.sob.SobService;
 import org.slf4j.Logger;
@@ -29,7 +27,7 @@ public class OppdaterStatusBehandlingAvsluttet implements StegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws FunksjonellException, TekniskException {
+    public void utfør(Prosessinstans prosessinstans) {
         final long behandlingID = prosessinstans.getBehandling().getId();
         sobService.sakOgBehandlingAvsluttet(behandlingID);
         log.info("Oppdatert sob-status til avsluttet for behandling {}", behandlingID);

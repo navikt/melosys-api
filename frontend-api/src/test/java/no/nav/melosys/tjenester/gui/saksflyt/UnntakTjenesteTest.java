@@ -4,8 +4,6 @@ import java.io.IOException;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
 import no.nav.melosys.tjenester.gui.dto.GodkjennUnntaksperiodeDto;
@@ -36,7 +34,7 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void godkjennUnntaksperiode() throws FunksjonellException, TekniskException, IOException {
+    public void godkjennUnntaksperiode() throws IOException {
         GodkjennUnntaksperiodeDto dto = new GodkjennUnntaksperiodeDto(true, "tekst");
         unntakTjeneste.godkjennUnntaksperiode(1L, dto);
         verify(unntaksperiodeService).godkjennPeriode(anyLong(), eq(true), eq("tekst"));
@@ -44,7 +42,7 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void ikkeGodkjennUnntaksperiode() throws FunksjonellException, IOException, TekniskException {
+    public void ikkeGodkjennUnntaksperiode() throws IOException {
         VurderUnntaksperiodeDto dto = new VurderUnntaksperiodeDto(
             Sets.newHashSet(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.name()), null);
         unntakTjeneste.ikkeGodkjennUnntaksperiode(1L, dto);

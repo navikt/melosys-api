@@ -15,8 +15,6 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeid
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.validering.Kontrollfeil;
@@ -45,7 +43,7 @@ public class AnmodningUnntakKontrollServiceTest {
     private AnmodningUnntakKontrollService anmodningUnntakKontrollService;
 
     @BeforeEach
-    public void setup() throws FunksjonellException {
+    public void setup() {
         Saksopplysning persopplysning = new Saksopplysning();
         persopplysning.setType(SaksopplysningType.PERSOPL);
         persopplysning.setDokument(personDokument);
@@ -65,7 +63,7 @@ public class AnmodningUnntakKontrollServiceTest {
     }
 
     @Test
-    public void utførKontroller_manglerBostedsadresse_returnererKode() throws TekniskException, FunksjonellException {
+    public void utførKontroller_manglerBostedsadresse_returnererKode() {
         personDokument.bostedsadresse = new Bostedsadresse();
 
         Collection<Kontrollfeil> resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID);
@@ -75,7 +73,7 @@ public class AnmodningUnntakKontrollServiceTest {
     }
 
     @Test
-    public void utførKontroller_anmodningsperiodeManglerSluttdato_returnererKode() throws TekniskException, FunksjonellException {
+    public void utførKontroller_anmodningsperiodeManglerSluttdato_returnererKode() {
         anmodningsperiode.setTom(null);
 
         Collection<Kontrollfeil> resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID);
@@ -85,7 +83,7 @@ public class AnmodningUnntakKontrollServiceTest {
     }
 
     @Test
-    public void utførKontroller_arbeidsstedManglerFelter_returnererKode() throws FunksjonellException, TekniskException {
+    public void utførKontroller_arbeidsstedManglerFelter_returnererKode() {
         behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidssteder = List.of(new FysiskArbeidssted());
 
         Collection<Kontrollfeil> resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID);
@@ -95,7 +93,7 @@ public class AnmodningUnntakKontrollServiceTest {
     }
 
     @Test
-    public void utførKontroller_foretakUtlandManglerFelter_returnererKode() throws FunksjonellException, TekniskException {
+    public void utførKontroller_foretakUtlandManglerFelter_returnererKode() {
         behandlingsgrunnlagData.foretakUtland = List.of(new ForetakUtland());
 
         Collection<Kontrollfeil> resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID);

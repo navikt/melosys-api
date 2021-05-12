@@ -64,7 +64,7 @@ public class AvklarteMedfolgendeFamilieServiceTest {
     }
 
     @Test
-    public void lagreMedfolgendeFamilieSomAvklartefakta_ikkeOmfattetFamilie_lagresKorrekt() throws FunksjonellException {
+    public void lagreMedfolgendeFamilieSomAvklartefakta_ikkeOmfattetFamilie_lagresKorrekt() {
         AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie =
             new AvklarteMedfolgendeFamilie(Set.of(), Set.of(
                 new IkkeOmfattetFamilie(uuidBarn, OVER_18_AR.getKode(), fritekstBarn),
@@ -110,7 +110,7 @@ public class AvklarteMedfolgendeFamilieServiceTest {
     }
 
     @Test
-    public void lagreMedfolgendeFamilieSomAvklartefakta_omfattetFamilie_lagresKorrekt() throws FunksjonellException {
+    public void lagreMedfolgendeFamilieSomAvklartefakta_omfattetFamilie_lagresKorrekt() {
         AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie =
             new AvklarteMedfolgendeFamilie(
                 Set.of(new OmfattetFamilie(uuidBarn), new OmfattetFamilie(uuidEktefelleSamboer)),
@@ -150,7 +150,7 @@ public class AvklarteMedfolgendeFamilieServiceTest {
     }
 
     @Test
-    public void lagreMedfolgendeFamilieSomAvklartefakta_omfattetFamilieIkkeLagretIBehandlingsgrunnlaget_kasterFeilmelding() throws FunksjonellException {
+    public void lagreMedfolgendeFamilieSomAvklartefakta_omfattetFamilieIkkeLagretIBehandlingsgrunnlaget_kasterFeilmelding() {
         AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie =
             new AvklarteMedfolgendeFamilie(Set.of(new OmfattetFamilie("uuid3")), Set.of());
 
@@ -164,7 +164,7 @@ public class AvklarteMedfolgendeFamilieServiceTest {
     }
 
     @Test
-    public void lagreMedfolgendeFamilieSomAvklartefakta_ikkeOmfattetFamilieIkkeLagretIBehandlingsgrunnlaget_kasterFeilmelding() throws FunksjonellException {
+    public void lagreMedfolgendeFamilieSomAvklartefakta_ikkeOmfattetFamilieIkkeLagretIBehandlingsgrunnlaget_kasterFeilmelding() {
         AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie =
             new AvklarteMedfolgendeFamilie(Set.of(), Set.of(
                 new IkkeOmfattetFamilie("uuid3", OVER_18_AR.getKode(), fritekstBarn)));
@@ -179,7 +179,7 @@ public class AvklarteMedfolgendeFamilieServiceTest {
     }
 
     @Test
-    public void lagreMedfolgendeFamilieSomAvklartefakta_ugyldigBegrunnelseKodeForBarn_kasterFeilmelding() throws FunksjonellException {
+    public void lagreMedfolgendeFamilieSomAvklartefakta_ugyldigBegrunnelseKodeForBarn_kasterFeilmelding() {
         AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie =
             new AvklarteMedfolgendeFamilie(Set.of(), Set.of(
                 new IkkeOmfattetFamilie(uuidBarn, SAMBOER_UTEN_FELLES_BARN.getKode(), fritekstBarn)));
@@ -194,7 +194,7 @@ public class AvklarteMedfolgendeFamilieServiceTest {
     }
 
     @Test
-    public void lagreMedfolgendeFamilieSomAvklartefakta_ugyldigBegrunnelseKodeForEktefelleSamboer_kasterFeilmelding() throws FunksjonellException {
+    public void lagreMedfolgendeFamilieSomAvklartefakta_ugyldigBegrunnelseKodeForEktefelleSamboer_kasterFeilmelding() {
         AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie =
             new AvklarteMedfolgendeFamilie(Set.of(), Set.of(
                 new IkkeOmfattetFamilie(uuidEktefelleSamboer, OVER_18_AR.getKode(), fritekstEktefelleSamboer)));
@@ -209,7 +209,7 @@ public class AvklarteMedfolgendeFamilieServiceTest {
     }
 
     @Test
-    public void lagreMedfolgendeFamilieSomAvklartefakta_ikkeSattBegrunnelseKode_kasterFeilmelding() throws FunksjonellException {
+    public void lagreMedfolgendeFamilieSomAvklartefakta_ikkeSattBegrunnelseKode_kasterFeilmelding() {
         AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie =
             new AvklarteMedfolgendeFamilie(Set.of(), Set.of(
                 new IkkeOmfattetFamilie(uuidBarn, null, fritekstBarn)));

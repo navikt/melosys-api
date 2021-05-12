@@ -6,9 +6,6 @@ import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.service.behandling.BehandlingService;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +38,7 @@ public class SendOrienteringsbrevVideresendSøknadTest {
 
 
     @BeforeEach
-    public void setup() throws IkkeFunnetException {
+    public void setup() {
         steg = new SendOrienteringsbrevVideresendSøknad(behandlingService , brevBestiller);
 
         behandling = new Behandling();
@@ -52,7 +49,7 @@ public class SendOrienteringsbrevVideresendSøknadTest {
     }
 
     @Test
-    public void utfør_brevbestilling_harRiktigBrevTypeOgMottaker() throws FunksjonellException, TekniskException {
+    public void utfør_brevbestilling_harRiktigBrevTypeOgMottaker() {
         steg.utfør(prosessinstans);
         verify(brevBestiller).bestill(captor.capture());
         DoksysBrevbestilling brevbestilling = captor.getValue();

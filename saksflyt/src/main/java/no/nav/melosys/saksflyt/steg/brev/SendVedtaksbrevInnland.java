@@ -9,6 +9,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
+import no.nav.melosys.domain.brev.FastMottaker;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
@@ -18,9 +19,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
-import no.nav.melosys.domain.brev.FastMottaker;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -30,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.brev.FastMottaker.*;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
@@ -37,7 +37,6 @@ import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemm
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.SEND_VEDTAKSBREV_INNLAND;
-import static no.nav.melosys.domain.brev.FastMottaker.*;
 
 
 @Component
@@ -63,7 +62,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         Behandlingsresultattyper behandlingsresultatType = resultat.getType();
@@ -89,8 +88,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     private void sendAvslagsbrev(Behandling behandling,
                                  Behandlingsresultattyper behandlingsresultatType,
                                  String saksbehandler,
-                                 String fritekst)
-        throws FunksjonellException, TekniskException {
+                                 String fritekst) {
         Produserbaredokumenter avslagTypeBruker = (behandlingsresultatType != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL)
             ? AVSLAG_YRKESAKTIV : AVSLAG_MANGLENDE_OPPLYSNINGER;
 
@@ -129,8 +127,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
                                       Behandlingsresultat resultat,
                                       String saksbehandler,
                                       String begrunnelseKode,
-                                      String fritekst)
-        throws FunksjonellException, TekniskException {
+                                      String fritekst) {
         Produserbaredokumenter innvilgelseType = (resultat.erInnvilgelseFlereLand())
             ? INNVILGELSE_YRKESAKTIV_FLERE_LAND : INNVILGELSE_YRKESAKTIV;
 
@@ -152,8 +149,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         brevBestiller.bestill(innvilgelseBrukerOgSkatt);
     }
 
-    private void sendUtpekingsbrev(Behandling behandling, String saksbehandler, String fritekst)
-        throws FunksjonellException, TekniskException {
+    private void sendUtpekingsbrev(Behandling behandling, String saksbehandler, String fritekst) {
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(ORIENTERING_UTPEKING_UTLAND)
             .medAvsenderNavn(saksbehandler)
             .medBehandling(behandling)
@@ -163,8 +159,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         brevBestiller.bestill(brevbestilling);
     }
 
-    private void sendOrienteringTilArbeidsgiver(Behandling behandling, Behandlingsresultat resultat, String saksbehandler)
-        throws FunksjonellException, TekniskException {
+    private void sendOrienteringTilArbeidsgiver(Behandling behandling, Behandlingsresultat resultat, String saksbehandler) {
         final Lovvalgsperiode lovvalgsperiode = resultat.hentValidertLovvalgsperiode();
         // Saker med kun selvstendig næringsdrivende skal ikke sende brevet INNVILGESE_ARBEIDSGIVER
         if (behandling.getFagsak().harAktørMedRolleType(ARBEIDSGIVER)

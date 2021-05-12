@@ -8,7 +8,6 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
@@ -43,7 +42,7 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
         }
     }
 
-    private void oppdaterLovvalgsperiode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) throws FunksjonellException, TekniskException {
+    private void oppdaterLovvalgsperiode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
         if (lovvalgsperiode.erAvslått()) {
             if (lovvalgsperiode.getMedlPeriodeID() != null) {
                 medlPeriodeService.avvisPeriode(lovvalgsperiode.getMedlPeriodeID());
@@ -55,7 +54,7 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
         }
     }
 
-    private void opprettEllerOppdaterMedlPeriode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) throws FunksjonellException, TekniskException {
+    private void opprettEllerOppdaterMedlPeriode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
         if (lovvalgsperiode.getMedlPeriodeID() == null) {
             opprettMedlPeriode(behandling, lovvalgsperiode);
         } else {
@@ -63,7 +62,7 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
         }
     }
 
-    private void opprettMedlPeriode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) throws FunksjonellException, TekniskException {
+    private void opprettMedlPeriode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
         if (lovvalgsperiode.erArtikkel13()) {
             medlPeriodeService.opprettPeriodeForeløpig(lovvalgsperiode, behandling.getId(), !behandling.erBehandlingAvSøknad());
         } else {
@@ -71,7 +70,7 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
         }
     }
 
-    private void oppdaterMedlPeriode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) throws TekniskException {
+    private void oppdaterMedlPeriode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
         if (lovvalgsperiode.erArtikkel13()) {
             medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode, !behandling.erBehandlingAvSøknad());
         } else {

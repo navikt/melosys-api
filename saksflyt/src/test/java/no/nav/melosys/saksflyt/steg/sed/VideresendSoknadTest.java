@@ -18,8 +18,6 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.SedSomBrevService;
@@ -58,7 +56,7 @@ class VideresendSoknadTest {
     private static final String MOTTAKER_INSTITUSJON = "SE:123";
 
     @BeforeEach
-    void setup() throws SikkerhetsbegrensningException, IntegrasjonException {
+    void setup() {
         videresendSoknad = new VideresendSoknad(eessiService, behandlingsresultatService,
             joarkFasade, fagsakService, sedSomBrevService);
 

@@ -3,8 +3,6 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
@@ -34,7 +32,7 @@ public class BrevDataByggerVideresendTest {
     private BrevDataByggerVideresend brevDataByggerVideresend;
 
     @BeforeEach
-    public void setUp() throws FunksjonellException, TekniskException {
+    public void setUp() {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         when(brevDataGrunnlag.getBehandling()).thenReturn(behandling);
@@ -43,7 +41,7 @@ public class BrevDataByggerVideresendTest {
     }
 
     @Test
-    public void lag_medBostedSverigeOgTrygdemyndighetslandSverige_girBrevdata() throws FunksjonellException, TekniskException {
+    public void lag_medBostedSverigeOgTrygdemyndighetslandSverige_girBrevdata() {
         when(landvelgerService.hentBostedsland(eq(1L), any())).thenReturn(Landkoder.SE);
 
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();

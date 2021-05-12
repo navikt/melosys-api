@@ -23,8 +23,6 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -112,7 +110,7 @@ class SendVedtaksbrevInnlandTest {
         return new SendVedtaksbrevInnland(brevBestiller, behandlingService, mockBehandlingsresultatService());
     }
 
-    private static BehandlingService mockBehandlingService() throws IkkeFunnetException {
+    private static BehandlingService mockBehandlingService() {
         Fagsak fagsak = lagFagsak();
         Behandling behandling = lagBehandling(fagsak);
         BehandlingService behandlingService = mock(BehandlingService.class);
@@ -130,8 +128,7 @@ class SendVedtaksbrevInnlandTest {
         return behandlingService;
     }
 
-    private static DokumentSystemService lagDokumentService(BrevDataByggerVelger brevDataByggerVelger)
-        throws TekniskException, IkkeFunnetException {
+    private static DokumentSystemService lagDokumentService(BrevDataByggerVelger brevDataByggerVelger) {
         AvklarteVirksomheterService avklarteVirksomheterService = mock(AvklarteVirksomheterService.class);
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any())).thenReturn(Set.of("123456789"));
         BehandlingService behandlingService = mockBehandlingService();
@@ -148,7 +145,7 @@ class SendVedtaksbrevInnlandTest {
             brevmottakerService, brevDataByggerVelger, mock(BrevdataGrunnlagFactory.class)));
     }
 
-    private static BehandlingsresultatService mockBehandlingsresultatService() throws IkkeFunnetException {
+    private static BehandlingsresultatService mockBehandlingsresultatService() {
         BehandlingsresultatService behandlingsresultatService = mock(BehandlingsresultatService.class);
         Lovvalgsperiode periode = lagLovvalgsperiodeArt16_1();
         Behandlingsresultat behandlingsresultat = lagUgyldigBehandlingsresultat(periode);

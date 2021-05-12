@@ -13,9 +13,6 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdress
 import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.domain.kodeverk.Flyvningstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.BehandlingsgrunnlagGetDto;
@@ -85,7 +82,7 @@ public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentBehandlingsgrunnlag_erSedGrunnlag_validerSchema() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, IOException {
+    void hentBehandlingsgrunnlag_erSedGrunnlag_validerSchema() throws IOException {
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setType(Behandlingsgrunnlagtyper.SED);
 

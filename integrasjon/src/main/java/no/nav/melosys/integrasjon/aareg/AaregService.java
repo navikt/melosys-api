@@ -13,7 +13,6 @@ import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumer;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning;
@@ -45,7 +44,7 @@ public class AaregService implements AaregFasade {
     }
 
     @Override
-    public Saksopplysning finnArbeidsforholdPrArbeidstaker(String ident, LocalDate fom, LocalDate tom) throws TekniskException, SikkerhetsbegrensningException {
+    public Saksopplysning finnArbeidsforholdPrArbeidstaker(String ident, LocalDate fom, LocalDate tom) {
         FinnArbeidsforholdPrArbeidstakerRequest request = new FinnArbeidsforholdPrArbeidstakerRequest();
 
         NorskIdent norskIdent = new NorskIdent();
@@ -72,7 +71,7 @@ public class AaregService implements AaregFasade {
         return finnArbeidsforholdPrArbeidstaker(request);
     }
 
-    private Saksopplysning finnArbeidsforholdPrArbeidstaker(FinnArbeidsforholdPrArbeidstakerRequest request) throws SikkerhetsbegrensningException, IntegrasjonException {
+    private Saksopplysning finnArbeidsforholdPrArbeidstaker(FinnArbeidsforholdPrArbeidstakerRequest request) {
         // Kall til Aa-registret
         FinnArbeidsforholdPrArbeidstakerResponse response;
         try {
@@ -106,7 +105,7 @@ public class AaregService implements AaregFasade {
     }
 
     @Override
-    public Saksopplysning hentArbeidsforholdHistorikk(Long arbeidsforholdsID) throws IntegrasjonException, SikkerhetsbegrensningException, IkkeFunnetException {
+    public Saksopplysning hentArbeidsforholdHistorikk(Long arbeidsforholdsID) {
         HentArbeidsforholdHistorikkRequest request = new HentArbeidsforholdHistorikkRequest();
         request.setArbeidsforholdId(arbeidsforholdsID);
 

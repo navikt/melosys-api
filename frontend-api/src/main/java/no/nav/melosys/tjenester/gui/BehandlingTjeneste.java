@@ -12,7 +12,6 @@ import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.EndreBehandlingstemaService;
@@ -171,7 +170,7 @@ public class BehandlingTjeneste {
         return behandlingDto;
     }
 
-    private BehandlingOppsummeringDto tilOppsummeringDto(Behandling behandling) throws TekniskException {
+    private BehandlingOppsummeringDto tilOppsummeringDto(Behandling behandling) {
         BehandlingOppsummeringDto behandlingOppsummeringDto = new BehandlingOppsummeringDto();
         behandlingOppsummeringDto.setBehandlingsstatus(behandling.getStatus());
         behandlingOppsummeringDto.setBehandlingstype(behandling.getType());

@@ -29,10 +29,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.doksys.Dokumentbestilling;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
@@ -243,8 +240,7 @@ public final class DokumentServiceTest {
         return new DokumentService(behandlingService, brevDataService, dokSysFasade, brevmottakerService, brevdatabyggervelger, lagBrevinput(persondataFasade, avklartefaktaService));
     }
 
-    private BrevdataGrunnlagFactory lagBrevinput(PersondataFasade persondataFasade, AvklartefaktaService avklartefaktaService)
-        throws IkkeFunnetException, TekniskException {
+    private BrevdataGrunnlagFactory lagBrevinput(PersondataFasade persondataFasade, AvklartefaktaService avklartefaktaService) {
         KodeverkRegister kodeverkRegister = mockKodeverkRegister();
         KodeverkService kodeverkService = new KodeverkService(kodeverkRegister);
         EregFasade eregFasade = mockEregFasade();
@@ -333,11 +329,11 @@ public final class DokumentServiceTest {
             utpekingService, vilkaarsresultatRepository, vilkaarsresultatService, persondataFasade, behandlingsgrunnlagService);
     }
 
-    private BrevDataByggerVelger lagBrevdatabyggerVelgerMock() throws FunksjonellException, TekniskException {
+    private BrevDataByggerVelger lagBrevdatabyggerVelgerMock() {
         return lagBrevdatabyggerVelgerMock(new BrevbestillingDto());
     }
 
-    private BrevDataByggerVelger lagBrevdatabyggerVelgerMock(BrevbestillingDto bestillingDto) throws FunksjonellException, TekniskException {
+    private BrevDataByggerVelger lagBrevdatabyggerVelgerMock(BrevbestillingDto bestillingDto) {
         BrevDataByggerInnvilgelse brevDataByggerInnvilgelse = mock(BrevDataByggerInnvilgelse.class);
         BrevDataByggerAvslagArbeidsgiver brevDataByggerAvslagArbeidsgiver = mock(BrevDataByggerAvslagArbeidsgiver.class);
         BrevDataByggerVedlegg brevDataByggerVedlegg = mock(BrevDataByggerVedlegg.class);
@@ -363,7 +359,7 @@ public final class DokumentServiceTest {
         return brevdatabyggervelger;
     }
 
-    private static EregFasade mockEregFasade() throws IkkeFunnetException, IntegrasjonException {
+    private static EregFasade mockEregFasade() {
         EregFasade eregFasade = mock(EregFasade.class);
         OrganisasjonDokument orgDok = new OrganisasjonDokument();
         orgDok.setNavn(Collections.singletonList("Virker av og til"));
@@ -413,14 +409,14 @@ public final class DokumentServiceTest {
         return behandlingsresultatRepository;
     }
 
-    private static PersondataFasade mockPersondataFasade(Aktoer aktør) throws IkkeFunnetException {
+    private static PersondataFasade mockPersondataFasade(Aktoer aktør) {
         PersondataFasade persondataFasade = mock(PersondataFasade.class);
         when(persondataFasade.hentFolkeregisterIdent(anyString()))
             .thenReturn(String.format("IDENT%s", aktør.getAktørId()));
         return persondataFasade;
     }
 
-    private static BehandlingService mockBehandlingService(Behandling behandling) throws IkkeFunnetException {
+    private static BehandlingService mockBehandlingService(Behandling behandling) {
         BehandlingService behandlingService = mock(BehandlingService.class);
         when(behandlingService.hentBehandling(eq(BEHANDLINGSID))).thenReturn(behandling);
         when(behandlingService.hentBehandlingUtenSaksopplysninger(eq(BEHANDLINGSID))).thenReturn(behandling);

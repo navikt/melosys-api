@@ -9,7 +9,6 @@ import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +73,7 @@ public class VilkaarsresultatService {
     }
 
     @Transactional
-    public void registrerVilkår(long behandlingID, List<VilkaarDto> vilkaarDtoer) throws FunksjonellException {
+    public void registrerVilkår(long behandlingID, List<VilkaarDto> vilkaarDtoer) {
         validerVilkår(vilkaarDtoer);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         tømVilkårForBehandlingsresultat(behandlingsresultat);
@@ -96,7 +95,7 @@ public class VilkaarsresultatService {
         vilkaarsresultatRepo.deleteByBehandlingsresultatAndVilkaarNotIn(behandlingsresultat, IMMUTABLE_VILKAAR);
     }
 
-    private void validerVilkår(List<VilkaarDto> vilkaarDtoer) throws FunksjonellException {
+    private void validerVilkår(List<VilkaarDto> vilkaarDtoer) {
 
         final Collection<String> nyeVilkår = vilkaarDtoer.stream().map(VilkaarDto::getVilkaar).collect(Collectors.toList());
 
@@ -111,7 +110,7 @@ public class VilkaarsresultatService {
     public void oppdaterVilkaarsresultat(long behandlingID,
                                          Vilkaar vilkaar,
                                          boolean oppfylt,
-                                         Set<Kodeverk> begrunnelseKoder) throws IkkeFunnetException {
+                                         Set<Kodeverk> begrunnelseKoder) {
         vilkaarsresultatRepo.deleteByBehandlingsresultatId(behandlingID);
         vilkaarsresultatRepo.flush();
         vilkaarsresultatRepo.save(

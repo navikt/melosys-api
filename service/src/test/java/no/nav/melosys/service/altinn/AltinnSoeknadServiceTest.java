@@ -14,8 +14,6 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.altinn.SoknadMottakConsumer;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
@@ -65,8 +63,7 @@ class AltinnSoeknadServiceTest {
     }
 
     @Test
-    void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksisterer_verifiserFagsakBehandlingOgBehandlinggrunnlagOpprettet()
-        throws FunksjonellException, TekniskException {
+    void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksisterer_verifiserFagsakBehandlingOgBehandlinggrunnlagOpprettet() {
         final Fagsak fagsak = lagFagsak();
         final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
 
@@ -88,8 +85,7 @@ class AltinnSoeknadServiceTest {
     }
 
     @Test
-    void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksistererArbeidsgiverOffentlig_verifiserBehandlingstemaArbeidsEttLandØvrig()
-        throws FunksjonellException, TekniskException {
+    void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksistererArbeidsgiverOffentlig_verifiserBehandlingstemaArbeidsEttLandØvrig() {
         final Fagsak fagsak = lagFagsak();
         final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
 
@@ -109,8 +105,7 @@ class AltinnSoeknadServiceTest {
     }
 
     @Test
-    void opprettSakFraAltinnSøknad_rådgivningsfirmaErFullmektig_lagerFullmektig()
-        throws FunksjonellException, TekniskException {
+    void opprettSakFraAltinnSøknad_rådgivningsfirmaErFullmektig_lagerFullmektig() {
         final Fagsak fagsak = lagFagsak();
         final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
 
@@ -127,8 +122,7 @@ class AltinnSoeknadServiceTest {
     }
 
     @Test
-    void opprettSakFraAltinnSøknad_fullmaktUtenRådgivningsfirma_lagerArbeidsgiverSomFullmektig()
-        throws FunksjonellException, TekniskException {
+    void opprettSakFraAltinnSøknad_fullmaktUtenRådgivningsfirma_lagerArbeidsgiverSomFullmektig() {
         final Fagsak fagsak = lagFagsak();
         final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
         søknad.getInnhold().getFullmakt().setFullmektigVirksomhetsnummer(null);
@@ -147,8 +141,7 @@ class AltinnSoeknadServiceTest {
     }
 
     @Test
-    void opprettSakFraAltinnSøknad_kontaktpersonNavnFinnes_lagerKontaktopplysninger()
-        throws FunksjonellException, TekniskException {
+    void opprettSakFraAltinnSøknad_kontaktpersonNavnFinnes_lagerKontaktopplysninger() {
         final Fagsak fagsak = lagFagsak();
         final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
         søknad.getInnhold().getArbeidsgiver().getKontaktperson().setKontaktpersonNavn("Ola");
@@ -167,8 +160,7 @@ class AltinnSoeknadServiceTest {
     }
 
     @Test
-    void opprettSakFraAltinnSøknad_arbeidstakerHarUtenlandskIDnummer_utenlandskPersonIdBlirSatt()
-        throws FunksjonellException, TekniskException {
+    void opprettSakFraAltinnSøknad_arbeidstakerHarUtenlandskIDnummer_utenlandskPersonIdBlirSatt() {
         final String utenlandskPersonId = "utenlandskPersonId";
         final Fagsak fagsak = lagFagsak();
         final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
@@ -184,8 +176,7 @@ class AltinnSoeknadServiceTest {
     }
 
     @Test
-    void opprettFagsakOgBehandlingFraAltinnSøknad_virksomhetLagresSomAvklartFakta()
-        throws FunksjonellException, TekniskException {
+    void opprettFagsakOgBehandlingFraAltinnSøknad_virksomhetLagresSomAvklartFakta() {
         final Fagsak fagsak = lagFagsak();
         final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
 

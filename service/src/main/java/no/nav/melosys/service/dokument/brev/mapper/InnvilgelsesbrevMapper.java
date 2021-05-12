@@ -18,14 +18,14 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.MaritimtArbeid;
-import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
-import no.nav.melosys.domain.person.familie.IkkeOmfattetBarn;
-import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
+import no.nav.melosys.domain.person.familie.IkkeOmfattetBarn;
+import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
@@ -51,7 +51,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             entry(Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER, BarnAvslagBegrunnelseKode.MANGLER_OPPLYSNINGER));
 
     @Override
-    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevdata) throws JAXBException, SAXException, TekniskException {
+    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevdata) throws JAXBException, SAXException {
         BrevDataInnvilgelse brevDataInnvilgelse = (BrevDataInnvilgelse) brevdata;
 
         VedleggMapper vedleggMapper = new VedleggMapper(behandling, resultat);
@@ -63,7 +63,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataInnvilgelse brevdata) throws TekniskException {
+    private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataInnvilgelse brevdata) {
         Fag fag = new Fag();
 
         fag.setBehandlingstype(BehandlingstypeKodeMapper.hentBehandlingstypeKode(behandling));
@@ -157,7 +157,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         return fag;
     }
 
-    private VedtaksTypeKode tilVedtaksTypeKode(Vedtakstyper vedtakstype) throws TekniskException {
+    private VedtaksTypeKode tilVedtaksTypeKode(Vedtakstyper vedtakstype) {
         if (vedtakstype == null) {
             return null;
         }
@@ -184,7 +184,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             .withBarnInnvilgelse(barnInnvilgelse).build();
     }
 
-    private BarnIkkeOmfattetAvNorskTrygdListeType hentBarnIkkeOmfattetAvNorskTrygd(AvklarteMedfolgendeBarn avklarteMedfolgendeBarn) throws TekniskException {
+    private BarnIkkeOmfattetAvNorskTrygdListeType hentBarnIkkeOmfattetAvNorskTrygd(AvklarteMedfolgendeBarn avklarteMedfolgendeBarn) {
         List<BarnAvslagType> barnAvslag = new ArrayList<>();
         for (IkkeOmfattetBarn medfolgendeBarn : avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd) {
             barnAvslag.add(lagBarnAvslagType(medfolgendeBarn));
@@ -197,13 +197,13 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         return BarnInnvilgelseType.builder().withBarnOmfattetAvNorskTrygd(omfattetBarn.getSammensattNavn()).build();
     }
 
-    private BarnAvslagType lagBarnAvslagType(IkkeOmfattetBarn ikkeOmfattetBarn) throws TekniskException {
+    private BarnAvslagType lagBarnAvslagType(IkkeOmfattetBarn ikkeOmfattetBarn) {
         return BarnAvslagType.builder()
             .withBarnAvslagBegrunnelse(tilBarnAvslagBegrunnelseKode(ikkeOmfattetBarn.begrunnelse))
             .withBarnIkkeOmfattetAvNorskTrygd(ikkeOmfattetBarn.sammensattNavn).build();
     }
 
-    private BarnAvslagBegrunnelseKode tilBarnAvslagBegrunnelseKode(Medfolgende_barn_begrunnelser begrunnelse) throws TekniskException {
+    private BarnAvslagBegrunnelseKode tilBarnAvslagBegrunnelseKode(Medfolgende_barn_begrunnelser begrunnelse) {
         if (begrunnelse == null) {
             return null;
         } else if (BARN_AVSLAG_BEGRUNNELSE_KODE_MAP.containsKey(begrunnelse)) {

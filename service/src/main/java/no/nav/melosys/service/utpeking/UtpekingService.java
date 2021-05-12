@@ -72,7 +72,7 @@ public class UtpekingService {
     }
 
     @Transactional
-    public Collection<Utpekingsperiode> lagreUtpekingsperioder(long behandlingID, Collection<Utpekingsperiode> utpekingsperioder) throws FunksjonellException {
+    public Collection<Utpekingsperiode> lagreUtpekingsperioder(long behandlingID, Collection<Utpekingsperiode> utpekingsperioder) {
         List<Utpekingsperiode> eksisterende = utpekingsperiodeRepository.findByBehandlingsresultat_Id(behandlingID);
 
         for (Utpekingsperiode utpekingsperiode : eksisterende) {
@@ -140,7 +140,7 @@ public class UtpekingService {
     }
 
     @Transactional
-    public void avvisUtpeking(long behandlingID, UtpekingAvvis utpekingAvvis) throws FunksjonellException, TekniskException {
+    public void avvisUtpeking(long behandlingID, UtpekingAvvis utpekingAvvis) {
         validerAvslagUtpeking(utpekingAvvis);
 
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
@@ -161,7 +161,7 @@ public class UtpekingService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private void validerAvslagUtpeking(UtpekingAvvis utpekingAvvis) throws FunksjonellException {
+    private void validerAvslagUtpeking(UtpekingAvvis utpekingAvvis) {
         if (StringUtils.isEmpty(utpekingAvvis.getBegrunnelse())) {
             throw new FunksjonellException("Du må oppgi en begrunnelse for å kunne avslå en utpeking");
         }
@@ -170,14 +170,14 @@ public class UtpekingService {
         }
     }
 
-    private void validerUtpekingsperiode(Utpekingsperiode utpekingsperiode) throws FunksjonellException {
+    private void validerUtpekingsperiode(Utpekingsperiode utpekingsperiode) {
         if (utpekingsperiode.getTom() == null) {
             throw new FunksjonellException("Utpekingsperioden mangler sluttdato");
         }
     }
 
     @Transactional
-    public void oppdaterSendtUtland(Utpekingsperiode utpekingsperiode) throws FunksjonellException, TekniskException {
+    public void oppdaterSendtUtland(Utpekingsperiode utpekingsperiode) {
 
         if (utpekingsperiode.getId() == null) {
             throw new TekniskException("Forsøk på å oppdatere en ikke-persistert utpekingsperiode");
