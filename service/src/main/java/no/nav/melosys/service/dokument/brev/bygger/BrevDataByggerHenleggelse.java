@@ -8,9 +8,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RegistreringsInfo;
 import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
@@ -27,7 +25,7 @@ public class BrevDataByggerHenleggelse implements BrevDataBygger {
     }
 
     @Override
-    public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, IntegrasjonException {
+    public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) {
         Instant forsendelseMottattTidspunkt = hentInitierendeJournalpostMottattTidspunktFraFørsteBehandling(dataGrunnlag.getBehandling());
 
         BrevDataMottattDato brevData = new BrevDataMottattDato(saksbehandler, brevbestillingDto);
@@ -35,7 +33,7 @@ public class BrevDataByggerHenleggelse implements BrevDataBygger {
         return brevData;
     }
 
-    private Instant hentInitierendeJournalpostMottattTidspunktFraFørsteBehandling(Behandling behandling) throws FunksjonellException, IntegrasjonException {
+    private Instant hentInitierendeJournalpostMottattTidspunktFraFørsteBehandling(Behandling behandling) {
         final Fagsak fagsak = behandling.getFagsak();
         String initierendeJournalpostId = fagsak.getBehandlinger()
             .stream()

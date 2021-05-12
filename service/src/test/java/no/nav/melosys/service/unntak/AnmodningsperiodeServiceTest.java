@@ -57,7 +57,7 @@ class AnmodningsperiodeServiceTest {
     }
 
     @Test
-    void lagreAnmodningsperioder_ingenSvarRegistrert_mottarLagredePerioder() throws FunksjonellException {
+    void lagreAnmodningsperioder_ingenSvarRegistrert_mottarLagredePerioder() {
         long behandlingID = 2;
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now().plusYears(2), Landkoder.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1,
             null, Landkoder.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, Trygdedekninger.FULL_DEKNING_EOSFO);
@@ -71,7 +71,7 @@ class AnmodningsperiodeServiceTest {
     }
 
     @Test
-    void lagreAnmodningsperioder_svarErRegistrert_forventFunksjonellException() throws FunksjonellException {
+    void lagreAnmodningsperioder_svarErRegistrert_forventFunksjonellException() {
         long behandlingID = 2;
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now().plusYears(2), Landkoder.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1,
             null, Landkoder.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, Trygdedekninger.FULL_DEKNING_EOSFO);
@@ -85,7 +85,7 @@ class AnmodningsperiodeServiceTest {
     }
 
     @Test
-    void lagreAnmodningsperiodeSvar_svarErInnvilgelse_lagrerAnmodningsperiodeSvar() throws FunksjonellException {
+    void lagreAnmodningsperiodeSvar_svarErInnvilgelse_lagrerAnmodningsperiodeSvar() {
         long anmodningsperiodeID = 2;
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now().plusYears(2), Landkoder.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1,
             null, Landkoder.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, Trygdedekninger.FULL_DEKNING_EOSFO);
@@ -101,7 +101,7 @@ class AnmodningsperiodeServiceTest {
     }
 
     @Test
-    void lagreAnmodningsperiodeSvar_svarErDelvisInnvilgelseIngenPeriode_forventFunksjonellException() throws FunksjonellException {
+    void lagreAnmodningsperiodeSvar_svarErDelvisInnvilgelseIngenPeriode_forventFunksjonellException() {
         long anmodningsperiodeID = 2;
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now().plusYears(2), Landkoder.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1,
             null, Landkoder.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, Trygdedekninger.FULL_DEKNING_EOSFO);
@@ -117,7 +117,7 @@ class AnmodningsperiodeServiceTest {
     }
 
     @Test
-    void lagreAnmodningsperiodeSvar_svarErAvslag_ingenFeil() throws FunksjonellException {
+    void lagreAnmodningsperiodeSvar_svarErAvslag_ingenFeil() {
         long anmodningsperiodeID = 2;
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now().plusYears(2), Landkoder.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1,
             null, Landkoder.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, Trygdedekninger.FULL_DEKNING_EOSFO);
@@ -133,7 +133,7 @@ class AnmodningsperiodeServiceTest {
     }
 
     @Test
-    void lagreAnmodningsperiodeSvar_svarManglerType_forventFunksjonellException() throws FunksjonellException {
+    void lagreAnmodningsperiodeSvar_svarManglerType_forventFunksjonellException() {
         long anmodningsperiodeID = 2;
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now().plusYears(2), Landkoder.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1,
             null, Landkoder.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, Trygdedekninger.FULL_DEKNING_EOSFO);
@@ -147,7 +147,7 @@ class AnmodningsperiodeServiceTest {
     }
 
     @Test
-    void lagreAnmodningsperiodeSvar_ugyldigPeriodeForDelvisInnvilgelse_forventFunksjonellException() throws FunksjonellException {
+    void lagreAnmodningsperiodeSvar_ugyldigPeriodeForDelvisInnvilgelse_forventFunksjonellException() {
         long anmodningsperiodeID = 2;
         AnmodningsperiodeSvar svar = new AnmodningsperiodeSvar();
         svar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.DELVIS_INNVILGELSE);
@@ -161,7 +161,7 @@ class AnmodningsperiodeServiceTest {
     }
 
     @Test
-    void oppdaterAnmodningsperiodeSendtForBehandling_verifiserOppdatert() throws FunksjonellException {
+    void oppdaterAnmodningsperiodeSendtForBehandling_verifiserOppdatert() {
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
         when(anmodningsperiodeRepository.findByBehandlingsresultatId(anyLong())).thenReturn(Collections.singletonList(anmodningsperiode));
         anmodningsperiodeService.oppdaterAnmodningsperiodeSendtForBehandling(1L);

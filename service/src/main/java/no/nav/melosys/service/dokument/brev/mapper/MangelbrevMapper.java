@@ -31,13 +31,13 @@ public class MangelbrevMapper implements BrevDataMapper {
     private static final int FRIST_UKER = 3;
 
     @Override
-    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException, TekniskException {
+    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException {
         Fag fag = mapFag(brevData, behandling);
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    public Fag mapFag(BrevData brevData, Behandling behandling) throws TekniskException {
+    public Fag mapFag(BrevData brevData, Behandling behandling) {
         if (brevData.fritekst == null) {
             throw new IntegrasjonException("Mangelbrev mangler informasjon om manglende opplysninger.");
         }

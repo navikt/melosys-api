@@ -13,8 +13,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
@@ -49,7 +47,7 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) {
         String aktørID = hentAktørID(prosessinstans);
         String arbeidsgiver = prosessinstans.getData(ARBEIDSGIVER);
         String representant = prosessinstans.getData(REPRESENTANT);
@@ -78,7 +76,7 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
         log.info("Opprettet fagsak {} med behandling {}", fagsak.getSaksnummer(), behandling.getId());
     }
 
-    private String hentAktørID(Prosessinstans prosessinstans) throws IkkeFunnetException {
+    private String hentAktørID(Prosessinstans prosessinstans) {
         String aktørID = prosessinstans.getData(AKTØR_ID);
         if (StringUtils.isNotEmpty(aktørID)) {
             return aktørID;

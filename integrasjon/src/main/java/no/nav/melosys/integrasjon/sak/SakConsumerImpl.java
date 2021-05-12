@@ -14,9 +14,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
 import no.nav.melosys.integrasjon.felles.FeilResponseDto;
 import no.nav.melosys.integrasjon.felles.JacksonObjectMapperProvider;
@@ -35,7 +33,7 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
     private final boolean erSystem;
     private final WebTarget target;
 
-    SakConsumerImpl(String endpointUrl, boolean erSystem) throws IntegrasjonException {
+    SakConsumerImpl(String endpointUrl, boolean erSystem) {
         this.erSystem = erSystem;
         try {
             SSLContext sslContext = SSLContext.getDefault();
@@ -53,7 +51,7 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
     }
 
     @Override
-    public SakDto hentSak(Long id) throws FunksjonellException, TekniskException {
+    public SakDto hentSak(Long id) {
         try {
             return target
                 .path(Long.toString(id))
@@ -69,7 +67,7 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
     }
 
     @Override
-    public List<SakDto> finnSaker(SakSearchRequest sakSearchRequest) throws FunksjonellException, TekniskException {
+    public List<SakDto> finnSaker(SakSearchRequest sakSearchRequest) {
         try {
             return target
                 .queryParam("aktoerId", sakSearchRequest.getAktørId())
@@ -89,7 +87,7 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
     }
 
     @Override
-    public SakDto opprettSak(SakDto sakDto) throws FunksjonellException, TekniskException {
+    public SakDto opprettSak(SakDto sakDto) {
         sakDto.setOpprettetAv(getUserID());
         try (Response response = target
             .request()
@@ -103,7 +101,7 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
     }
 
     @Override
-    public void håndterEvFeil(Response response) throws FunksjonellException, TekniskException {
+    public void håndterEvFeil(Response response) {
         if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) return;
         FeilResponseDto feilResponseDto = response.readEntity(FeilResponseDto.class);
         log.error("Feil oppstod. Uuid={}, Response Kode={}, Feilmelding={}", feilResponseDto.getUuid(), response.getStatus(), feilResponseDto.getFeilmelding());

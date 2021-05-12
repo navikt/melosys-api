@@ -17,8 +17,6 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
@@ -68,7 +66,7 @@ public class AvklarteVirksomheterService {
         return organisasjonsnumre;
     }
 
-    public Set<String> hentNorskeArbeidsgivendeOrgnumre(Behandling behandling) throws TekniskException {
+    public Set<String> hentNorskeArbeidsgivendeOrgnumre(Behandling behandling) {
         ArbeidsforholdDokument arbDok = behandling.hentArbeidsforholdDokument();
         Set<String> arbeidsgivendeOrgnumre = arbDok.hentOrgnumre();
         BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
@@ -79,36 +77,33 @@ public class AvklarteVirksomheterService {
         return arbeidsgivendeOrgnumre;
     }
 
-    public List<AvklartVirksomhet> hentNorskeSelvstendigeForetak(Behandling behandling) throws IkkeFunnetException, TekniskException {
+    public List<AvklartVirksomhet> hentNorskeSelvstendigeForetak(Behandling behandling) {
         return hentNorskeSelvstendigeForetak(behandling, this::utfyllManglendeAdressefelter);
     }
 
-    public List<AvklartVirksomhet> hentNorskeSelvstendigeForetak(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer)
-        throws IkkeFunnetException, TekniskException {
+    public List<AvklartVirksomhet> hentNorskeSelvstendigeForetak(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer) {
         Set<String> selvstendigeForetakOrgnumre = hentNorskeSelvstendigeForetakOrgnumre(behandling);
         return registerOppslagService.hentOrganisasjoner(selvstendigeForetakOrgnumre).stream()
             .map(org -> new AvklartVirksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), adressekonverterer.apply(org), Yrkesaktivitetstyper.SELVSTENDIG))
             .collect(Collectors.toList());
     }
 
-    public List<AvklartVirksomhet> hentNorskeArbeidsgivere(Behandling behandling) throws IkkeFunnetException, TekniskException {
+    public List<AvklartVirksomhet> hentNorskeArbeidsgivere(Behandling behandling) {
         return hentNorskeArbeidsgivere(behandling, this::utfyllManglendeAdressefelter);
     }
 
-    public List<AvklartVirksomhet> hentNorskeArbeidsgivere(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer)
-        throws IkkeFunnetException, TekniskException {
+    public List<AvklartVirksomhet> hentNorskeArbeidsgivere(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer) {
         Set<String> arbeidsgivendeOrgnumre = hentNorskeArbeidsgivendeOrgnumre(behandling);
         return registerOppslagService.hentOrganisasjoner(arbeidsgivendeOrgnumre).stream()
             .map(org -> new AvklartVirksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), adressekonverterer.apply(org), Yrkesaktivitetstyper.LOENNET_ARBEID))
             .collect(Collectors.toList());
     }
 
-    public List<AvklartVirksomhet> hentAlleNorskeVirksomheter(Behandling behandling) throws IkkeFunnetException, TekniskException {
+    public List<AvklartVirksomhet> hentAlleNorskeVirksomheter(Behandling behandling) {
         return hentAlleNorskeVirksomheter(behandling, this::utfyllManglendeAdressefelter);
     }
 
-    public List<AvklartVirksomhet> hentAlleNorskeVirksomheter(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer)
-        throws IkkeFunnetException, TekniskException {
+    public List<AvklartVirksomhet> hentAlleNorskeVirksomheter(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer) {
         List<AvklartVirksomhet> norskeVirksomheter = hentNorskeArbeidsgivere(behandling, adressekonverterer);
         norskeVirksomheter.addAll(hentNorskeSelvstendigeForetak(behandling, adressekonverterer));
         return norskeVirksomheter;
@@ -116,7 +111,7 @@ public class AvklarteVirksomheterService {
 
     @Transactional
     public void lagreVirksomheterSomAvklartefakta(List<String> virksomhetIDer,
-                                                  Long behandlingID) throws FunksjonellException, TekniskException {
+                                                  Long behandlingID) {
         validerVirksomhetIDerGyldige(virksomhetIDer, behandlingID);
 
         avklartefaktaService.slettAvklarteFakta(behandlingID, VIRKSOMHET);
@@ -126,12 +121,12 @@ public class AvklarteVirksomheterService {
         }
     }
 
-    public void lagreVirksomhetSomAvklartfakta(String virksomhetID, Long behandlingID) throws FunksjonellException {
+    public void lagreVirksomhetSomAvklartfakta(String virksomhetID, Long behandlingID) {
         avklartefaktaService.leggTilAvklarteFakta(behandlingID, VIRKSOMHET, VIRKSOMHET.getKode(), virksomhetID, Avklartefakta.VALGT_FAKTA);
     }
 
     private void validerVirksomhetIDerGyldige(List<String> virksomhetIDer,
-                                                 Long behandlingID) throws FunksjonellException, TekniskException {
+                                                 Long behandlingID) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         for (String virksomhetID : virksomhetIDer) {
             if (!erVirksomhetIDGyldig(virksomhetID, behandling)) {
@@ -140,7 +135,7 @@ public class AvklarteVirksomheterService {
         }
     }
 
-    private boolean erVirksomhetIDGyldig(String virksomhetID, Behandling behandling) throws TekniskException {
+    private boolean erVirksomhetIDGyldig(String virksomhetID, Behandling behandling) {
         BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         return erVirksomhetForetakUtland(virksomhetID, behandlingsgrunnlagData)
             || erVirksomhetSelvstendigForetakEllerLagtInnManuelt(virksomhetID, behandlingsgrunnlagData)
@@ -155,7 +150,7 @@ public class AvklarteVirksomheterService {
         return behandlingsgrunnlagData.hentAlleOrganisasjonsnumre().contains(orgnr);
     }
 
-    private boolean erVirksomhetArbeidNorge(String orgnr, Behandling behandling) throws TekniskException {
+    private boolean erVirksomhetArbeidNorge(String orgnr, Behandling behandling) {
         return behandling.hentArbeidsforholdDokument().hentOrgnumre().contains(orgnr);
     }
 

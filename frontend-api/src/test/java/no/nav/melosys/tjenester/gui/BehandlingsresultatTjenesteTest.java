@@ -9,8 +9,6 @@ import no.nav.melosys.domain.VedtakMetadata;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsresultatDto;
@@ -58,7 +56,7 @@ public class BehandlingsresultatTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void hentBehandlingsresultat_medBehandlingsid_forventerBehandlingsresultatDto() throws FunksjonellException, TekniskException, IOException {
+    public void hentBehandlingsresultat_medBehandlingsid_forventerBehandlingsresultatDto() throws IOException {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(Behandlingsresultattyper.IKKE_FASTSATT);
         behandlingsresultat.setBegrunnelseFritekst("Bruker har fått flyskrekk");

@@ -6,7 +6,6 @@ import java.util.concurrent.TimeoutException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.JsonSchemaValidator;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.dto.UtstedtA1Melding;
 import org.slf4j.Logger;
@@ -37,7 +36,7 @@ public class UtstedtA1Producer {
         this.topicName = topicName;
     }
 
-    public UtstedtA1Melding produserMelding(UtstedtA1Melding melding) throws TekniskException {
+    public UtstedtA1Melding produserMelding(UtstedtA1Melding melding) {
         valider(melding);
         ListenableFuture<SendResult<String, UtstedtA1Melding>> future = kafkaTemplate.send(topicName, melding);
 
@@ -60,7 +59,7 @@ public class UtstedtA1Producer {
         }
     }
 
-    private void valider(UtstedtA1Melding melding) throws TekniskException {
+    private void valider(UtstedtA1Melding melding) {
         new JsonSchemaValidator(objectMapper).valider(melding, A1_UTSTEDT_SCHEMA);
     }
 }

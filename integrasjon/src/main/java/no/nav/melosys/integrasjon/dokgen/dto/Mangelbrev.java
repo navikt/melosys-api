@@ -10,8 +10,6 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
@@ -35,7 +33,7 @@ public class Mangelbrev extends DokgenDto {
     private final String manglerInfoFritekst;
     private final String innledningFritekst;
 
-    protected Mangelbrev(MangelbrevBrevbestilling brevbestilling) throws TekniskException, IkkeFunnetException {
+    protected Mangelbrev(MangelbrevBrevbestilling brevbestilling) {
         super(brevbestilling);
         Fagsak fagsak = brevbestilling.getBehandling().getFagsak();
 

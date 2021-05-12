@@ -30,7 +30,7 @@ class BostedGrunnlagTest {
     }
 
     @Test
-    void hentBostedsadresse_forventStrukturertAdresse() throws FunksjonellException {
+    void hentBostedsadresse_forventStrukturertAdresse() {
         soeknad.bosted = new Bosted();
         soeknad.bosted.oppgittAdresse = new StrukturertAdresse();
         soeknad.bosted.oppgittAdresse.landkode = "SE";
@@ -43,7 +43,7 @@ class BostedGrunnlagTest {
     }
 
     @Test
-    void hentBostedsadresse_ingenAdresse_forventException() throws  FunksjonellException {
+    void hentBostedsadresse_ingenAdresse_forventException() {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> bostedGrunnlag.hentBostedsadresse())
             .withMessageContaining("finnes ikke eller mangler landkode");

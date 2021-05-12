@@ -7,9 +7,6 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.aktoer.AktoerService;
@@ -41,7 +38,7 @@ public class AktoerTjenesteTest extends JsonSchemaTestParent {
     private AktoerTjeneste aktoerTjeneste;
 
     @BeforeEach
-    public void setUp() throws IkkeFunnetException {
+    public void setUp() {
         aktoerTjeneste = new AktoerTjeneste(tilgangService, aktoerService, fagsakService);
     }
 
@@ -78,7 +75,7 @@ public class AktoerTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public final void hentAktoer_tilAktoerDto() throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
+    public final void hentAktoer_tilAktoerDto() {
         when(fagsakService.hentFagsak("MELTEST-1")).thenReturn(lagFagsak());
 
         Aktoer aktoerRep = new Aktoer();

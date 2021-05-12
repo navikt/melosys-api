@@ -4,58 +4,56 @@ import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 
 public interface OppgaveFasade {
 
     /**
      * Ferdigstiller en opprettet oppgave i Oppgave
      */
-    void ferdigstillOppgave(String oppgaveId) throws TekniskException, FunksjonellException;
+    void ferdigstillOppgave(String oppgaveId);
 
     /**
      * Finner aktive og utildelte oppgaver som svarer til noen gitt kriterier.
      * Oppgave sorterer oppgavene stigende etter frist.
      */
-    List<Oppgave> finnUtildelteOppgaverEtterFrist(String behandlingstype) throws TekniskException, FunksjonellException;
+    List<Oppgave> finnUtildelteOppgaverEtterFrist(String behandlingstype);
 
-    void oppdaterOppgave(String oppgaveID, OppgaveOppdatering oppgaveOppdatering) throws FunksjonellException, TekniskException;
+    void oppdaterOppgave(String oppgaveID, OppgaveOppdatering oppgaveOppdatering);
 
     /**
      * Finner Oppgaver basert på ansvarlig saksbehandler
      * Oppgave sorterer oppgavene stigende etter frist.
      */
-    Set<Oppgave> finnOppgaverMedAnsvarlig(String ansvarligId) throws TekniskException, FunksjonellException;
+    Set<Oppgave> finnOppgaverMedAnsvarlig(String ansvarligId);
 
     /**
      * Finner oppgaver relatert til en bruker.
      * Oppgaver sorteres stigende etter frist.
      */
-    List<Oppgave> finnOppgaverMedBrukerID(String aktørID) throws FunksjonellException, TekniskException;
+    List<Oppgave> finnOppgaverMedBrukerID(String aktørID);
 
     /**
      * Finner alle oppgaver med gitt saksnummer.
      */
-    List<Oppgave> finnOppgaverMedSaksnummer(String saksnummer) throws FunksjonellException, TekniskException;
+    List<Oppgave> finnOppgaverMedSaksnummer(String saksnummer);
 
     /**
      * Hent oppgave fra Oppgave på en gitt oppgaveId
      */
-    Oppgave hentOppgave(String oppgaveId) throws TekniskException, FunksjonellException;
+    Oppgave hentOppgave(String oppgaveId);
 
     /**
      * Oppretter en oppgave for Melosys i Oppgave og returnerer en unik oppgaveId
      */
-    String opprettOppgave(Oppgave oppgave) throws FunksjonellException, TekniskException;
+    String opprettOppgave(Oppgave oppgave);
 
     /**
      * Oppretter en oppgave for NAV Viken i Oppgave og returnerer en unik oppgaveId
      */
-    String opprettSensitivOppgave(Oppgave oppgave) throws FunksjonellException, TekniskException;
+    String opprettSensitivOppgave(Oppgave oppgave);
 
     /**
      * Legger tilbake en oppgave i Oppgave
      */
-    void leggTilbakeOppgave(String oppgaveId) throws FunksjonellException, TekniskException;
+    void leggTilbakeOppgave(String oppgaveId);
 }

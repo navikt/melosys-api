@@ -10,21 +10,14 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevAdresse;
 import no.nav.melosys.service.brev.BrevbestillingService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import no.nav.melosys.tjenester.gui.dto.brev.BrevmalDto;
-import no.nav.melosys.tjenester.gui.dto.brev.BrevmalFeltDto;
-import no.nav.melosys.tjenester.gui.dto.brev.FeltType;
-import no.nav.melosys.tjenester.gui.dto.brev.FeltvalgDto;
-import no.nav.melosys.tjenester.gui.dto.brev.HentMuligeMottakereRequestDto;
-import no.nav.melosys.tjenester.gui.dto.brev.MottakerAdresseDto;
-import no.nav.melosys.tjenester.gui.dto.brev.MottakerDto;
 import no.nav.melosys.service.dokument.MuligeMottakereDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.tjenester.gui.dto.brev.*;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -57,15 +50,14 @@ public class BrevbestillingTjeneste {
 
     @GetMapping(value = "/tilgjengelige-maler/{behandlingID}", produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Henter alle tilgjengelige brevmaler for en behandling", response = BrevmalDto.class, responseContainer = "List")
-    public List<BrevmalDto> hentTilgjengeligeMaler(@PathVariable long behandlingID) throws FunksjonellException, TekniskException {
+    public List<BrevmalDto> hentTilgjengeligeMaler(@PathVariable long behandlingID) {
         return byggBrevmalListe(behandlingID);
     }
 
     @PostMapping(value = "/mulige-mottakere/{behandlingID}", produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Henter alle mulige mottakere for valgt dokumenttype, og organisasjonsnummer dersom hovedmottaker ikke er bruker")
     public MuligeMottakereDto hentTilgjengeligeMottakere(@PathVariable long behandlingID,
-                                                         @RequestBody HentMuligeMottakereRequestDto hentMuligeMottakereRequestDto)
-        throws FunksjonellException, TekniskException {
+                                                         @RequestBody HentMuligeMottakereRequestDto hentMuligeMottakereRequestDto) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         return brevbestillingService.hentMuligeMottakere(hentMuligeMottakereRequestDto.produserbartdokument(), behandling, hentMuligeMottakereRequestDto.orgnr());
     }
@@ -73,8 +65,7 @@ public class BrevbestillingTjeneste {
     @PostMapping(value = "pdf/brev/utkast/{behandlingID}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_PDF_VALUE)
     @ApiOperation(value = "Produser utkast")
     public ResponseEntity<byte[]> produserUtkast(@PathVariable long behandlingID,
-                                                 @RequestBody BrevbestillingDto brevbestillingDto)
-        throws FunksjonellException, TekniskException {
+                                                 @RequestBody BrevbestillingDto brevbestillingDto) {
 
         byte[] pdf = brevbestillingService.produserUtkast(behandlingID, brevbestillingDto);
         return new ResponseEntity<>(pdf, genPdfHeaders("utkast_" + behandlingID, false), HttpStatus.OK);
@@ -83,11 +74,11 @@ public class BrevbestillingTjeneste {
     @PostMapping("opprett/{behandlingID}")
     @ApiOperation(value = "Produser brev gjennom melosys-dokgen")
     public void produserBrev(@PathVariable("behandlingID") long behandlingID,
-                             @RequestBody BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
+                             @RequestBody BrevbestillingDto brevbestillingDto) {
         brevbestillingService.produserBrev(behandlingID, brevbestillingDto);
     }
 
-    private List<BrevmalDto> byggBrevmalListe(long behandlingId) throws FunksjonellException, TekniskException {
+    private List<BrevmalDto> byggBrevmalListe(long behandlingId) {
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentMuligeProduserbaredokumenter(behandling);
 
@@ -110,8 +101,7 @@ public class BrevbestillingTjeneste {
         return maler;
     }
 
-    private BrevmalDto lagBrevMalDtoForForventetSaksbehandlingstid(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, Behandling behandling)
-        throws FunksjonellException, TekniskException {
+    private BrevmalDto lagBrevMalDtoForForventetSaksbehandlingstid(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, Behandling behandling) {
         var builder = new MottakerDto.Builder()
             .medType(BRUKER_ELLER_BRUKERS_FULLMEKTIG)
             .medRolle(hovedMottaker);
@@ -124,8 +114,7 @@ public class BrevbestillingTjeneste {
             .build();
     }
 
-    private BrevmalDto lagBrevMalDtoForMangelbrev(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, Behandling behandling)
-        throws FunksjonellException, TekniskException {
+    private BrevmalDto lagBrevMalDtoForMangelbrev(Produserbaredokumenter produserbartdokument, Aktoersroller hovedMottaker, Behandling behandling) {
         List<MottakerDto> mottakere = new ArrayList<>();
         List<FeltvalgDto> feltvalgDtos = new ArrayList<>();
 
@@ -173,8 +162,7 @@ public class BrevbestillingTjeneste {
             .build();
     }
 
-    private void leggTilAdresseOgFeilmelding(MottakerDto.Builder builder, Produserbaredokumenter produserbaredokumenter, Aktoersroller aktoersroller, Behandling behandling)
-        throws TekniskException, FunksjonellException {
+    private void leggTilAdresseOgFeilmelding(MottakerDto.Builder builder, Produserbaredokumenter produserbaredokumenter, Aktoersroller aktoersroller, Behandling behandling) {
         try {
             var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(produserbaredokumenter, aktoersroller, behandling);
             if (aktoersroller == Aktoersroller.BRUKER && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {

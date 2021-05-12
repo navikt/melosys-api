@@ -9,8 +9,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +39,7 @@ class OpprettAvgiftsoppgaveTest {
     private Behandlingsresultat behandlingsresultat;
 
     @BeforeEach
-    public void setUp() throws FunksjonellException {
+    public void setUp() {
         opprettAvgiftsoppgave = new OpprettAvgiftsoppgave(behandlingsresultatService, oppgaveService);
         behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
@@ -49,7 +47,7 @@ class OpprettAvgiftsoppgaveTest {
     }
 
     @Test
-    void utfør_oppretterRiktigOppgave() throws FunksjonellException, TekniskException {
+    void utfør_oppretterRiktigOppgave() {
         behandlingsresultat.getLovvalgsperioder().add(lagLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2));
         opprettAvgiftsoppgave.utfør(lagProsessinstans());
 
@@ -63,7 +61,7 @@ class OpprettAvgiftsoppgaveTest {
     }
 
     @Test
-    void utfør_avslag_oppretterIkkeOppgave() throws FunksjonellException, TekniskException {
+    void utfør_avslag_oppretterIkkeOppgave() {
         Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.AVSLAATT);
         behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
@@ -74,7 +72,7 @@ class OpprettAvgiftsoppgaveTest {
     }
 
     @Test
-    void utfør_art13_oppretterIkkeOppgave() throws FunksjonellException, TekniskException {
+    void utfør_art13_oppretterIkkeOppgave() {
         behandlingsresultat.getLovvalgsperioder().add(lagLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A));
         opprettAvgiftsoppgave.utfør(lagProsessinstans());
 

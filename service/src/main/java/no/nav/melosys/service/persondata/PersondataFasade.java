@@ -4,21 +4,17 @@ import java.time.LocalDate;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.person.Informasjonsbehov;
-import no.nav.melosys.exception.*;
 
 public interface PersondataFasade {
-    String hentAktørIdForIdent(String ident) throws IkkeFunnetException;
+    String hentAktørIdForIdent(String ident);
 
-    String hentFolkeregisterIdent(String ident) throws IkkeFunnetException;
+    String hentFolkeregisterIdent(String ident);
 
-    Saksopplysning hentPerson(String ident, Informasjonsbehov behov) throws IkkeFunnetException,
-        IntegrasjonException, SikkerhetsbegrensningException;
+    Saksopplysning hentPerson(String ident, Informasjonsbehov behov);
 
-    Saksopplysning hentPersonhistorikk(String ident, LocalDate dato) throws IkkeFunnetException,
-        SikkerhetsbegrensningException, TekniskException;
+    Saksopplysning hentPersonhistorikk(String ident, LocalDate dato);
 
-    String hentSammensattNavn(String fnr) throws FunksjonellException, IntegrasjonException;
+    String hentSammensattNavn(String fnr);
 
-    boolean harStrengtFortroligAdresse(String fnr) throws IkkeFunnetException, IntegrasjonException,
-        SikkerhetsbegrensningException;
+    boolean harStrengtFortroligAdresse(String fnr);
 }

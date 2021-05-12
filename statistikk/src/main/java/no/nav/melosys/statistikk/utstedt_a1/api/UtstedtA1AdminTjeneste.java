@@ -7,9 +7,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.VedtakMetadataRepository;
 import no.nav.melosys.service.AdminTjeneste;
 import no.nav.melosys.statistikk.utstedt_a1.service.UtstedtA1Service;
@@ -50,7 +47,7 @@ public class UtstedtA1AdminTjeneste implements AdminTjeneste {
     public ResponseEntity<Void> publiserMelding(
         @RequestHeader(API_KEY_HEADER) String apiKey,
         @PathVariable long behandlingID
-    ) throws FunksjonellException, TekniskException {
+    ) {
         validerApikey(apiKey);
         utstedtA1Service.sendMeldingOmUtstedtA1(behandlingID);
         return ResponseEntity.ok().build();
@@ -60,7 +57,7 @@ public class UtstedtA1AdminTjeneste implements AdminTjeneste {
     public ResponseEntity<Map<String, Set<Long>>> publiserEksisterendeBehandlinger(
         @RequestHeader(API_KEY_HEADER) String apiKey,
         @RequestParam("fom") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fom
-    ) throws SikkerhetsbegrensningException {
+    ) {
         validerApikey(apiKey);
         return ResponseEntity.ok(
             publiserEksisterendeBehandlinger(vedtakMetadataRepository

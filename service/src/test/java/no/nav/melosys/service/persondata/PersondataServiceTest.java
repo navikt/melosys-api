@@ -37,13 +37,13 @@ class PersondataServiceTest {
     }
 
     @Test
-    void hentAktørID_finnes_verifiserAktørId() throws IkkeFunnetException {
+    void hentAktørID_finnes_verifiserAktørId() {
         when(pdlConsumer.hentIdenter(anyString())).thenReturn(lagIdentliste());
         assertThat(persondataService.hentAktørIdForIdent("123")).isEqualTo("11111");
     }
 
     @Test
-    void hentAktørID_finnesIkke_feiler() throws IkkeFunnetException {
+    void hentAktørID_finnesIkke_feiler() {
         when(pdlConsumer.hentIdenter("321")).thenReturn(lagTomIdentliste());
         assertThatExceptionOfType(IkkeFunnetException.class)
             .isThrownBy(() -> persondataService.hentAktørIdForIdent("321"))
@@ -51,13 +51,13 @@ class PersondataServiceTest {
     }
 
     @Test
-    void hentFolkeregisterIdent_finnes_verifiserIdent() throws IkkeFunnetException {
+    void hentFolkeregisterIdent_finnes_verifiserIdent() {
         when(pdlConsumer.hentIdenter(anyString())).thenReturn(lagIdentliste());
         assertThat(persondataService.hentFolkeregisterIdent("123")).isEqualTo("22222");
     }
 
     @Test
-    void hentFolkeregisterIdent_finnesIkke_feiler() throws IkkeFunnetException {
+    void hentFolkeregisterIdent_finnesIkke_feiler() {
         when(pdlConsumer.hentIdenter(anyString())).thenReturn(lagTomIdentliste());
         assertThatExceptionOfType(IkkeFunnetException.class)
             .isThrownBy(() -> persondataService.hentFolkeregisterIdent("123"))

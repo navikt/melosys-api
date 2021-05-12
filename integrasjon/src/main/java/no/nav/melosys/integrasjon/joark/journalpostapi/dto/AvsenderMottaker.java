@@ -78,7 +78,7 @@ public class AvsenderMottaker {
         }
     }
 
-    public static AvsenderMottaker.IdType tilAvsenderMottakerIdType(Avsendertyper avsendertype) throws TekniskException {
+    public static AvsenderMottaker.IdType tilAvsenderMottakerIdType(Avsendertyper avsendertype) {
         switch (avsendertype) {
             case PERSON:
                 return AvsenderMottaker.IdType.FNR;

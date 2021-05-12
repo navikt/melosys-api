@@ -5,9 +5,6 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlService;
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
@@ -54,25 +51,25 @@ public class MedlPeriodeService {
         this.medlemskapsperiodeRepository = medlemskapsperiodeRepository;
     }
 
-    public Saksopplysning hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom) throws TekniskException {
+    public Saksopplysning hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom) {
         return medlService.hentPeriodeListe(fnr, fom, tom);
     }
 
-    public void opprettPeriodeForeløpig(PeriodeOmLovvalg periodeOmLovvalg, Long behandlingID, boolean erSed) throws TekniskException, FunksjonellException {
+    public void opprettPeriodeForeløpig(PeriodeOmLovvalg periodeOmLovvalg, Long behandlingID, boolean erSed) {
         log.info("Oppretter foreløpig periode i MEDL for behandling {}", behandlingID);
         String fnr = hentFnr(behandlingID);
         Long medlPeriodeID = medlService.opprettPeriodeForeløpig(fnr, periodeOmLovvalg, hentKildedokumenttype(erSed));
         lagreMedlPeriodeId(medlPeriodeID, periodeOmLovvalg, behandlingID);
     }
 
-    public void opprettPeriodeUnderAvklaring(PeriodeOmLovvalg periodeOmLovvalg, Long behandlingID, boolean erSed) throws TekniskException, FunksjonellException {
+    public void opprettPeriodeUnderAvklaring(PeriodeOmLovvalg periodeOmLovvalg, Long behandlingID, boolean erSed) {
         log.info("Oppretter periode under avklaring i MEDL for behandling {}", behandlingID);
         String fnr = hentFnr(behandlingID);
         Long medlPeriodeID = medlService.opprettPeriodeUnderAvklaring(fnr, periodeOmLovvalg, hentKildedokumenttype(erSed));
         lagreMedlPeriodeId(medlPeriodeID, periodeOmLovvalg, behandlingID);
     }
 
-    public void opprettPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, Long behandlingID, boolean erSed) throws TekniskException, FunksjonellException {
+    public void opprettPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, Long behandlingID, boolean erSed) {
         String fnr = hentFnr(behandlingID);
         log.info("Oppretter endelig periode i MEDL for behandling {}", behandlingID);
         Long medlPeriodeID = medlService.opprettPeriodeEndelig(fnr, lovvalgsperiode, hentKildedokumenttype(erSed));
@@ -80,7 +77,7 @@ public class MedlPeriodeService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void opprettPeriodeEndelig(long behandlingId, Medlemskapsperiode medlemskapsperiode) throws FunksjonellException {
+    public void opprettPeriodeEndelig(long behandlingId, Medlemskapsperiode medlemskapsperiode) {
         String fnr = hentFnr(behandlingId);
         log.info("Oppretter endelig medlemskapsperiode i MEDL for behandling {}", behandlingId);
         Long medlPeriodeId = medlService.opprettPeriodeEndelig(fnr, medlemskapsperiode, KildedokumenttypeMedl.HENV_SOKNAD);
@@ -92,32 +89,32 @@ public class MedlPeriodeService {
         lagreMedlPeriodeId(medlPeriodeId, medlemskapsperiode);
     }
 
-    public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, boolean erSed) throws TekniskException {
+    public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, boolean erSed) {
         log.info("Oppdaterer MEDL-periode {} til status endelig", lovvalgsperiode.getMedlPeriodeID());
         medlService.oppdaterPeriodeEndelig(lovvalgsperiode, hentKildedokumenttype(erSed));
     }
 
-    public void oppdaterPeriodeForeløpig(Lovvalgsperiode lovvalgsperiode, boolean erSed) throws TekniskException {
+    public void oppdaterPeriodeForeløpig(Lovvalgsperiode lovvalgsperiode, boolean erSed) {
         log.info("Oppdaterer MEDL-periode {} til status foreløpig", lovvalgsperiode.getMedlPeriodeID());
         medlService.oppdaterPeriodeForeløpig(lovvalgsperiode, hentKildedokumenttype(erSed));
     }
 
-    public void avvisPeriode(Long medlPeriodeID) throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public void avvisPeriode(Long medlPeriodeID) {
         log.info("Avviser MEDL-periode {} med status avvist", medlPeriodeID);
         avvisPeriode(medlPeriodeID, StatusaarsakMedl.AVVIST);
     }
 
-    public void avvisPeriodeFeilregistrert(long medlPeriodeID) throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public void avvisPeriodeFeilregistrert(long medlPeriodeID) {
         log.info("Avviser MEDL-periode {} med status feilregistrert", medlPeriodeID);
         avvisPeriode(medlPeriodeID, StatusaarsakMedl.FEILREGISTRERT);
     }
 
-    public void avvisPeriodeOpphørt(long medlPeriodeID) throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public void avvisPeriodeOpphørt(long medlPeriodeID) {
         log.info("Avviser MEDL-periode {} med status opphørt", medlPeriodeID);
         avvisPeriode(medlPeriodeID, StatusaarsakMedl.OPPHORT);
     }
 
-    public void avsluttTidligerMedlPeriode(Fagsak fagsak) throws FunksjonellException {
+    public void avsluttTidligerMedlPeriode(Fagsak fagsak) {
         Behandling tidligereBehandling = fagsak.getTidligsteInaktiveBehandling();
 
         if (tidligereBehandling != null) {
@@ -129,26 +126,26 @@ public class MedlPeriodeService {
         }
     }
 
-    private void avvisPeriode(long medlPeriodeId, StatusaarsakMedl statusaarsakMedl) throws SikkerhetsbegrensningException, IkkeFunnetException {
+    private void avvisPeriode(long medlPeriodeId, StatusaarsakMedl statusaarsakMedl) {
         medlService.avvisPeriode(medlPeriodeId, statusaarsakMedl);
     }
 
-    private String hentFnr(Long behandlingID) throws TekniskException, IkkeFunnetException {
+    private String hentFnr(Long behandlingID) {
         Behandling behandling = behandlingsresultatService.hentBehandlingsresultat(behandlingID).getBehandling();
         Fagsak fagsak = behandling.getFagsak();
         Aktoer bruker = fagsak.hentBruker();
         return persondataFasade.hentFolkeregisterIdent(bruker.getAktørId());
     }
 
-    private Optional<Lovvalgsperiode> finnLovvalgsperiode(Behandling behandling) throws IkkeFunnetException {
+    private Optional<Lovvalgsperiode> finnLovvalgsperiode(Behandling behandling) {
         return hentBehandlingsresultat(behandling).getLovvalgsperioder().stream().findFirst();
     }
 
-    private Behandlingsresultat hentBehandlingsresultat(Behandling behandling) throws IkkeFunnetException {
+    private Behandlingsresultat hentBehandlingsresultat(Behandling behandling) {
         return behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
     }
 
-    private void lagreMedlPeriodeId(Long medlPeriodeID, PeriodeOmLovvalg periodeOmLovvalg, long behandlingID) throws FunksjonellException {
+    private void lagreMedlPeriodeId(Long medlPeriodeID, PeriodeOmLovvalg periodeOmLovvalg, long behandlingID) {
         if (medlPeriodeID == null) {
             throw new FunksjonellException(FEIL_VED_OPPDATERING_MEDL + behandlingID);
         }

@@ -12,7 +12,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -81,7 +80,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
         return sendUtland(BucType.LA_BUC_02, prosessinstans);
     }
 
-    private DoksysBrevbestilling lagBrevBestilling(Prosessinstans prosessinstans) throws IkkeFunnetException {
+    private DoksysBrevbestilling lagBrevBestilling(Prosessinstans prosessinstans) {
         Long behandlingID = prosessinstans.getBehandling().getId();
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         return new DoksysBrevbestilling.Builder().medProduserbartDokument(ATTEST_A1)
@@ -117,7 +116,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
         return behandlingsresultat.hentValidertLovvalgsperiode().getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1;
     }
 
-    private BucType avklarBucType(Behandling behandling) throws IkkeFunnetException, TekniskException {
+    private BucType avklarBucType(Behandling behandling) {
         return behandlingsresultatService.hentBehandlingsresultat(behandling.getId())
             .getLovvalgsperioder().stream().findFirst()
             .map(Lovvalgsperiode::getBestemmelse)

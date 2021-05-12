@@ -8,7 +8,6 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -37,7 +36,7 @@ class FerdigstillJournalpostSedTest {
     private static final String TITTEL = "tittel123";
 
     @BeforeEach
-    public void setUp() throws IkkeFunnetException {
+    public void setUp() {
         ferdigstillJournalpostSed = new FerdigstillJournalpostSed(joarkFasade, persondataFasade);
         when(persondataFasade.hentFolkeregisterIdent(AKTØR_ID)).thenReturn(BRUKER_ID);
     }

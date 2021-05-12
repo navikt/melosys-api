@@ -89,7 +89,7 @@ class RepresentantServiceTest {
     }
 
     @Test
-    void oppdaterValgtRepresentant_selvbetalendeIngenTidligereInfo_lagresKorrekt() throws FunksjonellException {
+    void oppdaterValgtRepresentant_selvbetalendeIngenTidligereInfo_lagresKorrekt() {
         var medlemAvFolketrygden = new MedlemAvFolketrygden();
         medlemAvFolketrygden.setFastsattTrygdeavgift(new FastsattTrygdeavgift());
         when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(anyLong())).thenReturn(java.util.Optional.of(medlemAvFolketrygden));
@@ -115,7 +115,7 @@ class RepresentantServiceTest {
     }
 
     @Test
-    void oppdaterValgtRepresentant_selvbetalendeTidligereInfoErSelvbetalende_lagresKorrekt() throws FunksjonellException {
+    void oppdaterValgtRepresentant_selvbetalendeTidligereInfoErSelvbetalende_lagresKorrekt() {
         var aktoer = lagAktoer(Aktoersroller.BRUKER, 1L);
         var fastsattTrygdeavgift = new FastsattTrygdeavgift();
         fastsattTrygdeavgift.setBetalesAv(aktoer);
@@ -144,7 +144,7 @@ class RepresentantServiceTest {
     }
 
     @Test
-    void oppdaterValgtRepresentant_selvbetalendeTidligereInfoErIkkeSelvbetalende_lagresKorrekt() throws FunksjonellException {
+    void oppdaterValgtRepresentant_selvbetalendeTidligereInfoErIkkeSelvbetalende_lagresKorrekt() {
         var aktoer = lagAktoer(Aktoersroller.REPRESENTANT_TRYGDEAVGIFT, 1L);
         var fastsattTrygdeavgift = new FastsattTrygdeavgift();
         fastsattTrygdeavgift.setBetalesAv(aktoer);
@@ -173,7 +173,7 @@ class RepresentantServiceTest {
     }
 
     @Test
-    void oppdaterValgtRepresentant_ikkeSelvbetalendeIkkeTidligereInfo_lagresKorrekt() throws FunksjonellException {
+    void oppdaterValgtRepresentant_ikkeSelvbetalendeIkkeTidligereInfo_lagresKorrekt() {
         var saksnummerCaptor = ArgumentCaptor.forClass(String.class);
         var orgnrCaptor = ArgumentCaptor.forClass(String.class);
         var kontaktNavnCaptor = ArgumentCaptor.forClass(String.class);
@@ -206,7 +206,7 @@ class RepresentantServiceTest {
     }
 
     @Test
-    void oppdaterValgtRepresentant_ikkeSelvbetalendeTidligereInfoErSelvbetalende_lagresKorrekt() throws FunksjonellException {
+    void oppdaterValgtRepresentant_ikkeSelvbetalendeTidligereInfoErSelvbetalende_lagresKorrekt() {
         var saksnummerCaptor = ArgumentCaptor.forClass(String.class);
         var orgnrCaptor = ArgumentCaptor.forClass(String.class);
         var kontaktNavnCaptor = ArgumentCaptor.forClass(String.class);
@@ -243,7 +243,7 @@ class RepresentantServiceTest {
     }
 
     @Test
-    void oppdaterValgtRepresentant_ikkeSelvbetalendeTidligereInfoErIkkeSelvbetalende_lagresKorrekt() throws FunksjonellException {
+    void oppdaterValgtRepresentant_ikkeSelvbetalendeTidligereInfoErIkkeSelvbetalende_lagresKorrekt() {
         var saksnummerCaptor = ArgumentCaptor.forClass(String.class);
         var orgnrCaptor = ArgumentCaptor.forClass(String.class);
         var kontaktNavnCaptor = ArgumentCaptor.forClass(String.class);
@@ -296,7 +296,7 @@ class RepresentantServiceTest {
     }
 
     @Test
-    void hentValgtRepresentant_selvbetalende_hentesKorrekt() throws FunksjonellException {
+    void hentValgtRepresentant_selvbetalende_hentesKorrekt() {
         var fastsattTrygdeavgift = new FastsattTrygdeavgift();
         fastsattTrygdeavgift.setRepresentantNr("repnr");
         var medlemAvFolketrygden = new MedlemAvFolketrygden();
@@ -313,7 +313,7 @@ class RepresentantServiceTest {
     }
 
     @Test
-    void hentValgtRepresentant_ikkeSelvbetalendeKontaktpersonSatt_hentesKorrekt() throws FunksjonellException {
+    void hentValgtRepresentant_ikkeSelvbetalendeKontaktpersonSatt_hentesKorrekt() {
         var fagsak = lagFagsak();
         var aktoer = new Aktoer();
         aktoer.setOrgnr("orgnr");
@@ -339,7 +339,7 @@ class RepresentantServiceTest {
     }
 
     @Test
-    void hentValgtRepresentant_ikkeSelvbetalendeKontaktpersonIkkeSatt_hentesKorrekt() throws FunksjonellException {
+    void hentValgtRepresentant_ikkeSelvbetalendeKontaktpersonIkkeSatt_hentesKorrekt() {
         var fagsak = lagFagsak();
         var aktoer = new Aktoer();
         aktoer.setOrgnr("orgnr");

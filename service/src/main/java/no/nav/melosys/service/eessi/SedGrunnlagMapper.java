@@ -18,7 +18,7 @@ public class SedGrunnlagMapper {
         throw new IllegalStateException("Utility");
     }
 
-    public static SedGrunnlag tilSedGrunnlag(SedGrunnlagDto sedGrunnlagDto) throws FunksjonellException {
+    public static SedGrunnlag tilSedGrunnlag(SedGrunnlagDto sedGrunnlagDto) {
         SedGrunnlag sedGrunnlag = new SedGrunnlag();
 
         sedGrunnlag.personOpplysninger = tilPersonopplysninger(sedGrunnlagDto.getUtenlandskIdent());
@@ -49,7 +49,7 @@ public class SedGrunnlagMapper {
             .collect(Collectors.toList());
     }
 
-    private static Periode tilPeriode(List<Lovvalgsperiode> lovvalgsperioder) throws FunksjonellException {
+    private static Periode tilPeriode(List<Lovvalgsperiode> lovvalgsperioder) {
         if (CollectionUtils.isEmpty(lovvalgsperioder)) {
             return new Periode();
         }

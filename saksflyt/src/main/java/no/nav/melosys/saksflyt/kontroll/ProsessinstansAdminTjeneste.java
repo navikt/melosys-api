@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.impl.BehandleProsessinstansDelegate;
 import no.nav.melosys.saksflyt.kontroll.dto.HentProsessinstansDto;
@@ -42,7 +41,7 @@ public class ProsessinstansAdminTjeneste implements AdminTjeneste {
 
     @GetMapping("/feilede")
     public ResponseEntity<List<HentProsessinstansDto>> hentFeiledeProsessinstanser(
-        @RequestHeader(API_KEY_HEADER) String apiKey) throws SikkerhetsbegrensningException {
+        @RequestHeader(API_KEY_HEADER) String apiKey) {
 
         validerApikey(apiKey);
         return ResponseEntity.ok(prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET).stream()
@@ -52,7 +51,7 @@ public class ProsessinstansAdminTjeneste implements AdminTjeneste {
 
     @PostMapping("/feilede/restart")
     public ResponseEntity<List<HentProsessinstansDto>> restartAlleFeiledeProsessinstanser(
-        @RequestHeader(API_KEY_HEADER) String apiKey) throws SikkerhetsbegrensningException {
+        @RequestHeader(API_KEY_HEADER) String apiKey) {
         validerApikey(apiKey);
         Collection<Prosessinstans> prosessinstanser = prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET);
         restartProsessinstanser(prosessinstanser);
@@ -62,7 +61,7 @@ public class ProsessinstansAdminTjeneste implements AdminTjeneste {
 
     @PostMapping("/restart")
     public ResponseEntity<Void> restartProsessinstans(@RequestHeader(API_KEY_HEADER) String apiKey,
-                                                      @RequestBody RestartProsessinstanserRequest request) throws FunksjonellException {
+                                                      @RequestBody RestartProsessinstanserRequest request) {
         validerApikey(apiKey);
 
         log.info("Forsøker å restarte prosessinstanser {}", request.getUuids());

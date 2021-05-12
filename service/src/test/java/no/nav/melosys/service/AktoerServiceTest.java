@@ -9,7 +9,6 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AktoerRepository;
 import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.aktoer.AktoerService;
@@ -49,7 +48,7 @@ class AktoerServiceTest {
     }
 
     @Test
-    void lagEllerOppdater_nyAktoer() throws FunksjonellException {
+    void lagEllerOppdater_nyAktoer() {
         doReturn(aktør).when(aktørRepository).save(any());
         AktoerDto aktoerDto = spy(lagAktoerDto());
         Fagsak fagsak = lagFagsak();
@@ -65,7 +64,7 @@ class AktoerServiceTest {
     }
 
     @Test
-    void lagEllerOppdater_oppdaterAktoer() throws FunksjonellException {
+    void lagEllerOppdater_oppdaterAktoer() {
         doReturn(aktør).when(aktørRepository).save(any());
 
         AktoerDto aktoerDto = lagAktoerDto();
@@ -114,7 +113,7 @@ class AktoerServiceTest {
     }
 
     @Test
-    void slettAktør_sletteBruker_kasterException() throws FunksjonellException, TekniskException {
+    void slettAktør_sletteBruker_kasterException() {
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.BRUKER);
         Optional<Aktoer> optionalAktoer = Optional.of(aktoer);
@@ -128,7 +127,7 @@ class AktoerServiceTest {
     }
 
     @Test
-    void slettAktør_sletteRepresentant_fungerer() throws FunksjonellException, TekniskException {
+    void slettAktør_sletteRepresentant_fungerer() {
         Aktoer aktoer = new Aktoer();
         aktoer.setId(10L);
         aktoer.setRolle(Aktoersroller.REPRESENTANT);

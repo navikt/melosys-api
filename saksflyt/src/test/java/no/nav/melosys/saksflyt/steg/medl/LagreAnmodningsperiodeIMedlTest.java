@@ -14,9 +14,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +39,7 @@ class LagreAnmodningsperiodeIMedlTest {
     private Behandlingsresultat behandlingsresultat;
 
     @BeforeEach
-    public void setUp() throws IkkeFunnetException {
+    public void setUp() {
         lagreAnmodningsperiodeIMedl = new LagreAnmodningsperiodeIMedl(behandlingsresultatService, medlPeriodeService);
 
         prosessinstans = new Prosessinstans();
@@ -63,7 +60,7 @@ class LagreAnmodningsperiodeIMedlTest {
     }
 
     @Test
-    void utførNårBehandlingsresultatTypeErAnmodning_om_unntak() throws FunksjonellException, TekniskException {
+    void utførNårBehandlingsresultatTypeErAnmodning_om_unntak() {
         behandlingsresultat.setType(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
 
         lagreAnmodningsperiodeIMedl.utfør(prosessinstans);

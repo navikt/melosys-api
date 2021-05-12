@@ -13,10 +13,6 @@ import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
 import no.nav.melosys.integrasjon.dokgen.dto.DokgenDto;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
@@ -30,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.REPRESENTANT;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_BRUKER;
 import static org.springframework.util.StringUtils.hasText;
@@ -66,7 +61,7 @@ public class DokgenService {
         this.prosessinstansService = prosessinstansService;
     }
 
-    public byte[] produserUtkast(long behandlingId, BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
+    public byte[] produserUtkast(long behandlingId, BrevbestillingDto brevbestillingDto) {
         Produserbaredokumenter produserbartdokument = brevbestillingDto.getProduserbardokument();
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         Aktoer mottaker;
@@ -96,7 +91,7 @@ public class DokgenService {
         return produserBrev(mottaker, brevbestilling.build());
     }
 
-    public byte[] produserBrev(Aktoer mottaker, DokgenBrevbestilling brevbestilling) throws FunksjonellException, TekniskException {
+    public byte[] produserBrev(Aktoer mottaker, DokgenBrevbestilling brevbestilling) {
         Behandling behandling = behandlingService.hentBehandling(brevbestilling.getBehandlingId());
         String malnavn = dokumentproduksjonsInfoMapper.hentMalnavn(brevbestilling.getProduserbartdokument());
         String orgnr = mottaker != null ? mottaker.getOrgnr() : null;
@@ -115,7 +110,7 @@ public class DokgenService {
         return dokgenConsumer.lagPdf(malnavn, dokgenDto, brevbestilling.bestillKopi());
     }
 
-    public void produserOgDistribuerBrev(long behandlingId, BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
+    public void produserOgDistribuerBrev(long behandlingId, BrevbestillingDto brevbestillingDto) {
         Produserbaredokumenter produserbartDokument = brevbestillingDto.getProduserbardokument();
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
 
@@ -161,7 +156,7 @@ public class DokgenService {
         prosessinstansService.opprettProsessinstansOpprettOgDistribuerBrev(behandling, mottaker, brevbestilling);
     }
 
-    public DokumentproduksjonsInfo hentDokumentInfo(Produserbaredokumenter produserbartDokument) throws FunksjonellException {
+    public DokumentproduksjonsInfo hentDokumentInfo(Produserbaredokumenter produserbartDokument) {
         return dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(produserbartDokument);
     }
 
@@ -171,8 +166,7 @@ public class DokgenService {
     }
 
     private void settOrganisasjonsOpplysninger(Behandling behandling, String orgnr,
-                                               DokgenBrevbestilling.Builder<?> brevbestilling)
-        throws IkkeFunnetException, IntegrasjonException {
+                                               DokgenBrevbestilling.Builder<?> brevbestilling) {
         Kontaktopplysning kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), orgnr).orElse(null);
         String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : orgnr;
         brevbestilling
@@ -180,8 +174,7 @@ public class DokgenService {
             .medKontaktopplysning(kontaktopplysning);
     }
 
-    private void settJournalpostOpplysninger(Behandling behandling, DokgenBrevbestilling.Builder<?> brevbestilling) throws
-        FunksjonellException, IntegrasjonException {
+    private void settJournalpostOpplysninger(Behandling behandling, DokgenBrevbestilling.Builder<?> brevbestilling) {
         Journalpost journalpost = joarkFasade.hentJournalpost(behandling.getInitierendeJournalpostId());
         brevbestilling
             .medForsendelseMottatt(journalpost.getForsendelseMottatt())

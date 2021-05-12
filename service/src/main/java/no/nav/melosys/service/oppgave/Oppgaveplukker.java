@@ -13,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
@@ -55,7 +54,7 @@ public class Oppgaveplukker {
      * 4) Oppgaven tildeles til saksbehandleren.
      */
     @Transactional
-    public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) throws FunksjonellException, TekniskException {
+    public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) {
         validerPlukkOppgave(plukkDto);
 
         Behandlingstema behandlingstema = Behandlingstema.valueOf(plukkDto.getBehandlingstema());
@@ -72,7 +71,7 @@ public class Oppgaveplukker {
         return valg;
     }
 
-    private void oppdaterBehandlingsstatus(String saksnummer) throws IkkeFunnetException, TekniskException {
+    private void oppdaterBehandlingsstatus(String saksnummer) {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         Behandling behandling = fagsak.hentAktivBehandling();
         if (behandling != null && (behandling.getStatus() == Behandlingsstatus.SVAR_ANMODNING_MOTTATT || behandling.getStatus() == Behandlingsstatus.OPPRETTET)) {
@@ -81,7 +80,7 @@ public class Oppgaveplukker {
         }
     }
 
-    private void fjernOppgaverSomVenterForDokumentasjon(List<Oppgave> oppgaver) throws TekniskException, FunksjonellException {
+    private void fjernOppgaverSomVenterForDokumentasjon(List<Oppgave> oppgaver) {
         Iterator<Oppgave> iter = oppgaver.iterator();
         while (iter.hasNext()) {
             Oppgave oppgave = iter.next();
@@ -105,7 +104,7 @@ public class Oppgaveplukker {
     }
 
     @Transactional
-    public synchronized void leggTilbakeOppgave(String saksbehandlerID, TilbakeleggingDto tilbakelegging) throws FunksjonellException, TekniskException {
+    public synchronized void leggTilbakeOppgave(String saksbehandlerID, TilbakeleggingDto tilbakelegging) {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(tilbakelegging.getBehandlingID());
 
         Fagsak fagsak = behandling.getFagsak();
@@ -146,7 +145,7 @@ public class Oppgaveplukker {
         return !tilbakelegging.isEmpty();
     }
 
-    private static void validerPlukkOppgave(PlukkOppgaveInnDto plukkDto) throws FunksjonellException {
+    private static void validerPlukkOppgave(PlukkOppgaveInnDto plukkDto) {
         if (StringUtils.isEmpty(plukkDto.getBehandlingstema())) {
             throw new FunksjonellException("Behandlingstema er påkrevd");
         }

@@ -7,7 +7,6 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.exception.FunksjonellException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -15,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class LovvalgsperiodeTest {
 
     @Test
-    public void konverterAnmodningTilLovvalgsperiode_innvilgelse_girInnvilgetOgLovvalgsland() throws FunksjonellException {
+    public void konverterAnmodningTilLovvalgsperiode_innvilgelse_girInnvilgetOgLovvalgsland() {
         Anmodningsperiode innvilgetPeriode = lagAnmodningsperiode(Anmodningsperiodesvartyper.INNVILGELSE);
         Lovvalgsperiode lovvalgsperiode = Lovvalgsperiode.av(innvilgetPeriode.getAnmodningsperiodeSvar(), Medlemskapstyper.PLIKTIG);
         assertThat(lovvalgsperiode.getFom()).isEqualTo(innvilgetPeriode.getFom());
@@ -25,7 +24,7 @@ public class LovvalgsperiodeTest {
     }
 
     @Test
-    public void konverterAnmodningTilLovvalgsperiode_delvisInnvilgelse_girInnvilgetOgLovvalgsland() throws FunksjonellException {
+    public void konverterAnmodningTilLovvalgsperiode_delvisInnvilgelse_girInnvilgetOgLovvalgsland() {
         Anmodningsperiode innvilgetPeriode = lagAnmodningsperiode(Anmodningsperiodesvartyper.DELVIS_INNVILGELSE);
         AnmodningsperiodeSvar svar = innvilgetPeriode.getAnmodningsperiodeSvar();
         Lovvalgsperiode lovvalgsperiode = Lovvalgsperiode.av(innvilgetPeriode.getAnmodningsperiodeSvar(), Medlemskapstyper.PLIKTIG);
@@ -36,7 +35,7 @@ public class LovvalgsperiodeTest {
     }
 
     @Test
-    public void konverterAnmodningTilLovvalgsperiode_avslag_girAvslagOgTomtLovvalgsland() throws FunksjonellException {
+    public void konverterAnmodningTilLovvalgsperiode_avslag_girAvslagOgTomtLovvalgsland() {
         Anmodningsperiode innvilgetPeriode = lagAnmodningsperiode(Anmodningsperiodesvartyper.AVSLAG);
         Lovvalgsperiode lovvalgsperiode = Lovvalgsperiode.av(innvilgetPeriode.getAnmodningsperiodeSvar(), Medlemskapstyper.PLIKTIG);
         assertThat(lovvalgsperiode.getFom()).isEqualTo(innvilgetPeriode.getFom());

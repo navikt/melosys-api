@@ -14,8 +14,6 @@ import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
@@ -53,7 +51,7 @@ class LandvelgerServiceTest {
     private final Landkoder territorialfarvannLand = Landkoder.GB;
 
     @BeforeEach
-    public void setUp() throws IkkeFunnetException {
+    public void setUp() {
         søknad = new Soeknad();
         søknad.oppholdUtland.oppholdslandkoder.add("NO");
         søknad.bosted.oppgittAdresse.landkode = oppgittbostedsland.getKode();
@@ -72,7 +70,7 @@ class LandvelgerServiceTest {
         landvelgerService = new LandvelgerService(avklartefaktaService, behandlingsresultatService, behandlingsgrunnlagService);
     }
 
-    private Behandlingsresultat lagBehandlingsresultat(PeriodeOmLovvalg periode) throws IkkeFunnetException {
+    private Behandlingsresultat lagBehandlingsresultat(PeriodeOmLovvalg periode) {
         Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();
         behandling.setId(behandlingID);
@@ -98,7 +96,7 @@ class LandvelgerServiceTest {
     }
 
     @Test
-    void hentArbeidsland_utenAvklartArbeidsland_girSøknadsland() throws FunksjonellException {
+    void hentArbeidsland_utenAvklartArbeidsland_girSøknadsland() {
         mockBehandlingsgrunnlag();
 
         søknad.soeknadsland.landkoder.add(søknadsland.getKode());
@@ -107,7 +105,7 @@ class LandvelgerServiceTest {
     }
 
     @Test
-    void hentAlleArbeidsland_medAvklartArbeidsland_girAvklartArbeidsland() throws IkkeFunnetException {
+    void hentAlleArbeidsland_medAvklartArbeidsland_girAvklartArbeidsland() {
         lagBehandlingsresultat(lovvalgsperiode);
         leggTilAlleAvklartArbeidsland(Collections.singleton(avklartArbeidsland));
 
@@ -116,7 +114,7 @@ class LandvelgerServiceTest {
     }
 
     @Test
-    void hentAlleArbeidsland_medAvklartArbeidslandOgSøknadsland_girAlleUnikeArbeidsland() throws IkkeFunnetException {
+    void hentAlleArbeidsland_medAvklartArbeidslandOgSøknadsland_girAlleUnikeArbeidsland() {
         mockBehandlingsgrunnlag();
         lagBehandlingsresultat(lovvalgsperiode);
         when(avklartefaktaService.hentAlleAvklarteArbeidsland(anyLong())).thenReturn(new HashSet<>(Arrays.asList(Landkoder.DK, Landkoder.NO)));
@@ -128,7 +126,7 @@ class LandvelgerServiceTest {
     }
 
     @Test
-    void hentAlleArbeidsland_noenMedMarginaltArbeid_girKunArbeidslandMedVesentligVirksomhet() throws IkkeFunnetException {
+    void hentAlleArbeidsland_noenMedMarginaltArbeid_girKunArbeidslandMedVesentligVirksomhet() {
         lagBehandlingsresultat(lovvalgsperiode);
         leggTilAlleAvklartArbeidsland(Arrays.asList(Landkoder.DK, Landkoder.SE));
         when(avklartefaktaService.hentLandkoderMedMarginaltArbeid(anyLong())).thenReturn(new HashSet<>(Collections.singletonList(Landkoder.SE)));
@@ -138,7 +136,7 @@ class LandvelgerServiceTest {
     }
 
     @Test
-    void hentAlleArbeidsland_medArtikkel11_4_2AvklartArbeidslandOgSøknadsland_girKunArbeidsland() throws FunksjonellException {
+    void hentAlleArbeidsland_medArtikkel11_4_2AvklartArbeidslandOgSøknadsland_girKunArbeidsland() {
         lagBehandlingsresultat(lovvalgsperiode);
         when(avklartefaktaService.hentAlleAvklarteArbeidsland(anyLong())).thenReturn(new HashSet<>(Arrays.asList(Landkoder.DK, Landkoder.NO)));
         søknad.soeknadsland.landkoder = Arrays.asList(Landkoder.DK.getKode(), Landkoder.SE.getKode());
@@ -149,7 +147,7 @@ class LandvelgerServiceTest {
     }
 
     @Test
-    void hentUtenlandskTrygdemyndighetsland_medArt121_girSøknadsland() throws FunksjonellException {
+    void hentUtenlandskTrygdemyndighetsland_medArt121_girSøknadsland() {
         mockBehandlingsgrunnlag();
         lagBehandlingsresultat(lovvalgsperiode);
         søknad.soeknadsland.landkoder.add(søknadsland.getKode());
@@ -158,7 +156,7 @@ class LandvelgerServiceTest {
     }
 
     @Test
-    void hentUtenlandskTrygdemyndighetsland_medArt121AvklartArbeidsland_girAvklartArbeidsland() throws FunksjonellException {
+    void hentUtenlandskTrygdemyndighetsland_medArt121AvklartArbeidsland_girAvklartArbeidsland() {
         mockBehandlingsgrunnlag();
         lagBehandlingsresultat(lovvalgsperiode);
         leggTilAlleAvklartArbeidsland(Collections.singletonList(avklartArbeidsland));
@@ -167,7 +165,7 @@ class LandvelgerServiceTest {
     }
 
     @Test
-    void hentUtenlandskTrygdemyndighetsland_medArt122_girSøknadsland() throws FunksjonellException {
+    void hentUtenlandskTrygdemyndighetsland_medArt122_girSøknadsland() {
         mockBehandlingsgrunnlag();
         lagBehandlingsresultat(lovvalgsperiode);
         søknad.soeknadsland.landkoder.add(søknadsland.getKode());
@@ -188,7 +186,7 @@ class LandvelgerServiceTest {
     }
 
     @Test
-    void hentUtenlandskTrygdemyndighetsland_medArt1142_girSøknadsland() throws FunksjonellException {
+    void hentUtenlandskTrygdemyndighetsland_medArt1142_girSøknadsland() {
         mockBehandlingsgrunnlag();
         lagBehandlingsresultat(lovvalgsperiode);
         søknad.soeknadsland.landkoder.add(søknadsland.getKode());
@@ -198,7 +196,7 @@ class LandvelgerServiceTest {
     }
 
     @Test
-    void hentUtenlandskTrygdemyndighetsland_medArt113A_girOppgittBostedsland() throws FunksjonellException {
+    void hentUtenlandskTrygdemyndighetsland_medArt113A_girOppgittBostedsland() {
         mockBehandlingsgrunnlag();
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A);
@@ -209,7 +207,7 @@ class LandvelgerServiceTest {
     }
 
     @Test
-    void hentUtenlandskTrygdemyndighetsland_medArt113AOgAvklartBosted_overstyrerOppgittBosted() throws FunksjonellException {
+    void hentUtenlandskTrygdemyndighetsland_medArt113AOgAvklartBosted_overstyrerOppgittBosted() {
         mockBehandlingsgrunnlag();
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A);
@@ -221,7 +219,7 @@ class LandvelgerServiceTest {
     }
 
     @Test
-    void hentUtenlandskTrygdemyndighetsland_medArt113AUtenOppgittEllerAvkartBostedsland_girTomListe() throws FunksjonellException {
+    void hentUtenlandskTrygdemyndighetsland_medArt113AUtenOppgittEllerAvkartBostedsland_girTomListe() {
         mockBehandlingsgrunnlag();
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A);
@@ -234,7 +232,7 @@ class LandvelgerServiceTest {
     }
 
     @Test
-    void hentUtenlandskTrygdemyndighetsland_medArt13BostedsadresseIkkeNorge() throws IkkeFunnetException {
+    void hentUtenlandskTrygdemyndighetsland_medArt13BostedsadresseIkkeNorge() {
         mockBehandlingsgrunnlag();
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
@@ -248,7 +246,7 @@ class LandvelgerServiceTest {
     }
 
     @Test
-    void hentUtenlandskTrygdemyndighetsland_medArt13BostedsadresseNorge_girSøknadsland() throws IkkeFunnetException {
+    void hentUtenlandskTrygdemyndighetsland_medArt13BostedsadresseNorge_girSøknadsland() {
         mockBehandlingsgrunnlag();
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
@@ -259,7 +257,7 @@ class LandvelgerServiceTest {
     }
 
     @Test
-    void hentUtenlandskTrygdemyndighetsland_medArt13Videresending() throws IkkeFunnetException {
+    void hentUtenlandskTrygdemyndighetsland_medArt13Videresending() {
         mockBehandlingsgrunnlag();
         Fagsak fagsak = new Fagsak();
         fagsak.setStatus(Saksstatuser.VIDERESENDT);
@@ -279,7 +277,7 @@ class LandvelgerServiceTest {
     }
 
     @Test
-    void hentUtenlandskTrygdemyndighetsland_artikkel13IngenArbeidssted_forventLand() throws IkkeFunnetException {
+    void hentUtenlandskTrygdemyndighetsland_artikkel13IngenArbeidssted_forventLand() {
         mockBehandlingsgrunnlag();
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
@@ -300,7 +298,7 @@ class LandvelgerServiceTest {
     }
 
     @Test
-    void hentUtenlandskTrygdemyndighetsland_artikkel13MedArbeidssted_forventLand() throws IkkeFunnetException {
+    void hentUtenlandskTrygdemyndighetsland_artikkel13MedArbeidssted_forventLand() {
         mockBehandlingsgrunnlag();
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
@@ -321,8 +319,7 @@ class LandvelgerServiceTest {
     }
 
     @Test
-    void hentUtenlandskTrygdemyndighetsland_artikkel13MedArbeidsstedOgMarginaltArbeid_forventLand()
-        throws IkkeFunnetException {
+    void hentUtenlandskTrygdemyndighetsland_artikkel13MedArbeidsstedOgMarginaltArbeid_forventLand() {
         mockBehandlingsgrunnlag();
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
@@ -346,7 +343,7 @@ class LandvelgerServiceTest {
     }
 
     @Test
-    void hentUtenlandskTrygdemyndighetsland_artikkel11_5DanmarkValgtAvSaksbehandler_forventEttLandDanmark() throws IkkeFunnetException {
+    void hentUtenlandskTrygdemyndighetsland_artikkel11_5DanmarkValgtAvSaksbehandler_forventEttLandDanmark() {
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A);
         lovvalgsperiode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5);
@@ -359,7 +356,7 @@ class LandvelgerServiceTest {
     }
 
     @Test
-    void hentUtenlandskTrygdemyndighetsland_artikkel11_5SaksbehandlerIkkeValgLand_forventTomListe() throws IkkeFunnetException {
+    void hentUtenlandskTrygdemyndighetsland_artikkel11_5SaksbehandlerIkkeValgLand_forventTomListe() {
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A);
         lovvalgsperiode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5);

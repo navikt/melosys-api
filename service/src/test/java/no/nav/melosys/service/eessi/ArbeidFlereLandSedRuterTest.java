@@ -15,7 +15,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.eessi.ruting.ArbeidFlereLandSedRuter;
@@ -63,7 +62,7 @@ class ArbeidFlereLandSedRuterTest {
     private Prosessinstans prosessinstans;
 
     @BeforeEach
-    public void setup() throws IkkeFunnetException {
+    public void setup() {
         arbeidFlereLandSedRuter = new ArbeidFlereLandSedRuter(prosessinstansService, fagsakService, behandlingService, behandlingsresultatService, oppgaveService);
 
         behandling = new Behandling();

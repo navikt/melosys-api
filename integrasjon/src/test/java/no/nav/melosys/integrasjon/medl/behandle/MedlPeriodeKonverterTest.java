@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class MedlPeriodeKonverterTest {
 
     @Test
-    void tilGrunnlagMedltype() throws TekniskException {
+    void tilGrunnlagMedltype() {
         assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2))
             .isEqualTo(GrunnlagMedl.FO_12_2);
         assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1))
@@ -41,7 +41,7 @@ class MedlPeriodeKonverterTest {
     }
 
     @Test
-    void tilLovvalgBestemmelse() throws TekniskException {
+    void tilLovvalgBestemmelse() {
         assertThat(MedlPeriodeKonverter.tilLovvalgBestemmelse(GrunnlagMedl.FO_12_2))
             .isEqualTo(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2);
         assertThat(MedlPeriodeKonverter.tilLovvalgBestemmelse(GrunnlagMedl.FO_16))
@@ -53,7 +53,7 @@ class MedlPeriodeKonverterTest {
     }
 
     @Test
-    void hentFellesKodeForDekningtype() throws TekniskException {
+    void hentFellesKodeForDekningtype() {
         Trygdedekninger trygdeDekning = Trygdedekninger.UTEN_DEKNING;
         DekningMedl dekningMedl = MedlPeriodeKonverter.tilMedlTrygdeDekningEos(trygdeDekning);
         assertThat(dekningMedl).isEqualTo(DekningMedl.UNNTATT);

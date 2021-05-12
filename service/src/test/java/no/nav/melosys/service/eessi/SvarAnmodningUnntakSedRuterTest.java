@@ -12,7 +12,6 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.eessi.ruting.SvarAnmodningUnntakSedRuter;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -123,7 +122,7 @@ class SvarAnmodningUnntakSedRuterTest {
     }
 
     @Test
-    void finnSakOgBestemRuting_ingenTilhørendeArkivsak_opprettJfrOppgave() throws FunksjonellException, TekniskException {
+    void finnSakOgBestemRuting_ingenTilhørendeArkivsak_opprettJfrOppgave() {
         Prosessinstans prosessinstans = new Prosessinstans();
         MelosysEessiMelding eessiMelding = melosysEessiMelding();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);

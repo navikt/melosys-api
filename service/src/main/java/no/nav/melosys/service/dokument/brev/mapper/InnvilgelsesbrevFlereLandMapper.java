@@ -30,7 +30,7 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
     private static final String XSD_LOCATION = "melosysbrev/melosys_000083.xsd";
 
     @Override
-    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevdata) throws JAXBException, SAXException, TekniskException {
+    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevdata) throws JAXBException, SAXException {
         BrevDataInnvilgelseFlereLand brevDataInnvilgelse = (BrevDataInnvilgelseFlereLand) brevdata;
 
         VedleggMapper vedleggMapper = new VedleggMapper(behandling, resultat);
@@ -42,7 +42,7 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
         return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataInnvilgelseFlereLand brevdata) throws TekniskException {
+    private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataInnvilgelseFlereLand brevdata) {
         Fag fag = new Fag();
 
         fag.setBehandlingstype(BehandlingstypeKodeMapper.hentBehandlingstypeKode(behandling));
@@ -112,7 +112,7 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
         return fag;
     }
 
-    private VedtaksTypeKode tilVedtaksTypeKode(Vedtakstyper vedtakstype) throws TekniskException {
+    private VedtaksTypeKode tilVedtaksTypeKode(Vedtakstyper vedtakstype) {
         if (vedtakstype == null) {
             return null;
         }

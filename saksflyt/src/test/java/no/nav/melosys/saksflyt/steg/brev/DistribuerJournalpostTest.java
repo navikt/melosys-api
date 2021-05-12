@@ -11,7 +11,6 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.saksflyt.TestdataFactory;
@@ -122,7 +121,7 @@ class DistribuerJournalpostTest {
         verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), any(StrukturertAdresse.class), any(), any());
     }
 
-    private Prosessinstans setupHappypath(String journalpostId, Aktoersroller rolle) throws IkkeFunnetException {
+    private Prosessinstans setupHappypath(String journalpostId, Aktoersroller rolle) {
         Behandling behandling = TestdataFactory.lagBehandling();
         Prosessinstans prosessinstans = new Prosessinstans();
         DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()

@@ -32,7 +32,7 @@ public class OppdaterTrygdeavgiftsgrunnlagRequest extends AbstraktAvgiftsgrunnla
         return lønnsforhold == LØNN_FRA_UTLANDET || lønnsforhold == DELT_LØNN;
     }
 
-    public Collection<Avklartefakta> tilAvklartefakta() throws FunksjonellException {
+    public Collection<Avklartefakta> tilAvklartefakta() {
         if (getLønnsforhold() == null) {
             throw new FunksjonellException("Lønnsforhold er ikke satt!");
         }

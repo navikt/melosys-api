@@ -10,7 +10,6 @@ import no.nav.dok.melosysbrev._000081.Fag;
 import no.nav.dok.melosysbrev._000081.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev._000081.ObjectFactory;
 import no.nav.dok.melosysbrev.felles.melosys_felles.*;
-
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -32,7 +31,7 @@ public class AvslagYrkesaktivMapper implements BrevDataMapper {
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat,
-                                BrevData brevDataFelles) throws JAXBException, SAXException, TekniskException {
+                                BrevData brevDataFelles) throws JAXBException, SAXException {
         BrevDataAvslagYrkesaktiv brevdata = (BrevDataAvslagYrkesaktiv) brevDataFelles;
         Fag fag = mapFag(behandling, resultat, brevdata);
 
@@ -53,7 +52,7 @@ public class AvslagYrkesaktivMapper implements BrevDataMapper {
         fag.setArt161AvslagBegrunnelse(avslagBegrunnelse);
     }
 
-    private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataAvslagYrkesaktiv brevData) throws TekniskException {
+    private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataAvslagYrkesaktiv brevData) {
         Fag fag = new Fag();
 
         if (behandling.getFagsak().getType() == Sakstyper.EU_EOS) {
@@ -97,7 +96,7 @@ public class AvslagYrkesaktivMapper implements BrevDataMapper {
         return fag;
     }
 
-    void mapArt161Avslag(Fag fag, BrevDataAvslagYrkesaktiv brevdata) throws TekniskException {
+    void mapArt161Avslag(Fag fag, BrevDataAvslagYrkesaktiv brevdata) {
         Vilkaarsresultat vilkaarsresultat = brevdata.art16Vilkaar;
         Set<VilkaarBegrunnelse> art161Begrunnelser = vilkaarsresultat.getBegrunnelser();
         Art161AvslagBegrunnelse art161AvslagBegrunnelser = lagTomArt161AvslagBegrunnelse();
@@ -132,7 +131,7 @@ public class AvslagYrkesaktivMapper implements BrevDataMapper {
             .withSoektForSent("").build();
     }
 
-    static String validerFritekstbegrunnelse(String begrunnelse) throws TekniskException {
+    static String validerFritekstbegrunnelse(String begrunnelse) {
         if (!StringUtils.isEmpty(begrunnelse)) {
             return begrunnelse;
         } else {
@@ -140,7 +139,7 @@ public class AvslagYrkesaktivMapper implements BrevDataMapper {
         }
     }
 
-    private static LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat) throws TekniskException {
+    private static LovvalgsperiodeType lagLovvalgsperiodeType(Behandlingsresultat resultat) {
         Lovvalgsperiode lovvalgsperiode = resultat.hentValidertLovvalgsperiode();
         LovvalgsperiodeType lovvalgsperiodeType = new LovvalgsperiodeType();
 

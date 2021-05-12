@@ -34,7 +34,7 @@ class LdapServiceTest {
     }
 
     @Test
-    void hentBrukerinformasjon_gyldigIdent_brukerReturnert() throws TekniskException {
+    void hentBrukerinformasjon_gyldigIdent_brukerReturnert() {
         LdapBruker ldapBruker = new LdapBruker("navn", List.of("en", "to"));
         when(ldapTemplate.search(any(LdapQuery.class), any(AttributesMapper.class))).thenReturn(List.of(ldapBruker));
         Optional<LdapBruker> res = ldapService.finnBrukerinformasjon("Z123123");
@@ -42,7 +42,7 @@ class LdapServiceTest {
     }
 
     @Test
-    void hentBrukerinformasjon_identTomString_kasterException() throws TekniskException {
+    void hentBrukerinformasjon_identTomString_kasterException() {
         assertThatExceptionOfType(TekniskException.class)
             .isThrownBy(() -> ldapService.finnBrukerinformasjon(""))
             .withMessageContaining("Kan ikke slå opp brukernavn uten å ha ident");
@@ -68,7 +68,7 @@ class LdapServiceTest {
     }
 
     @Test
-    void finnNavnForIdent_medMelosysSomBruker_returnererMelosysBrukernavn() throws TekniskException {
+    void finnNavnForIdent_medMelosysSomBruker_returnererMelosysBrukernavn() {
         Optional<LdapBruker> bruker = ldapService.finnBrukerinformasjon("MELOSYS");
 
         assertThat(bruker)
@@ -80,7 +80,7 @@ class LdapServiceTest {
     }
 
     @Test
-    void finnNavnForIdent_medUgyldigIdent_returnererMelosysBrukernavn() throws TekniskException {
+    void finnNavnForIdent_medUgyldigIdent_returnererMelosysBrukernavn() {
         Optional<LdapBruker> bruker = ldapService.finnBrukerinformasjon("Ugyldig ident");
 
         assertThat(bruker)

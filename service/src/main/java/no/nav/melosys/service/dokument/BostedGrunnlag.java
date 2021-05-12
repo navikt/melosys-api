@@ -6,8 +6,8 @@ import java.util.Optional;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.util.BehandlingsgrunnlagUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -27,7 +27,7 @@ public class BostedGrunnlag {
         this.kodeverkService = kodeverkService;
     }
 
-    public StrukturertAdresse hentBostedsadresse() throws FunksjonellException {
+    public StrukturertAdresse hentBostedsadresse() {
         return finnBostedsadresse().orElseThrow(() ->
             new FunksjonellException("Bostedsadressen finnes ikke eller mangler landkode"));
     }

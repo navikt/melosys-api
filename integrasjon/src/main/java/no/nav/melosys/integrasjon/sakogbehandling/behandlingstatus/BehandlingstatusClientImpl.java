@@ -43,18 +43,18 @@ public class BehandlingstatusClientImpl implements BehandlingstatusClient {
     }
 
     @Override
-    public void sendBehandlingOpprettet(BehandlingStatusMapper mapper) throws IntegrasjonException {
+    public void sendBehandlingOpprettet(BehandlingStatusMapper mapper) {
         BehandlingOpprettet behandlingOpprettet = mapper.tilBehandlingOpprettet();
         jmsTemplate.convertAndSend(hendelseshåndterer, behandlingStatusTilXml(behandlingOpprettet), behandleMelding);
     }
 
     @Override
-    public void sendBehandlingAvsluttet(BehandlingStatusMapper mapper) throws IntegrasjonException {
+    public void sendBehandlingAvsluttet(BehandlingStatusMapper mapper) {
         BehandlingAvsluttet behandlingAvsluttet = mapper.tilBehandlingAvsluttet();
         jmsTemplate.convertAndSend(hendelseshåndterer, behandlingStatusTilXml(behandlingAvsluttet), behandleMelding);
     }
 
-    private String behandlingStatusTilXml(BehandlingStatus behandlingStatus) throws IntegrasjonException {
+    private String behandlingStatusTilXml(BehandlingStatus behandlingStatus) {
         try {
             JAXBElement<?> xmlElement;
             if (behandlingStatus instanceof BehandlingOpprettet) {

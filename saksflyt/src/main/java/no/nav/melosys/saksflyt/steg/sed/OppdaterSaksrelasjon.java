@@ -7,7 +7,6 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IkkeInngaaendeJournalpostException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -68,7 +67,7 @@ public class OppdaterSaksrelasjon implements StegBehandler {
         return Optional.empty();
     }
 
-    private long hentArkivsakID(Prosessinstans prosessinstans) throws IkkeFunnetException {
+    private long hentArkivsakID(Prosessinstans prosessinstans) {
         if (prosessinstans.getBehandling() != null) {
             return prosessinstans.getBehandling().getFagsak().getGsakSaksnummer();
         }

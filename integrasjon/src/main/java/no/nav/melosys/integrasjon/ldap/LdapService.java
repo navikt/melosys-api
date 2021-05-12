@@ -34,7 +34,7 @@ public class LdapService {
         this.ldapTemplate = ldapTemplate;
     }
 
-    public Optional<LdapBruker> finnBrukerinformasjon(String ident) throws TekniskException {
+    public Optional<LdapBruker> finnBrukerinformasjon(String ident) {
         if (ident == null || ident.isEmpty()) {
             throw new TekniskException("Kan ikke slå opp brukernavn uten å ha ident");
         }

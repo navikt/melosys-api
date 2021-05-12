@@ -5,8 +5,6 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +31,7 @@ public class AvsluttArt13BehandlingJobbTest {
     }
 
     @Test
-    public void avsluttBehandlingArt13_femBehandlinger_serviceBlirKalt() throws FunksjonellException, TekniskException {
+    public void avsluttBehandlingArt13_femBehandlinger_serviceBlirKalt() {
 
         Behandling b1 = new Behandling();
         b1.setId(111L);

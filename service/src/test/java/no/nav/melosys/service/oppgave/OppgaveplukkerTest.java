@@ -18,8 +18,6 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -62,7 +60,7 @@ class OppgaveplukkerTest {
     private final static String SAKSNUMMER = "MOCK-1";
 
     @BeforeEach
-    public void setUp() throws IkkeFunnetException {
+    public void setUp() {
         this.oppgaveplukker = new Oppgaveplukker(oppgaveFasade, oppgaveTilbakkeleggingRepo, fagsakService, behandlingService, oppgaveService);
 
         Behandling behandling = new Behandling();
@@ -359,7 +357,7 @@ class OppgaveplukkerTest {
     }
 
     @Test
-    void plukkOppgave_søknadStatusSvarAou_oppdaterStatus() throws FunksjonellException, TekniskException {
+    void plukkOppgave_søknadStatusSvarAou_oppdaterStatus() {
         List<Oppgave> oppgaver = new ArrayList<>();
         oppgaver.add(opprettOppgave("1", Oppgavetyper.VUR, PrioritetType.LAV, LocalDate.of(2017, 8, 7), LocalDate.now(), "MEL-1"));
 
@@ -390,7 +388,7 @@ class OppgaveplukkerTest {
     }
 
     @Test
-    void plukkOppgave_utenBehandlingstema_forventException() throws FunksjonellException, TekniskException {
+    void plukkOppgave_utenBehandlingstema_forventException() {
         PlukkOppgaveInnDto plukkOppgaveInnDto = opprettPlukkOppgaveInnDto("");
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto))

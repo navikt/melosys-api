@@ -4,9 +4,6 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -39,7 +36,7 @@ public class FerdigstillJournalpostSed implements StegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) {
 
         final var behandling = prosessinstans.getBehandling();
 
@@ -58,7 +55,7 @@ public class FerdigstillJournalpostSed implements StegBehandler {
         log.info("Journalpost {} ferdigstilt for behandling {}", eessiMelding.getJournalpostId(), behandling.getId());
     }
 
-    private String hentBrukerID(Prosessinstans prosessinstans) throws IkkeFunnetException, TekniskException {
+    private String hentBrukerID(Prosessinstans prosessinstans) {
         String aktørID = prosessinstans.getBehandling().getFagsak().hentBruker().getAktørId();
         return persondataFasade.hentFolkeregisterIdent(aktørID);
     }

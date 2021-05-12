@@ -29,7 +29,6 @@ import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import org.jeasy.random.EasyRandom;
@@ -176,7 +175,7 @@ public class A001MapperTest {
     }
 
 
-    private String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, BrevData brevData) throws JAXBException, SAXException, TekniskException {
+    private String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, BrevData brevData) throws JAXBException, SAXException {
         final String XSD_LOCATION = "melosysbrev/melosys_000116.xsd";
 
         Fag fag = mapFag();

@@ -83,7 +83,7 @@ class UtpekingServiceTest {
     private final Fagsak fagsak = new Fagsak();
 
     @BeforeEach
-    public void setup() throws FunksjonellException {
+    public void setup() {
         utpekingService = new UtpekingService(behandlingService, behandlingsresultatService, eessiService, landvelgerService,
             lovvalgsperiodeService, oppgaveService, prosessinstansService, utpekingsperiodeRepository, vedtakKontrollService, melosysEventMulticaster);
 
@@ -181,7 +181,7 @@ class UtpekingServiceTest {
     }
 
     @Test
-    void avvisUtpeking_utpekingAvAnnetLand_oppdaterUtfallRegistreringUnntak() throws FunksjonellException, TekniskException {
+    void avvisUtpeking_utpekingAvAnnetLand_oppdaterUtfallRegistreringUnntak() {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
 
         utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis());
@@ -191,7 +191,7 @@ class UtpekingServiceTest {
     }
 
     @Test
-    void avvisUtpeking_utpekingAvNorge_oppdaterUtfallUtpeking() throws FunksjonellException, TekniskException {
+    void avvisUtpeking_utpekingAvNorge_oppdaterUtfallUtpeking() {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
 
         utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis());
@@ -237,7 +237,7 @@ class UtpekingServiceTest {
     }
 
     @Test
-    void oppdaterSendtUtland_ikkeSattFraFør_oppdateres() throws FunksjonellException, TekniskException {
+    void oppdaterSendtUtland_ikkeSattFraFør_oppdateres() {
         Utpekingsperiode utpekingsperiode = new Utpekingsperiode();
         utpekingsperiode.setId(1L);
 

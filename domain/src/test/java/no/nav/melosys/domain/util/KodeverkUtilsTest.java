@@ -11,13 +11,13 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class KodeverkUtilsTest {
 
     @Test
-    void dekod() throws IkkeFunnetException {
+    void dekod() {
         Behandlingstyper behandlingstype = KodeverkUtils.dekod(Behandlingstyper.class, Behandlingstyper.SOEKNAD.getKode());
         assertThat(behandlingstype).isEqualTo(Behandlingstyper.SOEKNAD);
     }
 
     @Test
-    void dekod_ikkeFunnet() throws IkkeFunnetException {
+    void dekod_ikkeFunnet() {
         assertThatExceptionOfType(IkkeFunnetException.class)
             .isThrownBy(() -> KodeverkUtils.dekod(Behandlingstyper.class, "ZØKNAD"))
             .withMessageContaining("finnes ikke");

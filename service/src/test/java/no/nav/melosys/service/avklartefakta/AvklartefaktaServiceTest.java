@@ -12,7 +12,6 @@ import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -69,7 +68,7 @@ class AvklartefaktaServiceTest {
     }
 
     @Test
-    void lagreAvklarteFakta() throws IkkeFunnetException {
+    void lagreAvklarteFakta() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
         Avklartefakta avklartefakta = new Avklartefakta();
@@ -103,7 +102,7 @@ class AvklartefaktaServiceTest {
     }
 
     @Test
-    void hentYrkesgruppe_forventerOrdinær() throws TekniskException {
+    void hentYrkesgruppe_forventerOrdinær() {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("ORDINAER");
         Optional<Avklartefakta> avklartefaktaSet = Optional.of(avklartefakta);
@@ -114,7 +113,7 @@ class AvklartefaktaServiceTest {
     }
 
     @Test
-    void hentYrkesgruppe_forventerFlyende() throws TekniskException {
+    void hentYrkesgruppe_forventerFlyende() {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("YRKESAKTIV_FLYVENDE");
         Optional<Avklartefakta> avklartefaktaSet = Optional.of(avklartefakta);
@@ -125,7 +124,7 @@ class AvklartefaktaServiceTest {
     }
 
     @Test
-    void hentYrkesgruppe_forventerSokkelSkip() throws TekniskException {
+    void hentYrkesgruppe_forventerSokkelSkip() {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("SOKKEL_ELLER_SKIP");
         Optional<Avklartefakta> avklartefaktaFraDb = Optional.of(avklartefakta);
@@ -136,7 +135,7 @@ class AvklartefaktaServiceTest {
     }
 
     @Test
-    void hentYrkesgruppe_utenYrkesgruppe_forventerFeil() throws TekniskException {
+    void hentYrkesgruppe_utenYrkesgruppe_forventerFeil() {
         Avklartefakta avklartefakta = new Avklartefakta();
         avklartefakta.setFakta("IKKE_YRKESAKTIV");
         Optional<Avklartefakta> avklartefaktaFraDb = Optional.of(avklartefakta);

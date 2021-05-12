@@ -55,7 +55,7 @@ public class AnmodningsperiodeService {
     }
 
     @Transactional
-    public Collection<Anmodningsperiode> lagreAnmodningsperioder(long behandlingID, Collection<Anmodningsperiode> anmodningsperioder) throws FunksjonellException {
+    public Collection<Anmodningsperiode> lagreAnmodningsperioder(long behandlingID, Collection<Anmodningsperiode> anmodningsperioder) {
         List<Anmodningsperiode> eksisterende = anmodningsperiodeRepository.findByBehandlingsresultatId(behandlingID);
 
         for (Anmodningsperiode anmodningsperiode : eksisterende) {
@@ -74,24 +74,24 @@ public class AnmodningsperiodeService {
     }
 
     @Transactional
-    public AnmodningsperiodeSvar lagreAnmodningsperiodeSvar(long anmodningsperiodeId, AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
+    public AnmodningsperiodeSvar lagreAnmodningsperiodeSvar(long anmodningsperiodeId, AnmodningsperiodeSvar anmodningsperiodeSvar) {
         Anmodningsperiode anmodningsperiode = anmodningsperiodeRepository.findById(anmodningsperiodeId)
             .orElseThrow(() -> new IkkeFunnetException("Anmodningsperiode med id " + anmodningsperiodeId + " finnes ikke"));
 
         return lagreAnmodningsperiodeSvar(anmodningsperiode, anmodningsperiodeSvar);
     }
 
-    public void lagreAnmodningsperiodeSvarForBehandling(long behandlingID, AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
+    public void lagreAnmodningsperiodeSvarForBehandling(long behandlingID, AnmodningsperiodeSvar anmodningsperiodeSvar) {
         lagreAnmodningsperiodeSvar(hentFørsteAnmodningsperiode(behandlingID), anmodningsperiodeSvar);
     }
 
-    public void oppdaterAnmodningsperiodeSendtForBehandling(long behandlingID) throws FunksjonellException {
+    public void oppdaterAnmodningsperiodeSendtForBehandling(long behandlingID) {
         Anmodningsperiode anmodningsperiode = hentFørsteAnmodningsperiode(behandlingID);
         anmodningsperiode.setSendtUtland(true);
         anmodningsperiodeRepository.save(anmodningsperiode);
     }
 
-    public Anmodningsperiode hentFørsteAnmodningsperiode(Long behandlingID) throws FunksjonellException {
+    public Anmodningsperiode hentFørsteAnmodningsperiode(Long behandlingID) {
         Collection<Anmodningsperiode> anmodningsperioder = hentAnmodningsperioder(behandlingID);
 
         if (anmodningsperioder.size() != 1) {
@@ -101,7 +101,7 @@ public class AnmodningsperiodeService {
         return anmodningsperioder.iterator().next();
     }
 
-    private AnmodningsperiodeSvar lagreAnmodningsperiodeSvar(Anmodningsperiode anmodningsperiode, AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
+    private AnmodningsperiodeSvar lagreAnmodningsperiodeSvar(Anmodningsperiode anmodningsperiode, AnmodningsperiodeSvar anmodningsperiodeSvar) {
         validerSvar(anmodningsperiodeSvar);
 
         if (anmodningsperiode.getAnmodningsperiodeSvar() != null) {
@@ -122,7 +122,7 @@ public class AnmodningsperiodeService {
         return opprinnelig;
     }
 
-    private void validerSvar(AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
+    private void validerSvar(AnmodningsperiodeSvar anmodningsperiodeSvar) {
         validerSvartype(anmodningsperiodeSvar);
 
         if (anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == Anmodningsperiodesvartyper.DELVIS_INNVILGELSE) {
@@ -130,13 +130,13 @@ public class AnmodningsperiodeService {
         }
     }
 
-    private void validerSvartype(AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
+    private void validerSvartype(AnmodningsperiodeSvar anmodningsperiodeSvar) {
         if (anmodningsperiodeSvar.getAnmodningsperiodeSvarType() == null) {
             throw new FunksjonellException("Må spesifiseres svarType for svar på anmodningsperiode");
         }
     }
 
-    private void validerDelvisInnvilgelse(AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
+    private void validerDelvisInnvilgelse(AnmodningsperiodeSvar anmodningsperiodeSvar) {
         if (!anmodningsperiodeSvar.erGyldigDelvisInnvilgelse()) {
             throw new FunksjonellException("Periode må være fyllt ut ved " + Anmodningsperiodesvartyper.DELVIS_INNVILGELSE);
         }

@@ -7,7 +7,6 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -41,7 +40,7 @@ class BestemBehandlingsmåteSedTest {
     private final Prosessinstans prosessinstans = new Prosessinstans();
 
     @BeforeEach
-    public void setUp() throws IkkeFunnetException {
+    public void setUp() {
         bestemBehandlingsmåteSed = new BestemBehandlingsmåteSed(behandlingService, behandlingsresultatService, oppgaveService, unntaksperiodeService);
         prosessinstans.setBehandling(behandling);
         behandling.setId(234L);

@@ -2,8 +2,6 @@ package no.nav.melosys.saksflyt.steg.sob;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.sob.SobService;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +11,7 @@ import static org.mockito.Mockito.verify;
 
 class OppdaterStatusBehandlingOpprettetTest {
     @Test
-    void utfør() throws FunksjonellException, TekniskException {
+    void utfør() {
         SobService sobService = mock(SobService.class);
         OppdaterStatusBehandlingOpprettet oppdaterStatusBehandlingAvsluttet = new OppdaterStatusBehandlingOpprettet(sobService);
 

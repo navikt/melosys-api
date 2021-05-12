@@ -14,7 +14,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOf
 public class AvgiftsgrunnlagInfoTest {
 
     @Test
-    void validerLovligeKominasjonerLønnFraNorge_gyldigeKombinasjon_ingenFeil() throws FunksjonellException {
+    void validerLovligeKominasjonerLønnFraNorge_gyldigeKombinasjon_ingenFeil() {
         new AvgiftsgrunnlagInfo(true, true, null).
             validerLovligeKominasjonerLønnFraNorge();
         new AvgiftsgrunnlagInfo(true, false, MISJONÆR)
@@ -43,7 +43,7 @@ public class AvgiftsgrunnlagInfoTest {
     }
 
     @Test
-    void validerLovligeKominasjonerLønnFraUtlandet_gyldigeKombinasjon_ingenFeil() throws FunksjonellException {
+    void validerLovligeKominasjonerLønnFraUtlandet_gyldigeKombinasjon_ingenFeil() {
         new AvgiftsgrunnlagInfo(true, false, null)
             .validerLovligeKominasjonerLønnFraUtlandet();
         new AvgiftsgrunnlagInfo(false, false, null)

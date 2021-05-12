@@ -17,7 +17,7 @@ public class BrevDataByggerUtpekingAnnetLand implements BrevDataBygger {
     }
 
     @Override
-    public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException {
+    public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) {
         BrevDataUtpekingAnnetLand brevDataUtpekingAnnetLand = new BrevDataUtpekingAnnetLand(brevbestillingDto, saksbehandler);
         long behandlingID = dataGrunnlag.getBehandling().getId();
         brevDataUtpekingAnnetLand.utpekingsperiode = utpekingService.hentUtpekingsperioder(behandlingID)

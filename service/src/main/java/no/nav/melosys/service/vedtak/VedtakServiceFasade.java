@@ -54,7 +54,7 @@ public class VedtakServiceFasade {
     }
 
     @Transactional(noRollbackFor = {ValideringException.class})
-    public void endreVedtak(long behandlingID, Endretperiode endretperiode, String fritekst, String fritekstSed) throws FunksjonellException {
+    public void endreVedtak(long behandlingID, Endretperiode endretperiode, String fritekst, String fritekstSed) {
         var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         Sakstyper sakstype = behandling.getFagsak().getType();
 
@@ -65,7 +65,7 @@ public class VedtakServiceFasade {
         }
     }
 
-    private void validerKanFattesVedtakAvTema(Behandling behandling) throws FunksjonellException {
+    private void validerKanFattesVedtakAvTema(Behandling behandling) {
         if (!behandling.kanResultereIVedtak()) {
             throw new FunksjonellException("Kan ikke fatte vedtak ved behandlingstema " + behandling.getTema().getBeskrivelse());
         }

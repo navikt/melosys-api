@@ -21,9 +21,6 @@ import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
@@ -86,7 +83,7 @@ class BrevDataByggerA001Test {
     private final String orgnr2 = "10987654321";
 
     @BeforeEach
-    public void setUp() throws IkkeFunnetException, TekniskException {
+    public void setUp() {
         behandling = new Behandling();
         behandling.setId(123L);
 
@@ -157,17 +154,17 @@ class BrevDataByggerA001Test {
         when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(vilkaarType))).thenReturn(Optional.of(vilkaarsresultat));
     }
 
-    private BrevDataGrunnlag lagBrevDataGrunnlag() throws TekniskException {
+    private BrevDataGrunnlag lagBrevDataGrunnlag() {
         return lagBrevDataGrunnlag(new DoksysBrevbestilling.Builder().medBehandling(behandling).build());
     }
 
-    private BrevDataGrunnlag lagBrevDataGrunnlag(DoksysBrevbestilling brevbestilling) throws TekniskException {
+    private BrevDataGrunnlag lagBrevDataGrunnlag(DoksysBrevbestilling brevbestilling) {
         RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(ereg, mock(PersondataFasade.class));
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), mock(KodeverkService.class));
         return new BrevDataGrunnlag(brevbestilling, mock(KodeverkService.class), avklarteVirksomheterService, avklartefaktaService);
     }
 
-    private void leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) throws IkkeFunnetException, IntegrasjonException {
+    private void leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) {
         OrganisasjonDokument orgDok = new OrganisasjonDokument();
         orgDok.setNavn(Collections.singletonList(navn));
         orgDok.setOrgnummer(orgnummer);

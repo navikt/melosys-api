@@ -17,7 +17,6 @@ import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_vesentlig_virksomhet;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagArbeidsgiver;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -31,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class AvslagArbeidsgiverMapperTest {
 
     @Test
-    public void mapTilBrevXML() throws JAXBException, SAXException, TekniskException {
+    public void mapTilBrevXML() throws JAXBException, SAXException {
         FellesType fellesType = new FellesType();
         fellesType.setFagsaksnummer("MELTEST-2");
 

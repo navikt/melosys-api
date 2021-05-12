@@ -72,7 +72,7 @@ public final class MedlPeriodeKonverter {
     }
 
 
-    public static DekningMedl tilMedlTrygdeDekningEos(Trygdedekninger dekning) throws TekniskException {
+    public static DekningMedl tilMedlTrygdeDekningEos(Trygdedekninger dekning) {
         return switch (dekning) {
             case FULL_DEKNING_EOSFO, FULL_DEKNING_FTRL -> DekningMedl.FULL;
             case UTEN_DEKNING -> DekningMedl.UNNTATT;
@@ -80,7 +80,7 @@ public final class MedlPeriodeKonverter {
         };
     }
 
-    public static DekningMedl tilMedlTrygdeDekningFtrl(Trygdedekninger dekning, Folketrygdloven_kap2_bestemmelser bestemmelse) throws TekniskException {
+    public static DekningMedl tilMedlTrygdeDekningFtrl(Trygdedekninger dekning, Folketrygdloven_kap2_bestemmelser bestemmelse) {
         return switch (bestemmelse) {
             case FTRL_KAP2_2_8, FTRL_KAP2_2_8_FØRSTE_LEDD_A, FTRL_KAP2_2_8_FØRSTE_LEDD_B,
                 FTRL_KAP2_2_8_FØRSTE_LEDD_C, FTRL_KAP2_2_8_FØRSTE_LEDD_D, FTRL_KAP2_2_8_ANDRE_LEDD,
@@ -100,7 +100,7 @@ public final class MedlPeriodeKonverter {
         };
     }
 
-    public static GrunnlagMedl tilGrunnlagMedltype(LovvalgBestemmelse bestemmelse) throws TekniskException {
+    public static GrunnlagMedl tilGrunnlagMedltype(LovvalgBestemmelse bestemmelse) {
         //ART16_2 er pensjon og brukes foreløpig ikke i Melosys
         //ART16_1 og ART16_2 mappes til samme GrunnlMedl
         if (bestemmelse.equals(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2)) {
@@ -113,13 +113,13 @@ public final class MedlPeriodeKonverter {
         return grunnlagMedltype;
     }
 
-    public static GrunnlagMedl tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser bestemmelse) throws TekniskException {
+    public static GrunnlagMedl tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser bestemmelse) {
         return ofNullable(ftrlKap2BestemmelserGrunnLagMedlTabell.get(bestemmelse))
             .orElseThrow(() -> new TekniskException("Folketrygdloven bestemmelse støttes ikke. Kode: " +
                 bestemmelse.getKode() + " Beskrivelse: " + bestemmelse.getBeskrivelse()));
     }
 
-    public static LovvalgBestemmelse tilLovvalgBestemmelse(GrunnlagMedl grunnlagKode) throws TekniskException {
+    public static LovvalgBestemmelse tilLovvalgBestemmelse(GrunnlagMedl grunnlagKode) {
         LovvalgBestemmelse lovvalgBestemmelse = lovvalgsbestemmelseTilGrunnlagMedlTabell.inverse().get(grunnlagKode);
         if (lovvalgBestemmelse == null) {
             throw new TekniskException("GrunnlagMedlKode er ukjent. Kode: " + grunnlagKode.getKode());

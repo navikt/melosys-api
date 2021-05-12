@@ -47,17 +47,17 @@ public class BehandlingsresultatService {
         }
     }
 
-    public Behandlingsresultat hentBehandlingsresultat(long behandlingsid) throws IkkeFunnetException {
+    public Behandlingsresultat hentBehandlingsresultat(long behandlingsid) {
         return behandlingsresultatRepository.findById(behandlingsid)
             .orElseThrow(() -> new IkkeFunnetException("Kan ikke finne behandlingsresultat for behandling: " + behandlingsid));
     }
 
-    public Behandlingsresultat hentBehandlingsresultatMedKontrollresultat(long behandlingsid) throws IkkeFunnetException {
+    public Behandlingsresultat hentBehandlingsresultatMedKontrollresultat(long behandlingsid) {
         return behandlingsresultatRepository.findWithKontrollresultaterById(behandlingsid)
             .orElseThrow(() -> new IkkeFunnetException("Kan ikke finne behandlingsresultat for behandling: " + behandlingsid));
     }
 
-    public Behandlingsresultat hentBehandlingsresultatMedAvklartefakta(long behandlingsid) throws IkkeFunnetException {
+    public Behandlingsresultat hentBehandlingsresultatMedAvklartefakta(long behandlingsid) {
         return behandlingsresultatRepository.findWithAvklartefaktaById(behandlingsid)
             .orElseThrow(() -> new IkkeFunnetException("Kan ikke finne behandlingsresultat for behandling: " + behandlingsid));
     }
@@ -68,7 +68,7 @@ public class BehandlingsresultatService {
 
     @Transactional(rollbackFor = Exception.class)
     public void replikerBehandlingsresultat(Behandling tidligsteInaktiveBehandling, Behandling behandlingsreplika)
-        throws IkkeFunnetException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(tidligsteInaktiveBehandling.getId());
 
         Behandlingsresultat behandlingsresultatsreplika = (Behandlingsresultat) BeanUtils.cloneBean(behandlingsresultat);
@@ -194,7 +194,7 @@ public class BehandlingsresultatService {
         }
     }
 
-    public void oppdaterBehandlingsMaate(Long id, Behandlingsmaate behandlingsmaate) throws FunksjonellException {
+    public void oppdaterBehandlingsMaate(Long id, Behandlingsmaate behandlingsmaate) {
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(id);
         if (behandlingsresultat.getBehandlingsmåte() != Behandlingsmaate.UDEFINERT) {
             throw new FunksjonellException("Behandlingsmaate kan ikke oppdateres etter det er definert!");
@@ -204,7 +204,7 @@ public class BehandlingsresultatService {
         behandlingsresultatRepository.save(behandlingsresultat);
     }
 
-    public void oppdaterUtfallRegistreringUnntak(long behandlingID, Utfallregistreringunntak utfallRegistreringUnntak) throws FunksjonellException {
+    public void oppdaterUtfallRegistreringUnntak(long behandlingID, Utfallregistreringunntak utfallRegistreringUnntak) {
         final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
         if (behandlingsresultat.getUtfallRegistreringUnntak() != null) {
             throw new FunksjonellException("Utfall for registrering av unntak er allerede satt for behandlingsresultat " + behandlingID);
@@ -215,7 +215,7 @@ public class BehandlingsresultatService {
         behandlingsresultatRepository.save(behandlingsresultat);
     }
 
-    public void oppdaterUtfallUtpeking(long behandlingID, Utfallregistreringunntak utfallUtpeking) throws FunksjonellException {
+    public void oppdaterUtfallUtpeking(long behandlingID, Utfallregistreringunntak utfallUtpeking) {
         final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
         if (behandlingsresultat.getUtfallUtpeking() != null) {
             throw new FunksjonellException("Utfall for utpeking er allerede satt for behandlingsresultat " + behandlingID);
@@ -226,7 +226,7 @@ public class BehandlingsresultatService {
         behandlingsresultatRepository.save(behandlingsresultat);
     }
 
-    public void oppdaterBegrunnelser(long behandlingID, Set<BehandlingsresultatBegrunnelse> begrunnelser, String begrunnelseFritekst) throws IkkeFunnetException {
+    public void oppdaterBegrunnelser(long behandlingID, Set<BehandlingsresultatBegrunnelse> begrunnelser, String begrunnelseFritekst) {
         final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
         begrunnelser.forEach(b -> b.setBehandlingsresultat(behandlingsresultat));
         behandlingsresultat.getBehandlingsresultatBegrunnelser().addAll(begrunnelser);
