@@ -1,4 +1,4 @@
-package no.nav.melosys.service.vedtak.dto;
+package no.nav.melosys.service.vedtak;
 
 public class FattFtrlVedtakRequest extends FattVedtakRequest {
     private final String fritekstBegrunnelse;

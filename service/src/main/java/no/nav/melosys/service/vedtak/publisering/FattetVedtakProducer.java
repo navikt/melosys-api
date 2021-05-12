@@ -1,9 +1,9 @@
-package no.nav.melosys.service.vedtak;
+package no.nav.melosys.service.vedtak.publisering;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.service.JsonSchemaValidator;
-import no.nav.melosys.service.vedtak.dto.FattetVedtak;
+import no.nav.melosys.service.vedtak.publisering.dto.FattetVedtak;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.steg.hendelse;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
-import no.nav.melosys.service.vedtak.FattetVedtakService;
+import no.nav.melosys.service.vedtak.publisering.FattetVedtakService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

@@ -1,4 +1,4 @@
-package no.nav.melosys.service.vedtak;
+package no.nav.melosys.service.vedtak.publisering;
 
 import java.time.ZoneId;
 import java.util.Collection;
@@ -19,16 +19,16 @@ import no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.vedtak.dto.Fullmektig;
-import no.nav.melosys.service.vedtak.dto.*;
+import no.nav.melosys.service.vedtak.publisering.dto.*;
+import no.nav.melosys.service.vedtak.publisering.dto.Fullmektig;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static java.time.LocalDate.ofInstant;
 import static java.util.Collections.emptyList;
-import static no.nav.melosys.service.vedtak.dto.IdentifikatorType.BRUKER;
-import static no.nav.melosys.service.vedtak.dto.IdentifikatorType.ORGANISASJON;
+import static no.nav.melosys.service.vedtak.publisering.dto.IdentifikatorType.BRUKER;
+import static no.nav.melosys.service.vedtak.publisering.dto.IdentifikatorType.ORGANISASJON;
 import static org.springframework.util.ObjectUtils.isEmpty;
 import static org.springframework.util.StringUtils.hasText;
 

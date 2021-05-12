@@ -30,7 +30,7 @@ import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.soknad.SoknadMottatt;
-import no.nav.melosys.service.vedtak.dto.FattFtrlVedtakRequest;
+import no.nav.melosys.service.vedtak.FattFtrlVedtakRequest;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

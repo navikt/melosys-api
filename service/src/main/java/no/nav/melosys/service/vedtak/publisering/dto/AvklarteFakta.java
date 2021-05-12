@@ -1,4 +1,4 @@
-package no.nav.melosys.service.vedtak.dto;
+package no.nav.melosys.service.vedtak.publisering.dto;
 
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 

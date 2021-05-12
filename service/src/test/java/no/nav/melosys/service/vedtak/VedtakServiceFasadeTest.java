@@ -9,8 +9,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.vedtak.dto.FattEosVedtakRequest;
-import no.nav.melosys.service.vedtak.dto.FattFtrlVedtakRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
