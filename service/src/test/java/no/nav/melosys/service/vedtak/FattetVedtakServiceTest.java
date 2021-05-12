@@ -20,6 +20,7 @@ import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.vedtak.dto.FattetVedtak;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,6 +48,9 @@ class FattetVedtakServiceTest {
     @Mock
     private BehandlingsresultatService mockBehandlingsresultatService;
 
+    @Mock
+    private PersondataFasade mockPersondataFasade;
+
     @Captor
     private ArgumentCaptor<FattetVedtak> fattetVedtakCaptor;
 
@@ -54,7 +58,7 @@ class FattetVedtakServiceTest {
 
     @BeforeEach
     void setUp() {
-        fattetVedtakService = new FattetVedtakService(mockFattetVedtakProducer, mockBehandlingService, mockBehandlingsresultatService);
+        fattetVedtakService = new FattetVedtakService(mockFattetVedtakProducer, mockBehandlingService, mockBehandlingsresultatService, mockPersondataFasade);
     }
 
     @Test

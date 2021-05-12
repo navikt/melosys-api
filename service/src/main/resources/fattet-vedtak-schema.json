@@ -59,6 +59,13 @@
         "trygdesats",
         "avgiftskode"
       ]
+    },
+    "identifikatorType": {
+      "type": "string",
+      "enum": [
+        "BRUKER",
+        "ORGANISASJON"
+      ]
     }
   },
   "required": [
@@ -401,7 +408,7 @@
           "type": "string"
         },
         "type": {
-          "type": "string"
+          "$ref": "#/definitions/identifikatorType"
         }
       },
       "required": [
@@ -416,7 +423,7 @@
           "type": "string"
         },
         "type": {
-          "type": "string"
+          "$ref": "#/definitions/identifikatorType"
         },
         "representantNrAvgiftssystem": {
           "type": "string"
