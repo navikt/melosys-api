@@ -5,14 +5,12 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.ctc.wstx.util.StringUtil;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.pdl.dto.person.Navn;
@@ -25,14 +23,11 @@ import no.nav.melosys.service.vedtak.dto.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 
 import static java.time.LocalDate.ofInstant;
 import static java.util.Collections.emptyList;
-import static java.util.Optional.ofNullable;
 import static no.nav.melosys.service.vedtak.dto.IdentifikatorType.BRUKER;
 import static no.nav.melosys.service.vedtak.dto.IdentifikatorType.ORGANISASJON;
-import static org.springframework.util.ObjectUtils.isEmpty;
 import static org.springframework.util.StringUtils.hasText;
 
 @Service
@@ -194,7 +189,7 @@ public class FattetVedtakService {
 
             return new RepresentantAvgift(
                 erBruker ? fnr : betalesAv.getOrgnr(),
-                erBruker  ? BRUKER : ORGANISASJON,
+                erBruker ? BRUKER : ORGANISASJON,
                 fastsattTrygdeavgift.getRepresentantNr()
             );
         }).orElse(null);
