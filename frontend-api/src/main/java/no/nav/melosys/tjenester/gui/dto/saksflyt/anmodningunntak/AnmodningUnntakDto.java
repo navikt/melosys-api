@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.dto.anmodning;
+package no.nav.melosys.tjenester.gui.dto.saksflyt.anmodningunntak;
 
 import java.util.ArrayList;
 import java.util.Collection;
