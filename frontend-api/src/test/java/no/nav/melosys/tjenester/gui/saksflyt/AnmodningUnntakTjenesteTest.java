@@ -6,7 +6,7 @@ import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
-import no.nav.melosys.tjenester.gui.dto.AnmodningUnntakDto;
+import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningUnntakDto;
 import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.VedleggDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
