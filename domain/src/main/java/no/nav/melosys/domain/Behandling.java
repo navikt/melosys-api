@@ -380,10 +380,8 @@ public class Behandling extends RegistreringsInfo {
         return erBehandlingAvSøknad(behandlingstema.getKode());
     }
 
-    public boolean erElektroniskSøknad()
-    {
-        if (behandlingsgrunnlag != null)
-        {
+    public boolean erElektroniskSøknad() {
+        if (behandlingsgrunnlag != null) {
             return behandlingsgrunnlag.getType() == Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS;
         }
         return false;
