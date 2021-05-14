@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.sed;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsmaate;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -52,7 +53,7 @@ public class BestemBehandlingsmåteSed implements StegBehandler {
         if (skalGodkjenneUnntaksperiode(behandling, behandlingsresultat)) {
             log.info("Behandling {} tema {} behandles automatisk", behandlingID, behandling.getTema());
             behandlingsresultatService.oppdaterBehandlingsMaate(behandlingID, Behandlingsmaate.AUTOMATISERT);
-            unntaksperiodeService.godkjennPeriode(behandling.getId(), false, null);
+            unntaksperiodeService.godkjennPeriode(behandling.getId(), false, prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
         } else {
             log.info("Oppretter oppgave for behandling {}", behandlingID);
             behandlingsresultatService.oppdaterBehandlingsMaate(behandlingID, Behandlingsmaate.DELVIS_AUTOMATISERT);

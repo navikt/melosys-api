@@ -49,9 +49,9 @@ public class AnmodningUnntakTjeneste {
 
     @PutMapping(value = "{behandlingID}/svar", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
     @ApiOperation(value = "Sender et svar på anmodning om unntak basert på AnmodningsperiodeSvar som er registrert på behandlingen")
-    public ResponseEntity<Void> svar(@PathVariable("behandlingID") long behandlingID) {
+    public ResponseEntity<Void> svar(@PathVariable("behandlingID") long behandlingID, @RequestBody String ytterligereInfo) {
         tilgangService.sjekkTilgang(behandlingID);
-        anmodningUnntakService.anmodningOmUnntakSvar(behandlingID);
+        anmodningUnntakService.anmodningOmUnntakSvar(behandlingID, ytterligereInfo);
         return ResponseEntity.ok().build();
     }
 }
