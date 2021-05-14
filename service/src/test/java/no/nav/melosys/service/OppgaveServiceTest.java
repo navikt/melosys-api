@@ -176,9 +176,6 @@ class OppgaveServiceTest {
 
         verify(oppgaveFasade).opprettOppgave(oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(mottattString);
-        //Oppgave oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(fagsaksnummer);
-        //assertThat(oppgave.getBeskrivelse()).isEqualTo(mottattString);
-
     }
 
     @Test
