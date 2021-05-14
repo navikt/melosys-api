@@ -13,6 +13,7 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
+import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -377,6 +378,15 @@ public class Behandling extends RegistreringsInfo {
 
     public static boolean erBehandlingAvSøknad(Behandlingstema behandlingstema) {
         return erBehandlingAvSøknad(behandlingstema.getKode());
+    }
+
+    public boolean erElektroniskSøknad()
+    {
+        if (behandlingsgrunnlag != null)
+        {
+            return behandlingsgrunnlag.getType() == Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS;
+        }
+        return false;
     }
 
     public static boolean erBehandlingAvSøknad(String behandlingstemaKode) {

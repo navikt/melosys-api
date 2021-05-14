@@ -123,7 +123,7 @@ public class OppgaveService {
         Optional<Oppgave> eksisterendeOppgave = finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         if (eksisterendeOppgave.isEmpty()) {
-            String beskrivelse = behandling.getBehandlingsgrunnlag() != null ? behandling.getBehandlingsgrunnlag().getType() == Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS ? "Mottatt elektronisk søknad" : null : null;
+            String beskrivelse = behandling.erElektroniskSøknad() ? "Mottatt elektronisk søknad"  : null;
             Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType())
                 .setTilordnetRessurs(tilordnetRessurs)
                 .setJournalpostId(journalpostID)
