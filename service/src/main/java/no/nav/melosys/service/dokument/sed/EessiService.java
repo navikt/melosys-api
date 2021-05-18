@@ -148,8 +148,8 @@ public class EessiService {
         return true;
     }
 
-    public List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, List<String> statuser) {
-        return eessiConsumer.hentTilknyttedeBucer(gsakSaksnummer, statuser);
+    public List<BucInformasjon> hentTilknyttedeBucer(long arkivsakID, List<String> statuser) {
+        return eessiConsumer.hentTilknyttedeBucer(arkivsakID, statuser);
     }
 
     public boolean støtterAutomatiskBehandling(String journalpostID) {
