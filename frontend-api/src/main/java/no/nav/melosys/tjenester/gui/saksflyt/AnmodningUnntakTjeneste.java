@@ -48,11 +48,11 @@ public class AnmodningUnntakTjeneste {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping(value = "svar", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
+    @PostMapping("{behandlingID}/svar")
     @ApiOperation(value = "Sender et svar på anmodning om unntak basert på AnmodningsperiodeSvar som er registrert på behandlingen")
-    public ResponseEntity<Void> svar(@RequestBody AnmodningUnntakSvarDto anmodningUnntakSvarDto) {
-        tilgangService.sjekkTilgang(anmodningUnntakSvarDto.behandlingID());
-        anmodningUnntakService.anmodningOmUnntakSvar(anmodningUnntakSvarDto.behandlingID(), anmodningUnntakSvarDto.ytterligereInfo());
+    public ResponseEntity<Void> svar(@PathVariable("behandlingID") long behandlingID, @RequestBody AnmodningUnntakSvarDto anmodningUnntakSvarDto) {
+        tilgangService.sjekkTilgang(behandlingID);
+        anmodningUnntakService.anmodningOmUnntakSvar(behandlingID, anmodningUnntakSvarDto.ytterligereInfo());
         return ResponseEntity.ok().build();
     }
 }
