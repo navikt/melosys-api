@@ -42,7 +42,7 @@ import org.springframework.context.event.ApplicationEventMulticaster;
 
 import static no.nav.melosys.domain.kodeverk.Vedtakstyper.FØRSTEGANGSVEDTAK;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
-import static no.nav.melosys.service.vedtak.EosVedtakService.FRIST_KLAGE_UKER;
+import static no.nav.melosys.service.vedtak.VedtakServiceFasade.FRIST_KLAGE_UKER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
@@ -117,7 +117,7 @@ class EosVedtakServiceTest {
             .containsExactly(FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
         verify(behandlingService).lagre(behandling);
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
             any(),
             eq(FASTSATT_LOVVALGSLAND),
             eq(behandlingsresultatFritekst),
@@ -145,7 +145,7 @@ class EosVedtakServiceTest {
             .containsExactly(FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
         verify(behandlingService).lagre(behandling);
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
             any(Behandling.class),
             eq(FASTSATT_LOVVALGSLAND),
             eq(behandlingsresultatFritekst),
@@ -177,7 +177,7 @@ class EosVedtakServiceTest {
             .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getRevurderBegrunnelse, VedtakMetadata::getVedtakKlagefrist)
             .containsExactly(FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
             eq(behandling),
             eq(FASTSATT_LOVVALGSLAND),
             eq(behandlingsresultatFritekst),
@@ -204,7 +204,7 @@ class EosVedtakServiceTest {
             .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getRevurderBegrunnelse, VedtakMetadata::getVedtakKlagefrist)
             .containsExactly(vedtakstype, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
             eq(behandling),
             eq(resultatType),
             isNull(),
@@ -222,7 +222,7 @@ class EosVedtakServiceTest {
 
         vedtakService.fattVedtak(behandling, lagRequest(FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK, null, null, null));
 
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
             eq(behandling),
             eq(FASTSATT_LOVVALGSLAND),
             isNull(),

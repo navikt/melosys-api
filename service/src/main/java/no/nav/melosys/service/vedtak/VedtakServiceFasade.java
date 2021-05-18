@@ -22,6 +22,8 @@ public class VedtakServiceFasade {
     private final EosVedtakSystemService eosVedtakSystemService;
     private final FtrlVedtakService ftrlVedtakService;
 
+    public static final int FRIST_KLAGE_UKER = 6;
+
     @Autowired
     public VedtakServiceFasade(BehandlingService behandlingService, EosVedtakService eosVedtakService,
                                EosVedtakSystemService eosVedtakSystemService, FtrlVedtakService ftrlVedtakService) {

@@ -74,6 +74,7 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
         final byte[] MOCK_PDF = "bytes fra et brev".getBytes();
         when(dokumentServiceFasade.produserUtkast(anyLong(), any())).thenReturn(MOCK_PDF);
         BrevbestillingDto brevBestillingDto = new BrevbestillingDto.Builder()
+            .medProduserbardokument(Produserbaredokumenter.ATTEST_A1)
             .medBegrunnelseKode("KODE")
             .medFritekst("Fritekst.")
             .medMottaker(Aktoersroller.MYNDIGHET)
@@ -82,7 +83,7 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
 
         ResponseEntity response = dokumentTjeneste.produserUtkastBrev(1L, Produserbaredokumenter.ATTEST_A1, brevBestillingDto);
         assertThat(response.getBody()).isEqualTo(MOCK_PDF);
-        valider(brevBestillingDto, "dokumenter-pdf-utkast-brev-post-schema.json", new ObjectMapper());
+        valider(brevBestillingDto, "dokumenter-v2-utkast-post-schema.json", new ObjectMapper());
     }
 
     @Test

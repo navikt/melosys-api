@@ -74,7 +74,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         FattFtrlVedtakDto fattVedtakDto = new FattFtrlVedtakDto();
         fattVedtakDto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
         fattVedtakDto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
-        fattVedtakDto.setFritekstInnledning("Innledning");
+        fattVedtakDto.setFritekstBegrunnelse("Begrunnelse");
 
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 

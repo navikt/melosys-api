@@ -1,6 +1,5 @@
 {
-  "behandlingsresultatTypeKode": "FASTSATT_LOVVALGSLAND",
-  "fritekstInnledning": "Fritekst innledning",
+  "behandlingsresultatTypeKode": "MEDLEM_I_FOLKETRYGDEN",
   "fritekstBegrunnelse": "Fritekst begrunnelse",
   "vedtakstype": "FØRSTEGANGSVEDTAK"
 }

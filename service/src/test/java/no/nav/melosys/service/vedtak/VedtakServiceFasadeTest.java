@@ -184,7 +184,7 @@ class VedtakServiceFasadeTest {
         return new FattFtrlVedtakRequest.Builder()
             .medBehandlingsresultat(FASTSATT_LOVVALGSLAND)
             .medVedtakstype(FØRSTEGANGSVEDTAK)
-            .medFritekstInnledning("Innledning")
+            .medFritekstBegrunnelse("Begrunnelse")
             .build();
     }
 }
