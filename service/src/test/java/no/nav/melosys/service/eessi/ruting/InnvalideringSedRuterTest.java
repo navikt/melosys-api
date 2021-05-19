@@ -6,10 +6,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.SedInformasjon;
+import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -28,6 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -48,6 +51,8 @@ class InnvalideringSedRuterTest {
     @Mock
     private EessiService eessiService;
 
+    private FakeUnleash fakeUnleash = new FakeUnleash();
+
     private InnvalideringSedRuter innvalideringSedRuter;
 
     private final long behandlingID = 111;
@@ -60,11 +65,23 @@ class InnvalideringSedRuterTest {
     @BeforeEach
     void setup() {
         innvalideringSedRuter = new InnvalideringSedRuter(fagsakService, prosessinstansService, oppgaveService,
-            behandlingsresultatService, medlPeriodeService, eessiService);
+            behandlingsresultatService, medlPeriodeService, eessiService, fakeUnleash);
 
         melosysEessiMelding.setAktoerId("12312412");
         melosysEessiMelding.setRinaSaksnummer("143141");
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
+    }
+
+    @Test
+    void gjelderSedTyper_featureTogglePå_collectionMedX008() {
+        fakeUnleash.enableAll();
+        assertThat(innvalideringSedRuter.gjelderSedTyper()).containsExactly(SedType.X008);
+    }
+
+    @Test
+    void gjelderSedTyper_featureToggleAv_tomCollection() {
+        fakeUnleash.disableAll();
+        assertThat(innvalideringSedRuter.gjelderSedTyper()).isEmpty();
     }
 
     @Test

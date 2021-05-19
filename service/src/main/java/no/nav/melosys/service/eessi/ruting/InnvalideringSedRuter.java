@@ -1,10 +1,8 @@
 package no.nav.melosys.service.eessi.ruting;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.PeriodeOmLovvalg;
@@ -35,23 +33,29 @@ public class InnvalideringSedRuter implements SedRuterForSedTyper {
     private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
     private final EessiService eessiService;
+    private final Unleash unleash;
 
     public InnvalideringSedRuter(FagsakService fagsakService,
                                  ProsessinstansService prosessinstansService,
                                  OppgaveService oppgaveService,
                                  BehandlingsresultatService behandlingsresultatService,
-                                 MedlPeriodeService medlPeriodeService, EessiService eessiService) {
+                                 MedlPeriodeService medlPeriodeService, EessiService eessiService, Unleash unleash) {
         this.fagsakService = fagsakService;
         this.prosessinstansService = prosessinstansService;
         this.oppgaveService = oppgaveService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
         this.eessiService = eessiService;
+        this.unleash = unleash;
     }
 
     @Override
     public Collection<SedType> gjelderSedTyper() {
-        return Set.of(SedType.X008);
+        if (unleash.isEnabled("melosys.sed.x008")) {
+            return Set.of(SedType.X008);
+        } else {
+            return Collections.emptySet();
+        }
     }
 
     @Override
