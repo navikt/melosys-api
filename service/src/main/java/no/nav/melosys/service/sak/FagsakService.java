@@ -350,7 +350,7 @@ public class FagsakService {
         log.info("Fagsak {} med behandling avsluttet", fagsak.getSaksnummer());
     }
 
-    protected void oppdaterStatus(Fagsak fagsak, Saksstatuser saksstatus) {
+    public void oppdaterStatus(Fagsak fagsak, Saksstatuser saksstatus) {
         fagsak.setStatus(saksstatus);
         fagsakRepository.save(fagsak);
     }

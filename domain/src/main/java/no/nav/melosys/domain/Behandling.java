@@ -372,6 +372,10 @@ public class Behandling extends RegistreringsInfo {
         return erRegistreringAvUnntak(tema.getKode());
     }
 
+    public boolean erAnmodningOmUnntak() {
+        return erAnmodningOmUnntak(tema.getKode());
+    }
+
     public static boolean erGyldigBehandlingAvSøknad(Behandlingstema behandlingstema) {
         return BEHANDLINGSTEMA_SØKNAD.contains(behandlingstema);
     }
