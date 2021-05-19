@@ -7,6 +7,7 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.eessi.SedInformasjon;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -95,16 +96,21 @@ public class InnvalideringSedRuter implements SedRuterForSedTyper {
     }
 
     private void annullerSakOgBehandling(Behandling behandling) {
+        Optional<? extends PeriodeOmLovvalg> periodeOmLovvalgMedMedlPeriode;
+        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+
         if (behandling.erAktiv()) {
-            log.info("Behandling vil bli avsluttet og status settes til annullert");
+            log.info("Behandling {} vil bli avsluttet og status settes til annullert", behandling.getId());
             fagsakService.avsluttFagsakOgBehandling(behandling.getFagsak(), Saksstatuser.AVSLUTTET); //FIXME: Saksstatuser.ANNULLERT
+            periodeOmLovvalgMedMedlPeriode = behandlingsresultat.finnValidertAnmodningsperiode().filter(a -> a.getMedlPeriodeID() != null);
         } else {
-            log.info("Behandling vil bli avsluttet og status settes til annullert");
+            log.info("Saksstatus settes til annullert for behandling {}", behandling.getId());
             fagsakService.oppdaterStatus(behandling.getFagsak(),Saksstatuser.AVSLUTTET);//FIXME: ANNULLERT
-            behandlingsresultatService.hentBehandlingsresultat(behandling.getId())
+            periodeOmLovvalgMedMedlPeriode = behandlingsresultatService.hentBehandlingsresultat(behandling.getId())
                 .finnValidertLovvalgsperiode()
-                .filter(l -> l.getMedlPeriodeID() != null)
-                .ifPresent(l -> medlPeriodeService.avvisPeriodeOpphørt(l.getMedlPeriodeID()));
+                .filter(l -> l.getMedlPeriodeID() != null);
         }
+
+        periodeOmLovvalgMedMedlPeriode.ifPresent(periode -> medlPeriodeService.avvisPeriodeOpphørt(periode.getMedlPeriodeID()));
     }
 }

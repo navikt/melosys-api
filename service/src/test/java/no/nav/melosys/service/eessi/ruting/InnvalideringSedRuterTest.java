@@ -105,11 +105,13 @@ class InnvalideringSedRuterTest {
     }
 
     @Test
-    void rutSedTilBehandling_behandlingErUtlandUtstasjonertOgPågående_oppdaterSaksstatusAnnullert(){
+    void rutSedTilBehandling_behandlingErUtstasjoneringOgAktiv_oppdaterSaksstatusAnnullert(){
         var fagsak = lagFagsak(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, Behandlingsstatus.UNDER_BEHANDLING);
         fagsak.hentSistAktiveBehandling().getSaksopplysninger().add(lagSedDokument());
+
         when(eessiService.hentTilknyttedeBucer(arkivsakID, List.of())).thenReturn(lagBucInformasjon("AVBRUTT"));
         when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(lagBehandlingsresultat(false));
 
         innvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
 
@@ -118,16 +120,16 @@ class InnvalideringSedRuterTest {
     }
 
     @Test
-    void rutSedTilBehandling_behandlingErUnntakNorskTrygvØvrigOgBehandlingPågående_oppdaterSaksstatusAnnulert(){
+    void rutSedTilBehandling_behandlingErUnntakNorskTrygvØvrigAktivSedIkkeAnnullert_oppretterBehandlingsoppgave(){
         var fagsak = lagFagsak(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, Behandlingsstatus.UNDER_BEHANDLING);
         fagsak.hentSistAktiveBehandling().getSaksopplysninger().add(lagSedDokument());
 
-        when(eessiService.hentTilknyttedeBucer(arkivsakID, List.of())).thenReturn(lagBucInformasjon("AVBRUTT"));
+        when(eessiService.hentTilknyttedeBucer(arkivsakID, List.of())).thenReturn(lagBucInformasjon("ÅPEN"));
         when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
 
         innvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
-        verify(fagsakService).avsluttFagsakOgBehandling(fagsak, Saksstatuser.AVSLUTTET); //FIXME: ANNULERT
-
+        verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(any(Behandling.class),
+            eq(melosysEessiMelding.getJournalpostId()), eq(melosysEessiMelding.getAktoerId()), isNull());
     }
 
 
