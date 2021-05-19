@@ -100,7 +100,7 @@ class InnvalideringSedRuterTest {
 
         innvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
 
-        verify(fagsakService).oppdaterStatus(fagsak, Saksstatuser.AVSLUTTET); //FIXME: ANNULERT
+        verify(fagsakService).oppdaterStatus(fagsak, Saksstatuser.ANNULLERT);
         verify(medlPeriodeService).avvisPeriodeOpphørt(behandlingsresultat.hentValidertLovvalgsperiode().getMedlPeriodeID());
     }
 
@@ -115,7 +115,7 @@ class InnvalideringSedRuterTest {
 
         innvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
 
-        verify(fagsakService).avsluttFagsakOgBehandling(fagsak, Saksstatuser.AVSLUTTET); //FIXME: ANNULERT
+        verify(fagsakService).avsluttFagsakOgBehandling(fagsak, Saksstatuser.ANNULLERT);
 
     }
 

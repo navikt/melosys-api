@@ -101,11 +101,11 @@ public class InnvalideringSedRuter implements SedRuterForSedTyper {
 
         if (behandling.erAktiv()) {
             log.info("Behandling {} vil bli avsluttet og status settes til annullert", behandling.getId());
-            fagsakService.avsluttFagsakOgBehandling(behandling.getFagsak(), Saksstatuser.AVSLUTTET); //FIXME: Saksstatuser.ANNULLERT
+            fagsakService.avsluttFagsakOgBehandling(behandling.getFagsak(), Saksstatuser.ANNULLERT);
             periodeOmLovvalgMedMedlPeriode = behandlingsresultat.finnValidertAnmodningsperiode().filter(a -> a.getMedlPeriodeID() != null);
         } else {
             log.info("Saksstatus settes til annullert for behandling {}", behandling.getId());
-            fagsakService.oppdaterStatus(behandling.getFagsak(),Saksstatuser.AVSLUTTET);//FIXME: ANNULLERT
+            fagsakService.oppdaterStatus(behandling.getFagsak(),Saksstatuser.ANNULLERT);
             periodeOmLovvalgMedMedlPeriode = behandlingsresultatService.hentBehandlingsresultat(behandling.getId())
                 .finnValidertLovvalgsperiode()
                 .filter(l -> l.getMedlPeriodeID() != null);
