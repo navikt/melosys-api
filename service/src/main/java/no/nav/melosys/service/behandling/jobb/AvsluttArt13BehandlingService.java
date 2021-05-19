@@ -8,8 +8,6 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -43,8 +41,8 @@ public class AvsluttArt13BehandlingService {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void avsluttBehandlingHvisToMndPassert(long behandlingID) throws FunksjonellException, TekniskException {
+    @Transactional
+    public void avsluttBehandlingHvisToMndPassert(long behandlingID) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
 
@@ -53,7 +51,7 @@ public class AvsluttArt13BehandlingService {
         }
     }
 
-    private void avsluttBehandling(Behandling behandling, Behandlingsresultat behandlingsresultat) throws FunksjonellException, TekniskException {
+    private void avsluttBehandling(Behandling behandling, Behandlingsresultat behandlingsresultat) {
 
         log.info("To måneder har passert siden saksbehandling for behandling {}. Forsøker å avslutte den", behandling.getId());
         Lovvalgsperiode lovvalgsperiode = hentLovvalgsperiode(behandlingsresultat);
@@ -73,7 +71,7 @@ public class AvsluttArt13BehandlingService {
     }
 
 
-    private boolean toMndHarPassertSidenSaksbehandling(Behandling behandling, Behandlingsresultat behandlingsresultat) throws FunksjonellException {
+    private boolean toMndHarPassertSidenSaksbehandling(Behandling behandling, Behandlingsresultat behandlingsresultat) {
         if (behandling.kanResultereIVedtak() && !erUtpekingUtenVedtak(behandlingsresultat)) {
 
             if (!behandlingsresultat.harVedtak()) {

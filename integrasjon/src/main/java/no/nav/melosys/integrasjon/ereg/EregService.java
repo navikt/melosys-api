@@ -34,7 +34,7 @@ public class EregService implements EregFasade {
     }
 
     @Override
-    public Saksopplysning hentOrganisasjon(String orgnummer) throws IkkeFunnetException, IntegrasjonException {
+    public Saksopplysning hentOrganisasjon(String orgnummer) {
         HentOrganisasjonResponse response = hentOrganisasjonResponse(orgnummer);
 
         // Response -> xml
@@ -60,7 +60,7 @@ public class EregService implements EregFasade {
     }
 
     @Override
-    public String hentOrganisasjonNavn(String orgnummer) throws IkkeFunnetException, IntegrasjonException {
+    public String hentOrganisasjonNavn(String orgnummer) {
         OrganisasjonDokument organisasjonDokument = (OrganisasjonDokument) hentOrganisasjon(orgnummer).getDokument();
         return organisasjonDokument.getNavn();
     }
@@ -74,7 +74,7 @@ public class EregService implements EregFasade {
         }
     }
 
-    private HentOrganisasjonResponse hentOrganisasjonResponse(String orgnummer) throws IkkeFunnetException, IntegrasjonException {
+    private HentOrganisasjonResponse hentOrganisasjonResponse(String orgnummer) {
         HentOrganisasjonRequest request = new HentOrganisasjonRequest();
         request.setOrgnummer(orgnummer);
 

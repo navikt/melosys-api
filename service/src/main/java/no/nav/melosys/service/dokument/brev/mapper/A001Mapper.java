@@ -34,7 +34,7 @@ import static no.nav.melosys.service.dokument.brev.mapper.felles.Vilkaarbegrunne
 
 class A001Mapper {
 
-    SEDA001 mapSEDA001(BrevDataA001 brevData) throws TekniskException {
+    SEDA001 mapSEDA001(BrevDataA001 brevData) {
         SEDA001 seda001 = new SEDA001();
 
         seda001.setAntallVedlegg("0");
@@ -90,8 +90,7 @@ class A001Mapper {
         return ansettelsesperiodeType;
     }
 
-    private TidligereLovvalgsperiodeListeType mapTidligereLovvalgsperioder(Collection<Lovvalgsperiode> tidligerePerioder)
-        throws TekniskException {
+    private TidligereLovvalgsperiodeListeType mapTidligereLovvalgsperioder(Collection<Lovvalgsperiode> tidligerePerioder) {
         TidligereLovvalgsperiodeListeType tidligereLovvalgsperiodeListeType = new TidligereLovvalgsperiodeListeType();
         for (Lovvalgsperiode lovvalgsperiode : tidligerePerioder) {
             PeriodeType periode = new PeriodeType();
@@ -109,7 +108,7 @@ class A001Mapper {
         return tidligereLovvalgsperiodeListeType;
     }
 
-    private TidligereAnmodningListeType mapTidligereAnmodningListe(List<LocalDate> tidligereAnmodningdatoer) throws TekniskException {
+    private TidligereAnmodningListeType mapTidligereAnmodningListe(List<LocalDate> tidligereAnmodningdatoer) {
         TidligereAnmodningListeType tidligereAnmodningListeType = new TidligereAnmodningListeType();
         for (LocalDate dato : tidligereAnmodningdatoer) {
             TidligereAnmodningType tidligereAnmodningType = new TidligereAnmodningType();
@@ -139,8 +138,7 @@ class A001Mapper {
         return trygdemyndighet;
     }
 
-    private PersonType mapPerson(PersonDokument personDok, StrukturertAdresse bostedsadresse, Optional<String> utenlandskIdent)
-        throws TekniskException {
+    private PersonType mapPerson(PersonDokument personDok, StrukturertAdresse bostedsadresse, Optional<String> utenlandskIdent) {
         PersonType person = new PersonType();
         person.setPersonnavn(lagPersonnavn(personDok));
         person.setStatsborgerskapListe(mapStatsborgerskapListe(personDok));
@@ -283,8 +281,7 @@ class A001Mapper {
         return selvstendigeVirksomheter;
     }
 
-    private LovvalgsPeriodeListeType mapAnmodningsperioder(Collection<Anmodningsperiode> anmodningsperioder)
-        throws TekniskException {
+    private LovvalgsPeriodeListeType mapAnmodningsperioder(Collection<Anmodningsperiode> anmodningsperioder) {
         LovvalgsPeriodeListeType anmodningsperoderBrev = new LovvalgsPeriodeListeType();
         for (Anmodningsperiode periode : anmodningsperioder) {
             LovvalgsPeriodeType lovvalgsperiodeBrev = mapAnmodningsperiode(periode);
@@ -296,7 +293,7 @@ class A001Mapper {
         return anmodningsperoderBrev;
     }
 
-    private LovvalgsPeriodeType mapAnmodningsperiode(Anmodningsperiode periode) throws TekniskException {
+    private LovvalgsPeriodeType mapAnmodningsperiode(Anmodningsperiode periode) {
         LovvalgsPeriodeType lovvalgsperiodeBrev = new LovvalgsPeriodeType();
         try {
             lovvalgsperiodeBrev.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(periode.getFom()));

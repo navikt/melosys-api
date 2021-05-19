@@ -2,17 +2,15 @@ package no.nav.melosys.service.sak;
 
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.sak.SakConsumer;
 import no.nav.melosys.integrasjon.sak.dto.SakDto;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,7 +18,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ArkivsakServiceTest {
     @Mock
     private SakConsumer sakConsumer;
@@ -30,13 +28,13 @@ public class ArkivsakServiceTest {
     @Captor
     private ArgumentCaptor<SakDto> captor;
 
-    @Before
+    @BeforeEach
     public void setup() {
         arkivsakService = new ArkivsakService(sakConsumer);
     }
 
     @Test
-    public void opprettSak_behandlingstypeSøknad_temaMed() throws FunksjonellException, TekniskException {
+    public void opprettSak_behandlingstypeSøknad_temaMed() {
         final String saksnummer = "MEL-123";
         final Behandlingstema behandlingstema = Behandlingstema.UTSENDT_ARBEIDSTAKER;
         final String aktørID = "123123123";
@@ -56,7 +54,7 @@ public class ArkivsakServiceTest {
     }
 
     @Test
-    public void opprettSak_behandlingstypeRegistreringUnntak_temaUfm() throws FunksjonellException, TekniskException {
+    public void opprettSak_behandlingstypeRegistreringUnntak_temaUfm() {
         final String saksnummer = "MEL-123";
         final Behandlingstema behandlingstema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
         final String aktørID = "123123123";
@@ -76,7 +74,7 @@ public class ArkivsakServiceTest {
     }
 
     @Test
-    public void hentTemaFraSak_temaErUfm_forventUfm() throws FunksjonellException, TekniskException {
+    public void hentTemaFraSak_temaErUfm_forventUfm() {
         final Long sakID = 11111L;
         SakDto sakDto = new SakDto();
         sakDto.setTema(Tema.UFM.getKode());

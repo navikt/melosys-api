@@ -7,27 +7,25 @@ import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.inntk.inntekt.InntektMock;
 import no.nav.tjeneste.virksomhet.inntekt.v3.binding.HentInntektListeBolkHarIkkeTilgangTilOensketAInntektsfilter;
 import no.nav.tjeneste.virksomhet.inntekt.v3.binding.HentInntektListeBolkUgyldigInput;
 import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.Uttrekksperiode;
 import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkRequest;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class InntektServiceTest {
 
     @Spy
@@ -38,14 +36,14 @@ public class InntektServiceTest {
     @Captor
     private ArgumentCaptor<HentInntektListeBolkRequest> captor;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         DokumentFactory dokumentFactory = new DokumentFactory(JaxbConfig.jaxb2Marshaller(), new XsltTemplatesFactory());
         inntektService = new InntektService(inntektMock, dokumentFactory);
     }
 
     @Test
-    public void hentInntektListe_periodeEtterJan2015_henterInntekt() throws FunksjonellException, IntegrasjonException {
+    public void hentInntektListe_periodeEtterJan2015_henterInntekt() {
         Saksopplysning saksopplysning = inntektService.hentInntektListe("99999999992", YearMonth.of(2017, 6), YearMonth.of(2017, 8));
         InntektDokument dokument = (InntektDokument) saksopplysning.getDokument();
         assertThat(dokument).isNotNull();
@@ -67,7 +65,7 @@ public class InntektServiceTest {
     }
 
     @Test
-    public void hentInntektListe_helePeriodeFørJan2015_returnererTomInntektListe() throws FunksjonellException, IntegrasjonException, HentInntektListeBolkUgyldigInput, HentInntektListeBolkHarIkkeTilgangTilOensketAInntektsfilter {
+    public void hentInntektListe_helePeriodeFørJan2015_returnererTomInntektListe() throws HentInntektListeBolkUgyldigInput, HentInntektListeBolkHarIkkeTilgangTilOensketAInntektsfilter {
         Saksopplysning saksopplysning = inntektService.hentInntektListe("99999999992", YearMonth.of(2012, 1), YearMonth.of(2014, 12));
 
         verify(inntektMock, never()).hentInntektListeBolk(any());

@@ -15,7 +15,6 @@ import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.UtpekingsperiodeRepository;
 import no.nav.melosys.service.LandvelgerService;
@@ -27,6 +26,7 @@ import no.nav.melosys.service.kontroll.vedtak.VedtakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.service.vedtak.EosVedtakService;
+import no.nav.melosys.service.vedtak.VedtakServiceFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.ApplicationEventMulticaster;
@@ -72,8 +72,8 @@ public class UtpekingService {
         return utpekingsperiodeRepository.findByBehandlingsresultat_Id(behandlingID);
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public Collection<Utpekingsperiode> lagreUtpekingsperioder(long behandlingID, Collection<Utpekingsperiode> utpekingsperioder) throws FunksjonellException {
+    @Transactional
+    public Collection<Utpekingsperiode> lagreUtpekingsperioder(long behandlingID, Collection<Utpekingsperiode> utpekingsperioder) {
         List<Utpekingsperiode> eksisterende = utpekingsperiodeRepository.findByBehandlingsresultat_Id(behandlingID);
 
         for (Utpekingsperiode utpekingsperiode : eksisterende) {
@@ -89,12 +89,12 @@ public class UtpekingService {
         return utpekingsperiodeRepository.saveAll(utpekingsperioder);
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public void utpekLovvalgsland(Fagsak fagsak,
                                   Set<String> mottakerinstitusjoner,
                                   String ytterligereInformasjonSed,
                                   String fritekstBrev)
-        throws MelosysException {
+        {
         Behandling behandling = fagsak.hentAktivBehandling();
         if (behandling.getTema() != Behandlingstema.ARBEID_FLERE_LAND) {
             throw new FunksjonellException("Utpeking kan ikke skje for en behandling med tema " + behandling.getTema());
@@ -129,7 +129,7 @@ public class UtpekingService {
     private void oppdaterBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
         behandlingsresultat.setType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
         behandlingsresultat.setFastsattAvLand(Landkoder.NO);
-        behandlingsresultat.settVedtakMetadata(Vedtakstyper.FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(EosVedtakService.FRIST_KLAGE_UKER));
+        behandlingsresultat.settVedtakMetadata(Vedtakstyper.FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(VedtakServiceFasade.FRIST_KLAGE_UKER));
         behandlingsresultatService.lagre(behandlingsresultat);
 
         melosysEventMulticaster.multicastEvent(new VedtakMetadataLagretEvent(behandlingsresultat.getId()));
@@ -140,8 +140,8 @@ public class UtpekingService {
             .lagreLovvalgsperioder(behandlingID, Collections.singleton(Lovvalgsperiode.av(utpekingsperiode)));
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void avvisUtpeking(long behandlingID, UtpekingAvvis utpekingAvvis) throws FunksjonellException, TekniskException {
+    @Transactional
+    public void avvisUtpeking(long behandlingID, UtpekingAvvis utpekingAvvis) {
         validerAvslagUtpeking(utpekingAvvis);
 
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
@@ -162,7 +162,7 @@ public class UtpekingService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private void validerAvslagUtpeking(UtpekingAvvis utpekingAvvis) throws FunksjonellException {
+    private void validerAvslagUtpeking(UtpekingAvvis utpekingAvvis) {
         if (StringUtils.isEmpty(utpekingAvvis.getBegrunnelse())) {
             throw new FunksjonellException("Du må oppgi en begrunnelse for å kunne avslå en utpeking");
         }
@@ -171,14 +171,14 @@ public class UtpekingService {
         }
     }
 
-    private void validerUtpekingsperiode(Utpekingsperiode utpekingsperiode) throws FunksjonellException {
+    private void validerUtpekingsperiode(Utpekingsperiode utpekingsperiode) {
         if (utpekingsperiode.getTom() == null) {
             throw new FunksjonellException("Utpekingsperioden mangler sluttdato");
         }
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void oppdaterSendtUtland(Utpekingsperiode utpekingsperiode) throws FunksjonellException, TekniskException {
+    @Transactional
+    public void oppdaterSendtUtland(Utpekingsperiode utpekingsperiode) {
 
         if (utpekingsperiode.getId() == null) {
             throw new TekniskException("Forsøk på å oppdatere en ikke-persistert utpekingsperiode");

@@ -5,6 +5,9 @@ import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.SelvstendigForetak;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
@@ -14,19 +17,11 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.SelvstendigForetak;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -35,14 +30,17 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagSystemService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser.UTSENDELSE_OVER_24_MN;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Art12_2_begrunnelser.NORMALT_IKKE_DRIFT_NORGE;
@@ -55,8 +53,9 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BrevDataByggerA001Test {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class BrevDataByggerA001Test {
     @Mock
     private AnmodningsperiodeService anmodningsperiodeService;
     @Mock
@@ -83,8 +82,8 @@ public class BrevDataByggerA001Test {
     private final String orgnr1 = "12345678910";
     private final String orgnr2 = "10987654321";
 
-    @Before
-    public void setUp() throws IkkeFunnetException, TekniskException {
+    @BeforeEach
+    public void setUp() {
         behandling = new Behandling();
         behandling.setId(123L);
 
@@ -155,17 +154,17 @@ public class BrevDataByggerA001Test {
         when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(vilkaarType))).thenReturn(Optional.of(vilkaarsresultat));
     }
 
-    private BrevDataGrunnlag lagBrevDataGrunnlag() throws TekniskException {
+    private BrevDataGrunnlag lagBrevDataGrunnlag() {
         return lagBrevDataGrunnlag(new DoksysBrevbestilling.Builder().medBehandling(behandling).build());
     }
 
-    private BrevDataGrunnlag lagBrevDataGrunnlag(DoksysBrevbestilling brevbestilling) throws TekniskException {
+    private BrevDataGrunnlag lagBrevDataGrunnlag(DoksysBrevbestilling brevbestilling) {
         RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(ereg, mock(PersondataFasade.class));
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), mock(KodeverkService.class));
         return new BrevDataGrunnlag(brevbestilling, mock(KodeverkService.class), avklarteVirksomheterService, avklartefaktaService);
     }
 
-    private void leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) throws IkkeFunnetException, IntegrasjonException {
+    private void leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) {
         OrganisasjonDokument orgDok = new OrganisasjonDokument();
         orgDok.setNavn(Collections.singletonList(navn));
         orgDok.setOrgnummer(orgnummer);
@@ -186,7 +185,7 @@ public class BrevDataByggerA001Test {
     }
 
     @Test
-    public void testHentAvklarteSelvstendigeForetak() throws MelosysException {
+    void testHentAvklarteSelvstendigeForetak() {
         avklarteOrganisasjoner.add("12345678910");
 
         SelvstendigForetak foretak = new SelvstendigForetak();
@@ -203,7 +202,7 @@ public class BrevDataByggerA001Test {
     }
 
     @Test
-    public void testHentAvklarteNorskeForetak() throws MelosysException {
+    void testHentAvklarteNorskeForetak() {
         avklarteOrganisasjoner.add(orgnr1);
 
         SelvstendigForetak foretak = new SelvstendigForetak();
@@ -220,7 +219,7 @@ public class BrevDataByggerA001Test {
     }
 
     @Test
-    public void testIngenAvklarteforetak() throws MelosysException {
+    void testIngenAvklarteforetak() {
         SelvstendigForetak foretak = new SelvstendigForetak();
         foretak.orgnr = orgnr1;
         søknad.selvstendigArbeid.selvstendigForetak.add(foretak);
@@ -230,7 +229,7 @@ public class BrevDataByggerA001Test {
     }
 
     @Test
-    public void lag_art16MedArt121_harKunArt16Begrunnelser() throws MelosysException {
+    void lag_art16MedArt121_harKunArt16Begrunnelser() {
         lagVilkårResultat(Vilkaar.FO_883_2004_ART12_1, false, UTSENDELSE_OVER_24_MN);
         lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
 
@@ -243,7 +242,7 @@ public class BrevDataByggerA001Test {
     }
 
     @Test
-    public void lag_art16MedArt122_harKunArt16Begrunnelser() throws MelosysException {
+    void lag_art16MedArt122_harKunArt16Begrunnelser() {
         lagVilkårResultat(Vilkaar.FO_883_2004_ART12_2, false, NORMALT_IKKE_DRIFT_NORGE);
         lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
 
@@ -256,7 +255,7 @@ public class BrevDataByggerA001Test {
     }
 
     @Test
-    public void lag_art16UtenArt12_harKunArt16UtenArt12Begrunnelser() throws MelosysException {
+    void lag_art16UtenArt12_harKunArt16UtenArt12Begrunnelser() {
         lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, SJOEMANNSKIRKEN);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
@@ -269,7 +268,7 @@ public class BrevDataByggerA001Test {
 
 
     @Test
-    public void testAnsettelsesperiode() throws MelosysException {
+    void testAnsettelsesperiode() {
         avklarteOrganisasjoner.add(orgnr1);
 
         lagArbeidsforhold(orgnr1,
@@ -290,7 +289,7 @@ public class BrevDataByggerA001Test {
     }
 
     @Test
-    public void testIngenAnsettelsePeriode() throws MelosysException {
+    void testIngenAnsettelsePeriode() {
         avklarteOrganisasjoner.add(orgnr1);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
@@ -298,7 +297,7 @@ public class BrevDataByggerA001Test {
     }
 
     @Test
-    public void lagBrevdata_ytterligereInfoFraBestilling_infoFinnes() throws MelosysException {
+    void lagBrevdata_ytterligereInfoFraBestilling_infoFinnes() {
         final String forventetInfo = "By the way...";
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
             .medBehandling(behandling)

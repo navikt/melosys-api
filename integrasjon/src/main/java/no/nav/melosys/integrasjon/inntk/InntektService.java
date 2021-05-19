@@ -14,7 +14,6 @@ import no.nav.melosys.domain.SaksopplysningKildesystem;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XmlFormaterer;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.inntk.inntekt.InntektConsumer;
@@ -57,7 +56,7 @@ public class InntektService implements InntektFasade {
 
     // Henter inntekter for én ident fra hentInntektListeBolk for å få opplysninger om frilansforhold (se MELOSYS-1453).
     @Override
-    public Saksopplysning hentInntektListe(String personID, YearMonth fom, YearMonth tom) throws FunksjonellException, IntegrasjonException {
+    public Saksopplysning hentInntektListe(String personID, YearMonth fom, YearMonth tom) {
 
         HentInntektListeBolkResponse response = hentInntektListeBolkResponse(personID, fom, tom);
 
@@ -87,7 +86,7 @@ public class InntektService implements InntektFasade {
         return saksopplysning;
     }
 
-    private HentInntektListeBolkResponse hentInntektListeBolkResponse(String personID, YearMonth fom, YearMonth tom) throws FunksjonellException, IntegrasjonException {
+    private HentInntektListeBolkResponse hentInntektListeBolkResponse(String personID, YearMonth fom, YearMonth tom) {
 
         if (fom.isBefore(JANUAR_2015)) {
             if (tom.isBefore(JANUAR_2015)) {

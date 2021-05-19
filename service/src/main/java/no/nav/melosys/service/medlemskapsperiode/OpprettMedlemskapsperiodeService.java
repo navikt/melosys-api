@@ -14,7 +14,6 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.springframework.stereotype.Service;
@@ -36,8 +35,8 @@ public class OpprettMedlemskapsperiodeService {
         this.behandlingsresultatService = behandlingsresultatService;
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public Collection<Medlemskapsperiode> utledMedlemskapsperioderFraSøknad(long behandlingID, Folketrygdloven_kap2_bestemmelser bestemmelse) throws FunksjonellException {
+    @Transactional
+    public Collection<Medlemskapsperiode> utledMedlemskapsperioderFraSøknad(long behandlingID, Folketrygdloven_kap2_bestemmelser bestemmelse) {
         if (!støtterBestemmelse(bestemmelse)) {
             throw new FunksjonellException("Støtter ikke perioder med bestemmelse " + bestemmelse);
         }
@@ -77,14 +76,14 @@ public class OpprettMedlemskapsperiodeService {
         return medlemAvFolketrygdenRepository.save(medlemAvFolketrygden);
     }
 
-    private void validerVilkår(Behandlingsresultat behandlingsresultat, Folketrygdloven_kap2_bestemmelser bestemmelse) throws FunksjonellException {
+    private void validerVilkår(Behandlingsresultat behandlingsresultat, Folketrygdloven_kap2_bestemmelser bestemmelse) {
         var vilkårForBestemmelse = hentVilkårForBestemmelse(bestemmelse);
         if (!behandlingsresultat.oppfyllerVilkår(vilkårForBestemmelse)) {
             throw new FunksjonellException(format("Vilkår %s er påkrevd for bestemmelse %s", vilkårForBestemmelse, bestemmelse));
         }
     }
 
-    private void validerSakstype(Fagsak fagsak) throws FunksjonellException {
+    private void validerSakstype(Fagsak fagsak) {
         if (fagsak.getType() != Sakstyper.FTRL) {
             throw new FunksjonellException("Kan ikke opprette medlemskapsperioder for sakstype " + fagsak.getType());
         }
@@ -98,7 +97,7 @@ public class OpprettMedlemskapsperiodeService {
         );
     }
 
-    private Collection<Vilkaar> hentVilkårForBestemmelse(Folketrygdloven_kap2_bestemmelser bestemmelse) throws FunksjonellException {
+    private Collection<Vilkaar> hentVilkårForBestemmelse(Folketrygdloven_kap2_bestemmelser bestemmelse) {
         return Optional.ofNullable(hentBestemmelserMedVilkaar().get(bestemmelse))
             .orElseThrow(() -> new FunksjonellException("Finner ikke vilkår for bestemmelse " + bestemmelse));
     }

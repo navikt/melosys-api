@@ -5,8 +5,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import no.nav.melosys.tjenester.gui.dto.OrganisasjonDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -35,8 +33,7 @@ public class OrganisasjonTjeneste {
     @GetMapping("{orgnr}")
     @JsonView(DokumentView.FrontendApi.class)
     @ApiOperation(value = "Henter en organisasjon fra Enhetsregisteret.", response = OrganisasjonDto.class)
-    public ResponseEntity<OrganisasjonDokument> hentOrganisasjon(@PathVariable("orgnr") String orgnummer)
-        throws IntegrasjonException, IkkeFunnetException {
+    public ResponseEntity<OrganisasjonDokument> hentOrganisasjon(@PathVariable("orgnr") String orgnummer) {
         return ResponseEntity.ok(registerOppslag.hentOrganisasjon(orgnummer));
     }
 }

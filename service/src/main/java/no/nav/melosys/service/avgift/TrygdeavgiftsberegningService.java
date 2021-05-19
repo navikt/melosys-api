@@ -9,13 +9,9 @@ import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfo;
 import no.nav.melosys.domain.avgift.OppdaterTrygdeavgiftsberegningRequest;
 import no.nav.melosys.domain.avgift.Trygdeavgift;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsberegningsresultat;
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer;
 import no.nav.melosys.integrasjon.trygdeavgift.dto.MelosysTrygdeavgfitBeregningDto;
-import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
+import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,20 +22,19 @@ import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_utenl
 public class TrygdeavgiftsberegningService {
 
     private final TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService;
-    private final MedlemAvFolketrygdenRepository medlemAvFolketrygdenRepository;
+    private final MedlemAvFolketrygdenService medlemAvFolketrygdenService;
     private final TrygdeavgiftConsumer trygdeavgiftConsumer;
 
     public TrygdeavgiftsberegningService(TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService,
-                                         MedlemAvFolketrygdenRepository medlemAvFolketrygdenRepository,
-                                         TrygdeavgiftConsumer trygdeavgiftConsumer) {
+                                         MedlemAvFolketrygdenService medlemAvFolketrygdenService, TrygdeavgiftConsumer trygdeavgiftConsumer) {
         this.trygdeavgiftsgrunnlagService = trygdeavgiftsgrunnlagService;
-        this.medlemAvFolketrygdenRepository = medlemAvFolketrygdenRepository;
+        this.medlemAvFolketrygdenService = medlemAvFolketrygdenService;
         this.trygdeavgiftConsumer = trygdeavgiftConsumer;
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void oppdaterBeregningsgrunnlag(long behandlingsresultatID, OppdaterTrygdeavgiftsberegningRequest request) throws FunksjonellException {
-        final var medlemAvFolketrygden = hentMedlemAvFolketrygden(behandlingsresultatID);
+    @Transactional
+    public void oppdaterBeregningsgrunnlag(long behandlingsresultatID, OppdaterTrygdeavgiftsberegningRequest request) {
+        final var medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID);
 
         if (medlemAvFolketrygden.getVurderingTrygdeavgiftNorskInntekt() == NORSK_INNTEKT_TRYGDEAVGIFT_NAV) {
             medlemAvFolketrygden.getFastsattTrygdeavgift().setAvgiftspliktigNorskInntektMnd(request.getAvgiftspliktigLønnNorge());
@@ -56,9 +51,9 @@ public class TrygdeavgiftsberegningService {
         beregnAvgift(behandlingsresultatID);
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void beregnAvgift(long behandlingsresultatID) throws IkkeFunnetException {
-        final var medlemAvFolketrygden = hentMedlemAvFolketrygden(behandlingsresultatID);
+    @Transactional
+    public void beregnAvgift(long behandlingsresultatID) {
+        final var medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID);
         final var medlemskapsperioder = medlemAvFolketrygden.getMedlemskapsperioder();
         final var fastsattTrygdeavgift = medlemAvFolketrygden.getFastsattTrygdeavgift();
 
@@ -96,7 +91,7 @@ public class TrygdeavgiftsberegningService {
             new MelosysTrygdeavgfitBeregningDto(
                 avgiftsgrunnlag.betalerArbeidsgiverAvgift(),
                 avgiftsgrunnlag.erSkattepliktig(),
-                medlemskapsperiode.getTrygdedekning(),
+                medlemskapsperiode.getDekning(),
                 medlemskapsperiode.getBestemmelse(),
                 inntektPerMd,
                 LocalDate.now(),
@@ -116,22 +111,13 @@ public class TrygdeavgiftsberegningService {
     }
 
     @Transactional(readOnly = true)
-    public Trygdeavgiftsberegningsresultat hentBeregningsresultat(long behandlingsresultatID) throws IkkeFunnetException {
-        return Trygdeavgiftsberegningsresultat.lag(hentMedlemAvFolketrygden(behandlingsresultatID));
+    public Trygdeavgiftsberegningsresultat hentBeregningsresultat(long behandlingsresultatID) {
+        return Trygdeavgiftsberegningsresultat.lag(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID));
     }
 
     @Transactional(readOnly = true)
     public Optional<Trygdeavgiftsberegningsresultat> finnBeregningsresultat(long behandlingsresultatID) {
-        return finnMedlemAvFolketrygden(behandlingsresultatID)
+        return medlemAvFolketrygdenService.finnMedlemAvFolketrygden(behandlingsresultatID)
             .map(Trygdeavgiftsberegningsresultat::lag);
-    }
-
-    private MedlemAvFolketrygden hentMedlemAvFolketrygden(long behandlingsresultatID) throws IkkeFunnetException {
-        return finnMedlemAvFolketrygden(behandlingsresultatID)
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke medlemAvFolketrygden for behandlingsresultatID " + behandlingsresultatID));
-    }
-
-    private Optional<MedlemAvFolketrygden> finnMedlemAvFolketrygden(long behandlingsresultatID) {
-        return medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID);
     }
 }

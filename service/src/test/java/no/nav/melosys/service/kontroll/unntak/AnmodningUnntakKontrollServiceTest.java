@@ -1,36 +1,34 @@
 package no.nav.melosys.service.kontroll.unntak;
 
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
+
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.dokument.person.Bostedsadresse;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.validering.Kontrollfeil;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AnmodningUnntakKontrollServiceTest {
     @Mock
     private BehandlingService behandlingService;
@@ -44,8 +42,8 @@ public class AnmodningUnntakKontrollServiceTest {
 
     private AnmodningUnntakKontrollService anmodningUnntakKontrollService;
 
-    @Before
-    public void setup() throws FunksjonellException {
+    @BeforeEach
+    public void setup() {
         Saksopplysning persopplysning = new Saksopplysning();
         persopplysning.setType(SaksopplysningType.PERSOPL);
         persopplysning.setDokument(personDokument);
@@ -65,7 +63,7 @@ public class AnmodningUnntakKontrollServiceTest {
     }
 
     @Test
-    public void utførKontroller_manglerBostedsadresse_returnererKode() throws TekniskException, FunksjonellException {
+    public void utførKontroller_manglerBostedsadresse_returnererKode() {
         personDokument.bostedsadresse = new Bostedsadresse();
 
         Collection<Kontrollfeil> resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID);
@@ -75,7 +73,7 @@ public class AnmodningUnntakKontrollServiceTest {
     }
 
     @Test
-    public void utførKontroller_anmodningsperiodeManglerSluttdato_returnererKode() throws TekniskException, FunksjonellException {
+    public void utførKontroller_anmodningsperiodeManglerSluttdato_returnererKode() {
         anmodningsperiode.setTom(null);
 
         Collection<Kontrollfeil> resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID);
@@ -85,7 +83,7 @@ public class AnmodningUnntakKontrollServiceTest {
     }
 
     @Test
-    public void utførKontroller_arbeidsstedManglerFelter_returnererKode() throws FunksjonellException, TekniskException {
+    public void utførKontroller_arbeidsstedManglerFelter_returnererKode() {
         behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidssteder = List.of(new FysiskArbeidssted());
 
         Collection<Kontrollfeil> resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID);
@@ -95,7 +93,7 @@ public class AnmodningUnntakKontrollServiceTest {
     }
 
     @Test
-    public void utførKontroller_foretakUtlandManglerFelter_returnererKode() throws FunksjonellException, TekniskException {
+    public void utførKontroller_foretakUtlandManglerFelter_returnererKode() {
         behandlingsgrunnlagData.foretakUtland = List.of(new ForetakUtland());
 
         Collection<Kontrollfeil> resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID);

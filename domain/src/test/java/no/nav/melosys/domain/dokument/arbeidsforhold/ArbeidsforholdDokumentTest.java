@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.dokument.felles.Periode;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

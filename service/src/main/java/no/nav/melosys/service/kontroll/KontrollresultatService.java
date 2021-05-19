@@ -7,10 +7,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Kontrollresultat;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.KontrollresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -41,8 +37,8 @@ public class KontrollresultatService {
         this.behandlingService = behandlingService;
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void utførKontrollerOgRegistrerFeil(long behandlingId) throws TekniskException, FunksjonellException {
+    @Transactional
+    public void utførKontrollerOgRegistrerFeil(long behandlingId) {
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         List<Kontroll_begrunnelser> registrerteTreff = ufmKontrollService.utførKontroller(behandling);
 
@@ -50,7 +46,7 @@ public class KontrollresultatService {
         lagreKontrollresultater(behandlingId, registrerteTreff);
     }
 
-    private void lagreKontrollresultater(Long behandlingID, List<Kontroll_begrunnelser> kontrollBegrunnelser) throws IkkeFunnetException {
+    private void lagreKontrollresultater(Long behandlingID, List<Kontroll_begrunnelser> kontrollBegrunnelser) {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 
         kontrollresultatRepository.deleteByBehandlingsresultat(behandlingsresultat);

@@ -1,19 +1,18 @@
 package no.nav.melosys.service;
 
+import java.util.Collection;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsnotat;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingsnotatRepository;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collection;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class BehandlingsnotatService {
@@ -27,19 +26,19 @@ public class BehandlingsnotatService {
     }
 
     @Transactional(readOnly = true)
-    public Collection<Behandlingsnotat> hentNotatForFagsak(String saksnummer) throws IkkeFunnetException {
+    public Collection<Behandlingsnotat> hentNotatForFagsak(String saksnummer) {
         return fagsakService.hentFagsak(saksnummer).getBehandlinger().stream()
             .flatMap(b -> b.getBehandlingsnotater().stream())
             .collect(Collectors.toList());
     }
 
-    private Behandlingsnotat hentNotat(Long id) throws IkkeFunnetException {
+    private Behandlingsnotat hentNotat(Long id) {
         return behandlingsnotatRepository.findById(id)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke notat med id " + id));
     }
 
     @Transactional
-    public Behandlingsnotat opprettNotat(String saksnummer, String tekst) throws FunksjonellException, TekniskException {
+    public Behandlingsnotat opprettNotat(String saksnummer, String tekst) {
         Behandling behandling = Optional.ofNullable(fagsakService.hentFagsak(saksnummer).hentAktivBehandling())
             .orElseThrow(() -> new FunksjonellException("Fagsak " + saksnummer + " har ingen aktive behandlinger"));
 
@@ -50,7 +49,7 @@ public class BehandlingsnotatService {
     }
 
     @Transactional
-    public Behandlingsnotat oppdaterNotat(Long notatID, String tekst) throws FunksjonellException {
+    public Behandlingsnotat oppdaterNotat(Long notatID, String tekst) {
         Behandlingsnotat behandlingsnotat = hentNotat(notatID);
 
         if (!behandlingsnotat.erRedigerbar()) {

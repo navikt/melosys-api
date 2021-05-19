@@ -14,7 +14,10 @@ import no.nav.dok.tjenester.journalfoerinngaaende.GetJournalpostResponse;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IkkeInngaaendeJournalpostException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.joark.journal.JournalConsumer;
 import no.nav.melosys.integrasjon.joark.journalfoerinngaaende.JournalfoerInngaaendeConsumer;
@@ -60,13 +63,13 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public void ferdigstillJournalføring(String journalpostId) throws FunksjonellException {
+    public void ferdigstillJournalføring(String journalpostId) {
         FerdigstillJournalpostRequest request = new FerdigstillJournalpostRequest();
         journalpostapiConsumer.ferdigstillJournalpost(request, journalpostId);
     }
 
     @Override
-    public byte[] hentDokument(String journalPostID, String dokumentID) throws SikkerhetsbegrensningException, IkkeFunnetException {
+    public byte[] hentDokument(String journalPostID, String dokumentID) {
         if (unleash.isEnabled(SAF_FEATURE_TOGGLE_NAVN)) {
             return safConsumer.hentDokument(journalPostID, dokumentID);
         }
@@ -91,7 +94,7 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public Journalpost hentJournalpost(String journalpostID) throws FunksjonellException {
+    public Journalpost hentJournalpost(String journalpostID) {
         if (unleash.isEnabled(SAF_FEATURE_TOGGLE_NAVN)) {
             return safConsumer.hentJournalpost(journalpostID).tilDomene();
         } else {
@@ -99,8 +102,7 @@ public class JoarkService implements JoarkFasade {
         }
     }
 
-    private Journalpost hentInngåendeJournalpost(String journalpostID) throws IntegrasjonException,
-        FunksjonellException {
+    private Journalpost hentInngåendeJournalpost(String journalpostID) {
         GetJournalpostResponse response;
         try {
             response = journalfoerInngaaendeConsumer.hentJournalpost(journalpostID);
@@ -148,9 +150,6 @@ public class JoarkService implements JoarkFasade {
                 }
             }
         }
-        if (response.getArkivSak() != null) {
-            journalpost.setArkivSakId(response.getArkivSak().getArkivSakId());
-        }
         return journalpost;
     }
 
@@ -162,7 +161,7 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public LocalDate hentMottaksDatoForJournalpost(String journalpostID) throws FunksjonellException {
+    public LocalDate hentMottaksDatoForJournalpost(String journalpostID) {
         return LocalDate.ofInstant(hentJournalpost(journalpostID).getForsendelseMottatt(), ZoneId.systemDefault());
     }
 
@@ -178,7 +177,7 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public List<Journalpost> hentJournalposterTilknyttetSak(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest) throws SikkerhetsbegrensningException {
+    public List<Journalpost> hentJournalposterTilknyttetSak(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest) {
 
         if (unleash.isEnabled(SAF_FEATURE_TOGGLE_NAVN)) {
             return safConsumer.hentDokumentoversikt(hentJournalposterTilknyttetSakRequest.saksnummer())
@@ -188,7 +187,7 @@ public class JoarkService implements JoarkFasade {
         }
 
         Assert.notNull(hentJournalposterTilknyttetSakRequest.arkivsakID(), "HentKjerneJournalpostListe krever en arkivSakID.");
-        HentKjerneJournalpostListeRequest hentKjerneJournalpostListeRequest = new HentKjerneJournalpostListeRequest();
+        var hentKjerneJournalpostListeRequest = new HentKjerneJournalpostListeRequest();
         hentKjerneJournalpostListeRequest.getArkivSakListe().add(lagArkivSak(hentJournalposterTilknyttetSakRequest.arkivsakID(), Fagsystem.GSAK_I_JOARK.getKode()));
 
         HentKjerneJournalpostListeResponse hentKjerneJournalpostListeResponse;
@@ -204,6 +203,7 @@ public class JoarkService implements JoarkFasade {
             .stream()
             .filter(journalpost -> !UTGAAR.equals(journalpost.getJournaltilstand()))
             .map(this::lagJournalpost)
+            .peek(j -> j.setSaksnummer(hentJournalposterTilknyttetSakRequest.saksnummer()))
             .collect(Collectors.toList());
     }
 
@@ -218,9 +218,6 @@ public class JoarkService implements JoarkFasade {
 
     private Journalpost lagJournalpost(no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.Journalpost j) {
         Journalpost journalpost = new Journalpost(j.getJournalpostId());
-        if (j.getGjelderArkivSak() != null) {
-            journalpost.setArkivSakId(j.getGjelderArkivSak().getArkivSakId());
-        }
         if (j.getForsendelseMottatt() != null) {
             journalpost.setForsendelseMottatt(KonverteringsUtils.xmlGregorianCalendarToInstant(j.getForsendelseMottatt()));
         }
@@ -250,8 +247,7 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public String opprettJournalpost(OpprettJournalpost opprettJournalpost, boolean forsøkEndeligJfr)
-        throws FunksjonellException {
+    public String opprettJournalpost(OpprettJournalpost opprettJournalpost, boolean forsøkEndeligJfr) {
         OpprettJournalpostRequest request = OpprettJournalpostRequest.av(opprettJournalpost);
         if (forsøkEndeligJfr) {
             JournalpostRequestValidator.validerJournalpostForEndeligJfr(request);
@@ -261,8 +257,7 @@ public class JoarkService implements JoarkFasade {
     }
 
     @Override
-    public void oppdaterJournalpost(String journalpostID, JournalpostOppdatering journalpostOppdatering, boolean forsøkFerdigstill)
-        throws FunksjonellException {
+    public void oppdaterJournalpost(String journalpostID, JournalpostOppdatering journalpostOppdatering, boolean forsøkFerdigstill) {
 
         fjernEksisterendeLogiskeVedleggPåHovddokument(journalpostID);
 
@@ -270,7 +265,8 @@ public class JoarkService implements JoarkFasade {
             .medDatoMottatt(journalpostOppdatering.getMottattDato())
             .medTittel(journalpostOppdatering.getTittel())
             .medBruker(journalpostOppdatering.getBrukerID())
-            .medArkivsaksnummer(Long.toString(journalpostOppdatering.getArkivSakID()));
+            .medSaksnummer(journalpostOppdatering.getSaksnummer())
+            .medTema(journalpostOppdatering.getTema());
 
         final String hovedDokumentID = journalpostOppdatering.getHovedDokumentID();
         if (hovedDokumentID != null) {
@@ -305,7 +301,7 @@ public class JoarkService implements JoarkFasade {
         }
     }
 
-    private void fjernEksisterendeLogiskeVedleggPåHovddokument(String journalpostID) throws FunksjonellException {
+    private void fjernEksisterendeLogiskeVedleggPåHovddokument(String journalpostID) {
         var journalpost = hentJournalpost(journalpostID);
         if (journalpost.getHoveddokument() != null) {
             var hoveddokument = journalpost.getHoveddokument();

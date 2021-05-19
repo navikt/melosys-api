@@ -10,7 +10,6 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -57,7 +56,7 @@ public class OpprettJournalforBrev implements StegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) {
         if (prosessinstans.getBehandling() == null) {
             throw new FunksjonellException("Prosessinstans mangler behandling");
         }
@@ -98,7 +97,7 @@ public class OpprettJournalforBrev implements StegBehandler {
             .medMottakerNavn(hasText(orgnr) ? eregFasade.hentOrganisasjonNavn(orgnr) : sammensattNavn)
             .medMottakerId(hasText(orgnr) ? orgnr : fnr)
             .medErMottakerOrg(hasText(orgnr))
-            .medArkivSakId(behandling.getFagsak().getGsakSaksnummer().toString())
+            .medSaksnummer(behandling.getFagsak().getSaksnummer())
             .medPdf(pdf)
             .build();
 

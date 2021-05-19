@@ -13,8 +13,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -66,7 +64,7 @@ class AnmodningUnntakServiceTest {
     }
 
     @Test
-    void anmodningOmUnntak_erEessiKlarMedMottakerInstitusjon_prosessOpprettet() throws MelosysException {
+    void anmodningOmUnntak_erEessiKlarMedMottakerInstitusjon_prosessOpprettet() throws Exception {
         final long behandlingID = 1L;
         final String mottakerInstitusjon = "SE:432";
         final DokumentReferanse dokumentReferanse = new DokumentReferanse("jpID", "dokID");
@@ -90,7 +88,7 @@ class AnmodningUnntakServiceTest {
     }
 
     @Test
-    void anmodningOmUnntak_ikkeEessiReadyMottakerInstitusjonNull_prosessOpprettet() throws MelosysException {
+    void anmodningOmUnntak_ikkeEessiReadyMottakerInstitusjonNull_prosessOpprettet() throws Exception {
         final long behandlingID = 1L;
         final String fritekstSed = "friteksssst";
         Behandling behandling = new Behandling();
@@ -112,7 +110,7 @@ class AnmodningUnntakServiceTest {
     }
 
     @Test
-    void anmodningOmUnntakSvar_validert_forventMetodekall() throws FunksjonellException, TekniskException {
+    void anmodningOmUnntakSvar_validert_forventMetodekall() {
         Behandling behandling = lagBehandling();
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
 
@@ -130,7 +128,7 @@ class AnmodningUnntakServiceTest {
     }
 
     @Test
-    void anmodningOmUnntakSvar_feilBehandlingstype_forventException() throws FunksjonellException {
+    void anmodningOmUnntakSvar_feilBehandlingstype_forventException() {
         Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
 
@@ -140,7 +138,7 @@ class AnmodningUnntakServiceTest {
     }
 
     @Test
-    void anmodningOmUnntakSvar_behandlingErAvsluttet_forventException() throws FunksjonellException {
+    void anmodningOmUnntakSvar_behandlingErAvsluttet_forventException() {
         Behandling behandling = lagBehandling();
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
@@ -152,7 +150,7 @@ class AnmodningUnntakServiceTest {
     }
 
     @Test
-    void anmodningOmUnntakSvar_behandlingHarIngenAnmodningsperiodeSvar_forventException() throws FunksjonellException {
+    void anmodningOmUnntakSvar_behandlingHarIngenAnmodningsperiodeSvar_forventException() {
         Behandling behandling = lagBehandling();
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
@@ -164,7 +162,7 @@ class AnmodningUnntakServiceTest {
     }
 
     @Test
-    void anmodningOmUnntakSvar_behandlingHarIngenLovvalgsperiode_forventException() throws FunksjonellException {
+    void anmodningOmUnntakSvar_behandlingHarIngenLovvalgsperiode_forventException() {
         Behandling behandling = lagBehandling();
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
@@ -178,7 +176,7 @@ class AnmodningUnntakServiceTest {
     }
 
     @Test
-    void anmodningOmUnntakSvar_avslagForLangFritekst_forventException() throws FunksjonellException {
+    void anmodningOmUnntakSvar_avslagForLangFritekst_forventException() {
         Behandling behandling = lagBehandling();
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);

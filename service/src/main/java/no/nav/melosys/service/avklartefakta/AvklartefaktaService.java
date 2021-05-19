@@ -7,19 +7,16 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
-import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
-import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
-import no.nav.melosys.domain.familie.OmfattetFamilie;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
+import no.nav.melosys.domain.person.familie.IkkeOmfattetBarn;
+import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,7 +77,7 @@ public class AvklartefaktaService {
                 .collect(Collectors.toSet());
     }
 
-    public Optional<Yrkesgrupper> finnYrkesGruppe(long behandlingID) throws TekniskException {
+    public Optional<Yrkesgrupper> finnYrkesGruppe(long behandlingID) {
         final var avklartYrkesgruppeType = avklarteFaktaRepository
             .findByBehandlingsresultatIdAndType(behandlingID, Avklartefaktatyper.YRKESGRUPPE)
             .map(Avklartefakta::getFakta).map(AvklartYrkesgruppeType::valueOf).orElse(null);
@@ -149,14 +146,14 @@ public class AvklartefaktaService {
             .collect(Collectors.groupingBy(Avklartefakta::getSubjekt, Collectors.toList()));
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public void slettAvklarteFakta(long behandlingID, Avklartefaktatyper type) {
         avklarteFaktaRepository.deleteByBehandlingsresultatIdAndType(behandlingID, type);
         avklarteFaktaRepository.flush();
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void lagreAvklarteFakta(long behandlingID, Set<AvklartefaktaDto> avklartefaktaDtos) throws IkkeFunnetException {
+    @Transactional
+    public void lagreAvklarteFakta(long behandlingID, Set<AvklartefaktaDto> avklartefaktaDtos) {
         Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException(FANT_IKKE_RESULTAT + behandlingID));
 
@@ -170,8 +167,8 @@ public class AvklartefaktaService {
         avklarteFaktaRepository.saveAll(avklartefaktaList);
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void leggTilAvklarteFakta(long behandlingID, Avklartefaktatyper type, String referanse, String subjekt, String fakta) throws IkkeFunnetException {
+    @Transactional
+    public void leggTilAvklarteFakta(long behandlingID, Avklartefaktatyper type, String referanse, String subjekt, String fakta) {
         Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException(FANT_IKKE_RESULTAT + behandlingID));
 
@@ -185,18 +182,18 @@ public class AvklartefaktaService {
         avklarteFaktaRepository.save(avklartefakta);
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public void lagre(Avklartefakta avklartefakta) {
         avklarteFaktaRepository.save(avklartefakta);
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void leggTilBegrunnelse(long behandlingID, Avklartefaktatyper avklartefaktatype, String begrunnelseKode) throws IkkeFunnetException {
+    @Transactional
+    public void leggTilBegrunnelse(long behandlingID, Avklartefaktatyper avklartefaktatype, String begrunnelseKode) {
         leggTilAvklarteFakta(behandlingID, avklartefaktatype, avklartefaktatype.getKode(), null, begrunnelseKode);
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void leggTilRegistrering(long behandlingID, Avklartefaktatyper avklartefaktatype, String begrunnelseKode) throws IkkeFunnetException {
+    @Transactional
+    public void leggTilRegistrering(long behandlingID, Avklartefaktatyper avklartefaktatype, String begrunnelseKode) {
         Avklartefakta avklartefakta = avklarteFaktaRepository.findByBehandlingsresultatIdAndType(behandlingID, avklartefaktatype)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke avklarte fakta av type " + avklartefaktatype.name() + " for behandling " + behandlingID));
 

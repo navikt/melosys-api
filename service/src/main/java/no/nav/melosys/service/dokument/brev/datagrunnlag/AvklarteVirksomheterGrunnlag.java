@@ -8,8 +8,6 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 
 public class AvklarteVirksomheterGrunnlag {
@@ -29,21 +27,21 @@ public class AvklarteVirksomheterGrunnlag {
         this.avklarteVirksomheterService = avklarteVirksomheterService;
     }
 
-    public List<AvklartVirksomhet> hentAlleNorskeVirksomheterMedAdresse() throws IkkeFunnetException, TekniskException {
+    public List<AvklartVirksomhet> hentAlleNorskeVirksomheterMedAdresse() {
         if (norskeVirksomheter == null) {
             norskeVirksomheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling);
         }
         return norskeVirksomheter;
     }
 
-    public List<AvklartVirksomhet> hentNorskeArbeidsgivere() throws IkkeFunnetException, TekniskException {
+    public List<AvklartVirksomhet> hentNorskeArbeidsgivere() {
         if (norskeArbeidsgivere == null) {
             norskeArbeidsgivere = avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling);
         }
         return norskeArbeidsgivere;
     }
 
-    public List<AvklartVirksomhet> hentNorskeSelvstendige() throws IkkeFunnetException, TekniskException {
+    public List<AvklartVirksomhet> hentNorskeSelvstendige() {
         if (norskeSelvstendige == null) {
             norskeSelvstendige = avklarteVirksomheterService.hentNorskeSelvstendigeForetak(behandling);
         }
@@ -69,11 +67,11 @@ public class AvklarteVirksomheterGrunnlag {
             .collect(Collectors.toList());
     }
 
-    public Set<String> hentNorskeArbeidsgivendeOrgnumre() throws TekniskException {
+    public Set<String> hentNorskeArbeidsgivendeOrgnumre() {
         return avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
     }
 
-    public AvklartVirksomhet hentHovedvirksomhet() throws IkkeFunnetException, TekniskException {
+    public AvklartVirksomhet hentHovedvirksomhet() {
         if (!hentAlleNorskeVirksomheterMedAdresse().isEmpty()) {
             return hentAlleNorskeVirksomheterMedAdresse().iterator().next();
         } else {
@@ -81,12 +79,12 @@ public class AvklarteVirksomheterGrunnlag {
         }
     }
 
-    public int antallVirksomheter() throws IkkeFunnetException, TekniskException {
+    public int antallVirksomheter() {
         return hentAlleNorskeVirksomheterMedAdresse().size() +
                hentUtenlandskeVirksomheter().size();
     }
 
-    public Collection<AvklartVirksomhet> hentBivirksomheter() throws IkkeFunnetException, TekniskException {
+    public Collection<AvklartVirksomhet> hentBivirksomheter() {
         Collection<AvklartVirksomhet> bivirksomheter = new ArrayList<>();
         bivirksomheter.addAll(hentAlleNorskeVirksomheterMedAdresse());
         bivirksomheter.addAll(hentUtenlandskeVirksomheter());

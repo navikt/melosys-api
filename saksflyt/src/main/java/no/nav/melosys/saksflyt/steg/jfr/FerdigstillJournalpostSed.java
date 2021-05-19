@@ -1,13 +1,9 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -18,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.TemaFactory.fraBehandlingstema;
+
 @Component
 public class FerdigstillJournalpostSed implements StegBehandler {
 
@@ -27,7 +25,7 @@ public class FerdigstillJournalpostSed implements StegBehandler {
     private final PersondataFasade persondataFasade;
 
     @Autowired
-    public FerdigstillJournalpostSed(JoarkFasade joarkFasade, @Qualifier("system") PersondataFasade persondataFasade) {
+    public FerdigstillJournalpostSed(@Qualifier("system") JoarkFasade joarkFasade, @Qualifier("system") PersondataFasade persondataFasade) {
         this.joarkFasade = joarkFasade;
         this.persondataFasade = persondataFasade;
     }
@@ -38,25 +36,26 @@ public class FerdigstillJournalpostSed implements StegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) {
 
-        final Behandling behandling = prosessinstans.getBehandling();
+        final var behandling = prosessinstans.getBehandling();
 
-        Long arkivSakID = behandling.getFagsak().getGsakSaksnummer();
-        String brukerID = hentBrukerID(prosessinstans);
-        MelosysEessiMelding eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
-        String tittel = prosessinstans.getData(ProsessDataKey.HOVEDDOKUMENT_TITTEL);
+        final String saksnummer = behandling.getFagsak().getSaksnummer();
+        final String brukerID = hentBrukerID(prosessinstans);
+        final MelosysEessiMelding eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
+        final String tittel = prosessinstans.getData(ProsessDataKey.HOVEDDOKUMENT_TITTEL);
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
             .medBrukerID(brukerID)
-            .medArkivSakID(arkivSakID)
+            .medSaksnummer(saksnummer)
             .medTittel(tittel)
+            .medTema(fraBehandlingstema(behandling.getTema()).getKode())
             .build();
 
         joarkFasade.oppdaterJournalpost(eessiMelding.getJournalpostId(), journalpostOppdatering, true);
         log.info("Journalpost {} ferdigstilt for behandling {}", eessiMelding.getJournalpostId(), behandling.getId());
     }
 
-    private String hentBrukerID(Prosessinstans prosessinstans) throws IkkeFunnetException, TekniskException {
+    private String hentBrukerID(Prosessinstans prosessinstans) {
         String aktørID = prosessinstans.getBehandling().getFagsak().hentBruker().getAktørId();
         return persondataFasade.hentFolkeregisterIdent(aktørID);
     }

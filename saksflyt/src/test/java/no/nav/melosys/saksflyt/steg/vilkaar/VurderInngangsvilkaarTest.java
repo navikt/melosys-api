@@ -12,9 +12,6 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +35,7 @@ class VurderInngangsvilkaarTest {
     private final Behandling behandling = new Behandling();
 
     @BeforeEach
-    public void setUp() throws IkkeFunnetException {
+    public void setUp() {
         vurderInngangsvilkaar = new VurderInngangsvilkaar(inngangsvilkaarService, behandlingService);
 
         behandling.setId(behandlingID);
@@ -48,7 +45,7 @@ class VurderInngangsvilkaarTest {
     }
 
     @Test
-    void utfoerSteg_funker() throws FunksjonellException, TekniskException {
+    void utfoerSteg_funker() {
         BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
         behandlingsgrunnlagData.periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(1L));
         behandlingsgrunnlagData.soeknadsland.landkoder = List.of(Landkoder.NO.getKode(), Landkoder.SE.getKode());
@@ -76,7 +73,7 @@ class VurderInngangsvilkaarTest {
     }
 
     @Test
-    void utfør_behandlingstemaBeslutningLovvalgAnnetLand_vurdererIkkeInngangsvilkår() throws FunksjonellException, TekniskException {
+    void utfør_behandlingstemaBeslutningLovvalgAnnetLand_vurdererIkkeInngangsvilkår() {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
@@ -88,7 +85,7 @@ class VurderInngangsvilkaarTest {
     }
 
     @Test
-    void utfør_sakstypeFtrl_vurdererIkkeInngangsvilkår() throws FunksjonellException, TekniskException {
+    void utfør_sakstypeFtrl_vurdererIkkeInngangsvilkår() {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         behandling.setFagsak(new Fagsak());

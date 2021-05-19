@@ -5,7 +5,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 
 public class BrevDataInnvilgelse extends BrevData {

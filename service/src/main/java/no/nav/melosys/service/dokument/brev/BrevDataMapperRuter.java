@@ -31,7 +31,7 @@ final class BrevDataMapperRuter {
     private BrevDataMapperRuter() {
     }
 
-    static BrevDataMapper brevDataMapper(Produserbaredokumenter type) throws TekniskException {
+    static BrevDataMapper brevDataMapper(Produserbaredokumenter type) {
         if (!DOKUMENT_DATAMAPPER_MAP.containsKey(type)) {
             throw new TekniskException("Produserbaredokumenter " + type.getKode() + " støttes ikke");
         }

@@ -8,24 +8,24 @@ import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataUtpekingAnnetLand;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.utpeking.UtpekingService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BrevDataByggerUtpekingAnnetLandTest {
+@ExtendWith(MockitoExtension.class)
+class BrevDataByggerUtpekingAnnetLandTest {
     @Mock
     UtpekingService utpekingService;
     @Mock
@@ -33,8 +33,8 @@ public class BrevDataByggerUtpekingAnnetLandTest {
 
     private BrevDataByggerUtpekingAnnetLand brevDataByggerUtpekingAnnetLand;
 
-    @Before
-    public void setUp() throws FunksjonellException, TekniskException {
+    @BeforeEach
+    public void setUp() {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         when(brevDataGrunnlag.getBehandling()).thenReturn(behandling);
@@ -42,7 +42,7 @@ public class BrevDataByggerUtpekingAnnetLandTest {
     }
 
     @Test
-    public void lag_medUtpekingPeriode_girBrevdata() throws FunksjonellException {
+    void lag_medUtpekingPeriode_girBrevdata() {
         Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.now(), null, Landkoder.CY,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
         when(utpekingService.hentUtpekingsperioder(eq(1L))).thenReturn(List.of(utpekingsperiode));
@@ -51,8 +51,10 @@ public class BrevDataByggerUtpekingAnnetLandTest {
         assertThat(((BrevDataUtpekingAnnetLand)brevData).utpekingsperiode).isEqualTo(utpekingsperiode);
     }
 
-    @Test(expected = FunksjonellException.class)
-    public void lag_utenUtpekingPeriode_kasterException() throws FunksjonellException {
-        brevDataByggerUtpekingAnnetLand.lag(brevDataGrunnlag, "sb");
+    @Test
+    void lag_utenUtpekingPeriode_kasterException() {
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> brevDataByggerUtpekingAnnetLand.lag(brevDataGrunnlag, "sb"))
+            .withMessageContaining("uten utpekingsperiode");
     }
 }

@@ -32,17 +32,17 @@ public class SakOgBehandlingService implements SakOgBehandlingFasade {
     }
 
     @Override
-    public void sendBehandlingOpprettet(BehandlingStatusMapper mapper) throws IntegrasjonException {
+    public void sendBehandlingOpprettet(BehandlingStatusMapper mapper) {
         behandlingstatusClient.sendBehandlingOpprettet(mapper);
     }
 
     @Override
-    public void sendBehandlingAvsluttet(BehandlingStatusMapper mapper) throws IntegrasjonException {
+    public void sendBehandlingAvsluttet(BehandlingStatusMapper mapper) {
         behandlingstatusClient.sendBehandlingAvsluttet(mapper);
     }
 
     @Override
-    public Saksopplysning finnSakOgBehandlingskjedeListe(String aktørId) throws IntegrasjonException {
+    public Saksopplysning finnSakOgBehandlingskjedeListe(String aktørId) {
 
         FinnSakOgBehandlingskjedeListeRequest request = new FinnSakOgBehandlingskjedeListeRequest();
 

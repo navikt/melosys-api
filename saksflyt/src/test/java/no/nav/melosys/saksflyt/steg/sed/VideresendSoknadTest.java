@@ -18,9 +18,6 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.SedSomBrevService;
@@ -59,7 +56,7 @@ class VideresendSoknadTest {
     private static final String MOTTAKER_INSTITUSJON = "SE:123";
 
     @BeforeEach
-    void setup() throws SikkerhetsbegrensningException, IntegrasjonException {
+    void setup() {
         videresendSoknad = new VideresendSoknad(eessiService, behandlingsresultatService,
             joarkFasade, fagsakService, sedSomBrevService);
 
@@ -81,7 +78,7 @@ class VideresendSoknadTest {
     }
 
     @Test
-    void utfør_skalSendesUtlandErEessiKlar_senderSedIBuc3() throws MelosysException {
+    void utfør_skalSendesUtlandErEessiKlar_senderSedIBuc3() {
         Prosessinstans prosessinstans = opprettProsessinstans();
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of("SE:123"));
 
@@ -107,7 +104,7 @@ class VideresendSoknadTest {
     }
 
     @Test
-    void utfør_skalSendesUtlandErIkkeEessiKlar_senderA008SomBrev() throws MelosysException {
+    void utfør_skalSendesUtlandErIkkeEessiKlar_senderA008SomBrev() {
         Prosessinstans prosessinstans = opprettProsessinstans();
         Behandling behandling = prosessinstans.getBehandling();
         String opprettetJournalpostID = "532523";

@@ -14,6 +14,7 @@ public class BrevbestillingDto {
     private String orgNr;
     private String innledningFritekst;
     private String manglerFritekst;
+    private String begrunnelseFritekst;
     private String kontaktpersonNavn;
     private List<KopiMottaker> kopiMottakere;
 
@@ -36,6 +37,11 @@ public class BrevbestillingDto {
     private String ytterligereInformasjon;
 
     public BrevbestillingDto() {
+    }
+
+    // Må ha mulighet for å sette produserbartdokument pga bakoverkompabilitet
+    public void setProduserbardokument(Produserbaredokumenter produserbardokument) {
+        this.produserbardokument = produserbardokument;
     }
 
     public BrevbestillingDto(Builder builder) {
@@ -71,6 +77,10 @@ public class BrevbestillingDto {
         return manglerFritekst;
     }
 
+    public String getBegrunnelseFritekst() {
+        return begrunnelseFritekst;
+    }
+
     public String getKontaktpersonNavn() {
         return kontaktpersonNavn;
     }
@@ -100,6 +110,7 @@ public class BrevbestillingDto {
         private String orgNr;
         private String innledningFritekst;
         private String manglerFritekst;
+        private String begrunnelseFritekst;
         private String kontaktpersonNavn;
         private List<KopiMottaker> kopiMottakere;
         private String fritekst;
@@ -128,6 +139,11 @@ public class BrevbestillingDto {
 
         public Builder medManglerFritekst(String manglerFritekst) {
             this.manglerFritekst = manglerFritekst;
+            return this;
+        }
+
+        public Builder medBegrunnelseFritekst(String begrunnelseFritekst) {
+            this.begrunnelseFritekst = begrunnelseFritekst;
             return this;
         }
 

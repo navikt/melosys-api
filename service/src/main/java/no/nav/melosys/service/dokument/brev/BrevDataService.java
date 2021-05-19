@@ -21,14 +21,13 @@ import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -73,8 +72,7 @@ public class BrevDataService {
      */
     public DokumentbestillingMetadata lagBestillingMetadata(Produserbaredokumenter produserbartDokument,
                                                             Aktoer mottaker, Kontaktopplysning kontaktopplysning,
-                                                            Behandling behandling, BrevData brevData)
-        throws TekniskException, FunksjonellException {
+                                                            Behandling behandling, BrevData brevData) {
         Fagsak fagsak = behandling.getFagsak();
 
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
@@ -107,7 +105,7 @@ public class BrevDataService {
         return metadata;
     }
 
-    private String avklarMottakerId(Aktoer mottaker, Kontaktopplysning kontaktopplysning) throws TekniskException {
+    private String avklarMottakerId(Aktoer mottaker, Kontaktopplysning kontaktopplysning) {
         Aktoersroller mottakerRolle = mottaker.getRolle();
 
         if (mottakerRolle == ARBEIDSGIVER || mottakerRolle == REPRESENTANT) {
@@ -129,7 +127,7 @@ public class BrevDataService {
         throw new TekniskException(mottakerRolle + " støttes ikke.");
     }
 
-    UtenlandskMyndighet hentMyndighetFraAktoer(Aktoer aktoer) throws TekniskException {
+    UtenlandskMyndighet hentMyndighetFraAktoer(Aktoer aktoer) {
         Landkoder landkode = aktoer.hentMyndighetLandkode();
         return utenlandskMyndighetRepository.findByLandkode(landkode)
             .orElseThrow(() -> new TekniskException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."));
@@ -139,7 +137,7 @@ public class BrevDataService {
      * Genererer XML i hensyn til mal og validere mot xsd.
      */
     @Transactional(propagation = Propagation.MANDATORY, readOnly = true)
-    public Element lagBrevXML(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling, BrevData brevData) throws TekniskException, FunksjonellException {
+    public Element lagBrevXML(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling, BrevData brevData) {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandling.getId())
             .orElseThrow(() -> new TekniskException("Finner ingen behandlingsresultat for behandlingid " + behandling.getId()));
 
@@ -175,8 +173,7 @@ public class BrevDataService {
         return fellesType;
     }
 
-    private MelosysNAVFelles mapNAVFelles(Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling, BrevData brevData)
-        throws TekniskException, FunksjonellException {
+    private MelosysNAVFelles mapNAVFelles(Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling, BrevData brevData) {
         final MelosysNAVFelles navFelles = new MelosysNAVFelles();
 
         navFelles.setBehandlendeEnhet(lagNavEnhet());
@@ -190,7 +187,7 @@ public class BrevDataService {
         return navFelles;
     }
 
-    Mottaker lagMottaker(Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling) throws TekniskException, FunksjonellException {
+    Mottaker lagMottaker(Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling) {
         Aktoersroller mottakerRolle = mottaker.getRolle();
         String mottakerID = avklarMottakerId(mottaker, kontaktopplysning);
 
@@ -231,7 +228,7 @@ public class BrevDataService {
         return mottakerBrev;
     }
 
-    private Mottaker lagMottakerForBruker(Behandling behandling, String mottakerID) throws TekniskException, FunksjonellException {
+    private Mottaker lagMottakerForBruker(Behandling behandling, String mottakerID) {
         Mottaker mottakerBrev;
         mottakerBrev = new Person();
         mottakerBrev.setTypeKode(AktoerType.PERSON);
@@ -258,7 +255,7 @@ public class BrevDataService {
         return mottakerBrev;
     }
 
-    private Saksbehandler lagSaksbehandler(String ident) throws IkkeFunnetException, TekniskException {
+    private Saksbehandler lagSaksbehandler(String ident) {
         Saksbehandler saksbehandler = new Saksbehandler();
         saksbehandler.setNavEnhet(lagNavEnhet());
         var saksbehandlerNavn = ident != null ? saksbehandlerService.hentNavnForIdent(ident) : "N/A";
@@ -266,7 +263,7 @@ public class BrevDataService {
         return saksbehandler;
     }
 
-    private Sakspart lagSakspart(Behandling behandling) throws TekniskException {
+    private Sakspart lagSakspart(Behandling behandling) {
         Sakspart sakspart = new Sakspart();
         Aktoer aktør = behandling.getFagsak().hentBruker();
 
@@ -284,7 +281,7 @@ public class BrevDataService {
         return sakspart;
     }
 
-    private boolean brukerHarIkkeAdresseiTps(Behandling behandling) throws TekniskException {
+    private boolean brukerHarIkkeAdresseiTps(Behandling behandling) {
         return behandling.hentPersonDokument().harIkkeRegistrertAdresse();
     }
 }

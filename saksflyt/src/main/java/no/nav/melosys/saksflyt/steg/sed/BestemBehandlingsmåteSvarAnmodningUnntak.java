@@ -17,8 +17,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.exception.validering.KontrollfeilDto;
@@ -74,7 +72,7 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) {
         final long behandlingID = prosessinstans.getBehandling().getId();
         Anmodningsperiode anmodningsperiode = anmodningsperiodeService.hentAnmodningsperioder(behandlingID)
             .stream().findFirst()
@@ -101,13 +99,13 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
 
     private boolean vedtakFattesAutomatisk(long behandlingID,
                                            Anmodningsperiode anmodningsperiode,
-                                           MelosysEessiMelding melosysEessiMelding) throws IkkeFunnetException {
+                                           MelosysEessiMelding melosysEessiMelding) {
         return anmodningsperiode.getAnmodningsperiodeSvar().erInnvilgelse()
             && !melosysEessiMelding.inneholderYtterligereInformasjon()
             && behandlingService.hentBehandling(behandlingID).harStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
     }
 
-    private void fattVedtak(long behandlingID) throws MelosysException {
+    private void fattVedtak(long behandlingID) {
         try {
             vedtakServiceFasade.fattVedtak(behandlingID, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
             behandlingsresultatService.oppdaterBehandlingsMaate(behandlingID, Behandlingsmaate.DELVIS_AUTOMATISERT);

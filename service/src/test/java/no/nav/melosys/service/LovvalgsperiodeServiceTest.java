@@ -11,7 +11,6 @@ import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.GrunnlagMedl;
 import no.nav.melosys.integrasjon.medl.MedlPeriodeKonverter;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -19,10 +18,8 @@ import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -30,9 +27,6 @@ import static org.mockito.Mockito.*;
 class LovvalgsperiodeServiceTest {
 
     private final BehandlingRepository behandlingRepositoryMock = mock(BehandlingRepository.class);
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     private LovvalgsperiodeService instanse;
 
@@ -55,7 +49,7 @@ class LovvalgsperiodeServiceTest {
         TidligereMedlemsperiode tidligerePeriode = new TidligereMedlemsperiode();
         tidligerePeriode.setId(medlemsperiodeId);
 
-        when(tidligereMedlemsperiodeRepository.findById_BehandlingId(eq(1L))).thenReturn(Collections.singletonList(tidligerePeriode));
+        when(tidligereMedlemsperiodeRepository.findById_BehandlingId(1L)).thenReturn(Collections.singletonList(tidligerePeriode));
         return tidligereMedlemsperiodeRepository;
     }
 
@@ -69,7 +63,7 @@ class LovvalgsperiodeServiceTest {
 
     private static BehandlingsresultatRepository mockBehandlingsresultatRepo() {
         BehandlingsresultatRepository mock = mock(BehandlingsresultatRepository.class);
-        when(mock.findById(eq(13L))).thenReturn(Optional.of(new Behandlingsresultat()));
+        when(mock.findById(13L)).thenReturn(Optional.of(new Behandlingsresultat()));
         return mock;
     }
 
@@ -97,7 +91,7 @@ class LovvalgsperiodeServiceTest {
     }
 
     @Test
-    void tidligereLovvalgsperioder_enValgtMedlemsperiode_returnererEnTidligerLovvalgsperiode() throws TekniskException {
+    void tidligereLovvalgsperioder_enValgtMedlemsperiode_returnererEnTidligerLovvalgsperiode() {
         Medlemsperiode medlemsperiode = lagMedlemsperiode(23L, GrunnlagMedl.FO_12_2.getKode());
         Medlemsperiode medlemsperiodeFeilId = lagMedlemsperiode(46L, GrunnlagMedl.FO_12_2.getKode());
 
@@ -122,7 +116,7 @@ class LovvalgsperiodeServiceTest {
     }
 
     @Test
-    void tidligerePerioder_ukjentGrunnlagskodeMedl_grunnlagMappetTilAnnet() throws TekniskException {
+    void tidligerePerioder_ukjentGrunnlagskodeMedl_grunnlagMappetTilAnnet() {
         Medlemsperiode medlemsperiode = lagMedlemsperiode(23L, "AV_ANNET"); // Eksempel på mapping som ikke melosys kjenner til
 
         MedlemskapDokument medlDokument = new MedlemskapDokument();
@@ -137,14 +131,14 @@ class LovvalgsperiodeServiceTest {
     }
 
     @Test
-    void tidligerePerioder_ingenPerioderValgt_returnererTomCollection() throws TekniskException {
+    void tidligerePerioder_ingenPerioderValgt_returnererTomCollection() {
         Behandling behandling = new Behandling();
         behandling.setId(2L);
         assertThat(instanse.hentTidligereLovvalgsperioder(behandling)).isEmpty();
     }
 
     @Test
-    void hentOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingMedTidligerePeriode_returnererPeriode() throws IkkeFunnetException {
+    void hentOpprinneligLovvalgsperiode_finnerOpprinneligBehandlingMedTidligerePeriode_returnererPeriode() {
         Behandling behandling = new Behandling();
         Behandling opprinneligBehandling = new Behandling();
         opprinneligBehandling.setId(5L);

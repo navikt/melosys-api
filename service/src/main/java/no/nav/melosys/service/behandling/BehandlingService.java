@@ -18,7 +18,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -80,8 +79,8 @@ public class BehandlingService {
     /**
      * Knytt medlemsperioder fra MEDL til behandlingen.
      */
-    @Transactional(rollbackFor = MelosysException.class)
-    public void knyttMedlemsperioder(long behandlingID, List<Long> periodeIder) throws FunksjonellException {
+    @Transactional
+    public void knyttMedlemsperioder(long behandlingID, List<Long> periodeIder) {
         Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
 
         if (!behandling.erAktiv()) {
@@ -97,13 +96,12 @@ public class BehandlingService {
         behandlingRepository.save(behandling);
     }
 
-    public void oppdaterStatus(long behandlingID, Behandlingsstatus status)
-        throws FunksjonellException, TekniskException {
+    public void oppdaterStatus(long behandlingID, Behandlingsstatus status) {
         Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
         oppdaterStatus(behandling, status);
     }
 
-    private void oppdaterStatus(Behandling behandling, Behandlingsstatus status) throws FunksjonellException, TekniskException {
+    private void oppdaterStatus(Behandling behandling, Behandlingsstatus status) {
         if (behandling.getStatus() == status) {
             return;
         }
@@ -125,21 +123,16 @@ public class BehandlingService {
         }
     }
 
-    /**
-     * Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas,
-     * eller for å avslutte behandling ved behandlingstype VURDER_TRYGDETID
-     */
-    public void brukerOppdaterStatus(long behandlingID, Behandlingsstatus status)
-        throws FunksjonellException, TekniskException {
+    public void brukerOppdaterStatus(long behandlingID, Behandlingsstatus status) {
         Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingID);
         if (!hentMuligeStatuser(behandling).contains(status)) {
-            throw new FunksjonellException(String.format("Behandlingen kan ikke endres til status %s. Gyldige statuser er %s", status, hentMuligeStatuser(behandling)));
+            throw new FunksjonellException(String.format("Behandlingen kan ikke endres til status %s. Gyldige statuser for behandling %s er %s", status, behandlingID, hentMuligeStatuser(behandling)));
         }
         oppdaterStatus(behandling, status);
     }
 
     @Transactional(readOnly = true)
-    public Collection<Behandlingsstatus> hentMuligeStatuser(long behandlingId) throws IkkeFunnetException {
+    public Collection<Behandlingsstatus> hentMuligeStatuser(long behandlingId) {
         Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingId);
         return hentMuligeStatuser(behandling);
     }
@@ -147,7 +140,7 @@ public class BehandlingService {
     private Collection<Behandlingsstatus> hentMuligeStatuser(Behandling behandling) {
         if (behandling.erInaktiv()) return Collections.emptyList();
 
-        List<Behandlingsstatus> muligeStatuser = List.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING).stream()
+        List<Behandlingsstatus> muligeStatuser = List.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING).stream()
             .filter(status -> status != behandling.getStatus())
             .collect(Collectors.toList());
 
@@ -203,7 +196,7 @@ public class BehandlingService {
     @Transactional(rollbackFor = Exception.class)
     public Behandling replikerBehandlingOgBehandlingsresultat(Behandling tidligsteInaktiveBehandling,
                                                               Behandlingsstatus behandlingsstatus,
-                                                              Behandlingstyper behandlingstype) throws TekniskException, IkkeFunnetException {
+                                                              Behandlingstyper behandlingstype) {
         Behandling behandlingsreplika;
         try {
             behandlingsreplika = replikerBehandling(tidligsteInaktiveBehandling, behandlingsstatus, behandlingstype);
@@ -253,13 +246,17 @@ public class BehandlingService {
 
     private Behandlingsgrunnlag repolikerBehandlingsgrunnlag(Behandling behandlingsreplika, Behandlingsgrunnlag opprinneligBehandlingsgrunnlag)
         throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        if (opprinneligBehandlingsgrunnlag == null) {
+            return null;
+        }
+
         Behandlingsgrunnlag replikertBehandlingsgrunnlag = (Behandlingsgrunnlag) BeanUtils.cloneBean(opprinneligBehandlingsgrunnlag);
         replikertBehandlingsgrunnlag.setId(null);
         replikertBehandlingsgrunnlag.setBehandling(behandlingsreplika);
         return replikertBehandlingsgrunnlag;
     }
 
-    public void avsluttBehandling(long behandlingId) throws FunksjonellException {
+    public void avsluttBehandling(long behandlingId) {
         Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingId);
         if (behandling.erAvsluttet()) {
             throw new FunksjonellException("Behandling " + behandlingId + " er allerede avsluttet!");
@@ -270,12 +267,12 @@ public class BehandlingService {
         behandlingerAvsluttet.increment();
     }
 
-    public Behandling hentBehandling(long behandlingId) throws IkkeFunnetException {
+    public Behandling hentBehandling(long behandlingId) {
         return Optional.ofNullable(behandlingRepository.findWithSaksopplysningerById(behandlingId))
             .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
     }
 
-    public Behandling hentBehandlingUtenSaksopplysninger(long behandlingId) throws IkkeFunnetException {
+    public Behandling hentBehandlingUtenSaksopplysninger(long behandlingId) {
         return behandlingRepository.findById(behandlingId)
             .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
     }
@@ -298,7 +295,7 @@ public class BehandlingService {
         lagre(behandling);
     }
 
-    public boolean erBehandlingRedigerbarOgTilordnetSaksbehandler(Behandling behandling, String saksbehandler) throws FunksjonellException, TekniskException {
+    public boolean erBehandlingRedigerbarOgTilordnetSaksbehandler(Behandling behandling, String saksbehandler) {
         if (!behandling.erRedigerbar()) {
             return false;
         }
@@ -314,7 +311,7 @@ public class BehandlingService {
     }
 
     @Transactional
-    public void endreBehandlingsfrist(long behandlingId, LocalDate behandlingsfrist) throws IkkeFunnetException {
+    public void endreBehandlingsfrist(long behandlingId, LocalDate behandlingsfrist) {
         Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingId);
         behandling.setBehandlingsfrist(behandlingsfrist);
         lagre(behandling);

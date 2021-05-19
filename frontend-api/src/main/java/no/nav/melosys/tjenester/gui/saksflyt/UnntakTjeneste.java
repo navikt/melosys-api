@@ -2,8 +2,6 @@ package no.nav.melosys.tjenester.gui.saksflyt;
 
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
 import no.nav.melosys.tjenester.gui.dto.GodkjennUnntaksperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.VurderUnntaksperiodeDto;
@@ -29,7 +27,7 @@ public class UnntakTjeneste {
     }
 
     @PostMapping("{behandlingID}/ikkegodkjenn")
-    public ResponseEntity<Void> ikkeGodkjennUnntaksperiode(@PathVariable("behandlingID") Long behandlingId, @RequestBody VurderUnntaksperiodeDto vurderUnntaksperiodeDto) throws FunksjonellException, TekniskException {
+    public ResponseEntity<Void> ikkeGodkjennUnntaksperiode(@PathVariable("behandlingID") Long behandlingId, @RequestBody VurderUnntaksperiodeDto vurderUnntaksperiodeDto) {
         unntaksperiodeService.ikkeGodkjennPeriode(behandlingId, vurderUnntaksperiodeDto.getIkkeGodkjentBegrunnelseKoder(), vurderUnntaksperiodeDto.getBegrunnelseFritekst());
         return ResponseEntity.noContent().build();
     }
@@ -38,8 +36,8 @@ public class UnntakTjeneste {
     public ResponseEntity<Void> godkjennUnntaksperiode(
         @PathVariable("behandlingID") Long behandlingId,
         @RequestBody GodkjennUnntaksperiodeDto godkjennUnntaksperiodeDto
-    ) throws FunksjonellException, TekniskException {
-        unntaksperiodeService.godkjennPeriode(behandlingId, godkjennUnntaksperiodeDto.isVarsleUtland());
+    ) {
+        unntaksperiodeService.godkjennPeriode(behandlingId, godkjennUnntaksperiodeDto.isVarsleUtland(), godkjennUnntaksperiodeDto.getFritekst());
         return ResponseEntity.noContent().build();
     }
 }

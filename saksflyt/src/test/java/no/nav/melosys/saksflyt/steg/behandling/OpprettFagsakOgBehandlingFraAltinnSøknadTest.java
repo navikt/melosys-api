@@ -3,22 +3,19 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.altinn.AltinnSoeknadService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class OpprettFagsakOgBehandlingFraAltinnSøknadTest {
 
     @Mock
@@ -30,8 +27,8 @@ public class OpprettFagsakOgBehandlingFraAltinnSøknadTest {
     private final Behandling behandling = new Behandling();
     private final Prosessinstans prosessinstans = new Prosessinstans();
 
-    @Before
-    public void setup() throws FunksjonellException, TekniskException {
+    @BeforeEach
+    public void setup() {
         opprettFagsakOgBehandlingFraAltinnSøknad = new OpprettFagsakOgBehandlingFraAltinnSøknad(altinnSoeknadService);
 
         prosessinstans.setData(ProsessDataKey.MOTTATT_SOKNAD_ID, soeknadID);
@@ -40,7 +37,7 @@ public class OpprettFagsakOgBehandlingFraAltinnSøknadTest {
     }
 
     @Test
-    public void utfør_behandlingBlirOpprettetVerifiserNesteSteg() throws MelosysException {
+    public void utfør_behandlingBlirOpprettetVerifiserNesteSteg() {
         opprettFagsakOgBehandlingFraAltinnSøknad.utfør(prosessinstans);
         verify(altinnSoeknadService).opprettFagsakOgBehandlingFraAltinnSøknad(eq(soeknadID));
         assertThat(prosessinstans.getBehandling()).isEqualTo(behandling);

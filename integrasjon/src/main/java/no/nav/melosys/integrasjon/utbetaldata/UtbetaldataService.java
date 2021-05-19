@@ -39,7 +39,7 @@ public class UtbetaldataService implements UtbetaldataFasade {
     }
 
     @Override
-    public Saksopplysning hentUtbetalingerBarnetrygd(String fnr, LocalDate fom, LocalDate tom) throws TekniskException, FunksjonellException {
+    public Saksopplysning hentUtbetalingerBarnetrygd(String fnr, LocalDate fom, LocalDate tom) {
         HentUtbetalingsinformasjonResponse response;
 
         // Utbetldata støtter ikke uthenting av data for lenger tilbake enn 3 år
@@ -61,7 +61,7 @@ public class UtbetaldataService implements UtbetaldataFasade {
         return saksopplysning;
     }
 
-    private HentUtbetalingsinformasjonResponse hentUtbetalingsinformasjon(HentUtbetalingsinformasjonRequest request) throws FunksjonellException, IntegrasjonException {
+    private HentUtbetalingsinformasjonResponse hentUtbetalingsinformasjon(HentUtbetalingsinformasjonRequest request) {
         try {
             return utbetalingConsumer.hentUtbetalingsinformasjon(request);
         } catch (HentUtbetalingsinformasjonPersonIkkeFunnet hentUtbetalingsinformasjonPersonIkkeFunnet) {
@@ -75,7 +75,7 @@ public class UtbetaldataService implements UtbetaldataFasade {
         }
     }
 
-    private StringWriter lagXml(HentUtbetalingsinformasjonResponse response) throws IntegrasjonException {
+    private StringWriter lagXml(HentUtbetalingsinformasjonResponse response) {
         StringWriter xmlWriter = new StringWriter();
         try {
             no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonResponse xmlRoot =
@@ -98,7 +98,7 @@ public class UtbetaldataService implements UtbetaldataFasade {
         return saksopplysning;
     }
 
-    private static HentUtbetalingsinformasjonRequest lagRequest(String fnr, LocalDate fom, LocalDate tom) throws TekniskException {
+    private static HentUtbetalingsinformasjonRequest lagRequest(String fnr, LocalDate fom, LocalDate tom) {
         HentUtbetalingsinformasjonRequest request = new HentUtbetalingsinformasjonRequest();
         request.setId(lagIdent(fnr));
         request.setPeriode(lagPeriode(fom, tom));
@@ -114,7 +114,7 @@ public class UtbetaldataService implements UtbetaldataFasade {
         return ident;
     }
 
-    private static ForespurtPeriode lagPeriode(LocalDate fom, LocalDate tom) throws TekniskException {
+    private static ForespurtPeriode lagPeriode(LocalDate fom, LocalDate tom) {
         ForespurtPeriode periode = new ForespurtPeriode();
         Periodetyper periodetype = new Periodetyper();
         periodetype.setValue(YTELSESPERIODE);

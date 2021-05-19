@@ -15,7 +15,6 @@ import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
@@ -40,7 +39,7 @@ public class LandvelgerService {
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
     }
 
-    public Landkoder hentArbeidsland(long behandlingID) throws FunksjonellException {
+    public Landkoder hentArbeidsland(long behandlingID) {
         Collection<Landkoder> alleArbeidsland = hentAlleArbeidslandUtenMarginaltArbeid(behandlingID);
         if (alleArbeidsland.size() != 1) {
             throw new FunksjonellException("Fant ingen eller flere enn ett arbeidsland");
@@ -48,7 +47,7 @@ public class LandvelgerService {
         return alleArbeidsland.iterator().next();
     }
 
-    public Collection<Landkoder> hentAlleArbeidsland(long behandlingID) throws IkkeFunnetException {
+    public Collection<Landkoder> hentAlleArbeidsland(long behandlingID) {
         Collection<Landkoder> alleArbeidsland = avklartefaktaService.hentAlleAvklarteArbeidsland(behandlingID);
         if (alleArbeidsland.isEmpty() || erArtikkel13(behandlingID)) {
             BehandlingsgrunnlagData grunnlagData = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID).getBehandlingsgrunnlagdata();
@@ -58,7 +57,7 @@ public class LandvelgerService {
         return alleArbeidsland;
     }
 
-    public Collection<Landkoder> hentAlleArbeidslandUtenMarginaltArbeid(long behandlingID) throws IkkeFunnetException {
+    public Collection<Landkoder> hentAlleArbeidslandUtenMarginaltArbeid(long behandlingID) {
         Collection<Landkoder> alleArbeidsland = hentAlleArbeidsland(behandlingID);
         Collection<Landkoder> landMedMarginaltArbeid = avklartefaktaService.hentLandkoderMedMarginaltArbeid(behandlingID);
         alleArbeidsland.removeAll(landMedMarginaltArbeid);
@@ -66,7 +65,7 @@ public class LandvelgerService {
         return alleArbeidsland;
     }
 
-    private boolean erArtikkel13(long behandlingId) throws IkkeFunnetException {
+    private boolean erArtikkel13(long behandlingId) {
         return erArtikkel13(behandlingsresultatService.hentBehandlingsresultat(behandlingId));
     }
 
@@ -90,7 +89,7 @@ public class LandvelgerService {
         return fagsak.getStatus() == Saksstatuser.VIDERESENDT;
     }
 
-    public Collection<Landkoder> hentUtenlandskTrygdemyndighetsland(long behandlingID) throws IkkeFunnetException {
+    public Collection<Landkoder> hentUtenlandskTrygdemyndighetsland(long behandlingID) {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 
         if (erArtikkel13(behandlingsresultat) && !erVideresendt(behandlingsresultat)) {
@@ -105,7 +104,7 @@ public class LandvelgerService {
         return trygdemyndighetsland;
     }
 
-    private Collection<Landkoder> hentUtenlandskTrygdemyndighetslandArtikkel13(Behandlingsresultat behandlingsresultat) throws IkkeFunnetException {
+    private Collection<Landkoder> hentUtenlandskTrygdemyndighetslandArtikkel13(Behandlingsresultat behandlingsresultat) {
         final long behandlingID = behandlingsresultat.getId();
         Set<Landkoder> landkoderMedMarginaltArbeid = avklartefaktaService.hentLandkoderMedMarginaltArbeid(behandlingID);
         Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID);
@@ -125,7 +124,7 @@ public class LandvelgerService {
         ).filter(landkoder -> landkoder != Landkoder.NO).collect(Collectors.toSet());
     }
 
-    private Collection<Landkoder> hentTrygdemyndighetsland(Behandlingsresultat behandlingsresultat) throws IkkeFunnetException {
+    private Collection<Landkoder> hentTrygdemyndighetsland(Behandlingsresultat behandlingsresultat) {
         final long behandlingID = behandlingsresultat.getId();
         BehandlingsgrunnlagData grunnlagdata = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID).getBehandlingsgrunnlagdata();
 

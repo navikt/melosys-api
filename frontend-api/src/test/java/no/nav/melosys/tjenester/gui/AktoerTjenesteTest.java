@@ -7,26 +7,22 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.aktoer.AktoerService;
 import no.nav.melosys.service.sak.FagsakService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AktoerTjenesteTest extends JsonSchemaTestParent {
     private static final Logger log = LoggerFactory.getLogger(AktoerTjenesteTest.class);
     private static final String AKTOER_SCHEMA = "fagsaker-aktoerer-schema.json";
@@ -41,10 +37,9 @@ public class AktoerTjenesteTest extends JsonSchemaTestParent {
 
     private AktoerTjeneste aktoerTjeneste;
 
-    @Before
-    public void setUp() throws IkkeFunnetException {
+    @BeforeEach
+    public void setUp() {
         aktoerTjeneste = new AktoerTjeneste(tilgangService, aktoerService, fagsakService);
-        when(fagsakService.hentFagsak("MELTEST-1")).thenReturn(lagFagsak());
     }
 
     @Test
@@ -62,7 +57,8 @@ public class AktoerTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public final void lagOppdaterAktoer() throws MelosysException {
+    public final void lagOppdaterAktoer() {
+        when(fagsakService.hentFagsak("MELTEST-1")).thenReturn(lagFagsak());
 
         Aktoer aktoerBruker = new Aktoer();
         aktoerBruker.setAktørId("1234");
@@ -79,7 +75,8 @@ public class AktoerTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public final void hentAktoer_tilAktoerDto() throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
+    public final void hentAktoer_tilAktoerDto() {
+        when(fagsakService.hentFagsak("MELTEST-1")).thenReturn(lagFagsak());
 
         Aktoer aktoerRep = new Aktoer();
         aktoerRep.setId(29L);

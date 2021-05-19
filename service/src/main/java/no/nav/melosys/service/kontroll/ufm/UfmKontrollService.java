@@ -12,7 +12,6 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +32,7 @@ public class UfmKontrollService {
             .forEach(b -> Metrics.counter(UNNTAKSPERIODE_KONTROLL_TREFF, TAG_BEGRUNNELSE, b.getKode()));
     }
 
-    public List<Kontroll_begrunnelser> utførKontroller(Behandling behandling) throws TekniskException {
+    public List<Kontroll_begrunnelser> utførKontroller(Behandling behandling) {
         SedDokument sedDokument = behandling.hentSedDokument();
         if (feilIPeriode(sedDokument)) {
             return Collections.singletonList(Kontroll_begrunnelser.FEIL_I_PERIODEN);

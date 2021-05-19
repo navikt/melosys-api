@@ -8,29 +8,26 @@ import no.nav.melosys.domain.Behandlingsnotat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingsnotatRepository;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BehandlingsnotatServiceTest {
+@ExtendWith(MockitoExtension.class)
+class BehandlingsnotatServiceTest {
 
     @Mock
     private FagsakService fagsakService;
@@ -39,9 +36,6 @@ public class BehandlingsnotatServiceTest {
 
     private BehandlingsnotatService behandlingsnotatService;
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     @Captor
     private ArgumentCaptor<Behandlingsnotat> captor;
 
@@ -49,26 +43,26 @@ public class BehandlingsnotatServiceTest {
 
     private final String saksnummer = "MEL-123";
 
-    @Before
-    public void setup() throws IkkeFunnetException {
+    @BeforeEach
+    public void setup() {
         behandlingsnotatService = new BehandlingsnotatService(behandlingsnotatRepository, fagsakService);
-
         fagsak = new Fagsak();
-        when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsak);
         SpringSubjectHandler.set(new TestSubjectHandler());
     }
 
     @Test
-    public void opprettNotat_fagsakHarIkkeAktivBehandling_forventException() throws FunksjonellException, TekniskException {
+    void opprettNotat_fagsakHarIkkeAktivBehandling_forventException() {
+        when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsak);
         lagBehandling(fagsak, Behandlingsstatus.AVSLUTTET);
 
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("har ingen aktive behandlinger");
-        behandlingsnotatService.opprettNotat(saksnummer, "heihei");
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> behandlingsnotatService.opprettNotat(saksnummer, "heihei"))
+            .withMessageContaining("har ingen aktive behandlinger");
     }
 
     @Test
-    public void opprettNotat_fagsakHarAktivBehandling_blirLagret() throws FunksjonellException, TekniskException {
+    void opprettNotat_fagsakHarAktivBehandling_blirLagret() {
+        when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsak);
         Behandling behandling = lagBehandling(fagsak, Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
 
         String tekst = "heiheihei";
@@ -79,7 +73,8 @@ public class BehandlingsnotatServiceTest {
     }
 
     @Test
-    public void hentNotaterForFagsak_enBehandlingErAvsluttet_verifiserRedigerbareOgIkkeRedigerbareNotater() throws IkkeFunnetException {
+    void hentNotaterForFagsak_enBehandlingErAvsluttet_verifiserRedigerbareOgIkkeRedigerbareNotater() {
+        when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsak);
         Behandling avsluttetBehandling = lagBehandling(fagsak, Behandlingsstatus.AVSLUTTET);
         Behandlingsnotat ikkeAktivBehandlingsnotat = new Behandlingsnotat();
         ikkeAktivBehandlingsnotat.setTekst("tetetetekksttt");
@@ -100,7 +95,7 @@ public class BehandlingsnotatServiceTest {
     }
 
     @Test
-    public void oppdaterNotat_behandlingIkkeRedigerbar_kasterException() throws FunksjonellException {
+    void oppdaterNotat_behandlingIkkeRedigerbar_kasterException() {
         final long notatID = 111L;
         Behandling behandling = lagBehandling(fagsak, Behandlingsstatus.AVSLUTTET);
         Behandlingsnotat behandlingsnotat = new Behandlingsnotat();
@@ -110,14 +105,13 @@ public class BehandlingsnotatServiceTest {
 
         when(behandlingsnotatRepository.findById(eq(notatID))).thenReturn(Optional.of(behandlingsnotat));
 
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage(" kan ikke oppdateres, da den tilhører en behandling som er avsluttet");
-
-        behandlingsnotatService.oppdaterNotat(notatID, "Et skummelt notat.");
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> behandlingsnotatService.oppdaterNotat(notatID, "Et skummelt notat."))
+            .withMessageContaining(" kan ikke oppdateres, da den tilhører en behandling som er avsluttet");
     }
 
     @Test
-    public void oppdaterNotat_behandlingSaksbehandlerIkkeTilgang_kasterException() throws FunksjonellException {
+    void oppdaterNotat_behandlingSaksbehandlerIkkeTilgang_kasterException() {
         final long notatID = 111L;
         Behandling behandling = lagBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING);
         Behandlingsnotat behandlingsnotat = new Behandlingsnotat();
@@ -127,10 +121,9 @@ public class BehandlingsnotatServiceTest {
 
         when(behandlingsnotatRepository.findById(eq(notatID))).thenReturn(Optional.of(behandlingsnotat));
 
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("Et notat kan ikke endres av andre!");
-
-        behandlingsnotatService.oppdaterNotat(notatID, "Et enda skumlere notat.");
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> behandlingsnotatService.oppdaterNotat(notatID, "Et enda skumlere notat."))
+            .withMessageContaining("Et notat kan ikke endres av andre!");
     }
 
     private Behandling lagBehandling(Fagsak fagsak, Behandlingsstatus behandlingsstatus) {

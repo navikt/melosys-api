@@ -18,7 +18,7 @@ public final class VilkaarbegrunnelseFactory {
         throw new IllegalStateException("Utility");
     }
 
-    public static Art121BegrunnelseType mapArt121BegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) throws TekniskException {
+    public static Art121BegrunnelseType mapArt121BegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) {
         Art121BegrunnelseType art121BegrunnelseType = lagArt121BegrunnelseType();
         for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
             Art12_1_begrunnelser artikkel12_1 = Art12_1_begrunnelser.valueOf(vilkaarBegrunnelse.getKode());
@@ -63,7 +63,7 @@ public final class VilkaarbegrunnelseFactory {
         return art121BegrunnelseType;
     }
 
-    public static Art121ForutgaaendeBegrunnelseType mapArt121ForutgaaendeBegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) throws TekniskException {
+    public static Art121ForutgaaendeBegrunnelseType mapArt121ForutgaaendeBegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) {
         Art121ForutgaaendeBegrunnelseType art121ForutgaaendeBegrunnelseType = lagArt121ForutgaaendeBegrunnelseType();
 
         for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
@@ -93,7 +93,7 @@ public final class VilkaarbegrunnelseFactory {
         return art121ForutgaaendeBegrunnelseType;
     }
 
-    public static Art121VesentligVirksomhetBegrunnelse mapArt121VesentligVirksomhetBegrunnelse(Set<VilkaarBegrunnelse> begrunnelser) throws TekniskException {
+    public static Art121VesentligVirksomhetBegrunnelse mapArt121VesentligVirksomhetBegrunnelse(Set<VilkaarBegrunnelse> begrunnelser) {
         Art121VesentligVirksomhetBegrunnelse brevBegrunnelse = lagArt121VesentligVirksomhetBegrunnelseType();
         for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
             Art12_1_vesentlig_virksomhet vesentligVirksomhetBegrunnelse = Art12_1_vesentlig_virksomhet.valueOf(vilkaarBegrunnelse.getKode());
@@ -138,7 +138,7 @@ public final class VilkaarbegrunnelseFactory {
         return brevBegrunnelse;
     }
 
-    public static Art122BegrunnelseType mapArt122BegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) throws TekniskException {
+    public static Art122BegrunnelseType mapArt122BegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) {
         Art122BegrunnelseType art122BegrunnelseType = lagArt122BegrunnelseType();
         for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
             Art12_2_begrunnelser artikkel12_2 = Art12_2_begrunnelser.valueOf(vilkaarBegrunnelse.getKode());
@@ -167,7 +167,7 @@ public final class VilkaarbegrunnelseFactory {
         return art122BegrunnelseType;
     }
 
-    public static Art122NormalVirksomhetBegrunnelseType mapArt122NormalVirksomhetBegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) throws TekniskException {
+    public static Art122NormalVirksomhetBegrunnelseType mapArt122NormalVirksomhetBegrunnelseType(Set<VilkaarBegrunnelse> begrunnelser) {
         Art122NormalVirksomhetBegrunnelseType art122NormalVirksomhetBegrunnelseType = lagArt122NormalVirksomhetBegrunnelseType();
         for (VilkaarBegrunnelse vilkaarBegrunnelse : begrunnelser) {
             Art12_2_normalt_virksomhet normaltDriverVirksomhet = Art12_2_normalt_virksomhet.valueOf(vilkaarBegrunnelse.getKode());
@@ -193,7 +193,7 @@ public final class VilkaarbegrunnelseFactory {
         return art122NormalVirksomhetBegrunnelseType;
     }
 
-    public static Optional<Art161AnmodningBegrunnelseKode> mapAnmodningBegrunnelser(Collection<VilkaarBegrunnelse> anmodningbegrunnelser) throws TekniskException {
+    public static Optional<Art161AnmodningBegrunnelseKode> mapAnmodningBegrunnelser(Collection<VilkaarBegrunnelse> anmodningbegrunnelser) {
         if (anmodningbegrunnelser.size() > 1) {
             throw new TekniskException("Mer enn én art16-anmodningbegrunnelse");
         }
@@ -203,7 +203,7 @@ public final class VilkaarbegrunnelseFactory {
             .findFirst();
     }
 
-    public static Optional<Art161AnmodningUtenArt12BegrunnelseKode> mapAnmodningUtenArt12Begrunnelser(Collection<VilkaarBegrunnelse> anmodningbegrunnelser) throws TekniskException {
+    public static Optional<Art161AnmodningUtenArt12BegrunnelseKode> mapAnmodningUtenArt12Begrunnelser(Collection<VilkaarBegrunnelse> anmodningbegrunnelser) {
         if (anmodningbegrunnelser.size() > 1) {
             throw new TekniskException("Mer enn én art16-anmodningbegrunnelse");
         }

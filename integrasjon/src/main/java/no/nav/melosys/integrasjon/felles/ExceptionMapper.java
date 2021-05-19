@@ -12,10 +12,7 @@ public final class ExceptionMapper {
         throw new IllegalArgumentException("Utility");
     }
 
-    /**
-     * WebTarget.get kan kaste ProcessingException eller WebApplicationException. Denne metoden kaster en MelosysException, basert på typen til parameteren.
-     */
-    public static void JaxGetRuntimeExTilMelosysEx(RuntimeException e) throws FunksjonellException, TekniskException {
+    public static void JaxGetRuntimeExTilMelosysEx(RuntimeException e) {
         if (e instanceof NotAuthorizedException || e instanceof ForbiddenException) {
             throw new SikkerhetsbegrensningException(e.getMessage());
         } else if (e instanceof NotFoundException) {
@@ -30,11 +27,11 @@ public final class ExceptionMapper {
         }
     }
 
-    public static MelosysException springExTilMelosysEx(RestClientException ex) {
-        return springExTilMelosysEx(ex, ex.getMessage());
+    public static RuntimeException mapException(RestClientException ex) {
+        return mapException(ex, ex.getMessage());
     }
 
-    public static MelosysException springExTilMelosysEx(RestClientException ex, String feilmelding) {
+    public static RuntimeException mapException(RestClientException ex, String feilmelding) {
         if (ex instanceof HttpStatusCodeException httpStatusCodeException) {
             return switch (httpStatusCodeException.getStatusCode()) {
                 case FORBIDDEN, UNAUTHORIZED -> new SikkerhetsbegrensningException(feilmelding, ex);

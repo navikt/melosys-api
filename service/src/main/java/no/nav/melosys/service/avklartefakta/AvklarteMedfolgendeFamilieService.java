@@ -1,8 +1,5 @@
 package no.nav.melosys.service.avklartefakta;
 
-import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_LOVVALG_BARN;
-import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER;
-
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -11,22 +8,22 @@ import java.util.stream.Stream;
 
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
+import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
+import no.nav.melosys.domain.person.familie.OmfattetFamilie;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.apache.cxf.common.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
-import no.nav.melosys.domain.familie.AvklarteMedfolgendeFamilie;
-import no.nav.melosys.domain.familie.IkkeOmfattetFamilie;
-import no.nav.melosys.domain.familie.OmfattetFamilie;
-import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
-import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.service.behandling.BehandlingService;
+import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_LOVVALG_BARN;
+import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER;
 
 @Service
 public class AvklarteMedfolgendeFamilieService {
@@ -44,8 +41,8 @@ public class AvklarteMedfolgendeFamilieService {
         this.avklartefaktaService = avklartefaktaService;
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void lagreMedfolgendeFamilieSomAvklartefakta(long behandlingID, AvklarteMedfolgendeFamilie medfolgendeFamilie) throws FunksjonellException {
+    @Transactional
+    public void lagreMedfolgendeFamilieSomAvklartefakta(long behandlingID, AvklarteMedfolgendeFamilie medfolgendeFamilie) {
         Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolleFraBehandlingsgrunnlag =
             behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID).getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().hentUuidOgRolleMedfølgendeFamilie();
 
@@ -57,12 +54,12 @@ public class AvklarteMedfolgendeFamilieService {
         lagreFamilieSomAvklartfakta(behandlingID, medfolgendeFamilie.tilAvklartefakta(uuidOgRolleFraBehandlingsgrunnlag));
     }
 
-    private void validerMedfolgendeFamilie(AvklarteMedfolgendeFamilie medfolgendeFamilie, Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolleFraBehandlingsgrunnlag) throws FunksjonellException {
+    private void validerMedfolgendeFamilie(AvklarteMedfolgendeFamilie medfolgendeFamilie, Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolleFraBehandlingsgrunnlag) {
         validerOmfattetFamilie(medfolgendeFamilie.getFamilieOmfattetAvNorskTrygd(), uuidOgRolleFraBehandlingsgrunnlag);
         validerIkkeOmfattetFamilie(medfolgendeFamilie.getFamilieIkkeOmfattetAvNorskTrygd(), uuidOgRolleFraBehandlingsgrunnlag);
     }
 
-    private void validerOmfattetFamilie(Set<OmfattetFamilie> omfattetFamilieSet, Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolle) throws FunksjonellException {
+    private void validerOmfattetFamilie(Set<OmfattetFamilie> omfattetFamilieSet, Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolle) {
         for (OmfattetFamilie omfattetFamilie : omfattetFamilieSet) {
             if (!uuidOgRolle.containsKey(omfattetFamilie.getUuid())) {
                 throw new FunksjonellException("Medfolgende familie som er omfattet av norsk trygd: " + omfattetFamilie.getUuid() + " er ikke lagret i behandlingsgrunnlaget.");
@@ -70,7 +67,7 @@ public class AvklarteMedfolgendeFamilieService {
         }
     }
 
-    private void validerIkkeOmfattetFamilie(Set<IkkeOmfattetFamilie> ikkeOmfattetFamilieSet, Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolle) throws FunksjonellException {
+    private void validerIkkeOmfattetFamilie(Set<IkkeOmfattetFamilie> ikkeOmfattetFamilieSet, Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolle) {
         var begrunnelserBarn = Stream.of(Medfolgende_barn_begrunnelser_ftrl.values()).map(Medfolgende_barn_begrunnelser_ftrl::getKode).collect(Collectors.toList());
         var begrunnelserEktefelleSamboer =Stream.of(Medfolgende_ektefelle_samboer_begrunnelser_ftrl.values()).map(Medfolgende_ektefelle_samboer_begrunnelser_ftrl::getKode).collect(Collectors.toList());
 
@@ -90,7 +87,7 @@ public class AvklarteMedfolgendeFamilieService {
         }
     }
 
-    public void lagreFamilieSomAvklartfakta(long behandlingID, Collection<Avklartefakta> avklartefaktaFraMedfolgendeFamilie) throws IkkeFunnetException {
+    public void lagreFamilieSomAvklartfakta(long behandlingID, Collection<Avklartefakta> avklartefaktaFraMedfolgendeFamilie) {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 
         avklartefaktaFraMedfolgendeFamilie.forEach(avklartefakta -> {

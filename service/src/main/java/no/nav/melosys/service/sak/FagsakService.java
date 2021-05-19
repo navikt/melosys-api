@@ -19,8 +19,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -82,7 +80,7 @@ public class FagsakService {
         this.unleash = unleash;
     }
 
-    public Fagsak hentFagsak(String saksnummer) throws IkkeFunnetException {
+    public Fagsak hentFagsak(String saksnummer) {
         return finnFagsakFraSaksnummer(saksnummer)
             .orElseThrow(() -> new IkkeFunnetException("Det finnes ingen fagsak med saksnummer: " + saksnummer));
     }
@@ -91,7 +89,7 @@ public class FagsakService {
         return fagsakRepository.findBySaksnummer(saksnummer);
     }
 
-    public Fagsak hentFagsakFraArkivsakID(Long arkivsakID) throws IkkeFunnetException {
+    public Fagsak hentFagsakFraArkivsakID(Long arkivsakID) {
         return finnFagsakFraArkivsakID(arkivsakID)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke fagsak for arkivsakID " + arkivsakID));
     }
@@ -100,7 +98,7 @@ public class FagsakService {
         return fagsakRepository.findByGsakSaksnummer(arkivsakID);
     }
 
-    public List<Fagsak> hentFagsakerMedAktør(Aktoersroller rolleType, String ident) throws IkkeFunnetException {
+    public List<Fagsak> hentFagsakerMedAktør(Aktoersroller rolleType, String ident) {
         String aktørID = persondataFasade.hentAktørIdForIdent(ident);
         return fagsakRepository.findByRolleAndAktør(rolleType, aktørID);
     }
@@ -113,8 +111,8 @@ public class FagsakService {
         fagsakRepository.save(sak);
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void bestillNySakOgBehandling(OpprettSakDto opprettSakDto) throws FunksjonellException {
+    @Transactional
+    public void bestillNySakOgBehandling(OpprettSakDto opprettSakDto) {
         validerOpprettSakDto(opprettSakDto);
         final Oppgave oppgave = validerOppgave(opprettSakDto.getOppgaveID());
         prosessinstansService.opprettProsessinstansNySak(
@@ -124,7 +122,7 @@ public class FagsakService {
         );
     }
 
-    void validerOpprettSakDto(OpprettSakDto opprettSakDto) throws FunksjonellException {
+    void validerOpprettSakDto(OpprettSakDto opprettSakDto) {
         final var sakstype = opprettSakDto.getSakstype();
         final var behandlingstema = opprettSakDto.getBehandlingstema();
         if (behandlingstema == null) {
@@ -164,7 +162,7 @@ public class FagsakService {
         }
     }
 
-    private Oppgave validerOppgave(String oppgaveID) throws FunksjonellException {
+    private Oppgave validerOppgave(String oppgaveID) {
         if (StringUtils.isEmpty(oppgaveID)) {
             throw new FunksjonellException("OppgaveID mangler.");
         }
@@ -187,7 +185,7 @@ public class FagsakService {
     // Sletter myndigheter som ikke ligger i oppgitt liste og legger til de som mangler.
     // Oppdaterer IKKE de som allerede finnes i database
     @Transactional
-    public void oppdaterMyndigheter(String saksnummer, Collection<String> ider) throws IkkeFunnetException {
+    public void oppdaterMyndigheter(String saksnummer, Collection<String> ider) {
         Fagsak fagsak = hentFagsak(saksnummer);
         fagsak.getAktører().removeIf(aktoer -> !ider.contains(aktoer.getInstitusjonId())
             && aktoer.getRolle() == Aktoersroller.MYNDIGHET);
@@ -201,7 +199,7 @@ public class FagsakService {
     }
 
     @Transactional
-    public void leggTilAktør(String saksnummer, Aktoersroller aktørsrolle, String ID) throws IkkeFunnetException {
+    public void leggTilAktør(String saksnummer, Aktoersroller aktørsrolle, String ID) {
         Fagsak fagsak = hentFagsak(saksnummer);
 
         Aktoer aktør = lagAktør(fagsak, aktørsrolle, ID);
@@ -235,7 +233,7 @@ public class FagsakService {
      * - Oppretter bruker, arbeidsgiver og representanter.
      * - Oppretter tom behandlingsresultat.
      */
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public Fagsak nyFagsakOgBehandling(OpprettSakRequest opprettSakRequest) {
         Fagsak fagsak = new Fagsak();
         String saksnummer = hentNesteSaksnummer();
@@ -303,8 +301,8 @@ public class FagsakService {
         return FAGSAKID_PREFIX + fagsakRepository.hentNesteSekvensVerdi();
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void avsluttSakSomBortfalt(Fagsak fagsak) throws FunksjonellException {
+    @Transactional
+    public void avsluttSakSomBortfalt(Fagsak fagsak) {
         fagsak.getBehandlinger().forEach(behandling -> behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE));
 
         fagsak.getBehandlinger().forEach(behandling -> {
@@ -318,8 +316,8 @@ public class FagsakService {
     }
 
     //Brukes for å avslutte behandling (og dermed fagsak) fra frontend i manuelle sed-behandlinger
-    @Transactional(rollbackFor = MelosysException.class)
-    public void avsluttFagsakOgBehandlingValiderBehandlingstype(Fagsak fagsak, Behandling behandling) throws FunksjonellException {
+    @Transactional
+    public void avsluttFagsakOgBehandlingValiderBehandlingstype(Fagsak fagsak, Behandling behandling) {
         Behandlingstema behandlingstema = behandling.getTema();
         if (!behandling.kanAvsluttesManuelt()) {
             throw new FunksjonellException("Behandlingstema " + behandlingstema + " kan ikke avsluttes manuelt");
@@ -331,7 +329,7 @@ public class FagsakService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 
-    public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus) throws FunksjonellException {
+    public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus) {
         Behandling aktivBehandling = fagsak.hentAktivBehandling();
         if (aktivBehandling == null) {
             throw new FunksjonellException("Fagsak " + fagsak.getSaksnummer() + " har ingen aktiv behandling");
@@ -342,7 +340,7 @@ public class FagsakService {
 
     public void avsluttFagsakOgBehandling(Fagsak fagsak,
                                           Behandling behandling,
-                                          Saksstatuser saksstatus) throws FunksjonellException {
+                                          Saksstatuser saksstatus) {
         if (!behandling.getFagsak().getSaksnummer().equals(fagsak.getSaksnummer())) {
             throw new FunksjonellException("Behandling " + behandling.getId()
                 + " tilhører ikke fagsak " + fagsak.getSaksnummer());
@@ -357,8 +355,8 @@ public class FagsakService {
         fagsakRepository.save(fagsak);
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public long opprettNyVurderingBehandling(String saksnummer) throws FunksjonellException {
+    @Transactional
+    public long opprettNyVurderingBehandling(String saksnummer) {
         Fagsak fagsak = hentFagsak(saksnummer);
         Behandling behandling = fagsak.hentSistAktiveBehandling();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
@@ -386,7 +384,7 @@ public class FagsakService {
         return replikertBehandling.getId();
     }
 
-    private void validerOpprettNyVurdering(Behandling behandling, Behandlingsresultat behandlingsresultat) throws FunksjonellException {
+    private void validerOpprettNyVurdering(Behandling behandling, Behandlingsresultat behandlingsresultat) {
         if (behandling.erAktiv() && !behandlingsresultat.erArtikkel16MedSendtAnmodningOmUnntak()) {
             throw new FunksjonellException("Kan ikke revurdere en aktiv behandling");
         } else if (behandling.erEndretPeriode()) {
@@ -394,7 +392,7 @@ public class FagsakService {
         }
     }
 
-    private void avsluttTidligereMedlPeriode(Behandlingsresultat behandlingsresultat) throws IkkeFunnetException, SikkerhetsbegrensningException {
+    private void avsluttTidligereMedlPeriode(Behandlingsresultat behandlingsresultat) {
         Collection<? extends PeriodeOmLovvalg> anmodningsperioder = behandlingsresultat.getAnmodningsperioder();
         Collection<? extends PeriodeOmLovvalg> lovvalgsperioder = behandlingsresultat.getLovvalgsperioder();
 

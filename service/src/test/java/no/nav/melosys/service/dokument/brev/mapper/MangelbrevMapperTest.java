@@ -11,32 +11,28 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.jeasy.random.EasyRandom;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-public class MangelbrevMapperTest {
+class MangelbrevMapperTest {
 
     private MangelbrevMapper mapper;
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     private EasyRandom easyRandom;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         mapper = new MangelbrevMapper();
         easyRandom = EasyRandomConfigurer.randomForDokProd();
     }
 
     @Test
-    public void mapTilBrevXML() throws Exception {
+    void mapTilBrevXML() throws Exception {
         FellesType fellesType = new FellesType();
         fellesType.setFagsaksnummer("MELTEST-1");
 
@@ -58,7 +54,7 @@ public class MangelbrevMapperTest {
     }
 
     @Test
-    public void mapFag() throws Exception {
+    void mapFag() {
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
         brevData.fritekst = "Test";
@@ -78,13 +74,12 @@ public class MangelbrevMapperTest {
     }
 
     @Test
-    public void mapFag_manglerFritekst() throws Exception {
+    void mapFag_manglerFritekst() {
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
-        expectedException.expect(IntegrasjonException.class);
-        expectedException.expectMessage("Mangelbrev mangler informasjon");
-
-        mapper.mapFag(brevData, new Behandling());
+        assertThatExceptionOfType(IntegrasjonException.class)
+            .isThrownBy(() -> mapper.mapFag(brevData, new Behandling()))
+            .withMessageContaining("Mangelbrev mangler informasjon");
     }
 }

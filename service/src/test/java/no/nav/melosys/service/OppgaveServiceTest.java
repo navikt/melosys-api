@@ -25,18 +25,15 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto;
 import no.nav.melosys.service.oppgave.dto.JournalfoeringsoppgaveDto;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -74,7 +71,7 @@ class OppgaveServiceTest {
     private final String saksnummer = "MEL-12345";
 
     @BeforeEach
-    public void setUp() throws FunksjonellException, TekniskException {
+    public void setUp() {
         this.oppgaveService = new OppgaveService(
                 behandlingService,
                 fagsakService,
@@ -90,7 +87,7 @@ class OppgaveServiceTest {
     }
 
     @Test
-    void hentOppgaverMedAnsvarlig() throws MelosysException {
+    void hentOppgaverMedAnsvarlig() {
         final String behOppgID = "1";
         final String jfrOppgID = "2";
 
@@ -141,7 +138,7 @@ class OppgaveServiceTest {
     }
 
     @Test
-    void hentOppgaveForFagsaksnummer_oppgaveEksisterer_forventOppgave() throws MelosysException {
+    void hentOppgaveForFagsaksnummer_oppgaveEksisterer_forventOppgave() {
         when(oppgaveFasade.finnOppgaverMedSaksnummer(eq(saksnummer))).thenReturn(List.of(oppgave));
 
         Oppgave oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(saksnummer);
@@ -149,7 +146,7 @@ class OppgaveServiceTest {
     }
 
     @Test
-    void opprettEllerGjenbrukBehandlingsoppgave_ingenEksisterendeOppgave_oppgaveBlirOpprettet() throws FunksjonellException, TekniskException {
+    void opprettEllerGjenbrukBehandlingsoppgave_ingenEksisterendeOppgave_oppgaveBlirOpprettet() {
         Behandling behandling = lagBehandling();
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer("MEL-11111");
@@ -163,7 +160,7 @@ class OppgaveServiceTest {
     }
 
     @Test
-    void opprettEllerGjenbrukBehandlingsoppgave_oppgaveEksistererSaksbehandlerErTilordnet_oppgaveBlirIkkeOpprettetEllerOppdatert() throws FunksjonellException, TekniskException {
+    void opprettEllerGjenbrukBehandlingsoppgave_oppgaveEksistererSaksbehandlerErTilordnet_oppgaveBlirIkkeOpprettetEllerOppdatert() {
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
@@ -177,7 +174,7 @@ class OppgaveServiceTest {
     }
 
     @Test
-    void opprettEllerGjenbrukBehandlingsoppgave_oppgaveEksistererTilordnetAnnenRessurs_oppdaterTilordnetRessurs() throws FunksjonellException, TekniskException {
+    void opprettEllerGjenbrukBehandlingsoppgave_oppgaveEksistererTilordnetAnnenRessurs_oppdaterTilordnetRessurs() {
         final String tilordnetRessurs = "Z12332123";
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);
@@ -193,7 +190,7 @@ class OppgaveServiceTest {
     }
 
     @Test
-    void opprettEllerGjenbrukBehandlingsoppgave_personHarBeskyttelsesbehov_sensitivOppgaveBlirOpprettet() throws FunksjonellException, TekniskException {
+    void opprettEllerGjenbrukBehandlingsoppgave_personHarBeskyttelsesbehov_sensitivOppgaveBlirOpprettet() {
         Behandling behandling = lagBehandling();
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer("MEL-11111");
@@ -208,7 +205,7 @@ class OppgaveServiceTest {
     }
 
     @Test
-    void opprettEllerGjenbrukBehandlingsoppgave_barnHarBeskyttelsesbehov_sensitivOppgaveBlirOpprettet() throws FunksjonellException, TekniskException {
+    void opprettEllerGjenbrukBehandlingsoppgave_barnHarBeskyttelsesbehov_sensitivOppgaveBlirOpprettet() {
         Behandling behandling = lagBehandling();
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer("MEL-11111");

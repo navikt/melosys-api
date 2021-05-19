@@ -70,7 +70,7 @@ class BehandlingsresultatServiceTest {
     }
 
     @Test
-    void hentBehandlingsresultat_returnererBehandlingsresultat() throws IkkeFunnetException {
+    void hentBehandlingsresultat_returnererBehandlingsresultat() {
         Behandlingsresultat resultat = new Behandlingsresultat();
         BehandlingsresultatBegrunnelse begrunnelse = new BehandlingsresultatBegrunnelse();
         begrunnelse.setKode(Henleggelsesgrunner.ANNET.getKode());
@@ -90,7 +90,7 @@ class BehandlingsresultatServiceTest {
 
     @Test
     void replikerBehandlingOgBehandlingsresultat_replikererBehandlingsresultatObjekterOgCollections()
-        throws NoSuchMethodException, InstantiationException, IkkeFunnetException, IllegalAccessException, InvocationTargetException {
+        throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
         Behandling tidligsteInaktiveBehandling = new Behandling();
         tidligsteInaktiveBehandling.setId(1L);
         Behandling behandlingsreplika = new Behandling();
@@ -201,7 +201,7 @@ class BehandlingsresultatServiceTest {
     }
 
     @Test
-    void oppdaterBehandlingsmaate_bhmåteUdefinert_verifiserOppdatert() throws FunksjonellException {
+    void oppdaterBehandlingsmaate_bhmåteUdefinert_verifiserOppdatert() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setBehandlingsmåte(Behandlingsmaate.UDEFINERT);
         when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
@@ -211,7 +211,7 @@ class BehandlingsresultatServiceTest {
     }
 
     @Test
-    void oppdaterUtfallRegistreringUnntak_ikkeSatt_lagres() throws FunksjonellException {
+    void oppdaterUtfallRegistreringUnntak_ikkeSatt_lagres() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatRepo.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
         behandlingsresultatService.oppdaterUtfallRegistreringUnntak(1, Utfallregistreringunntak.GODKJENT);
@@ -229,7 +229,7 @@ class BehandlingsresultatServiceTest {
     }
 
     @Test
-    void oppdaterBegrunnelser_enBegrunnelse_blirLagret() throws IkkeFunnetException {
+    void oppdaterBegrunnelser_enBegrunnelse_blirLagret() {
         var behandlingsresultatBegrunnelse = new BehandlingsresultatBegrunnelse();
         behandlingsresultatBegrunnelse.setKode("koden");
 

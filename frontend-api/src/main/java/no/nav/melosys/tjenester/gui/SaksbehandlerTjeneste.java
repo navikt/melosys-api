@@ -5,9 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import no.nav.freg.abac.core.annotation.Abac;
 import no.nav.freg.abac.core.dto.response.Decision;
 import no.nav.melosys.domain.Saksbehandler;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.sikkerhet.abac.PepImpl;
 import no.nav.melosys.tjenester.gui.dto.InnloggetBrukerDto;
@@ -39,7 +37,7 @@ public class SaksbehandlerTjeneste {
         value = "Returnerer fullt navn for ident",
         notes = ("Ident hentes fra sikkerhetskonteksten som er tilgjengelig etter innlogging."),
         response = InnloggetBrukerDto.class)
-    public InnloggetBrukerDto innloggetBruker() throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+    public InnloggetBrukerDto innloggetBruker() {
         Saksbehandler saksbehandler = saksbehandlerService.hentBrukerinformasjon();
 
         if (!saksbehandlerService.harTilgangTilMelosys(saksbehandler)) {

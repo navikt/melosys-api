@@ -12,7 +12,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import com.networknt.schema.uri.URIFetcher;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.JsonSchemaValidator;
 import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -79,30 +78,30 @@ public class JsonSchemaTestParent {
         return objectMapperMedKodeverkServiceStub;
     }
 
-    protected void valider(Object o, String schemaNavn) throws IOException, TekniskException {
+    protected void valider(Object o, String schemaNavn) throws IOException {
         String jsonString = objectMapper().writeValueAsString(o);
         valider(jsonString, schemaNavn, log);
     }
 
-    protected void valider(Object o, String schemaNavn, Logger logger) throws IOException, TekniskException {
+    protected void valider(Object o, String schemaNavn, Logger logger) throws IOException {
         String jsonString = objectMapper().writeValueAsString(o);
         valider(jsonString, schemaNavn, logger);
     }
 
-    protected void valider(String json, String schemaNavn, Logger logger) throws IOException, TekniskException {
+    protected void valider(String json, String schemaNavn, Logger logger) throws IOException {
         jsonSchemaValidator(objectMapper()).valider(objectMapper().readTree(json), hentSchemaStream(schemaNavn), logger);
     }
 
-    protected void valider(Object o, String schemaNavn, ObjectMapper objectMapper) throws IOException, TekniskException {
+    protected void valider(Object o, String schemaNavn, ObjectMapper objectMapper) throws IOException {
         String jsonString = objectMapper.writeValueAsString(o);
         jsonSchemaValidator(objectMapper).valider(jsonString, hentSchemaStream(schemaNavn), log);
     }
 
-    protected <T> void validerArray(Collection<T> liste, String schemaNavn) throws IOException, TekniskException {
+    protected <T> void validerArray(Collection<T> liste, String schemaNavn) throws IOException {
         validerArray(liste, schemaNavn, log);
     }
 
-    protected <T> void validerArray(Collection<T> liste, String schemaNavn, Logger logger) throws IOException, TekniskException {
+    protected <T> void validerArray(Collection<T> liste, String schemaNavn, Logger logger) throws IOException {
         String json = objectMapper().writeValueAsString(liste);
         jsonSchemaValidator(objectMapper()).valider(objectMapper().readTree(json), hentSchemaStream(schemaNavn), logger);
     }

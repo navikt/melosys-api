@@ -21,8 +21,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -65,7 +63,7 @@ class VideresendSoknadServiceTest {
     private final String saksnummer = "MEL-2222";
 
     @BeforeEach
-    public void setup() throws IkkeFunnetException {
+    public void setup() {
         videresendSoknadService = new VideresendSoknadService(
             fagsakService, behandlingsresultatService, prosessinstansService, landvelgerService, eessiService, oppgaveService
         );
@@ -91,7 +89,7 @@ class VideresendSoknadServiceTest {
     }
 
     @Test
-    void henleggOgVideresend_bostedsLandSpaniaErSøknad_prosessinstansBlirOpprettet() throws MelosysException {
+    void henleggOgVideresend_bostedsLandSpaniaErSøknad_prosessinstansBlirOpprettet() {
         final Set<String> validerteMottakere = Set.of("ES:mottakerID123");
         when(landvelgerService.hentBostedsland(behandling)).thenReturn(Landkoder.ES);
         when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), eq(List.of(Landkoder.ES)), eq(BucType.LA_BUC_03)))

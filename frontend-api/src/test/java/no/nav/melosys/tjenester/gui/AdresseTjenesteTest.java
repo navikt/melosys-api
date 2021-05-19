@@ -5,8 +5,6 @@ import java.util.List;
 
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +18,7 @@ class AdresseTjenesteTest {
     private AdresseTjeneste adresseTjeneste;
 
     @BeforeEach
-    void setUp() throws IkkeFunnetException {
+    void setUp() {
         UtenlandskMyndighetService utenlandskMyndighetRepo = mock(UtenlandskMyndighetService.class);
         adresseTjeneste = new AdresseTjeneste(utenlandskMyndighetRepo);
 
@@ -38,7 +36,7 @@ class AdresseTjenesteTest {
     }
 
     @Test
-    public void hentMyndighet_gyldigLandkode() throws FunksjonellException {
+    public void hentMyndighet_gyldigLandkode() {
         ResponseEntity response = adresseTjeneste.hentMyndighet(Landkoder.DK);
         assertThat(response).isNotNull();
         assertThat(response.getBody()).isNotNull();
@@ -50,7 +48,7 @@ class AdresseTjenesteTest {
     }
 
     @Test
-    public void hentMyndighet_ikkeGyldigLandkode() throws FunksjonellException {
+    public void hentMyndighet_ikkeGyldigLandkode() {
         ResponseEntity response = adresseTjeneste.hentMyndighet(Landkoder.NO);
         assertThat(response).isNotNull();
         assertThat(response.getBody()).isNull();

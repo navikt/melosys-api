@@ -1,9 +1,6 @@
 package no.nav.melosys.tjenester.gui.avklartefakta;
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
@@ -36,7 +33,7 @@ public class TrygdeavgiftTjeneste {
     @PutMapping("/grunnlag")
     public ResponseEntity<AvgiftsgrunnlagDto> oppdaterAvgiftsgrunnlag(@PathVariable("behandlingID") long behandlingID,
                                                                       @RequestBody OppdaterAvgiftsgrunnlagDto oppdaterAvgiftsgrunnlagDto
-    ) throws FunksjonellException, TekniskException {
+    ) {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         return ResponseEntity.ok(
             AvgiftsgrunnlagDto.av(
@@ -48,7 +45,7 @@ public class TrygdeavgiftTjeneste {
     }
 
     @GetMapping("/grunnlag")
-    public ResponseEntity<AvgiftsgrunnlagDto> hentAvgiftsgrunnlag(@PathVariable("behandlingID") long behandlingID) throws FunksjonellException, TekniskException {
+    public ResponseEntity<AvgiftsgrunnlagDto> hentAvgiftsgrunnlag(@PathVariable("behandlingID") long behandlingID) {
         tilgangService.sjekkTilgang(behandlingID);
         return ResponseEntity.ok(
             AvgiftsgrunnlagDto.av(
@@ -59,7 +56,7 @@ public class TrygdeavgiftTjeneste {
 
     @PutMapping("/beregning")
     public ResponseEntity<BeregningsresultatDto> oppdaterBeregningsgrunnlag(@PathVariable("behandlingID") long behandlingID,
-                                                                            @RequestBody OppdaterBeregningsgrunnlagDto oppdaterBeregningsgrunnlagDto) throws FunksjonellException, TekniskException {
+                                                                            @RequestBody OppdaterBeregningsgrunnlagDto oppdaterBeregningsgrunnlagDto) {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         trygdeavgiftsberegningService.oppdaterBeregningsgrunnlag(behandlingID, oppdaterBeregningsgrunnlagDto.til());
 
@@ -71,7 +68,7 @@ public class TrygdeavgiftTjeneste {
     }
 
     @GetMapping("/beregning")
-    public ResponseEntity<BeregningsresultatDto> hentBeregningsresultat(@PathVariable("behandlingID") long behandlingID) throws IkkeFunnetException {
+    public ResponseEntity<BeregningsresultatDto> hentBeregningsresultat(@PathVariable("behandlingID") long behandlingID) {
         return ResponseEntity.ok(
             BeregningsresultatDto.av(
                 trygdeavgiftsberegningService.hentBeregningsresultat(behandlingID)

@@ -14,7 +14,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 public class Journalpost {
     private final String journalpostId;
     private boolean erFerdigstilt;
-    private String arkivSakId;
+    private String saksnummer;
     private String avsenderId;
     private String avsenderNavn;
     private Avsendertyper avsenderType;
@@ -45,7 +45,7 @@ public class Journalpost {
             .findFirst();
     }
 
-    public ArkivDokument hentArkivDokument(String dokumentID) throws IkkeFunnetException {
+    public ArkivDokument hentArkivDokument(String dokumentID) {
         return finnArkivDokument(dokumentID).orElseThrow(() ->
             new IkkeFunnetException(String.format("Finner ikke dokument %s i journalpost %s", dokumentID, journalpostId)));
     }
@@ -62,12 +62,12 @@ public class Journalpost {
         return erFerdigstilt;
     }
 
-    public String getArkivSakId() {
-        return arkivSakId;
+    public String getSaksnummer() {
+        return saksnummer;
     }
 
-    public void setArkivSakId(String arkivSakId) {
-        this.arkivSakId = arkivSakId;
+    public void setSaksnummer(String saksnummer) {
+        this.saksnummer = saksnummer;
     }
 
     public String getAvsenderId() {

@@ -6,8 +6,6 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +29,7 @@ class OpprettOppgaveTest {
     }
 
     @Test
-    void utfoerSteg_nySak_sendForvaltningsmelding() throws FunksjonellException, TekniskException {
+    void utfoerSteg_nySak_sendForvaltningsmelding() {
         final String journalpostID = "142342343";
         final String aktørID = "1242142";
         final String saksbehandler = "meg!";

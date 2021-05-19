@@ -13,8 +13,6 @@ import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -33,12 +31,11 @@ public abstract class AbstraktSendUtland implements StegBehandler {
         this.behandlingsresultatService = behandlingsresultatService;
     }
 
-    protected SendUtlandStatus sendUtland(BucType bucType, Prosessinstans prosessinstans) throws MelosysException {
+    protected SendUtlandStatus sendUtland(BucType bucType, Prosessinstans prosessinstans) {
         return sendUtland(bucType, prosessinstans, null);
     }
 
-    protected SendUtlandStatus sendUtland(BucType bucType, Prosessinstans prosessinstans, Collection<Vedlegg> vedlegg) throws
-        MelosysException {
+    protected SendUtlandStatus sendUtland(BucType bucType, Prosessinstans prosessinstans, Collection<Vedlegg> vedlegg) {
         Long behandlingID = prosessinstans.getBehandling().getId();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 
@@ -57,11 +54,11 @@ public abstract class AbstraktSendUtland implements StegBehandler {
         return SendUtlandStatus.IKKE_SENDT;
     }
 
-    protected abstract void sendBrev(Prosessinstans prosessinstans) throws MelosysException;
+    protected abstract void sendBrev(Prosessinstans prosessinstans);
 
     protected abstract boolean skalSendesUtland(Behandlingsresultat behandlingsresultat);
 
-    protected String hentBegrunnelsekodeTilForkortetPeriode(Prosessinstans prosessinstans) throws IkkeFunnetException {
+    protected String hentBegrunnelsekodeTilForkortetPeriode(Prosessinstans prosessinstans) {
         Behandlingsresultat behandlingsresultat =
             behandlingsresultatService.hentBehandlingsresultatMedAvklartefakta(prosessinstans.getBehandling().getId());
         return behandlingsresultat.getAvklartefakta().stream()
@@ -73,7 +70,7 @@ public abstract class AbstraktSendUtland implements StegBehandler {
             .orElse(null);
     }
 
-    protected String hentSaksbehandler(Prosessinstans prosessinstans) throws IkkeFunnetException {
+    protected String hentSaksbehandler(Prosessinstans prosessinstans) {
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
         if (StringUtils.isEmpty(saksbehandler)) {
             Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(prosessinstans.getBehandling().getId());

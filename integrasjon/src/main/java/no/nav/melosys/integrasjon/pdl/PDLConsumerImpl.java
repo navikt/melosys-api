@@ -39,7 +39,7 @@ public class PDLConsumerImpl implements PDLConsumer {
     }
 
     @Override
-    public Identliste hentIdenter(String ident) throws IkkeFunnetException, IntegrasjonException {
+    public Identliste hentIdenter(String ident) {
         GraphQLRequest request = new GraphQLRequest(HENT_IDENTER_QUERY, Map.of(IDENT, ident));
 
         GraphQLResponse<HentIdenterResponse> response = webClient.post()
@@ -53,7 +53,7 @@ public class PDLConsumerImpl implements PDLConsumer {
     }
 
     @Override
-    public Person hentPerson(String ident) throws IkkeFunnetException, IntegrasjonException {
+    public Person hentPerson(String ident) {
         GraphQLRequest request = new GraphQLRequest(HENT_PERSON_QUERY, Map.of(IDENT, ident));
 
         GraphQLResponse<HentPersonResponse> response = webClient.post()
@@ -66,7 +66,7 @@ public class PDLConsumerImpl implements PDLConsumer {
         return response.data().hentPerson();
     }
 
-    private void håndterFeil(GraphQLResponse<?> response) throws IkkeFunnetException, IntegrasjonException {
+    private void håndterFeil(GraphQLResponse<?> response) {
         if (response == null) {
             throw new IntegrasjonException("Respons fra PDL er null!");
         }

@@ -15,9 +15,6 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.journalforing.dto.*;
@@ -66,11 +63,11 @@ public class JournalfoeringService {
         this.unleash = unleash;
     }
 
-    public Journalpost hentJournalpost(String journalpostID) throws FunksjonellException, IntegrasjonException {
+    public Journalpost hentJournalpost(String journalpostID) {
         return joarkFasade.hentJournalpost(journalpostID);
     }
 
-    public Optional<String> finnBrukerIdent(Journalpost journalpost) throws IkkeFunnetException {
+    public Optional<String> finnBrukerIdent(Journalpost journalpost) {
         if (journalpost.getBrukerIdType() == null || journalpost.getBrukerId() == null) {
             return Optional.empty();
         }
@@ -81,8 +78,8 @@ public class JournalfoeringService {
         };
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void opprettOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
+    @Transactional
+    public void opprettOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) {
         Journalpost journalpost = hentJournalpost(journalfoeringDto.getJournalpostID());
 
         if (journalpost.isErFerdigstilt()) {
@@ -104,7 +101,7 @@ public class JournalfoeringService {
         oppgaveService.ferdigstillOppgave(journalfoeringDto.getOppgaveID());
     }
 
-    private void validerKanOppretteSakFraSed(Journalpost journalpost) throws MelosysException {
+    private void validerKanOppretteSakFraSed(Journalpost journalpost) {
 
         final MelosysEessiMelding melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId());
         validerSkalIkkeBehandlesAutomatisk(melosysEessiMelding);
@@ -115,18 +112,18 @@ public class JournalfoeringService {
         }
     }
 
-    private Optional<Fagsak> finnSakTilknyttetSed(MelosysEessiMelding melosysEessiMelding) throws MelosysException {
+    private Optional<Fagsak> finnSakTilknyttetSed(MelosysEessiMelding melosysEessiMelding) {
         final Optional<Long> tilknyttetArkivsak = eessiService.finnSakForRinasaksnummer(melosysEessiMelding.getRinaSaksnummer());
         return tilknyttetArkivsak.flatMap(fagsakService::finnFagsakFraArkivsakID);
     }
 
-    private void validerSkalIkkeBehandlesAutomatisk(MelosysEessiMelding melosysEessiMelding) throws FunksjonellException {
+    private void validerSkalIkkeBehandlesAutomatisk(MelosysEessiMelding melosysEessiMelding) {
         if (eessiService.støtterAutomatiskBehandling(melosysEessiMelding)) {
             throw new FunksjonellException("Journalpost med id " + melosysEessiMelding.getJournalpostId() + " skal ikke journalføres manuelt");
         }
     }
 
-    private void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) throws MelosysException {
+    private void opprettSakOgJournalfør(JournalfoeringOpprettDto journalfoeringDto) {
         log.info("{} oppretter ny sak etter journalføring av journalpost {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID());
 
         valider(journalfoeringDto);
@@ -173,8 +170,8 @@ public class JournalfoeringService {
         prosessinstansService.lagre(prosessinstans);
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void tilordneSakOgJournalfør(JournalfoeringTilordneDto journalfoeringDto) throws MelosysException {
+    @Transactional
+    public void tilordneSakOgJournalfør(JournalfoeringTilordneDto journalfoeringDto) {
 
         final Journalpost journalpost = joarkFasade.hentJournalpost(journalfoeringDto.getJournalpostID());
         final String saksnummer = journalfoeringDto.getSaksnummer();
@@ -209,6 +206,9 @@ public class JournalfoeringService {
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessType, journalfoeringDto);
 
+        if (prosessType == ProsessType.JFR_KNYTT) {
+            prosessinstans.setBehandling(fagsak.hentSistAktiveBehandling());
+        }
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringDto.isIngenVurdering());
@@ -217,7 +217,7 @@ public class JournalfoeringService {
         oppgaveService.ferdigstillOppgave(journalfoeringDto.getOppgaveID());
     }
 
-    private void validerKanTilknytteJournalpostForSedTilSak(Journalpost journalpost, String tilknyttTilSaksnummer) throws MelosysException {
+    private void validerKanTilknytteJournalpostForSedTilSak(Journalpost journalpost, String tilknyttTilSaksnummer) {
         final MelosysEessiMelding melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId());
         validerSkalIkkeBehandlesAutomatisk(melosysEessiMelding);
 
@@ -227,7 +227,7 @@ public class JournalfoeringService {
         }
     }
 
-    private void valider(JournalfoeringDto journalfoeringDto) throws FunksjonellException {
+    private void valider(JournalfoeringDto journalfoeringDto) {
         if (StringUtils.isEmpty(journalfoeringDto.getJournalpostID())) {
             throw new FunksjonellException("JournalpostID mangler");
         }
@@ -260,7 +260,7 @@ public class JournalfoeringService {
         }
     }
 
-    private void validerOpprettSakForSøknadBehandlingFelter(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
+    private void validerOpprettSakForSøknadBehandlingFelter(JournalfoeringOpprettDto journalfoeringDto) {
         if (journalfoeringDto.getFagsak() == null) {
             throw new FunksjonellException("Opplysninger for å opprette en søknad mangler");
         }
@@ -283,7 +283,7 @@ public class JournalfoeringService {
         validerAntallLand(journalfoeringDto);
     }
 
-    private void validerAntallLand(JournalfoeringOpprettDto journalfoeringDto) throws FunksjonellException {
+    private void validerAntallLand(JournalfoeringOpprettDto journalfoeringDto) {
         String behandlingstemaKode = journalfoeringDto.getBehandlingstemaKode();
         int antallLand = journalfoeringDto.getFagsak().getLand().size();
 
@@ -295,15 +295,15 @@ public class JournalfoeringService {
 
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void journalførSed(JournalfoeringSedDto journalfoeringSedDto) throws MelosysException {
+    @Transactional
+    public void journalførSed(JournalfoeringSedDto journalfoeringSedDto) {
         validerJournalfoerSed(journalfoeringSedDto);
         MelosysEessiMelding eessiMelding = eessiService.hentSedTilknyttetJournalpost(journalfoeringSedDto.getJournalpostID());
         prosessinstansService.opprettProsessinstansSedMottak(eessiMelding, persondataFasade.hentAktørIdForIdent(journalfoeringSedDto.getBrukerID()));
         oppgaveService.ferdigstillOppgave(journalfoeringSedDto.getOppgaveID());
     }
 
-    private void validerJournalfoerSed(JournalfoeringSedDto journalfoeringSedDto) throws MelosysException {
+    private void validerJournalfoerSed(JournalfoeringSedDto journalfoeringSedDto) {
 
         if(StringUtils.isEmpty(journalfoeringSedDto.getJournalpostID())) {
             throw new FunksjonellException("JournalpostID er påkrevd!");
@@ -317,7 +317,7 @@ public class JournalfoeringService {
         }
     }
 
-    public Optional<Behandlingstema> finnBehandlingstemaForSedTilknyttetJournalpost(String journalpostID) throws MelosysException {
+    public Optional<Behandlingstema> finnBehandlingstemaForSedTilknyttetJournalpost(String journalpostID) {
         return eessiService.finnBehandlingstemaForSedTilknyttetJournalpost(journalpostID);
     }
 }

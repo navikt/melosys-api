@@ -90,7 +90,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_medBrukerRolleUtenRepresentant_girBrukerAktør() throws FunksjonellException, TekniskException {
+    void avklarMottakere_medBrukerRolleUtenRepresentant_girBrukerAktør() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
 
         List<Aktoer> aktoers = brevmottakerService.avklarMottakere(null, Mottaker.av(BRUKER), behandling);
@@ -100,7 +100,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_medBrukerRolleMedRepresentant_girRepresentantAktør() throws FunksjonellException, TekniskException {
+    void avklarMottakere_medBrukerRolleMedRepresentant_girRepresentantAktør() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(Representerer.BRUKER));
 
         List<Aktoer> aktoers = brevmottakerService.avklarMottakere(null, Mottaker.av(BRUKER), behandling);
@@ -110,7 +110,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_medArbeidsgiverRolleOgIngenArbeidsgivere_feiler() throws TekniskException {
+    void avklarMottakere_medArbeidsgiverRolleOgIngenArbeidsgivere_feiler() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(eq(behandling))).thenReturn(Collections.emptySet());
         when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(eq(behandling))).thenReturn(Collections.emptyList());
@@ -121,7 +121,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_medArbeidsgiverRolle_girArbeidsgiverAktører() throws FunksjonellException, TekniskException {
+    void avklarMottakere_medArbeidsgiverRolle_girArbeidsgiverAktører() {
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(eq(behandling))).thenReturn(Sets.newHashSet("123456789", "987654321"));
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
 
@@ -133,7 +133,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_medBareUtenlandskeArbeidsgivere_girIngenMottakere() throws FunksjonellException, TekniskException {
+    void avklarMottakere_medBareUtenlandskeArbeidsgivere_girIngenMottakere() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(eq(behandling))).thenReturn(Collections.emptySet());
         when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(eq(behandling)))
@@ -144,7 +144,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_medArbeidsgiverRolleIkkeKunAvklarteVirksomheterOgIngenArbeidsgivere_girTomListe() throws TekniskException, FunksjonellException {
+    void avklarMottakere_medArbeidsgiverRolleIkkeKunAvklarteVirksomheterOgIngenArbeidsgivere_girTomListe() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
         when(behandling.getBehandlingsgrunnlag()).thenReturn(lagBehandlingsgrunnlag(null, null));
         when(behandling.hentArbeidsforholdDokument()).thenReturn(lagArbeidsforholdDokument(null));
@@ -155,7 +155,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_medArbeidsgiverRolleIkkeKunAvklarteVirksomheter_girArbeidsgiverAktører() throws FunksjonellException, TekniskException {
+    void avklarMottakere_medArbeidsgiverRolleIkkeKunAvklarteVirksomheter_girArbeidsgiverAktører() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
         when(behandling.getBehandlingsgrunnlag()).thenReturn(lagBehandlingsgrunnlag("987654321", null));
         when(behandling.hentArbeidsforholdDokument()).thenReturn(lagArbeidsforholdDokument("123456789"));
@@ -168,7 +168,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_medBareUtenlandskeArbeidsgivereIkkeKunAvklarteVirksomheter_girIngenMottakere() throws FunksjonellException, TekniskException {
+    void avklarMottakere_medBareUtenlandskeArbeidsgivereIkkeKunAvklarteVirksomheter_girIngenMottakere() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(null));
         when(behandling.getBehandlingsgrunnlag()).thenReturn(lagBehandlingsgrunnlag(null, "uuid"));
         when(behandling.hentArbeidsforholdDokument()).thenReturn(lagArbeidsforholdDokument(null));
@@ -178,7 +178,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_medArbeidsgiverRolleOgRepresentantForBruker_girArbeidsgiverAktører() throws FunksjonellException, TekniskException {
+    void avklarMottakere_medArbeidsgiverRolleOgRepresentantForBruker_girArbeidsgiverAktører() {
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(eq(behandling))).thenReturn(Sets.newHashSet("123456789", "987654321"));
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(Representerer.BRUKER));
 
@@ -190,7 +190,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_medArbeidsgiverRolleOgRepresentantForArbeidsgiver_girRepresentantAktør() throws FunksjonellException, TekniskException {
+    void avklarMottakere_medArbeidsgiverRolleOgRepresentantForArbeidsgiver_girRepresentantAktør() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(Representerer.ARBEIDSGIVER));
 
         List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
@@ -201,7 +201,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_medArbeidsgiverRolleOgRepresentantForBegge_girRepresentantAktør() throws FunksjonellException, TekniskException {
+    void avklarMottakere_medArbeidsgiverRolleOgRepresentantForBegge_girRepresentantAktør() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentant(Representerer.BEGGE));
 
         List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
@@ -212,7 +212,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_art12_1_CZerReservertFraA1_forventerIngenAktør() throws FunksjonellException, TekniskException {
+    void avklarMottakere_art12_1_CZerReservertFraA1_forventerIngenAktør() {
         when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(eq(behandling))).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagAktoerUtenlandskMyndighet()));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
@@ -221,7 +221,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_art_11_4_2_CZerReservertFraA1_forventerIngenAktør() throws FunksjonellException, TekniskException {
+    void avklarMottakere_art_11_4_2_CZerReservertFraA1_forventerIngenAktør() {
         when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(eq(behandling))).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagAktoerUtenlandskMyndighet()));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
@@ -231,7 +231,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_A001_CZerReservertFraA1_forventerMyndighetAktør() throws FunksjonellException, TekniskException {
+    void avklarMottakere_A001_CZerReservertFraA1_forventerMyndighetAktør() {
         when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(eq(behandling))).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagAktoerUtenlandskMyndighet()));
 
         List<Aktoer> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ANMODNING_UNNTAK, Mottaker.av(MYNDIGHET), behandling);
@@ -450,21 +450,21 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakerRolleFraDokument_tilBruker_girRolleBruker() throws TekniskException {
+    void avklarMottakerRolleFraDokument_tilBruker_girRolleBruker() {
         Aktoersroller mottakerRolle = brevmottakerService.avklarMottakerRolleFraDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
 
         assertThat(mottakerRolle).isEqualTo(BRUKER);
     }
 
     @Test
-    void avklarMottakerRolleFraDokument_tilArbeidsgiver_girRolleArbeidsgiver() throws TekniskException {
+    void avklarMottakerRolleFraDokument_tilArbeidsgiver_girRolleArbeidsgiver() {
         Aktoersroller mottakerRolle = brevmottakerService.avklarMottakerRolleFraDokument(INNVILGELSE_ARBEIDSGIVER);
 
         assertThat(mottakerRolle).isEqualTo(ARBEIDSGIVER);
     }
 
     @Test
-    void avklarMottakerRolleFraDokument_tilMyndighet_girRolleMyndighet() throws TekniskException {
+    void avklarMottakerRolleFraDokument_tilMyndighet_girRolleMyndighet() {
         Aktoersroller mottakerRolle = brevmottakerService.avklarMottakerRolleFraDokument(ATTEST_A1);
 
         assertThat(mottakerRolle).isEqualTo(MYNDIGHET);

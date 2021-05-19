@@ -18,8 +18,6 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -40,6 +38,7 @@ import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.kodeverk.Utfallregistreringunntak.GODKJENT;
+import static no.nav.melosys.service.vedtak.VedtakServiceFasade.FRIST_KLAGE_UKER;
 
 @Service
 public class EosVedtakService {
@@ -56,8 +55,6 @@ public class EosVedtakService {
     private final VedtakKontrollService vedtakKontrollService;
     private final AvklartefaktaService avklartefaktaService;
     private final ApplicationEventMulticaster melosysEventMulticaster;
-
-    public static final int FRIST_KLAGE_UKER = 6;
 
     @Autowired
     public EosVedtakService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
@@ -79,33 +76,40 @@ public class EosVedtakService {
         this.melosysEventMulticaster = melosysEventMulticaster;
     }
 
-    public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType,
-                           String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner,
-                           Vedtakstyper vedtakstype, String revurderBegrunnelse) throws MelosysException {
+    public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype) throws ValideringException {
+        FattEosVedtakRequest request = new FattEosVedtakRequest.Builder()
+            .medBehandlingsresultat(behandlingsresultattype)
+            .medVedtakstype(vedtakstype)
+            .build();
+        fattVedtak(behandling, request);
+    }
+
+    public void fattVedtak(Behandling behandling, FattEosVedtakRequest request) throws ValideringException {
         long behandlingID = behandling.getId();
 
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        behandlingsresultat.setType(behandlingsresultatType);
-        log.info("Fatter vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
+        log.info("Fatter vedtak for (EU_EØS) sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
+
+        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
 
         if (behandlingsresultat.erInnvilgelse()) {
-            validerInnvilgelse(vedtakstype, behandling, behandlingsresultat);
+            validerInnvilgelse(request.getVedtakstype(), behandling, behandlingsresultat);
         }
 
-        oppdaterBehandlingsresultat(behandlingsresultat, vedtakstype, fritekst, revurderBegrunnelse);
-        mottakerinstitusjoner = validerOgAvklarMottakerInstitusjoner(behandling, mottakerinstitusjoner, behandlingsresultat);
+        oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), request.getFritekst(), request.getRevurderBegrunnelse());
+        Set<String> mottakerinstitusjoner = validerOgAvklarMottakerInstitusjoner(behandling, request.getMottakerinstitusjoner(), behandlingsresultat);
 
         if (prosessinstansService.harVedtakInstans(behandlingID)) {
             throw new FunksjonellException("Det finnes allerede en vedtak-prosess for behandling " + behandling);
         }
         behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
         behandlingService.lagre(behandling);
-        prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, behandlingsresultatType,
-            fritekst, fritekstSed, mottakerinstitusjoner, revurderBegrunnelse);
+        prosessinstansService.opprettProsessinstansIverksettVedtakEos(behandling, request.getBehandlingsresultatTypeKode(),
+            request.getFritekst(), request.getFritekstSed(), mottakerinstitusjoner, request.getRevurderBegrunnelse());
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    public void endreVedtak(Behandling behandling, Endretperiode endretperiode, String fritekst, String fritekstSed) throws FunksjonellException, TekniskException {
+    public void endreVedtak(Behandling behandling, Endretperiode endretperiode, String fritekst, String fritekstSed) {
         long behandlingID = behandling.getId();
         log.info("Endrer vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
         avklartefaktaService.leggTilBegrunnelse(behandlingID, Avklartefaktatyper.AARSAK_ENDRING_PERIODE, endretperiode.getKode());
@@ -124,7 +128,7 @@ public class EosVedtakService {
     private void oppdaterBehandlingsresultat(Behandlingsresultat behandlingsresultat,
                                              Vedtakstyper vedtakstype,
                                              String behandlingresultatBegrunnelseFritekst,
-                                             String revurderBegrunnelse) throws FunksjonellException {
+                                             String revurderBegrunnelse) {
         final Behandling behandling = behandlingsresultat.getBehandling();
         if (behandling.erNorgeUtpekt()) {
             behandlingsresultatService.oppdaterUtfallUtpeking(behandling.getId(), GODKJENT);
@@ -140,7 +144,7 @@ public class EosVedtakService {
 
     private void validerInnvilgelse(Vedtakstyper vedtakstype,
                                     Behandling behandling,
-                                    Behandlingsresultat behandlingsresultat) throws MelosysException {
+                                    Behandlingsresultat behandlingsresultat) throws ValideringException {
         Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
         String fnr = persondataFasade.hentFolkeregisterIdent(behandling.getFagsak().hentBruker().getAktørId());
 
@@ -159,7 +163,7 @@ public class EosVedtakService {
 
     private Set<String> validerOgAvklarMottakerInstitusjoner(Behandling behandling,
                                                              Set<String> mottakerinstitusjoner,
-                                                             Behandlingsresultat behandlingsresultat) throws MelosysException {
+                                                             Behandlingsresultat behandlingsresultat) {
         Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId());
         if (mottakereTrenges(behandling) && skalSedSendes(behandlingsresultat, landkoder)) {
             mottakerinstitusjoner = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
@@ -187,7 +191,7 @@ public class EosVedtakService {
         return !behandlingsresultat.erArt16EtterUtlandMedRegistrertSvar();
     }
 
-    private void kontrollerFattVedtak(long behandlingID, Vedtakstyper vedtakstype) throws MelosysException {
+    private void kontrollerFattVedtak(long behandlingID, Vedtakstyper vedtakstype) throws ValideringException {
         Collection<Kontrollfeil> feilValideringer = vedtakKontrollService.utførKontroller(behandlingID, vedtakstype);
         if (!feilValideringer.isEmpty()) {
             throw new ValideringException("Feil i validering. Kan ikke fatte vedtak.",

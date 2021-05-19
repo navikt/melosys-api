@@ -1,5 +1,6 @@
 package no.nav.melosys.service.unntaksperiode;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -10,8 +11,6 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -44,10 +43,13 @@ class UnntaksperiodeServiceTest {
 
     private UnntaksperiodeService unntaksperiodeService;
 
+    private final Periode PERIODE_OK = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
+    private final Periode PERIODE_BAD = new Periode(LocalDate.now(), LocalDate.now().minusYears(2));
+
     private final Behandling behandling = new Behandling();
 
     @BeforeEach
-    public void setUp() throws IkkeFunnetException {
+    public void setUp() {
         unntaksperiodeService = new UnntaksperiodeService(behandlingService, behandlingsresultatService, lovvalgsperiodeService, oppgaveService, prosessinstansService);
         behandling.setId(1L);
         behandling.setFagsak(new Fagsak());
@@ -61,7 +63,7 @@ class UnntaksperiodeServiceTest {
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L,  false))
+            .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L, false, null))
             .withMessageContaining("er inaktiv");
     }
 
@@ -69,27 +71,42 @@ class UnntaksperiodeServiceTest {
     void godkjennPeriode_feilBehandlingstype_forventException() {
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L,  false))
+            .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L, false, null))
             .withMessageContaining("ikke av tema");
     }
 
     @Test
-    void godkjennPeriode_korrektStatusOgType_verifiserKall() throws FunksjonellException, TekniskException {
+    void godkjennPeriode_korrektStatusOgType_verifiserKall() {
         Saksopplysning sedSaksopplysning = new Saksopplysning();
         sedSaksopplysning.setType(SaksopplysningType.SEDOPPL);
         SedDokument sedDokument = new SedDokument();
-        sedDokument.setLovvalgsperiode(new Periode());
+        sedDokument.setLovvalgsperiode(PERIODE_OK);
         sedSaksopplysning.setDokument(sedDokument);
         behandling.getSaksopplysninger().add(sedSaksopplysning);
 
         when(behandlingsresultatService.hentBehandlingsresultat(eq(behandling.getId()))).thenReturn(new Behandlingsresultat());
 
-        unntaksperiodeService.godkjennPeriode(1L, false);
+        unntaksperiodeService.godkjennPeriode(1L, false, null);
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(behandling.getFagsak().getSaksnummer()));
     }
 
     @Test
+    void godkjennPeriode_oppNedPeriode_forventException() {
+        Saksopplysning sedSaksopplysning = new Saksopplysning();
+        sedSaksopplysning.setType(SaksopplysningType.SEDOPPL);
+        SedDokument sedDokument = new SedDokument();
+        sedDokument.setLovvalgsperiode(PERIODE_BAD);
+        sedSaksopplysning.setDokument(sedDokument);
+        behandling.getSaksopplysninger().add(sedSaksopplysning);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L, false, null))
+            .withMessageContaining("har feil i perioden");
+    }
+
+    @Test
     void ikkeGodkjennPeriode_medBegrunnelser_ingenFeil() throws Exception {
+        leggTilNødvendigeSaksopplysninger();
         Set<String> begrunnelser = new HashSet<>();
         begrunnelser.add(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.getKode());
         unntaksperiodeService.ikkeGodkjennPeriode(1L, begrunnelser, null);
@@ -98,6 +115,7 @@ class UnntaksperiodeServiceTest {
 
     @Test
     void ikkeGodkjennPeriode_ingenBegrunnelser_forventException() {
+        leggTilNødvendigeSaksopplysninger();
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> unntaksperiodeService.ikkeGodkjennPeriode(1L, Set.of(), null))
             .withMessageContaining("Ingen begrunnelser");
@@ -105,6 +123,7 @@ class UnntaksperiodeServiceTest {
 
     @Test
     void ikkeGodkjennPeriode_begrunnelseAnnetIngenFritekst_forventException() {
+        leggTilNødvendigeSaksopplysninger();
         Set<String> begrunnelser = new HashSet<>();
         begrunnelser.add(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.getKode());
         begrunnelser.add(Ikke_godkjent_begrunnelser.ANNET.getKode());
@@ -113,4 +132,14 @@ class UnntaksperiodeServiceTest {
             .isThrownBy(() -> unntaksperiodeService.ikkeGodkjennPeriode(1L, begrunnelser, null))
             .withMessageContaining("krever fritekst");
     }
+
+    private void leggTilNødvendigeSaksopplysninger() {
+        Saksopplysning sedSaksopplysning = new Saksopplysning();
+        sedSaksopplysning.setType(SaksopplysningType.SEDOPPL);
+        SedDokument sedDokument = new SedDokument();
+        sedDokument.setLovvalgsperiode(PERIODE_OK);
+        sedSaksopplysning.setDokument(sedDokument);
+        behandling.getSaksopplysninger().add(sedSaksopplysning);
+    }
+
 }

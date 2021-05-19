@@ -41,13 +41,16 @@
                     <periodeFra>2019-08-05</periodeFra>
                     <periodeTil>2019-08-06</periodeTil>
                 </periodeUtland>
-                <samletUtsendingsperiode></samletUtsendingsperiode>
+                <samletUtsendingsperiode>
+                    <periodeFra>2019-08-01</periodeFra>
+                    <periodeTil>2019-08-06</periodeTil>
+                </samletUtsendingsperiode>
                 <sendesUtOppdragIUtlandet>false</sendesUtOppdragIUtlandet>
                 <ansattForOppdragIUtlandet>false</ansattForOppdragIUtlandet>
                 <erArbeidstakerAnsattHelePerioden>true</erArbeidstakerAnsattHelePerioden>
                 <drattPaaEgetInitiativ>false</drattPaaEgetInitiativ>
                 <erstatterTidligereUtsendte>false</erstatterTidligereUtsendte>
-                <naeringsGruppe>2019-08-05</naeringsGruppe>
+                <naeringsGruppe>næringsgruppe</naeringsGruppe>
             </utenlandsoppdraget>
             <loennOgGodtgjoerelse>
                 <norskArbgUtbetalerLoenn>true</norskArbgUtbetalerLoenn>

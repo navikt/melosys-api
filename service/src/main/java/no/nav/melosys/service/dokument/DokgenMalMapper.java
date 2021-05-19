@@ -14,14 +14,11 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -48,7 +45,7 @@ public class DokgenMalMapper {
         this.persondataFasade = persondataFasade;
     }
 
-    public DokgenDto mapBehandling(DokgenBrevbestilling brevbestilling) throws TekniskException, FunksjonellException {
+    public DokgenDto mapBehandling(DokgenBrevbestilling brevbestilling) {
         DokgenDto dto;
         if (brevbestilling.getOrg() == null) {
             String fnr = brevbestilling.getBehandling().hentPersonDokument().fnr;
@@ -91,13 +88,13 @@ public class DokgenMalMapper {
         return kodeverkService.dekod(FellesKodeverk.POSTNUMMER, postnr, LocalDate.now());
     }
 
-    private Instant hentVedtaksdato(Long behandlingId) throws IkkeFunnetException {
+    private Instant hentVedtaksdato(Long behandlingId) {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
         return (behandlingsresultat != null && behandlingsresultat.harVedtak()) ?
             behandlingsresultat.getVedtakMetadata().getVedtaksdato() : null;
     }
 
-    private String hentFullmektigNavn(Fagsak fagsak) throws IkkeFunnetException, IntegrasjonException {
+    private String hentFullmektigNavn(Fagsak fagsak) {
         Optional<Aktoer> representant = fagsak.hentRepresentant(Representerer.BRUKER);
         if (representant.isPresent()) {
             return eregFasade.hentOrganisasjonNavn(representant.get().getOrgnr());

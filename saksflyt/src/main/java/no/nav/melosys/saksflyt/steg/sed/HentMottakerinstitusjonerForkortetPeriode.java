@@ -13,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.LandvelgerService;
@@ -49,12 +48,12 @@ public class HentMottakerinstitusjonerForkortetPeriode implements StegBehandler 
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) {
         avklarMottakerInstitusjoner(prosessinstans, prosessinstans.getBehandling());
         log.info("Avklart mottakerinstitusjoner for behandling {}.", prosessinstans.getBehandling().getId());
     }
 
-    private void avklarMottakerInstitusjoner(Prosessinstans prosessinstans, Behandling behandling) throws MelosysException {
+    private void avklarMottakerInstitusjoner(Prosessinstans prosessinstans, Behandling behandling) {
         Fagsak fagsak = behandling.getFagsak();
 
         Collection<Landkoder> utlMyndighetLand = landvelgerService.hentUtenlandskTrygdemyndighetsland(prosessinstans.getBehandling().getId());

@@ -9,8 +9,6 @@ import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.slf4j.Logger;
@@ -36,7 +34,7 @@ public class OpprettAnmodningsperiodeSvar implements StegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) {
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
         AnmodningsperiodeSvar anmodningsperiodeSvar = opprettAnmodningsperiodeSvar(melosysEessiMelding.getSvarAnmodningUnntak());
         anmodningsperiodeService.lagreAnmodningsperiodeSvarForBehandling(prosessinstans.getBehandling().getId(), anmodningsperiodeSvar);

@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfo;
 import no.nav.melosys.domain.avgift.OppdaterTrygdeavgiftsgrunnlagRequest;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
@@ -16,15 +15,12 @@ import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.*;
 import static no.nav.melosys.domain.kodeverk.Loenn_forhold.*;
-import static no.nav.melosys.domain.kodeverk.Saerligeavgiftsgrupper.*;
 import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_norsk_inntekt.NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV;
 import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_norsk_inntekt.NORSK_INNTEKT_TRYGDEAVGIFT_NAV;
 import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV;
@@ -44,8 +40,8 @@ public class TrygdeavgiftsgrunnlagService {
         this.behandlingsresultatService = behandlingsresultatService;
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public Trygdeavgiftsgrunnlag oppdaterAvgiftsgrunnlag(long behandlingsresultatID, OppdaterTrygdeavgiftsgrunnlagRequest req) throws FunksjonellException {
+    @Transactional
+    public Trygdeavgiftsgrunnlag oppdaterAvgiftsgrunnlag(long behandlingsresultatID, OppdaterTrygdeavgiftsgrunnlagRequest req) {
         valider(req);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID);
         oppdaterAvklartefakta(behandlingsresultat, req.tilAvklartefakta());
@@ -128,7 +124,7 @@ public class TrygdeavgiftsgrunnlagService {
             req.getAvgiftsGrunnlagUtland().erAvgiftspliktig();
     }
 
-    private void valider(OppdaterTrygdeavgiftsgrunnlagRequest req) throws FunksjonellException {
+    private void valider(OppdaterTrygdeavgiftsgrunnlagRequest req) {
         if (req.getLønnsforhold() == null) {
             throw new FunksjonellException("Lønnsforhold ikke oppgitt");
         }
@@ -147,7 +143,7 @@ public class TrygdeavgiftsgrunnlagService {
     }
 
     @Transactional(readOnly = true)
-    public Trygdeavgiftsgrunnlag hentAvgiftsgrunnlag(long behandlingresultatID) throws IkkeFunnetException {
+    public Trygdeavgiftsgrunnlag hentAvgiftsgrunnlag(long behandlingresultatID) {
         return Trygdeavgiftsgrunnlag.av(behandlingsresultatService.hentBehandlingsresultat(behandlingresultatID));
 
     }

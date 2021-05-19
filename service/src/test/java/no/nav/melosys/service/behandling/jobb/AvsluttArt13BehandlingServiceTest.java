@@ -11,26 +11,23 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.sak.FagsakService;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AvsluttArt13BehandlingServiceTest {
+@ExtendWith(MockitoExtension.class)
+class AvsluttArt13BehandlingServiceTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
@@ -44,9 +41,6 @@ public class AvsluttArt13BehandlingServiceTest {
 
     private AvsluttArt13BehandlingService avsluttArt13BehandlingService;
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
     private final Behandling behandling = new Behandling();
     private final Fagsak fagsak = new Fagsak();
@@ -55,8 +49,8 @@ public class AvsluttArt13BehandlingServiceTest {
 
     private final long behandlingID = 11L;
 
-    @Before
-    public void setup() throws IkkeFunnetException {
+    @BeforeEach
+    public void setup() {
         avsluttArt13BehandlingService = new AvsluttArt13BehandlingService(behandlingService, fagsakService,
             behandlingsresultatService, medlPeriodeService, lovvalgsperiodeService);
 
@@ -74,24 +68,22 @@ public class AvsluttArt13BehandlingServiceTest {
         lovvalgsperiode.setMedlPeriodeID(123L);
 
         when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingID)))
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID))
             .thenReturn(behandlingsresultat);
     }
 
     @Test
-    public void avsluttBehandlingArt13_ikkeArt13_kasterException() throws FunksjonellException, TekniskException {
+    void avsluttBehandlingArt13_ikkeArt13_kasterException() {
         vedtakMetadata.setVedtaksdato(månederOgDagerSiden(2, 1));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
 
-
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("Behandling skal ikke avsluttes automatisk da perioden er av bestemmelse");
-
-        avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID))
+            .withMessageContaining("Behandling skal ikke avsluttes automatisk da perioden er av bestemmelse");
     }
 
     @Test
-    public void avsluttBehandlingArt13_søknad1MndSidenVedtak_behandlingIkkeAvlsuttet() throws FunksjonellException, TekniskException {
+    void avsluttBehandlingArt13_søknad1MndSidenVedtak_behandlingIkkeAvlsuttet() {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         vedtakMetadata.setVedtaksdato(månederOgDagerSiden(1, 0));
 
@@ -100,7 +92,7 @@ public class AvsluttArt13BehandlingServiceTest {
     }
 
     @Test
-    public void avsluttBehandlingArt13_norgeUtpekt2Mnd1DagSidenVedtak_behandlingBlirAvlsuttet() throws FunksjonellException, TekniskException {
+    void avsluttBehandlingArt13_norgeUtpekt2Mnd1DagSidenVedtak_behandlingBlirAvlsuttet() {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         vedtakMetadata.setVedtaksdato(månederOgDagerSiden(2, 1));
 
@@ -110,18 +102,17 @@ public class AvsluttArt13BehandlingServiceTest {
     }
 
     @Test
-    public void avsluttBehandlingArt13_norgeUtpektVedtakIkkeLagret_kasterException() throws FunksjonellException, TekniskException {
+    void avsluttBehandlingArt13_norgeUtpektVedtakIkkeLagret_kasterException() {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         behandlingsresultat.setVedtakMetadata(null);
 
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("har ikke et vedtak og status kan da ikke settes til AVSLUTTET");
-        avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> avsluttArt13BehandlingService.avsluttBehandlingHvisToMndPassert(behandlingID))
+            .withMessageContaining("har ikke et vedtak og status kan da ikke settes til AVSLUTTET");
     }
 
     @Test
-    public void avsluttBehandlingArt13_søknad2Mnd1DagSidenEndretDato_medlOppdatertOgBehandlingBlirAvsluttet()
-        throws FunksjonellException, TekniskException {
+    void avsluttBehandlingArt13_søknad2Mnd1DagSidenEndretDato_medlOppdatertOgBehandlingBlirAvsluttet() {
         behandlingsresultat.setEndretDato(månederOgDagerSiden(2, 1));
         vedtakMetadata.setVedtaksdato(månederOgDagerSiden(2, 1));
 
@@ -131,8 +122,7 @@ public class AvsluttArt13BehandlingServiceTest {
     }
 
     @Test
-    public void avsluttBehandlingArt13_søknad3MndSidenEndretDatoUtpekingUtenVedtak_lovvalgsperiodeOpprettetOgBehandlingAvsluttet()
-        throws FunksjonellException, TekniskException {
+    void avsluttBehandlingArt13_søknad3MndSidenEndretDatoUtpekingUtenVedtak_lovvalgsperiodeOpprettetOgBehandlingAvsluttet() {
 
         Utpekingsperiode utpekingsperiode = new Utpekingsperiode(
             LocalDate.now(), LocalDate.now(), Landkoder.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);

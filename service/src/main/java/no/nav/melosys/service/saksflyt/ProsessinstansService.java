@@ -1,10 +1,10 @@
 package no.nav.melosys.service.saksflyt;
 
-import javax.annotation.Nullable;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
@@ -30,6 +30,7 @@ import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.soknad.SoknadMottatt;
+import no.nav.melosys.service.vedtak.FattFtrlVedtakRequest;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -123,7 +124,7 @@ public class ProsessinstansService {
     }
 
     public boolean harVedtakInstans(Long behandlingID) {
-        return prosessinstansRepo.findByTypeAndBehandling_Id(ProsessType.IVERKSETT_VEDTAK, behandlingID).isPresent();
+        return prosessinstansRepo.findByBehandling_IdAndTypeIn(behandlingID, ProsessType.IVERKSETT_VEDTAK, ProsessType.IVERKSETT_VEDTAK_EOS).isPresent();
     }
 
     public void lagre(Prosessinstans prosessinstans) {
@@ -149,7 +150,8 @@ public class ProsessinstansService {
     public void opprettProsessinstansAnmodningOmUnntak(Behandling behandling, Set<String> mottakerInstitusjon,
                                                        Set<DokumentReferanse> vedleggReferanserTilSed,
                                                        String ytterligereInformasjonSed) {
-        Prosessinstans prosessinstans = new ProsessinstansBuilder().medType(ProsessType.ANMODNING_OM_UNNTAK)
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.ANMODNING_OM_UNNTAK)
             .medBehandling(behandling)
             .medEessiMottakere(mottakerInstitusjon)
             .medVedleggTilSed(vedleggReferanserTilSed)
@@ -177,11 +179,11 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansIverksettVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultatType,
-                                                     String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner,
-                                                     String revurderBegrunnelse) {
+    public void opprettProsessinstansIverksettVedtakEos(Behandling behandling, Behandlingsresultattyper behandlingsresultatType,
+                                                        String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner,
+                                                        String revurderBegrunnelse) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(ProsessType.IVERKSETT_VEDTAK)
+            .medType(ProsessType.IVERKSETT_VEDTAK_EOS)
             .medBehandling(behandling)
             .medBegrunnelseFritekst(fritekst)
             .medEessiMottakere(mottakerinstitusjoner)
@@ -192,6 +194,16 @@ public class ProsessinstansService {
         if (StringUtils.isNotEmpty(revurderBegrunnelse)) {
             prosessinstans.setData(ProsessDataKey.REVURDER_BEGRUNNELSE, revurderBegrunnelse);
         }
+
+        lagre(prosessinstans);
+    }
+
+    public void opprettProsessinstansIverksettVedtak(Behandling behandling, FattFtrlVedtakRequest request) {
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.IVERKSETT_VEDTAK)
+            .medBehandling(behandling)
+            .medBegrunnelseFritekst(request.getFritekstBegrunnelse())
+            .build();
 
         lagre(prosessinstans);
     }
@@ -218,7 +230,7 @@ public class ProsessinstansService {
                                                     String fritekstSed) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
-            .medType(ProsessType.IVERKSETT_VEDTAK_FORKORT_PERIODE)
+            .medType(ProsessType.IVERKSETT_VEDTAK_EOS_FORKORT_PERIODE)
             .medBegrunnelseFritekst(fritekst)
             .medYtterligereinformasjonSed(fritekstSed)
             .build();
@@ -226,10 +238,11 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansGodkjennUnntaksperiode(Behandling behandling, boolean varsleUtland) {
+    public void opprettProsessinstansGodkjennUnntaksperiode(Behandling behandling, boolean varsleUtland, String fritekst) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
             .medType(ProsessType.REGISTRERING_UNNTAK_GODKJENN)
+            .medYtterligereinformasjonSed(fritekst)
             .build();
 
         prosessinstans.setData(ProsessDataKey.VARSLE_UTLAND, varsleUtland);
@@ -276,7 +289,11 @@ public class ProsessinstansService {
     }
 
     private Prosessinstans prosessinstansForSedMottak(MelosysEessiMelding melosysEessiMelding) {
-        Prosessinstans prosessinstans = new Prosessinstans();
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medType(ProsessType.MOTTAK_SED)
+            .medEessiMelding(melosysEessiMelding)
+            .build();
+
         prosessinstans.setType(ProsessType.MOTTAK_SED);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, melosysEessiMelding.getJournalpostId());
         prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, melosysEessiMelding.getErEndring());
@@ -305,7 +322,7 @@ public class ProsessinstansService {
                                                     String ytterligereInformasjonSed,
                                                     String fritekstBrev) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
-            .medType(ProsessType.IVERKSETT_VEDTAK)
+            .medType(ProsessType.IVERKSETT_VEDTAK_EOS)
             .medBehandling(behandling)
             .medEessiMottakere(mottakerinstitusjoner)
             .medYtterligereinformasjonSed(ytterligereInformasjonSed)

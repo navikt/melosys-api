@@ -3,8 +3,6 @@ package no.nav.melosys.tjenester.gui;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsresultatDto;
@@ -37,8 +35,7 @@ public class BehandlingsresultatTjeneste {
     @GetMapping("{behandlingID}/resultat")
     @ApiOperation(value = "Hent behandlingsresultat knyttet til en behandling",
         response = BehandlingsresultatDto.class)
-    public ResponseEntity<BehandlingsresultatDto> hentBehandlingsresultat(@PathVariable("behandlingID") long behandlingID)
-        throws FunksjonellException, TekniskException {
+    public ResponseEntity<BehandlingsresultatDto> hentBehandlingsresultat(@PathVariable("behandlingID") long behandlingID) {
         tilgangService.sjekkTilgang(behandlingID);
 
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultatMedKontrollresultat(behandlingID);

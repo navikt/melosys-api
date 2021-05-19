@@ -7,26 +7,24 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Kontrollresultat;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.KontrollresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.KontrollresultatService;
 import no.nav.melosys.service.kontroll.ufm.UfmKontrollService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class KontrollresultatServiceTest {
     @Mock
     private KontrollresultatRepository kontrollresultatRepository;
@@ -41,8 +39,8 @@ public class KontrollresultatServiceTest {
 
     private KontrollresultatService kontrollresultatService;
 
-    @Before
-    public void setUp() throws IkkeFunnetException, TekniskException {
+    @BeforeEach
+    public void setUp() {
         kontrollresultatService = new KontrollresultatService(kontrollresultatRepository, behandlingsresultatService, ufmKontrollService, behandlingService);
 
         when(kontrollresultatRepository.saveAll(anyCollection())).thenReturn(List.of());

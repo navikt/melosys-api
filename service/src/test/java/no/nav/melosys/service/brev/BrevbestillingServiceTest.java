@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.brev.*;
+import no.nav.melosys.domain.brev.FastMottaker;
+import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.brev.Mottakerliste;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -18,17 +20,9 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.person.Informasjonsbehov;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
-import no.nav.melosys.service.dokument.BrevmottakerService;
-import no.nav.melosys.service.dokument.DokgenService;
-import no.nav.melosys.service.dokument.DokumentServiceFasade;
-import no.nav.melosys.service.dokument.MuligMottakerDto;
-import no.nav.melosys.service.dokument.MuligeMottakereDto;
+import no.nav.melosys.service.dokument.*;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -77,7 +71,7 @@ class BrevbestillingServiceTest {
     }
 
     @Test
-    void hentMuligeMottakere_hovedMottakerBruker_returnererBrukerSomHovedMottaker() throws FunksjonellException, TekniskException {
+    void hentMuligeMottakere_hovedMottakerBruker_returnererBrukerSomHovedMottaker() {
         leggPersondokumentTilBehandling();
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, behandling))
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).build());
@@ -100,7 +94,7 @@ class BrevbestillingServiceTest {
     }
 
     @Test
-    void hentMuligeMottakere_hovedMottakerBrukerMedFullmektig_returnererFullmektigSomHovedMottaker() throws FunksjonellException, TekniskException {
+    void hentMuligeMottakere_hovedMottakerBrukerMedFullmektig_returnererFullmektigSomHovedMottaker() {
         leggFagsakTilBehandling();
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, behandling))
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).build());
@@ -124,7 +118,7 @@ class BrevbestillingServiceTest {
     }
 
     @Test
-    void hentMuligeMottakere_hovedMottakerArbeidsgiver_returnererArbeidsgiverSomHovedMottaker() throws FunksjonellException, TekniskException {
+    void hentMuligeMottakere_hovedMottakerArbeidsgiver_returnererArbeidsgiverSomHovedMottaker() {
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, behandling))
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(ARBEIDSGIVER).build());
         mockHentOrganisasjon("orgnr", "Ola Nordmann Rørleggerfirma");
@@ -145,7 +139,7 @@ class BrevbestillingServiceTest {
     }
 
     @Test
-    void hentMuligeMottakere_kopiTilBruker_returnererBrukerSomKopi() throws FunksjonellException, TekniskException {
+    void hentMuligeMottakere_kopiTilBruker_returnererBrukerSomKopi() {
         leggPersondokumentTilBehandling();
         leggFagsakTilBehandling();
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, behandling))
@@ -168,7 +162,7 @@ class BrevbestillingServiceTest {
     }
 
     @Test
-    void hentMuligeMottakere_kopiTilBrukerMedFullmektig_returnererFullmektigSomKopi() throws FunksjonellException, TekniskException {
+    void hentMuligeMottakere_kopiTilBrukerMedFullmektig_returnererFullmektigSomKopi() {
         leggFagsakTilBehandling();
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, behandling))
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(ARBEIDSGIVER).medKopiMottaker(BRUKER).build());
@@ -192,7 +186,7 @@ class BrevbestillingServiceTest {
     }
 
     @Test
-    void hentMuligeMottakere_kopiTilBrukerMedFullmektigNårHovedMottakerErBruker_returnererBrukerSomKopi() throws FunksjonellException, TekniskException {
+    void hentMuligeMottakere_kopiTilBrukerMedFullmektigNårHovedMottakerErBruker_returnererBrukerSomKopi() {
         leggPersondokumentTilBehandling();
         leggFagsakTilBehandling();
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, behandling))
@@ -222,7 +216,7 @@ class BrevbestillingServiceTest {
     }
 
     @Test
-    void hentMuligeMottakere_kopiTilArbeidsgiver_returnererArbeidsgiverSomKopi() throws FunksjonellException, TekniskException {
+    void hentMuligeMottakere_kopiTilArbeidsgiver_returnererArbeidsgiverSomKopi() {
         leggPersondokumentTilBehandling();
         leggFagsakTilBehandling();
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, behandling))
@@ -250,7 +244,7 @@ class BrevbestillingServiceTest {
     }
 
     @Test
-    void hentMuligeMottakere_kopiTilArbeidsgiverMedFullmektig_returnererFullmektigSomKopi() throws FunksjonellException, TekniskException {
+    void hentMuligeMottakere_kopiTilArbeidsgiverMedFullmektig_returnererFullmektigSomKopi() {
         leggPersondokumentTilBehandling();
         leggFagsakTilBehandling();
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, behandling))
@@ -276,7 +270,7 @@ class BrevbestillingServiceTest {
     }
 
     @Test
-    void hentMuligeMottakere_fastTilSkatt_returnererSkattSomFast() throws FunksjonellException, TekniskException {
+    void hentMuligeMottakere_fastTilSkatt_returnererSkattSomFast() {
         leggPersondokumentTilBehandling();
         leggFagsakTilBehandling();
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, behandling))
@@ -452,7 +446,7 @@ class BrevbestillingServiceTest {
         return aktoer;
     }
 
-    private void leggPersondokumentTilBehandling() throws TekniskException {
+    private void leggPersondokumentTilBehandling() {
         var dokument = new PersonDokument();
         dokument.sammensattNavn = "Ola Nordmann";
         when(behandling.hentPersonDokument()).thenReturn(dokument);
@@ -468,7 +462,7 @@ class BrevbestillingServiceTest {
         when(behandling.getFagsak()).thenReturn(fagsak);
     }
 
-    private void mockHentOrganisasjon(String orgnr, String navn) throws IntegrasjonException, IkkeFunnetException {
+    private void mockHentOrganisasjon(String orgnr, String navn) {
         when(mockEregFasade.hentOrganisasjon(orgnr)).thenReturn(lagORGSaksopplysning(orgnr, navn));
     }
 

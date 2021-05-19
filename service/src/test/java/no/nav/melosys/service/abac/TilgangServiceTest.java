@@ -9,16 +9,13 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.sikkerhet.abac.Pep;
 import no.nav.melosys.sikkerhet.abac.PepImpl;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -92,7 +89,7 @@ class TilgangServiceTest {
     }
 
     @Test
-    void sjekkRedigerbar_behandlingErRedigerbar_Ok() throws FunksjonellException, TekniskException {
+    void sjekkRedigerbar_behandlingErRedigerbar_Ok() {
         when(abacContext.getRequest()).thenReturn(new XacmlRequest());
         when(abacService.evaluate(any())).thenReturn(abacResponse);
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
@@ -105,7 +102,7 @@ class TilgangServiceTest {
     }
 
     @Test
-    void sjekkRedigerbar_behandlingIkkeRedigerbar_girFeil() throws FunksjonellException {
+    void sjekkRedigerbar_behandlingIkkeRedigerbar_girFeil() {
         when(behandlingMocked.erRedigerbar()).thenReturn(false);
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandlingMocked);
 
@@ -115,7 +112,7 @@ class TilgangServiceTest {
     }
 
     @Test
-    void sjekkTilordnet_behandlingErTilordnetSaksbehandler_Ok() throws FunksjonellException, TekniskException {
+    void sjekkTilordnet_behandlingErTilordnetSaksbehandler_Ok() {
         String saksbehandler = "Z123456";
         SubjectHandler subjectHandler = mock(SpringSubjectHandler.class);
         SubjectHandler.set(subjectHandler);
@@ -133,7 +130,7 @@ class TilgangServiceTest {
     }
 
     @Test
-    public void sjekkTilordnet_behandlingErIkkeTilordnetSaksbehandler_girFeil() throws FunksjonellException {
+    public void sjekkTilordnet_behandlingErIkkeTilordnetSaksbehandler_girFeil() {
         String saksbehandler = "Z123456";
         SubjectHandler subjectHandler = mock(SpringSubjectHandler.class);
         SubjectHandler.set(subjectHandler);
@@ -147,7 +144,7 @@ class TilgangServiceTest {
     }
 
     @Test
-    void testFagsakOk() throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
+    void testFagsakOk() {
         when(abacContext.getRequest()).thenReturn(new XacmlRequest());
         when(abacService.evaluate(any())).thenReturn(abacResponse);
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
@@ -158,7 +155,7 @@ class TilgangServiceTest {
     }
 
     @Test
-    void testFagsakIkkeTilgang() throws TekniskException, IkkeFunnetException {
+    void testFagsakIkkeTilgang() {
         when(abacContext.getRequest()).thenReturn(new XacmlRequest());
         when(abacService.evaluate(any())).thenReturn(abacResponse);
         when(abacResponse.getDecision()).thenReturn(Decision.DENY);

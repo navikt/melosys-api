@@ -11,9 +11,6 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
@@ -50,7 +47,7 @@ public class DefaultSedRuter implements SedRuter {
      * Hvis SED'en er tilknyttet en sak går den til ferdigstilling av journalpost
      * Ellers opprettes det en journalføringsoppgave
      */
-    public void rutSedTilBehandling(Prosessinstans prosessinstans, Long arkivsakID) throws MelosysException {
+    public void rutSedTilBehandling(Prosessinstans prosessinstans, Long arkivsakID) {
         final MelosysEessiMelding eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
         SedType sedType = SedType.valueOf(eessiMelding.getSedType());
         Optional<Fagsak> fagsak = arkivsakID != null ? fagsakService.finnFagsakFraArkivsakID(arkivsakID) : Optional.empty();
@@ -85,7 +82,7 @@ public class DefaultSedRuter implements SedRuter {
         return sedType != SedType.A012 && sedType != SedType.X001 && sedType != SedType.X007;
     }
 
-    private void oppdaterOppgave(Behandling behandling, Prosessinstans prosessinstans, SedType sedType) throws FunksjonellException, TekniskException {
+    private void oppdaterOppgave(Behandling behandling, Prosessinstans prosessinstans, SedType sedType) {
         Optional<Oppgave> oppgave = oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         String oppgaveID;
@@ -100,7 +97,7 @@ public class DefaultSedRuter implements SedRuter {
         }
     }
 
-    private void oppdaterOppgavePrioritet(String oppgaveID) throws FunksjonellException, TekniskException {
+    private void oppdaterOppgavePrioritet(String oppgaveID) {
         log.info("Setter prioritet til HØY for oppgave {}", oppgaveID);
         oppgaveService.oppdaterOppgave(oppgaveID,
             OppgaveOppdatering.builder()
@@ -110,7 +107,7 @@ public class DefaultSedRuter implements SedRuter {
         );
     }
 
-    private String opprettBehandlingsoppgave(Behandling behandling, String aktørID, SedType sedType) throws FunksjonellException, TekniskException {
+    private String opprettBehandlingsoppgave(Behandling behandling, String aktørID, SedType sedType) {
         Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType())
             .setAktørId(aktørID)
             .setSaksnummer(behandling.getFagsak().getSaksnummer())

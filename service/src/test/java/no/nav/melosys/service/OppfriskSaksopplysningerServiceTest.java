@@ -17,8 +17,6 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.person.Informasjonsbehov;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.KontrollresultatService;
@@ -58,7 +56,7 @@ class OppfriskSaksopplysningerServiceTest {
     private static final long BEHANDLING_ID = 11L;
 
     @BeforeEach
-    public void setUp() throws IkkeFunnetException {
+    public void setUp() {
         oppfriskSaksopplysningerService = new OppfriskSaksopplysningerService(
             behandlingService, behandlingsresultatService,
             kontrollresultatService, inngangsvilkaarService,
@@ -68,7 +66,7 @@ class OppfriskSaksopplysningerServiceTest {
     }
 
     @Test
-    void oppfriskSaksopplysning() throws MelosysException {
+    void oppfriskSaksopplysning() {
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
@@ -78,7 +76,7 @@ class OppfriskSaksopplysningerServiceTest {
     }
 
     @Test
-    void oppfriskSaksopplysning_medSED_kallerKontroller() throws MelosysException {
+    void oppfriskSaksopplysning_medSED_kallerKontroller() {
         Behandling behandling = lagBehandling();
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE);
 
@@ -91,7 +89,7 @@ class OppfriskSaksopplysningerServiceTest {
     }
 
     @Test
-    void oppfriskSaksopplysning_harIkkeOppfyltInngangsvilkår_oppdatererType() throws MelosysException {
+    void oppfriskSaksopplysning_harIkkeOppfyltInngangsvilkår_oppdatererType() {
         Behandling behandling = lagBehandling();
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
 
@@ -111,7 +109,7 @@ class OppfriskSaksopplysningerServiceTest {
     }
 
     @Test
-    void oppfriskSaksopplysning_utenFamilierelasjoner_girForventetInformasjonsbehov() throws MelosysException {
+    void oppfriskSaksopplysning_utenFamilierelasjoner_girForventetInformasjonsbehov() {
         Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         ArgumentCaptor<RegisteropplysningerRequest> requestCaptor = ArgumentCaptor.forClass(RegisteropplysningerRequest.class);
@@ -121,7 +119,7 @@ class OppfriskSaksopplysningerServiceTest {
     }
 
     @Test
-    void oppfriskSaksopplysning_medFamilierelasjoner_girForventetInformasjonsbehov() throws MelosysException {
+    void oppfriskSaksopplysning_medFamilierelasjoner_girForventetInformasjonsbehov() {
         Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         ArgumentCaptor<RegisteropplysningerRequest> requestCaptor = ArgumentCaptor.forClass(RegisteropplysningerRequest.class);
