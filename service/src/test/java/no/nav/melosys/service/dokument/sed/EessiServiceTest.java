@@ -353,7 +353,7 @@ class EessiServiceTest {
         when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
         mockBehandlingsresultat();
 
-        eessiService.sendAnmodningUnntakSvar(BEHANDLING_ID);
+        eessiService.sendAnmodningUnntakSvar(BEHANDLING_ID, null);
 
         verify(behandlingService).hentBehandling(BEHANDLING_ID);
         verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.ANMODNINGSPERIODE));

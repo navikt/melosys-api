@@ -53,7 +53,7 @@ public class BestemBehandlingsmåteSed implements StegBehandler {
         if (skalGodkjenneUnntaksperiode(behandling, behandlingsresultat)) {
             log.info("Behandling {} tema {} behandles automatisk", behandlingID, behandling.getTema());
             behandlingsresultatService.oppdaterBehandlingsMaate(behandlingID, Behandlingsmaate.AUTOMATISERT);
-            unntaksperiodeService.godkjennPeriode(behandling.getId(), false, prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
+            unntaksperiodeService.godkjennPeriode(behandling.getId(), false, null);
         } else {
             log.info("Oppretter oppgave for behandling {}", behandlingID);
             behandlingsresultatService.oppdaterBehandlingsMaate(behandlingID, Behandlingsmaate.DELVIS_AUTOMATISERT);
