@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.sed;
 
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -29,7 +30,7 @@ public class SendSvarAnmodningUnntak implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) {
         long behandlingId = prosessinstans.getBehandling().getId();
-        eessiService.sendAnmodningUnntakSvar(behandlingId);
+        eessiService.sendAnmodningUnntakSvar(behandlingId, prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
         log.info("Svar på anmodning om unntak sendt for behandling {}", behandlingId);
     }
 }

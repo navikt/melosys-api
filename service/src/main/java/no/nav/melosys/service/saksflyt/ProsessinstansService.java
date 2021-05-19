@@ -161,10 +161,11 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansAnmodningOmUnntakMottakSvar(Behandling behandling) {
+    public void opprettProsessinstansAnmodningOmUnntakMottakSvar(Behandling behandling, String ytterligereInfo) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.ANMODNING_OM_UNNTAK_MOTTAK_SVAR)
             .medBehandling(behandling)
+            .medYtterligereinformasjonSed(ytterligereInfo)
             .build();
 
         lagre(prosessinstans);

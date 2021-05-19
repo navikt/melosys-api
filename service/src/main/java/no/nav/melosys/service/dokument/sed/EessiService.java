@@ -148,8 +148,8 @@ public class EessiService {
         return true;
     }
 
-    public List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, List<String> statuser) {
-        return eessiConsumer.hentTilknyttedeBucer(gsakSaksnummer, statuser);
+    public List<BucInformasjon> hentTilknyttedeBucer(long arkivsakID, List<String> statuser) {
+        return eessiConsumer.hentTilknyttedeBucer(arkivsakID, statuser);
     }
 
     public boolean støtterAutomatiskBehandling(String journalpostID) {
@@ -185,9 +185,9 @@ public class EessiService {
         eessiConsumer.lagreSaksrelasjon(new SaksrelasjonDto(arkivsakID, rinaSaksnummer, bucType));
     }
 
-    public void sendAnmodningUnntakSvar(long behandlingId) {
+    public void sendAnmodningUnntakSvar(long behandlingId, String ytterligereInformasjon) {
         log.info("Sender svar på anmodning om unntak for behandling {}", behandlingId);
-        sendSedPåEksisterendeBehandling(behandlingId, PeriodeType.ANMODNINGSPERIODE, this::hentSedTypeForAnmodningUnntakSvar);
+        sendSedPåEksisterendeBehandling(behandlingId, PeriodeType.ANMODNINGSPERIODE, this::hentSedTypeForAnmodningUnntakSvar, ytterligereInformasjon);
 
     }
 
