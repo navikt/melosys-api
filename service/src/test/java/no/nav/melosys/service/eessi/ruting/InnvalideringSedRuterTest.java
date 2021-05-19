@@ -50,12 +50,12 @@ class InnvalideringSedRuterTest {
 
     private InnvalideringSedRuter innvalideringSedRuter;
 
-    private long behandlingID = 111;
-    private long arkivsakID = 123321;
-    private Prosessinstans prosessinstans = new Prosessinstans();
-    private MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
-    private String rinaSaksnummer = "1233333";
-    private String sedID = "2414";
+    private final long behandlingID = 111;
+    private final long arkivsakID = 123321;
+    private final Prosessinstans prosessinstans = new Prosessinstans();
+    private final MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
+    private final String rinaSaksnummer = "1233333";
+    private final String sedID = "2414";
 
     @BeforeEach
     void setup() {
@@ -65,6 +65,13 @@ class InnvalideringSedRuterTest {
         melosysEessiMelding.setAktoerId("12312412");
         melosysEessiMelding.setRinaSaksnummer("143141");
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
+    }
+
+    @Test
+    void rutSedTilBehandling_arkivsaksIdErNull_opprettJournalFøringsOppgave(){
+        innvalideringSedRuter.rutSedTilBehandling(prosessinstans, null);
+        verify(oppgaveService).opprettJournalføringsoppgave(melosysEessiMelding.getJournalpostId(), melosysEessiMelding.getAktoerId());
+
     }
 
     @Test
@@ -96,6 +103,34 @@ class InnvalideringSedRuterTest {
         verify(fagsakService).oppdaterStatus(fagsak, Saksstatuser.AVSLUTTET); //FIXME: ANNULERT
         verify(medlPeriodeService).avvisPeriodeOpphørt(behandlingsresultat.hentValidertLovvalgsperiode().getMedlPeriodeID());
     }
+
+    @Test
+    void rutSedTilBehandling_behandlingErUtlandUtstasjonertOgPågående_oppdaterSaksstatusAnnullert(){
+        var fagsak = lagFagsak(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, Behandlingsstatus.UNDER_BEHANDLING);
+        fagsak.hentSistAktiveBehandling().getSaksopplysninger().add(lagSedDokument());
+        when(eessiService.hentTilknyttedeBucer(arkivsakID, List.of())).thenReturn(lagBucInformasjon("AVBRUTT"));
+        when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
+
+        innvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
+
+        verify(fagsakService).avsluttFagsakOgBehandling(fagsak, Saksstatuser.AVSLUTTET); //FIXME: ANNULERT
+
+    }
+
+    @Test
+    void rutSedTilBehandling_behandlingErUnntakNorskTrygvØvrigOgBehandlingPågående_oppdaterSaksstatusAnnulert(){
+        var fagsak = lagFagsak(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, Behandlingsstatus.UNDER_BEHANDLING);
+        fagsak.hentSistAktiveBehandling().getSaksopplysninger().add(lagSedDokument());
+
+        when(eessiService.hentTilknyttedeBucer(arkivsakID, List.of())).thenReturn(lagBucInformasjon("AVBRUTT"));
+        when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
+
+        innvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
+        verify(fagsakService).avsluttFagsakOgBehandling(fagsak, Saksstatuser.AVSLUTTET); //FIXME: ANNULERT
+
+    }
+
+
 
     private Behandlingsresultat lagBehandlingsresultat(boolean medMedlperiode) {
         var behandlingsresultat = new Behandlingsresultat();
