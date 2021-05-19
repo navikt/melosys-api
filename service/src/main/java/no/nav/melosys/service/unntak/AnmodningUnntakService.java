@@ -87,11 +87,11 @@ public class AnmodningUnntakService {
     }
 
     @Transactional
-    public void anmodningOmUnntakSvar(long behandlingID) {
+    public void anmodningOmUnntakSvar(long behandlingID, String ytterligereInfo) {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         validerBehandlingstemaUnntak(behandling);
         validerSvar(behandling);
-        prosessinstansService.opprettProsessinstansAnmodningOmUnntakMottakSvar(behandling);
+        prosessinstansService.opprettProsessinstansAnmodningOmUnntakMottakSvar(behandling, ytterligereInfo);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
