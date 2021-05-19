@@ -14,6 +14,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.ArbeidsstedT
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.LuftfartBase;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.MaritimtArbeid;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.ArbeidssituasjonOgOevrig;
 import no.nav.melosys.domain.kodeverk.Innretningstyper;
 import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM;
 import no.nav.melosys.soknad_altinn.ObjectFactory;
