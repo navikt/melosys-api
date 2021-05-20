@@ -1,5 +1,7 @@
 package no.nav.melosys.service.dokument.sed.bygger;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -14,6 +16,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -70,10 +73,23 @@ public class SedDataBygger {
                 .orElseThrow(() -> new FunksjonellException("Finner ingen bostedsadresse på person i behandling " + behandlingsresultat.getId())));
             sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, periodeType));
         }
+        VedtakDto vedtakDto = lagVedtakDto(behandlingsresultat);
+        sedDataDto.setVedtakDto(vedtakDto);
         sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(dataGrunnlag.getBehandling()));
         sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
         return sedDataDto;
     }
+
+    private VedtakDto lagVedtakDto(Behandlingsresultat behandlingsresultat){
+        if (behandlingsresultat.getVedtakMetadata() != null) {
+            if (!behandlingsresultat.getVedtakMetadata().getVedtakstype().equals(Vedtakstyper.FØRSTEGANGSVEDTAK)) {
+                LocalDate date = behandlingsresultat.getVedtakMetadata().getVedtaksdato().atZone(ZoneId.systemDefault()).toLocalDate();
+                return new VedtakDto(false, date);
+            }
+        }
+        return new VedtakDto(true,null);
+    }
+
 
     private SedDataDto lagPersonopplysninger(SedDataGrunnlag dataGrunnlag) {
         if (dataGrunnlag instanceof SedDataGrunnlagMedSoknad) {
