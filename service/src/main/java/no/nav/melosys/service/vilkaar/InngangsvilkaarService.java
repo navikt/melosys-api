@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
@@ -14,9 +15,12 @@ import no.nav.melosys.domain.inngangsvilkar.Feilmelding;
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Inngangsvilkaar;
+import no.nav.melosys.domain.person.Statsborgerskap;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarConsumer;
 import no.nav.melosys.service.SaksopplysningerService;
+import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.persondata.PersondataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,16 +34,25 @@ import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerPe
 public class InngangsvilkaarService {
     private static final Logger log = LoggerFactory.getLogger(InngangsvilkaarService.class);
 
-    private final SaksopplysningerService saksopplysningerService;
+    private final BehandlingService behandlingService;
     private final InngangsvilkaarConsumer inngangsvilkaarConsumer;
+    private final PersondataService persondataService;
+    private final SaksopplysningerService saksopplysningerService;
+    private final Unleash unleash;
     private final VilkaarsresultatService vilkaarsresultatService;
 
     @Autowired
-    public InngangsvilkaarService(SaksopplysningerService saksopplysningerService,
+    public InngangsvilkaarService(BehandlingService behandlingService,
                                   InngangsvilkaarConsumer inngangsvilkaarConsumer,
+                                  PersondataService persondataService,
+                                  SaksopplysningerService saksopplysningerService,
+                                  Unleash unleash,
                                   VilkaarsresultatService vilkaarsresultatService) {
-        this.saksopplysningerService = saksopplysningerService;
+        this.behandlingService = behandlingService;
         this.inngangsvilkaarConsumer = inngangsvilkaarConsumer;
+        this.persondataService = persondataService;
+        this.saksopplysningerService = saksopplysningerService;
+        this.unleash = unleash;
         this.vilkaarsresultatService = vilkaarsresultatService;
     }
 
@@ -59,9 +72,11 @@ public class InngangsvilkaarService {
         return erEF_883_2004;
     }
 
-    private InngangsvilkaarVurdering vurderInngangsvilkår(long behandlingID, Collection<String> søknadsland, ErPeriode søknadsperiode) {
-        Land statsborgerskap = hentStatsborgerskapForPerioden(behandlingID, søknadsperiode);
-        if (statsborgerskap == null) {
+    private InngangsvilkaarVurdering vurderInngangsvilkår(long behandlingID,
+                                                          Collection<String> søknadsland,
+                                                          ErPeriode søknadsperiode) {
+        Set<Land> statsborgerskap = hentStatsborgerskapForPerioden(behandlingID, søknadsperiode);
+        if (statsborgerskap.isEmpty()) {
             return new InngangsvilkaarVurdering(false, Inngangsvilkaar.MANGLER_STATSBORGERSKAP);
         }
         if (søknadsperiode.getTom() == null) {
@@ -84,7 +99,30 @@ public class InngangsvilkaarService {
         }
     }
 
-    private Land hentStatsborgerskapForPerioden(long behandlingID, ErPeriode periode) {
+    private Set<Land> hentStatsborgerskapForPerioden(long behandlingID, ErPeriode periode) {
+        if (unleash.isEnabled("melosys.pdl.statsborgerskap")) {
+            final var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+            final String brukerIdent = behandling.getFagsak().hentBruker().getAktørId();
+            return avgjørGyldigeStatsborgerskapFraPdlForPerioden(persondataService.hentStatsborgerskap(brukerIdent), periode);
+        }
+        return Optional.ofNullable(avgjørStatsborgerskapFraTPS(behandlingID, periode))
+            .stream().collect(Collectors.toUnmodifiableSet());
+    }
+
+    Set<Land> avgjørGyldigeStatsborgerskapFraPdlForPerioden(Set<Statsborgerskap> statsborgerskap, ErPeriode periode) {
+        return statsborgerskap.stream().filter(s -> erGyldigStatsborgerskapForPeriode(s, periode))
+            .map(s -> Land.av(s.land())).collect(Collectors.toUnmodifiableSet());
+    }
+
+    private boolean erGyldigStatsborgerskapForPeriode(Statsborgerskap s, ErPeriode periode) {
+        final LocalDate søknadPeriodeFom = periode.getFom();
+        if (s.master().equals("PDL")) {
+            return s.erGyldigPåDato(søknadPeriodeFom) || s.erBekreftetPåDato(LocalDate.now());
+        }
+        return s.erGyldigPåDato(søknadPeriodeFom);
+    }
+
+    private Land avgjørStatsborgerskapFraTPS(long behandlingID, ErPeriode periode) {
         // Hent statsborgerskap fra saksopplysningene...
         // Ved søknad tilbake i tid brukes historisk statsborgerskap
         if (periode.getFom().isBefore(LocalDate.now())) {

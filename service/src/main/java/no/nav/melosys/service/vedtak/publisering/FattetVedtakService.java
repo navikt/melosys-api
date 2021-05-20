@@ -115,6 +115,9 @@ public class FattetVedtakService {
                 ),
                 new Statsborgerskap(
                     personDokument.statsborgerskap.getKode(),
+                    null,
+                    null,
+                    null,
                     null
                 ),
                 null,

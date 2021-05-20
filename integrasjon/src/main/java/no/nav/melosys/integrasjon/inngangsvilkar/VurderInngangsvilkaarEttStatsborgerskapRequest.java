@@ -4,19 +4,19 @@ import java.util.Set;
 
 import no.nav.melosys.domain.ErPeriode;
 
-
-class VurderInngangsvilkaarRequest {
-    private Set<String> statsborgerskap;
+@Deprecated
+class VurderInngangsvilkaarEttStatsborgerskapRequest {
+    private String statsborgerskap;
     private Set<String> arbeidsland;
     private ErPeriode periode;
 
-    VurderInngangsvilkaarRequest(Set<String> statsborgerskap, Set<String> arbeidsland, ErPeriode periode) {
+    VurderInngangsvilkaarEttStatsborgerskapRequest(String statsborgerskap, Set<String> arbeidsland, ErPeriode periode) {
         this.statsborgerskap = statsborgerskap;
         this.arbeidsland = arbeidsland;
         this.periode = periode;
     }
 
-    public Set<String> getStatsborgerskap() {
+    public String getStatsborgerskap() {
         return statsborgerskap;
     }
 
