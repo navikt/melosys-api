@@ -87,7 +87,7 @@
         <unleash.version>3.3.4</unleash.version>
 
         <!-- Transitive avhengiheter -->
-        <asm.version>9.0</asm.version>
+        <asm.version>9.1</asm.version>
         <bcprov-jdk15on.version>1.68</bcprov-jdk15on.version>
         <commons-logging.version>1.2</commons-logging.version>
         <javassist.version>3.27.0-GA</javassist.version>
