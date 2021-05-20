@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.TemaFactory;
 import no.nav.melosys.domain.arkiv.FysiskDokument;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.eessi.SedType;
@@ -48,10 +49,11 @@ public class SedSomBrevService {
         String institusjonID = utenlandskMyndighetService.lagInstitusjonsId(utenlandskMyndighet);
         String brukerFnr = persondataFasade.hentFolkeregisterIdent(fagsak.hentBruker().getAktørId());
         byte[] sedPdf = eessiService.genererSedPdf(behandling.getId(), sedType);
+        var tema = TemaFactory.fraBehandlingstema(behandling.getTema());
 
         OpprettJournalpost opprettJournalpost = OpprettJournalpost.lagJournalpostForSendingAvSedSomBrev(
-            fagsak.getSaksnummer(), brukerFnr, sedType, sedPdf,
-            institusjonID, utenlandskMyndighet.navn, mottakerland.getKode(), vedlegg
+            fagsak.getSaksnummer(), brukerFnr, sedType, sedPdf, institusjonID,
+            utenlandskMyndighet.navn, mottakerland.getKode(), vedlegg, tema
         );
         return joarkFasade.opprettJournalpost(opprettJournalpost, true);
     }
