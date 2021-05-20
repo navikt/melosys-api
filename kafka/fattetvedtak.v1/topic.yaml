@@ -1,0 +1,17 @@
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: fattvedtak.v1
+  namespace: teammelosys
+  labels:
+    team: teammelosys
+spec:
+  pool: {{pool}}
+  config:
+  {{#each config as |value key|}}
+     {{key}}: {{value}}
+  {{/each}}
+  acl:
+    - team: teammelosys
+      application: melosys-avgift-overforing
+      access: read

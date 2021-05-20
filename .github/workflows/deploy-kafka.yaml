@@ -1,0 +1,61 @@
+name: Deploy
+
+on:
+  push:
+    branches: master
+    paths:
+      - kafka/**
+      - .github/workflows/deploy-kafka.yaml
+      - '!kafka/README.md'
+jobs:
+  setup-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      emptyMatrix: ${{ steps.set-matrix.outputs.emptyMatrix }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - id: set-matrix
+        run: |
+          MATRIX=$(git diff-tree --diff-filter=d --no-commit-id --name-only -r ${{ github.event.before }} ${{ github.sha }} | grep kafka/ | cut -d '/' -f 2 | sort -u | paste -d',' -s )
+          echo Matrix is $MATRIX
+          if [[  -z "${MATRIX// }" ]]; then
+            echo "Empty matrix"
+            echo "::set-output name=emptyMatrix::true"
+            echo "::set-output name=matrix::[]"
+          else
+            JSON=$(jq -c -n --arg v $MATRIX '{"topic": $v|split(",")}')
+            echo "matrix: $JSON"
+            echo "::set-output name=matrix::$JSON"
+            echo "::set-output name=emptyMatrix::false"
+          fi
+  deploy:
+    needs: setup-matrix
+    runs-on: ubuntu-latest
+    if: needs.setup-matrix.outputs.emptyMatrix == 'false'
+    strategy:
+      fail-fast: true
+      matrix: ${{ fromJson(needs.setup-matrix.outputs.matrix) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: deploy to dev
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: kafka/${{ matrix.topic }}/topic.yaml
+          VARS: kafka/${{ matrix.topic }}/dev-vars.yaml
+          PRINT_PAYLOAD: true
+      - name: deploy to prod
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: kafka/${{ matrix.topic }}/topic.yaml
+          VARS: kafka/${{ matrix.topic }}/prod-vars.yaml
+          PRINT_PAYLOAD: true

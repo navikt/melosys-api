@@ -1,0 +1,8 @@
+pool: nav-prod
+config:
+  cleanupPolicy: compact
+  minimumInSyncReplicas: 1
+  partitions: 6
+  replication: 2
+  retentionBytes: -1
+  retentionHours: 24
