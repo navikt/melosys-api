@@ -67,6 +67,7 @@ public class PersondataService implements PersondataFasade {
         return tpsService.hentSammensattNavn(fnr);
     }
 
+    @Override
     public Set<Statsborgerskap> hentStatsborgerskap(String ident) {
         return pdlConsumer.hentStatsborgerskap(ident).stream()
             .filter(s -> !s.erOpphørt())

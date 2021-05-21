@@ -22,7 +22,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarConsumerImpl;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.persondata.PersondataService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,7 +45,7 @@ class InngangsvilkaarServiceTest {
     @Mock
     private InngangsvilkaarConsumerImpl inngangsvilkaarConsumer;
     @Mock
-    private PersondataService persondataService;
+    private PersondataFasade persondataFasade;
     @Mock
     private SaksopplysningerService saksopplysningerService;
     @Mock
@@ -56,8 +56,8 @@ class InngangsvilkaarServiceTest {
 
     @BeforeEach
     void setUp() {
-        inngangsvilkaarService = new InngangsvilkaarService(behandlingService, inngangsvilkaarConsumer, persondataService,
-            saksopplysningerService, unleash, vilkaarsresultatService);
+        inngangsvilkaarService = new InngangsvilkaarService(behandlingService, inngangsvilkaarConsumer,
+            persondataFasade, saksopplysningerService, unleash, vilkaarsresultatService);
     }
 
     @Test
@@ -92,7 +92,7 @@ class InngangsvilkaarServiceTest {
             new no.nav.melosys.domain.person.Statsborgerskap("SWE", LocalDate.parse("2009-11-18"), null, null, "PDL",
                 "Dolly", false)
         );
-        when(persondataService.hentStatsborgerskap(ident)).thenReturn(statsborgerskap);
+        when(persondataFasade.hentStatsborgerskap(ident)).thenReturn(statsborgerskap);
 
         InngangsvilkarResponse res = new InngangsvilkarResponse();
         res.setFeilmeldinger(Collections.emptyList());
