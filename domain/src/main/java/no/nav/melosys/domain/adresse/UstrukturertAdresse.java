@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.dokument.adresse;
+package no.nav.melosys.domain.adresse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,8 +11,11 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdress
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
 import org.apache.commons.lang3.StringUtils;
 
-public class UstrukturertAdresse extends Adresse {
+import static no.nav.melosys.domain.adresse.Adresse.sammenslå;
+
+public class UstrukturertAdresse implements Adresse {
     private final List<String> adresselinjer = new ArrayList<>();
+    private String landkode;
 
     private UstrukturertAdresse(String l1, String l2, String l3, String l4, String landKode) {
         if (StringUtils.isNotEmpty(l1)) {
@@ -76,6 +79,11 @@ public class UstrukturertAdresse extends Adresse {
         return adresselinjer;
     }
 
+    @Override
+    public String getLandkode() {
+        return landkode;
+    }
+
     @JsonIgnore
     public String getAdresselinje(int linjenummer) {
         if (linjenummer > adresselinjer.size()) {
@@ -85,6 +93,7 @@ public class UstrukturertAdresse extends Adresse {
         }
     }
 
+    @Override
     public boolean erTom() {
         return adresselinjer.isEmpty() && StringUtils.isEmpty(landkode);
     }

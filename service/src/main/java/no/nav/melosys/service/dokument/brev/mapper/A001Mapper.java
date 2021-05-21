@@ -14,7 +14,7 @@ import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -26,7 +26,7 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeidssted;
 import org.apache.commons.lang3.StringUtils;
 
-import static no.nav.melosys.domain.dokument.adresse.Adresse.sammenslå;
+import static no.nav.melosys.domain.adresse.Adresse.sammenslå;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactory.mapAnmodningBegrunnelser;

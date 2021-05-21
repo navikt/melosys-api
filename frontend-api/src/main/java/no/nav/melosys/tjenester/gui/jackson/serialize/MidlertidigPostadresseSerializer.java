@@ -13,8 +13,8 @@ import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.MidlertidigPostadresseDto;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.adresse.UstrukturertAdresse;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.adresse.UstrukturertAdresse;
 
 import static no.nav.melosys.domain.FellesKodeverk.POSTNUMMER;
 

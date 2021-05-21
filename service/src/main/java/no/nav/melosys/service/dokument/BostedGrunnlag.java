@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.util.BehandlingsgrunnlagUtils;

@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.avklartefakta;
 
-import no.nav.melosys.domain.dokument.adresse.Adresse;
+import no.nav.melosys.domain.adresse.Adresse;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 

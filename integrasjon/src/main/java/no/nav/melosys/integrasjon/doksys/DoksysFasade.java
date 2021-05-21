@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.doksys;
 
 import no.nav.melosys.domain.Kontaktopplysning;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 
 public interface DoksysFasade {
 

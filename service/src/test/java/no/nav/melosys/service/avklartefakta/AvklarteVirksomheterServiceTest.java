@@ -15,8 +15,8 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.SelvstendigForetak;
-import no.nav.melosys.domain.dokument.adresse.Adresse;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.adresse.Adresse;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Periode;
@@ -76,7 +76,7 @@ class AvklarteVirksomheterServiceTest {
     private String uuid1 = "a2k2jf-a3khs";
     private String uuid2 = "0dkf93-kj701";
 
-    Function<OrganisasjonDokument, Adresse> ingenAdresse = org -> null;
+    Function<OrganisasjonDokument, Adresse> INGEN_ADRESSE = org -> null;
 
     @BeforeEach
     public void setUp() {
@@ -166,7 +166,7 @@ class AvklarteVirksomheterServiceTest {
         leggTilIRegisterOppslag(Arrays.asList(orgnr2, orgnr3));
 
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, behandlingService, mockKodeverkService);
-        assertThat(avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, ingenAdresse).stream()
+        assertThat(avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, INGEN_ADRESSE).stream()
             .map(nv -> nv.orgnr)
             .collect(Collectors.toList())).contains(orgnr2, orgnr3);
     }
@@ -187,7 +187,7 @@ class AvklarteVirksomheterServiceTest {
         leggTilIRegisterOppslag(selvstendigeForetak);
 
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, behandlingService, mockKodeverkService);
-        assertThat(avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, ingenAdresse).stream()
+        assertThat(avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, INGEN_ADRESSE).stream()
             .map(nv -> nv.orgnr)
             .collect(Collectors.toList())).contains(orgnr1);
     }

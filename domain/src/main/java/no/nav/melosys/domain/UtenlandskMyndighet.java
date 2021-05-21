@@ -5,7 +5,7 @@ import java.util.Objects;
 import java.util.Set;
 import javax.persistence.*;
 
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 
 @Entity

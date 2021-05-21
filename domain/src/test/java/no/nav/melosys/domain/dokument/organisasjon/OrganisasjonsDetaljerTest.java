@@ -2,8 +2,8 @@ package no.nav.melosys.domain.dokument.organisasjon;
 
 import java.util.Arrays;
 
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.adresse.UstrukturertAdresse;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +14,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class OrganisasjonsDetaljerTest {
-
     private SemistrukturertAdresse adresse;
 
     private String linje1 = "LINJE1  ";
@@ -55,7 +54,7 @@ public class OrganisasjonsDetaljerTest {
         assertThat(resultatAdresse.getAdresselinje(2)).isEqualTo(linje2);
         assertThat(resultatAdresse.getAdresselinje(3)).isEqualTo(linje3);
         assertThat(resultatAdresse.getAdresselinje(4)).isEqualTo(postnr + " " + poststed);
-        assertThat(resultatAdresse.landkode).isEqualTo(landkode);
+        assertThat(resultatAdresse.getLandkode()).isEqualTo(landkode);
     }
 
     @Test
@@ -71,7 +70,7 @@ public class OrganisasjonsDetaljerTest {
         assertThat(resultatAdresse.getAdresselinje(2)).isEqualTo(linje2);
         assertThat(resultatAdresse.getAdresselinje(3)).isEqualTo(linje3);
         assertThat(resultatAdresse.getAdresselinje(4)).isEqualTo(poststedUtland);
-        assertThat(resultatAdresse.landkode).isEqualTo(landkode);
+        assertThat(resultatAdresse.getLandkode()).isEqualTo(landkode);
     }
 
     @Test
