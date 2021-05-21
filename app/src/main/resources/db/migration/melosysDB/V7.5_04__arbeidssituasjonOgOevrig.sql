@@ -42,8 +42,12 @@ BEGIN
                                                           '"mottarYtelserUtlandet": null' ||
                                                           '}');
 
-                arbeidssituasjonOgOevrig.put('beskrivelseArbeidSisteMnd', beskrivelseArbeidSisteMnd);
-                arbeidssituasjonOgOevrig.put('beskrivelseAnnetArbeid', beskrivelseAnnetArbeid);
+                IF beskrivelseArbeidSisteMnd IS NOT NULL THEN
+                    arbeidssituasjonOgOevrig.put('beskrivelseArbeidSisteMnd', beskrivelseArbeidSisteMnd);
+                END IF;
+                IF beskrivelseAnnetArbeid IS NOT NULL THEN
+                    arbeidssituasjonOgOevrig.put('beskrivelseAnnetArbeid', beskrivelseAnnetArbeid);
+                END IF;
                 IF harLoennetArbeidMinstEnMndFoerUtsending = 'true' THEN
                     arbeidssituasjonOgOevrig.put('harLoennetArbeidMinstEnMndFoerUtsending', true);
                 ELSIF harLoennetArbeidMinstEnMndFoerUtsending = 'false' THEN
