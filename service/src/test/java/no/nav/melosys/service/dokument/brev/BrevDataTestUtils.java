@@ -143,6 +143,7 @@ public class BrevDataTestUtils {
         omfattetBarn.setIdent("123321123");
         IkkeOmfattetBarn ikkeOmfattetBarn = new IkkeOmfattetBarn("fnrIkkeOmfattet", OVER_18_AR.getKode(), null);
         ikkeOmfattetBarn.sammensattNavn = "Ikke Omfattet Barn";
+        ikkeOmfattetBarn.ident = "1111111111";
 
         return new AvklarteMedfolgendeBarn(Set.of(omfattetBarn), Set.of(ikkeOmfattetBarn));
     }

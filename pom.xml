@@ -41,7 +41,7 @@
         <!-- Melosys -->
         <melosys.jsonschema.version>1.35.119</melosys.jsonschema.version>
         <melosys.internt.kodeverk.version>5.15.63</melosys.internt.kodeverk.version>
-        <melosys.brev.version>1.2.81</melosys.brev.version>
+        <melosys.brev.version>1.2.82</melosys.brev.version>
 
         <!-- NAV -->
         <nav.tjenestespesifikasjoner.version>1.2020.01.09-12.44-3713b7c04e1c</nav.tjenestespesifikasjoner.version>

@@ -170,7 +170,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
 
     private BarnOmfattetAvNorskTrygdListeType hentBarnOmfattetAvNorskTrygd(AvklarteMedfolgendeBarn avklarteMedfolgendeBarn) {
         List<BarnInnvilgelseType> barnInnvilgelse = avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd.stream()
-            .map(InnvilgelsesbrevMapper::lagBarnInnvilgelseType)
+            .map(this::lagBarnInnvilgelseType)
             .collect(Collectors.toList());
         return BarnOmfattetAvNorskTrygdListeType.builder()
             .withBarnInnvilgelse(barnInnvilgelse).build();
@@ -185,7 +185,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             .withBarnAvslag(barnAvslag).build();
     }
 
-    private static BarnInnvilgelseType lagBarnInnvilgelseType(OmfattetFamilie omfattetBarn) {
+    private BarnInnvilgelseType lagBarnInnvilgelseType(OmfattetFamilie omfattetBarn) {
         return BarnInnvilgelseType.builder()
             .withBarnOmfattetAvNorskTrygd(omfattetBarn.getSammensattNavn())
             .withBarnFodselsnummer(omfattetBarn.getIdent())
@@ -195,6 +195,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
     private BarnAvslagType lagBarnAvslagType(IkkeOmfattetBarn ikkeOmfattetBarn) throws TekniskException {
         return BarnAvslagType.builder()
             .withBarnAvslagBegrunnelse(tilBarnAvslagBegrunnelseKode(ikkeOmfattetBarn.begrunnelse))
+            .withBarnFodselsnummer(ikkeOmfattetBarn.ident)
             .withBarnIkkeOmfattetAvNorskTrygd(ikkeOmfattetBarn.sammensattNavn).build();
     }
 
