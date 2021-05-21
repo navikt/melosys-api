@@ -45,6 +45,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagAnmodningsperiodeSvarInnvilgelse;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagPersonsaksopplysning;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -209,14 +210,16 @@ public class BrevDataByggerInnvilgelseTest {
             Set.of(new OmfattetFamilie(barn1.uuid)),
             Set.of(new IkkeOmfattetBarn(barn2.uuid, null, null))));
         when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
-        when(persondataFasade.hentSammensattNavn(eq(barn1.fnr))).thenReturn("Navn1");
-        when(persondataFasade.hentSammensattNavn(eq(barn2.fnr))).thenReturn("Navn2");
+        when(persondataFasade.hentSammensattNavn(barn1.fnr)).thenReturn("Navn1");
+        when(persondataFasade.hentSammensattNavn(barn2.fnr)).thenReturn("Navn2");
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
         assertThat(brevData.avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd)
-            .extracting("sammensattNavn").containsExactly("Navn1");
+            .extracting("sammensattNavn", "ident")
+            .containsExactly(tuple("Navn1", barn1.getFnr()));
         assertThat(brevData.avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd)
-            .extracting("sammensattNavn").containsExactly("Navn2");
+            .extracting("sammensattNavn")
+            .containsExactly("Navn2");
 
         verify(persondataFasade, times(2)).hentSammensattNavn(anyString());
     }

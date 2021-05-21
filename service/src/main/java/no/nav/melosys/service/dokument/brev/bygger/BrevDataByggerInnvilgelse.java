@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 
 import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
@@ -82,17 +81,17 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         long behandlingID = dataGrunnlag.getBehandling().getId();
 
         // Bruker skal ha A1 som vedlegg - Arbeidsgiver skal ikke
-        BrevDataInnvilgelse brevdata = new BrevDataInnvilgelse(brevbestillingDto, saksbehandler);
+        var brevDataInnvilgelse = new BrevDataInnvilgelse(brevbestillingDto, saksbehandler);
         if (brevbyggerA1 != null) {
-            brevdata.vedleggA1 = (BrevDataA1) brevbyggerA1.lag(dataGrunnlag, saksbehandler);
+            brevDataInnvilgelse.vedleggA1 = (BrevDataA1) brevbyggerA1.lag(dataGrunnlag, saksbehandler);
         }
 
-        brevdata.personNavn = dataGrunnlag.getPerson().sammensattNavn;
-        brevdata.lovvalgsperiode = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID);
-        brevdata.arbeidsland = landvelgerService.hentArbeidsland(behandlingID).getBeskrivelse();
-        brevdata.bostedsland = landvelgerService.hentBostedsland(behandlingID, dataGrunnlag.getBehandlingsgrunnlagData()).getBeskrivelse();
+        brevDataInnvilgelse.personNavn = dataGrunnlag.getPerson().sammensattNavn;
+        brevDataInnvilgelse.lovvalgsperiode = lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID);
+        brevDataInnvilgelse.arbeidsland = landvelgerService.hentArbeidsland(behandlingID).getBeskrivelse();
+        brevDataInnvilgelse.bostedsland = landvelgerService.hentBostedsland(behandlingID, dataGrunnlag.getBehandlingsgrunnlagData()).getBeskrivelse();
 
-        brevdata.trygdemyndighetsland = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream()
+        brevDataInnvilgelse.trygdemyndighetsland = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream()
             .findFirst()
             .map(Landkoder::getBeskrivelse)
             .orElse(null);
@@ -101,35 +100,36 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
             throw new FunksjonellException("Ingen eller flere enn én norsk eller utenlandsk virksomhet forsøkt brukt i innvilgelsesbrev");
         }
 
-        brevdata.hovedvirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();
+        brevDataInnvilgelse.hovedvirksomhet = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentHovedvirksomhet();
 
         Set<Maritimtyper> maritimTyper = avklartefaktaService.hentMaritimTyper(behandlingID);
         if (!maritimTyper.isEmpty()) {
-            brevdata.avklartMaritimType = maritimTyper.iterator().next();
+            brevDataInnvilgelse.avklartMaritimType = maritimTyper.iterator().next();
         }
 
-        brevdata.setAnmodningsperiodesvar(anmodningsperiodeService.hentAnmodningsperioder(behandlingID)
+        brevDataInnvilgelse.setAnmodningsperiodesvar(anmodningsperiodeService.hentAnmodningsperioder(behandlingID)
             .stream()
             .filter(Anmodningsperiode::erSendtUtland)
             .findFirst()
             .map(Anmodningsperiode::getAnmodningsperiodeSvar)
             .orElse(null));
 
-        brevdata.erArt16UtenArt12 = vilkaarsresultatService.harVilkaarForArtikkel16(behandlingID) && !vilkaarsresultatService.harVilkaarForArtikkel12(behandlingID);
-        brevdata.erTuristskip = vilkaarsresultatService.oppfyllerVilkaar(behandlingID, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP);
-        brevdata.avklarteMedfolgendeBarn = hentAvklarteMedfølgendeBarn(behandlingID);
+        brevDataInnvilgelse.erArt16UtenArt12 = vilkaarsresultatService.harVilkaarForArtikkel16(behandlingID) && !vilkaarsresultatService.harVilkaarForArtikkel12(behandlingID);
+        brevDataInnvilgelse.erTuristskip = vilkaarsresultatService.oppfyllerVilkaar(behandlingID, Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP);
+        brevDataInnvilgelse.avklarteMedfolgendeBarn = hentAvklarteMedfølgendeBarn(behandlingID);
 
-        return brevdata;
+        return brevDataInnvilgelse;
     }
 
     private AvklarteMedfolgendeBarn hentAvklarteMedfølgendeBarn(long behandlingID) {
-        AvklarteMedfolgendeBarn avklarteMedfolgendeBarn = avklartefaktaService.hentAvklarteMedfølgendeBarn(behandlingID);
+        var avklarteMedfolgendeBarn = avklartefaktaService.hentAvklarteMedfølgendeBarn(behandlingID);
         Map<String, MedfolgendeFamilie> medfølgendeBarn = hentMedfølgendeBarn(behandlingID);
         for (OmfattetFamilie omfattetBarn : avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd) {
             if (!medfølgendeBarn.containsKey(omfattetBarn.getUuid())) {
                 throw new FunksjonellException("Avklart medfølgende barn " + omfattetBarn.getUuid() + " finnes ikke i behandlingsgrunnlaget");
             }
             MedfolgendeFamilie barn = medfølgendeBarn.get(omfattetBarn.getUuid());
+            omfattetBarn.setIdent(barn.fnr);
             omfattetBarn.setSammensattNavn(barn.fnr != null ? persondataFasade.hentSammensattNavn(barn.fnr) : barn.navn);
         }
         for (IkkeOmfattetBarn ikkeOmfattetBarn : avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd) {
@@ -138,12 +138,13 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
             }
             MedfolgendeFamilie barn = medfølgendeBarn.get(ikkeOmfattetBarn.uuid);
             ikkeOmfattetBarn.sammensattNavn = barn.fnr != null ? persondataFasade.hentSammensattNavn(barn.fnr) : barn.navn;
+            ikkeOmfattetBarn.ident = barn.fnr;
         }
         return avklarteMedfolgendeBarn;
     }
 
     private Map<String, MedfolgendeFamilie> hentMedfølgendeBarn(long behandlingID) {
-        Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID);
+        var behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID);
         return behandlingsgrunnlag == null ? Collections.emptyMap()
             : behandlingsgrunnlag.getBehandlingsgrunnlagdata().hentMedfølgendeBarn();
     }
