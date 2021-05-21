@@ -9,15 +9,13 @@ import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +39,7 @@ class HentRegisteropplysningerTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
-    private TpsFasade tpsFasade;
+    private PersondataFasade persondataFasade;
 
     private HentRegisteropplysninger hentRegisteropplysninger;
 
@@ -53,8 +51,8 @@ class HentRegisteropplysningerTest {
     private final String ident = "143545";
 
     @BeforeEach
-    public void setUp() throws IkkeFunnetException {
-        hentRegisteropplysninger = new HentRegisteropplysninger(registeropplysningerService, behandlingService, tpsFasade);
+    public void setUp() {
+        hentRegisteropplysninger = new HentRegisteropplysninger(registeropplysningerService, behandlingService, persondataFasade);
 
         behandling.setId(222L);
 
@@ -67,11 +65,11 @@ class HentRegisteropplysningerTest {
         behandling.setFagsak(fagsak);
 
         when(behandlingService.hentBehandling(eq(behandling.getId()))).thenReturn(behandling);
-        when(tpsFasade.hentIdentForAktørId(eq(aktørID))).thenReturn(ident);
+        when(persondataFasade.hentFolkeregisterIdent(eq(aktørID))).thenReturn(ident);
     }
 
     @Test
-    void utfør_behandlingstemaUtsendtArbeidstaker_henterPeriodeFraSøknad() throws MelosysException {
+    void utfør_behandlingstemaUtsendtArbeidstaker_henterPeriodeFraSøknad() {
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
         Periode periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
@@ -93,7 +91,7 @@ class HentRegisteropplysningerTest {
     }
 
     @Test
-    void utfør_sakstypeFtrl_henterKunPersonopplysninger() throws MelosysException {
+    void utfør_sakstypeFtrl_henterKunPersonopplysninger() {
         behandling.setTema(Behandlingstema.ARBEID_I_UTLANDET);
         behandling.getFagsak().setType(Sakstyper.FTRL);
 

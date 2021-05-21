@@ -13,7 +13,7 @@ public class MedlemskapsperiodeOppdatering {
     private final Trygdedekninger trygdedekning;
     private final InnvilgelsesResultat innvilgelsesResultat;
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public MedlemskapsperiodeOppdatering(@JsonProperty("fomDato") LocalDate fomDato,
                                          @JsonProperty("tomDato") LocalDate tomDato,
                                          @JsonProperty("trygdedekning") Trygdedekninger trygdedekning,

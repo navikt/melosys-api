@@ -29,7 +29,7 @@ public class KodeverkService {
 
     private static final long MILLIS_MELLOM_VÅKNE_OPP = 3600000;
     private static final long KLOKKESLETT_FOR_CACHE_REFRESH = 6;
-    private static final String UKJENT = "UKJENT";
+    public static final String UKJENT = "UKJENT";
 
     private Map<String, no.nav.melosys.integrasjon.kodeverk.Kodeverk> kodeverkCache; // Ikke aksesser denne usynkronisert med mindre du vet hva du gjør
     private KodeverkRegister kodeverkRegister;
@@ -60,7 +60,7 @@ public class KodeverkService {
      */
     public String dekod(FellesKodeverk kodeverk, String kode, LocalDate dato) {
         if (StringUtils.isEmpty(kode)) {
-            log.error("Metode dekod kalt for kodeverk {} med kode {}", kodeverk, kode);
+            log.warn("Metode dekod kalt for kodeverk {} med kode {}", kodeverk, kode);
             return UKJENT;
         }
 

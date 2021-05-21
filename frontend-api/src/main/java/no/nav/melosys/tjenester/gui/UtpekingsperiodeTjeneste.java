@@ -5,12 +5,8 @@ import java.util.Collection;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Utpekingsperiode;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.service.abac.TilgangService;
+import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.utpeking.UtpekingsperioderDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +32,7 @@ public class UtpekingsperiodeTjeneste {
 
     @GetMapping("{behandlingID}")
     @ApiOperation(value = "Henter utpekingsperioder for en gitt behandling", response = UtpekingsperioderDto.class)
-    public UtpekingsperioderDto hentUtpekingsperioder(@PathVariable("behandlingID") long behandlingID)
-        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public UtpekingsperioderDto hentUtpekingsperioder(@PathVariable("behandlingID") long behandlingID) {
 
         tilgangService.sjekkTilgang(behandlingID);
 
@@ -49,8 +44,7 @@ public class UtpekingsperiodeTjeneste {
     @PostMapping("{behandlingID}")
     @ApiOperation("Lagrer utpekingssperioder for en gitt behandling.")
     public UtpekingsperioderDto lagreUtpekingsperioder(@PathVariable("behandlingID") long behandlingID,
-                                                           @RequestBody UtpekingsperioderDto utpekingsperioderDto)
-        throws TekniskException, FunksjonellException {
+                                                           @RequestBody UtpekingsperioderDto utpekingsperioderDto) {
 
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
 

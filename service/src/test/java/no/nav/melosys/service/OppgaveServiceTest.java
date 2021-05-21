@@ -10,48 +10,42 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MedfolgendeFamilie;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Diskresjonskode;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ArbeidUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Oppgavetyper;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto;
 import no.nav.melosys.service.oppgave.dto.JournalfoeringsoppgaveDto;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class OppgaveServiceTest {
+@ExtendWith(MockitoExtension.class)
+class OppgaveServiceTest {
     @Mock
     private FagsakService fagsakService;
     @Mock
@@ -59,7 +53,7 @@ public class OppgaveServiceTest {
     @Mock
     private OppgaveFasade oppgaveFasade;
     @Mock
-    private TpsFasade tpsFasade;
+    private PersondataFasade persondataFasade;
     @Mock
     private SaksopplysningerService saksopplysningerService;
     @Mock
@@ -70,29 +64,30 @@ public class OppgaveServiceTest {
     @Captor
     private ArgumentCaptor<OppgaveOppdatering> oppgaveOppdateringCaptor;
 
+    @Captor
+    private ArgumentCaptor<Oppgave> oppgaveCaptor;
+
     private Oppgave oppgave;
     private final String saksnummer = "MEL-12345";
 
-    @Before
-    public void setUp() throws FunksjonellException, TekniskException {
+    @BeforeEach
+    public void setUp() {
         this.oppgaveService = new OppgaveService(
                 behandlingService,
                 fagsakService,
             oppgaveFasade,
                 saksopplysningerService,
-            behandlingsgrunnlagService, tpsFasade);
+            behandlingsgrunnlagService, persondataFasade);
 
-        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
-        oppgaveBuilder.setOppgavetype(Oppgavetyper.BEH_SAK_MK);
-        oppgaveBuilder.setTilordnetRessurs("Z998877");
-        oppgaveBuilder.setSaksnummer(saksnummer);
-        oppgave = oppgaveBuilder.build();
-
-        when(oppgaveFasade.finnOppgaverMedSaksnummer(eq(saksnummer))).thenReturn(List.of(oppgave));
+        oppgave = new Oppgave.Builder()
+            .setOppgavetype(Oppgavetyper.BEH_SAK_MK)
+            .setTilordnetRessurs("Z998877")
+            .setSaksnummer(saksnummer)
+            .build();
     }
 
     @Test
-    public void hentOppgaverMedAnsvarlig() throws MelosysException {
+    void hentOppgaverMedAnsvarlig() {
         final String behOppgID = "1";
         final String jfrOppgID = "2";
 
@@ -143,13 +138,15 @@ public class OppgaveServiceTest {
     }
 
     @Test
-    public void hentOppgaveForFagsaksnummer_oppgaveEksisterer_forventOppgave() throws MelosysException {
+    void hentOppgaveForFagsaksnummer_oppgaveEksisterer_forventOppgave() {
+        when(oppgaveFasade.finnOppgaverMedSaksnummer(eq(saksnummer))).thenReturn(List.of(oppgave));
+
         Oppgave oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(saksnummer);
         assertThat(oppgave.erBehandling()).isTrue();
     }
 
     @Test
-    public void opprettEllerGjenbrukBehandlingsoppgave_ingenEksisterendeOppgave_oppgaveBlirOpprettet() throws FunksjonellException, TekniskException {
+    void opprettEllerGjenbrukBehandlingsoppgave_ingenEksisterendeOppgave_oppgaveBlirOpprettet() {
         Behandling behandling = lagBehandling();
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer("MEL-11111");
@@ -160,15 +157,35 @@ public class OppgaveServiceTest {
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
         verify(oppgaveFasade).opprettOppgave(any(Oppgave.class));
         verify(oppgaveFasade, never()).opprettSensitivOppgave(any(Oppgave.class));
+
     }
 
     @Test
-    public void opprettEllerGjenbrukBehandlingsoppgave_oppgaveEksistererSaksbehandlerErTilordnet_oppgaveBlirIkkeOpprettetEllerOppdatert() throws FunksjonellException, TekniskException {
+    void opprettEllerGjenbrukBehandlingsoppgave_oppgaveOpprettElektroniskSøknad_oppgaveBlirOpprettetMedBeskrvielse()
+        {
+        final String mottattString = "Mottatt elektronisk søknad";
+        Behandling behandling = lagBehandling();
+        behandling.setFagsak(new Fagsak());
+        behandling.getFagsak().setSaksnummer(saksnummer);
+        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
+        behandling.getBehandlingsgrunnlag().setType(Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+
+        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
+
+        verify(oppgaveFasade).opprettOppgave(oppgaveCaptor.capture());
+        assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(mottattString);
+    }
+
+    @Test
+    void opprettEllerGjenbrukBehandlingsoppgave_oppgaveEksistererSaksbehandlerErTilordnet_oppgaveBlirIkkeOpprettetEllerOppdatert() {
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer(saksnummer);
+        when(oppgaveFasade.finnOppgaverMedSaksnummer(eq(saksnummer))).thenReturn(List.of(oppgave));
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", oppgave.getTilordnetRessurs());
         verify(oppgaveFasade, never()).opprettOppgave(any());
@@ -176,13 +193,14 @@ public class OppgaveServiceTest {
     }
 
     @Test
-    public void opprettEllerGjenbrukBehandlingsoppgave_oppgaveEksistererTilordnetAnnenRessurs_oppdaterTilordnetRessurs() throws FunksjonellException, TekniskException {
+    void opprettEllerGjenbrukBehandlingsoppgave_oppgaveEksistererTilordnetAnnenRessurs_oppdaterTilordnetRessurs() {
         final String tilordnetRessurs = "Z12332123";
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer(saksnummer);
+        when(oppgaveFasade.finnOppgaverMedSaksnummer(eq(saksnummer))).thenReturn(List.of(oppgave));
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", tilordnetRessurs);
         verify(oppgaveFasade, never()).opprettOppgave(any());
@@ -191,7 +209,7 @@ public class OppgaveServiceTest {
     }
 
     @Test
-    public void opprettEllerGjenbrukBehandlingsoppgave_personHarBeskyttelsesbehov_sensitivOppgaveBlirOpprettet() throws FunksjonellException, TekniskException {
+    void opprettEllerGjenbrukBehandlingsoppgave_personHarBeskyttelsesbehov_sensitivOppgaveBlirOpprettet() {
         Behandling behandling = lagBehandling();
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer("MEL-11111");
@@ -206,7 +224,7 @@ public class OppgaveServiceTest {
     }
 
     @Test
-    public void opprettEllerGjenbrukBehandlingsoppgave_barnHarBeskyttelsesbehov_sensitivOppgaveBlirOpprettet() throws FunksjonellException, TekniskException {
+    void opprettEllerGjenbrukBehandlingsoppgave_barnHarBeskyttelsesbehov_sensitivOppgaveBlirOpprettet() {
         Behandling behandling = lagBehandling();
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer("MEL-11111");
@@ -214,7 +232,7 @@ public class OppgaveServiceTest {
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
         behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().personOpplysninger.medfolgendeFamilie
             = List.of(MedfolgendeFamilie.tilBarnFraFnrOgNavn("fnrBarn", null));
-        when(tpsFasade.harStrengtFortroligAdresse("fnrBarn")).thenReturn(true);
+        when(persondataFasade.harStrengtFortroligAdresse("fnrBarn")).thenReturn(true);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
@@ -259,9 +277,9 @@ public class OppgaveServiceTest {
 
     private static Soeknad lagSoeknadDokument() {
         Soeknad soeknad = new Soeknad();
-        ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse.landkode = new Land(Land.NORGE).getKode();
-        soeknad.arbeidUtland = Collections.singletonList(arbeidUtland);
+        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
+        fysiskArbeidssted.adresse.landkode = new Land(Land.NORGE).getKode();
+        soeknad.arbeidPaaLand.fysiskeArbeidssteder = Collections.singletonList(fysiskArbeidssted);
 
         soeknad.oppholdUtland.oppholdslandkoder = Collections.singletonList(Landkoder.NO.getKode());
         soeknad.oppholdUtland.oppholdsPeriode = new Periode(LocalDate.now(), LocalDate.of(2018, 12, 12));

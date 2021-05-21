@@ -10,10 +10,6 @@ import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.melosys.service.medlemskapsperiode.OpprettMedlemskapsperiodeService;
@@ -58,7 +54,7 @@ class MedlemskapsperiodeTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentMedlemskapsperioder_validerSchema() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, IOException {
+    void hentMedlemskapsperioder_validerSchema() throws IOException {
         final var medlemskapsperiode = lagMedlemskapsperiode();
         when(medlemskapsperiodeService.hentMedlemskapsperioder(eq(behandlingID)))
             .thenReturn(Collections.singleton(medlemskapsperiode));
@@ -73,7 +69,7 @@ class MedlemskapsperiodeTjenesteTest extends JsonSchemaTestParent {
                 MedlemskapsperiodeDto::getInnvilgelsesResultat, MedlemskapsperiodeDto::getMedlemskapstype)
             .containsExactly(
                 medlemskapsperiode.getId(), medlemskapsperiode.getArbeidsland(), medlemskapsperiode.getBestemmelse(),
-                medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getTrygdedekning(),
+                medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getDekning(),
                 medlemskapsperiode.getInnvilgelsesresultat(), medlemskapsperiode.getMedlemskapstype()
             );
 
@@ -82,7 +78,7 @@ class MedlemskapsperiodeTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void opprettMedlemskapsperioder_validerSchema() throws FunksjonellException, TekniskException, IOException {
+    void opprettMedlemskapsperioder_validerSchema() throws IOException {
         var opprettMedlemskapsperiodeRequest = new MedlemskapsperiodeOppdatering(LocalDate.now(), LocalDate.now(),
             Trygdedekninger.HELSE_OG_PENSJONSDEL, InnvilgelsesResultat.DELVIS_INNVILGET);
 
@@ -94,7 +90,7 @@ class MedlemskapsperiodeTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void oppdaterMedlemskapsperioder_validerSchema() throws FunksjonellException, IOException, TekniskException {
+    void oppdaterMedlemskapsperioder_validerSchema() throws IOException {
         var oppdaterMedlemskapsperiodeRequest = new MedlemskapsperiodeOppdatering(LocalDate.now(), LocalDate.now(),
             Trygdedekninger.HELSE_OG_PENSJONSDEL, InnvilgelsesResultat.DELVIS_INNVILGET);
 
@@ -106,7 +102,7 @@ class MedlemskapsperiodeTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void opprettMedlemskapsperioderFraBestemmelse() throws FunksjonellException, TekniskException, IOException {
+    void opprettMedlemskapsperioderFraBestemmelse() throws IOException {
 
         when(opprettMedlemskapsperiodeService.utledMedlemskapsperioderFraSøknad(eq(behandlingID), any(Folketrygdloven_kap2_bestemmelser.class)))
             .thenReturn(Collections.singleton(lagMedlemskapsperiode()));
@@ -121,7 +117,7 @@ class MedlemskapsperiodeTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentBestemmelserMedVilkår_validerSchema() throws IOException {
+    void hentBestemmelserMedVilkår_validerSchema() throws Exception {
         when(opprettMedlemskapsperiodeService.hentBestemmelserMedVilkaar()).thenCallRealMethod();
         when(opprettMedlemskapsperiodeService.hentMuligeBegrunnelser(any(Vilkaar.class))).thenCallRealMethod();
         validerArray(medlemskapsperiodeTjeneste.hentBestemmelserMedVilkaar().getBody(), MEDLEMSKAPSPERIODER_BESTEMMELSE_SCHEMA);

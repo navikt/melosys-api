@@ -4,11 +4,14 @@ import java.time.LocalDate;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ForetakUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
+import no.nav.melosys.domain.brev.FastMottaker;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
@@ -20,14 +23,12 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
-import no.nav.melosys.saksflyt.brev.FastMottaker;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
+import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -35,13 +36,13 @@ import no.nav.melosys.service.dokument.*;
 import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.bygger.*;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.context.ApplicationEventPublisher;
 
+import static no.nav.melosys.domain.brev.FastMottaker.*;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static no.nav.melosys.saksflyt.brev.FastMottaker.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
@@ -60,9 +61,9 @@ class SendVedtaksbrevInnlandTest {
     private static final long ART13_1A_INNVILGET_BEHANDLINGSID = 51L;
     private static final long ART11_4_INNVILGET_BEHANDLINGSID = 52L;
     private static final long ART13_1B1_UTPEKING_BEHANDLINGSID = 53L;
+    private static final long ART12_1_FORKORTET_PERIODE_BEHANDLINGSID = 54L;
 
     private static DokumentSystemService dokService;
-    private static DokumentServiceFasade dokumentServiceFasade;
 
     private static SendVedtaksbrevInnland lagStegbehandler(Behandling behandling) throws Exception {
         String saksbehandler = "Z123456";
@@ -99,8 +100,8 @@ class SendVedtaksbrevInnlandTest {
         when(byggerVelger.hent(eq(ORIENTERING_UTPEKING_UTLAND), any())).thenReturn(brevDataByggerUtpekingAnnetLand);
 
         dokService = spy(lagDokumentService(byggerVelger));
-        dokumentServiceFasade = new DokumentServiceFasade(mock(DokumentService.class), dokService, mock(DokgenService.class),
-            mock(BehandlingService.class), mock(ProsessinstansService.class), mock(BrevmottakerService.class));
+        DokumentServiceFasade dokumentServiceFasade = new DokumentServiceFasade(mock(DokumentService.class), dokService, mock(DokgenService.class),
+            mock(BehandlingService.class), mock(ApplicationEventPublisher.class));
         BrevBestiller brevBestiller = new BrevBestiller(dokumentServiceFasade);
 
         BehandlingService behandlingService = mock(BehandlingService.class);
@@ -109,7 +110,7 @@ class SendVedtaksbrevInnlandTest {
         return new SendVedtaksbrevInnland(brevBestiller, behandlingService, mockBehandlingsresultatService());
     }
 
-    private static BehandlingService mockBehandlingService() throws IkkeFunnetException {
+    private static BehandlingService mockBehandlingService() {
         Fagsak fagsak = lagFagsak();
         Behandling behandling = lagBehandling(fagsak);
         BehandlingService behandlingService = mock(BehandlingService.class);
@@ -121,13 +122,13 @@ class SendVedtaksbrevInnlandTest {
             BEHANDLINGSID_MANGLENDE_OPPL,
             ART13_1A_INNVILGET_BEHANDLINGSID,
             ART13_1B1_UTPEKING_BEHANDLINGSID,
-            ART11_4_INNVILGET_BEHANDLINGSID);
+            ART11_4_INNVILGET_BEHANDLINGSID,
+            ART12_1_FORKORTET_PERIODE_BEHANDLINGSID);
         when(behandlingService.hentBehandling(longThat(behandlingReferanser::contains))).thenReturn(behandling);
         return behandlingService;
     }
 
-    private static DokumentSystemService lagDokumentService(BrevDataByggerVelger brevDataByggerVelger)
-        throws TekniskException, IkkeFunnetException {
+    private static DokumentSystemService lagDokumentService(BrevDataByggerVelger brevDataByggerVelger) {
         AvklarteVirksomheterService avklarteVirksomheterService = mock(AvklarteVirksomheterService.class);
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any())).thenReturn(Set.of("123456789"));
         BehandlingService behandlingService = mockBehandlingService();
@@ -139,12 +140,12 @@ class SendVedtaksbrevInnlandTest {
             .thenReturn(Collections.singletonMap(new UtenlandskMyndighet(), new Aktoer()));
         KontaktopplysningService kontaktopplysningService = mock(KontaktopplysningService.class);
         BrevmottakerService brevmottakerService = new BrevmottakerService(kontaktopplysningService,
-            avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService);
+            avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService, mock(TrygdeavgiftsberegningService.class));
         return spy(new DokumentSystemService(behandlingService, brevDataService, dokSysFasade,
             brevmottakerService, brevDataByggerVelger, mock(BrevdataGrunnlagFactory.class)));
     }
 
-    private static BehandlingsresultatService mockBehandlingsresultatService() throws IkkeFunnetException {
+    private static BehandlingsresultatService mockBehandlingsresultatService() {
         BehandlingsresultatService behandlingsresultatService = mock(BehandlingsresultatService.class);
         Lovvalgsperiode periode = lagLovvalgsperiodeArt16_1();
         Behandlingsresultat behandlingsresultat = lagUgyldigBehandlingsresultat(periode);
@@ -188,6 +189,15 @@ class SendVedtaksbrevInnlandTest {
         norskLovvalgUtenInnvilgetBestemmelse.setType(Behandlingsresultattyper.IKKE_FASTSATT);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGSID_NORSK_LOVVALG_UTEN_INNVILGET_BESTEMMELSE)).thenReturn(norskLovvalgUtenInnvilgetBestemmelse);
 
+        Behandlingsresultat endretPeriode12_1resultat = lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1));
+        endretPeriode12_1resultat.getAvklartefakta().add(
+            new Avklartefakta(
+                endretPeriode12_1resultat,
+                Avklartefaktatyper.AARSAK_ENDRING_PERIODE.getKode(),
+                Avklartefaktatyper.AARSAK_ENDRING_PERIODE,
+                null,
+                Endretperiode.ENDRINGER_ARBEIDSSITUASJON.getKode()));
+        when(behandlingsresultatService.hentBehandlingsresultat(ART12_1_FORKORTET_PERIODE_BEHANDLINGSID)).thenReturn(endretPeriode12_1resultat);
         return behandlingsresultatService;
     }
 
@@ -382,17 +392,6 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    void utfør_utenlandskForetak_innvilgelseSendesTilSkatteoppkreverUtland() throws Exception {
-        Prosessinstans prosessinstans = lagProsessinstans(ART13_1A_INNVILGET_BEHANDLINGSID);
-        prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(new ForetakUtland());
-        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-
-        instans.utfør(prosessinstans);
-
-        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV_FLERE_LAND), eq(FastMottaker.av(SKATTEOPPKREVER_UTLAND)), anyLong(), any());
-    }
-
-    @Test
     void utfør_innvilgelses13_1A_senderIkkeInnvilgelseTilArbeidsgiver() throws Exception {
         Prosessinstans prosessinstans = lagProsessinstans(ART13_1A_INNVILGET_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
@@ -403,51 +402,40 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    void utfør_innvilgelsesMedForetakUtland_senderInnvilgelseTilSkatteoppkreverUtland() throws Exception {
-        Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_UTENLANDSK_VIRKSOMHET_BEHANDLINGSID);
+    void utfør_innvilgelsesMedUtenlandskForetak_senderBrevTilStatligSkatteoppkreving() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART13_1A_INNVILGET_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
+        ForetakUtland arbeidsgiverUtland = new ForetakUtland();
+        arbeidsgiverUtland.selvstendigNæringsvirksomhet = Boolean.FALSE;
+        prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata()
+            .foretakUtland.add(arbeidsgiverUtland);
+        instans.utfør(prosessinstans);
+
+        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV_FLERE_LAND), eq(FastMottaker.av(STATLIG_SKATTEOPPKREVING)), anyLong(), any());
+    }
+
+    @Test
+    void utfør_innvilgelse161MedUtenlandskSelvstendigArbeid_senderIkkeBrevTilStatligSkatteoppkreving() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_BEHANDLINGSID);
+        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
+        ForetakUtland utenlandskSelvstendigVirksomhet = new ForetakUtland();
+        utenlandskSelvstendigVirksomhet.selvstendigNæringsvirksomhet = Boolean.TRUE;
+        prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata()
+            .foretakUtland.add(utenlandskSelvstendigVirksomhet);
+
+        instans.utfør(prosessinstans);
+
+        verify(dokService, never()).produserDokument(any(), eq(FastMottaker.av(STATLIG_SKATTEOPPKREVING)), anyLong(), any());
+    }
+
+    @Test
+    void utfør_innvilgelses12_senderIkkeBrevTilStatligSkatteoppkreving() throws Exception {
+        Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
         prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(new ForetakUtland());
-        instans.utfør(prosessinstans);
-
-        verify(dokService).produserDokument(eq(INNVILGELSE_YRKESAKTIV), eq(FastMottaker.av(SKATTEOPPKREVER_UTLAND)), anyLong(), any());
-    }
-
-    @Test
-    void utfør_innvilgelses161_senderIkkeBrevTilSkatteoppkreverUtland() throws Exception {
-        Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utfør(prosessinstans);
 
-        verify(dokService, never()).produserDokument(any(), eq(FastMottaker.av(SKATTEOPPKREVER_UTLAND)), anyLong(), any());
-    }
-
-    @Test
-    void utfør_innvilgelse161MedUtenlandskSelvstendigArbeid_senderIkkeBrevTilSkatteoppkreverUtland() throws Exception {
-        Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_BEHANDLINGSID);
-        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-
-        ForetakUtland utenlandskSelvstendigArbeid = new ForetakUtland();
-        utenlandskSelvstendigArbeid.selvstendigNæringsvirksomhet = Boolean.TRUE;
-        prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(utenlandskSelvstendigArbeid);
-
-        instans.utfør(prosessinstans);
-
-        verify(dokService, never()).produserDokument(any(), eq(FastMottaker.av(SKATTEOPPKREVER_UTLAND)), anyLong(), any());
-    }
-
-    @Test
-    void utfør_innvilgelse161MedForetakUtlandOgUtenlandskSelvstendigArbeid_senderIkkeBrevTilSkatteoppkreverUtland() throws Exception {
-        Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_BEHANDLINGSID);
-        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
-
-        ForetakUtland utenlandskSelvstendigArbeid = new ForetakUtland();
-        utenlandskSelvstendigArbeid.selvstendigNæringsvirksomhet = Boolean.TRUE;
-        prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(utenlandskSelvstendigArbeid);
-        prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(new ForetakUtland());
-
-        instans.utfør(prosessinstans);
-
-        verify(dokService, never()).produserDokument(any(), eq(FastMottaker.av(SKATTEOPPKREVER_UTLAND)), anyLong(), any());
+        verify(dokService, never()).produserDokument(any(), eq(FastMottaker.av(STATLIG_SKATTEOPPKREVING)), anyLong(), any());
     }
 
     @Test
@@ -513,9 +501,8 @@ class SendVedtaksbrevInnlandTest {
 
     @Test
     final void utfør_PåInnvilgelsesBrev_medBegrunnelsekode_oppdatererBrevdata() throws Exception {
-        Prosessinstans prosessinstans = lagProsessinstans(ART12_2_INNVILGET_BEHANDLINGSID);
-        StegBehandler instans = lagStegbehandler(lagBehandling(ART12_2_INNVILGET_BEHANDLINGSID));
-        prosessinstans.setData(ProsessDataKey.BEGRUNNELSEKODE, Endretperiode.ENDRINGER_ARBEIDSSITUASJON);
+        Prosessinstans prosessinstans = lagProsessinstans(ART12_1_FORKORTET_PERIODE_BEHANDLINGSID);
+        StegBehandler instans = lagStegbehandler(lagBehandling(ART12_1_FORKORTET_PERIODE_BEHANDLINGSID));
         ArgumentCaptor<DoksysBrevbestilling> captor = ArgumentCaptor.forClass(DoksysBrevbestilling.class);
 
         instans.utfør(prosessinstans);
@@ -528,7 +515,7 @@ class SendVedtaksbrevInnlandTest {
         Prosessinstans resultat = new Prosessinstans();
         Behandling behandling = lagBehandling(behandlingsid);
         resultat.setBehandling(behandling);
-        resultat.setType(ProsessType.IVERKSETT_VEDTAK);
+        resultat.setType(ProsessType.IVERKSETT_VEDTAK_EOS);
         BrevData brevdata = new BrevData();
         resultat.setData(ProsessDataKey.BREVDATA, brevdata);
         return resultat;

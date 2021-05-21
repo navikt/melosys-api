@@ -13,12 +13,12 @@ public enum ProsessDataKey {
     AVSENDER_LAND("avsenderLand"),
     AVSENDER_NAVN("avsenderNavn"),
     AVSENDER_TYPE("avsenderType"),
-    BEGRUNNELSEKODE("begrunnelsekode"),
     BEHANDLINGSRESULTATTYPE("behandlingsresultatType"),
     BEHANDLINGSRESULTAT_BEGRUNNELSER("behandlingsresultatBegrunnelse"),
     BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST("behandlingsresultatBegrunnelseFritekst"),
     BEHANDLINGSTEMA("behandlingstema"),
     BEHANDLINGSTYPE("behandlingstype"),
+    BREVBESTILLING("brevbestilling"),
     BREVDATA("brevData"),
     BRUKER_ID("brukerID"),
     DISTRIBUERBAR_JOURNALPOST_ID("distribuerbarJournalpostID"),
@@ -40,6 +40,7 @@ public enum ProsessDataKey {
     MOTTATT_SOKNAD_ID("mottattSoknadID"),
     OPPGAVE_ID("oppgaveID"),
     OPPHOLDSLAND("oppholdsland"),
+    ORGNR("orgnr"),
     PRODUSERBART_BREV("produserbartBrev"),
     REPRESENTANT("representant"),
     REPRESENTANT_KONTAKTPERSON("representantKontakperson"),
@@ -60,7 +61,7 @@ public enum ProsessDataKey {
     UTPEKING_AVVIS("utpekingAvvis"),
     UTPEKT_LAND("utpektLand"),
     VARSLE_UTLAND("varsleUtland"),
-    VEDTAKSTYPE("vedtakstype"),
+    VEDLEGG_SED("vedleggTilSed"),
     YTTERLIGERE_INFO_SED("ytterligereInformasjonSed");
 
     private String kode;

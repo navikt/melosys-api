@@ -1,29 +1,28 @@
 package no.nav.melosys.tjenester.gui;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.net.URI;
+import java.util.Collection;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.jayway.jsonpath.JsonPath;
-import com.networknt.schema.*;
+import com.networknt.schema.JsonSchemaFactory;
+import com.networknt.schema.SpecVersion;
 import com.networknt.schema.uri.URIFetcher;
+import no.nav.melosys.service.JsonSchemaValidator;
 import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.jackson.MelosysModule;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
-import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
-
-import javax.validation.ValidationException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
-import java.net.URI;
-import java.util.Collection;
+import org.springframework.core.io.DefaultResourceLoader;
 
 import static org.jeasy.random.FieldPredicates.named;
 import static org.jeasy.random.FieldPredicates.ofType;
@@ -33,12 +32,6 @@ import static org.mockito.Mockito.mock;
 
 public class JsonSchemaTestParent {
     private static final Logger log = LoggerFactory.getLogger(JsonSchemaTestParent.class);
-
-    private static final String FEILMELDING = "Schemavalidering feilet for schema {}";
-    private static final JsonSchemaFactory jsonSchemaFactory = JsonSchemaFactory
-        .builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7))
-        .uriFetcher(new ClasspathURIFetcher(), "http")
-        .build();
 
     private static ObjectMapper objectMapper;
     private static ObjectMapper objectMapperMedKodeverkServiceStub;
@@ -58,12 +51,6 @@ public class JsonSchemaTestParent {
             easyRandom = new EasyRandom(defaultEasyRandomParameters());
         }
         return easyRandom;
-    }
-
-    protected JsonSchema hentSchema(String schemaNavn) throws JSONException {
-       InputStream inputStream = Thread.currentThread().getContextClassLoader()
-            .getResourceAsStream(schemaNavn);
-        return jsonSchemaFactory.getSchema(inputStream);
     }
 
     protected ObjectMapper objectMapper() {
@@ -102,42 +89,33 @@ public class JsonSchemaTestParent {
     }
 
     protected void valider(String json, String schemaNavn, Logger logger) throws IOException {
-        valider(objectMapper().readTree(json), hentSchema(schemaNavn), logger);
+        jsonSchemaValidator(objectMapper()).valider(objectMapper().readTree(json), hentSchemaStream(schemaNavn), logger);
     }
 
     protected void valider(Object o, String schemaNavn, ObjectMapper objectMapper) throws IOException {
         String jsonString = objectMapper.writeValueAsString(o);
-        valider(jsonString, schemaNavn, log);
+        jsonSchemaValidator(objectMapper).valider(jsonString, hentSchemaStream(schemaNavn), log);
     }
 
-    protected void validerArray(Collection liste, String schemaNavn) throws IOException {
+    protected <T> void validerArray(Collection<T> liste, String schemaNavn) throws IOException {
         validerArray(liste, schemaNavn, log);
     }
 
-    protected void validerArray(Collection liste, String schemaNavn, Logger logger) throws IOException {
+    protected <T> void validerArray(Collection<T> liste, String schemaNavn, Logger logger) throws IOException {
         String json = objectMapper().writeValueAsString(liste);
-        valider(objectMapper().readTree(json), hentSchema(schemaNavn), logger);
+        jsonSchemaValidator(objectMapper()).valider(objectMapper().readTree(json), hentSchemaStream(schemaNavn), logger);
     }
 
-    private void valider(JsonNode jsonNode, JsonSchema schema, Logger logger) {
-        ValidationResult result = schema.validateAndCollect(jsonNode);
-        if (!result.getValidationMessages().isEmpty()){
-            formaterFeil(result, schema, jsonNode.toString(), logger);
-        }
+    private InputStream hentSchemaStream(String schemanavn) throws IOException {
+        return new DefaultResourceLoader().getResource("classpath:" + schemanavn).getInputStream();
     }
 
-    private void formaterFeil(ValidationResult validationResult, JsonSchema schema, String json, Logger logger) {
-        logger.error(FEILMELDING, schema.getCurrentUri().toString());
-        validationResult.getValidationMessages().forEach(
-            validationMessage -> logger.error(formaterMelding(validationMessage, json)));
-        throw new ValidationException(String.format("%s: %d schema violations found",
-            schema.getCurrentUri(), validationResult.getValidationMessages().size()));
-    }
-
-    private String formaterMelding(ValidationMessage validationMessage, String json) {
-        String verdi = JsonPath.read(json, validationMessage.getPath());
-        String sti = validationMessage.getPath();
-        return validationMessage.getMessage().replace(sti, sti + " [" + verdi + "]");
+    private JsonSchemaValidator jsonSchemaValidator(ObjectMapper objectMapper) {
+        return new JsonSchemaValidator(objectMapper,
+            JsonSchemaFactory
+                .builder(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7))
+                .uriFetcher(new ClasspathURIFetcher(), "http")
+                .build());
     }
 
     private static class ClasspathURIFetcher implements URIFetcher {

@@ -2,34 +2,26 @@ package no.nav.melosys.integrasjon.tps;
 
 import java.io.StringWriter;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collections;
+import java.util.Set;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import no.nav.melosys.domain.dokument.person.Familiemedlem;
-import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKildesystem;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
+import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
-import no.nav.melosys.integrasjon.tps.aktoer.AktoerIdCache;
-import no.nav.melosys.integrasjon.tps.aktoer.AktorConsumer;
-import no.nav.melosys.integrasjon.tps.mapper.PersonMedKilde;
 import no.nav.melosys.integrasjon.tps.mapper.PersonMapper;
+import no.nav.melosys.integrasjon.tps.mapper.PersonMedKilde;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
-import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentAktoerIdForIdentPersonIkkeFunnet;
-import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentIdentForAktoerIdPersonIkkeFunnet;
-import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentAktoerIdForIdentRequest;
-import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentAktoerIdForIdentResponse;
-import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentIdentForAktoerIdRequest;
-import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentIdentForAktoerIdResponse;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonPersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonSikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.person.v3.binding.HentPersonhistorikkPersonIkkeFunnet;
@@ -51,66 +43,17 @@ public class TpsService implements TpsFasade {
     private static final String PERSON_VERSJON = "3.0";
     private static final String PERSONHISTORIKK_VERSJON = "3.4";
 
-    private final AktorConsumer aktorConsumer;
     private final PersonConsumer personConsumer;
     private final DokumentFactory dokumentFactory;
-    private final AktoerIdCache aktørIdCache;
 
     @Autowired
-    public TpsService(AktorConsumer aktorConsumer,
-                      PersonConsumer personConsumer,
-                      DokumentFactory dokumentFactory,
-                      AktoerIdCache aktørIdCache) {
-        this.aktorConsumer = aktorConsumer;
+    public TpsService(PersonConsumer personConsumer, DokumentFactory dokumentFactory) {
         this.personConsumer = personConsumer;
         this.dokumentFactory = dokumentFactory;
-        this.aktørIdCache = aktørIdCache;
     }
 
     @Override
-    public String hentAktørIdForIdent(String fnr) throws IkkeFunnetException {
-        if (aktørIdCache.hentAktørIdFraCache(fnr) != null) {
-            return aktørIdCache.hentAktørIdFraCache(fnr);
-        }
-
-        HentAktoerIdForIdentRequest request = new HentAktoerIdForIdentRequest();
-        request.setIdent(fnr);
-
-        try {
-            HentAktoerIdForIdentResponse response = aktorConsumer.hentAktørIdForIdent(request);
-
-            // I følge kontrakten kan ident-historikken være tom
-            if (response.getIdentHistorikk() != null && !response.getIdentHistorikk().isEmpty()) {
-                String gjeldendeFnr = response.getIdentHistorikk().get(0).getTpsId();
-                aktørIdCache.leggTilCache(gjeldendeFnr, response.getAktoerId());
-            }
-
-            return response.getAktoerId();
-        } catch (HentAktoerIdForIdentPersonIkkeFunnet e) { // NOSONAR
-            throw new IkkeFunnetException(e);
-        }
-    }
-
-    @Override
-    public String hentIdentForAktørId(String aktørID) throws IkkeFunnetException {
-        if (aktørIdCache.hentIdentFraCache(aktørID) != null) {
-            return aktørIdCache.hentIdentFraCache(aktørID);
-        }
-
-        HentIdentForAktoerIdRequest request = new HentIdentForAktoerIdRequest();
-        request.setAktoerId(aktørID);
-
-        try {
-            HentIdentForAktoerIdResponse response = aktorConsumer.hentIdentForAktoerId(request);
-            aktørIdCache.leggTilCache(response.getIdent(), aktørID);
-            return response.getIdent();
-        } catch (HentIdentForAktoerIdPersonIkkeFunnet e) { // NOSONAR
-            throw new IkkeFunnetException(e);
-        }
-    }
-
-    @Override
-    public Saksopplysning hentPerson(String ident, Informasjonsbehov behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    public Saksopplysning hentPerson(String ident, Informasjonsbehov behov) {
         PersonMedKilde personMedKilde = hentPersonMedKilde(ident, mapInformasjonsbehovTilTps(behov));
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.leggTilKildesystemOgMottattDokument(
@@ -129,7 +72,7 @@ public class TpsService implements TpsFasade {
         return saksopplysning;
     }
 
-    private PersonMedKilde hentPersonMedKilde(String ident, Set<no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov> behov) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
+    private PersonMedKilde hentPersonMedKilde(String ident, Set<no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov> behov) {
         HentPersonRequest request = new HentPersonRequest();
         NorskIdent norskIdent = new NorskIdent();
         norskIdent.setIdent(ident);
@@ -164,7 +107,7 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    public Saksopplysning hentPersonhistorikk(String ident, LocalDate dato) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
+    public Saksopplysning hentPersonhistorikk(String ident, LocalDate dato) {
         HentPersonhistorikkRequest request = new HentPersonhistorikkRequest();
         NorskIdent norskIdent = new NorskIdent();
         norskIdent.setIdent(ident);
@@ -219,28 +162,26 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    public String hentSammensattNavn(String fnr) throws FunksjonellException, IntegrasjonException {
+    public String hentSammensattNavn(String fnr) {
         Saksopplysning tpsOpplysning = hentPerson(fnr, Informasjonsbehov.INGEN);
         PersonDokument personDokument = (PersonDokument) tpsOpplysning.getDokument();
         return personDokument != null ? personDokument.sammensattNavn : null;
     }
 
     @Override
-    public boolean harStrengtFortroligAdresse(String fnr) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    public boolean harStrengtFortroligAdresse(String fnr) {
         Saksopplysning saksopplysning = hentPerson(fnr, Informasjonsbehov.INGEN);
         PersonDokument personDokument = (PersonDokument) saksopplysning.getDokument();
         return personDokument.diskresjonskode != null && personDokument.diskresjonskode.erKode6();
     }
 
     private Set<no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov> mapInformasjonsbehovTilTps(Informasjonsbehov behov) {
-        switch (behov) {
-            case STANDARD:
-                return Set.of(no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov.ADRESSE);
-            case MED_FAMILIERELASJONER:
-                return Set.of(no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov.ADRESSE,
-                    no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov.FAMILIERELASJONER);
-            default:
-                return Collections.emptySet();
-        }
+        return switch (behov) {
+            case STANDARD -> Set.of(no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov.ADRESSE);
+            case MED_FAMILIERELASJONER -> Set.of(
+                no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov.ADRESSE,
+                no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov.FAMILIERELASJONER);
+            default -> Collections.emptySet();
+        };
     }
 }

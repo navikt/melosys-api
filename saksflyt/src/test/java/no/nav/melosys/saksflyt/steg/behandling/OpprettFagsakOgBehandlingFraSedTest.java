@@ -12,20 +12,20 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class OpprettFagsakOgBehandlingFraSedTest {
 
     @Mock
@@ -36,36 +36,27 @@ public class OpprettFagsakOgBehandlingFraSedTest {
     @Captor
     private ArgumentCaptor<OpprettSakRequest> opprettSakRequestArgumentCaptor;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         opprettFagsakOgBehandlingFraSed = new OpprettFagsakOgBehandlingFraSed(fagsakService);
         when(fagsakService.nyFagsakOgBehandling(any())).thenReturn(hentFagsak());
     }
 
     @Test
-    public void utfør_prosessTypeAnmodningsUnntak_verifiserNyFagsakOgBehandlingBlirOpprettet() throws Exception {
-        Prosessinstans prosessinstans = hentProsessinstans(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
+    public void utfør_verifiserNyFagsakOgBehandlingBlirOpprettet() throws Exception {
+        Prosessinstans prosessinstans = hentProsessinstans();
         prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
         opprettFagsakOgBehandlingFraSed.utfør(prosessinstans);
         verify(fagsakService).nyFagsakOgBehandling(opprettSakRequestArgumentCaptor.capture());
         assertThat(opprettSakRequestArgumentCaptor.getValue().getSakstype()).isEqualTo(Sakstyper.EU_EOS);
     }
 
-    @Test
-    public void utfør__verifiserNyFagsakOgBehandlingBlirOpprettet() throws Exception {
-        Prosessinstans prosessinstans = hentProsessinstans(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
-        prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
-        opprettFagsakOgBehandlingFraSed.utfør(prosessinstans);
-        verify(fagsakService).nyFagsakOgBehandling(opprettSakRequestArgumentCaptor.capture());
-        assertThat(opprettSakRequestArgumentCaptor.getValue().getSakstype()).isEqualTo(Sakstyper.UKJENT);
-    }
-
-    private Prosessinstans hentProsessinstans(Behandlingstema behandlingstema) {
+    private Prosessinstans hentProsessinstans() {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, "123");
         prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, "321");
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, 123);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.BESLUTNING_LOVVALG_NORGE);
 
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setRinaSaksnummer("123rina");

@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MaritimtArbeid;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.MaritimtArbeid;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.AvklarteVirksomheterGrunnlag;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
@@ -37,8 +37,8 @@ public class ArbeidsstedGrunnlag {
     }
 
     private List<Arbeidssted> hentFysiskearbeidssteder() {
-        List<Arbeidssted> fysiskeArbeidssteder = grunnlagData.arbeidUtland.stream()
-            .map(au -> new FysiskArbeidssted(au.foretakNavn, au.foretakOrgnr, au.adresse))
+        List<Arbeidssted> fysiskeArbeidssteder = grunnlagData.arbeidPaaLand.fysiskeArbeidssteder.stream()
+            .map(fa -> new FysiskArbeidssted(fa.virksomhetNavn, null, fa.adresse))
             .collect(Collectors.toList());
 
         if (fysiskeArbeidssteder.isEmpty()) {
@@ -50,7 +50,6 @@ public class ArbeidsstedGrunnlag {
     }
 
     private List<MaritimtArbeidssted> hentMaritimeArbeidssteder() {
-        // Arbeidssted for maritimt arbeid benytter foretakNavn og foretakOrgnr fra søknad, og arbeidsland fra avklartfakta
         return grunnlagData.maritimtArbeid.stream()
             .map(this::lagMaritimtArbeidssted)
             .filter(Objects::nonNull)
@@ -64,6 +63,7 @@ public class ArbeidsstedGrunnlag {
     }
 
     private MaritimtArbeidssted lagMaritimtArbeidssted(MaritimtArbeid maritimtArbeid) {
+        // Arbeidssted for maritimt arbeid benytter arbeidsland fra avklartfakta
         AvklartMaritimtArbeid avklartMaritimtArbeid = avklarteMaritimeArbeidEtterSubjekt.get(maritimtArbeid.enhetNavn);
         if (avklartMaritimtArbeid != null) {
             return new MaritimtArbeidssted(maritimtArbeid, avklartMaritimtArbeid);

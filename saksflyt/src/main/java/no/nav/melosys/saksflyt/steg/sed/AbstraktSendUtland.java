@@ -1,17 +1,18 @@
 package no.nav.melosys.saksflyt.steg.sed;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Vedlegg;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -30,11 +31,11 @@ public abstract class AbstraktSendUtland implements StegBehandler {
         this.behandlingsresultatService = behandlingsresultatService;
     }
 
-    protected SendUtlandStatus sendUtland(BucType bucType, Prosessinstans prosessinstans) throws MelosysException {
+    protected SendUtlandStatus sendUtland(BucType bucType, Prosessinstans prosessinstans) {
         return sendUtland(bucType, prosessinstans, null);
     }
 
-    protected SendUtlandStatus sendUtland(BucType bucType, Prosessinstans prosessinstans, Vedlegg vedlegg) throws MelosysException {
+    protected SendUtlandStatus sendUtland(BucType bucType, Prosessinstans prosessinstans, Collection<Vedlegg> vedlegg) {
         Long behandlingID = prosessinstans.getBehandling().getId();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 
@@ -42,7 +43,8 @@ public abstract class AbstraktSendUtland implements StegBehandler {
             Set<String> mottakerinstitusjoner = prosessinstans.getData(ProsessDataKey.EESSI_MOTTAKERE, new TypeReference<Set<String>>() {});
 
             if (!CollectionUtils.isEmpty(mottakerinstitusjoner)) {
-                eessiService.opprettOgSendSed(behandlingID, new ArrayList<>(mottakerinstitusjoner), bucType, vedlegg, prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
+                eessiService.opprettOgSendSed(behandlingID, new ArrayList<>(mottakerinstitusjoner), bucType, vedlegg,
+                    prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
                 return SendUtlandStatus.SED_SENDT;
             } else {
                 sendBrev(prosessinstans);
@@ -52,20 +54,23 @@ public abstract class AbstraktSendUtland implements StegBehandler {
         return SendUtlandStatus.IKKE_SENDT;
     }
 
-    protected abstract void sendBrev(Prosessinstans prosessinstans) throws MelosysException;
+    protected abstract void sendBrev(Prosessinstans prosessinstans);
 
     protected abstract boolean skalSendesUtland(Behandlingsresultat behandlingsresultat);
 
-    protected String hentBegrunnelseKode(Prosessinstans prosessinstans) {
-        Endretperiode endretPeriodeBegrunnelseKode = prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperiode.class);
-        String begrunnelseKode = null;
-        if (endretPeriodeBegrunnelseKode != null) {
-            begrunnelseKode = endretPeriodeBegrunnelseKode.getKode();
-        }
-        return begrunnelseKode;
+    protected String hentBegrunnelsekodeTilForkortetPeriode(Prosessinstans prosessinstans) {
+        Behandlingsresultat behandlingsresultat =
+            behandlingsresultatService.hentBehandlingsresultatMedAvklartefakta(prosessinstans.getBehandling().getId());
+        return behandlingsresultat.getAvklartefakta().stream()
+            .filter(avklartfakta -> avklartfakta.getType() == Avklartefaktatyper.AARSAK_ENDRING_PERIODE)
+            .map(Avklartefakta::getFakta)
+            .map(Endretperiode::valueOf)
+            .map(Endretperiode::getKode)
+            .findFirst()
+            .orElse(null);
     }
 
-    protected String hentSaksbehandler(Prosessinstans prosessinstans) throws IkkeFunnetException {
+    protected String hentSaksbehandler(Prosessinstans prosessinstans) {
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
         if (StringUtils.isEmpty(saksbehandler)) {
             Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(prosessinstans.getBehandling().getId());

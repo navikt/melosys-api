@@ -3,23 +3,21 @@ package no.nav.melosys.tjenester.gui.saksflyt;
 import java.io.IOException;
 
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
 import no.nav.melosys.tjenester.gui.dto.utpeking.UtpekingAvvisDto;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class UtpekingTjenesteTest extends JsonSchemaTestParent {
 
     private static final String UTPEKING_AVVIS_POST_SCHEMA = "saksflyt-utpeking-avvis-post-schema.json";
@@ -30,13 +28,13 @@ public class UtpekingTjenesteTest extends JsonSchemaTestParent {
     private TilgangService tilgangService;
     private UtpekingTjeneste utpekingTjeneste;
 
-    @Before
+    @BeforeEach
     public void settOpp() {
         utpekingTjeneste = new UtpekingTjeneste(utpekingService, tilgangService);
     }
 
     @Test
-    public void avvisUtpeking() throws IOException, FunksjonellException, TekniskException {
+    public void avvisUtpeking() throws IOException {
 
         UtpekingAvvisDto utpekingAvvisDto = new UtpekingAvvisDto();
         utpekingAvvisDto.setFritekst("test");

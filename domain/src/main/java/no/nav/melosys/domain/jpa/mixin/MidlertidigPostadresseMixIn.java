@@ -2,8 +2,8 @@ package no.nav.melosys.domain.jpa.mixin;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
-import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
+import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
+import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(value = {

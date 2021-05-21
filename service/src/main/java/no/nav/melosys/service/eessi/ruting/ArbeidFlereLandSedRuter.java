@@ -15,7 +15,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -50,7 +49,7 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
     }
 
     @Override
-    public void rutSedTilBehandling(Prosessinstans prosessinstans, Long arkivsakID) throws MelosysException {
+    public void rutSedTilBehandling(Prosessinstans prosessinstans, Long arkivsakID) {
 
         final MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
 
@@ -135,7 +134,7 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
             : Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND;
     }
 
-    private void validerNorgeIkkeUtpektOgVedtakIkkeFattet(Behandling behandling, Behandlingsresultat behandlingsresultat) throws FunksjonellException {
+    private void validerNorgeIkkeUtpektOgVedtakIkkeFattet(Behandling behandling, Behandlingsresultat behandlingsresultat) {
         if (behandling.erNorgeUtpekt() && behandlingsresultat.harVedtak()) {
             throw new FunksjonellException(String.format(
                     "Det er allerede fattet vedtak på behandling %s med tema %s. Støtte for omgjøring ikke implementert",

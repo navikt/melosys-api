@@ -15,6 +15,8 @@ import no.nav.melosys.tjenester.gui.dto.GateadresseDto;
 import no.nav.melosys.tjenester.gui.dto.OrganisasjonDto;
 import org.apache.commons.lang3.StringUtils;
 
+import static no.nav.melosys.service.kodeverk.KodeverkService.UKJENT;
+
 public class OrganisasjonSerializer extends StdSerializer<AbstraktOrganisasjon> {
 
     private final transient KodeverkService kodeverkService;
@@ -54,9 +56,14 @@ public class OrganisasjonSerializer extends StdSerializer<AbstraktOrganisasjon> 
         gateadresse.setGatenavn(adresse.gatenavn);
 
         dto.setPostnr(adresse.postnummer);
-        String poststed = StringUtils.isNotEmpty(adresse.poststed) ? adresse.poststed : kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
+        String poststed = StringUtils.isNotEmpty(adresse.poststed) ? adresse.poststed
+            : kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
         dto.setPoststed(poststed);
-        dto.setLand(kodeverkService.dekod(FellesKodeverk.LANDKODERISO2, adresse.landkode, LocalDate.now()));
+
+        final String landISO2 = kodeverkService.dekod(FellesKodeverk.LANDKODERISO2, adresse.landkode, LocalDate.now());
+        final String landkode = !UKJENT.equals(landISO2) ? landISO2
+            :  kodeverkService.dekod(FellesKodeverk.LANDKODER, adresse.landkode, LocalDate.now());
+        dto.setLand(landkode);
 
         return dto;
     }

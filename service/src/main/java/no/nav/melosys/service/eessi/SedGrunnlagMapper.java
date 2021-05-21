@@ -5,7 +5,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser;
 import no.nav.melosys.exception.FunksjonellException;
@@ -17,12 +18,12 @@ public class SedGrunnlagMapper {
         throw new IllegalStateException("Utility");
     }
 
-    public static SedGrunnlag tilSedGrunnlag(SedGrunnlagDto sedGrunnlagDto) throws FunksjonellException {
+    public static SedGrunnlag tilSedGrunnlag(SedGrunnlagDto sedGrunnlagDto) {
         SedGrunnlag sedGrunnlag = new SedGrunnlag();
 
         sedGrunnlag.personOpplysninger = tilPersonopplysninger(sedGrunnlagDto.getUtenlandskIdent());
         sedGrunnlag.bosted = tilBosted(sedGrunnlagDto.getBostedsadresse());
-        sedGrunnlag.arbeidUtland = tilArbeidUtland(sedGrunnlagDto.getArbeidssteder());
+        sedGrunnlag.arbeidPaaLand.fysiskeArbeidssteder = tilFysiskeArbeidssteder(sedGrunnlagDto.getArbeidssteder());
         sedGrunnlag.foretakUtland = tilForetakUtland(sedGrunnlagDto.getArbeidsgivendeVirksomheter(), sedGrunnlagDto.getSelvstendigeVirksomheter());
         sedGrunnlag.periode = tilPeriode(sedGrunnlagDto.getLovvalgsperioder());
         sedGrunnlag.ytterligereInformasjon = sedGrunnlagDto.getYtterligereInformasjon();
@@ -48,7 +49,7 @@ public class SedGrunnlagMapper {
             .collect(Collectors.toList());
     }
 
-    private static Periode tilPeriode(List<Lovvalgsperiode> lovvalgsperioder) throws FunksjonellException {
+    private static Periode tilPeriode(List<Lovvalgsperiode> lovvalgsperioder) {
         if (CollectionUtils.isEmpty(lovvalgsperioder)) {
             return new Periode();
         }
@@ -76,8 +77,8 @@ public class SedGrunnlagMapper {
         return bosted;
     }
 
-    private static List<ArbeidUtland> tilArbeidUtland(List<Arbeidssted> arbeidssteder) {
-        return arbeidssteder.stream().map(Arbeidssted::tilArbeidUtland).collect(Collectors.toList());
+    private static List<FysiskArbeidssted> tilFysiskeArbeidssteder(List<no.nav.melosys.domain.eessi.sed.Arbeidssted> arbeidssteder) {
+        return arbeidssteder.stream().map(no.nav.melosys.domain.eessi.sed.Arbeidssted::tilFysiskArbeidssted).collect(Collectors.toList());
     }
 
     private static List<ForetakUtland> tilForetakUtland(List<Virksomhet> arbeidsgivendeVirksomheter, List<Virksomhet> selvstendigeVirksomheter) {

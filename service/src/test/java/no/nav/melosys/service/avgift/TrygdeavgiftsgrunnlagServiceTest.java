@@ -8,9 +8,10 @@ import no.nav.melosys.domain.avgift.OppdaterTrygdeavgiftsgrunnlagRequest;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Loenn_forhold;
+import no.nav.melosys.domain.kodeverk.Saerligeavgiftsgrupper;
+import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static no.nav.melosys.domain.avklartefakta.Avklartefakta.IKKE_VALGT_FAKTA;
 import static no.nav.melosys.domain.avklartefakta.Avklartefakta.VALGT_FAKTA;
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.*;
+import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_norsk_inntekt.NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV;
 import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_norsk_inntekt.NORSK_INNTEKT_TRYGDEAVGIFT_NAV;
+import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV;
 import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -68,12 +71,12 @@ class TrygdeavgiftsgrunnlagServiceTest {
     }
 
     @Test
-    void lagreAvgiftsinformasjon_kunAvgiftspliktigNorge_lagres() throws FunksjonellException {
+    void lagreAvgiftsinformasjon_kunAvgiftspliktigNorge_lagres() {
         final var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
         final var request = new OppdaterTrygdeavgiftsgrunnlagRequest(
             Loenn_forhold.LØNN_FRA_NORGE,
-            new AvgiftsgrunnlagInfo(true, false, null),
+            new AvgiftsgrunnlagInfo(true, true, null),
             null);
         trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request);
 
@@ -81,7 +84,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
             .containsExactlyInAnyOrder(
                 new Avklartefakta(behandlingsresultat, LØNN_FORHOLD_VIRKSOMHET.getKode(), LØNN_FORHOLD_VIRKSOMHET, null, Loenn_forhold.LØNN_FRA_NORGE.getKode()),
                 new Avklartefakta(behandlingsresultat, LØNN_NORGE_SKATTEPLIKTIG_NORGE.getKode(), LØNN_NORGE_SKATTEPLIKTIG_NORGE, null, VALGT_FAKTA),
-                new Avklartefakta(behandlingsresultat, LØNN_NORGE_ARBEIDSGIVERAVGIFT.getKode(), LØNN_NORGE_ARBEIDSGIVERAVGIFT, null, IKKE_VALGT_FAKTA),
+                new Avklartefakta(behandlingsresultat, LØNN_NORGE_ARBEIDSGIVERAVGIFT.getKode(), LØNN_NORGE_ARBEIDSGIVERAVGIFT, null, VALGT_FAKTA),
                 new Avklartefakta(behandlingsresultat, LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE.getKode(), LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE, null, IKKE_VALGT_FAKTA)
             );
 
@@ -92,14 +95,14 @@ class TrygdeavgiftsgrunnlagServiceTest {
                 m -> m.getFastsattTrygdeavgift().getTrygdeavgiftstype()
             )
             .containsExactly(
-                NORSK_INNTEKT_TRYGDEAVGIFT_NAV,
-                Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV,
+                NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV,
+                UTENLANDSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV,
                 Trygdeavgift_typer.FORELØPIG
             );
     }
 
     @Test
-    void lagreAvgiftsinformasjon_kunAvgiftspliktigUtland_lagres() throws FunksjonellException {
+    void lagreAvgiftsinformasjon_kunAvgiftspliktigUtland_lagres() {
         final var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
         final var request = new OppdaterTrygdeavgiftsgrunnlagRequest(
@@ -123,19 +126,19 @@ class TrygdeavgiftsgrunnlagServiceTest {
                 m -> m.getFastsattTrygdeavgift().getTrygdeavgiftstype()
             )
             .containsExactly(
-                Vurderingsutfall_trygdeavgift_norsk_inntekt.NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV,
+                NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV,
                 UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV,
                 Trygdeavgift_typer.FORELØPIG
             );
     }
 
     @Test
-    void lagreAvgiftsinformasjon_deltLønn_lagres() throws FunksjonellException {
+    void lagreAvgiftsinformasjon_deltLønn_lagres() {
         final var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
         final var request = new OppdaterTrygdeavgiftsgrunnlagRequest(
             Loenn_forhold.DELT_LØNN,
-            new AvgiftsgrunnlagInfo(true, false, null),
+            new AvgiftsgrunnlagInfo(true, true, null),
             new AvgiftsgrunnlagInfo(false, false, null));
         trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request);
 
@@ -143,7 +146,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
             .containsExactlyInAnyOrder(
                 new Avklartefakta(behandlingsresultat, LØNN_FORHOLD_VIRKSOMHET.getKode(), LØNN_FORHOLD_VIRKSOMHET, null, Loenn_forhold.DELT_LØNN.getKode()),
                 new Avklartefakta(behandlingsresultat, LØNN_NORGE_SKATTEPLIKTIG_NORGE.getKode(), LØNN_NORGE_SKATTEPLIKTIG_NORGE, null, VALGT_FAKTA),
-                new Avklartefakta(behandlingsresultat, LØNN_NORGE_ARBEIDSGIVERAVGIFT.getKode(), LØNN_NORGE_ARBEIDSGIVERAVGIFT, null, IKKE_VALGT_FAKTA),
+                new Avklartefakta(behandlingsresultat, LØNN_NORGE_ARBEIDSGIVERAVGIFT.getKode(), LØNN_NORGE_ARBEIDSGIVERAVGIFT, null, VALGT_FAKTA),
                 new Avklartefakta(behandlingsresultat, LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE.getKode(), LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE, null, IKKE_VALGT_FAKTA),
                 new Avklartefakta(behandlingsresultat, LØNN_UTL_SKATTEPLIKTIG_NORGE.getKode(), LØNN_UTL_SKATTEPLIKTIG_NORGE, null, IKKE_VALGT_FAKTA),
                 new Avklartefakta(behandlingsresultat, LØNN_UTL_ARBEIDSGIVERAVGIFT.getKode(), LØNN_UTL_ARBEIDSGIVERAVGIFT, null, IKKE_VALGT_FAKTA),
@@ -157,14 +160,14 @@ class TrygdeavgiftsgrunnlagServiceTest {
                 m -> m.getFastsattTrygdeavgift().getTrygdeavgiftstype()
             )
             .containsExactly(
-                NORSK_INNTEKT_TRYGDEAVGIFT_NAV,
+                NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV,
                 UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV,
                 Trygdeavgift_typer.FORELØPIG
             );
     }
 
     @Test
-    void lagreAvgiftsinformasjon_lønnFraNorgeErMisjonær_ikkeAvgiftspliktig() throws FunksjonellException {
+    void lagreAvgiftsinformasjon_lønnFraNorgeErMisjonær_ikkeAvgiftspliktig() {
         final var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
         final var request = new OppdaterTrygdeavgiftsgrunnlagRequest(
@@ -188,14 +191,14 @@ class TrygdeavgiftsgrunnlagServiceTest {
                 m -> m.getFastsattTrygdeavgift().getTrygdeavgiftstype()
             )
             .containsExactly(
-                Vurderingsutfall_trygdeavgift_norsk_inntekt.NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV,
-                Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV,
+                NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV,
+                UTENLANDSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV,
                 Trygdeavgift_typer.FORELØPIG
             );
     }
 
     @Test
-    void hentAvgiftsgrunnlag_medAvklarteFakta_validerMapping() throws IkkeFunnetException {
+    void hentAvgiftsgrunnlag_medAvklarteFakta_validerMapping() {
         final var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
         behandlingsresultat.getAvklartefakta().addAll(Set.of(
@@ -214,12 +217,12 @@ class TrygdeavgiftsgrunnlagServiceTest {
         assertThat(trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(behandlingsresultatID))
             .extracting(
                 Trygdeavgiftsgrunnlag::getLønnsforhold,
-                a -> a.getAvgiftsGrunnlagNorge().getBetalerArbeidsgiverAvgift(),
-                a -> a.getAvgiftsGrunnlagNorge().getErSkattepliktig(),
+                a -> a.getAvgiftsGrunnlagNorge().betalerArbeidsgiverAvgift(),
+                a -> a.getAvgiftsGrunnlagNorge().erSkattepliktig(),
                 a -> a.getAvgiftsGrunnlagNorge().getSærligAvgiftsgruppe(),
                 a -> a.getAvgiftsGrunnlagNorge().getVurderingTrygdeavgiftNorskInntekt(),
-                a -> a.getAvgiftsGrunnlagUtland().getBetalerArbeidsgiverAvgift(),
-                a -> a.getAvgiftsGrunnlagUtland().getErSkattepliktig(),
+                a -> a.getAvgiftsGrunnlagUtland().betalerArbeidsgiverAvgift(),
+                a -> a.getAvgiftsGrunnlagUtland().erSkattepliktig(),
                 a -> a.getAvgiftsGrunnlagUtland().getSærligAvgiftsgruppe(),
                 a -> a.getAvgiftsGrunnlagUtland().getVurderingTrygdeavgiftUtenlandskInntekt()
             ).containsExactly(

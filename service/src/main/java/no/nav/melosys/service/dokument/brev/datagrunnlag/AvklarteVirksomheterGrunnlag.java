@@ -1,6 +1,5 @@
 package no.nav.melosys.service.dokument.brev.datagrunnlag;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -8,20 +7,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.kodeverk.KodeverkService;
-import org.apache.commons.lang3.StringUtils;
 
 public class AvklarteVirksomheterGrunnlag {
     private final Behandling behandling;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
-    private final KodeverkService kodeverkService;
 
     // Microcachede verdier som kun eksisterer under brevbygging.
     // For å slippe å gjøre register- og kodeverksoppslag gjentatte ganger
@@ -31,30 +22,28 @@ public class AvklarteVirksomheterGrunnlag {
     private List<AvklartVirksomhet> utenlandskeVirksomheter;
 
     public AvklarteVirksomheterGrunnlag(Behandling behandling,
-                                        AvklarteVirksomheterService avklarteVirksomheterService,
-                                        KodeverkService kodeverkService) {
+                                        AvklarteVirksomheterService avklarteVirksomheterService) {
         this.behandling = behandling;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
-        this.kodeverkService = kodeverkService;
     }
 
-    public List<AvklartVirksomhet> hentAlleNorskeVirksomheterMedAdresse() throws IkkeFunnetException, TekniskException {
+    public List<AvklartVirksomhet> hentAlleNorskeVirksomheterMedAdresse() {
         if (norskeVirksomheter == null) {
-            norskeVirksomheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, this::utfyllManglendeAdressefelter);
+            norskeVirksomheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling);
         }
         return norskeVirksomheter;
     }
 
-    public List<AvklartVirksomhet> hentNorskeArbeidsgivere() throws IkkeFunnetException, TekniskException {
+    public List<AvklartVirksomhet> hentNorskeArbeidsgivere() {
         if (norskeArbeidsgivere == null) {
-            norskeArbeidsgivere = avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling, this::utfyllManglendeAdressefelter);
+            norskeArbeidsgivere = avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling);
         }
         return norskeArbeidsgivere;
     }
 
-    public List<AvklartVirksomhet> hentNorskeSelvstendige() throws IkkeFunnetException, TekniskException {
+    public List<AvklartVirksomhet> hentNorskeSelvstendige() {
         if (norskeSelvstendige == null) {
-            norskeSelvstendige = avklarteVirksomheterService.hentNorskeSelvstendigeForetak(behandling, this::utfyllManglendeAdressefelter);
+            norskeSelvstendige = avklarteVirksomheterService.hentNorskeSelvstendigeForetak(behandling);
         }
         return norskeSelvstendige;
     }
@@ -78,11 +67,11 @@ public class AvklarteVirksomheterGrunnlag {
             .collect(Collectors.toList());
     }
 
-    public Set<String> hentNorskeArbeidsgivendeOrgnumre() throws TekniskException {
+    public Set<String> hentNorskeArbeidsgivendeOrgnumre() {
         return avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
     }
 
-    public AvklartVirksomhet hentHovedvirksomhet() throws IkkeFunnetException, TekniskException {
+    public AvklartVirksomhet hentHovedvirksomhet() {
         if (!hentAlleNorskeVirksomheterMedAdresse().isEmpty()) {
             return hentAlleNorskeVirksomheterMedAdresse().iterator().next();
         } else {
@@ -90,33 +79,16 @@ public class AvklarteVirksomheterGrunnlag {
         }
     }
 
-    public int antallVirksomheter() throws IkkeFunnetException, TekniskException {
+    public int antallVirksomheter() {
         return hentAlleNorskeVirksomheterMedAdresse().size() +
                hentUtenlandskeVirksomheter().size();
     }
 
-    public Collection<AvklartVirksomhet> hentBivirksomheter() throws IkkeFunnetException, TekniskException {
+    public Collection<AvklartVirksomhet> hentBivirksomheter() {
         Collection<AvklartVirksomhet> bivirksomheter = new ArrayList<>();
         bivirksomheter.addAll(hentAlleNorskeVirksomheterMedAdresse());
         bivirksomheter.addAll(hentUtenlandskeVirksomheter());
         bivirksomheter.remove(hentHovedvirksomhet());
         return bivirksomheter;
-    }
-
-    StrukturertAdresse utfyllManglendeAdressefelter(OrganisasjonDokument org) {
-        StrukturertAdresse adresse = org.getOrganisasjonDetaljer().hentStrukturertForretningsadresse();
-        if (adresse == null || StringUtils.isEmpty(adresse.postnummer)) {
-            adresse = org.getOrganisasjonDetaljer().hentStrukturertPostadresse();
-        }
-        if (StringUtils.isEmpty(adresse.gatenavn)) {
-            adresse.gatenavn = " ";
-        }
-        if (adresse.erNorsk()) {
-            adresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
-        } else if (StringUtils.isEmpty(adresse.postnummer)) {
-            //Utenlandske adresser har ikke alltid postnummer
-            adresse.postnummer = " ";
-        }
-        return adresse;
     }
 }

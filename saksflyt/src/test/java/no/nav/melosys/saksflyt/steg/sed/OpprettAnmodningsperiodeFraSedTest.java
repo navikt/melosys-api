@@ -11,8 +11,6 @@ import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +39,7 @@ class OpprettAnmodningsperiodeFraSedTest {
     }
 
     @Test
-    void utfør_medEksisterendeSedDokument_forventKall() throws FunksjonellException, TekniskException {
+    void utfør_medEksisterendeSedDokument_forventKall() {
         Prosessinstans prosessinstans = new Prosessinstans();
         Behandling behandling = new Behandling();
         behandling.setId(1L);

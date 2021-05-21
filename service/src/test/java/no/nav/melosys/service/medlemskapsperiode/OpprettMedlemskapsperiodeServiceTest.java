@@ -8,7 +8,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -51,7 +51,7 @@ class OpprettMedlemskapsperiodeServiceTest {
     }
 
     @Test
-    void utledMedlemskapsperioderFraSøknad_dataFraSøknadSatt_lagrerMedlemskapsperioder() throws FunksjonellException {
+    void utledMedlemskapsperioderFraSøknad_dataFraSøknadSatt_lagrerMedlemskapsperioder() {
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
         behandlingsresultat.getVilkaarsresultater().add(lagOppfyltVilkår(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID));
         when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingsresultatID))).thenReturn(behandlingsresultat);
@@ -62,7 +62,7 @@ class OpprettMedlemskapsperiodeServiceTest {
     }
 
     @Test
-    void utledMedlemskapsperioderFraSøknad_oppfyllerIkkeVilkår_kasterFeil() throws FunksjonellException {
+    void utledMedlemskapsperioderFraSøknad_oppfyllerIkkeVilkår_kasterFeil() {
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingsresultatID))).thenReturn(behandlingsresultat);
         assertThatExceptionOfType(FunksjonellException.class)

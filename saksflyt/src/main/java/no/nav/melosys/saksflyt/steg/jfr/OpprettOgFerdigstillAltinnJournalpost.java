@@ -12,13 +12,12 @@ import no.nav.melosys.domain.msm.AltinnDokument;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.altinn.AltinnSoeknadService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -28,18 +27,18 @@ public class OpprettOgFerdigstillAltinnJournalpost implements StegBehandler {
     private final BehandlingService behandlingService;
     private final EregFasade eregFasade;
     private final JoarkFasade joarkFasade;
-    private final TpsFasade tpsFasade;
+    private final PersondataFasade persondataFasade;
 
     public OpprettOgFerdigstillAltinnJournalpost(AltinnSoeknadService altinnSoeknadService,
                                                  BehandlingService behandlingService,
                                                  @Qualifier("system") EregFasade eregFasade,
                                                  @Qualifier("system") JoarkFasade joarkFasade,
-                                                 @Qualifier("system") TpsFasade tpsFasade) {
+                                                 @Qualifier("system") PersondataFasade persondataFasade) {
         this.altinnSoeknadService = altinnSoeknadService;
         this.behandlingService = behandlingService;
         this.eregFasade = eregFasade;
         this.joarkFasade = joarkFasade;
-        this.tpsFasade = tpsFasade;
+        this.persondataFasade = persondataFasade;
     }
 
     @Override
@@ -48,11 +47,11 @@ public class OpprettOgFerdigstillAltinnJournalpost implements StegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) {
         final Behandling behandling = prosessinstans.getBehandling();
         final Fagsak fagsak = behandling.getFagsak();
 
-        String ident = tpsFasade.hentIdentForAktørId(fagsak.hentBruker().getAktørId());
+        String ident = persondataFasade.hentFolkeregisterIdent(fagsak.hentBruker().getAktørId());
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, ident);
 
         Collection<AltinnDokument> dokumenter = altinnSoeknadService

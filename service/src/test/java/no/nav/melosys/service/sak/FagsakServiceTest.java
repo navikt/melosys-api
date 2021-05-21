@@ -14,9 +14,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -24,6 +21,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
@@ -51,7 +49,7 @@ class FagsakServiceTest {
     @Mock
     private OppgaveService oppgaveService;
     @Mock
-    private TpsFasade tps;
+    private PersondataFasade tps;
     @Mock
     private ProsessinstansService prosessinstansService;
     @Mock
@@ -79,7 +77,7 @@ class FagsakServiceTest {
     }
 
     @Test
-    void hentFagsak() throws IkkeFunnetException {
+    void hentFagsak() {
         String saksnummer = "saksnummer";
         when(fagsakRepo.findBySaksnummer(anyString())).thenReturn(Optional.of(new Fagsak()));
         fagsakService.hentFagsak(saksnummer);
@@ -87,7 +85,7 @@ class FagsakServiceTest {
     }
 
     @Test
-    void hentFagsakerMedAktør() throws IkkeFunnetException {
+    void hentFagsakerMedAktør() {
         when(tps.hentAktørIdForIdent(any())).thenReturn("AKTOER_ID");
         fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, "FNR");
         verify(fagsakRepo).findByRolleAndAktør(eq(Aktoersroller.BRUKER), eq("AKTOER_ID"));
@@ -103,7 +101,7 @@ class FagsakServiceTest {
     }
 
     @Test
-    void bestillNySakOgBehandling_oppretterProsess() throws FunksjonellException, TekniskException {
+    void bestillNySakOgBehandling_oppretterProsess() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.ØVRIGE_SED_MED);
@@ -136,7 +134,7 @@ class FagsakServiceTest {
     }
 
     @Test
-    void bestillNySakOgBehandling_utenJournalpostID_feiler() throws FunksjonellException, TekniskException {
+    void bestillNySakOgBehandling_utenJournalpostID_feiler() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
@@ -148,7 +146,7 @@ class FagsakServiceTest {
     }
 
     @Test
-    void bestillNySakOgBehandling_oppgaveTypeUgyldig_feiler() throws FunksjonellException, TekniskException {
+    void bestillNySakOgBehandling_oppgaveTypeUgyldig_feiler() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
@@ -209,17 +207,23 @@ class FagsakServiceTest {
         String initierendeDokumentId = "221234";
         doReturn(behandling).when(behandlingService).nyBehandling(any(), any(), any(), any(), anyString(), anyString());
 
-        OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder().medAktørID("123456789")
-            .medBehandlingstype(Behandlingstyper.SOEKNAD).medBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
-            .medInitierendeJournalpostId(initierendeJournalpostId).medInitierendeDokumentId(initierendeDokumentId)
+        OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
+            .medAktørID("123456789")
+            .medSakstype(Sakstyper.EU_EOS)
+            .medBehandlingstype(Behandlingstyper.SOEKNAD)
+            .medBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER)
+            .medInitierendeJournalpostId(initierendeJournalpostId)
+            .medInitierendeDokumentId(initierendeDokumentId)
             .medArbeidsgiver("arbeidsgiver")
-            .medFullmektig(new Fullmektig("orgnr", Representerer.ARBEIDSGIVER)).build();
+            .medFullmektig(new Fullmektig("orgnr", Representerer.ARBEIDSGIVER))
+            .build();
+
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
         verify(fagsakRepo).save(any(Fagsak.class));
         verify(behandlingService).nyBehandling(any(), eq(Behandlingsstatus.OPPRETTET), eq(Behandlingstyper.SOEKNAD),
             eq(Behandlingstema.UTSENDT_ARBEIDSTAKER), eq(initierendeJournalpostId), eq(initierendeDokumentId));
         assertThat(fagsak.getBehandlinger()).isNotEmpty();
-        assertThat(fagsak.getType()).isEqualTo(Sakstyper.UKJENT);
+        assertThat(fagsak.getType()).isEqualTo(Sakstyper.EU_EOS);
         Aktoer forventetFullmektig = new Aktoer();
         forventetFullmektig.setFagsak(fagsak);
         forventetFullmektig.setRolle(Aktoersroller.REPRESENTANT);
@@ -244,7 +248,7 @@ class FagsakServiceTest {
     }
 
     @Test
-    void avsluttSakSomBortfalt_harFagsakMedFlereBehandlinger_AvslutterAlleBehandlingerOgSetterFagsakstatusTilHENLAGT_BORTFALT() throws FunksjonellException, TekniskException {
+    void avsluttSakSomBortfalt_harFagsakMedFlereBehandlinger_AvslutterAlleBehandlingerOgSetterFagsakstatusTilHENLAGT_BORTFALT() {
         String saksnummer = "saksnummer";
         Fagsak fagsak = lagFagsak(saksnummer);
         Behandling førsteBehandling = new Behandling();
@@ -265,7 +269,7 @@ class FagsakServiceTest {
     }
 
     @Test
-    void avsluttFagsakOgBehandlingValiderBehandlingstema_behtemaIkkeYrkesaktiv_blirAvsluttet() throws FunksjonellException, TekniskException {
+    void avsluttFagsakOgBehandlingValiderBehandlingstema_behtemaIkkeYrkesaktiv_blirAvsluttet() {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-123");
         Behandling behandling = new Behandling();
@@ -281,7 +285,7 @@ class FagsakServiceTest {
     }
 
     @Test
-    void avsluttFagsakOgBehandlingValiderBehandlingstype_behtemaTrygdetid_blirAvsluttet() throws FunksjonellException, TekniskException {
+    void avsluttFagsakOgBehandlingValiderBehandlingstype_behtemaTrygdetid_blirAvsluttet() {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-123");
         Behandling behandling = new Behandling();
@@ -311,7 +315,7 @@ class FagsakServiceTest {
     }
 
     @Test
-    void leggTilFjernAktørerForMyndighet() throws IkkeFunnetException {
+    void leggTilFjernAktørerForMyndighet() {
         String saksnummer = "1234";
         Fagsak eksisterendeFagsak = lagFagsakMedAktørforMyndighet(saksnummer, "Gammel institusjonsid");
         when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(Optional.of(eksisterendeFagsak));
@@ -328,7 +332,7 @@ class FagsakServiceTest {
     }
 
     @Test
-    void oppdaterMyndigheter_harBruker_fjernerIkkeBruker() throws IkkeFunnetException {
+    void oppdaterMyndigheter_harBruker_fjernerIkkeBruker() {
         String saksnummer = "1234";
         Fagsak eksisterendeFagsak = lagFagsakMedAktørforMyndighet(saksnummer, "Gammel institusjonsid");
         when(fagsakRepo.findBySaksnummer(eq(saksnummer))).thenReturn(Optional.of(eksisterendeFagsak));
@@ -355,7 +359,7 @@ class FagsakServiceTest {
     }
 
     @Test
-    void avsluttFagsakOgBehandling_erAktiv_blirAvsluttet() throws FunksjonellException, TekniskException {
+    void avsluttFagsakOgBehandling_erAktiv_blirAvsluttet() {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-123");
         Behandling behandling = new Behandling();
@@ -406,7 +410,7 @@ class FagsakServiceTest {
     }
 
     @Test
-    void opprettNyVurderingBehandling_behandlingErAktivIkkeArt16_kastException() throws FunksjonellException {
+    void opprettNyVurderingBehandling_behandlingErAktivIkkeArt16_kastException() {
         final String saksnummer = "MEL-1";
         Fagsak fagsak = lagFagsakMedBruker(saksnummer);
 
@@ -424,7 +428,7 @@ class FagsakServiceTest {
     }
 
     @Test
-    void opprettNyVurderingBehandling_behandlingErAktivErArt16AnmodningIkkeSendt_kastException() throws FunksjonellException {
+    void opprettNyVurderingBehandling_behandlingErAktivErArt16AnmodningIkkeSendt_kastException() {
         final String saksnummer = "MEL-1";
         Fagsak fagsak = lagFagsakMedBruker(saksnummer);
 
@@ -447,7 +451,7 @@ class FagsakServiceTest {
     }
 
     @Test
-    void opprettNyVurderingBehandling_behandlingErAktivErArt16AnmodningSendt_nyBehandlingOpprettet() throws FunksjonellException, TekniskException {
+    void opprettNyVurderingBehandling_behandlingErAktivErArt16AnmodningSendt_nyBehandlingOpprettet() {
         final String saksnummer = "MEL-1";
         Fagsak fagsak = lagFagsakMedBruker(saksnummer);
 
@@ -476,7 +480,7 @@ class FagsakServiceTest {
     }
 
     @Test
-    void opprettNyVurderingBehandling_toBehandlingerErAvsluttet_nyBehandlingOpprettetTypeNyVurderingReplikerFraSistOppdaterte() throws FunksjonellException, TekniskException {
+    void opprettNyVurderingBehandling_toBehandlingerErAvsluttet_nyBehandlingOpprettetTypeNyVurderingReplikerFraSistOppdaterte() {
         final String saksnummer = "MEL-1";
         Fagsak fagsak = lagFagsakMedBruker(saksnummer);
 

@@ -2,10 +2,6 @@ package no.nav.melosys.tjenester.gui;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.BehandlingsgrunnlagGetDto;
@@ -31,7 +27,7 @@ public class BehandlingsgrunnlagTjeneste {
     @GetMapping("/{behandlingID}")
     public ResponseEntity<BehandlingsgrunnlagGetDto> hentBehandlingsgrunnlag(
         @PathVariable(value = "behandlingID") long behandlingID
-    ) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    ) {
 
         tilgangService.sjekkTilgang(behandlingID);
         Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID);
@@ -42,7 +38,7 @@ public class BehandlingsgrunnlagTjeneste {
     public ResponseEntity<BehandlingsgrunnlagGetDto> oppdaterBehandlingsgrunnlag(
         @PathVariable(value = "behandlingID") long behandlingID,
         @RequestBody BehandlingsgrunnlagPostDto behandlingsgrunnlagPostDto
-    ) throws FunksjonellException, TekniskException {
+    ) {
 
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandlingID, behandlingsgrunnlagPostDto.getData());

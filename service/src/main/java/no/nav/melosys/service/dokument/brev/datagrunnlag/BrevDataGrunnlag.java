@@ -4,7 +4,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.ArbeidsstedGrunnlag;
@@ -23,12 +22,12 @@ public class BrevDataGrunnlag implements DataGrunnlag {
     public BrevDataGrunnlag(DoksysBrevbestilling brevbestilling,
                             KodeverkService kodeverkService,
                             AvklarteVirksomheterService avklarteVirksomheterService,
-                            AvklartefaktaService avklartefaktaService) throws TekniskException {
+                            AvklartefaktaService avklartefaktaService) {
         this.brevbestilling = brevbestilling;
         final Behandling behandling = brevbestilling.getBehandling();
         this.behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         this.person = behandling.hentPersonDokument();
-        this.avklarteVirksomheterGrunnlag = new AvklarteVirksomheterGrunnlag(behandling, avklarteVirksomheterService, kodeverkService);
+        this.avklarteVirksomheterGrunnlag = new AvklarteVirksomheterGrunnlag(behandling, avklarteVirksomheterService);
         this.bostedGrunnlag = new BostedGrunnlag(behandlingsgrunnlagData, getPerson(), kodeverkService);
         this.arbeidsstedGrunnlag = new ArbeidsstedGrunnlag(
             avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(behandling.getId()),

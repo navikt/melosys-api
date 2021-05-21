@@ -1,172 +1,119 @@
 package no.nav.melosys.integrasjon.oppgave.konsument;
 
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
-import javax.net.ssl.SSLContext;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status.Family;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.felles.*;
+import no.nav.melosys.integrasjon.felles.FeilResponseDto;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSvar;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto;
-import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.logging.LoggingFeature;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
-public class OppgaveConsumerImpl implements RestConsumer, OppgaveConsumer {
-
-    private static final Logger log = LoggerFactory.getLogger(OppgaveConsumerImpl.class);
+public class OppgaveConsumerImpl implements OppgaveConsumer {
+    // Oppgave (/Abac) kaster feil om svaret på et søk inneholder oppgaver med 50+ unike personer
+    private static final int OPPGAVE_ANTALL_ABAC_LIMIT = 40;
     private static final String CORRELATION_ID = "X-Correlation-ID";
-    private static final int OPPGAVE_ANTALL_LIMIT = 20;
 
-    private final boolean erSystem;
+    private static final String OPPGAVE_BASE_URI = "/oppgaver";
+    private static final String OPPGAVE_URI_MED_ID = OPPGAVE_BASE_URI + "/{oppgaveID}";
 
-    private WebTarget target;
+    private final WebClient webClient;
 
-    OppgaveConsumerImpl(String endpointUrl, boolean erSystem) throws IntegrasjonException {
-        this.erSystem = erSystem;
-        try {
-            SSLContext sslContext = SSLContext.getDefault();
-            ClientConfig clientConfig = new ClientConfig();
-            clientConfig.property(LoggingFeature.LOGGING_FEATURE_VERBOSITY_CLIENT, LoggingFeature.Verbosity.PAYLOAD_ANY);
-            clientConfig.register(new RestClientLoggingFilter());
-            Client client = ClientBuilder.newBuilder().sslContext(sslContext).withConfig(clientConfig).build();
-            target = client.register(JacksonObjectMapperProvider.class).target(endpointUrl);
-        } catch (NoSuchAlgorithmException e) {
-            log.error("Feilet under oppsett av integrasjon mot Sak API", e);
-            throw new IntegrasjonException("Feilet under oppsett av integrasjon mot Oppgave API");
-        }
+    public OppgaveConsumerImpl(WebClient webClient) {
+        this.webClient = webClient;
     }
 
     @Override
-    public boolean isSystem() {
-        return erSystem;
-    }
-
-    @Override
-    public OppgaveDto hentOppgave(String oppgaveId) throws FunksjonellException, TekniskException {
-        try {
-            return target
-                .path(oppgaveId)
-                .request()
-                .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
-                .header(CORRELATION_ID, getCallID())
-                .header(HttpHeaders.AUTHORIZATION, getAuth())
-                .get(OppgaveDto.class);
-        } catch (RuntimeException e) {
-            ExceptionMapper.JaxGetRuntimeExTilMelosysEx(e);
-            return null; // Død kode
-        }
-    }
-
-    @Override
-    public List<OppgaveDto> hentOppgaveListe(OppgaveSearchRequest oppgaveSearchRequest) throws FunksjonellException, TekniskException {
-        OppgaveSvar førsteOppgaveSvar = hentOppgaveListe(oppgaveSearchRequest, 0);
-
-        List<OppgaveDto> alleOppgavene = new ArrayList<>(førsteOppgaveSvar.getOppgaver());
-        int antallTreffTotalt = førsteOppgaveSvar.getAntallTreffTotalt();
-        if (antallTreffTotalt > OPPGAVE_ANTALL_LIMIT) {
-            for (int i = OPPGAVE_ANTALL_LIMIT; i < antallTreffTotalt; i += OPPGAVE_ANTALL_LIMIT) {
-                OppgaveSvar oppgaveSvar = hentOppgaveListe(oppgaveSearchRequest, i);
-                alleOppgavene.addAll(oppgaveSvar.getOppgaver());
-            }
-        }
-        return alleOppgavene;
-    }
-
-    OppgaveSvar hentOppgaveListe(OppgaveSearchRequest oppgaveSearchRequest, int offset) throws FunksjonellException, TekniskException {
-        WebTarget lokalTarget = target;
-        if (oppgaveSearchRequest.getAktørId() != null) {
-            lokalTarget = lokalTarget.queryParam("aktoerId", oppgaveSearchRequest.getAktørId());
-        }
-
-        lokalTarget = lokalTarget.queryParam("tildeltEnhetsnr", oppgaveSearchRequest.getTildeltEnhetsnr())
-            .queryParam("tildeltRessurs", oppgaveSearchRequest.getTildeltRessurs())
-            .queryParam("sorteringsfelt", oppgaveSearchRequest.getSorteringsfelt())
-            .queryParam("tilordnetRessurs", oppgaveSearchRequest.getTilordnetRessurs())
-            .queryParam("statuskategori", oppgaveSearchRequest.getStatusKategori())
-            .queryParam("behandlesAvApplikasjon", oppgaveSearchRequest.getBehandlesAvApplikasjon())
-            .queryParam("limit", OPPGAVE_ANTALL_LIMIT)
-            .queryParam("offset", offset)
-            .queryParam("behandlingstype", oppgaveSearchRequest.getBehandlingstype())
-            .queryParam("behandlingstema", oppgaveSearchRequest.getBehandlingstema());
-
-        lokalTarget = leggTilQueryParamSomArray(lokalTarget, "oppgavetype", oppgaveSearchRequest.getOppgavetype());
-        lokalTarget = leggTilQueryParamSomArray(lokalTarget, "saksreferanse", oppgaveSearchRequest.getSaksreferanse());
-        lokalTarget = leggTilQueryParamSomArray(lokalTarget, "tema", oppgaveSearchRequest.getTema());
-
-
-        try {
-            return lokalTarget.request()
-                .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
-                .header(CORRELATION_ID, getCallID())
-                .header(HttpHeaders.AUTHORIZATION, getAuth())
-                .get(OppgaveSvar.class);
-        } catch (RuntimeException e) {
-            ExceptionMapper.JaxGetRuntimeExTilMelosysEx(e);
-            return null; // Død kode
-        }
-    }
-
-    // Eksempel: https://oppgave.nais.preprod.local/api/v1/oppgaver?tema=MED&tema=MEL
-    private WebTarget leggTilQueryParamSomArray(WebTarget target, String key, String[] param) {
-        WebTarget tempTarget = target;
-        if (param != null) {
-            for (String s : param) {
-                if (s != null) {
-                    tempTarget = tempTarget.queryParam(key, s);
-                }
-            }
-        }
-        return tempTarget;
-    }
-
-    @Override
-    public void oppdaterOppgave(OppgaveDto request) throws FunksjonellException, TekniskException {
-        try (Response response = target.path(request.getId())
-            .request(MediaType.APPLICATION_JSON)
+    public OppgaveDto hentOppgave(String oppgaveId) {
+        return webClient.get()
+            .uri(OPPGAVE_URI_MED_ID, oppgaveId)
             .header(CORRELATION_ID, getCallID())
-            .header(HttpHeaders.AUTHORIZATION, getAuth())
-            .put(Entity.json(request))) {
-            håndterEvFeil(response);
-        } catch (RuntimeException e) { // Kan være ProcessingException
-            throw new TekniskException(e);
-        }
+            .retrieve()
+            .onStatus(HttpStatus::isError, this::håndterFeil)
+            .bodyToMono(OppgaveDto.class)
+            .block();
     }
 
     @Override
-    public String opprettOppgave(OpprettOppgaveDto request) throws FunksjonellException, TekniskException {
-        try (Response response = target
-            .request(MediaType.APPLICATION_JSON)
+    public List<OppgaveDto> hentOppgaveListe(OppgaveSearchRequest oppgaveSearchRequest) {
+        return hentOppgaveListe(oppgaveSearchRequest, 0);
+    }
+
+    private List<OppgaveDto> hentOppgaveListe(OppgaveSearchRequest oppgaveSearchRequest, int offset) {
+        final OppgaveSvar oppgaveSvar = hentOppgaveSvar(oppgaveSearchRequest, offset);
+        if (oppgaveSvar == null) {
+            return Collections.emptyList();
+        }
+        List<OppgaveDto> oppgaveListe = new ArrayList<>(oppgaveSvar.getOppgaver());
+        if (oppgaveSvar.getAntallTreffTotalt() > offset + OPPGAVE_ANTALL_ABAC_LIMIT) {
+            oppgaveListe.addAll(hentOppgaveListe(oppgaveSearchRequest, offset + OPPGAVE_ANTALL_ABAC_LIMIT));
+        }
+        return oppgaveListe;
+    }
+
+    private OppgaveSvar hentOppgaveSvar(OppgaveSearchRequest oppgaveSearchRequest, int offset) {
+        return webClient.get()
+            .uri(OPPGAVE_BASE_URI, uriBuilder ->
+                uriBuilder
+                    .queryParamIfPresent("aktoerId", Optional.ofNullable(oppgaveSearchRequest.getAktørId()))
+                    .queryParamIfPresent("tildeltEnhetsnr", Optional.ofNullable(oppgaveSearchRequest.getTildeltEnhetsnr()))
+                    .queryParamIfPresent("tildeltRessurs", Optional.ofNullable(oppgaveSearchRequest.getTildeltRessurs()))
+                    .queryParamIfPresent("sorteringsfelt", Optional.ofNullable(oppgaveSearchRequest.getSorteringsfelt()))
+                    .queryParamIfPresent("tilordnetRessurs", Optional.ofNullable(oppgaveSearchRequest.getTilordnetRessurs()))
+                    .queryParamIfPresent("statuskategori", Optional.ofNullable(oppgaveSearchRequest.getStatusKategori()))
+                    .queryParamIfPresent("behandlesAvApplikasjon", Optional.ofNullable(oppgaveSearchRequest.getBehandlesAvApplikasjon()))
+                    .queryParam("limit", OPPGAVE_ANTALL_ABAC_LIMIT)
+                    .queryParam("offset", offset)
+                    .queryParamIfPresent("behandlingstype", Optional.ofNullable(oppgaveSearchRequest.getBehandlingstype()))
+                    .queryParamIfPresent("behandlingstema", Optional.ofNullable(oppgaveSearchRequest.getBehandlingstema()))
+                    .queryParamIfPresent("oppgavetype", tilOptionalListe(oppgaveSearchRequest.getOppgavetype()))
+                    .queryParamIfPresent("saksreferanse", tilOptionalListe(oppgaveSearchRequest.getSaksreferanse()))
+                    .queryParamIfPresent("tema", tilOptionalListe(oppgaveSearchRequest.getTema()))
+                    .build()
+            ).header(CORRELATION_ID, getCallID())
+            .retrieve()
+            .onStatus(HttpStatus::isError, this::håndterFeil)
+            .bodyToMono(OppgaveSvar.class)
+            .block();
+    }
+
+    private Optional<Collection<String>> tilOptionalListe(String[] array) {
+        return array != null ? Optional.of(Arrays.stream(array).collect(Collectors.toList())) : Optional.empty();
+    }
+
+    @Override
+    public OppgaveDto oppdaterOppgave(OppgaveDto request) {
+        return webClient.put()
+            .uri(OPPGAVE_URI_MED_ID, request.getId())
             .header(CORRELATION_ID, getCallID())
-            .header(HttpHeaders.AUTHORIZATION, getAuth())
-            .post(Entity.json(request))) {
-            håndterEvFeil(response);
-            OppgaveDto oppgaveDto = response.readEntity(OppgaveDto.class);
-            return oppgaveDto.getId();
-        } catch (RuntimeException e) { // Kan være ProcessingException
-            throw new TekniskException(e);
-        }
+            .bodyValue(request)
+            .retrieve()
+            .onStatus(HttpStatus::isError, this::håndterFeil)
+            .bodyToMono(OppgaveDto.class)
+            .block();
     }
 
     @Override
-    public void håndterEvFeil(Response response) throws FunksjonellException, TekniskException {
-        if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) return;
-        FeilResponseDto feilResponseDto = response.readEntity(FeilResponseDto.class);
-        log.error("Feil oppstod. Uuid={}, Response Kode={}, Feilmelding={}", feilResponseDto.getUuid(), response.getStatus(), feilResponseDto.getFeilmelding());
-        httpStatusTilMelosysException(response.getStatus(), feilResponseDto.getFeilmelding());
+    public String opprettOppgave(OpprettOppgaveDto request) {
+        return webClient.post()
+            .uri(OPPGAVE_BASE_URI)
+            .header(CORRELATION_ID, getCallID())
+            .bodyValue(request)
+            .retrieve()
+            .onStatus(HttpStatus::isError, this::håndterFeil)
+            .bodyToMono(OppgaveDto.class)
+            .map(OppgaveDto::getId)
+            .block();
+    }
+
+    private Mono<Exception> håndterFeil(ClientResponse clientResponse) {
+        final HttpStatus status = clientResponse.statusCode();
+        return clientResponse.bodyToMono(FeilResponseDto.class)
+            .map(FeilResponseDto::getFeilmelding)
+            .map(feilmelding -> tilException(feilmelding, status));
     }
 }

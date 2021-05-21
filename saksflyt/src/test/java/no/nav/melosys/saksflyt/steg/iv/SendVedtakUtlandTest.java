@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.BucType;
@@ -17,7 +18,6 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.sed.SendVedtakUtland;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -70,6 +70,13 @@ class SendVedtakUtlandTest {
         prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
+        Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+
+        sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingService, behandlingsresultatService, brevBestiller, sedSomBrevService, utpekingService);
+    }
+
+    private Behandlingsresultat lagBehandlingsresultat() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(BEHANDLING_ID);
         lovvalgsperiode = new Lovvalgsperiode();
@@ -79,9 +86,9 @@ class SendVedtakUtlandTest {
         behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
         behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         behandlingsresultat.setBehandling(behandling);
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-
-        sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingService, behandlingsresultatService, brevBestiller, sedSomBrevService, utpekingService);
+        Set<Avklartefakta> avklartefakta = Set.of(new Avklartefakta());
+        behandlingsresultat.setAvklartefakta(avklartefakta);
+        return behandlingsresultat;
     }
 
     @Test
@@ -94,6 +101,9 @@ class SendVedtakUtlandTest {
     @Test
     void utfør_ingenInstitusjonEessiKlar_senderBrev() throws Exception {
         when(behandlingService.hentBehandling(anyLong())).thenReturn(prosessinstans.getBehandling());
+        when(behandlingsresultatService.hentBehandlingsresultatMedAvklartefakta(anyLong()))
+            .thenReturn(lagBehandlingsresultat());
+
         sendVedtakUtland.utfør(prosessinstans);
         verify(brevBestiller).bestill(brevbestillingArgumentCaptor.capture());
         assertThat(brevbestillingArgumentCaptor.getValue().getMottakere()).contains(Mottaker.av(Aktoersroller.MYNDIGHET));
@@ -110,7 +120,7 @@ class SendVedtakUtlandTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    void utfør_utenOppgittMottakerinstitusjon_forventHenterMottakerinstitusjonFraTidligereBuc() throws MelosysException {
+    void utfør_utenOppgittMottakerinstitusjon_forventHenterMottakerinstitusjonFraTidligereBuc() {
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
 
         Aktoer myndighet = new Aktoer();
@@ -131,7 +141,7 @@ class SendVedtakUtlandTest {
     }
 
     @Test
-    void utfør_utpekAnnetLandUtenEessiMottakere_lagerBrev() throws MelosysException {
+    void utfør_utpekAnnetLandUtenEessiMottakere_lagerBrev() {
         behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
@@ -151,7 +161,7 @@ class SendVedtakUtlandTest {
     }
 
     @Test
-    void utfør_norgeErUtpektElektronisk_senderA012() throws MelosysException {
+    void utfør_norgeErUtpektElektronisk_senderA012() {
         prosessinstans.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, "Hei");
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         sendVedtakUtland.utfør(prosessinstans);

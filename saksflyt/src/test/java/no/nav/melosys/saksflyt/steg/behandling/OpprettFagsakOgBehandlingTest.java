@@ -8,9 +8,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +27,7 @@ class OpprettFagsakOgBehandlingTest {
     @Mock
     private FagsakService fagsakService;
     @Mock
-    private TpsFasade tpsFasade;
+    private PersondataFasade persondataFasade;
 
     private OpprettFagsakOgBehandling opprettFagsakOgBehandling;
 
@@ -38,11 +36,11 @@ class OpprettFagsakOgBehandlingTest {
 
     @BeforeEach
     public void setUp() {
-        opprettFagsakOgBehandling = new OpprettFagsakOgBehandling(fagsakService, tpsFasade);
+        opprettFagsakOgBehandling = new OpprettFagsakOgBehandling(fagsakService, persondataFasade);
     }
 
     @Test
-    void utfør_typeJfrNySak_fagsakBliropprettet() throws FunksjonellException, TekniskException {
+    void utfør_typeJfrNySak_fagsakBliropprettet() {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.JFR_NY_SAK);
         String aktørId = "1000104568393";

@@ -12,8 +12,6 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -50,7 +48,7 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) {
 
         Long arkivsakID = prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class);
         Behandlingstema behandlingstema = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class);
@@ -77,7 +75,7 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
         prosessinstans.setBehandling(behandling);
     }
 
-    private void avsluttTidligereBehandling(Fagsak fagsak) throws TekniskException, FunksjonellException {
+    private void avsluttTidligereBehandling(Fagsak fagsak) {
         Behandling aktivBehandling = fagsak.hentAktivBehandling();
 
         if (aktivBehandling != null) {
@@ -85,7 +83,7 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
         }
     }
 
-    private void ferdigstillOppgave(String saksnummer) throws FunksjonellException, TekniskException {
+    private void ferdigstillOppgave(String saksnummer) {
         Optional<String> oppgaveID = oppgaveService.finnOppgaveMedFagsaksnummer(saksnummer)
             .map(Oppgave::getOppgaveId);
 

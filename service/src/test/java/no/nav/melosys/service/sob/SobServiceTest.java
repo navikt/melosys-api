@@ -6,12 +6,10 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +33,7 @@ class SobServiceTest {
     @Mock
     private SakOgBehandlingFasade sakOgBehandlingFasade;
     @Mock
-    private TpsFasade tpsFasade;
+    private PersondataFasade persondataFasade;
     @Mock
     private BehandlingService behandlingService;
 
@@ -46,12 +44,12 @@ class SobServiceTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        sobService = new SobService(sakOgBehandlingFasade, tpsFasade, behandlingService);
+        sobService = new SobService(sakOgBehandlingFasade, persondataFasade, behandlingService);
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(lagBehandling());
     }
 
     @Test
-    void sakOgBehandlingOpprettet_forventMapperMedVerdier() throws FunksjonellException, TekniskException {
+    void sakOgBehandlingOpprettet_forventMapperMedVerdier() {
         sobService.sakOgBehandlingOpprettet(BEHANDING_ID);
 
         verify(sakOgBehandlingFasade).sendBehandlingOpprettet(captor.capture());
@@ -64,7 +62,7 @@ class SobServiceTest {
     }
 
     @Test
-    void sakOgBehandlingAvsluttet_forventMapperMedVerdier() throws FunksjonellException, TekniskException {
+    void sakOgBehandlingAvsluttet_forventMapperMedVerdier() {
         sobService.sakOgBehandlingAvsluttet(BEHANDING_ID);
 
         verify(sakOgBehandlingFasade).sendBehandlingAvsluttet(captor.capture());

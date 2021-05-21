@@ -7,7 +7,6 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.sak.ArkivsakService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,7 +36,7 @@ class OpprettArkivsakTest {
     }
 
     @Test
-    void utfør_arkivsakIDEksistererIkkeFraFør_arkivsakBlirOpprettet() throws FunksjonellException, TekniskException {
+    void utfør_arkivsakIDEksistererIkkeFraFør_arkivsakBlirOpprettet() {
         final long forventetArkivsakID = 1234432;
 
         String aktørID = "4214323324";

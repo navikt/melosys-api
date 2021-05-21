@@ -6,18 +6,16 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.MoreCollectors;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.msm.AltinnDokument;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 
 import static no.nav.melosys.domain.arkiv.FysiskDokument.*;
 
 public class OpprettJournalpost extends Journalpost {
     private static final String SENTRAL_UTSKRIFT = "S";
     private static final String MEDLEMSKAP_OG_AVGIFT = "4530";
-    private static final String UNNTAK_FRA_MEDLEMSKAP = "UFM";
     private static final String MEDLEMSKAP = "MED";
     private static final String ALTINN = "ALTINN";
     private static final String UTENLANDSK_ORGANISASJON = "UTL_ORG";
@@ -36,23 +34,24 @@ public class OpprettJournalpost extends Journalpost {
     }
 
     public static OpprettJournalpost lagJournalpostForSendingAvSedSomBrev(
-        Long arkivsakID, String brukerFnr, SedType sedType, byte[] sedPdf,
-        String institusjonID, String institusjonNavn, String institusjonLand, List<FysiskDokument> vedlegg) {
+        String saksnummer, String brukerFnr, SedType sedType, byte[] sedPdf, String institusjonID,
+        String institusjonNavn, String institusjonLand, List<FysiskDokument> vedlegg, Tema tema) {
 
-        OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
+        var opprettJournalpost = new OpprettJournalpost();
         opprettJournalpost.setHoveddokument(lagFysiskDokumentSed(sedType, sedPdf));
         opprettJournalpost.setVedlegg(vedlegg);
-        opprettJournalpost.setArkivSakId(arkivsakID.toString());
+        opprettJournalpost.setSaksnummer(saksnummer);
         opprettJournalpost.setMottaksKanal(SENTRAL_UTSKRIFT);
         opprettJournalpost.setJournalposttype(Journalposttype.UT);
         opprettJournalpost.setJournalførendeEnhet(MEDLEMSKAP_OG_AVGIFT);
-        opprettJournalpost.setTema(UNNTAK_FRA_MEDLEMSKAP);
+        opprettJournalpost.setTema(tema.getKode());
 
         opprettJournalpost.setKorrespondansepartId(institusjonID);
         opprettJournalpost.setKorrespondansepartNavn(institusjonNavn);
         opprettJournalpost.setKorrespondansepartLand(institusjonLand);
         opprettJournalpost.setKorrespondansepartIdType(UTENLANDSK_ORGANISASJON);
         opprettJournalpost.setBrukerId(brukerFnr);
+        opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
 
         opprettJournalpost.setInnhold(opprettJournalpost.getHoveddokument().getTittel());
 
@@ -61,9 +60,8 @@ public class OpprettJournalpost extends Journalpost {
 
     public static OpprettJournalpost lagJournalpostForMottakAltinnSøknad(Fagsak fagsak,
                                                                          Collection<AltinnDokument> dokumenter,
-                                                                         String brukerID,
-                                                                         String avsenderNavn)
-        throws FunksjonellException, TekniskException {
+                                                                         String brukerFnr,
+                                                                         String avsenderNavn) {
         AltinnDokument hovedDokument = dokumenter.stream().filter(AltinnDokument::erSøknad)
             .collect(MoreCollectors.onlyElement());
         dokumenter.remove(hovedDokument);
@@ -73,13 +71,14 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setHoveddokument(lagFysiskHovedDokumentAltinn(hovedDokument, behandlingsgrunnlag));
         opprettJournalpost.setInnhold(opprettJournalpost.getHoveddokument().getTittel());
         opprettJournalpost.setVedlegg(dokumenter.stream().map(FysiskDokument::lagFysiskDokumentAltinn).collect(Collectors.toList()));
-        opprettJournalpost.setArkivSakId(fagsak.getGsakSaksnummer().toString());
+        opprettJournalpost.setSaksnummer(fagsak.getSaksnummer());
         opprettJournalpost.setMottaksKanal(ALTINN);
         opprettJournalpost.setEksternReferanseId(hovedDokument.getSoknadID());
         opprettJournalpost.setJournalposttype(Journalposttype.INN);
         opprettJournalpost.setJournalførendeEnhet(MEDLEMSKAP_OG_AVGIFT);
         opprettJournalpost.setTema(MEDLEMSKAP);
-        opprettJournalpost.setBrukerId(brukerID);
+        opprettJournalpost.setBrukerId(brukerFnr);
+        opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
         opprettJournalpost.setForsendelseMottatt(hovedDokument.getInnsendtTidspunkt());
 
         fagsak.hentRepresentant(Representerer.BRUKER).ifPresentOrElse(
@@ -89,7 +88,7 @@ public class OpprettJournalpost extends Journalpost {
                 opprettJournalpost.setKorrespondansepartIdType(ORGNR);
             },
             () -> {
-                opprettJournalpost.setKorrespondansepartId(brukerID);
+                opprettJournalpost.setKorrespondansepartId(brukerFnr);
                 opprettJournalpost.setKorrespondansepartNavn(avsenderNavn);
                 opprettJournalpost.setKorrespondansepartIdType(FNR);
             }
@@ -100,12 +99,13 @@ public class OpprettJournalpost extends Journalpost {
 
     public static OpprettJournalpost lagJournalpostForBrev(JournalpostBestilling bestilling) {
         OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
-        opprettJournalpost.setHoveddokument(lagInfoBrevPdf(bestilling.getTittel(), bestilling.getBrevkode(), bestilling.getPdf()));
+        opprettJournalpost.setHoveddokument(lagFysiskDokument(bestilling));
         opprettJournalpost.setJournalposttype(Journalposttype.UT);
         opprettJournalpost.setJournalførendeEnhet(MEDLEMSKAP_OG_AVGIFT);
         opprettJournalpost.setTema(MEDLEMSKAP);
-        opprettJournalpost.setArkivSakId(bestilling.getArkivSakId());
+        opprettJournalpost.setSaksnummer(bestilling.getSaksnummer());
         opprettJournalpost.setBrukerId(bestilling.getBrukerFnr());
+        opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
         opprettJournalpost.setKorrespondansepartId(bestilling.getMottakerId());
         opprettJournalpost.setKorrespondansepartNavn(bestilling.getMottakerNavn());
         opprettJournalpost.setKorrespondansepartIdType(bestilling.erMottakerOrg() ? ORGNR : FNR);

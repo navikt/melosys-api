@@ -2,12 +2,10 @@ package no.nav.melosys.integrasjon.doksys;
 
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.UstrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.DistribuerJournalpostConsumer;
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.Adresse;
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostRequest;
@@ -29,13 +27,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static no.nav.melosys.domain.Fagsystem.GSAK_I_JOARK;
 import static no.nav.melosys.domain.Fagsystem.MELOSYS;
 import static no.nav.melosys.domain.dokument.adresse.Adresse.sammenslå;
-import static no.nav.melosys.domain.dokument.felles.Land.NORGE;
 import static no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID;
+import static org.springframework.util.StringUtils.hasText;
 
 @Service
 @Primary
@@ -59,7 +55,7 @@ public class DoksysService implements DoksysFasade {
     }
 
     @Override
-    public byte[] produserDokumentutkast(Dokumentbestilling dokumentbestilling) throws IntegrasjonException {
+    public byte[] produserDokumentutkast(Dokumentbestilling dokumentbestilling) {
         ProduserDokumentutkastRequest wsRequest = new ProduserDokumentutkastRequest();
         DokumentbestillingMetadata metadata = dokumentbestilling.getMetadata();
 
@@ -79,8 +75,7 @@ public class DoksysService implements DoksysFasade {
     }
 
     @Override
-    public DokumentbestillingResponse produserIkkeredigerbartDokument(Dokumentbestilling dokumentbestilling)
-        throws FunksjonellException, TekniskException {
+    public DokumentbestillingResponse produserIkkeredigerbartDokument(Dokumentbestilling dokumentbestilling) {
         ProduserIkkeredigerbartDokumentRequest wsRequest = new ProduserIkkeredigerbartDokumentRequest();
         Dokumentbestillingsinformasjon info = new Dokumentbestillingsinformasjon();
 
@@ -165,12 +160,12 @@ public class DoksysService implements DoksysFasade {
     }
 
     @Override
-    public String distribuerJournalpost(String journalpostId, StrukturertAdresse mottakeradresse, Kontaktopplysning kontaktopplysning) {
+    public String distribuerJournalpost(String journalpostId, StrukturertAdresse mottakeradresse, Kontaktopplysning kontaktopplysning, String kontaktpersonNavn) {
         DistribuerJournalpostRequest request = DistribuerJournalpostRequest.builder()
             .journalpostId(journalpostId)
             .bestillendeFagsystem(MELOSYS.getKode())
             .dokumentProdApp(MELOSYS.getKode())
-            .adresse(mapAdresse(mottakeradresse, kontaktopplysning))
+            .adresse(mapAdresse(mottakeradresse, kontaktopplysning, kontaktpersonNavn))
             .build();
 
         return distribuerJournalpostConsumer.distribuerJournalpost(request).getBestillingsId();
@@ -208,13 +203,17 @@ public class DoksysService implements DoksysFasade {
             .build();
     }
 
-    private Adresse mapAdresse(StrukturertAdresse strukturertAdresse, Kontaktopplysning kontaktopplysning) {
+    private Adresse mapAdresse(StrukturertAdresse strukturertAdresse, Kontaktopplysning kontaktopplysning, String kontaktpersonNavn) {
         Adresse.AdresseBuilder adresseBuilder = Adresse.builder()
             .land(strukturertAdresse.landkode);
 
-        if (kontaktopplysning != null) {
+        if(hasText(kontaktpersonNavn)) {
             adresseBuilder
-                .adresselinje1("v/" + kontaktopplysning.getKontaktNavn())
+                .adresselinje1("Att: " + kontaktpersonNavn)
+                .adresselinje2(strukturertAdresse.gatenavn + ((strukturertAdresse.husnummer == null) ? "" : " " + strukturertAdresse.husnummer));
+        } else if (kontaktopplysning != null) {
+            adresseBuilder
+                .adresselinje1("Att: " + kontaktopplysning.getKontaktNavn())
                 .adresselinje2(strukturertAdresse.gatenavn + ((strukturertAdresse.husnummer == null) ? "" : " " + strukturertAdresse.husnummer));
         } else {
             adresseBuilder
@@ -241,7 +240,7 @@ public class DoksysService implements DoksysFasade {
         return utenlandskPostadresse;
     }
 
-    private Aktoer lagMottaker(DokumentbestillingMetadata metadata) throws FunksjonellException {
+    private Aktoer lagMottaker(DokumentbestillingMetadata metadata) {
         if (metadata.mottaker == null) {
             throw new FunksjonellException("Brev kan ikke sendes, mottaker er ikke satt.");
         }

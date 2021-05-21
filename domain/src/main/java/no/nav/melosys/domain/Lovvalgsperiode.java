@@ -190,7 +190,7 @@ public class Lovvalgsperiode implements PeriodeOmLovvalg {
     }
 
     public static Lovvalgsperiode av(AnmodningsperiodeSvar anmodningsperiodeSvar,
-                                     Medlemskapstyper medlemskapstype) throws FunksjonellException {
+                                     Medlemskapstyper medlemskapstype) {
         if (anmodningsperiodeSvar == null) {
             throw new FunksjonellException("Kan ikke opprette lovvalgsperiode fra anmodningsperiode " +
                 "uten at et svar er registrert!");

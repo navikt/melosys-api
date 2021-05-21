@@ -2,24 +2,24 @@ package no.nav.melosys.service.oppgave;
 
 
 import java.util.*;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.oppgave.dto.*;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -41,7 +41,7 @@ public class OppgaveService {
     private final OppgaveFasade oppgaveFasade;
     private final SaksopplysningerService saksopplysningerService;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
-    private final TpsFasade tpsFasade;
+    private final PersondataFasade persondataFasade;
     private static final String UKJENT = "UKJENT";
 
     @Autowired
@@ -49,34 +49,34 @@ public class OppgaveService {
                           FagsakService fagsakService,
                           OppgaveFasade oppgaveFasade,
                           SaksopplysningerService saksopplysningerService,
-                          BehandlingsgrunnlagService behandlingsgrunnlagService, TpsFasade tpsFasade) {
+                          BehandlingsgrunnlagService behandlingsgrunnlagService, PersondataFasade persondataFasade) {
         this.behandlingService = behandlingService;
         this.fagsakService = fagsakService;
         this.oppgaveFasade = oppgaveFasade;
         this.saksopplysningerService = saksopplysningerService;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
-        this.tpsFasade = tpsFasade;
+        this.persondataFasade = persondataFasade;
     }
 
-    public List<Oppgave> finnOppgaverMedBrukerID(String brukerIdent) throws FunksjonellException, TekniskException {
-        String aktørId = tpsFasade.hentAktørIdForIdent(brukerIdent);
+    public List<Oppgave> finnOppgaverMedBrukerID(String brukerIdent) {
+        String aktørId = persondataFasade.hentAktørIdForIdent(brukerIdent);
         if (aktørId == null) {
             throw new IkkeFunnetException("Finner ikke aktørId for ident " + brukerIdent);
         }
         return oppgaveFasade.finnOppgaverMedBrukerID(aktørId);
     }
 
-    public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) throws TekniskException, FunksjonellException {
+    public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) {
         Collection<Oppgave> oppgaverFraDomain = oppgaveFasade.finnOppgaverMedAnsvarlig(ansvarligID);
         return oppgaverTilDtoer(oppgaverFraDomain);
     }
 
-    public void ferdigstillOppgave(String oppgaveID) throws FunksjonellException, TekniskException {
+    public void ferdigstillOppgave(String oppgaveID) {
         log.info("Ferdigstiller oppgave {}", oppgaveID);
         oppgaveFasade.ferdigstillOppgave(oppgaveID);
     }
 
-    public void ferdigstillOppgaveMedSaksnummer(String fagSaksnummer) throws FunksjonellException, TekniskException {
+    public void ferdigstillOppgaveMedSaksnummer(String fagSaksnummer) {
         Oppgave oppgave;
         try {
             oppgave = hentOppgaveMedFagsaksnummer(fagSaksnummer);
@@ -87,12 +87,12 @@ public class OppgaveService {
         ferdigstillOppgave(oppgave.getOppgaveId());
     }
 
-    public void leggTilbakeOppgaveMedSaksnummer(String fagSaksnummer) throws FunksjonellException, TekniskException {
+    public void leggTilbakeOppgaveMedSaksnummer(String fagSaksnummer) {
         Oppgave oppgave = hentOppgaveMedFagsaksnummer(fagSaksnummer);
         oppgaveFasade.leggTilbakeOppgave(oppgave.getOppgaveId());
     }
 
-    public Optional<Oppgave> finnOppgaveMedFagsaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
+    public Optional<Oppgave> finnOppgaveMedFagsaksnummer(String saksnummer) {
         List<Oppgave> oppgaver = oppgaveFasade.finnOppgaverMedSaksnummer(saksnummer);
 
         if (!oppgaver.isEmpty()) {
@@ -105,27 +105,29 @@ public class OppgaveService {
         }
     }
 
-    public Oppgave hentOppgaveMedFagsaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
+    public Oppgave hentOppgaveMedFagsaksnummer(String saksnummer) {
         return finnOppgaveMedFagsaksnummer(saksnummer)
             .orElseThrow(() -> new IkkeFunnetException("Finner ingen oppgave med saksnummer " + saksnummer));
     }
 
-    public Oppgave hentOppgaveMedOppgaveID(String oppgaveID) throws FunksjonellException, TekniskException {
+    public Oppgave hentOppgaveMedOppgaveID(String oppgaveID) {
         return oppgaveFasade.hentOppgave(oppgaveID);
     }
 
-    public Behandling hentSistAktiveBehandling(String saksnummer) throws FunksjonellException, TekniskException {
+    public Behandling hentSistAktiveBehandling(String saksnummer) {
         return fagsakService.hentFagsak(saksnummer).hentSistAktiveBehandling();
     }
 
-    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) throws FunksjonellException, TekniskException {
+    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) {
 
         Optional<Oppgave> eksisterendeOppgave = finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         if (eksisterendeOppgave.isEmpty()) {
+            String beskrivelse = behandling.erElektroniskSøknad() ? "Mottatt elektronisk søknad"  : null;
             Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType())
                 .setTilordnetRessurs(tilordnetRessurs)
                 .setJournalpostId(journalpostID)
+                .setBeskrivelse(beskrivelse)
                 .setAktørId(aktørID)
                 .setSaksnummer(behandling.getFagsak().getSaksnummer())
                 .build();
@@ -140,32 +142,41 @@ public class OppgaveService {
         }
     }
 
-    public void opprettJournalføringsoppgave(String journalpostID, String aktørID) throws FunksjonellException, TekniskException {
+    public void opprettJournalføringsoppgave(String journalpostID, String aktørID) {
         final String oppgaveID = opprettOppgave(OppgaveFactory.lagJournalføringsoppgave(journalpostID).setAktørId(aktørID).build());
         log.info("Journalføringsoppgave {} opprettet for journalpost {}", oppgaveID, journalpostID);
     }
 
-    public String opprettOppgave(Oppgave oppgave) throws FunksjonellException, TekniskException {
+    public String opprettOppgave(Oppgave oppgave) {
         return oppgaveFasade.opprettOppgave(oppgave);
     }
 
-    public void oppdaterOppgave(String oppgaveID, OppgaveOppdatering oppgaveOppdatering) throws FunksjonellException, TekniskException {
+    public void oppdaterOppgave(String oppgaveID, OppgaveOppdatering oppgaveOppdatering) {
         oppgaveFasade.oppdaterOppgave(oppgaveID, oppgaveOppdatering);
     }
 
-    public void tildelOppgave(String oppgaveID, String saksbehandler) throws FunksjonellException, TekniskException {
+    public void tildelOppgave(String oppgaveID, String saksbehandler) {
         oppgaveFasade.oppdaterOppgave(oppgaveID, OppgaveOppdatering.builder().tilordnetRessurs(saksbehandler).build());
     }
 
-    private List<OppgaveDto> oppgaverTilDtoer(Collection<Oppgave> oppgaverFraDomain) throws TekniskException, FunksjonellException {
-        List<OppgaveDto> res = new ArrayList<>();
-        for (Oppgave o : oppgaverFraDomain) {
-            res.add(tilOppgaveDto(o));
-        }
-        return res;
+    private List<OppgaveDto> oppgaverTilDtoer(Collection<Oppgave> oppgaverFraDomain) {
+        return oppgaverFraDomain.stream()
+            .map(this::tilOppgaveDtoHåndterException)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
     }
 
-    private OppgaveDto tilOppgaveDto(Oppgave oppgave) throws TekniskException, FunksjonellException {
+    @Nullable
+    private OppgaveDto tilOppgaveDtoHåndterException(Oppgave oppgave) {
+        try {
+            return tilOppgaveDto(oppgave);
+        } catch (Exception e) {
+            log.error("Kan ikke mappe oppgave {}", oppgave.getOppgaveId(), e);
+            return null;
+        }
+    }
+
+    private OppgaveDto tilOppgaveDto(Oppgave oppgave) {
         OppgaveDto dest;
 
         if (oppgave.erJournalFøring()) {
@@ -173,10 +184,10 @@ public class OppgaveService {
             jfrOppgaveDto.setJournalpostID(oppgave.getJournalpostId());
             dest = jfrOppgaveDto;
             String aktørId = oppgave.getAktørId();
-            String fnr = aktørId != null ? tpsFasade.hentIdentForAktørId(aktørId) : null;
+            String fnr = aktørId != null ? persondataFasade.hentFolkeregisterIdent(aktørId) : null;
             if (StringUtils.isNotEmpty(fnr)){
                 dest.setFnr(fnr);
-                dest.setSammensattNavn(tpsFasade.hentSammensattNavn(fnr));
+                dest.setSammensattNavn(persondataFasade.hentSammensattNavn(fnr));
             }
             else {
                 dest.setFnr(UKJENT);
@@ -247,7 +258,7 @@ public class OppgaveService {
         return new PeriodeDto(periode.getFom(), periode.getTom());
     }
 
-    private boolean harBeskyttelsesbehov(long behandlingID) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
+    private boolean harBeskyttelsesbehov(long behandlingID) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         if (behandling.hentPersonDokument().harBeskyttelsesbehov()) {
             return true;
@@ -255,7 +266,7 @@ public class OppgaveService {
             return false;
         }
         for (String fnr : behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().hentFnrMedfølgendeBarn()) {
-            if (tpsFasade.harStrengtFortroligAdresse(fnr)) {
+            if (persondataFasade.harStrengtFortroligAdresse(fnr)) {
                 return true;
             }
         }

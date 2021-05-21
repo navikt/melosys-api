@@ -17,6 +17,8 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import static java.util.Optional.ofNullable;
+
 @Entity
 @Table(name = "behandlingsresultat")
 @EntityListeners(AuditingEntityListener.class)
@@ -54,7 +56,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "utfall_utpeking")
-    private Utfallregistreringunntak utfallUtpeking; //FIXME: egne kodeverk-verdier for utfallUtpeking
+    private Utfallregistreringunntak utfallUtpeking;
 
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Avklartefakta> avklartefakta = new HashSet<>(1);
@@ -77,7 +79,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<BehandlingsresultatBegrunnelse> behandlingsresultatBegrunnelser = new HashSet<>(1);
 
-    @OneToOne(mappedBy = "behandlingsresultat", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private MedlemAvFolketrygden medlemAvFolketrygden;
 
     public Long getId() {
@@ -212,6 +214,10 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return medlemAvFolketrygden;
     }
 
+    public Optional<MedlemAvFolketrygden> finnMedlemAvFolketrygden() {
+        return ofNullable(getMedlemAvFolketrygden());
+    }
+
     public void setMedlemAvFolketrygden(MedlemAvFolketrygden medlemAvFolketrygden) {
         this.medlemAvFolketrygden = medlemAvFolketrygden;
     }
@@ -221,10 +227,9 @@ public class Behandlingsresultat extends RegistreringsInfo {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Behandlingsresultat)) {
+        if (!(o instanceof Behandlingsresultat that)) {
             return false;
         }
-        Behandlingsresultat that = (Behandlingsresultat) o;
         return Objects.equals(this.type, that.type)
             && Objects.equals(this.behandling, that.behandling);
     }
@@ -235,11 +240,13 @@ public class Behandlingsresultat extends RegistreringsInfo {
     }
 
     public boolean erAvslag() {
-        if (type == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
-            return true;
-        }
-        return type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            && hentValidertLovvalgsperiode().erAvslått();
+        return erAvslagManglendeOpplysninger() ||
+            (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+                && hentValidertLovvalgsperiode().erAvslått());
+    }
+
+    public boolean erAvslagManglendeOpplysninger() {
+        return type == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL;
     }
 
     public boolean erAnmodningOmUnntak() {
@@ -293,15 +300,6 @@ public class Behandlingsresultat extends RegistreringsInfo {
             && finnValidertLovvalgsperiode().stream().anyMatch(PeriodeOmLovvalg::erArtikkel13);
     }
 
-    // Medl skal ikke oppdateres ved avslag.
-    public boolean medlOppdateres() {
-        return harMedlPeriode() || !erAvslag();
-    }
-
-    private boolean harMedlPeriode() {
-        return lovvalgsperioder.stream().anyMatch(l -> l.getMedlPeriodeID() != null);
-    }
-
     public boolean harPeriodeOmLovvalg() {
         return !lovvalgsperioder.isEmpty() || !anmodningsperioder.isEmpty() || !utpekingsperioder.isEmpty();
     }
@@ -309,9 +307,9 @@ public class Behandlingsresultat extends RegistreringsInfo {
     public PeriodeOmLovvalg hentValidertPeriodeOmLovvalg() {
         if (!lovvalgsperioder.isEmpty()) {
             return hentValidertLovvalgsperiode();
-        } else if (!anmodningsperioder.isEmpty()){
+        } else if (!anmodningsperioder.isEmpty()) {
             return hentValidertAnmodningsperiode();
-        } else if (!utpekingsperioder.isEmpty()){
+        } else if (!utpekingsperioder.isEmpty()) {
             return hentValidertUtpekingsperiode();
         }
 
@@ -378,7 +376,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
     public boolean erInnvilgetArbeidPåSkipOmfattetAvArbeidsland() {
         return finnValidertLovvalgsperiode().stream()
             .anyMatch(l -> l.erInnvilget()
-                &&  l.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
+                && l.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
                 && l.getTilleggsbestemmelse() == Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
     }
 
@@ -387,6 +385,13 @@ public class Behandlingsresultat extends RegistreringsInfo {
             && utfallRegistreringUnntak == Utfallregistreringunntak.GODKJENT;
     }
 
+    public boolean a1Produseres() {
+        return erInnvilgelse() && !erUtpeking() && harVedtak();
+    }
+
+    public void settVedtakMetadata(Vedtakstyper vedtakstype, LocalDate klagefrist) {
+        settVedtakMetadata(vedtakstype, null, klagefrist);
+    }
 
     public void settVedtakMetadata(Vedtakstyper vedtakstype,
                                    String revurderBegrunnelse,

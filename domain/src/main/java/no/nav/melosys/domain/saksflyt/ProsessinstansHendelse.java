@@ -2,7 +2,6 @@ package no.nav.melosys.domain.saksflyt;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
-
 import javax.persistence.*;
 
 
@@ -28,6 +27,7 @@ public class ProsessinstansHendelse {
     @Column(name = "type", updatable = false)
     private String type;
 
+    @Lob
     @Column(name = "melding", nullable = false, updatable = false)
     private String melding;
 

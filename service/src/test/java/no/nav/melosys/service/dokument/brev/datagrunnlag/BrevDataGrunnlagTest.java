@@ -6,37 +6,38 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.MaritimtArbeid;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MaritimtArbeid;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BrevDataGrunnlagTest {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class BrevDataGrunnlagTest {
     @Mock
     private KodeverkService kodeverkService;
     @Mock
@@ -48,8 +49,8 @@ public class BrevDataGrunnlagTest {
     private Soeknad søknad;
     private BrevDataGrunnlag dataGrunnlag;
 
-    @Before
-    public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    @BeforeEach
+    public void setUp() {
         AvklartMaritimtArbeid maritimtArbeid = lagAvklartMaritimtArbeid();
         when(avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(anyLong()))
             .thenReturn(Collections.singletonMap("Dunfjæder", maritimtArbeid));
@@ -83,15 +84,19 @@ public class BrevDataGrunnlagTest {
         return behandling;
     }
 
-    @Test(expected = FunksjonellException.class)
-    public void hentBostedsadresse_manglerOppgittOgTpsBostedsadresse_girUnntak() throws FunksjonellException {
+    @Test
+    void hentBostedsadresse_manglerOppgittOgTpsBostedsadresse_girUnntak() {
         person.bostedsadresse = new Bostedsadresse();
         søknad.bosted.oppgittAdresse = new StrukturertAdresse();
-        dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
+        var bostedsgrunnlag = dataGrunnlag.getBostedGrunnlag();
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(bostedsgrunnlag::hentBostedsadresse)
+            .withMessageContaining("finnes ikke");
     }
 
     @Test
-    public void hentBostedsadresse_brukerBostedFraPersonDokument() throws FunksjonellException {
+    void hentBostedsadresse_brukerBostedFraPersonDokument() {
         StrukturertAdresse bostedsadresse = dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
         assertThat(bostedsadresse.gatenavn).isEqualTo("Hjemgata");
         assertThat(bostedsadresse.husnummer).isEqualTo("23");
@@ -101,7 +106,7 @@ public class BrevDataGrunnlagTest {
     }
 
     @Test
-    public void hentBostedsadresse_oppgittAdresseOverstyrerTPS_nårOppgittAdresseISøknad() throws FunksjonellException {
+    void hentBostedsadresse_oppgittAdresseOverstyrerTPS_nårOppgittAdresseISøknad() {
         StrukturertAdresse oppgittBosted = new StrukturertAdresse();
         oppgittBosted.gatenavn = "HerBorJegGata";
         oppgittBosted.husnummer = "123";
@@ -121,7 +126,7 @@ public class BrevDataGrunnlagTest {
     }
 
     @Test
-    public void hentArbeidssteder_medMaritimtArbeid_girMaritimeArbeidssteder() {
+    void hentArbeidssteder_medMaritimtArbeid_girMaritimeArbeidssteder() {
         MaritimtArbeid maritimtArbeidISøknad = lagMaritimtArbeid();
         this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
 
@@ -129,30 +134,14 @@ public class BrevDataGrunnlagTest {
         assertThat(arbeidssteder.size()).isEqualTo(1);
 
         MaritimtArbeidssted arbeidssted = (MaritimtArbeidssted) arbeidssteder.get(0);
-        assertThat(arbeidssted.getForetakNavn()).isEqualTo(maritimtArbeidISøknad.foretakNavn);
         assertThat(arbeidssted.getEnhetNavn()).isEqualTo(maritimtArbeidISøknad.enhetNavn);
-        assertThat(arbeidssted.getIdnummer()).isEqualTo(maritimtArbeidISøknad.foretakOrgnr);
+        assertThat(arbeidssted.getForetakNavn()).isNullOrEmpty();
+        assertThat(arbeidssted.getIdnummer()).isNullOrEmpty();
         assertThat(arbeidssted.getYrkesgruppe().getKode()).isEqualTo(Yrkesgrupper.SOKKEL_ELLER_SKIP.getKode());
     }
 
     @Test
-    public void hentArbeidssteder_medMaritimtArbeidUtenForetak_girMaritimeArbeidssteder() {
-        MaritimtArbeid maritimtArbeidISøknad = lagMaritimtArbeid();
-        maritimtArbeidISøknad.foretakOrgnr = null;
-        maritimtArbeidISøknad.foretakNavn = null;
-        this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
-
-        List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder();
-        assertThat(arbeidssteder.size()).isEqualTo(1);
-
-        MaritimtArbeidssted arbeidssted = (MaritimtArbeidssted) arbeidssteder.get(0);
-        assertThat(arbeidssted.getForetakNavn()).isNullOrEmpty();
-        assertThat(arbeidssted.getEnhetNavn()).isEqualTo("Dunfjæder");
-        assertThat(arbeidssted.getIdnummer()).isNullOrEmpty();
-    }
-
-    @Test
-    public void hentArbeidssteder_medMaritimtArbeidUtenAvklartMaritimtArbeid_girTomListe() throws TekniskException {
+    void hentArbeidssteder_medMaritimtArbeidUtenAvklartMaritimtArbeid_girTomListe() {
         MaritimtArbeid maritimtArbeidISøknad = lagMaritimtArbeid();
         this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
 

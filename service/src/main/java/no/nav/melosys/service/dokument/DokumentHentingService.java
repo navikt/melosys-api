@@ -4,9 +4,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.integrasjon.joark.HentJournalposterTilknyttetSakRequest;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,15 +25,15 @@ public class DokumentHentingService {
     /**
      * Henter et dokument fra Joark
      */
-    public byte[] hentDokument(String journalpostID, String dokumentID) throws IkkeFunnetException, SikkerhetsbegrensningException {
+    public byte[] hentDokument(String journalpostID, String dokumentID) {
         return joarkFasade.hentDokument(journalpostID, dokumentID);
     }
 
     /**
      * Henter dokumenter knyttet til en sak med et gitt saksnummer
      */
-    public List<Journalpost> hentDokumenter(String saksnummer) throws IkkeFunnetException, IntegrasjonException, SikkerhetsbegrensningException {
+    public List<Journalpost> hentDokumenter(String saksnummer) {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        return joarkFasade.hentKjerneJournalpostListe(fagsak.getGsakSaksnummer());
+        return joarkFasade.hentJournalposterTilknyttetSak(new HentJournalposterTilknyttetSakRequest(fagsak.getGsakSaksnummer(), saksnummer));
     }
 }

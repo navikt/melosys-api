@@ -9,9 +9,6 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.service.behandling.BehandlingService;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +37,7 @@ class SendOrienteringAnmodningUnntakTest {
     private static final String SAKSBEHANDLER = "Z121212";
 
     @BeforeEach
-    public void setUp() throws IkkeFunnetException {
+    public void setUp() {
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setId(1L);
@@ -57,7 +54,7 @@ class SendOrienteringAnmodningUnntakTest {
     }
 
     @Test
-    void utfoerSteg() throws FunksjonellException, TekniskException {
+    void utfoerSteg() {
         sendOrienteringAnmodningUnntak.utfør(prosessinstans);
         verify(brevBestiller).bestill(eq(Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK), eq(SAKSBEHANDLER), eq(Mottaker.av(Aktoersroller.BRUKER)), any(Behandling.class));
     }

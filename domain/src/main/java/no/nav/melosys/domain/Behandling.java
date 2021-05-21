@@ -1,6 +1,7 @@
 package no.nav.melosys.domain;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 import javax.persistence.*;
 
@@ -12,6 +13,7 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
+import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -62,6 +64,9 @@ public class Behandling extends RegistreringsInfo {
 
     @Column(name = "initierende_dokument_id")
     private String initierendeDokumentId;
+
+    @Column(name = "behandlingsfrist")
+    private LocalDate behandlingsfrist;
 
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Saksopplysning> saksopplysninger = new HashSet<>(1);
@@ -159,6 +164,14 @@ public class Behandling extends RegistreringsInfo {
         this.initierendeDokumentId = initierendeDokumentId;
     }
 
+    public LocalDate getBehandlingsfrist() {
+        return behandlingsfrist;
+    }
+
+    public void setBehandlingsfrist(LocalDate behandlingsfrist) {
+        this.behandlingsfrist = behandlingsfrist;
+    }
+
     public Behandling getOpprinneligBehandling() {
         return opprinneligBehandling;
     }
@@ -183,7 +196,7 @@ public class Behandling extends RegistreringsInfo {
         this.behandlingsgrunnlag = behandlingsgrunnlag;
     }
 
-    public PersonDokument hentPersonDokument() throws TekniskException {
+    public PersonDokument hentPersonDokument() {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.PERSOPL);
         return (PersonDokument) saksopplysning
             .orElseThrow(() -> new TekniskException("Finner ikke persondokument"));
@@ -193,19 +206,19 @@ public class Behandling extends RegistreringsInfo {
         return hentDokument(SaksopplysningType.PERSOPL).map(s -> (PersonDokument) s);
     }
 
-    public MedlemskapDokument hentMedlemskapDokument() throws TekniskException {
+    public MedlemskapDokument hentMedlemskapDokument() {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.MEDL);
         return (MedlemskapDokument) saksopplysning
             .orElseThrow(() -> new TekniskException("Finner ikke medlemskapdokument"));
     }
 
-    public ArbeidsforholdDokument hentArbeidsforholdDokument() throws TekniskException {
+    public ArbeidsforholdDokument hentArbeidsforholdDokument() {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.ARBFORH);
         return (ArbeidsforholdDokument) saksopplysning
             .orElseThrow(() -> new TekniskException("Finner ikke arbeidsforholddokument"));
     }
 
-    public SedDokument hentSedDokument() throws TekniskException {
+    public SedDokument hentSedDokument() {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.SEDOPPL);
         return (SedDokument) saksopplysning
             .orElseThrow(() -> new TekniskException("Finner ikke seddokument"));
@@ -215,7 +228,7 @@ public class Behandling extends RegistreringsInfo {
         return hentDokument(SaksopplysningType.SEDOPPL).map(s -> (SedDokument) s);
     }
 
-    public InntektDokument hentInntektDokument() throws TekniskException {
+    public InntektDokument hentInntektDokument() {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.INNTK);
         return (InntektDokument) saksopplysning
             .orElseThrow(() -> new TekniskException("Finner ikke inntektdokument"));
@@ -231,7 +244,7 @@ public class Behandling extends RegistreringsInfo {
             .findFirst().map(Saksopplysning::getDokument);
     }
 
-    public ErPeriode hentPeriode() throws IkkeFunnetException {
+    public ErPeriode hentPeriode() {
         return finnPeriode()
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke periode for behandling " + id));
     }
@@ -275,13 +288,13 @@ public class Behandling extends RegistreringsInfo {
         if (this.id != 0 && that.id != 0) { // Begge entiteter er persistert. True hvis samme rad i db.
             return this.id.equals(that.getId());
         }
-        return Objects.equals(registrertDato, that.registrertDato)
+        return Objects.equals(this.getRegistrertDato(), that.getRegistrertDato())
             && Objects.equals(this.fagsak, that.fagsak);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(registrertDato, fagsak);
+        return Objects.hash(getRegistrertDato(), fagsak);
     }
 
     public boolean kanAvsluttesManuelt() {
@@ -359,12 +372,23 @@ public class Behandling extends RegistreringsInfo {
         return erRegistreringAvUnntak(tema.getKode());
     }
 
+    public boolean erAnmodningOmUnntak() {
+        return erAnmodningOmUnntak(tema.getKode());
+    }
+
     public static boolean erGyldigBehandlingAvSøknad(Behandlingstema behandlingstema) {
         return BEHANDLINGSTEMA_SØKNAD.contains(behandlingstema);
     }
 
     public static boolean erBehandlingAvSøknad(Behandlingstema behandlingstema) {
         return erBehandlingAvSøknad(behandlingstema.getKode());
+    }
+
+    public boolean erElektroniskSøknad() {
+        if (behandlingsgrunnlag != null) {
+            return behandlingsgrunnlag.getType() == Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS;
+        }
+        return false;
     }
 
     public static boolean erBehandlingAvSøknad(String behandlingstemaKode) {
@@ -407,6 +431,10 @@ public class Behandling extends RegistreringsInfo {
         return Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING.getKode().equalsIgnoreCase(behandlingstemaKode)
             || Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE.getKode().equalsIgnoreCase(behandlingstemaKode)
             || Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND.getKode().equalsIgnoreCase(behandlingstemaKode);
+    }
+
+    public boolean harStatus(Behandlingsstatus status) {
+        return this.status == status;
     }
 
     @Override

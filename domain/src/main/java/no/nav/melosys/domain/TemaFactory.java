@@ -20,7 +20,7 @@ public class TemaFactory {
         REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
         ANMODNING_OM_UNNTAK_HOVEDREGEL, BESLUTNING_LOVVALG_ANNET_LAND, ØVRIGE_SED_UFM);
 
-    public static Tema fraBehandlingstema(Behandlingstema behandlingstema) throws FunksjonellException {
+    public static Tema fraBehandlingstema(Behandlingstema behandlingstema) {
         if (GYLDIGE_BEHANDLINGSTEMA_MED.contains(behandlingstema)) {
             return Tema.MED;
         } else if (GYLDIGE_BEHANDLINGSTEMA_UFM.contains(behandlingstema)) {

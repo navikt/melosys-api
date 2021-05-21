@@ -1,6 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper.arbeidssted;
 
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MaritimtArbeid;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.MaritimtArbeid;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
@@ -12,7 +12,7 @@ public final class MaritimtArbeidssted extends AbstractArbeidssted implements Ik
     private final String flaggLandKode;
 
     public MaritimtArbeidssted(MaritimtArbeid maritimtArbeid, AvklartMaritimtArbeid avklartMaritimtArbeid) {
-        super(maritimtArbeid.foretakNavn, maritimtArbeid.foretakOrgnr, avklartMaritimtArbeid.getLand());
+        super(null, null, avklartMaritimtArbeid.getLand());
         this.avklartMaritimtArbeid = avklartMaritimtArbeid;
         this.enhetNavn = maritimtArbeid.enhetNavn;
         this.flaggLandKode = maritimtArbeid.flaggLandkode;

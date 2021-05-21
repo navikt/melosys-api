@@ -26,16 +26,20 @@ public class EessiConsumerProducer {
 
     @Bean
     @Primary
-    public EessiConsumer melosysEessiConsumer(ObjectMapper objectMapper, UserContextClientRequestInterceptor interceptor) {
-        RestTemplate restTemplate = new RestTemplateBuilder().rootUri(url).build();
+    public EessiConsumer melosysEessiConsumer(ObjectMapper objectMapper,
+                                              UserContextClientRequestInterceptor interceptor,
+                                              RestTemplateBuilder restTemplateBuilder) {
+        RestTemplate restTemplate = restTemplateBuilder.rootUri(url).build();
         restTemplate.setInterceptors(Collections.singletonList(interceptor));
         return new EessiConsumerImpl(restTemplate, objectMapper);
     }
 
     @Bean
     @Qualifier("system")
-    public EessiConsumer melosysEessiSystemConsumer(ObjectMapper objectMapper, SystemContextClientRequestInterceptor interceptor) {
-        RestTemplate restTemplate = new RestTemplateBuilder().rootUri(url).build();
+    public EessiConsumer melosysEessiSystemConsumer(ObjectMapper objectMapper,
+                                                    SystemContextClientRequestInterceptor interceptor,
+                                                    RestTemplateBuilder restTemplateBuilder) {
+        RestTemplate restTemplate = restTemplateBuilder.rootUri(url).build();
         restTemplate.setInterceptors(Collections.singletonList(interceptor));
         return new EessiConsumerImpl(restTemplate, objectMapper);
     }

@@ -9,12 +9,9 @@ import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,7 +40,7 @@ public class VilkaarsresultatService {
             VilkaarDto vilkaarDto = new VilkaarDto();
             vilkaarDto.setVilkaar(vilkaarsresultat.getVilkaar().getKode());
             vilkaarDto.setOppfylt(vilkaarsresultat.isOppfylt());
-            vilkaarDto.setBegrunnelseKoder(vilkaarsresultat.getBegrunnelser().stream().map(VilkaarBegrunnelse::getKode).collect(Collectors.toList()));
+            vilkaarDto.setBegrunnelseKoder(vilkaarsresultat.getBegrunnelser().stream().map(VilkaarBegrunnelse::getKode).collect(Collectors.toSet()));
             vilkaarDto.setBegrunnelseFritekst(vilkaarsresultat.getBegrunnelseFritekst());
             vilkaarDto.setBegrunnelseFritekstEngelsk(vilkaarsresultat.getBegrunnelseFritekstEessi());
             vilkaarDtoListe.add(vilkaarDto);
@@ -75,8 +72,8 @@ public class VilkaarsresultatService {
         return art161Vilkaar.isPresent();
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void registrerVilkår(long behandlingID, List<VilkaarDto> vilkaarDtoer) throws FunksjonellException {
+    @Transactional
+    public void registrerVilkår(long behandlingID, List<VilkaarDto> vilkaarDtoer) {
         validerVilkår(vilkaarDtoer);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         tømVilkårForBehandlingsresultat(behandlingsresultat);
@@ -93,12 +90,12 @@ public class VilkaarsresultatService {
         }
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public void tømVilkårForBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
         vilkaarsresultatRepo.deleteByBehandlingsresultatAndVilkaarNotIn(behandlingsresultat, IMMUTABLE_VILKAAR);
     }
 
-    private void validerVilkår(List<VilkaarDto> vilkaarDtoer) throws FunksjonellException {
+    private void validerVilkår(List<VilkaarDto> vilkaarDtoer) {
 
         final Collection<String> nyeVilkår = vilkaarDtoer.stream().map(VilkaarDto::getVilkaar).collect(Collectors.toList());
 
@@ -109,22 +106,27 @@ public class VilkaarsresultatService {
         }
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public void oppdaterVilkaarsresultat(long behandlingID,
                                          Vilkaar vilkaar,
                                          boolean oppfylt,
-                                         @Nullable Kodeverk begrunnelseKode) throws IkkeFunnetException {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        vilkaarsresultatRepo.deleteByBehandlingsresultat(behandlingsresultat);
+                                         Set<Kodeverk> begrunnelseKoder) {
+        vilkaarsresultatRepo.deleteByBehandlingsresultatId(behandlingID);
         vilkaarsresultatRepo.flush();
-        List<String> begrunnelseKoder = begrunnelseKode == null ? List.of() : List.of(begrunnelseKode.getKode());
-        vilkaarsresultatRepo.save(lagVilkaarsresultat(behandlingsresultat, vilkaar, oppfylt, begrunnelseKoder));
+        vilkaarsresultatRepo.save(
+            lagVilkaarsresultat(
+                behandlingsresultatService.hentBehandlingsresultat(behandlingID),
+                vilkaar,
+                oppfylt,
+                begrunnelseKoder.stream().map(Kodeverk::getKode).collect(Collectors.toSet())
+            )
+        );
     }
 
     private Vilkaarsresultat lagVilkaarsresultat(Behandlingsresultat behandlingsresultat,
                                                  Vilkaar vilkaar,
                                                  boolean oppfylt,
-                                                 List<String> begrunnelseKoder) {
+                                                 Set<String> begrunnelseKoder) {
         return lagVilkaarsresultat(behandlingsresultat, vilkaar, oppfylt, begrunnelseKoder,
             null, null);
     }
@@ -132,7 +134,7 @@ public class VilkaarsresultatService {
     private Vilkaarsresultat lagVilkaarsresultat(Behandlingsresultat behandlingsresultat,
                                                  Vilkaar vilkaar,
                                                  boolean oppfylt,
-                                                 List<String> begrunnelseKoder,
+                                                 Set<String> begrunnelseKoder,
                                                  String begrunnelseFritekst,
                                                  String begrunnelseFritekstEngelsk) {
         Vilkaarsresultat vilkaarsresultat = new Vilkaarsresultat();

@@ -8,6 +8,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
+import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
@@ -17,29 +18,25 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.SedSomBrevService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.sak.FagsakService;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class VideresendSoknadTest {
+@ExtendWith(MockitoExtension.class)
+class VideresendSoknadTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
@@ -56,37 +53,32 @@ public class VideresendSoknadTest {
     private final Behandling behandling = new Behandling();
     private final Journalpost journalpost = new Journalpost("123");
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     private static final String MOTTAKER_INSTITUSJON = "SE:123";
 
-    @Before
-    public void setup() throws SikkerhetsbegrensningException, IntegrasjonException {
+    @BeforeEach
+    void setup() {
         videresendSoknad = new VideresendSoknad(eessiService, behandlingsresultatService,
             joarkFasade, fagsakService, sedSomBrevService);
 
         behandling.setId(1L);
         behandling.setInitierendeJournalpostId("123");
         journalpost.setHoveddokument(new ArkivDokument());
-        journalpost.getHoveddokument().setTittel("tittei på deg");
+        journalpost.getHoveddokument().setTittel("tittel på deg");
         journalpost.getHoveddokument().setDokumentId("44444");
-
-        when(joarkFasade.hentJournalpost(eq(behandling.getInitierendeJournalpostId()))).thenReturn(journalpost);
     }
 
     @Test
-    public void utfør_journalpostIDFinnesIkke_forventFunksjonellException() throws MelosysException {
+    void utfør_vedleggFinnesIkke_forventFunksjonellException() {
         Prosessinstans prosessinstans = opprettProsessinstans();
         prosessinstans.getBehandling().setInitierendeJournalpostId(null);
 
-        expectedException.expect(FunksjonellException.class);
-        expectedException.expectMessage("JournalpostID til behandling " + behandling.getId() + " finnes ikke!");
-        videresendSoknad.utfør(prosessinstans);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> videresendSoknad.utfør(prosessinstans))
+            .withMessageContaining("Kan ikke videresende søknad uten vedlegg");
     }
 
     @Test
-    public void utfør_skalSendesUtlandErEessiKlar_senderSedIBuc3() throws MelosysException {
+    void utfør_skalSendesUtlandErEessiKlar_senderSedIBuc3() {
         Prosessinstans prosessinstans = opprettProsessinstans();
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of("SE:123"));
 
@@ -96,29 +88,34 @@ public class VideresendSoknadTest {
         behandlingsresultat.setId(behandlingID);
         behandlingsresultat.setBehandling(behandling);
 
-        byte[] vedlegg = new byte[10];
-
-        when(joarkFasade.hentDokument(eq(behandling.getInitierendeJournalpostId()), eq(journalpost.getHoveddokument().getDokumentId())))
-            .thenReturn(vedlegg);
+        final byte[] vedlegg = new byte[10];
+        final var dokumentReferanse = new DokumentReferanse(behandling.getInitierendeJournalpostId(),
+            journalpost.getHoveddokument().getDokumentId());
+        prosessinstans.setData(ProsessDataKey.VEDLEGG_SED, Set.of(dokumentReferanse));
+        final Vedlegg forventetVedlegg = new Vedlegg(vedlegg, "tittel");
+        when(eessiService.lagEessiVedlegg(any(), anyCollection())).thenReturn(Set.of(forventetVedlegg));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         videresendSoknad.utfør(prosessinstans);
 
         verify(eessiService).opprettOgSendSed(eq(behandlingID), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_03),
-            eq(new Vedlegg(vedlegg, journalpost.getHoveddokument().getTittel())), isNull());
+            argThat(collection -> collection.contains(forventetVedlegg)), isNull());
         assertThat(prosessinstans.getData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID)).isNull();
     }
 
     @Test
-    public void utfør_skalSendesUtlandErIkkeEessiKlar_senderA008SomBrev() throws MelosysException {
+    void utfør_skalSendesUtlandErIkkeEessiKlar_senderA008SomBrev() {
         Prosessinstans prosessinstans = opprettProsessinstans();
         Behandling behandling = prosessinstans.getBehandling();
         String opprettetJournalpostID = "532523";
 
         byte[] vedlegg = new byte[10];
-        when(joarkFasade.hentDokument(eq(behandling.getInitierendeJournalpostId()), eq(journalpost.getHoveddokument().getDokumentId())))
-            .thenReturn(vedlegg);
+        prosessinstans.setData(ProsessDataKey.VEDLEGG_SED,
+            Set.of(new DokumentReferanse(behandling.getInitierendeJournalpostId(), journalpost.getHoveddokument().getDokumentId())));
 
+        when(joarkFasade.hentJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(journalpost);
+        when(joarkFasade.hentDokument(behandling.getInitierendeJournalpostId(), journalpost.getHoveddokument().getDokumentId()))
+            .thenReturn(vedlegg);
         when(sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(any(SedType.class), any(Landkoder.class), any(), any()))
             .thenReturn(opprettetJournalpostID);
 

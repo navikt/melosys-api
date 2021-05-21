@@ -1,35 +1,41 @@
 package no.nav.melosys.service.avklartefakta;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.SelvstendigForetak;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.adresse.Adresse;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ForetakUtland;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
+import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VIRKSOMHET;
 import static no.nav.melosys.service.BehandlingsgrunnlagStub.lagBehandlingsgrunnlag;
@@ -37,17 +43,12 @@ import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplys
 import static no.nav.melosys.service.SaksopplysningStubs.lagOrganisasjonDokumenter;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AvklarteVirksomheterServiceTest {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class AvklarteVirksomheterServiceTest {
 
     @Mock
     private AvklartefaktaService avklartefaktaService;
@@ -57,6 +58,9 @@ public class AvklarteVirksomheterServiceTest {
 
     @Mock
     private BehandlingsgrunnlagService behandlingsgrunnlagService;
+
+    @Mock
+    private KodeverkService mockKodeverkService;
 
     @Mock
     private BehandlingService behandlingService;
@@ -74,17 +78,19 @@ public class AvklarteVirksomheterServiceTest {
 
     Function<OrganisasjonDokument, Adresse> ingenAdresse = org -> null;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         behandling = new Behandling();
         behandling.setId(1L);
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(new HashSet<>(Arrays.asList(orgnr1, uuid1)));
 
-        avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, behandlingService);
+        when(mockKodeverkService.dekod(any(FellesKodeverk.class), anyString(), any(LocalDate.class))).thenReturn("Poststed");
+
+        avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, behandlingService, mockKodeverkService);
     }
 
     @Test
-    public void hentUtenlandskeVirksomheter_girListeMedKunAvklarteForetak() throws TekniskException {
+    void hentUtenlandskeVirksomheter_girListeMedKunAvklarteForetak() {
         ForetakUtland foretak1 = lagForetakUtland("Utland1", uuid1, null);
         ForetakUtland foretak2 = lagForetakUtland("Utland2", uuid2, "SE-123456789");
         behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(Collections.emptyList(), Arrays.asList(foretak1, foretak2), Collections.emptyList()));
@@ -94,7 +100,7 @@ public class AvklarteVirksomheterServiceTest {
     }
 
     @Test
-    public void hentUtenlandskeVirksomheter_girListeAvklartVirksomhetMedOrgnrIkkeUuid() throws TekniskException {
+    void hentUtenlandskeVirksomheter_girListeAvklartVirksomhetMedOrgnrIkkeUuid() {
         ForetakUtland foretak1 = lagForetakUtland("Utland1", uuid1, "SE-123456789");
         behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(Collections.emptyList(), Collections.singletonList(foretak1), Collections.emptyList()));
 
@@ -111,7 +117,7 @@ public class AvklarteVirksomheterServiceTest {
     }
 
     @Test
-    public void hentSelvstendigeForetakOrgnumre_girListeMedKunAvklarteOrgnumre() throws TekniskException {
+    void hentSelvstendigeForetakOrgnumre_girListeMedKunAvklarteOrgnumre() {
         List<String> selvstendigeForetak = Arrays.asList(orgnr1, orgnr2);
         behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(selvstendigeForetak, Collections.emptyList(), Collections.emptyList()));
 
@@ -120,7 +126,7 @@ public class AvklarteVirksomheterServiceTest {
     }
 
     @Test
-    public void hentArbeidsgivendeEkstraOrgnumre_girListeMedKunAvklarteOrgnumre() throws TekniskException {
+    void hentArbeidsgivendeEkstraOrgnumre_girListeMedKunAvklarteOrgnumre() {
         List<String> arbeidgivendeEkstraOrgnumre = Arrays.asList(orgnr2, orgnr1);
         Set<Saksopplysning> saksopplysninger =
             lagArbeidsforholdOpplysninger(Collections.emptyList());
@@ -132,7 +138,7 @@ public class AvklarteVirksomheterServiceTest {
     }
 
     @Test
-    public void hentArbeidsgivendeRegistreOrgnumre_girListeMedKunAvklarteOrgnumre() throws TekniskException {
+    void hentArbeidsgivendeRegistreOrgnumre_girListeMedKunAvklarteOrgnumre() {
         List<String> arbeidgivendeOrgnumreEkstra = Arrays.asList(orgnr1, orgnr2, orgnr3);
         Set<Saksopplysning> saksopplysninger =
             lagArbeidsforholdOpplysninger(arbeidgivendeOrgnumreEkstra);
@@ -144,7 +150,7 @@ public class AvklarteVirksomheterServiceTest {
     }
 
     @Test
-    public void testHentAvklarteNorskeForetak_girAvklarteArbeidsgivere() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    void testHentAvklarteNorskeForetak_girAvklarteArbeidsgivere() {
         List<String> arbeidsgivereEkstra = Collections.singletonList(orgnr2);
         List<String> arbeidsgivereRegister = Collections.singletonList(orgnr3);
 
@@ -159,14 +165,14 @@ public class AvklarteVirksomheterServiceTest {
 
         leggTilIRegisterOppslag(Arrays.asList(orgnr2, orgnr3));
 
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, behandlingService);
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, behandlingService, mockKodeverkService);
         assertThat(avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, ingenAdresse).stream()
             .map(nv -> nv.orgnr)
             .collect(Collectors.toList())).contains(orgnr2, orgnr3);
     }
 
     @Test
-    public void testHentAvklarteNorskeForetak_girAvklarteSelvstendigeForetak() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    void testHentAvklarteNorskeForetak_girAvklarteSelvstendigeForetak() {
         List<String> selvstendigeForetak = Collections.singletonList(orgnr1);
 
         Set<Saksopplysning> saksopplysninger =
@@ -180,60 +186,111 @@ public class AvklarteVirksomheterServiceTest {
 
         leggTilIRegisterOppslag(selvstendigeForetak);
 
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, behandlingService);
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, behandlingService, mockKodeverkService);
         assertThat(avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, ingenAdresse).stream()
             .map(nv -> nv.orgnr)
             .collect(Collectors.toList())).contains(orgnr1);
     }
 
     @Test
-    public void lagreVirksomheterSomAvklartefakta_virksomhetErForetakUtland_valideringOKOgVirksomhetLagret() throws FunksjonellException, TekniskException {
+    void lagreVirksomheterSomAvklartefakta_virksomhetErForetakUtland_valideringOKOgVirksomhetLagret() {
         List<String> virksomhetIDer = List.of(uuid1);
         forberedValidering();
 
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomhetIDer, 1L);
-        verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), uuid1, "TRUE");
+        verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), uuid1, Avklartefakta.VALGT_FAKTA);
     }
 
     @Test
-    public void lagreVirksomheterSomAvklartefakta_virksomhetErSelvstendigForetak_valideringOKOgVirksomhetLagret() throws FunksjonellException, TekniskException {
+    void lagreVirksomheterSomAvklartefakta_virksomhetErSelvstendigForetak_valideringOKOgVirksomhetLagret() {
         List<String> virksomhetIDer = List.of(orgnr1);
         forberedValidering();
 
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomhetIDer, 1L);
-        verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr1, "TRUE");
+        verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr1, Avklartefakta.VALGT_FAKTA);
     }
 
     @Test
-    public void lagreVirksomheterSomAvklartefakta_virksomhetErLagtInnManuelt_valideringOKOgVirksomhetLagret() throws FunksjonellException, TekniskException {
+    void lagreVirksomheterSomAvklartefakta_virksomhetErLagtInnManuelt_valideringOKOgVirksomhetLagret() {
         List<String> virksomhetIDer = List.of(orgnr2);
         forberedValidering();
 
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomhetIDer, 1L);
-        verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr2, "TRUE");
+        verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr2, Avklartefakta.VALGT_FAKTA);
     }
 
     @Test
-    public void lagreVirksomheterSomAvklartefakta_virksomhetErArbeidNorge_valideringOKOgVirksomhetLagret() throws FunksjonellException, TekniskException {
+    void lagreVirksomheterSomAvklartefakta_virksomhetErArbeidNorge_valideringOKOgVirksomhetLagret() {
         List<String> virksomhetIDer = List.of(orgnr3);
         forberedValidering();
 
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomhetIDer, 1L);
-        verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr3, "TRUE");
+        verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr3, Avklartefakta.VALGT_FAKTA);
     }
 
     @Test
-    public void lagreVirksomheterSomAvklartefakta_virksomhetErUgyldig_valideringFailerOgVirksomhetIkkeLagret() throws FunksjonellException, TekniskException {
+    void lagreVirksomheterSomAvklartefakta_virksomhetErUgyldig_valideringFailerOgVirksomhetIkkeLagret() {
         List<String> virksomhetIDer = List.of(orgnr4);
         forberedValidering();
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomhetIDer, 1L))
             .withMessage(String.format("VirksomhetID %s hører ikke til noen av arbeidsforholdene", orgnr4));
-        verify(avklartefaktaService, never()).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatyper.class), anyString(), anyString(), eq("TRUE"));
+        verify(avklartefaktaService, never()).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatyper.class), anyString(), anyString(), eq(Avklartefakta.VALGT_FAKTA));
     }
 
-    private void forberedValidering() throws FunksjonellException {
+    @Test
+    void utfyllManglendeAdressefelter_gyldigForretningsadresse_girForretningsadresse() {
+        StrukturertAdresse adresse = avklarteVirksomheterService.utfyllManglendeAdressefelter(lagOrganisasjonDokument("2345", "Forretningsgatenavn"));
+
+        assertThat(adresse.gatenavn).isEqualTo("Forretningsgatenavn");
+        assertThat(adresse.postnummer).isEqualTo("2345");
+        assertThat(adresse.poststed).isEqualTo("Poststed");
+        assertThat(adresse.landkode).isEqualTo("NO");
+
+        verify(mockKodeverkService).dekod(eq(FellesKodeverk.POSTNUMMER), eq("2345"), any(LocalDate.class));
+    }
+
+    @Test
+    void utfyllManglendeAdressefelter_forretningsadresseManglerGatenavn_girForretningsadresseMedBlanktGatenavn() {
+        StrukturertAdresse adresse = avklarteVirksomheterService.utfyllManglendeAdressefelter(lagOrganisasjonDokument("2345", null));
+
+        assertThat(adresse.gatenavn).isEqualTo(" ");
+        assertThat(adresse.postnummer).isEqualTo("2345");
+        assertThat(adresse.poststed).isEqualTo("Poststed");
+        assertThat(adresse.landkode).isEqualTo("NO");
+
+        verify(mockKodeverkService).dekod(eq(FellesKodeverk.POSTNUMMER), eq("2345"), any(LocalDate.class));
+    }
+
+    @Test
+    void utfyllManglendeAdressefelter_utenlandskIngenForretningsadressePostadresseUtenPostnummer_postnummerTomString() {
+        var organisasjonDokument = lagOrganisasjonDokument(null, null, null, "DK");
+        organisasjonDokument.organisasjonDetaljer.forretningsadresse = Collections.emptyList();
+        organisasjonDokument.organisasjonDetaljer.postadresse.stream().findFirst().ifPresent(a -> ((SemistrukturertAdresse)a).setPostnr(null));
+        StrukturertAdresse adresse = avklarteVirksomheterService.utfyllManglendeAdressefelter(organisasjonDokument);
+
+        assertThat(adresse.gatenavn).isEqualTo("Postgatenavn");
+        assertThat(adresse.postnummer).isEqualTo(" ");
+        assertThat(adresse.poststed).isEqualTo("Postpoststed");
+        assertThat(adresse.landkode).isEqualTo("DK");
+
+        verify(mockKodeverkService, never()).dekod(any(), any(), any());
+    }
+
+    @Test
+    void utfyllManglendeAdressefelter_forretningsadresseManglerPostnr_girPostadresse() {
+        StrukturertAdresse adresse = avklarteVirksomheterService.utfyllManglendeAdressefelter(lagOrganisasjonDokument(null, null));
+
+        assertThat(adresse.gatenavn).isEqualTo("Postgatenavn");
+        assertThat(adresse.postnummer).isEqualTo("6789");
+        assertThat(adresse.poststed).isEqualTo("Poststed");
+        assertThat(adresse.landkode).isEqualTo("NO");
+
+        verify(mockKodeverkService).dekod(eq(FellesKodeverk.POSTNUMMER), eq("6789"), any(LocalDate.class));
+    }
+
+    private void forberedValidering() {
         ForetakUtland foretakUtland = new ForetakUtland();
         foretakUtland.uuid = uuid1;
         SelvstendigForetak selvstendigForetak = new SelvstendigForetak();
@@ -258,7 +315,33 @@ public class AvklarteVirksomheterServiceTest {
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
     }
 
-    private void leggTilIRegisterOppslag(Collection<String> orgnumre) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    private void leggTilIRegisterOppslag(Collection<String> orgnumre) {
         when(registerOppslagService.hentOrganisasjoner(eq(new HashSet<>(orgnumre)))).thenReturn(lagOrganisasjonDokumenter(orgnumre));
+    }
+
+    private OrganisasjonDokument lagOrganisasjonDokument(String forretningsPostnr, String forretningsGatenavn) {
+        return lagOrganisasjonDokument(forretningsPostnr, forretningsGatenavn, "6789", "NO");
+    }
+
+    private OrganisasjonDokument lagOrganisasjonDokument(String forretningsPostnr, String forretningsGatenavn, String postadressePostnr, String postadresseLand) {
+        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
+        OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
+        organisasjonDokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
+        SemistrukturertAdresse forretningsadresse = new SemistrukturertAdresse();
+        organisasjonsDetaljer.forretningsadresse.add(forretningsadresse);
+        forretningsadresse.setAdresselinje1(forretningsGatenavn);
+        forretningsadresse.setPostnr(forretningsPostnr);
+        forretningsadresse.setPoststed("Forretningspoststed");
+        forretningsadresse.setLandkode("NO");
+        forretningsadresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1)));
+        SemistrukturertAdresse postadresse = new SemistrukturertAdresse();
+        organisasjonsDetaljer.postadresse.add(postadresse);
+        postadresse.setAdresselinje1("Postgatenavn");
+        postadresse.setPostnr(postadressePostnr);
+        postadresse.setPoststed("Postpoststed");
+        postadresse.setLandkode(postadresseLand);
+        postadresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1)));
+
+        return organisasjonDokument;
     }
 }

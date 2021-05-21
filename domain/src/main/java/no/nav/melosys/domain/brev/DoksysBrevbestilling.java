@@ -40,7 +40,7 @@ public final class DoksysBrevbestilling extends Brevbestilling {
         private String fritekst;
         private String ytterligereInformasjon;
 
-        public Builder medProdserbartDokument(Produserbaredokumenter produserbartdokument) {
+        public Builder medProduserbartDokument(Produserbaredokumenter produserbartdokument) {
             this.produserbartdokument = produserbartdokument;
             return this;
         }

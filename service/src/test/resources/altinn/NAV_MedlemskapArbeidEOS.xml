@@ -39,38 +39,111 @@
                     <periodeFra>2019-08-05</periodeFra>
                     <periodeTil>2019-08-06</periodeTil>
                 </periodeUtland>
-                <samletUtsendingsperiode></samletUtsendingsperiode>
+                <samletUtsendingsperiode>
+                    <periodeFra>2019-08-01</periodeFra>
+                    <periodeTil>2019-08-06</periodeTil>
+                </samletUtsendingsperiode>
                 <sendesUtOppdragIUtlandet>false</sendesUtOppdragIUtlandet>
                 <ansattForOppdragIUtlandet>false</ansattForOppdragIUtlandet>
+                <erArbeidstakerAnsattHelePerioden>true</erArbeidstakerAnsattHelePerioden>
                 <drattPaaEgetInitiativ>false</drattPaaEgetInitiativ>
                 <erstatterTidligereUtsendte>false</erstatterTidligereUtsendte>
-                <naeringsGruppe>2019-08-05</naeringsGruppe>
+                <naeringsGruppe>næringsgruppe</naeringsGruppe>
             </utenlandsoppdraget>
             <loennOgGodtgjoerelse>
                 <norskArbgUtbetalerLoenn>true</norskArbgUtbetalerLoenn>
-                <utlArbgUtbetalerLoenn>false</utlArbgUtbetalerLoenn>
+                <utlArbgUtbetalerLoenn>true</utlArbgUtbetalerLoenn>
+                <utlArbTilhorerSammeKonsern>false</utlArbTilhorerSammeKonsern>
+                <loennUtlArbg>1000.00</loennUtlArbg>
+                <loennNorskArbg>2000.00</loennNorskArbg>
                 <mottarNaturalytelser>false</mottarNaturalytelser>
+                <samletVerdiNaturalytelser>10000.50</samletVerdiNaturalytelser>
                 <trukketTrygdeavgift>true</trukketTrygdeavgift>
                 <betalerArbeidsgiveravgift>true</betalerArbeidsgiveravgift>
             </loennOgGodtgjoerelse>
             <virksomhetIUtlandet>
-                <adresse></adresse>
+                <navn>Virskomheten i utlandet</navn>
+                <registreringsnummer>XYZ123456789</registreringsnummer>
+                <adresse>
+                    <gatenavn>gatenavn med mer</gatenavn>
+                    <by>testbyen</by>
+                    <postkode>UTLAND-1234</postkode>
+                    <region>testregion</region>
+                    <land>BELGIA</land>
+                </adresse>
             </virksomhetIUtlandet>
             <arbeidssted>
                 <typeArbeidssted>land</typeArbeidssted>
                 <arbeidPaaLand>
-                    <fysiskeArbeidssteder/>
-                    <hjemmekontor>false</hjemmekontor>
+                    <fysiskeArbeidssteder>
+                        <fysiskArbeidssted>
+                            <gatenavn>Gaten 1</gatenavn>
+                            <by>Stedet</by>
+                            <postkode>1234</postkode>
+                            <region>Region</region>
+                            <land>BE</land>
+                            <firmanavn>Firmaet</firmanavn>
+                        </fysiskArbeidssted>
+                        <fysiskArbeidssted>
+                            <gatenavn>Gaten 2</gatenavn>
+                            <by>Byen</by>
+                            <postkode>5678</postkode>
+                            <region>Region</region>
+                            <land>CH</land>
+                            <firmanavn>Virksomheten</firmanavn>
+                        </fysiskArbeidssted>
+                    </fysiskeArbeidssteder>
+                    <hjemmekontor>true</hjemmekontor>
                     <fastArbeidssted>false</fastArbeidssted>
                 </arbeidPaaLand>
-                <offshoreEnheter/>
+                <offshoreEnheter>
+                    <offshoreEnhet>
+                        <enhetsType>plattform</enhetsType>
+                        <enhetsNavn>Landplattform</enhetsNavn>
+                        <sokkelLand>CH</sokkelLand>
+                    </offshoreEnhet>
+                    <offshoreEnhet>
+                        <enhetsType>boreskip</enhetsType>
+                        <enhetsNavn>Båt på land</enhetsNavn>
+                        <sokkelLand>LI</sokkelLand>
+                    </offshoreEnhet>
+                    <offshoreEnhet>
+                        <enhetsType>annenStasjonaerEnhet</enhetsType>
+                        <enhetsNavn>Noe annet</enhetsNavn>
+                        <sokkelLand>MT</sokkelLand>
+                    </offshoreEnhet>
+                </offshoreEnheter>
                 <luftfart>
-                    <luftfartBaser/>
+                    <luftfartBaser>
+                        <luftfartbase>
+                            <hjemmebaseNavn>koti</hjemmebaseNavn>
+                            <hjemmebaseLand>FI</hjemmebaseLand>
+                            <typeFlyvninger>internasjonal</typeFlyvninger>
+                        </luftfartbase>
+                        <luftfartbase>
+                            <hjemmebaseNavn>hus</hjemmebaseNavn>
+                            <hjemmebaseLand>NO</hjemmebaseLand>
+                            <typeFlyvninger>begge</typeFlyvninger>
+                        </luftfartbase>
+                    </luftfartBaser>
                 </luftfart>
-                <skipListe/>
+                <skipListe>
+                    <skip>
+                        <skipNavn>abcd</skipNavn>
+                        <fartsomraade>innenriks</fartsomraade>
+                        <territorialEllerHavnLand>BG</territorialEllerHavnLand>
+                    </skip>
+                    <skip>
+                        <skipNavn>sdgh</skipNavn>
+                        <fartsomraade>utenriks</fartsomraade>
+                        <flaggland>FO</flaggland>
+                    </skip>
+                </skipListe>
             </arbeidssted>
         </midlertidigUtsendt>
         <fullmakt>
+            <fullmektigVirksomhetsnavn>fullmektigVirksomhetsnavn</fullmektigVirksomhetsnavn>
+            <fullmektigVirksomhetsnummer>fullmektigVirksomhetsnummer</fullmektigVirksomhetsnummer>
             <fullmaktFraArbeidstaker>true</fullmaktFraArbeidstaker>
         </fullmakt>
     </Innhold>

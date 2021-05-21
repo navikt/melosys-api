@@ -6,67 +6,56 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.SelvstendigForetak;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ArbeidUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ForetakUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.SelvstendigForetak;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.exception.*;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
-import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagSystemService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysning;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BrevDataByggerA1Test {
-
+@ExtendWith(MockitoExtension.class)
+class BrevDataByggerA1Test {
     @Mock
     private AvklartefaktaService avklartefaktaService;
     @Mock
     private LandvelgerService landvelgerService;
-
-    private Behandling behandling;
-
-    private Set<String> avklarteOrganisasjoner;
-
     @Mock
     RegisterOppslagSystemService registerOppslagService;
 
+    private Set<String> avklarteOrganisasjoner;
     private Soeknad søknad;
     private BrevDataGrunnlag dataGrunnlag;
-
     private BrevDataByggerA1 brevDataByggerA1;
 
     private final String saksbehandler = "";
-
     private final String orgnr2 = "10987654321";
 
-    @Before
-    public void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        behandling = new Behandling();
+    @BeforeEach
+    void setUp() {
+        Behandling behandling = new Behandling();
         behandling.setId(123L);
 
         avklarteOrganisasjoner = new HashSet<>();
@@ -103,23 +92,26 @@ public class BrevDataByggerA1Test {
         KodeverkService kodeverkService = mock(KodeverkService.class);
         when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
 
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class));
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
+            registerOppslagService,
+            mock(BehandlingService.class),
+                kodeverkService);
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
         dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
         brevDataByggerA1 = new BrevDataByggerA1(avklartefaktaService, landvelgerService);
     }
 
-    private void lagAvklartOrganisasjoner(List<String> orgnumre) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    private void mockAvklarteOrganisasjoner(List<String> orgnumre) {
+        avklarteOrganisasjoner.addAll(orgnumre);
         OrganisasjonsDetaljer detaljer = mock(OrganisasjonsDetaljer.class);
         when(detaljer.hentStrukturertForretningsadresse()).thenReturn(lagStrukturertAdresse());
 
         Set<OrganisasjonDokument> organisasjonDokumenter = new HashSet<>();
         for (String orgnr : orgnumre) {
-            organisasjonDokumenter.add(leggTilTestorganisasjon("navn"+orgnr, orgnr, detaljer));
+            organisasjonDokumenter.add(leggTilTestorganisasjon("navn" + orgnr, orgnr, detaljer));
         }
 
-        avklarteOrganisasjoner.addAll(orgnumre);
-        when(registerOppslagService.hentOrganisasjoner(avklarteOrganisasjoner))
+        when(registerOppslagService.hentOrganisasjoner(any()))
             .thenReturn(organisasjonDokumenter);
     }
 
@@ -135,9 +127,16 @@ public class BrevDataByggerA1Test {
     }
 
     @Test
-    public void testHentAvklarteSelvstendigeForetak() throws FunksjonellException, TekniskException {
-        lagAvklartOrganisasjoner(Collections.singletonList("999"));
+    void lag_brukAlleArbeidsland() {
+        mockAvklarteOrganisasjoner(Collections.singletonList("1"));
+        brevDataByggerA1.lag(dataGrunnlag, saksbehandler);
 
+        verify(landvelgerService).hentAlleArbeidsland(anyLong());
+    }
+
+    @Test
+    void lag_sjekkAvklarteSelvstendigeForetak() {
+        mockAvklarteOrganisasjoner(Collections.singletonList("999"));
         SelvstendigForetak foretak = new SelvstendigForetak();
         foretak.orgnr = "999";
         søknad.selvstendigArbeid.selvstendigForetak.add(foretak);
@@ -147,8 +146,8 @@ public class BrevDataByggerA1Test {
     }
 
     @Test
-    public void testHentAvklarteArbeidsgivere() throws FunksjonellException, TekniskException {
-        lagAvklartOrganisasjoner(Collections.singletonList("7777"));
+    void lag_hentAvklarteArbeidsgivere() {
+        mockAvklarteOrganisasjoner(Collections.singletonList("7777"));
         søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.add("7777");
 
         BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(dataGrunnlag, saksbehandler);
@@ -166,19 +165,19 @@ public class BrevDataByggerA1Test {
     }
 
     @Test
-    public void testArbeidsstedHosOppdragsgiver_girUtenlandskvirksomhet() throws FunksjonellException, TekniskException {
-        lagAvklartOrganisasjoner(Collections.singletonList(orgnr2));
+    void lag_ArbeidsstedHosOppdragsgiver_girUtenlandskvirksomhet() {
+        mockAvklarteOrganisasjoner(Collections.singletonList(orgnr2));
 
-        ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.foretakNavn = "Utenlandsk Oppdragsgiver LTD";
-        arbeidUtland.adresse = lagStrukturertAdresse();
-        søknad.arbeidUtland.add(arbeidUtland);
+        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
+        fysiskArbeidssted.virksomhetNavn = "Utenlandsk Oppdragsgiver LTD";
+        fysiskArbeidssted.adresse = lagStrukturertAdresse();
+        søknad.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
 
         BrevDataA1 brevDataDto = (BrevDataA1) brevDataByggerA1.lag(dataGrunnlag, saksbehandler);
-        assertThat(brevDataDto.bivirksomheter.stream().map(uv -> uv.navn)).contains(arbeidUtland.foretakNavn);
+        assertThat(brevDataDto.bivirksomheter.stream().map(uv -> uv.navn)).contains(fysiskArbeidssted.virksomhetNavn);
         assertThat(brevDataDto.arbeidssteder.stream()
-            .filter(Arbeidssted::erFysisk)
-            .map(FysiskArbeidssted.class::cast)
-            .map(FysiskArbeidssted::getAdresse)).contains(arbeidUtland.adresse);
+            .filter(no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted::erFysisk)
+            .map(no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted.class::cast)
+            .map(no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted::getAdresse)).contains(fysiskArbeidssted.adresse);
     }
 }

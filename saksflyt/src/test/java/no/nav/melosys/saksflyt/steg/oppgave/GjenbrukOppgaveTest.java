@@ -11,8 +11,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,7 +41,7 @@ class GjenbrukOppgaveTest {
     }
 
     @Test
-    void gjenbrukOppgave_utfør_oppdatererOppgave() throws FunksjonellException, TekniskException {
+    void gjenbrukOppgave_utfør_oppdatererOppgave() {
         final String oppgaveID = "1234";
         final String saksnummer = "MEL-123";
         final String oppgaveBeskrivelse = "jeg beskriver oppgave";

@@ -14,6 +14,7 @@ import no.nav.melosys.exception.FunksjonellException;
 
 import static no.nav.melosys.domain.avklartefakta.Avklartefakta.IKKE_VALGT_FAKTA;
 import static no.nav.melosys.domain.avklartefakta.Avklartefakta.VALGT_FAKTA;
+import static no.nav.melosys.domain.kodeverk.Loenn_forhold.*;
 
 public class OppdaterTrygdeavgiftsgrunnlagRequest extends AbstraktAvgiftsgrunnlag<AvgiftsgrunnlagInfo, AvgiftsgrunnlagInfo> {
 
@@ -23,7 +24,15 @@ public class OppdaterTrygdeavgiftsgrunnlagRequest extends AbstraktAvgiftsgrunnla
         super(lønnsforhold, avgiftsGrunnlagNorge, avgiftsGrunnlagUtland);
     }
 
-    public Collection<Avklartefakta> tilAvklartefakta() throws FunksjonellException {
+    public boolean harLønnFraNorge() {
+        return lønnsforhold == LØNN_FRA_NORGE || lønnsforhold == DELT_LØNN;
+    }
+
+    public boolean harLønnFraUtlandet() {
+        return lønnsforhold == LØNN_FRA_UTLANDET || lønnsforhold == DELT_LØNN;
+    }
+
+    public Collection<Avklartefakta> tilAvklartefakta() {
         if (getLønnsforhold() == null) {
             throw new FunksjonellException("Lønnsforhold er ikke satt!");
         }
@@ -45,16 +54,16 @@ public class OppdaterTrygdeavgiftsgrunnlagRequest extends AbstraktAvgiftsgrunnla
 
     private Collection<Avklartefakta> lagAvgiftsgrunnlagNorge() {
         return Set.of(
-            lag(Avklartefaktatyper.LØNN_NORGE_ARBEIDSGIVERAVGIFT, avgiftsGrunnlagNorge::getBetalerArbeidsgiverAvgift),
-            lag(Avklartefaktatyper.LØNN_NORGE_SKATTEPLIKTIG_NORGE, avgiftsGrunnlagNorge::getErSkattepliktig),
+            lag(Avklartefaktatyper.LØNN_NORGE_ARBEIDSGIVERAVGIFT, avgiftsGrunnlagNorge::betalerArbeidsgiverAvgift),
+            lag(Avklartefaktatyper.LØNN_NORGE_SKATTEPLIKTIG_NORGE, avgiftsGrunnlagNorge::erSkattepliktig),
             lag(Avklartefaktatyper.LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE, avgiftsGrunnlagNorge::getSærligAvgiftsgruppe)
         );
     }
 
     private Collection<Avklartefakta> lagAvgiftsgrunnlagUtland() {
         return Set.of(
-            lag(Avklartefaktatyper.LØNN_UTL_ARBEIDSGIVERAVGIFT, avgiftsGrunnlagUtland::getBetalerArbeidsgiverAvgift),
-            lag(Avklartefaktatyper.LØNN_UTL_SKATTEPLIKTIG_NORGE, avgiftsGrunnlagUtland::getErSkattepliktig),
+            lag(Avklartefaktatyper.LØNN_UTL_ARBEIDSGIVERAVGIFT, avgiftsGrunnlagUtland::betalerArbeidsgiverAvgift),
+            lag(Avklartefaktatyper.LØNN_UTL_SKATTEPLIKTIG_NORGE, avgiftsGrunnlagUtland::erSkattepliktig),
             lag(Avklartefaktatyper.LØNN_UTL_SÆRLIG_AVGIFTS_GRUPPE, avgiftsGrunnlagUtland::getSærligAvgiftsgruppe)
         );
     }

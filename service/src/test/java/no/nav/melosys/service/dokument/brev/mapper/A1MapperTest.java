@@ -20,19 +20,18 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.LuftfartBase;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ForetakUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.LuftfartBase;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
@@ -41,10 +40,8 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
 import org.apache.commons.lang3.StringUtils;
 import org.jeasy.random.EasyRandom;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 
 import static java.util.function.Predicate.not;
@@ -56,12 +53,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class A1MapperTest {
+class A1MapperTest {
 
     private A1Mapper mapper;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     private EasyRandom easyRandom;
 
@@ -72,7 +66,7 @@ public class A1MapperTest {
     private FellesType fellesType;
     private MelosysNAVFelles navFelles;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         mapper = new A1Mapper();
         easyRandom = EasyRandomConfigurer.randomForDokProd();
@@ -151,14 +145,14 @@ public class A1MapperTest {
     }
 
     @Test
-    public void mapTilBrevXML() throws Exception {
+    void mapTilBrevXML() throws Exception {
         String xml = mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData);
 
         assertThat(xml).isNotNull();
     }
 
     @Test
-    public void mapTilBrevXML_hovedVirksomhetUtenOrgnr_fyll4_2MedMellomrom() throws Exception {
+    void mapTilBrevXML_hovedVirksomhetUtenOrgnr_fyll4_2MedMellomrom() throws Exception {
         ForetakUtland utenlandskForetak = lagForetakUtland(false);
         utenlandskForetak.orgnr = null;
         brevData.hovedvirksomhet = new AvklartVirksomhet(utenlandskForetak);
@@ -171,7 +165,7 @@ public class A1MapperTest {
     }
 
     @Test
-    public void mapTilBrevXML_bostedsAdresseIkkeGyldig_settBostedsadresseSinGateAdresseTom() throws Exception {
+    void mapTilBrevXML_bostedsAdresseIkkeGyldig_settBostedsadresseSinGateAdresseTom() throws Exception {
         brevData.bostedsadresse.gatenavn = null;
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
         assertThat(a1.getPerson().getBostedsadresse().getGatenavn()).isEqualTo(" ");
@@ -182,7 +176,7 @@ public class A1MapperTest {
     }
 
     @Test
-    public void mapBrevTilXML_arbeidslandUtenFysiskArbeidssted_fyllerPåMedArbeidsland() throws TekniskException, JAXBException, SAXException {
+    void mapBrevTilXML_arbeidslandUtenFysiskArbeidssted_fyllerPåMedArbeidsland() throws JAXBException, SAXException {
         brevData.arbeidsland = List.of(Landkoder.SE, Landkoder.DK, Landkoder.GB);
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
 
@@ -196,7 +190,7 @@ public class A1MapperTest {
     }
 
     @Test
-    public void mapBrevTilXML_harFlyvendeArbeidssted_fyllerUtHjemmebaseNavnOgLand() throws TekniskException {
+    void mapBrevTilXML_harFlyvendeArbeidssted_fyllerUtHjemmebaseNavnOgLand() {
         Landkoder landkode = Landkoder.FI;
         LuftfartBase luftfartBase = new LuftfartBase();
         luftfartBase.hjemmebaseNavn = "hjemmebaseNavn";
@@ -214,7 +208,7 @@ public class A1MapperTest {
     }
 
     @Test
-    public void mapTilBrevXML_harKortAdressePåArbeidssted_brekkerIkkeAdresseOverFlereLinjer() throws TekniskException {
+    void mapTilBrevXML_harKortAdressePåArbeidssted_brekkerIkkeAdresseOverFlereLinjer() {
         StrukturertAdresse adresse = lagStrukturertAdresse();
         Arbeidssted fysiskArbeidssted = new FysiskArbeidssted("", "", adresse);
 
@@ -233,7 +227,7 @@ public class A1MapperTest {
     }
 
     @Test
-    public void mapTilBrevXML_harLangAdressePåArbeidssted_brekkerAdresseOverFlereLinjer() throws TekniskException {
+    void mapTilBrevXML_harLangAdressePåArbeidssted_brekkerAdresseOverFlereLinjer() {
         StrukturertAdresse adresse = lagStrukturertAdresse();
         adresse.gatenavn = "Lorem ipsumdolorsitamet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua-veien";
         adresse.husnummer = "47";
@@ -253,7 +247,14 @@ public class A1MapperTest {
         assertThat(utfylteAdresselinjer.size()).isGreaterThan(1);
     }
 
-    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException, TekniskException {
+    @Test
+    void mapTilBrevXML_brukerErStatsløs_forventStatløsTekst() {
+        brevData.person.statsborgerskap = Land.av(Land.STATSLØS);
+        A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
+        assertThat(a1.getPerson().getStatsborgerskap()).isEqualTo("Stateless");
+    }
+
+    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException {
         final String XSD_LOCATION = "melosysbrev/melosys_000116.xsd";
 
         Fag fag = mapFag();

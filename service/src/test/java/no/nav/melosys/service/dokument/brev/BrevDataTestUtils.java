@@ -8,14 +8,14 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.Bostedsadresse;
-import no.nav.melosys.domain.dokument.person.Gateadresse;
+import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
+import no.nav.melosys.domain.dokument.person.adresse.Gateadresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ForetakUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MaritimtArbeid;
-import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
-import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
-import no.nav.melosys.domain.familie.OmfattetBarn;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.MaritimtArbeid;
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
+import no.nav.melosys.domain.person.familie.IkkeOmfattetBarn;
+import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
@@ -105,8 +105,6 @@ public class BrevDataTestUtils {
 
     public static MaritimtArbeid lagMaritimtArbeid() {
         MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
-        maritimtArbeid.foretakOrgnr = "123456789";
-        maritimtArbeid.foretakNavn = "Equinor GB";
         maritimtArbeid.enhetNavn = "Dunfjæder";
         maritimtArbeid.flaggLandkode = Landkoder.GB.getKode();
         return maritimtArbeid;
@@ -140,8 +138,8 @@ public class BrevDataTestUtils {
     }
 
     public static AvklarteMedfolgendeBarn lagAvklarteMedfølgendeBarn() {
-        OmfattetBarn omfattetBarn = new OmfattetBarn("fnrOmfattet");
-        omfattetBarn.sammensattNavn = "Omfattet Barn";
+        OmfattetFamilie omfattetBarn = new OmfattetFamilie("fnrOmfattet");
+        omfattetBarn.setSammensattNavn("Omfattet Barn");
         IkkeOmfattetBarn ikkeOmfattetBarn = new IkkeOmfattetBarn("fnrIkkeOmfattet", OVER_18_AR.getKode(), null);
         ikkeOmfattetBarn.sammensattNavn = "Ikke Omfattet Barn";
 

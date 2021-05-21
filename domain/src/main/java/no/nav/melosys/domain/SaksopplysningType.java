@@ -1,5 +1,7 @@
 package no.nav.melosys.domain;
 
+import java.util.Set;
+
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 
 public enum SaksopplysningType implements Kodeverk {
@@ -31,5 +33,13 @@ public enum SaksopplysningType implements Kodeverk {
     public String getBeskrivelse() {
         return beskrivelse;
     }
+
+    public static final Set<SaksopplysningType> KREVER_FNR = Set.of(
+        ARBFORH, INNTK, MEDL, PERSHIST, PERSOPL, SOB_SAK, UTBETAL
+    );
+
+    public static final Set<SaksopplysningType> KREVER_PERIODE = Set.of(
+        ARBFORH, INNTK, MEDL, PERSHIST, UTBETAL
+    );
 }
 

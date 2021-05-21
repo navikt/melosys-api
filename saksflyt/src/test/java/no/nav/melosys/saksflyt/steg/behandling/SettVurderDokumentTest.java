@@ -7,8 +7,6 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +38,7 @@ class SettVurderDokumentTest {
     }
 
     @Test
-    void utfør_sakMedBehandling_oppdatererStatus() throws FunksjonellException, TekniskException {
+    void utfør_sakMedBehandling_oppdatererStatus() {
         when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsakMedBehandling());
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, false);
         settVurderDokument.utfør(prosessinstans);
@@ -48,7 +46,7 @@ class SettVurderDokumentTest {
     }
 
     @Test
-    void utfør_sakUtenBehandling_ingenStatusEndring() throws FunksjonellException, TekniskException {
+    void utfør_sakUtenBehandling_ingenStatusEndring() {
         when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(new Fagsak());
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, false);
         settVurderDokument.utfør(prosessinstans);
@@ -56,7 +54,7 @@ class SettVurderDokumentTest {
     }
 
     @Test
-    void utfør_ingenVurdering_ingenStatusEndring() throws FunksjonellException, TekniskException {
+    void utfør_ingenVurdering_ingenStatusEndring() {
         when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsakMedBehandling());
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, true);
         settVurderDokument.utfør(prosessinstans);

@@ -20,8 +20,6 @@ public final class XsltConfig {
 
     public static final String INNTK_MAPPE= "inntk";
 
-    public static final String MEDL_MAPPE = "medl";
-
     private static final String SOB_MAPPE = "sob";
 
     public static final String TPS_MAPPE = "tps";
@@ -32,8 +30,6 @@ public final class XsltConfig {
     private static final String ARBEIDSFORHOLD_TJENESTE = "arbeidsforhold";
 
     private static final String INNTEKT_TJENESTE = "inntekt";
-
-    private static final String MEDLEMSKAP_TJENESTE = "medlemskap";
 
     private static final String ORGANISASJON_TJENESTE = "organisasjon";
 
@@ -60,29 +56,27 @@ public final class XsltConfig {
     }
 
     private static String getTjenesteNavn(SaksopplysningType type) {
-        switch (type){
-            case PERSOPL: return XsltConfig.PERSON_TJENESTE;
-            case PERSHIST: return XsltConfig.PERSONHISTORIKK_TJENESTE;
-            case ORG: return XsltConfig.ORGANISASJON_TJENESTE;
-            case ARBFORH: return XsltConfig.ARBEIDSFORHOLD_TJENESTE;
-            case INNTK: return XsltConfig.INNTEKT_TJENESTE;
-            case MEDL: return XsltConfig.MEDLEMSKAP_TJENESTE;
-            case SOB_SAK: return XsltConfig.SAKOGBEHANDLING_TJENESTE;
-            case UTBETAL: return XsltConfig.UTBETAL;
-            default: throw new IllegalStateException("SaksopplysningType " + type + " er ikke støttet");
-        }
+        return switch (type) {
+            case PERSOPL -> XsltConfig.PERSON_TJENESTE;
+            case PERSHIST -> XsltConfig.PERSONHISTORIKK_TJENESTE;
+            case ORG -> XsltConfig.ORGANISASJON_TJENESTE;
+            case ARBFORH -> XsltConfig.ARBEIDSFORHOLD_TJENESTE;
+            case INNTK -> XsltConfig.INNTEKT_TJENESTE;
+            case SOB_SAK -> XsltConfig.SAKOGBEHANDLING_TJENESTE;
+            case UTBETAL -> XsltConfig.UTBETAL;
+            default -> throw new IllegalStateException("SaksopplysningType " + type + " er ikke støttet");
+        };
     }
 
     private static String getXsltMappe(SaksopplysningType type) {
-        switch (type){
-            case PERSOPL: case PERSHIST: return XsltConfig.TPS_MAPPE;
-            case ORG: return XsltConfig.EREG_MAPPE;
-            case ARBFORH: return XsltConfig.AAREG_MAPPE;
-            case INNTK: return XsltConfig.INNTK_MAPPE;
-            case MEDL: return XsltConfig.MEDL_MAPPE;
-            case SOB_SAK: return XsltConfig.SOB_MAPPE;
-            case UTBETAL: return XsltConfig.UTBETAL_MAPPE;
-            default: throw new IllegalStateException("SaksopplysningType " + type + " er ikke støttet");
-        }
+        return switch (type) {
+            case PERSOPL, PERSHIST -> XsltConfig.TPS_MAPPE;
+            case ORG -> XsltConfig.EREG_MAPPE;
+            case ARBFORH -> XsltConfig.AAREG_MAPPE;
+            case INNTK -> XsltConfig.INNTK_MAPPE;
+            case SOB_SAK -> XsltConfig.SOB_MAPPE;
+            case UTBETAL -> XsltConfig.UTBETAL_MAPPE;
+            default -> throw new IllegalStateException("SaksopplysningType " + type + " er ikke støttet");
+        };
     }
 }

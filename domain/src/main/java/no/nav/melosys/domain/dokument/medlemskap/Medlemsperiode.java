@@ -8,6 +8,8 @@ import no.nav.melosys.domain.HarPeriode;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Medlemsperiode implements HarPeriode {
 
+    private static final String KILDE_LÅNEKASSEN = "LAANEKASSEN";
+
     public Long id;
 
     public Periode periode;
@@ -65,4 +67,7 @@ public class Medlemsperiode implements HarPeriode {
         return kilde;
     }
 
+    public boolean erKildeLånekassen() {
+        return KILDE_LÅNEKASSEN.equals(kilde);
+    }
 }

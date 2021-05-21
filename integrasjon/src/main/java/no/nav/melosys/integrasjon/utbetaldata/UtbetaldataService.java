@@ -4,6 +4,7 @@ import java.io.StringWriter;
 import java.time.LocalDate;
 import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.ws.WebServiceException;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKildesystem;
@@ -38,10 +39,17 @@ public class UtbetaldataService implements UtbetaldataFasade {
     }
 
     @Override
-    public Saksopplysning hentUtbetalingerBarnetrygd(String fnr, LocalDate fom, LocalDate tom) throws TekniskException, FunksjonellException {
-        HentUtbetalingsinformasjonResponse response = filtrerYtelserAvTypeBarnetrygd(
-                hentUtbetalingsinformasjon(lagRequest(fnr, fom, tom))
-        );
+    public Saksopplysning hentUtbetalingerBarnetrygd(String fnr, LocalDate fom, LocalDate tom) {
+        HentUtbetalingsinformasjonResponse response;
+
+        // Utbetldata støtter ikke uthenting av data for lenger tilbake enn 3 år
+        if (tom != null && datoErEldreEnnTreÅr(tom)) {
+            response = new HentUtbetalingsinformasjonResponse();
+        } else {
+            response = filtrerYtelserAvTypeBarnetrygd(
+                    hentUtbetalingsinformasjon(lagRequest(fnr, fom, tom))
+            );
+        }
 
         // Response -> xml
         StringWriter xmlWriter = lagXml(response);
@@ -53,7 +61,7 @@ public class UtbetaldataService implements UtbetaldataFasade {
         return saksopplysning;
     }
 
-    private HentUtbetalingsinformasjonResponse hentUtbetalingsinformasjon(HentUtbetalingsinformasjonRequest request) throws FunksjonellException {
+    private HentUtbetalingsinformasjonResponse hentUtbetalingsinformasjon(HentUtbetalingsinformasjonRequest request) {
         try {
             return utbetalingConsumer.hentUtbetalingsinformasjon(request);
         } catch (HentUtbetalingsinformasjonPersonIkkeFunnet hentUtbetalingsinformasjonPersonIkkeFunnet) {
@@ -62,10 +70,12 @@ public class UtbetaldataService implements UtbetaldataFasade {
             throw new FunksjonellException("Oppgitt periode er ikke gyldig", hentUtbetalingsinformasjonPeriodeIkkeGyldig);
         } catch (HentUtbetalingsinformasjonIkkeTilgang hentUtbetalingsinformasjonIkkeTilgang) {
             throw new SikkerhetsbegrensningException("Har ikke tilgang til å hente data for person", hentUtbetalingsinformasjonIkkeTilgang);
+        } catch (WebServiceException e) {
+            throw new IntegrasjonException(e);
         }
     }
 
-    private StringWriter lagXml(HentUtbetalingsinformasjonResponse response) throws IntegrasjonException {
+    private StringWriter lagXml(HentUtbetalingsinformasjonResponse response) {
         StringWriter xmlWriter = new StringWriter();
         try {
             no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonResponse xmlRoot =
@@ -88,7 +98,7 @@ public class UtbetaldataService implements UtbetaldataFasade {
         return saksopplysning;
     }
 
-    private static HentUtbetalingsinformasjonRequest lagRequest(String fnr, LocalDate fom, LocalDate tom) throws TekniskException {
+    private static HentUtbetalingsinformasjonRequest lagRequest(String fnr, LocalDate fom, LocalDate tom) {
         HentUtbetalingsinformasjonRequest request = new HentUtbetalingsinformasjonRequest();
         request.setId(lagIdent(fnr));
         request.setPeriode(lagPeriode(fom, tom));
@@ -104,11 +114,15 @@ public class UtbetaldataService implements UtbetaldataFasade {
         return ident;
     }
 
-    private static ForespurtPeriode lagPeriode(LocalDate fom, LocalDate tom) throws TekniskException {
+    private static ForespurtPeriode lagPeriode(LocalDate fom, LocalDate tom) {
         ForespurtPeriode periode = new ForespurtPeriode();
         Periodetyper periodetype = new Periodetyper();
         periodetype.setValue(YTELSESPERIODE);
         periode.setPeriodeType(periodetype);
+
+        if (datoErEldreEnnTreÅr(fom)) {
+            fom = LocalDate.now().minusYears(3);
+        }
 
         try {
             periode.setFom(KonverteringsUtils.localDateToXMLGregorianCalendar(fom));
@@ -136,5 +150,9 @@ public class UtbetaldataService implements UtbetaldataFasade {
         return ytelse.getYtelsestype() != null
             && ytelse.getYtelsestype().getValue() != null
             && ytelse.getYtelsestype().getValue().trim().equalsIgnoreCase(BARNETRYGD);
+    }
+
+    private static boolean datoErEldreEnnTreÅr(LocalDate dato) {
+        return dato.isBefore(LocalDate.now().minusYears(3));
     }
 }

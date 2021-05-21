@@ -14,21 +14,23 @@
       }
     ]
   },
-  "arbeidUtland": [
-    {
-      "adresse": {
-        "gatenavn": "Adresseveien 123",
-        "husnummer": "123",
-        "region": "Brandenburger",
-        "postnummer": "1234",
-        "poststed": "Poststedet",
-        "landkode": "DE"
-      },
-      "foretakNavn": "EQUINOR",
-      "foretakOrgnr": "372384726",
-      "arbeidUtlandHjemmekontor": false
-    }
-  ],
+  "arbeidPaaLand": {
+    "fysiskeArbeidssteder": [
+      {
+        "adresse": {
+          "gatenavn": "Adresseveien 123",
+          "husnummer": "123",
+          "region": "Brandenburger",
+          "postnummer": "1234",
+          "poststed": "Poststedet",
+          "landkode": "DE"
+        },
+        "virksomhetNavn": "EQUINOR"
+      }
+    ],
+    "erHjemmekontor": true,
+    "erFastArbeidssted": false
+  },
   "foretakUtland": [
     {
       "uuid": "2c5ea4c0-4067-11e9-8bad-9b1deb4d3b7d",
@@ -86,17 +88,17 @@
     "andelKontrakterINorge": 30.5,
     "ekstraArbeidsgivere": []
   },
-  "arbeidsinntekt": {
-    "inntektNorskIPerioden": 5500,
-    "inntektUtenlandskIPerioden": 2000,
-    "inntektNaeringIPerioden": 1000,
-    "inntektNaturalytelser": {
-      "friBolig": true,
-      "friBil": true,
-      "friAnnet": "Ubegrenset mengde kaffegrut fra bedriftens kaffemaskinen"
-    },
-    "inntektErInnrapporteringspliktig": true,
-    "inntektTrygdeavgiftBlirTrukket": true
+  "loennOgGodtgjoerelse": {
+    "norskArbgUtbetalerLoenn": false,
+    "erArbeidstakerAnsattHelePerioden": true,
+    "utlArbgUtbetalerLoenn": true,
+    "utlArbTilhoererSammeKonsern": false,
+    "bruttoLoennPerMnd": 7000.12,
+    "bruttoLoennUtlandPerMnd": 14000.23,
+    "mottarNaturalytelser": true,
+    "samletVerdiNaturalytelser": 99000.57,
+    "erArbeidsgiveravgiftHelePerioden": true,
+    "erTrukketTrygdeavgift": false
   },
   "arbeidsgiversBekreftelse": {
     "arbeidsgiverBekrefterUtsendelse": true,
@@ -112,10 +114,9 @@
       "enhetNavn": "Dunfjæder",
       "fartsomradeKode": "INNENRIKS",
       "flaggLandkode": "GB",
-      "installasjonsLandkode": "GB",
-      "territorialfarvann": "GB",
-      "foretakNavn": "SWECO NORGE AS",
-      "foretakOrgnr": "967032271"
+      "innretningLandkode": "GB",
+      "innretningstype": "BORESKIP",
+      "territorialfarvann": "GB"
     }
   ],
   "soeknadsland": {

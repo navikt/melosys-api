@@ -6,13 +6,12 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -49,11 +48,11 @@ public class VideresendSoknadService {
         this.oppgaveService = oppgaveService;
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
+    @Transactional
     public void videresend(String saksnummer,
                            String mottakerinstitusjon,
-                           String fritekst) throws MelosysException {
-
+                           String fritekst,
+                           Set<DokumentReferanse> vedleggReferanser) {
         final Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         final Behandling behandling = fagsak.hentAktivBehandling();
         log.info("Videresender søknad for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandling.getId());
@@ -72,12 +71,13 @@ public class VideresendSoknadService {
 
         prosessinstansService.opprettProsessinstansVideresendSoknad(behandling,
             avklarteEessiMottakere.stream().findFirst().orElse(null),
-            fritekst
+            fritekst,
+            vedleggReferanser
         );
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private void validerBehandlingOgBosted(Behandling behandling, Landkoder bostedsland) throws FunksjonellException, TekniskException {
+    private void validerBehandlingOgBosted(Behandling behandling, Landkoder bostedsland) {
         if (!behandling.erBehandlingAvSøknad()) {
             throw new FunksjonellException("Behandling " + behandling.getId() + " er ikke behandling av en søknad!");
         }

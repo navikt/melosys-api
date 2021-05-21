@@ -20,7 +20,7 @@ public class VirksomheterDto {
         this.virksomhetIDer = virksomhetIDer;
     }
 
-    public static VirksomheterDto tilVirksomheterDto(Set<AvklartefaktaDto> avklartefaktas) {
+    public static VirksomheterDto av(Set<AvklartefaktaDto> avklartefaktas) {
         List<String> virksomheter = new ArrayList<>();
         avklartefaktas.stream()
             .filter(avklartefakta -> VIRKSOMHET.getKode().equals(avklartefakta.getReferanse()) && VIRKSOMHET.equals(avklartefakta.getAvklartefaktaType()))

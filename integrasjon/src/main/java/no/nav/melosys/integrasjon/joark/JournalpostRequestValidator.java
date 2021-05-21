@@ -17,8 +17,7 @@ final class JournalpostRequestValidator {
     // Manuell validering før vi prøver å opprette journalpost.
     // Ref: https://confluence.adeo.no/display/BOA/ferdigstillJournalpost
     // og https://confluence.adeo.no/display/BOA/opprettJournalpost
-    static void validerJournalpostForEndeligJfr(OpprettJournalpostRequest opprettJournalpostRequest)
-        throws FunksjonellException {
+    static void validerJournalpostForEndeligJfr(OpprettJournalpostRequest opprettJournalpostRequest) {
         Collection<String> feil = new ArrayList<>();
         feil.addAll(validerSak(opprettJournalpostRequest.getSak()));
         feil.addAll(validerJournalpost(opprettJournalpostRequest));
@@ -32,11 +31,11 @@ final class JournalpostRequestValidator {
 
     private static Collection<String> validerSak(Sak sak) {
         Collection<String> feil = new ArrayList<>();
-        if (StringUtils.isEmpty(sak.getArkivsaksnummer())) {
-            feil.add("Arkivsaksnummer mangler");
+        if (StringUtils.isEmpty(sak.getFagsakId())) {
+            feil.add("Saksnummer mangler");
         }
-        if (StringUtils.isEmpty(sak.getArkivsaksystem())) {
-            feil.add("Arkivsaksystem mangler");
+        if (StringUtils.isEmpty(sak.getFagsaksystem())) {
+            feil.add("Fagsaksystem mangler");
         }
         return feil;
     }

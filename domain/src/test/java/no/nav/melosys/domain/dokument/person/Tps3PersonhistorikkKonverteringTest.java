@@ -10,27 +10,27 @@ import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.KonverteringTest;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
-import org.junit.Before;
-import org.junit.Test;
+import no.nav.melosys.domain.dokument.person.adresse.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class Tps3PersonhistorikkKonverteringTest implements KonverteringTest {
-
+class Tps3PersonhistorikkKonverteringTest implements KonverteringTest {
     private static final String XML_PATH = "person/person_historikk.xml";
 
     private DokumentFactory factory;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         Jaxb2Marshaller marshaller = JaxbConfig.jaxb2Marshaller();
         XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();
         factory = new DokumentFactory(marshaller, xsltTemplatesFactory);
     }
 
     @Test
-    public void testKonverteringPersonhistorikk() throws Exception {
+    void testKonverteringPersonhistorikk() throws Exception {
         PersonhistorikkDokument dokument = (PersonhistorikkDokument) getSaksopplysning(XML_PATH).getDokument();
 
         assertThat(dokument).isNotNull();
@@ -61,6 +61,12 @@ public class Tps3PersonhistorikkKonverteringTest implements KonverteringTest {
             assertThat(midlertidigPostadresse.endringstidspunkt).isNotNull();
             assertThat(midlertidigPostadresse.postleveringsPeriode).isNotNull();
             assertThat(midlertidigPostadresse.land).isNotNull();
+            if (midlertidigPostadresse instanceof MidlertidigPostadresseNorge) {
+                assertThat(((MidlertidigPostadresseNorge) midlertidigPostadresse).gateadresse.getGatenavn()).isNotNull();
+            }
+            if (midlertidigPostadresse instanceof MidlertidigPostadresseUtland) {
+                assertThat(((MidlertidigPostadresseUtland) midlertidigPostadresse).adresselinje1).isNotNull();
+            }
         }
     }
 

@@ -2,50 +2,45 @@ package no.nav.melosys.service.registeropplysninger;
 
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.exception.TekniskException;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-public class RegisteropplysningerRequestTest {
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+class RegisteropplysningerRequestTest {
 
     @Test
-    public void valider_ingenBehandlingID_forventException() throws TekniskException {
-        expectedException.expect(TekniskException.class);
-        expectedException.expectMessage("BehandlingID er påkrevd for å hente registeropplysninger");
-        RegisteropplysningerRequest.builder().build();
+    void valider_ingenBehandlingID_forventException() {
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(() -> RegisteropplysningerRequest.builder().build())
+            .withMessageContaining("BehandlingID er påkrevd for å hente registeropplysninger");
     }
 
     @Test
-    public void valider_ingenSaksopplysningstype_forventException() throws TekniskException {
-        expectedException.expect(TekniskException.class);
-        expectedException.expectMessage("Krever minst én saksopplysningstype for å hente registeropplysninger");
-        RegisteropplysningerRequest.builder().behandlingID(1L).build();
+    void valider_ingenSaksopplysningstype_forventException() {
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(() -> RegisteropplysningerRequest.builder().behandlingID(1L).build())
+            .withMessageContaining("Krever minst én saksopplysningstype for å hente registeropplysninger");
     }
 
     @Test
-    public void valider_ingenFnrMenPåkrevd_forventException() throws TekniskException {
-        expectedException.expect(TekniskException.class);
-        expectedException.expectMessage("Krever at fnr er satt ved henting av ");
-        expectedException.expectMessage(SaksopplysningType.MEDL.getBeskrivelse());
-        expectedException.expectMessage(SaksopplysningType.PERSOPL.getBeskrivelse());
-
-        RegisteropplysningerRequest.builder()
-            .behandlingID(1L)
-            .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
-                .personopplysninger()
-                .medlemskapsopplysninger()
-                .organisasjonsopplysninger()
+    void valider_ingenFnrMenPåkrevd_forventException() {
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(() -> RegisteropplysningerRequest.builder()
+                .behandlingID(1L)
+                .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
+                    .personopplysninger()
+                    .medlemskapsopplysninger()
+                    .organisasjonsopplysninger()
+                    .build())
                 .build())
-            .build();
+            .withMessageContaining("Krever at fnr er satt ved henting av ")
+            .withMessageContaining(SaksopplysningType.MEDL.getBeskrivelse())
+            .withMessageContaining(SaksopplysningType.PERSOPL.getBeskrivelse());
     }
 
     @Test
-    public void valider_ingenFnrMenIkkePåkrevd_forventFnrLikNull() throws TekniskException {
+    void valider_ingenFnrMenIkkePåkrevd_forventFnrLikNull() {
         RegisteropplysningerRequest registeropplysningerRequest = RegisteropplysningerRequest.builder()
             .behandlingID(1L)
             .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
@@ -57,27 +52,26 @@ public class RegisteropplysningerRequestTest {
     }
 
     @Test
-    public void valider_feilIPeriode_forventException() throws TekniskException {
-        expectedException.expect(TekniskException.class);
-        expectedException.expectMessage("Feil i periode:");
-        expectedException.expectMessage(SaksopplysningType.INNTK.getBeskrivelse());
-        expectedException.expectMessage(SaksopplysningType.ARBFORH.getBeskrivelse());
-        expectedException.expectMessage("krever en gyldig periode");
-
-        RegisteropplysningerRequest.builder()
-            .behandlingID(1L)
-            .fnr("123")
-            .fom(null)
-            .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
-                .arbeidsforholdopplysninger()
-                .inntektsopplysninger()
-                .organisasjonsopplysninger()
+    void valider_feilIPeriode_forventException() {
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(() -> RegisteropplysningerRequest.builder()
+                .behandlingID(1L)
+                .fnr("123")
+                .fom(null)
+                .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
+                    .arbeidsforholdopplysninger()
+                    .inntektsopplysninger()
+                    .organisasjonsopplysninger()
+                    .build())
                 .build())
-            .build();
+            .withMessageContaining("Feil i periode")
+            .withMessageContaining(SaksopplysningType.INNTK.getBeskrivelse())
+            .withMessageContaining(SaksopplysningType.ARBFORH.getBeskrivelse())
+            .withMessageContaining("krever en gyldig periode");
     }
 
     @Test
-    public void valider_feilIPeriodeMenIkkePåkrevd_forventPeriodeLikNull() throws TekniskException {
+    void valider_feilIPeriodeMenIkkePåkrevd_forventPeriodeLikNull() {
         RegisteropplysningerRequest registeropplysningerRequest = RegisteropplysningerRequest.builder()
             .behandlingID(1L)
             .fnr("123")

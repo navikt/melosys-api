@@ -6,35 +6,33 @@ import java.util.Arrays;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class BrevDataByggerHenleggelseTest {
     @Mock
     JoarkService joarkService;
 
     private BrevDataByggerHenleggelse brevDataByggerHenleggelse;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         brevDataByggerHenleggelse = new BrevDataByggerHenleggelse(joarkService, new BrevbestillingDto());
     }
 
     @Test
-    public void lag_henleggelseBrev_setterForendelseMottatt() throws FunksjonellException, IntegrasjonException {
+    public void lag_henleggelseBrev_setterForendelseMottatt() {
         String journalpostId = "998877";
 
         Instant forsendelseMottatt = Instant.parse("2006-09-22T01:02:00Z");

@@ -10,7 +10,6 @@ import no.nav.melosys.domain.eessi.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.eessi.dto.*;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
 import no.nav.melosys.integrasjon.felles.JsonRestIntegrasjon;
@@ -38,25 +37,27 @@ public class EessiConsumerImpl implements EessiConsumer, JsonRestIntegrasjon {
     public OpprettSedDto opprettBucOgSed(SedDataDto sedDataDto,
                                          Collection<Vedlegg> vedlegg,
                                          BucType bucType,
-                                         boolean sendAutomatisk) throws MelosysException {
+                                         boolean sendAutomatisk,
+                                         boolean oppdaterEksisterendeOmFinnes) {
         return exchange(
-            "/buc/{bucType}?sendAutomatisk={sendAutomatisk}",
+            "/buc/{bucType}?sendAutomatisk={sendAutomatisk}&oppdaterEksisterende={oppdaterEksisterendeOmFinnes}",
             HttpMethod.POST,
             new HttpEntity<>(new OpprettBucOgSedDto(sedDataDto, vedlegg), getDefaultHeaders()),
             new ParameterizedTypeReference<OpprettSedDto>() {},
             bucType,
-            sendAutomatisk);
+            sendAutomatisk,
+            oppdaterEksisterendeOmFinnes);
     }
 
     @Override
-    public void sendSedPåEksisterendeBuc(SedDataDto sedDataDto, String rinaSaksnummer, SedType sedType) throws MelosysException {
+    public void sendSedPåEksisterendeBuc(SedDataDto sedDataDto, String rinaSaksnummer, SedType sedType) {
         exchange("/buc/{bucID}/sed/{sedType}", HttpMethod.POST,
             new HttpEntity<>(sedDataDto, getDefaultHeaders()), new ParameterizedTypeReference<Void>() {
             }, rinaSaksnummer, sedType);
     }
 
     @Override
-    public List<Institusjon> hentMottakerinstitusjoner(String bucType, Collection<String> landkoder) throws MelosysException {
+    public List<Institusjon> hentMottakerinstitusjoner(String bucType, Collection<String> landkoder) {
 
         List<InstitusjonDto> institusjonDtoList = exchange("/buc/{bucType}/institusjoner?land={landkoder}", HttpMethod.GET,
             new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<InstitusjonDto>>() {
@@ -69,34 +70,34 @@ public class EessiConsumerImpl implements EessiConsumer, JsonRestIntegrasjon {
     }
 
     @Override
-    public MelosysEessiMelding hentMelosysEessiMeldingFraJournalpostID(String journalpostID) throws MelosysException {
+    public MelosysEessiMelding hentMelosysEessiMeldingFraJournalpostID(String journalpostID) {
         return exchange("/journalpost/{journalpostID}/eessimelding", HttpMethod.GET,
             new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<MelosysEessiMelding>(){
             }, journalpostID);
     }
 
     @Override
-    public void lagreSaksrelasjon(SaksrelasjonDto saksrelasjonDto) throws MelosysException {
+    public void lagreSaksrelasjon(SaksrelasjonDto saksrelasjonDto) {
         exchange("/sak", HttpMethod.POST, new HttpEntity<>(saksrelasjonDto, getDefaultHeaders()),
             new ParameterizedTypeReference<Void>() {});
     }
 
     @Override
-    public List<SaksrelasjonDto> hentSakForRinasaksnummer(String rinaSaksnummer) throws MelosysException {
+    public List<SaksrelasjonDto> hentSakForRinasaksnummer(String rinaSaksnummer) {
         return exchange("/sak?rinaSaksnummer={rinaSaksnummer}", HttpMethod.GET,
             new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<SaksrelasjonDto>>() {
             }, rinaSaksnummer);
     }
 
     @Override
-    public byte[] genererSedPdf(SedDataDto sedDataDto, SedType sedType) throws MelosysException {
+    public byte[] genererSedPdf(SedDataDto sedDataDto, SedType sedType) {
         return exchange("/sed/{sedType}/pdf", HttpMethod.POST,
             new HttpEntity<>(sedDataDto, getDefaultHeaders()), new ParameterizedTypeReference<byte[]>() {
             }, sedType);
     }
 
     @Override
-    public List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, List<String> statuser) throws MelosysException {
+    public List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, List<String> statuser) {
 
         List<BucinfoDto> bucinfoDtoList = exchange("/sak/{arkivSakID}/bucer?statuser={statuser}", HttpMethod.GET,
             new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<List<BucinfoDto>>() {
@@ -106,17 +107,17 @@ public class EessiConsumerImpl implements EessiConsumer, JsonRestIntegrasjon {
     }
 
     @Override
-    public SedGrunnlagDto hentSedGrunnlag(String rinaSaksnummer, String rinaDokumentID) throws MelosysException {
+    public SedGrunnlagDto hentSedGrunnlag(String rinaSaksnummer, String rinaDokumentID) {
         return exchange("/buc/{rinaSaksnummer}/sed/{rinaDokumentID}/grunnlag", HttpMethod.GET,
             new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<SedGrunnlagDto>() {
             }, rinaSaksnummer, rinaDokumentID);
     }
 
-    private <T> T exchange(String uri, HttpMethod method, HttpEntity<?> entity, ParameterizedTypeReference<T> responseType, Object... variabler) throws MelosysException {
+    private <T> T exchange(String uri, HttpMethod method, HttpEntity<?> entity, ParameterizedTypeReference<T> responseType, Object... variabler) {
         try {
             return restTemplate.exchange(uri, method, entity, responseType, variabler).getBody();
         } catch (RestClientResponseException e) {
-            throw ExceptionMapper.springExTilMelosysEx(e, hentFeilmelding(e));
+            throw ExceptionMapper.mapException(e, hentFeilmelding(e));
         }
     }
 

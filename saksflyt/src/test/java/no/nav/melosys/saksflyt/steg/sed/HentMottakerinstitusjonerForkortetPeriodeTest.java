@@ -13,30 +13,27 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class HentMottakerinstitusjonerForkortetPeriodeTest {
+@ExtendWith(MockitoExtension.class)
+class HentMottakerinstitusjonerForkortetPeriodeTest {
 
     private HentMottakerinstitusjonerForkortetPeriode hentMottakerinstitusjonerForkortetPeriode;
     @Mock
@@ -48,11 +45,8 @@ public class HentMottakerinstitusjonerForkortetPeriodeTest {
 
     private final long behandlingId = 34;
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
-    public void setUp() throws MelosysException {
+    @BeforeEach
+    public void setUp() {
         hentMottakerinstitusjonerForkortetPeriode = new HentMottakerinstitusjonerForkortetPeriode(behandlingsresultatService, eessiService, landvelgerService);
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
@@ -64,13 +58,9 @@ public class HentMottakerinstitusjonerForkortetPeriodeTest {
     }
 
     @Test
-    public void utfør_harTidligereBUC_setterMottakerInstitusjoner() throws MelosysException {
-        Endretperiode endretperiodeKode = Endretperiode.ARBEIDSFORHOLD_AVSLUTTET;
-
+    void utfør_harTidligereBUC_setterMottakerInstitusjoner() {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(lagBehandling());
-        p.setData(ProsessDataKey.BEGRUNNELSEKODE, endretperiodeKode);
-
         Set<String> mottakerInstitusjoner = Set.of("SE:123");
 
         when(eessiService.landErEessiReady(eq(BucType.LA_BUC_04.name()), any(Collection.class))).thenReturn(true);
@@ -84,13 +74,9 @@ public class HentMottakerinstitusjonerForkortetPeriodeTest {
     }
 
     @Test
-    public void utfør_ikkeEessiReady_ingenMottakerInstitusjoner() throws MelosysException {
-        Endretperiode endretperiodeKode = Endretperiode.ARBEIDSFORHOLD_AVSLUTTET;
-
+    void utfør_ikkeEessiReady_ingenMottakerInstitusjoner() {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(lagBehandling());
-        p.setData(ProsessDataKey.BEGRUNNELSEKODE, endretperiodeKode);
-
         Set<String> mottakerInstitusjoner = Collections.emptySet();
 
         when(eessiService.landErEessiReady(eq(BucType.LA_BUC_04.name()), any(Collection.class))).thenReturn(true);
@@ -104,19 +90,16 @@ public class HentMottakerinstitusjonerForkortetPeriodeTest {
     }
 
     @Test
-    public void utfør_erEessiReadyFinnerIngenBuc_kasterException() throws MelosysException {
-        Endretperiode endretperiodeKode = Endretperiode.ARBEIDSFORHOLD_AVSLUTTET;
-
+    void utfør_erEessiReadyFinnerIngenBuc_kasterException() {
         Prosessinstans p = new Prosessinstans();
         p.setBehandling(lagBehandling());
-        p.setData(ProsessDataKey.BEGRUNNELSEKODE, endretperiodeKode);
 
         when(eessiService.landErEessiReady(eq(BucType.LA_BUC_04.name()), any(Collection.class))).thenReturn(true);
         when(eessiService.hentTilknyttedeBucer(anyLong(), anyList())).thenReturn(Collections.emptyList());
 
-        expectedException.expect(TekniskException.class);
-        expectedException.expectMessage("er EESSI-ready, men har ingen tidligere buc tilknyttet seg");
-        hentMottakerinstitusjonerForkortetPeriode.utfør(p);
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(() -> hentMottakerinstitusjonerForkortetPeriode.utfør(p))
+            .withMessageContaining("er EESSI-ready, men har ingen tidligere buc tilknyttet seg");
     }
 
     private Behandling lagBehandling() {

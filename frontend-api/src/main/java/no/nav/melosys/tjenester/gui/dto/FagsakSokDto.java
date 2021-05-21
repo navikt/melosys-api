@@ -8,7 +8,7 @@ public class FagsakSokDto {
     private final String ident;
     private final String saksnummer;
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public FagsakSokDto(@JsonProperty("ident") String ident, @JsonProperty("saksnummer") String saksnummer) {
         this.ident = ident;
         this.saksnummer = saksnummer;

@@ -1,12 +1,12 @@
 package no.nav.melosys.service.registeropplysninger;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.time.LocalDate;
-import java.time.YearMonth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -95,10 +95,6 @@ class RegisteropplysningerPeriodeFactoryTest {
     }
 
     @Test
-    void hentPeriodeForYtelser() {
-    }
-
-    @Test
     void hentPeriodeForYtelser_periodePåbegynt_verifiserInntektPeriode() {
         LocalDate fom = LocalDate.now().minusYears(1);
         LocalDate tom = LocalDate.now().plusYears(1);
@@ -118,6 +114,18 @@ class RegisteropplysningerPeriodeFactoryTest {
 
         assertThat(periode.fom).isEqualTo(YearMonth.from(LocalDate.now().minusMonths(2)));
         assertThat(periode.tom).isEqualTo(YearMonth.from(LocalDate.now()));
+    }
+
+    @Test
+    void hentPeriodeForYtelser_åpenPeriodeIkkePåbegyntMottakSed_verifiserInntektPeriode() {
+        LocalDate now = LocalDate.now();
+        LocalDate fom = now.plusYears(1);
+        LocalDate tom = null;
+
+        RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed);
+
+        assertThat(periode.fom).isEqualTo(YearMonth.from(now.minusMonths(2)));
+        assertThat(periode.tom).isEqualTo(YearMonth.from(now));
     }
 
     @Test
@@ -144,13 +152,14 @@ class RegisteropplysningerPeriodeFactoryTest {
 
     @Test
     void hentPeriodeForYtelser_åpenPeriodeMottakSed_forespørTomTilDato() {
-        LocalDate fom = LocalDate.now().minusYears(2);
+        LocalDate now = LocalDate.now();
+        LocalDate fom = now.minusYears(2);
         LocalDate tom = null;
 
         RegisteropplysningerPeriodeFactory.Periode periode = factory.hentPeriodeForInntekt(fom, tom, mottakAvSed);
 
-        assertThat(periode.fom).isEqualTo(YearMonth.from(fom));
-        assertThat(periode.tom).isEqualTo(YearMonth.from(fom.plusYears(2)));
+        assertThat(periode.fom).isEqualTo(YearMonth.from(fom.minusMonths(2)));
+        assertThat(periode.tom).isEqualTo(YearMonth.from(now));
     }
 
     @Test

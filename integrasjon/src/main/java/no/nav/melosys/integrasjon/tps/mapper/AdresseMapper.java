@@ -4,12 +4,12 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.person.Bostedsadresse;
-import no.nav.melosys.domain.dokument.person.Gateadresse;
-import no.nav.melosys.domain.dokument.person.MidlertidigPostadresse;
-import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseNorge;
-import no.nav.melosys.domain.dokument.person.MidlertidigPostadresseUtland;
-import no.nav.melosys.domain.dokument.person.UstrukturertAdresse;
+import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
+import no.nav.melosys.domain.dokument.person.adresse.Gateadresse;
+import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
+import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
+import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
+import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.*;
 
@@ -92,17 +92,24 @@ class AdresseMapper {
         return ustrukturertAdresse;
     }
 
-    private static MidlertidigPostadresseNorge mapTilMidlertidigPostadresseNorge(no.nav.tjeneste.virksomhet.person.v3.informasjon.MidlertidigPostadresseNorge midlertidigPostadresseNorge) {
+    private static MidlertidigPostadresseNorge mapTilMidlertidigPostadresseNorge(
+        no.nav.tjeneste.virksomhet.person.v3.informasjon.MidlertidigPostadresseNorge midlertidigPostadresseNorge) {
         MidlertidigPostadresseNorge mpn = new MidlertidigPostadresseNorge();
-        if (midlertidigPostadresseNorge.getStrukturertAdresse() != null) {
-            if (midlertidigPostadresseNorge.getStrukturertAdresse() instanceof no.nav.tjeneste.virksomhet.person.v3.informasjon.Gateadresse) {
-                mpn.gateadresse = mapTilGateadresse((no.nav.tjeneste.virksomhet.person.v3.informasjon.Gateadresse) midlertidigPostadresseNorge.getStrukturertAdresse());
+        final var strukturertAdresse = midlertidigPostadresseNorge.getStrukturertAdresse();
+        if (strukturertAdresse != null) {
+            if (strukturertAdresse instanceof no.nav.tjeneste.virksomhet.person.v3.informasjon.Gateadresse) {
+                mpn.gateadresse = mapTilGateadresse((no.nav.tjeneste.virksomhet.person.v3.informasjon.Gateadresse) strukturertAdresse);
             }
-            if (midlertidigPostadresseNorge.getStrukturertAdresse() instanceof StedsadresseNorge) {
-                StedsadresseNorge stedsadresseNorge = (StedsadresseNorge) midlertidigPostadresseNorge.getStrukturertAdresse();
+            if (strukturertAdresse instanceof Matrikkeladresse) {
+                Matrikkeladresse matrikkeladresse = (Matrikkeladresse) strukturertAdresse;
+                mpn.gateadresse = new Gateadresse();
+                mpn.gateadresse.setGatenavn(matrikkeladresse.getEiendomsnavn());
+            }
+            if (strukturertAdresse instanceof StedsadresseNorge) {
+                StedsadresseNorge stedsadresseNorge = (StedsadresseNorge) strukturertAdresse;
                 mpn.poststed = stedsadresseNorge.getPoststed().getValue();
             }
-            mpn.land = Land.av(midlertidigPostadresseNorge.getStrukturertAdresse().getLandkode().getValue());
+            mpn.land = Land.av(strukturertAdresse.getLandkode().getValue());
         }
         return mpn;
     }
@@ -147,7 +154,7 @@ class AdresseMapper {
                 + " "
                 + (gateadresse.getHusnummer() == null ? "" : gateadresse.getHusnummer().toString())
                 + (gateadresse.getHusbokstav() == null ? "" : gateadresse.getHusbokstav());
-            
+
         } else if (person.getBostedsadresse().getStrukturertAdresse() instanceof Matrikkeladresse) {
             Matrikkeladresse matrikkeladresse = (Matrikkeladresse) person.getBostedsadresse().getStrukturertAdresse();
             postadresse.adresselinje1 = matrikkeladresse.getEiendomsnavn();

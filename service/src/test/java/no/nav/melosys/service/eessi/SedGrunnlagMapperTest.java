@@ -10,7 +10,6 @@ import java.util.Objects;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto;
-import no.nav.melosys.exception.MelosysException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,7 +18,7 @@ import static org.assertj.core.api.Assertions.tuple;
 class SedGrunnlagMapperTest {
 
     @Test
-    void mapSedGrunnlag() throws MelosysException, IOException, URISyntaxException {
+    void mapSedGrunnlag() throws IOException, URISyntaxException {
         SedGrunnlag sedGrunnlag = SedGrunnlagMapper.tilSedGrunnlag(lagSedGrunnlag());
 
         assertThat(sedGrunnlag)
@@ -39,13 +38,11 @@ class SedGrunnlagMapperTest {
                 utenlandskIdent -> utenlandskIdent.landkode)
             .containsExactly(tuple("15225345345", "BG"));
 
-        assertThat(sedGrunnlag.arbeidUtland)
-            .extracting(
-                arbeidUtland -> arbeidUtland.foretakNavn,
-                arbeidUtland -> arbeidUtland.foretakOrgnr)
+        assertThat(sedGrunnlag.arbeidPaaLand.fysiskeArbeidssteder)
+            .extracting(arbeidssted -> arbeidssted.virksomhetNavn)
             .containsExactlyInAnyOrder(
-                tuple("Testarbeidsstednavn", null),
-                tuple("Testarbeidsstednavn2", null)
+                "Testarbeidsstednavn",
+                "Testarbeidsstednavn2"
             );
 
         assertThat(sedGrunnlag.juridiskArbeidsgiverNorge.ekstraArbeidsgivere)

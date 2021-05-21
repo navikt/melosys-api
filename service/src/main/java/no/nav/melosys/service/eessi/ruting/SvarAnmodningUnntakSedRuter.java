@@ -14,7 +14,6 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -51,8 +50,14 @@ public class SvarAnmodningUnntakSedRuter implements SedRuterForSedTyper {
     }
 
     @Override
-    public void rutSedTilBehandling(Prosessinstans prosessinstans, Long arkivsakID) throws TekniskException, FunksjonellException {
+    public void rutSedTilBehandling(Prosessinstans prosessinstans, Long arkivsakID) {
         MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
+
+        if (arkivsakID == null) {
+            oppgaveService.opprettJournalføringsoppgave(melosysEessiMelding.getJournalpostId(), melosysEessiMelding.getAktoerId());
+            return;
+        }
+
         Behandling behandling = hentBehandling(arkivsakID);
         prosessinstans.setBehandling(behandling);
         Optional<Anmodningsperiode> anmodningsperiode = anmodningsperiodeService.hentAnmodningsperioder(behandling.getId())
@@ -79,13 +84,13 @@ public class SvarAnmodningUnntakSedRuter implements SedRuterForSedTyper {
         );
     }
 
-    private Behandling hentBehandling(Long gsakSaksnummer) throws FunksjonellException, TekniskException {
+    private Behandling hentBehandling(Long gsakSaksnummer) {
         return fagsakService
             .hentFagsakFraArkivsakID(gsakSaksnummer)
             .hentSistAktiveBehandling();
     }
 
-    private void oppdaterBehandlingOgOppgave(Behandling behandling, String sedType) throws FunksjonellException, TekniskException {
+    private void oppdaterBehandlingOgOppgave(Behandling behandling, String sedType) {
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
         Optional<Oppgave> oppgave = oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
         if (oppgave.isEmpty()) {
@@ -95,7 +100,7 @@ public class SvarAnmodningUnntakSedRuter implements SedRuterForSedTyper {
         }
     }
 
-    private void opprettOppgave(Behandling behandling, String sedType) throws FunksjonellException, TekniskException {
+    private void opprettOppgave(Behandling behandling, String sedType) {
         String aktørID = behandling.getFagsak().hentBruker().getAktørId();
 
         Oppgave.Builder oppgaveBuilder = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType())

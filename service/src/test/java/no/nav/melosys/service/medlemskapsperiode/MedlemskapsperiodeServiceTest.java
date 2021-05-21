@@ -67,7 +67,7 @@ class MedlemskapsperiodeServiceTest {
     }
 
     @Test
-    void opprettMedlemskapsperiode_finnesEksisterende_verifiserFårSammeArbeidslandOgBestemmelse() throws FunksjonellException {
+    void opprettMedlemskapsperiode_finnesEksisterende_verifiserFårSammeArbeidslandOgBestemmelse() {
         final var eksisterende = lagMedlemskapsperiode();
         when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID))
             .thenReturn(Optional.of(lagMedlemAvFolketrygden(eksisterende)));
@@ -78,13 +78,13 @@ class MedlemskapsperiodeServiceTest {
         verify(medlemskapsperiodeRepository).save(medlemskapsperiodeCaptor.capture());
         assertThat(medlemskapsperiodeCaptor.getValue()).isNotNull()
             .extracting(Medlemskapsperiode::getArbeidsland, Medlemskapsperiode::getBestemmelse,
-                Medlemskapsperiode::getInnvilgelsesresultat, Medlemskapsperiode::getTrygdedekning, Medlemskapsperiode::getMedlemskapstype)
+                Medlemskapsperiode::getInnvilgelsesresultat, Medlemskapsperiode::getDekning, Medlemskapsperiode::getMedlemskapstype)
             .containsExactly(eksisterende.getArbeidsland(), eksisterende.getBestemmelse(),
                 InnvilgelsesResultat.AVSLAATT, Trygdedekninger.HELSEDEL, eksisterende.getMedlemskapstype());
     }
 
     @Test
-    void oppdaterMedlemskapsperiode_medlemskapsperoideFinnes_oppdateres() throws FunksjonellException {
+    void oppdaterMedlemskapsperiode_medlemskapsperoideFinnes_oppdateres() {
         final var medlemskapsperiode = lagMedlemskapsperiode();
         when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID))
             .thenReturn(Optional.of(lagMedlemAvFolketrygden(medlemskapsperiode)));
@@ -96,7 +96,7 @@ class MedlemskapsperiodeServiceTest {
         verify(medlemskapsperiodeRepository).save(eq(medlemskapsperiode));
         assertThat(medlemskapsperiode)
             .extracting(Medlemskapsperiode::getFom, Medlemskapsperiode::getTom,
-                Medlemskapsperiode::getInnvilgelsesresultat, Medlemskapsperiode::getTrygdedekning)
+                Medlemskapsperiode::getInnvilgelsesresultat, Medlemskapsperiode::getDekning)
             .containsExactly(nå, nå, InnvilgelsesResultat.AVSLAATT, Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER);
     }
 
@@ -166,7 +166,7 @@ class MedlemskapsperiodeServiceTest {
     }
 
     @Test
-    void slettMedlemskapsperiode_finnesToMedlemskapsperioder_slettes() throws FunksjonellException {
+    void slettMedlemskapsperiode_finnesToMedlemskapsperioder_slettes() {
         var medlemskapsperiode1 = lagMedlemskapsperiode();
         var medlemskapsperiode2 = lagMedlemskapsperiode();
         medlemskapsperiode2.setId(123321L);

@@ -22,6 +22,7 @@ public class ProsessinstansStatusCache {
     private Map<Pair<ProsessType, ProsessStatus>, Long> antallPerTypeOgStatus;
     private long sistLestTidspunkt = 0;
 
+    private static final EnumSet<ProsessType> PROSESS_TYPER = EnumSet.allOf(ProsessType.class);
     private static final EnumSet<ProsessStatus> STATUS_FEILET = EnumSet.of(ProsessStatus.FEILET);
 
     @Autowired
@@ -59,7 +60,8 @@ public class ProsessinstansStatusCache {
     }
 
     private void oppfriskCache() {
-        Collection<ProsessinstansAntall> prosessinstansMetrikker = prosessinstansRepository.antallAktiveOgFeiletPerTypeOgStatus();
+        Collection<ProsessinstansAntall> prosessinstansMetrikker = prosessinstansRepository.
+            antallAktiveOgFeiletPerTypeOgStatus(PROSESS_TYPER);
 
         antallPerTypeOgStatus = new HashMap<>();
         for (ProsessinstansAntall prosessinstansAntall : prosessinstansMetrikker) {

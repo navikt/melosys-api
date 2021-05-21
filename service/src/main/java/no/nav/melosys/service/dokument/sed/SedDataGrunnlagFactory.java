@@ -2,7 +2,6 @@ package no.nav.melosys.service.dokument.sed;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -28,7 +27,7 @@ public class SedDataGrunnlagFactory {
         this.kodeverkService = kodeverkService;
     }
 
-    public SedDataGrunnlag av(Behandling behandling) throws TekniskException {
+    public SedDataGrunnlag av(Behandling behandling) {
         Behandlingsgrunnlag behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
         if (behandlingsgrunnlag != null) {
             return new SedDataGrunnlagMedSoknad(behandling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);

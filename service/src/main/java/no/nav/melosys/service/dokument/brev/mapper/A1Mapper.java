@@ -16,6 +16,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.util.LandkoderUtils;
@@ -35,10 +36,11 @@ class A1Mapper {
     private static final int ANTALL_PÅKREVDE_FELTER_I_LISTE_5_1 = 15;
     private static final int ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2 = 13;
     static final int MAKS_ANTALL_TEGN_PER_LINJE_5_2 = 70;
+    private static final String STATSLØS = "Stateless";
 
     private BrevDataA1 brevData;
 
-    public A1 mapA1(Behandling behandling, Behandlingsresultat resultat, BrevDataA1 brevData) throws TekniskException {
+    public A1 mapA1(Behandling behandling, Behandlingsresultat resultat, BrevDataA1 brevData) {
         this.brevData = brevData;
 
         A1 a1 = new A1();
@@ -66,10 +68,10 @@ class A1Mapper {
         return a1;
     }
 
-    private PersonType mapPerson(PersonDokument personDokument) throws TekniskException {
+    private PersonType mapPerson(PersonDokument personDokument) {
         PersonType person = new PersonType();
         person.setKjoenn(KjoennKode.fromValue(personDokument.kjønn.getKode()));
-        person.setStatsborgerskap(LandkoderUtils.tilIso2(personDokument.statsborgerskap.getKode()));
+        person.setStatsborgerskap(mapStatsborgerskap(personDokument.statsborgerskap));
 
         person.setPersonnavn(lagPersonnavn(personDokument));
 
@@ -83,7 +85,15 @@ class A1Mapper {
         return person;
     }
 
-    private LovvalgsperiodeType mapLovvalgsperiode(Lovvalgsperiode lovvalgsperiode) throws TekniskException {
+    private static String mapStatsborgerskap(Land statsborgerskap) {
+        if (statsborgerskap.erStatsløs()) {
+            return STATSLØS;
+        } else {
+            return LandkoderUtils.tilIso2(statsborgerskap.getKode());
+        }
+    }
+
+    private LovvalgsperiodeType mapLovvalgsperiode(Lovvalgsperiode lovvalgsperiode) {
         LovvalgsperiodeType brevPeriode = new LovvalgsperiodeType();
         brevPeriode.setLovvalgsLand(lovvalgsperiode.getLovvalgsland().getKode());
         brevPeriode.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(lovvalgsperiode.getBestemmelse().getKode()));

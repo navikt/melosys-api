@@ -24,12 +24,16 @@ public interface PeriodeOmLovvalg extends ErPeriode, HarBestemmelse<LovvalgBeste
     }
 
     default boolean erArtikkel13() {
-        return getBestemmelse() == FO_883_2004_ART13_1A
-            || getBestemmelse() == FO_883_2004_ART13_1B1 || getBestemmelse() == FO_883_2004_ART13_1B2
-            || getBestemmelse() == FO_883_2004_ART13_1B3 || getBestemmelse() == FO_883_2004_ART13_1B4
+        return erArtikkel13_1()
             || getBestemmelse() == FO_883_2004_ART13_2A || getBestemmelse() == FO_883_2004_ART13_2B
             || getBestemmelse() == FO_883_2004_ART13_3
             || getBestemmelse() == FO_883_2004_ART13_4;
+    }
+
+    default boolean erArtikkel13_1() {
+        return getBestemmelse() == FO_883_2004_ART13_1A
+            || getBestemmelse() == FO_883_2004_ART13_1B1 || getBestemmelse() == FO_883_2004_ART13_1B2
+            || getBestemmelse() == FO_883_2004_ART13_1B3 || getBestemmelse() == FO_883_2004_ART13_1B4;
     }
 
     default boolean erArtikkel11() {

@@ -5,7 +5,7 @@ import javax.xml.datatype.DatatypeFactory;
 import no.nav.tjeneste.virksomhet.inntekt.v3.informasjon.inntekt.*;
 import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkRequest;
 import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkResponse;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static no.nav.melosys.integrasjon.inntk.InntektService.*;
 import static org.assertj.core.api.Assertions.assertThat;

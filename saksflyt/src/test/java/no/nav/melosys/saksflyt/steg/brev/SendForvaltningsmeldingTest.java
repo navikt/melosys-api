@@ -7,8 +7,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.service.behandling.BehandlingService;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,13 +15,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class SendForvaltningsmeldingTest {
@@ -41,7 +34,7 @@ class SendForvaltningsmeldingTest {
     }
 
     @Test
-    void utfør_skalSendesForvaltningsmelding_bestillerForvaltningsmelding() throws TekniskException, FunksjonellException {
+    void utfør_skalSendesForvaltningsmelding_bestillerForvaltningsmelding() {
         final long behandlingID = 21432L;
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, Boolean.TRUE);
@@ -60,7 +53,7 @@ class SendForvaltningsmeldingTest {
     }
 
     @Test
-    void utfør_skalIkkeSendeForvaltningsmelding_senderIkke() throws FunksjonellException, TekniskException {
+    void utfør_skalIkkeSendeForvaltningsmelding_senderIkke() {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(new Behandling());
         sendForvaltningsmelding.utfør(prosessinstans);

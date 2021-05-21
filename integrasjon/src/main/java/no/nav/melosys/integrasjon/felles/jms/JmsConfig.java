@@ -6,6 +6,7 @@ import javax.jms.Queue;
 
 import com.ibm.mq.jms.MQQueue;
 import com.ibm.mq.jms.MQQueueConnectionFactory;
+import com.ibm.msg.client.jms.JmsConstants;
 import com.ibm.msg.client.wmq.compat.jms.internal.JMSC;
 import no.nav.melosys.exception.IntegrasjonException;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,6 +44,9 @@ public class JmsConfig {
     @Value("${SBEH.queueName}")
     private String sakBehKøNavn;
 
+    @Value("${SBEH.username}")
+    private String sakBehUsername;
+
     @Bean(name = HENDELSESKØ)
     public Queue hendelseshåndterer() throws JMSException {
         return new MQQueue(sakBehKøNavn);
@@ -56,7 +60,7 @@ public class JmsConfig {
     }
 
     @Bean
-    public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() throws IntegrasjonException {
+    public DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         try {
             factory.setConnectionFactory(mqQueueConnectionFactory());
@@ -85,8 +89,9 @@ public class JmsConfig {
             connectionFactory.setSSLCipherSuite("TLS_RSA_WITH_AES_128_CBC_SHA");
         }
 
+        connectionFactory.setBooleanProperty(JmsConstants.USER_AUTHENTICATION_MQCSP, false);
         UserCredentialsConnectionFactoryAdapter credentialQueueConnectionFactory = new UserCredentialsConnectionFactoryAdapter();
-        credentialQueueConnectionFactory.setUsername("srvappserver");
+        credentialQueueConnectionFactory.setUsername(sakBehUsername);
         credentialQueueConnectionFactory.setPassword("");
         credentialQueueConnectionFactory.setTargetConnectionFactory(connectionFactory);
 

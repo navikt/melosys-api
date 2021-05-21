@@ -7,21 +7,25 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 
 public final class LandkoderUtils {
-    private static final BiMap<String, String> map = HashBiMap.create();
+    private static final BiMap<String, String> ISO2_ISO3 = HashBiMap.create();
+    private static final BiMap<String, String> ISO2_TIL_EU_EOS_LANDNAVN = HashBiMap.create();
 
     static {
         Arrays.stream(Locale.getISOCountries())
-            .forEach(c -> map.put(c, new Locale("", c).getISO3Country()));
+            .forEach(c -> ISO2_ISO3.put(c, new Locale("", c).getISO3Country()));
+        Arrays.stream(Landkoder.values())
+            .forEach(c -> ISO2_TIL_EU_EOS_LANDNAVN.put(c.getKode(), c.getBeskrivelse().toUpperCase()));
     }
 
     private LandkoderUtils() {
-        throw new IllegalArgumentException("Utility");
+        throw new IllegalStateException("Utility");
     }
 
     public static String tilIso3(String iso2Kode) {
-        return map.get(iso2Kode);
+        return ISO2_ISO3.get(iso2Kode);
     }
 
     public static Collection<String> tilIso3(Collection<String> iso2Koder) {
@@ -29,6 +33,13 @@ public final class LandkoderUtils {
     }
 
     public static String tilIso2(String iso3Kode) {
-        return map.inverse().get(iso3Kode);
+        return ISO2_ISO3.inverse().get(iso3Kode);
+    }
+
+    public static String tilIso2FraEuEosLandnavn(String landnavn) {
+        if (landnavn == null) {
+            throw new IllegalArgumentException("Landnavn kreves");
+        }
+        return ISO2_TIL_EU_EOS_LANDNAVN.inverse().get(landnavn.trim().toUpperCase());
     }
 }

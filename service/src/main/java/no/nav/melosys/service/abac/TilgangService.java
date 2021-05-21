@@ -4,14 +4,10 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.sikkerhet.abac.Pep;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +24,7 @@ public class TilgangService {
         this.pep = pep;
     }
 
-    public void sjekkRedigerbarOgTilordnetSaksbehandlerOgTilgang(long behandlingsId) throws FunksjonellException, TekniskException{
+    public void sjekkRedigerbarOgTilordnetSaksbehandlerOgTilgang(long behandlingsId) {
         String saksbehandler = SubjectHandler.getInstance().getUserID();
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsId);
 
@@ -39,7 +35,7 @@ public class TilgangService {
         sjekkTilgang(behandling);
     }
 
-    public void sjekkRedigerbarOgTilgang(long behandlingsId) throws FunksjonellException, TekniskException {
+    public void sjekkRedigerbarOgTilgang(long behandlingsId) {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsId);
 
         if(!behandling.erRedigerbar()) {
@@ -50,13 +46,13 @@ public class TilgangService {
     }
 
     // Behandling
-    public void sjekkTilgang(long behandlingsId) throws SikkerhetsbegrensningException, TekniskException, IkkeFunnetException {
+    public void sjekkTilgang(long behandlingsId) {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsId);
 
         sjekkTilgang(behandling);
     }
 
-    private void sjekkTilgang(Behandling behandling) throws SikkerhetsbegrensningException, TekniskException {
+    private void sjekkTilgang(Behandling behandling) {
         Fagsak fagsak = behandling.getFagsak();
         Aktoer aktør = fagsak.hentBruker();
         if (aktør != null) {
@@ -64,19 +60,19 @@ public class TilgangService {
         }
     }
 
-    public void sjekkSak(String saksnummer) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public void sjekkSak(String saksnummer) {
         sjekkSak(fagsakService.hentFagsak(saksnummer));
     }
 
     // Fagsak
-    public void sjekkSak(Fagsak fagsak) throws SikkerhetsbegrensningException, TekniskException {
+    public void sjekkSak(Fagsak fagsak) {
         Aktoer aktør = fagsak.hentBruker();
         if (aktør != null) {
             pep.sjekkTilgangTilAktoerId(aktør.getAktørId());
         }
     }
 
-    public void sjekkFnr(String fnr) throws SikkerhetsbegrensningException {
+    public void sjekkFnr(String fnr) {
         pep.sjekkTilgangTilFnr(fnr);
     }
 }

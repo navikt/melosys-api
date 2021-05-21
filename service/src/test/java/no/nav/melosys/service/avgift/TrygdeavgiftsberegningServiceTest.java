@@ -11,12 +11,10 @@ import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Loenn_forhold;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer;
 import no.nav.melosys.integrasjon.trygdeavgift.dto.MelosysTrygdeavgfitBeregningDto;
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftDto;
-import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
+import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,7 +36,7 @@ class TrygdeavgiftsberegningServiceTest {
     @Mock
     private TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService;
     @Mock
-    private MedlemAvFolketrygdenRepository medlemAvFolketrygdenRepository;
+    private MedlemAvFolketrygdenService medlemAvFolketrygdenService;
     @Mock
     private TrygdeavgiftConsumer trygdeavgiftConsumer;
 
@@ -51,12 +49,12 @@ class TrygdeavgiftsberegningServiceTest {
     @BeforeEach
     public void setup() {
         medlemAvFolketrygden.setFastsattTrygdeavgift(new FastsattTrygdeavgift());
-        trygdeavgiftsberegningService = new TrygdeavgiftsberegningService(trygdeavgiftsgrunnlagService, medlemAvFolketrygdenRepository, trygdeavgiftConsumer);
-        when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(eq(behandlingsresultatID))).thenReturn(Optional.of(medlemAvFolketrygden));
+        trygdeavgiftsberegningService = new TrygdeavgiftsberegningService(trygdeavgiftsgrunnlagService, medlemAvFolketrygdenService, trygdeavgiftConsumer);
     }
 
     @Test
-    void oppdaterBeregningsgrunnlag_medNorskOgUtenlandskAvgiftSkalIkkeBetaleAvgiftForNorskInntekt_setterIkkeAvgiftNorge() throws FunksjonellException {
+    void oppdaterBeregningsgrunnlag_medNorskOgUtenlandskAvgiftSkalIkkeBetaleAvgiftForNorskInntekt_setterIkkeAvgiftNorge() {
+        initMedlemAvFolketrygdenMock();
         var request = new OppdaterTrygdeavgiftsberegningRequest(1L, 2L);
         medlemAvFolketrygden.setVurderingTrygdeavgiftNorskInntekt(NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV);
         medlemAvFolketrygden.setVurderingTrygdeavgiftUtenlandskInntekt(UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV);
@@ -69,7 +67,8 @@ class TrygdeavgiftsberegningServiceTest {
     }
 
     @Test
-    void oppdaterBeregningsgrunnlag_medNorskOgUtenlandskAvgiftSkalIkkeBetaleAvgiftForUtenlandskInntket_setterIkkeAvgiftUtland() throws FunksjonellException {
+    void oppdaterBeregningsgrunnlag_medNorskOgUtenlandskAvgiftSkalIkkeBetaleAvgiftForUtenlandskInntket_setterIkkeAvgiftUtland() {
+        initMedlemAvFolketrygdenMock();
         var request = new OppdaterTrygdeavgiftsberegningRequest(1L, 2L);
         medlemAvFolketrygden.setVurderingTrygdeavgiftNorskInntekt(NORSK_INNTEKT_TRYGDEAVGIFT_NAV);
         medlemAvFolketrygden.setVurderingTrygdeavgiftUtenlandskInntekt(UTENLANDSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV);
@@ -82,7 +81,8 @@ class TrygdeavgiftsberegningServiceTest {
     }
 
     @Test
-    void oppdaterBeregningsgrunnlag_medUtenlandskOgNorskAvgift_beregnerAvgift() throws FunksjonellException {
+    void oppdaterBeregningsgrunnlag_medUtenlandskOgNorskAvgift_beregnerAvgift() {
+        initMedlemAvFolketrygdenMock();
         var request = new OppdaterTrygdeavgiftsberegningRequest(1L, 1L);
         medlemAvFolketrygden.setVurderingTrygdeavgiftUtenlandskInntekt(UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV);
         medlemAvFolketrygden.setVurderingTrygdeavgiftNorskInntekt(NORSK_INNTEKT_TRYGDEAVGIFT_NAV);
@@ -101,22 +101,25 @@ class TrygdeavgiftsberegningServiceTest {
     }
 
     @Test
-    void beregnAvgift_fastsattTrygdeavgiftIkkeSatt_beregnesIkke() throws IkkeFunnetException {
+    void beregnAvgift_fastsattTrygdeavgiftIkkeSatt_beregnesIkke() {
+        initMedlemAvFolketrygdenMock();
         medlemAvFolketrygden.setFastsattTrygdeavgift(null);
         trygdeavgiftsberegningService.beregnAvgift(behandlingsresultatID);
         verify(trygdeavgiftsgrunnlagService, never()).hentAvgiftsgrunnlag(anyLong());
-        verify(medlemAvFolketrygdenRepository, never()).save(any());
     }
 
     @Test
-    void beregnAvgift_tomtAvgiftsgrunnlag_beregnesIkke() throws IkkeFunnetException {
+    void beregnAvgift_tomtAvgiftsgrunnlag_beregnesIkke() {
+        initMedlemAvFolketrygdenMock();
         when(trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(eq(behandlingsresultatID))).thenReturn(new Trygdeavgiftsgrunnlag(null, null, null));
         trygdeavgiftsberegningService.beregnAvgift(behandlingsresultatID);
         verify(trygdeavgiftConsumer, never()).beregnTrygdeavgift(any());
     }
 
     @Test
-    void beregnAvgift_tidligereBeregnetNorskAvgiftHarAvgiftspliktigUtenlandskInntekt_beregnesAvgiftAvUtenlandskInntekt() throws IkkeFunnetException {
+    void beregnAvgift_tidligereBeregnetNorskAvgiftHarAvgiftspliktigUtenlandskInntekt_beregnesAvgiftAvUtenlandskInntekt() {
+        initMedlemAvFolketrygdenMock();
+
         var medlemskapsperiode = lagMedlemskapsperiode();
         medlemskapsperiode.getTrygdeavgift().add(lagTrygdeavgift(true));
         medlemAvFolketrygden.getMedlemskapsperioder().add(medlemskapsperiode);
@@ -130,7 +133,7 @@ class TrygdeavgiftsberegningServiceTest {
         final var forventetTrygdeavgiftsbeløp = new BigDecimal("10");
         final var forventetTrygdesats = new BigDecimal("12.2");
         when(trygdeavgiftConsumer.beregnTrygdeavgift(eq(new MelosysTrygdeavgfitBeregningDto(
-            false, true, medlemskapsperiode.getTrygdedekning(), medlemskapsperiode.getBestemmelse(),
+            false, true, medlemskapsperiode.getDekning(), medlemskapsperiode.getBestemmelse(),
             medlemAvFolketrygden.getFastsattTrygdeavgift().getAvgiftspliktigUtenlandskInntektMnd(), LocalDate.now(), null
         )))).thenReturn(new TrygdeavgiftDto("kode", forventetTrygdesats, forventetTrygdeavgiftsbeløp));
 
@@ -152,7 +155,9 @@ class TrygdeavgiftsberegningServiceTest {
     }
 
     @Test
-    void beregnAvgift_tidligereBeregnetNorskOgUtenlandskAvgiftHarAvgiftspliktigUtenlandskOgNorskInntekt_beregnesAvgiftAvUtenlandskOgNorskInntekt() throws IkkeFunnetException {
+    void beregnAvgift_tidligereBeregnetNorskOgUtenlandskAvgiftHarAvgiftspliktigUtenlandskOgNorskInntekt_beregnesAvgiftAvUtenlandskOgNorskInntekt() {
+        initMedlemAvFolketrygdenMock();
+
         var medlemskapsperiode = lagMedlemskapsperiode();
         medlemskapsperiode.getTrygdeavgift().add(lagTrygdeavgift(true));
         medlemskapsperiode.getTrygdeavgift().add(lagTrygdeavgift(false));
@@ -196,7 +201,9 @@ class TrygdeavgiftsberegningServiceTest {
     }
 
     @Test
-    void hentBeregningsresultat_medNorskAvgift_validerBeregningsresultat() throws IkkeFunnetException {
+    void hentBeregningsresultat_medNorskAvgift_validerBeregningsresultat() {
+        initMedlemAvFolketrygdenMock();
+
         var medlemskapsperiode = lagMedlemskapsperiode();
         medlemskapsperiode.getTrygdeavgift().add(lagTrygdeavgift(true));
         medlemAvFolketrygden.getMedlemskapsperioder().add(medlemskapsperiode);
@@ -208,11 +215,13 @@ class TrygdeavgiftsberegningServiceTest {
         assertThat(trygdeavgiftsberegningsresultat.getAvgiftspliktigLønnNorge()).isNotNull();
         assertThat(trygdeavgiftsberegningsresultat.getAvgiftsperioder()).hasSize(1)
             .flatExtracting(Avgiftsperiode::getFom, Avgiftsperiode::getTom, Avgiftsperiode::getTrygdedekning, Avgiftsperiode::isForNorskInntekt)
-            .containsExactly(medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getTrygdedekning(), true);
+            .containsExactly(medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getDekning(), true);
     }
 
     @Test
-    void hentBeregningsresultat_medUtenlandskAvgift_validerBeregningsresultat() throws IkkeFunnetException {
+    void hentBeregningsresultat_medUtenlandskAvgift_validerBeregningsresultat() {
+        initMedlemAvFolketrygdenMock();
+
         var medlemskapsperiode = lagMedlemskapsperiode();
         medlemskapsperiode.getTrygdeavgift().add(lagTrygdeavgift(false));
         medlemAvFolketrygden.getMedlemskapsperioder().add(medlemskapsperiode);
@@ -224,11 +233,13 @@ class TrygdeavgiftsberegningServiceTest {
         assertThat(trygdeavgiftsberegningsresultat.getAvgiftspliktigLønnUtland()).isNotNull();
         assertThat(trygdeavgiftsberegningsresultat.getAvgiftsperioder()).hasSize(1)
             .flatExtracting(Avgiftsperiode::getFom, Avgiftsperiode::getTom, Avgiftsperiode::getTrygdedekning, Avgiftsperiode::isForNorskInntekt)
-            .containsExactly(medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getTrygdedekning(), false);
+            .containsExactly(medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getDekning(), false);
     }
 
     @Test
-    void hentBeregningsresultat_medNorskOgUtenlandskAvgift_validerBeregningsresultat() throws IkkeFunnetException {
+    void hentBeregningsresultat_medNorskOgUtenlandskAvgift_validerBeregningsresultat() {
+        initMedlemAvFolketrygdenMock();
+
         var medlemskapsperiode = lagMedlemskapsperiode();
         medlemskapsperiode.getTrygdeavgift().add(lagTrygdeavgift(true));
         medlemskapsperiode.getTrygdeavgift().add(lagTrygdeavgift(false));
@@ -244,9 +255,47 @@ class TrygdeavgiftsberegningServiceTest {
         assertThat(trygdeavgiftsberegningsresultat.getAvgiftsperioder()).hasSize(2)
             .flatExtracting(Avgiftsperiode::getFom, Avgiftsperiode::getTom, Avgiftsperiode::getTrygdedekning, Avgiftsperiode::isForNorskInntekt)
             .containsExactlyInAnyOrder(
-                medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getTrygdedekning(), false,
-                medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getTrygdedekning(), true
+                medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getDekning(), false,
+                medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getDekning(), true
             );
+    }
+
+    @Test
+    void finnBeregningsresultat_medNorskAvgift_validerBeregningsresultat() {
+        when(medlemAvFolketrygdenService.finnMedlemAvFolketrygden(behandlingsresultatID)).thenReturn(Optional.of(medlemAvFolketrygden));
+
+        var medlemskapsperiode = lagMedlemskapsperiode();
+        medlemskapsperiode.getTrygdeavgift().add(lagTrygdeavgift(true));
+        medlemskapsperiode.getTrygdeavgift().add(lagTrygdeavgift(false));
+        medlemAvFolketrygden.getMedlemskapsperioder().add(medlemskapsperiode);
+        medlemAvFolketrygden.setVurderingTrygdeavgiftNorskInntekt(NORSK_INNTEKT_TRYGDEAVGIFT_NAV);
+        medlemAvFolketrygden.getFastsattTrygdeavgift().setAvgiftspliktigNorskInntektMnd(100L);
+
+        Optional<Trygdeavgiftsberegningsresultat> resultat = trygdeavgiftsberegningService.finnBeregningsresultat(behandlingsresultatID);
+        assertThat(resultat).isPresent();
+        Trygdeavgiftsberegningsresultat trygdeavgiftsberegningsresultat = resultat.get();
+        assertThat(trygdeavgiftsberegningsresultat.getAvgiftspliktigLønnNorge()).isNotNull();
+        assertThat(trygdeavgiftsberegningsresultat.getAvgiftspliktigLønnUtland()).isNull();
+        assertThat(trygdeavgiftsberegningsresultat.getAvgiftsperioder()).hasSize(2)
+            .flatExtracting(Avgiftsperiode::getFom, Avgiftsperiode::getTom, Avgiftsperiode::getTrygdedekning, Avgiftsperiode::isForNorskInntekt)
+            .containsExactlyInAnyOrder(
+                medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getDekning(), false,
+                medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getDekning(), true
+            );
+
+    }
+
+    @Test
+    void finnBeregningsresultat_ikkeFunnet_tomtResultat() {
+        when(medlemAvFolketrygdenService.finnMedlemAvFolketrygden(behandlingsresultatID)).thenReturn(Optional.empty());
+
+        Optional<Trygdeavgiftsberegningsresultat> resultat = trygdeavgiftsberegningService.finnBeregningsresultat(behandlingsresultatID);
+
+        assertThat(resultat).isNotPresent();
+    }
+
+    private void initMedlemAvFolketrygdenMock() {
+        when(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)).thenReturn(medlemAvFolketrygden);
     }
 
     private Medlemskapsperiode lagMedlemskapsperiode() {

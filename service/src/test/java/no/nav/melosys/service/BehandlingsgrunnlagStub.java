@@ -6,9 +6,9 @@ import java.util.List;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ArbeidUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ForetakUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.SelvstendigForetak;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.SelvstendigForetak;
 import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 
 public final class BehandlingsgrunnlagStub {
@@ -29,10 +29,10 @@ public final class BehandlingsgrunnlagStub {
             søknad.selvstendigArbeid.selvstendigForetak.add(selvstendigForetak);
         }
 
-        ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse.landkode = "DE";
-        søknad.arbeidUtland = new ArrayList<>();
-        søknad.arbeidUtland.add(arbeidUtland);
+        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
+        fysiskArbeidssted.adresse.landkode = "DE";
+        søknad.arbeidPaaLand.fysiskeArbeidssteder = new ArrayList<>();
+        søknad.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
         søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere = ekstraArbeidsgivere;
         søknad.foretakUtland = foretakUtland;
         søknad.soeknadsland.landkoder.add("DE");

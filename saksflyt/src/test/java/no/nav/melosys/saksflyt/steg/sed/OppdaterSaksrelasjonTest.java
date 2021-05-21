@@ -6,7 +6,7 @@ import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.IkkeInngaaendeJournalpostException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -16,12 +16,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class OppdaterSaksrelasjonTest {
-
     @Mock
     private EessiService eessiService;
     @Mock
@@ -39,7 +37,7 @@ class OppdaterSaksrelasjonTest {
     }
 
     @Test
-    void utfør_journalpostErFraEessi_verifiserOppdaterSaksrelasjon() throws MelosysException {
+    void utfør_journalpostErFraEessi_verifiserOppdaterSaksrelasjon() {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID);
 
@@ -51,37 +49,47 @@ class OppdaterSaksrelasjonTest {
 
         Journalpost journalpost = new Journalpost(JOURNALPOST_ID);
         journalpost.setMottaksKanal("EESSI");
-        when(joarkFasade.hentJournalpost(eq(JOURNALPOST_ID))).thenReturn(journalpost);
+        when(joarkFasade.hentJournalpost(JOURNALPOST_ID)).thenReturn(journalpost);
 
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setBucType("LA_BUC_04");
         melosysEessiMelding.setRinaSaksnummer("321323");
-        when(eessiService.hentSedTilknyttetJournalpost(eq(JOURNALPOST_ID))).thenReturn(melosysEessiMelding);
+        when(eessiService.hentSedTilknyttetJournalpost(JOURNALPOST_ID)).thenReturn(melosysEessiMelding);
 
         oppdaterSaksrelasjon.utfør(prosessinstans);
 
         verify(eessiService).lagreSaksrelasjon(
-            eq(fagsak.getGsakSaksnummer()),
-            eq(melosysEessiMelding.getRinaSaksnummer()),
-            eq(melosysEessiMelding.getBucType())
+            fagsak.getGsakSaksnummer(),
+            melosysEessiMelding.getRinaSaksnummer(),
+            melosysEessiMelding.getBucType()
         );
     }
 
     @Test
-    void utfør_journalpostIkkeFraEessi_verifiserOppdatererIkkeSaksrelasjon() throws MelosysException {
+    void utfør_journalpostIkkeInngående_verifiserOppdatererIkkeSaksrelasjon() {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID);
-
-        Journalpost journalpost = new Journalpost(JOURNALPOST_ID);
-        journalpost.setMottaksKanal("flaskepost");
-        when(joarkFasade.hentJournalpost(eq(JOURNALPOST_ID))).thenReturn(journalpost);
+        when(joarkFasade.hentJournalpost(JOURNALPOST_ID)).thenThrow(new IkkeInngaaendeJournalpostException("Nei nei"));
 
         oppdaterSaksrelasjon.utfør(prosessinstans);
         verify(eessiService, never()).lagreSaksrelasjon(any(), any(), any());
     }
 
     @Test
-    void utfør_eessiMeldingFinnesIData_verifiserOppdatererSaksrelasjon() throws MelosysException {
+    void utfør_journalpostIkkeFraEessi_verifiserOppdatererIkkeSaksrelasjon() {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID);
+
+        Journalpost journalpost = new Journalpost(JOURNALPOST_ID);
+        journalpost.setMottaksKanal("flaskepost");
+        when(joarkFasade.hentJournalpost(JOURNALPOST_ID)).thenReturn(journalpost);
+
+        oppdaterSaksrelasjon.utfør(prosessinstans);
+        verify(eessiService, never()).lagreSaksrelasjon(any(), any(), any());
+    }
+
+    @Test
+    void utfør_eessiMeldingFinnesIData_verifiserOppdatererSaksrelasjon() {
         MelosysEessiMelding eessiMelding = new MelosysEessiMelding();
         eessiMelding.setRinaSaksnummer("12312");
         eessiMelding.setBucType("LA_BUC_06");
@@ -98,12 +106,12 @@ class OppdaterSaksrelasjonTest {
 
         oppdaterSaksrelasjon.utfør(prosessinstans);
         verify(eessiService).lagreSaksrelasjon(
-            eq(fagsak.getGsakSaksnummer()), eq(eessiMelding.getRinaSaksnummer()), eq(eessiMelding.getBucType())
+            fagsak.getGsakSaksnummer(), eessiMelding.getRinaSaksnummer(), eessiMelding.getBucType()
         );
     }
 
     @Test
-    void utfør_ingenBehandlingIngenArkivsakIDIProsessinstnas_henterArkivsakIDFraSaksnummerIFagsakServiceOppdatererSaksrelasjon() throws MelosysException {
+    void utfør_ingenBehandlingIngenArkivsakIDIProsessinstnas_henterArkivsakIDFraSaksnummerIFagsakServiceOppdatererSaksrelasjon() {
         final Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-0");
         fagsak.setGsakSaksnummer(123L);
@@ -117,11 +125,11 @@ class OppdaterSaksrelasjonTest {
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, fagsak.getSaksnummer());
 
 
-        when(fagsakService.hentFagsak(eq(fagsak.getSaksnummer()))).thenReturn(fagsak);
+        when(fagsakService.hentFagsak(fagsak.getSaksnummer())).thenReturn(fagsak);
 
         oppdaterSaksrelasjon.utfør(prosessinstans);
         verify(eessiService).lagreSaksrelasjon(
-            eq(fagsak.getGsakSaksnummer()), eq(eessiMelding.getRinaSaksnummer()), eq(eessiMelding.getBucType())
+            fagsak.getGsakSaksnummer(), eessiMelding.getRinaSaksnummer(), eessiMelding.getBucType()
         );
     }
 }

@@ -9,8 +9,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.MelosysException;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,7 +38,7 @@ class LagreLovvalgsperiodeMedlTest {
 
 
     @BeforeEach
-    public void setup() throws IkkeFunnetException {
+    public void setup() {
         lagreLovvalgsperiodeMedl = new LagreLovvalgsperiodeMedl(behandlingsresultatService, medlPeriodeService);
 
         behandling.setId(behandlingID);
@@ -48,7 +48,7 @@ class LagreLovvalgsperiodeMedlTest {
     }
 
     @Test
-    void utfør_erAvslagMedLovvalgsperiodeMedMedlID_avviserMedlPeriode() throws MelosysException {
+    void utfør_erAvslagMedLovvalgsperiodeMedMedlID_avviserMedlPeriode() {
         Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(11L, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, InnvilgelsesResultat.AVSLAATT);
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
         behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
@@ -59,7 +59,7 @@ class LagreLovvalgsperiodeMedlTest {
     }
 
     @Test
-    void utfør_erInnvilgelseArt13IngenMedlID_oppretterForeløpigPeriode() throws MelosysException {
+    void utfør_erInnvilgelseArt13IngenMedlID_oppretterForeløpigPeriode() {
         Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(null, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, InnvilgelsesResultat.INNVILGET);
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
 
@@ -68,7 +68,7 @@ class LagreLovvalgsperiodeMedlTest {
     }
 
     @Test
-    void utfør_erInnvilgelseArt13MedMedlID_oppdatererTilForeløpigPeriode() throws MelosysException {
+    void utfør_erInnvilgelseArt13MedMedlID_oppdatererTilForeløpigPeriode() {
         Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(11L, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, InnvilgelsesResultat.INNVILGET);
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
 
@@ -77,7 +77,7 @@ class LagreLovvalgsperiodeMedlTest {
     }
 
     @Test
-    void utfør_erInnvilgelseArt12IngenMedlID_oppretterEndeligPeriode() throws MelosysException {
+    void utfør_erInnvilgelseArt12IngenMedlID_oppretterEndeligPeriode() {
         Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(null, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, InnvilgelsesResultat.INNVILGET);
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
 
@@ -86,7 +86,7 @@ class LagreLovvalgsperiodeMedlTest {
     }
 
     @Test
-    void utfør_erInnvilgelseArt12MedMedlID_oppdatererTilEndeligPeriode() throws MelosysException {
+    void utfør_erInnvilgelseArt12MedMedlID_oppdatererTilEndeligPeriode() {
         Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(11L, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, InnvilgelsesResultat.INNVILGET);
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
 
@@ -95,10 +95,27 @@ class LagreLovvalgsperiodeMedlTest {
     }
 
     @Test
-    void utfør_avslagManglendeOpplysningerIngenLovvalgsperiode_oppretterIkkeLovvalgsperiode() throws MelosysException {
+    void utfør_avslagManglendeOpplysningerIngenLovvalgsperiode_oppretterIkkeLovvalgsperiode() {
         behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
         lagreLovvalgsperiodeMedl.utfør(prosessinstans);
         verifyNoInteractions(medlPeriodeService);
+    }
+
+    @Test
+    void utfør_typeFastsattLovvalgslandIngenLovvalgsperiode_forventException() {
+        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> lagreLovvalgsperiodeMedl.utfør(prosessinstans))
+            .withMessageContaining("Finner ingen lovvalgsperiode");
+    }
+
+    @Test
+    void utfør_lovvalgsperiodeFinnesInnvilgelsesresultatDelvisInnvilget_forventException() {
+        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(11L, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, InnvilgelsesResultat.DELVIS_INNVILGET);
+        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> lagreLovvalgsperiodeMedl.utfør(prosessinstans))
+            .withMessageContaining("Ukjent eller ikke-eksisterende innvilgelsesresultat");
     }
 
     private Lovvalgsperiode lagLovvalgsperiode(Long medlPeriodeID,

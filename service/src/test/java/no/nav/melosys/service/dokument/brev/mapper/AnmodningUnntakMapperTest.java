@@ -14,9 +14,9 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ArbeidUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
+import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -26,10 +26,9 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntak;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
@@ -41,7 +40,7 @@ public class AnmodningUnntakMapperTest {
 
     private AnmodningUnntakMapper mapper;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         mapper = new AnmodningUnntakMapper();
     }
@@ -86,7 +85,7 @@ public class AnmodningUnntakMapperTest {
     }
 
     @Test
-    public void mapFag_unntakFraBestemmelseArtikkel13_forventIkkeNull() throws TekniskException {
+    public void mapFag_unntakFraBestemmelseArtikkel13_forventIkkeNull() {
         Behandling behandling = lagBehandling();
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
         BrevDataAnmodningUnntak brevData = lagBrevData(behandlingsresultat, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B3);
@@ -96,7 +95,7 @@ public class AnmodningUnntakMapperTest {
     }
 
     @Test
-    public void mapFag_unntakFraBestemmelseIkkeArtikkel13_forventNull() throws TekniskException {
+    public void mapFag_unntakFraBestemmelseIkkeArtikkel13_forventNull() {
         Behandling behandling = lagBehandling();
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
         BrevDataAnmodningUnntak brevData = lagBrevData(behandlingsresultat, Lovvalgbestemmelser_987_2009.FO_987_2009_ART14_11);
@@ -106,7 +105,7 @@ public class AnmodningUnntakMapperTest {
     }
 
     @Test
-    public void mapFag_unntakFraBestemmelseNull_forventNull() throws TekniskException {
+    public void mapFag_unntakFraBestemmelseNull_forventNull() {
         Behandling behandling = lagBehandling();
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
         BrevDataAnmodningUnntak brevData = lagBrevData(behandlingsresultat);
@@ -155,13 +154,13 @@ public class AnmodningUnntakMapperTest {
         fagsak.setType(Sakstyper.EU_EOS);
         behandling.setFagsak(fagsak);
 
-        ArbeidUtland arbeidUtland = new ArbeidUtland();
-        arbeidUtland.adresse = new StrukturertAdresse();
-        arbeidUtland.adresse.landkode = "NO";
+        FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
+        fysiskArbeidssted.adresse = new StrukturertAdresse();
+        fysiskArbeidssted.adresse.landkode = "NO";
 
         Soeknad soeknad = new Soeknad();
-        soeknad.arbeidUtland = new ArrayList<>();
-        soeknad.arbeidUtland.add(arbeidUtland);
+        soeknad.arbeidPaaLand.fysiskeArbeidssteder = new ArrayList<>();
+        soeknad.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
 
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(soeknad);

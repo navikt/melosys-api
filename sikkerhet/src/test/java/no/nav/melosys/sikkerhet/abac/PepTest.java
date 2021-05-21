@@ -6,18 +6,19 @@ import no.nav.freg.abac.core.dto.response.Decision;
 import no.nav.freg.abac.core.dto.response.XacmlResponse;
 import no.nav.freg.abac.core.service.AbacService;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class PepTest {
+@ExtendWith(MockitoExtension.class)
+class PepTest {
 
     @InjectMocks
     public PepImpl pep;
@@ -32,57 +33,70 @@ public class PepTest {
     private XacmlResponse abacResponse;
 
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(abacContext.getRequest()).thenReturn(new XacmlRequest());
         when(abacService.evaluate(any())).thenReturn(abacResponse);
     }
 
-    public void testSjekkTilgangTilFnr() throws SikkerhetsbegrensningException {
+    @Test
+    void testSjekkTilgangTilFnr() {
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
         pep.sjekkTilgangTilFnr("12345678910");
     }
 
-    @Test(expected = SikkerhetsbegrensningException.class)
-    public void testSjekkTilgangTilFnrResponsDeny() throws SikkerhetsbegrensningException {
+    @Test
+    void testSjekkTilgangTilFnrResponsDeny() {
         when(abacResponse.getDecision()).thenReturn(Decision.DENY);
-        pep.sjekkTilgangTilFnr("12345678910");
+        assertThatExceptionOfType(SikkerhetsbegrensningException.class)
+            .isThrownBy(() -> pep.sjekkTilgangTilFnr("12345678910"))
+            .withMessageContaining("ikke tilgang");
     }
 
-    @Test(expected = SikkerhetsbegrensningException.class)
-    public void testSjekkTilgangTilFnrResponsIndeterminate() throws SikkerhetsbegrensningException {
+    @Test
+    void testSjekkTilgangTilFnrResponsIndeterminate() {
         when(abacResponse.getDecision()).thenReturn(Decision.INDETERMINATE);
-        pep.sjekkTilgangTilFnr("12345678910");
+        assertThatExceptionOfType(SikkerhetsbegrensningException.class)
+            .isThrownBy(() -> pep.sjekkTilgangTilFnr("12345678910"))
+            .withMessageContaining("ikke tilgang");
     }
 
-    @Test(expected = SikkerhetsbegrensningException.class)
-    public void testSjekkTilgangTilFnrResponsNotApplicable() throws SikkerhetsbegrensningException {
+    @Test
+    void testSjekkTilgangTilFnrResponsNotApplicable() {
         when(abacResponse.getDecision()).thenReturn(Decision.NOT_APPLICABLE);
-        pep.sjekkTilgangTilFnr("12345678910");
+        assertThatExceptionOfType(SikkerhetsbegrensningException.class)
+            .isThrownBy(() -> pep.sjekkTilgangTilFnr("12345678910"))
+            .withMessageContaining("ikke tilgang");
     }
 
 
-    @Test()
-    public void testSjekkTilgangTilAktor() throws SikkerhetsbegrensningException {
+    @Test
+    void testSjekkTilgangTilAktor() {
         when(abacResponse.getDecision()).thenReturn(Decision.PERMIT);
         pep.sjekkTilgangTilAktoerId("12345678910");
     }
 
-    @Test(expected = SikkerhetsbegrensningException.class)
-    public void testSjekkTilgangTilAktorIdResponseDeny() throws SikkerhetsbegrensningException {
+    @Test
+    void testSjekkTilgangTilAktorIdResponseDeny() {
         when(abacResponse.getDecision()).thenReturn(Decision.DENY);
-        pep.sjekkTilgangTilAktoerId("12345678910");
+        assertThatExceptionOfType(SikkerhetsbegrensningException.class)
+            .isThrownBy(() -> pep.sjekkTilgangTilFnr("12345678910"))
+            .withMessageContaining("ikke tilgang");
     }
 
-    @Test(expected = SikkerhetsbegrensningException.class)
-    public void testSjekkTilgangTilAktorIdResponseIndeterminate() throws SikkerhetsbegrensningException {
+    @Test
+    void testSjekkTilgangTilAktorIdResponseIndeterminate() {
         when(abacResponse.getDecision()).thenReturn(Decision.INDETERMINATE);
-        pep.sjekkTilgangTilAktoerId("12345678910");
+        assertThatExceptionOfType(SikkerhetsbegrensningException.class)
+            .isThrownBy(() -> pep.sjekkTilgangTilFnr("12345678910"))
+            .withMessageContaining("ikke tilgang");
     }
 
-    @Test(expected = SikkerhetsbegrensningException.class)
-    public void testSjekkTilgangTilAktorIdResponseNotApplicable() throws SikkerhetsbegrensningException {
+    @Test
+    void testSjekkTilgangTilAktorIdResponseNotApplicable() {
         when(abacResponse.getDecision()).thenReturn(Decision.NOT_APPLICABLE);
-        pep.sjekkTilgangTilAktoerId("12345678910");
+        assertThatExceptionOfType(SikkerhetsbegrensningException.class)
+            .isThrownBy(() -> pep.sjekkTilgangTilFnr("12345678910"))
+            .withMessageContaining("ikke tilgang");
     }
 }

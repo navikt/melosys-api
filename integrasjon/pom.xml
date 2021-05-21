@@ -74,6 +74,10 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-features-logging</artifactId>
         </dependency>
@@ -172,14 +176,9 @@
 
         <!--MEDL2-->
         <dependency>
-            <groupId>no.nav.tjenestespesifikasjoner</groupId>
-            <artifactId>nav-medlemskap-v2-tjenestespesifikasjon</artifactId>
+            <groupId>no.nav.tjenester</groupId>
+            <artifactId>medlemskapsunntak-api-v1</artifactId>
         </dependency>
-        <dependency>
-            <groupId>no.nav.tjenestespesifikasjoner</groupId>
-            <artifactId>nav-behandleMedlemskap-v2-tjenestespesifikasjon</artifactId>
-        </dependency>
-
         <!-- Utbetaling -->
         <dependency>
             <groupId>no.nav.tjenestespesifikasjoner</groupId>
@@ -200,6 +199,11 @@
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>mockwebserver</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-standalone</artifactId>
             <scope>test</scope>
         </dependency>
 

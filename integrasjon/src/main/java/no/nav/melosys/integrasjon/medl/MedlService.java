@@ -1,184 +1,206 @@
 package no.nav.melosys.integrasjon.medl;
 
-import java.io.StringWriter;
 import java.time.LocalDate;
-import java.util.Optional;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.datatype.DatatypeConfigurationException;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.dokument.DokumentFactory;
-import no.nav.melosys.exception.*;
-import no.nav.melosys.integrasjon.KonverteringsUtils;
-import no.nav.melosys.integrasjon.medl.behandle.BehandleMedlemskapConsumer;
-import no.nav.melosys.integrasjon.medl.medlemskap.HentPeriodeListeResponseWrapper;
-import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapConsumer;
-import no.nav.melosys.integrasjon.medl.medlemskap.MedlemskapConsumerConfig;
-import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.PeriodeIkkeFunnet;
-import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.PeriodeUtdatert;
-import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.UgyldigInput;
-import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OppdaterPeriodeRequest;
-import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriodeRequest;
-import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriodeResponse;
-import no.nav.tjeneste.virksomhet.medlemskap.v2.PersonIkkeFunnet;
-import no.nav.tjeneste.virksomhet.medlemskap.v2.Sikkerhetsbegrensning;
-import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Foedselsnummer;
-import no.nav.tjeneste.virksomhet.medlemskap.v2.informasjon.Medlemsperiode;
-import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeRequest;
-import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeListeResponse;
-import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeRequest;
-import no.nav.tjeneste.virksomhet.medlemskap.v2.meldinger.HentPeriodeResponse;
+import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
+import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
+import no.nav.melosys.domain.dokument.medlemskap.Periode;
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.domain.util.LandkoderUtils;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForGet;
+import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPost;
+import no.nav.tjenester.medlemskapsunntak.api.v1.MedlemskapsunntakForPut;
+import no.nav.tjenester.medlemskapsunntak.api.v1.Sporingsinformasjon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import static no.nav.melosys.integrasjon.medl.MedlPeriodeKonverter.*;
+
 @Service
-public class MedlService implements MedlFasade {
+public class MedlService {
     private static final String MEDLEMSKAP_VERSJON = "2.0";
 
-    private final MedlemskapConsumer medlemskapConsumer;
-    private final BehandleMedlemskapConsumer behandleMedlemskapConsumer;
-    private final DokumentFactory dokumentFactory;
+    private final MedlemskapRestConsumer medlemskapRestConsumer;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public MedlService(MedlemskapConsumer medlemskapConsumer,
-                       BehandleMedlemskapConsumer behandleMedlemskapConsumer,
-                       DokumentFactory dokumentFactory) {
-        this.medlemskapConsumer = medlemskapConsumer;
-        this.behandleMedlemskapConsumer = behandleMedlemskapConsumer;
-        this.dokumentFactory = dokumentFactory;
+    public MedlService(MedlemskapRestConsumer medlemskapRestConsumer,
+                       ObjectMapper objectMapper) {
+        this.medlemskapRestConsumer = medlemskapRestConsumer;
+        this.objectMapper = objectMapper;
+
+        this.objectMapper.registerModule(new JavaTimeModule());
     }
 
-    @Override
-    public Saksopplysning hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom) throws IntegrasjonException, SikkerhetsbegrensningException, IkkeFunnetException {
-        HentPeriodeListeResponse response = hentPeriodeListeResponse(fnr, fom, tom);
+    public Saksopplysning hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom) {
+        List<MedlemskapsunntakForGet> periodeListeResponse = medlemskapRestConsumer.hentPeriodeListe(fnr, fom, tom);
 
-        // Response -> xml
-        StringWriter xmlWriter = new StringWriter();
-        try {
-            HentPeriodeListeResponseWrapper wrapper
-                = new HentPeriodeListeResponseWrapper().withPeriodeListe(response.getPeriodeListe());
-            JAXBElement<HentPeriodeListeResponseWrapper> xmlRoot
-                = new JAXBElement<>(MedlemskapConsumerConfig.getResponse(), HentPeriodeListeResponseWrapper.class, wrapper);
+        MedlemskapDokument medlemskapDokument = new MedlemskapDokument();
+        List<Medlemsperiode> medlemsperioder = new ArrayList<>();
 
-            dokumentFactory.createMarshaller().marshal(xmlRoot, xmlWriter);
-        } catch (JAXBException e) {
-            throw new IntegrasjonException(e);
+        for (MedlemskapsunntakForGet m : periodeListeResponse) {
+            Medlemsperiode medlemsperiode = new Medlemsperiode();
+            medlemsperiode.id = m.getUnntakId();
+            medlemsperiode.periode = new Periode(m.getFraOgMed(), m.getTilOgMed());
+            medlemsperiode.type = m.getMedlem() ? "PMMEDSKP" : "PUMEDSKP";
+            medlemsperiode.status = m.getStatus();
+            medlemsperiode.grunnlagstype = m.getGrunnlag();
+            medlemsperiode.land = m.getLovvalgsland();
+            medlemsperiode.lovvalg = m.getLovvalg();
+            medlemsperiode.trygdedekning = m.getDekning();
+            Sporingsinformasjon sporingsinformasjon = m.getSporingsinformasjon();
+            medlemsperiode.kildedokumenttype = sporingsinformasjon.getKildedokument();
+            medlemsperiode.kilde = sporingsinformasjon.getKilde();
+
+            medlemsperioder.add(medlemsperiode);
         }
 
+        medlemskapDokument.medlemsperiode = medlemsperioder;
+
         Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.leggTilKildesystemOgMottattDokument(
-            SaksopplysningKildesystem.MEDL, xmlWriter.toString());
         saksopplysning.setType(SaksopplysningType.MEDL);
         saksopplysning.setVersjon(MEDLEMSKAP_VERSJON);
+        saksopplysning.setDokument(medlemskapDokument);
 
-        // xml -> java objekter
-        dokumentFactory.lagDokument(saksopplysning);
+        try {
+            saksopplysning.leggTilKildesystemOgMottattDokument(SaksopplysningKildesystem.MEDL, objectMapper.writeValueAsString(periodeListeResponse));
+        } catch (JsonProcessingException e) {
+            throw new TekniskException("Kunne ikke lagre kildedokument fra MEDL");
+        }
 
         return saksopplysning;
     }
 
-    @Override
-    public Long opprettPeriodeEndelig(String fnr, Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
-        return opprettPeriode(fnr, lovvalgsperiode, PeriodestatusMedl.GYLD, LovvalgMedl.ENDL, kildedokumenttypeMedl);
+    public Long opprettPeriodeEndelig(String fnr, HarBestemmelse<?> bestemmelse, KildedokumenttypeMedl kildedokumenttypeMedl) {
+        return opprettPeriode(fnr, bestemmelse, PeriodestatusMedl.GYLD, LovvalgMedl.ENDL, kildedokumenttypeMedl);
     }
 
-    @Override
-    public Long opprettPeriodeUnderAvklaring(String fnr, PeriodeOmLovvalg periodeOmLovvalg, KildedokumenttypeMedl kildedokumenttypeMedl) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public Long opprettPeriodeUnderAvklaring(String fnr, PeriodeOmLovvalg periodeOmLovvalg, KildedokumenttypeMedl kildedokumenttypeMedl) {
         return opprettPeriode(fnr, periodeOmLovvalg, PeriodestatusMedl.UAVK, LovvalgMedl.UAVK, kildedokumenttypeMedl);
     }
 
-    @Override
-    public Long opprettPeriodeForeløpig(String fnr, PeriodeOmLovvalg periodeOmLovvalg, KildedokumenttypeMedl kildedokumenttypeMedl) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public Long opprettPeriodeForeløpig(String fnr, PeriodeOmLovvalg periodeOmLovvalg, KildedokumenttypeMedl kildedokumenttypeMedl) {
         return opprettPeriode(fnr, periodeOmLovvalg, PeriodestatusMedl.UAVK, LovvalgMedl.FORL, kildedokumenttypeMedl);
     }
 
-    Long opprettPeriode(String fnr, PeriodeOmLovvalg periodeOmLovvalg, PeriodestatusMedl periodestatusMedl, LovvalgMedl lovvalgMedl, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException, SikkerhetsbegrensningException, IkkeFunnetException {
-        try {
-            OpprettPeriodeRequest request = MedlPeriodeKonverter.konverterTilOpprettPeriodRequest(fnr, periodeOmLovvalg, periodestatusMedl, lovvalgMedl, kildedokumenttypeMedl);
-            OpprettPeriodeResponse response = behandleMedlemskapConsumer.opprettPeriode(request);
-            return response.getPeriodeId();
-        } catch (no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.PersonIkkeFunnet e) {
-            throw new IkkeFunnetException(e);
-        } catch (no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.Sikkerhetsbegrensning e) {
-            throw new SikkerhetsbegrensningException(e);
-        } catch (UgyldigInput e) {
-            throw new IntegrasjonException(e);
-        }
-    }
-
-    @Override
-    public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException, FunksjonellException {
+    public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) {
         oppdaterPeriode(lovvalgsperiode, PeriodestatusMedl.GYLD, LovvalgMedl.ENDL, kildedokumenttypeMedl);
     }
 
-    @Override
-    public void oppdaterPeriodeForeløpig(Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws FunksjonellException, TekniskException {
+    public void oppdaterPeriodeForeløpig(Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) {
         oppdaterPeriode(lovvalgsperiode, PeriodestatusMedl.UAVK, LovvalgMedl.FORL, kildedokumenttypeMedl);
     }
 
-    private void oppdaterPeriode(Lovvalgsperiode lovvalgsperiode,
-                                 PeriodestatusMedl periodestatusMedl,
-                                 LovvalgMedl lovvalgMedl,
-                                 KildedokumenttypeMedl kildedokumenttypeMedl) throws FunksjonellException, TekniskException {
-        try {
-            Long medlPeriodeID = lovvalgsperiode.getMedlPeriodeID();
-            if (medlPeriodeID == null) {
-                throw new TekniskException("Det er ikke lagret noen medlPeriodeID på lovvalgsperiode som skal oppdateres i MEDL");
-            }
-            HentPeriodeResponse hentPeriodeResponse = medlemskapConsumer.hentPeriode(lagHentPeriodeRequest(medlPeriodeID));
-            Medlemsperiode periode = Optional.ofNullable(hentPeriodeResponse.getPeriode())
-                .orElseThrow(() -> new TekniskException("Fant ingen eksisterende medlPeriode med id " + medlPeriodeID));
-            OppdaterPeriodeRequest request = MedlPeriodeKonverter.konverterTilOppdaterPeriodeRequest(lovvalgsperiode, periodestatusMedl, lovvalgMedl, kildedokumenttypeMedl, periode.getVersjon());
-            behandleMedlemskapConsumer.oppdaterPeriode(request);
-        } catch (no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.Sikkerhetsbegrensning | Sikkerhetsbegrensning e) {
-            throw new SikkerhetsbegrensningException(e);
-        } catch (UgyldigInput e) {
-            throw new IntegrasjonException(e);
-        } catch (PeriodeUtdatert e) {
-            throw new FunksjonellException(e);
-        } catch (PeriodeIkkeFunnet e) {
-            throw new IkkeFunnetException(e);
-        }
+    public void avvisPeriode(Long medlPeriodeID, StatusaarsakMedl årsak) {
+        MedlemskapsunntakForGet eksisterendePeriode = hentEksisterendePeriode(medlPeriodeID);
+
+        MedlemskapsunntakForPut.SporingsinformasjonForPut sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut.builder()
+            .kildedokument(eksisterendePeriode.getSporingsinformasjon().getKildedokument())
+            .versjon(eksisterendePeriode.getSporingsinformasjon().getVersjon())
+            .build();
+
+        MedlemskapsunntakForPut request = MedlemskapsunntakForPut.builder()
+            .unntakId(eksisterendePeriode.getUnntakId())
+            .fraOgMed(eksisterendePeriode.getFraOgMed())
+            .tilOgMed(eksisterendePeriode.getTilOgMed())
+            .status(PeriodestatusMedl.AVST.getKode())
+            .statusaarsak(årsak.getKode())
+            .dekning(eksisterendePeriode.getDekning())
+            .lovvalgsland(eksisterendePeriode.getLovvalgsland())
+            .lovvalg(LovvalgMedl.ENDL.getKode())
+            .grunnlag(eksisterendePeriode.getGrunnlag())
+            .sporingsinformasjon(sporingsinformasjon)
+            .build();
+
+        medlemskapRestConsumer.oppdaterPeriode(request);
     }
 
-    @Override
-    public void avvisPeriode(Long medlPeriodeID, StatusaarsakMedl årsak) throws SikkerhetsbegrensningException, IkkeFunnetException {
-        try {
-            behandleMedlemskapConsumer.avvisPeriode(
-                MedlPeriodeKonverter.konverterTilAvvisPeriodeRequest(medlPeriodeID, årsak)
-            );
-        } catch (no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.Sikkerhetsbegrensning ex) {
-            throw new SikkerhetsbegrensningException(ex);
-        } catch (PeriodeIkkeFunnet ex) {
-            throw new IkkeFunnetException(ex);
+    private Long opprettPeriode(String fnr, HarBestemmelse<?> bestemmelse, PeriodestatusMedl periodestatusMedl,
+                                LovvalgMedl lovvalgMedl, KildedokumenttypeMedl kildedokumenttypeMedl) {
+
+        MedlemskapsunntakForPost.MedlemskapsunntakForPostBuilder request = null;
+
+        if (bestemmelse instanceof PeriodeOmLovvalg periodeOmLovvalg) {
+            request = lovvalgRequest(periodeOmLovvalg);
+        } else if (bestemmelse instanceof Medlemskapsperiode medlemskapsperiode) {
+            request = medlemskapsperiodeRequest(medlemskapsperiode);
         }
+
+        if (request == null) {
+            throw new TekniskException("Oppretting av periode i MEDL feilet");
+        }
+
+        MedlemskapsunntakForPost.SporingsinformasjonForPost sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost.builder()
+            .kildedokument(kildedokumenttypeMedl.getKode())
+            .build();
+
+        request
+            .sporingsinformasjon(sporingsinformasjon)
+            .ident(fnr)
+            .status(periodestatusMedl.getKode())
+            .lovvalg(lovvalgMedl.getKode());
+
+        return medlemskapRestConsumer.opprettPeriode(request.build()).getUnntakId();
     }
 
-    private HentPeriodeRequest lagHentPeriodeRequest(long medlPeriodeID) {
-        HentPeriodeRequest hentPeriodeRequest = new HentPeriodeRequest();
-        hentPeriodeRequest.setPeriodeId(medlPeriodeID);
-        return hentPeriodeRequest;
+    private MedlemskapsunntakForPost.MedlemskapsunntakForPostBuilder lovvalgRequest(PeriodeOmLovvalg periodeOmLovvalg) {
+        return MedlemskapsunntakForPost.builder()
+            .fraOgMed(periodeOmLovvalg.getFom())
+            .tilOgMed(periodeOmLovvalg.getTom())
+            .dekning(tilMedlTrygdeDekningEos(periodeOmLovvalg.getDekning()).getKode())
+            .lovvalgsland(LandkoderUtils.tilIso3(periodeOmLovvalg.getLovvalgsland().getKode()))
+            .grunnlag(tilGrunnlagMedltype(hentLovvalgBestemmelse(periodeOmLovvalg)).getKode());
     }
 
+    private MedlemskapsunntakForPost.MedlemskapsunntakForPostBuilder medlemskapsperiodeRequest(Medlemskapsperiode medlemskapsperiode) {
+        return MedlemskapsunntakForPost.builder()
+            .fraOgMed(medlemskapsperiode.getFom())
+            .tilOgMed(medlemskapsperiode.getTom())
+            .dekning(tilMedlTrygdeDekningFtrl(medlemskapsperiode.getDekning(), medlemskapsperiode.getBestemmelse()).getKode())
+            .lovvalgsland(LandkoderUtils.tilIso3(medlemskapsperiode.getArbeidsland()))
+            .grunnlag(tilGrunnlagMedltype(medlemskapsperiode.getBestemmelse()).getKode());
+    }
 
-    private HentPeriodeListeResponse hentPeriodeListeResponse(String fnr, LocalDate fom, LocalDate tom) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
-        Foedselsnummer ident = new Foedselsnummer();
-        ident.setValue(fnr);
+    private void oppdaterPeriode(Lovvalgsperiode lovvalgsperiode, PeriodestatusMedl periodestatusMedl,
+                                 LovvalgMedl lovvalgMedl, KildedokumenttypeMedl kildedokumenttypeMedl) {
 
-        HentPeriodeListeRequest req = new HentPeriodeListeRequest();
-        req.setIdent(ident);
-
-        try {
-            req.setInkluderPerioderFraOgMed(KonverteringsUtils.localDateToXMLGregorianCalendar(fom));
-            req.setInkluderPerioderTilOgMed(KonverteringsUtils.localDateToXMLGregorianCalendar(tom));
-            return medlemskapConsumer.hentPeriodeListe(req);
-        } catch (DatatypeConfigurationException e) {
-            throw new IntegrasjonException(e);
-        } catch (Sikkerhetsbegrensning sikkerhetsbegrensning) {
-            throw new SikkerhetsbegrensningException(sikkerhetsbegrensning);
-        } catch (PersonIkkeFunnet personIkkeFunnet) {
-            throw new IkkeFunnetException(personIkkeFunnet);
+        Long medlPeriodeID = lovvalgsperiode.getMedlPeriodeID();
+        if (medlPeriodeID == null) {
+            throw new TekniskException("Det er ikke lagret noen medlPeriodeID på lovvalgsperiode som skal oppdateres i MEDL");
         }
+
+        MedlemskapsunntakForGet eksisterendePeriode = hentEksisterendePeriode(medlPeriodeID);
+
+        MedlemskapsunntakForPut.SporingsinformasjonForPut sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut.builder()
+            .kildedokument(kildedokumenttypeMedl.getKode())
+            .versjon(eksisterendePeriode.getSporingsinformasjon().getVersjon())
+            .build();
+
+        LovvalgBestemmelse bestemmelse = hentLovvalgBestemmelse(lovvalgsperiode);
+
+        MedlemskapsunntakForPut request = MedlemskapsunntakForPut.builder()
+            .unntakId(medlPeriodeID)
+            .fraOgMed(lovvalgsperiode.getFom())
+            .tilOgMed(lovvalgsperiode.getTom())
+            .status(periodestatusMedl.getKode())
+            .dekning(tilMedlTrygdeDekningEos(lovvalgsperiode.getDekning()).getKode())
+            .lovvalgsland(LandkoderUtils.tilIso3(lovvalgsperiode.getLovvalgsland().getKode()))
+            .lovvalg(lovvalgMedl.getKode())
+            .grunnlag(tilGrunnlagMedltype(bestemmelse).getKode())
+            .sporingsinformasjon(sporingsinformasjon)
+            .build();
+
+        medlemskapRestConsumer.oppdaterPeriode(request);
+    }
+
+    private MedlemskapsunntakForGet hentEksisterendePeriode(Long medlPeriodeID) {
+        return medlemskapRestConsumer.hentPeriode(medlPeriodeID.toString());
     }
 }

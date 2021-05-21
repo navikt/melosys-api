@@ -121,6 +121,16 @@ class SvarAnmodningUnntakSedRuterTest {
             .withMessageContaining("men behandlingen har ingen anmodningsperiode");
     }
 
+    @Test
+    void finnSakOgBestemRuting_ingenTilhørendeArkivsak_opprettJfrOppgave() {
+        Prosessinstans prosessinstans = new Prosessinstans();
+        MelosysEessiMelding eessiMelding = melosysEessiMelding();
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
+
+        svarAnmodningUnntakSedRuter.rutSedTilBehandling(prosessinstans, null);
+        verify(oppgaveService).opprettJournalføringsoppgave(eq(melosysEessiMelding().getJournalpostId()), eq(melosysEessiMelding().getAktoerId()));
+    }
+
     private Fagsak hentFagsak(Behandlingstema behandlingstema, Behandlingsstatus behandlingsstatus) {
         Fagsak fagsak = new Fagsak();
         Behandling behandling = new Behandling();

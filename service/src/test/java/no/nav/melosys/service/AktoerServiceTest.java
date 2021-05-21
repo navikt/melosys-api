@@ -9,31 +9,26 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AktoerRepository;
 import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.aktoer.AktoerService;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Example;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AktoerServiceTest {
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+@ExtendWith(MockitoExtension.class)
+class AktoerServiceTest {
 
     @Mock
     private AktoerRepository aktørRepository;
@@ -43,17 +38,18 @@ public class AktoerServiceTest {
     @Captor
     private ArgumentCaptor<Example> exampleCaptor;
     private long aktoerId = 234L;
+    private Aktoer aktør;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         aktørService = new AktoerService(aktørRepository);
-        Aktoer aktoer = new Aktoer();
-        aktoer.setId(aktoerId);
-        doReturn(aktoer).when(aktørRepository).save(any());
+        aktør = new Aktoer();
+        aktør.setId(aktoerId);
     }
 
     @Test
-    public final void lagEllerOppdater_nyAktoer() throws FunksjonellException {
+    void lagEllerOppdater_nyAktoer() {
+        doReturn(aktør).when(aktørRepository).save(any());
         AktoerDto aktoerDto = spy(lagAktoerDto());
         Fagsak fagsak = lagFagsak();
         Long databaseId = aktørService.lagEllerOppdaterAktoer(fagsak, aktoerDto);
@@ -68,7 +64,9 @@ public class AktoerServiceTest {
     }
 
     @Test
-    public final void lagEllerOppdater_oppdaterAktoer() throws FunksjonellException {
+    void lagEllerOppdater_oppdaterAktoer() {
+        doReturn(aktør).when(aktørRepository).save(any());
+
         AktoerDto aktoerDto = lagAktoerDto();
         aktoerDto.setDatabaseID(aktoerId);
         Fagsak fagsak = lagFagsak();
@@ -88,7 +86,7 @@ public class AktoerServiceTest {
     }
 
     @Test
-    public final void hentfagsakAktoerer() {
+    void hentfagsakAktoerer() {
         aktørService.hentfagsakAktører(lagFagsak(), Aktoersroller.REPRESENTANT, Representerer.BRUKER);
 
         verify(aktørRepository).findAll(exampleCaptor.capture());
@@ -101,7 +99,7 @@ public class AktoerServiceTest {
     }
 
     @Test
-    public void erstattEksisterendeArbeidsgiveraktører_medNyttOrgnr() {
+    void erstattEksisterendeArbeidsgiveraktører_medNyttOrgnr() {
         Fagsak fagsak = lagFagsak();
         List<String> orgnumre = Collections.singletonList("123456789");
         aktørService.erstattEksisterendeArbeidsgiveraktører(fagsak, orgnumre);
@@ -115,20 +113,21 @@ public class AktoerServiceTest {
     }
 
     @Test
-    public void slettAktør_sletteBruker_kasterException() throws FunksjonellException, TekniskException {
+    void slettAktør_sletteBruker_kasterException() {
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.BRUKER);
         Optional<Aktoer> optionalAktoer = Optional.of(aktoer);
         doReturn(optionalAktoer).when(aktørRepository).findById(10L);
-        expectedException.expect(FunksjonellException.class);
 
-        aktørService.slettAktoer(10L);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> aktørService.slettAktoer(10L))
+            .withMessageContaining("er en bruker");
 
         verify(aktørRepository, never()).deleteByAktørId(optionalAktoer.get().getAktørId());
     }
 
     @Test
-    public void slettAktør_sletteRepresentant_fungerer() throws FunksjonellException, TekniskException {
+    void slettAktør_sletteRepresentant_fungerer() {
         Aktoer aktoer = new Aktoer();
         aktoer.setId(10L);
         aktoer.setRolle(Aktoersroller.REPRESENTANT);
@@ -142,7 +141,7 @@ public class AktoerServiceTest {
     }
 
     @Test
-    public void erstattEksisterendeArbeidsgiveraktører_utenNyeOrgnr() {
+    void erstattEksisterendeArbeidsgiveraktører_utenNyeOrgnr() {
         Fagsak fagsak = lagFagsak();
         aktørService.erstattEksisterendeArbeidsgiveraktører(fagsak, Collections.emptyList());
         verify(aktørRepository).deleteAllByFagsakAndRolle(eq(fagsak), eq(Aktoersroller.ARBEIDSGIVER));

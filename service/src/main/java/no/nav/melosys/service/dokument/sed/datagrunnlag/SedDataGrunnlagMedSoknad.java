@@ -3,11 +3,10 @@ package no.nav.melosys.service.dokument.sed.datagrunnlag;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.dokument.BostedGrunnlag;
 import no.nav.melosys.service.dokument.ArbeidsstedGrunnlag;
+import no.nav.melosys.service.dokument.BostedGrunnlag;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.AvklarteVirksomheterGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
@@ -22,11 +21,11 @@ public class SedDataGrunnlagMedSoknad implements SedDataGrunnlag {
     public SedDataGrunnlagMedSoknad(Behandling behandling,
                                     KodeverkService kodeverkService,
                                     AvklarteVirksomheterService avklarteVirksomheterService,
-                                    AvklartefaktaService avklartefaktaService) throws TekniskException {
+                                    AvklartefaktaService avklartefaktaService) {
         this.behandling = behandling;
         this.behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         this.person = behandling.hentPersonDokument();
-        this.avklarteVirksomheterGrunnlag = new AvklarteVirksomheterGrunnlag(behandling, avklarteVirksomheterService, kodeverkService);
+        this.avklarteVirksomheterGrunnlag = new AvklarteVirksomheterGrunnlag(behandling, avklarteVirksomheterService);
         this.bostedGrunnlag = new BostedGrunnlag(behandlingsgrunnlagData, getPerson(), kodeverkService);
         this.arbeidsstedGrunnlag = new ArbeidsstedGrunnlag(
             avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(behandling.getId()),

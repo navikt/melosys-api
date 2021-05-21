@@ -12,10 +12,7 @@ public final class ExceptionMapper {
         throw new IllegalArgumentException("Utility");
     }
 
-    /**
-     * WebTarget.get kan kaste ProcessingException eller WebApplicationException. Denne metoden kaster en MelosysException, basert på typen til parameteren.
-     */
-    public static void JaxGetRuntimeExTilMelosysEx(RuntimeException e) throws FunksjonellException, TekniskException {
+    public static void JaxGetRuntimeExTilMelosysEx(RuntimeException e) {
         if (e instanceof NotAuthorizedException || e instanceof ForbiddenException) {
             throw new SikkerhetsbegrensningException(e.getMessage());
         } else if (e instanceof NotFoundException) {
@@ -30,29 +27,21 @@ public final class ExceptionMapper {
         }
     }
 
-    public static MelosysException springExTilMelosysEx(RestClientException ex) {
-        return springExTilMelosysEx(ex, ex.getMessage());
+    public static RuntimeException mapException(RestClientException ex) {
+        return mapException(ex, ex.getMessage());
     }
 
-    public static MelosysException springExTilMelosysEx(RestClientException ex, String feilmelding) {
-        if (ex instanceof HttpStatusCodeException) {
-            switch (((HttpStatusCodeException)ex).getStatusCode()) {
-                case UNAUTHORIZED:
-                case FORBIDDEN:
-                    return new SikkerhetsbegrensningException(feilmelding, ex);
-                case NOT_FOUND:
-                    return new IkkeFunnetException(feilmelding, ex);
-                case INTERNAL_SERVER_ERROR:
-                case BAD_REQUEST:
-                case METHOD_NOT_ALLOWED:
-                case SERVICE_UNAVAILABLE:
-                    return new IntegrasjonException(feilmelding, ex);
-                default:
-                    return new TekniskException(feilmelding, ex);
-            }
+    public static RuntimeException mapException(RestClientException ex, String feilmelding) {
+        if (ex instanceof HttpStatusCodeException httpStatusCodeException) {
+            return switch (httpStatusCodeException.getStatusCode()) {
+                case FORBIDDEN, UNAUTHORIZED -> new SikkerhetsbegrensningException(feilmelding, ex);
+                case NOT_FOUND -> new IkkeFunnetException(feilmelding, ex);
+                case BAD_REQUEST, INTERNAL_SERVER_ERROR, METHOD_NOT_ALLOWED, SERVICE_UNAVAILABLE ->
+                    throw new IntegrasjonException(feilmelding, ex);
+                default -> throw new TekniskException(feilmelding, ex);
+            };
         }
 
-        return new TekniskException(feilmelding, ex);
+        throw new TekniskException(feilmelding, ex);
     }
-    
 }

@@ -5,14 +5,13 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -62,8 +61,9 @@ public class AnmodningUnntakService {
         this.anmodningUnntakKontrollService = anmodningUnntakKontrollService;
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void anmodningOmUnntak(long behandlingID, String mottakerinstitusjon, String ytterligereInformasjonSed) throws MelosysException {
+    @Transactional
+    public void anmodningOmUnntak(long behandlingID, String mottakerinstitusjon,
+                                  Set<DokumentReferanse> vedleggReferanser, String ytterligereInformasjonSed) throws ValideringException {
         Set<String> mottakerinstitusjoner = validerMottakerInstitusjon(behandlingID, mottakerinstitusjon);
 
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
@@ -72,11 +72,12 @@ public class AnmodningUnntakService {
         kontrollerAnmodningOmUnntak(behandlingID);
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
 
-        prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, mottakerinstitusjoner, ytterligereInformasjonSed);
+        prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, mottakerinstitusjoner,
+            vedleggReferanser, ytterligereInformasjonSed);
         oppgaveService.leggTilbakeOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private Set<String> validerMottakerInstitusjon(long behandlingID, String mottakerinstitusjon) throws MelosysException {
+    private Set<String> validerMottakerInstitusjon(long behandlingID, String mottakerinstitusjon) {
         Landkoder landkode = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream().findFirst()
             .orElseThrow(() -> new FunksjonellException("Finner ikke utenlandsk myndighet for behandling " + behandlingID));
 
@@ -85,16 +86,16 @@ public class AnmodningUnntakService {
             List.of(landkode), BucType.LA_BUC_01);
     }
 
-    @Transactional(rollbackFor = MelosysException.class)
-    public void anmodningOmUnntakSvar(long behandlingID) throws FunksjonellException, TekniskException {
+    @Transactional
+    public void anmodningOmUnntakSvar(long behandlingID, String ytterligereInfo) {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         validerBehandlingstemaUnntak(behandling);
         validerSvar(behandling);
-        prosessinstansService.opprettProsessinstansAnmodningOmUnntakMottakSvar(behandling);
+        prosessinstansService.opprettProsessinstansAnmodningOmUnntakMottakSvar(behandling, ytterligereInfo);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private static void validerBehandlingstemaUnntak(Behandling behandling) throws FunksjonellException {
+    private static void validerBehandlingstemaUnntak(Behandling behandling) {
         if (behandling.getTema() != Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL) {
             throw new FunksjonellException("Behandling er ikke av tema ANMODNING_OM_UNNTAK_HOVEDREGEL");
         } else if (behandling.getStatus() == Behandlingsstatus.AVSLUTTET) {
@@ -102,7 +103,7 @@ public class AnmodningUnntakService {
         }
     }
 
-    private void validerSvar(Behandling behandling) throws FunksjonellException {
+    private void validerSvar(Behandling behandling) {
         Optional<AnmodningsperiodeSvar> anmodningsperiodeSvar = anmodningsperiodeService
             .hentAnmodningsperiodeSvarForBehandling(behandling.getId()).stream().findFirst();
         if (anmodningsperiodeSvar.isEmpty()) {
@@ -118,13 +119,13 @@ public class AnmodningUnntakService {
         }
     }
 
-    private void validerFritekstLengde(AnmodningsperiodeSvar anmodningsperiodeSvar) throws FunksjonellException {
+    private void validerFritekstLengde(AnmodningsperiodeSvar anmodningsperiodeSvar) {
         if (anmodningsperiodeSvar.getBegrunnelseFritekst() != null && anmodningsperiodeSvar.getBegrunnelseFritekst().length() > 255) {
             throw new FunksjonellException("Kan ikke ha fritekst lengre enn 255 for avslag på anmodning om unntak");
         }
     }
 
-    private void kontrollerAnmodningOmUnntak(long behandlingID) throws MelosysException {
+    private void kontrollerAnmodningOmUnntak(long behandlingID) throws ValideringException {
         Collection<Kontrollfeil> feilValideringer = anmodningUnntakKontrollService.utførKontroller(behandlingID);
         if (!feilValideringer.isEmpty()) {
             throw new ValideringException("Feil i validering. Kan ikke sende anmodning om unntak.",

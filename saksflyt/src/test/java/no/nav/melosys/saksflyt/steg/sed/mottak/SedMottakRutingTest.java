@@ -8,7 +8,6 @@ import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.MelosysException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.eessi.ruting.DefaultSedRuter;
@@ -40,15 +39,15 @@ class SedMottakRutingTest {
     private final Journalpost journalpost = new Journalpost("123");
 
     @BeforeEach
-    public void setUp() throws MelosysException {
+    public void setUp() {
         journalpost.setErFerdigstilt(false);
-        when(sedRuterForSedTyper.gjelderSedTyper()).thenReturn(Collections.singleton(SedType.A009));
         sedMottakRuting = new SedMottakRuting(Collections.singleton(sedRuterForSedTyper), defaultSedRuter, eessiService, joarkFasade);
-        when(joarkFasade.hentJournalpost(eq(journalpost.getJournalpostId()))).thenReturn(journalpost);
+        when(joarkFasade.hentJournalpost(journalpost.getJournalpostId())).thenReturn(journalpost);
     }
 
     @Test
-    void utfør_sedTypeA009_sedRuterForSedTypeBlirKalt() throws MelosysException {
+    void utfør_sedTypeA009_sedRuterForSedTypeBlirKalt() {
+        when(sedRuterForSedTyper.gjelderSedTyper()).thenReturn(Collections.singleton(SedType.A009));
         when(eessiService.finnSakForRinasaksnummer(anyString())).thenReturn(Optional.of(arkivsakID));
 
         MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(SedType.A009);
@@ -57,12 +56,13 @@ class SedMottakRutingTest {
 
         sedMottakRuting.utfør(prosessinstans);
 
-        verify(sedRuterForSedTyper).rutSedTilBehandling(eq(prosessinstans), eq(arkivsakID));
+        verify(sedRuterForSedTyper).rutSedTilBehandling(prosessinstans, arkivsakID);
         verify(defaultSedRuter, never()).rutSedTilBehandling(any(), any());
     }
 
     @Test
-    void utfør_sedTypeX009_manuellBehandlerBlirKalt() throws MelosysException {
+    void utfør_sedTypeX009_manuellBehandlerBlirKalt() {
+        when(sedRuterForSedTyper.gjelderSedTyper()).thenReturn(Collections.singleton(SedType.A009));
         when(eessiService.finnSakForRinasaksnummer(anyString())).thenReturn(Optional.of(arkivsakID));
 
         MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(SedType.X009);
@@ -72,11 +72,11 @@ class SedMottakRutingTest {
         sedMottakRuting.utfør(prosessinstans);
 
         verify(sedRuterForSedTyper, never()).rutSedTilBehandling(any(), any());
-        verify(defaultSedRuter).rutSedTilBehandling(eq(prosessinstans), eq(arkivsakID));
+        verify(defaultSedRuter).rutSedTilBehandling(prosessinstans, arkivsakID);
     }
 
     @Test
-    void utfør_journalpostFerdigstilt_behandlerIkkeVidere() throws MelosysException {
+    void utfør_journalpostFerdigstilt_behandlerIkkeVidere() {
         MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(SedType.A009);
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);

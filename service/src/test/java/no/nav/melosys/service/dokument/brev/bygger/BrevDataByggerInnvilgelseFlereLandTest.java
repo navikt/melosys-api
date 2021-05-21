@@ -7,16 +7,14 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.SaksopplysningerService;
@@ -27,11 +25,11 @@ import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagPersonsaksopplysning;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -39,7 +37,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class BrevDataByggerInnvilgelseFlereLandTest {
     @Mock
     AvklartefaktaService avklartefaktaService;
@@ -59,18 +57,19 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     private final String saksbehandler = "saksbehandler";
     private BrevDataBygger brevDataByggerInnvilgelse;
 
-    @Before
-    public void setUp() throws FunksjonellException, TekniskException {
+    @BeforeEach
+    public void setUp() {
         behandling = new Behandling();
         behandling.setId(1L);
         behandling.getSaksopplysninger().add(lagPersonsopplysning());
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new Soeknad());
 
-        brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.mottaker = Aktoersroller.BRUKER;
-        brevbestillingDto.begrunnelseKode = "BEGRUNNELSEKODE";
-        brevbestillingDto.fritekst = "FRITEKST";
+        brevbestillingDto = new BrevbestillingDto.Builder()
+            .medMottaker(Aktoersroller.BRUKER)
+            .medBegrunnelseKode("BEGRUNNELSEKODE")
+            .medFritekst("FRITEKST")
+            .build();
 
         when(brevDataByggerA1.lag(any(), any())).thenReturn(new BrevDataA1());
 
@@ -88,7 +87,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
             brevDataByggerA1);
     }
 
-    private BrevDataGrunnlag lagBrevressurser() throws TekniskException {
+    private BrevDataGrunnlag lagBrevressurser() {
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
         return new BrevDataGrunnlag(brevbestilling, null, avklarteVirksomheterService, avklartefaktaService);
     }
@@ -99,7 +98,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     }
 
     @Test
-    public void lag_medSokkel_setterMaritimtypeSokkel() throws FunksjonellException, TekniskException {
+    public void lag_medSokkel_setterMaritimtypeSokkel() {
         Maritimtyper maritimType = Maritimtyper.SOKKEL;
         when(avklartefaktaService.hentMaritimTyper(anyLong())).thenReturn(Set.of(maritimType));
 
@@ -111,7 +110,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     }
 
     @Test
-    public void lag_utenMaritimtArbeid_setterMaritimtypeTilNull() throws FunksjonellException, TekniskException {
+    public void lag_utenMaritimtArbeid_setterMaritimtypeTilNull() {
         when(avklartefaktaService.hentMaritimTyper(anyLong())).thenReturn(Collections.emptySet());
 
         BrevDataGrunnlag brevdataressurser = lagBrevressurser();
@@ -122,7 +121,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     }
 
     @Test
-    public void lag_utpekingAnnetLand_setterTrydemyndighetsland() throws FunksjonellException, TekniskException {
+    public void lag_utpekingAnnetLand_setterTrydemyndighetsland() {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         SedDokument sedDokument = new SedDokument();
         sedDokument.setAvsenderLandkode(Landkoder.DE);
@@ -134,7 +133,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     }
 
     @Test
-    public void lag_innvilgelsesBrev_harBestillingsinformasjon() throws FunksjonellException, TekniskException {
+    public void lag_innvilgelsesBrev_harBestillingsinformasjon() {
         BrevData brevData = brevDataByggerInnvilgelse.lag(lagBrevressurser(), saksbehandler);
 
         assertThat(brevData).isEqualToComparingOnlyGivenFields(brevbestillingDto, "begrunnelseKode", "fritekst");

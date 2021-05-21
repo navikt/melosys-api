@@ -3,19 +3,19 @@ package no.nav.melosys.integrasjon.oppgave.konsument.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class OppgaveSearchRequest {
-    private String tildeltEnhetsnr;
-    private Boolean tildeltRessurs;
+    private final String tildeltEnhetsnr;
+    private final Boolean tildeltRessurs;
     @JsonProperty("aktoerId")
-    private String aktørId;
-    private String[] oppgavetype;
-    private String behandlingstype;
-    private String tilordnetRessurs;
-    private String[] tema;
-    private String sorteringsfelt;
-    private String statusKategori;
-    private String[] saksreferanse;
-    private String behandlesAvApplikasjon;
-    private String behandlingstema;
+    private final String aktørId;
+    private final String[] oppgavetype;
+    private final String behandlingstype;
+    private final String tilordnetRessurs;
+    private final String[] tema;
+    private final String sorteringsfelt;
+    private final String statusKategori;
+    private final String[] saksreferanse;
+    private final String behandlesAvApplikasjon;
+    private final String behandlingstema;
 
     private OppgaveSearchRequest(Builder builder) {
         this.tildeltEnhetsnr = builder.enhetId;
@@ -82,7 +82,7 @@ public class OppgaveSearchRequest {
 
     public static class Builder {
 
-        private String enhetId;
+        private final String enhetId;
         private String aktørId;
         private String[] oppgavetype;
         private String behandlingstype;

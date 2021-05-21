@@ -3,6 +3,7 @@ package no.nav.melosys.domain.saksflyt;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
@@ -12,7 +13,8 @@ public class ProsessinstansBuilder {
     private Behandling behandling;
     private Object begrunnelser;
     private String begrunnelseFritekst;
-    private String ytterligereInformasjonSed;
+    private Set<DokumentReferanse> vedleggTilSed;
+    private String ytterligereInformasjonTilSed;
     private Set<String> eessiMottakere;
     private MelosysEessiMelding eessiMelding;
 
@@ -36,8 +38,13 @@ public class ProsessinstansBuilder {
         return this;
     }
 
+    public ProsessinstansBuilder medVedleggTilSed(Set<DokumentReferanse> vedlegg) {
+        this.vedleggTilSed = vedlegg;
+        return this;
+    }
+
     public ProsessinstansBuilder medYtterligereinformasjonSed(String ytterligereInformasjonSed) {
-        this.ytterligereInformasjonSed = ytterligereInformasjonSed;
+        this.ytterligereInformasjonTilSed = ytterligereInformasjonSed;
         return this;
     }
 
@@ -62,14 +69,18 @@ public class ProsessinstansBuilder {
         if (StringUtils.isNotEmpty(begrunnelseFritekst)) {
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST, begrunnelseFritekst);
         }
-        if (StringUtils.isNotEmpty(ytterligereInformasjonSed)) {
-            prosessinstans.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, ytterligereInformasjonSed);
+        if (!CollectionUtils.isEmpty(vedleggTilSed)) {
+            prosessinstans.setData(ProsessDataKey.VEDLEGG_SED, vedleggTilSed);
+        }
+        if (StringUtils.isNotEmpty(ytterligereInformasjonTilSed)) {
+            prosessinstans.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, ytterligereInformasjonTilSed);
         }
         if (!CollectionUtils.isEmpty(eessiMottakere)) {
             prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, eessiMottakere);
         }
         if (eessiMelding != null) {
             prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
+            prosessinstans.setLåsReferanse(eessiMelding.lagUnikIdentifikator());
         }
         return prosessinstans;
     }

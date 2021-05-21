@@ -23,4 +23,6 @@ public interface AvklarteFaktaRepository extends JpaRepository<Avklartefakta, Lo
                                                                   String fakta);
 
     void deleteByBehandlingsresultatId(long behandlingsid);
+
+    void deleteByBehandlingsresultatIdAndType(long behandlingsid, Avklartefaktatyper avklartefaktatyper);
 }

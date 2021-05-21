@@ -13,8 +13,6 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -24,11 +22,13 @@ import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Art12_2_begrunnelser.UTSENDELSE_OVER_24_MN;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning.KORT_OPPDRAG_RETUR_NORSK_AG;
@@ -41,8 +41,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BrevDataByggerAnmodningUnntakTest {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class BrevDataByggerAnmodningUnntakTest {
     @Mock
     AvklartefaktaService avklartefaktaService;
     @Mock
@@ -58,7 +59,7 @@ public class BrevDataByggerAnmodningUnntakTest {
 
     private final String saksbehandler = "saksbehandler";
 
-    @Before
+    @BeforeEach
     public void setUp() {
         brevDataByggerAnmodningUnntak = new BrevDataByggerAnmodningUnntak(landvelgerService, vilkaarsresultatService);
 
@@ -68,7 +69,7 @@ public class BrevDataByggerAnmodningUnntakTest {
     }
 
     @Test
-    public void lag_annmodningUnntakBrev_avklarVirksomhetSomSelvstendigForetak() throws Exception {
+    void lag_annmodningUnntakBrev_avklarVirksomhetSomSelvstendigForetak() {
         Behandling behandling = lagBehandling();
 
         BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);
@@ -96,8 +97,8 @@ public class BrevDataByggerAnmodningUnntakTest {
         return behandling;
     }
 
-    public BrevDataGrunnlag lagBrevressurser(Behandling behandling) throws TekniskException, FunksjonellException {
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class));
+    public BrevDataGrunnlag lagBrevressurser(Behandling behandling) {
+        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), kodeverkService);
 
         Set<String> orgSet = new HashSet<>(Collections.singletonList("987654321"));
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId())).thenReturn(orgSet);
@@ -115,7 +116,7 @@ public class BrevDataByggerAnmodningUnntakTest {
     }
 
     @Test
-    public void lag_brevDataUtenArt12_girAnmodningUtenArt12Begrunnelser() throws TekniskException, FunksjonellException {
+    void lag_brevDataUtenArt12_girAnmodningUtenArt12Begrunnelser() {
         Behandling behandling = lagBehandling();
         BrevDataAnmodningUnntak brevData = (BrevDataAnmodningUnntak) brevDataByggerAnmodningUnntak.lag(lagBrevressurser(behandling), saksbehandler);
         assertThat(brevData.anmodningBegrunnelser).isEmpty();
@@ -123,7 +124,7 @@ public class BrevDataByggerAnmodningUnntakTest {
     }
 
     @Test
-    public void lag_brevDataMedArt121_girAnmodningBegrunnelser() throws TekniskException, FunksjonellException {
+    void lag_brevDataMedArt121_girAnmodningBegrunnelser() {
         when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART12_2)))
             .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, false, UTSENDELSE_OVER_24_MN)));
 
@@ -134,7 +135,7 @@ public class BrevDataByggerAnmodningUnntakTest {
     }
 
     @Test
-    public void lag_brevDataMedArt122_girAnmodningBegrunnelser() throws TekniskException, FunksjonellException {
+    void lag_brevDataMedArt122_girAnmodningBegrunnelser() {
         when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART12_2)))
             .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, false, UTSENDELSE_OVER_24_MN)));
 
@@ -145,7 +146,7 @@ public class BrevDataByggerAnmodningUnntakTest {
     }
 
     @Test
-    public void lag_brevDataMedOppfyltArt121_girAnmodningBegrunnelser() throws TekniskException, FunksjonellException {
+    void lag_brevDataMedOppfyltArt121_girAnmodningBegrunnelser() {
         when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART12_2)))
             .thenReturn(Optional.of(lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_2, true)));
 
@@ -156,7 +157,7 @@ public class BrevDataByggerAnmodningUnntakTest {
     }
 
     @Test
-    public void lag_brevDataMedFritekst() throws TekniskException, FunksjonellException {
+    void lag_brevDataMedFritekst() {
         Vilkaarsresultat vilkaar = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, KORT_OPPDRAG_RETUR_NORSK_AG);
         vilkaar.setBegrunnelseFritekst("FRITEKST");
         when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_ART16_1))).thenReturn(Optional.of(vilkaar));

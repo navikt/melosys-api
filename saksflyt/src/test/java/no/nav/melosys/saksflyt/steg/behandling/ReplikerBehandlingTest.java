@@ -11,8 +11,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +39,7 @@ class ReplikerBehandlingTest {
     private final Prosessinstans prosessinstans = new Prosessinstans();
 
     @BeforeEach
-    public void setUp() throws IkkeFunnetException {
+    public void setUp() {
         replikerBehandling = new ReplikerBehandling(fagsakService, behandlingService);
         fagsak.setStatus(Saksstatuser.LOVVALG_AVKLART);
         fagsak.setBehandlinger(new ArrayList<>());
@@ -58,7 +56,7 @@ class ReplikerBehandlingTest {
     }
 
     @Test
-    void utfør_eksisterendeInaktivBehandling_settStegOpprettOppgave() throws FunksjonellException, TekniskException {
+    void utfør_eksisterendeInaktivBehandling_settStegOpprettOppgave() {
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);

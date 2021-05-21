@@ -5,29 +5,21 @@ import java.util.Optional;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class TildelBehandlingsoppgaveTest {
+@ExtendWith(MockitoExtension.class)
+class TildelBehandlingsoppgaveTest {
     private static final String SAKSBEHANDLER = "Z998877";
     private static final String SAKSNUMMER = "MEL-1234";
     private static final String OPPGAVE_ID = "123123";
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     @Mock
     private OppgaveService oppgaveService;
@@ -36,8 +28,8 @@ public class TildelBehandlingsoppgaveTest {
 
     private Prosessinstans prosessinstans;
 
-    @Before
-    public void setUp() throws FunksjonellException, TekniskException {
+    @BeforeEach
+    public void setUp() {
         tildelBehandlingsoppgave = new TildelBehandlingsoppgave(oppgaveService);
 
         prosessinstans = new Prosessinstans();
@@ -48,14 +40,14 @@ public class TildelBehandlingsoppgaveTest {
         oppgaveBuilder.setOppgaveId(OPPGAVE_ID);
         Oppgave oppgave = oppgaveBuilder.build();
 
-        when(oppgaveService.finnOppgaveMedFagsaksnummer(eq(SAKSNUMMER))).thenReturn(Optional.of(oppgave));
+        when(oppgaveService.finnOppgaveMedFagsaksnummer(SAKSNUMMER)).thenReturn(Optional.of(oppgave));
     }
 
     @Test
-    public void utfør_finnerOppgave_forventTildelingAvOppgave() throws FunksjonellException, TekniskException {
+    void utfør_finnerOppgave_forventTildelingAvOppgave() {
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, true);
         tildelBehandlingsoppgave.utfør(prosessinstans);
 
-        verify(oppgaveService).tildelOppgave(eq(OPPGAVE_ID), eq(SAKSBEHANDLER));
+        verify(oppgaveService).tildelOppgave(OPPGAVE_ID, SAKSBEHANDLER);
     }
 }

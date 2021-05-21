@@ -11,9 +11,6 @@ import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.*;
@@ -21,12 +18,11 @@ import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveOversiktDto;
 import no.nav.melosys.tjenester.gui.dto.oppgave.PlukketOppgaveDto;
-import org.json.JSONException;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +32,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class OppgaveTjenesteTest extends JsonSchemaTestParent {
     private static final Logger logger = LoggerFactory.getLogger(OppgaveTjenesteTest.class);
 
@@ -52,14 +48,14 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
     @Mock
     private OppgaveService oppgaveService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         oppgaveTjeneste = new OppgaveTjeneste(oppgaveplukker, oppgaveService);
         SpringSubjectHandler.set(new TestSubjectHandler());
     }
 
     @Test
-    public void mineOppgaver() throws MelosysException, IOException, JSONException {
+    public void mineOppgaver() throws IOException {
         List<OppgaveDto> oppgaver = new ArrayList<>();
         int oppgaveNr = 1 + defaultEasyRandom().nextInt(2);
         for (int i = 0; i < oppgaveNr; i++) {
@@ -75,7 +71,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void plukkOppgave() throws FunksjonellException, TekniskException, IOException {
+    public void plukkOppgave() throws IOException {
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
@@ -110,7 +106,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void søkOppgaverMedBrukerID() throws FunksjonellException, TekniskException, IOException {
+    public void søkOppgaverMedBrukerID() throws IOException {
         List<Oppgave> oppgaver = defaultEasyRandom().objects(Oppgave.class, 3).collect(Collectors.toList());
         when(oppgaveService.finnOppgaverMedBrukerID(anyString())).thenReturn(oppgaver);
 
@@ -118,7 +114,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void tilbakeleggOppgave() throws IOException {
+    public void tilbakeleggOppgave() throws Exception {
         TilbakeleggingDto tilbakelegging = defaultEasyRandom().nextObject(TilbakeleggingDto.class);
 
         assertThat(tilbakelegging).isNotNull();

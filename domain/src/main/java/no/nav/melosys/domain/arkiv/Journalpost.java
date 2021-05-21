@@ -14,11 +14,12 @@ import no.nav.melosys.exception.IkkeFunnetException;
 public class Journalpost {
     private final String journalpostId;
     private boolean erFerdigstilt;
-    private String arkivSakId;
+    private String saksnummer;
     private String avsenderId;
     private String avsenderNavn;
     private Avsendertyper avsenderType;
     private String brukerId;
+    private BrukerIdType brukerIdType;
     private String korrespondansepartNavn;
     private String korrespondansepartId;
     private Instant forsendelseJournalfoert;
@@ -26,13 +27,12 @@ public class Journalpost {
     private ArkivDokument hoveddokument;
     private String innhold;
     private Journalposttype journalposttype;
-    private List<ArkivDokument> vedleggListe;
+    private final List<ArkivDokument> vedleggListe = new ArrayList<>();
     private String mottaksKanal;
     private String tema;
 
     public Journalpost(String journalpostId) {
         this.journalpostId = journalpostId;
-        this.vedleggListe = new ArrayList<>();
     }
 
     public Optional<ArkivDokument> finnArkivDokument(String dokumentID) {
@@ -45,7 +45,7 @@ public class Journalpost {
             .findFirst();
     }
 
-    public ArkivDokument hentArkivDokument(String dokumentID) throws IkkeFunnetException {
+    public ArkivDokument hentArkivDokument(String dokumentID) {
         return finnArkivDokument(dokumentID).orElseThrow(() ->
             new IkkeFunnetException(String.format("Finner ikke dokument %s i journalpost %s", dokumentID, journalpostId)));
     }
@@ -62,12 +62,12 @@ public class Journalpost {
         return erFerdigstilt;
     }
 
-    public String getArkivSakId() {
-        return arkivSakId;
+    public String getSaksnummer() {
+        return saksnummer;
     }
 
-    public void setArkivSakId(String arkivSakId) {
-        this.arkivSakId = arkivSakId;
+    public void setSaksnummer(String saksnummer) {
+        this.saksnummer = saksnummer;
     }
 
     public String getAvsenderId() {
@@ -100,6 +100,14 @@ public class Journalpost {
 
     public void setBrukerId(String brukerId) {
         this.brukerId = brukerId;
+    }
+
+    public BrukerIdType getBrukerIdType() {
+        return brukerIdType;
+    }
+
+    public void setBrukerIdType(BrukerIdType brukerIdType) {
+        this.brukerIdType = brukerIdType;
     }
 
     public String getKorrespondansepartNavn() {

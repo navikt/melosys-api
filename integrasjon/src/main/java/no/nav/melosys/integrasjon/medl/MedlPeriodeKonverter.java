@@ -1,24 +1,20 @@
 package no.nav.melosys.integrasjon.medl;
 
-import java.time.LocalDate;
-import javax.xml.datatype.DatatypeConfigurationException;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.PeriodeOmLovvalg;
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
-import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.KonverteringsUtils;
-import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Medlemsperiode;
-import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.kodeverk.*;
-import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.AvvisPeriodeRequest;
-import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OppdaterPeriodeRequest;
-import no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.meldinger.OpprettPeriodeRequest;
+
+import static java.util.Optional.ofNullable;
 
 public final class MedlPeriodeKonverter {
 
@@ -27,6 +23,13 @@ public final class MedlPeriodeKonverter {
     }
 
     private static final BiMap<LovvalgBestemmelse, GrunnlagMedl> lovvalgsbestemmelseTilGrunnlagMedlTabell;
+    private static final Map<Folketrygdloven_kap2_bestemmelser, GrunnlagMedl> ftrlKap2BestemmelserGrunnLagMedlTabell;
+
+    private static final Collection<LovvalgBestemmelse> TILLEGGSBESTEMMELSER_MAPPES_TIL_MEDL = Set.of(
+        Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_2,
+        Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1,
+        Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5
+    );
 
     static {
         BiMap<LovvalgBestemmelse, GrunnlagMedl> tbl = HashBiMap.create();
@@ -53,24 +56,51 @@ public final class MedlPeriodeKonverter {
         tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART15, GrunnlagMedl.FO_15);
         tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1, GrunnlagMedl.FO_16);
         lovvalgsbestemmelseTilGrunnlagMedlTabell = tbl;
+
+
+        ftrlKap2BestemmelserGrunnLagMedlTabell = Map.of(
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8, GrunnlagMedl.FTL_2_8,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A, GrunnlagMedl.FTL_2_8,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_B, GrunnlagMedl.FTL_2_8,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_C, GrunnlagMedl.FTL_2_8,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_D, GrunnlagMedl.FTL_2_8,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD, GrunnlagMedl.FTL_2_8,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_TREDJE_LEDD, GrunnlagMedl.FTL_2_8,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FJERDE_LEDD, GrunnlagMedl.FTL_2_8,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FEMTE_LEDD, GrunnlagMedl.FTL_2_8
+        );
     }
 
-    public static DekningMedl tilMedlTrygdeDekning(Trygdedekninger dekning) throws TekniskException {
-        DekningMedl dekningMedltype;
-        switch (dekning) {
-            case FULL_DEKNING_EOSFO:
-                dekningMedltype = DekningMedl.FULL;
-                break;
-            case UTEN_DEKNING:
-                dekningMedltype = DekningMedl.UNNTATT;
-                break;
-            default:
-                throw new TekniskException("Dekningstype støttes ikke:" + dekning.getKode());
-        }
-        return dekningMedltype;
+
+    public static DekningMedl tilMedlTrygdeDekningEos(Trygdedekninger dekning) {
+        return switch (dekning) {
+            case FULL_DEKNING_EOSFO, FULL_DEKNING_FTRL -> DekningMedl.FULL;
+            case UTEN_DEKNING -> DekningMedl.UNNTATT;
+            default -> throw new TekniskException("Dekningstype støttes ikke for EØS:" + dekning.getKode());
+        };
     }
 
-    public static GrunnlagMedl tilGrunnlagMedltype(LovvalgBestemmelse bestemmelse) throws TekniskException {
+    public static DekningMedl tilMedlTrygdeDekningFtrl(Trygdedekninger dekning, Folketrygdloven_kap2_bestemmelser bestemmelse) {
+        return switch (bestemmelse) {
+            case FTRL_KAP2_2_8, FTRL_KAP2_2_8_FØRSTE_LEDD_A, FTRL_KAP2_2_8_FØRSTE_LEDD_B,
+                FTRL_KAP2_2_8_FØRSTE_LEDD_C, FTRL_KAP2_2_8_FØRSTE_LEDD_D, FTRL_KAP2_2_8_ANDRE_LEDD,
+                FTRL_KAP2_2_8_TREDJE_LEDD, FTRL_KAP2_2_8_FJERDE_LEDD, FTRL_KAP2_2_8_FEMTE_LEDD -> mapForFtrlKap2_8(dekning);
+            default -> throw new TekniskException("Bestemmelse støttes ikke for FTRL: " + bestemmelse.getKode());
+        };
+    }
+
+    private static DekningMedl mapForFtrlKap2_8(Trygdedekninger dekning) {
+        return switch (dekning) {
+            case HELSEDEL -> DekningMedl.FTRL_2_9_1_LEDD_A;
+            case HELSEDEL_MED_SYKE_OG_FORELDREPENGER -> DekningMedl.FTRL_2_9_2_LEDD_1A;
+            case PENSJONSDEL -> DekningMedl.FTRL_2_9_1_LEDD_B;
+            case HELSE_OG_PENSJONSDEL -> DekningMedl.FTRL_2_9_1_LEDD_C;
+            case HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER -> DekningMedl.FTRL_2_9_2_LEDD_1C;
+            default -> throw new TekniskException("Dekningstype støttes ikke for FTRL:" + dekning.getKode());
+        };
+    }
+
+    public static GrunnlagMedl tilGrunnlagMedltype(LovvalgBestemmelse bestemmelse) {
         //ART16_2 er pensjon og brukes foreløpig ikke i Melosys
         //ART16_1 og ART16_2 mappes til samme GrunnlMedl
         if (bestemmelse.equals(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2)) {
@@ -83,104 +113,30 @@ public final class MedlPeriodeKonverter {
         return grunnlagMedltype;
     }
 
-    public static LovvalgBestemmelse tilLovvalgBestemmelse(GrunnlagMedl grunnlagKode) throws TekniskException {
+    public static GrunnlagMedl tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser bestemmelse) {
+        return ofNullable(ftrlKap2BestemmelserGrunnLagMedlTabell.get(bestemmelse))
+            .orElseThrow(() -> new TekniskException("Folketrygdloven bestemmelse støttes ikke. Kode: " +
+                bestemmelse.getKode() + " Beskrivelse: " + bestemmelse.getBeskrivelse()));
+    }
+
+    public static LovvalgBestemmelse tilLovvalgBestemmelse(GrunnlagMedl grunnlagKode) {
         LovvalgBestemmelse lovvalgBestemmelse = lovvalgsbestemmelseTilGrunnlagMedlTabell.inverse().get(grunnlagKode);
         if (lovvalgBestemmelse == null) {
-            throw new TekniskException("GrunnlagMedlKode er ukjent. Kode: " + grunnlagKode.getKode() );
+            throw new TekniskException("GrunnlagMedlKode er ukjent. Kode: " + grunnlagKode.getKode());
         }
         return lovvalgBestemmelse;
     }
 
-    public static OpprettPeriodeRequest konverterTilOpprettPeriodRequest(String fnr,
-                                                                         PeriodeOmLovvalg periodeOmLovvalg,
-                                                                         PeriodestatusMedl periodestatusMedl,
-                                                                         LovvalgMedl lovvalgMedl,
-                                                                         KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
-
-        OpprettPeriodeRequest request = new OpprettPeriodeRequest();
-
-        no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Foedselsnummer ident = new no.nav.tjeneste.virksomhet.behandlemedlemskap.v2.informasjon.Foedselsnummer();
-        ident.setValue(fnr);
-
-        Medlemsperiode periode = opprettPeriode(periodeOmLovvalg, periodestatusMedl, lovvalgMedl, kildedokumenttypeMedl);
-
-        request.setIdent(ident);
-        request.setPeriode(periode);
-
-        return request;
-    }
-
-    static OppdaterPeriodeRequest konverterTilOppdaterPeriodeRequest(Lovvalgsperiode lovvalgsperiode,
-                                                                     PeriodestatusMedl periodestatusMedl,
-                                                                     LovvalgMedl lovvalgMedl,
-                                                                     KildedokumenttypeMedl kildedokumenttypeMedl, int versjon) throws TekniskException {
-        OppdaterPeriodeRequest request = new OppdaterPeriodeRequest();
-
-        request.setPeriodeId(lovvalgsperiode.getMedlPeriodeID());
-        request.setVersjon(versjon);
-
-        Medlemsperiode periode = opprettPeriode(lovvalgsperiode, periodestatusMedl, lovvalgMedl, kildedokumenttypeMedl);
-
-        request.setPeriode(periode);
-
-        return request;
-    }
-
-    private static Medlemsperiode opprettPeriode(PeriodeOmLovvalg periodeOmLovvalg, PeriodestatusMedl periodestatusMedl, LovvalgMedl lovvalgMedl, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
-        Medlemsperiode periode = new Medlemsperiode();
-        try {
-            periode.setFraOgMed(KonverteringsUtils.localDateToXMLGregorianCalendar(periodeOmLovvalg.getFom()));
-            periode.setTilOgMed(KonverteringsUtils.localDateToXMLGregorianCalendar(periodeOmLovvalg.getTom()));
-            periode.setDatoRegistrert(KonverteringsUtils.localDateToXMLGregorianCalendar(LocalDate.now()));
-        } catch (DatatypeConfigurationException e) {
-            throw new TekniskException(e);
-        }
-        if (periodestatusMedl != null) {
-            periode.setStatus(new Statuskode().withValue(periodestatusMedl.getKode()));
-        }
-
-        if (lovvalgMedl != null) {
-            periode.setLovvalg(new Lovvalg().withValue(lovvalgMedl.getKode()));
-        }
-
-        if (periodeOmLovvalg.getDekning() != null) {
-            DekningMedl dekningMedl = tilMedlTrygdeDekning(periodeOmLovvalg.getDekning());
-            periode.setTrygdedekning(new Trygdedekning().withValue(dekningMedl.getKode()));
-        }
-
-        if (periodeOmLovvalg.getLovvalgsland() != null) {
-            String lovvalgLand = LandkoderUtils.tilIso3(periodeOmLovvalg.getLovvalgsland().getKode());
-            periode.setLand(new Landkode().withValue(lovvalgLand));
-        }
-
-        LovvalgBestemmelse bestemmelse = hentLovvalgBestemmelse(periodeOmLovvalg);
-        if (bestemmelse != null) {
-            GrunnlagMedl grunnlagMedl = tilGrunnlagMedltype(bestemmelse);
-            periode.setGrunnlagstype(new Grunnlagstype().withValue(grunnlagMedl.getKode()));
-        }
-
-        if (kildedokumenttypeMedl != null) {
-            periode.setKildedokumenttype(new Kildedokumenttype().withValue(kildedokumenttypeMedl.getKode()));
-        }
-        return periode;
-    }
-
-    private static LovvalgBestemmelse hentLovvalgBestemmelse(PeriodeOmLovvalg lovvalgsperiode) {
-        final boolean harTilleggsbestemmelseART11_4_1 = lovvalgsperiode.getTilleggsbestemmelse() != null && lovvalgsperiode.getTilleggsbestemmelse().equals(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
+    public static LovvalgBestemmelse hentLovvalgBestemmelse(PeriodeOmLovvalg lovvalgsperiode) {
+        final boolean tilleggsbestemmelseSkalMappes = lovvalgsperiode.getTilleggsbestemmelse() != null
+            && TILLEGGSBESTEMMELSER_MAPPES_TIL_MEDL.contains(lovvalgsperiode.getTilleggsbestemmelse());
 
         LovvalgBestemmelse bestemmelse;
-        if (harTilleggsbestemmelseART11_4_1) {
-            bestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1;
+        if (tilleggsbestemmelseSkalMappes) {
+            bestemmelse = lovvalgsperiode.getTilleggsbestemmelse();
         } else {
             bestemmelse = lovvalgsperiode.getBestemmelse();
         }
         return bestemmelse;
-    }
-
-    static AvvisPeriodeRequest konverterTilAvvisPeriodeRequest(Long medlId, StatusaarsakMedl årsak) {
-        AvvisPeriodeRequest request = new AvvisPeriodeRequest();
-        request.setPeriodeId(medlId);
-        request.setAarsak(new Statusaarsak().withValue(årsak.getKode()));
-        return request;
     }
 }

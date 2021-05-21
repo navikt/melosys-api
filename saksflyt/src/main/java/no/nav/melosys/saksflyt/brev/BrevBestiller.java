@@ -4,8 +4,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,15 +21,15 @@ public class BrevBestiller {
         this.dokumentServiceFasade = dokumentServiceFasade;
     }
 
-    public void bestill(Produserbaredokumenter dokumentType, String avsender, Mottaker mottaker, Behandling behandling) throws FunksjonellException, TekniskException {
-        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProdserbartDokument(dokumentType)
+    public void bestill(Produserbaredokumenter dokumentType, String avsender, Mottaker mottaker, Behandling behandling) {
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(dokumentType)
             .medAvsenderNavn(avsender)
             .medMottakere(mottaker)
             .medBehandling(behandling).build();
         bestill(brevbestilling);
     }
 
-    public void bestill(DoksysBrevbestilling brevbestilling) throws FunksjonellException, TekniskException {
+    public void bestill(DoksysBrevbestilling brevbestilling) {
         Produserbaredokumenter dokumentType = brevbestilling.getProduserbartdokument();
         Behandling behandling = brevbestilling.getBehandling();
 

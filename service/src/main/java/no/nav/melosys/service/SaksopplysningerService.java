@@ -27,7 +27,7 @@ public class SaksopplysningerService {
             .map(s -> (PersonDokument) s.getDokument());
     }
 
-    public PersonDokument hentPersonOpplysninger(long behandlingID) throws IkkeFunnetException {
+    public PersonDokument hentPersonOpplysninger(long behandlingID) {
         return finnPersonOpplysninger(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke persondokument for behandling " + behandlingID));
     }
@@ -37,7 +37,7 @@ public class SaksopplysningerService {
             .map(s -> (SedDokument) s.getDokument());
     }
 
-    public SedDokument hentSedOpplysninger(long behandlingID) throws IkkeFunnetException {
+    public SedDokument hentSedOpplysninger(long behandlingID) {
         return finnSedOpplysninger(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke seddokument for behandling " + behandlingID));
     }
@@ -52,7 +52,7 @@ public class SaksopplysningerService {
             .map(s -> (InntektDokument) s.getDokument());
     }
 
-    public PersonhistorikkDokument hentPersonhistorikk(long behandlingID) throws IkkeFunnetException {
+    public PersonhistorikkDokument hentPersonhistorikk(long behandlingID) {
         return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.PERSHIST)
             .map(s -> (PersonhistorikkDokument) s.getDokument())
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke personhistorikkDokument for behandling " + behandlingID));

@@ -2,7 +2,6 @@ package no.nav.melosys.service.dokument.brev.bygger;
 
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.integrasjon.joark.JoarkService;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -12,23 +11,24 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.mock;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class BrevDataByggerVelgerTest {
 
     private BrevDataByggerVelger brevDataByggerVelger;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         AnmodningsperiodeService anmodningsperiodeService = mock(AnmodningsperiodeService.class);
         AvklartefaktaService avklartefaktaService = mock(AvklartefaktaService.class);
@@ -40,12 +40,12 @@ public class BrevDataByggerVelgerTest {
         UtpekingService utpekingService = mock(UtpekingService.class);
         VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
         VilkaarsresultatService vilkaarsresultatService = mock(VilkaarsresultatService.class);
-        TpsFasade tpsFasade = mock(TpsFasade.class);
+        PersondataFasade persondataFasade = mock(PersondataFasade.class);
         BehandlingsgrunnlagService behandlingsgrunnlagService = mock(BehandlingsgrunnlagService.class);
 
         brevDataByggerVelger = new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService, joarkService,
             landvelgerService, lovvalgsperiodeService, saksopplysningerService, utenlandskMyndighetService,
-            utpekingService, vilkaarsresultatRepository, vilkaarsresultatService, tpsFasade, behandlingsgrunnlagService);
+            utpekingService, vilkaarsresultatRepository, vilkaarsresultatService, persondataFasade, behandlingsgrunnlagService);
     }
 
     @Test

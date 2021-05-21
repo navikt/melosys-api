@@ -43,6 +43,7 @@ public class Prosessinstans {
     @JoinColumn(name = "behandling_id")
     private Behandling behandling;
 
+    @Lob
     @Column(name = "data")
     @Convert(converter = PropertiesConverter.class)
     private final Properties data = new Properties();
@@ -60,7 +61,11 @@ public class Prosessinstans {
     @OneToMany(mappedBy = "prosessinstans", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ProsessinstansHendelse> hendelser = new ArrayList<>();
 
-    private static final ObjectMapper dataMapper = new ObjectMapper().registerModule(new JavaTimeModule())
+    @Column(name = "sed_laas_referanse")
+    private String låsReferanse;
+
+    private static final ObjectMapper dataMapper = new ObjectMapper()
+        .registerModule(new JavaTimeModule())
         .registerModule(new SimpleModule().addDeserializer(LovvalgBestemmelse.class, new LovvalgBestemmelseDeserializer()));
 
     public UUID getId() {
@@ -99,7 +104,9 @@ public class Prosessinstans {
         return data;
     }
 
-    /** Returnerer et dataelement som String */
+    /**
+     * Returnerer et dataelement som String
+     */
     public String getData(ProsessDataKey key) {
         return data.getProperty(key.getKode());
     }
@@ -120,6 +127,10 @@ public class Prosessinstans {
         }
     }
 
+    public <T> T getData(ProsessDataKey key, Class<T> type, T defaultVerdi) {
+        return Optional.ofNullable(getData(key, type)).orElse(defaultVerdi);
+    }
+
     public <T> T getData(ProsessDataKey key, TypeReference<T> type) {
         String dataString = getData(key);
         if (dataString == null) {
@@ -132,7 +143,7 @@ public class Prosessinstans {
         }
     }
 
-    public <T> T getData(ProsessDataKey key, Class<T> type, T defaultVerdi) {
+    public <T> T getData(ProsessDataKey key, TypeReference<T> type, T defaultVerdi) {
         return Optional.ofNullable(getData(key, type)).orElse(defaultVerdi);
     }
 
@@ -141,7 +152,7 @@ public class Prosessinstans {
     }
 
     /**
-     * Setter et dataelement til et objet (ved json serialisering)
+     * Setter et dataelement til et object (ved json serialisering)
      */
     public void setData(ProsessDataKey key, Object value) {
         try {
@@ -184,6 +195,14 @@ public class Prosessinstans {
         return hendelser;
     }
 
+    public String getLåsReferanse() {
+        return låsReferanse;
+    }
+
+    public void setLåsReferanse(String låsReferanse) {
+        this.låsReferanse = låsReferanse;
+    }
+
     public String hentJournalpostID() {
         return Optional.ofNullable(getData(ProsessDataKey.JOURNALPOST_ID))
             .orElse(behandling.getInitierendeJournalpostId());
@@ -211,8 +230,20 @@ public class Prosessinstans {
         );
     }
 
-    public boolean statusErKlarEllerRestartet() {
-        return status == ProsessStatus.KLAR || status == ProsessStatus.RESTARTET;
+    public boolean erFerdig() {
+        return status == ProsessStatus.FERDIG;
+    }
+
+    public boolean erFeilet() {
+        return status == ProsessStatus.FEILET;
+    }
+
+    public boolean erPåVent() {
+        return status == ProsessStatus.PÅ_VENT;
+    }
+
+    public boolean erUnderBehandling() {
+        return status == ProsessStatus.UNDER_BEHANDLING;
     }
 
     @Override
@@ -225,10 +256,9 @@ public class Prosessinstans {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Prosessinstans)) {
+        if (!(o instanceof Prosessinstans that)) {
             return false;
         }
-        Prosessinstans that = (Prosessinstans) o;
         return this.id != null && this.id.equals(that.id);
     }
 

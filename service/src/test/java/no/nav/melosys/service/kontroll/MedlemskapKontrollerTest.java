@@ -9,7 +9,7 @@ import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -130,6 +130,16 @@ public class MedlemskapKontrollerTest {
     public void statsborgerskapErMedlemsland_statsborgerUS_ingenTreff() {
         assertThat(MedlemskapKontroller.statsborgerskapErMedlemsland(Lists.newArrayList("US")))
             .isFalse();
+    }
+
+    @Test
+    public void overlappendeGyldigMedlemsperiode_kildeLånekassen_ingenTreff() {
+        MedlemskapDokument medlemskapDokument = hentMedlemskapsDokument();
+        Medlemsperiode medlemsperiode = medlemskapDokument.getMedlemsperiode().get(0);
+        medlemsperiode.kilde = "LAANEKASSEN";
+        assertThat(MedlemskapKontroller.overlappendeMedlemsperiodeGyldigPeriode(
+            LocalDate.now(), LocalDate.now().plusYears(2), medlemskapDokument)
+        ).isFalse();
     }
 
     private MedlemskapDokument hentMedlemskapsDokument() {

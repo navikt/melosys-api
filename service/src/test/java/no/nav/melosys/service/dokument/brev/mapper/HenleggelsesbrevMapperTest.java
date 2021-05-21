@@ -14,7 +14,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.jeasy.random.EasyRandom;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static no.nav.melosys.service.dokument.brev.mapper.felles.FellesBrevtypeMappingTest.hentAlleVerdierFraKodeverk;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,10 +56,11 @@ public class HenleggelsesbrevMapperTest {
     private void testMapTilBrevXml(Behandling behandling, Behandlingsresultat behandlingsresultat) throws Exception {
         FellesType fellesType = lagFellesType();
         MelosysNAVFelles navFelles = LagMelosysNAVFelles();
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.mottaker = Aktoersroller.BRUKER;
-        brevbestillingDto.begrunnelseKode = "ANNET";
-        brevbestillingDto.fritekst = "something";
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+            .medMottaker(Aktoersroller.BRUKER)
+            .medBegrunnelseKode("ANNET")
+            .medFritekst("something")
+            .build();
 
         BrevDataMottattDato brevdata = new BrevDataMottattDato("saksbehandler", brevbestillingDto);
         brevdata.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();

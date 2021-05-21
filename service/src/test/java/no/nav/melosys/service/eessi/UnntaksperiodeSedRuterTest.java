@@ -17,23 +17,21 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.eessi.ruting.UnntaksperiodeSedRuter;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class UnntaksperiodeSedRuterTest {
 
     @Mock
@@ -47,13 +45,13 @@ public class UnntaksperiodeSedRuterTest {
 
     private final String aktørID = "143455432";
 
-    @Before
+    @BeforeEach
     public void setup() {
         unntaksperiodeSedRuter = new UnntaksperiodeSedRuter(prosessinstansService, fagsakService, behandlingsresultatService);
     }
 
     @Test
-    public void finnSakOgBestemRuting_nySak_verifiserResultatNySak() throws FunksjonellException, TekniskException {
+    public void finnSakOgBestemRuting_nySak_verifiserResultatNySak() {
         Prosessinstans prosessinstans = hentProsessinstans(LocalDate.now(), LocalDate.now().plusYears(1));
 
         unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, 1L);

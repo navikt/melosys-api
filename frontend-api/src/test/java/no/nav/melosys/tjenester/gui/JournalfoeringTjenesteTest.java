@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.io.IOException;
+import java.util.Optional;
 
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -37,9 +37,10 @@ class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
 
     private EasyRandom random;
 
-    private JournalfoeringTjeneste tjeneste;
     @Mock
     private JournalfoeringService journalføringService;
+
+    private JournalfoeringTjeneste tjeneste;
 
     @BeforeEach
     public void setUp() {
@@ -51,9 +52,9 @@ class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     @Test
     void hentJournalpostValidering() throws Exception {
         Journalpost journalpost = random.nextObject(Journalpost.class);
-        journalpost.setBrukerId(SAMPLE_FNR);
         journalpost.setAvsenderId(SAMPLE_ORGNR);
         when(journalføringService.hentJournalpost(anyString())).thenReturn(journalpost);
+        when(journalføringService.finnBrukerIdent(journalpost)).thenReturn(Optional.of(SAMPLE_FNR));
 
         ResponseEntity<JournalpostDto> response = tjeneste.hentJournalpostOpplysninger(anyString());
         JournalpostDto journalpostDto = response.getBody();
@@ -90,7 +91,7 @@ class JournalfoeringTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void journalførSedSchemaValidering() throws IOException {
+    void journalførSedSchemaValidering() throws Exception {
         JournalfoeringSedDto journalfoeringSedDto = new JournalfoeringSedDto();
         journalfoeringSedDto.setOppgaveID("123123");
         journalfoeringSedDto.setBrukerID(SAMPLE_FNR);

@@ -12,10 +12,8 @@ import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
+import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -33,13 +31,14 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SendAvslagUtpekingTest {
-
     @Mock
     private SedDataBygger sedDataBygger;
     @Mock
     private SedDataGrunnlagFactory sedDataGrunnlagFactory;
     @Mock
     private EessiConsumer eessiConsumer;
+    @Mock
+    private JoarkFasade joarkFasade;
     @Mock
     private BehandlingService behandlingService;
     @Mock
@@ -50,11 +49,9 @@ class SendAvslagUtpekingTest {
     private Behandling behandling;
 
     @BeforeEach
-    public void settOpp() throws FunksjonellException, TekniskException {
-        eessiService = new EessiService(
-            sedDataBygger, sedDataGrunnlagFactory,
-            eessiConsumer, behandlingService, behandlingsresultatService
-        );
+    public void settOpp() {
+        eessiService = new EessiService(behandlingService, behandlingsresultatService, eessiConsumer, joarkFasade,
+                sedDataBygger, sedDataGrunnlagFactory);
         sendAvslagUtpeking = new SendAvslagUtpeking(eessiService);
 
         SedDokument sedDokument = new SedDokument();
@@ -74,7 +71,7 @@ class SendAvslagUtpekingTest {
     }
 
     @Test
-    void utfør() throws MelosysException {
+    void utfør() {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.UTPEKING_AVVIS, new UtpekingAvvis(

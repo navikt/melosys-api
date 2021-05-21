@@ -5,6 +5,7 @@ import java.util.Objects;
 
 import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
+import org.apache.commons.lang3.StringUtils;
 
 public class MelosysEessiMelding {
     private String sedId;
@@ -24,6 +25,7 @@ public class MelosysEessiMelding {
     private String ytterligereInformasjon;
     private String bucType;
     private String sedType;
+    private String sedVersjon;
 
     private SvarAnmodningUnntak svarAnmodningUnntak;
     private AnmodningUnntak anmodningUnntak;
@@ -180,6 +182,14 @@ public class MelosysEessiMelding {
         this.anmodningUnntak = anmodningUnntak;
     }
 
+    public void setSedVersjon(String sedVersjon) {
+        this.sedVersjon = sedVersjon;
+    }
+
+    public String getSedVersjon() {
+        return sedVersjon;
+    }
+
     @Override
     public String toString() {
         return "MelosysEessiMelding{" +
@@ -229,5 +239,13 @@ public class MelosysEessiMelding {
     @Override
     public int hashCode() {
         return Objects.hash(sedId, rinaSaksnummer, avsender, journalpostId, dokumentId, gsakSaksnummer, aktoerId, statsborgerskap, arbeidssteder, periode, lovvalgsland, artikkel, erEndring, midlertidigBestemmelse, ytterligereInformasjon, bucType, sedType, svarAnmodningUnntak, anmodningUnntak);
+    }
+
+    public boolean inneholderYtterligereInformasjon() {
+        return StringUtils.isNotEmpty(getYtterligereInformasjon());
+    }
+
+    public String lagUnikIdentifikator() {
+        return String.format("%s_%s_%s", rinaSaksnummer, sedId, sedVersjon);
     }
 }

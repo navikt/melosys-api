@@ -6,25 +6,22 @@ import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.service.behandling.BehandlingService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class SendOrienteringsbrevVideresendSøknadTest {
 
     @Mock
@@ -40,8 +37,8 @@ public class SendOrienteringsbrevVideresendSøknadTest {
     private ArgumentCaptor<DoksysBrevbestilling> captor;
 
 
-    @Before
-    public void setup() throws IkkeFunnetException {
+    @BeforeEach
+    public void setup() {
         steg = new SendOrienteringsbrevVideresendSøknad(behandlingService , brevBestiller);
 
         behandling = new Behandling();
@@ -52,7 +49,7 @@ public class SendOrienteringsbrevVideresendSøknadTest {
     }
 
     @Test
-    public void utfør_brevbestilling_harRiktigBrevTypeOgMottaker() throws FunksjonellException, TekniskException {
+    public void utfør_brevbestilling_harRiktigBrevTypeOgMottaker() {
         steg.utfør(prosessinstans);
         verify(brevBestiller).bestill(captor.capture());
         DoksysBrevbestilling brevbestilling = captor.getValue();

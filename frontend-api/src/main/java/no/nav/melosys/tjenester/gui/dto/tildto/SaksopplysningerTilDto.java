@@ -21,11 +21,11 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.PersonUtenAdresseDto;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
-import no.nav.melosys.tjenester.gui.dto.dokument.PersonhistorikkDto;
+import no.nav.melosys.tjenester.gui.dto.PersonhistorikkDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.SedDokumentDto;
 import no.nav.melosys.tjenester.gui.dto.inntekt.InntektDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.domain.FellesKodeverk.POSTNUMMER;
 
 /**
- * Denne klassen konverterer alle SaksopplysningDokumenter til et objekt tre for frontend.
+ * Klassen konverterer alle saksopplysninger til SaksopplysningerDto for visning i frontend.
  */
 @Component
 public class SaksopplysningerTilDto {

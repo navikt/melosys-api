@@ -1,7 +1,7 @@
 package no.nav.melosys.domain.avklartefakta;
 
 import no.nav.melosys.domain.dokument.adresse.Adresse;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.ForetakUtland;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 
 public class AvklartVirksomhet {
@@ -27,6 +27,10 @@ public class AvklartVirksomhet {
         this.adresse = adresse;
         this.adresseErOgsåArbeidssted = false;
         this.yrkesaktivitet = yrkesaktivitet;
+    }
+
+    public String getOrgnr() {
+        return orgnr;
     }
 
     public boolean erSelvstendigForetak() {

@@ -6,9 +6,12 @@ import java.util.List;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
+import no.nav.melosys.domain.brev.FastMottaker;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -16,9 +19,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
-import no.nav.melosys.saksflyt.brev.FastMottaker;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -28,12 +29,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.brev.FastMottaker.*;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.SEND_VEDTAKSBREV_INNLAND;
-import static no.nav.melosys.saksflyt.brev.FastMottaker.*;
 
 
 @Component
@@ -59,12 +62,12 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         Behandlingsresultattyper behandlingsresultatType = resultat.getType();
         String saksbehandler = hentSaksbehandler(prosessinstans, resultat);
-        String begrunnelseKode = hentBegrunnelseKode(prosessinstans);
+        String begrunnelseKode = hentBegrunnelsekodeTilForkortetPeriode(resultat);
         String fritekst = hentBegrunnelseFritekst(prosessinstans);
 
         if (resultat.erAvslag()) {
@@ -85,8 +88,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     private void sendAvslagsbrev(Behandling behandling,
                                  Behandlingsresultattyper behandlingsresultatType,
                                  String saksbehandler,
-                                 String fritekst)
-        throws FunksjonellException, TekniskException {
+                                 String fritekst) {
         Produserbaredokumenter avslagTypeBruker = (behandlingsresultatType != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL)
             ? AVSLAG_YRKESAKTIV : AVSLAG_MANGLENDE_OPPLYSNINGER;
 
@@ -97,7 +99,8 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             mottakerListe = List.of(Mottaker.av(BRUKER));
         }
 
-        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProdserbartDokument(avslagTypeBruker)
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
+            .medProduserbartDokument(avslagTypeBruker)
             .medAvsenderNavn(saksbehandler)
             .medBehandling(behandling)
             .medMottakere(mottakerListe)
@@ -110,7 +113,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
                 ? AVSLAG_ARBEIDSGIVER : AVSLAG_MANGLENDE_OPPLYSNINGER;
 
             DoksysBrevbestilling.Builder brevbestillingArbeidsgiver = new DoksysBrevbestilling.Builder()
-                .medProdserbartDokument(avslagTypeArbeidsgiver)
+                .medProduserbartDokument(avslagTypeArbeidsgiver)
                 .medAvsenderNavn(saksbehandler)
                 .medBehandling(behandling)
                 .medMottakere(Mottaker.av(ARBEIDSGIVER))
@@ -124,17 +127,19 @@ public class SendVedtaksbrevInnland implements StegBehandler {
                                       Behandlingsresultat resultat,
                                       String saksbehandler,
                                       String begrunnelseKode,
-                                      String fritekst)
-        throws FunksjonellException, TekniskException {
+                                      String fritekst) {
         Produserbaredokumenter innvilgelseType = (resultat.erInnvilgelseFlereLand())
             ? INNVILGELSE_YRKESAKTIV_FLERE_LAND : INNVILGELSE_YRKESAKTIV;
 
         List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.av(BRUKER), FastMottaker.av(SKATT)));
-        if (skalSendesTilSkatteoppkreverUtland(behandling.getBehandlingsgrunnlag())) {
-            mottakerListe.add(FastMottaker.av(SKATTEOPPKREVER_UTLAND));
+        if (brevSendesTilStatligSkatteoppkreving(
+            resultat.hentValidertLovvalgsperiode(),
+            behandling.getBehandlingsgrunnlag()
+        )) {
+            mottakerListe.add(FastMottaker.av(STATLIG_SKATTEOPPKREVING));
         }
 
-        DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProdserbartDokument(innvilgelseType)
+        DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProduserbartDokument(innvilgelseType)
             .medAvsenderNavn(saksbehandler)
             .medBehandling(behandling)
             .medBegrunnelseKode(begrunnelseKode)
@@ -144,9 +149,8 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         brevBestiller.bestill(innvilgelseBrukerOgSkatt);
     }
 
-    private void sendUtpekingsbrev(Behandling behandling, String saksbehandler, String fritekst)
-        throws FunksjonellException, TekniskException {
-        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProdserbartDokument(ORIENTERING_UTPEKING_UTLAND)
+    private void sendUtpekingsbrev(Behandling behandling, String saksbehandler, String fritekst) {
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(ORIENTERING_UTPEKING_UTLAND)
             .medAvsenderNavn(saksbehandler)
             .medBehandling(behandling)
             .medMottakere(Mottaker.av(BRUKER))
@@ -155,8 +159,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         brevBestiller.bestill(brevbestilling);
     }
 
-    private void sendOrienteringTilArbeidsgiver(Behandling behandling, Behandlingsresultat resultat, String saksbehandler)
-        throws FunksjonellException, TekniskException {
+    private void sendOrienteringTilArbeidsgiver(Behandling behandling, Behandlingsresultat resultat, String saksbehandler) {
         final Lovvalgsperiode lovvalgsperiode = resultat.hentValidertLovvalgsperiode();
         // Saker med kun selvstendig næringsdrivende skal ikke sende brevet INNVILGESE_ARBEIDSGIVER
         if (behandling.getFagsak().harAktørMedRolleType(ARBEIDSGIVER)
@@ -166,27 +169,33 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         }
     }
 
-    private static boolean skalSendesTilSkatteoppkreverUtland(Behandlingsgrunnlag behandlingsgrunnlag) {
-        return finnesForetakUtland(behandlingsgrunnlag)
-            && !finnesUtenlandskSelvstendigForetak(behandlingsgrunnlag);
+    private static boolean brevSendesTilStatligSkatteoppkreving(Lovvalgsperiode lovvalgsperiode,
+                                                                Behandlingsgrunnlag behandlingsgrunnlag) {
+        return harArtikkelRelevantForStatligSkatteoppkreving(lovvalgsperiode)
+            && finnesArbeidsgiverUtland(behandlingsgrunnlag);
     }
 
-    private static boolean finnesForetakUtland(Behandlingsgrunnlag behandlingsgrunnlag) {
-        return !behandlingsgrunnlag.getBehandlingsgrunnlagdata().foretakUtland.isEmpty();
+    public static boolean harArtikkelRelevantForStatligSkatteoppkreving(Lovvalgsperiode lovvalgsperiode) {
+        return lovvalgsperiode.erArtikkel11()
+            || lovvalgsperiode.erArtikkel13_1()
+            || lovvalgsperiode.getBestemmelse() == FO_883_2004_ART13_4
+            || lovvalgsperiode.getBestemmelse() == FO_883_2004_ART16_1;
     }
 
-    private static boolean finnesUtenlandskSelvstendigForetak(Behandlingsgrunnlag behandlingsgrunnlag) {
-        return behandlingsgrunnlag.getBehandlingsgrunnlagdata().foretakUtland.stream()
-            .anyMatch(foretakUtland -> Boolean.TRUE.equals(foretakUtland.selvstendigNæringsvirksomhet));
+    private static boolean finnesArbeidsgiverUtland(Behandlingsgrunnlag behandlingsgrunnlag) {
+        return !behandlingsgrunnlag.getBehandlingsgrunnlagdata().foretakUtland.isEmpty()
+            && behandlingsgrunnlag.getBehandlingsgrunnlagdata().foretakUtland.stream()
+            .anyMatch(foretakUtland -> Boolean.FALSE.equals(foretakUtland.selvstendigNæringsvirksomhet));
     }
 
-    private String hentBegrunnelseKode(Prosessinstans prosessinstans) {
-        Endretperiode endretPeriodeBegrunnelseKode = prosessinstans.getData(ProsessDataKey.BEGRUNNELSEKODE, Endretperiode.class);
-        String begrunnelseKode = null;
-        if (endretPeriodeBegrunnelseKode != null) {
-            begrunnelseKode = endretPeriodeBegrunnelseKode.getKode();
-        }
-        return begrunnelseKode;
+    private String hentBegrunnelsekodeTilForkortetPeriode(Behandlingsresultat behandlingsresultat) {
+        return behandlingsresultat.getAvklartefakta().stream()
+            .filter(avklartfakta -> avklartfakta.getType() == Avklartefaktatyper.AARSAK_ENDRING_PERIODE)
+            .map(Avklartefakta::getFakta)
+            .map(Endretperiode::valueOf)
+            .map(Endretperiode::getKode)
+            .findFirst()
+            .orElse(null);
     }
 
     private String hentBegrunnelseFritekst(Prosessinstans prosessinstans) {

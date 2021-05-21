@@ -10,14 +10,15 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import org.assertj.core.util.Sets;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-public class FagsakTest {
+class FagsakTest {
 
     @Test
-    public void getAktivBehandling() throws TekniskException {
+    void getAktivBehandling() {
         Fagsak fagsak = new Fagsak();
         Behandling b1 = new Behandling();
         b1.setStatus(Behandlingsstatus.AVSLUTTET);
@@ -40,7 +41,7 @@ public class FagsakTest {
     }
 
     @Test
-    public void getTidligsteInaktivBehandling_toInaktive() {
+    void getTidligsteInaktivBehandling_toInaktive() {
         Fagsak fagsak = new Fagsak();
         Behandling tidligsteInaktiveBehandling = new Behandling();
         tidligsteInaktiveBehandling.setRegistrertDato(Instant.parse("2019-01-10T10:37:30.00Z"));
@@ -63,7 +64,7 @@ public class FagsakTest {
     }
 
     @Test
-    public void getSistOppdaterteBehandling_medEnBehandling() throws FunksjonellException {
+    void getSistOppdaterteBehandling_medEnBehandling() {
         Fagsak fagsak = new Fagsak();
 
         Behandling behandling = new Behandling();
@@ -74,7 +75,7 @@ public class FagsakTest {
     }
 
     @Test
-    public void getSistOppdaterteBehandling_medTreBehandlinger() throws FunksjonellException {
+    void getSistOppdaterteBehandling_medTreBehandlinger() {
         Fagsak fagsak = new Fagsak();
 
         Behandling sistOppdaterteBehandling = new Behandling();
@@ -95,13 +96,16 @@ public class FagsakTest {
         assertThat(fagsak.getSistOppdaterteBehandling()).isEqualTo(sistOppdaterteBehandling);
     }
 
-    @Test(expected = FunksjonellException.class)
-    public void getSistOppdaterteBehandling_ingenBehandlinger_kasterException() throws FunksjonellException {
-        new Fagsak().getSistOppdaterteBehandling();
+    @Test
+    void getSistOppdaterteBehandling_ingenBehandlinger_kasterException() {
+        var fagsak = new Fagsak();
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(fagsak::getSistOppdaterteBehandling)
+            .withMessageContaining("Finner ikke behandlinger");
     }
 
     @Test
-    public void getAktivBehandling_ingenAktive() throws TekniskException {
+    void getAktivBehandling_ingenAktive() {
         Fagsak fagsak = new Fagsak();
         Behandling b1 = new Behandling();
         b1.setStatus(Behandlingsstatus.AVSLUTTET);
@@ -119,8 +123,8 @@ public class FagsakTest {
         assertThat(aktivBehandling).isNull();
     }
 
-    @Test(expected = TekniskException.class)
-    public void getAktivBehandling_feilTilstand() throws TekniskException {
+    @Test
+    void getAktivBehandling_feilTilstand() {
         Fagsak fagsak = new Fagsak();
         Behandling b1 = new Behandling();
         b1.setStatus(Behandlingsstatus.AVVENT_DOK_PART);
@@ -133,11 +137,13 @@ public class FagsakTest {
         behandlinger.add(b2);
         fagsak.setBehandlinger(behandlinger);
 
-        fagsak.hentAktivBehandling();
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(fagsak::hentAktivBehandling)
+            .withMessageContaining("mer enn en");
     }
 
     @Test
-    public void getBruker() throws TekniskException {
+    void getBruker() {
         Fagsak fagsak = new Fagsak();
         fagsak.setAktører(new HashSet<>());
         Aktoer a1 = new Aktoer();
@@ -155,7 +161,7 @@ public class FagsakTest {
     }
 
     @Test
-    public void getBruker_ingen() throws TekniskException {
+    void getBruker_ingen() {
         Fagsak fagsak = new Fagsak();
         fagsak.setAktører(new HashSet<>());
         Aktoer a2 = new Aktoer();
@@ -168,8 +174,8 @@ public class FagsakTest {
         assertThat(bruker).isNull();
     }
 
-    @Test(expected = TekniskException.class)
-    public void getBruker_flere() throws TekniskException {
+    @Test
+    void getBruker_flere() {
         Fagsak fagsak = new Fagsak();
         fagsak.setAktører(new HashSet<>());
         Aktoer a1 = new Aktoer();
@@ -181,13 +187,13 @@ public class FagsakTest {
         a2.setAktørId("456");
         fagsak.getAktører().add(a2);
 
-        Aktoer bruker = fagsak.hentBruker();
-
-        assertThat(bruker).isEqualTo(a1);
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(fagsak::hentBruker)
+            .withMessageContaining("mer enn en");
     }
 
     @Test
-    public void hentRepresentant_arbeidsgiver_funker() {
+    void hentRepresentant_arbeidsgiver_funker() {
         Fagsak fagsak = new Fagsak();
         fagsak.setAktører(new HashSet<>());
         Aktoer a1 = new Aktoer();
@@ -207,7 +213,7 @@ public class FagsakTest {
     }
 
     @Test
-    public void hentRepresentant_begge_funker() {
+    void hentRepresentant_begge_funker() {
         Fagsak fagsak = new Fagsak();
         fagsak.setAktører(new HashSet<>());
         Aktoer a1 = new Aktoer();
@@ -227,7 +233,7 @@ public class FagsakTest {
     }
 
     @Test
-    public void hentMyndighetLandkode_forventGyldigLandkode() throws Exception {
+    void hentMyndighetLandkode_forventGyldigLandkode() {
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.MYNDIGHET);
         aktoer.setInstitusjonId("SE:gfr");
@@ -239,8 +245,8 @@ public class FagsakTest {
         assertThat(resultat).isEqualByComparingTo(Landkoder.SE);
     }
 
-    @Test(expected = TekniskException.class)
-    public void hentMyndighetLandkode_aktoerIkkeMyndighet_forventTekniskException() throws Exception {
+    @Test
+    void hentMyndighetLandkode_aktoerIkkeMyndighet_forventTekniskException() {
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.BRUKER);
         aktoer.setInstitusjonId("SE:gfr");
@@ -248,11 +254,13 @@ public class FagsakTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setAktører(Sets.newLinkedHashSet(aktoer));
 
-        fagsak.hentMyndighetLandkode();
+        assertThatExceptionOfType(TekniskException.class)
+            .isThrownBy(fagsak::hentMyndighetLandkode)
+            .withMessageContaining("Finner ingen aktør");
     }
 
     @Test
-    public void harAktørMedRolleTypeArbeidsgiver_arbeidsgiverFinnes_forventTrue() {
+    void harAktørMedRolleTypeArbeidsgiver_arbeidsgiverFinnes_forventTrue() {
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.ARBEIDSGIVER);
 
@@ -263,7 +271,7 @@ public class FagsakTest {
     }
 
     @Test
-    public void harAktørMedRolleTypeArbeidsgiver_kunBruker_forventFalse() {
+    void harAktørMedRolleTypeArbeidsgiver_kunBruker_forventFalse() {
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.BRUKER);
 

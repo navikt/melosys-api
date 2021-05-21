@@ -41,7 +41,7 @@ public class MedlemskapsperiodeService {
             .orElse(Collections.emptyList());
     }
 
-    public MedlemAvFolketrygden hentMedlemAvFolketrygden(long behandlingsresultatID) throws FunksjonellException {
+    public MedlemAvFolketrygden hentMedlemAvFolketrygden(long behandlingsresultatID) {
         return medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID)
             .orElseThrow(() -> new FunksjonellException("Bestemmelse er ikke opprettet for behandling " + behandlingsresultatID));
     }
@@ -51,7 +51,7 @@ public class MedlemskapsperiodeService {
                                                         LocalDate fom,
                                                         LocalDate tom,
                                                         InnvilgelsesResultat innvilgelsesResultat,
-                                                        Trygdedekninger trygdedekning) throws FunksjonellException {
+                                                        Trygdedekninger trygdedekning) {
         final var medlemAvFolketrygden = hentMedlemAvFolketrygden(behandlingsresultatID);
         final var eksisterendeMedlemsperiode = medlemAvFolketrygden
             .getMedlemskapsperioder()
@@ -75,7 +75,7 @@ public class MedlemskapsperiodeService {
                                                          LocalDate fom,
                                                          LocalDate tom,
                                                          InnvilgelsesResultat innvilgelsesResultat,
-                                                         Trygdedekninger trygdedekning) throws FunksjonellException {
+                                                         Trygdedekninger trygdedekning) {
         var medlemskapsperiode = hentMedlemAvFolketrygden(behandlingsresultatID)
             .getMedlemskapsperioder()
             .stream()
@@ -91,7 +91,7 @@ public class MedlemskapsperiodeService {
                                             LocalDate fom,
                                             LocalDate tom,
                                             InnvilgelsesResultat innvilgelsesResultat,
-                                            Trygdedekninger trygdedekning) throws FunksjonellException {
+                                            Trygdedekninger trygdedekning) {
         if (fom == null || innvilgelsesResultat == null || trygdedekning == null) {
             throw new FunksjonellException("Fom-dato, innvilgelsesresultat og trygdedekning er påkrevd");
         } else if (!GYLDIGE_TRYGDEDEKNINGER.contains(trygdedekning)) {
@@ -107,7 +107,7 @@ public class MedlemskapsperiodeService {
     }
 
     @Transactional
-    public void slettMedlemskapsperiode(long behandlingsresultatID, long medlemskapsperiodeID) throws FunksjonellException {
+    public void slettMedlemskapsperiode(long behandlingsresultatID, long medlemskapsperiodeID) {
         MedlemAvFolketrygden medlemAvFolketrygden = hentMedlemAvFolketrygden(behandlingsresultatID);
         Collection<Medlemskapsperiode> medlemskapsperioder = medlemAvFolketrygden.getMedlemskapsperioder();
 

@@ -13,9 +13,6 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdress
 import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.domain.kodeverk.Flyvningstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.BehandlingsgrunnlagGetDto;
@@ -23,11 +20,11 @@ import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.jeasy.random.randomizers.misc.EnumRandomizer;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -39,7 +36,7 @@ import static org.jeasy.random.FieldPredicates.ofType;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
     private static final Logger log = LoggerFactory.getLogger(BehandlingsgrunnlagTjenesteTest.class);
 
@@ -52,7 +49,7 @@ public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
 
     private EasyRandom random;
 
-    @Before
+    @BeforeEach
     public void setup() {
         behandlingsgrunnlagTjeneste = new BehandlingsgrunnlagTjeneste(behandlingsgrunnlagService, tilgangService);
 
@@ -64,12 +61,12 @@ public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
             .randomize(named("fnr").and(ofType(String.class)), new NumericStringRandomizer(11))
             .randomize(named("orgnr").and(ofType(String.class)), new NumericStringRandomizer(9))
             .randomize(named("orgnummer").and(ofType(String.class)), new NumericStringRandomizer(9))
-            .randomize(named("typeFlyvninger"), () -> new EnumRandomizer<>(Flyvningstyper.class).getRandomValue().getKode())
+            .randomize(named("typeFlyvninger"), () -> new EnumRandomizer<>(Flyvningstyper.class).getRandomValue())
             .randomize(named("uuid"), () -> UUID.randomUUID().toString()));
     }
 
     @Test
-    public void hentBehandlingsgrunnlag_erSoeknad_validerSchema() throws Exception{
+    void hentBehandlingsgrunnlag_erSoeknad_validerSchema() throws Exception{
         Soeknad soeknad = random.nextObject(Soeknad.class);
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setType(Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS);
@@ -85,7 +82,7 @@ public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void hentBehandlingsgrunnlag_erSedGrunnlag_validerSchema() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, IOException {
+    void hentBehandlingsgrunnlag_erSedGrunnlag_validerSchema() throws IOException {
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setType(Behandlingsgrunnlagtyper.SED);
 

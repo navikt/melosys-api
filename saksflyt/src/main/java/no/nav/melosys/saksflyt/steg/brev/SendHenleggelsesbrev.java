@@ -14,9 +14,7 @@ import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -48,7 +46,7 @@ public class SendHenleggelsesbrev implements StegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) {
         log.info("Sender henleggelsesbrev for behandling {}", prosessinstans.getBehandling().getId());
         final List<String> henleggelsesGrunnerKoder = Arrays.stream(Henleggelsesgrunner.values())
             .map(Kodeverk::getKode).collect(Collectors.toList());
@@ -64,7 +62,7 @@ public class SendHenleggelsesbrev implements StegBehandler {
             .findFirst().orElseThrow(() -> new IkkeFunnetException("Finner ingen henleggelsesgrunn"));
 
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
-            .medProdserbartDokument(MELDING_HENLAGT_SAK)
+            .medProduserbartDokument(MELDING_HENLAGT_SAK)
             .medAvsenderNavn(saksbehandler)
             .medMottakere(Mottaker.av(Aktoersroller.BRUKER))
             .medBehandling(behandling)

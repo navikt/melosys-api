@@ -6,18 +6,14 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.soeknad.MedfolgendeFamilie;
-import no.nav.melosys.domain.familie.AvklarteMedfolgendeBarn;
-import no.nav.melosys.domain.familie.IkkeOmfattetBarn;
-import no.nav.melosys.domain.familie.OmfattetBarn;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
+import no.nav.melosys.domain.person.familie.IkkeOmfattetBarn;
+import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -27,6 +23,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 
@@ -38,7 +35,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final VilkaarsresultatService vilkaarsresultatService;
-    private final TpsFasade tpsFasade;
+    private final PersondataFasade persondataFasade;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
 
     public BrevDataByggerInnvilgelse(AvklartefaktaService avklartefaktaService,
@@ -47,7 +44,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
                                      AnmodningsperiodeService anmodningsperiodeService,
                                      BrevbestillingDto brevbestillingDto,
                                      VilkaarsresultatService vilkaarsresultatService,
-                                     TpsFasade tpsFasade,
+                                     PersondataFasade persondataFasade,
                                      BehandlingsgrunnlagService behandlingsgrunnlagService) {
         this.landvelgerService = landvelgerService;
         this.avklartefaktaService = avklartefaktaService;
@@ -56,7 +53,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.vilkaarsresultatService = vilkaarsresultatService;
         this.brevbyggerA1 = null;
-        this.tpsFasade = tpsFasade;
+        this.persondataFasade = persondataFasade;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
     }
 
@@ -67,7 +64,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
                                      BrevbestillingDto brevbestillingDto,
                                      BrevDataByggerA1 brevbyggerA1,
                                      VilkaarsresultatService vilkaarsresultatService,
-                                     TpsFasade tpsFasade,
+                                     PersondataFasade persondataFasade,
                                      BehandlingsgrunnlagService behandlingsgrunnlagService) {
         this.landvelgerService = landvelgerService;
         this.avklartefaktaService = avklartefaktaService;
@@ -76,12 +73,12 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         this.brevbyggerA1 = brevbyggerA1;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.vilkaarsresultatService = vilkaarsresultatService;
-        this.tpsFasade = tpsFasade;
+        this.persondataFasade = persondataFasade;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
     }
 
     @Override
-    public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
+    public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) {
         long behandlingID = dataGrunnlag.getBehandling().getId();
 
         // Bruker skal ha A1 som vedlegg - Arbeidsgiver skal ikke
@@ -125,27 +122,27 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         return brevdata;
     }
 
-    private AvklarteMedfolgendeBarn hentAvklarteMedfølgendeBarn(long behandlingID) throws FunksjonellException, IntegrasjonException {
+    private AvklarteMedfolgendeBarn hentAvklarteMedfølgendeBarn(long behandlingID) {
         AvklarteMedfolgendeBarn avklarteMedfolgendeBarn = avklartefaktaService.hentAvklarteMedfølgendeBarn(behandlingID);
         Map<String, MedfolgendeFamilie> medfølgendeBarn = hentMedfølgendeBarn(behandlingID);
-        for (OmfattetBarn omfattetBarn : avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd) {
-            if (!medfølgendeBarn.containsKey(omfattetBarn.uuid)) {
-                throw new FunksjonellException("Avklart medfølgende barn " + omfattetBarn.uuid + " finnes ikke i behandlingsgrunnlaget");
+        for (OmfattetFamilie omfattetBarn : avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd) {
+            if (!medfølgendeBarn.containsKey(omfattetBarn.getUuid())) {
+                throw new FunksjonellException("Avklart medfølgende barn " + omfattetBarn.getUuid() + " finnes ikke i behandlingsgrunnlaget");
             }
-            MedfolgendeFamilie barn = medfølgendeBarn.get(omfattetBarn.uuid);
-            omfattetBarn.sammensattNavn = barn.fnr != null ? tpsFasade.hentSammensattNavn(barn.fnr) : barn.navn;
+            MedfolgendeFamilie barn = medfølgendeBarn.get(omfattetBarn.getUuid());
+            omfattetBarn.setSammensattNavn(barn.fnr != null ? persondataFasade.hentSammensattNavn(barn.fnr) : barn.navn);
         }
         for (IkkeOmfattetBarn ikkeOmfattetBarn : avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd) {
             if (!medfølgendeBarn.containsKey(ikkeOmfattetBarn.uuid)) {
                 throw new FunksjonellException("Avklart medfølgende barn " + ikkeOmfattetBarn.uuid + " finnes ikke i behandlingsgrunnlaget");
             }
             MedfolgendeFamilie barn = medfølgendeBarn.get(ikkeOmfattetBarn.uuid);
-            ikkeOmfattetBarn.sammensattNavn = barn.fnr != null ? tpsFasade.hentSammensattNavn(barn.fnr) : barn.navn;
+            ikkeOmfattetBarn.sammensattNavn = barn.fnr != null ? persondataFasade.hentSammensattNavn(barn.fnr) : barn.navn;
         }
         return avklarteMedfolgendeBarn;
     }
 
-    private Map<String, MedfolgendeFamilie> hentMedfølgendeBarn(long behandlingID) throws IkkeFunnetException {
+    private Map<String, MedfolgendeFamilie> hentMedfølgendeBarn(long behandlingID) {
         Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID);
         return behandlingsgrunnlag == null ? Collections.emptyMap()
             : behandlingsgrunnlag.getBehandlingsgrunnlagdata().hentMedfølgendeBarn();

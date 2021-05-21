@@ -4,15 +4,15 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.MelosysException;
-import no.nav.melosys.integrasjon.tps.TpsFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.HENT_REGISTEROPPLYSNINGER;
@@ -25,13 +25,15 @@ public class HentRegisteropplysninger implements StegBehandler {
 
     private final RegisteropplysningerService registeropplysningerService;
     private final BehandlingService behandlingService;
-    private final TpsFasade tpsFasade;
+    private final PersondataFasade persondataFasade;
 
     @Autowired
-    public HentRegisteropplysninger(RegisteropplysningerService registeropplysningerService, BehandlingService behandlingService, TpsFasade tpsFasade) {
+    public HentRegisteropplysninger(RegisteropplysningerService registeropplysningerService,
+                                    BehandlingService behandlingService,
+                                    @Qualifier("system") PersondataFasade persondataFasade) {
         this.registeropplysningerService = registeropplysningerService;
         this.behandlingService = behandlingService;
-        this.tpsFasade = tpsFasade;
+        this.persondataFasade = persondataFasade;
     }
 
     @Override
@@ -40,10 +42,10 @@ public class HentRegisteropplysninger implements StegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws MelosysException {
+    public void utfør(Prosessinstans prosessinstans) {
 
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
-        String brukerId = tpsFasade.hentIdentForAktørId(behandling.getFagsak().hentBruker().getAktørId());
+        String brukerId = persondataFasade.hentFolkeregisterIdent(behandling.getFagsak().hentBruker().getAktørId());
 
 
         var registeropplysningerRequestBuilder = RegisteropplysningerRequest.builder()
