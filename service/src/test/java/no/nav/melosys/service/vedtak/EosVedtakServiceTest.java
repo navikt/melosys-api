@@ -18,8 +18,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.exception.validering.KontrollfeilDto;
 import no.nav.melosys.service.LandvelgerService;
@@ -44,7 +42,7 @@ import org.springframework.context.event.ApplicationEventMulticaster;
 
 import static no.nav.melosys.domain.kodeverk.Vedtakstyper.FØRSTEGANGSVEDTAK;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
-import static no.nav.melosys.service.vedtak.EosVedtakService.FRIST_KLAGE_UKER;
+import static no.nav.melosys.service.vedtak.VedtakServiceFasade.FRIST_KLAGE_UKER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
@@ -119,7 +117,7 @@ class EosVedtakServiceTest {
             .containsExactly(FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
         verify(behandlingService).lagre(behandling);
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
             any(),
             eq(FASTSATT_LOVVALGSLAND),
             eq(behandlingsresultatFritekst),
@@ -147,7 +145,7 @@ class EosVedtakServiceTest {
             .containsExactly(FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
         verify(behandlingService).lagre(behandling);
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
             any(Behandling.class),
             eq(FASTSATT_LOVVALGSLAND),
             eq(behandlingsresultatFritekst),
@@ -179,7 +177,7 @@ class EosVedtakServiceTest {
             .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getRevurderBegrunnelse, VedtakMetadata::getVedtakKlagefrist)
             .containsExactly(FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
             eq(behandling),
             eq(FASTSATT_LOVVALGSLAND),
             eq(behandlingsresultatFritekst),
@@ -206,7 +204,7 @@ class EosVedtakServiceTest {
             .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getRevurderBegrunnelse, VedtakMetadata::getVedtakKlagefrist)
             .containsExactly(vedtakstype, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
             eq(behandling),
             eq(resultatType),
             isNull(),
@@ -224,7 +222,7 @@ class EosVedtakServiceTest {
 
         vedtakService.fattVedtak(behandling, lagRequest(FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK, null, null, null));
 
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtak(
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
             eq(behandling),
             eq(FASTSATT_LOVVALGSLAND),
             isNull(),
@@ -266,7 +264,7 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void endreVedtak_fungerer() throws FunksjonellException, TekniskException {
+    void endreVedtak_fungerer() {
         final Endretperiode endretperiodeBegrunnelse = Endretperiode.ENDRINGER_ARBEIDSSITUASJON;
         leggTilMyndighetAktoer();
 
@@ -287,7 +285,7 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void endreVedtak_harEksisterendeProsess_kasterException() throws FunksjonellException {
+    void endreVedtak_harEksisterendeProsess_kasterException() {
         when(prosessinstansService.harAktivProsessinstans(behandlingID)).thenReturn(true);
 
         assertThatThrownBy(() -> vedtakService.endreVedtak(behandling, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, "FRITEKST", "FRITEKST_SED"))
@@ -304,7 +302,7 @@ class EosVedtakServiceTest {
         verifyNoInteractions(oppgaveService);
     }
 
-    private void mockBehandlingsresultat() throws IkkeFunnetException {
+    private void mockBehandlingsresultat() {
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
     }
 
@@ -315,7 +313,7 @@ class EosVedtakServiceTest {
             .thenReturn(List.of(new Institusjon("AB:CDEF123", "inst", Landkoder.SE.getKode())));
     }
 
-    private void mockFeilendeValidering() throws FunksjonellException, TekniskException {
+    private void mockFeilendeValidering() {
         when(persondataFasade.hentFolkeregisterIdent(anyString())).thenReturn("123");
         when(vedtakKontrollService.utførKontroller(anyLong(), any(Vedtakstyper.class)))
             .thenReturn(Collections.singletonList(new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)));

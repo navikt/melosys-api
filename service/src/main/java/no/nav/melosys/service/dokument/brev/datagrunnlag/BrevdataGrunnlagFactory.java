@@ -1,7 +1,6 @@
 package no.nav.melosys.service.dokument.brev.datagrunnlag;
 
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -24,7 +23,7 @@ public class BrevdataGrunnlagFactory {
         this.kodeverkService = kodeverkService;
     }
 
-    public BrevDataGrunnlag av(DoksysBrevbestilling brevbestilling) throws TekniskException {
+    public BrevDataGrunnlag av(DoksysBrevbestilling brevbestilling) {
         return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
     }
 }

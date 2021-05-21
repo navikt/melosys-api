@@ -7,8 +7,6 @@ import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,19 +33,19 @@ class OpprettSoeknadTest {
     }
 
     @Test
-    void utfør_behandlingstemaUtsendtArbeidstaker_oppretterSøknadYrkesaktiveEøs() throws FunksjonellException, IntegrasjonException {
+    void utfør_behandlingstemaUtsendtArbeidstaker_oppretterSøknadYrkesaktiveEøs() {
         opprettSoeknad.utfør(lagProsessinstans(Sakstyper.EU_EOS, Behandlingstema.UTSENDT_ARBEIDSTAKER));
         verify(behandlingsgrunnlagService).opprettSøknadYrkesaktiveEøs(eq(behandlingID), any(Soeknad.class));
     }
 
     @Test
-    void utfør_behandlingstemaArbeidIUtlandet_oppretterSøknadFtrl() throws FunksjonellException, IntegrasjonException {
+    void utfør_behandlingstemaArbeidIUtlandet_oppretterSøknadFtrl() {
         opprettSoeknad.utfør(lagProsessinstans(Sakstyper.FTRL, Behandlingstema.ARBEID_I_UTLANDET));
         verify(behandlingsgrunnlagService).opprettSøknadFolketrygden(eq(behandlingID), any(SoeknadFtrl.class));
     }
 
     @Test
-    void utfør_behandlingsTemaØvrigeSed_oppretterIkkeSøknad() throws FunksjonellException, IntegrasjonException {
+    void utfør_behandlingsTemaØvrigeSed_oppretterIkkeSøknad() {
         opprettSoeknad.utfør(lagProsessinstans(Sakstyper.EU_EOS, Behandlingstema.ØVRIGE_SED_MED));
         verify(behandlingsgrunnlagService, never()).opprettSøknadYrkesaktiveEøs(eq(behandlingID), any(Soeknad.class));
     }

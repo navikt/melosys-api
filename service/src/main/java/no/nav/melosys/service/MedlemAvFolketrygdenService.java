@@ -18,7 +18,7 @@ public class MedlemAvFolketrygdenService {
         this.medlemAvFolketrygdenRepository = medlemAvFolketrygdenRepository;
     }
 
-    public MedlemAvFolketrygden hentMedlemAvFolketrygden(long behandlingsresultatID) throws IkkeFunnetException {
+    public MedlemAvFolketrygden hentMedlemAvFolketrygden(long behandlingsresultatID) {
         return finnMedlemAvFolketrygden(behandlingsresultatID)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke medlemAvFolketrygden for behandlingsresultatID " + behandlingsresultatID));
     }

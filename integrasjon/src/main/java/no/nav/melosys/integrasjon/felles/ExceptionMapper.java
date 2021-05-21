@@ -12,7 +12,7 @@ public final class ExceptionMapper {
         throw new IllegalArgumentException("Utility");
     }
 
-    public static void JaxGetRuntimeExTilMelosysEx(RuntimeException e) throws FunksjonellException, TekniskException {
+    public static void JaxGetRuntimeExTilMelosysEx(RuntimeException e) {
         if (e instanceof NotAuthorizedException || e instanceof ForbiddenException) {
             throw new SikkerhetsbegrensningException(e.getMessage());
         } else if (e instanceof NotFoundException) {

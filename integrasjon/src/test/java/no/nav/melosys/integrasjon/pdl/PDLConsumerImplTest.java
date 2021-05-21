@@ -6,10 +6,13 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.integrasjon.pdl.dto.Endring;
+import no.nav.melosys.integrasjon.pdl.dto.Metadata;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
 import no.nav.melosys.integrasjon.pdl.dto.person.*;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.*;
@@ -39,7 +42,7 @@ class PDLConsumerImplTest {
     }
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         pdlConsumer = new PDLConsumerImpl(
             WebClient.builder().baseUrl(String.format("http://localhost:%s", mockServer.getPort()))
                 .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE).build());
@@ -55,6 +58,19 @@ class PDLConsumerImplTest {
 
         assertThat(pdlConsumer.hentIdenter("123").identer()).containsExactly(
             new Ident("99026522600", FOLKEREGISTERIDENT), new Ident("9834873315250", AKTORID));
+    }
+
+    @Test
+    void hentIdenter_feilFraPDL_kasterFeil() {
+        mockServer.enqueue(
+            new MockResponse()
+                .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(lastFil("mock/pdl/feil.json"))
+        );
+
+        assertThatExceptionOfType(IntegrasjonException.class).isThrownBy(
+            () -> pdlConsumer.hentIdenter("123"))
+            .withMessageContaining("My error message");
     }
 
     @Test
@@ -127,16 +143,18 @@ class PDLConsumerImplTest {
     }
 
     @Test
-    void hentIdenter_feilFraPDL_kasterFeil() {
+    void hentStatsborgerskap_medIdent_mottarResponseUtenFeil() {
         mockServer.enqueue(
-            new MockResponse()
-                .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setBody(lastFil("mock/pdl/feil.json"))
-        );
+            new MockResponse().setBody(lastFil("mock/pdl/hentStatsborgerskap.json")).addHeader(HttpHeaders.CONTENT_TYPE,
+                MediaType.APPLICATION_JSON_VALUE));
 
-        assertThatExceptionOfType(IntegrasjonException.class).isThrownBy(
-            () -> pdlConsumer.hentIdenter("123"))
-            .withMessageContaining("My error message");
+        assertThat(pdlConsumer.hentStatsborgerskap("123")).containsExactlyInAnyOrder(
+            new Statsborgerskap("ALB", null, LocalDate.parse("1961-02-01"), LocalDate.parse("1981-09-07"),
+                new Metadata("FREG", true,
+                    List.of(new Endring("OPPRETT", LocalDateTime.parse("2021-05-07T10:04:52"), "Dolly")))),
+            new Statsborgerskap("AIA", LocalDate.parse("2021-05-08"), LocalDate.parse("1979-11-18"), null,
+                new Metadata("PDL", false,
+                    List.of(new Endring("OPPRETT", LocalDateTime.parse("2021-05-07T10:04:52"), "PDL")))));
     }
 
     private String lastFil(String filnavn) {

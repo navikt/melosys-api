@@ -17,7 +17,6 @@ import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.domain.util.KodeverkUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumer;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
@@ -49,15 +48,14 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public void ferdigstillOppgave(String oppgaveID) throws FunksjonellException, TekniskException {
+    public void ferdigstillOppgave(String oppgaveID) {
         OppgaveDto oppgave = hentOppgaveDto(oppgaveID);
         oppgave.setStatus(OPPGAVE_STATUS_FERDIGSTILT);
         oppgaveConsumer.oppdaterOppgave(oppgave);
     }
 
     @Override
-    public List<Oppgave> finnUtildelteOppgaverEtterFrist(String behandlingstype)
-        throws FunksjonellException, TekniskException {
+    public List<Oppgave> finnUtildelteOppgaverEtterFrist(String behandlingstype) {
 
         OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medBehandlingsType(behandlingstype)
@@ -76,21 +74,21 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public Oppgave hentOppgave(String oppgaveId) throws FunksjonellException, TekniskException {
+    public Oppgave hentOppgave(String oppgaveId) {
         return oppgaveMappingDtoTilDomain(hentOppgaveDto(oppgaveId));
     }
 
     @Override
-    public String opprettOppgave(Oppgave oppgave) throws FunksjonellException, TekniskException {
+    public String opprettOppgave(Oppgave oppgave) {
         return opprettOppgave(oppgave, false);
     }
 
     @Override
-    public String opprettSensitivOppgave(Oppgave oppgave) throws FunksjonellException, TekniskException {
+    public String opprettSensitivOppgave(Oppgave oppgave) {
         return opprettOppgave(oppgave, true);
     }
 
-    private String opprettOppgave(Oppgave oppgave, boolean erSensitiv) throws FunksjonellException, TekniskException {
+    private String opprettOppgave(Oppgave oppgave, boolean erSensitiv) {
         LocalDate idag = LocalDate.now();
         OpprettOppgaveDto oppgaveDto = new OpprettOppgaveDto();
         oppgaveDto.setAktivDato(idag);
@@ -121,14 +119,14 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public void leggTilbakeOppgave(String oppgaveId) throws FunksjonellException, TekniskException {
+    public void leggTilbakeOppgave(String oppgaveId) {
         OppgaveDto oppgave = hentOppgaveDto(oppgaveId);
         oppgave.setTilordnetRessurs(null);
         oppgaveConsumer.oppdaterOppgave(oppgave);
     }
 
     @Override
-    public void oppdaterOppgave(String oppgaveID, OppgaveOppdatering oppgaveOppdatering) throws FunksjonellException, TekniskException {
+    public void oppdaterOppgave(String oppgaveID, OppgaveOppdatering oppgaveOppdatering) {
         OppgaveDto oppgaveDto = hentOppgaveDto(oppgaveID);
 
         if (oppgaveOppdatering.getOppgavetype() != null) {
@@ -171,7 +169,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         oppgaveConsumer.oppdaterOppgave(oppgaveDto);
     }
 
-    private OppgaveDto hentOppgaveDto(String oppgaveID) throws FunksjonellException, TekniskException {
+    private OppgaveDto hentOppgaveDto(String oppgaveID) {
         OppgaveDto oppgave = oppgaveConsumer.hentOppgave(oppgaveID);
         if (oppgave == null) {
             throw new IkkeFunnetException("Feil ved henting av oppgave for oppgaveID:" + oppgaveID);
@@ -181,7 +179,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public Set<Oppgave> finnOppgaverMedAnsvarlig(String tilordnetRessurs) throws FunksjonellException, TekniskException {
+    public Set<Oppgave> finnOppgaverMedAnsvarlig(String tilordnetRessurs) {
         OppgaveSearchRequest.Builder oppgaveSearchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medTilordnetRessurs(tilordnetRessurs)
             .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
@@ -192,7 +190,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         return hentOppgaverAlleTyper(oppgaveSearchRequestBuilder);
     }
 
-    private Set<Oppgave> hentOppgaverAlleTyper(OppgaveSearchRequest.Builder oppgaveSearchRequestBuilder) throws FunksjonellException, TekniskException {
+    private Set<Oppgave> hentOppgaverAlleTyper(OppgaveSearchRequest.Builder oppgaveSearchRequestBuilder) {
         // Henter oppgaver opprettet av melosys, hvor melosys har satt behandlesAvApplikasjon
         List<OppgaveDto> finnOppgaveListeResponse = oppgaveConsumer.hentOppgaveListe(
             oppgaveSearchRequestBuilder.medBehandlesAvApplikasjon(Fagsystem.MELOSYS.getKode()).build()
@@ -211,7 +209,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public List<Oppgave> finnOppgaverMedBrukerID(String aktørId) throws FunksjonellException, TekniskException {
+    public List<Oppgave> finnOppgaverMedBrukerID(String aktørId) {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medAktørId(aktørId)
             .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
@@ -226,7 +224,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public List<Oppgave> finnOppgaverMedSaksnummer(String saksnummer) throws FunksjonellException, TekniskException {
+    public List<Oppgave> finnOppgaverMedSaksnummer(String saksnummer) {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medSaksreferanse(new String[]{saksnummer})
             .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})

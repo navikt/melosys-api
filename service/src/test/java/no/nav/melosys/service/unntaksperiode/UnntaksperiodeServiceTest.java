@@ -11,8 +11,6 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -51,7 +49,7 @@ class UnntaksperiodeServiceTest {
     private final Behandling behandling = new Behandling();
 
     @BeforeEach
-    public void setUp() throws IkkeFunnetException {
+    public void setUp() {
         unntaksperiodeService = new UnntaksperiodeService(behandlingService, behandlingsresultatService, lovvalgsperiodeService, oppgaveService, prosessinstansService);
         behandling.setId(1L);
         behandling.setFagsak(new Fagsak());
@@ -78,7 +76,7 @@ class UnntaksperiodeServiceTest {
     }
 
     @Test
-    void godkjennPeriode_korrektStatusOgType_verifiserKall() throws FunksjonellException, TekniskException {
+    void godkjennPeriode_korrektStatusOgType_verifiserKall() {
         Saksopplysning sedSaksopplysning = new Saksopplysning();
         sedSaksopplysning.setType(SaksopplysningType.SEDOPPL);
         SedDokument sedDokument = new SedDokument();
@@ -93,7 +91,7 @@ class UnntaksperiodeServiceTest {
     }
 
     @Test
-    void godkjennPeriode_oppNedPeriode_forventException() throws IkkeFunnetException {
+    void godkjennPeriode_oppNedPeriode_forventException() {
         Saksopplysning sedSaksopplysning = new Saksopplysning();
         sedSaksopplysning.setType(SaksopplysningType.SEDOPPL);
         SedDokument sedDokument = new SedDokument();

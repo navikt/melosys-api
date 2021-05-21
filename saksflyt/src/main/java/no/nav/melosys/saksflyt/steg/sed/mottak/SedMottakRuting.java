@@ -27,7 +27,7 @@ public class SedMottakRuting implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(SedMottakRuting.class);
 
-    private final Map<SedType, SedRuterForSedTyper> sedRuterMap;
+    private final Collection<SedRuterForSedTyper> sedRutereForSedTyper;
     private final DefaultSedRuter defaultSedRuter;
     private final EessiService eessiService;
     private final JoarkFasade joarkFasade;
@@ -39,9 +39,7 @@ public class SedMottakRuting implements StegBehandler {
                            @Qualifier("system") JoarkFasade joarkFasade) {
         this.defaultSedRuter = defaultSedRuter;
         this.eessiService = eessiService;
-        this.sedRuterMap = ruterForSedTyper.stream()
-            .flatMap(ruter -> ruter.gjelderSedTyper().stream().map(sedType -> Map.entry(sedType, ruter)))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        this.sedRutereForSedTyper = ruterForSedTyper;
         this.joarkFasade = joarkFasade;
     }
 
@@ -62,14 +60,20 @@ public class SedMottakRuting implements StegBehandler {
             log.info("Forsøker å rute sed {} i RINA-sak {}", eessiMelding.getSedId(), eessiMelding.getRinaSaksnummer());
 
             Long arkivsakID = eessiService.finnSakForRinasaksnummer(eessiMelding.getRinaSaksnummer()).orElse(null);
-            SedType sedType = SedType.valueOf(eessiMelding.getSedType());
+            var sedType = SedType.valueOf(eessiMelding.getSedType());
             hentSedRuterForSedType(sedType).rutSedTilBehandling(prosessinstans, arkivsakID);
         }
     }
 
     private SedRuter hentSedRuterForSedType(SedType sedType) {
-        return Optional.ofNullable(sedRuterMap.get(sedType))
+        return Optional.ofNullable(hentSedRutereForSedTyper().get(sedType))
             .map(SedRuter.class::cast)
             .orElse(defaultSedRuter);
+    }
+
+    private Map<SedType, SedRuterForSedTyper> hentSedRutereForSedTyper() {
+        return sedRutereForSedTyper.stream()
+            .flatMap(ruter -> ruter.gjelderSedTyper().stream().map(sedType -> Map.entry(sedType, ruter)))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

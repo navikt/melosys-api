@@ -12,8 +12,6 @@ import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -49,7 +47,7 @@ public class UnntaksperiodeService {
     }
 
     @Transactional
-    public void godkjennPeriode(long behandlingID, boolean varsleUtland, String fritekst) throws FunksjonellException, TekniskException {
+    public void godkjennPeriode(long behandlingID, boolean varsleUtland, String fritekst) {
         Behandling behandling = hentOgValiderBehandling(behandlingID);
         opprettLovvalgsperiodeHvisIkkeEksisterer(behandling);
         behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.GODKJENT);
@@ -58,7 +56,7 @@ public class UnntaksperiodeService {
     }
 
     //Lovvalgsperiode finnes ikke om automatisk behandlet, eller om saksbehandler godkjenner periode fra SED uten å endre den
-    private void opprettLovvalgsperiodeHvisIkkeEksisterer(Behandling behandling) throws IkkeFunnetException, TekniskException {
+    private void opprettLovvalgsperiodeHvisIkkeEksisterer(Behandling behandling) {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         if (behandlingsresultat.finnValidertLovvalgsperiode().isEmpty()) {
             lovvalgsperiodeService.lagreLovvalgsperioder(
@@ -69,7 +67,7 @@ public class UnntaksperiodeService {
     }
 
     @Transactional
-    public void ikkeGodkjennPeriode(long behandlingID, Set<String> begrunnelser, String fritekst) throws FunksjonellException, TekniskException {
+    public void ikkeGodkjennPeriode(long behandlingID, Set<String> begrunnelser, String fritekst) {
         Behandling behandling = hentOgValiderBehandling(behandlingID);
         Set<Ikke_godkjent_begrunnelser> ikkeGodkjentBegrunnelser = tilIkkeGodkjentBegrunnelser(begrunnelser);
         validerBegrunnelser(ikkeGodkjentBegrunnelser, fritekst);
@@ -90,13 +88,13 @@ public class UnntaksperiodeService {
         return ikkeGodkjentBegrunnelser;
     }
 
-    private Behandling hentOgValiderBehandling(long behandlingID) throws FunksjonellException {
+    private Behandling hentOgValiderBehandling(long behandlingID) {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         validerBehandling(behandling);
         return behandling;
     }
 
-    private void validerBehandling(Behandling behandling) throws FunksjonellException {
+    private void validerBehandling(Behandling behandling) {
         if (!behandling.erRegisteringAvUnntak()) {
             throw new FunksjonellException(
                 String.format("Behandling %s er ikke av tema registrering-unntak, men %s", behandling.getId(), behandling.getTema())
@@ -110,7 +108,7 @@ public class UnntaksperiodeService {
         }
     }
 
-    private void validerBegrunnelser(Set<Ikke_godkjent_begrunnelser> begrunnelser, String fritekst) throws FunksjonellException {
+    private void validerBegrunnelser(Set<Ikke_godkjent_begrunnelser> begrunnelser, String fritekst) {
         if (begrunnelser.isEmpty()) {
             throw new FunksjonellException("Ingen begrunnelser for avlag av periode");
         } else if (begrunnelser.contains(Ikke_godkjent_begrunnelser.ANNET) && StringUtils.isEmpty(fritekst)) {

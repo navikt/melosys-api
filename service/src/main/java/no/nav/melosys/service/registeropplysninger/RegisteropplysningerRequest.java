@@ -110,12 +110,12 @@ public class RegisteropplysningerRequest {
             return this;
         }
 
-        public RegisteropplysningerRequest build() throws TekniskException {
+        public RegisteropplysningerRequest build() {
             valider();
             return new RegisteropplysningerRequest(behandlingID, saksopplysningTyper.getOpplysningstyper(), fnr, fom, tom, informasjonsbehov);
         }
 
-        private void valider() throws TekniskException {
+        private void valider() {
             if (behandlingID == null) {
                 throw new TekniskException("BehandlingID er påkrevd for å hente registeropplysninger");
             }

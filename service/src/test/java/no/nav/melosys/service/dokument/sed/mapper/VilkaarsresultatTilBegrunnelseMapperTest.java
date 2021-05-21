@@ -10,7 +10,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning_engelsk;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning_uten_art12;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning_uten_art12_engelsk;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning.SAERLIG_GRUNN;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning.UTSENDELSE_MELLOM_24_MN_OG_5_AAR;

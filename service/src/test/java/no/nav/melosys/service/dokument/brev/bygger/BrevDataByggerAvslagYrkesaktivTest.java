@@ -11,7 +11,6 @@ import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -23,11 +22,11 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning.KORT_OPPDRAG_RETUR_NORSK_AG;
 import static no.nav.melosys.service.BehandlingsgrunnlagStub.lagBehandlingsgrunnlag;
@@ -36,11 +35,10 @@ import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BrevDataByggerAvslagYrkesaktivTest {
+@ExtendWith(MockitoExtension.class)
+class BrevDataByggerAvslagYrkesaktivTest {
     @Mock
     AvklartefaktaService avklartefaktaService;
     @Mock
@@ -57,7 +55,7 @@ public class BrevDataByggerAvslagYrkesaktivTest {
     private BrevDataByggerAvslagYrkesaktiv brevDataByggerAvslagYrkesaktiv;
     private AnmodningsperiodeSvar anmodningsperiodeSvar;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         anmodningsperiodeSvar = lagAnmodningsperiodeSvarAvslag();
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
@@ -72,7 +70,7 @@ public class BrevDataByggerAvslagYrkesaktivTest {
     }
 
     @Test
-    public void lag_annmodningUnntakBrev_avklarVirksomhetSomSelvstendigForetak() throws Exception {
+    void lag_annmodningUnntakBrev_avklarVirksomhetSomSelvstendigForetak() throws Exception {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         Fagsak fagsak = new Fagsak();
@@ -97,7 +95,7 @@ public class BrevDataByggerAvslagYrkesaktivTest {
         when(organisasjonsDetaljer.hentStrukturertForretningsadresse()).thenReturn(lagStrukturertAdresse());
         organisasjonDokument.organisasjonDetaljer = organisasjonsDetaljer;
 
-        when(registerOppslagService.hentOrganisasjoner(orgSet)).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
+        lenient().when(registerOppslagService.hentOrganisasjoner(orgSet)).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
         when(vilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenReturn(false);
         when(vilkaarsresultatService.harVilkaarForArtikkel16(anyLong())).thenReturn(true);
 
@@ -118,7 +116,7 @@ public class BrevDataByggerAvslagYrkesaktivTest {
         return anmodningsperiodeSvar;
     }
 
-    public BrevDataGrunnlag lagBrevressurser(Behandling behandling) throws TekniskException {
+    public BrevDataGrunnlag lagBrevressurser(Behandling behandling) {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), kodeverkService);
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
         return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);

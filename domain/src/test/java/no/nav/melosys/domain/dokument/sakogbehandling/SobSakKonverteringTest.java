@@ -11,8 +11,8 @@ import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,7 +24,7 @@ public class SobSakKonverteringTest {
 
     DokumentFactory factory;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         Jaxb2Marshaller marshaller = JaxbConfig.jaxb2Marshaller();
         XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();

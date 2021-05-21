@@ -22,8 +22,6 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
@@ -67,8 +65,7 @@ public class EessiService {
         this.dataGrunnlagFactory = dataGrunnlagFactory;
     }
 
-    public Collection<Vedlegg> lagEessiVedlegg(Fagsak fagsak, Collection<DokumentReferanse> vedleggReferanser) throws
-        IkkeFunnetException, IntegrasjonException, SikkerhetsbegrensningException {
+    public Collection<Vedlegg> lagEessiVedlegg(Fagsak fagsak, Collection<DokumentReferanse> vedleggReferanser) {
         if (vedleggReferanser.isEmpty()) {
             return Collections.emptySet();
         }
@@ -87,8 +84,7 @@ public class EessiService {
         return vedlegg;
     }
 
-    private Vedlegg lagEessiVedlegg(Journalpost journalpost, DokumentReferanse vedleggReferanse) throws
-        IkkeFunnetException, SikkerhetsbegrensningException {
+    private Vedlegg lagEessiVedlegg(Journalpost journalpost, DokumentReferanse vedleggReferanse) {
         byte[] pdf = joarkFasade.hentDokument(vedleggReferanse.getJournalpostID(), vedleggReferanse.getDokumentID());
         String tittel = journalpost.hentArkivDokument(vedleggReferanse.getDokumentID()).getTittel();
         return new Vedlegg(pdf, tittel);
@@ -152,8 +148,8 @@ public class EessiService {
         return true;
     }
 
-    public List<BucInformasjon> hentTilknyttedeBucer(long gsakSaksnummer, List<String> statuser) {
-        return eessiConsumer.hentTilknyttedeBucer(gsakSaksnummer, statuser);
+    public List<BucInformasjon> hentTilknyttedeBucer(long arkivsakID, List<String> statuser) {
+        return eessiConsumer.hentTilknyttedeBucer(arkivsakID, statuser);
     }
 
     public boolean støtterAutomatiskBehandling(String journalpostID) {
@@ -189,9 +185,9 @@ public class EessiService {
         eessiConsumer.lagreSaksrelasjon(new SaksrelasjonDto(arkivsakID, rinaSaksnummer, bucType));
     }
 
-    public void sendAnmodningUnntakSvar(long behandlingId) {
+    public void sendAnmodningUnntakSvar(long behandlingId, String ytterligereInformasjon) {
         log.info("Sender svar på anmodning om unntak for behandling {}", behandlingId);
-        sendSedPåEksisterendeBehandling(behandlingId, PeriodeType.ANMODNINGSPERIODE, this::hentSedTypeForAnmodningUnntakSvar);
+        sendSedPåEksisterendeBehandling(behandlingId, PeriodeType.ANMODNINGSPERIODE, this::hentSedTypeForAnmodningUnntakSvar, ytterligereInformasjon);
 
     }
 
@@ -267,7 +263,7 @@ public class EessiService {
         return eessiConsumer.genererSedPdf(sedDataDto, sedType);
     }
 
-    public SedType hentSedTypeForAnmodningUnntakSvar(Long behandlingID) throws IkkeFunnetException {
+    public SedType hentSedTypeForAnmodningUnntakSvar(Long behandlingID) {
         return hentSedTypeForAnmodningUnntakSvar(behandlingsresultatService.hentBehandlingsresultat(behandlingID));
     }
 
@@ -312,7 +308,7 @@ public class EessiService {
 
     private void validerMottakerInstitusjonerForLand(Collection<Landkoder> mottakerland,
                                                      Collection<String> valgteMottakerinstitusjoner,
-                                                     Map<Landkoder, Set<String>> institusjonerPerLand) throws FunksjonellException {
+                                                     Map<Landkoder, Set<String>> institusjonerPerLand) {
 
         List<String> validerteMottakerinstitusjoner = new ArrayList<>();
         StringBuilder feilmelding = new StringBuilder();

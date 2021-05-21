@@ -19,16 +19,9 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
-import no.nav.melosys.service.dokument.BrevmottakerService;
-import no.nav.melosys.service.dokument.DokgenService;
-import no.nav.melosys.service.dokument.DokumentServiceFasade;
-import no.nav.melosys.service.dokument.MuligMottakerDto;
-import no.nav.melosys.service.dokument.MuligeMottakereDto;
+import no.nav.melosys.service.dokument.*;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -69,8 +62,7 @@ public class BrevbestillingService {
     }
 
 
-    public MuligeMottakereDto hentMuligeMottakere(Produserbaredokumenter produserbaredokumenter, Behandling behandling, String orgnrTilValgtArbeidsgiver)
-        throws FunksjonellException, TekniskException {
+    public MuligeMottakereDto hentMuligeMottakere(Produserbaredokumenter produserbaredokumenter, Behandling behandling, String orgnrTilValgtArbeidsgiver) {
         Mottakerliste mottakerliste = brevmottakerService.hentMottakerliste(produserbaredokumenter, behandling);
         return new MuligeMottakereDto(
             lagHovedMottakerMuligMottakerDto(produserbaredokumenter, behandling, mottakerliste.getHovedMottaker(), orgnrTilValgtArbeidsgiver),
@@ -78,8 +70,7 @@ public class BrevbestillingService {
             lagFasteMottakereMuligMottakerDtos(produserbaredokumenter, behandling, mottakerliste.getFasteMottakere()));
     }
 
-    private MuligMottakerDto lagHovedMottakerMuligMottakerDto(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller hovedmottaker, String orgnrTilValgtArbeidsgiver)
-        throws FunksjonellException, TekniskException {
+    private MuligMottakerDto lagHovedMottakerMuligMottakerDto(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller hovedmottaker, String orgnrTilValgtArbeidsgiver) {
         return new MuligMottakerDto.Builder()
             .medDokumentNavn(produserbaredokumenter.getBeskrivelse())
             .medMottakerNavn(hentMottakerNavn(produserbaredokumenter, behandling, hovedmottaker, orgnrTilValgtArbeidsgiver))
@@ -87,7 +78,7 @@ public class BrevbestillingService {
             .build();
     }
 
-    private String hentMottakerNavn(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller hovedmottaker, String orgnrTilValgtArbeidsgiver) throws FunksjonellException, TekniskException {
+    private String hentMottakerNavn(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller hovedmottaker, String orgnrTilValgtArbeidsgiver) {
         if (hovedmottaker == Aktoersroller.BRUKER) {
             Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling);
             if (avklartMottaker.getRolle() == Aktoersroller.BRUKER) {
@@ -104,7 +95,7 @@ public class BrevbestillingService {
         throw new FunksjonellException("Melosys støtter ikke hovedmottakere med rollen " + hovedmottaker);
     }
 
-    private List<MuligMottakerDto> lagKopiMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<Aktoersroller> kopiMottakere, Aktoersroller hovedmottaker) throws FunksjonellException, TekniskException {
+    private List<MuligMottakerDto> lagKopiMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<Aktoersroller> kopiMottakere, Aktoersroller hovedmottaker) {
         List<MuligMottakerDto> muligMottakerDtos = new ArrayList<>();
         for (Aktoersroller kopiMottaker : kopiMottakere) {
             if (kopiMottaker == Aktoersroller.BRUKER) {
@@ -117,7 +108,7 @@ public class BrevbestillingService {
         return muligMottakerDtos;
     }
 
-    private MuligMottakerDto lagKopiMottakerForBruker(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker, Aktoersroller hovedmottaker) throws FunksjonellException, TekniskException {
+    private MuligMottakerDto lagKopiMottakerForBruker(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker, Aktoersroller hovedmottaker) {
         Aktoer avklartKopi = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling);
         if (avklartKopi.getRolle() == Aktoersroller.BRUKER || hovedmottaker == kopiMottaker) {
             return new MuligMottakerDto.Builder()
@@ -137,7 +128,7 @@ public class BrevbestillingService {
         }
     }
 
-    private List<MuligMottakerDto> lagKopiMottakereForArbeidsgiver(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker) throws FunksjonellException, TekniskException {
+    private List<MuligMottakerDto> lagKopiMottakereForArbeidsgiver(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker) {
         List<MuligMottakerDto> muligMottakerDtos = new ArrayList<>();
 
         List<Aktoer> avklarteKopier = brevmottakerService.avklarMottakere(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling, false, true);
@@ -153,7 +144,7 @@ public class BrevbestillingService {
         return muligMottakerDtos;
     }
 
-    private List<MuligMottakerDto> lagFasteMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<FastMottaker> fasteMottakere) throws FunksjonellException, TekniskException {
+    private List<MuligMottakerDto> lagFasteMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<FastMottaker> fasteMottakere) {
         List<MuligMottakerDto> muligMottakerDtos = new ArrayList<>();
 
         for (FastMottaker fastMottaker : fasteMottakere) {
@@ -169,7 +160,7 @@ public class BrevbestillingService {
         return muligMottakerDtos;
     }
 
-    private OrganisasjonDokument hentRettOrganisasjonsdokument(Behandling behandling, String orgnr) throws IkkeFunnetException, IntegrasjonException {
+    private OrganisasjonDokument hentRettOrganisasjonsdokument(Behandling behandling, String orgnr) {
         Kontaktopplysning kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), orgnr).orElse(null);
         String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : orgnr;
         return (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();
@@ -188,7 +179,7 @@ public class BrevbestillingService {
         return behandling.erAktiv() ? brevmaler : emptyList();
     }
 
-    public List<BrevAdresse> hentBrevAdresseTilMottakere(Produserbaredokumenter produserbaredokumenter, Aktoersroller aktoersroller, Behandling behandling) throws FunksjonellException, TekniskException {
+    public List<BrevAdresse> hentBrevAdresseTilMottakere(Produserbaredokumenter produserbaredokumenter, Aktoersroller aktoersroller, Behandling behandling) {
         var mottakere = brevmottakerService.avklarMottakere(produserbaredokumenter, Mottaker.av(aktoersroller), behandling, false, false);
         List<BrevAdresse> brevAdresser = new ArrayList<>();
 
@@ -198,7 +189,7 @@ public class BrevbestillingService {
         return brevAdresser;
     }
 
-    private BrevAdresse tilBrevAdresse(Aktoer mottaker, Behandling behandling) throws TekniskException, FunksjonellException {
+    private BrevAdresse tilBrevAdresse(Aktoer mottaker, Behandling behandling) {
         PersonDokument personDokument = null;
         Kontaktopplysning kontaktopplysning = null;
         OrganisasjonDokument orgDokument = null;
@@ -223,12 +214,11 @@ public class BrevbestillingService {
     }
 
     @Transactional
-    public void produserBrev(long behandlingId, BrevbestillingDto brevbestillingDto) throws FunksjonellException, TekniskException {
+    public void produserBrev(long behandlingId, BrevbestillingDto brevbestillingDto) {
         dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto);
     }
 
-    public byte[] produserUtkast(long behandlingID, BrevbestillingDto brevbestillingDto)
-        throws FunksjonellException, TekniskException {
+    public byte[] produserUtkast(long behandlingID, BrevbestillingDto brevbestillingDto) {
         return dokumentServiceFasade.produserUtkast(behandlingID, brevbestillingDto);
     }
 }

@@ -6,8 +6,6 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.SaksopplysningerService;
@@ -44,7 +42,7 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
     }
 
     @Override
-    public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
+    public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) {
         long behandlingID = dataGrunnlag.getBehandling().getId();
         BehandlingsgrunnlagData grunnlagData = dataGrunnlag.getBehandlingsgrunnlagData();
 
@@ -77,7 +75,7 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
         return brevdata;
     }
 
-    private BrevDataInnvilgelseFlereLand lagInnvilgelseBrevdataMedA1(BrevDataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
+    private BrevDataInnvilgelseFlereLand lagInnvilgelseBrevdataMedA1(BrevDataGrunnlag dataGrunnlag, String saksbehandler) {
         BrevDataInnvilgelseFlereLand brevdata = new BrevDataInnvilgelseFlereLand(brevbestillingDto, saksbehandler);
         brevdata.vedleggA1 = (BrevDataA1) brevbyggerA1.lag(dataGrunnlag, saksbehandler);
         return brevdata;

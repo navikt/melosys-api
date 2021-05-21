@@ -4,11 +4,9 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collection;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.statistikk.utstedt_a1.integrasjon.UtstedtA1Producer;
@@ -29,25 +27,18 @@ public class UtstedtA1Service {
     private final UtstedtA1Producer utstedtA1Producer;
     private final BehandlingsresultatService behandlingsresultatService;
     private final LandvelgerService landvelgerService;
-    private final Unleash unleash;
 
     @Autowired
     public UtstedtA1Service(UtstedtA1Producer utstedtA1Producer,
                             BehandlingsresultatService behandlingsresultatService,
-                            LandvelgerService landvelgerService,
-                            Unleash unleash) {
+                            LandvelgerService landvelgerService) {
         this.utstedtA1Producer = utstedtA1Producer;
         this.behandlingsresultatService = behandlingsresultatService;
         this.landvelgerService = landvelgerService;
-        this.unleash = unleash;
     }
 
     @Transactional(readOnly = true)
-    public void sendMeldingOmUtstedtA1(Long behandlingID) throws TekniskException, FunksjonellException {
-        if (!unleash.isEnabled("melosys.statistikkA1")) {
-            return;
-        }
-
+    public void sendMeldingOmUtstedtA1(Long behandlingID) {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         if (behandlingsresultat.a1Produseres()) {
             log.info("Produserer melding om utstedt A1 for behandling {}", behandlingID);
@@ -57,12 +48,12 @@ public class UtstedtA1Service {
         }
     }
 
-    private void sendMeldingOmUtstedtA1(Behandlingsresultat behandlingsresultat) throws TekniskException, FunksjonellException {
+    private void sendMeldingOmUtstedtA1(Behandlingsresultat behandlingsresultat) {
         final UtstedtA1Melding melding = lagMelding(behandlingsresultat);
         utstedtA1Producer.produserMelding(melding);
     }
 
-    private UtstedtA1Melding lagMelding(Behandlingsresultat behandlingsresultat) throws TekniskException, FunksjonellException {
+    private UtstedtA1Melding lagMelding(Behandlingsresultat behandlingsresultat) {
         final Behandling behandling = behandlingsresultat.getBehandling();
         final Fagsak fagsak = behandling.getFagsak();
 
@@ -89,7 +80,7 @@ public class UtstedtA1Service {
         );
     }
 
-    private String hentUtsendtTilLand(Long behandlingID, Lovvalgsperiode lovvalgsperiode) throws FunksjonellException {
+    private String hentUtsendtTilLand(Long behandlingID, Lovvalgsperiode lovvalgsperiode) {
         if (landSkalIkkeSendes(lovvalgsperiode)) {
             return null;
         }

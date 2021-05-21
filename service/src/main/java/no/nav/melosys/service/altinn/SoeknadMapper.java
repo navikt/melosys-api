@@ -11,6 +11,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.LoennOgGodtgjoerelse;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Utenlandsoppdraget;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.ArbeidPaaLand;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
@@ -47,6 +48,7 @@ public final class SoeknadMapper {
             soeknad.foretakUtland.add(lagUtenlandskVirksomhet(virksomhetIUtlandet));
         }
         soeknad.juridiskArbeidsgiverNorge = lagJuridiskArbeidsgiverNorge(innhold.getArbeidsgiver());
+        soeknad.utenlandsoppdraget = lagUtenlandsoppdraget(innhold.getMidlertidigUtsendt().getUtenlandsoppdraget());
         return soeknad;
     }
 
@@ -58,8 +60,12 @@ public final class SoeknadMapper {
     private static Periode lagPeriode(Innhold innhold) {
         Tidsrom utsendingsperiode = innhold.getMidlertidigUtsendt().getUtenlandsoppdraget()
             .getPeriodeUtland();
-        LocalDate periodeFra = xmlCalTilLocalDate(utsendingsperiode.getPeriodeFra());
-        LocalDate periodeTil = xmlCalTilLocalDate(utsendingsperiode.getPeriodeTil());
+        return lagPeriode(utsendingsperiode);
+    }
+
+    private static Periode lagPeriode(Tidsrom tidsrom) {
+        LocalDate periodeFra = xmlCalTilLocalDate(tidsrom.getPeriodeFra());
+        LocalDate periodeTil = xmlCalTilLocalDate(tidsrom.getPeriodeTil());
         return new Periode(periodeFra, periodeTil);
     }
 
@@ -215,18 +221,39 @@ public final class SoeknadMapper {
 
     private static JuridiskArbeidsgiverNorge lagJuridiskArbeidsgiverNorge(Arbeidsgiver arbeidsgiver) {
         JuridiskArbeidsgiverNorge juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
-        if (arbeidsgiver != null && !arbeidsgiver.isOffentligVirksomhet() && arbeidsgiver.getSamletVirksomhetINorge() != null) {
-            SamletVirksomhetINorge samletVirksomhetINorge = arbeidsgiver.getSamletVirksomhetINorge();
-            juridiskArbeidsgiverNorge.antallAnsatte = samletVirksomhetINorge.getAntallAnsatte().intValue();
-            juridiskArbeidsgiverNorge.antallAdmAnsatte = samletVirksomhetINorge.getAntallAdministrativeAnsatteINorge().intValue();
-            juridiskArbeidsgiverNorge.antallUtsendte = samletVirksomhetINorge.getAntallUtsendte().intValue();
-            juridiskArbeidsgiverNorge.andelOmsetningINorge = new BigDecimal(samletVirksomhetINorge.getAndelOmsetningINorge());
-            juridiskArbeidsgiverNorge.andelOppdragINorge = new BigDecimal(samletVirksomhetINorge.getAndelOppdragINorge());
-            juridiskArbeidsgiverNorge.andelKontrakterINorge = new BigDecimal(samletVirksomhetINorge.getAndelKontrakterInngaasINorge());
-            juridiskArbeidsgiverNorge.andelRekruttertINorge = new BigDecimal(samletVirksomhetINorge.getAndelRekrutteresINorge());
-            juridiskArbeidsgiverNorge.ekstraArbeidsgivere = List.of(arbeidsgiver.getVirksomhetsnummer());
+        if (arbeidsgiver != null) {
+            juridiskArbeidsgiverNorge.erOffentligVirksomhet = arbeidsgiver.isOffentligVirksomhet();
+
+            if (!arbeidsgiver.isOffentligVirksomhet() && arbeidsgiver.getSamletVirksomhetINorge() != null) {
+                SamletVirksomhetINorge samletVirksomhetINorge = arbeidsgiver.getSamletVirksomhetINorge();
+                juridiskArbeidsgiverNorge.antallAnsatte = samletVirksomhetINorge.getAntallAnsatte().intValue();
+                juridiskArbeidsgiverNorge.antallAdmAnsatte = samletVirksomhetINorge.getAntallAdministrativeAnsatteINorge().intValue();
+                juridiskArbeidsgiverNorge.antallUtsendte = samletVirksomhetINorge.getAntallUtsendte().intValue();
+                juridiskArbeidsgiverNorge.andelOmsetningINorge = new BigDecimal(samletVirksomhetINorge.getAndelOmsetningINorge());
+                juridiskArbeidsgiverNorge.andelOppdragINorge = new BigDecimal(samletVirksomhetINorge.getAndelOppdragINorge());
+                juridiskArbeidsgiverNorge.andelKontrakterINorge = new BigDecimal(samletVirksomhetINorge.getAndelKontrakterInngaasINorge());
+                juridiskArbeidsgiverNorge.andelRekruttertINorge = new BigDecimal(samletVirksomhetINorge.getAndelRekrutteresINorge());
+                juridiskArbeidsgiverNorge.ekstraArbeidsgivere = List.of(arbeidsgiver.getVirksomhetsnummer());
+            }
         }
         return juridiskArbeidsgiverNorge;
+    }
+
+    private static Utenlandsoppdraget lagUtenlandsoppdraget(no.nav.melosys.soknad_altinn.Utenlandsoppdraget utenlandsoppdraget) {
+        Periode samletUtsendingsperiode = null;
+        if (Boolean.TRUE.equals(utenlandsoppdraget.isErstatterTidligereUtsendte())
+            && utenlandsoppdraget.getSamletUtsendingsperiode() != null) {
+            samletUtsendingsperiode = lagPeriode(utenlandsoppdraget.getSamletUtsendingsperiode());
+        }
+
+        return new Utenlandsoppdraget(
+            samletUtsendingsperiode,
+            utenlandsoppdraget.isSendesUtOppdragIUtlandet(),
+            utenlandsoppdraget.isAnsattEtterOppdraget(),
+            utenlandsoppdraget.isAnsattForOppdragIUtlandet(),
+            utenlandsoppdraget.isDrattPaaEgetInitiativ(),
+            utenlandsoppdraget.isErstatterTidligereUtsendte()
+        );
     }
 
     private static LocalDate xmlCalTilLocalDate(XMLGregorianCalendar calendar) {

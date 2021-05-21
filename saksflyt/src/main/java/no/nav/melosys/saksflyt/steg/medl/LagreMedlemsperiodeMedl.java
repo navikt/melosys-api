@@ -46,7 +46,7 @@ public class LagreMedlemsperiodeMedl implements StegBehandler {
         }
     }
 
-    private void opprettMedlPeriode(long behandlingId, Medlemskapsperiode medlemskapsperiode) throws FunksjonellException {
+    private void opprettMedlPeriode(long behandlingId, Medlemskapsperiode medlemskapsperiode) {
         if (isEmpty(medlemskapsperiode.getMedlPeriodeID())) {
             medlPeriodeService.opprettPeriodeEndelig(behandlingId, medlemskapsperiode);
         }

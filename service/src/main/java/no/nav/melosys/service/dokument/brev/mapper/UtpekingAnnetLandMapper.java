@@ -30,13 +30,13 @@ public final class UtpekingAnnetLandMapper implements BrevDataMapper {
                                 MelosysNAVFelles navFelles,
                                 Behandling behandling,
                                 Behandlingsresultat resultat,
-                                BrevData brevData) throws JAXBException, SAXException, TekniskException {
+                                BrevData brevData) throws JAXBException, SAXException {
         Fag fag = mapFag((BrevDataUtpekingAnnetLand)brevData);
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    Fag mapFag(BrevDataUtpekingAnnetLand brevDataUtpekingAnnetLand) throws TekniskException {
+    Fag mapFag(BrevDataUtpekingAnnetLand brevDataUtpekingAnnetLand) {
         Fag fag = new Fag();
         Utpekingsperiode utpekingsperiode = brevDataUtpekingAnnetLand.utpekingsperiode;
 
@@ -51,8 +51,7 @@ public final class UtpekingAnnetLandMapper implements BrevDataMapper {
         return fag;
     }
 
-    private static LovvalgsperiodeType lagLovvalgsperiodeType(Utpekingsperiode utpekingsperiode)
-        throws TekniskException {
+    private static LovvalgsperiodeType lagLovvalgsperiodeType(Utpekingsperiode utpekingsperiode) {
         LovvalgsperiodeType lovvalgsperiodeType = new LovvalgsperiodeType();
         try {
             lovvalgsperiodeType.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(utpekingsperiode.getFom()));

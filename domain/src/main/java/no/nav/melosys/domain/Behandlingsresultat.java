@@ -17,6 +17,8 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import static java.util.Optional.ofNullable;
+
 @Entity
 @Table(name = "behandlingsresultat")
 @EntityListeners(AuditingEntityListener.class)
@@ -212,6 +214,10 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return medlemAvFolketrygden;
     }
 
+    public Optional<MedlemAvFolketrygden> finnMedlemAvFolketrygden() {
+        return ofNullable(getMedlemAvFolketrygden());
+    }
+
     public void setMedlemAvFolketrygden(MedlemAvFolketrygden medlemAvFolketrygden) {
         this.medlemAvFolketrygden = medlemAvFolketrygden;
     }
@@ -381,6 +387,10 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public boolean a1Produseres() {
         return erInnvilgelse() && !erUtpeking() && harVedtak();
+    }
+
+    public void settVedtakMetadata(Vedtakstyper vedtakstype, LocalDate klagefrist) {
+        settVedtakMetadata(vedtakstype, null, klagefrist);
     }
 
     public void settVedtakMetadata(Vedtakstyper vedtakstype,

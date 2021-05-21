@@ -6,18 +6,16 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.MoreCollectors;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.msm.AltinnDokument;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 
 import static no.nav.melosys.domain.arkiv.FysiskDokument.*;
 
 public class OpprettJournalpost extends Journalpost {
     private static final String SENTRAL_UTSKRIFT = "S";
     private static final String MEDLEMSKAP_OG_AVGIFT = "4530";
-    private static final String UNNTAK_FRA_MEDLEMSKAP = "UFM";
     private static final String MEDLEMSKAP = "MED";
     private static final String ALTINN = "ALTINN";
     private static final String UTENLANDSK_ORGANISASJON = "UTL_ORG";
@@ -36,17 +34,17 @@ public class OpprettJournalpost extends Journalpost {
     }
 
     public static OpprettJournalpost lagJournalpostForSendingAvSedSomBrev(
-        String saksnummer, String brukerFnr, SedType sedType, byte[] sedPdf,
-        String institusjonID, String institusjonNavn, String institusjonLand, List<FysiskDokument> vedlegg) {
+        String saksnummer, String brukerFnr, SedType sedType, byte[] sedPdf, String institusjonID,
+        String institusjonNavn, String institusjonLand, List<FysiskDokument> vedlegg, Tema tema) {
 
-        OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
+        var opprettJournalpost = new OpprettJournalpost();
         opprettJournalpost.setHoveddokument(lagFysiskDokumentSed(sedType, sedPdf));
         opprettJournalpost.setVedlegg(vedlegg);
         opprettJournalpost.setSaksnummer(saksnummer);
         opprettJournalpost.setMottaksKanal(SENTRAL_UTSKRIFT);
         opprettJournalpost.setJournalposttype(Journalposttype.UT);
         opprettJournalpost.setJournalførendeEnhet(MEDLEMSKAP_OG_AVGIFT);
-        opprettJournalpost.setTema(UNNTAK_FRA_MEDLEMSKAP);
+        opprettJournalpost.setTema(tema.getKode());
 
         opprettJournalpost.setKorrespondansepartId(institusjonID);
         opprettJournalpost.setKorrespondansepartNavn(institusjonNavn);
@@ -63,8 +61,7 @@ public class OpprettJournalpost extends Journalpost {
     public static OpprettJournalpost lagJournalpostForMottakAltinnSøknad(Fagsak fagsak,
                                                                          Collection<AltinnDokument> dokumenter,
                                                                          String brukerFnr,
-                                                                         String avsenderNavn)
-        throws FunksjonellException, TekniskException {
+                                                                         String avsenderNavn) {
         AltinnDokument hovedDokument = dokumenter.stream().filter(AltinnDokument::erSøknad)
             .collect(MoreCollectors.onlyElement());
         dokumenter.remove(hovedDokument);

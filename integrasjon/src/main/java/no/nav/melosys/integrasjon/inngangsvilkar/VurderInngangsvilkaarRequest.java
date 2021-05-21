@@ -1,26 +1,26 @@
 package no.nav.melosys.integrasjon.inngangsvilkar;
 
-import java.util.Collection;
+import java.util.Set;
 
 import no.nav.melosys.domain.ErPeriode;
 
 
 class VurderInngangsvilkaarRequest {
-    private String statsborgerskap;
-    private Collection<String> arbeidsland;
+    private Set<String> statsborgerskap;
+    private Set<String> arbeidsland;
     private ErPeriode periode;
 
-    VurderInngangsvilkaarRequest(String statsborgerskap, Collection<String> arbeidsland, ErPeriode periode) {
+    VurderInngangsvilkaarRequest(Set<String> statsborgerskap, Set<String> arbeidsland, ErPeriode periode) {
         this.statsborgerskap = statsborgerskap;
         this.arbeidsland = arbeidsland;
         this.periode = periode;
     }
 
-    public String getStatsborgerskap() {
+    public Set<String> getStatsborgerskap() {
         return statsborgerskap;
     }
 
-    public Collection<String> getArbeidsland() {
+    public Set<String> getArbeidsland() {
         return arbeidsland;
     }
 

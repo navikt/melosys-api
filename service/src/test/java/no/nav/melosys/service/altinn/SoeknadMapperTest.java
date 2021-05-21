@@ -2,12 +2,14 @@ package no.nav.melosys.service.altinn;
 
 import java.math.BigDecimal;
 import java.net.URL;
+import java.time.LocalDate;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.UtenlandskIdent;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.ArbeidsstedType;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.LuftfartBase;
@@ -63,6 +65,47 @@ class SoeknadMapperTest {
         assertThat(foretakUtland.adresse.poststed).isEqualTo("testbyen");
         assertThat(foretakUtland.adresse.postnummer).isEqualTo("UTLAND-1234");
         assertThat(foretakUtland.adresse.landkode).isEqualTo("BE");
+        final var utenlandsoppdraget = soeknad.utenlandsoppdraget;
+        assertThat(utenlandsoppdraget.erErstatningTidligereUtsendte).isFalse();
+        assertThat(utenlandsoppdraget.samletUtsendingsperiode).isNull();
+        assertThat(utenlandsoppdraget.erUtsendelseForOppdragIUtlandet).isFalse();
+        assertThat(utenlandsoppdraget.erFortsattAnsattEtterOppdraget).isNull();
+        assertThat(utenlandsoppdraget.erAnsattForOppdragIUtlandet).isFalse();
+        assertThat(utenlandsoppdraget.erDrattPaaEgetInitiativ).isFalse();
+    }
+
+    @Test
+    void testMappingArbeidsgiver() throws JAXBException {
+        final MedlemskapArbeidEOSM medlemskapArbeidEOSM = parseSøknadXML();
+        medlemskapArbeidEOSM.getInnhold().getArbeidsgiver().setOffentligVirksomhet(true);
+
+        Soeknad soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM);
+
+        var juridiskArbeidsgiverNorge = soeknad.juridiskArbeidsgiverNorge;
+        assertThat(juridiskArbeidsgiverNorge.erOffentligVirksomhet).isEqualTo(true);
+        assertThat(juridiskArbeidsgiverNorge.antallAnsatte).isNull();
+        assertThat(juridiskArbeidsgiverNorge.antallAdmAnsatte).isNull();
+        assertThat(juridiskArbeidsgiverNorge.antallUtsendte).isNull();
+        assertThat(juridiskArbeidsgiverNorge.andelOmsetningINorge).isNull();
+        assertThat(juridiskArbeidsgiverNorge.andelOppdragINorge).isNull();
+        assertThat(juridiskArbeidsgiverNorge.andelKontrakterINorge).isNull();
+        assertThat(juridiskArbeidsgiverNorge.andelRekruttertINorge).isNull();
+        assertThat(juridiskArbeidsgiverNorge.ekstraArbeidsgivere).isEmpty();
+
+        medlemskapArbeidEOSM.getInnhold().getArbeidsgiver().setOffentligVirksomhet(false);
+
+        soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM);
+
+        juridiskArbeidsgiverNorge = soeknad.juridiskArbeidsgiverNorge;
+        assertThat(juridiskArbeidsgiverNorge.erOffentligVirksomhet).isEqualTo(false);
+        assertThat(juridiskArbeidsgiverNorge.antallAnsatte).isEqualTo(100);
+        assertThat(juridiskArbeidsgiverNorge.antallAdmAnsatte).isEqualTo(10);
+        assertThat(juridiskArbeidsgiverNorge.antallUtsendte).isEqualTo(10);
+        assertThat(juridiskArbeidsgiverNorge.andelOmsetningINorge).isEqualTo(new BigDecimal(90));
+        assertThat(juridiskArbeidsgiverNorge.andelOppdragINorge).isEqualTo(new BigDecimal(90));
+        assertThat(juridiskArbeidsgiverNorge.andelKontrakterINorge).isEqualTo(new BigDecimal(90));
+        assertThat(juridiskArbeidsgiverNorge.andelRekruttertINorge).isEqualTo(new BigDecimal(90));
+        assertThat(juridiskArbeidsgiverNorge.ekstraArbeidsgivere).contains("910825569");
     }
 
     @Test
@@ -111,6 +154,24 @@ class SoeknadMapperTest {
         assertThat(luftfartBase.hjemmebaseNavn).isEqualTo("koti");
         assertThat(luftfartBase.hjemmebaseLand).isEqualTo("FI");
         assertThat(luftfartBase.typeFlyvninger).isEqualTo(INTERNASJONAL);
+    }
+
+    @Test
+    void testMappingSamletUtsendingsperiode() throws JAXBException {
+        MedlemskapArbeidEOSM medlemskapArbeidEOSM = parseSøknadXML();
+        medlemskapArbeidEOSM.getInnhold().getMidlertidigUtsendt().getUtenlandsoppdraget()
+            .setErstatterTidligereUtsendte(Boolean.TRUE);
+
+        Soeknad soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM);
+
+        final var utenlandsoppdraget = soeknad.utenlandsoppdraget;
+        assertThat(utenlandsoppdraget.erErstatningTidligereUtsendte).isTrue();
+        assertThat(utenlandsoppdraget.samletUtsendingsperiode)
+            .extracting(Periode::getFom, Periode::getTom)
+            .containsExactly(
+                LocalDate.of(2019, 8, 1),
+                LocalDate.of(2019, 8, 6)
+            );
     }
 
     private MedlemskapArbeidEOSM parseSøknadXML() throws JAXBException {

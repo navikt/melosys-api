@@ -13,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -57,6 +56,11 @@ class AnmodningUnntakServiceTest {
 
     private AnmodningUnntakService anmodningUnntakService;
 
+    private static final long BEHANDLING_ID = 1L;
+    private static final String FRITEKST_SED = "Ytterligere info som fritekst";
+    private static final String SAKSNUMMER = "MEL-111";
+    private static final String MOTTAKER_INSTITUSJON = "SE:432";
+
     @BeforeEach
     public void setUp() {
         anmodningUnntakService = new AnmodningUnntakService(
@@ -66,52 +70,47 @@ class AnmodningUnntakServiceTest {
 
     @Test
     void anmodningOmUnntak_erEessiKlarMedMottakerInstitusjon_prosessOpprettet() throws Exception {
-        final long behandlingID = 1L;
-        final String mottakerInstitusjon = "SE:432";
         final DokumentReferanse dokumentReferanse = new DokumentReferanse("jpID", "dokID");
-        final String fritekstSed = "friteksssst";
         Behandling behandling = new Behandling();
         Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-111");
+        fagsak.setSaksnummer(SAKSNUMMER);
         behandling.setFagsak(fagsak);
         behandling.getSaksopplysninger().add(lagPersonSaksopplysning());
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID)).thenReturn(Collections.singletonList(Landkoder.SE));
+        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(Collections.singletonList(Landkoder.SE));
 
-        anmodningUnntakService.anmodningOmUnntak(behandlingID, mottakerInstitusjon, Set.of(dokumentReferanse), fritekstSed);
+        anmodningUnntakService.anmodningOmUnntak(BEHANDLING_ID, MOTTAKER_INSTITUSJON, Set.of(dokumentReferanse), FRITEKST_SED);
 
-        verify(anmodningUnntakKontrollService).utførKontroller(behandlingID);
+        verify(anmodningUnntakKontrollService).utførKontroller(BEHANDLING_ID);
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class),
-            anySet(), eq(Set.of(dokumentReferanse)), eq(fritekstSed));
+            anySet(), eq(Set.of(dokumentReferanse)), eq(FRITEKST_SED));
         verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
-        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
     }
 
     @Test
     void anmodningOmUnntak_ikkeEessiReadyMottakerInstitusjonNull_prosessOpprettet() throws Exception {
-        final long behandlingID = 1L;
-        final String fritekstSed = "friteksssst";
         Behandling behandling = new Behandling();
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-111");
+        fagsak.setSaksnummer(SAKSNUMMER);
         behandling.setFagsak(fagsak);
         behandling.getSaksopplysninger().add(lagPersonSaksopplysning());
-        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID)).thenReturn(Collections.singletonList(Landkoder.SE));
+        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(Collections.singletonList(Landkoder.SE));
 
-        anmodningUnntakService.anmodningOmUnntak(behandlingID, null, Collections.emptySet(), fritekstSed);
+        anmodningUnntakService.anmodningOmUnntak(BEHANDLING_ID, null, Collections.emptySet(), FRITEKST_SED);
 
-        verify(anmodningUnntakKontrollService).utførKontroller(behandlingID);
+        verify(anmodningUnntakKontrollService).utførKontroller(BEHANDLING_ID);
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), anySet(),
-            anySet(), eq(fritekstSed));
+            anySet(), eq(FRITEKST_SED));
         verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
-        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
     }
 
     @Test
-    void anmodningOmUnntakSvar_validert_forventMetodekall() throws FunksjonellException, TekniskException {
+    void anmodningOmUnntakSvar_validert_forventMetodekall() {
         Behandling behandling = lagBehandling();
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
 
@@ -119,51 +118,51 @@ class AnmodningUnntakServiceTest {
         when(anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(anyLong())).thenReturn(Collections.singletonList(new AnmodningsperiodeSvar()));
         when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singletonList(new Lovvalgsperiode()));
 
-        anmodningUnntakService.anmodningOmUnntakSvar(1L);
+        anmodningUnntakService.anmodningOmUnntakSvar(BEHANDLING_ID, FRITEKST_SED);
 
-        verify(behandlingService).hentBehandlingUtenSaksopplysninger(1L);
-        verify(anmodningsperiodeService).hentAnmodningsperiodeSvarForBehandling(1L);
-        verify(lovvalgsperiodeService).hentLovvalgsperioder(1L);
-        verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntakMottakSvar(behandling);
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer("MEL-111");
+        verify(behandlingService).hentBehandlingUtenSaksopplysninger(BEHANDLING_ID);
+        verify(anmodningsperiodeService).hentAnmodningsperiodeSvarForBehandling(BEHANDLING_ID);
+        verify(lovvalgsperiodeService).hentLovvalgsperioder(BEHANDLING_ID);
+        verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntakMottakSvar(behandling, FRITEKST_SED);
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
     }
 
     @Test
-    void anmodningOmUnntakSvar_feilBehandlingstype_forventException() throws FunksjonellException {
+    void anmodningOmUnntakSvar_feilBehandlingstype_forventException() {
         Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> anmodningUnntakService.anmodningOmUnntakSvar(1L))
+            .isThrownBy(() -> anmodningUnntakService.anmodningOmUnntakSvar(BEHANDLING_ID, null))
             .withMessageContaining("Behandling er ikke av tema ANMODNING_OM_UNNTAK_HOVEDREGEL");
     }
 
     @Test
-    void anmodningOmUnntakSvar_behandlingErAvsluttet_forventException() throws FunksjonellException {
+    void anmodningOmUnntakSvar_behandlingErAvsluttet_forventException() {
         Behandling behandling = lagBehandling();
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> anmodningUnntakService.anmodningOmUnntakSvar(1L))
+            .isThrownBy(() -> anmodningUnntakService.anmodningOmUnntakSvar(BEHANDLING_ID, null))
             .withMessageContaining("Behandlingen er avsluttet");
     }
 
     @Test
-    void anmodningOmUnntakSvar_behandlingHarIngenAnmodningsperiodeSvar_forventException() throws FunksjonellException {
+    void anmodningOmUnntakSvar_behandlingHarIngenAnmodningsperiodeSvar_forventException() {
         Behandling behandling = lagBehandling();
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(behandling);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> anmodningUnntakService.anmodningOmUnntakSvar(1L))
+            .isThrownBy(() -> anmodningUnntakService.anmodningOmUnntakSvar(BEHANDLING_ID, null))
             .withMessageContaining("Finner ingen AnmodningsperiodeSvar for behandling 1");
     }
 
     @Test
-    void anmodningOmUnntakSvar_behandlingHarIngenLovvalgsperiode_forventException() throws FunksjonellException {
+    void anmodningOmUnntakSvar_behandlingHarIngenLovvalgsperiode_forventException() {
         Behandling behandling = lagBehandling();
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
@@ -172,12 +171,12 @@ class AnmodningUnntakServiceTest {
         when(anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(anyLong())).thenReturn(Collections.singletonList(new AnmodningsperiodeSvar()));
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> anmodningUnntakService.anmodningOmUnntakSvar(1L))
+            .isThrownBy(() -> anmodningUnntakService.anmodningOmUnntakSvar(BEHANDLING_ID, null))
             .withMessageContaining("Finner ingen Lovvalgsperioder for behandling 1");
     }
 
     @Test
-    void anmodningOmUnntakSvar_avslagForLangFritekst_forventException() throws FunksjonellException {
+    void anmodningOmUnntakSvar_avslagForLangFritekst_forventException() {
         Behandling behandling = lagBehandling();
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
@@ -191,16 +190,16 @@ class AnmodningUnntakServiceTest {
         when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(Collections.singletonList(new Lovvalgsperiode()));
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> anmodningUnntakService.anmodningOmUnntakSvar(1L))
+            .isThrownBy(() -> anmodningUnntakService.anmodningOmUnntakSvar(BEHANDLING_ID, null))
             .withMessageContaining("Kan ikke ha fritekst lengre enn 255 for avslag på anmodning om unntak");
     }
 
     private static Behandling lagBehandling() {
         Behandling behandling = new Behandling();
         Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-111");
+        fagsak.setSaksnummer(SAKSNUMMER);
         behandling.setFagsak(fagsak);
-        behandling.setId(1L);
+        behandling.setId(BEHANDLING_ID);
 
         return behandling;
     }

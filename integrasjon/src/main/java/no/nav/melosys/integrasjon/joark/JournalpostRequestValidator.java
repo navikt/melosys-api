@@ -17,8 +17,7 @@ final class JournalpostRequestValidator {
     // Manuell validering før vi prøver å opprette journalpost.
     // Ref: https://confluence.adeo.no/display/BOA/ferdigstillJournalpost
     // og https://confluence.adeo.no/display/BOA/opprettJournalpost
-    static void validerJournalpostForEndeligJfr(OpprettJournalpostRequest opprettJournalpostRequest)
-        throws FunksjonellException {
+    static void validerJournalpostForEndeligJfr(OpprettJournalpostRequest opprettJournalpostRequest) {
         Collection<String> feil = new ArrayList<>();
         feil.addAll(validerSak(opprettJournalpostRequest.getSak()));
         feil.addAll(validerJournalpost(opprettJournalpostRequest));

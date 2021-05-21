@@ -12,8 +12,6 @@ import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.validering.Kontrollfeil;
@@ -30,7 +28,7 @@ public class VedtakKontrollService {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
     }
 
-    public Collection<Kontrollfeil> utførKontroller(long behandlingID, Vedtakstyper vedtakstype) throws FunksjonellException, TekniskException {
+    public Collection<Kontrollfeil> utførKontroller(long behandlingID, Vedtakstyper vedtakstype) {
         return utførKontroller(
             behandlingService.hentBehandling(behandlingID),
             lovvalgsperiodeService.hentValidertLovvalgsperiode(behandlingID),
@@ -42,7 +40,7 @@ public class VedtakKontrollService {
         Behandling behandling,
         Lovvalgsperiode lovvalgsperiode,
         Set<Function<VedtakKontrollData, Kontrollfeil>> kontroller
-    ) throws TekniskException {
+    ) {
         BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
         PersonDokument personDokument = behandling.hentPersonDokument();

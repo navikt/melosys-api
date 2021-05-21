@@ -12,9 +12,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -48,7 +45,7 @@ class AvsluttFagsakOgBehandlingTest {
     private final String saksnummer = "MEL-123";
 
     @BeforeEach
-    public void setUp() throws IkkeFunnetException {
+    public void setUp() {
         avsluttFagsakOgBehandling = new AvsluttFagsakOgBehandling(fagsakService, behandlingService, behandlingsresultatService);
 
         prosessinstans = new Prosessinstans();
@@ -78,7 +75,7 @@ class AvsluttFagsakOgBehandlingTest {
     }
 
     @Test
-    void utfør_erArtikkel12_behandlingOgFagsakAvsluttet() throws FunksjonellException, TekniskException {
+    void utfør_erArtikkel12_behandlingOgFagsakAvsluttet() {
         when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsak);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         avsluttFagsakOgBehandling.utfør(prosessinstans);
@@ -86,7 +83,7 @@ class AvsluttFagsakOgBehandlingTest {
     }
 
     @Test
-    void utfør_erArtikkel13_behandlingsstatusMidlertidigLovvalgsbeslutning() throws FunksjonellException, TekniskException {
+    void utfør_erArtikkel13_behandlingsstatusMidlertidigLovvalgsbeslutning() {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
         avsluttFagsakOgBehandling.utfør(prosessinstans);
         verify(behandlingService).oppdaterStatus(eq(behandling.getId()), eq(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING));

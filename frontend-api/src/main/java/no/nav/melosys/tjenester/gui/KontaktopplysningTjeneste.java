@@ -5,7 +5,6 @@ import java.util.Optional;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Kontaktopplysning;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.tjenester.gui.dto.KontaktInfoDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -54,7 +53,7 @@ public class KontaktopplysningTjeneste {
 
     @DeleteMapping("/{saksnummer}/kontaktopplysninger/{orgnr}")
     @ApiOperation(value = "Sletter kontaktopplysning på en fagsak med gitt orgnummer")
-    public ResponseEntity slettKontaktopplysning(@PathVariable("saksnummer") String saksnummer, @PathVariable("orgnr") String orgnr) throws FunksjonellException {
+    public ResponseEntity slettKontaktopplysning(@PathVariable("saksnummer") String saksnummer, @PathVariable("orgnr") String orgnr) {
         kontaktopplysningService.slettKontaktopplysning(saksnummer, orgnr);
         return ResponseEntity.ok().build();
     }

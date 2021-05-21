@@ -16,8 +16,8 @@ import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,7 +26,7 @@ public class Aareg3KonverteringTest {
 
     private DokumentFactory factory;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         Jaxb2Marshaller marshaller = JaxbConfig.jaxb2Marshaller();
         XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();
@@ -37,7 +37,7 @@ public class Aareg3KonverteringTest {
     public void transform() throws TransformerFactoryConfigurationError, TransformerException, IOException, JAXBException {
         InputStream xslt = getClass().getClassLoader().getResourceAsStream("aareg/arbeidsforhold_3.0.xslt");
         InputStream kilde = getClass().getClassLoader().getResourceAsStream("arbeidsforhold/99999999999_med_mock.xml");
-        
+
         Transformer transformer = TransformerFactory.newInstance().newTransformer(new StreamSource(xslt));
         transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");

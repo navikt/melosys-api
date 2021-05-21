@@ -5,11 +5,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import no.nav.melosys.service.abac.TilgangService;
+import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import no.nav.melosys.tjenester.gui.dto.PersonDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,8 +39,7 @@ public class PersonTjeneste {
     @GetMapping("{fnr}")
     @JsonView(DokumentView.FrontendApi.class)
     @ApiOperation(value = "Henter en person fra TPS.", response = PersonDokument.class)
-    public ResponseEntity getPerson(@PathVariable("fnr") String personnummer)
-        throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
+    public ResponseEntity getPerson(@PathVariable("fnr") String personnummer) {
         if (personnummer == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }

@@ -6,12 +6,9 @@ import java.util.Set;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.domain.person.Informasjonsbehov;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -31,7 +28,7 @@ public class RegisterOppslagService {
     /**
      *  Henter et sett med organisasjonsopplysninger
      */
-    public Set<OrganisasjonDokument> hentOrganisasjoner(Set<String> orgnumre) throws IkkeFunnetException, IntegrasjonException {
+    public Set<OrganisasjonDokument> hentOrganisasjoner(Set<String> orgnumre) {
         Set<OrganisasjonDokument> organisasjoner = new HashSet<>();
         for (String orgnr : orgnumre) {
             OrganisasjonDokument saksopplysning = hentOrganisasjon(orgnr);
@@ -45,7 +42,7 @@ public class RegisterOppslagService {
     /**
      * Henter organisasjonsopplysninger.
      */
-    public OrganisasjonDokument hentOrganisasjon(String orgnummer) throws IkkeFunnetException, IntegrasjonException {
+    public OrganisasjonDokument hentOrganisasjon(String orgnummer) {
         Saksopplysning saksopplysning = eregFasade.hentOrganisasjon(orgnummer);
         return (OrganisasjonDokument) saksopplysning.getDokument();
     }
@@ -53,7 +50,7 @@ public class RegisterOppslagService {
     /**
      * Henter personopplysninger.
      */
-    public PersonDokument hentPerson(String personnummer) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    public PersonDokument hentPerson(String personnummer) {
         Saksopplysning saksopplysning = persondataFasade.hentPerson(personnummer, Informasjonsbehov.STANDARD);
         return (PersonDokument) saksopplysning.getDokument();
     }

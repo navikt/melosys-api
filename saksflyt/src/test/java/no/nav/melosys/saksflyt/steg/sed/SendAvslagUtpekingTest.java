@@ -12,8 +12,6 @@ import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -51,7 +49,7 @@ class SendAvslagUtpekingTest {
     private Behandling behandling;
 
     @BeforeEach
-    public void settOpp() throws FunksjonellException, TekniskException {
+    public void settOpp() {
         eessiService = new EessiService(behandlingService, behandlingsresultatService, eessiConsumer, joarkFasade,
                 sedDataBygger, sedDataGrunnlagFactory);
         sendAvslagUtpeking = new SendAvslagUtpeking(eessiService);

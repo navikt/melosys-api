@@ -7,16 +7,15 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.SelvstendigForetak;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.exception.*;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -55,7 +54,7 @@ class BrevDataByggerA1Test {
     private final String orgnr2 = "10987654321";
 
     @BeforeEach
-    void setUp() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    void setUp() {
         Behandling behandling = new Behandling();
         behandling.setId(123L);
 
@@ -102,7 +101,7 @@ class BrevDataByggerA1Test {
         brevDataByggerA1 = new BrevDataByggerA1(avklartefaktaService, landvelgerService);
     }
 
-    private void mockAvklarteOrganisasjoner(List<String> orgnumre) throws IkkeFunnetException, IntegrasjonException {
+    private void mockAvklarteOrganisasjoner(List<String> orgnumre) {
         avklarteOrganisasjoner.addAll(orgnumre);
         OrganisasjonsDetaljer detaljer = mock(OrganisasjonsDetaljer.class);
         when(detaljer.hentStrukturertForretningsadresse()).thenReturn(lagStrukturertAdresse());
@@ -128,7 +127,7 @@ class BrevDataByggerA1Test {
     }
 
     @Test
-    void lag_brukAlleArbeidsland() throws FunksjonellException, TekniskException {
+    void lag_brukAlleArbeidsland() {
         mockAvklarteOrganisasjoner(Collections.singletonList("1"));
         brevDataByggerA1.lag(dataGrunnlag, saksbehandler);
 
@@ -136,7 +135,7 @@ class BrevDataByggerA1Test {
     }
 
     @Test
-    void lag_sjekkAvklarteSelvstendigeForetak() throws FunksjonellException, TekniskException {
+    void lag_sjekkAvklarteSelvstendigeForetak() {
         mockAvklarteOrganisasjoner(Collections.singletonList("999"));
         SelvstendigForetak foretak = new SelvstendigForetak();
         foretak.orgnr = "999";
@@ -147,7 +146,7 @@ class BrevDataByggerA1Test {
     }
 
     @Test
-    void lag_hentAvklarteArbeidsgivere() throws FunksjonellException, TekniskException {
+    void lag_hentAvklarteArbeidsgivere() {
         mockAvklarteOrganisasjoner(Collections.singletonList("7777"));
         søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.add("7777");
 
@@ -166,7 +165,7 @@ class BrevDataByggerA1Test {
     }
 
     @Test
-    void lag_ArbeidsstedHosOppdragsgiver_girUtenlandskvirksomhet() throws FunksjonellException, TekniskException {
+    void lag_ArbeidsstedHosOppdragsgiver_girUtenlandskvirksomhet() {
         mockAvklarteOrganisasjoner(Collections.singletonList(orgnr2));
 
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();

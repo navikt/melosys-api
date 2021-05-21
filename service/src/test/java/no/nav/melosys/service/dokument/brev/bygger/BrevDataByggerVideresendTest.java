@@ -3,23 +3,21 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class BrevDataByggerVideresendTest {
 
     @Mock
@@ -33,8 +31,8 @@ public class BrevDataByggerVideresendTest {
 
     private BrevDataByggerVideresend brevDataByggerVideresend;
 
-    @Before
-    public void setUp() throws FunksjonellException, TekniskException {
+    @BeforeEach
+    public void setUp() {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         when(brevDataGrunnlag.getBehandling()).thenReturn(behandling);
@@ -43,7 +41,7 @@ public class BrevDataByggerVideresendTest {
     }
 
     @Test
-    public void lag_medBostedSverigeOgTrygdemyndighetslandSverige_girBrevdata() throws FunksjonellException, TekniskException {
+    public void lag_medBostedSverigeOgTrygdemyndighetslandSverige_girBrevdata() {
         when(landvelgerService.hentBostedsland(eq(1L), any())).thenReturn(Landkoder.SE);
 
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();

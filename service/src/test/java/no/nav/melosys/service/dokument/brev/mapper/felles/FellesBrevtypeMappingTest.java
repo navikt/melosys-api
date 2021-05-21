@@ -14,7 +14,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_9
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class FellesBrevtypeMappingTest {
 

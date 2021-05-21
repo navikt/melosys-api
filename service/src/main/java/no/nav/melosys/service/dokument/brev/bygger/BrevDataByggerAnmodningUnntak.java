@@ -26,7 +26,7 @@ public class BrevDataByggerAnmodningUnntak implements BrevDataBygger {
     }
 
     @Override
-    public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) throws FunksjonellException, TekniskException {
+    public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) {
         BrevDataAnmodningUnntak brevData = new BrevDataAnmodningUnntak(saksbehandler);
         long behandlingID = dataGrunnlag.getBehandling().getId();
         if (dataGrunnlag.getAvklarteVirksomheterGrunnlag().antallVirksomheter() != 1) {
@@ -53,7 +53,7 @@ public class BrevDataByggerAnmodningUnntak implements BrevDataBygger {
     }
 
     // Vilkåret for art16 er både oppfylt og har begrunnelser ved anmodning om unntak
-    private Vilkaarsresultat hentFørsteGyldigeVilkaarsresultatArt16(long behandlingID) throws TekniskException {
+    private Vilkaarsresultat hentFørsteGyldigeVilkaarsresultatArt16(long behandlingID) {
         return vilkaarsresultatService.finnVilkaarsresultat(behandlingID, FO_883_2004_ART16_1)
             .filter(v -> v.isOppfylt() && !v.getBegrunnelser().isEmpty())
             .orElseThrow(() -> new TekniskException("Ingen oppfylte art16-vilkår med vilkårbegrunnelser funnet for brev om orientering anmodning om unntak"));

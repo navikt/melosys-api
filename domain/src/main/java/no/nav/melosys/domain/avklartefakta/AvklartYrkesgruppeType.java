@@ -11,7 +11,7 @@ public enum AvklartYrkesgruppeType {
     IKKE_YRKESAKTIV,
     KONTANTYTELSEMOTTAKER;
 
-    public Yrkesgrupper tilYrkesgruppeType() throws TekniskException {
+    public Yrkesgrupper tilYrkesgruppeType() {
         switch(this) {
             case ORDINAER:
             case ORDINAER_UTEN_ART12:

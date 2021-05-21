@@ -15,7 +15,7 @@ public enum AvsenderMottakerType {
             case FNR -> Avsendertyper.PERSON;
             case ORGNR -> Avsendertyper.ORGANISASJON;
             case UTL_ORG -> Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET;
-            default -> throw new IllegalArgumentException("Støtter ikke avsendertype " + avsenderMottakerType);
+            default -> null;
         };
     }
 }

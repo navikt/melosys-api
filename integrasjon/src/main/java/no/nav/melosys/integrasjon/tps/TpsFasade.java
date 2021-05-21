@@ -2,20 +2,19 @@ package no.nav.melosys.integrasjon.tps;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.domain.person.Informasjonsbehov;
 
 public interface TpsFasade {
-    Saksopplysning hentPerson(String ident, Informasjonsbehov behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException;
+    Saksopplysning hentPerson(String ident, Informasjonsbehov behov);
 
     /**
      * Henter all historikk fram til angitt dato (start av søknadsperioden).
      */
     Saksopplysning hentPersonhistorikk(String ident, LocalDate dato)
-        throws SikkerhetsbegrensningException, IkkeFunnetException, TekniskException;
+    ;
 
-    String hentSammensattNavn(String fnr) throws FunksjonellException, IntegrasjonException;
+    String hentSammensattNavn(String fnr);
 
-    boolean harStrengtFortroligAdresse(String fnr) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException;
+    boolean harStrengtFortroligAdresse(String fnr);
 }

@@ -9,7 +9,6 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -41,7 +40,7 @@ public class ReplikerBehandling implements StegBehandler {
     }
 
     @Override
-    public void utfør(Prosessinstans prosessinstans) throws TekniskException, FunksjonellException {
+    public void utfør(Prosessinstans prosessinstans) {
         String saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER);
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
 

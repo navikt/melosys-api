@@ -12,7 +12,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,7 +60,7 @@ class EndreBehandlingstemaServiceTest {
     }
 
     @Test
-    void hentMuligeBehandlingstema_gyldigSøknadBehandlingstema_returnererSøknadBehandlinstema() throws IkkeFunnetException {
+    void hentMuligeBehandlingstema_gyldigSøknadBehandlingstema_returnererSøknadBehandlinstema() {
         behandling.setTema(ARBEID_FLERE_LAND);
         when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
 
@@ -70,7 +69,7 @@ class EndreBehandlingstemaServiceTest {
     }
 
     @Test
-    void hentMuligeBehandlingstema_gyldigSEDForespørselBehandlingstema_returnererSEDForespørselBehandlingstema() throws IkkeFunnetException{
+    void hentMuligeBehandlingstema_gyldigSEDForespørselBehandlingstema_returnererSEDForespørselBehandlingstema() {
         behandling.setTema(ØVRIGE_SED_MED);
         when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
 
@@ -79,7 +78,7 @@ class EndreBehandlingstemaServiceTest {
     }
 
     @Test
-    void hentMuligeBehandlingstema_ugyldigBehandlingstema_returnererTomListe() throws IkkeFunnetException{
+    void hentMuligeBehandlingstema_ugyldigBehandlingstema_returnererTomListe() {
         behandling.setTema(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
 
@@ -88,7 +87,7 @@ class EndreBehandlingstemaServiceTest {
     }
 
     @Test
-    void hentMuligeBehandlingstema_inaktivBehandling_returnererTomListe() throws IkkeFunnetException{
+    void hentMuligeBehandlingstema_inaktivBehandling_returnererTomListe() {
         behandling.setTema(ARBEID_FLERE_LAND);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
 
@@ -97,7 +96,7 @@ class EndreBehandlingstemaServiceTest {
     }
 
     @Test
-    void hentMuligeBehandlingstema_erArtikkel16MedSendtAnmodningOmUnntak_returnererTomListe() throws IkkeFunnetException{
+    void hentMuligeBehandlingstema_erArtikkel16MedSendtAnmodningOmUnntak_returnererTomListe() {
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
         anmodningsperiode.setSendtUtland(true);
         behandlingsresultat.setAnmodningsperioder(Set.of(anmodningsperiode));

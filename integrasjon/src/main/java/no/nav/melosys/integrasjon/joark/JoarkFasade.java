@@ -5,42 +5,39 @@ import java.util.List;
 
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 
 public interface JoarkFasade {
 
     /**
      * Ferdigstiller journalføring
      */
-    void ferdigstillJournalføring(String journalpostId) throws FunksjonellException;
+    void ferdigstillJournalføring(String journalpostId);
 
     /**
      * Henter et dokument fra Joark
      */
-    byte[] hentDokument(String journalPostID, String dokumentID) throws SikkerhetsbegrensningException, IkkeFunnetException;
+    byte[] hentDokument(String journalPostID, String dokumentID);
 
     /**
      * Henter en journalpost fra Joark
      */
-    Journalpost hentJournalpost(String journalpostID) throws FunksjonellException;
+    Journalpost hentJournalpost(String journalpostID);
 
     /**
      * Henter en liste med journalposter knyttet til en sak.
      */
-    List<Journalpost> hentJournalposterTilknyttetSak(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest) throws SikkerhetsbegrensningException;
+    List<Journalpost> hentJournalposterTilknyttetSak(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest);
 
     /**
      * Oppretter en journalpost  i Joark
      */
-    String opprettJournalpost(OpprettJournalpost opprettJournalpost, boolean forsøkEndeligJfr) throws FunksjonellException;
+    String opprettJournalpost(OpprettJournalpost opprettJournalpost, boolean forsøkEndeligJfr);
 
     /**
      * Oppdaterer en journalpost og forsøker å ferdigstille hvis forsøkFerdigstill er satt
      */
     void oppdaterJournalpost(String journalpostID, JournalpostOppdatering journalpostOppdatering, boolean forsøkFerdigstill)
-        throws FunksjonellException;
+    ;
 
-    LocalDate hentMottaksDatoForJournalpost(String journalpostID) throws FunksjonellException;
+    LocalDate hentMottaksDatoForJournalpost(String journalpostID);
 }

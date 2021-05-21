@@ -38,7 +38,7 @@ public class AvgiftsgrunnlagInfo {
         return !erSkattepliktig || !betalerArbeidsgiverAvgift;
     }
 
-    public void validerLovligeKominasjonerLønnFraNorge() throws FunksjonellException {
+    public void validerLovligeKominasjonerLønnFraNorge() {
         if (særligAvgiftsgruppe == null && betalerArbeidsgiverAvgift) {
             return;
         }
@@ -51,7 +51,7 @@ public class AvgiftsgrunnlagInfo {
         throw new FunksjonellException("Ulovlig kombinasjon for lønn fra Norge: " + this);
     }
 
-    public void validerLovligeKominasjonerLønnFraUtlandet() throws FunksjonellException {
+    public void validerLovligeKominasjonerLønnFraUtlandet() {
         if (særligAvgiftsgruppe == null && !betalerArbeidsgiverAvgift) {
             return;
         }

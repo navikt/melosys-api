@@ -9,8 +9,6 @@ import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfo;
 import no.nav.melosys.domain.avgift.OppdaterTrygdeavgiftsberegningRequest;
 import no.nav.melosys.domain.avgift.Trygdeavgift;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsberegningsresultat;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer;
 import no.nav.melosys.integrasjon.trygdeavgift.dto.MelosysTrygdeavgfitBeregningDto;
 import no.nav.melosys.service.MedlemAvFolketrygdenService;
@@ -35,7 +33,7 @@ public class TrygdeavgiftsberegningService {
     }
 
     @Transactional
-    public void oppdaterBeregningsgrunnlag(long behandlingsresultatID, OppdaterTrygdeavgiftsberegningRequest request) throws FunksjonellException {
+    public void oppdaterBeregningsgrunnlag(long behandlingsresultatID, OppdaterTrygdeavgiftsberegningRequest request) {
         final var medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID);
 
         if (medlemAvFolketrygden.getVurderingTrygdeavgiftNorskInntekt() == NORSK_INNTEKT_TRYGDEAVGIFT_NAV) {
@@ -54,7 +52,7 @@ public class TrygdeavgiftsberegningService {
     }
 
     @Transactional
-    public void beregnAvgift(long behandlingsresultatID) throws IkkeFunnetException {
+    public void beregnAvgift(long behandlingsresultatID) {
         final var medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID);
         final var medlemskapsperioder = medlemAvFolketrygden.getMedlemskapsperioder();
         final var fastsattTrygdeavgift = medlemAvFolketrygden.getFastsattTrygdeavgift();
@@ -113,7 +111,7 @@ public class TrygdeavgiftsberegningService {
     }
 
     @Transactional(readOnly = true)
-    public Trygdeavgiftsberegningsresultat hentBeregningsresultat(long behandlingsresultatID) throws IkkeFunnetException {
+    public Trygdeavgiftsberegningsresultat hentBeregningsresultat(long behandlingsresultatID) {
         return Trygdeavgiftsberegningsresultat.lag(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID));
     }
 

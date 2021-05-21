@@ -11,7 +11,6 @@ import no.nav.melosys.domain.dokument.DokumentBestiltEvent;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,13 +50,13 @@ class BehandlingEventListenerTest {
     }
 
     @Test
-    void dokumentBestilt_dokumentErInnvilgelsesbrev_ingenAksjon() throws IkkeFunnetException {
+    void dokumentBestilt_dokumentErInnvilgelsesbrev_ingenAksjon() {
         behandlingEventListener.dokumentBestilt(new DokumentBestiltEvent(BEHANDLING_ID, Produserbaredokumenter.INNVILGELSE_YRKESAKTIV));
         verifyNoInteractions(behandlingService);
     }
 
     @Test
-    void dokumentBestilt_dokumentErMangelbrevBehandlingIkkeAktiv_ingenAksjon() throws IkkeFunnetException {
+    void dokumentBestilt_dokumentErMangelbrevBehandlingIkkeAktiv_ingenAksjon() {
         behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         when(behandlingService.hentBehandlingUtenSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
         behandlingEventListener.dokumentBestilt(new DokumentBestiltEvent(BEHANDLING_ID, Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER));
@@ -66,7 +65,7 @@ class BehandlingEventListenerTest {
     }
 
     @Test
-    void dokumentBestilt_dokumentErMangelbrevBehandlingErAktiv_oppdatererStatusOgFrist() throws IkkeFunnetException {
+    void dokumentBestilt_dokumentErMangelbrevBehandlingErAktiv_oppdatererStatusOgFrist() {
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         when(behandlingService.hentBehandlingUtenSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
         behandlingEventListener.dokumentBestilt(new DokumentBestiltEvent(BEHANDLING_ID, Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER));

@@ -22,6 +22,8 @@ public class VedtakServiceFasade {
     private final EosVedtakSystemService eosVedtakSystemService;
     private final FtrlVedtakService ftrlVedtakService;
 
+    public static final int FRIST_KLAGE_UKER = 6;
+
     @Autowired
     public VedtakServiceFasade(BehandlingService behandlingService, EosVedtakService eosVedtakService,
                                EosVedtakSystemService eosVedtakSystemService, FtrlVedtakService ftrlVedtakService) {
@@ -54,7 +56,7 @@ public class VedtakServiceFasade {
     }
 
     @Transactional(noRollbackFor = {ValideringException.class})
-    public void endreVedtak(long behandlingID, Endretperiode endretperiode, String fritekst, String fritekstSed) throws FunksjonellException {
+    public void endreVedtak(long behandlingID, Endretperiode endretperiode, String fritekst, String fritekstSed) {
         var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         Sakstyper sakstype = behandling.getFagsak().getType();
 
@@ -65,7 +67,7 @@ public class VedtakServiceFasade {
         }
     }
 
-    private void validerKanFattesVedtakAvTema(Behandling behandling) throws FunksjonellException {
+    private void validerKanFattesVedtakAvTema(Behandling behandling) {
         if (!behandling.kanResultereIVedtak()) {
             throw new FunksjonellException("Kan ikke fatte vedtak ved behandlingstema " + behandling.getTema().getBeskrivelse());
         }

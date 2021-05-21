@@ -46,7 +46,7 @@ class ProsessinstansAdminTjenesteTest {
     }
 
     @Test
-    void hentFeiledeProsessinstanser() throws SikkerhetsbegrensningException {
+    void hentFeiledeProsessinstanser() {
         Prosessinstans prosessinstans = lagProsessinstans();
 
         when(prosessinstansRepository.findAllByStatus(eq(ProsessStatus.FEILET)))
@@ -64,7 +64,7 @@ class ProsessinstansAdminTjenesteTest {
     }
 
     @Test
-    void restartAlleFeiledeProsessinstanser_treFeilet_restarterIRekkefølge() throws SikkerhetsbegrensningException {
+    void restartAlleFeiledeProsessinstanser_treFeilet_restarterIRekkefølge() {
         Prosessinstans tidligstFeilet = lagProsessinstans(LocalDateTime.now().minusDays(3));
         Prosessinstans nestTidligstFeilet = lagProsessinstans(LocalDateTime.now().minusDays(2));
         Prosessinstans senestFeilet = lagProsessinstans(LocalDateTime.now());
@@ -96,7 +96,7 @@ class ProsessinstansAdminTjenesteTest {
     }
 
     @Test
-    void restartProsessinstans_prosessinstansHarStatusFeilet_blirRestartet() throws FunksjonellException {
+    void restartProsessinstans_prosessinstansHarStatusFeilet_blirRestartet() {
         Prosessinstans prosessinstans = lagProsessinstans();
         UUID uuid = prosessinstans.getId();
 

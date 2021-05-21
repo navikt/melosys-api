@@ -10,8 +10,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.jeasy.random.EasyRandom;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
@@ -23,7 +23,7 @@ public class ForvaltningsmeldingMapperTest {
 
     private EasyRandom easyRandom;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         mapper = new ForvaltningsmeldingMapper();
         // Sparer ~= 10 sek. kjøretid i forhold til å skanne hele

@@ -12,9 +12,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AktoerRepository;
 import no.nav.melosys.service.aktoer.AktoerService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterSystemService;
@@ -49,7 +46,7 @@ class AvklarArbeidsgiverTest {
     private Lovvalgsperiode lovvalgsperiode;
 
     @BeforeEach
-    public void setUp() throws IkkeFunnetException {
+    public void setUp() {
         aktoerService = mock(AktoerService.class);
         avklarArbeidsgiver = new AvklarArbeidsgiver(aktoerService, avklarteVirksomheterService, behandlingService, behandlingsresultatService);
 
@@ -75,7 +72,7 @@ class AvklarArbeidsgiverTest {
     }
 
     @Test
-    void utfør_medAvklartNorskVirksomhet_arbeidsgiveraktørOpprettes() throws FunksjonellException, TekniskException {
+    void utfør_medAvklartNorskVirksomhet_arbeidsgiveraktørOpprettes() {
         AktoerRepository aktoerRepository = mock(AktoerRepository.class);
         AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository), avklarteVirksomheterService,
             behandlingService, behandlingsresultatService);
@@ -96,7 +93,7 @@ class AvklarArbeidsgiverTest {
     }
 
     @Test
-    void utfør_utenAvklartNorskVirksomhet_arbeidsgiveraktorerSlettes() throws FunksjonellException, TekniskException {
+    void utfør_utenAvklartNorskVirksomhet_arbeidsgiveraktorerSlettes() {
         AktoerRepository aktoerRepository = mock(AktoerRepository.class);
         AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository), avklarteVirksomheterService,
             behandlingService, behandlingsresultatService);
@@ -108,7 +105,7 @@ class AvklarArbeidsgiverTest {
     }
 
     @Test
-    void utfør_iverksettVedtakArt12_arbeidsgiverAktoererSkalOpprettes() throws FunksjonellException, TekniskException {
+    void utfør_iverksettVedtakArt12_arbeidsgiverAktoererSkalOpprettes() {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         avklarArbeidsgiver.utfør(prosessinstans);
@@ -116,14 +113,14 @@ class AvklarArbeidsgiverTest {
     }
 
     @Test
-    void utfør_iverksettVedtakArt13_arbeidsgiverAktoererSkalIkkeOpprettes() throws FunksjonellException, TekniskException {
+    void utfør_iverksettVedtakArt13_arbeidsgiverAktoererSkalIkkeOpprettes() {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
         avklarArbeidsgiver.utfør(prosessinstans);
         verify(aktoerService, never()).erstattEksisterendeArbeidsgiveraktører(any(), any());
     }
 
     @Test
-    void utfør_iverksettVedtakAvslagManglendeOppl_arbeidsgiverAktoererSkalIkkeOpprettes() throws FunksjonellException, TekniskException {
+    void utfør_iverksettVedtakAvslagManglendeOppl_arbeidsgiverAktoererSkalIkkeOpprettes() {
         behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
         behandlingsresultat.setLovvalgsperioder(new HashSet<>());
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);

@@ -1,6 +1,8 @@
 package no.nav.melosys.integrasjon.medl;
 
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -22,6 +24,12 @@ public final class MedlPeriodeKonverter {
 
     private static final BiMap<LovvalgBestemmelse, GrunnlagMedl> lovvalgsbestemmelseTilGrunnlagMedlTabell;
     private static final Map<Folketrygdloven_kap2_bestemmelser, GrunnlagMedl> ftrlKap2BestemmelserGrunnLagMedlTabell;
+
+    private static final Collection<LovvalgBestemmelse> TILLEGGSBESTEMMELSER_MAPPES_TIL_MEDL = Set.of(
+        Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_2,
+        Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1,
+        Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5
+    );
 
     static {
         BiMap<LovvalgBestemmelse, GrunnlagMedl> tbl = HashBiMap.create();
@@ -64,7 +72,7 @@ public final class MedlPeriodeKonverter {
     }
 
 
-    public static DekningMedl tilMedlTrygdeDekningEos(Trygdedekninger dekning) throws TekniskException {
+    public static DekningMedl tilMedlTrygdeDekningEos(Trygdedekninger dekning) {
         return switch (dekning) {
             case FULL_DEKNING_EOSFO, FULL_DEKNING_FTRL -> DekningMedl.FULL;
             case UTEN_DEKNING -> DekningMedl.UNNTATT;
@@ -72,7 +80,7 @@ public final class MedlPeriodeKonverter {
         };
     }
 
-    public static DekningMedl tilMedlTrygdeDekningFtrl(Trygdedekninger dekning, Folketrygdloven_kap2_bestemmelser bestemmelse) throws TekniskException {
+    public static DekningMedl tilMedlTrygdeDekningFtrl(Trygdedekninger dekning, Folketrygdloven_kap2_bestemmelser bestemmelse) {
         return switch (bestemmelse) {
             case FTRL_KAP2_2_8, FTRL_KAP2_2_8_FØRSTE_LEDD_A, FTRL_KAP2_2_8_FØRSTE_LEDD_B,
                 FTRL_KAP2_2_8_FØRSTE_LEDD_C, FTRL_KAP2_2_8_FØRSTE_LEDD_D, FTRL_KAP2_2_8_ANDRE_LEDD,
@@ -92,7 +100,7 @@ public final class MedlPeriodeKonverter {
         };
     }
 
-    public static GrunnlagMedl tilGrunnlagMedltype(LovvalgBestemmelse bestemmelse) throws TekniskException {
+    public static GrunnlagMedl tilGrunnlagMedltype(LovvalgBestemmelse bestemmelse) {
         //ART16_2 er pensjon og brukes foreløpig ikke i Melosys
         //ART16_1 og ART16_2 mappes til samme GrunnlMedl
         if (bestemmelse.equals(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2)) {
@@ -105,13 +113,13 @@ public final class MedlPeriodeKonverter {
         return grunnlagMedltype;
     }
 
-    public static GrunnlagMedl tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser bestemmelse) throws TekniskException {
+    public static GrunnlagMedl tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser bestemmelse) {
         return ofNullable(ftrlKap2BestemmelserGrunnLagMedlTabell.get(bestemmelse))
             .orElseThrow(() -> new TekniskException("Folketrygdloven bestemmelse støttes ikke. Kode: " +
                 bestemmelse.getKode() + " Beskrivelse: " + bestemmelse.getBeskrivelse()));
     }
 
-    public static LovvalgBestemmelse tilLovvalgBestemmelse(GrunnlagMedl grunnlagKode) throws TekniskException {
+    public static LovvalgBestemmelse tilLovvalgBestemmelse(GrunnlagMedl grunnlagKode) {
         LovvalgBestemmelse lovvalgBestemmelse = lovvalgsbestemmelseTilGrunnlagMedlTabell.inverse().get(grunnlagKode);
         if (lovvalgBestemmelse == null) {
             throw new TekniskException("GrunnlagMedlKode er ukjent. Kode: " + grunnlagKode.getKode());
@@ -120,11 +128,12 @@ public final class MedlPeriodeKonverter {
     }
 
     public static LovvalgBestemmelse hentLovvalgBestemmelse(PeriodeOmLovvalg lovvalgsperiode) {
-        final boolean harTilleggsbestemmelseART11_4_1 = lovvalgsperiode.getTilleggsbestemmelse() != null && lovvalgsperiode.getTilleggsbestemmelse().equals(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
+        final boolean tilleggsbestemmelseSkalMappes = lovvalgsperiode.getTilleggsbestemmelse() != null
+            && TILLEGGSBESTEMMELSER_MAPPES_TIL_MEDL.contains(lovvalgsperiode.getTilleggsbestemmelse());
 
         LovvalgBestemmelse bestemmelse;
-        if (harTilleggsbestemmelseART11_4_1) {
-            bestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1;
+        if (tilleggsbestemmelseSkalMappes) {
+            bestemmelse = lovvalgsperiode.getTilleggsbestemmelse();
         } else {
             bestemmelse = lovvalgsperiode.getBestemmelse();
         }

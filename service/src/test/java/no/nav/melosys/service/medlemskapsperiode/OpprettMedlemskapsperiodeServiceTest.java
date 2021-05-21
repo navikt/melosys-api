@@ -51,7 +51,7 @@ class OpprettMedlemskapsperiodeServiceTest {
     }
 
     @Test
-    void utledMedlemskapsperioderFraSøknad_dataFraSøknadSatt_lagrerMedlemskapsperioder() throws FunksjonellException {
+    void utledMedlemskapsperioderFraSøknad_dataFraSøknadSatt_lagrerMedlemskapsperioder() {
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
         behandlingsresultat.getVilkaarsresultater().add(lagOppfyltVilkår(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID));
         when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingsresultatID))).thenReturn(behandlingsresultat);
@@ -62,7 +62,7 @@ class OpprettMedlemskapsperiodeServiceTest {
     }
 
     @Test
-    void utledMedlemskapsperioderFraSøknad_oppfyllerIkkeVilkår_kasterFeil() throws FunksjonellException {
+    void utledMedlemskapsperioderFraSøknad_oppfyllerIkkeVilkår_kasterFeil() {
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingsresultatID))).thenReturn(behandlingsresultat);
         assertThatExceptionOfType(FunksjonellException.class)

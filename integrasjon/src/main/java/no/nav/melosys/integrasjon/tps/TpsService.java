@@ -15,7 +15,6 @@ import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.person.Informasjonsbehov;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -54,7 +53,7 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    public Saksopplysning hentPerson(String ident, Informasjonsbehov behov) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    public Saksopplysning hentPerson(String ident, Informasjonsbehov behov) {
         PersonMedKilde personMedKilde = hentPersonMedKilde(ident, mapInformasjonsbehovTilTps(behov));
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.leggTilKildesystemOgMottattDokument(
@@ -73,7 +72,7 @@ public class TpsService implements TpsFasade {
         return saksopplysning;
     }
 
-    private PersonMedKilde hentPersonMedKilde(String ident, Set<no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov> behov) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
+    private PersonMedKilde hentPersonMedKilde(String ident, Set<no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov> behov) {
         HentPersonRequest request = new HentPersonRequest();
         NorskIdent norskIdent = new NorskIdent();
         norskIdent.setIdent(ident);
@@ -108,7 +107,7 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    public Saksopplysning hentPersonhistorikk(String ident, LocalDate dato) throws SikkerhetsbegrensningException, IkkeFunnetException, IntegrasjonException {
+    public Saksopplysning hentPersonhistorikk(String ident, LocalDate dato) {
         HentPersonhistorikkRequest request = new HentPersonhistorikkRequest();
         NorskIdent norskIdent = new NorskIdent();
         norskIdent.setIdent(ident);
@@ -163,14 +162,14 @@ public class TpsService implements TpsFasade {
     }
 
     @Override
-    public String hentSammensattNavn(String fnr) throws FunksjonellException, IntegrasjonException {
+    public String hentSammensattNavn(String fnr) {
         Saksopplysning tpsOpplysning = hentPerson(fnr, Informasjonsbehov.INGEN);
         PersonDokument personDokument = (PersonDokument) tpsOpplysning.getDokument();
         return personDokument != null ? personDokument.sammensattNavn : null;
     }
 
     @Override
-    public boolean harStrengtFortroligAdresse(String fnr) throws IkkeFunnetException, SikkerhetsbegrensningException, IntegrasjonException {
+    public boolean harStrengtFortroligAdresse(String fnr) {
         Saksopplysning saksopplysning = hentPerson(fnr, Informasjonsbehov.INGEN);
         PersonDokument personDokument = (PersonDokument) saksopplysning.getDokument();
         return personDokument.diskresjonskode != null && personDokument.diskresjonskode.erKode6();

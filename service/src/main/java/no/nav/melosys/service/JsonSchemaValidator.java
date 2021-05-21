@@ -47,31 +47,31 @@ public class JsonSchemaValidator {
         this(DEFAULT_OBJECT_MAPPER, DEFAULT_JSON_SCHEMA_FACTORY);
     }
 
-    public void valider(Object object, String schemaNavn) throws TekniskException {
+    public void valider(Object object, String schemaNavn) {
         valider(objektTilString(object), schemaNavn);
     }
 
-    public void valider(String json, String schemaNavn) throws TekniskException {
+    public void valider(String json, String schemaNavn) {
         valider(tilJsonNode(json), hentSchema(schemaNavn));
     }
 
-    public void valider(String json, InputStream schemaStream) throws TekniskException {
+    public void valider(String json, InputStream schemaStream) {
         valider(json, schemaStream, log);
     }
 
-    public void valider(String json, InputStream schemaStream, Logger logger) throws TekniskException {
+    public void valider(String json, InputStream schemaStream, Logger logger) {
         valider(tilJsonNode(json), hentSchema(schemaStream), logger);
     }
 
-    public void valider(Object o, InputStream schemaStream) throws TekniskException {
+    public void valider(Object o, InputStream schemaStream) {
         valider(objektTilString(o), schemaStream, log);
     }
 
-    public void valider(ArrayNode arrayNode, InputStream schemaStream) throws TekniskException {
+    public void valider(ArrayNode arrayNode, InputStream schemaStream) {
         valider(arrayNode, schemaStream, log);
     }
 
-    public void valider(ArrayNode arrayNode, InputStream schemaStream, Logger logger) throws TekniskException {
+    public void valider(ArrayNode arrayNode, InputStream schemaStream, Logger logger) {
         valider(arrayNode, hentSchema(schemaStream), logger);
     }
 
@@ -82,7 +82,7 @@ public class JsonSchemaValidator {
         }
     }
 
-    public void valider(JsonNode jsonObject, InputStream schemaStream, Logger logger) throws TekniskException {
+    public void valider(JsonNode jsonObject, InputStream schemaStream, Logger logger) {
         valider(jsonObject, hentSchema(schemaStream), logger);
     }
 
@@ -97,7 +97,7 @@ public class JsonSchemaValidator {
         }
     }
 
-    private String objektTilString(Object object) throws TekniskException {
+    private String objektTilString(Object object) {
         try {
             return objectMapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
@@ -105,7 +105,7 @@ public class JsonSchemaValidator {
         }
     }
 
-    private JsonNode tilJsonNode(String jsonString) throws TekniskException {
+    private JsonNode tilJsonNode(String jsonString) {
         try {
             return objectMapper.readTree(jsonString);
         } catch (JsonProcessingException e) {

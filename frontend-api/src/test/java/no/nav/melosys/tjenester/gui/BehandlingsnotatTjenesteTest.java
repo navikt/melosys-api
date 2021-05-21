@@ -11,20 +11,16 @@ import no.nav.melosys.domain.Behandlingsnotat;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.BehandlingsnotatService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsnotatGetDto;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsnotatPostDto;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -33,7 +29,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class BehandlingsnotatTjenesteTest extends JsonSchemaTestParent {
 
     private static final String BEHANDLINGNOTAT_GET_SCHEMA = "fagsaker-notater-schema.json";
@@ -52,14 +48,14 @@ public class BehandlingsnotatTjenesteTest extends JsonSchemaTestParent {
 
     private BehandlingsnotatTjeneste behandlingsnotatTjeneste;
 
-    @Before
-    public void setup() throws TekniskException {
+    @BeforeEach
+    public void setup() {
         behandlingsnotatTjeneste = new BehandlingsnotatTjeneste(behandlingsnotatService, saksbehandlerService, tilgangService);
         when(saksbehandlerService.finnNavnForIdent(eq(saksbehandler))).thenReturn(Optional.of(saksbehandlerNavn));
     }
 
     @Test
-    public void hentBehandlingsnotaterForFagsak_hentes_validerSchema() throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException, IOException {
+    public void hentBehandlingsnotaterForFagsak_hentes_validerSchema() throws IOException {
 
         final String saksnummer = "MEL-222";
         Behandlingsnotat behandlingsnotat = lagBehandlingsnotat();
@@ -81,7 +77,7 @@ public class BehandlingsnotatTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void oppdaterBehandlingsnotat_blirOppdatert_validerSchema() throws FunksjonellException, TekniskException, IOException {
+    public void oppdaterBehandlingsnotat_blirOppdatert_validerSchema() throws IOException {
 
         BehandlingsnotatPostDto req = new BehandlingsnotatPostDto();
         req.setTekst("teteteksssst");
@@ -97,7 +93,7 @@ public class BehandlingsnotatTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void opprettBehandlingsnotat_blirOpprettet_validerSchema() throws FunksjonellException, TekniskException, IOException {
+    public void opprettBehandlingsnotat_blirOpprettet_validerSchema() throws IOException {
 
         BehandlingsnotatPostDto req = new BehandlingsnotatPostDto();
         req.setTekst("teteteksssst");

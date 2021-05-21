@@ -4,14 +4,14 @@ import java.util.Collections;
 
 import no.nav.melosys.domain.arkiv.DokumentVariant;
 import no.nav.melosys.domain.arkiv.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class OpprettJournalpostRequestTest {
+class OpprettJournalpostRequestTest {
 
     @Test
-    public void av_medGyldigOpprettJournalpost_forventObjekt() {
+    void av_medGyldigOpprettJournalpost_forventObjekt() {
         FysiskDokument hoveddokument = new FysiskDokument();
         hoveddokument.setTittel("tittel");
         hoveddokument.setBrevkode("brevkode");

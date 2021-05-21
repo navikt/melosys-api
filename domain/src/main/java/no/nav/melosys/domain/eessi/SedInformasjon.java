@@ -49,4 +49,8 @@ public class SedInformasjon {
     public String getRinaUrl() {
         return rinaUrl;
     }
+
+    public boolean erAvbrutt() {
+        return "AVBRUTT".equalsIgnoreCase(status);
+    }
 }

@@ -13,7 +13,7 @@ public final class KodeverkUtils {
         throw new UnsupportedOperationException();
     }
 
-    public static <K extends Kodeverk> K dekod(Class<K> clazz, String kode) throws IkkeFunnetException {
+    public static <K extends Kodeverk> K dekod(Class<K> clazz, String kode) {
         for (K k : clazz.getEnumConstants()) {
             if (k.getKode().equals(kode)) {
                 return k;

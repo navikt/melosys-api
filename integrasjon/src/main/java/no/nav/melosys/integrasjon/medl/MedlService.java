@@ -39,7 +39,7 @@ public class MedlService {
         this.objectMapper.registerModule(new JavaTimeModule());
     }
 
-    public Saksopplysning hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom) throws TekniskException {
+    public Saksopplysning hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom) {
         List<MedlemskapsunntakForGet> periodeListeResponse = medlemskapRestConsumer.hentPeriodeListe(fnr, fom, tom);
 
         MedlemskapDokument medlemskapDokument = new MedlemskapDokument();
@@ -82,19 +82,19 @@ public class MedlService {
         return opprettPeriode(fnr, bestemmelse, PeriodestatusMedl.GYLD, LovvalgMedl.ENDL, kildedokumenttypeMedl);
     }
 
-    public Long opprettPeriodeUnderAvklaring(String fnr, PeriodeOmLovvalg periodeOmLovvalg, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
+    public Long opprettPeriodeUnderAvklaring(String fnr, PeriodeOmLovvalg periodeOmLovvalg, KildedokumenttypeMedl kildedokumenttypeMedl) {
         return opprettPeriode(fnr, periodeOmLovvalg, PeriodestatusMedl.UAVK, LovvalgMedl.UAVK, kildedokumenttypeMedl);
     }
 
-    public Long opprettPeriodeForeløpig(String fnr, PeriodeOmLovvalg periodeOmLovvalg, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
+    public Long opprettPeriodeForeløpig(String fnr, PeriodeOmLovvalg periodeOmLovvalg, KildedokumenttypeMedl kildedokumenttypeMedl) {
         return opprettPeriode(fnr, periodeOmLovvalg, PeriodestatusMedl.UAVK, LovvalgMedl.FORL, kildedokumenttypeMedl);
     }
 
-    public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
+    public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) {
         oppdaterPeriode(lovvalgsperiode, PeriodestatusMedl.GYLD, LovvalgMedl.ENDL, kildedokumenttypeMedl);
     }
 
-    public void oppdaterPeriodeForeløpig(Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
+    public void oppdaterPeriodeForeløpig(Lovvalgsperiode lovvalgsperiode, KildedokumenttypeMedl kildedokumenttypeMedl) {
         oppdaterPeriode(lovvalgsperiode, PeriodestatusMedl.UAVK, LovvalgMedl.FORL, kildedokumenttypeMedl);
     }
 
@@ -123,7 +123,7 @@ public class MedlService {
     }
 
     private Long opprettPeriode(String fnr, HarBestemmelse<?> bestemmelse, PeriodestatusMedl periodestatusMedl,
-                                LovvalgMedl lovvalgMedl, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
+                                LovvalgMedl lovvalgMedl, KildedokumenttypeMedl kildedokumenttypeMedl) {
 
         MedlemskapsunntakForPost.MedlemskapsunntakForPostBuilder request = null;
 
@@ -150,7 +150,7 @@ public class MedlService {
         return medlemskapRestConsumer.opprettPeriode(request.build()).getUnntakId();
     }
 
-    private MedlemskapsunntakForPost.MedlemskapsunntakForPostBuilder lovvalgRequest(PeriodeOmLovvalg periodeOmLovvalg) throws TekniskException {
+    private MedlemskapsunntakForPost.MedlemskapsunntakForPostBuilder lovvalgRequest(PeriodeOmLovvalg periodeOmLovvalg) {
         return MedlemskapsunntakForPost.builder()
             .fraOgMed(periodeOmLovvalg.getFom())
             .tilOgMed(periodeOmLovvalg.getTom())
@@ -159,7 +159,7 @@ public class MedlService {
             .grunnlag(tilGrunnlagMedltype(hentLovvalgBestemmelse(periodeOmLovvalg)).getKode());
     }
 
-    private MedlemskapsunntakForPost.MedlemskapsunntakForPostBuilder medlemskapsperiodeRequest(Medlemskapsperiode medlemskapsperiode) throws TekniskException {
+    private MedlemskapsunntakForPost.MedlemskapsunntakForPostBuilder medlemskapsperiodeRequest(Medlemskapsperiode medlemskapsperiode) {
         return MedlemskapsunntakForPost.builder()
             .fraOgMed(medlemskapsperiode.getFom())
             .tilOgMed(medlemskapsperiode.getTom())
@@ -169,7 +169,7 @@ public class MedlService {
     }
 
     private void oppdaterPeriode(Lovvalgsperiode lovvalgsperiode, PeriodestatusMedl periodestatusMedl,
-                                 LovvalgMedl lovvalgMedl, KildedokumenttypeMedl kildedokumenttypeMedl) throws TekniskException {
+                                 LovvalgMedl lovvalgMedl, KildedokumenttypeMedl kildedokumenttypeMedl) {
 
         Long medlPeriodeID = lovvalgsperiode.getMedlPeriodeID();
         if (medlPeriodeID == null) {

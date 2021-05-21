@@ -40,7 +40,7 @@ class A1Mapper {
 
     private BrevDataA1 brevData;
 
-    public A1 mapA1(Behandling behandling, Behandlingsresultat resultat, BrevDataA1 brevData) throws TekniskException {
+    public A1 mapA1(Behandling behandling, Behandlingsresultat resultat, BrevDataA1 brevData) {
         this.brevData = brevData;
 
         A1 a1 = new A1();
@@ -68,7 +68,7 @@ class A1Mapper {
         return a1;
     }
 
-    private PersonType mapPerson(PersonDokument personDokument) throws TekniskException {
+    private PersonType mapPerson(PersonDokument personDokument) {
         PersonType person = new PersonType();
         person.setKjoenn(KjoennKode.fromValue(personDokument.kjønn.getKode()));
         person.setStatsborgerskap(mapStatsborgerskap(personDokument.statsborgerskap));
@@ -93,7 +93,7 @@ class A1Mapper {
         }
     }
 
-    private LovvalgsperiodeType mapLovvalgsperiode(Lovvalgsperiode lovvalgsperiode) throws TekniskException {
+    private LovvalgsperiodeType mapLovvalgsperiode(Lovvalgsperiode lovvalgsperiode) {
         LovvalgsperiodeType brevPeriode = new LovvalgsperiodeType();
         brevPeriode.setLovvalgsLand(lovvalgsperiode.getLovvalgsland().getKode());
         brevPeriode.setLovvalgsbestemmelse(LovvalgsbestemmelseKode.fromValue(lovvalgsperiode.getBestemmelse().getKode()));

@@ -3,8 +3,6 @@ package no.nav.melosys.service.ldap;
 import java.util.Collections;
 import java.util.Optional;
 
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.ldap.LdapBruker;
 import no.nav.melosys.integrasjon.ldap.LdapService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
@@ -37,21 +35,21 @@ class SaksbehandlerServiceTest {
     }
 
     @Test
-    void harTilgangTilMelosys_harKorrektAdGruppe_harTilgang() throws TekniskException, IkkeFunnetException {
+    void harTilgangTilMelosys_harKorrektAdGruppe_harTilgang() {
         when(brukeroppslag.finnBrukerinformasjon(eq(ident)))
             .thenReturn(Optional.of(new LdapBruker("navn", Collections.singleton(melosysAdGruppe))));
         assertThat(saksbehandlerService.harTilgangTilMelosys()).isTrue();
     }
 
     @Test
-    void harTilgangTilMelosys_harIkkeKorrektAdGruppe_harTilgang() throws TekniskException, IkkeFunnetException {
+    void harTilgangTilMelosys_harIkkeKorrektAdGruppe_harTilgang() {
         when(brukeroppslag.finnBrukerinformasjon(eq(ident)))
             .thenReturn(Optional.of(new LdapBruker("navn", Collections.emptyList())));
         assertThat(saksbehandlerService.harTilgangTilMelosys()).isFalse();
     }
 
     @Test
-    void finnNavnForIdent_brukerEksistererKallerToGanger_returnerNavnLdapSkalKunKallesEnGang() throws TekniskException {
+    void finnNavnForIdent_brukerEksistererKallerToGanger_returnerNavnLdapSkalKunKallesEnGang() {
         LdapBruker ldapBruker = new LdapBruker("navnesen navn", Collections.emptyList());
         when(brukeroppslag.finnBrukerinformasjon(eq(ident))).thenReturn(Optional.of(ldapBruker));
 

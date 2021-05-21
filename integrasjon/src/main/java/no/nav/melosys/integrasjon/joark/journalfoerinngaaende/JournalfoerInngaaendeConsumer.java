@@ -18,12 +18,12 @@ public class JournalfoerInngaaendeConsumer implements JsonRestIntegrasjon {
         this.restTemplate = restTemplate;
     }
 
-    public GetJournalpostResponse hentJournalpost(String journalpostID) throws SikkerhetsbegrensningException, IntegrasjonException {
+    public GetJournalpostResponse hentJournalpost(String journalpostID) {
         return exchange("/journalposter/{journalpostID}", HttpMethod.GET,
             new HttpEntity<>(getDefaultHeaders()), GetJournalpostResponse.class, journalpostID);
     }
 
-    private <T> T exchange(String uri, HttpMethod method, HttpEntity<?> entity, Class<T> clazz, Object... variabler) throws SikkerhetsbegrensningException, IntegrasjonException {
+    private <T> T exchange(String uri, HttpMethod method, HttpEntity<?> entity, Class<T> clazz, Object... variabler) {
         try {
             return restTemplate.exchange(uri, method, entity, clazz, variabler).getBody();
         } catch (HttpStatusCodeException ex) {

@@ -22,11 +22,13 @@ import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.PersonUtenAdresseDto;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import static no.nav.melosys.domain.SaksopplysningType.PERSHIST;
@@ -36,8 +38,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SaksopplysningerTilDtoTest {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class SaksopplysningerTilDtoTest {
 
     private DokumentFactory dokumentFactory;
 
@@ -46,7 +49,7 @@ public class SaksopplysningerTilDtoTest {
 
     private SaksopplysningerTilDto saksopplysningerTilDto;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         saksopplysningerTilDto = new SaksopplysningerTilDto(kodeverkService);
         Jaxb2Marshaller marshaller = JaxbConfig.jaxb2Marshaller();
@@ -57,7 +60,7 @@ public class SaksopplysningerTilDtoTest {
     }
 
     @Test
-    public void testArbeidsforholdSortering() {
+    void testArbeidsforholdSortering() {
         List<Arbeidsforhold> arbeidsforholdListe = new ArrayList<>();
         Arbeidsforhold a1 = new Arbeidsforhold();
         a1.ansettelsesPeriode = new Periode(LocalDate.now(), LocalDate.MAX);
@@ -79,7 +82,7 @@ public class SaksopplysningerTilDtoTest {
     }
 
     @Test
-    public void testMedlemsperioderKronologisk(){
+    void testMedlemsperioderKronologisk(){
         List<Medlemsperiode> medlemsperioder = new ArrayList<>() ;
         Medlemsperiode medlemsperiode1 = new Medlemsperiode();
         medlemsperiode1.type = "PMMEDSKP";
@@ -111,7 +114,7 @@ public class SaksopplysningerTilDtoTest {
     }
 
     @Test
-    public void testKonverteringPersonMedStatsborgerskap() {
+    void testKonverteringPersonMedStatsborgerskap() {
         Saksopplysning personDokument = lagDokument("88888888882.xml", PERSOPL, "3.0");
         Saksopplysning personhistorikkDokument = lagDokument("88888888882_historikk.xml", PERSHIST, "3.4");
 

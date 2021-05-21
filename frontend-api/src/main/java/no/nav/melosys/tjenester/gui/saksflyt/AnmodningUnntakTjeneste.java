@@ -8,7 +8,8 @@ import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
-import no.nav.melosys.tjenester.gui.dto.AnmodningUnntakDto;
+import no.nav.melosys.tjenester.gui.dto.saksflyt.anmodningunntak.AnmodningUnntakDto;
+import no.nav.melosys.tjenester.gui.dto.saksflyt.anmodningunntak.AnmodningUnntakSvarDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -47,11 +48,11 @@ public class AnmodningUnntakTjeneste {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping(value = "{behandlingID}/svar", consumes = MediaType.TEXT_PLAIN_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
+    @PostMapping("{behandlingID}/svar")
     @ApiOperation(value = "Sender et svar på anmodning om unntak basert på AnmodningsperiodeSvar som er registrert på behandlingen")
-    public ResponseEntity<Void> svar(@PathVariable("behandlingID") long behandlingID) {
+    public ResponseEntity<Void> svar(@PathVariable("behandlingID") long behandlingID, @RequestBody AnmodningUnntakSvarDto anmodningUnntakSvarDto) {
         tilgangService.sjekkTilgang(behandlingID);
-        anmodningUnntakService.anmodningOmUnntakSvar(behandlingID);
+        anmodningUnntakService.anmodningOmUnntakSvar(behandlingID, anmodningUnntakSvarDto.ytterligereInfo());
         return ResponseEntity.ok().build();
     }
 }

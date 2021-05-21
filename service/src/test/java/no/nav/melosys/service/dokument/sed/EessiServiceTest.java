@@ -16,9 +16,7 @@ import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
@@ -96,7 +94,7 @@ class EessiServiceTest {
         return behandling;
     }
 
-    private void mockBehandling() throws IkkeFunnetException {
+    private void mockBehandling() {
         when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(lagBehandling());
     }
 
@@ -115,12 +113,12 @@ class EessiServiceTest {
         return behandlingsresultat;
     }
 
-    private void mockBehandlingsresultat() throws IkkeFunnetException {
+    private void mockBehandlingsresultat() {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(lagBehandlingsresultat());
     }
 
     @Test
-    void lagEessiVedlegg() throws IkkeFunnetException, IntegrasjonException, SikkerhetsbegrensningException {
+    void lagEessiVedlegg() {
         final Journalpost journalpost = lagJournalpost(List.of(lagArkivDokument("1"), lagArkivDokument("2")));
         final String journalpostID = journalpost.getJournalpostId();
         DokumentReferanse dokumentReferanse = new DokumentReferanse(journalpostID, "2");
@@ -355,7 +353,7 @@ class EessiServiceTest {
         when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
         mockBehandlingsresultat();
 
-        eessiService.sendAnmodningUnntakSvar(BEHANDLING_ID);
+        eessiService.sendAnmodningUnntakSvar(BEHANDLING_ID, null);
 
         verify(behandlingService).hentBehandling(BEHANDLING_ID);
         verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.ANMODNINGSPERIODE));
@@ -462,7 +460,7 @@ class EessiServiceTest {
     }
 
     @Test
-    void hentSedTypeForAnmodningUnntakSvar_forventA002() throws IkkeFunnetException {
+    void hentSedTypeForAnmodningUnntakSvar_forventA002() {
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
         behandlingsresultat.hentValidertAnmodningsperiode()
             .getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
@@ -474,7 +472,7 @@ class EessiServiceTest {
     }
 
     @Test
-    void hentSedTypeForAnmodningUnntakSvar_forventA011() throws IkkeFunnetException {
+    void hentSedTypeForAnmodningUnntakSvar_forventA011() {
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
         behandlingsresultat.hentValidertAnmodningsperiode()
             .getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);

@@ -7,10 +7,6 @@ import java.util.stream.Collectors;
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.melosys.service.medlemskapsperiode.OpprettMedlemskapsperiodeService;
@@ -41,7 +37,7 @@ public class MedlemskapsperiodeTjeneste {
     }
 
     @GetMapping("/behandlinger/{behandlingID}/medlemskapsperioder")
-    public ResponseEntity<Collection<MedlemskapsperiodeDto>> hentMedlemskapsperioder(@PathVariable("behandlingID") long behandlingID) throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public ResponseEntity<Collection<MedlemskapsperiodeDto>> hentMedlemskapsperioder(@PathVariable("behandlingID") long behandlingID) {
         tilgangService.sjekkTilgang(behandlingID);
         return ResponseEntity.ok(
             medlemskapsperiodeService.hentMedlemskapsperioder(behandlingID)
@@ -53,7 +49,7 @@ public class MedlemskapsperiodeTjeneste {
 
     @PostMapping("/behandlinger/{behandlingID}/medlemskapsperioder")
     public ResponseEntity<MedlemskapsperiodeDto> opprettMedlemskapsperiode(@PathVariable("behandlingID") long behandlingID,
-                                                                           @RequestBody MedlemskapsperiodeOppdatering medlemskapsperiodeOppdatering) throws FunksjonellException, TekniskException {
+                                                                           @RequestBody MedlemskapsperiodeOppdatering medlemskapsperiodeOppdatering) {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         return ResponseEntity.ok(
             MedlemskapsperiodeDto.av(
@@ -70,7 +66,7 @@ public class MedlemskapsperiodeTjeneste {
     @PutMapping("/behandlinger/{behandlingID}/medlemskapsperioder/{medlemskapsperiodeID}")
     public ResponseEntity<MedlemskapsperiodeDto> oppdaterMedlemskapsperiode(@PathVariable("behandlingID") long behandlingID,
                                                                             @PathVariable("medlemskapsperiodeID") long medlemskapsperiodeID,
-                                                                            @RequestBody MedlemskapsperiodeOppdatering medlemskapsperiodeOppdatering) throws FunksjonellException, TekniskException {
+                                                                            @RequestBody MedlemskapsperiodeOppdatering medlemskapsperiodeOppdatering) {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         return ResponseEntity.ok(
             MedlemskapsperiodeDto.av(
@@ -88,7 +84,7 @@ public class MedlemskapsperiodeTjeneste {
 
     @DeleteMapping("/behandlinger/{behandlingID}/medlemskapsperioder/{medlemskapsperiodeID}")
     public ResponseEntity<Void> slettMedlemskapsperiode(@PathVariable("behandlingID") long behandlingID,
-                                                        @PathVariable("medlemskapsperiodeID") long medlemskapsperiodeID) throws FunksjonellException, TekniskException {
+                                                        @PathVariable("medlemskapsperiodeID") long medlemskapsperiodeID) {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         medlemskapsperiodeService.slettMedlemskapsperiode(behandlingID, medlemskapsperiodeID);
         return ResponseEntity.ok().build();
@@ -119,7 +115,7 @@ public class MedlemskapsperiodeTjeneste {
     @PostMapping("/behandlinger/{behandlingID}/medlemskapsperioder/bestemmelser")
     public ResponseEntity<Collection<MedlemskapsperiodeDto>> opprettMedlemskapsperioderFraBestemmelse(@PathVariable("behandlingID") long behandlingID,
                                                                                                       @RequestBody UtledMedlemskapsperiodeDto utledMedlemskapsperiodeDto
-    ) throws FunksjonellException, TekniskException {
+    ) {
 
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         return ResponseEntity.ok(

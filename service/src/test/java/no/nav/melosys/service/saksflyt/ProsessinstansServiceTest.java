@@ -29,7 +29,6 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
@@ -136,7 +135,7 @@ class ProsessinstansServiceTest {
         Behandling behandling = new Behandling();
         Behandlingsresultattyper resultatType = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND;
         String mottakerInstitusjon = "DE:2332";
-        prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, resultatType, "FRITEKST", "FRITEKST_SED", Set.of(mottakerInstitusjon), "BEGRUNNELSE");
+        prosessinstansService.opprettProsessinstansIverksettVedtakEos(behandling, resultatType, "FRITEKST", "FRITEKST_SED", Set.of(mottakerInstitusjon), "BEGRUNNELSE");
 
         verify(prosessinstansRepo).save(piCaptor.capture());
 
@@ -260,7 +259,7 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    void opprettProsessinstansJournalføring_utendlandskMyndighet_settesIProsessinstans() throws IkkeFunnetException {
+    void opprettProsessinstansJournalføring_utendlandskMyndighet_settesIProsessinstans() {
         JournalfoeringOpprettDto journalfoeringDto = lagJournalfoeringOpprettDto();
         journalfoeringDto.setAvsenderType(Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET);
         journalfoeringDto.setAvsenderID("DK");

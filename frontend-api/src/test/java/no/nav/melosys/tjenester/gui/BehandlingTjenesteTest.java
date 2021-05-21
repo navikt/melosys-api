@@ -3,6 +3,7 @@ package no.nav.melosys.tjenester.gui;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import no.nav.melosys.domain.dokument.DokumentView;
@@ -14,16 +15,14 @@ import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.EndreBehandlingstemaService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
-import no.nav.melosys.tjenester.gui.dto.EndreBehandlingsfristDto;
-import no.nav.melosys.tjenester.gui.dto.EndreBehandlingstemaDto;
-import no.nav.melosys.tjenester.gui.dto.TidligereMedlemsperioderDto;
+import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.tildto.SaksopplysningerTilDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
@@ -50,6 +49,8 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     private static final String BEHANDLINGER_SCHEMA = "behandlinger-behandling-schema.json";
     private static final String ENDRE_BEHANDLINGSTEMA_SCHEMA = "behandlinger-endrebehandlingstema-schema.json";
     private static final String ENDRE_BEHANDLINGSTEMA_POST_SCHEMA = "behandlinger-endrebehandlingstema-post-schema.json";
+    private static final String ENDRE_BEHANDLINGSSTATUS_SCHEMA = "behandlinger-status-schema.json";
+    private static final String ENDRE_BEHANDLINGSSTATUS_POST_SCHEMA = "behandlinger-status-post-schema.json";
     private static final long BEHANDLING_ID = 11L;
     private static final List<Long> PERIODE_IDER = Arrays.asList(2L, 3L, 5L);
 
@@ -119,6 +120,18 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
         EndreBehandlingstemaDto endreBehandlingstemaDto = new EndreBehandlingstemaDto();
         endreBehandlingstemaDto.setBehandlingstema(Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND.getKode());
         valider(endreBehandlingstemaDto, ENDRE_BEHANDLINGSTEMA_POST_SCHEMA, log);
+    }
+
+    @Test
+    void hentMuligeBehandlinsstatuserValidering() throws IOException {
+        Collection<Behandlingsstatus> muligeStatuser = behandlingTjeneste.hentMuligeStatuser(BEHANDLING_ID).getBody();
+        validerArray(muligeStatuser, ENDRE_BEHANDLINGSSTATUS_SCHEMA, log);
+    }
+
+    @Test
+    void endreBehandlinsstatusValidering() throws Exception {
+        EndreBehandlingsstatusDto behandlingsstatusDto = new EndreBehandlingsstatusDto(Behandlingsstatus.AVVENT_FAGLIG_AVKLARING.getKode());
+        valider(behandlingsstatusDto, ENDRE_BEHANDLINGSSTATUS_POST_SCHEMA, log);
     }
 
     @Test

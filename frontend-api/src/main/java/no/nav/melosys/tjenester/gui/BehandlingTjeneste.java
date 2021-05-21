@@ -12,7 +12,6 @@ import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.EndreBehandlingstemaService;
@@ -62,15 +61,14 @@ public class BehandlingTjeneste {
     }
 
     @PostMapping("{behandlingID}/status")
-    @ApiOperation("Oppdaterer status for en behandling. " +
-        "Brukes til å markere om saksbehandler fortsatt venter på dokumentasjon eller om behandling kan gjenopptas.")
-    public ResponseEntity<Void> oppdaterStatus(@PathVariable("behandlingID") long behandlingID,
-                                               @RequestBody BehandlingsstatusDto status)
+    @ApiOperation("Endre status for en gitt behandling.")
+    public ResponseEntity<Void> endreStatus(@PathVariable("behandlingID") long behandlingID,
+                                            @RequestBody EndreBehandlingsstatusDto status)
         {
         log.info("Saksbehandler {} ber om å endre status for behandling {} til {}.", SubjectHandler.getInstance().getUserID(),
-            behandlingID, status.getBehandlingsstatus().getKode());
+            behandlingID, status.behandlingsstatus());
         tilgangService.sjekkTilgang(behandlingID);
-        behandlingService.brukerOppdaterStatus(behandlingID, status.getBehandlingsstatus());
+        behandlingService.brukerOppdaterStatus(behandlingID, Behandlingsstatus.valueOf(status.behandlingsstatus()));
         return ResponseEntity.noContent().build();
     }
 
@@ -172,7 +170,7 @@ public class BehandlingTjeneste {
         return behandlingDto;
     }
 
-    private BehandlingOppsummeringDto tilOppsummeringDto(Behandling behandling) throws TekniskException {
+    private BehandlingOppsummeringDto tilOppsummeringDto(Behandling behandling) {
         BehandlingOppsummeringDto behandlingOppsummeringDto = new BehandlingOppsummeringDto();
         behandlingOppsummeringDto.setBehandlingsstatus(behandling.getStatus());
         behandlingOppsummeringDto.setBehandlingstype(behandling.getType());

@@ -10,9 +10,6 @@ import no.nav.melosys.domain.dokument.DokumentBestiltEvent;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,7 +31,7 @@ public class BehandlingEventListener {
     }
 
     @TransactionalEventListener
-    public void dokumentBestilt(DokumentBestiltEvent dokumentBestiltEvent) throws IkkeFunnetException {
+    public void dokumentBestilt(DokumentBestiltEvent dokumentBestiltEvent) {
         if (dokumentBestiltEvent.getProduserbaredokumenter() == Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER) {
             Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(dokumentBestiltEvent.getBehandlingID());
             if (behandling.erAktiv()) {
@@ -49,7 +46,7 @@ public class BehandlingEventListener {
 
     @TransactionalEventListener
     @Async
-    public void behandlingsfristEndret(BehandlingsfristEndretEvent behandlingsfristEndretEvent) throws TekniskException, FunksjonellException {
+    public void behandlingsfristEndret(BehandlingsfristEndretEvent behandlingsfristEndretEvent) {
         Behandling behandling = behandlingService.hentBehandling(behandlingsfristEndretEvent.getBehandlingId());
         Optional<Oppgave> oppgave = oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
         if (oppgave.isPresent()) {

@@ -19,7 +19,6 @@ import no.nav.melosys.domain.eessi.melding.Avsender;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.eessi.kafka.EessiMeldingConsumer;
@@ -57,7 +56,7 @@ class SedMottakTestIT {
     }
 
     @Test
-    void mottaSED_mottar3SED_blirBehandletEtterHverandre() throws FunksjonellException {
+    void mottaSED_mottar3SED_blirBehandletEtterHverandre() {
         //Periode på 6 år - fører til et kontrolltreff
         var eessiMeldingA009 = melosysEessiMelding(
             BucType.LA_BUC_04, SedType.A009, new Periode(LocalDate.now(), LocalDate.now().plusYears(6)),
@@ -123,7 +122,7 @@ class SedMottakTestIT {
         return eessiMelding;
     }
 
-    private String opprettEessiJournalpost(SedType sedType) throws FunksjonellException {
+    private String opprettEessiJournalpost(SedType sedType) {
         OpprettJournalpost request = new OpprettJournalpost();
 
         FysiskDokument hovedDokument = new FysiskDokument();

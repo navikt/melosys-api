@@ -4,8 +4,6 @@ import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.TemaFactory;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.sak.SakConsumer;
 import no.nav.melosys.integrasjon.sak.dto.SakDto;
 import org.slf4j.Logger;
@@ -24,7 +22,7 @@ public class ArkivsakService {
         this.sakConsumer = sakConsumer;
     }
 
-    public Long opprettSak(String saksnummer, Behandlingstema behandlingstema, String aktørId) throws FunksjonellException, TekniskException {
+    public Long opprettSak(String saksnummer, Behandlingstema behandlingstema, String aktørId) {
         SakDto sakDto = new SakDto();
 
         sakDto.setTema(TemaFactory.fraBehandlingstema(behandlingstema).getKode());
@@ -36,7 +34,7 @@ public class ArkivsakService {
         return sakDto.getId();
     }
 
-    public Tema hentTemaFraSak(Long gsakSaksnummer) throws FunksjonellException, TekniskException {
+    public Tema hentTemaFraSak(Long gsakSaksnummer) {
         return Tema.valueOf(sakConsumer.hentSak(gsakSaksnummer).getTema());
     }
 }

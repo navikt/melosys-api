@@ -3,8 +3,6 @@ package no.nav.melosys.integrasjon.oppgave.konsument;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.felles.FeilResponseDto;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
@@ -88,7 +86,7 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
     }
 
     @Override
-    public OppgaveDto oppdaterOppgave(OppgaveDto request) throws FunksjonellException, TekniskException {
+    public OppgaveDto oppdaterOppgave(OppgaveDto request) {
         return webClient.put()
             .uri(OPPGAVE_URI_MED_ID, request.getId())
             .header(CORRELATION_ID, getCallID())
@@ -100,7 +98,7 @@ public class OppgaveConsumerImpl implements OppgaveConsumer {
     }
 
     @Override
-    public String opprettOppgave(OpprettOppgaveDto request) throws FunksjonellException, TekniskException {
+    public String opprettOppgave(OpprettOppgaveDto request) {
         return webClient.post()
             .uri(OPPGAVE_BASE_URI)
             .header(CORRELATION_ID, getCallID())

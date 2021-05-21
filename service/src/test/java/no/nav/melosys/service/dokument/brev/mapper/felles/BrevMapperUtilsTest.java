@@ -3,10 +3,9 @@ package no.nav.melosys.service.dokument.brev.mapper.felles;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

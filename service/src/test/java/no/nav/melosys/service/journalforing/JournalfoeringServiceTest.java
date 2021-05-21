@@ -19,7 +19,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.journalforing.dto.*;
@@ -101,14 +100,14 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void finnBrukerIdent_brukerIdentErFolkeregisterident_returnererIdent() throws IkkeFunnetException {
+    void finnBrukerIdent_brukerIdentErFolkeregisterident_returnererIdent() {
         journalpost.setBrukerId("123");
         journalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
         assertThat(journalfoeringService.finnBrukerIdent(journalpost)).contains(journalpost.getBrukerId());
     }
 
     @Test
-    void finnBrukerIdent_brukerIdentErAktørId_henterIdent() throws IkkeFunnetException {
+    void finnBrukerIdent_brukerIdentErAktørId_henterIdent() {
         final var ident = "123321";
         journalpost.setBrukerId("123");
         journalpost.setBrukerIdType(BrukerIdType.AKTØR_ID);
@@ -117,14 +116,14 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void finnBrukerIdent_brukerIdentErOrgnr_returnererIngenting() throws IkkeFunnetException {
+    void finnBrukerIdent_brukerIdentErOrgnr_returnererIngenting() {
         journalpost.setBrukerId("123");
         journalpost.setBrukerIdType(BrukerIdType.ORGNR);
         assertThat(journalfoeringService.finnBrukerIdent(journalpost)).isEmpty();
     }
 
     @Test
-    void finnBrukerIdent_brukerErNull_returnererIngenting() throws IkkeFunnetException {
+    void finnBrukerIdent_brukerErNull_returnererIngenting() {
         assertThat(journalfoeringService.finnBrukerIdent(journalpost)).isEmpty();
     }
 
@@ -158,7 +157,7 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void opprettSakOgJournalfør_sakstypeFtrlBehandlingstemaArbeidFlereLand_feilKombinasjonSakstypeBehandlingstemaKasterFeil() throws FunksjonellException {
+    void opprettSakOgJournalfør_sakstypeFtrlBehandlingstemaArbeidFlereLand_feilKombinasjonSakstypeBehandlingstemaKasterFeil() {
         FagsakDto fagsakDto = lagFagsakDto(null, null, null, Sakstyper.FTRL);
         opprettDto.setFagsak(fagsakDto);
         opprettDto.setBehandlingstemaKode(Behandlingstema.ARBEID_FLERE_LAND.getKode());
@@ -170,7 +169,7 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void opprettSakOgJournalfør_fomEtterTom_feiler() throws FunksjonellException {
+    void opprettSakOgJournalfør_fomEtterTom_feiler() {
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MAX, LocalDate.MIN, "DK", Sakstyper.EU_EOS);
         opprettDto.setFagsak(fagsakDto);
         when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK), any()))
@@ -196,7 +195,7 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void opprettSakOgJournalfør_sakstypeFtrlFeatureToggleFolketrygdMvpDisabled_kasterException() throws FunksjonellException {
+    void opprettSakOgJournalfør_sakstypeFtrlFeatureToggleFolketrygdMvpDisabled_kasterException() {
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, null, "DK", Sakstyper.FTRL);
         opprettDto.setFagsak(fagsakDto);
         opprettDto.setBehandlingstemaKode(Behandlingstema.ARBEID_I_UTLANDET.getKode());
@@ -223,7 +222,7 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void opprettSakOgJournalfør_oppgaveID_mangler() throws FunksjonellException {
+    void opprettSakOgJournalfør_oppgaveID_mangler() {
         opprettDto.setOppgaveID(null);
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
@@ -288,7 +287,7 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void opprettOgJournalfør_brukerIDMangler_kasterException() throws FunksjonellException {
+    void opprettOgJournalfør_brukerIDMangler_kasterException() {
         opprettDto.setBrukerID(null);
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
@@ -298,7 +297,7 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void opprettOgJournalfør_journalpostErFerdigstilt_kasterException() throws FunksjonellException {
+    void opprettOgJournalfør_journalpostErFerdigstilt_kasterException() {
         journalpost.setErFerdigstilt(true);
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
@@ -350,7 +349,7 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void tilordneSakOgJournalfør_saksnr_mangler() throws FunksjonellException {
+    void tilordneSakOgJournalfør_saksnr_mangler() {
         tilordneDto.setSaksnummer("");
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 

@@ -13,10 +13,7 @@ import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
@@ -51,8 +48,7 @@ public class AnmodningsperiodeTjeneste {
     @GetMapping("{behandlingID}")
     @ApiOperation(value = "Henter anmodningsperioder for en gitt behandling", response = AnmodningsperiodeSkrivDto.class)
     @ApiResponses({@ApiResponse(code = 404, message = "Dersom behandlingID-en ikke fins.")})
-    public AnmodningsperiodeGetDto hentAnmodningsperioder(@PathVariable("behandlingID") long behandlingID)
-        throws IkkeFunnetException, SikkerhetsbegrensningException, TekniskException {
+    public AnmodningsperiodeGetDto hentAnmodningsperioder(@PathVariable("behandlingID") long behandlingID) {
         tilgangService.sjekkTilgang(behandlingID);
         return AnmodningsperiodeGetDto.av(anmodningsperiodeService.hentAnmodningsperioder(behandlingID));
     }
@@ -61,8 +57,7 @@ public class AnmodningsperiodeTjeneste {
     @ApiOperation("Lagrer anmodningsperioder for en gitt behandling.")
     @ApiResponses({@ApiResponse(code = 404, message = "Dersom behandlingID-en ikke fins.")})
     public AnmodningsperiodeGetDto lagreAnmodningsperioder(@PathVariable("behandlingID") long behandlingID,
-                                                           @RequestBody AnmodningsperiodePostDto anmodningsperiodePostDto)
-        throws TekniskException, FunksjonellException {
+                                                           @RequestBody AnmodningsperiodePostDto anmodningsperiodePostDto) {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         Collection<Anmodningsperiode> anmodningsperioder = anmodningsperiodeService.lagreAnmodningsperioder(
             behandlingID, anmodningsperiodePostDto.getAnmodningsperioder().stream().map(AnmodningsperiodeSkrivDto::til)
@@ -74,8 +69,7 @@ public class AnmodningsperiodeTjeneste {
     @GetMapping("{anmodningsperiodeID}/svar")
     @ApiOperation("Henter svar på en anmodningsperiode.")
     @ApiResponses({@ApiResponse(code = 404, message = "Dersom anmodningsperioden ikke fins.")})
-    public AnmodningsperiodeSvarDto hentAnmodningsperiodeSvar(@PathVariable("anmodningsperiodeID") long anmodningsperiodeID)
-        throws FunksjonellException, TekniskException {
+    public AnmodningsperiodeSvarDto hentAnmodningsperiodeSvar(@PathVariable("anmodningsperiodeID") long anmodningsperiodeID) {
 
         Optional<Anmodningsperiode> anmodningsperiodeOptional = anmodningsperiodeService.finnAnmodningsperiode(anmodningsperiodeID);
 
@@ -93,8 +87,7 @@ public class AnmodningsperiodeTjeneste {
     @ApiOperation("Lagrer svar på en anmodningsperiode.")
     @ApiResponses({@ApiResponse(code = 404, message = "Dersom anmodningsperioden ikke fins.")})
     public AnmodningsperiodeSvarDto lagreAnmodningsperiodeSvar(@PathVariable("anmodningsperiodeID") long anmodningsperiodeID,
-                                                               @RequestBody AnmodningsperiodeSvarDto anmodningsperiodeSvarDto)
-        throws FunksjonellException, TekniskException {
+                                                               @RequestBody AnmodningsperiodeSvarDto anmodningsperiodeSvarDto) {
 
         long behandlingID = anmodningsperiodeService.finnAnmodningsperiode(anmodningsperiodeID)
             .map(Anmodningsperiode::getBehandlingsresultat)

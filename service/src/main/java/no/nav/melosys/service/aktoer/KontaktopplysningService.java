@@ -35,7 +35,7 @@ public class KontaktopplysningService {
         return kontaktopplysning;
     }
 
-    public void slettKontaktopplysning(String saksnummer, String orgnr) throws FunksjonellException {
+    public void slettKontaktopplysning(String saksnummer, String orgnr) {
         try {
             kontaktopplysningRepository.deleteById(new KontaktopplysningID(saksnummer, orgnr));
         } catch (EmptyResultDataAccessException e) {

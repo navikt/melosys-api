@@ -14,7 +14,7 @@ import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.inntekt.inntektstype.YtelseFraOffentlige;
 import no.nav.melosys.domain.dokument.utbetaling.Utbetaling;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
