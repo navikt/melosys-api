@@ -73,8 +73,7 @@ public class SedDataBygger {
                 .orElseThrow(() -> new FunksjonellException("Finner ingen bostedsadresse på person i behandling " + behandlingsresultat.getId())));
             sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, periodeType));
         }
-        VedtakDto vedtakDto = lagVedtakDto(behandlingsresultat);
-        sedDataDto.setVedtakDto(vedtakDto);
+        sedDataDto.setVedtakDto(lagVedtakDto(behandlingsresultat));
         sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(dataGrunnlag.getBehandling()));
         sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
         return sedDataDto;
@@ -83,8 +82,7 @@ public class SedDataBygger {
     private VedtakDto lagVedtakDto(Behandlingsresultat behandlingsresultat){
         if (behandlingsresultat.getVedtakMetadata() != null) {
             if (!behandlingsresultat.getVedtakMetadata().getVedtakstype().equals(Vedtakstyper.FØRSTEGANGSVEDTAK)) {
-                LocalDate date = behandlingsresultat.getVedtakMetadata().getVedtaksdato().atZone(ZoneId.systemDefault()).toLocalDate();
-                return new VedtakDto(false, date);
+                return new VedtakDto(false, behandlingsresultat.getVedtakMetadata().getVedtaksdato().atZone(ZoneId.systemDefault()).toLocalDate());
             }
         }
         return new VedtakDto(true,null);
