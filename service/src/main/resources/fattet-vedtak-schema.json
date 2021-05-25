@@ -73,7 +73,7 @@
       },
       "required": [
         "ident",
-        "identifikatorType"
+        "gjelder"
       ]
     }
   },
@@ -92,7 +92,7 @@
           "type": "string"
         },
         "behandlingId": {
-          "type": "string"
+          "type": "integer"
         },
         "saksnummer": {
           "type": "string"
@@ -127,7 +127,7 @@
           "$ref": "#/definitions/dato"
         },
         "vedtakstype": {
-          "type": "null",
+          "type": "string",
           "enum":[
             "FØRSTEGANGSVEDTAK",
             "KORRIGERT_VEDTAK",
@@ -171,16 +171,16 @@
               "type": "boolean"
             },
             "bruttoLoennPerMnd": {
-              "type": "string"
+              "type": "integer"
             },
             "bruttoLoennUtlandPerMnd": {
-              "type": "string"
+              "type": "integer"
             },
             "mottarNaturalytelser": {
               "type": "boolean"
             },
             "samletVerdiNaturalytelser": {
-              "type": "string"
+              "type": "integer"
             },
             "erArbeidsgiveravgiftHelePerioden": {
               "type": "boolean"
@@ -215,16 +215,16 @@
               "type": "integer"
             },
             "andelOmsetningINorge": {
-              "type": "string"
+              "type": "integer"
             },
             "andelOppdragINorge": {
-              "type": "string"
+              "type": "integer"
             },
             "andelKontrakterINorge": {
-              "type": "string"
+              "type": "integer"
             },
             "andelRekruttertINorge": {
-              "type": "string"
+              "type": "integer"
             },
             "ekstraArbeidsgivere": {
               "type": "array",
@@ -418,8 +418,7 @@
         }
       },
       "required": [
-        "identifikator",
-        "type"
+        "identifikator"
       ]
     },
     "representantAvgift": {
