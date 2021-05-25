@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon.utbetaldata.utbetaling;
 
-import no.nav.tjeneste.virksomhet.utbetaling.v1.binding.UtbetalingV1;
+import no.nav.tjeneste.virksomhet.utbetaling.v1.UtbetalingV1;
 
 public class UtbetalingSelftestConsumerImpl implements UtbetalingSelftestConsumer {
     private UtbetalingV1 port;

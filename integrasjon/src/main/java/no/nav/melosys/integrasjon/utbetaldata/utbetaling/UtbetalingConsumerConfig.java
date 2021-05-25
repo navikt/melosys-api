@@ -5,7 +5,7 @@ import java.util.Map;
 import javax.xml.namespace.QName;
 
 import no.nav.melosys.integrasjon.felles.mdc.CallIdOutInterceptor;
-import no.nav.tjeneste.virksomhet.utbetaling.v1.binding.UtbetalingV1;
+import no.nav.tjeneste.virksomhet.utbetaling.v1.UtbetalingV1;
 import org.apache.cxf.ext.logging.LoggingFeature;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.apache.cxf.ws.addressing.WSAddressingFeature;
