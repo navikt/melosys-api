@@ -17,38 +17,6 @@ public record MedlemskapsperiodeDto (long id,
                                      Trygdedekninger trygdedekning,
                                      Medlemskapstyper medlemskapstype) {
 
-    public long getId() {
-        return id;
-    }
-
-    public String getArbeidsland() {
-        return arbeidsland;
-    }
-
-    public LocalDate getFomDato() {
-        return fomDato;
-    }
-
-    public LocalDate getTomDato() {
-        return tomDato;
-    }
-
-    public Folketrygdloven_kap2_bestemmelser getBestemmelse() {
-        return bestemmelse;
-    }
-
-    public InnvilgelsesResultat getInnvilgelsesResultat() {
-        return innvilgelsesResultat;
-    }
-
-    public Trygdedekninger getTrygdedekning() {
-        return trygdedekning;
-    }
-
-    public Medlemskapstyper getMedlemskapstype() {
-        return medlemskapstype;
-    }
-
     public static MedlemskapsperiodeDto av(Medlemskapsperiode medlemskapsperiode) {
         return new MedlemskapsperiodeDto(
             medlemskapsperiode.getId(),
