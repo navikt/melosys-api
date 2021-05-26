@@ -64,9 +64,9 @@ class MedlemskapsperiodeTjenesteTest extends JsonSchemaTestParent {
 
         assertThat(res.getBody()).hasSize(1)
             .flatExtracting(
-                MedlemskapsperiodeDto::getId, MedlemskapsperiodeDto::getArbeidsland, MedlemskapsperiodeDto::getBestemmelse,
-                MedlemskapsperiodeDto::getFomDato, MedlemskapsperiodeDto::getTomDato, MedlemskapsperiodeDto::getTrygdedekning,
-                MedlemskapsperiodeDto::getInnvilgelsesResultat, MedlemskapsperiodeDto::getMedlemskapstype)
+                MedlemskapsperiodeDto::id, MedlemskapsperiodeDto::arbeidsland, MedlemskapsperiodeDto::bestemmelse,
+                MedlemskapsperiodeDto::fomDato, MedlemskapsperiodeDto::tomDato, MedlemskapsperiodeDto::trygdedekning,
+                MedlemskapsperiodeDto::innvilgelsesResultat, MedlemskapsperiodeDto::medlemskapstype)
             .containsExactly(
                 medlemskapsperiode.getId(), medlemskapsperiode.getArbeidsland(), medlemskapsperiode.getBestemmelse(),
                 medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getDekning(),
