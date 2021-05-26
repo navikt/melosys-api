@@ -93,20 +93,11 @@ public final class SoeknadMapper {
         final ArbeidsstedType arbeidsstedType = ArbeidsstedType.valueOf(arbeidssted.getTypeArbeidssted().toUpperCase());
 
         switch (arbeidsstedType) {
-            case LAND:
-                soeknad.arbeidPaaLand = lagArbeidPåLand(arbeidssted.getArbeidPaaLand());
-                break;
-            case OFFSHORE:
-                soeknad.maritimtArbeid = lagOffshoreArbeid(arbeidssted.getOffshoreEnheter());
-                break;
-            case SKIPSFART:
-                soeknad.maritimtArbeid = lagArbeidPåSkip(arbeidssted.getSkipListe());
-                break;
-            case LUFTFART:
-                soeknad.luftfartBaser = lagLuftfartBaser(arbeidssted.getLuftfart());
-                break;
-            default:
-                throw new IllegalArgumentException("ArbeidsstedType ikke støttet: " + arbeidsstedType);
+            case LAND -> soeknad.arbeidPaaLand = lagArbeidPåLand(arbeidssted.getArbeidPaaLand());
+            case OFFSHORE -> soeknad.maritimtArbeid = lagOffshoreArbeid(arbeidssted.getOffshoreEnheter());
+            case SKIPSFART -> soeknad.maritimtArbeid = lagArbeidPåSkip(arbeidssted.getSkipListe());
+            case LUFTFART -> soeknad.luftfartBaser = lagLuftfartBaser(arbeidssted.getLuftfart());
+            default -> throw new IllegalArgumentException("ArbeidsstedType ikke støttet: " + arbeidsstedType);
         }
     }
 
@@ -142,15 +133,10 @@ public final class SoeknadMapper {
     }
 
     private static Innretningstyper mapInnretningstyper(OffshoreEnhetstype offshoreEnhetstype) {
-        switch (offshoreEnhetstype) {
-            case BORESKIP:
-                return Innretningstyper.BORESKIP;
-            case PLATTFORM:
-            case ANNEN_STASJONAER_ENHET:
-                return Innretningstyper.PLATTFORM;
-            default:
-                return Innretningstyper.valueOf(offshoreEnhetstype.toString().toUpperCase());
-        }
+        return switch (offshoreEnhetstype) {
+            case BORESKIP -> Innretningstyper.BORESKIP;
+            case PLATTFORM, ANNEN_STASJONAER_ENHET -> Innretningstyper.PLATTFORM;
+        };
     }
 
     private static List<MaritimtArbeid> lagArbeidPåSkip(SkipListe skipListe) {
@@ -240,7 +226,7 @@ public final class SoeknadMapper {
     }
 
     private static Utenlandsoppdraget lagUtenlandsoppdraget(no.nav.melosys.soknad_altinn.Utenlandsoppdraget utenlandsoppdraget) {
-        Periode samletUtsendingsperiode = null;
+        Periode samletUtsendingsperiode = new Periode();
         if (Boolean.TRUE.equals(utenlandsoppdraget.isErstatterTidligereUtsendte())
             && utenlandsoppdraget.getSamletUtsendingsperiode() != null) {
             samletUtsendingsperiode = lagPeriode(utenlandsoppdraget.getSamletUtsendingsperiode());
