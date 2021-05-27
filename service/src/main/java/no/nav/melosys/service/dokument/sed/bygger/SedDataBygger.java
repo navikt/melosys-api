@@ -80,10 +80,8 @@ public class SedDataBygger {
     }
 
     private VedtakDto lagVedtakDto(Behandlingsresultat behandlingsresultat){
-        if (behandlingsresultat.getVedtakMetadata() != null) {
-            if (!behandlingsresultat.getVedtakMetadata().getVedtakstype().equals(Vedtakstyper.FØRSTEGANGSVEDTAK)) {
-                return new VedtakDto(false, behandlingsresultat.getVedtakMetadata().getVedtaksdato().atZone(ZoneId.systemDefault()).toLocalDate());
-            }
+        if ((behandlingsresultat.getVedtakMetadata() != null) && (behandlingsresultat.getVedtakMetadata().getVedtakstype() != (Vedtakstyper.FØRSTEGANGSVEDTAK))) {
+            return new VedtakDto(false, behandlingsresultat.getVedtakMetadata().getVedtaksdato().atZone(ZoneId.systemDefault()).toLocalDate());
         }
         return new VedtakDto(true,null);
     }
