@@ -49,6 +49,7 @@ public final class SoeknadMapper {
         }
         soeknad.juridiskArbeidsgiverNorge = lagJuridiskArbeidsgiverNorge(innhold.getArbeidsgiver());
         soeknad.utenlandsoppdraget = lagUtenlandsoppdraget(innhold.getMidlertidigUtsendt().getUtenlandsoppdraget());
+        soeknad.arbeidssituasjonOgOevrig = lagArbeidssituasjonOgOevrig(innhold.getMidlertidigUtsendt());
         return soeknad;
     }
 
@@ -254,6 +255,18 @@ public final class SoeknadMapper {
             utenlandsoppdraget.isDrattPaaEgetInitiativ(),
             utenlandsoppdraget.isErstatterTidligereUtsendte()
         );
+    }
+
+    private static ArbeidssituasjonOgOevrig lagArbeidssituasjonOgOevrig(MidlertidigUtsendt midlertidigUtsendt) {
+        ArbeidssituasjonOgOevrig arbeidssituasjonOgOevrig = new ArbeidssituasjonOgOevrig();
+        arbeidssituasjonOgOevrig.harLoennetArbeidMinstEnMndFoerUtsending = midlertidigUtsendt.isLoennetArbeidMinstEnMnd();
+        arbeidssituasjonOgOevrig.beskrivelseArbeidSisteMnd = midlertidigUtsendt.getBeskrivArbeidSisteMnd();
+        arbeidssituasjonOgOevrig.harAndreArbeidsgivereIUtsendingsperioden = midlertidigUtsendt.isAndreArbeidsgivereIUtsendingsperioden();
+        arbeidssituasjonOgOevrig.beskrivelseAnnetArbeid = midlertidigUtsendt.getBeskrivelseAnnetArbeid();
+        arbeidssituasjonOgOevrig.erSkattepliktig = midlertidigUtsendt.isSkattepliktig();
+        arbeidssituasjonOgOevrig.mottarYtelserNorge = midlertidigUtsendt.isMottaYtelserNorge();
+        arbeidssituasjonOgOevrig.mottarYtelserUtlandet = midlertidigUtsendt.isMottaYtelserUtlandet();
+        return arbeidssituasjonOgOevrig;
     }
 
     private static LocalDate xmlCalTilLocalDate(XMLGregorianCalendar calendar) {

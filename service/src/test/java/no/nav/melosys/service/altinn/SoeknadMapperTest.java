@@ -14,6 +14,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.ArbeidsstedT
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.LuftfartBase;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.MaritimtArbeid;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.ArbeidssituasjonOgOevrig;
 import no.nav.melosys.domain.kodeverk.Innretningstyper;
 import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM;
 import no.nav.melosys.soknad_altinn.ObjectFactory;
@@ -172,6 +173,22 @@ class SoeknadMapperTest {
                 LocalDate.of(2019, 8, 1),
                 LocalDate.of(2019, 8, 6)
             );
+    }
+
+    @Test
+    void testArbeidssituasjonOgOevrig() throws JAXBException {
+        final MedlemskapArbeidEOSM medlemskapArbeidEOSM = parseSøknadXML();
+
+        final Soeknad soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM);
+
+        final ArbeidssituasjonOgOevrig arbeidssituasjonOgOevrig = soeknad.arbeidssituasjonOgOevrig;
+        assertThat(arbeidssituasjonOgOevrig.harLoennetArbeidMinstEnMndFoerUtsending).isTrue();
+        assertThat(arbeidssituasjonOgOevrig.beskrivelseArbeidSisteMnd).isEqualTo("Arbeid siste mnd");
+        assertThat(arbeidssituasjonOgOevrig.harAndreArbeidsgivereIUtsendingsperioden).isFalse();
+        assertThat(arbeidssituasjonOgOevrig.beskrivelseAnnetArbeid).isEqualTo("Annet arbeid");
+        assertThat(arbeidssituasjonOgOevrig.erSkattepliktig).isTrue();
+        assertThat(arbeidssituasjonOgOevrig.mottarYtelserNorge).isFalse();
+        assertThat(arbeidssituasjonOgOevrig.mottarYtelserUtlandet).isFalse();
     }
 
     private MedlemskapArbeidEOSM parseSøknadXML() throws JAXBException {
