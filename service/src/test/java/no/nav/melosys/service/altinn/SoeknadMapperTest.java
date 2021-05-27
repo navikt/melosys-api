@@ -68,7 +68,8 @@ class SoeknadMapperTest {
         assertThat(foretakUtland.adresse.landkode).isEqualTo("BE");
         final var utenlandsoppdraget = soeknad.utenlandsoppdraget;
         assertThat(utenlandsoppdraget.erErstatningTidligereUtsendte).isFalse();
-        assertThat(utenlandsoppdraget.samletUtsendingsperiode).isNull();
+        assertThat(utenlandsoppdraget.samletUtsendingsperiode).isNotNull();
+        assertThat(utenlandsoppdraget.samletUtsendingsperiode.getFom()).isNull();
         assertThat(utenlandsoppdraget.erUtsendelseForOppdragIUtlandet).isFalse();
         assertThat(utenlandsoppdraget.erFortsattAnsattEtterOppdraget).isNull();
         assertThat(utenlandsoppdraget.erAnsattForOppdragIUtlandet).isFalse();
