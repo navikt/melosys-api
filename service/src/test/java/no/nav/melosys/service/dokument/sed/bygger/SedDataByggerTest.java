@@ -1,6 +1,8 @@
 package no.nav.melosys.service.dokument.sed.bygger;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
@@ -20,6 +22,7 @@ import no.nav.melosys.domain.eessi.sed.Virksomhet;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LandvelgerService;
@@ -365,6 +368,23 @@ class SedDataByggerTest {
 
         lagUtkastAssertions(sedData, false);
         assertThat(sedData.getBostedsadresse()).isNull();
+    }
+
+    @Test
+    public void lagVedtakDto_ikkeOpprinneligVedtakMedDagensDato_setterDatoOgVariablerISed(){
+        VedtakMetadata vedtakMetadata = new VedtakMetadata();
+        LocalDate date = LocalDate.now();
+        vedtakMetadata.setVedtaksdato(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        vedtakMetadata.setVedtakstype(Vedtakstyper.KORRIGERT_VEDTAK);
+        behandlingsresultat.setVedtakMetadata(vedtakMetadata);
+
+        SedDataGrunnlagMedSoknad dataGrunnlag = lagDokumentressurser();
+
+        SedDataDto sedData = dataBygger.lag(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
+        assertThat(sedData).isNotNull();
+        assertThat(sedData.getVedtakDto().erFørstegangsVedtak()).isFalse();
+        assertThat(sedData.getVedtakDto().datoForrigeVedtak()).isEqualTo(LocalDate.now()); //Fixme hent ut fagsak og den forrige dato dersom det ligger en tidligere behandling
+
     }
 
     @Test
