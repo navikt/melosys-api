@@ -1,11 +1,11 @@
 package no.nav.melosys.service.dokument.sed.bygger;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Bosted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
@@ -15,26 +15,28 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Diskresjonskode;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.adresse.Gateadresse;
-import no.nav.melosys.domain.eessi.sed.Adresse;
-import no.nav.melosys.domain.eessi.sed.Arbeidssted;
-import no.nav.melosys.domain.eessi.sed.SedDataDto;
-import no.nav.melosys.domain.eessi.sed.Virksomhet;
+import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagMedSoknad;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagUtenSoknad;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
+import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,6 +64,12 @@ class SedDataByggerTest {
     private AvklartefaktaService avklartefaktaService;
     @Mock
     private LandvelgerService landvelgerService;
+    @Mock
+    private BehandlingsresultatService behandlingsresultatService;
+    @Mock
+    private BehandlingsresultatRepository behandlingsresultatRepo;
+    @Mock
+    private VilkaarsresultatService vilkaarsresultatService;
 
     private SedDataBygger dataBygger;
     private Behandling behandling;
@@ -72,6 +80,8 @@ class SedDataByggerTest {
 
     @BeforeEach
     public void setup() {
+        behandlingsresultatService = spy(new BehandlingsresultatService(behandlingsresultatRepo, vilkaarsresultatService));
+
 
         doReturn(DataByggerStubs.hentOrganisasjonDokumentSetStub()).when(registerOppslagService).hentOrganisasjoner(anySet());
 
@@ -101,8 +111,8 @@ class SedDataByggerTest {
         behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
 
         behandling = DataByggerStubs.hentBehandlingStub();
-
-        dataBygger = new SedDataBygger(lovvalgsperiodeService, landvelgerService);
+        behandlingsresultat.setBehandling(behandling);
+        dataBygger = new SedDataBygger(lovvalgsperiodeService, landvelgerService, behandlingsresultatService);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(LocalDate.now());
@@ -371,23 +381,6 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lagVedtakDto_ikkeOpprinneligVedtakMedDagensDato_setterDatoOgVariablerISed(){
-        VedtakMetadata vedtakMetadata = new VedtakMetadata();
-        LocalDate date = LocalDate.now();
-        vedtakMetadata.setVedtaksdato(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        vedtakMetadata.setVedtakstype(Vedtakstyper.KORRIGERT_VEDTAK);
-        behandlingsresultat.setVedtakMetadata(vedtakMetadata);
-
-        SedDataGrunnlagMedSoknad dataGrunnlag = lagDokumentressurser();
-
-        SedDataDto sedData = dataBygger.lag(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
-        assertThat(sedData).isNotNull();
-        assertThat(sedData.getVedtakDto().erFørstegangsVedtak()).isFalse();
-        assertThat(sedData.getVedtakDto().datoForrigeVedtak()).isEqualTo(LocalDate.now()); //Fixme hent ut fagsak og den forrige dato dersom det ligger en tidligere behandling
-
-    }
-
-    @Test
     public void lagUtkast_harIkkeFastArbeidsstedForArbeidsland_arbeidsstedBlirSatt() {
         when(landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(anyLong())).thenReturn(List.of(Landkoder.SE));
         SedDataGrunnlagMedSoknad dataGrunnlag = lagDokumentressurser();
@@ -443,6 +436,33 @@ class SedDataByggerTest {
         assertThat(sedData.getArbeidsgivendeVirksomheter())
             .extracting(Virksomhet::getNavn)
             .doesNotContain("selvstendig");
+    }
+
+    @Test
+    public void lagVedtakDto_ikkeOpprinneligVedtakMedDagensDato_setterDatoOgVariablerISed(){
+        Behandlingsresultat behandlingsresultat1 = new Behandlingsresultat();
+        VedtakMetadata vedtakMetadata = new VedtakMetadata();
+        vedtakMetadata.setVedtaksdato(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
+        behandlingsresultat1.setVedtakMetadata(vedtakMetadata);
+
+        Behandling behandling2 = DataByggerStubs.hentBehandlingStub();
+        behandling2.setStatus(Behandlingsstatus.AVSLUTTET);
+        behandling2.setId(2L);
+        behandlingsresultat1.setBehandling(behandling2);
+
+        ArrayList<Behandling> list = new ArrayList<>();
+        list.add(behandling);
+        list.add(behandling2);
+        behandling.getFagsak().setBehandlinger(list);
+        behandlingsresultat.setBehandling(behandling);
+
+        when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat1));
+        SedDataGrunnlagMedSoknad dataGrunnlag = lagDokumentressurser();
+
+        SedDataDto sedDataDto = dataBygger.lag(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
+        assertThat(sedDataDto).isNotNull();
+        assertThat(sedDataDto.getVedtakDto().erFørstegangsVedtak()).isFalse();
+        assertThat(sedDataDto.getVedtakDto().datoForrigeVedtak()).isEqualTo(LocalDate.now().toString());
     }
 
     @Test
