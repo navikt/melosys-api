@@ -4,7 +4,8 @@
       "adressebeskyttelse": [],
       "bostedsadresse": [
         {
-          "angittFlyttedato": "2020-03-29",
+          "gyldigFraOgMed": "1979-11-18T00:00",
+          "gyldigTilOgMed": null,
           "coAdressenavn": null,
           "matrikkeladresse": null,
           "ukjentBosted": null,
@@ -14,21 +15,33 @@
             "husbokstav": null,
             "tilleggsnavn": null,
             "postnummer": "6713"
+          },
+          "utenlandskAdresse": null,
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2021-05-07T10:04:52",
+                "kilde": "Dolly"
+              }
+            ]
           }
         }
       ],
       "doedsfall": [],
       "foedsel": [
         {
-          "foedselsdato": "1991-02-27",
-          "foedselsaar": null,
-          "foedeland": null,
-          "foedested": null,
+          "foedselsdato": "1979-11-18",
+          "foedselsaar": 1979,
+          "foedeland": "ARG",
+          "foedested": "Fødested i/på ARGENTINA",
           "metadata": {
             "master": "FREG",
             "endringer": [
               {
-                "registrert": "2021-03-30T12:23:06",
+                "registrert": "2021-05-07T10:04:51",
                 "type": "OPPRETT"
               }
             ]
@@ -37,46 +50,32 @@
       ],
       "folkeregisteridentifikator": [
         {
-          "identifikasjonsnummer": "27429104489",
-          "type": "FNR",
+          "identifikasjonsnummer": "58517918383",
+          "type": "DNR",
           "status": "I_BRUK"
         }
       ],
       "folkeregisterpersonstatus": [
         {
-          "forenkletStatus": "bosattEtterFolkeregisterloven",
-          "status": "bosatt"
+          "forenkletStatus": "dNummer",
+          "status": "midlertidig"
         }
       ],
       "forelderBarnRelasjon": [
         {
           "relatertPersonsIdent": "22511596061",
           "relatertPersonsRolle": "BARN",
-          "minRolleForPerson": "MOR"
-        }
-      ],
-      "fullmakt": [
-        {
-          "motpartsPersonident": "18498008107",
-          "motpartsRolle": "FULLMEKTIG",
-          "omraader": [
-            "KLA",
-            "UKJ",
-            "MED",
-            "UFM"
-          ],
-          "gyldigFraOgMed": "2021-04-01",
-          "gyldigTilOgMed": "2023-03-30"
+          "minRolleForPerson": "FAR"
         }
       ],
       "kjoenn": [
         {
-          "kjoenn": "KVINNE",
+          "kjoenn": "MANN",
           "metadata": {
             "master": "FREG",
             "endringer": [
               {
-                "registrert": "2021-03-30T12:23:06",
+                "registrert": "2021-05-07T10:04:51",
                 "type": "OPPRETT"
               }
             ]
@@ -85,10 +84,9 @@
       ],
       "kontaktadresse": [
         {
-          "type": "Innland",
           "gyldigFraOgMed": "2020-03-30T00:00",
-          "gyldigTilOgMed": "2031-03-30T23:59:59",
-          "coAdressenavn": null,
+          "gyldigTilOgMed": "2021-04-01T00:00",
+          "coAdressenavn": "C/O RAKRYGGET STAFFELI",
           "postboksadresse": null,
           "postadresseIFrittFormat": {
             "adresselinje1": "POSTLINJE 1",
@@ -98,36 +96,58 @@
           },
           "utenlandskAdresse": null,
           "utenlandskAdresseIFrittFormat": null,
-          "vegadresse": null
+          "vegadresse": null,
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2021-05-07T10:04:52",
+                "kilde": "Dolly"
+              }
+            ]
+          }
         },
         {
-          "type": "Innland",
-          "gyldigFraOgMed": "2021-03-30T00:00",
-          "gyldigTilOgMed": "2021-04-01T00:00",
-          "coAdressenavn": "C/O RAKRYGGET STAFFELI",
+          "gyldigFraOgMed": "2021-05-07T10:04:52",
+          "gyldigTilOgMed": null,
+          "coAdressenavn": null,
           "postboksadresse": null,
           "postadresseIFrittFormat": null,
           "utenlandskAdresse": null,
-          "utenlandskAdresseIFrittFormat": null,
-          "vegadresse": {
-            "adressenavn": "LANGBERGA",
-            "husnummer": "30",
-            "husbokstav": null,
-            "tilleggsnavn": null,
-            "postnummer": "6800"
+          "utenlandskAdresseIFrittFormat": {
+            "adresselinje1": "1KOLEJOWA 6/5",
+            "adresselinje2": "18-500 KOLNO",
+            "adresselinje3": "CAPITAL WEST 3000",
+            "byEllerStedsnavn": null,
+            "landkode": "ARG",
+            "postkode": null
+          },
+          "vegadresse": null,
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2021-05-07T10:04:52",
+                "kilde": "Dolly"
+              }
+            ]
           }
         }
       ],
       "navn": [
         {
-          "fornavn": "MOLEFONKEN",
-          "mellomnavn": "DANSENDE",
-          "etternavn": "KNOTT",
+          "fornavn": "ÅPENHJERTIG",
+          "mellomnavn": null,
+          "etternavn": "BLYANT",
           "metadata": {
             "master": "FREG",
             "endringer": [
               {
-                "registrert": "2021-03-30T12:23:06",
+                "registrert": "2021-05-07T10:04:51",
                 "type": "OPPRETT"
               }
             ]
@@ -138,24 +158,39 @@
         {
           "gyldigFraOgMed": null,
           "gyldigTilOgMed": null,
-          "oppholdAnnetSted": null,
           "coAdressenavn": "Estate of",
           "matrikkeladresse": null,
           "utenlandskAdresse": {
             "adressenavnNummer": "Adresse er påkrevd",
             "bygningEtasjeLeilighet": "Bygning",
-            "postboksNummerNavn": null,
             "postkode": "Postkode",
             "bySted": "By",
             "regionDistriktOmraade": "Region",
             "landkode": "ABW"
           },
-          "vegadresse": null
+          "vegadresse": null,
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2021-05-07T10:04:51",
+                "kilde": "Dolly"
+              }
+            ]
+          }
         }
       ],
       "statsborgerskap": [
         {
-          "land": "NOR",
+          "land": "ALB",
+          "metadata": {
+            "master": "FREG"
+          }
+        },
+        {
+          "land": "AIA",
           "metadata": {
             "master": "FREG"
           }

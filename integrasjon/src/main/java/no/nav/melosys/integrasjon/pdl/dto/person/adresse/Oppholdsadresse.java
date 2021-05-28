@@ -2,6 +2,9 @@ package no.nav.melosys.integrasjon.pdl.dto.person.adresse;
 
 import java.time.LocalDateTime;
 
+import no.nav.melosys.integrasjon.pdl.dto.HarMetadata;
+import no.nav.melosys.integrasjon.pdl.dto.Metadata;
+
 public record Oppholdsadresse(
     LocalDateTime gyldigFraOgMed,
     LocalDateTime gyldigTilOgMed,
@@ -9,6 +12,5 @@ public record Oppholdsadresse(
     UtenlandskAdresse utenlandskAdresse,
     Vegadresse vegadresse,
     Matrikkeladresse matrikkeladresse,
-    String oppholdAnnetSted
-) {
+    Metadata metadata) implements HarMetadata {
 }
