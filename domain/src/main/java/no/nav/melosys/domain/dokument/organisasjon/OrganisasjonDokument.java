@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import no.nav.melosys.domain.AbstraktOrganisasjon;
 import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)

@@ -1,7 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper.arbeidssted;
 
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.adresse.UstrukturertAdresse;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 
 public class FysiskArbeidssted extends AbstractArbeidssted {

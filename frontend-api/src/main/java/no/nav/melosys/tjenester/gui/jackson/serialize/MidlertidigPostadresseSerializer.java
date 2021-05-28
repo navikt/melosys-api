@@ -12,9 +12,9 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.domain.dokument.adresse.MidlertidigPostadresse;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.adresse.UstrukturertAdresse;
+import no.nav.melosys.tjenester.gui.dto.MidlertidigPostadresseDto;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.adresse.UstrukturertAdresse;
 
 import static no.nav.melosys.domain.FellesKodeverk.POSTNUMMER;
 
@@ -29,7 +29,7 @@ public class MidlertidigPostadresseSerializer extends StdSerializer<no.nav.melos
 
     @Override
     public void serialize(no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse midlertidigPostadresse, JsonGenerator generator, SerializerProvider provider) throws IOException {
-        MidlertidigPostadresse dto = new MidlertidigPostadresse();
+        MidlertidigPostadresseDto dto = new MidlertidigPostadresseDto();
 
         if (midlertidigPostadresse instanceof MidlertidigPostadresseNorge) {
             MidlertidigPostadresseNorge adresse = (MidlertidigPostadresseNorge) midlertidigPostadresse;
@@ -47,12 +47,12 @@ public class MidlertidigPostadresseSerializer extends StdSerializer<no.nav.melos
             if (midlertidigPostadresse.land != null) {
                 dto.strukturertAdresse.landkode = midlertidigPostadresse.land.getKode();
             }
-            dto.adressetype = MidlertidigPostadresse.Adressetype.STRUKTURERT;
+            dto.adressetype = MidlertidigPostadresseDto.Adressetype.STRUKTURERT;
 
         } else if (midlertidigPostadresse instanceof MidlertidigPostadresseUtland) {
             MidlertidigPostadresseUtland adresse = (MidlertidigPostadresseUtland) midlertidigPostadresse;
             dto.ustrukturertAdresse = UstrukturertAdresse.av(adresse);
-            dto.adressetype = MidlertidigPostadresse.Adressetype.USTRUKTURERT;
+            dto.adressetype = MidlertidigPostadresseDto.Adressetype.USTRUKTURERT;
         }
         generator.writeObject(dto);
     }

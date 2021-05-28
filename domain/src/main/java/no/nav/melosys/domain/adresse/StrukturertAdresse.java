@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.dokument.adresse;
+package no.nav.melosys.domain.adresse;
 
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -10,13 +10,16 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import org.apache.commons.lang3.StringUtils;
 
-public class StrukturertAdresse extends Adresse {
+import static no.nav.melosys.domain.adresse.Adresse.sammenslå;
+
+public class StrukturertAdresse implements Adresse {
     public String gatenavn;
     // Sammensatt av husnummer og husbokstav
     public String husnummer;
     public String postnummer;
     public String poststed;
     public String region;
+    public String landkode;
 
     public StrukturertAdresse() {
     }
@@ -56,6 +59,11 @@ public class StrukturertAdresse extends Adresse {
     @Override
     public boolean erTom() {
         return StringUtils.isAllEmpty(gatenavn, husnummer, postnummer, poststed, region, landkode);
+    }
+
+    @Override
+    public String getLandkode() {
+        return landkode;
     }
 
     @Override

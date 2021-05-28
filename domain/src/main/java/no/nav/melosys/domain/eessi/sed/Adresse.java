@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.eessi.sed;
 
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import org.apache.commons.lang3.StringUtils;
 
 import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
