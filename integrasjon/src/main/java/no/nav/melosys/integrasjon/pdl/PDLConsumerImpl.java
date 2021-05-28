@@ -17,6 +17,7 @@ import no.nav.melosys.integrasjon.felles.graphql.GraphQLResponse;
 import no.nav.melosys.integrasjon.pdl.dto.identer.HentIdenterResponse;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste;
 import no.nav.melosys.integrasjon.pdl.dto.person.HentPersonResponse;
+import no.nav.melosys.integrasjon.pdl.dto.person.Navn;
 import no.nav.melosys.integrasjon.pdl.dto.person.Person;
 import no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap;
 import org.apache.commons.collections4.CollectionUtils;
@@ -27,8 +28,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static no.nav.melosys.integrasjon.pdl.dto.identer.Query.HENT_IDENTER_QUERY;
-import static no.nav.melosys.integrasjon.pdl.dto.person.Query.HENT_PERSON_QUERY;
-import static no.nav.melosys.integrasjon.pdl.dto.person.Query.HENT_STATSBORGERSKAP_QUERY;
+import static no.nav.melosys.integrasjon.pdl.dto.person.Query.*;
 
 public class PDLConsumerImpl implements PDLConsumer {
     private static final Logger log = LoggerFactory.getLogger(PDLConsumerImpl.class);
@@ -62,6 +62,12 @@ public class PDLConsumerImpl implements PDLConsumer {
     @Retryable
     public Person hentPerson(String ident) {
         return hentPersondata(HENT_PERSON_QUERY, ident, false);
+    }
+
+    @Override
+    @Retryable
+    public Collection<Navn> hentNavn(String ident) {
+        return hentPersondata(HENT_SAMMENSATT_NAVN_QUERY, ident, false).navn();
     }
 
     @Override

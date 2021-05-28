@@ -9,7 +9,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
-import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -49,7 +48,8 @@ public class OppgaveService {
                           FagsakService fagsakService,
                           OppgaveFasade oppgaveFasade,
                           SaksopplysningerService saksopplysningerService,
-                          BehandlingsgrunnlagService behandlingsgrunnlagService, PersondataFasade persondataFasade) {
+                          BehandlingsgrunnlagService behandlingsgrunnlagService,
+                          PersondataFasade persondataFasade) {
         this.behandlingService = behandlingService;
         this.fagsakService = fagsakService;
         this.oppgaveFasade = oppgaveFasade;

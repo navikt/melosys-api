@@ -7,6 +7,10 @@ import no.nav.melosys.domain.person.Statsborgerskap;
 import no.nav.melosys.integrasjon.pdl.dto.Endring;
 
 public class StasborgerskapOversetter {
+    private StasborgerskapOversetter() {
+        throw new IllegalStateException("Ikke ment å bli instantiert");
+    }
+
     public static no.nav.melosys.domain.person.Statsborgerskap oversett(
         no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap statsborgerskapPDL
     ) {

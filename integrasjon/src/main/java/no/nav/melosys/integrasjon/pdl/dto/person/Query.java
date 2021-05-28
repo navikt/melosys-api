@@ -202,6 +202,25 @@ query($ident: ID!) {
 }
         """;
 
+    public static final String HENT_SAMMENSATT_NAVN_QUERY = """
+query($ident: ID!, $historikk: Boolean!) {
+  hentPerson(ident: $ident) {
+    navn(historikk: $historikk) {
+      fornavn
+      mellomnavn
+      etternavn
+      metadata {
+        master
+        endringer {
+          registrert
+          type
+        }
+      }
+    }
+  }
+}
+        """;
+
     public static final String HENT_STATSBORGERSKAP_QUERY = """
         query($ident: ID!, $historikk: Boolean!) {
             hentPerson(ident: $ident) {
