@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_INNGANGSVILKAAR;
 import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
@@ -155,6 +156,7 @@ public class InngangsvilkaarService {
         }
     }
 
+    @Transactional
     public void overstyrInngangsvilkårTilOppfylt(long behandlingID) {
         final var inngangsvilkaar = vilkaarsresultatService.finnVilkaarsresultat(behandlingID, FO_883_2004_INNGANGSVILKAAR);
         if (inngangsvilkaar.isEmpty()) {
