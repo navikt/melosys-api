@@ -38,4 +38,4 @@ spec:
   - name: SPRING_PROFILES_ACTIVE
     value: nais
   kafka:
-    pool: {{ POOL }}
+    pool: {{ KAFKA_POOL }}

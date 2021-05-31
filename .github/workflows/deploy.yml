@@ -86,7 +86,7 @@ jobs:
           echo "NAMESPACE=default" >> $GITHUB_ENV
           echo "URL=melosys-api.nais.adeo.no" >> $GITHUB_ENV
           echo "ENVIRONMENT=p" >> $GITHUB_ENV
-          echo "POOL=nav-prod" >> $GITHUB_ENV
+          echo "KAFKA_POOL=nav-prod" >> $GITHUB_ENV
       - name: Deploy to q1
         if: github.event.inputs.environment == 'q1'
         run: |
@@ -94,7 +94,7 @@ jobs:
           echo "NAMESPACE=default" >> $GITHUB_ENV
           echo "URL=melosys-api.dev.adeo.no" >> $GITHUB_ENV
           echo "ENVIRONMENT=q1" >> $GITHUB_ENV
-          echo "POOL=nav-dev" >> $GITHUB_ENV
+          echo "KAFKA_POOL=nav-dev" >> $GITHUB_ENV
       - name: Deploy to q2
         if: github.event.inputs.environment == 'q2' || (github.event_name == 'push' && github.ref == 'refs/heads/master')
         run: |
@@ -102,7 +102,7 @@ jobs:
           echo "NAMESPACE=q2" >> $GITHUB_ENV
           echo "URL=melosys-api-q2.dev.adeo.no" >> $GITHUB_ENV
           echo "ENVIRONMENT=q2" >> $GITHUB_ENV
-          echo "POOL=nav-dev" >> $GITHUB_ENV
+          echo "KAFKA_POOL=nav-dev" >> $GITHUB_ENV
       - uses: nais/deploy/actions/deploy@v1
         if: ${{ env.CLUSTER != '' }}
         env:
