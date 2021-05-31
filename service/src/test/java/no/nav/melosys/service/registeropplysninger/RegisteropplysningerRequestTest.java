@@ -50,40 +50,4 @@ class RegisteropplysningerRequestTest {
 
         assertThat(registeropplysningerRequest.getFnr()).isNull();
     }
-
-    @Test
-    void valider_feilIPeriode_forventException() {
-        assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(() -> RegisteropplysningerRequest.builder()
-                .behandlingID(1L)
-                .fnr("123")
-                .fom(null)
-                .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
-                    .arbeidsforholdopplysninger()
-                    .inntektsopplysninger()
-                    .organisasjonsopplysninger()
-                    .build())
-                .build())
-            .withMessageContaining("Feil i periode")
-            .withMessageContaining(SaksopplysningType.INNTK.getBeskrivelse())
-            .withMessageContaining(SaksopplysningType.ARBFORH.getBeskrivelse())
-            .withMessageContaining("krever en gyldig periode");
-    }
-
-    @Test
-    void valider_feilIPeriodeMenIkkePåkrevd_forventPeriodeLikNull() {
-        RegisteropplysningerRequest registeropplysningerRequest = RegisteropplysningerRequest.builder()
-            .behandlingID(1L)
-            .fnr("123")
-            .fom(null)
-            .tom(null)
-            .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder()
-                .personopplysninger()
-                .organisasjonsopplysninger()
-                .build())
-            .build();
-
-        assertThat(registeropplysningerRequest.getFom()).isNull();
-        assertThat(registeropplysningerRequest.getTom()).isNull();
-    }
 }
