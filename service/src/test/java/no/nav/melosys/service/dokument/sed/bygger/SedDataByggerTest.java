@@ -1,9 +1,11 @@
 package no.nav.melosys.service.dokument.sed.bygger;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Bosted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
@@ -13,25 +15,28 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Diskresjonskode;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.adresse.Gateadresse;
-import no.nav.melosys.domain.eessi.sed.Adresse;
-import no.nav.melosys.domain.eessi.sed.Arbeidssted;
-import no.nav.melosys.domain.eessi.sed.SedDataDto;
-import no.nav.melosys.domain.eessi.sed.Virksomhet;
+import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.kodeverk.Vedtakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagMedSoknad;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagUtenSoknad;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
+import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,6 +64,8 @@ class SedDataByggerTest {
     private AvklartefaktaService avklartefaktaService;
     @Mock
     private LandvelgerService landvelgerService;
+    @Mock
+    private BehandlingsresultatService behandlingsresultatService;
 
     private SedDataBygger dataBygger;
     private Behandling behandling;
@@ -98,8 +105,8 @@ class SedDataByggerTest {
         behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
 
         behandling = DataByggerStubs.hentBehandlingStub();
-
-        dataBygger = new SedDataBygger(lovvalgsperiodeService, landvelgerService);
+        behandlingsresultat.setBehandling(behandling);
+        dataBygger = new SedDataBygger(lovvalgsperiodeService, landvelgerService, behandlingsresultatService);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(LocalDate.now());
@@ -423,6 +430,34 @@ class SedDataByggerTest {
         assertThat(sedData.getArbeidsgivendeVirksomheter())
             .extracting(Virksomhet::getNavn)
             .doesNotContain("selvstendig");
+    }
+
+    @Test
+    public void lagVedtakDto_ikkeOpprinneligVedtakMedDagensDato_setterDatoOgVariablerISed() {
+        Behandlingsresultat behandlingsresultatMedVedtak = new Behandlingsresultat();
+        VedtakMetadata vedtakMetadata = new VedtakMetadata();
+        vedtakMetadata.setVedtaksdato(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
+        behandlingsresultatMedVedtak.setVedtakMetadata(vedtakMetadata);
+
+        Behandling avsluttetBehandling = DataByggerStubs.hentBehandlingStub();
+        avsluttetBehandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        avsluttetBehandling.setId(2L);
+        behandlingsresultatMedVedtak.setBehandling(avsluttetBehandling);
+
+        ArrayList<Behandling> list = new ArrayList<>();
+        list.add(behandling);
+        list.add(avsluttetBehandling);
+        behandling.getFagsak().setBehandlinger(list);
+        behandlingsresultat.setBehandling(behandling);
+
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultatMedVedtak);
+
+        SedDataGrunnlagMedSoknad dataGrunnlag = lagDokumentressurser();
+
+        SedDataDto sedDataDto = dataBygger.lag(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
+        assertThat(sedDataDto).isNotNull();
+        assertThat(sedDataDto.getVedtakDto().erFørstegangsVedtak()).isFalse();
+        assertThat(sedDataDto.getVedtakDto().datoForrigeVedtak()).isEqualTo(LocalDate.now().toString());
     }
 
     @Test

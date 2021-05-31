@@ -1,5 +1,7 @@
 package no.nav.melosys.service.dokument.sed.bygger;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -14,9 +16,12 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Vedtakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.BostedGrunnlag;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FlyvendeArbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted;
@@ -37,11 +42,13 @@ import static no.nav.melosys.domain.eessi.sed.Adresse.lagAdresse;
 public class SedDataBygger {
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final LandvelgerService landvelgerService;
+    private final BehandlingsresultatService behandlingsresultatService;
 
     @Autowired
-    public SedDataBygger(LovvalgsperiodeService lovvalgsperiodeService, LandvelgerService landvelgerService) {
+    public SedDataBygger(LovvalgsperiodeService lovvalgsperiodeService, LandvelgerService landvelgerService, BehandlingsresultatService behandlingsresultatService) {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.landvelgerService = landvelgerService;
+        this.behandlingsresultatService = behandlingsresultatService;
     }
 
     public SedDataDto lag(SedDataGrunnlag dataGrunnlag,
@@ -70,9 +77,21 @@ public class SedDataBygger {
                 .orElseThrow(() -> new FunksjonellException("Finner ingen bostedsadresse på person i behandling " + behandlingsresultat.getId())));
             sedDataDto.setLovvalgsperioder(lagLovvalgsperioderDto(behandlingsresultat, periodeType));
         }
+        sedDataDto.setVedtakDto(lagVedtakDto(behandlingsresultat));
         sedDataDto.setTidligereLovvalgsperioder(lagTidligereLovvalgsperioderDto(dataGrunnlag.getBehandling()));
         sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntakDto(behandlingsresultat));
         return sedDataDto;
+    }
+
+    private VedtakDto lagVedtakDto(Behandlingsresultat behandlingsresultat) {
+        return behandlingsresultat.getBehandling().getFagsak().getBehandlinger()
+            .stream()
+            .filter(behandling -> behandling.harStatus(Behandlingsstatus.AVSLUTTET) && !behandling.getId().equals(behandlingsresultat.getId()))
+            .map(behandling -> behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
+            .filter(Behandlingsresultat::harVedtak)
+            .max(Comparator.comparing(b -> b.getVedtakMetadata().getVedtaksdato()))
+            .map(b -> new VedtakDto(false, b.getVedtakMetadata().getVedtaksdato().atZone(ZoneId.systemDefault()).toLocalDate()))
+            .orElse(new VedtakDto(true, null));
     }
 
     private SedDataDto lagPersonopplysninger(SedDataGrunnlag dataGrunnlag) {
