@@ -46,6 +46,6 @@ public class BostedGrunnlag {
             return Optional.empty();
         }
         bostedsadresse.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, bostedsadresse.getPostnr(), LocalDate.now()));
-        return Optional.of(StrukturertAdresse.av(bostedsadresse));
+        return Optional.of(bostedsadresse.tilStrukturertAdresse());
     }
 }

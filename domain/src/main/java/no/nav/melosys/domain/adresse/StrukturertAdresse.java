@@ -1,21 +1,18 @@
 package no.nav.melosys.domain.adresse;
 
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
-import no.nav.melosys.domain.dokument.person.adresse.Gateadresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.util.LandkoderUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import static no.nav.melosys.domain.adresse.Adresse.sammenslå;
 
 public class StrukturertAdresse implements Adresse {
     public String gatenavn;
-    // Sammensatt av husnummer og husbokstav
-    public String husnummer;
+    public String husnummer; // Sammensatt av husnummer og husbokstav
+    public String postboks;
+    public String tillegsnavn;
     public String postnummer;
     public String poststed;
     public String region;
@@ -38,27 +35,28 @@ public class StrukturertAdresse implements Adresse {
         this.landkode = landkode;
     }
 
-    public static StrukturertAdresse av(Bostedsadresse bostedsadresse) {
-        Gateadresse gateadresse = bostedsadresse.getGateadresse();
-        StrukturertAdresse adresse = new StrukturertAdresse();
-        if (gateadresse != null) {
-            adresse.gatenavn = gateadresse.getGatenavn();
-            adresse.husnummer = Objects.toString(gateadresse.getHusnummer(), "");
-            adresse.husnummer += Objects.toString(gateadresse.getHusbokstav(), "");
-        }
-
-        adresse.postnummer = bostedsadresse.getPostnr();
-        adresse.poststed = bostedsadresse.getPoststed();
-        if (StringUtils.isNotEmpty(bostedsadresse.getLand().getKode())) {
-            adresse.landkode = LandkoderUtils.tilIso2(bostedsadresse.getLand().getKode());
-        }
-
-        return adresse;
+    public StrukturertAdresse(String gatenavn,
+                              String husnummer,
+                              String tillegsnavn,
+                              String postboks,
+                              String postnummer,
+                              String poststed,
+                              String region,
+                              String landkode) {
+        this.gatenavn = gatenavn;
+        this.husnummer = husnummer;
+        this.tillegsnavn = tillegsnavn;
+        this.postboks = postboks;
+        this.region = region;
+        this.postnummer = postnummer;
+        this.poststed = poststed;
+        this.landkode = landkode;
     }
 
     @Override
     public boolean erTom() {
-        return StringUtils.isAllEmpty(gatenavn, husnummer, postnummer, poststed, region, landkode);
+        return StringUtils.isAllEmpty(gatenavn, husnummer, tillegsnavn, postboks, postnummer, poststed, region,
+            landkode);
     }
 
     @Override
@@ -69,8 +67,7 @@ public class StrukturertAdresse implements Adresse {
     @Override
     public String toString() {
         return Stream.of(sammenslå(gatenavn, husnummer),
-                region,
-                postnummer, poststed,
+                tillegsnavn, postboks, postnummer, poststed, region,
                 Landkoder.valueOf(landkode).getBeskrivelse())
             .filter(StringUtils::isNotEmpty)
             .collect(Collectors.joining(", "));
