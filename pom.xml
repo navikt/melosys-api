@@ -71,7 +71,7 @@
         <javax.ws.rs-api.version>2.1</javax.ws.rs-api.version>
         <json-smart.version>2.3</json-smart.version>
         <jms-api.version>2.0.1</jms-api.version>
-        <micrometer-jvm-extras.version>0.2.1</micrometer-jvm-extras.version>
+        <micrometer-jvm-extras.version>0.2.2</micrometer-jvm-extras.version>
         <networknt.json-schema-validator.version>1.0.47</networknt.json-schema-validator.version>
         <nimbus-jose-jwt.version>8.20.1</nimbus-jose-jwt.version>
         <ojdbc.version>18.3.0.0</ojdbc.version>
@@ -401,7 +401,7 @@
             <dependency>
                 <groupId>org.checkerframework</groupId>
                 <artifactId>checker-qual</artifactId>
-                <version>3.12.0</version>
+                <version>3.13.0</version>
             </dependency>
             <dependency>
                 <groupId>org.codehaus.woodstox</groupId>
