@@ -1,16 +1,21 @@
 package no.nav.melosys.saksflyt.steg.iv;
 
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -55,6 +60,7 @@ class SendVedtakUtlandTest {
 
     private Prosessinstans prosessinstans;
     private Lovvalgsperiode lovvalgsperiode;
+    private Behandlingsresultat behandlingsresultat;
     private final Behandling behandling = new Behandling();
 
     @Captor
@@ -64,16 +70,19 @@ class SendVedtakUtlandTest {
     private static final String MOTTAKER_INSTITUSJON = "SE:123";
 
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp() {
 
         behandling.setId(BEHANDLING_ID);
         prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
-        Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
+        behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingService, behandlingsresultatService, brevBestiller, sedSomBrevService, utpekingService);
+        var fakeUnleash = new FakeUnleash();
+        fakeUnleash.enableAll();
+
+        sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingService, behandlingsresultatService, brevBestiller, sedSomBrevService, utpekingService, fakeUnleash);
     }
 
     private Behandlingsresultat lagBehandlingsresultat() {
@@ -86,20 +95,21 @@ class SendVedtakUtlandTest {
         behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
         behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         behandlingsresultat.setBehandling(behandling);
+        behandlingsresultat.setVedtakMetadata(new VedtakMetadata());
         Set<Avklartefakta> avklartefakta = Set.of(new Avklartefakta());
         behandlingsresultat.setAvklartefakta(avklartefakta);
         return behandlingsresultat;
     }
 
     @Test
-    void utfør_artikkel12Suksessfull_statusErOppdaterResultat() throws Exception {
+    void utfør_artikkel12Suksessfull_statusErOppdaterResultat() {
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
         sendVedtakUtland.utfør(prosessinstans);
         verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_04), isNull(), isNull());
     }
 
     @Test
-    void utfør_ingenInstitusjonEessiKlar_senderBrev() throws Exception {
+    void utfør_ingenInstitusjonEessiKlar_senderBrev() {
         when(behandlingService.hentBehandling(anyLong())).thenReturn(prosessinstans.getBehandling());
         when(behandlingsresultatService.hentBehandlingsresultatMedAvklartefakta(anyLong()))
             .thenReturn(lagBehandlingsresultat());
@@ -111,14 +121,13 @@ class SendVedtakUtlandTest {
     }
 
     @Test
-    void utfør_ForArtikkel11Suksessfull_statusErOppdaterResultat() throws Exception {
+    void utfør_ForArtikkel11Suksessfull_statusErOppdaterResultat() {
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3B);
         sendVedtakUtland.utfør(prosessinstans);
         verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_05), isNull(), isNull());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void utfør_utenOppgittMottakerinstitusjon_forventHenterMottakerinstitusjonFraTidligereBuc() {
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
@@ -134,30 +143,45 @@ class SendVedtakUtlandTest {
 
         sendVedtakUtland.utfør(prosessinstans);
 
-        ArgumentCaptor<List<String>> captor = ArgumentCaptor.forClass(List.class);
-        verify(eessiService).opprettOgSendSed(anyLong(), captor.capture(), any(), any(), isNull());
-
-        assertThat(captor.getValue()).containsExactly(MOTTAKER_INSTITUSJON);
+        verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), any(), any(), isNull());
     }
 
     @Test
     void utfør_utpekAnnetLandUtenEessiMottakere_lagerBrev() {
         behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
         behandlingsresultat.getUtpekingsperioder().add(new Utpekingsperiode());
         behandlingsresultat.setId(BEHANDLING_ID);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B2);
         lovvalgsperiode.setLovvalgsland(Landkoder.AT);
-        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         prosessinstans.setData(ProsessDataKey.UTPEKT_LAND, Landkoder.AT);
         when(sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(eq(SedType.A003), any(), any()))
             .thenReturn("journalpostID");
         sendVedtakUtland.utfør(prosessinstans);
         verify(sedSomBrevService)
-            .lagJournalpostForSendingAvSedSomBrev(eq(SedType.A003), eq(Landkoder.AT), eq(behandling));
+            .lagJournalpostForSendingAvSedSomBrev(SedType.A003, Landkoder.AT, behandling);
+    }
+
+    @Test
+    void utfør_vedtakEtterArt16HarTilknyttetLaBuc01_lukkerBuc() {
+        final var rinaSaksnummer = "5453";
+        behandlingsresultat.hentValidertLovvalgsperiode().setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
+        var anmodningsperiode = new Anmodningsperiode();
+        anmodningsperiode.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
+        anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
+        behandlingsresultat.getAnmodningsperioder().add(anmodningsperiode);
+
+        var fagsak = new Fagsak();
+        fagsak.setGsakSaksnummer(123L);
+        behandling.setFagsak(fagsak);
+
+        when(eessiService.hentTilknyttedeBucer(fagsak.getGsakSaksnummer(), Collections.emptyList()))
+            .thenReturn(List.of(new BucInformasjon(rinaSaksnummer, BucType.LA_BUC_01.name(), LocalDate.now(), Set.of(), Collections.emptyList())));
+
+        sendVedtakUtland.utfør(prosessinstans);
+
+        verify(eessiService).lukkBuc(rinaSaksnummer);
     }
 
     @Test
@@ -166,6 +190,6 @@ class SendVedtakUtlandTest {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         sendVedtakUtland.utfør(prosessinstans);
 
-        verify(eessiService).sendGodkjenningArbeidFlereLand(eq(behandling.getId()), eq("Hei"));
+        verify(eessiService).sendGodkjenningArbeidFlereLand(behandling.getId(),"Hei");
     }
 }
