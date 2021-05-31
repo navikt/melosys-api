@@ -16,10 +16,7 @@ import no.nav.melosys.integrasjon.felles.graphql.GraphQLRequest;
 import no.nav.melosys.integrasjon.felles.graphql.GraphQLResponse;
 import no.nav.melosys.integrasjon.pdl.dto.identer.HentIdenterResponse;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste;
-import no.nav.melosys.integrasjon.pdl.dto.person.HentPersonResponse;
-import no.nav.melosys.integrasjon.pdl.dto.person.Navn;
-import no.nav.melosys.integrasjon.pdl.dto.person.Person;
-import no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap;
+import no.nav.melosys.integrasjon.pdl.dto.person.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +59,12 @@ public class PDLConsumerImpl implements PDLConsumer {
     @Retryable
     public Person hentPerson(String ident) {
         return hentPersondata(HENT_PERSON_QUERY, ident, false);
+    }
+
+    @Override
+    @Retryable
+    public Collection<Adressebeskyttelse> hentAdressebeskyttelser(String ident) {
+        return hentPersondata(HENT_ADRESSEBESKYTTELSE_QUERY, ident, false).adressebeskyttelse();
     }
 
     @Override
