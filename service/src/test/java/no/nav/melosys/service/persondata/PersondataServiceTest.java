@@ -14,6 +14,7 @@ import no.nav.melosys.integrasjon.pdl.dto.Endring;
 import no.nav.melosys.integrasjon.pdl.dto.Metadata;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste;
+import no.nav.melosys.integrasjon.pdl.dto.person.Navn;
 import no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import org.junit.jupiter.api.BeforeEach;
@@ -72,11 +73,20 @@ class PersondataServiceTest {
     }
 
     @Test
-    void hentStatsborgerskap() throws IkkeFunnetException {
+    void hentSammensatNavn() {
+        fakeUnleash.enable("melosys.pdl.sammensatt-navn");
+        when(pdlConsumer.hentNavn(anyString())).thenReturn(Set.of(
+            new Navn("Fornavn", "Mellom", "Etternavnsen", lagMetadata())
+        ));
+
+        assertThat(persondataService.hentSammensattNavn("")).isEqualTo("Etternavnsen Mellom Fornavn");
+    }
+
+    @Test
+    void hentStatsborgerskap() {
         when(pdlConsumer.hentStatsborgerskap("ident")).thenReturn(Set.of(
             new Statsborgerskap("AIA", LocalDate.parse("2021-05-08"), LocalDate.parse("1979-11-18"),
-                LocalDate.parse("1980-11-18"), new Metadata("PDL", false,
-                List.of(new Endring("OPPRETT", LocalDateTime.parse("2021-05-07T10:04:52"), "Dolly")))))
+                LocalDate.parse("1980-11-18"), lagMetadata()))
         );
 
         assertThat(persondataService.hentStatsborgerskap("ident")).containsExactly(
@@ -97,5 +107,10 @@ class PersondataServiceTest {
 
     private Identliste lagTomIdentliste() {
         return new Identliste(Collections.emptySet());
+    }
+
+    private Metadata lagMetadata() {
+        return new Metadata("PDL", false,
+            List.of(new Endring("OPPRETT", LocalDateTime.parse("2021-05-07T10:04:52"), "Dolly")));
     }
 }

@@ -1,6 +1,7 @@
 package no.nav.melosys.service.persondata;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -64,6 +65,12 @@ public class PersondataService implements PersondataFasade {
 
     @Override
     public String hentSammensattNavn(String fnr) {
+        if (unleash.isEnabled("melosys.pdl.sammensatt-navn")) {
+            return pdlConsumer.hentNavn(fnr).stream()
+                .max(Comparator.comparing(n -> n.metadata().datoSistRegistrert()))
+                .map(NavnOversetter::tilSammensattNavn)
+                .orElse(NavnOversetter.UKJENT);
+        }
         return tpsService.hentSammensattNavn(fnr);
     }
 

@@ -25,6 +25,7 @@ import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 public class BrevDataByggerInnvilgelse implements BrevDataBygger {
     private final LandvelgerService landvelgerService;
@@ -43,7 +44,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
                                      AnmodningsperiodeService anmodningsperiodeService,
                                      BrevbestillingDto brevbestillingDto,
                                      VilkaarsresultatService vilkaarsresultatService,
-                                     PersondataFasade persondataFasade,
+                                     @Qualifier("system") PersondataFasade persondataFasade,
                                      BehandlingsgrunnlagService behandlingsgrunnlagService) {
         this.landvelgerService = landvelgerService;
         this.avklartefaktaService = avklartefaktaService;
