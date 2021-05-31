@@ -8,10 +8,7 @@ import javax.persistence.*;
 
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
-import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
@@ -286,13 +283,15 @@ public class Behandlingsresultat extends RegistreringsInfo {
     }
 
     public boolean erArt16EtterUtlandMedRegistrertSvar() {
-        if (anmodningsperioder.isEmpty()) {
-            return false;
-        }
+        return finnValidertAnmodningsperiode()
+            .filter(Anmodningsperiode::harRegistrertSvar)
+            .isPresent();
+    }
 
-        Anmodningsperiode anmodningsperiode = hentValidertAnmodningsperiode();
-        return anmodningsperiode.getAnmodningsperiodeSvar() != null
-            && anmodningsperiode.getAnmodningsperiodeSvar().getAnmodningsperiodeSvarType() != null;
+    public boolean harLovvalgsperiodeMedBestemmelse(LovvalgBestemmelse lovvalgBestemmelse) {
+        return finnValidertLovvalgsperiode()
+            .filter(l -> l.getBestemmelse() == lovvalgBestemmelse)
+            .isPresent();
     }
 
     public boolean erGodkjenningEllerInnvilgelseArt13() {
@@ -387,6 +386,13 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public boolean a1Produseres() {
         return erInnvilgelse() && !erUtpeking() && harVedtak();
+    }
+
+    public boolean utlandSkalVarslesOmVedtak() {
+        return harVedtak()
+            && ((erInnvilgelse() && !harLovvalgsperiodeMedBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1))
+                    || erInnvilgelseFlereLand()
+                    || erUtpeking());
     }
 
     public void settVedtakMetadata(Vedtakstyper vedtakstype, LocalDate klagefrist) {

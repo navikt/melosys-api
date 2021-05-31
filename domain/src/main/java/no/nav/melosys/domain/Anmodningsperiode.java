@@ -23,7 +23,7 @@ public class Anmodningsperiode implements PeriodeOmLovvalg {
     @Column(name = "fom_dato", nullable = false, updatable = false)
     private LocalDate fom;
 
-    @Column(name = "tom_dato", nullable = true, updatable = false)
+    @Column(name = "tom_dato", updatable = false)
     private LocalDate tom;
 
     @Enumerated(EnumType.STRING)
@@ -186,10 +186,9 @@ public class Anmodningsperiode implements PeriodeOmLovvalg {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Anmodningsperiode)) {
+        if (!(o instanceof Anmodningsperiode that)) {
             return false;
         }
-        Anmodningsperiode that = (Anmodningsperiode) o;
         return Objects.equals(this.behandlingsresultat, that.behandlingsresultat)
             && Objects.equals(this.fom, that.fom);
     }
@@ -203,5 +202,9 @@ public class Anmodningsperiode implements PeriodeOmLovvalg {
         return lovvalgsland == periode2.getLovvalgsland() &&
             unntakFraBestemmelse == periode2.getUnntakFraBestemmelse() &&
             unntakFraLovvalgsland == periode2.getUnntakFraLovvalgsland();
+    }
+
+    public boolean harRegistrertSvar() {
+        return anmodningsperiodeSvar != null && anmodningsperiodeSvar.getAnmodningsperiodeSvarType() != null;
     }
 }
