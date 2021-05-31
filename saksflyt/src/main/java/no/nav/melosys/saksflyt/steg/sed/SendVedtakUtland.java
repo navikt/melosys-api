@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.sed;
 
 import java.util.List;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -39,6 +40,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     private final BrevBestiller brevBestiller;
     private final SedSomBrevService sedSomBrevService;
     private final UtpekingService utpekingService;
+    private final Unleash unleash;
 
     @Autowired
     public SendVedtakUtland(@Qualifier("system") EessiService eessiService,
@@ -46,12 +48,13 @@ public class SendVedtakUtland extends AbstraktSendUtland {
                             BehandlingsresultatService behandlingsresultatService,
                             BrevBestiller brevBestiller,
                             SedSomBrevService sedSomBrevService,
-                            UtpekingService utpekingService) {
+                            UtpekingService utpekingService, Unleash unleash) {
         super(eessiService, behandlingsresultatService);
         this.behandlingService = behandlingService;
         this.brevBestiller = brevBestiller;
         this.sedSomBrevService = sedSomBrevService;
         this.utpekingService = utpekingService;
+        this.unleash = unleash;
     }
 
     @Override
@@ -72,7 +75,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             log.info("SendUtlandStatus for behandling {}: {}", behandling.getId(), status);
         } else if (skalSendesUtland(behandlingsresultat)) {
             super.sendUtland(avklarBucType(behandling), prosessinstans);
-        } else if (behandlingsresultat.erArt16EtterUtlandMedRegistrertSvar()) {
+        } else if (unleash.isEnabled("melosys.labuc01.lukk_etter_vedtak") && behandlingsresultat.erArt16EtterUtlandMedRegistrertSvar()) {
             finnOgLukkTilhørendeBUC(behandlingsresultat);
         }
     }
