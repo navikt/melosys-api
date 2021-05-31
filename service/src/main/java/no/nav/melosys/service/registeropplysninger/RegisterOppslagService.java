@@ -43,7 +43,7 @@ public class RegisterOppslagService {
      * Henter organisasjonsopplysninger.
      */
     public OrganisasjonDokument hentOrganisasjon(String orgnummer) {
-        Saksopplysning saksopplysning = eregFasade.hentOrganisasjon(orgnummer);
+        Saksopplysning saksopplysning = eregFasade.hentOrganisasjon(vaskOrgnr(orgnummer));
         return (OrganisasjonDokument) saksopplysning.getDokument();
     }
 
@@ -53,5 +53,12 @@ public class RegisterOppslagService {
     public PersonDokument hentPerson(String personnummer) {
         Saksopplysning saksopplysning = persondataFasade.hentPerson(personnummer, Informasjonsbehov.STANDARD);
         return (PersonDokument) saksopplysning.getDokument();
+    }
+
+    /**
+     * Fjerner mellomrom i orgnr
+     */
+    private String vaskOrgnr(String orgnr) {
+        return orgnr.replace(" ", "");
     }
 }
