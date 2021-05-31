@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.service.JsonSchemaValidator;
 import no.nav.melosys.service.vedtak.publisering.dto.FattetVedtak;
-import org.apache.kafka.common.errors.AuthenticationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,9 +52,6 @@ public class FattetVedtakProducer {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IntegrasjonException("Avbrutt ved sending av melding om fattet vedtak");
-        } catch (AuthenticationException e) {
-            //TODO: Trigg restart av pod eller reload credentials og prøv på nytt
-            throw new IntegrasjonException("Autentiseringsfeil");
         }
     }
 

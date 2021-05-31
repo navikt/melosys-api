@@ -28,24 +28,6 @@ public class KafkaProducerConfig {
     @Value("${kafka.aiven.brokers}")
     private String brokersUrl;
 
-    @Value("${kafka.aiven.certificate}")
-    private String certificate;
-
-    @Value("${kafka.aiven.certificatePath}")
-    private String certificatePath;
-
-    @Value("${kafka.aiven.privateKey}")
-    private String privateKey;
-
-    @Value("${kafka.aiven.privateKeyPath}")
-    private String privateKeyPath;
-
-    @Value("${kafka.aiven.ca}")
-    private String ca;
-
-    @Value("${kafka.aiven.caPath}")
-    private String caPath;
-
     @Value("${kafka.aiven.keystorePath}")
     private String keystorePath;
 
