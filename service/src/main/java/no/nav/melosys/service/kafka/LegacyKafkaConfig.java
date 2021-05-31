@@ -6,9 +6,9 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.service.soknad.SoknadMottatt;
-import no.nav.melosys.service.vedtak.publisering.dto.FattetVedtak;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +23,10 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 @Configuration
 @EnableKafka
-public class KafkaConfig {
+public class LegacyKafkaConfig {
+
+    // Denne gjelder for topics liggende på on-prem kafka
+
     @Bean
     public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, MelosysEessiMelding>> eessiMeldingListenerContainerFactory(
         KafkaProperties kafkaProperties, @Value("${kafka.eessi.groupid}") String groupId
