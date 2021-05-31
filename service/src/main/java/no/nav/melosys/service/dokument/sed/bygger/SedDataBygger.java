@@ -83,16 +83,15 @@ public class SedDataBygger {
         return sedDataDto;
     }
 
-    private VedtakDto lagVedtakDto(Behandlingsresultat behandlingsresultat){
+    private VedtakDto lagVedtakDto(Behandlingsresultat behandlingsresultat) {
         return behandlingsresultat.getBehandling().getFagsak().getBehandlinger()
             .stream()
-            .filter( behandling -> behandling.harStatus(Behandlingsstatus.AVSLUTTET) && !behandling.getId().equals(behandlingsresultat.getId()))
-            .map( behandling -> behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
+            .filter(behandling -> behandling.harStatus(Behandlingsstatus.AVSLUTTET) && !behandling.getId().equals(behandlingsresultat.getId()))
+            .map(behandling -> behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
             .filter(Behandlingsresultat::harVedtak)
             .max(Comparator.comparing(b -> b.getVedtakMetadata().getVedtaksdato()))
-            .map( b -> new VedtakDto(false, b.getVedtakMetadata().getVedtaksdato().atZone(ZoneId.systemDefault()).toLocalDate()))
-            .orElse( new VedtakDto(true,null));
-
+            .map(b -> new VedtakDto(false, b.getVedtakMetadata().getVedtaksdato().atZone(ZoneId.systemDefault()).toLocalDate()))
+            .orElse(new VedtakDto(true, null));
     }
 
     private SedDataDto lagPersonopplysninger(SedDataGrunnlag dataGrunnlag) {

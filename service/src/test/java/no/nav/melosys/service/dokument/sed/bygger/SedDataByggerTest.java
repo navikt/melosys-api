@@ -66,10 +66,6 @@ class SedDataByggerTest {
     private LandvelgerService landvelgerService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private BehandlingsresultatRepository behandlingsresultatRepo;
-    @Mock
-    private VilkaarsresultatService vilkaarsresultatService;
 
     private SedDataBygger dataBygger;
     private Behandling behandling;
@@ -80,8 +76,6 @@ class SedDataByggerTest {
 
     @BeforeEach
     public void setup() {
-        behandlingsresultatService = spy(new BehandlingsresultatService(behandlingsresultatRepo, vilkaarsresultatService));
-
 
         doReturn(DataByggerStubs.hentOrganisasjonDokumentSetStub()).when(registerOppslagService).hentOrganisasjoner(anySet());
 
@@ -439,24 +433,25 @@ class SedDataByggerTest {
     }
 
     @Test
-    public void lagVedtakDto_ikkeOpprinneligVedtakMedDagensDato_setterDatoOgVariablerISed(){
-        Behandlingsresultat behandlingsresultat1 = new Behandlingsresultat();
+    public void lagVedtakDto_ikkeOpprinneligVedtakMedDagensDato_setterDatoOgVariablerISed() {
+        Behandlingsresultat behandlingsresultatMedVedtak = new Behandlingsresultat();
         VedtakMetadata vedtakMetadata = new VedtakMetadata();
         vedtakMetadata.setVedtaksdato(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
-        behandlingsresultat1.setVedtakMetadata(vedtakMetadata);
+        behandlingsresultatMedVedtak.setVedtakMetadata(vedtakMetadata);
 
-        Behandling behandling2 = DataByggerStubs.hentBehandlingStub();
-        behandling2.setStatus(Behandlingsstatus.AVSLUTTET);
-        behandling2.setId(2L);
-        behandlingsresultat1.setBehandling(behandling2);
+        Behandling avsluttetBehandling = DataByggerStubs.hentBehandlingStub();
+        avsluttetBehandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        avsluttetBehandling.setId(2L);
+        behandlingsresultatMedVedtak.setBehandling(avsluttetBehandling);
 
         ArrayList<Behandling> list = new ArrayList<>();
         list.add(behandling);
-        list.add(behandling2);
+        list.add(avsluttetBehandling);
         behandling.getFagsak().setBehandlinger(list);
         behandlingsresultat.setBehandling(behandling);
 
-        when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat1));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultatMedVedtak);
+
         SedDataGrunnlagMedSoknad dataGrunnlag = lagDokumentressurser();
 
         SedDataDto sedDataDto = dataBygger.lag(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
