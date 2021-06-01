@@ -12,6 +12,7 @@ import no.nav.melosys.domain.person.Statsborgerskap;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
+import no.nav.melosys.integrasjon.pdl.dto.person.Adressebeskyttelse;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -84,6 +85,9 @@ public class PersondataService implements PersondataFasade {
 
     @Override
     public boolean harStrengtFortroligAdresse(String fnr) {
+        if (unleash.isEnabled("melosys.pdl.adressebeskyttelse")) {
+            return pdlConsumer.hentAdressebeskyttelser(fnr).stream().anyMatch(Adressebeskyttelse::erStrengtFortrolig);
+        }
         return tpsService.harStrengtFortroligAdresse(fnr);
     }
 }

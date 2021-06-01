@@ -202,6 +202,16 @@ query($ident: ID!) {
 }
         """;
 
+    public static final String HENT_ADRESSEBESKYTTELSE_QUERY = """
+query($ident: ID!, $historikk: Boolean!) {
+  hentPerson(ident: $ident) {
+    adressebeskyttelse(historikk: $historikk) {
+      gradering
+    }
+  }
+}
+        """;
+
     public static final String HENT_SAMMENSATT_NAVN_QUERY = """
 query($ident: ID!, $historikk: Boolean!) {
   hentPerson(ident: $ident) {
