@@ -1,17 +1,20 @@
 package no.nav.melosys.saksflyt.kontroll.dto;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.UUID;
 
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.ProsessinstansHendelse;
 
 public class HentProsessinstansDto {
     private final UUID id;
     private final String prosessType;
     private final LocalDateTime endretDato;
     private final String sistFullførtSteg;
+    private final String sisteFeilmelding;
 
     public HentProsessinstansDto(Prosessinstans prosessinstans) {
         this.id = prosessinstans.getId();
@@ -19,6 +22,11 @@ public class HentProsessinstansDto {
         this.endretDato = prosessinstans.getEndretDato();
         this.sistFullførtSteg = Optional.ofNullable(prosessinstans.getSistFullførtSteg())
             .map(ProsessSteg::getKode)
+            .orElse(null);
+        this.sisteFeilmelding = prosessinstans.getHendelser()
+            .stream()
+            .max(Comparator.comparing(ProsessinstansHendelse::getDato))
+            .map(ProsessinstansHendelse::getMelding)
             .orElse(null);
     }
 
@@ -36,5 +44,9 @@ public class HentProsessinstansDto {
 
     public String getSistFullførtSteg() {
         return sistFullførtSteg;
+    }
+
+    public String getSisteFeilmelding() {
+        return sisteFeilmelding;
     }
 }
