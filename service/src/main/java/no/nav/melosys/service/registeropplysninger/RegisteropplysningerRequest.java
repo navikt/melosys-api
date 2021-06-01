@@ -18,7 +18,7 @@ public class RegisteropplysningerRequest {
     private final LocalDate tom;
     private final Informasjonsbehov informasjonsbehov;
 
-    public RegisteropplysningerRequest(Long behandlingID, Set<SaksopplysningType> opplysningstyper,
+    private RegisteropplysningerRequest(Long behandlingID, Set<SaksopplysningType> opplysningstyper,
                                        String fnr, LocalDate fom, LocalDate tom, Informasjonsbehov informasjonsbehov) {
         this.behandlingID = behandlingID;
         this.opplysningstyper = opplysningstyper;
