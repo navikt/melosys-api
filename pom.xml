@@ -92,7 +92,7 @@
         <commons-logging.version>1.2</commons-logging.version>
         <javassist.version>3.27.0-GA</javassist.version>
         <jaxb2-basics-runtime.version>0.12.0</jaxb2-basics-runtime.version>
-        <joda-time.version>2.9.4</joda-time.version>
+        <joda-time.version>2.10.10</joda-time.version>
         <objenesis.version>3.1</objenesis.version>
         <stax2-api.version>4.2.1</stax2-api.version>
         <woodstox.version>6.2.3</woodstox.version>
@@ -401,7 +401,7 @@
             <dependency>
                 <groupId>org.checkerframework</groupId>
                 <artifactId>checker-qual</artifactId>
-                <version>3.12.0</version>
+                <version>3.13.0</version>
             </dependency>
             <dependency>
                 <groupId>org.codehaus.woodstox</groupId>
