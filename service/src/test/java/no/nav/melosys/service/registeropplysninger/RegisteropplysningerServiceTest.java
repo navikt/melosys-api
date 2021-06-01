@@ -254,9 +254,13 @@ class RegisteropplysningerServiceTest {
         LocalDate fom = LocalDate.now().plusYears(2);
         LocalDate tom = LocalDate.now();
 
-        registeropplysningerService.hentOgLagreOpplysninger(new RegisteropplysningerRequest(
-            2L, RegisteropplysningerRequest.hentAlleSaksopplysningTyper().getOpplysningstyper(), FNR, fom, tom, null
-        ));
+        registeropplysningerService.hentOgLagreOpplysninger(RegisteropplysningerRequest.builder()
+            .behandlingID(2L)
+            .saksopplysningTyper(RegisteropplysningerRequest.hentAlleSaksopplysningTyper())
+            .fnr(FNR)
+            .fom(fom)
+            .tom(tom)
+            .build());
 
         verify(aaregFasade, never()).finnArbeidsforholdPrArbeidstaker(anyString(), any(), any());
         verify(inntektService, never()).hentInntektListe(anyString(), any(), any());
