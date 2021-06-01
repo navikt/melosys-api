@@ -30,7 +30,8 @@ public class FattetVedtakProducer {
     private final String topicName;
 
     @Autowired
-    public FattetVedtakProducer(@Qualifier("fattetVedtak") KafkaTemplate kafkaTemplate, @Value("${melosys.kafka.topic.fattetvedtak}") String topicName,
+    public FattetVedtakProducer(@Qualifier("fattetVedtak") KafkaTemplate kafkaTemplate,
+                                @Value("${kafka.fattetvedtak.topic}") String topicName,
                                 ObjectMapper objectMapper) {
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;

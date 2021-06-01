@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.service.vedtak.publisering.dto.FattetVedtak;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -37,16 +35,12 @@ public class KafkaProducerConfig {
     @Value("${kafka.aiven.credstorePassword}")
     private String credstorePassword;
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-        .registerModule(new JavaTimeModule())
-        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-
     @Bean
     @Qualifier("fattetVedtak")
-    public KafkaTemplate<String, FattetVedtak> fattetVedtakTemplate() {
+    public KafkaTemplate<String, FattetVedtak> fattetVedtakTemplate(ObjectMapper objectMapper) {
         Map<String, Object> props = commonProps();
         ProducerFactory<String, FattetVedtak> producerFactory =
-            new DefaultKafkaProducerFactory<>(props, new StringSerializer(), new JsonSerializer<>(OBJECT_MAPPER));
+            new DefaultKafkaProducerFactory<>(props, new StringSerializer(), new JsonSerializer<>(objectMapper));
 
         return new KafkaTemplate<>(producerFactory);
     }
