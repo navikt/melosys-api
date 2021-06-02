@@ -24,9 +24,9 @@ public class KontaktadresseOversetter {
         UstrukturertAdresse ustrukturertAdresse = null;
 
         if (kontaktadressePDL.vegadresse() != null) {
-            strukturertAdresse = lagStrukturertAdresse(kontaktadressePDL.vegadresse(), kodeverkService);
+            strukturertAdresse = PdlAdresseformatOversetter.lagStrukturertAdresse(kontaktadressePDL.vegadresse(), kodeverkService);
         } else if (kontaktadressePDL.utenlandskAdresse() != null) {
-            strukturertAdresse = lagStrukturertAdresse(kontaktadressePDL.utenlandskAdresse());
+            strukturertAdresse = PdlAdresseformatOversetter.lagStrukturertAdresse(kontaktadressePDL.utenlandskAdresse());
         } else if (kontaktadressePDL.postadresseIFrittFormat() != null) {
             ustrukturertAdresse = lagUstrukturertAdresse(kontaktadressePDL.postadresseIFrittFormat(), kodeverkService);
         } else if (kontaktadressePDL.utenlandskAdresseIFrittFormat() != null) {
@@ -44,23 +44,6 @@ public class KontaktadresseOversetter {
             kontaktadressePDL.hentKilde(),
             kontaktadressePDL.metadata().historisk()
         );
-    }
-
-    private static StrukturertAdresse lagStrukturertAdresse(Vegadresse vegadresse, KodeverkService kodeverkService) {
-        return new StrukturertAdresse(
-            vegadresse.adressenavn(),
-            vegadresse.husnummer() + leggTilHusBokstav(vegadresse),
-            vegadresse.tilleggsnavn(),
-            null,
-            vegadresse.postnummer(),
-            kodeverkService.dekod(POSTNUMMER, vegadresse.postnummer(), LocalDate.now()),
-            null,
-            Landkoder.NO.getKode()
-        );
-    }
-
-    private static String leggTilHusBokstav(Vegadresse vegadresse) {
-        return vegadresse.husbokstav() != null ? " " + vegadresse.husbokstav() : "";
     }
 
     private static StrukturertAdresse lagStrukturertAdresse(Postboksadresse postboksadresse,
@@ -85,19 +68,6 @@ public class KontaktadresseOversetter {
             postadresseIFrittFormat.adresselinje3(),
             postadresseIFrittFormat.postnummer() + " " + kodeverkService.dekod(POSTNUMMER, postadresseIFrittFormat.postnummer(), LocalDate.now()),
             Landkoder.NO.getKode()
-        );
-    }
-
-    private static StrukturertAdresse lagStrukturertAdresse(UtenlandskAdresse utenlandskAdresse) {
-        return new StrukturertAdresse(
-            utenlandskAdresse.adressenavnNummer(),
-            utenlandskAdresse.bygningEtasjeLeilighet(),
-            null,
-            utenlandskAdresse.postboksNummerNavn(),
-            utenlandskAdresse.postkode(),
-            utenlandskAdresse.bySted(),
-            utenlandskAdresse.regionDistriktOmraade(),
-            LandkoderUtils.tilIso2(utenlandskAdresse.landkode())
         );
     }
 

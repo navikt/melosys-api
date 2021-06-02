@@ -10,7 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.service.persondata.PdlObjectFactory.lagMetadata;
+import static no.nav.melosys.service.persondata.PdlObjectFactory.metadata;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -38,7 +38,7 @@ class KontaktadresseOversetterTest {
                 "Storgården",
                 "1234"
             ),
-            lagMetadata()
+            metadata()
         );
         when(kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234"), any())).thenReturn("Bergen");
 
@@ -67,7 +67,7 @@ class KontaktadresseOversetterTest {
             null,
             null,
             null,
-            lagMetadata()
+            metadata()
         );
         when(kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234"), any())).thenReturn("Enby");
 
@@ -99,7 +99,7 @@ class KontaktadresseOversetterTest {
             ),
             null,
             null,
-            lagMetadata()
+            metadata()
         );
 
         final var kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService);
@@ -131,7 +131,7 @@ class KontaktadresseOversetterTest {
                 "FRA"
             ),
             null,
-            lagMetadata()
+            metadata()
         );
 
         final var kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService);
