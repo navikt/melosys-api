@@ -17,7 +17,7 @@ public class UstrukturertAdresse implements Adresse {
     private final List<String> adresselinjer = new ArrayList<>();
     private String landkode;
 
-    private UstrukturertAdresse(String l1, String l2, String l3, String l4, String landKode) {
+    public UstrukturertAdresse(String l1, String l2, String l3, String l4, String landKode) {
         if (StringUtils.isNotEmpty(l1)) {
             adresselinjer.add(l1);
         }
