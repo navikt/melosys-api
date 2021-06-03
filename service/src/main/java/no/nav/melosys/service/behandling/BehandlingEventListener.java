@@ -48,7 +48,7 @@ public class BehandlingEventListener {
     @Async
     public void behandlingsfristEndret(BehandlingsfristEndretEvent behandlingsfristEndretEvent) {
         Behandling behandling = behandlingService.hentBehandling(behandlingsfristEndretEvent.getBehandlingId());
-        Optional<Oppgave> oppgave = oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
+        Optional<Oppgave> oppgave = oppgaveService.finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
         if (oppgave.isPresent()) {
             oppgaveService.oppdaterOppgave(
                 oppgave.get().getOppgaveId(),

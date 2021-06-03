@@ -139,9 +139,9 @@ class OppgaveServiceTest {
 
     @Test
     void hentOppgaveForFagsaksnummer_oppgaveEksisterer_forventOppgave() {
-        when(oppgaveFasade.finnOppgaverMedSaksnummer(eq(saksnummer))).thenReturn(List.of(oppgave));
+        when(oppgaveFasade.finnÅpneOppgaverMedSaksnummer(eq(saksnummer))).thenReturn(List.of(oppgave));
 
-        Oppgave oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(saksnummer);
+        Oppgave oppgave = oppgaveService.hentÅpenOppgaveMedFagsaksnummer(saksnummer);
         assertThat(oppgave.erBehandling()).isTrue();
     }
 
@@ -185,7 +185,7 @@ class OppgaveServiceTest {
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer(saksnummer);
-        when(oppgaveFasade.finnOppgaverMedSaksnummer(eq(saksnummer))).thenReturn(List.of(oppgave));
+        when(oppgaveFasade.finnÅpneOppgaverMedSaksnummer(eq(saksnummer))).thenReturn(List.of(oppgave));
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", oppgave.getTilordnetRessurs());
         verify(oppgaveFasade, never()).opprettOppgave(any());
@@ -200,7 +200,7 @@ class OppgaveServiceTest {
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer(saksnummer);
-        when(oppgaveFasade.finnOppgaverMedSaksnummer(eq(saksnummer))).thenReturn(List.of(oppgave));
+        when(oppgaveFasade.finnÅpneOppgaverMedSaksnummer(eq(saksnummer))).thenReturn(List.of(oppgave));
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", tilordnetRessurs);
         verify(oppgaveFasade, never()).opprettOppgave(any());

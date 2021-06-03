@@ -84,7 +84,7 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
     }
 
     private void ferdigstillOppgave(String saksnummer) {
-        Optional<String> oppgaveID = oppgaveService.finnOppgaveMedFagsaksnummer(saksnummer)
+        Optional<String> oppgaveID = oppgaveService.finnÅpenOppgaveMedFagsaksnummer(saksnummer)
             .map(Oppgave::getOppgaveId);
 
         if (oppgaveID.isPresent()) {

@@ -33,9 +33,14 @@ public interface OppgaveFasade {
     List<Oppgave> finnOppgaverMedBrukerID(String aktørID);
 
     /**
+     * Finner alle åpne oppgaver med gitt saksnummer.
+     */
+    List<Oppgave> finnÅpneOppgaverMedSaksnummer(String saksnummer);
+
+    /**
      * Finner alle oppgaver med gitt saksnummer.
      */
-    List<Oppgave> finnOppgaverMedSaksnummer(String saksnummer);
+    List<Oppgave> finnAlleOppgaverMedSaksnummer(String saksnummer);
 
     /**
      * Hent oppgave fra Oppgave på en gitt oppgaveId
