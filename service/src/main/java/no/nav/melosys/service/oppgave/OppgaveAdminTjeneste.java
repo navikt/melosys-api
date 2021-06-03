@@ -21,13 +21,13 @@ public class OppgaveAdminTjeneste implements AdminTjeneste {
         this.apiKey = apiKey;
     }
 
-    @PostMapping("/gjenåpne/{saksnummer}")
+    @PostMapping("/gjenaapne/{saksnummer}")
     public ResponseEntity<String> gjenåpneOppgave(@RequestHeader(API_KEY_HEADER) String apiKey,
                                                   @PathVariable String saksnummer) {
         validerApikey(apiKey);
 
         String oppdatertOppgaveId = oppgaveService.gjenåpneOppgaveMedFagsaksnummer(saksnummer);
-        return ResponseEntity.ok(oppdatertOppgaveId);
+        return ResponseEntity.ok(String.format("Gjenåpnet oppgave med id %s", oppdatertOppgaveId));
     }
 
     @Override
