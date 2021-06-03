@@ -79,7 +79,7 @@ public class OppgaveService {
     public void ferdigstillOppgaveMedSaksnummer(String fagSaksnummer) {
         Oppgave oppgave;
         try {
-            oppgave = hentOppgaveMedFagsaksnummer(fagSaksnummer);
+            oppgave = hentÅpenOppgaveMedFagsaksnummer(fagSaksnummer);
         } catch (IkkeFunnetException e) {
             log.debug("Sak {} har ingen oppgaver å ferdigstille.", fagSaksnummer);
             return;
@@ -88,12 +88,21 @@ public class OppgaveService {
     }
 
     public void leggTilbakeOppgaveMedSaksnummer(String fagSaksnummer) {
-        Oppgave oppgave = hentOppgaveMedFagsaksnummer(fagSaksnummer);
+        Oppgave oppgave = hentÅpenOppgaveMedFagsaksnummer(fagSaksnummer);
         oppgaveFasade.leggTilbakeOppgave(oppgave.getOppgaveId());
     }
 
-    public Optional<Oppgave> finnOppgaveMedFagsaksnummer(String saksnummer) {
-        List<Oppgave> oppgaver = oppgaveFasade.finnOppgaverMedSaksnummer(saksnummer);
+    public Optional<Oppgave> finnSisteFerdigstilteOppgaveMedFagsaksnummer(String saksnummer) {
+        List<Oppgave> oppgaver = oppgaveFasade.finnFerdigstilteOppgaverMedSaksnummer(saksnummer);
+
+        if (oppgaver.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(oppgaver.get(0));
+    }
+
+    public Optional<Oppgave> finnÅpenOppgaveMedFagsaksnummer(String saksnummer) {
+        List<Oppgave> oppgaver = oppgaveFasade.finnÅpneOppgaverMedSaksnummer(saksnummer);
 
         if (!oppgaver.isEmpty()) {
             if (oppgaver.size() > 1) {
@@ -105,9 +114,14 @@ public class OppgaveService {
         }
     }
 
-    public Oppgave hentOppgaveMedFagsaksnummer(String saksnummer) {
-        return finnOppgaveMedFagsaksnummer(saksnummer)
+    public Oppgave hentSisteFerdigstilteOppgaveMedFagsaksnummer(String saksnummer) {
+        return finnSisteFerdigstilteOppgaveMedFagsaksnummer(saksnummer)
             .orElseThrow(() -> new IkkeFunnetException("Finner ingen oppgave med saksnummer " + saksnummer));
+    }
+
+    public Oppgave hentÅpenOppgaveMedFagsaksnummer(String saksnummer) {
+        return finnÅpenOppgaveMedFagsaksnummer(saksnummer)
+            .orElseThrow(() -> new IkkeFunnetException("Finner ingen åpen oppgave med saksnummer " + saksnummer));
     }
 
     public Oppgave hentOppgaveMedOppgaveID(String oppgaveID) {
@@ -120,7 +134,7 @@ public class OppgaveService {
 
     public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) {
 
-        Optional<Oppgave> eksisterendeOppgave = finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
+        Optional<Oppgave> eksisterendeOppgave = finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         if (eksisterendeOppgave.isEmpty()) {
             String beskrivelse = behandling.erElektroniskSøknad() ? "Mottatt elektronisk søknad"  : null;
@@ -157,6 +171,15 @@ public class OppgaveService {
 
     public void tildelOppgave(String oppgaveID, String saksbehandler) {
         oppgaveFasade.oppdaterOppgave(oppgaveID, OppgaveOppdatering.builder().tilordnetRessurs(saksbehandler).build());
+    }
+
+    public String gjenåpneSisteFerdigstilteOppgaveMedFagsaksnummer(String saksnummer) {
+        String oppgaveId = hentSisteFerdigstilteOppgaveMedFagsaksnummer(saksnummer).getOppgaveId();
+        var oppdatering = OppgaveOppdatering.builder().status("UNDER_BEHANDLING").build();
+
+        log.info("Gjenoppretter oppgave med id {} knyttet til saksnummer {}", oppgaveId, saksnummer);
+        oppdaterOppgave(oppgaveId, oppdatering);
+        return oppgaveId;
     }
 
     private List<OppgaveDto> oppgaverTilDtoer(Collection<Oppgave> oppgaverFraDomain) {

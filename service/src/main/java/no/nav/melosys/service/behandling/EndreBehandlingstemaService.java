@@ -59,7 +59,7 @@ public class EndreBehandlingstemaService {
     }
 
     private void oppdaterOppgave(Behandling behandling) {
-        Oppgave oppgave = oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())
+        Oppgave oppgave = oppgaveService.finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())
             .orElseThrow(() -> new FunksjonellException("Finner ikke tilhørende oppgave"));
 
         Oppgave behandlingsOppgaveForType = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()).build();

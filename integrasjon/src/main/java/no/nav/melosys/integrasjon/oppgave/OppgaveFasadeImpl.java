@@ -38,6 +38,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
 
     private static final String OPPGAVE_STATUS_FERDIGSTILT = "FERDIGSTILT";
     private static final String SORTERINGSFELT = "FRIST";
+    private static final String SORTERINGSREKKEFOLGE_DESC = "DESC";
     private static final String OPPGAVE_STATUSKATEGORI_AAPEN = "AAPEN";
 
     private final OppgaveConsumer oppgaveConsumer;
@@ -224,12 +225,28 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public List<Oppgave> finnOppgaverMedSaksnummer(String saksnummer) {
+    public List<Oppgave> finnÅpneOppgaverMedSaksnummer(String saksnummer) {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medSaksreferanse(new String[]{saksnummer})
             .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
             .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode(), Oppgavetyper.BEH_SED.getKode()})
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
+            .build();
+
+        return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
+            .map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Oppgave> finnFerdigstilteOppgaverMedSaksnummer(String saksnummer) {
+        OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
+            .medSaksreferanse(new String[]{saksnummer})
+            .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
+            .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode(), Oppgavetyper.BEH_SED.getKode()})
+            .medSorteringsfelt(SORTERINGSFELT)
+            .medSorteringsrekkefolge(SORTERINGSREKKEFOLGE_DESC)
+            .medStatusKategori(OPPGAVE_STATUS_FERDIGSTILT)
             .build();
 
         return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()

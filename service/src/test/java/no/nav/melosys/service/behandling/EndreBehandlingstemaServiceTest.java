@@ -157,7 +157,7 @@ class EndreBehandlingstemaServiceTest {
             .setSaksnummer(behandling.getFagsak().getSaksnummer())
             .build();
         when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
-        when(oppgaveService.finnOppgaveMedFagsaksnummer(fagsak.getSaksnummer())).thenReturn(Optional.of(oppgave));
+        when(oppgaveService.finnÅpenOppgaveMedFagsaksnummer(fagsak.getSaksnummer())).thenReturn(Optional.of(oppgave));
     }
 
 }

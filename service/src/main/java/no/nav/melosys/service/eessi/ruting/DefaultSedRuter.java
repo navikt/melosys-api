@@ -83,7 +83,7 @@ public class DefaultSedRuter implements SedRuter {
     }
 
     private void oppdaterOppgave(Behandling behandling, Prosessinstans prosessinstans, SedType sedType) {
-        Optional<Oppgave> oppgave = oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
+        Optional<Oppgave> oppgave = oppgaveService.finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         String oppgaveID;
         if (oppgave.isEmpty()) {

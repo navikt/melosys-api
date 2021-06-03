@@ -300,7 +300,7 @@ public class BehandlingService {
             return false;
         }
 
-        Optional<Oppgave> oppgaveOptional = oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
+        Optional<Oppgave> oppgaveOptional = oppgaveService.finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         if (oppgaveOptional.isEmpty()) {
             return false;
