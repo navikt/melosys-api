@@ -159,6 +159,15 @@ public class OppgaveService {
         oppgaveFasade.oppdaterOppgave(oppgaveID, OppgaveOppdatering.builder().tilordnetRessurs(saksbehandler).build());
     }
 
+    public String gjenopprettOppgaveMedFagsaksnummer(String saksnummer) {
+        String oppgaveId = hentOppgaveMedFagsaksnummer(saksnummer).getOppgaveId();
+        var oppdatering = OppgaveOppdatering.builder().status("UNDER_BEHANDLING").build();
+
+        log.info("Gjenoppretter oppgave med id {} knyttet til saksnummer {}", oppgaveId, saksnummer);
+        oppdaterOppgave(oppgaveId, oppdatering);
+        return oppgaveId;
+    }
+
     private List<OppgaveDto> oppgaverTilDtoer(Collection<Oppgave> oppgaverFraDomain) {
         return oppgaverFraDomain.stream()
             .map(this::tilOppgaveDtoHåndterException)
