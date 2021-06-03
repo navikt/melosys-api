@@ -1,6 +1,5 @@
 package no.nav.melosys.service.oppgave;
 
-
 import no.nav.melosys.service.AdminTjeneste;
 import no.nav.security.token.support.core.api.Unprotected;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +25,8 @@ public class OppgaveAdminTjeneste implements AdminTjeneste {
                                                      @PathVariable String saksnummer) {
         validerApikey(apiKey);
 
-        return ResponseEntity.ok(oppgaveService.gjenopprettOppgaveMedFagsaksnummer(saksnummer));
+        String oppdatertOppgaveId = oppgaveService.gjenopprettOppgaveMedFagsaksnummer(saksnummer);
+        return ResponseEntity.ok(oppdatertOppgaveId);
     }
 
     @Override
