@@ -48,11 +48,8 @@ public class KontaktadresseOversetter {
 
     private static StrukturertAdresse lagStrukturertAdresse(Postboksadresse postboksadresse,
                                                             KodeverkService kodeverkService) {
-        return new StrukturertAdresse(
-            null,
-            null,
-            null,
-            postboksadresse.postboks(),
+        return new StrukturertAdresse(null, null,
+            null, postboksadresse.postboks(),
             postboksadresse.postnummer(),
             kodeverkService.dekod(POSTNUMMER, postboksadresse.postnummer(), LocalDate.now()),
             null,

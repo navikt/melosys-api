@@ -67,7 +67,7 @@ public class AttestMapperTest {
 
         StrukturertAdresse boAdresse = new StrukturertAdresse();
         boAdresse.gatenavn = "HjemmeGata";
-        boAdresse.husnummer = "25";
+        boAdresse.husnummerEtasjeLeilighet = "25";
         boAdresse.postnummer = "0165";
         boAdresse.poststed = "Poststed";
         boAdresse.region = "Region";
@@ -87,7 +87,7 @@ public class AttestMapperTest {
         when(behandling.getFagsak()).thenReturn(new Fagsak());
 
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.husnummer = "25";
+        strukturertAdresse.husnummerEtasjeLeilighet = "25";
         strukturertAdresse.gatenavn = "Gatenavn";
         strukturertAdresse.postnummer = "0165";
         strukturertAdresse.poststed = "Poststed";

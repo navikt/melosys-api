@@ -36,7 +36,7 @@ public class MidlertidigPostadresseSerializer extends StdSerializer<no.nav.melos
             dto.strukturertAdresse = new StrukturertAdresse();
 
             dto.strukturertAdresse.gatenavn = adresse.gateadresse.getGatenavn();
-            dto.strukturertAdresse.husnummer =
+            dto.strukturertAdresse.husnummerEtasjeLeilighet =
                 Stream.of(
                     adresse.gateadresse.getHusbokstav(),
                     adresse.gateadresse.getHusnummer()

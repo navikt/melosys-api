@@ -19,9 +19,9 @@ class PdlAdresseformatOversetter {
 
     static StrukturertAdresse lagStrukturertAdresse(Vegadresse vegadresse, KodeverkService kodeverkService) {
         return new StrukturertAdresse(
+            vegadresse.tilleggsnavn(),
             vegadresse.adressenavn(),
             vegadresse.husnummer() + leggTilHusBokstav(vegadresse),
-            vegadresse.tilleggsnavn(),
             null,
             vegadresse.postnummer(),
             kodeverkService.dekod(POSTNUMMER, vegadresse.postnummer(), LocalDate.now()),
@@ -35,10 +35,9 @@ class PdlAdresseformatOversetter {
     }
 
     static StrukturertAdresse lagStrukturertAdresse(UtenlandskAdresse utenlandskAdresse) {
-        return new StrukturertAdresse(
+        return new StrukturertAdresse(null,
             utenlandskAdresse.adressenavnNummer(),
             utenlandskAdresse.bygningEtasjeLeilighet(),
-            null,
             utenlandskAdresse.postboksNummerNavn(),
             utenlandskAdresse.postkode(),
             utenlandskAdresse.bySted(),

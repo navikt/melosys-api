@@ -33,7 +33,7 @@ public final class DokgenAdresseMapper {
             }
 
             adresselinjer.add(orgAdresse.gatenavn +
-                ((orgAdresse.husnummer == null) ? "" : " " + orgAdresse.husnummer));
+                ((orgAdresse.husnummerEtasjeLeilighet == null) ? "" : " " + orgAdresse.husnummerEtasjeLeilighet));
         }
         return adresselinjer;
     }

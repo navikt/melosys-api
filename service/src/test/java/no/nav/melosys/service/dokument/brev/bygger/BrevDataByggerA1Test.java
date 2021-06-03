@@ -65,7 +65,7 @@ class BrevDataByggerA1Test {
 
         StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
         oppgittAdresse.gatenavn = "HjemmeGata";
-        oppgittAdresse.husnummer = "23B";
+        oppgittAdresse.husnummerEtasjeLeilighet = "23B";
         oppgittAdresse.postnummer = "0165";
         oppgittAdresse.poststed = "Oslo";
         oppgittAdresse.landkode = Landkoder.NO.getKode();
@@ -157,7 +157,7 @@ class BrevDataByggerA1Test {
     private StrukturertAdresse lagStrukturertAdresse() {
         StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
         oppgittAdresse.gatenavn = "HjemmeGata";
-        oppgittAdresse.husnummer = "23B";
+        oppgittAdresse.husnummerEtasjeLeilighet = "23B";
         oppgittAdresse.postnummer = "0165";
         oppgittAdresse.poststed = "Oslo";
         oppgittAdresse.landkode = Landkoder.NO.getKode();

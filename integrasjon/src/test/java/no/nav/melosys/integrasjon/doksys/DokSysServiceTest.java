@@ -85,7 +85,7 @@ class DokSysServiceTest {
     void produserIkkeredigerbartDokument_forBrukerMedPostadresse_girPostadresseOgNavn() throws Exception {
         StrukturertAdresse postadresse = new StrukturertAdresse();
         postadresse.gatenavn = "Gatenavn";
-        postadresse.husnummer = "123";
+        postadresse.husnummerEtasjeLeilighet = "123";
         postadresse.postnummer = "1337";
         postadresse.poststed = "Poststed";
         postadresse.region = "Region";
@@ -102,7 +102,7 @@ class DokSysServiceTest {
         assertThat(dokInfo.getMottaker().isBerik()).isFalse();
 
         UtenlandskPostadresse adresse = (UtenlandskPostadresse) dokInfo.getAdresse();
-        assertThat(adresse.getAdresselinje1()).isEqualTo(postadresse.gatenavn+" "+postadresse.husnummer);
+        assertThat(adresse.getAdresselinje1()).isEqualTo(postadresse.gatenavn+" "+postadresse.husnummerEtasjeLeilighet);
         assertThat(adresse.getAdresselinje2()).isEqualTo(postadresse.postnummer+" "+postadresse.poststed);
         assertThat(adresse.getAdresselinje3()).isEqualTo(postadresse.region);
         assertThat(adresse.getLand().getValue()).isEqualTo(postadresse.landkode);
@@ -164,7 +164,7 @@ class DokSysServiceTest {
         mottakeradresse.gatenavn = "gate";
         mottakeradresse.postnummer = "0463";
         mottakeradresse.region = "Oslo";
-        mottakeradresse.husnummer = "4B";
+        mottakeradresse.husnummerEtasjeLeilighet = "4B";
         mottakeradresse.poststed = "Oslo";
 
         when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
@@ -186,7 +186,7 @@ class DokSysServiceTest {
         mottakeradresse.gatenavn = "svensk gate";
         mottakeradresse.postnummer = "9999";
         mottakeradresse.region = "Sverige";
-        mottakeradresse.husnummer = "4B";
+        mottakeradresse.husnummerEtasjeLeilighet = "4B";
         mottakeradresse.poststed = "Stockholm";
 
         when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))

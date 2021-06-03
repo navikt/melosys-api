@@ -43,7 +43,7 @@ class SoeknadMapperTest {
         final FysiskArbeidssted fysiskArbeidssted = soeknad.arbeidPaaLand.fysiskeArbeidssteder.get(0);
         assertThat(fysiskArbeidssted.virksomhetNavn).isEqualTo("Firmaet");
         assertThat(fysiskArbeidssted.adresse.gatenavn).isEqualTo("Gaten 1");
-        assertThat(fysiskArbeidssted.adresse.husnummer).isNull();
+        assertThat(fysiskArbeidssted.adresse.husnummerEtasjeLeilighet).isNull();
         assertThat(fysiskArbeidssted.adresse.postnummer).isEqualTo("1234");
         assertThat(fysiskArbeidssted.adresse.poststed).isEqualTo("Stedet");
         assertThat(fysiskArbeidssted.adresse.region).isEqualTo("Region");

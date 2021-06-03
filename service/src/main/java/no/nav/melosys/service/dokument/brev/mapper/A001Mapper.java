@@ -203,7 +203,7 @@ class A001Mapper {
         StrukturertAdresse adresse = arbeidssted.getAdresse();
         AdresseType3 adresseBrev = new AdresseType3();
         adresseBrev.setGatenavn(adresse.gatenavn);
-        adresseBrev.setHusnummer(adresse.husnummer);
+        adresseBrev.setHusnummer(adresse.husnummerEtasjeLeilighet);
         adresseBrev.setPostnummer(adresse.postnummer);
         adresseBrev.setPoststed(adresse.poststed);
         adresseBrev.setRegion(adresse.region);
@@ -228,7 +228,7 @@ class A001Mapper {
     private BostedsadresseType mapBostedAdresse(StrukturertAdresse bosted) {
         BostedsadresseType bostedsadresse = new BostedsadresseType();
         bostedsadresse.setGatenavn(bosted.gatenavn);
-        bostedsadresse.setHusnummer(bosted.husnummer);
+        bostedsadresse.setHusnummer(bosted.husnummerEtasjeLeilighet);
         bostedsadresse.setPostnummer(bosted.postnummer);
         bostedsadresse.setPoststed(bosted.poststed);
         bostedsadresse.setRegion(bosted.region);
@@ -248,7 +248,7 @@ class A001Mapper {
 
             StrukturertAdresse adresse = (StrukturertAdresse) virksomhet.adresse;
             AdresseType adresseBrev = new AdresseType();
-            adresseBrev.setAdresselinje1(sammenslå(adresse.gatenavn, adresse.husnummer));
+            adresseBrev.setAdresselinje1(sammenslå(adresse.gatenavn, adresse.husnummerEtasjeLeilighet));
             adresseBrev.setAdresselinje2(adresse.poststed);
             adresseBrev.setAdresselinje3(StringUtils.isEmpty(adresse.postnummer) ? " " : adresse.postnummer);
             adresseBrev.setAdresselinje4(adresse.region);
@@ -269,7 +269,7 @@ class A001Mapper {
 
             AdresseType2 adresseBrev = new AdresseType2();
             StrukturertAdresse adresse = (StrukturertAdresse) virksomhet.adresse;
-            adresseBrev.setAdresselinje1(sammenslå(adresse.gatenavn, adresse.husnummer));
+            adresseBrev.setAdresselinje1(sammenslå(adresse.gatenavn, adresse.husnummerEtasjeLeilighet));
             adresseBrev.setAdresselinje2(adresse.poststed);
             adresseBrev.setAdresselinje3(adresse.postnummer);
             adresseBrev.setAdresselinje4(adresse.region);

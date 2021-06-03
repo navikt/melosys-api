@@ -52,7 +52,7 @@ public class Adresse {
 
     public static Adresse fraStrukturertAdresse(StrukturertAdresse strukturertAdresse) {
         Adresse adresse = new Adresse();
-        adresse.setGateadresse(lagGateadresse(strukturertAdresse.gatenavn, strukturertAdresse.husnummer));
+        adresse.setGateadresse(lagGateadresse(strukturertAdresse.gatenavn, strukturertAdresse.husnummerEtasjeLeilighet));
         adresse.setLand(strukturertAdresse.landkode);
         adresse.setPostnr(strukturertAdresse.postnummer);
         adresse.setPoststed(StringUtils.isBlank(strukturertAdresse.poststed) ? UKJENT : strukturertAdresse.poststed);

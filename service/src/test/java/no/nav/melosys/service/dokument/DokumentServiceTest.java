@@ -202,7 +202,7 @@ public final class DokumentServiceTest {
         sadr.poststed = "Sted";
         sadr.postnummer = "1234";
         sadr.gatenavn = "Gate";
-        sadr.husnummer = "1";
+        sadr.husnummerEtasjeLeilighet = "1";
         return sadr;
     }
 

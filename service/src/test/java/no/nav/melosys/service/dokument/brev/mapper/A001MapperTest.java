@@ -67,7 +67,7 @@ public class A001MapperTest {
 
         StrukturertAdresse boAdresse = new StrukturertAdresse();
         boAdresse.gatenavn = "Gatenavn";
-        boAdresse.husnummer = "23A";
+        boAdresse.husnummerEtasjeLeilighet = "23A";
         boAdresse.postnummer = "0165";
         boAdresse.poststed = "Oslo";
         boAdresse.landkode = Landkoder.NO.getKode();

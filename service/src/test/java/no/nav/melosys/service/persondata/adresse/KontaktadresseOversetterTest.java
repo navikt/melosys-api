@@ -47,7 +47,7 @@ class KontaktadresseOversetterTest {
         assertThat(kontaktadresse.coAdressenavn()).isEqualTo("Kari Hansen");
         assertThat(kontaktadresse.gyldigFraOgMed()).isEqualTo(LocalDateTime.parse("2020-01-01T00:00:00"));
         assertThat(kontaktadresse.strukturertAdresse().gatenavn).isEqualTo("Kirkegata");
-        assertThat(kontaktadresse.strukturertAdresse().husnummer).isEqualTo("12 B");
+        assertThat(kontaktadresse.strukturertAdresse().husnummerEtasjeLeilighet).isEqualTo("12 B");
         assertThat(kontaktadresse.strukturertAdresse().postnummer).isEqualTo("1234");
         assertThat(kontaktadresse.strukturertAdresse().poststed).isEqualTo("Bergen");
         assertThat(kontaktadresse.strukturertAdresse().region).isNull();
@@ -105,7 +105,7 @@ class KontaktadresseOversetterTest {
         final var kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService);
 
         assertThat(kontaktadresse.strukturertAdresse().gatenavn).isEqualTo("adressenavnNummer");
-        assertThat(kontaktadresse.strukturertAdresse().husnummer).isEqualTo("bygningEtasjeLeilighet");
+        assertThat(kontaktadresse.strukturertAdresse().husnummerEtasjeLeilighet).isEqualTo("bygningEtasjeLeilighet");
         assertThat(kontaktadresse.strukturertAdresse().postboks).isEqualTo("P.O.Box 1234 Place");
         assertThat(kontaktadresse.strukturertAdresse().postnummer).isEqualTo("SE-12345");
         assertThat(kontaktadresse.strukturertAdresse().poststed).isEqualTo("Haworth");

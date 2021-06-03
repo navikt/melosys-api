@@ -48,7 +48,7 @@ class BostedsadresseOversetterTest {
         assertThat(bostedsadresse.coAdressenavn()).isEqualTo("Kari Hansen");
         assertThat(bostedsadresse.gyldigFraOgMed()).isEqualTo(LocalDateTime.parse("2020-01-01T00:00:00"));
         assertThat(bostedsadresse.strukturertAdresse().gatenavn).isEqualTo("Kirkegata");
-        assertThat(bostedsadresse.strukturertAdresse().husnummer).isEqualTo("12 B");
+        assertThat(bostedsadresse.strukturertAdresse().husnummerEtasjeLeilighet).isEqualTo("12 B");
         assertThat(bostedsadresse.strukturertAdresse().tillegsnavn).isEqualTo("Storgården");
         assertThat(bostedsadresse.strukturertAdresse().postnummer).isEqualTo("1234");
         assertThat(bostedsadresse.strukturertAdresse().poststed).isEqualTo("Bergen");
@@ -82,7 +82,7 @@ class BostedsadresseOversetterTest {
         final var bostedsadresse = BostedsadresseOversetter.oversett(bostedsadressePDL, kodeverkService);
 
         assertThat(bostedsadresse.strukturertAdresse().gatenavn).isEqualTo("adressenavnNummer");
-        assertThat(bostedsadresse.strukturertAdresse().husnummer).isEqualTo("bygningEtasjeLeilighet");
+        assertThat(bostedsadresse.strukturertAdresse().husnummerEtasjeLeilighet).isEqualTo("bygningEtasjeLeilighet");
         assertThat(bostedsadresse.strukturertAdresse().postboks).isEqualTo("P.O.Box 1234 Place");
         assertThat(bostedsadresse.strukturertAdresse().postnummer).isEqualTo("SE-12345");
         assertThat(bostedsadresse.strukturertAdresse().poststed).isEqualTo("Haworth");

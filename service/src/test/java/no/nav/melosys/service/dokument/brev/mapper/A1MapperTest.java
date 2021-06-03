@@ -86,7 +86,7 @@ class A1MapperTest {
         when(behandlingsresultat.hentValidertLovvalgsperiode()).thenReturn(lovvalgsperiode);
 
         StrukturertAdresse boAdresse = new StrukturertAdresse();
-        boAdresse.husnummer = "12B";
+        boAdresse.husnummerEtasjeLeilighet = "12B";
         boAdresse.gatenavn = "Bogata";
         boAdresse.postnummer = "0165";
         boAdresse.poststed = "Poststed";
@@ -230,7 +230,7 @@ class A1MapperTest {
     void mapTilBrevXML_harLangAdressePåArbeidssted_brekkerAdresseOverFlereLinjer() {
         StrukturertAdresse adresse = lagStrukturertAdresse();
         adresse.gatenavn = "Lorem ipsumdolorsitamet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua-veien";
-        adresse.husnummer = "47";
+        adresse.husnummerEtasjeLeilighet = "47";
         Arbeidssted fysiskArbeidssted = new FysiskArbeidssted("", "", adresse);
 
         assertThat(fysiskArbeidssted.lagAdresselinje().length()).isGreaterThan(MAKS_ANTALL_TEGN_PER_LINJE_5_2);

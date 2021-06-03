@@ -31,7 +31,7 @@ public class BrevDataTestUtils {
     public static StrukturertAdresse lagStrukturertAdresse() {
         StrukturertAdresse addr = new StrukturertAdresse();
         addr.gatenavn = "Strukturert Gate";
-        addr.husnummer = "12B";
+        addr.husnummerEtasjeLeilighet = "12B";
         addr.poststed = "Poststed";
         addr.postnummer = "4321";
         addr.landkode = Landkoder.BG.getKode();

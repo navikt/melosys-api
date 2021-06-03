@@ -99,7 +99,7 @@ class BrevDataGrunnlagTest {
     void hentBostedsadresse_brukerBostedFraPersonDokument() {
         StrukturertAdresse bostedsadresse = dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
         assertThat(bostedsadresse.gatenavn).isEqualTo("Hjemgata");
-        assertThat(bostedsadresse.husnummer).isEqualTo("23");
+        assertThat(bostedsadresse.husnummerEtasjeLeilighet).isEqualTo("23");
         assertThat(bostedsadresse.postnummer).isEqualTo("0165");
         assertThat(bostedsadresse.poststed).isEqualTo("Oslo");
         assertThat(bostedsadresse.landkode).isEqualTo(Landkoder.NO.getKode());
@@ -109,7 +109,7 @@ class BrevDataGrunnlagTest {
     void hentBostedsadresse_oppgittAdresseOverstyrerTPS_nårOppgittAdresseISøknad() {
         StrukturertAdresse oppgittBosted = new StrukturertAdresse();
         oppgittBosted.gatenavn = "HerBorJegGata";
-        oppgittBosted.husnummer = "123";
+        oppgittBosted.husnummerEtasjeLeilighet = "123";
         oppgittBosted.postnummer = "0166";
         oppgittBosted.poststed = "Oslo";
         oppgittBosted.region = "Østlandet";
@@ -118,7 +118,7 @@ class BrevDataGrunnlagTest {
 
         StrukturertAdresse bostedsadresse = dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
         assertThat(bostedsadresse.gatenavn).isEqualTo("HerBorJegGata");
-        assertThat(bostedsadresse.husnummer).isEqualTo("123");
+        assertThat(bostedsadresse.husnummerEtasjeLeilighet).isEqualTo("123");
         assertThat(bostedsadresse.postnummer).isEqualTo("0166");
         assertThat(bostedsadresse.poststed).isEqualTo("Oslo");
         assertThat(bostedsadresse.region).isEqualTo("Østlandet");

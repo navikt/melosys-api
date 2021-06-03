@@ -90,7 +90,7 @@ public final class BrevDataUtils {
         } else {
             bostedAdresse.setGatenavn(" ");
         }
-        bostedAdresse.setHusnummer(bosted.husnummer);
+        bostedAdresse.setHusnummer(bosted.husnummerEtasjeLeilighet);
         bostedAdresse.setPostnr(bosted.postnummer);
         bostedAdresse.setPoststed(bosted.poststed);
         bostedAdresse.setRegion(bosted.region);
@@ -100,7 +100,7 @@ public final class BrevDataUtils {
 
     public static UtenlandskPostadresse lagAdresse(StrukturertAdresse adresse) {
         return UtenlandskPostadresse.builder()
-            .withAdresselinje1(sammenslå(adresse.gatenavn, adresse.husnummer))
+            .withAdresselinje1(sammenslå(adresse.gatenavn, adresse.husnummerEtasjeLeilighet))
             .withAdresselinje3(adresse.region)
             .withAdresselinje2(sammenslå(adresse.postnummer, adresse.poststed))
             .withLand(Landkoder.valueOf(adresse.landkode).getBeskrivelse())

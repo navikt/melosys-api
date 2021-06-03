@@ -66,7 +66,7 @@ public class UstrukturertAdresse implements Adresse {
     }
 
     public static UstrukturertAdresse av(StrukturertAdresse sAdresse) {
-        String linje1 = sammenslå(sAdresse.gatenavn, sAdresse.husnummer);
+        String linje1 = sammenslå(sAdresse.gatenavn, sAdresse.husnummerEtasjeLeilighet);
 
         return new UstrukturertAdresse(linje1,
                                        sAdresse.postnummer,

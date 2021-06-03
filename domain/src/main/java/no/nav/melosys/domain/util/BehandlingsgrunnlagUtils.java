@@ -44,7 +44,7 @@ public final class BehandlingsgrunnlagUtils {
     public static StrukturertAdresse hentBostedsadresse(BehandlingsgrunnlagData grunnlagdata) {
         StrukturertAdresse oppgittAdresse = grunnlagdata.bosted.oppgittAdresse;
         if ((StringUtils.isNotEmpty(oppgittAdresse.gatenavn) ||
-            StringUtils.isNotEmpty(oppgittAdresse.husnummer) ||
+            StringUtils.isNotEmpty(oppgittAdresse.husnummerEtasjeLeilighet) ||
             StringUtils.isNotEmpty(oppgittAdresse.region) ||
             StringUtils.isNotEmpty(oppgittAdresse.postnummer) ||
             StringUtils.isNotEmpty(oppgittAdresse.poststed)) &&

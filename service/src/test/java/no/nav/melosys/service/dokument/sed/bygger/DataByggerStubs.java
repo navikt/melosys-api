@@ -135,7 +135,7 @@ class DataByggerStubs {
 
     private static StrukturertAdresse hentStrukturertAddresseStub() {
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.husnummer = "25";
+        strukturertAdresse.husnummerEtasjeLeilighet = "25";
         strukturertAdresse.gatenavn = "Gatenavn";
         strukturertAdresse.postnummer = "0165";
         strukturertAdresse.region = "Region";

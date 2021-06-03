@@ -83,8 +83,8 @@ public class Bostedsadresse {
         StrukturertAdresse adresse = new StrukturertAdresse();
         if (gateadresse != null) {
             adresse.gatenavn = gateadresse.getGatenavn();
-            adresse.husnummer = Objects.toString(gateadresse.getHusnummer(), "");
-            adresse.husnummer += Objects.toString(gateadresse.getHusbokstav(), "");
+            adresse.husnummerEtasjeLeilighet = Objects.toString(gateadresse.getHusnummer(), "");
+            adresse.husnummerEtasjeLeilighet += Objects.toString(gateadresse.getHusbokstav(), "");
         }
 
         adresse.postnummer = getPostnr();
