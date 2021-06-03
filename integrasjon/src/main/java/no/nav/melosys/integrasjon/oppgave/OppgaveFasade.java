@@ -40,7 +40,7 @@ public interface OppgaveFasade {
     /**
      * Finner alle oppgaver med gitt saksnummer.
      */
-    List<Oppgave> finnAlleOppgaverMedSaksnummer(String saksnummer);
+    List<Oppgave> finnFerdigstilteOppgaverMedSaksnummer(String saksnummer);
 
     /**
      * Hent oppgave fra Oppgave på en gitt oppgaveId

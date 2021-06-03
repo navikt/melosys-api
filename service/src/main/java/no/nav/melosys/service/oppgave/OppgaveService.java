@@ -92,17 +92,13 @@ public class OppgaveService {
         oppgaveFasade.leggTilbakeOppgave(oppgave.getOppgaveId());
     }
 
-    public Optional<Oppgave> finnOppgaveMedFagsaksnummer(String saksnummer) {
-        List<Oppgave> oppgaver = oppgaveFasade.finnAlleOppgaverMedSaksnummer(saksnummer);
+    public Optional<Oppgave> finnSisteFerdigstilteOppgaveMedFagsaksnummer(String saksnummer) {
+        List<Oppgave> oppgaver = oppgaveFasade.finnFerdigstilteOppgaverMedSaksnummer(saksnummer);
 
-        if (!oppgaver.isEmpty()) {
-            if (oppgaver.size() > 1) {
-                throw new TekniskException("Det finnes flere behandlingsoppgaver for sak " + saksnummer);
-            }
-            return Optional.of(oppgaver.get(0));
-        } else {
+        if (oppgaver.isEmpty()) {
             return Optional.empty();
         }
+        return Optional.of(oppgaver.get(0));
     }
 
     public Optional<Oppgave> finnÅpenOppgaveMedFagsaksnummer(String saksnummer) {
@@ -118,8 +114,8 @@ public class OppgaveService {
         }
     }
 
-    public Oppgave hentOppgaveMedFagsaksnummer(String saksnummer) {
-        return finnOppgaveMedFagsaksnummer(saksnummer)
+    public Oppgave hentSisteFerdigstilteOppgaveMedFagsaksnummer(String saksnummer) {
+        return finnSisteFerdigstilteOppgaveMedFagsaksnummer(saksnummer)
             .orElseThrow(() -> new IkkeFunnetException("Finner ingen oppgave med saksnummer " + saksnummer));
     }
 
@@ -177,8 +173,8 @@ public class OppgaveService {
         oppgaveFasade.oppdaterOppgave(oppgaveID, OppgaveOppdatering.builder().tilordnetRessurs(saksbehandler).build());
     }
 
-    public String gjenåpneOppgaveMedFagsaksnummer(String saksnummer) {
-        String oppgaveId = hentOppgaveMedFagsaksnummer(saksnummer).getOppgaveId();
+    public String gjenåpneSisteFerdigstilteOppgaveMedFagsaksnummer(String saksnummer) {
+        String oppgaveId = hentSisteFerdigstilteOppgaveMedFagsaksnummer(saksnummer).getOppgaveId();
         var oppdatering = OppgaveOppdatering.builder().status("UNDER_BEHANDLING").build();
 
         log.info("Gjenoppretter oppgave med id {} knyttet til saksnummer {}", oppgaveId, saksnummer);

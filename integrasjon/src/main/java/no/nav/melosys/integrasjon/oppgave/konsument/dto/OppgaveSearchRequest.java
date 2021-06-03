@@ -12,6 +12,7 @@ public class OppgaveSearchRequest {
     private final String tilordnetRessurs;
     private final String[] tema;
     private final String sorteringsfelt;
+    private final String sorteringsrekkefolge;
     private final String statusKategori;
     private final String[] saksreferanse;
     private final String behandlesAvApplikasjon;
@@ -26,6 +27,7 @@ public class OppgaveSearchRequest {
         this.tilordnetRessurs = builder.tilordnetRessurs;
         this.tema = builder.tema;
         this.sorteringsfelt = builder.sorteringsfelt;
+        this.sorteringsrekkefolge = builder.sorteringsrekkefolge;
         this.statusKategori = builder.statusKategori;
         this.saksreferanse = builder.saksreferanse;
         this.behandlesAvApplikasjon = builder.behandlesAvApplikasjon;
@@ -46,6 +48,10 @@ public class OppgaveSearchRequest {
 
     public String getSorteringsfelt() {
         return sorteringsfelt;
+    }
+
+    public String getSorteringsrekkefolge() {
+        return sorteringsrekkefolge;
     }
 
     public String getTildeltEnhetsnr() {
@@ -90,6 +96,7 @@ public class OppgaveSearchRequest {
         private Boolean tildeltRessurs;
         private String[] tema;
         private String sorteringsfelt;
+        private String sorteringsrekkefolge;
         private String statusKategori;
         private String[] saksreferanse;
         private String behandlesAvApplikasjon;
@@ -116,6 +123,11 @@ public class OppgaveSearchRequest {
 
         public Builder medSorteringsfelt(String sorteringsfelt) {
             this.sorteringsfelt = sorteringsfelt;
+            return this;
+        }
+
+        public Builder medSorteringsrekkefolge(String sorteringsrekkefolge) {
+            this.sorteringsrekkefolge = sorteringsrekkefolge;
             return this;
         }
 
