@@ -36,7 +36,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class InnvalideringSedRuterTest {
+class AdminInnvalideringSedRuterTest {
 
     @Mock
     private FagsakService fagsakService;
@@ -51,9 +51,9 @@ class InnvalideringSedRuterTest {
     @Mock
     private EessiService eessiService;
 
-    private FakeUnleash fakeUnleash = new FakeUnleash();
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
-    private InnvalideringSedRuter innvalideringSedRuter;
+    private AdminInnvalideringSedRuter adminInnvalideringSedRuter;
 
     private final long behandlingID = 111;
     private final long arkivsakID = 123321;
@@ -64,7 +64,7 @@ class InnvalideringSedRuterTest {
 
     @BeforeEach
     void setup() {
-        innvalideringSedRuter = new InnvalideringSedRuter(fagsakService, prosessinstansService, oppgaveService,
+        adminInnvalideringSedRuter = new AdminInnvalideringSedRuter(fagsakService, prosessinstansService, oppgaveService,
             behandlingsresultatService, medlPeriodeService, eessiService, fakeUnleash);
 
         melosysEessiMelding.setAktoerId("12312412");
@@ -75,32 +75,32 @@ class InnvalideringSedRuterTest {
     @Test
     void gjelderSedTyper_featureTogglePå_collectionMedX008() {
         fakeUnleash.enableAll();
-        assertThat(innvalideringSedRuter.gjelderSedTyper()).containsExactly(SedType.X008);
+        assertThat(adminInnvalideringSedRuter.gjelderSedTyper()).containsExactly(SedType.X008);
     }
 
     @Test
     void gjelderSedTyper_featureToggleAv_tomCollection() {
         fakeUnleash.disableAll();
-        assertThat(innvalideringSedRuter.gjelderSedTyper()).isEmpty();
+        assertThat(adminInnvalideringSedRuter.gjelderSedTyper()).isEmpty();
     }
 
     @Test
     void rutSedTilBehandling_arkivsaksIdErNull_opprettJournalFøringsOppgave(){
-        innvalideringSedRuter.rutSedTilBehandling(prosessinstans, null);
+        adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, null);
         verify(oppgaveService).opprettJournalføringsoppgave(melosysEessiMelding.getJournalpostId(), melosysEessiMelding.getAktoerId());
 
     }
 
     @Test
     void rutSedTilBehandling_finnesIngenTilhørendeFagsak_opprettesJfrOppgave() {
-        innvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
+        adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
         verify(oppgaveService).opprettJournalføringsoppgave(melosysEessiMelding.getJournalpostId(), melosysEessiMelding.getAktoerId());
     }
 
     @Test
     void rutSedTilBehandling_tilhørendeFagsakFinnesOgBehandlingErNorgeUtpekt_opprettesJfrProsessOgBehandlingsoppgave() {
         when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING)));
-        innvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
+        adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
 
         verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(any(Behandling.class), eq(melosysEessiMelding.getJournalpostId()), eq(melosysEessiMelding.getAktoerId()), isNull());
     }
@@ -115,7 +115,7 @@ class InnvalideringSedRuterTest {
         when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
 
-        innvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
+        adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
 
         verify(fagsakService).oppdaterStatus(fagsak, Saksstatuser.ANNULLERT);
         verify(medlPeriodeService).avvisPeriodeOpphørt(behandlingsresultat.hentValidertLovvalgsperiode().getMedlPeriodeID());
@@ -130,7 +130,7 @@ class InnvalideringSedRuterTest {
         when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(lagBehandlingsresultat(false));
 
-        innvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
+        adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
 
         verify(fagsakService).avsluttFagsakOgBehandling(fagsak, Saksstatuser.ANNULLERT);
 
@@ -144,7 +144,7 @@ class InnvalideringSedRuterTest {
         when(eessiService.hentTilknyttedeBucer(arkivsakID, List.of())).thenReturn(lagBucInformasjon("ÅPEN"));
         when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
 
-        innvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
+        adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
         verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(any(Behandling.class),
             eq(melosysEessiMelding.getJournalpostId()), eq(melosysEessiMelding.getAktoerId()), isNull());
     }

@@ -1,0 +1,68 @@
+package no.nav.melosys.service.eessi.ruting;
+
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.eessi.Institusjon;
+import no.nav.melosys.domain.eessi.SedType;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.medl.MedlPeriodeService;
+import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+
+
+public class AdminFjernmottakerSedRuter extends AdminSedRuter implements SedRuterForSedTyper {
+    private static final Logger log = LoggerFactory.getLogger(AdminFjernmottakerSedRuter.class);
+
+    private final OppgaveService oppgaveService;
+    private final BehandlingsresultatService behandlingsresultatService;
+
+    public AdminFjernmottakerSedRuter(FagsakService fagsakService,
+                                      ProsessinstansService prosessinstansService,
+                                      OppgaveService oppgaveService,
+                                      BehandlingsresultatService behandlingsresultatService,
+                                      MedlPeriodeService medlPeriodeService) {
+        super(fagsakService,
+            behandlingsresultatService,
+            medlPeriodeService,
+            prosessinstansService);
+
+        this.oppgaveService = oppgaveService;
+        this.behandlingsresultatService = behandlingsresultatService;
+    }
+
+    @Override
+    public Collection<SedType> gjelderSedTyper() {
+        return Collections.singleton(SedType.X006);
+    }
+
+    @Override
+    public void rutSedTilBehandling(Prosessinstans prosessinstans, Long arkivsakID) {
+        final MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(prosessinstans);
+        Optional<Fagsak> fagsak = hentFagsakDersomArkivsakIDEksisterer(arkivsakID);
+
+
+        if (fagsak.isEmpty()) {
+            log.info("Oppretter jfr-oppgave for SED {} i RINA-sak {}", melosysEessiMelding.getSedId(), melosysEessiMelding.getRinaSaksnummer());
+            oppgaveService.opprettJournalføringsoppgave(melosysEessiMelding.getJournalpostId(), melosysEessiMelding.getAktoerId());
+            return;
+        }
+        Optional<Institusjon> mottakerInstitusjonFraMelding = melosysEessiMelding.getInstitusjon() != null ? Optional.of(melosysEessiMelding.getInstitusjon()) : Optional.empty();
+        var sistAktiveBehandling = fagsak.get().hentSistAktiveBehandling();
+
+        if (mottakerInstitusjonFraMelding.isPresent()) {
+            if (mottakerInstitusjonFraMelding.get().getId().split(":")[0].equals("NO")) {
+                log.info(annullerSakOgBehandling(sistAktiveBehandling));
+                var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(sistAktiveBehandling.getId());
+
+            }
+        }
+        opprettJournalføringProsess(melosysEessiMelding, sistAktiveBehandling);
+
+    }
+}

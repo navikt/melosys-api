@@ -3,8 +3,7 @@ package no.nav.melosys.domain.eessi.melding;
 import java.util.List;
 import java.util.Objects;
 
-import no.nav.melosys.domain.eessi.Periode;
-import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
+import no.nav.melosys.domain.eessi.*;
 import org.apache.commons.lang3.StringUtils;
 
 public class MelosysEessiMelding {
@@ -29,6 +28,7 @@ public class MelosysEessiMelding {
 
     private SvarAnmodningUnntak svarAnmodningUnntak;
     private AnmodningUnntak anmodningUnntak;
+    private Institusjon institusjon;
 
     public String getSedId() {
         return sedId;
@@ -188,6 +188,14 @@ public class MelosysEessiMelding {
 
     public String getSedVersjon() {
         return sedVersjon;
+    }
+
+    public Institusjon getInstitusjon() {
+        return institusjon;
+    }
+
+    public void setInstitusjon(Institusjon institusjon) {
+        this.institusjon = institusjon;
     }
 
     @Override
