@@ -134,18 +134,19 @@ public class OrganisasjonsDetaljer {
             }
             String adresseLinje = stringBuilder.toString();
 
-            strukturertAdresse.gatenavn = adresseLinje.replaceAll("\\s+", " ");
-            strukturertAdresse.landkode = sAdresse.getLandkode();
-            strukturertAdresse.postnummer = sAdresse.getPostnr();
+            strukturertAdresse.setGatenavn(adresseLinje.replaceAll("\\s+", " "));
+            strukturertAdresse.setLandkode(sAdresse.getLandkode());
+            strukturertAdresse.setPostnummer(sAdresse.getPostnr());
 
             if (sAdresse.erUtenlandsk()) {
-                strukturertAdresse.poststed = StringUtils.isEmpty(sAdresse.getPoststedUtland()) ? sAdresse.getPoststed() : sAdresse.getPoststedUtland();
+                strukturertAdresse.setPoststed(
+                        StringUtils.isEmpty(sAdresse.getPoststedUtland()) ? sAdresse.getPoststed() : sAdresse.getPoststedUtland());
                 // Utenlandsk adresse kan ha postnummer som en del av poststed
-                if (strukturertAdresse.postnummer == null) {
-                    strukturertAdresse.postnummer = " ";
+                if (strukturertAdresse.getPostnummer() == null) {
+                    strukturertAdresse.setPostnummer(" ");
                 }
             } else {
-                strukturertAdresse.poststed = sAdresse.getPoststed() == null ? "" : sAdresse.getPoststed();
+                strukturertAdresse.setPoststed(sAdresse.getPoststed() == null ? "" : sAdresse.getPoststed());
             }
         }
         else {

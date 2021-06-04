@@ -102,11 +102,11 @@ class BrevDataByggerA001Test {
         lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
 
         StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
-        oppgittAdresse.gatenavn = "HjemmeGata";
-        oppgittAdresse.husnummerEtasjeLeilighet = "23B";
-        oppgittAdresse.postnummer = "0165";
-        oppgittAdresse.poststed = "Oslo";
-        oppgittAdresse.landkode = Landkoder.NO.getKode();
+        oppgittAdresse.setGatenavn("HjemmeGata");
+        oppgittAdresse.setHusnummerEtasjeLeilighet("23B");
+        oppgittAdresse.setPostnummer("0165");
+        oppgittAdresse.setPoststed("Oslo");
+        oppgittAdresse.setLandkode(Landkoder.NO.getKode());
 
         søknad = new Soeknad();
         søknad.bosted.oppgittAdresse = oppgittAdresse;

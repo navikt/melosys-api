@@ -66,13 +66,12 @@ public class UstrukturertAdresse implements Adresse {
     }
 
     public static UstrukturertAdresse av(StrukturertAdresse sAdresse) {
-        String linje1 = sammenslå(sAdresse.gatenavn, sAdresse.husnummerEtasjeLeilighet);
+        String linje1 = sammenslå(sAdresse.getTillegsnavn(), sAdresse.getGatenavn(),
+            sAdresse.getHusnummerEtasjeLeilighet());
 
-        return new UstrukturertAdresse(linje1,
-                                       sAdresse.postnummer,
-                                       sAdresse.poststed,
-                                       sAdresse.region,
-                                       sAdresse.landkode);
+        return new UstrukturertAdresse(linje1, sAdresse.getPostboks(),
+                                       sammenslå(sAdresse.getPostnummer(), sAdresse.getPoststed()),
+            sAdresse.getRegion(), sAdresse.getLandkode());
     }
 
     public List<String> getAdresselinjer() {

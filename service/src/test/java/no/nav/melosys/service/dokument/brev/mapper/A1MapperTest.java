@@ -86,12 +86,12 @@ class A1MapperTest {
         when(behandlingsresultat.hentValidertLovvalgsperiode()).thenReturn(lovvalgsperiode);
 
         StrukturertAdresse boAdresse = new StrukturertAdresse();
-        boAdresse.husnummerEtasjeLeilighet = "12B";
-        boAdresse.gatenavn = "Bogata";
-        boAdresse.postnummer = "0165";
-        boAdresse.poststed = "Poststed";
-        boAdresse.region = "Region";
-        boAdresse.landkode = Landkoder.NO.getKode();
+        boAdresse.setHusnummerEtasjeLeilighet("12B");
+        boAdresse.setGatenavn("Bogata");
+        boAdresse.setPostnummer("0165");
+        boAdresse.setPoststed("Poststed");
+        boAdresse.setRegion("Region");
+        boAdresse.setLandkode(Landkoder.NO.getKode());
 
         behandling = mock(Behandling.class);
         when(behandling.getRegistrertDato()).thenReturn(Instant.now());
@@ -166,7 +166,7 @@ class A1MapperTest {
 
     @Test
     void mapTilBrevXML_bostedsAdresseIkkeGyldig_settBostedsadresseSinGateAdresseTom() throws Exception {
-        brevData.bostedsadresse.gatenavn = null;
+        brevData.bostedsadresse.setGatenavn(null);
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
         assertThat(a1.getPerson().getBostedsadresse().getGatenavn()).isEqualTo(" ");
 
@@ -229,8 +229,9 @@ class A1MapperTest {
     @Test
     void mapTilBrevXML_harLangAdressePåArbeidssted_brekkerAdresseOverFlereLinjer() {
         StrukturertAdresse adresse = lagStrukturertAdresse();
-        adresse.gatenavn = "Lorem ipsumdolorsitamet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua-veien";
-        adresse.husnummerEtasjeLeilighet = "47";
+        adresse.setGatenavn(
+                "Lorem ipsumdolorsitamet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua-veien");
+        adresse.setHusnummerEtasjeLeilighet("47");
         Arbeidssted fysiskArbeidssted = new FysiskArbeidssted("", "", adresse);
 
         assertThat(fysiskArbeidssted.lagAdresselinje().length()).isGreaterThan(MAKS_ANTALL_TEGN_PER_LINJE_5_2);

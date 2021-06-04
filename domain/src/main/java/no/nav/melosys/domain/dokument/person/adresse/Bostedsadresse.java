@@ -82,15 +82,16 @@ public class Bostedsadresse {
     public StrukturertAdresse tilStrukturertAdresse() {
         StrukturertAdresse adresse = new StrukturertAdresse();
         if (gateadresse != null) {
-            adresse.gatenavn = gateadresse.getGatenavn();
-            adresse.husnummerEtasjeLeilighet = Objects.toString(gateadresse.getHusnummer(), "");
-            adresse.husnummerEtasjeLeilighet += Objects.toString(gateadresse.getHusbokstav(), "");
+            adresse.setGatenavn(gateadresse.getGatenavn());
+            adresse.setHusnummerEtasjeLeilighet(Objects.toString(gateadresse.getHusnummer(), ""));
+            adresse.setHusnummerEtasjeLeilighet(
+                    adresse.getHusnummerEtasjeLeilighet() + Objects.toString(gateadresse.getHusbokstav(), ""));
         }
 
-        adresse.postnummer = getPostnr();
-        adresse.poststed = getPoststed();
+        adresse.setPostnummer(getPostnr());
+        adresse.setPoststed(getPoststed());
         if (StringUtils.isNotEmpty(getLand().getKode())) {
-            adresse.landkode = LandkoderUtils.tilIso2(getLand().getKode());
+            adresse.setLandkode(LandkoderUtils.tilIso2(getLand().getKode()));
         }
 
         return adresse;

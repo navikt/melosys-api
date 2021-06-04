@@ -198,11 +198,11 @@ public final class DokumentServiceTest {
 
     private static StrukturertAdresse lagStrukturertAdresse() {
         StrukturertAdresse sadr = new StrukturertAdresse();
-        sadr.landkode = "NL";
-        sadr.poststed = "Sted";
-        sadr.postnummer = "1234";
-        sadr.gatenavn = "Gate";
-        sadr.husnummerEtasjeLeilighet = "1";
+        sadr.setLandkode("NL");
+        sadr.setPoststed("Sted");
+        sadr.setPostnummer("1234");
+        sadr.setGatenavn("Gate");
+        sadr.setHusnummerEtasjeLeilighet("1");
         return sadr;
     }
 

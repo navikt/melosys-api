@@ -118,10 +118,10 @@ class A1Mapper {
         String orgnr = StringUtils.isNotEmpty(virksomhet.orgnr) ? virksomhet.orgnr : " ";
         hovedvirksomhetBrev.setOrgnummer(orgnr);
         hovedvirksomhetBrev.setNavn(virksomhet.navn);
-        hovedvirksomhetBrev.setGatenavn(adresse.gatenavn);
-        hovedvirksomhetBrev.setPostnr(adresse.postnummer);
-        hovedvirksomhetBrev.setPoststed(adresse.poststed);
-        hovedvirksomhetBrev.setLandkode(adresse.landkode);
+        hovedvirksomhetBrev.setGatenavn(adresse.getGatenavn());
+        hovedvirksomhetBrev.setPostnr(adresse.getPostnummer());
+        hovedvirksomhetBrev.setPoststed(adresse.getPoststed());
+        hovedvirksomhetBrev.setLandkode(adresse.getLandkode());
         if (virksomhet.yrkesaktivitet != null) {
             hovedvirksomhetBrev.setYrkesaktivitet(YrkesaktivitetsKode.valueOf(virksomhet.yrkesaktivitet.getKode()));
         }

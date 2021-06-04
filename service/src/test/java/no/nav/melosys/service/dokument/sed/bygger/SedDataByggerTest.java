@@ -19,12 +19,9 @@ import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
@@ -36,7 +33,6 @@ import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagMedSoknad
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagUtenSoknad;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
-import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -411,7 +407,7 @@ class SedDataByggerTest {
     public void lagUtkast_medUtenlandskSelvstendigForetak_forventAtUtenlandskSelvstendigForetakIkkeSendesSomArbeidsgivendeVirksomhet() {
         ForetakUtland utenlandskSelvstendigForetak = new ForetakUtland();
         utenlandskSelvstendigForetak.adresse = new StrukturertAdresse();
-        utenlandskSelvstendigForetak.adresse.landkode = Landkoder.DE.getKode();
+        utenlandskSelvstendigForetak.adresse.setLandkode(Landkoder.DE.getKode());
         utenlandskSelvstendigForetak.selvstendigNæringsvirksomhet = true;
         utenlandskSelvstendigForetak.navn = "selvstendig";
         utenlandskSelvstendigForetak.uuid = "123";

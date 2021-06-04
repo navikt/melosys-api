@@ -115,17 +115,17 @@ class DataByggerStubs {
         BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
 
         FysiskArbeidssted fysiskArbeidssted = behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidssteder.remove(0);
-        fysiskArbeidssted.adresse.poststed = null;
+        fysiskArbeidssted.adresse.setPoststed(null);
         if (fysiskArbeidsstedManglerLandkode) {
-            fysiskArbeidssted.adresse.landkode = null;
+            fysiskArbeidssted.adresse.setLandkode(null);
         }
         behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
 
         ForetakUtland foretakUtland = behandlingsgrunnlagData.foretakUtland.remove(0);
-        foretakUtland.adresse.postnummer = null;
-        foretakUtland.adresse.poststed = null;
+        foretakUtland.adresse.setPostnummer(null);
+        foretakUtland.adresse.setPoststed(null);
         if (arbeidsgivendeForetakUtlandManglerLandkode || selvstendigForetakUtlandManglerLandkode) {
-            foretakUtland.adresse.landkode = null;
+            foretakUtland.adresse.setLandkode(null);
         }
         foretakUtland.selvstendigNæringsvirksomhet = selvstendigForetakUtlandManglerLandkode;
         behandlingsgrunnlagData.foretakUtland.add(foretakUtland);
@@ -135,11 +135,11 @@ class DataByggerStubs {
 
     private static StrukturertAdresse hentStrukturertAddresseStub() {
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.husnummerEtasjeLeilighet = "25";
-        strukturertAdresse.gatenavn = "Gatenavn";
-        strukturertAdresse.postnummer = "0165";
-        strukturertAdresse.region = "Region";
-        strukturertAdresse.landkode = Landkoder.NO.getKode();
+        strukturertAdresse.setHusnummerEtasjeLeilighet("25");
+        strukturertAdresse.setGatenavn("Gatenavn");
+        strukturertAdresse.setPostnummer("0165");
+        strukturertAdresse.setRegion("Region");
+        strukturertAdresse.setLandkode(Landkoder.NO.getKode());
         return strukturertAdresse;
     }
 

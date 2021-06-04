@@ -33,13 +33,13 @@ class BostedGrunnlagTest {
     void hentBostedsadresse_forventStrukturertAdresse() {
         soeknad.bosted = new Bosted();
         soeknad.bosted.oppgittAdresse = new StrukturertAdresse();
-        soeknad.bosted.oppgittAdresse.landkode = "SE";
-        soeknad.bosted.oppgittAdresse.gatenavn = "gate";
+        soeknad.bosted.oppgittAdresse.setLandkode("SE");
+        soeknad.bosted.oppgittAdresse.setGatenavn("gate");
 
         StrukturertAdresse strukturertAdresse = bostedGrunnlag.hentBostedsadresse();
 
-        assertThat(strukturertAdresse.gatenavn).isEqualTo("gate");
-        assertThat(strukturertAdresse.landkode).isEqualTo("SE");
+        assertThat(strukturertAdresse.getGatenavn()).isEqualTo("gate");
+        assertThat(strukturertAdresse.getLandkode()).isEqualTo("SE");
     }
 
     @Test
@@ -53,14 +53,14 @@ class BostedGrunnlagTest {
     void finnBostedsadresse_harBostedsadresse_forventBostedsadresse() {
         soeknad.bosted = new Bosted();
         soeknad.bosted.oppgittAdresse = new StrukturertAdresse();
-        soeknad.bosted.oppgittAdresse.landkode = "SE";
-        soeknad.bosted.oppgittAdresse.gatenavn = "gate";
+        soeknad.bosted.oppgittAdresse.setLandkode("SE");
+        soeknad.bosted.oppgittAdresse.setGatenavn("gate");
 
         Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnBostedsadresse();
 
         assertThat(strukturertAdresse).isPresent();
-        assertThat(strukturertAdresse.get().gatenavn).isEqualTo("gate");
-        assertThat(strukturertAdresse.get().landkode).isEqualTo("SE");
+        assertThat(strukturertAdresse.get().getGatenavn()).isEqualTo("gate");
+        assertThat(strukturertAdresse.get().getLandkode()).isEqualTo("SE");
     }
 
     @Test
@@ -73,8 +73,8 @@ class BostedGrunnlagTest {
         Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnBostedsadresse();
 
         assertThat(strukturertAdresse).isPresent();
-        assertThat(strukturertAdresse.get().gatenavn).isEqualTo("gate");
-        assertThat(strukturertAdresse.get().landkode).isEqualTo("SE");
+        assertThat(strukturertAdresse.get().getGatenavn()).isEqualTo("gate");
+        assertThat(strukturertAdresse.get().getLandkode()).isEqualTo("SE");
     }
 
     @Test

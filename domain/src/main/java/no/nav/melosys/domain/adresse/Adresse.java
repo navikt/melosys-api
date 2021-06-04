@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.adresse;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -12,7 +13,8 @@ public interface Adresse {
         return Landkoder.NO.getKode().equals(getLandkode());
     }
 
-    static String sammenslå(String s1, String s2) {
-        return (Objects.toString(s1, "") + " " + Objects.toString(s2, "")).trim();
+    static String sammenslå(String... strings) {
+        return Arrays.stream(strings)
+            .reduce("", (res, s) -> res + " " + Objects.toString(s, "")).trim();
     }
 }

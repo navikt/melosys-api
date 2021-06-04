@@ -55,8 +55,8 @@ public class PersonKontrollerTest {
     @Test
     public void harBostedsadresse_oppgittBostedsadresseIBehandlingsgrunnnlag_true() {
         Bosted bosted = behandlingsgrunnlagData.bosted;
-        bosted.oppgittAdresse.gatenavn = "gate";
-        bosted.oppgittAdresse.landkode = "SE";
+        bosted.oppgittAdresse.setGatenavn("gate");
+        bosted.oppgittAdresse.setLandkode("SE");
 
         assertThat(PersonKontroller.harRegistrertBostedsadresse(personDokument, behandlingsgrunnlagData)).isTrue();
     }

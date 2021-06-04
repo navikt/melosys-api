@@ -243,10 +243,10 @@ class AvklarteVirksomheterServiceTest {
     void utfyllManglendeAdressefelter_gyldigForretningsadresse_girForretningsadresse() {
         StrukturertAdresse adresse = avklarteVirksomheterService.utfyllManglendeAdressefelter(lagOrganisasjonDokument("2345", "Forretningsgatenavn"));
 
-        assertThat(adresse.gatenavn).isEqualTo("Forretningsgatenavn");
-        assertThat(adresse.postnummer).isEqualTo("2345");
-        assertThat(adresse.poststed).isEqualTo("Poststed");
-        assertThat(adresse.landkode).isEqualTo("NO");
+        assertThat(adresse.getGatenavn()).isEqualTo("Forretningsgatenavn");
+        assertThat(adresse.getPostnummer()).isEqualTo("2345");
+        assertThat(adresse.getPoststed()).isEqualTo("Poststed");
+        assertThat(adresse.getLandkode()).isEqualTo("NO");
 
         verify(mockKodeverkService).dekod(eq(FellesKodeverk.POSTNUMMER), eq("2345"), any(LocalDate.class));
     }
@@ -255,10 +255,10 @@ class AvklarteVirksomheterServiceTest {
     void utfyllManglendeAdressefelter_forretningsadresseManglerGatenavn_girForretningsadresseMedBlanktGatenavn() {
         StrukturertAdresse adresse = avklarteVirksomheterService.utfyllManglendeAdressefelter(lagOrganisasjonDokument("2345", null));
 
-        assertThat(adresse.gatenavn).isEqualTo(" ");
-        assertThat(adresse.postnummer).isEqualTo("2345");
-        assertThat(adresse.poststed).isEqualTo("Poststed");
-        assertThat(adresse.landkode).isEqualTo("NO");
+        assertThat(adresse.getGatenavn()).isEqualTo(" ");
+        assertThat(adresse.getPostnummer()).isEqualTo("2345");
+        assertThat(adresse.getPoststed()).isEqualTo("Poststed");
+        assertThat(adresse.getLandkode()).isEqualTo("NO");
 
         verify(mockKodeverkService).dekod(eq(FellesKodeverk.POSTNUMMER), eq("2345"), any(LocalDate.class));
     }
@@ -270,10 +270,10 @@ class AvklarteVirksomheterServiceTest {
         organisasjonDokument.organisasjonDetaljer.postadresse.stream().findFirst().ifPresent(a -> ((SemistrukturertAdresse)a).setPostnr(null));
         StrukturertAdresse adresse = avklarteVirksomheterService.utfyllManglendeAdressefelter(organisasjonDokument);
 
-        assertThat(adresse.gatenavn).isEqualTo("Postgatenavn");
-        assertThat(adresse.postnummer).isEqualTo(" ");
-        assertThat(adresse.poststed).isEqualTo("Postpoststed");
-        assertThat(adresse.landkode).isEqualTo("DK");
+        assertThat(adresse.getGatenavn()).isEqualTo("Postgatenavn");
+        assertThat(adresse.getPostnummer()).isEqualTo(" ");
+        assertThat(adresse.getPoststed()).isEqualTo("Postpoststed");
+        assertThat(adresse.getLandkode()).isEqualTo("DK");
 
         verify(mockKodeverkService, never()).dekod(any(), any(), any());
     }
@@ -282,10 +282,10 @@ class AvklarteVirksomheterServiceTest {
     void utfyllManglendeAdressefelter_forretningsadresseManglerPostnr_girPostadresse() {
         StrukturertAdresse adresse = avklarteVirksomheterService.utfyllManglendeAdressefelter(lagOrganisasjonDokument(null, null));
 
-        assertThat(adresse.gatenavn).isEqualTo("Postgatenavn");
-        assertThat(adresse.postnummer).isEqualTo("6789");
-        assertThat(adresse.poststed).isEqualTo("Poststed");
-        assertThat(adresse.landkode).isEqualTo("NO");
+        assertThat(adresse.getGatenavn()).isEqualTo("Postgatenavn");
+        assertThat(adresse.getPostnummer()).isEqualTo("6789");
+        assertThat(adresse.getPoststed()).isEqualTo("Poststed");
+        assertThat(adresse.getLandkode()).isEqualTo("NO");
 
         verify(mockKodeverkService).dekod(eq(FellesKodeverk.POSTNUMMER), eq("6789"), any(LocalDate.class));
     }
