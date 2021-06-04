@@ -40,7 +40,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     private static final String SORTERINGSFELT = "FRIST";
     private static final String SORTERINGSREKKEFOLGE_DESC = "DESC";
     private static final String OPPGAVE_STATUSKATEGORI_AAPEN = "AAPEN";
-    private static final String OPPGAVE_STATUSKATEGORI_LUKKET = "LUKKET";
+    private static final String OPPGAVE_STATUSKATEGORI_AVSLUTTET = "AVSLUTTET";
 
     private final OppgaveConsumer oppgaveConsumer;
 
@@ -240,14 +240,14 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public List<Oppgave> finnLukkedeOppgaverMedSaksnummer(String saksnummer) {
+    public List<Oppgave> finnAvsluttetOppgaverMedSaksnummer(String saksnummer) {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medSaksreferanse(new String[]{saksnummer})
             .medTema(new String[]{Tema.MED.getKode(), Tema.UFM.getKode()})
             .medOppgaveTyper(new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode(), Oppgavetyper.BEH_SED.getKode()})
             .medSorteringsfelt(SORTERINGSFELT)
             .medSorteringsrekkefolge(SORTERINGSREKKEFOLGE_DESC)
-            .medStatusKategori(OPPGAVE_STATUSKATEGORI_LUKKET)
+            .medStatusKategori(OPPGAVE_STATUSKATEGORI_AVSLUTTET)
             .build();
 
         return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
