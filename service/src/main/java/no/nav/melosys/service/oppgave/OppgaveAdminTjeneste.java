@@ -26,7 +26,7 @@ public class OppgaveAdminTjeneste implements AdminTjeneste {
                                                   @PathVariable String saksnummer) {
         validerApikey(apiKey);
 
-        String oppdatertOppgaveId = oppgaveService.gjenåpneSisteFerdigstilteOppgaveMedFagsaksnummer(saksnummer);
+        String oppdatertOppgaveId = oppgaveService.gjenåpneSisteLukkedeOppgaveMedFagsaksnummer(saksnummer);
         return ResponseEntity.ok(String.format("Gjenåpnet oppgave med id %s", oppdatertOppgaveId));
     }
 
