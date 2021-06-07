@@ -3,6 +3,7 @@ package no.nav.melosys.service.eessi.ruting;
 import java.util.*;
 
 import no.finn.unleash.Unleash;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.SedInformasjon;
@@ -83,6 +84,16 @@ public class AdminInnvalideringSedRuter extends AdminSedRuter implements SedRute
             .flatMap(b -> b.getSeder().stream())
             .filter(s -> s.getSedId().equals(dokument.getRinaDokumentID()))
             .anyMatch(SedInformasjon::erAvbrutt)).isPresent();
+    }
+
+    private void annullerSakOgBehandling(Behandling behandling) {
+        if (behandling.erAktiv()) {
+            log.info("Behandling {} vil bli avsluttet og status settes til annullert", behandling.getId());
+            avsluttBehandlingOgReturnerMedlPeriodeFraAnmodningsperiode(behandling);
+        } else {
+            log.info("Saksstatus settes til annullert for behandling {}", behandling.getId());
+            oppdaterStatusOgReturnerMedlPeriodeFraLovvalgsperiode(behandling);
+        }
     }
 
 }

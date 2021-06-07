@@ -11,6 +11,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import org.slf4j.Logger;
 
 import java.util.Optional;
 
@@ -31,27 +32,20 @@ public abstract class AdminSedRuter {
         this.prosessinstansService = prosessinstansService;
     }
 
-    String annullerSakOgBehandling(Behandling behandling) {
-        Optional<? extends PeriodeOmLovvalg> periodeOmLovvalgMedMedlPeriode;
-        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        String info;
+    protected void avsluttBehandlingOgReturnerMedlPeriodeFraAnmodningsperiode(Behandling behandling){
+        fagsakService.avsluttFagsakOgBehandling(behandling.getFagsak(), Saksstatuser.ANNULLERT);
+        behandlingsresultatService.hentBehandlingsresultat(behandling.getId())
+            .finnValidertAnmodningsperiode()
+            .filter(a -> a.getMedlPeriodeID() != null)
+            .ifPresent(anmodningsperiode -> medlPeriodeService.avvisPeriodeOpphørt(anmodningsperiode.getMedlPeriodeID()));
+    }
 
-        if (behandling.erAktiv()) {
-            info = String.format("Behandling %2d vil bli avsluttet og status settes til annullert", behandling.getId());
-            fagsakService.avsluttFagsakOgBehandling(behandling.getFagsak(), Saksstatuser.ANNULLERT);
-            periodeOmLovvalgMedMedlPeriode = behandlingsresultat
-                .finnValidertAnmodningsperiode()
-                .filter(a -> a.getMedlPeriodeID() != null);
-        } else {
-            info = String.format("Saksstatus settes til annullert for behandling %2d", behandling.getId());
-            fagsakService.oppdaterStatus(behandling.getFagsak(), Saksstatuser.ANNULLERT);
-            periodeOmLovvalgMedMedlPeriode = behandlingsresultat
-                .finnValidertLovvalgsperiode()
-                .filter(l -> l.getMedlPeriodeID() != null);
-        }
-
-        periodeOmLovvalgMedMedlPeriode.ifPresent(periode -> medlPeriodeService.avvisPeriodeOpphørt(periode.getMedlPeriodeID()));
-        return info;
+    protected void oppdaterStatusOgReturnerMedlPeriodeFraLovvalgsperiode(Behandling behandling){
+        fagsakService.oppdaterStatus(behandling.getFagsak(),Saksstatuser.ANNULLERT);
+        behandlingsresultatService.hentBehandlingsresultat(behandling.getId())
+            .finnValidertLovvalgsperiode()
+            .filter(l -> l.getMedlPeriodeID() != null)
+            .ifPresent(lovvalgsperiode -> medlPeriodeService.avvisPeriodeOpphørt(lovvalgsperiode.getMedlPeriodeID()));
     }
 
     public void opprettJournalføringProsess(MelosysEessiMelding melosysEessiMelding, Behandling sistAktiveBehandling) {

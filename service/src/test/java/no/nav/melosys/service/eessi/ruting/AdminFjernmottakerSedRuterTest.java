@@ -92,6 +92,19 @@ class AdminFjernmottakerSedRuterTest {
     }
 
     @Test
+    void rutSedTilBehandling_institusjonErIkkeTilstedePåSed_opprettJournalFøringsProsess() {
+        var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING);
+
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
+        Behandling sistAktiveBehandling = fagsak.hentSistAktiveBehandling();
+
+        when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
+
+        adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(sistAktiveBehandling, melosysEessiMelding);
+    }
+
+    @Test
     void rutSedTilBehandling_fjernMottakerSomErNorskPåÅpenA003_blirAvsluttetOgSattTilAnnullert() {
         var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING);
         Institusjon danskInstitusjon = new Institusjon("NO:NAVAT07", "NONAVAT07", Landkoder.NO.name());
