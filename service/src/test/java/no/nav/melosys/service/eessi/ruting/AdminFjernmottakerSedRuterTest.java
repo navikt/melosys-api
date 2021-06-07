@@ -82,11 +82,13 @@ class AdminFjernmottakerSedRuterTest {
         var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING);
         Institusjon danskInstitusjon = new Institusjon("DK:DENNAV006", "NavIDanmark", Landkoder.DE.name());
         melosysEessiMelding.setInstitusjon(danskInstitusjon);
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
+
         Behandling sistAktiveBehandling = fagsak.hentSistAktiveBehandling();
 
         when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
         adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
-        verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.hentSistAktiveBehandling(), melosysEessiMelding);
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(sistAktiveBehandling, melosysEessiMelding);
     }
 
     @Test
