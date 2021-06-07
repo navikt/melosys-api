@@ -241,12 +241,13 @@ public class MelosysEessiMelding {
             Objects.equals(bucType, that.bucType) &&
             Objects.equals(sedType, that.sedType) &&
             Objects.equals(svarAnmodningUnntak, that.svarAnmodningUnntak) &&
-            Objects.equals(anmodningUnntak, that.anmodningUnntak);
+            Objects.equals(anmodningUnntak, that.anmodningUnntak) &&
+            Objects.equals(institusjon, that.institusjon);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sedId, rinaSaksnummer, avsender, journalpostId, dokumentId, gsakSaksnummer, aktoerId, statsborgerskap, arbeidssteder, periode, lovvalgsland, artikkel, erEndring, midlertidigBestemmelse, ytterligereInformasjon, bucType, sedType, svarAnmodningUnntak, anmodningUnntak);
+        return Objects.hash(sedId, rinaSaksnummer, avsender, journalpostId, dokumentId, gsakSaksnummer, aktoerId, statsborgerskap, arbeidssteder, periode, lovvalgsland, artikkel, erEndring, midlertidigBestemmelse, ytterligereInformasjon, bucType, sedType, svarAnmodningUnntak, anmodningUnntak, institusjon);
     }
 
     public boolean inneholderYtterligereInformasjon() {

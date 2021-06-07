@@ -58,8 +58,6 @@ public class AdminFjernmottakerSedRuter extends AdminSedRuter implements SedRute
         if (mottakerInstitusjonFraMelding.isPresent()) {
             if (mottakerInstitusjonFraMelding.get().getId().split(":")[0].equals("NO")) {
                 log.info(annullerSakOgBehandling(sistAktiveBehandling));
-                var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(sistAktiveBehandling.getId());
-
             }
         }
         opprettJournalføringProsess(melosysEessiMelding, sistAktiveBehandling);
