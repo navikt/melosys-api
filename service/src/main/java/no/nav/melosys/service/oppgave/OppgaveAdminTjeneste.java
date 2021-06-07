@@ -21,6 +21,10 @@ public class OppgaveAdminTjeneste implements AdminTjeneste {
         this.apiKey = apiKey;
     }
 
+    /**
+     * Oppdateroppgave-endepunktet støtter ikke per nå å endre oppgaver med status FERDIGSTILT
+     * Denne tjenesten funker dermed ikke før dette blir løst, evt blir endret til å skape en kopi av oppgaven med ny status
+     */
     @PostMapping("/gjenaapne/{saksnummer}")
     public ResponseEntity<String> gjenåpneOppgave(@RequestHeader(API_KEY_HEADER) String apiKey,
                                                   @PathVariable String saksnummer) {
