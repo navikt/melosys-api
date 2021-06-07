@@ -376,7 +376,8 @@ public class FagsakService {
             behandlingService.avsluttBehandling(behandling.getId());
         }
 
-        oppdaterStatus(fagsak, Saksstatuser.OPPRETTET);
+        log.info("Saksstatuser: {}", fagsak.getStatus());
+
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
             replikertBehandling, replikertBehandling.getInitierendeJournalpostId(), fagsak.hentBruker().getAktørId(), SubjectHandler.getInstance().getUserID()
         );
