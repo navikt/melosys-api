@@ -92,8 +92,8 @@ public class OppgaveService {
         oppgaveFasade.leggTilbakeOppgave(oppgave.getOppgaveId());
     }
 
-    public Optional<Oppgave> finnSisteFerdigstilteOppgaveMedFagsaksnummer(String saksnummer) {
-        List<Oppgave> oppgaver = oppgaveFasade.finnFerdigstilteOppgaverMedSaksnummer(saksnummer);
+    public Optional<Oppgave> finnSisteAvsluttetOppgaveMedFagsaksnummer(String saksnummer) {
+        List<Oppgave> oppgaver = oppgaveFasade.finnAvsluttetOppgaverMedSaksnummer(saksnummer);
 
         if (oppgaver.isEmpty()) {
             return Optional.empty();
@@ -114,8 +114,8 @@ public class OppgaveService {
         }
     }
 
-    public Oppgave hentSisteFerdigstilteOppgaveMedFagsaksnummer(String saksnummer) {
-        return finnSisteFerdigstilteOppgaveMedFagsaksnummer(saksnummer)
+    public Oppgave hentSisteAvsluttetOppgaveMedFagsaksnummer(String saksnummer) {
+        return finnSisteAvsluttetOppgaveMedFagsaksnummer(saksnummer)
             .orElseThrow(() -> new IkkeFunnetException("Finner ingen oppgave med saksnummer " + saksnummer));
     }
 
@@ -173,8 +173,8 @@ public class OppgaveService {
         oppgaveFasade.oppdaterOppgave(oppgaveID, OppgaveOppdatering.builder().tilordnetRessurs(saksbehandler).build());
     }
 
-    public String gjenåpneSisteFerdigstilteOppgaveMedFagsaksnummer(String saksnummer) {
-        String oppgaveId = hentSisteFerdigstilteOppgaveMedFagsaksnummer(saksnummer).getOppgaveId();
+    public String gjenåpneSisteAvsluttetOppgaveMedFagsaksnummer(String saksnummer) {
+        String oppgaveId = hentSisteAvsluttetOppgaveMedFagsaksnummer(saksnummer).getOppgaveId();
         var oppdatering = OppgaveOppdatering.builder().status("UNDER_BEHANDLING").build();
 
         log.info("Gjenoppretter oppgave med id {} knyttet til saksnummer {}", oppgaveId, saksnummer);
