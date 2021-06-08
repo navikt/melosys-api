@@ -191,20 +191,17 @@ class SendVedtakUtlandTest {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         sendVedtakUtland.utfør(prosessinstans);
 
-        verify(eessiService).sendGodkjenningArbeidFlereLand(behandling.getId(),"Hei");
+        verify(eessiService).sendGodkjenningArbeidFlereLand(behandling.getId(), "Hei");
     }
 
     @Test
     void utfør_norgeErUtpektElektroniskBukLukket_senderIkkeA012() {
-        //var fagsak = new Fagsak();
-        //fagsak.setGsakSaksnummer(123L);
-        //behandling.setFagsak(fagsak);
         when(eessiService.hentTilknyttedeBucer(eq(fagsak.getGsakSaksnummer()), any()))
             .thenReturn(List.of(new BucInformasjon("5453", false, BucType.LA_BUC_01.name(), LocalDate.now(), Set.of(), Collections.emptyList())));
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
 
         sendVedtakUtland.utfør(prosessinstans);
 
-        verify(eessiService, never()).sendGodkjenningArbeidFlereLand(anyLong(),anyString());
+        verify(eessiService, never()).sendGodkjenningArbeidFlereLand(anyLong(), anyString());
     }
 }
