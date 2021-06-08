@@ -185,7 +185,7 @@ class SendVedtakUtlandTest {
     @Test
     void utfør_norgeErUtpektElektroniskBucÅpen_senderA012() {
         when(eessiService.hentTilknyttedeBucer(eq(fagsak.getGsakSaksnummer()), any()))
-            .thenReturn(List.of(new BucInformasjon("5453", true, BucType.LA_BUC_01.name(), LocalDate.now(), Set.of(), Collections.emptyList())));
+            .thenReturn(List.of(new BucInformasjon("5453", true, BucType.LA_BUC_02.name(), LocalDate.now(), Set.of(), Collections.emptyList())));
 
         prosessinstans.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, "Hei");
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
@@ -197,7 +197,7 @@ class SendVedtakUtlandTest {
     @Test
     void utfør_norgeErUtpektElektroniskBukLukket_senderIkkeA012() {
         when(eessiService.hentTilknyttedeBucer(eq(fagsak.getGsakSaksnummer()), any()))
-            .thenReturn(List.of(new BucInformasjon("5453", false, BucType.LA_BUC_01.name(), LocalDate.now(), Set.of(), Collections.emptyList())));
+            .thenReturn(List.of(new BucInformasjon("5453", false, BucType.LA_BUC_02.name(), LocalDate.now(), Set.of(), Collections.emptyList())));
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
 
         sendVedtakUtland.utfør(prosessinstans);

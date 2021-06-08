@@ -70,7 +70,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
 
         if (behandling.erNorgeUtpekt()) {
             var bucer = eessiService.hentTilknyttedeBucer(behandling.getFagsak().getGsakSaksnummer(), Collections.emptyList());
-            if (bucer.stream().anyMatch(buc -> buc.getBucType().equals(BucType.LA_BUC_02) && buc.erÅpen())) {
+            if (bucer.stream().anyMatch(buc -> buc.getBucType().equals(BucType.LA_BUC_02.name()) && buc.erÅpen())) {
                 eessiService.sendGodkjenningArbeidFlereLand(behandling.getId(), prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
             }
         } else if (behandlingsresultat.erUtpeking()) {
