@@ -109,7 +109,7 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{ env.CLUSTER }}
           RESOURCE: nais.yml
-          VAR: IMAGE=${{ env.IMAGE }},NAMESPACE=${{ env.NAMESPACE }},URL=${{ env.URL }}
+          VAR: IMAGE=${{ env.IMAGE }},NAMESPACE=${{ env.NAMESPACE }},URL=${{ env.URL }},KAFKA_POOL=${{ env.KAFKA_POOL }}
 
       - name: Get commit message
         run: echo "COMMIT_MSG=$(git log --format=%s -n 1)" >> $GITHUB_ENV
