@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.sed;
 
+import java.util.Collections;
 import java.util.List;
 
 import no.finn.unleash.Unleash;
@@ -68,7 +69,10 @@ public class SendVedtakUtland extends AbstraktSendUtland {
         final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
 
         if (behandling.erNorgeUtpekt()) {
-            eessiService.sendGodkjenningArbeidFlereLand(behandling.getId(), prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
+            var bucer = eessiService.hentTilknyttedeBucer(behandling.getFagsak().getGsakSaksnummer(), Collections.emptyList());
+            if (bucer.stream().anyMatch(BucInformasjon::erÅpen)) {
+                eessiService.sendGodkjenningArbeidFlereLand(behandling.getId(), prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
+            }
         } else if (behandlingsresultat.erUtpeking()) {
             utpekingService.oppdaterSendtUtland(behandlingsresultat.hentValidertUtpekingsperiode());
             SendUtlandStatus status = sendSedA003(prosessinstans);

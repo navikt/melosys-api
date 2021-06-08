@@ -124,6 +124,7 @@ class EessiTjenesteTest extends JsonSchemaTestParent {
     private BucInformasjon bucInformasjon() {
         return new BucInformasjon(
             defaultEasyRandom().nextObject(String.class),
+            true,
             defaultEasyRandom().nextObject(String.class),
             defaultEasyRandom().nextObject(LocalDate.class),
             Collections.singleton(defaultEasyRandom().toString()),
