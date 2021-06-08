@@ -57,8 +57,6 @@ public class ReplikerBehandling implements StegBehandler {
 
         prosessinstans.setBehandling(nyBehandling);
 
-        log.info("Saksstatuser: {}", fagsak.getStatus());
-
         fagsakService.lagre(fagsak);
 
         log.info("Behandling {} replikert og behandling {} har blitt opprettet for {}",
