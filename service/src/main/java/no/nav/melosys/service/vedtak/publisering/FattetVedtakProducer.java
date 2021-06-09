@@ -44,8 +44,8 @@ public class FattetVedtakProducer {
 
         try {
             SendResult<String, FattetVedtak> res = future.get(15L, TimeUnit.SECONDS);
-            log.info("Melding sendt på topic {} for sak {}. Record.value: {}, offset: {}",
-                topicName, res.getProducerRecord().value().sak().saksnummer(), res.getProducerRecord().value(), res.getRecordMetadata().offset()
+            log.info("Melding sendt på topic {} for sak {}. Offset: {}",
+                topicName, res.getProducerRecord().value().sak().saksnummer(), res.getRecordMetadata().offset()
             );
             return res.getProducerRecord().value();
         } catch (ExecutionException | TimeoutException e) {
