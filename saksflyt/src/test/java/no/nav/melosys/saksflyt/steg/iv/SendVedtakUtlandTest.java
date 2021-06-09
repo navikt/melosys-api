@@ -62,17 +62,21 @@ class SendVedtakUtlandTest {
     private Lovvalgsperiode lovvalgsperiode;
     private Behandlingsresultat behandlingsresultat;
     private final Behandling behandling = new Behandling();
+    private final Fagsak fagsak = new Fagsak();
 
     @Captor
     private ArgumentCaptor<DoksysBrevbestilling> brevbestillingArgumentCaptor;
 
     private static final long BEHANDLING_ID = 1L;
+    private static final long SAKSNUMMER = 123L;
     private static final String MOTTAKER_INSTITUSJON = "SE:123";
 
     @BeforeEach
     public void setUp() {
-
+        fagsak.setGsakSaksnummer(SAKSNUMMER);
+        behandling.setFagsak(fagsak);
         behandling.setId(BEHANDLING_ID);
+
         prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
@@ -136,9 +140,7 @@ class SendVedtakUtlandTest {
         myndighet.setInstitusjonId(MOTTAKER_INSTITUSJON);
         myndighet.setRolle(Aktoersroller.MYNDIGHET);
 
-        Fagsak fagsak = new Fagsak();
         fagsak.setAktører(Set.of(myndighet));
-        fagsak.setGsakSaksnummer(1L);
         behandling.setFagsak(fagsak);
 
         sendVedtakUtland.utfør(prosessinstans);
@@ -172,12 +174,8 @@ class SendVedtakUtlandTest {
         anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
         behandlingsresultat.getAnmodningsperioder().add(anmodningsperiode);
 
-        var fagsak = new Fagsak();
-        fagsak.setGsakSaksnummer(123L);
-        behandling.setFagsak(fagsak);
-
         when(eessiService.hentTilknyttedeBucer(fagsak.getGsakSaksnummer(), Collections.emptyList()))
-            .thenReturn(List.of(new BucInformasjon(rinaSaksnummer, BucType.LA_BUC_01.name(), LocalDate.now(), Set.of(), Collections.emptyList())));
+            .thenReturn(List.of(new BucInformasjon(rinaSaksnummer, true, BucType.LA_BUC_01.name(), LocalDate.now(), Set.of(), Collections.emptyList())));
 
         sendVedtakUtland.utfør(prosessinstans);
 
@@ -185,11 +183,25 @@ class SendVedtakUtlandTest {
     }
 
     @Test
-    void utfør_norgeErUtpektElektronisk_senderA012() {
+    void utfør_norgeErUtpektElektroniskBucÅpen_senderA012() {
+        when(eessiService.hentTilknyttedeBucer(eq(fagsak.getGsakSaksnummer()), any()))
+            .thenReturn(List.of(new BucInformasjon("5453", true, BucType.LA_BUC_02.name(), LocalDate.now(), Set.of(), Collections.emptyList())));
+
         prosessinstans.setData(ProsessDataKey.YTTERLIGERE_INFO_SED, "Hei");
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         sendVedtakUtland.utfør(prosessinstans);
 
-        verify(eessiService).sendGodkjenningArbeidFlereLand(behandling.getId(),"Hei");
+        verify(eessiService).sendGodkjenningArbeidFlereLand(behandling.getId(), "Hei");
+    }
+
+    @Test
+    void utfør_norgeErUtpektElektroniskBukLukket_senderIkkeA012() {
+        when(eessiService.hentTilknyttedeBucer(eq(fagsak.getGsakSaksnummer()), any()))
+            .thenReturn(List.of(new BucInformasjon("5453", false, BucType.LA_BUC_02.name(), LocalDate.now(), Set.of(), Collections.emptyList())));
+        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
+
+        sendVedtakUtland.utfør(prosessinstans);
+
+        verify(eessiService, never()).sendGodkjenningArbeidFlereLand(anyLong(), anyString());
     }
 }
