@@ -72,6 +72,8 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             var bucer = eessiService.hentTilknyttedeBucer(behandling.getFagsak().getGsakSaksnummer(), Collections.emptyList());
             if (bucer.stream().anyMatch(buc -> buc.getBucType().equals(BucType.LA_BUC_02.name()) && buc.erÅpen())) {
                 eessiService.sendGodkjenningArbeidFlereLand(behandling.getId(), prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
+            } else {
+                log.info("Sender ikke GodkjenningArbeidFlereLand da behandling {} ikke er tilknyttet en åpen LA_BUC_012", behandling.getId());
             }
         } else if (behandlingsresultat.erUtpeking()) {
             utpekingService.oppdaterSendtUtland(behandlingsresultat.hentValidertUtpekingsperiode());
