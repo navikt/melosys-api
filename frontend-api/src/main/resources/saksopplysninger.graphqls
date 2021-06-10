@@ -5,12 +5,14 @@ scalar Date
 # Eksempel: 2018-01-01T12:00:00.
 scalar DateTime
 
+scalar Long
+
 type Query {
-    hentSaksopplysninger(saksnummer: String!): Saksopplysninger
+    hentSaksopplysninger(behandlingID: Long!): Saksopplysninger
 }
 
 type Saksopplysninger {
-    saksnummer: String!
+    behandlingID: Long!
     persondata: Personopplysninger
 }
 

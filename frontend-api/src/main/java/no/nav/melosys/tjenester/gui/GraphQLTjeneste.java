@@ -30,7 +30,7 @@ public class GraphQLTjeneste {
     public Map<String, Object> graphql(@RequestBody GraphQLRequest request) {
         String query = Objects.nonNull(request.query()) ? request.query() : "";
         Map<String, Object> variables = Objects.nonNull(request.variables()) ? request.variables() : emptyMap();
-        tilgangService.sjekkSak(validerOgHentSaksnummer(variables));
+        tilgangService.sjekkTilgang(validerOgHentBehandlingID(variables));
 
         var executionInput = ExecutionInput.newExecutionInput()
             .query(query)
@@ -42,12 +42,12 @@ public class GraphQLTjeneste {
         return executionResult.toSpecification();
     }
 
-    private String validerOgHentSaksnummer(Map<String, Object> variables) {
-        Object saksnummer = variables.get("saksnummer");
-        if (!(saksnummer instanceof String) || ((String) saksnummer).isBlank()) {
-            throw new IllegalArgumentException("Saksnummer mangler.");
+    private long validerOgHentBehandlingID(Map<String, Object> variables) {
+        Object behandlingID = variables.get("behandlingID");
+        if (!(behandlingID instanceof Integer)) {
+            throw new IllegalArgumentException("behandlingID mangler.");
         } else {
-            return saksnummer.toString();
+            return Integer.toUnsignedLong((Integer) behandlingID);
         }
     }
 }

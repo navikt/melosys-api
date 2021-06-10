@@ -5,8 +5,8 @@ import java.util.stream.Collectors;
 import graphql.execution.DataFetcherResult;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.tjenester.gui.graphql.dto.PersonopplysningerDto;
 import no.nav.melosys.tjenester.gui.graphql.dto.SaksopplysningerDto;
 import no.nav.melosys.tjenester.gui.graphql.mapping.StatsborgerskapTilDtoConverter;
@@ -14,22 +14,25 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class SaksopplysningerDataFetcher implements DataFetcher<Object> {
-    private final FagsakService fagsakService;
+    private final BehandlingService behandlingService;
     private final PersondataFasade persondataFasade;
 
-    public SaksopplysningerDataFetcher(FagsakService fagsakService, PersondataFasade persondataFasade) {
-        this.fagsakService = fagsakService;
+    public SaksopplysningerDataFetcher(BehandlingService behandlingService, PersondataFasade persondataFasade) {
+        this.behandlingService = behandlingService;
         this.persondataFasade = persondataFasade;
     }
 
     @Override
     public DataFetcherResult<Object> get(DataFetchingEnvironment dataFetchingEnvironment) throws Exception {
-        final String saksnummer = dataFetchingEnvironment.getArgument("saksnummer");
-        final String ident = fagsakService.hentFagsak(saksnummer).hentBruker().getAktørId();
+        final Long behandlingID = dataFetchingEnvironment.getArgument("behandlingID");
+        final String ident = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)
+            .getFagsak().hentBruker().getAktørId();
 
+        // TODO erstattes med hentPerson som tar behandlingID for å sjekke om data skal returneres fra gammel
+        //  TPS-data eller fra PDL
         final var statsborgerskapDto = persondataFasade.hentStatsborgerskap(ident).stream().map(
             StatsborgerskapTilDtoConverter::tilDto).collect(Collectors.toUnmodifiableList());
-        return DataFetcherResult.newResult().data(new SaksopplysningerDto(saksnummer,
+        return DataFetcherResult.newResult().data(new SaksopplysningerDto(behandlingID,
             new PersonopplysningerDto(statsborgerskapDto))).build();
     }
 }
