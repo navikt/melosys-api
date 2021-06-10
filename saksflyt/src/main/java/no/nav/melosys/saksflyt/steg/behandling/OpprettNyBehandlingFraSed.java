@@ -66,7 +66,6 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
         Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.SED, behandlingstema,
             prosessinstans.getData(JOURNALPOST_ID), prosessinstans.getData(DOKUMENT_ID));
 
-        fagsak.setStatus(Saksstatuser.OPPRETTET);
         fagsak.getBehandlinger().add(behandling);
         fagsakService.lagre(fagsak);
 
