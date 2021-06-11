@@ -1,15 +1,13 @@
 package no.nav.melosys.tjenester.gui.graphql;
 
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 
-import graphql.Scalars;
+import graphql.language.IntValue;
 import graphql.language.StringValue;
-import graphql.schema.Coercing;
-import graphql.schema.CoercingParseLiteralException;
-import graphql.schema.CoercingSerializeException;
-import graphql.schema.GraphQLScalarType;
+import graphql.schema.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -93,7 +91,65 @@ class ScalarConfig {
     }
 
     @Bean
-    static GraphQLScalarType GraphQLLong() {
-        return Scalars.GraphQLLong;
+    static GraphQLScalarType longScalar() {
+        return GraphQLScalarType.newScalar()
+            .name("Long")
+            .description("Custom scalar for Long")
+            .coercing(longCoercing())
+            .build();
     }
+
+    private static Coercing<Long, String> longCoercing() {
+        return new Coercing<>() {
+            @Override
+            public String serialize(Object input) throws CoercingSerializeException {
+                if (input instanceof Long l) {
+                    return l.toString();
+                } else if (input instanceof String s) {
+                    return s;
+                } else {
+                    return null;
+                }
+            }
+
+            @Override
+            public Long parseValue(Object input) throws CoercingParseValueException {
+                if (input instanceof Long l) {
+                    return l;
+                } else if (input instanceof Integer i) {
+                    return i.longValue();
+                } else if (input instanceof String s) {
+                    return Long.parseLong(s);
+                } else {
+                    return null;
+                }
+            }
+
+            @Override
+            public Long parseLiteral(Object input) throws CoercingParseLiteralException {
+                if (input instanceof StringValue stringValue) {
+                    try {
+                        return Long.parseLong(stringValue.getValue());
+                    } catch (NumberFormatException e) {
+                        throw new CoercingParseLiteralException(
+                            "Expected value to be a Long but it was '" + input + "'"
+                        );
+                    }
+                } else if (input instanceof IntValue intValue) {
+                    BigInteger value = intValue.getValue();
+                    if (value.compareTo(BigInteger.valueOf(Long.MIN_VALUE)) < 0 || value.compareTo(
+                        BigInteger.valueOf(Long.MAX_VALUE)) > 0) {
+                        throw new CoercingParseLiteralException(
+                            "Expected value to be in the Long range but it was '" + value + "'"
+                        );
+                    }
+                    return value.longValue();
+                }
+                throw new CoercingParseLiteralException(
+                    "Expected AST type 'IntValue' or 'StringValue' but was '" + input.getClass().getSimpleName() + "'."
+                );
+            }
+        };
+    }
+
 }
