@@ -21,7 +21,7 @@ BEGIN
                     fysiskArbeidsstedAdresse := fysiskArbeidssted.get_Object('adresse');
                     fysiskArbeidsstedAdresse.rename_key('husnummer', 'husnummerEtasjeLeilighet');
                     fysiskArbeidsstedAdresse.put_Null('postboks');
-                    fysiskArbeidsstedAdresse.put_Null('tillegsnavn');
+                    fysiskArbeidsstedAdresse.put_Null('tilleggsnavn');
                 END LOOP;
 
             foretakUtlandArray := jsonData.get_Array('foretakUtland');
@@ -31,13 +31,13 @@ BEGIN
                     foretakUtlandAdresse := foretakUtland.get_Object('adresse');
                     foretakUtlandAdresse.rename_key('husnummer', 'husnummerEtasjeLeilighet');
                     foretakUtlandAdresse.put_Null('postboks');
-                    foretakUtlandAdresse.put_Null('tillegsnavn');
+                    foretakUtlandAdresse.put_Null('tilleggsnavn');
                 END LOOP;
 
             oppgittAdresse := jsonData.get_Object('bosted').get_Object('oppgittAdresse');
             oppgittAdresse.rename_key('husnummer', 'husnummerEtasjeLeilighet');
             oppgittAdresse.put_Null('postboks');
-            oppgittAdresse.put_Null('tillegsnavn');
+            oppgittAdresse.put_Null('tilleggsnavn');
 
             oppdatertJsonData := jsonData.stringify;
             UPDATE BEHANDLINGSGRUNNLAG SET DATA = oppdatertJsonData WHERE CURRENT OF bgs;
