@@ -15,6 +15,7 @@ import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
+import no.nav.melosys.domain.person.Persondata;
 
 
 /**
@@ -22,7 +23,7 @@ import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
  *
  */
 @XmlRootElement
-public class PersonDokument implements SaksopplysningDokument {
+public class PersonDokument implements Persondata, SaksopplysningDokument {
 
     public String fnr;
 

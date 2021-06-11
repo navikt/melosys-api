@@ -50,7 +50,7 @@ public class DokgenMalMapper {
         if (brevbestilling.getOrg() == null) {
             String fnr = brevbestilling.getBehandling().hentPersonDokument().fnr;
             //NOTE Henter opplysninger på nytt for å sikre at korrekt adresse benyttes
-            PersonDokument personDokument = (PersonDokument) persondataFasade.hentPerson(fnr, Informasjonsbehov.STANDARD).getDokument();
+            PersonDokument personDokument = (PersonDokument) persondataFasade.hentPersonFraTps(fnr, Informasjonsbehov.STANDARD).getDokument();
             brevbestilling.toBuilder().medPersonDokument(personDokument).build();
         }
         switch (brevbestilling.getProduserbartdokument()) {

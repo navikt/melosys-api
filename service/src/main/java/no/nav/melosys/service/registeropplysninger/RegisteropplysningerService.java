@@ -150,7 +150,7 @@ public class RegisteropplysningerService {
     }
 
     private List<Saksopplysning> hentPersonopplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {
-        Saksopplysning saksopplysning = persondataFasade.hentPerson(registeropplysningerRequest.getFnr(), registeropplysningerRequest.getInformasjonsbehov());
+        Saksopplysning saksopplysning = persondataFasade.hentPersonFraTps(registeropplysningerRequest.getFnr(), registeropplysningerRequest.getInformasjonsbehov());
         return List.of(saksopplysning);
     }
 
