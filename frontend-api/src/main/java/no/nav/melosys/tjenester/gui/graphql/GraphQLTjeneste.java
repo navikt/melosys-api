@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui;
+package no.nav.melosys.tjenester.gui.graphql;
 
 import java.util.Map;
 import java.util.Objects;
@@ -6,7 +6,6 @@ import java.util.Objects;
 import graphql.ExecutionInput;
 import graphql.GraphQL;
 import no.nav.melosys.service.abac.TilgangService;
-import no.nav.melosys.tjenester.gui.graphql.GraphQLRequest;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
