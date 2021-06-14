@@ -40,7 +40,6 @@ import static no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper.*;
 public class BrevbestillingService {
 
     private final DokumentServiceFasade dokumentServiceFasade;
-    private final DokgenService dokgenService;
     private final BrevmottakerService brevmottakerService;
     private final PersondataFasade persondataFasade;
     private final EregFasade eregFasade;
@@ -48,12 +47,11 @@ public class BrevbestillingService {
     private final KodeverkService kodeverkService;
 
     @Autowired
-    public BrevbestillingService(DokumentServiceFasade dokumentServiceFasade, DokgenService dokgenService,
+    public BrevbestillingService(DokumentServiceFasade dokumentServiceFasade,
                                  BrevmottakerService brevmottakerService, PersondataFasade persondataFasade,
                                  EregFasade eregFasade, KontaktopplysningService kontaktopplysningService,
                                  KodeverkService kodeverkService) {
         this.dokumentServiceFasade = dokumentServiceFasade;
-        this.dokgenService = dokgenService;
         this.brevmottakerService = brevmottakerService;
         this.persondataFasade = persondataFasade;
         this.eregFasade = eregFasade;
@@ -161,7 +159,7 @@ public class BrevbestillingService {
     }
 
     private OrganisasjonDokument hentRettOrganisasjonsdokument(Behandling behandling, String orgnr) {
-        Kontaktopplysning kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), orgnr).orElse(null);
+        var kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), orgnr).orElse(null);
         String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : orgnr;
         return (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();
     }
@@ -215,7 +213,7 @@ public class BrevbestillingService {
 
     @Transactional
     public void produserBrev(long behandlingId, BrevbestillingDto brevbestillingDto) {
-        dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto);
+        dokumentServiceFasade.produserDokument(behandlingId, brevbestillingDto);
     }
 
     public byte[] produserUtkast(long behandlingID, BrevbestillingDto brevbestillingDto) {

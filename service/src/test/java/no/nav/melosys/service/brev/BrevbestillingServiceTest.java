@@ -22,7 +22,10 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
-import no.nav.melosys.service.dokument.*;
+import no.nav.melosys.service.dokument.BrevmottakerService;
+import no.nav.melosys.service.dokument.DokumentServiceFasade;
+import no.nav.melosys.service.dokument.MuligMottakerDto;
+import no.nav.melosys.service.dokument.MuligeMottakereDto;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -48,8 +51,6 @@ class BrevbestillingServiceTest {
     @Mock
     private BrevmottakerService mockBrevmottakerService;
     @Mock
-    private DokgenService mockDokgenService;
-    @Mock
     private PersondataFasade mockPersondataFasade;
     @Mock
     private EregFasade mockEregFasade;
@@ -65,7 +66,7 @@ class BrevbestillingServiceTest {
     @BeforeEach
     void init() {
         brevbestillingService = new BrevbestillingService(
-            mockDokServiceFasade, mockDokgenService, mockBrevmottakerService, mockPersondataFasade,
+            mockDokServiceFasade, mockBrevmottakerService, mockPersondataFasade,
             mockEregFasade, mockKontaktopplysningService, mockKodeverkService
         );
     }
@@ -170,7 +171,6 @@ class BrevbestillingServiceTest {
             .thenReturn(lagAktoer(REPRESENTANT, "orgnrTilFullmektig"));
         mockHentOrganisasjon("orgnr", "Ola Nordmann Rørleggerfirma");
         mockHentOrganisasjon("orgnrTilFullmektig", "Fullmektig Virksomhet");
-
 
 
         var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, behandling, "orgnr");
@@ -424,7 +424,7 @@ class BrevbestillingServiceTest {
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().medProduserbardokument(MANGELBREV_BRUKER).build();
         brevbestillingService.produserBrev(123L, brevbestillingDto);
 
-        verify(mockDokgenService).produserOgDistribuerBrev(anyLong(), eq(brevbestillingDto));
+        verify(mockDokServiceFasade).produserDokument(anyLong(), eq(brevbestillingDto));
     }
 
     @Test
