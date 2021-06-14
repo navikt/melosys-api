@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.aareg;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
@@ -8,6 +9,7 @@ import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumer;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdMock;
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumerImpl;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.HentArbeidsforholdHistorikkSikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.HentArbeidsforholdHistorikkRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,7 +55,7 @@ public class AaregServiceTest {
         AaregService instans = lagAaregService(arbeidsforholdConsumer);
         Throwable unntak = catchThrowable(() -> instans.hentArbeidsforholdHistorikk(SIKKERHETSBEGRENSET_ID));
         assertThat(unntak).isInstanceOf(SikkerhetsbegrensningException.class)
-                .hasMessageContaining("oppslag av arbeidsforhold");
+            .hasMessageContaining("oppslag av arbeidsforhold");
     }
 
     private static ArbeidsforholdConsumer mockArbeidsforholdConsumer() throws Exception {
@@ -61,13 +63,16 @@ public class AaregServiceTest {
         HentArbeidsforholdHistorikkRequest request = new HentArbeidsforholdHistorikkRequest();
         request.setArbeidsforholdId(SIKKERHETSBEGRENSET_ID);
         when(arbeidsforholdConsumer
-                .hentArbeidsforholdHistorikk(argThat(r -> r.getArbeidsforholdId() == SIKKERHETSBEGRENSET_ID)))
-                        .thenThrow(new HentArbeidsforholdHistorikkSikkerhetsbegrensning(null, null));
+            .hentArbeidsforholdHistorikk(argThat(r -> r.getArbeidsforholdId() == SIKKERHETSBEGRENSET_ID)))
+            .thenThrow(new HentArbeidsforholdHistorikkSikkerhetsbegrensning(null, null));
         return arbeidsforholdConsumer;
     }
 
     private AaregService lagAaregService(ArbeidsforholdConsumer arbeidsforholdConsumer) {
         DokumentFactory dokumentFactory = new DokumentFactory(marshaller, new XsltTemplatesFactory());
-        return new AaregService(arbeidsforholdConsumer, dokumentFactory);
+        FakeUnleash unleash = new FakeUnleash();
+        unleash.enable("");
+        // TODO, add mock webClient
+        return new AaregService(arbeidsforholdConsumer, dokumentFactory, new ArbeidsforholdRestConsumerImpl(null), unleash);
     }
 }
