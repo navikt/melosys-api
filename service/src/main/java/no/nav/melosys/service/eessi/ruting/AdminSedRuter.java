@@ -32,7 +32,7 @@ public abstract class AdminSedRuter {
         this.prosessinstansService = prosessinstansService;
     }
 
-    protected void avsluttBehandlingOgReturnerMedlPeriodeFraAnmodningsperiode(Behandling behandling){
+    protected void avsluttBehandlingOgAvvisMedlPeriodeOpphørtFraAnmodningsperiode(Behandling behandling){
         fagsakService.avsluttFagsakOgBehandling(behandling.getFagsak(), Saksstatuser.ANNULLERT);
         behandlingsresultatService.hentBehandlingsresultat(behandling.getId())
             .finnValidertAnmodningsperiode()
@@ -40,7 +40,7 @@ public abstract class AdminSedRuter {
             .ifPresent(anmodningsperiode -> medlPeriodeService.avvisPeriodeOpphørt(anmodningsperiode.getMedlPeriodeID()));
     }
 
-    protected void oppdaterStatusOgReturnerMedlPeriodeFraLovvalgsperiode(Behandling behandling){
+    protected void oppdaterStatusOgAvvisPeriodeMedlPeriodeOpphørtFraLovvalgsperiode(Behandling behandling){
         fagsakService.oppdaterStatus(behandling.getFagsak(),Saksstatuser.ANNULLERT);
         behandlingsresultatService.hentBehandlingsresultat(behandling.getId())
             .finnValidertLovvalgsperiode()

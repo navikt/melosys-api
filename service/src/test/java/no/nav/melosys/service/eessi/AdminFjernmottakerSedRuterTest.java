@@ -1,8 +1,12 @@
-package no.nav.melosys.service.eessi.ruting;
+package no.nav.melosys.service.eessi;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.Institusjon;
-import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -11,26 +15,19 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.eessi.ruting.AdminFjernmottakerSedRuter;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AdminFjernmottakerSedRuterTest {
@@ -78,10 +75,9 @@ class AdminFjernmottakerSedRuterTest {
     }
 
     @Test
-    void rutSedTilBehandling_fjernMottakerSomIkkeErNorskPåÅpenA003_blirIkkeAvsluttetEllerSattTilAnnullert() {
+    void rutSedTilBehandling_erIkkeX006MottakerPåÅpenA003_blirIkkeAvsluttetEllerSattTilAnnullert() {
         var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING);
-        Institusjon danskInstitusjon = new Institusjon("DK:DENNAV006", "NavIDanmark", Landkoder.DE.name());
-        melosysEessiMelding.setInstitusjon(danskInstitusjon);
+        melosysEessiMelding.setErX006Mottaker(false);
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         Behandling sistAktiveBehandling = fagsak.hentSistAktiveBehandling();
@@ -92,7 +88,7 @@ class AdminFjernmottakerSedRuterTest {
     }
 
     @Test
-    void rutSedTilBehandling_institusjonErIkkeTilstedePåSed_opprettJournalFøringsProsess() {
+    void rutSedTilBehandling_erX006MottakerErIkkeTilstedePåSed_opprettJournalFøringsProsess() {
         var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING);
 
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
@@ -101,14 +97,14 @@ class AdminFjernmottakerSedRuterTest {
         when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
 
         adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
+        verifyNoInteractions(behandlingsresultatService);
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(sistAktiveBehandling, melosysEessiMelding);
     }
 
     @Test
-    void rutSedTilBehandling_fjernMottakerSomErNorskPåÅpenA003_blirAvsluttetOgSattTilAnnullert() {
+    void rutSedTilBehandling_erX006MottakerPåÅpenA003_blirAvsluttetOgSattTilAnnullert() {
         var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING);
-        Institusjon danskInstitusjon = new Institusjon("NO:NAVAT07", "NONAVAT07", Landkoder.NO.name());
-        melosysEessiMelding.setInstitusjon(danskInstitusjon);
+        melosysEessiMelding.setErX006Mottaker(true);
 
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
         Behandling sistAktiveBehandling = fagsak.hentSistAktiveBehandling();
@@ -126,6 +122,30 @@ class AdminFjernmottakerSedRuterTest {
 
         verify(fagsakService).avsluttFagsakOgBehandling(fagsak, Saksstatuser.ANNULLERT);
         verify(medlPeriodeService).avvisPeriodeOpphørt(behandlingsresultat.hentValidertAnmodningsperiode().getMedlPeriodeID());
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(sistAktiveBehandling, melosysEessiMelding);
+    }
+
+    @Test
+    void rutSedTilBehandling_erX006MottakerPåAvsluttetBehandling_oppdaterStatusPåFagsakTilAnnulert(){
+        var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.AVSLUTTET);
+        melosysEessiMelding.setErX006Mottaker(true);
+
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
+        Behandling sistAktiveBehandling = fagsak.hentSistAktiveBehandling();
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setBehandling(sistAktiveBehandling);
+
+        Lovvalgsperiode anmodningsperiode = new Lovvalgsperiode();
+        anmodningsperiode.setMedlPeriodeID(20L);
+        behandlingsresultat.setLovvalgsperioder(Set.of(anmodningsperiode));
+
+        when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+        adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
+
+        verify(fagsakService).oppdaterStatus(fagsak, Saksstatuser.ANNULLERT);
+        verify(medlPeriodeService).avvisPeriodeOpphørt(behandlingsresultat.hentValidertLovvalgsperiode().getMedlPeriodeID());
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(sistAktiveBehandling, melosysEessiMelding);
     }
 

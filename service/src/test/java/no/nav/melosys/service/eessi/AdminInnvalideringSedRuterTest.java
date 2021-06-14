@@ -1,4 +1,4 @@
-package no.nav.melosys.service.eessi.ruting;
+package no.nav.melosys.service.eessi;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -20,6 +20,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.eessi.ruting.AdminInnvalideringSedRuter;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -85,7 +86,7 @@ class AdminInnvalideringSedRuterTest {
     }
 
     @Test
-    void rutSedTilBehandling_arkivsaksIdErNull_opprettJournalFøringsOppgave(){
+    void rutSedTilBehandling_arkivsaksIdErNull_opprettJournalFøringsOppgave() {
         adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, null);
         verify(oppgaveService).opprettJournalføringsoppgave(melosysEessiMelding.getJournalpostId(), melosysEessiMelding.getAktoerId());
 
@@ -106,7 +107,7 @@ class AdminInnvalideringSedRuterTest {
     }
 
     @Test
-    void rutSedTilBehandling_behandlingErUtlandUtpektOgAvsluttetHarMedlPeriode_oppdaterSaksstatusAnnullertOgOpphørMEDLPeriode(){
+    void rutSedTilBehandling_behandlingErUtlandUtpektOgAvsluttetHarMedlPeriode_oppdaterSaksstatusAnnullertOgOpphørMEDLPeriode() {
         var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, Behandlingsstatus.AVSLUTTET);
         fagsak.hentSistAktiveBehandling().getSaksopplysninger().add(lagSedDokument());
         var behandlingsresultat = lagBehandlingsresultat(true);
@@ -122,7 +123,7 @@ class AdminInnvalideringSedRuterTest {
     }
 
     @Test
-    void rutSedTilBehandling_behandlingErUtstasjoneringOgAktiv_oppdaterSaksstatusAnnullert(){
+    void rutSedTilBehandling_behandlingErUtstasjoneringOgAktiv_oppdaterSaksstatusAnnullert() {
         var fagsak = lagFagsak(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, Behandlingsstatus.UNDER_BEHANDLING);
         fagsak.hentSistAktiveBehandling().getSaksopplysninger().add(lagSedDokument());
 
@@ -137,7 +138,7 @@ class AdminInnvalideringSedRuterTest {
     }
 
     @Test
-    void rutSedTilBehandling_behandlingErUnntakNorskTrygvØvrigAktivSedIkkeAnnullert_oppretterBehandlingsoppgave(){
+    void rutSedTilBehandling_behandlingErUnntakNorskTrygvØvrigAktivSedIkkeAnnullert_oppretterBehandlingsoppgave() {
         var fagsak = lagFagsak(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, Behandlingsstatus.UNDER_BEHANDLING);
         fagsak.hentSistAktiveBehandling().getSaksopplysninger().add(lagSedDokument());
 
@@ -148,7 +149,6 @@ class AdminInnvalideringSedRuterTest {
         verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(any(Behandling.class),
             eq(melosysEessiMelding.getJournalpostId()), eq(melosysEessiMelding.getAktoerId()), isNull());
     }
-
 
 
     private Behandlingsresultat lagBehandlingsresultat(boolean medMedlperiode) {

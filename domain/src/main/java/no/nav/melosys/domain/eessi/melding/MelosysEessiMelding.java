@@ -3,7 +3,8 @@ package no.nav.melosys.domain.eessi.melding;
 import java.util.List;
 import java.util.Objects;
 
-import no.nav.melosys.domain.eessi.*;
+import no.nav.melosys.domain.eessi.Periode;
+import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import org.apache.commons.lang3.StringUtils;
 
 public class MelosysEessiMelding {
@@ -21,6 +22,7 @@ public class MelosysEessiMelding {
     private String artikkel;
     private boolean erEndring;
     private boolean midlertidigBestemmelse;
+    private boolean erX006Mottaker;
     private String ytterligereInformasjon;
     private String bucType;
     private String sedType;
@@ -28,7 +30,6 @@ public class MelosysEessiMelding {
 
     private SvarAnmodningUnntak svarAnmodningUnntak;
     private AnmodningUnntak anmodningUnntak;
-    private Institusjon institusjon;
 
     public String getSedId() {
         return sedId;
@@ -190,12 +191,12 @@ public class MelosysEessiMelding {
         return sedVersjon;
     }
 
-    public Institusjon getInstitusjon() {
-        return institusjon;
+    public boolean isErX006Mottaker() {
+        return erX006Mottaker;
     }
 
-    public void setInstitusjon(Institusjon institusjon) {
-        this.institusjon = institusjon;
+    public void setErX006Mottaker(boolean erX006Mottaker) {
+        this.erX006Mottaker = erX006Mottaker;
     }
 
     @Override
@@ -213,6 +214,7 @@ public class MelosysEessiMelding {
             ", artikkel='" + artikkel + '\'' +
             ", erEndring=" + erEndring +
             ", midlertidigBestemmelse=" + midlertidigBestemmelse +
+            ", erX006Mottaker=" + erX006Mottaker +
             ", bucType='" + bucType + '\'' +
             ", sedType='" + sedType + '\'' +
             '}';
@@ -242,12 +244,12 @@ public class MelosysEessiMelding {
             Objects.equals(sedType, that.sedType) &&
             Objects.equals(svarAnmodningUnntak, that.svarAnmodningUnntak) &&
             Objects.equals(anmodningUnntak, that.anmodningUnntak) &&
-            Objects.equals(institusjon, that.institusjon);
+            Objects.equals(erX006Mottaker, that.erX006Mottaker);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sedId, rinaSaksnummer, avsender, journalpostId, dokumentId, gsakSaksnummer, aktoerId, statsborgerskap, arbeidssteder, periode, lovvalgsland, artikkel, erEndring, midlertidigBestemmelse, ytterligereInformasjon, bucType, sedType, svarAnmodningUnntak, anmodningUnntak, institusjon);
+        return Objects.hash(sedId, rinaSaksnummer, avsender, journalpostId, dokumentId, gsakSaksnummer, aktoerId, statsborgerskap, arbeidssteder, periode, lovvalgsland, artikkel, erEndring, midlertidigBestemmelse, ytterligereInformasjon, bucType, sedType, svarAnmodningUnntak, anmodningUnntak, erX006Mottaker);
     }
 
     public boolean inneholderYtterligereInformasjon() {

@@ -67,7 +67,8 @@ public class AdminInnvalideringSedRuter extends AdminSedRuter implements SedRute
 
         var sistAktiveBehandling = fagsak.get().hentSistAktiveBehandling();
         var sedDokument = sistAktiveBehandling.finnSedDokument();
-        boolean aktivBehandlingErInvalidert = erAktivBehandlingInvalidert(sedDokument,arkivsakID);;
+        boolean aktivBehandlingErInvalidert = erAktivBehandlingInvalidert(sedDokument, arkivsakID);
+        ;
 
         if (aktivBehandlingErInvalidert && (sistAktiveBehandling.erRegisteringAvUnntak() || sistAktiveBehandling.erAnmodningOmUnntak())) {
             annullerSakOgBehandling(sistAktiveBehandling);
@@ -77,7 +78,7 @@ public class AdminInnvalideringSedRuter extends AdminSedRuter implements SedRute
         opprettJournalføringProsess(melosysEessiMelding, sistAktiveBehandling);
     }
 
-    private boolean erAktivBehandlingInvalidert(Optional<SedDokument> sedDokument, Long arkivsakID){
+    private boolean erAktivBehandlingInvalidert(Optional<SedDokument> sedDokument, Long arkivsakID) {
         return sedDokument.filter(dokument -> eessiService.hentTilknyttedeBucer(arkivsakID, List.of())
             .stream()
             .filter(b -> b.getId().equals(dokument.getRinaSaksnummer()))
@@ -89,10 +90,10 @@ public class AdminInnvalideringSedRuter extends AdminSedRuter implements SedRute
     private void annullerSakOgBehandling(Behandling behandling) {
         if (behandling.erAktiv()) {
             log.info("Behandling {} vil bli avsluttet og status settes til annullert", behandling.getId());
-            avsluttBehandlingOgReturnerMedlPeriodeFraAnmodningsperiode(behandling);
+            avsluttBehandlingOgAvvisMedlPeriodeOpphørtFraAnmodningsperiode(behandling);
         } else {
             log.info("Saksstatus settes til annullert for behandling {}", behandling.getId());
-            oppdaterStatusOgReturnerMedlPeriodeFraLovvalgsperiode(behandling);
+            oppdaterStatusOgAvvisPeriodeMedlPeriodeOpphørtFraLovvalgsperiode(behandling);
         }
     }
 
