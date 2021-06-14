@@ -77,7 +77,7 @@ class AdminFjernmottakerSedRuterTest {
     @Test
     void rutSedTilBehandling_erIkkeX006MottakerPåÅpenA003_blirIkkeAvsluttetEllerSattTilAnnullert() {
         var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING);
-        melosysEessiMelding.setErX006Mottaker(false);
+        melosysEessiMelding.setX006NavErFjernet(false);
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         Behandling sistAktiveBehandling = fagsak.hentSistAktiveBehandling();
@@ -104,7 +104,7 @@ class AdminFjernmottakerSedRuterTest {
     @Test
     void rutSedTilBehandling_erX006MottakerPåÅpenA003_blirAvsluttetOgSattTilAnnullert() {
         var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING);
-        melosysEessiMelding.setErX006Mottaker(true);
+        melosysEessiMelding.setX006NavErFjernet(true);
 
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
         Behandling sistAktiveBehandling = fagsak.hentSistAktiveBehandling();
@@ -128,7 +128,7 @@ class AdminFjernmottakerSedRuterTest {
     @Test
     void rutSedTilBehandling_erX006MottakerPåAvsluttetBehandling_oppdaterStatusPåFagsakTilAnnulert(){
         var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.AVSLUTTET);
-        melosysEessiMelding.setErX006Mottaker(true);
+        melosysEessiMelding.setX006NavErFjernet(true);
 
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
         Behandling sistAktiveBehandling = fagsak.hentSistAktiveBehandling();

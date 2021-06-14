@@ -22,7 +22,7 @@ public class MelosysEessiMelding {
     private String artikkel;
     private boolean erEndring;
     private boolean midlertidigBestemmelse;
-    private boolean erX006Mottaker;
+    private boolean x006NavErFjernet;
     private String ytterligereInformasjon;
     private String bucType;
     private String sedType;
@@ -191,12 +191,12 @@ public class MelosysEessiMelding {
         return sedVersjon;
     }
 
-    public boolean isErX006Mottaker() {
-        return erX006Mottaker;
+    public boolean isX006NavErFjernet(){
+        return x006NavErFjernet;
     }
 
-    public void setErX006Mottaker(boolean erX006Mottaker) {
-        this.erX006Mottaker = erX006Mottaker;
+    public void setX006NavErFjernet(boolean x006NavErFjernet) {
+        this.x006NavErFjernet = x006NavErFjernet;
     }
 
     @Override
@@ -214,7 +214,7 @@ public class MelosysEessiMelding {
             ", artikkel='" + artikkel + '\'' +
             ", erEndring=" + erEndring +
             ", midlertidigBestemmelse=" + midlertidigBestemmelse +
-            ", erX006Mottaker=" + erX006Mottaker +
+            ", erX006Mottaker=" + x006NavErFjernet +
             ", bucType='" + bucType + '\'' +
             ", sedType='" + sedType + '\'' +
             '}';
@@ -244,12 +244,12 @@ public class MelosysEessiMelding {
             Objects.equals(sedType, that.sedType) &&
             Objects.equals(svarAnmodningUnntak, that.svarAnmodningUnntak) &&
             Objects.equals(anmodningUnntak, that.anmodningUnntak) &&
-            Objects.equals(erX006Mottaker, that.erX006Mottaker);
+            Objects.equals(x006NavErFjernet, that.x006NavErFjernet);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sedId, rinaSaksnummer, avsender, journalpostId, dokumentId, gsakSaksnummer, aktoerId, statsborgerskap, arbeidssteder, periode, lovvalgsland, artikkel, erEndring, midlertidigBestemmelse, ytterligereInformasjon, bucType, sedType, svarAnmodningUnntak, anmodningUnntak, erX006Mottaker);
+        return Objects.hash(sedId, rinaSaksnummer, avsender, journalpostId, dokumentId, gsakSaksnummer, aktoerId, statsborgerskap, arbeidssteder, periode, lovvalgsland, artikkel, erEndring, midlertidigBestemmelse, ytterligereInformasjon, bucType, sedType, svarAnmodningUnntak, anmodningUnntak, x006NavErFjernet);
     }
 
     public boolean inneholderYtterligereInformasjon() {

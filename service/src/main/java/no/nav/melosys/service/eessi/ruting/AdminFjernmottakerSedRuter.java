@@ -52,7 +52,7 @@ public class AdminFjernmottakerSedRuter extends AdminSedRuter implements SedRute
             return;
         }
         var sistAktiveBehandling = fagsak.get().hentSistAktiveBehandling();
-        boolean erMottakerInstitusjonFraMelding = melosysEessiMelding.isErX006Mottaker();
+        boolean erMottakerInstitusjonFraMelding = melosysEessiMelding.isX006NavErFjernet();
 
         if (erMottakerInstitusjonFraMelding) {
             annullerSakOgBehandling(sistAktiveBehandling);
