@@ -7,7 +7,7 @@ public class ArbeidsfoholdQuery {
 
     // Filter for regelverk (default = ALLE)
     // Available values : forenkletOppgjoersordning, frilanserOppdragstakerHonorarPersonerMm, maritimtArbeidsforhold, ordinaertArbeidsforhold
-    String arbeidsforholdType;
+    String arbeidsforholdType = "ALLE"; // for testing for now
 
     // Filter for fra-og-med-dato for ansettelsesperiode, format (ISO-8601): yyyy-MM-dd
     String ansettelsesperiodeFom;

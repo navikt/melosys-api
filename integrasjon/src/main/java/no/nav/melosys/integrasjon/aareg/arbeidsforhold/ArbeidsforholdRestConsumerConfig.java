@@ -40,6 +40,7 @@ public class ArbeidsforholdRestConsumerConfig implements RestConsumer {
             .build());
     }
 
+    // TODO: this is duplicated from MedlemskapRestConsumerConfig. Move to common place
     private ExchangeFilterFunction headerFilter() {
         return ExchangeFilterFunction.ofRequestProcessor(
             request -> Mono.just(ClientRequest.from(request)

@@ -15,6 +15,8 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsfoholdQuery;
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsfoholdResponse;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumer;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning;
@@ -53,12 +55,9 @@ public class AaregService implements AaregFasade {
 
     @Override
     public Saksopplysning finnArbeidsforholdPrArbeidstaker(String ident, LocalDate fom, LocalDate tom) {
-        // Test call
-        String result = arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker("123");
-        System.out.printf(result);
-
         if(unleash.isEnabled("melosys.aareg.rest")) {
-
+            ArbeidsfoholdQuery arbeidsfoholdQuery = new ArbeidsfoholdQuery();
+            ArbeidsfoholdResponse[] result = arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker("123", arbeidsfoholdQuery);
         }
 
         FinnArbeidsforholdPrArbeidstakerRequest request = new FinnArbeidsforholdPrArbeidstakerRequest();
