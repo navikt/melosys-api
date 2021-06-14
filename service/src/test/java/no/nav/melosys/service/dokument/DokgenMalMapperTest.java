@@ -264,9 +264,9 @@ class DokgenMalMapperTest {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.PERSOPL);
         PersonDokument personDokument = new PersonDokument();
-        personDokument.fnr = "99887766554";
-        personDokument.sammensattNavn = SAMMENSATT_NAVN;
-        personDokument.gjeldendePostadresse = lagAdresse();
+        personDokument.setFnr("99887766554");
+        personDokument.setSammensattNavn(SAMMENSATT_NAVN);
+        personDokument.setGjeldendePostadresse(lagAdresse());
         saksopplysning.setDokument(personDokument);
         return saksopplysning;
     }

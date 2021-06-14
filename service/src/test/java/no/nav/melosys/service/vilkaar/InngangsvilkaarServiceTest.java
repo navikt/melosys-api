@@ -65,7 +65,7 @@ class InngangsvilkaarServiceTest {
         final List<String> landkoder = List.of("FR", "DK", "NO");
         final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
         PersonDokument personDokument = new PersonDokument();
-        personDokument.statsborgerskap = Land.av(FINLAND);
+        personDokument.setStatsborgerskap(Land.av(FINLAND));
         when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(personDokument);
         InngangsvilkarResponse res = new InngangsvilkarResponse();
         res.setFeilmeldinger(Collections.emptyList());
@@ -74,7 +74,7 @@ class InngangsvilkaarServiceTest {
 
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, periode);
 
-        verify(inngangsvilkaarConsumer).vurderInngangsvilkår(Set.of(personDokument.statsborgerskap),
+        verify(inngangsvilkaarConsumer).vurderInngangsvilkår(Set.of(personDokument.getStatsborgerskap()),
             Set.copyOf(tilIso3(landkoder)), periode);
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR, true, Collections.emptySet());
     }
@@ -139,7 +139,7 @@ class InngangsvilkaarServiceTest {
         final List<String> landkoder = List.of("FR", "DK", "NO");
         final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusYears(1), null);
         PersonDokument personDokument = new PersonDokument();
-        personDokument.statsborgerskap = Land.av(FINLAND);
+        personDokument.setStatsborgerskap(Land.av(FINLAND));
         when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(personDokument);
         InngangsvilkarResponse res = new InngangsvilkarResponse();
         res.setFeilmeldinger(Collections.emptyList());
@@ -157,7 +157,7 @@ class InngangsvilkaarServiceTest {
         final List<String> landkoder = List.of("FR", "DK", "NO");
         final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
         PersonDokument personDokument = new PersonDokument();
-        personDokument.statsborgerskap = Land.av(FINLAND);
+        personDokument.setStatsborgerskap(Land.av(FINLAND));
         when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(personDokument);
         InngangsvilkarResponse res = new InngangsvilkarResponse();
         var feilmelding = new Feilmelding();
@@ -169,7 +169,7 @@ class InngangsvilkaarServiceTest {
 
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, periode);
 
-        verify(inngangsvilkaarConsumer).vurderInngangsvilkår(Set.of(personDokument.statsborgerskap),
+        verify(inngangsvilkaarConsumer).vurderInngangsvilkår(Set.of(personDokument.getStatsborgerskap()),
             Set.copyOf(tilIso3(landkoder)), periode);
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR,
             false, Set.of(Inngangsvilkaar.TEKNISK_FEIL));

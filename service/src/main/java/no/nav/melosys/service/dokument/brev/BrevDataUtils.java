@@ -109,9 +109,9 @@ public final class BrevDataUtils {
 
     public static PersonnavnType lagPersonnavn(PersonDokument personDokument) {
         PersonnavnType navn = new PersonnavnType();
-        navn.setFornavn(personDokument.fornavn);
-        navn.setMellomnavn(personDokument.mellomnavn);
-        navn.setEtternavn(personDokument.etternavn);
+        navn.setFornavn(personDokument.getFornavn());
+        navn.setMellomnavn(personDokument.getMellomnavn());
+        navn.setEtternavn(personDokument.getEtternavn());
         return navn;
     }
 }

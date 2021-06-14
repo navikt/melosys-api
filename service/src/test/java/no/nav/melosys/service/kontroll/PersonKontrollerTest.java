@@ -20,7 +20,7 @@ public class PersonKontrollerTest {
     @Test
     public void personDød_personErDød_true() {
         PersonDokument personDokument = new PersonDokument();
-        personDokument.dødsdato = LocalDate.now();
+        personDokument.setDødsdato(LocalDate.now());
         assertThat(PersonKontroller.personDød(personDokument)).isTrue();
     }
 
@@ -32,18 +32,18 @@ public class PersonKontrollerTest {
     @Test
     public void personBosattINorge_bosattINorge_true() {
         PersonDokument personDokument = new PersonDokument();
-        personDokument.dødsdato = LocalDate.now();
-        personDokument.bostedsadresse = new Bostedsadresse();
-        personDokument.bostedsadresse.setLand(new Land(Land.NORGE));
+        personDokument.setDødsdato(LocalDate.now());
+        personDokument.setBostedsadresse(new Bostedsadresse());
+        personDokument.getBostedsadresse().setLand(new Land(Land.NORGE));
         assertThat(PersonKontroller.personBosattINorge(personDokument)).isTrue();
     }
 
     @Test
     public void personBosattINorge_ikkeBosattINorge_false() {
         PersonDokument personDokument = new PersonDokument();
-        personDokument.dødsdato = LocalDate.now();
-        personDokument.bostedsadresse = new Bostedsadresse();
-        personDokument.bostedsadresse.setLand(new Land(Land.SVEITS));
+        personDokument.setDødsdato(LocalDate.now());
+        personDokument.setBostedsadresse(new Bostedsadresse());
+        personDokument.getBostedsadresse().setLand(new Land(Land.SVEITS));
         assertThat(PersonKontroller.personBosattINorge(personDokument)).isFalse();
     }
 
@@ -63,8 +63,8 @@ public class PersonKontrollerTest {
 
     @Test
     public void harRegistrertBostedsadresse_oppgittBostedsadresseITPS_true() {
-        personDokument.bostedsadresse.getGateadresse().setGatenavn("gate 123");
-        personDokument.bostedsadresse.getLand().setKode("SWE");
+        personDokument.getBostedsadresse().getGateadresse().setGatenavn("gate 123");
+        personDokument.getBostedsadresse().getLand().setKode("SWE");
 
         assertThat(PersonKontroller.harRegistrertBostedsadresse(personDokument, behandlingsgrunnlagData)).isTrue();
     }

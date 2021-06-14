@@ -93,7 +93,7 @@ public class OpprettJournalforBrev implements StegBehandler {
             .medTittel(dokumentproduksjonsInfo.journalføringsTittel())
             .medBrevkode(dokumentproduksjonsInfo.dokgenMalnavn())
             .medDokumentKategori(dokumentproduksjonsInfo.dokumentKategoriKode())
-            .medBrukerFnr(personDokument.fnr)
+            .medBrukerFnr(personDokument.getFnr())
             .medMottakerNavn(hasText(orgnr) ? eregFasade.hentOrganisasjonNavn(orgnr) : sammensattNavn)
             .medMottakerId(hasText(orgnr) ? orgnr : fnr)
             .medErMottakerOrg(hasText(orgnr))

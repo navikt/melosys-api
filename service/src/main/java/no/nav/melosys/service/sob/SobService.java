@@ -73,6 +73,6 @@ public class SobService {
 
     private String hentAktørIdFraTps(Behandling behandling) {
         PersonDokument personDokument = behandling.hentPersonDokument();
-        return persondataFasade.hentAktørIdForIdent(personDokument.fnr);
+        return persondataFasade.hentAktørIdForIdent(personDokument.getFnr());
     }
 }

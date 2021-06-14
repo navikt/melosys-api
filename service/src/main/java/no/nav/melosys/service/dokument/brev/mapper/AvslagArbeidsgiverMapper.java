@@ -37,7 +37,7 @@ public class AvslagArbeidsgiverMapper implements BrevDataMapper {
     Fag mapFag(BrevDataAvslagArbeidsgiver brevData) {
         Fag fag = new Fag();
 
-        fag.setNavn(brevData.person.sammensattNavn);
+        fag.setNavn(brevData.person.getSammensattNavn());
 
         fag.setArbeidsland(brevData.arbeidsland);
 

@@ -72,8 +72,7 @@ public class FattetVedtakService {
     }
 
     private Sak lagSak(Behandling behandling, Fagsak fagsak, PersonDokument personDokument) {
-        return new Sak(
-            personDokument.fnr,
+        return new Sak(personDokument.getFnr(),
             behandling.getId(),
             fagsak.getSaksnummer(),
             fagsak.getType(),
@@ -105,16 +104,12 @@ public class FattetVedtakService {
 
     private Saksopplysninger lagSaksopplysninger(PersonDokument personDokument) {
         return new Saksopplysninger(
-            new Person(
-                personDokument.fnr,
-                new Navn(
-                    personDokument.fornavn,
-                    personDokument.mellomnavn,
-                    personDokument.etternavn,
+            new Person(personDokument.getFnr(),
+                new Navn(personDokument.getFornavn(), personDokument.getMellomnavn(), personDokument.getEtternavn(),
                     null
                 ),
                 new Statsborgerskap(
-                    personDokument.statsborgerskap.getKode(),
+                    personDokument.getStatsborgerskap().getKode(),
                     null,
                     null,
                     null,

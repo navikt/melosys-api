@@ -78,27 +78,27 @@ class DataByggerStubs {
         søknadDokument.maritimtArbeid = Collections.singletonList(maritimtArbeid);
 
         PersonDokument personDokument = new PersonDokument();
-        personDokument.erEgenAnsatt = true;
-        personDokument.fødselsdato = LocalDate.now();
+        personDokument.setErEgenAnsatt(true);
+        personDokument.setFødselsdato(LocalDate.now());
         Bostedsadresse bostedsadresse = new Bostedsadresse();
         bostedsadresse.setLand(new Land(Land.NORGE));
         bostedsadresse.setPoststed("1212");
         bostedsadresse.setGateadresse(new Gateadresse());
-        personDokument.bostedsadresse = bostedsadresse;
+        personDokument.setBostedsadresse(bostedsadresse);
 
         Familiemedlem familiemedlem = new Familiemedlem();
         familiemedlem.navn = "farnavn";
         familiemedlem.fnr = "111111111";
         familiemedlem.familierelasjon = Familierelasjon.FARA;
-        personDokument.familiemedlemmer = Collections.singletonList(familiemedlem);
+        personDokument.setFamiliemedlemmer(Collections.singletonList(familiemedlem));
 
         KjoennsType kjønn = new KjoennsType();
         kjønn.setKode("M");
-        personDokument.kjønn = kjønn;
+        personDokument.setKjønn(kjønn);
 
-        personDokument.fornavn = "Mrfornavn";
-        personDokument.etternavn = "Spock";
-        personDokument.statsborgerskap = new Land(Land.NORGE);
+        personDokument.setFornavn("Mrfornavn");
+        personDokument.setEtternavn("Spock");
+        personDokument.setStatsborgerskap(new Land(Land.NORGE));
 
         saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.PERSOPL);

@@ -25,17 +25,17 @@ public class PersonUtenAdresseDto {
     public PersonUtenAdresseDto() {}
 
     public PersonUtenAdresseDto(PersonDokument person) {
-        fnr = person.fnr;
-        sivilstand = person.sivilstand;
-        statsborgerskap = person.statsborgerskap;
-        statsborgerskapDato = person.statsborgerskapDato;
-        sammensattNavn = person.sammensattNavn;
-        if (person.familiemedlemmer != null) {
-            familiemedlemmer = FamiliemedlemDto.avFamiliemedlemmer(person.familiemedlemmer);
+        fnr = person.getFnr();
+        sivilstand = person.getSivilstand();
+        statsborgerskap = person.getStatsborgerskap();
+        statsborgerskapDato = person.getStatsborgerskapDato();
+        sammensattNavn = person.getSammensattNavn();
+        if (person.getFamiliemedlemmer() != null) {
+            familiemedlemmer = FamiliemedlemDto.avFamiliemedlemmer(person.getFamiliemedlemmer());
         }
-        personStatus = person.personstatus;
-        kjoenn = person.kjønn;
-        foedselsdato = person.fødselsdato;
+        personStatus = person.getPersonstatus();
+        kjoenn = person.getKjønn();
+        foedselsdato = person.getFødselsdato();
     }
 
     public String getFnr() {

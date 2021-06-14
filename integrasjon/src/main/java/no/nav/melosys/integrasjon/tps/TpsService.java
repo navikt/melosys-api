@@ -61,7 +61,7 @@ public class TpsService implements TpsFasade {
         saksopplysning.setType(SaksopplysningType.PERSOPL);
         saksopplysning.setVersjon(PERSON_VERSJON);
 
-        for (Familiemedlem familiemedlem : personMedKilde.dokument.familiemedlemmer) {
+        for (Familiemedlem familiemedlem : personMedKilde.dokument.getFamiliemedlemmer()) {
             PersonMedKilde personIFamilie = hentPersonMedKilde(familiemedlem.fnr, mapInformasjonsbehovTilTps(Informasjonsbehov.MED_FAMILIERELASJONER));
             PersonMapper.berikFamiliemedlemMedOpplysninger(familiemedlem, personIFamilie.dokument, ident);
             saksopplysning.leggTilKildesystemOgMottattDokument(
@@ -165,14 +165,14 @@ public class TpsService implements TpsFasade {
     public String hentSammensattNavn(String fnr) {
         Saksopplysning tpsOpplysning = hentPerson(fnr, Informasjonsbehov.INGEN);
         PersonDokument personDokument = (PersonDokument) tpsOpplysning.getDokument();
-        return personDokument != null ? personDokument.sammensattNavn : null;
+        return personDokument != null ? personDokument.getSammensattNavn() : null;
     }
 
     @Override
     public boolean harStrengtFortroligAdresse(String fnr) {
         Saksopplysning saksopplysning = hentPerson(fnr, Informasjonsbehov.INGEN);
         PersonDokument personDokument = (PersonDokument) saksopplysning.getDokument();
-        return personDokument.diskresjonskode != null && personDokument.diskresjonskode.erKode6();
+        return personDokument.getDiskresjonskode() != null && personDokument.getDiskresjonskode().erKode6();
     }
 
     private Set<no.nav.tjeneste.virksomhet.person.v3.informasjon.Informasjonsbehov> mapInformasjonsbehovTilTps(Informasjonsbehov behov) {

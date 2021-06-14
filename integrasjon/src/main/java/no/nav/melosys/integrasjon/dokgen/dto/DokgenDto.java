@@ -45,10 +45,10 @@ public abstract class DokgenDto {
         PersonDokument personDokument = brevbestilling.getPersondokument() == null ?
             brevbestilling.getBehandling().hentPersonDokument() : brevbestilling.getPersondokument();
 
-        this.fnr = personDokument.fnr;
+        this.fnr = personDokument.getFnr();
         this.saksnummer = fagsak.getSaksnummer();
         this.dagensDato = Instant.now();
-        this.navnBruker = personDokument.sammensattNavn;
+        this.navnBruker = personDokument.getSammensattNavn();
         this.navnMottaker = mapMottakerNavn(org, personDokument);
         this.adresselinjer = mapAdresselinjer(org, brevbestilling.getKontaktpersonNavn(), brevbestilling.getKontaktopplysning(), personDokument);
         this.postnr = mapPostnr(org, personDokument);

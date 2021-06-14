@@ -70,13 +70,13 @@ class A1Mapper {
 
     private PersonType mapPerson(PersonDokument personDokument) {
         PersonType person = new PersonType();
-        person.setKjoenn(KjoennKode.fromValue(personDokument.kjønn.getKode()));
-        person.setStatsborgerskap(mapStatsborgerskap(personDokument.statsborgerskap));
+        person.setKjoenn(KjoennKode.fromValue(personDokument.getKjønn().getKode()));
+        person.setStatsborgerskap(mapStatsborgerskap(personDokument.getStatsborgerskap()));
 
         person.setPersonnavn(lagPersonnavn(personDokument));
 
         try {
-            person.setFoedselsdato(convertToXMLGregorianCalendarRemoveTimezone(personDokument.fødselsdato));
+            person.setFoedselsdato(convertToXMLGregorianCalendarRemoveTimezone(personDokument.getFødselsdato()));
         } catch (DatatypeConfigurationException e) {
             throw new TekniskException("Konverteringsfeil ved konvertering av fødselsdato", e);
         }

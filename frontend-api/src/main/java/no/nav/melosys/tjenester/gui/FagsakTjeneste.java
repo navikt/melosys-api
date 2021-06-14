@@ -265,7 +265,7 @@ public class FagsakTjeneste {
 
         Optional<PersonDokument> saksopplysningPerson = saksopplysningerService.finnPersonOpplysninger(behandlinger.get(0).getId());
         if (saksopplysningPerson.isPresent()) {
-            return saksopplysningPerson.get().sammensattNavn;
+            return saksopplysningPerson.get().getSammensattNavn();
         } else {
             return UKJENT_SAMMENSATT_NAVN;
         }

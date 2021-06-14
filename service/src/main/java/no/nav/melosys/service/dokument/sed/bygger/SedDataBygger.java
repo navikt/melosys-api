@@ -1,6 +1,5 @@
 package no.nav.melosys.service.dokument.sed.bygger;
 
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -16,7 +15,6 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LandvelgerService;
@@ -108,7 +106,7 @@ public class SedDataBygger {
 
         sedDataDto.setBruker(hentBrukerFraPersonDokument(dataGrunnlag.getPerson()));
 
-        sedDataDto.setFamilieMedlem(dataGrunnlag.getPerson().familiemedlemmer.stream()
+        sedDataDto.setFamilieMedlem(dataGrunnlag.getPerson().getFamiliemedlemmer().stream()
             .filter(f -> f.familierelasjon == Familierelasjon.FARA || f.familierelasjon == Familierelasjon.MORA)
             .map(SedDataBygger::hentFamilieMedlem).collect(Collectors.toList()));
 
@@ -129,7 +127,7 @@ public class SedDataBygger {
 
         sedDataDto.setBruker(hentBrukerFraPersonDokument(dataGrunnlag.getPerson()));
 
-        sedDataDto.setFamilieMedlem(dataGrunnlag.getPerson().familiemedlemmer.stream()
+        sedDataDto.setFamilieMedlem(dataGrunnlag.getPerson().getFamiliemedlemmer().stream()
             .filter(f -> f.familierelasjon == Familierelasjon.FARA || f.familierelasjon == Familierelasjon.MORA)
             .map(SedDataBygger::hentFamilieMedlem).collect(Collectors.toList()));
 
@@ -214,13 +212,13 @@ public class SedDataBygger {
 
     private static Bruker hentBrukerFraPersonDokument(PersonDokument personDokument) {
         Bruker bruker = new Bruker();
-        bruker.setEtternavn(personDokument.etternavn);
-        bruker.setFornavn(personDokument.fornavn);
-        bruker.setFnr(personDokument.fnr);
-        bruker.setFoedseldato(personDokument.fødselsdato);
-        bruker.setKjoenn(personDokument.kjønn.getKode());
-        bruker.setStatsborgerskap(personDokument.statsborgerskap.getKode());
-        bruker.setHarSensitiveOpplysninger(hentHarSensitiveOpplysninger(personDokument.diskresjonskode));
+        bruker.setEtternavn(personDokument.getEtternavn());
+        bruker.setFornavn(personDokument.getFornavn());
+        bruker.setFnr(personDokument.getFnr());
+        bruker.setFoedseldato(personDokument.getFødselsdato());
+        bruker.setKjoenn(personDokument.getKjønn().getKode());
+        bruker.setStatsborgerskap(personDokument.getStatsborgerskap().getKode());
+        bruker.setHarSensitiveOpplysninger(hentHarSensitiveOpplysninger(personDokument.getDiskresjonskode()));
 
         return bruker;
 

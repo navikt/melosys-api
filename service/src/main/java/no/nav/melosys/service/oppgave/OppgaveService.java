@@ -243,8 +243,8 @@ public class OppgaveService {
             }
             saksopplysningerService.finnPersonOpplysninger(behandling.getId()).ifPresent(
                 personDokument -> {
-                    behOppgaveDto.setSammensattNavn(personDokument.sammensattNavn);
-                    behOppgaveDto.setFnr(personDokument.fnr);
+                    behOppgaveDto.setSammensattNavn(personDokument.getSammensattNavn());
+                    behOppgaveDto.setFnr(personDokument.getFnr());
                 }
             );
 

@@ -1,9 +1,13 @@
 package no.nav.melosys.tjenester.gui.dto.tildto;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -19,6 +23,7 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
+import no.nav.melosys.domain.jpa.SaksopplysningDokumentConverter;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.PersonUtenAdresseDto;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
@@ -115,8 +120,8 @@ class SaksopplysningerTilDtoTest {
 
     @Test
     void testKonverteringPersonMedStatsborgerskap() {
-        Saksopplysning personDokument = lagDokument("88888888882.xml", PERSOPL, "3.0");
-        Saksopplysning personhistorikkDokument = lagDokument("88888888882_historikk.xml", PERSHIST, "3.4");
+        Saksopplysning personDokument = lagTpsDokumentFraJson("tps_person.json");
+        Saksopplysning personhistorikkDokument = lagDokumentFraXml("88888888882_historikk.xml", PERSHIST, "3.4");
 
         assertThat(personDokument).isNotNull();
         assertThat(personhistorikkDokument).isNotNull();
@@ -142,7 +147,22 @@ class SaksopplysningerTilDtoTest {
             .contains("sted");
     }
 
-    private Saksopplysning lagDokument(String ressurs, SaksopplysningType type, String versjon) {
+    private Saksopplysning lagTpsDokumentFraJson(String jsonRessurs) {
+        final String jsonString;
+        try {
+            jsonString = Files.readString(Path.of(getClass().getClassLoader().getResource(jsonRessurs).toURI()));
+        } catch (IOException | URISyntaxException e) {
+            throw new IllegalStateException(e);
+        }
+
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(PERSOPL);
+        saksopplysning.setVersjon("3.0");
+        saksopplysning.setDokument(new SaksopplysningDokumentConverter().convertToEntityAttribute(jsonString));
+        return saksopplysning;
+    }
+
+    private Saksopplysning lagDokumentFraXml(String ressurs, SaksopplysningType type, String versjon) {
         final InputStream kilde = getClass().getClassLoader().getResourceAsStream(ressurs);
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(kilde, StandardCharsets.UTF_8))) {

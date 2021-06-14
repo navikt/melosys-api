@@ -356,7 +356,7 @@ class DokgenServiceTest {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.PERSOPL);
         PersonDokument personDokument = new PersonDokument();
-        personDokument.fnr = "99887766554";
+        personDokument.setFnr("99887766554");
         saksopplysning.setDokument(personDokument);
         return saksopplysning;
     }

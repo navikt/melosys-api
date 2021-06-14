@@ -285,13 +285,13 @@ public final class DokumentServiceTest {
 
     private static PersonDokument lagPersonDokument() {
         PersonDokument resultat = new PersonDokument();
-        resultat.kjønn = lagKjoennsType();
-        resultat.statsborgerskap = new Land(Land.BELGIA);
-        resultat.fornavn = "For";
-        resultat.etternavn = "Etter";
-        resultat.sammensattNavn = "For Etter";
-        resultat.fødselsdato = LocalDate.ofYearDay(1900, 1);
-        resultat.bostedsadresse = lagBostedsadresse();
+        resultat.setKjønn(lagKjoennsType());
+        resultat.setStatsborgerskap(new Land(Land.BELGIA));
+        resultat.setFornavn("For");
+        resultat.setEtternavn("Etter");
+        resultat.setSammensattNavn("For Etter");
+        resultat.setFødselsdato(LocalDate.ofYearDay(1900, 1));
+        resultat.setBostedsadresse(lagBostedsadresse());
         return resultat;
     }
 
