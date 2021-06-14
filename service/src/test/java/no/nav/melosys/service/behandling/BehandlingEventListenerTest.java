@@ -73,7 +73,23 @@ class BehandlingEventListenerTest {
     }
 
     @Test
-    void behandlingsfristEndret_enUkeFrem_oppdatererFrist() throws Exception {
+    void dokumentBestilt_dokumentErNyttMangelbrevTilBrukerBehandlingErAktiv_oppdatererStatusOgFrist() {
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
+        behandlingEventListener.dokumentBestilt(new DokumentBestiltEvent(BEHANDLING_ID, Produserbaredokumenter.MANGELBREV_BRUKER));
+        verify(behandlingService).oppdaterStatusOgSvarfrist(eq(behandling), eq(Behandlingsstatus.AVVENT_DOK_PART), any(Instant.class));
+    }
+
+    @Test
+    void dokumentBestilt_dokumentErNyttMangelbrevTilArbeidsgiverBehandlingErAktiv_oppdatererStatusOgFrist() {
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
+        behandlingEventListener.dokumentBestilt(new DokumentBestiltEvent(BEHANDLING_ID, Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER));
+        verify(behandlingService).oppdaterStatusOgSvarfrist(eq(behandling), eq(Behandlingsstatus.AVVENT_DOK_PART), any(Instant.class));
+    }
+
+    @Test
+    void behandlingsfristEndret_enUkeFrem_oppdatererFrist() {
         LocalDate nå = LocalDate.now();
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer(FAGSAKSNUMMER);

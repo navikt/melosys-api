@@ -44,7 +44,7 @@ public class DokumentServiceFasade {
     @Transactional
     public void produserDokument(long behandlingId, BrevbestillingDto brevbestillingDto) {
         String saksbehandler = SubjectHandler.getInstance().getUserID();
-        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        var behandling = behandlingService.hentBehandling(behandlingId);
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(brevbestillingDto.getProduserbardokument())
             .medAvsenderNavn(saksbehandler)
             .medMottakere(Mottaker.av(brevbestillingDto.getMottaker()))
@@ -57,7 +57,7 @@ public class DokumentServiceFasade {
 
     @Transactional
     public void produserDokument(Produserbaredokumenter dokumentType, Mottaker mottaker, long behandlingId, DoksysBrevbestilling brevbestilling) {
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+        var brevbestillingDto = new BrevbestillingDto.Builder()
             .medProduserbardokument(dokumentType)
             .medMottaker(mottaker.getRolle())
             .build();
