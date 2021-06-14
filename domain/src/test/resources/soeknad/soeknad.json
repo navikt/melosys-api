@@ -18,7 +18,7 @@
     "fysiskeArbeidssteder": [
       {
         "adresse": {
-          "tillegsnavn": null,
+          "tilleggsnavn": null,
           "gatenavn": "Adresseveien 123",
           "husnummerEtasjeLeilighet": "123",
           "postboks": null,
@@ -40,7 +40,7 @@
       "orgnr": "372384726",
       "selvstendigNaeringsvirksomhet": true,
       "adresse": {
-        "tillegsnavn": null,
+        "tilleggsnavn": null,
         "gatenavn": "Deutschlandstrasse",
         "husnummerEtasjeLeilighet": "123",
         "postboks": null,
@@ -67,7 +67,7 @@
     "intensjonOmRetur": true,
     "antallMaanederINorge": 8,
     "oppgittAdresse": {
-      "tillegsnavn": null,
+      "tilleggsnavn": null,
       "gatenavn": "Gateadressen",
       "husnummerEtasjeLeilighet": "14B",
       "postboks": null,
