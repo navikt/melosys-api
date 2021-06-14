@@ -151,7 +151,7 @@ public class DoksysService implements DoksysFasade {
             .journalpostId(journalpostId)
             .bestillendeFagsystem(MELOSYS.getKode())
             .dokumentProdApp(MELOSYS.getKode())
-            .adresse("NO".equalsIgnoreCase(mottakeradresse.landkode)
+            .adresse("NO".equalsIgnoreCase(mottakeradresse.getLandkode())
                 ? norskAdresse(mottakeradresse)
                 : utenlandskAdresse(mottakeradresse))
             .build();
@@ -185,45 +185,48 @@ public class DoksysService implements DoksysFasade {
     private static Adresse norskAdresse(StrukturertAdresse strukturertAdresse) {
         return Adresse.builder()
             .adressetype("norskPostadresse")
-            .adresselinje1(sammenslå(strukturertAdresse.gatenavn, strukturertAdresse.husnummer))
-            .adresselinje2(strukturertAdresse.region)
-            .postnummer(strukturertAdresse.postnummer)
-            .poststed(strukturertAdresse.poststed)
-            .land(strukturertAdresse.landkode)
+            .adresselinje1(sammenslå(strukturertAdresse.getGatenavn(), strukturertAdresse.getHusnummerEtasjeLeilighet()))
+            .adresselinje2(strukturertAdresse.getRegion())
+            .postnummer(strukturertAdresse.getPostnummer())
+            .poststed(strukturertAdresse.getPoststed())
+            .land(strukturertAdresse.getLandkode())
             .build();
     }
 
     private static Adresse utenlandskAdresse(StrukturertAdresse strukturertAdresse) {
         return Adresse.builder()
             .adressetype("utenlandskPostadresse")
-            .adresselinje1(sammenslå(strukturertAdresse.gatenavn, strukturertAdresse.husnummer))
-            .adresselinje2(sammenslå(strukturertAdresse.postnummer, strukturertAdresse.poststed))
-            .adresselinje3(strukturertAdresse.region)
-            .land(strukturertAdresse.landkode)
+            .adresselinje1(sammenslå(strukturertAdresse.getGatenavn(), strukturertAdresse.getHusnummerEtasjeLeilighet()))
+            .adresselinje2(sammenslå(strukturertAdresse.getPostnummer(), strukturertAdresse.getPoststed()))
+            .adresselinje3(strukturertAdresse.getRegion())
+            .land(strukturertAdresse.getLandkode())
             .build();
     }
 
     private Adresse mapAdresse(StrukturertAdresse strukturertAdresse, Kontaktopplysning kontaktopplysning, String kontaktpersonNavn) {
         Adresse.AdresseBuilder adresseBuilder = Adresse.builder()
-            .land(strukturertAdresse.landkode);
+            .land(strukturertAdresse.getLandkode());
 
         if(hasText(kontaktpersonNavn)) {
             adresseBuilder
                 .adresselinje1("Att: " + kontaktpersonNavn)
-                .adresselinje2(strukturertAdresse.gatenavn + ((strukturertAdresse.husnummer == null) ? "" : " " + strukturertAdresse.husnummer));
+                .adresselinje2(
+                    strukturertAdresse.getGatenavn() + ((strukturertAdresse.getHusnummerEtasjeLeilighet() == null) ? "" : " " + strukturertAdresse.getHusnummerEtasjeLeilighet()));
         } else if (kontaktopplysning != null) {
             adresseBuilder
                 .adresselinje1("Att: " + kontaktopplysning.getKontaktNavn())
-                .adresselinje2(strukturertAdresse.gatenavn + ((strukturertAdresse.husnummer == null) ? "" : " " + strukturertAdresse.husnummer));
+                .adresselinje2(
+                    strukturertAdresse.getGatenavn() + ((strukturertAdresse.getHusnummerEtasjeLeilighet() == null) ? "" : " " + strukturertAdresse.getHusnummerEtasjeLeilighet()));
         } else {
             adresseBuilder
-                .adresselinje1(strukturertAdresse.gatenavn + ((strukturertAdresse.husnummer == null) ? "" : " " + strukturertAdresse.husnummer));
+                .adresselinje1(
+                    strukturertAdresse.getGatenavn() + ((strukturertAdresse.getHusnummerEtasjeLeilighet() == null) ? "" : " " + strukturertAdresse.getHusnummerEtasjeLeilighet()));
         }
 
         if (strukturertAdresse.erNorsk()) {
             adresseBuilder.adressetype("norskPostadresse")
-            .postnummer(strukturertAdresse.postnummer)
-            .poststed(strukturertAdresse.poststed);
+            .postnummer(strukturertAdresse.getPostnummer())
+            .poststed(strukturertAdresse.getPoststed());
         } else {
             adresseBuilder.adressetype("utenlandskPostadresse");
         }
@@ -233,10 +236,11 @@ public class DoksysService implements DoksysFasade {
 
     private UtenlandskPostadresse lagUtenlandskAdresse(StrukturertAdresse postadresse) {
         UtenlandskPostadresse utenlandskPostadresse = new UtenlandskPostadresse();
-        utenlandskPostadresse.setAdresselinje1(sammenslå(postadresse.gatenavn, postadresse.husnummer));
-        utenlandskPostadresse.setAdresselinje3(postadresse.region);
-        utenlandskPostadresse.setAdresselinje2(sammenslå(postadresse.postnummer, postadresse.poststed));
-        utenlandskPostadresse.setLand(new Landkoder().withValue(postadresse.landkode));
+        utenlandskPostadresse.setAdresselinje1(sammenslå(postadresse.getGatenavn(),
+            postadresse.getHusnummerEtasjeLeilighet()));
+        utenlandskPostadresse.setAdresselinje3(postadresse.getRegion());
+        utenlandskPostadresse.setAdresselinje2(sammenslå(postadresse.getPostnummer(), postadresse.getPoststed()));
+        utenlandskPostadresse.setLand(new Landkoder().withValue(postadresse.getLandkode()));
         return utenlandskPostadresse;
     }
 

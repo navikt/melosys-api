@@ -278,7 +278,7 @@ class OppgaveServiceTest {
     private static Soeknad lagSoeknadDokument() {
         Soeknad soeknad = new Soeknad();
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        fysiskArbeidssted.adresse.landkode = new Land(Land.NORGE).getKode();
+        fysiskArbeidssted.adresse.setLandkode(new Land(Land.NORGE).getKode());
         soeknad.arbeidPaaLand.fysiskeArbeidssteder = Collections.singletonList(fysiskArbeidssted);
 
         soeknad.oppholdUtland.oppholdslandkoder = Collections.singletonList(Landkoder.NO.getKode());

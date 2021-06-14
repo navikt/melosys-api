@@ -409,7 +409,7 @@ class SedDataByggerTest {
     public void lagUtkast_medUtenlandskSelvstendigForetak_forventAtUtenlandskSelvstendigForetakIkkeSendesSomArbeidsgivendeVirksomhet() {
         ForetakUtland utenlandskSelvstendigForetak = new ForetakUtland();
         utenlandskSelvstendigForetak.adresse = new StrukturertAdresse();
-        utenlandskSelvstendigForetak.adresse.landkode = Landkoder.DE.getKode();
+        utenlandskSelvstendigForetak.adresse.setLandkode(Landkoder.DE.getKode());
         utenlandskSelvstendigForetak.selvstendigNæringsvirksomhet = true;
         utenlandskSelvstendigForetak.navn = "selvstendig";
         utenlandskSelvstendigForetak.uuid = "123";

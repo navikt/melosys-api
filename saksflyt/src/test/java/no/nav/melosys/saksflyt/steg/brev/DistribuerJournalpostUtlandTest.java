@@ -51,9 +51,9 @@ class DistribuerJournalpostUtlandTest {
 
         StrukturertAdresse strukturertAdresse = captor.getValue();
         assertThat(strukturertAdresse).isNotNull();
-        assertThat(strukturertAdresse.gatenavn).isEqualTo("Svenskegatan 38");
-        assertThat(strukturertAdresse.postnummer).isEqualTo("8080");
-        assertThat(strukturertAdresse.landkode).isEqualTo(Landkoder.SE.getKode());
+        assertThat(strukturertAdresse.getGatenavn()).isEqualTo("Svenskegatan 38");
+        assertThat(strukturertAdresse.getPostnummer()).isEqualTo("8080");
+        assertThat(strukturertAdresse.getLandkode()).isEqualTo(Landkoder.SE.getKode());
     }
 
     @Test

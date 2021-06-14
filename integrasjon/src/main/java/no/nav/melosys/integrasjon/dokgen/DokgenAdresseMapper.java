@@ -32,8 +32,8 @@ public final class DokgenAdresseMapper {
                 adresselinjer.add("Att: " + kontaktopplysning.getKontaktNavn());
             }
 
-            adresselinjer.add(orgAdresse.gatenavn +
-                ((orgAdresse.husnummer == null) ? "" : " " + orgAdresse.husnummer));
+            adresselinjer.add(orgAdresse.getGatenavn() +
+                ((orgAdresse.getHusnummerEtasjeLeilighet() == null) ? "" : " " + orgAdresse.getHusnummerEtasjeLeilighet()));
         }
         return adresselinjer;
     }
@@ -44,7 +44,7 @@ public final class DokgenAdresseMapper {
             postNr = personDokument.gjeldendePostadresse.postnr;
         } else {
             StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
-            postNr = orgAdresse.postnummer;
+            postNr = orgAdresse.getPostnummer();
         }
         return postNr;
     }
@@ -59,7 +59,7 @@ public final class DokgenAdresseMapper {
             poststed = personDokument.gjeldendePostadresse.poststed;
         } else {
             StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
-            poststed = orgAdresse.poststed;
+            poststed = orgAdresse.getPoststed();
         }
         return poststed;
     }
@@ -70,7 +70,7 @@ public final class DokgenAdresseMapper {
             land = personDokument.gjeldendePostadresse.land != null ? personDokument.gjeldendePostadresse.land.toString() : null;
         } else {
             StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
-            land = orgAdresse.landkode != null ? orgAdresse.landkode : null;
+            land = orgAdresse.getLandkode() != null ? orgAdresse.getLandkode() : null;
         }
         return land;
     }

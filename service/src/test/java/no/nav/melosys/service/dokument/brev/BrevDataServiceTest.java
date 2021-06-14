@@ -308,7 +308,7 @@ class BrevDataServiceTest {
 
         Aktoer mottaker = lagAktør(Aktoersroller.BRUKER);
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, mottaker, null, behandling, brevData);
-        assertThat(metadata.postadresse.gatenavn).isEqualTo("Strukturert Gate");
+        assertThat(metadata.postadresse.getGatenavn()).isEqualTo("Strukturert Gate");
         assertThat(metadata.brukerNavn).isEqualTo(sammensattNavn);
         assertThat(metadata.berik).isFalse();
     }

@@ -66,12 +66,12 @@ public class AttestMapperTest {
         when(behandlingsresultat.hentValidertLovvalgsperiode()).thenReturn(lovvalgsperiode);
 
         StrukturertAdresse boAdresse = new StrukturertAdresse();
-        boAdresse.gatenavn = "HjemmeGata";
-        boAdresse.husnummer = "25";
-        boAdresse.postnummer = "0165";
-        boAdresse.poststed = "Poststed";
-        boAdresse.region = "Region";
-        boAdresse.landkode = Landkoder.NO.getKode();
+        boAdresse.setGatenavn("HjemmeGata");
+        boAdresse.setHusnummerEtasjeLeilighet("25");
+        boAdresse.setPostnummer("0165");
+        boAdresse.setPoststed("Poststed");
+        boAdresse.setRegion("Region");
+        boAdresse.setLandkode(Landkoder.NO.getKode());
 
         PersonDokument person = new PersonDokument();
         person.kjønn = new KjoennsType();
@@ -87,12 +87,12 @@ public class AttestMapperTest {
         when(behandling.getFagsak()).thenReturn(new Fagsak());
 
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.husnummer = "25";
-        strukturertAdresse.gatenavn = "Gatenavn";
-        strukturertAdresse.postnummer = "0165";
-        strukturertAdresse.poststed = "Poststed";
-        strukturertAdresse.region = "Region";
-        strukturertAdresse.landkode = Landkoder.NO.getKode();
+        strukturertAdresse.setHusnummerEtasjeLeilighet("25");
+        strukturertAdresse.setGatenavn("Gatenavn");
+        strukturertAdresse.setPostnummer("0165");
+        strukturertAdresse.setPoststed("Poststed");
+        strukturertAdresse.setRegion("Region");
+        strukturertAdresse.setLandkode(Landkoder.NO.getKode());
 
         FysiskArbeidssted arbeidssted = new FysiskArbeidssted();
         arbeidssted.adresse = strukturertAdresse;

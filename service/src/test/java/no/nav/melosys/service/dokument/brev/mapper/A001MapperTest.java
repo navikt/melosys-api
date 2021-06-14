@@ -66,11 +66,11 @@ public class A001MapperTest {
         when(behandlingsresultat.getRegistrertDato()).thenReturn(Instant.now());
 
         StrukturertAdresse boAdresse = new StrukturertAdresse();
-        boAdresse.gatenavn = "Gatenavn";
-        boAdresse.husnummer = "23A";
-        boAdresse.postnummer = "0165";
-        boAdresse.poststed = "Oslo";
-        boAdresse.landkode = Landkoder.NO.getKode();
+        boAdresse.setGatenavn("Gatenavn");
+        boAdresse.setHusnummerEtasjeLeilighet("23A");
+        boAdresse.setPostnummer("0165");
+        boAdresse.setPoststed("Oslo");
+        boAdresse.setLandkode(Landkoder.NO.getKode());
 
         PersonDokument person = new PersonDokument();
         person.kjønn = new KjoennsType();

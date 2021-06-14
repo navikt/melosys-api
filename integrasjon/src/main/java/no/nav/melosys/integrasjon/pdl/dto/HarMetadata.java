@@ -9,4 +9,9 @@ public interface HarMetadata {
         return metadata().endringer().stream().max(Comparator.comparing(Endring::registrert))
             .filter(Endring::erOpphør).isPresent();
     }
+
+    default String hentKilde() {
+        return metadata().endringer().stream().max(Comparator.comparing(Endring::registrert)).map(Endring::kilde)
+            .orElseThrow(() -> new IllegalArgumentException("Kilde er obligatorisk i PDL-endringer."));
+    }
 }

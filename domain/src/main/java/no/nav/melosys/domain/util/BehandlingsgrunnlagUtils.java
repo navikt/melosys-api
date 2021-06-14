@@ -43,12 +43,12 @@ public final class BehandlingsgrunnlagUtils {
 
     public static StrukturertAdresse hentBostedsadresse(BehandlingsgrunnlagData grunnlagdata) {
         StrukturertAdresse oppgittAdresse = grunnlagdata.bosted.oppgittAdresse;
-        if ((StringUtils.isNotEmpty(oppgittAdresse.gatenavn) ||
-            StringUtils.isNotEmpty(oppgittAdresse.husnummer) ||
-            StringUtils.isNotEmpty(oppgittAdresse.region) ||
-            StringUtils.isNotEmpty(oppgittAdresse.postnummer) ||
-            StringUtils.isNotEmpty(oppgittAdresse.poststed)) &&
-            StringUtils.isNotEmpty(oppgittAdresse.landkode)) {
+        if ((StringUtils.isNotEmpty(oppgittAdresse.getGatenavn()) ||
+            StringUtils.isNotEmpty(oppgittAdresse.getHusnummerEtasjeLeilighet()) ||
+            StringUtils.isNotEmpty(oppgittAdresse.getRegion()) ||
+            StringUtils.isNotEmpty(oppgittAdresse.getPostnummer()) ||
+            StringUtils.isNotEmpty(oppgittAdresse.getPoststed())) &&
+            StringUtils.isNotEmpty(oppgittAdresse.getLandkode())) {
             return oppgittAdresse;
         } else {
             return null;
@@ -56,6 +56,6 @@ public final class BehandlingsgrunnlagUtils {
     }
 
     public static Optional<Landkoder> hentOppgittBostedsland(BehandlingsgrunnlagData grunnlagdata) {
-        return Optional.ofNullable(grunnlagdata.bosted.oppgittAdresse.landkode).map(Landkoder::valueOf);
+        return Optional.ofNullable(grunnlagdata.bosted.oppgittAdresse.getLandkode()).map(Landkoder::valueOf);
     }
 }

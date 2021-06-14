@@ -85,8 +85,9 @@ public class DistribuerJournalpost implements StegBehandler {
         String bestillingsId;
         if (org != null) {
             StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
-            if (orgAdresse.erNorsk() && isEmpty(orgAdresse.poststed)) {
-                orgAdresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, orgAdresse.postnummer, LocalDate.now());
+            if (orgAdresse.erNorsk() && isEmpty(orgAdresse.getPoststed())) {
+                orgAdresse.setPoststed(
+                    kodeverkService.dekod(FellesKodeverk.POSTNUMMER, orgAdresse.getPostnummer(), LocalDate.now()));
             }
             bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, orgAdresse, kontaktopplysning, brevbestilling.getKontaktpersonNavn());
         } else {
