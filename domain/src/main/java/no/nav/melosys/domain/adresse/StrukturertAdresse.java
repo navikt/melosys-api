@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import static no.nav.melosys.domain.adresse.Adresse.sammenslå;
 
 public class StrukturertAdresse implements Adresse {
-    private String tillegsnavn;
+    private String tilleggsnavn;
     private String gatenavn;
     private String husnummerEtasjeLeilighet;
     private String postboks;
@@ -35,11 +35,11 @@ public class StrukturertAdresse implements Adresse {
         this.landkode = landkode;
     }
 
-    public StrukturertAdresse(String tillegsnavn, String gatenavn, String husnummerEtasjeLeilighet, String postboks,
+    public StrukturertAdresse(String tilleggsnavn, String gatenavn, String husnummerEtasjeLeilighet, String postboks,
                               String postnummer, String poststed, String region, String landkode) {
         this.gatenavn = gatenavn;
         this.husnummerEtasjeLeilighet = husnummerEtasjeLeilighet;
-        this.tillegsnavn = tillegsnavn;
+        this.tilleggsnavn = tilleggsnavn;
         this.postboks = postboks;
         this.region = region;
         this.postnummer = postnummer;
@@ -49,7 +49,7 @@ public class StrukturertAdresse implements Adresse {
 
     @Override
     public boolean erTom() {
-        return StringUtils.isAllEmpty(tillegsnavn, gatenavn, husnummerEtasjeLeilighet, postboks, postnummer, poststed,
+        return StringUtils.isAllEmpty(tilleggsnavn, gatenavn, husnummerEtasjeLeilighet, postboks, postnummer, poststed,
             region, landkode);
     }
 
@@ -60,19 +60,19 @@ public class StrukturertAdresse implements Adresse {
 
     @Override
     public String toString() {
-        return Stream.of(tillegsnavn, sammenslå(gatenavn, husnummerEtasjeLeilighet),
+        return Stream.of(tilleggsnavn, sammenslå(gatenavn, husnummerEtasjeLeilighet),
                 postboks, postnummer, poststed, region,
                 Landkoder.valueOf(landkode).getBeskrivelse())
             .filter(StringUtils::isNotEmpty)
             .collect(Collectors.joining(", "));
     }
 
-    public String getTillegsnavn() {
-        return tillegsnavn;
+    public String getTilleggsnavn() {
+        return tilleggsnavn;
     }
 
-    public void setTillegsnavn(String tillegsnavn) {
-        this.tillegsnavn = tillegsnavn;
+    public void setTilleggsnavn(String tilleggsnavn) {
+        this.tilleggsnavn = tilleggsnavn;
     }
 
     public String getGatenavn() {

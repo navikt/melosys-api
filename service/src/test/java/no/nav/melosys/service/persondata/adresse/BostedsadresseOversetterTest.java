@@ -49,7 +49,7 @@ class BostedsadresseOversetterTest {
         assertThat(bostedsadresse.gyldigFraOgMed()).isEqualTo(LocalDateTime.parse("2020-01-01T00:00:00"));
         assertThat(bostedsadresse.strukturertAdresse().getGatenavn()).isEqualTo("Kirkegata");
         assertThat(bostedsadresse.strukturertAdresse().getHusnummerEtasjeLeilighet()).isEqualTo("12 B");
-        assertThat(bostedsadresse.strukturertAdresse().getTillegsnavn()).isEqualTo("Storgården");
+        assertThat(bostedsadresse.strukturertAdresse().getTilleggsnavn()).isEqualTo("Storgården");
         assertThat(bostedsadresse.strukturertAdresse().getPostnummer()).isEqualTo("1234");
         assertThat(bostedsadresse.strukturertAdresse().getPoststed()).isEqualTo("Bergen");
         assertThat(bostedsadresse.strukturertAdresse().getRegion()).isNull();

@@ -48,7 +48,7 @@ class OppholdsadresseOversetterTest {
         assertThat(Oppholdsadresse.gyldigFraOgMed()).isEqualTo(LocalDateTime.parse("2020-01-01T00:00:00"));
         assertThat(Oppholdsadresse.strukturertAdresse().getGatenavn()).isEqualTo("Kirkegata");
         assertThat(Oppholdsadresse.strukturertAdresse().getHusnummerEtasjeLeilighet()).isEqualTo("12 B");
-        assertThat(Oppholdsadresse.strukturertAdresse().getTillegsnavn()).isEqualTo("Storgården");
+        assertThat(Oppholdsadresse.strukturertAdresse().getTilleggsnavn()).isEqualTo("Storgården");
         assertThat(Oppholdsadresse.strukturertAdresse().getPostnummer()).isEqualTo("1234");
         assertThat(Oppholdsadresse.strukturertAdresse().getPoststed()).isEqualTo("Bergen");
         assertThat(Oppholdsadresse.strukturertAdresse().getRegion()).isNull();
