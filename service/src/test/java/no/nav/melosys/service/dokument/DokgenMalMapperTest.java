@@ -72,7 +72,7 @@ class DokgenMalMapperTest {
     }
 
     @Test
-    void feilerNårProduserbartDokumentIkkeErStøttet() throws Exception {
+    void feilerNårProduserbartDokumentIkkeErStøttet() {
         when(mockPersondataFasade.hentPerson(any(), any())).thenReturn(lagPersonopplysning());
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
@@ -86,7 +86,7 @@ class DokgenMalMapperTest {
     }
 
     @Test
-    void skalMappeMedBrukerAdresse() throws Exception {
+    void skalMappeMedBrukerAdresse() {
         when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
         when(mockPersondataFasade.hentPerson(any(), any())).thenReturn(lagPersonopplysning());
 

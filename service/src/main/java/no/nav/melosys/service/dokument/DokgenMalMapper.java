@@ -5,10 +5,10 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
+import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Representerer;
@@ -50,32 +50,23 @@ public class DokgenMalMapper {
         if (brevbestilling.getOrg() == null) {
             String fnr = brevbestilling.getBehandling().hentPersonDokument().fnr;
             //NOTE Henter opplysninger på nytt for å sikre at korrekt adresse benyttes
-            PersonDokument personDokument = (PersonDokument) persondataFasade.hentPerson(fnr, Informasjonsbehov.STANDARD).getDokument();
+            var personDokument = (PersonDokument) persondataFasade.hentPerson(fnr, Informasjonsbehov.STANDARD).getDokument();
             brevbestilling.toBuilder().medPersonDokument(personDokument).build();
         }
-        switch (brevbestilling.getProduserbartdokument()) {
-            case MELDING_FORVENTET_SAKSBEHANDLINGSTID:
-            case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD:
-                dto = SaksbehandlingstidSoknad.av(brevbestilling);
-                break;
-            case MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE:
-                dto = SaksbehandlingstidKlage.av(brevbestilling);
-                break;
-            case MANGELBREV_BRUKER:
-                dto = MangelbrevBruker.av(((MangelbrevBrevbestilling) brevbestilling).toBuilder()
-                    .medVedtaksdato(hentVedtaksdato(brevbestilling.getBehandling().getId()))
-                    .build());
-                break;
-            case MANGELBREV_ARBEIDSGIVER:
-                MangelbrevBrevbestilling bestilling = (MangelbrevBrevbestilling) brevbestilling;
-                dto = MangelbrevArbeidsgiver.av(bestilling.toBuilder()
-                    .medVedtaksdato(hentVedtaksdato(brevbestilling.getBehandling().getId()))
-                    .medFullmektigNavn(hentFullmektigNavn(brevbestilling.getBehandling().getFagsak()))
-                    .build());
-                break;
-            default:
-                throw new FunksjonellException(format("ProduserbartDokument %s er ikke støttet av melosys-dokgen", brevbestilling.getProduserbartdokument()));
-        }
+        dto = switch (brevbestilling.getProduserbartdokument()) {
+            case MELDING_FORVENTET_SAKSBEHANDLINGSTID, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD -> SaksbehandlingstidSoknad.av(brevbestilling);
+            case MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> SaksbehandlingstidKlage.av(brevbestilling);
+            case MANGELBREV_BRUKER -> MangelbrevBruker.av(((MangelbrevBrevbestilling) brevbestilling).toBuilder()
+                .medVedtaksdato(hentVedtaksdato(brevbestilling.getBehandling().getId()))
+                .build());
+            case MANGELBREV_ARBEIDSGIVER -> MangelbrevArbeidsgiver.av(((MangelbrevBrevbestilling) brevbestilling).toBuilder()
+                .medVedtaksdato(hentVedtaksdato(brevbestilling.getBehandling().getId()))
+                .medFullmektigNavn(hentFullmektigNavn(brevbestilling.getBehandling().getFagsak()))
+                .build());
+            case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> InnvilgelseFtrl.av((InnvilgelseBrevbestilling) brevbestilling);
+
+            default -> throw new FunksjonellException(format("ProduserbartDokument %s er ikke støttet av melosys-dokgen", brevbestilling.getProduserbartdokument()));
+        };
 
         if (hasText(dto.getPostnr())) {
             dto.setPoststed(hentPoststed(dto.getPostnr()));
@@ -89,21 +80,18 @@ public class DokgenMalMapper {
     }
 
     private Instant hentVedtaksdato(Long behandlingId) {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
+        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
         return (behandlingsresultat != null && behandlingsresultat.harVedtak()) ?
             behandlingsresultat.getVedtakMetadata().getVedtaksdato() : null;
     }
 
     private String hentFullmektigNavn(Fagsak fagsak) {
         Optional<Aktoer> representant = fagsak.hentRepresentant(Representerer.BRUKER);
-        if (representant.isPresent()) {
-            return eregFasade.hentOrganisasjonNavn(representant.get().getOrgnr());
-        }
-        return null;
+        return representant.map(r -> eregFasade.hentOrganisasjonNavn(r.getOrgnr())).orElse(null);
     }
 
     private String hentLandnavn(String landkode) {
-        String landnavn = "";
+        var landnavn = "";
         if (hasText(landkode)) {
             landnavn = kodeverkService.dekod(FellesKodeverk.LANDKODER, landkode, LocalDate.now());
             if (landnavn.equals("UKJENT")) {

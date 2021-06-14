@@ -15,6 +15,8 @@ public class BrevbestillingDto {
     private String innledningFritekst;
     private String manglerFritekst;
     private String begrunnelseFritekst;
+    private String ektefelleFritekst;
+    private String barnFritekst;
     private String kontaktpersonNavn;
     private List<KopiMottaker> kopiMottakere;
 
@@ -50,6 +52,9 @@ public class BrevbestillingDto {
         this.orgNr = builder.orgNr;
         this.innledningFritekst = builder.innledningFritekst;
         this.manglerFritekst = builder.manglerFritekst;
+        this.begrunnelseFritekst = builder.begrunnelseFritekst;
+        this.ektefelleFritekst = builder.ektefelleFritekst;
+        this.barnFritekst = builder.barnFritekst;
         this.kontaktpersonNavn = builder.kontaktpersonNavn;
         this.kopiMottakere = builder.kopiMottakere;
         this.fritekst = builder.fritekst;
@@ -79,6 +84,14 @@ public class BrevbestillingDto {
 
     public String getBegrunnelseFritekst() {
         return begrunnelseFritekst;
+    }
+
+    public String getEktefelleFritekst() {
+        return ektefelleFritekst;
+    }
+
+    public String getBarnFritekst() {
+        return barnFritekst;
     }
 
     public String getKontaktpersonNavn() {
@@ -111,6 +124,8 @@ public class BrevbestillingDto {
         private String innledningFritekst;
         private String manglerFritekst;
         private String begrunnelseFritekst;
+        private String ektefelleFritekst;
+        private String barnFritekst;
         private String kontaktpersonNavn;
         private List<KopiMottaker> kopiMottakere;
         private String fritekst;
@@ -144,6 +159,16 @@ public class BrevbestillingDto {
 
         public Builder medBegrunnelseFritekst(String begrunnelseFritekst) {
             this.begrunnelseFritekst = begrunnelseFritekst;
+            return this;
+        }
+
+        public Builder medEktefelleFritekst(String ektefelleFritekst) {
+            this.ektefelleFritekst = ektefelleFritekst;
+            return this;
+        }
+
+        public Builder medBarnFritekst(String barnFritekst) {
+            this.barnFritekst = barnFritekst;
             return this;
         }
 
@@ -182,25 +207,27 @@ public class BrevbestillingDto {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BrevbestillingDto that = (BrevbestillingDto) o;
-        return mottaker == that.mottaker && Objects.equals(orgNr, that.orgNr) &&
-            Objects.equals(innledningFritekst, that.innledningFritekst) && Objects.equals(manglerFritekst, that.manglerFritekst) &&
-            Objects.equals(kontaktpersonNavn, that.kontaktpersonNavn) && Objects.equals(fritekst, that.fritekst) &&
-            Objects.equals(begrunnelseKode, that.begrunnelseKode) && Objects.equals(ytterligereInformasjon, that.ytterligereInformasjon);
+        return produserbardokument == that.produserbardokument && mottaker == that.mottaker && Objects.equals(orgNr, that.orgNr) && Objects.equals(innledningFritekst, that.innledningFritekst) && Objects.equals(manglerFritekst, that.manglerFritekst) && Objects.equals(begrunnelseFritekst, that.begrunnelseFritekst) && Objects.equals(ektefelleFritekst, that.ektefelleFritekst) && Objects.equals(barnFritekst, that.barnFritekst) && Objects.equals(kontaktpersonNavn, that.kontaktpersonNavn) && Objects.equals(kopiMottakere, that.kopiMottakere) && Objects.equals(fritekst, that.fritekst) && Objects.equals(begrunnelseKode, that.begrunnelseKode) && Objects.equals(ytterligereInformasjon, that.ytterligereInformasjon);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mottaker, orgNr, innledningFritekst, manglerFritekst, kontaktpersonNavn, fritekst, begrunnelseKode, ytterligereInformasjon);
+        return Objects.hash(produserbardokument, mottaker, orgNr, innledningFritekst, manglerFritekst, begrunnelseFritekst, ektefelleFritekst, barnFritekst, kontaktpersonNavn, kopiMottakere, fritekst, begrunnelseKode, ytterligereInformasjon);
     }
 
     @Override
     public String toString() {
         return "BrevbestillingDto{" +
-            "mottaker=" + mottaker +
+            "produserbardokument=" + produserbardokument +
+            ", mottaker=" + mottaker +
             ", orgNr='" + orgNr + '\'' +
             ", innledningFritekst='" + innledningFritekst + '\'' +
             ", manglerFritekst='" + manglerFritekst + '\'' +
+            ", begrunnelseFritekst='" + begrunnelseFritekst + '\'' +
+            ", ektefelleFritekst='" + ektefelleFritekst + '\'' +
+            ", barnFritekst='" + barnFritekst + '\'' +
             ", kontaktpersonNavn='" + kontaktpersonNavn + '\'' +
+            ", kopiMottakere=" + kopiMottakere +
             ", fritekst='" + fritekst + '\'' +
             ", begrunnelseKode='" + begrunnelseKode + '\'' +
             ", ytterligereInformasjon='" + ytterligereInformasjon + '\'' +

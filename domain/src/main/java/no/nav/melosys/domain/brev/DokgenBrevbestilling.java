@@ -10,10 +10,11 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
+@JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION, defaultImpl = DokgenBrevbestilling.class)
 @JsonSubTypes(
     {
-        @JsonSubTypes.Type(value = MangelbrevBrevbestilling.class, name = "MangelbrevBrevbestilling")
+        @JsonSubTypes.Type(value = MangelbrevBrevbestilling.class, name = "MangelbrevBrevbestilling"),
+        @JsonSubTypes.Type(value = InnvilgelseBrevbestilling.class, name = "InnvilgelseBrevbestilling")
     }
 )
 public class DokgenBrevbestilling extends Brevbestilling {

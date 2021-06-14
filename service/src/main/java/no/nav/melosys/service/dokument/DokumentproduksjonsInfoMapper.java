@@ -22,34 +22,36 @@ public class DokumentproduksjonsInfoMapper {
     private static final ImmutableMap<Produserbaredokumenter, DokumentproduksjonsInfo> DOKUMENTPRODUKSJONS_INFO_MAP;
 
     static {
-        String infobrevKode = DokumentKategoriKode.IB.getKode();
-
         DOKUMENTPRODUKSJONS_INFO_MAP = Maps.immutableEnumMap(ImmutableMap.<Produserbaredokumenter, DokumentproduksjonsInfo>builder()
             .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID,
                 new DokumentproduksjonsInfo("saksbehandlingstid_soknad",
-                    infobrevKode,
+                    DokumentKategoriKode.IB.getKode(),
                     "Melding om forventet saksbehandlingstid")
             )
             .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
                 new DokumentproduksjonsInfo("saksbehandlingstid_soknad",
-                    infobrevKode,
+                    DokumentKategoriKode.IB.getKode(),
                     "Melding om forventet saksbehandlingstid")
             )
             .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
                 new DokumentproduksjonsInfo("saksbehandlingstid_klage",
-                    infobrevKode,
+                    DokumentKategoriKode.IB.getKode(),
                     "Melding om forventet saksbehandlingstid")
             )
             .put(MANGELBREV_BRUKER,
                 new DokumentproduksjonsInfo("mangelbrev_bruker",
-                    infobrevKode,
+                    DokumentKategoriKode.IB.getKode(),
                     "Melding om manglende opplysninger")
             )
             .put(MANGELBREV_ARBEIDSGIVER,
                 new DokumentproduksjonsInfo("mangelbrev_arbeidsgiver",
-                    infobrevKode,
+                    DokumentKategoriKode.IB.getKode(),
                     "Melding om manglende opplysninger")
             )
+            .put(INNVILGELSE_FOLKETRYGDLOVEN_2_8,
+                new DokumentproduksjonsInfo("innvilgelse_ftrl_2_8",
+                    DokumentKategoriKode.VB.getKode(),
+                    "Vedtak om frivillig medlemskap"))
             .build());
     }
 
