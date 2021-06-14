@@ -1,6 +1,7 @@
 DECLARE
     CURSOR bgs IS SELECT * FROM BEHANDLINGSGRUNNLAG FOR UPDATE;
     jsonData JSON_OBJECT_T;
+    arbeidPaaLand JSON_OBJECT_T;
     fysiskeArbeidssteder JSON_ARRAY_T;
     fysiskArbeidssted JSON_OBJECT_T;
     fysiskArbeidsstedAdresse JSON_OBJECT_T;
@@ -14,33 +15,43 @@ BEGIN
         LOOP
             jsonData := TREAT(JSON_ELEMENT_T.parse(bg.data) AS JSON_OBJECT_T);
 
-            fysiskeArbeidssteder := jsonData.get_Object('arbeidPaaLand').get_Array('fysiskeArbeidssteder');
-            FOR i IN 0 .. fysiskeArbeidssteder.get_size - 1
-                LOOP
-                    fysiskArbeidssted := TREAT(fysiskeArbeidssteder.get(i) AS JSON_OBJECT_T);
-                    fysiskArbeidsstedAdresse := fysiskArbeidssted.get_Object('adresse');
-                    fysiskArbeidsstedAdresse.rename_key('husnummer', 'husnummerEtasjeLeilighet');
-                    fysiskArbeidsstedAdresse.put_Null('postboks');
-                    fysiskArbeidsstedAdresse.put_Null('tilleggsnavn');
-                END LOOP;
+            arbeidPaaLand := jsonData.get_Object('arbeidPaaLand');
+            IF arbeidPaaLand IS NOT NULL THEN
+                fysiskeArbeidssteder := arbeidPaaLand.get_Array('fysiskeArbeidssteder');
+                FOR i IN 0 .. fysiskeArbeidssteder.get_size - 1
+                    LOOP
+                        fysiskArbeidssted := TREAT(fysiskeArbeidssteder.get(i) AS JSON_OBJECT_T);
+                        fysiskArbeidsstedAdresse := fysiskArbeidssted.get_Object('adresse');
+                        IF fysiskArbeidsstedAdresse.get_Object('husnummer') IS NOT NULL THEN
+                            fysiskArbeidsstedAdresse.rename_key('husnummer', 'husnummerEtasjeLeilighet');
+                        END IF;
+                        fysiskArbeidsstedAdresse.put_Null('postboks');
+                        fysiskArbeidsstedAdresse.put_Null('tilleggsnavn');
+                    END LOOP;
+            END IF;
 
             foretakUtlandArray := jsonData.get_Array('foretakUtland');
             FOR i IN 0 .. foretakUtlandArray.get_size - 1
                 LOOP
                     foretakUtland := TREAT(foretakUtlandArray.get(i) AS JSON_OBJECT_T);
                     foretakUtlandAdresse := foretakUtland.get_Object('adresse');
-                    foretakUtlandAdresse.rename_key('husnummer', 'husnummerEtasjeLeilighet');
+                    IF foretakUtlandAdresse.get_Object('husnummer') IS NOT NULL THEN
+                        foretakUtlandAdresse.rename_key('husnummer', 'husnummerEtasjeLeilighet');
+                    END IF;
                     foretakUtlandAdresse.put_Null('postboks');
                     foretakUtlandAdresse.put_Null('tilleggsnavn');
                 END LOOP;
 
             oppgittAdresse := jsonData.get_Object('bosted').get_Object('oppgittAdresse');
-            oppgittAdresse.rename_key('husnummer', 'husnummerEtasjeLeilighet');
+            IF oppgittAdresse.get_Object('husnummer') IS NOT NULL THEN
+                oppgittAdresse.rename_key('husnummer', 'husnummerEtasjeLeilighet');
+            END IF;
             oppgittAdresse.put_Null('postboks');
             oppgittAdresse.put_Null('tilleggsnavn');
 
             oppdatertJsonData := jsonData.stringify;
             UPDATE BEHANDLINGSGRUNNLAG SET DATA = oppdatertJsonData WHERE CURRENT OF bgs;
+
         END LOOP;
 END;
 /
