@@ -10,7 +10,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 public class OppgaveOppdatering {
     private final Oppgavetyper oppgavetype;
     private final Tema tema;
-    private final Behandlingstema behandlingstema;
+    private final String behandlingstema;
     private final Fagsystem behandlesAvApplikasjon;
     private final String saksnummer;
     private final String beskrivelse;
@@ -44,7 +44,7 @@ public class OppgaveOppdatering {
         return tema;
     }
 
-    public Behandlingstema getBehandlingstema() {
+    public String getBehandlingstema() {
         return behandlingstema;
     }
 
@@ -79,7 +79,7 @@ public class OppgaveOppdatering {
     public static class OppgaveOppdateringBuilder {
         private Oppgavetyper oppgavetype;
         private Tema tema;
-        private Behandlingstema behandlingstema;
+        private String behandlingstema;
         private Fagsystem behandlesAvApplikasjon;
         private String saksnummer;
         private String beskrivelse;
@@ -101,7 +101,7 @@ public class OppgaveOppdatering {
             return this;
         }
 
-        public OppgaveOppdateringBuilder behandlingstema(Behandlingstema behandlingstema) {
+        public OppgaveOppdateringBuilder behandlingstema(String behandlingstema) {
             this.behandlingstema = behandlingstema;
             return this;
         }

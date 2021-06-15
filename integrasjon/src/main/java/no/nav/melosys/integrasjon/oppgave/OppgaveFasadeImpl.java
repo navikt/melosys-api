@@ -152,6 +152,10 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             }
         }
 
+        if (oppgaveOppdatering.getBehandlingstema() != null) {
+            oppgaveDto.setBehandlingstema(oppgaveOppdatering.getBehandlingstema());
+        }
+
         if (StringUtils.isNotEmpty(oppgaveOppdatering.getPrioritet())) {
             oppgaveDto.setPrioritet(oppgaveOppdatering.getPrioritet());
         }

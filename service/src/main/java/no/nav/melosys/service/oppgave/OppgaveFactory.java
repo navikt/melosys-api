@@ -14,7 +14,8 @@ public final class OppgaveFactory {
 
     private static final long FRIST_FERDIGSTILLELSE_JFR_OPPG = 7;
 
-    private OppgaveFactory() {}
+    private OppgaveFactory() {
+    }
 
     public static Oppgave.Builder lagJournalføringsoppgave(String journalpostID) {
         return new Oppgave.Builder()
@@ -43,7 +44,7 @@ public final class OppgaveFactory {
             .setBehandlesAvApplikasjon(Fagsystem.MELOSYS);
     }
 
-    static OppgaveParametere hentOppgaveParametere(Behandlingstema behandlingstema) {
+    public static OppgaveParametere hentOppgaveParametere(Behandlingstema behandlingstema) {
 
         OppgaveParametere oppgaveParametere;
 
@@ -77,10 +78,10 @@ public final class OppgaveFactory {
                 oppgaveParametere = new OppgaveParametere("ab0424", "ae0113", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(4));
                 break;
             case ANMODNING_OM_UNNTAK_HOVEDREGEL:
-                oppgaveParametere =  new OppgaveParametere("ab0424", "ae0110", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(8));
+                oppgaveParametere = new OppgaveParametere("ab0424", "ae0110", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(8));
                 break;
             case ØVRIGE_SED_UFM:
-                oppgaveParametere =  new OppgaveParametere("ab0424", "ae0254", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(8));
+                oppgaveParametere = new OppgaveParametere("ab0424", "ae0254", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(8));
                 break;
             case ØVRIGE_SED_MED:
                 oppgaveParametere = new OppgaveParametere("ab0424", "ae0254", Tema.MED, Oppgavetyper.BEH_SED, fristUker(8));
@@ -107,8 +108,8 @@ public final class OppgaveFactory {
         return LocalDate.now().plusDays(dager);
     }
 
-    static class OppgaveParametere {
-        final String behandlingstema;
+    public static class OppgaveParametere {
+        public final String behandlingstema;
         final String behandlingstype;
         final Tema tema;
         Oppgavetyper oppgavetype;
