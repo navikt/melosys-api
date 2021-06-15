@@ -58,9 +58,9 @@ class ArbeidsforholdRestConsumerTest {
             .regelverk(ArbeidsforholdQuery.Regelverk.ALLE)
             .arbeidsforholdType(ArbeidsforholdQuery.ArbeidsforholdType.ALLE)
             .build();
-        ArbeidsfoholdResponse arbeidsfoholdResponse = restConsumer.finnArbeidsforholdPrArbeidstaker(fnr, arbeidsforholdQuery);
+        ArbeidsforholdResponse arbeidsforholdResponse = restConsumer.finnArbeidsforholdPrArbeidstaker(fnr, arbeidsforholdQuery);
 
-        Arbeidsforhold[] arbeidsforholds = arbeidsfoholdResponse.getArbeidsforholdResponse();
+        Arbeidsforhold[] arbeidsforholds = arbeidsforholdResponse.getArbeidsforhold();
         assertThat(arbeidsforholds.length).isEqualTo(1);
         Arbeidsforhold arbeidsforhold = arbeidsforholds[0];
         assertThat(arbeidsforhold.getNavArbeidsforholdId()).isEqualTo(3065458);

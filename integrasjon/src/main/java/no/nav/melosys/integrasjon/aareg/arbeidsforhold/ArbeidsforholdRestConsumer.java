@@ -16,9 +16,9 @@ public class ArbeidsforholdRestConsumer implements RestConsumer {
         this.webClient = webClient;
     }
 
-    public ArbeidsfoholdResponse finnArbeidsforholdPrArbeidstaker(String fnr, ArbeidsforholdQuery arbeidsfoholdQuery) {
+    public ArbeidsforholdResponse finnArbeidsforholdPrArbeidstaker(String fnr, ArbeidsforholdQuery arbeidsfoholdQuery) {
         Arbeidsforhold[] arbeidsforholdResponse = hentArbeidsfohold(fnr, arbeidsfoholdQuery);
-        return new ArbeidsfoholdResponse(arbeidsforholdResponse);
+        return new ArbeidsforholdResponse(arbeidsforholdResponse);
     }
 
     private Arbeidsforhold[] hentArbeidsfohold(String fnr, ArbeidsforholdQuery arbeidsfoholdQuery) {

@@ -17,7 +17,7 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdQuery;
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsfoholdResponse;
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdResponse;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumer;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning;
@@ -69,11 +69,9 @@ public class AaregService implements AaregFasade {
             .arbeidsforholdType(ArbeidsforholdQuery.ArbeidsforholdType.ALLE)
             .regelverk(ArbeidsforholdQuery.Regelverk.A_ORDNINGEN)
             .build();
-        ArbeidsfoholdResponse result = arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker(ident, arbeidsfoholdQuery);
+        ArbeidsforholdResponse result = arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker(ident, arbeidsfoholdQuery);
 
-        Saksopplysning saksopplysning = new Saksopplysning();
-        ArbeidsforholdDokument arbeidsforholdDokument = new ArbeidsforholdDokument();
-        saksopplysning.setDokument(arbeidsforholdDokument);
+        Saksopplysning saksopplysning = result.createSaksopplysning();
 
         saksopplysning.leggTilKildesystemOgMottattDokument(
             SaksopplysningKildesystem.AAREG, result.getJsonDocument());

@@ -85,9 +85,8 @@ public class ArbeidsforholdQuery {
         private Boolean sporingsinformasjon;
 
         /**
-         * Filter for regelverk (default = ALLE)
-         * @param regelverk
-         * @return
+         * @param regelverk Filter for regelverk (default = ALLE)
+         * @return Builder
          */
         public Builder regelverk(Regelverk regelverk) {
             this.regelverk = regelverk;
@@ -95,9 +94,8 @@ public class ArbeidsforholdQuery {
         }
 
         /***
-         *  Filter for regelverk (default = ALLE)
-         * @param arbeidsforholdType
-         * @return
+         * @param arbeidsforholdType Filter for regelverk (default = ALLE)
+         * @return Builder
          */
         public Builder arbeidsforholdType(ArbeidsforholdType arbeidsforholdType) {
             this.arbeidsforholdType = arbeidsforholdType;
