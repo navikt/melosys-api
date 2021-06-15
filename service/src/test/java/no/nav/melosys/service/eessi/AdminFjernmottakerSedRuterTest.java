@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -42,6 +43,7 @@ class AdminFjernmottakerSedRuterTest {
     @Mock
     private MedlPeriodeService medlPeriodeService;
 
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
     private AdminFjernmottakerSedRuter adminFjernmottakerSedRuter;
 
     private final long behandlingID = 111;
@@ -54,7 +56,7 @@ class AdminFjernmottakerSedRuterTest {
     @BeforeEach
     void setup() {
         adminFjernmottakerSedRuter = new AdminFjernmottakerSedRuter(fagsakService, prosessinstansService, oppgaveService,
-            behandlingsresultatService, medlPeriodeService);
+            behandlingsresultatService, medlPeriodeService, fakeUnleash);
 
         melosysEessiMelding.setAktoerId("12312412");
         melosysEessiMelding.setRinaSaksnummer("143141");
@@ -126,7 +128,7 @@ class AdminFjernmottakerSedRuterTest {
     }
 
     @Test
-    void rutSedTilBehandling_erX006MottakerPåAvsluttetBehandling_oppdaterStatusPåFagsakTilAnnulert(){
+    void rutSedTilBehandling_erX006MottakerPåAvsluttetBehandling_oppdaterStatusPåFagsakTilAnnulert() {
         var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.AVSLUTTET);
         melosysEessiMelding.setX006NavErFjernet(true);
 

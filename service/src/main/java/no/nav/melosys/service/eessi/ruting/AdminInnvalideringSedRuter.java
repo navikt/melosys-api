@@ -18,6 +18,8 @@ import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -29,15 +31,17 @@ public class AdminInnvalideringSedRuter extends AdminSedRuter implements SedRute
     private final EessiService eessiService;
     private final Unleash unleash;
 
+    @Autowired
     public AdminInnvalideringSedRuter(FagsakService fagsakService,
                                       ProsessinstansService prosessinstansService,
-                                      OppgaveService oppgaveService,
+                                      @Qualifier("system") OppgaveService oppgaveService,
                                       BehandlingsresultatService behandlingsresultatService,
                                       MedlPeriodeService medlPeriodeService, EessiService eessiService, Unleash unleash) {
         super(fagsakService,
             behandlingsresultatService,
             medlPeriodeService,
-            prosessinstansService);
+            prosessinstansService,
+            log);
 
         this.oppgaveService = oppgaveService;
         this.eessiService = eessiService;
@@ -86,15 +90,4 @@ public class AdminInnvalideringSedRuter extends AdminSedRuter implements SedRute
             .filter(s -> s.getSedId().equals(dokument.getRinaDokumentID()))
             .anyMatch(SedInformasjon::erAvbrutt)).isPresent();
     }
-
-    private void annullerSakOgBehandling(Behandling behandling) {
-        if (behandling.erAktiv()) {
-            log.info("Behandling {} vil bli avsluttet og status settes til annullert", behandling.getId());
-            avsluttBehandlingOgAvvisMedlPeriodeOpphørtFraAnmodningsperiode(behandling);
-        } else {
-            log.info("Saksstatus settes til annullert for behandling {}", behandling.getId());
-            oppdaterStatusOgAvvisPeriodeMedlPeriodeOpphørtFraLovvalgsperiode(behandling);
-        }
-    }
-
 }

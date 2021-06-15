@@ -3,7 +3,9 @@ package no.nav.melosys.service.eessi.ruting;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
@@ -16,29 +18,42 @@ import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
-
+@Component
 public class AdminFjernmottakerSedRuter extends AdminSedRuter implements SedRuterForSedTyper {
     private static final Logger log = LoggerFactory.getLogger(AdminFjernmottakerSedRuter.class);
 
     private final OppgaveService oppgaveService;
+    private final Unleash unleash;
 
+    @Autowired
     public AdminFjernmottakerSedRuter(FagsakService fagsakService,
                                       ProsessinstansService prosessinstansService,
-                                      OppgaveService oppgaveService,
+                                      @Qualifier("system") OppgaveService oppgaveService,
                                       BehandlingsresultatService behandlingsresultatService,
-                                      MedlPeriodeService medlPeriodeService) {
+                                      MedlPeriodeService medlPeriodeService,
+                                      Unleash unleash) {
         super(fagsakService,
             behandlingsresultatService,
             medlPeriodeService,
-            prosessinstansService);
+            prosessinstansService,
+            log);
 
         this.oppgaveService = oppgaveService;
+        this.unleash = unleash;
+
     }
 
     @Override
     public Collection<SedType> gjelderSedTyper() {
-        return Collections.singleton(SedType.X006);
+        if (unleash.isEnabled("melosys.sed.x006")) {
+            return Collections.singleton(SedType.X006);
+        } else {
+            return Collections.emptySet();
+        }
     }
 
     @Override
@@ -61,15 +76,5 @@ public class AdminFjernmottakerSedRuter extends AdminSedRuter implements SedRute
         }
 
         opprettJournalføringProsess(melosysEessiMelding, sistAktiveBehandling);
-    }
-
-    private void annullerSakOgBehandling(Behandling behandling) {
-        if (behandling.erAktiv()) {
-            log.info("Behandling {} vil bli avsluttet og status settes til annullert", behandling.getId());
-            avsluttBehandlingOgAvvisMedlPeriodeOpphørtFraAnmodningsperiode(behandling);
-        } else {
-            log.info("Saksstatus settes til annullert for behandling {}", behandling.getId());
-            oppdaterStatusOgAvvisPeriodeMedlPeriodeOpphørtFraLovvalgsperiode(behandling);
-        }
     }
 }

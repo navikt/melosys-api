@@ -21,15 +21,18 @@ public abstract class AdminSedRuter {
     private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
     private final ProsessinstansService prosessinstansService;
+    private Logger log;
 
     public AdminSedRuter(FagsakService fagsakService,
                          BehandlingsresultatService behandlingsresultatService,
                          MedlPeriodeService medlPeriodeService,
-                         ProsessinstansService prosessinstansService) {
+                         ProsessinstansService prosessinstansService,
+                         Logger log) {
         this.fagsakService = fagsakService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
         this.prosessinstansService = prosessinstansService;
+        this.log = log;
     }
 
     protected void avsluttBehandlingOgAvvisMedlPeriodeOpphørtFraAnmodningsperiode(Behandling behandling){
@@ -61,5 +64,15 @@ public abstract class AdminSedRuter {
 
     protected Optional<Fagsak> hentFagsakDersomArkivsakIDEksisterer(Long arkivsakID) {
         return arkivsakID != null ? fagsakService.finnFagsakFraArkivsakID(arkivsakID) : Optional.empty();
+    }
+
+    protected void annullerSakOgBehandling(Behandling behandling) {
+        if (behandling.erAktiv()) {
+            log.info("Behandling {} vil bli avsluttet og status settes til annullert", behandling.getId());
+            avsluttBehandlingOgAvvisMedlPeriodeOpphørtFraAnmodningsperiode(behandling);
+        } else {
+            log.info("Saksstatus settes til annullert for behandling {}", behandling.getId());
+            oppdaterStatusOgAvvisPeriodeMedlPeriodeOpphørtFraLovvalgsperiode(behandling);
+        }
     }
 }
