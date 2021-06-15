@@ -302,8 +302,8 @@ public class EessiService {
     private Map<Landkoder, Set<String>> hentEessiMottakerinstitusjonerPerLand(BucType bucType, Set<String> landkoder) {
         return hentEessiMottakerinstitusjoner(bucType.name(), landkoder).stream()
             .collect(Collectors.groupingBy(
-                institusjon -> Landkoder.valueOf(institusjon.getLandkode()),
-                Collectors.mapping(Institusjon::getId, Collectors.toSet())));
+                institusjon -> Landkoder.valueOf(institusjon.landkode()),
+                Collectors.mapping(Institusjon::id, Collectors.toSet())));
     }
 
     private void validerMottakerInstitusjonerForLand(Collection<Landkoder> mottakerland,

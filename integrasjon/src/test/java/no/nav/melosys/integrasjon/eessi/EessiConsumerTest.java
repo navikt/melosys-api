@@ -125,7 +125,7 @@ class EessiConsumerTest {
                 MediaType.APPLICATION_JSON));
 
         List<Institusjon> institusjoner = eessiConsumer.hentMottakerinstitusjoner("LA_BUC_01", List.of("DE", "PL"));
-        assertThat(institusjoner).extracting(Institusjon::getId, Institusjon::getNavn, Institusjon::getLandkode)
+        assertThat(institusjoner).extracting(Institusjon::id, Institusjon::navn, Institusjon::landkode)
             .contains(tuple("NO:NAVT002", "NAVT002", "NO"));
     }
 
