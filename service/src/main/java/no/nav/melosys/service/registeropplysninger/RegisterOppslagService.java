@@ -7,6 +7,7 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.person.Informasjonsbehov;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ public class RegisterOppslagService {
     private final PersondataFasade persondataFasade;
 
     @Autowired
-    public  RegisterOppslagService(EregFasade eregFasade, PersondataFasade persondataFasade) {
+    public RegisterOppslagService(EregFasade eregFasade, PersondataFasade persondataFasade) {
         this.eregFasade = eregFasade;
         this.persondataFasade = persondataFasade;
     }
@@ -43,7 +44,7 @@ public class RegisterOppslagService {
      * Henter organisasjonsopplysninger.
      */
     public OrganisasjonDokument hentOrganisasjon(String orgnummer) {
-        Saksopplysning saksopplysning = eregFasade.hentOrganisasjon(vaskOrgnr(orgnummer));
+        Saksopplysning saksopplysning = eregFasade.hentOrganisasjon(validerOgVaskOrgnr(orgnummer));
         return (OrganisasjonDokument) saksopplysning.getDokument();
     }
 
@@ -59,7 +60,13 @@ public class RegisterOppslagService {
     /**
      * Fjerner mellomrom i orgnr
      */
-    private String vaskOrgnr(String orgnr) {
-        return orgnr.replace(" ", "");
+    private String validerOgVaskOrgnr(String orgnr) {
+        orgnr = orgnr.replace(" ", "");
+
+        if (orgnr.length() != 9) {
+            throw new FunksjonellException("Ugyldig orgnr " + orgnr);
+        }
+
+        return orgnr;
     }
 }

@@ -4,12 +4,12 @@ import java.time.LocalDate;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.SelvstendigForetak;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Periode;
@@ -79,8 +79,8 @@ class BrevDataByggerA001Test {
     private BrevDataByggerA001 brevDataByggerA001;
 
     private final String SAKSBEHANDLER_ID = "Z12345";
-    private final String orgnr1 = "12345678910";
-    private final String orgnr2 = "10987654321";
+    private final String orgnr1 = "123456789";
+    private final String orgnr2 = "987654321";
 
     @BeforeEach
     public void setUp() {
@@ -186,14 +186,14 @@ class BrevDataByggerA001Test {
 
     @Test
     void testHentAvklarteSelvstendigeForetak() {
-        avklarteOrganisasjoner.add("12345678910");
+        avklarteOrganisasjoner.add(orgnr1);
 
         SelvstendigForetak foretak = new SelvstendigForetak();
-        foretak.orgnr = "12345678910";
+        foretak.orgnr = orgnr1;
         søknad.selvstendigArbeid.selvstendigForetak.add(foretak);
 
         SelvstendigForetak foretak2 = new SelvstendigForetak();
-        foretak2.orgnr = "10987654321";
+        foretak2.orgnr = orgnr2;
         søknad.selvstendigArbeid.selvstendigForetak.add(foretak2);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
