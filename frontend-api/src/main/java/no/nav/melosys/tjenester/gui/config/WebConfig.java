@@ -15,10 +15,10 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void configurePathMatch(PathMatchConfigurer configurer) {
-        configurer.addPathPrefix(API_PREFIX, WebConfig::erFrontendApiTjeneste);
+        configurer.addPathPrefix(API_PREFIX, WebConfig::erFrontendApiRestTjeneste);
     }
 
-    private static boolean erFrontendApiTjeneste(Class clazz) {
+    private static boolean erFrontendApiRestTjeneste(Class clazz) {
         return clazz.getPackageName().startsWith(FRONTEND_API_TJENESTER)
             && clazz.isAnnotationPresent(RestController.class);
     }
