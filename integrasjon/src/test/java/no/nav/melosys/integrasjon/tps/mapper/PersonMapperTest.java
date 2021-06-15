@@ -29,22 +29,22 @@ class PersonMapperTest {
 
         PersonDokument personDokument = PersonMapper.mapTilPerson(response.getPerson());
         assertThat(personDokument).isNotNull();
-        assertThat(personDokument.fnr).isEqualTo("11111111111");
-        assertThat(personDokument.sivilstand.getKode()).isEqualTo("UGIF");
-        assertThat(personDokument.sivilstandGyldighetsperiodeFom).isEqualTo(LocalDate.parse("2010-08-09"));
-        assertThat(personDokument.statsborgerskap.getKode()).isEqualTo(Land.SVERIGE);
-        assertThat(personDokument.kjønn.getKode()).isEqualTo("K");
-        assertThat(personDokument.fornavn).isEqualTo("MAGICA");
-        assertThat(personDokument.mellomnavn).isEqualTo("FRA");
-        assertThat(personDokument.etternavn).isEqualTo("TRYLL");
-        assertThat(personDokument.sammensattNavn).isEqualTo("MAGICA FRA TRYLL");
-        assertThat(personDokument.fødselsdato).isEqualTo(LocalDate.parse("2011-11-11"));
-        assertThat(personDokument.dødsdato).isNull();
-        assertThat(personDokument.diskresjonskode.getKode()).isEqualTo("SPFO");
-        assertThat(personDokument.personstatus.getKode()).isEqualTo("BOSA");
-        assertThat(personDokument.bostedsadresse.getPostnr()).isEqualTo("5141");
-        assertThat(personDokument.bostedsadresse.getLand()).isEqualTo(Land.av(Land.NORGE));
-        assertThat(personDokument.bostedsadresse.getGateadresse())
+        assertThat(personDokument.getFnr()).isEqualTo("11111111111");
+        assertThat(personDokument.getSivilstand().getKode()).isEqualTo("UGIF");
+        assertThat(personDokument.getSivilstandGyldighetsperiodeFom()).isEqualTo(LocalDate.parse("2010-08-09"));
+        assertThat(personDokument.getStatsborgerskap().getKode()).isEqualTo(Land.SVERIGE);
+        assertThat(personDokument.getKjønn().getKode()).isEqualTo("K");
+        assertThat(personDokument.getFornavn()).isEqualTo("MAGICA");
+        assertThat(personDokument.getMellomnavn()).isEqualTo("FRA");
+        assertThat(personDokument.getEtternavn()).isEqualTo("TRYLL");
+        assertThat(personDokument.getSammensattNavn()).isEqualTo("MAGICA FRA TRYLL");
+        assertThat(personDokument.getFødselsdato()).isEqualTo(LocalDate.parse("2011-11-11"));
+        assertThat(personDokument.getDødsdato()).isNull();
+        assertThat(personDokument.getDiskresjonskode().getKode()).isEqualTo("SPFO");
+        assertThat(personDokument.getPersonstatus().getKode()).isEqualTo("BOSA");
+        assertThat(personDokument.getBostedsadresse().getPostnr()).isEqualTo("5141");
+        assertThat(personDokument.getBostedsadresse().getLand()).isEqualTo(Land.av(Land.NORGE));
+        assertThat(personDokument.getBostedsadresse().getGateadresse())
             .extracting("gatenavn", "husnummer", "husbokstav")
             .isEqualTo(List.of("XXXXXX", 7, "A"));
     }
@@ -57,7 +57,7 @@ class PersonMapperTest {
         PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson());
         // Verifiser...
         Assertions.assertThat(dokument).isNotNull();
-        Assertions.assertThat(dokument.familiemedlemmer).isNotEmpty();
+        Assertions.assertThat(dokument.getFamiliemedlemmer()).isNotEmpty();
     }
 
     @Test
@@ -68,9 +68,9 @@ class PersonMapperTest {
         PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson());
 
         Assertions.assertThat(dokument).isNotNull();
-        Assertions.assertThat(dokument.postadresse).isNotNull();
-        Assertions.assertThat(dokument.midlertidigPostadresse).isNotNull();
-        Assertions.assertThat(dokument.midlertidigPostadresse.land.getKode()).isEqualTo("GBR");
+        Assertions.assertThat(dokument.getPostadresse()).isNotNull();
+        Assertions.assertThat(dokument.getMidlertidigPostadresse()).isNotNull();
+        Assertions.assertThat(dokument.getMidlertidigPostadresse().land.getKode()).isEqualTo("GBR");
     }
 
     @Test
@@ -81,9 +81,9 @@ class PersonMapperTest {
         PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson());
 
         Assertions.assertThat(dokument).isNotNull();
-        Assertions.assertThat(dokument.midlertidigPostadresse).isNotNull();
+        Assertions.assertThat(dokument.getMidlertidigPostadresse()).isNotNull();
 
-        MidlertidigPostadresseNorge midlertidigPostadresseNorge = (MidlertidigPostadresseNorge) dokument.midlertidigPostadresse;
+        MidlertidigPostadresseNorge midlertidigPostadresseNorge = (MidlertidigPostadresseNorge) dokument.getMidlertidigPostadresse();
         Assertions.assertThat(midlertidigPostadresseNorge.gateadresse.getGatenummer()).isEqualTo(29);
         Assertions.assertThat(midlertidigPostadresseNorge.gateadresse.getHusnummer()).isEqualTo(7);
     }
@@ -95,7 +95,7 @@ class PersonMapperTest {
 
         PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson());
 
-        MidlertidigPostadresseNorge midlertidigPostadresseNorge = (MidlertidigPostadresseNorge) dokument.midlertidigPostadresse;
+        MidlertidigPostadresseNorge midlertidigPostadresseNorge = (MidlertidigPostadresseNorge) dokument.getMidlertidigPostadresse();
         Assertions.assertThat(midlertidigPostadresseNorge.gateadresse.getGatenavn()).isEqualTo("Bugstadveien 101");
     }
 
@@ -108,12 +108,12 @@ class PersonMapperTest {
 
         assertNotNull(dokument);
 
-        Bostedsadresse bostedsadresse = dokument.bostedsadresse;
-        UstrukturertAdresse gjeldendePostadresse = dokument.gjeldendePostadresse;
+        Bostedsadresse bostedsadresse = dokument.getBostedsadresse();
+        UstrukturertAdresse gjeldendePostadresse = dokument.getGjeldendePostadresse();
 
         assertNotNull(bostedsadresse);
         assertNotNull(gjeldendePostadresse);
-        assertNotNull(dokument.postadresse);
+        assertNotNull(dokument.getPostadresse());
 
         assertEquals(bostedsadresse.getLand(), gjeldendePostadresse.land);
         assertEquals(bostedsadresse.getPostnr(), gjeldendePostadresse.postnr);
@@ -128,9 +128,9 @@ class PersonMapperTest {
 
         assertNotNull(dokument);
 
-        Bostedsadresse bostedsadresse = dokument.bostedsadresse;
-        UstrukturertAdresse gjeldendePostadresse = dokument.gjeldendePostadresse;
-        MidlertidigPostadresseNorge midlertidigPostadresseNorge = (MidlertidigPostadresseNorge) dokument.midlertidigPostadresse;
+        Bostedsadresse bostedsadresse = dokument.getBostedsadresse();
+        UstrukturertAdresse gjeldendePostadresse = dokument.getGjeldendePostadresse();
+        MidlertidigPostadresseNorge midlertidigPostadresseNorge = (MidlertidigPostadresseNorge) dokument.getMidlertidigPostadresse();
 
         assertNotNull(bostedsadresse);
         assertNotNull(gjeldendePostadresse);

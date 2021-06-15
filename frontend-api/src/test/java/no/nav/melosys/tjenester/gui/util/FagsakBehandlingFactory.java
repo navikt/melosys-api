@@ -65,7 +65,7 @@ public class FagsakBehandlingFactory {
         Saksopplysning saksopplysningPerson = new Saksopplysning();
         saksopplysningPerson.setType(SaksopplysningType.PERSOPL);
         PersonDokument personDokument = new PersonDokument();
-        personDokument.sammensattNavn = "Joe Moe";
+        personDokument.setSammensattNavn("Joe Moe");
         saksopplysningPerson.setDokument(personDokument);
         return saksopplysningPerson;
     }

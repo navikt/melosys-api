@@ -134,9 +134,9 @@ public class UfmKontrollerTest {
         sedDokument.setArbeidssteder(arbeidssteder);
 
         PersonDokument personDokument = new PersonDokument();
-        personDokument.dødsdato = LocalDate.now();
-        personDokument.bostedsadresse = new Bostedsadresse();
-        personDokument.bostedsadresse.setLand(new Land("NOR"));
+        personDokument.setDødsdato(LocalDate.now());
+        personDokument.setBostedsadresse(new Bostedsadresse());
+        personDokument.getBostedsadresse().setLand(new Land("NOR"));
 
         MedlemskapDokument medlemskapDokument = new MedlemskapDokument();
         Medlemsperiode medlemsperiode = new Medlemsperiode();

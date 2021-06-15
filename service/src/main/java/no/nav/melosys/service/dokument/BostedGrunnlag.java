@@ -41,7 +41,7 @@ public class BostedGrunnlag {
     }
 
     private Optional<StrukturertAdresse> finnBostedsadresseFraRegister() {
-        Bostedsadresse bostedsadresse = person.bostedsadresse;
+        Bostedsadresse bostedsadresse = person.getBostedsadresse();
         if (StringUtils.isEmpty(bostedsadresse.getLand().getKode())) {
             return Optional.empty();
         }

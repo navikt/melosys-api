@@ -11,11 +11,11 @@ public final class PersonKontroller {
     }
 
     public static boolean personDød(PersonDokument personDokument) {
-        return personDokument.dødsdato != null;
+        return personDokument.getDødsdato() != null;
     }
 
     public static boolean personBosattINorge(PersonDokument personDokument) {
-        Bostedsadresse bostedsadresse = personDokument.bostedsadresse;
+        Bostedsadresse bostedsadresse = personDokument.getBostedsadresse();
 
         return bostedsadresse != null
             && bostedsadresse.getLand() != null

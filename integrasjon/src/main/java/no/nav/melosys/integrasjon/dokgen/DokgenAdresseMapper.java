@@ -16,13 +16,13 @@ public final class DokgenAdresseMapper {
     private DokgenAdresseMapper(){}
 
     public static String mapMottakerNavn(OrganisasjonDokument org, PersonDokument personDokument) {
-        return org == null ? personDokument.sammensattNavn : org.getNavn();
+        return org == null ? personDokument.getSammensattNavn() : org.getNavn();
     }
 
     public static List<String> mapAdresselinjer(OrganisasjonDokument org, String kontaktperson, Kontaktopplysning kontaktopplysning, PersonDokument personDokument) {
         List<String> adresselinjer;
         if (org == null) {
-            adresselinjer = personDokument.gjeldendePostadresse.adresselinjer();
+            adresselinjer = personDokument.getGjeldendePostadresse().adresselinjer();
         } else {
             StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
             adresselinjer = new ArrayList<>();
@@ -41,7 +41,7 @@ public final class DokgenAdresseMapper {
     public static String mapPostnr(OrganisasjonDokument org, PersonDokument personDokument) {
         String postNr;
         if (org == null) {
-            postNr = personDokument.gjeldendePostadresse.postnr;
+            postNr = personDokument.getGjeldendePostadresse().postnr;
         } else {
             StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
             postNr = orgAdresse.getPostnummer();
@@ -56,7 +56,7 @@ public final class DokgenAdresseMapper {
     public static String mapPoststed(OrganisasjonDokument org, PersonDokument personDokument) {
         String poststed;
         if (org == null) {
-            poststed = personDokument.gjeldendePostadresse.poststed;
+            poststed = personDokument.getGjeldendePostadresse().poststed;
         } else {
             StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
             poststed = orgAdresse.getPoststed();
@@ -67,7 +67,7 @@ public final class DokgenAdresseMapper {
     public static String mapLandForAdresse(OrganisasjonDokument org, PersonDokument personDokument) {
         String land;
         if (org == null) {
-            land = personDokument.gjeldendePostadresse.land != null ? personDokument.gjeldendePostadresse.land.toString() : null;
+            land = personDokument.getGjeldendePostadresse().land != null ? personDokument.getGjeldendePostadresse().land.toString() : null;
         } else {
             StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
             land = orgAdresse.getLandkode() != null ? orgAdresse.getLandkode() : null;

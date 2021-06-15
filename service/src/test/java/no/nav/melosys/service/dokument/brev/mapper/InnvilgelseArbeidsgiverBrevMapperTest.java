@@ -97,13 +97,13 @@ public class InnvilgelseArbeidsgiverBrevMapperTest {
 
     private static Behandling lagBehandling(Fagsak fagsak) {
         PersonDokument pdok = new PersonDokument();
-        pdok.kjønn = new KjoennsType();
-        pdok.kjønn.setKode(KjoennKode.U.name());
-        pdok.fornavn = "For";
-        pdok.etternavn = "Etter";
-        pdok.sammensattNavn = "For Etter";
-        pdok.statsborgerskap = new Land(Land.BELGIA);
-        pdok.fødselsdato = LocalDate.ofYearDay(1900, 1);
+        pdok.setKjønn(new KjoennsType());
+        pdok.getKjønn().setKode(KjoennKode.U.name());
+        pdok.setFornavn("For");
+        pdok.setEtternavn("Etter");
+        pdok.setSammensattNavn("For Etter");
+        pdok.setStatsborgerskap(new Land(Land.BELGIA));
+        pdok.setFødselsdato(LocalDate.ofYearDay(1900, 1));
         return lagBehandling(fagsak, Collections.singleton(lagSaksopplysning(SaksopplysningType.PERSOPL, pdok)));
     }
 

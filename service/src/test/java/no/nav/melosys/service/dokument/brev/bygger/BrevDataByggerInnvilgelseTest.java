@@ -94,7 +94,7 @@ public class BrevDataByggerInnvilgelseTest {
             .build();
 
         PersonDokument person = new PersonDokument();
-        person.sammensattNavn = "Tom Mestokk";
+        person.setSammensattNavn("Tom Mestokk");
         behandling.getSaksopplysninger().add(lagPersonsaksopplysning(person));
 
         when(brevDataByggerA1.lag(any(), any())).thenReturn(new BrevDataA1());

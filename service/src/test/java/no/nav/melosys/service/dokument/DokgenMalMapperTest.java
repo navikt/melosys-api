@@ -73,7 +73,7 @@ class DokgenMalMapperTest {
 
     @Test
     void feilerNårProduserbartDokumentIkkeErStøttet() throws Exception {
-        when(mockPersondataFasade.hentPerson(any(), any())).thenReturn(lagPersonopplysning());
+        when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(ATTEST_A1)
@@ -88,7 +88,7 @@ class DokgenMalMapperTest {
     @Test
     void skalMappeMedBrukerAdresse() throws Exception {
         when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
-        when(mockPersondataFasade.hentPerson(any(), any())).thenReturn(lagPersonopplysning());
+        when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
 
         Behandling behandling = lagBehandling(lagFagsak());
 
@@ -264,9 +264,9 @@ class DokgenMalMapperTest {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.PERSOPL);
         PersonDokument personDokument = new PersonDokument();
-        personDokument.fnr = "99887766554";
-        personDokument.sammensattNavn = SAMMENSATT_NAVN;
-        personDokument.gjeldendePostadresse = lagAdresse();
+        personDokument.setFnr("99887766554");
+        personDokument.setSammensattNavn(SAMMENSATT_NAVN);
+        personDokument.setGjeldendePostadresse(lagAdresse());
         saksopplysning.setDokument(personDokument);
         return saksopplysning;
     }

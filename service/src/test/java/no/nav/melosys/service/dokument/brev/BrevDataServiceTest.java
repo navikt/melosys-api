@@ -429,7 +429,7 @@ class BrevDataServiceTest {
         Collection<Saksopplysning> saksopplysninger = new HashSet<>();
 
         PersonDokument person = new PersonDokument();
-        person.bostedsadresse = lagBostedsadresse();
+        person.setBostedsadresse(lagBostedsadresse());
         saksopplysninger.add(lagPersonsaksopplysning(person));
         return saksopplysninger;
     }

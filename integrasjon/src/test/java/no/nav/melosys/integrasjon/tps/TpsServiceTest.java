@@ -53,7 +53,7 @@ public class TpsServiceTest {
         Saksopplysning saksopplysning = service.hentPerson(AKTØRID_1.toString(), Informasjonsbehov.INGEN);
 
         PersonDokument dokument = (PersonDokument) saksopplysning.getDokument();
-        assertThat(dokument.fnr).isEqualTo(AKTØRID_1.toString());
+        assertThat(dokument.getFnr()).isEqualTo(AKTØRID_1.toString());
     }
 
     @Test
@@ -80,7 +80,7 @@ public class TpsServiceTest {
         String sammensattNavn = "sammensattNavn";
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(personDokument);
-        personDokument.sammensattNavn = sammensattNavn;
+        personDokument.setSammensattNavn(sammensattNavn);
 
         String fnr = "fnr";
         doReturn(saksopplysning).when(service).hentPerson(fnr, Informasjonsbehov.INGEN);

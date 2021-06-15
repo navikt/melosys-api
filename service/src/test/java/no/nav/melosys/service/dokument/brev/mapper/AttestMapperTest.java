@@ -74,13 +74,13 @@ public class AttestMapperTest {
         boAdresse.setLandkode(Landkoder.NO.getKode());
 
         PersonDokument person = new PersonDokument();
-        person.kjønn = new KjoennsType();
-        person.kjønn.setKode("K");
-        person.fornavn = "Ola";
-        person.etternavn = "Nordmann";
-        person.fødselsdato = LocalDate.now();
-        person.statsborgerskap = new Land();
-        person.statsborgerskap.setKode(Land.NORGE);
+        person.setKjønn(new KjoennsType());
+        person.getKjønn().setKode("K");
+        person.setFornavn("Ola");
+        person.setEtternavn("Nordmann");
+        person.setFødselsdato(LocalDate.now());
+        person.setStatsborgerskap(new Land());
+        person.getStatsborgerskap().setKode(Land.NORGE);
 
         behandling = mock(Behandling.class);
         when(behandling.getRegistrertDato()).thenReturn(Instant.now());

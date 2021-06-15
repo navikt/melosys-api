@@ -134,13 +134,13 @@ class A1MapperTest {
 
     static PersonDokument lagPersonDokument() {
         PersonDokument person = new PersonDokument();
-        person.kjønn = new KjoennsType();
-        person.kjønn.setKode("K");
-        person.fornavn = "Ola";
-        person.etternavn = "Nordmann";
-        person.fødselsdato = LocalDate.now();
-        person.statsborgerskap = new Land();
-        person.statsborgerskap.setKode("NOR");
+        person.setKjønn(new KjoennsType());
+        person.getKjønn().setKode("K");
+        person.setFornavn("Ola");
+        person.setEtternavn("Nordmann");
+        person.setFødselsdato(LocalDate.now());
+        person.setStatsborgerskap(new Land());
+        person.getStatsborgerskap().setKode("NOR");
         return person;
     }
 
@@ -250,7 +250,7 @@ class A1MapperTest {
 
     @Test
     void mapTilBrevXML_brukerErStatsløs_forventStatløsTekst() {
-        brevData.person.statsborgerskap = Land.av(Land.STATSLØS);
+        brevData.person.setStatsborgerskap(Land.av(Land.STATSLØS));
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
         assertThat(a1.getPerson().getStatsborgerskap()).isEqualTo("Stateless");
     }

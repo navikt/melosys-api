@@ -58,7 +58,7 @@ public class VedtakKontrollServiceTest {
         Saksopplysning persopplysning = new Saksopplysning();
         persopplysning.setType(SaksopplysningType.PERSOPL);
         persopplysning.setDokument(personDokument);
-        personDokument.bostedsadresse.setPoststed("altOK");
+        personDokument.getBostedsadresse().setPoststed("altOK");
 
         Behandling behandling = new Behandling();
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
@@ -109,7 +109,7 @@ public class VedtakKontrollServiceTest {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        personDokument.bostedsadresse = new Bostedsadresse();
+        personDokument.setBostedsadresse(new Bostedsadresse());
 
         Collection<Kontrollfeil> resultat = vedtakKontrollService.utførKontroller(behandlingID, Vedtakstyper.FØRSTEGANGSVEDTAK);
         assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.MANGLENDE_BOSTEDSADRESSE);

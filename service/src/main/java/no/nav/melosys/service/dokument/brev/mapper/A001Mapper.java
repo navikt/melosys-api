@@ -142,13 +142,13 @@ class A001Mapper {
         PersonType person = new PersonType();
         person.setPersonnavn(lagPersonnavn(personDok));
         person.setStatsborgerskapListe(mapStatsborgerskapListe(personDok));
-        person.setKjønn(KjoennKode.fromValue(personDok.kjønn.getKode()));
+        person.setKjønn(KjoennKode.fromValue(personDok.getKjønn().getKode()));
         person.setBostedsadresse(mapBostedAdresse(bostedsadresse));
-        person.setFødselsnummer(personDok.fnr);
+        person.setFødselsnummer(personDok.getFnr());
         //Fødeland og Fødested skal ikke fylles ut
         utenlandskIdent.ifPresent(person::setUtenlandskID);
         try {
-            person.setFødselsdato(convertToXMLGregorianCalendarRemoveTimezone(personDok.fødselsdato));
+            person.setFødselsdato(convertToXMLGregorianCalendarRemoveTimezone(personDok.getFødselsdato()));
         } catch (DatatypeConfigurationException e) {
             throw new TekniskException("Konverteringsfeil ved konvertering av fødselsdato", e);
         }
@@ -158,7 +158,7 @@ class A001Mapper {
 
     private StatsborgerskapListeType mapStatsborgerskapListe(PersonDokument personDok) {
         StatsborgerskapType statsborgerskap = new StatsborgerskapType();
-        statsborgerskap.setStatsborgerskap(hentIso3Landkode(personDok.statsborgerskap.getKode()));
+        statsborgerskap.setStatsborgerskap(hentIso3Landkode(personDok.getStatsborgerskap().getKode()));
 
         StatsborgerskapListeType statsborgerskapListe = new StatsborgerskapListeType();
         statsborgerskapListe.getStatsborgerskap().add(statsborgerskap);

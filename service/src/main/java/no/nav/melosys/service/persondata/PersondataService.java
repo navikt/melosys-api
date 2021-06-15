@@ -55,13 +55,13 @@ public class PersondataService implements PersondataFasade {
     }
 
     @Override
-    public Saksopplysning hentPerson(String ident, Informasjonsbehov behov) {
-        return tpsService.hentPerson(ident, behov);
+    public Saksopplysning hentPersonFraTps(String fnr, Informasjonsbehov behov) {
+        return tpsService.hentPerson(fnr, behov);
     }
 
     @Override
-    public Saksopplysning hentPersonhistorikk(String ident, LocalDate dato) {
-        return tpsService.hentPersonhistorikk(ident, dato);
+    public Saksopplysning hentPersonhistorikk(String fnr, LocalDate dato) {
+        return tpsService.hentPersonhistorikk(fnr, dato);
     }
 
     @Override

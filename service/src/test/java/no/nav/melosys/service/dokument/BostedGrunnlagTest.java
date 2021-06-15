@@ -65,10 +65,10 @@ class BostedGrunnlagTest {
 
     @Test
     void finnBostedsadresse_harBostedsadresseIRegister_forventBostedsadresse() {
-        personDokument.bostedsadresse = new Bostedsadresse();
-        personDokument.bostedsadresse.setLand(new Land("SWE"));
-        personDokument.bostedsadresse.setGateadresse(new Gateadresse());
-        personDokument.bostedsadresse.getGateadresse().setGatenavn("gate");
+        personDokument.setBostedsadresse(new Bostedsadresse());
+        personDokument.getBostedsadresse().setLand(new Land("SWE"));
+        personDokument.getBostedsadresse().setGateadresse(new Gateadresse());
+        personDokument.getBostedsadresse().getGateadresse().setGatenavn("gate");
 
         Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnBostedsadresse();
 

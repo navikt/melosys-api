@@ -64,7 +64,7 @@ class BrevDataGrunnlagTest {
         boAdresseFraRegister.setLand(new Land(Land.NORGE));
 
         person = new PersonDokument();
-        person.bostedsadresse = boAdresseFraRegister;
+        person.setBostedsadresse(boAdresseFraRegister);
 
         søknad = new Soeknad();
         behandling = lagBehandling(søknad, person);
@@ -86,7 +86,7 @@ class BrevDataGrunnlagTest {
 
     @Test
     void hentBostedsadresse_manglerOppgittOgTpsBostedsadresse_girUnntak() {
-        person.bostedsadresse = new Bostedsadresse();
+        person.setBostedsadresse(new Bostedsadresse());
         søknad.bosted.oppgittAdresse = new StrukturertAdresse();
         var bostedsgrunnlag = dataGrunnlag.getBostedGrunnlag();
 

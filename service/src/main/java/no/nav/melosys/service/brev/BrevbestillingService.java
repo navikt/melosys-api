@@ -80,7 +80,7 @@ public class BrevbestillingService {
         if (hovedmottaker == Aktoersroller.BRUKER) {
             Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling);
             if (avklartMottaker.getRolle() == Aktoersroller.BRUKER) {
-                return behandling.hentPersonDokument().sammensattNavn;
+                return behandling.hentPersonDokument().getSammensattNavn();
             } else {
                 var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartMottaker.getOrgnr());
                 return orgDokument.getNavn();
@@ -111,7 +111,7 @@ public class BrevbestillingService {
         if (avklartKopi.getRolle() == Aktoersroller.BRUKER || hovedmottaker == kopiMottaker) {
             return new MuligMottakerDto.Builder()
                 .medDokumentNavn("Kopi til bruker")
-                .medMottakerNavn(behandling.hentPersonDokument().sammensattNavn)
+                .medMottakerNavn(behandling.hentPersonDokument().getSammensattNavn())
                 .medRolle(BRUKER)
                 .medAktørId(behandling.getFagsak().hentBruker().getAktørId())
                 .build();
@@ -193,7 +193,8 @@ public class BrevbestillingService {
         OrganisasjonDokument orgDokument = null;
 
         if (mottaker.getRolle() == Aktoersroller.BRUKER) {
-            personDokument = (PersonDokument) persondataFasade.hentPerson(behandling.hentPersonDokument().fnr, Informasjonsbehov.STANDARD).getDokument();
+            personDokument = (PersonDokument) persondataFasade.hentPersonFraTps(
+                    behandling.hentPersonDokument().getFnr(), Informasjonsbehov.STANDARD).getDokument();
 
             } else if (mottaker.getRolle() == Aktoersroller.ARBEIDSGIVER || mottaker.getRolle() == Aktoersroller.REPRESENTANT) {
                 kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), mottaker.getOrgnr()).orElse(null);
@@ -206,7 +207,7 @@ public class BrevbestillingService {
             .medOrgnr(orgDokument != null ? orgDokument.getOrgnummer() : null)
             .medAdresselinjer(mapAdresselinjer(orgDokument, null, kontaktopplysning, personDokument))
             .medPostnr(mapPostnr(orgDokument, personDokument))
-            .medPoststed(orgDokument != null ? mapPoststed(orgDokument) : kodeverkService.dekod(FellesKodeverk.POSTNUMMER, personDokument.gjeldendePostadresse.postnr, LocalDate.now()))
+            .medPoststed(orgDokument != null ? mapPoststed(orgDokument) : kodeverkService.dekod(FellesKodeverk.POSTNUMMER, personDokument.getGjeldendePostadresse().postnr, LocalDate.now()))
             .medLand(mapLandForAdresse(orgDokument, personDokument))
             .build();
     }

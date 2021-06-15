@@ -341,7 +341,7 @@ class BrevbestillingServiceTest {
 
         when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(), eq(false), eq(false)))
             .thenReturn(List.of(lagAktoer(Aktoersroller.BRUKER, null)));
-        when(mockPersondataFasade.hentPerson(any(), eq(Informasjonsbehov.STANDARD)))
+        when(mockPersondataFasade.hentPersonFraTps(any(), eq(Informasjonsbehov.STANDARD)))
             .thenReturn(saksbehandling);
         when(mockKodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), anyString(), any())).thenReturn("Oslo");
 
@@ -448,7 +448,7 @@ class BrevbestillingServiceTest {
 
     private void leggPersondokumentTilBehandling() {
         var dokument = new PersonDokument();
-        dokument.sammensattNavn = "Ola Nordmann";
+        dokument.setSammensattNavn("Ola Nordmann");
         when(behandling.hentPersonDokument()).thenReturn(dokument);
     }
 
@@ -487,11 +487,11 @@ class BrevbestillingServiceTest {
 
     private Saksopplysning lagPERSOPLSaksopplysning() {
         var dokument = new PersonDokument();
-        dokument.fnr = "12345678910";
-        dokument.sammensattNavn = "Ola Nordmann";
-        dokument.gjeldendePostadresse.adresselinje1 = "Gateadresse 43A";
-        dokument.gjeldendePostadresse.postnr = "0123";
-        dokument.gjeldendePostadresse.land = Land.av(Land.NORGE);
+        dokument.setFnr("12345678910");
+        dokument.setSammensattNavn("Ola Nordmann");
+        dokument.getGjeldendePostadresse().adresselinje1 = "Gateadresse 43A";
+        dokument.getGjeldendePostadresse().postnr = "0123";
+        dokument.getGjeldendePostadresse().land = Land.av(Land.NORGE);
         var saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(dokument);
         saksopplysning.setType(SaksopplysningType.PERSOPL);

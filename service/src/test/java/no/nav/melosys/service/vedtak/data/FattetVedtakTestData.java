@@ -3,7 +3,6 @@ package no.nav.melosys.service.vedtak.data;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -25,11 +24,9 @@ import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.integrasjon.pdl.dto.person.Navn;
-import no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand;
-import no.nav.melosys.integrasjon.pdl.dto.person.Sivilstandstype;
 import no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap;
-import no.nav.melosys.service.vedtak.publisering.dto.*;
 import no.nav.melosys.service.vedtak.publisering.dto.Fullmektig;
+import no.nav.melosys.service.vedtak.publisering.dto.*;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagBostedsadresse;
 
@@ -154,12 +151,12 @@ public class FattetVedtakTestData {
 
     private static Saksopplysning lagPersonDokument() {
         PersonDokument personDokument = new PersonDokument();
-        personDokument.statsborgerskap = new Land(Land.BELGIA);
-        personDokument.fnr = FNR;
-        personDokument.fornavn = FORNAVN;
-        personDokument.mellomnavn = MELLOMNANV;
-        personDokument.etternavn = ETTERNAVN;
-        personDokument.bostedsadresse = lagBostedsadresse();
+        personDokument.setStatsborgerskap(new Land(Land.BELGIA));
+        personDokument.setFnr(FNR);
+        personDokument.setFornavn(FORNAVN);
+        personDokument.setMellomnavn(MELLOMNANV);
+        personDokument.setEtternavn(ETTERNAVN);
+        personDokument.setBostedsadresse(lagBostedsadresse());
         return lagSaksopplysning(SaksopplysningType.PERSOPL, personDokument);
     }
 

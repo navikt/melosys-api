@@ -15,33 +15,34 @@ public class PersonMapper {
 
     public static PersonDokument mapTilPerson(no.nav.tjeneste.virksomhet.person.v3.informasjon.Person person) {
         PersonDokument dokument = new PersonDokument();
-        dokument.fnr = mapFnr(person.getAktoer());
-        dokument.sivilstand = mapSivilstand(person.getSivilstand());
-        dokument.sivilstandGyldighetsperiodeFom = person.getSivilstand() == null ? null
-            : KonverteringsUtils.xmlGregorianCalendarToLocalDate(person.getSivilstand().getFomGyldighetsperiode());
-        dokument.statsborgerskap = person.getStatsborgerskap() == null ? null
-            : Land.av(person.getStatsborgerskap().getLand().getValue());
-        dokument.kjønn = mapKjønn(person.getKjoenn());
+        dokument.setFnr(mapFnr(person.getAktoer()));
+        dokument.setSivilstand(mapSivilstand(person.getSivilstand()));
+        dokument.setSivilstandGyldighetsperiodeFom(person.getSivilstand() == null ? null
+            : KonverteringsUtils.xmlGregorianCalendarToLocalDate(person.getSivilstand().getFomGyldighetsperiode()));
+        dokument.setStatsborgerskap(person.getStatsborgerskap() == null ? null
+            : Land.av(person.getStatsborgerskap().getLand().getValue()));
+        dokument.setKjønn(mapKjønn(person.getKjoenn()));
         if (person.getPersonnavn() != null) {
-            dokument.fornavn = person.getPersonnavn().getFornavn();
-            dokument.mellomnavn = person.getPersonnavn().getMellomnavn();
-            dokument.etternavn = person.getPersonnavn().getEtternavn();
-            dokument.sammensattNavn = person.getPersonnavn().getSammensattNavn();
+            dokument.setFornavn(person.getPersonnavn().getFornavn());
+            dokument.setMellomnavn(person.getPersonnavn().getMellomnavn());
+            dokument.setEtternavn(person.getPersonnavn().getEtternavn());
+            dokument.setSammensattNavn(person.getPersonnavn().getSammensattNavn());
         }
-        dokument.fødselsdato = person.getFoedselsdato() == null ? null
-            : KonverteringsUtils.xmlGregorianCalendarToLocalDate(person.getFoedselsdato().getFoedselsdato());
-        dokument.dødsdato = person.getDoedsdato() == null ? null
-            : KonverteringsUtils.xmlGregorianCalendarToLocalDate(person.getDoedsdato().getDoedsdato());
-        dokument.diskresjonskode = mapDiskresjonskode(person.getDiskresjonskode());
-        dokument.personstatus = person.getPersonstatus() == null ? null
-            : Personstatus.valueOf(person.getPersonstatus().getPersonstatus().getValue());
-        dokument.bostedsadresse = AdresseMapper.mapTilBostedsadresse(person.getBostedsadresse());
-        dokument.postadresse = AdresseMapper.mapTilPostadresse(person.getPostadresse());
+        dokument.setFødselsdato(person.getFoedselsdato() == null ? null
+            : KonverteringsUtils.xmlGregorianCalendarToLocalDate(person.getFoedselsdato().getFoedselsdato()));
+        dokument.setDødsdato(person.getDoedsdato() == null ? null
+            : KonverteringsUtils.xmlGregorianCalendarToLocalDate(person.getDoedsdato().getDoedsdato()));
+        dokument.setDiskresjonskode(mapDiskresjonskode(person.getDiskresjonskode()));
+        dokument.setPersonstatus(person.getPersonstatus() == null ? null
+            : Personstatus.valueOf(person.getPersonstatus().getPersonstatus().getValue()));
+        dokument.setBostedsadresse(AdresseMapper.mapTilBostedsadresse(person.getBostedsadresse()));
+        dokument.setPostadresse(AdresseMapper.mapTilPostadresse(person.getPostadresse()));
         if (person instanceof Bruker) {
-            dokument.midlertidigPostadresse = AdresseMapper.mapTilMidlertidigPostadresse(((Bruker) person).getMidlertidigPostadresse());
-            dokument.gjeldendePostadresse = AdresseMapper.mapTilGjeldendePostadresse((Bruker) person);
+            dokument.setMidlertidigPostadresse(
+                    AdresseMapper.mapTilMidlertidigPostadresse(((Bruker) person).getMidlertidigPostadresse()));
+            dokument.setGjeldendePostadresse(AdresseMapper.mapTilGjeldendePostadresse((Bruker) person));
         }
-        dokument.familiemedlemmer = FamiliemedlemMapper.mapTilFamiliemedlemmer(person.getHarFraRolleI());
+        dokument.setFamiliemedlemmer(FamiliemedlemMapper.mapTilFamiliemedlemmer(person.getHarFraRolleI()));
         return dokument;
     }
 
@@ -49,10 +50,10 @@ public class PersonMapper {
         if (familiemedlem.erBarn()) {
             dokument.hentAnnenForelder(ident)
                 .ifPresent(forelder -> familiemedlem.fnrAnnenForelder = forelder.fnr);
-            familiemedlem.fødselsdato = dokument.fødselsdato;
+            familiemedlem.fødselsdato = dokument.getFødselsdato();
         } else if (familiemedlem.erEktefellePartnerSamboer()) {
-            familiemedlem.sivilstand = dokument.sivilstand;
-            familiemedlem.sivilstandGyldighetsperiodeFom = dokument.sivilstandGyldighetsperiodeFom;
+            familiemedlem.sivilstand = dokument.getSivilstand();
+            familiemedlem.sivilstandGyldighetsperiodeFom = dokument.getSivilstandGyldighetsperiodeFom();
         }
     }
 

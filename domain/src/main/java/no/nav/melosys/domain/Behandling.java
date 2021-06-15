@@ -196,6 +196,10 @@ public class Behandling extends RegistreringsInfo {
         this.behandlingsgrunnlag = behandlingsgrunnlag;
     }
 
+    /**
+     * @deprecated Persondata skal ikke lagres under saksopplysning ifm. PDL.
+     */
+    @Deprecated
     public PersonDokument hentPersonDokument() {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.PERSOPL);
         return (PersonDokument) saksopplysning

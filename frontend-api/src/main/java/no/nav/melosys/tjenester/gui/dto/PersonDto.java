@@ -11,16 +11,16 @@ import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 public class PersonDto {
 
     public PersonDto(PersonDokument person) {
-        fnr = person.fnr;
-        sivilstand = person.sivilstand;
-        statsborgerskap = person.statsborgerskap;
-        sammensattNavn = person.sammensattNavn;
-        personstatus = person.personstatus;
-        kjoenn = person.kjønn;
-        foedselsdato = person.fødselsdato;
-        bostedsadresse = person.bostedsadresse;
-        familiemedlemmer = person.familiemedlemmer == null ? new ArrayList<>()
-            : FamiliemedlemDto.avFamiliemedlemmer(person.familiemedlemmer);
+        fnr = person.getFnr();
+        sivilstand = person.getSivilstand();
+        statsborgerskap = person.getStatsborgerskap();
+        sammensattNavn = person.getSammensattNavn();
+        personstatus = person.getPersonstatus();
+        kjoenn = person.getKjønn();
+        foedselsdato = person.getFødselsdato();
+        bostedsadresse = person.getBostedsadresse();
+        familiemedlemmer = person.getFamiliemedlemmer() == null ? new ArrayList<>()
+            : FamiliemedlemDto.avFamiliemedlemmer(person.getFamiliemedlemmer());
     }
 
     public String fnr;
