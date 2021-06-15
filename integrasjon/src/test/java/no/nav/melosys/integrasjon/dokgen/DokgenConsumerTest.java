@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DokgenConsumerTest {
 
     private WireMockServer wireMockServer;
-    private DokgenConsumer restConsumer;
+    private DokgenConsumer dokgenConsumer;
 
     @BeforeAll
     public void setup() throws Exception {
@@ -40,7 +40,7 @@ class DokgenConsumerTest {
             .baseUrl("http://localhost:" + wireMockServer.port())
             .build();
 
-        restConsumer = new DokgenConsumer(webClient);
+        dokgenConsumer = new DokgenConsumer(webClient);
     }
 
     @AfterAll
@@ -57,7 +57,7 @@ class DokgenConsumerTest {
                 .withBody("pdf".getBytes(StandardCharsets.UTF_8)))
         );
 
-        assertThat(restConsumer.lagPdf("mangelbrev_bruker", getMangelbrevBruker(), false)).isNotNull();
+        assertThat(dokgenConsumer.lagPdf("mangelbrev_bruker", getMangelbrevBruker(), false)).isNotNull();
     }
 
     @Test
@@ -69,7 +69,7 @@ class DokgenConsumerTest {
                 .withBody("pdf".getBytes(StandardCharsets.UTF_8)))
         );
 
-        assertThat(restConsumer.lagPdf("mangelbrev_bruker", getMangelbrevBruker(), true)).isNotNull();
+        assertThat(dokgenConsumer.lagPdf("mangelbrev_bruker", getMangelbrevBruker(), true)).isNotNull();
     }
 
     private MangelbrevBruker getMangelbrevBruker() {
