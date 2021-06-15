@@ -11,11 +11,12 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKildesystem;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
+import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsfoholdQuery;
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdQuery;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsfoholdResponse;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumer;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer;
@@ -56,21 +57,26 @@ public class AaregService implements AaregFasade {
     @Override
     public Saksopplysning finnArbeidsforholdPrArbeidstaker(String ident, LocalDate fom, LocalDate tom) {
         if (unleash.isEnabled("melosys.aareg.rest")) {
-            finnArbeidsforholdPrArbeidstakerRest(ident, fom, tom);
+            return finnArbeidsforholdPrArbeidstakerRest(ident, fom, tom);
         }
         return finnArbeidsforholdPrArbeidstakerSOAP(ident, fom, tom);
     }
 
     private Saksopplysning finnArbeidsforholdPrArbeidstakerRest(String ident, LocalDate fom, LocalDate tom) {
-        ArbeidsfoholdQuery arbeidsfoholdQuery = new ArbeidsfoholdQuery
+        // TODO: use fom and tom
+        ArbeidsforholdQuery arbeidsfoholdQuery = new ArbeidsforholdQuery
             .Builder()
-            .arbeidsforholdType(ArbeidsfoholdQuery.ArbeidsforholdType.ALLE)
+            .arbeidsforholdType(ArbeidsforholdQuery.ArbeidsforholdType.ALLE)
+            .regelverk(ArbeidsforholdQuery.Regelverk.A_ORDNINGEN)
             .build();
-        ArbeidsfoholdResponse[] result = arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker(ident, arbeidsfoholdQuery);
+        ArbeidsfoholdResponse result = arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker(ident, arbeidsfoholdQuery);
 
         Saksopplysning saksopplysning = new Saksopplysning();
+        ArbeidsforholdDokument arbeidsforholdDokument = new ArbeidsforholdDokument();
+        saksopplysning.setDokument(arbeidsforholdDokument);
+
         saksopplysning.leggTilKildesystemOgMottattDokument(
-            SaksopplysningKildesystem.AAREG, null);
+            SaksopplysningKildesystem.AAREG, result.getJsonDocument());
         saksopplysning.setType(SaksopplysningType.ARBFORH);
         saksopplysning.setVersjon(ARBEIDSFORHOLD_VERSJON);
 

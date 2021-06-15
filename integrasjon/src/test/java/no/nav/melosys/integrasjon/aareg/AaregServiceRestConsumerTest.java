@@ -1,51 +1,38 @@
-package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
+package no.nav.melosys.integrasjon.aareg;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.model.Arbeidsforhold;
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.model.Arbeidstaker;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
+import no.finn.unleash.FakeUnleash;
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer;
+import org.junit.jupiter.api.*;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@ExtendWith(MockitoExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class ArbeidsforholdRestConsumerTest {
+public class AaregServiceRestConsumerTest {
+    private static final Long SIKKERHETSBEGRENSET_ID = 1L;
 
+    private AaregService aaregService;
     private WireMockServer wireMockServer;
     private ArbeidsforholdRestConsumer restConsumer;
 
     @BeforeAll
-    public void setup() throws Exception {
+    public void setupBeforeAll() {
         wireMockServer = new WireMockServer(wireMockConfig().dynamicPort());
         wireMockServer.start();
 
         WebClient webClient = WebClient.builder()
             .baseUrl("http://localhost:" + wireMockServer.port())
             .build();
-
         restConsumer = new ArbeidsforholdRestConsumer(webClient);
-    }
-
-    @AfterAll
-    public void tearDown() {
-        wireMockServer.stop();
-    }
-
-    @Test
-    void skalFinneArbeidsforholdPrArbeidstaker() {
-        String fnr = "12345678990";
 
         wireMockServer.stubFor(get(urlPathEqualTo("/"))
-            .withHeader("Nav-Personident", equalTo(fnr))
-            .withQueryParam("regelverk", equalTo("ALLE"))
             .willReturn(aResponse()
                 .withStatus(200)
                 .withHeader("Content-Type", "application/json")
@@ -53,24 +40,49 @@ class ArbeidsforholdRestConsumerTest {
             )
         );
 
-        ArbeidsforholdQuery arbeidsforholdQuery = new ArbeidsforholdQuery
-            .Builder()
-            .regelverk(ArbeidsforholdQuery.Regelverk.ALLE)
-            .arbeidsforholdType(ArbeidsforholdQuery.ArbeidsforholdType.ALLE)
-            .build();
-        ArbeidsfoholdResponse arbeidsfoholdResponse = restConsumer.finnArbeidsforholdPrArbeidstaker(fnr, arbeidsforholdQuery);
-
-        Arbeidsforhold[] arbeidsforholds = arbeidsfoholdResponse.getArbeidsforholdResponse();
-        assertThat(arbeidsforholds.length).isEqualTo(1);
-        Arbeidsforhold arbeidsforhold = arbeidsforholds[0];
-        assertThat(arbeidsforhold.getNavArbeidsforholdId()).isEqualTo(3065458);
-
-        Arbeidstaker arbeidstaker = arbeidsforhold.getArbeidstaker();
-        assertThat(arbeidstaker.getType()).isEqualTo("Person");
-        assertThat(arbeidstaker.getAktoerId()).isEqualTo("1685359155300");
     }
 
-    String responsBody = """
+    @BeforeEach
+    public void setUp() {
+        aaregService = lagAaregService();
+}
+    @AfterAll
+    public void tearDown() {
+        wireMockServer.stop();
+    }
+
+    @Test
+    public void getArbeidsforholdDokument() throws Exception {
+        Saksopplysning saksopplysning = aaregService.finnArbeidsforholdPrArbeidstaker("99999999991", null, null);
+        ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) saksopplysning.getDokument();
+        assertThat(arbeidsforholdDokument.getArbeidsforhold().size()).isGreaterThan(0);
+    }
+
+    @Test
+    public void getHistoriskArbeidsforholdDokument() throws Exception {
+        Saksopplysning saksopplysning = aaregService.hentArbeidsforholdHistorikk(12608035L);
+        ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) saksopplysning.getDokument();
+        assertThat(arbeidsforholdDokument.getArbeidsforhold().size()).isGreaterThan(0);
+        assertThat(arbeidsforholdDokument.getArbeidsforhold().get(0).getArbeidsavtaler().size()).isGreaterThan(1);
+    }
+
+    @Test
+    public void hentSikkerhetsbegrensetArbeidsforholdHistorikkKasterUnntak() throws Exception {
+        AaregService instans = lagAaregService();
+        Throwable unntak = catchThrowable(() -> instans.hentArbeidsforholdHistorikk(SIKKERHETSBEGRENSET_ID));
+        assertThat(unntak).isInstanceOf(SikkerhetsbegrensningException.class)
+            .hasMessageContaining("oppslag av arbeidsforhold");
+    }
+
+
+    private AaregService lagAaregService() {
+        FakeUnleash unleash = new FakeUnleash();
+        unleash.enable("melosys.aareg.rest");
+        // TODO, add mock webClient
+        return new AaregService(null, null, restConsumer, unleash);
+    }
+
+    private final String responsBody = """
         [
             {
                 "navArbeidsforholdId": 3065458,

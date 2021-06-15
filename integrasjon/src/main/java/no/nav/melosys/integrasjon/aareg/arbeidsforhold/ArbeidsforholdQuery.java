@@ -2,7 +2,7 @@ package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
 import java.util.Optional;
 
-public class ArbeidsfoholdQuery {
+public class ArbeidsforholdQuery {
     // Filter for regelverk (default = ALLE)
     // Available values : ALLE, A_ORDNINGEN, FOER_A_ORDNINGEN
     private String regelverk;
@@ -23,7 +23,7 @@ public class ArbeidsfoholdQuery {
     // Skal sporingsinformasjon inkluderes i respons? (default = true)
     private Boolean sporingsinformasjon;
 
-    private ArbeidsfoholdQuery() {
+    private ArbeidsforholdQuery() {
     }
 
     public String getRegelverk() {
@@ -104,8 +104,8 @@ public class ArbeidsfoholdQuery {
             return this;
         }
 
-        public ArbeidsfoholdQuery build() {
-            ArbeidsfoholdQuery arbeidsfoholdQuery = new ArbeidsfoholdQuery();
+        public ArbeidsforholdQuery build() {
+            ArbeidsforholdQuery arbeidsfoholdQuery = new ArbeidsforholdQuery();
             arbeidsfoholdQuery.regelverk = regelverk.toString();
             arbeidsfoholdQuery.arbeidsforholdType = arbeidsforholdType.toString();
             return arbeidsfoholdQuery;

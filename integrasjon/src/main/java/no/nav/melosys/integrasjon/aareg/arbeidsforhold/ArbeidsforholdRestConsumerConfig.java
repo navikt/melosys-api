@@ -23,7 +23,7 @@ public class ArbeidsforholdRestConsumerConfig implements RestConsumer {
     private static final Logger log = LoggerFactory.getLogger(ArbeidsforholdRestConsumerConfig.class);
 
     private static final String CONSUMER_ID = "srvmelosys";
-    private String url;
+    private final String url;
 
     @Autowired
     public ArbeidsforholdRestConsumerConfig(@Value("${arbeidsforhold.rest.url}") String url) {

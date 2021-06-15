@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.model.Arbeidsforhold;
 import no.nav.melosys.integrasjon.felles.RestConsumer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -15,7 +16,12 @@ public class ArbeidsforholdRestConsumer implements RestConsumer {
         this.webClient = webClient;
     }
 
-    public ArbeidsfoholdResponse[] finnArbeidsforholdPrArbeidstaker(String fnr, ArbeidsfoholdQuery arbeidsfoholdQuery) {
+    public ArbeidsfoholdResponse finnArbeidsforholdPrArbeidstaker(String fnr, ArbeidsforholdQuery arbeidsfoholdQuery) {
+        Arbeidsforhold[] arbeidsforholdResponse = hentArbeidsfohold(fnr, arbeidsfoholdQuery);
+        return new ArbeidsfoholdResponse(arbeidsforholdResponse);
+    }
+
+    private Arbeidsforhold[] hentArbeidsfohold(String fnr, ArbeidsforholdQuery arbeidsfoholdQuery) {
         return requireNonNull(
             webClient.get().uri("", uriBuilder ->
                 uriBuilder
@@ -28,7 +34,7 @@ public class ArbeidsforholdRestConsumer implements RestConsumer {
                 .header("Nav-Consumer-Token", getAuth())
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .bodyToMono(ArbeidsfoholdResponse[].class)
+                .bodyToMono(Arbeidsforhold[].class)
                 .block()
         );
     }

@@ -1,35 +1,21 @@
 package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.model.Arbeidstaker;
-
-import java.util.HashMap;
-import java.util.Map;
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.model.Arbeidsforhold;
 
 public class ArbeidsfoholdResponse {
-    private Map<String,Object>  unknownProperties = new HashMap<>();
 
-    private Integer navArbeidsforholdId;
+    private final Arbeidsforhold[] arbeidsforholdResponse;
 
-    private Arbeidstaker arbeidstaker;
-
-    public Arbeidstaker getArbeidstaker() {
-        return arbeidstaker;
+    public ArbeidsfoholdResponse(Arbeidsforhold[] arbeidsforholdResponse) {
+        this.arbeidsforholdResponse = arbeidsforholdResponse;
     }
 
-    public Integer getNavArbeidsforholdId() {
-        return navArbeidsforholdId;
+    public Arbeidsforhold[] getArbeidsforholdResponse() {
+        return arbeidsforholdResponse;
     }
 
-    @JsonAnySetter
-    void setUnknownProperty(String key, Object value) {
-        unknownProperties.put(key,value);
+    public String getJsonDocument() {
+        TODO: // serialize to json or find out if we want to convert to xml doc?
+        return  "json or xml?";
     }
-
-    @JsonAnyGetter
-    Object getUnknownProperty(String key) {
-        return unknownProperties.get(key);
-    }
-
 }
