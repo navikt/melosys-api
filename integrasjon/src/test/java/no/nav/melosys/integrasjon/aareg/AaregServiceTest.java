@@ -9,7 +9,7 @@ import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumer;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdMock;
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumerImpl;
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.HentArbeidsforholdHistorikkSikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.HentArbeidsforholdHistorikkRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -73,6 +73,6 @@ public class AaregServiceTest {
         FakeUnleash unleash = new FakeUnleash();
         unleash.enable("");
         // TODO, add mock webClient
-        return new AaregService(arbeidsforholdConsumer, dokumentFactory, new ArbeidsforholdRestConsumerImpl(null), unleash);
+        return new AaregService(arbeidsforholdConsumer, dokumentFactory, new ArbeidsforholdRestConsumer(null), unleash);
     }
 }

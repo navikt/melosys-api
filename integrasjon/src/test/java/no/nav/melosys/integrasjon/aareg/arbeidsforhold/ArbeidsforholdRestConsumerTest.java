@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -31,7 +30,7 @@ class ArbeidsforholdRestConsumerTest {
             .baseUrl("http://localhost:" + wireMockServer.port())
             .build();
 
-        restConsumer = new ArbeidsforholdRestConsumerImpl(webClient);
+        restConsumer = new ArbeidsforholdRestConsumer(webClient);
     }
 
     @AfterAll

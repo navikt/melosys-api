@@ -32,7 +32,7 @@ public class ArbeidsforholdRestConsumerConfig implements RestConsumer {
 
     @Bean
     ArbeidsforholdRestConsumer arbeidsforholdRestConsumer(WebClient.Builder webClientBuilder, SystemContextExchangeFilter systemContextExchangeFilter) {
-        return new ArbeidsforholdRestConsumerImpl(webClientBuilder
+        return new ArbeidsforholdRestConsumer(webClientBuilder
             .baseUrl(url)
             .filter(systemContextExchangeFilter)
             .filter(headerFilter())
