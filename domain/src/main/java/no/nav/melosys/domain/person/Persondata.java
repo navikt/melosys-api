@@ -19,10 +19,12 @@ public interface Persondata {
 
     boolean manglerBostedsadresse();
 
-    String getFnr();
+    String hentFolkeregisterIdent();
 
+    @Deprecated // Brukes bare til visning, som skal gå gjennom GraphQL
     Sivilstand getSivilstand();
 
+    @Deprecated // Brukes bare til visning, som skal gå gjennom GraphQL
     LocalDate getSivilstandGyldighetsperiodeFom();
 
     Land getStatsborgerskap();

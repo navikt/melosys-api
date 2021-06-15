@@ -53,7 +53,7 @@ public class TpsServiceTest {
         Saksopplysning saksopplysning = service.hentPerson(AKTØRID_1.toString(), Informasjonsbehov.INGEN);
 
         PersonDokument dokument = (PersonDokument) saksopplysning.getDokument();
-        assertThat(dokument.getFnr()).isEqualTo(AKTØRID_1.toString());
+        assertThat(dokument.hentFolkeregisterIdent()).isEqualTo(AKTØRID_1.toString());
     }
 
     @Test

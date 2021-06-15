@@ -26,7 +26,7 @@ public class PersonUtenAdresseDto {
     public PersonUtenAdresseDto() {}
 
     public PersonUtenAdresseDto(Persondata person) {
-        fnr = person.getFnr();
+        fnr = person.hentFolkeregisterIdent();
         sivilstand = person.getSivilstand();
         statsborgerskap = person.getStatsborgerskap();
         statsborgerskapDato = person.getStatsborgerskapDato();

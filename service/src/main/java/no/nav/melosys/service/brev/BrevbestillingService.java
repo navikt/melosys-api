@@ -194,7 +194,7 @@ public class BrevbestillingService {
 
         if (mottaker.getRolle() == Aktoersroller.BRUKER) {
             persondata = (Persondata) persondataFasade.hentPersonFraTps(
-                    behandling.hentPersonDokument().getFnr(), Informasjonsbehov.STANDARD).getDokument();
+                    behandling.hentPersonDokument().hentFolkeregisterIdent(), Informasjonsbehov.STANDARD).getDokument();
 
             } else if (mottaker.getRolle() == Aktoersroller.ARBEIDSGIVER || mottaker.getRolle() == Aktoersroller.REPRESENTANT) {
                 kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), mottaker.getOrgnr()).orElse(null);

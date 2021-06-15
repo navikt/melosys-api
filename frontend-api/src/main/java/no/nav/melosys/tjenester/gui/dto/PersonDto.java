@@ -12,7 +12,7 @@ import no.nav.melosys.domain.person.Persondata;
 public class PersonDto {
 
     public PersonDto(Persondata person) {
-        fnr = person.getFnr();
+        fnr = person.hentFolkeregisterIdent();
         sivilstand = person.getSivilstand();
         statsborgerskap = person.getStatsborgerskap();
         sammensattNavn = person.getSammensattNavn();

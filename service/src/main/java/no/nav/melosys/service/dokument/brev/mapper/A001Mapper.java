@@ -144,7 +144,7 @@ class A001Mapper {
         person.setStatsborgerskapListe(mapStatsborgerskapListe(personDok));
         person.setKjønn(KjoennKode.fromValue(personDok.getKjønn().getKode()));
         person.setBostedsadresse(mapBostedAdresse(bostedsadresse));
-        person.setFødselsnummer(personDok.getFnr());
+        person.setFødselsnummer(personDok.hentFolkeregisterIdent());
         //Fødeland og Fødested skal ikke fylles ut
         utenlandskIdent.ifPresent(person::setUtenlandskID);
         try {

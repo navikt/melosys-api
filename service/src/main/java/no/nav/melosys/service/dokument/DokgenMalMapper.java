@@ -48,7 +48,7 @@ public class DokgenMalMapper {
     public DokgenDto mapBehandling(DokgenBrevbestilling brevbestilling) {
         DokgenDto dto;
         if (brevbestilling.getOrg() == null) {
-            String fnr = brevbestilling.getBehandling().hentPersonDokument().getFnr();
+            String fnr = brevbestilling.getBehandling().hentPersonDokument().hentFolkeregisterIdent();
             //NOTE Henter opplysninger på nytt for å sikre at korrekt adresse benyttes
             Persondata persondata = (Persondata) persondataFasade.hentPersonFraTps(fnr, Informasjonsbehov.STANDARD).getDokument();
             brevbestilling.toBuilder().medPersonDokument(persondata).build();

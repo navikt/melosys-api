@@ -214,7 +214,7 @@ public class SedDataBygger {
         Bruker bruker = new Bruker();
         bruker.setEtternavn(persondata.getEtternavn());
         bruker.setFornavn(persondata.getFornavn());
-        bruker.setFnr(persondata.getFnr());
+        bruker.setFnr(persondata.hentFolkeregisterIdent());
         bruker.setFoedseldato(persondata.getFødselsdato());
         bruker.setKjoenn(persondata.getKjønn().getKode());
         bruker.setStatsborgerskap(persondata.getStatsborgerskap().getKode());

@@ -69,7 +69,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
     }
 
     @Override
-    public String getFnr() {
+    public String hentFolkeregisterIdent() {
         return fnr;
     }
 
