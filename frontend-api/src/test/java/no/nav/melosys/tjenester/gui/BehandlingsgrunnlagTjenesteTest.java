@@ -21,7 +21,6 @@ import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.jeasy.random.randomizers.misc.EnumRandomizer;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -37,7 +36,6 @@ import static org.jeasy.random.FieldPredicates.ofType;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
-@Disabled // TODO PR i schema kommer
 @ExtendWith(MockitoExtension.class)
 public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
     private static final Logger log = LoggerFactory.getLogger(BehandlingsgrunnlagTjenesteTest.class);

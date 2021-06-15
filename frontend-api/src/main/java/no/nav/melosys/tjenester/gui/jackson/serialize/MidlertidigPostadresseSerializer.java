@@ -9,18 +9,18 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import no.nav.melosys.domain.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.MidlertidigPostadresseDto;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.adresse.UstrukturertAdresse;
+import no.nav.melosys.tjenester.gui.dto.StrukturertAdresseDto;
 
 import static no.nav.melosys.domain.FellesKodeverk.POSTNUMMER;
 
 public class MidlertidigPostadresseSerializer extends StdSerializer<no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse> {
 
-    private transient KodeverkService kodeverkService;
+    private final transient KodeverkService kodeverkService;
 
     public MidlertidigPostadresseSerializer(KodeverkService kodeverkService) {
         super(no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse.class);
@@ -31,25 +31,21 @@ public class MidlertidigPostadresseSerializer extends StdSerializer<no.nav.melos
     public void serialize(no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse midlertidigPostadresse, JsonGenerator generator, SerializerProvider provider) throws IOException {
         MidlertidigPostadresseDto dto = new MidlertidigPostadresseDto();
 
-        if (midlertidigPostadresse instanceof MidlertidigPostadresseNorge) {
-            MidlertidigPostadresseNorge adresse = (MidlertidigPostadresseNorge) midlertidigPostadresse;
-            dto.strukturertAdresse = new StrukturertAdresse();
-
-            dto.strukturertAdresse.setGatenavn(adresse.gateadresse.getGatenavn());
-            dto.strukturertAdresse.setHusnummerEtasjeLeilighet(Stream.of(
-                adresse.gateadresse.getHusbokstav(),
-                adresse.gateadresse.getHusnummer()
-            ).filter(Objects::nonNull).map(Objects::toString).collect(Collectors.joining(" ")));
-            dto.strukturertAdresse.setPostnummer(adresse.poststed);
-            dto.strukturertAdresse.setPoststed(kodeverkService.dekod(POSTNUMMER, adresse.poststed, LocalDate.now()));
-
-            if (midlertidigPostadresse.land != null) {
-                dto.strukturertAdresse.setLandkode(midlertidigPostadresse.land.getKode());
-            }
+        if (midlertidigPostadresse instanceof MidlertidigPostadresseNorge adresse) {
+            dto.strukturertAdresse = new StrukturertAdresseDto(
+                adresse.gateadresse.getGatenavn(),
+                Stream.of(
+                    adresse.gateadresse.getHusbokstav(),
+                    adresse.gateadresse.getHusnummer()
+                ).filter(Objects::nonNull).map(Objects::toString).collect(Collectors.joining(" ")),
+                adresse.poststed,
+                kodeverkService.dekod(POSTNUMMER, adresse.poststed, LocalDate.now()),
+                null,
+                midlertidigPostadresse.land != null ? midlertidigPostadresse.land.getKode() : null
+            );
             dto.adressetype = MidlertidigPostadresseDto.Adressetype.STRUKTURERT;
 
-        } else if (midlertidigPostadresse instanceof MidlertidigPostadresseUtland) {
-            MidlertidigPostadresseUtland adresse = (MidlertidigPostadresseUtland) midlertidigPostadresse;
+        } else if (midlertidigPostadresse instanceof MidlertidigPostadresseUtland adresse) {
             dto.ustrukturertAdresse = UstrukturertAdresse.av(adresse);
             dto.adressetype = MidlertidigPostadresseDto.Adressetype.USTRUKTURERT;
         }

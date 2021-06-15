@@ -13,7 +13,7 @@ public class MidlertidigPostadresseDto {
 
     public Adressetype adressetype;
 
-    public StrukturertAdresse strukturertAdresse;
+    public StrukturertAdresseDto strukturertAdresse;
 
     public UstrukturertAdresse ustrukturertAdresse;
 }
