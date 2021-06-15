@@ -20,7 +20,7 @@ public class DokgenConsumer {
     public byte[] lagPdf(String malNavn, DokgenDto dokgenDto, boolean bestillKopi) {
         log.info("Produserer PDF i melosys-dokgen. Mal: {}", malNavn);
         return webClient.post()
-            .uri("/mal/{malNavn}/lag-pdf?somKopi={somKopi}", malNavn, bestillKopi)
+            .uri("/mal/{malNavn}/lag-pdf?somKopi={bestillKopi}", malNavn, bestillKopi)
             .bodyValue(dokgenDto)
             .retrieve()
             .bodyToMono(byte[].class)
