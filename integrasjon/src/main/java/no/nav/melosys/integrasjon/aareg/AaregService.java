@@ -55,11 +55,29 @@ public class AaregService implements AaregFasade {
 
     @Override
     public Saksopplysning finnArbeidsforholdPrArbeidstaker(String ident, LocalDate fom, LocalDate tom) {
-        if(unleash.isEnabled("melosys.aareg.rest")) {
-            ArbeidsfoholdQuery arbeidsfoholdQuery = new ArbeidsfoholdQuery();
-            ArbeidsfoholdResponse[] result = arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker("123", arbeidsfoholdQuery);
+        if (unleash.isEnabled("melosys.aareg.rest")) {
+            finnArbeidsforholdPrArbeidstakerRest(ident, fom, tom);
         }
+        return finnArbeidsforholdPrArbeidstakerSOAP(ident, fom, tom);
+    }
 
+    private Saksopplysning finnArbeidsforholdPrArbeidstakerRest(String ident, LocalDate fom, LocalDate tom) {
+        ArbeidsfoholdQuery arbeidsfoholdQuery = new ArbeidsfoholdQuery
+            .Builder()
+            .arbeidsforholdType(ArbeidsfoholdQuery.ArbeidsforholdType.ALLE)
+            .build();
+        ArbeidsfoholdResponse[] result = arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker(ident, arbeidsfoholdQuery);
+
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.leggTilKildesystemOgMottattDokument(
+            SaksopplysningKildesystem.AAREG, null);
+        saksopplysning.setType(SaksopplysningType.ARBFORH);
+        saksopplysning.setVersjon(ARBEIDSFORHOLD_VERSJON);
+
+        return saksopplysning;
+    }
+
+    private Saksopplysning finnArbeidsforholdPrArbeidstakerSOAP(String ident, LocalDate fom, LocalDate tom) {
         FinnArbeidsforholdPrArbeidstakerRequest request = new FinnArbeidsforholdPrArbeidstakerRequest();
 
         NorskIdent norskIdent = new NorskIdent();

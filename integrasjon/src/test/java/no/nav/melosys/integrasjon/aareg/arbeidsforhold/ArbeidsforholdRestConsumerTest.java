@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.model.Arbeidstaker;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -44,7 +45,7 @@ class ArbeidsforholdRestConsumerTest {
 
         wireMockServer.stubFor(get(urlPathEqualTo("/"))
             .withHeader("Nav-Personident", equalTo(fnr))
-            .withQueryParam("arbeidsforholdType", equalTo("ALLE"))
+            .withQueryParam("regelverk", equalTo("ALLE"))
             .willReturn(aResponse()
                 .withStatus(200)
                 .withHeader("Content-Type", "application/json")
@@ -52,10 +53,20 @@ class ArbeidsforholdRestConsumerTest {
             )
         );
 
-        ArbeidsfoholdResponse[] arbeidsfoholdResponse = restConsumer.finnArbeidsforholdPrArbeidstaker(fnr, new ArbeidsfoholdQuery());
+        ArbeidsfoholdQuery arbeidsfoholdQuery = new ArbeidsfoholdQuery
+            .Builder()
+            .regelverk(ArbeidsfoholdQuery.Regelverk.ALLE)
+            .arbeidsforholdType(ArbeidsfoholdQuery.ArbeidsforholdType.ALLE)
+            .build();
+        ArbeidsfoholdResponse[] arbeidsfoholdResponse = restConsumer.finnArbeidsforholdPrArbeidstaker(fnr, arbeidsfoholdQuery);
 
         assertThat(arbeidsfoholdResponse.length).isEqualTo(1);
-        assertThat(arbeidsfoholdResponse[0].getNavArbeidsforholdId()).isEqualTo(3065458);
+        ArbeidsfoholdResponse arbeidsfoholdResponse1 = arbeidsfoholdResponse[0];
+        assertThat(arbeidsfoholdResponse1.getNavArbeidsforholdId()).isEqualTo(3065458);
+
+        Arbeidstaker arbeidstaker = arbeidsfoholdResponse1.getArbeidstaker();
+        assertThat(arbeidstaker.getType()).isEqualTo("Person");
+        assertThat(arbeidstaker.getAktoerId()).isEqualTo("1685359155300");
     }
 
     String responsBody = """

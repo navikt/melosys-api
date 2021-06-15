@@ -20,7 +20,9 @@ public class ArbeidsforholdRestConsumerImpl implements ArbeidsforholdRestConsume
         return requireNonNull(
             webClient.get().uri("", uriBuilder ->
                 uriBuilder
-                    .queryParam("arbeidsforholdType", arbeidsfoholdQuery.arbeidsforholdType) // TODO: add all supported params
+                    .queryParam("regelverk", arbeidsfoholdQuery.getRegelverk())
+                    .queryParamIfPresent("arbeidsforholdType", arbeidsfoholdQuery.getArbeidsforholdType())
+                    // TODO: add all more params
                     .build())
                 .header("Nav-Personident", fnr)
                 .header(HttpHeaders.AUTHORIZATION, getAuth())
