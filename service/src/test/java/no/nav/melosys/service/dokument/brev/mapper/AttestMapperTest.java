@@ -79,8 +79,7 @@ public class AttestMapperTest {
         person.setFornavn("Ola");
         person.setEtternavn("Nordmann");
         person.setFødselsdato(LocalDate.now());
-        person.setStatsborgerskap(new Land());
-        person.getStatsborgerskap().setKode(Land.NORGE);
+        person.setStatsborgerskap(new Land(Land.NORGE));
 
         behandling = mock(Behandling.class);
         when(behandling.getRegistrertDato()).thenReturn(Instant.now());

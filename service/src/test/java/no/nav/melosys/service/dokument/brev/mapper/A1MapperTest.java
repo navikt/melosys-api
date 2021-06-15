@@ -19,10 +19,10 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.LuftfartBase;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -40,8 +40,10 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
 import org.apache.commons.lang3.StringUtils;
 import org.jeasy.random.EasyRandom;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.xml.sax.SAXException;
 
 import static java.util.function.Predicate.not;
@@ -53,6 +55,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class A1MapperTest {
 
     private A1Mapper mapper;
@@ -66,8 +69,8 @@ class A1MapperTest {
     private FellesType fellesType;
     private MelosysNAVFelles navFelles;
 
-    @BeforeEach
-    public void setUp() {
+    @BeforeAll
+    public void felleSetup() {
         mapper = new A1Mapper();
         easyRandom = EasyRandomConfigurer.randomForDokProd();
 
@@ -85,6 +88,13 @@ class A1MapperTest {
         when(behandlingsresultat.getLovvalgsperioder()).thenReturn(new HashSet<>(Collections.singletonList(lovvalgsperiode)));
         when(behandlingsresultat.hentValidertLovvalgsperiode()).thenReturn(lovvalgsperiode);
 
+        behandling = mock(Behandling.class);
+        when(behandling.getRegistrertDato()).thenReturn(Instant.now());
+        when(behandling.getFagsak()).thenReturn(new Fagsak());
+    }
+
+    @BeforeEach
+    public void setUp() {
         StrukturertAdresse boAdresse = new StrukturertAdresse();
         boAdresse.setHusnummerEtasjeLeilighet("12B");
         boAdresse.setGatenavn("Bogata");
@@ -93,27 +103,22 @@ class A1MapperTest {
         boAdresse.setRegion("Region");
         boAdresse.setLandkode(Landkoder.NO.getKode());
 
-        behandling = mock(Behandling.class);
-        when(behandling.getRegistrertDato()).thenReturn(Instant.now());
-        when(behandling.getFagsak()).thenReturn(new Fagsak());
-
         StrukturertAdresse strukturertAdresse = lagStrukturertAdresse();
 
         AvklartVirksomhet virksomhet = new AvklartVirksomhet("Jarlsberg",
-                                                           "123456789",
-                                                            strukturertAdresse,
-                                                            Yrkesaktivitetstyper.LOENNET_ARBEID);
+            "123456789",
+            strukturertAdresse,
+            Yrkesaktivitetstyper.LOENNET_ARBEID);
 
         AvklartVirksomhet utenlandskVirksomhet = new AvklartVirksomhet("JARLSBERG INTERNATIONAL",
-                                                                        "123456789",
-                                                                        strukturertAdresse,
-                                                                        Yrkesaktivitetstyper.LOENNET_ARBEID);
+            "123456789",
+            strukturertAdresse,
+            Yrkesaktivitetstyper.LOENNET_ARBEID);
 
         Arbeidssted fysiskArbeidssted = new FysiskArbeidssted("JARLSBERG INTERNATIONAL", "123456789", strukturertAdresse);
 
         Arbeidssted maritimtArbeidsstedSkip = lagMaritimtArbeidssted(Maritimtyper.SKIP);
         MaritimtArbeidssted maritimtArbeidsstedSokkel = (MaritimtArbeidssted) lagMaritimtArbeidssted(Maritimtyper.SOKKEL);
-
         brevData = new BrevDataA1();
         brevData.yrkesgruppe = Yrkesgrupper.ORDINAER;
         brevData.bostedsadresse = boAdresse;
@@ -139,8 +144,7 @@ class A1MapperTest {
         person.setFornavn("Ola");
         person.setEtternavn("Nordmann");
         person.setFødselsdato(LocalDate.now());
-        person.setStatsborgerskap(new Land());
-        person.getStatsborgerskap().setKode("NOR");
+        person.setStatsborgerskap(new Land(Land.NORGE));
         return person;
     }
 

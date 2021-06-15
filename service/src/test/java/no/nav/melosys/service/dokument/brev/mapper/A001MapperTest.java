@@ -79,8 +79,7 @@ public class A001MapperTest {
         person.setEtternavn("Nordmann");
         person.setFødselsdato(LocalDate.now());
         person.setFnr("123456789");
-        person.setStatsborgerskap(new Land());
-        person.getStatsborgerskap().setKode("NO");
+        person.setStatsborgerskap(new Land(Land.NORGE));
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.PERSOPL);

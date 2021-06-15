@@ -14,7 +14,7 @@ public class PersonDto {
     public PersonDto(Persondata person) {
         fnr = person.hentFolkeregisterIdent();
         sivilstand = person.getSivilstand();
-        statsborgerskap = person.getStatsborgerskap();
+        statsborgerskap = person.hentAlleStatsborgerskap().stream().findFirst().orElse(null);
         sammensattNavn = person.getSammensattNavn();
         personstatus = person.getPersonstatus();
         kjoenn = person.getKjønn();

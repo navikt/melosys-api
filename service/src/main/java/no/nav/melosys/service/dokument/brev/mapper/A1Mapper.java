@@ -14,8 +14,8 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.person.Persondata;
@@ -36,7 +36,7 @@ class A1Mapper {
     private static final int ANTALL_PÅKREVDE_FELTER_I_LISTE_5_1 = 15;
     private static final int ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2 = 13;
     static final int MAKS_ANTALL_TEGN_PER_LINJE_5_2 = 70;
-    private static final String STATSLØS = "Stateless";
+    private static final String STATSLØS_TEKST = "Stateless";
 
     private BrevDataA1 brevData;
 
@@ -71,7 +71,7 @@ class A1Mapper {
     private PersonType mapPerson(Persondata persondata) {
         PersonType person = new PersonType();
         person.setKjoenn(KjoennKode.fromValue(persondata.getKjønn().getKode()));
-        person.setStatsborgerskap(mapStatsborgerskap(persondata.getStatsborgerskap()));
+        person.setStatsborgerskap(mapStatsborgerskap(persondata.hentAlleStatsborgerskap()));
 
         person.setPersonnavn(lagPersonnavn(persondata));
 
@@ -85,12 +85,11 @@ class A1Mapper {
         return person;
     }
 
-    private static String mapStatsborgerskap(Land statsborgerskap) {
-        if (statsborgerskap.erStatsløs()) {
-            return STATSLØS;
-        } else {
-            return LandkoderUtils.tilIso2(statsborgerskap.getKode());
+    private static String mapStatsborgerskap(Set<Land> statsborgerskap) {
+        if (statsborgerskap.contains(Land.av(Land.STATSLØS))) {
+            return STATSLØS_TEKST;
         }
+        return statsborgerskap.stream().map(s -> LandkoderUtils.tilIso2(s.getKode())).collect(Collectors.joining(","));
     }
 
     private LovvalgsperiodeType mapLovvalgsperiode(Lovvalgsperiode lovvalgsperiode) {

@@ -74,7 +74,7 @@ class InngangsvilkaarServiceTest {
 
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, periode);
 
-        verify(inngangsvilkaarConsumer).vurderInngangsvilkår(Set.of(personDokument.getStatsborgerskap()),
+        verify(inngangsvilkaarConsumer).vurderInngangsvilkår(personDokument.hentAlleStatsborgerskap(),
             Set.copyOf(tilIso3(landkoder)), periode);
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR, true, Collections.emptySet());
     }
@@ -169,7 +169,7 @@ class InngangsvilkaarServiceTest {
 
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, periode);
 
-        verify(inngangsvilkaarConsumer).vurderInngangsvilkår(Set.of(personDokument.getStatsborgerskap()),
+        verify(inngangsvilkaarConsumer).vurderInngangsvilkår(personDokument.hentAlleStatsborgerskap(),
             Set.copyOf(tilIso3(landkoder)), periode);
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR,
             false, Set.of(Inngangsvilkaar.TEKNISK_FEIL));

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
@@ -66,6 +67,11 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
     @Override
     public boolean harBeskyttelsesbehov() {
         return diskresjonskode != null && diskresjonskode.erKode6();
+    }
+
+    @Override
+    public Set<Land> hentAlleStatsborgerskap() {
+        return Set.of(statsborgerskap);
     }
 
     @Override

@@ -28,7 +28,7 @@ public class PersonUtenAdresseDto {
     public PersonUtenAdresseDto(Persondata person) {
         fnr = person.hentFolkeregisterIdent();
         sivilstand = person.getSivilstand();
-        statsborgerskap = person.getStatsborgerskap();
+        statsborgerskap = person.hentAlleStatsborgerskap().stream().findFirst().orElse(null);
         statsborgerskapDato = person.getStatsborgerskapDato();
         sammensattNavn = person.getSammensattNavn();
         if (person.getFamiliemedlemmer() != null) {
