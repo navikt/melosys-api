@@ -7,10 +7,11 @@ import java.util.List;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.*;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
+import no.nav.melosys.domain.person.Persondata;
 
 public class PersonDto {
 
-    public PersonDto(PersonDokument person) {
+    public PersonDto(Persondata person) {
         fnr = person.getFnr();
         sivilstand = person.getSivilstand();
         statsborgerskap = person.getStatsborgerskap();

@@ -43,16 +43,19 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
     @JsonProperty(defaultValue = "false" )
     private boolean erEgenAnsatt;
 
+    @Override
     public boolean harIkkeRegistrertAdresse() {
         return bostedsadresse.erTom() &&
             postadresse.erTom() &&
             midlertidigPostadresse.land == null;
     }
 
+    @Override
     public boolean manglerBostedsadresse() {
         return bostedsadresse.erTom();
     }
 
+    @Override
     public Optional<Familiemedlem> hentAnnenForelder(String fnrGjeldendeForelder) {
         return familiemedlemmer.stream()
             .filter(Familiemedlem::erForelder)
@@ -60,10 +63,12 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
             .findAny();
     }
 
+    @Override
     public boolean harBeskyttelsesbehov() {
         return diskresjonskode != null && diskresjonskode.erKode6();
     }
 
+    @Override
     public String getFnr() {
         return fnr;
     }
@@ -72,6 +77,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.fnr = fnr;
     }
 
+    @Override
     public Sivilstand getSivilstand() {
         return sivilstand;
     }
@@ -80,6 +86,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.sivilstand = sivilstand;
     }
 
+    @Override
     public LocalDate getSivilstandGyldighetsperiodeFom() {
         return sivilstandGyldighetsperiodeFom;
     }
@@ -89,6 +96,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
     }
 
     /** Kodeverk: Landkoder */
+    @Override
     public Land getStatsborgerskap() {
         return statsborgerskap;
     }
@@ -98,6 +106,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
     }
 
     /** Kodeverk: Kjønnstyper */
+    @Override
     public KjoennsType getKjønn() {
         return kjønn;
     }
@@ -106,6 +115,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.kjønn = kjønn;
     }
 
+    @Override
     public String getFornavn() {
         return fornavn;
     }
@@ -114,6 +124,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.fornavn = fornavn;
     }
 
+    @Override
     public String getMellomnavn() {
         return mellomnavn;
     }
@@ -122,6 +133,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.mellomnavn = mellomnavn;
     }
 
+    @Override
     public String getEtternavn() {
         return etternavn;
     }
@@ -130,6 +142,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.etternavn = etternavn;
     }
 
+    @Override
     public String getSammensattNavn() {
         return sammensattNavn;
     }
@@ -138,6 +151,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.sammensattNavn = sammensattNavn;
     }
 
+    @Override
     public List<Familiemedlem> getFamiliemedlemmer() {
         return familiemedlemmer;
     }
@@ -146,6 +160,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.familiemedlemmer = familiemedlemmer;
     }
 
+    @Override
     public LocalDate getFødselsdato() {
         return fødselsdato;
     }
@@ -154,6 +169,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.fødselsdato = fødselsdato;
     }
 
+    @Override
     public LocalDate getDødsdato() {
         return dødsdato;
     }
@@ -162,6 +178,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.dødsdato = dødsdato;
     }
 
+    @Override
     public Diskresjonskode getDiskresjonskode() {
         return diskresjonskode;
     }
@@ -170,6 +187,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.diskresjonskode = diskresjonskode;
     }
 
+    @Override
     public Personstatus getPersonstatus() {
         return personstatus;
     }
@@ -178,6 +196,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.personstatus = personstatus;
     }
 
+    @Override
     public LocalDate getStatsborgerskapDato() {
         return statsborgerskapDato;
     }
@@ -186,6 +205,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.statsborgerskapDato = statsborgerskapDato;
     }
 
+    @Override
     public Bostedsadresse getBostedsadresse() {
         return bostedsadresse;
     }
@@ -194,6 +214,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.bostedsadresse = bostedsadresse;
     }
 
+    @Override
     public UstrukturertAdresse getPostadresse() {
         return postadresse;
     }
@@ -202,6 +223,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.postadresse = postadresse;
     }
 
+    @Override
     public MidlertidigPostadresse getMidlertidigPostadresse() {
         return midlertidigPostadresse;
     }
@@ -210,6 +232,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.midlertidigPostadresse = midlertidigPostadresse;
     }
 
+    @Override
     public UstrukturertAdresse getGjeldendePostadresse() {
         return gjeldendePostadresse;
     }

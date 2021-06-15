@@ -11,11 +11,11 @@ import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.Diskresjonskode;
 import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.dokument.person.Familierelasjon;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -210,15 +210,15 @@ public class SedDataBygger {
         return arbeidssted;
     }
 
-    private static Bruker hentBrukerFraPersonDokument(PersonDokument personDokument) {
+    private static Bruker hentBrukerFraPersonDokument(Persondata persondata) {
         Bruker bruker = new Bruker();
-        bruker.setEtternavn(personDokument.getEtternavn());
-        bruker.setFornavn(personDokument.getFornavn());
-        bruker.setFnr(personDokument.getFnr());
-        bruker.setFoedseldato(personDokument.getFødselsdato());
-        bruker.setKjoenn(personDokument.getKjønn().getKode());
-        bruker.setStatsborgerskap(personDokument.getStatsborgerskap().getKode());
-        bruker.setHarSensitiveOpplysninger(hentHarSensitiveOpplysninger(personDokument.getDiskresjonskode()));
+        bruker.setEtternavn(persondata.getEtternavn());
+        bruker.setFornavn(persondata.getFornavn());
+        bruker.setFnr(persondata.getFnr());
+        bruker.setFoedseldato(persondata.getFødselsdato());
+        bruker.setKjoenn(persondata.getKjønn().getKode());
+        bruker.setStatsborgerskap(persondata.getStatsborgerskap().getKode());
+        bruker.setHarSensitiveOpplysninger(hentHarSensitiveOpplysninger(persondata.getDiskresjonskode()));
 
         return bruker;
 

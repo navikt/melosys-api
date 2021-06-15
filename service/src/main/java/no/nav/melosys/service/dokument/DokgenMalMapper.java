@@ -10,9 +10,9 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.person.Informasjonsbehov;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
@@ -50,8 +50,8 @@ public class DokgenMalMapper {
         if (brevbestilling.getOrg() == null) {
             String fnr = brevbestilling.getBehandling().hentPersonDokument().getFnr();
             //NOTE Henter opplysninger på nytt for å sikre at korrekt adresse benyttes
-            PersonDokument personDokument = (PersonDokument) persondataFasade.hentPersonFraTps(fnr, Informasjonsbehov.STANDARD).getDokument();
-            brevbestilling.toBuilder().medPersonDokument(personDokument).build();
+            Persondata persondata = (Persondata) persondataFasade.hentPersonFraTps(fnr, Informasjonsbehov.STANDARD).getDokument();
+            brevbestilling.toBuilder().medPersonDokument(persondata).build();
         }
         switch (brevbestilling.getProduserbartdokument()) {
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID:

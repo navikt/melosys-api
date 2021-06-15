@@ -18,6 +18,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -206,8 +207,8 @@ public class Behandling extends RegistreringsInfo {
             .orElseThrow(() -> new TekniskException("Finner ikke persondokument"));
     }
 
-    public Optional<PersonDokument> finnPersonDokument() {
-        return hentDokument(SaksopplysningType.PERSOPL).map(s -> (PersonDokument) s);
+    public Optional<Persondata> finnPersonDokument() {
+        return hentDokument(SaksopplysningType.PERSOPL).map(s -> (Persondata) s);
     }
 
     public MedlemskapDokument hentMedlemskapDokument() {

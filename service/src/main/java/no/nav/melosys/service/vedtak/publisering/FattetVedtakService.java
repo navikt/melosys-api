@@ -9,10 +9,10 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.pdl.dto.person.Navn;
 import no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap;
@@ -71,8 +71,8 @@ public class FattetVedtakService {
         );
     }
 
-    private Sak lagSak(Behandling behandling, Fagsak fagsak, PersonDokument personDokument) {
-        return new Sak(personDokument.getFnr(),
+    private Sak lagSak(Behandling behandling, Fagsak fagsak, Persondata persondata) {
+        return new Sak(persondata.getFnr(),
             behandling.getId(),
             fagsak.getSaksnummer(),
             fagsak.getType(),
@@ -102,14 +102,14 @@ public class FattetVedtakService {
         );
     }
 
-    private Saksopplysninger lagSaksopplysninger(PersonDokument personDokument) {
+    private Saksopplysninger lagSaksopplysninger(Persondata persondata) {
         return new Saksopplysninger(
-            new Person(personDokument.getFnr(),
-                new Navn(personDokument.getFornavn(), personDokument.getMellomnavn(), personDokument.getEtternavn(),
+            new Person(persondata.getFnr(),
+                new Navn(persondata.getFornavn(), persondata.getMellomnavn(), persondata.getEtternavn(),
                     null
                 ),
                 new Statsborgerskap(
-                    personDokument.getStatsborgerskap().getKode(),
+                    persondata.getStatsborgerskap().getKode(),
                     null,
                     null,
                     null,

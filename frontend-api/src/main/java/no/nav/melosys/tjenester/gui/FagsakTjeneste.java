@@ -11,8 +11,8 @@ import no.nav.melosys.domain.RegistreringsInfo;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.abac.TilgangService;
@@ -263,7 +263,7 @@ public class FagsakTjeneste {
             return UKJENT_SAMMENSATT_NAVN;
         }
 
-        Optional<PersonDokument> saksopplysningPerson = saksopplysningerService.finnPersonOpplysninger(behandlinger.get(0).getId());
+        Optional<Persondata> saksopplysningPerson = saksopplysningerService.finnPersonOpplysninger(behandlinger.get(0).getId());
         if (saksopplysningPerson.isPresent()) {
             return saksopplysningPerson.get().getSammensattNavn();
         } else {

@@ -5,8 +5,8 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.JournalpostBestilling;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -61,7 +61,7 @@ public class OpprettJournalforBrev implements StegBehandler {
             throw new FunksjonellException("Prosessinstans mangler behandling");
         }
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
-        PersonDokument personDokument = behandling.hentPersonDokument();
+        Persondata persondata = behandling.hentPersonDokument();
         var brevbestilling = prosessinstans.getData(BREVBESTILLING, DokgenBrevbestilling.class);
         Produserbaredokumenter produserbartDokument = brevbestilling.getProduserbartdokument();
 
@@ -93,7 +93,7 @@ public class OpprettJournalforBrev implements StegBehandler {
             .medTittel(dokumentproduksjonsInfo.journalføringsTittel())
             .medBrevkode(dokumentproduksjonsInfo.dokgenMalnavn())
             .medDokumentKategori(dokumentproduksjonsInfo.dokumentKategoriKode())
-            .medBrukerFnr(personDokument.getFnr())
+            .medBrukerFnr(persondata.getFnr())
             .medMottakerNavn(hasText(orgnr) ? eregFasade.hentOrganisasjonNavn(orgnr) : sammensattNavn)
             .medMottakerId(hasText(orgnr) ? orgnr : fnr)
             .medErMottakerOrg(hasText(orgnr))

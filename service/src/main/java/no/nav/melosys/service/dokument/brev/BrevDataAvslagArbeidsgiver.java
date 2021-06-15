@@ -4,8 +4,8 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.person.Persondata;
 
 
 public class BrevDataAvslagArbeidsgiver extends BrevData {
@@ -13,7 +13,7 @@ public class BrevDataAvslagArbeidsgiver extends BrevData {
         this.saksbehandler = saksbehandler;
     }
 
-    public PersonDokument person;
+    public Persondata person;
     public AvklartVirksomhet hovedvirksomhet;
     public Lovvalgsperiode lovvalgsperiode;
     public String arbeidsland;

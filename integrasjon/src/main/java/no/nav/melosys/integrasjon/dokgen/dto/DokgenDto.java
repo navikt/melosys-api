@@ -12,7 +12,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.person.Persondata;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper.*;
@@ -42,18 +42,19 @@ public abstract class DokgenDto {
         Behandling behandling = brevbestilling.getBehandling();
         OrganisasjonDokument org = brevbestilling.getOrg();
         Fagsak fagsak = behandling.getFagsak();
-        PersonDokument personDokument = brevbestilling.getPersondokument() == null ?
+        Persondata persondata = brevbestilling.getPersondokument() == null ?
             brevbestilling.getBehandling().hentPersonDokument() : brevbestilling.getPersondokument();
 
-        this.fnr = personDokument.getFnr();
+        this.fnr = persondata.getFnr();
         this.saksnummer = fagsak.getSaksnummer();
         this.dagensDato = Instant.now();
-        this.navnBruker = personDokument.getSammensattNavn();
-        this.navnMottaker = mapMottakerNavn(org, personDokument);
-        this.adresselinjer = mapAdresselinjer(org, brevbestilling.getKontaktpersonNavn(), brevbestilling.getKontaktopplysning(), personDokument);
-        this.postnr = mapPostnr(org, personDokument);
-        this.poststed = mapPoststed(org, personDokument);
-        this.land = mapLandForAdresse(org, personDokument);
+        this.navnBruker = persondata.getSammensattNavn();
+        this.navnMottaker = mapMottakerNavn(org, persondata);
+        this.adresselinjer = mapAdresselinjer(org, brevbestilling.getKontaktpersonNavn(), brevbestilling.getKontaktopplysning(),
+            persondata);
+        this.postnr = mapPostnr(org, persondata);
+        this.poststed = mapPoststed(org, persondata);
+        this.land = mapLandForAdresse(org, persondata);
     }
 
     public String getFnr() {

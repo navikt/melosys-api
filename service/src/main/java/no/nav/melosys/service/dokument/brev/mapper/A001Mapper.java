@@ -16,8 +16,8 @@ import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
@@ -45,7 +45,7 @@ class A001Mapper {
 
         seda001.setTrygdemyndighet(mapTrygdemyndighet(brevData.utenlandskMyndighet));
 
-        seda001.setPerson(mapPerson(brevData.personDokument, brevData.bostedsadresse, brevData.utenlandskIdent));
+        seda001.setPerson(mapPerson(brevData.persondata, brevData.bostedsadresse, brevData.utenlandskIdent));
 
         seda001.setSelvstendigNæringsvirksomhetListe(mapSelvstendigvirksometliste(brevData.selvstendigeVirksomheter));
         seda001.setForetakListe(mapForetakliste(brevData.arbeidsgivendeVirksomheter));
@@ -138,7 +138,7 @@ class A001Mapper {
         return trygdemyndighet;
     }
 
-    private PersonType mapPerson(PersonDokument personDok, StrukturertAdresse bostedsadresse, Optional<String> utenlandskIdent) {
+    private PersonType mapPerson(Persondata personDok, StrukturertAdresse bostedsadresse, Optional<String> utenlandskIdent) {
         PersonType person = new PersonType();
         person.setPersonnavn(lagPersonnavn(personDok));
         person.setStatsborgerskapListe(mapStatsborgerskapListe(personDok));
@@ -156,7 +156,7 @@ class A001Mapper {
         return person;
     }
 
-    private StatsborgerskapListeType mapStatsborgerskapListe(PersonDokument personDok) {
+    private StatsborgerskapListeType mapStatsborgerskapListe(Persondata personDok) {
         StatsborgerskapType statsborgerskap = new StatsborgerskapType();
         statsborgerskap.setStatsborgerskap(hentIso3Landkode(personDok.getStatsborgerskap().getKode()));
 
