@@ -283,7 +283,7 @@ public class OppgaveService {
 
     private boolean harBeskyttelsesbehov(long behandlingID) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        if (behandling.hentPersonDokument().harBeskyttelsesbehov()) {
+        if (behandling.hentPersonDokument().harStrengtAdressebeskyttelse()) {
             return true;
         } else if (behandling.getBehandlingsgrunnlag() == null) {
             return false;

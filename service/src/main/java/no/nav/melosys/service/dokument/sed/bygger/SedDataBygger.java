@@ -5,10 +5,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.UtenlandskIdent;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.Diskresjonskode;
 import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.dokument.person.Familierelasjon;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
@@ -218,18 +217,9 @@ public class SedDataBygger {
         bruker.setFoedseldato(persondata.getFødselsdato());
         bruker.setKjoenn(persondata.hentKjønnType().getKode());
         bruker.setStatsborgerskap(persondata.getStatsborgerskap().getKode());
-        bruker.setHarSensitiveOpplysninger(hentHarSensitiveOpplysninger(persondata.getDiskresjonskode()));
+        bruker.setHarSensitiveOpplysninger(persondata.harStrengtAdressebeskyttelse());
 
         return bruker;
-
-    }
-
-    private static boolean hentHarSensitiveOpplysninger(Diskresjonskode diskresjonskode) {
-        if (diskresjonskode == null) {
-            return false;
-        }
-
-        return diskresjonskode.erKode6();
     }
 
     private static List<no.nav.melosys.domain.eessi.sed.Lovvalgsperiode> lagLovvalgsperioderDto(Behandlingsresultat behandlingsresultat, PeriodeType periodeType) {

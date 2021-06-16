@@ -66,7 +66,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
     }
 
     @Override
-    public boolean harBeskyttelsesbehov() {
+    public boolean harStrengtAdressebeskyttelse() {
         return diskresjonskode != null && diskresjonskode.erKode6();
     }
 
@@ -189,7 +189,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.dødsdato = dødsdato;
     }
 
-    @Override
     public Diskresjonskode getDiskresjonskode() {
         return diskresjonskode;
     }
@@ -250,10 +249,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
 
     public void setGjeldendePostadresse(UstrukturertAdresse gjeldendePostadresse) {
         this.gjeldendePostadresse = gjeldendePostadresse;
-    }
-
-    public boolean isErEgenAnsatt() {
-        return erEgenAnsatt;
     }
 
     public void setErEgenAnsatt(boolean erEgenAnsatt) {

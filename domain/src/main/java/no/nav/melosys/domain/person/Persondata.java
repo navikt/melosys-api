@@ -14,7 +14,7 @@ import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
 public interface Persondata {
     Optional<Familiemedlem> hentAnnenForelder(String fnrGjeldendeForelder);
 
-    boolean harBeskyttelsesbehov();
+    boolean harStrengtAdressebeskyttelse();
 
     boolean harIkkeRegistrertAdresse();
 
@@ -48,8 +48,6 @@ public interface Persondata {
     LocalDate getFødselsdato();
 
     LocalDate getDødsdato();
-
-    Diskresjonskode getDiskresjonskode();
 
     Personstatus getPersonstatus();
 
