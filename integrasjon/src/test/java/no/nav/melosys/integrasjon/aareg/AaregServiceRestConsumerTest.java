@@ -3,11 +3,14 @@ package no.nav.melosys.integrasjon.aareg;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer;
 import org.junit.jupiter.api.*;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
@@ -55,7 +58,15 @@ public class AaregServiceRestConsumerTest {
         Saksopplysning saksopplysning = aaregService.finnArbeidsforholdPrArbeidstaker("99999999991", null, null);
         ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) saksopplysning.getDokument();
 
-        arbeidsforholdDokument.getArbeidsforhold();
+        List<Arbeidsforhold> arbeidsforhold = arbeidsforholdDokument.getArbeidsforhold();
+        for(var item : arbeidsforhold) {
+            System.out.println(item.arbeidsforholdID);
+            System.out.println(item.arbeidstakerID);
+            for(var avtale : item.arbeidsavtaler) {
+                System.out.println("-arbeidsavtaler-");
+                System.out.println(avtale.beregnetAntallTimerPrUke);
+            }
+        }
     }
 
     @Test

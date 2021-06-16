@@ -66,6 +66,11 @@ class ArbeidsforholdRestConsumerTest {
         ArbeidsforholdResponse.Arbeidstaker arbeidstaker = arbeidsforhold.getArbeidstaker();
         assertThat(arbeidstaker.getType()).isEqualTo("Person");
         assertThat(arbeidstaker.getAktoerId()).isEqualTo("1685359155300");
+
+        ArbeidsforholdResponse.Arbeidsavtaler arbeidsavtaler = arbeidsforhold.getArbeidsavtaler().get(0);
+
+        System.out.println(arbeidsavtaler.type);
+
     }
 
     String responsBody = """

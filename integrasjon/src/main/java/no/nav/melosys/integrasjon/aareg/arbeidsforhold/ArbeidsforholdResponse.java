@@ -1,18 +1,17 @@
 package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
-import no.nav.melosys.exception.TekniskException;
-
-import java.util.ArrayList;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import no.nav.melosys.exception.TekniskException;
 
 public class ArbeidsforholdResponse {
     private final Arbeidsforhold[] arbeidsforhold;
@@ -25,21 +24,6 @@ public class ArbeidsforholdResponse {
         return arbeidsforhold;
     }
 
-    public Saksopplysning createSaksopplysning() {
-        Saksopplysning saksopplysning = new Saksopplysning();
-
-        List<Arbeidsforhold> arbeidsforholdList = new ArrayList<>();
-
-        // TODO: map from jsopn to ArbeidsforholdDokument
-        for(Arbeidsforhold item : arbeidsforhold) {
-
-        }
-
-        ArbeidsforholdDokument arbeidsforholdDokument = new ArbeidsforholdDokument();
-        saksopplysning.setDokument(arbeidsforholdDokument);
-        return saksopplysning;
-    }
-
     public String getJsonDocument() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
@@ -47,16 +31,17 @@ public class ArbeidsforholdResponse {
             // serialize to json or find out if we want to convert to xml doc?
             return objectMapper.writeValueAsString(arbeidsforhold);
         } catch (JsonProcessingException e) {
-            throw new TekniskException("Kunne ikke konvertere arbeidsforhold til json string");
+            throw new TekniskException("Kunne ikke konvertere arbeidsforhold til json string", e);
         }
     }
 
     public static class Arbeidsforhold {
-        private Map<String,Object> unknownProperties = new HashMap<>();
+        private Map<String, Object> unknownProperties = new HashMap<>();
 
         private Integer navArbeidsforholdId;
-
+        private String type;
         private Arbeidstaker arbeidstaker;
+        private List<Arbeidsavtaler> arbeidsavtaler;
 
         public Arbeidstaker getArbeidstaker() {
             return arbeidstaker;
@@ -66,14 +51,22 @@ public class ArbeidsforholdResponse {
             return navArbeidsforholdId;
         }
 
+        public List<Arbeidsavtaler> getArbeidsavtaler() {
+            return arbeidsavtaler;
+        }
+
         @JsonAnySetter
         void setUnknownProperty(String key, Object value) {
-            unknownProperties.put(key,value);
+            unknownProperties.put(key, value);
         }
 
         @JsonAnyGetter
         Object getUnknownProperty(String key) {
             return unknownProperties.get(key);
+        }
+
+        public String getType() {
+            return type;
         }
     }
 
@@ -99,5 +92,22 @@ public class ArbeidsforholdResponse {
     }
 
     public static class Opplysningspliktig {
+    }
+
+    public static class Arbeidsavtaler {
+        @JsonProperty
+        String type;
+
+        @JsonProperty
+        String arbeidstidsordning;
+
+        @JsonProperty
+        String yrke;
+
+        @JsonProperty
+        String stillingsprosent;
+
+        @JsonProperty
+        BigDecimal beregnetAntallTimerPrUke;
     }
 }

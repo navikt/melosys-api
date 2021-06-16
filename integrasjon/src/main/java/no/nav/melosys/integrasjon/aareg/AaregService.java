@@ -16,10 +16,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdQuery;
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdResponse;
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumer;
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer;
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.*;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.FinnArbeidsforholdPrArbeidstakerSikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.FinnArbeidsforholdPrArbeidstakerUgyldigInput;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.HentArbeidsforholdHistorikkArbeidsforholdIkkeFunnet;
@@ -69,12 +66,13 @@ public class AaregService implements AaregFasade {
             .arbeidsforholdType(ArbeidsforholdQuery.ArbeidsforholdType.ALLE)
             .regelverk(ArbeidsforholdQuery.Regelverk.A_ORDNINGEN)
             .build();
-        ArbeidsforholdResponse result = arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker(ident, arbeidsfoholdQuery);
 
-        Saksopplysning saksopplysning = result.createSaksopplysning();
+        ArbeidsforholdResponse response = arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker(ident, arbeidsfoholdQuery);
+        ArbeidsforholdKonvertering arbeidsforholdKonvertering = new ArbeidsforholdKonvertering(response);
 
+        Saksopplysning saksopplysning = arbeidsforholdKonvertering.createSaksopplysning();
         saksopplysning.leggTilKildesystemOgMottattDokument(
-            SaksopplysningKildesystem.AAREG, result.getJsonDocument());
+            SaksopplysningKildesystem.AAREG, response.getJsonDocument());
         saksopplysning.setType(SaksopplysningType.ARBFORH);
         saksopplysning.setVersjon(ARBEIDSFORHOLD_VERSJON);
 
