@@ -1,8 +1,6 @@
 package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.model.Arbeidsforhold;
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.model.Arbeidstaker;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -60,12 +58,12 @@ class ArbeidsforholdRestConsumerTest {
             .build();
         ArbeidsforholdResponse arbeidsforholdResponse = restConsumer.finnArbeidsforholdPrArbeidstaker(fnr, arbeidsforholdQuery);
 
-        Arbeidsforhold[] arbeidsforholds = arbeidsforholdResponse.getArbeidsforhold();
+        ArbeidsforholdResponse.Arbeidsforhold[] arbeidsforholds = arbeidsforholdResponse.getArbeidsforhold();
         assertThat(arbeidsforholds.length).isEqualTo(1);
-        Arbeidsforhold arbeidsforhold = arbeidsforholds[0];
+        ArbeidsforholdResponse.Arbeidsforhold arbeidsforhold = arbeidsforholds[0];
         assertThat(arbeidsforhold.getNavArbeidsforholdId()).isEqualTo(3065458);
 
-        Arbeidstaker arbeidstaker = arbeidsforhold.getArbeidstaker();
+        ArbeidsforholdResponse.Arbeidstaker arbeidstaker = arbeidsforhold.getArbeidstaker();
         assertThat(arbeidstaker.getType()).isEqualTo("Person");
         assertThat(arbeidstaker.getAktoerId()).isEqualTo("1685359155300");
     }
