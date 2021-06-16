@@ -7,6 +7,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.Bosted;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
+import no.nav.melosys.domain.person.Persondata;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -14,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class PersonKontrollerTest {
 
-    private PersonDokument personDokument = new PersonDokument();
+    private Persondata persondata = new PersonDokument();
     private BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
 
     @Test
@@ -58,19 +59,19 @@ public class PersonKontrollerTest {
         bosted.oppgittAdresse.setGatenavn("gate");
         bosted.oppgittAdresse.setLandkode("SE");
 
-        assertThat(PersonKontroller.harRegistrertBostedsadresse(personDokument, behandlingsgrunnlagData)).isTrue();
+        assertThat(PersonKontroller.harRegistrertBostedsadresse(persondata, behandlingsgrunnlagData)).isTrue();
     }
 
     @Test
     public void harRegistrertBostedsadresse_oppgittBostedsadresseITPS_true() {
-        personDokument.getBostedsadresse().getGateadresse().setGatenavn("gate 123");
-        personDokument.getBostedsadresse().getLand().setKode("SWE");
+        persondata.getBostedsadresse().getGateadresse().setGatenavn("gate 123");
+        persondata.getBostedsadresse().getLand().setKode("SWE");
 
-        assertThat(PersonKontroller.harRegistrertBostedsadresse(personDokument, behandlingsgrunnlagData)).isTrue();
+        assertThat(PersonKontroller.harRegistrertBostedsadresse(persondata, behandlingsgrunnlagData)).isTrue();
     }
 
     @Test
     public void harRegistrertBostedsadresse_ikkeOppgittBostedsadresseITPSEllerSøknad_false() {
-        assertThat(PersonKontroller.harRegistrertBostedsadresse(personDokument, behandlingsgrunnlagData)).isFalse();
+        assertThat(PersonKontroller.harRegistrertBostedsadresse(persondata, behandlingsgrunnlagData)).isFalse();
     }
 }

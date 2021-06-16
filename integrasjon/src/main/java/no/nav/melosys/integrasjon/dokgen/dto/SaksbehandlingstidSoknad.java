@@ -10,9 +10,9 @@ import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.person.Persondata;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
@@ -37,12 +37,12 @@ public class SaksbehandlingstidSoknad extends DokgenDto {
 
         Behandling behandling = brevbestilling.getBehandling();
         Fagsak fagsak = behandling.getFagsak();
-        PersonDokument personDokument = behandling.hentPersonDokument();
+        Persondata persondata = behandling.hentPersonDokument();
 
         this.datoMottatt = brevbestilling.getForsendelseMottatt();
         this.datoBehandlingstid = brevbestilling.getForsendelseMottatt().plus(SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS);
         this.typeSoknad = fagsak.getType();
-        this.avsenderTypeSoknad = (personDokument.getFnr().equals(brevbestilling.getAvsenderId()) ? BRUKER : REPRESENTANT);
+        this.avsenderTypeSoknad = (persondata.hentFolkeregisterIdent().equals(brevbestilling.getAvsenderId()) ? BRUKER : REPRESENTANT);
         this.avsenderSoknad = brevbestilling.getAvsenderNavn();
         this.avsenderLand = null; //NOTE Mangler inntil vi kan avgjøre om avsender == MYNDIGHET
     }

@@ -17,8 +17,8 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
@@ -68,15 +68,15 @@ class A1Mapper {
         return a1;
     }
 
-    private PersonType mapPerson(PersonDokument personDokument) {
+    private PersonType mapPerson(Persondata persondata) {
         PersonType person = new PersonType();
-        person.setKjoenn(KjoennKode.fromValue(personDokument.getKjønn().getKode()));
-        person.setStatsborgerskap(mapStatsborgerskap(personDokument.getStatsborgerskap()));
+        person.setKjoenn(KjoennKode.fromValue(persondata.getKjønn().getKode()));
+        person.setStatsborgerskap(mapStatsborgerskap(persondata.getStatsborgerskap()));
 
-        person.setPersonnavn(lagPersonnavn(personDokument));
+        person.setPersonnavn(lagPersonnavn(persondata));
 
         try {
-            person.setFoedselsdato(convertToXMLGregorianCalendarRemoveTimezone(personDokument.getFødselsdato()));
+            person.setFoedselsdato(convertToXMLGregorianCalendarRemoveTimezone(persondata.getFødselsdato()));
         } catch (DatatypeConfigurationException e) {
             throw new TekniskException("Konverteringsfeil ved konvertering av fødselsdato", e);
         }

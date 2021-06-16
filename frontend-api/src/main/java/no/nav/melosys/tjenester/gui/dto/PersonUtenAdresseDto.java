@@ -7,6 +7,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.*;
+import no.nav.melosys.domain.person.Persondata;
 
 public class PersonUtenAdresseDto {
 
@@ -24,8 +25,8 @@ public class PersonUtenAdresseDto {
 
     public PersonUtenAdresseDto() {}
 
-    public PersonUtenAdresseDto(PersonDokument person) {
-        fnr = person.getFnr();
+    public PersonUtenAdresseDto(Persondata person) {
+        fnr = person.hentFolkeregisterIdent();
         sivilstand = person.getSivilstand();
         statsborgerskap = person.getStatsborgerskap();
         statsborgerskapDato = person.getStatsborgerskapDato();
