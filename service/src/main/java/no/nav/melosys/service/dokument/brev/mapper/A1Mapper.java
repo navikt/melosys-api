@@ -70,7 +70,7 @@ class A1Mapper {
 
     private PersonType mapPerson(Persondata persondata) {
         PersonType person = new PersonType();
-        person.setKjoenn(KjoennKode.fromValue(persondata.getKjønn().getKode()));
+        person.setKjoenn(KjoennKode.fromValue(persondata.hentKjønnType().getKode()));
         person.setStatsborgerskap(mapStatsborgerskap(persondata.hentAlleStatsborgerskap()));
 
         person.setPersonnavn(lagPersonnavn(persondata));

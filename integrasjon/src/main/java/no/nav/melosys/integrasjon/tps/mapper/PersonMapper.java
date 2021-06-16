@@ -77,9 +77,7 @@ public class PersonMapper {
         if (kjoenn == null) {
             return null;
         }
-        KjoennsType kt = new KjoennsType();
-        kt.setKode(kjoenn.getKjoenn().getValue());
-        return kt;
+        return new KjoennsType(kjoenn.getKjoenn().getValue());
     }
 
     private static Diskresjonskode mapDiskresjonskode(Diskresjonskoder diskresjonskode) {

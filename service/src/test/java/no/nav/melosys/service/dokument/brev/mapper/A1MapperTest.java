@@ -139,8 +139,7 @@ class A1MapperTest {
 
     static PersonDokument lagPersonDokument() {
         PersonDokument person = new PersonDokument();
-        person.setKjønn(new KjoennsType());
-        person.getKjønn().setKode("K");
+        person.setKjønn(new KjoennsType("K"));
         person.setFornavn("Ola");
         person.setEtternavn("Nordmann");
         person.setFødselsdato(LocalDate.now());

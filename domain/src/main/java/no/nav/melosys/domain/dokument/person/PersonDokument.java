@@ -12,6 +12,7 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
+import no.nav.melosys.domain.person.KjoennType;
 import no.nav.melosys.domain.person.Persondata;
 
 
@@ -75,6 +76,11 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
     }
 
     @Override
+    public KjoennType hentKjønnType() {
+        return KjoennType.avKode(kjønn.getKode());
+    }
+
+    @Override
     public String hentFolkeregisterIdent() {
         return fnr;
     }
@@ -112,7 +118,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
     }
 
     /** Kodeverk: Kjønnstyper */
-    @Override
     public KjoennsType getKjønn() {
         return kjønn;
     }

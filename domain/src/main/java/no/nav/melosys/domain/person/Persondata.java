@@ -33,7 +33,7 @@ public interface Persondata {
 
     Set<Land> hentAlleStatsborgerskap();
 
-    KjoennsType getKjønn();
+    KjoennType hentKjønnType();
 
     String getFornavn();
 

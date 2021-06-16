@@ -296,9 +296,7 @@ public final class DokumentServiceTest {
     }
 
     private static KjoennsType lagKjoennsType() {
-        KjoennsType kjønn = new KjoennsType();
-        kjønn.setKode("K");
-        return kjønn;
+        return new KjoennsType("K");
     }
 
     private static AvklarteFaktaRepository mockAvklarteFaktaRepository(Avklartefakta arbeidsgiverFaktum, Avklartefakta yrkesgruppeFaktum) {

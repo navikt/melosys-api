@@ -142,7 +142,7 @@ class A001Mapper {
         PersonType person = new PersonType();
         person.setPersonnavn(lagPersonnavn(personDok));
         person.setStatsborgerskapListe(mapStatsborgerskapListe(personDok));
-        person.setKjønn(KjoennKode.fromValue(personDok.getKjønn().getKode()));
+        person.setKjønn(KjoennKode.fromValue(personDok.hentKjønnType().getKode()));
         person.setBostedsadresse(mapBostedAdresse(bostedsadresse));
         person.setFødselsnummer(personDok.hentFolkeregisterIdent());
         //Fødeland og Fødested skal ikke fylles ut

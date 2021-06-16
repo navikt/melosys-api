@@ -17,7 +17,7 @@ public class PersonDto {
         statsborgerskap = person.hentAlleStatsborgerskap().stream().findFirst().orElse(null);
         sammensattNavn = person.getSammensattNavn();
         personstatus = person.getPersonstatus();
-        kjoenn = person.getKjønn();
+        kjoenn = new KjoennDto(person.hentKjønnType().getKode(), person.hentKjønnType().toString());
         foedselsdato = person.getFødselsdato();
         bostedsadresse = person.getBostedsadresse();
         familiemedlemmer = person.getFamiliemedlemmer() == null ? new ArrayList<>()
@@ -34,7 +34,7 @@ public class PersonDto {
 
     public Personstatus personstatus;
 
-    public KjoennsType kjoenn;
+    public KjoennDto kjoenn;
 
     public LocalDate foedselsdato;
 

@@ -73,8 +73,7 @@ public class A001MapperTest {
         boAdresse.setLandkode(Landkoder.NO.getKode());
 
         PersonDokument person = new PersonDokument();
-        person.setKjønn(new KjoennsType());
-        person.getKjønn().setKode("K");
+        person.setKjønn(new KjoennsType("K"));
         person.setFornavn("Ola");
         person.setEtternavn("Nordmann");
         person.setFødselsdato(LocalDate.now());
