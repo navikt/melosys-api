@@ -6,10 +6,11 @@ import java.util.Optional;
 import java.util.Set;
 
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.*;
-import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
-import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
+import no.nav.melosys.domain.dokument.person.Familiemedlem;
+import no.nav.melosys.domain.dokument.person.Personstatus;
+import no.nav.melosys.domain.dokument.person.Sivilstand;
 import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
+import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 
 public interface Persondata {
     boolean erPersonDød();
@@ -52,11 +53,11 @@ public interface Persondata {
     @Deprecated // Brukes bare til visning, som skal gå gjennom GraphQL
     LocalDate getStatsborgerskapDato();
 
-    Bostedsadresse getBostedsadresse();
+    @Deprecated // knyttet til TPS
+    no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse getBostedsadresse();
 
-    UstrukturertAdresse getPostadresse();
+    Bostedsadresse hentBostedsadresse();
 
-    MidlertidigPostadresse getMidlertidigPostadresse();
-
+    @Deprecated // knyttet til TPS
     UstrukturertAdresse getGjeldendePostadresse();
 }

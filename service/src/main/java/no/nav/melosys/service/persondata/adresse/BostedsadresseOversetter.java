@@ -25,7 +25,6 @@ public class BostedsadresseOversetter {
         }  // Ukjent bosted
 
         return new Bostedsadresse(strukturertAdresse,
-            null,
             bostedsadressePDL.coAdressenavn(),
             bostedsadressePDL.gyldigFraOgMed(),
             bostedsadressePDL.gyldigTilOgMed(),

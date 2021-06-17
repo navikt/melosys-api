@@ -1,11 +1,11 @@
 package no.nav.melosys.service.kontroll;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 
 public final class PersonKontroller {
+    private static final String NORGE_ISO2_LANDKODE = "NO";
 
     private PersonKontroller() {
     }
@@ -15,11 +15,11 @@ public final class PersonKontroller {
     }
 
     public static boolean personBosattINorge(Persondata persondata) {
-        Bostedsadresse bostedsadresse = persondata.getBostedsadresse();
+        Bostedsadresse bostedsadresse = persondata.hentBostedsadresse();
 
         return bostedsadresse != null
-            && bostedsadresse.getLand() != null
-            && Land.NORGE.equals(bostedsadresse.getLand().getKode());
+            && bostedsadresse.strukturertAdresse().getLandkode() != null
+            && NORGE_ISO2_LANDKODE.equals(bostedsadresse.strukturertAdresse().getLandkode());
     }
 
     public static boolean harRegistrertBostedsadresse(Persondata persondata, BehandlingsgrunnlagData behandlingsgrunnlagData) {

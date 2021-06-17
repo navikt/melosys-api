@@ -6,24 +6,24 @@ import java.util.Optional;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
-import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.domain.person.Datakilde;
+import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.util.BehandlingsgrunnlagUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.apache.commons.lang3.StringUtils;
 
 public class BostedGrunnlag {
+    private final BehandlingsgrunnlagData grunnlagData;
+    private final Bostedsadresse bostedsadresseFraRegister;
     private final KodeverkService kodeverkService;
 
-    private final BehandlingsgrunnlagData grunnlagData;
-    private final Persondata persondata;
 
     public BostedGrunnlag(BehandlingsgrunnlagData grunnlagData,
-                          Persondata persondata,
+                          Bostedsadresse bostedsadresseFraRegister,
                           KodeverkService kodeverkService) {
         this.grunnlagData = grunnlagData;
-        this.persondata = persondata;
+        this.bostedsadresseFraRegister = bostedsadresseFraRegister;
         this.kodeverkService = kodeverkService;
     }
 
@@ -33,19 +33,24 @@ public class BostedGrunnlag {
     }
 
     public Optional<StrukturertAdresse> finnBostedsadresse() {
-        StrukturertAdresse bostedsadresse = grunnlagData != null ? BehandlingsgrunnlagUtils.hentBostedsadresse(grunnlagData) : null;
-        if (bostedsadresse == null) {
-            return finnBostedsadresseFraRegister();
-        }
-        return Optional.of(bostedsadresse);
+        return finnOppgittBostedsadresse().or(this::finnBostedsadresseFraRegister);
+    }
+
+    private Optional<StrukturertAdresse> finnOppgittBostedsadresse() {
+        return grunnlagData != null ? Optional.ofNullable(BehandlingsgrunnlagUtils.hentBostedsadresse(grunnlagData)) :
+            Optional.empty();
     }
 
     private Optional<StrukturertAdresse> finnBostedsadresseFraRegister() {
-        Bostedsadresse bostedsadresse = persondata.getBostedsadresse();
-        if (StringUtils.isEmpty(bostedsadresse.getLand().getKode())) {
+        if (bostedsadresseFraRegister == null
+            || StringUtils.isEmpty(bostedsadresseFraRegister.strukturertAdresse().getLandkode())) {
             return Optional.empty();
         }
-        bostedsadresse.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, bostedsadresse.getPostnr(), LocalDate.now()));
-        return Optional.of(bostedsadresse.tilStrukturertAdresse());
+        final var strukturertAdresse = bostedsadresseFraRegister.strukturertAdresse();
+        if (Datakilde.TPS.name().equals(bostedsadresseFraRegister.kilde())) {
+            strukturertAdresse.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, strukturertAdresse.getPostnummer(),
+                LocalDate.now()));
+        }
+        return Optional.of(strukturertAdresse);
     }
 }

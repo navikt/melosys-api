@@ -1,14 +1,16 @@
 package no.nav.melosys.service.dokument.brev;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
@@ -22,9 +24,8 @@ import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
 
+import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.ARBEIDSLAND;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser.OVER_18_AR;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class BrevDataTestUtils {
 
@@ -89,17 +90,13 @@ public class BrevDataTestUtils {
 
     public static Arbeidssted lagMaritimtArbeidssted(Maritimtyper maritimtype) {
         MaritimtArbeid maritimtArbeid = lagMaritimtArbeid();
-        AvklartMaritimtArbeid avklartMaritimtArbeid = lagAvklartMaritimtArbeid(maritimtype);
+        AvklartMaritimtArbeid avklartMaritimtArbeid = lagAvklartMaritimtArbeid();
         return new MaritimtArbeidssted(maritimtArbeid, avklartMaritimtArbeid);
     }
 
     public static AvklartMaritimtArbeid lagAvklartMaritimtArbeid() {
-        return lagAvklartMaritimtArbeid(Maritimtyper.SKIP);
-    }
-
-    private static AvklartMaritimtArbeid lagAvklartMaritimtArbeid(Maritimtyper maritimtype) {
-        AvklartMaritimtArbeid avklartMaritimtArbeid = mock(AvklartMaritimtArbeid.class);
-        when(avklartMaritimtArbeid.getLand()).thenReturn(Landkoder.GB.getKode());
+        AvklartMaritimtArbeid avklartMaritimtArbeid = new AvklartMaritimtArbeid("MaritimtArbeid",
+            List.of(new Avklartefakta(null, null, ARBEIDSLAND, null, "GB")));
         return avklartMaritimtArbeid;
     }
 

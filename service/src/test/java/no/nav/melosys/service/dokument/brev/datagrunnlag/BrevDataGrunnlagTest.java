@@ -5,17 +5,16 @@ import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.MaritimtArbeid;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -27,16 +26,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 class BrevDataGrunnlagTest {
     @Mock
     private KodeverkService kodeverkService;
@@ -44,18 +39,11 @@ class BrevDataGrunnlagTest {
     private AvklartefaktaService avklartefaktaService;
 
     private DoksysBrevbestilling brevbestilling;
-    private Behandling behandling;
-    private PersonDokument person;
     private Soeknad søknad;
     private BrevDataGrunnlag dataGrunnlag;
 
     @BeforeEach
     public void setUp() {
-        AvklartMaritimtArbeid maritimtArbeid = lagAvklartMaritimtArbeid();
-        when(avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(anyLong()))
-            .thenReturn(Collections.singletonMap("Dunfjæder", maritimtArbeid));
-        when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
-
         Bostedsadresse boAdresseFraRegister = new Bostedsadresse();
         boAdresseFraRegister.getGateadresse().setGatenavn("Hjemgata");
         boAdresseFraRegister.getGateadresse().setHusnummer(23);
@@ -63,11 +51,11 @@ class BrevDataGrunnlagTest {
         boAdresseFraRegister.setPoststed("Oslo");
         boAdresseFraRegister.setLand(new Land(Land.NORGE));
 
-        person = new PersonDokument();
+        PersonDokument person = new PersonDokument();
         person.setBostedsadresse(boAdresseFraRegister);
 
         søknad = new Soeknad();
-        behandling = lagBehandling(søknad, person);
+        Behandling behandling = lagBehandling(søknad, person);
 
         brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
         dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, mock(AvklarteVirksomheterService.class), avklartefaktaService);
@@ -85,18 +73,8 @@ class BrevDataGrunnlagTest {
     }
 
     @Test
-    void hentBostedsadresse_manglerOppgittOgTpsBostedsadresse_girUnntak() {
-        person.setBostedsadresse(new Bostedsadresse());
-        søknad.bosted.oppgittAdresse = new StrukturertAdresse();
-        var bostedsgrunnlag = dataGrunnlag.getBostedGrunnlag();
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(bostedsgrunnlag::hentBostedsadresse)
-            .withMessageContaining("finnes ikke");
-    }
-
-    @Test
     void hentBostedsadresse_brukerBostedFraPersonDokument() {
+        when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
         StrukturertAdresse bostedsadresse = dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
         assertThat(bostedsadresse.getGatenavn()).isEqualTo("Hjemgata");
         assertThat(bostedsadresse.getHusnummerEtasjeLeilighet()).isEqualTo("23");
@@ -127,6 +105,11 @@ class BrevDataGrunnlagTest {
 
     @Test
     void hentArbeidssteder_medMaritimtArbeid_girMaritimeArbeidssteder() {
+        AvklartMaritimtArbeid maritimtArbeid = lagAvklartMaritimtArbeid();
+        when(avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(anyLong()))
+            .thenReturn(Collections.singletonMap("Dunfjæder", maritimtArbeid));
+        dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, mock(AvklarteVirksomheterService.class), avklartefaktaService);
+
         MaritimtArbeid maritimtArbeidISøknad = lagMaritimtArbeid();
         this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
 

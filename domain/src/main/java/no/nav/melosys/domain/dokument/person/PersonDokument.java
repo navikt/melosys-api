@@ -12,6 +12,7 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
+import no.nav.melosys.domain.person.Datakilde;
 import no.nav.melosys.domain.person.KjoennType;
 import no.nav.melosys.domain.person.Persondata;
 
@@ -68,6 +69,19 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
             .filter(Familiemedlem::erForelder)
             .filter(forelder -> !fnrGjeldendeForelder.equals(forelder.fnr))
             .findAny();
+    }
+
+    @Override
+    public no.nav.melosys.domain.person.adresse.Bostedsadresse hentBostedsadresse() {
+        return new no.nav.melosys.domain.person.adresse.Bostedsadresse(
+            bostedsadresse.tilStrukturertAdresse(),
+            null,
+            null,
+            null,
+            Datakilde.TPS.name(),
+            Datakilde.TPS.name(),
+            false
+        );
     }
 
     @Override
@@ -231,7 +245,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.bostedsadresse = bostedsadresse;
     }
 
-    @Override
     public UstrukturertAdresse getPostadresse() {
         return postadresse;
     }
@@ -240,7 +253,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.postadresse = postadresse;
     }
 
-    @Override
     public MidlertidigPostadresse getMidlertidigPostadresse() {
         return midlertidigPostadresse;
     }
