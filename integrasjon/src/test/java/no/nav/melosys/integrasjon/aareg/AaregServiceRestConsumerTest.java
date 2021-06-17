@@ -54,7 +54,7 @@ public class AaregServiceRestConsumerTest {
     }
 
     @Test
-    public void getArbeidsforholdDokument() throws Exception {
+    public void getArbeidsforholdDokument() {
         Saksopplysning saksopplysning = aaregService.finnArbeidsforholdPrArbeidstaker("99999999991", null, null);
         ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) saksopplysning.getDokument();
 
@@ -89,7 +89,6 @@ public class AaregServiceRestConsumerTest {
     private AaregService lagAaregService() {
         FakeUnleash unleash = new FakeUnleash();
         unleash.enable("melosys.aareg.rest");
-        // TODO, add mock webClient
         return new AaregService(null, null, restConsumer, unleash);
     }
 

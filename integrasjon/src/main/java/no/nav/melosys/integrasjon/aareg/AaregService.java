@@ -11,7 +11,6 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKildesystem;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
-import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -65,6 +64,8 @@ public class AaregService implements AaregFasade {
             .Builder()
             .arbeidsforholdType(ArbeidsforholdQuery.ArbeidsforholdType.ALLE)
             .regelverk(ArbeidsforholdQuery.Regelverk.A_ORDNINGEN)
+            .ansettelsesperiodeFom(fom)
+            .ansettelsesperiodeFom(tom)
             .build();
 
         ArbeidsforholdResponse response = arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker(ident, arbeidsfoholdQuery);

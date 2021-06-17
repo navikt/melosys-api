@@ -9,6 +9,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.LocalDate;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,6 +46,8 @@ class ArbeidsforholdRestConsumerTest {
         wireMockServer.stubFor(get(urlPathEqualTo("/"))
             .withHeader("Nav-Personident", equalTo(fnr))
             .withQueryParam("regelverk", equalTo("ALLE"))
+            .withQueryParam("ansettelsesperiodeFom", equalTo("2020-01-01"))
+            .withQueryParam("ansettelsesperiodeTom", equalTo("2021-01-01"))
             .willReturn(aResponse()
                 .withStatus(200)
                 .withHeader("Content-Type", "application/json")
@@ -55,6 +59,8 @@ class ArbeidsforholdRestConsumerTest {
             .Builder()
             .regelverk(ArbeidsforholdQuery.Regelverk.ALLE)
             .arbeidsforholdType(ArbeidsforholdQuery.ArbeidsforholdType.ALLE)
+            .ansettelsesperiodeFom(LocalDate.parse("2020-01-01"))
+            .ansettelsesperiodeTom(LocalDate.parse("2021-01-01"))
             .build();
         ArbeidsforholdResponse arbeidsforholdResponse = restConsumer.finnArbeidsforholdPrArbeidstaker(fnr, arbeidsforholdQuery);
 
@@ -64,8 +70,8 @@ class ArbeidsforholdRestConsumerTest {
         assertThat(arbeidsforhold.getNavArbeidsforholdId()).isEqualTo(3065458);
 
         ArbeidsforholdResponse.Arbeidstaker arbeidstaker = arbeidsforhold.getArbeidstaker();
-        assertThat(arbeidstaker.getType()).isEqualTo("Person");
-        assertThat(arbeidstaker.getAktoerId()).isEqualTo("1685359155300");
+        assertThat(arbeidstaker.type).isEqualTo("Person");
+        assertThat(arbeidstaker.aktoerId).isEqualTo("1685359155300");
 
         ArbeidsforholdResponse.Arbeidsavtaler arbeidsavtaler = arbeidsforhold.getArbeidsavtaler().get(0);
 

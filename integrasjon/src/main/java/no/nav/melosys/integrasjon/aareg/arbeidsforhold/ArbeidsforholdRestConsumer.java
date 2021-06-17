@@ -26,7 +26,9 @@ public class ArbeidsforholdRestConsumer implements RestConsumer {
                 uriBuilder
                     .queryParam("regelverk", arbeidsfoholdQuery.getRegelverk())
                     .queryParamIfPresent("arbeidsforholdType", arbeidsfoholdQuery.getArbeidsforholdType())
-                    // TODO: add all more params
+                    .queryParamIfPresent("ansettelsesperiodeFom", arbeidsfoholdQuery.getAnsettelsesperiodeFom())
+                    .queryParamIfPresent("ansettelsesperiodeTom", arbeidsfoholdQuery.getAnsettelsesperiodeTom())
+                    // TODO: add more params
                     .build())
                 .header("Nav-Personident", fnr)
                 .header(HttpHeaders.AUTHORIZATION, getAuth())

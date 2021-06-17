@@ -72,7 +72,6 @@ public class AaregServiceTest {
         DokumentFactory dokumentFactory = new DokumentFactory(marshaller, new XsltTemplatesFactory());
         FakeUnleash unleash = new FakeUnleash();
         unleash.enable("");
-        // TODO, add mock webClient
         return new AaregService(arbeidsforholdConsumer, dokumentFactory, new ArbeidsforholdRestConsumer(null), unleash);
     }
 }

@@ -71,21 +71,14 @@ public class ArbeidsforholdResponse {
     }
 
     public static class Arbeidstaker {
-        private String type;
-        private String offentligIdent;
-        private String aktoerId;
+        @JsonProperty
+        String type;
 
-        public String getType() {
-            return type;
-        }
+        @JsonProperty
+        String offentligIdent;
 
-        public String getOffentligIdent() {
-            return offentligIdent;
-        }
-
-        public String getAktoerId() {
-            return aktoerId;
-        }
+        @JsonProperty
+        String aktoerId;
     }
 
     public static class Arbeidsgiver {

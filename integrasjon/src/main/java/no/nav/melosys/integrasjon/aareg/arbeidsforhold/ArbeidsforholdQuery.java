@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 public class ArbeidsforholdQuery {
@@ -31,18 +32,15 @@ public class ArbeidsforholdQuery {
     }
 
     public Optional<String> getArbeidsforholdType() {
-        if(arbeidsforholdType==null) {
-            return Optional.empty();
-        }
-        return Optional.of(arbeidsforholdType);
+        return Optional.ofNullable(arbeidsforholdType);
     }
 
-    public String getAnsettelsesperiodeFom() {
-        return ansettelsesperiodeFom;
+    public Optional<String> getAnsettelsesperiodeFom() {
+        return Optional.ofNullable(ansettelsesperiodeFom);
     }
 
-    public String getAnsettelsesperiodeTom() {
-        return ansettelsesperiodeTom;
+    public Optional<String> getAnsettelsesperiodeTom() {
+        return Optional.ofNullable(ansettelsesperiodeTom);
     }
 
     public Boolean getHistorikk() {
@@ -79,8 +77,8 @@ public class ArbeidsforholdQuery {
     static public class Builder {
         private Regelverk regelverk = Regelverk.ALLE; // set til default
         private ArbeidsforholdType arbeidsforholdType = ArbeidsforholdType.ALLE;
-        private String ansettelsesperiodeFom;
-        private String ansettelsesperiodeTom;
+        private LocalDate ansettelsesperiodeFom;
+        private LocalDate ansettelsesperiodeTom;
         private Boolean historikk;
         private Boolean sporingsinformasjon;
 
@@ -102,10 +100,36 @@ public class ArbeidsforholdQuery {
             return this;
         }
 
+        /***
+         * @param ansettelsesperiodeFom
+         * Filter for fra-og-med-dato for ansettelsesperiode
+         * @return Builder
+         */
+        public Builder ansettelsesperiodeFom(LocalDate ansettelsesperiodeFom) {
+            this.ansettelsesperiodeFom = ansettelsesperiodeFom;
+            return this;
+        }
+
+        /***
+         * @param ansettelsesperiodeTom Filter for regelverk (default = ALLE)
+         * Filter for til-og-med-dato for ansettelsesperiode
+         * @return Builder
+         */
+        public Builder ansettelsesperiodeTom(LocalDate ansettelsesperiodeTom) {
+            this.ansettelsesperiodeTom = ansettelsesperiodeTom;
+            return this;
+        }
+
         public ArbeidsforholdQuery build() {
             ArbeidsforholdQuery arbeidsfoholdQuery = new ArbeidsforholdQuery();
             arbeidsfoholdQuery.regelverk = regelverk.toString();
             arbeidsfoholdQuery.arbeidsforholdType = arbeidsforholdType.toString();
+            if (ansettelsesperiodeFom != null) {
+                arbeidsfoholdQuery.ansettelsesperiodeFom = ansettelsesperiodeFom.toString();
+            }
+            if (ansettelsesperiodeTom != null) {
+                arbeidsfoholdQuery.ansettelsesperiodeTom = ansettelsesperiodeTom.toString();
+            }
             return arbeidsfoholdQuery;
         }
     }
