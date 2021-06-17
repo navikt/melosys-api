@@ -27,7 +27,7 @@ public class SaksbehandlingstidSoknad extends DokgenDto {
     @JsonFormat(shape = STRING)
     private final Instant datoBehandlingstid;
 
-    private final Sakstyper typeSoknad;
+    private final String typeSoknad;
     private final Aktoersroller avsenderTypeSoknad;
     private final String avsenderSoknad;
     private final String avsenderLand;
@@ -41,7 +41,7 @@ public class SaksbehandlingstidSoknad extends DokgenDto {
 
         this.datoMottatt = brevbestilling.getForsendelseMottatt();
         this.datoBehandlingstid = brevbestilling.getForsendelseMottatt().plus(SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS);
-        this.typeSoknad = fagsak.getType();
+        this.typeSoknad = fagsak.getType().getKode();
         this.avsenderTypeSoknad = (personDokument.getFnr().equals(brevbestilling.getAvsenderId()) ? BRUKER : REPRESENTANT);
         this.avsenderSoknad = brevbestilling.getAvsenderNavn();
         this.avsenderLand = null; //NOTE Mangler inntil vi kan avgjøre om avsender == MYNDIGHET
@@ -59,7 +59,7 @@ public class SaksbehandlingstidSoknad extends DokgenDto {
         return datoBehandlingstid;
     }
 
-    public Sakstyper getTypeSoknad() {
+    public String getTypeSoknad() {
         return typeSoknad;
     }
 
