@@ -12,6 +12,8 @@ import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
 
 public interface Persondata {
+    boolean erPersonDød();
+
     Optional<Familiemedlem> hentAnnenForelder(String fnrGjeldendeForelder);
 
     boolean harStrengtAdressebeskyttelse();
@@ -47,10 +49,10 @@ public interface Persondata {
 
     LocalDate getFødselsdato();
 
-    LocalDate getDødsdato();
-
+    @Deprecated // Brukes bare til visning, som skal gå gjennom GraphQL
     Personstatus getPersonstatus();
 
+    @Deprecated // Brukes bare til visning, som skal gå gjennom GraphQL
     LocalDate getStatsborgerskapDato();
 
     Bostedsadresse getBostedsadresse();

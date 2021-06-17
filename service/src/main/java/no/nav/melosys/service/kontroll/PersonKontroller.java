@@ -10,8 +10,8 @@ public final class PersonKontroller {
     private PersonKontroller() {
     }
 
-    public static boolean personDød(Persondata persondata) {
-        return persondata.getDødsdato() != null;
+    public static boolean erPersonDød(Persondata persondata) {
+        return persondata.erPersonDød();
     }
 
     public static boolean personBosattINorge(Persondata persondata) {

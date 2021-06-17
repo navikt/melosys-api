@@ -46,6 +46,11 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
     private boolean erEgenAnsatt;
 
     @Override
+    public boolean erPersonDød() {
+        return dødsdato != null;
+    }
+
+    @Override
     public boolean harIkkeRegistrertAdresse() {
         return bostedsadresse.erTom() &&
             postadresse.erTom() &&
@@ -180,7 +185,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.fødselsdato = fødselsdato;
     }
 
-    @Override
     public LocalDate getDødsdato() {
         return dødsdato;
     }

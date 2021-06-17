@@ -22,12 +22,12 @@ public class PersonKontrollerTest {
     public void personDød_personErDød_true() {
         PersonDokument personDokument = new PersonDokument();
         personDokument.setDødsdato(LocalDate.now());
-        assertThat(PersonKontroller.personDød(personDokument)).isTrue();
+        assertThat(PersonKontroller.erPersonDød(personDokument)).isTrue();
     }
 
     @Test
     public void personDød_ingenDødsdato_false() {
-        assertThat(PersonKontroller.personDød(new PersonDokument())).isFalse();
+        assertThat(PersonKontroller.erPersonDød(new PersonDokument())).isFalse();
     }
 
     @Test

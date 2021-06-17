@@ -79,7 +79,7 @@ final class UfmKontroller {
     }
 
     static Kontroll_begrunnelser personDød(UfmKontrollData kontrollData) {
-        return PersonKontroller.personDød(kontrollData.getPersonDokument()) ?
+        return PersonKontroller.erPersonDød(kontrollData.getPersonDokument()) ?
             Kontroll_begrunnelser.PERSON_DOD : null;
     }
 
