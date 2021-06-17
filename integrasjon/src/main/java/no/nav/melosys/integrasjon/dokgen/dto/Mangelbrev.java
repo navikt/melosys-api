@@ -27,8 +27,8 @@ public class Mangelbrev extends DokgenDto {
     @JsonFormat(shape = STRING)
     private final Instant datoInnsendingsfrist;
 
-    private final Sakstyper sakstype;
-    private final Behandlingstyper behandlingstype;
+    private final String sakstype;
+    private final String behandlingstype;
     private final String saksbehandlerNavn;
     private final String manglerInfoFritekst;
     private final String innledningFritekst;
@@ -40,8 +40,8 @@ public class Mangelbrev extends DokgenDto {
         this.datoMottatt = brevbestilling.getForsendelseMottatt();
         this.datoVedtatt = brevbestilling.getVedtaksdato();
         this.datoInnsendingsfrist = Instant.now().plus(Period.ofWeeks(DOKUMENTASJON_SVARFRIST_UKER_MANGELBREV));
-        this.sakstype = fagsak.getType();
-        this.behandlingstype = fagsak.getSistOppdaterteBehandling().getType();
+        this.sakstype = fagsak.getType().getKode();
+        this.behandlingstype = fagsak.getSistOppdaterteBehandling().getType().getKode();
         this.saksbehandlerNavn = fagsak.getEndretAv();
         this.manglerInfoFritekst = brevbestilling.getManglerInfoFritekst();
         this.innledningFritekst = brevbestilling.getInnledningFritekst();
@@ -59,11 +59,11 @@ public class Mangelbrev extends DokgenDto {
         return datoInnsendingsfrist;
     }
 
-    public Sakstyper getSakstype() {
+    public String getSakstype() {
         return sakstype;
     }
 
-    public Behandlingstyper getBehandlingstype() {
+    public String getBehandlingstype() {
         return behandlingstype;
     }
 

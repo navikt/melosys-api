@@ -56,29 +56,29 @@ class DistribuerJournalpostTest {
     }
 
     @Test
-    void utførFeilerVedManglendeJournalpostId() throws Exception {
+    void utførFeilerVedManglendeJournalpostId() {
         Prosessinstans prosessinstans = new Prosessinstans();
         Behandling behandling = TestdataFactory.lagBehandling();
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling());
+        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling.Builder<>().build());
 
         assertThrows(FunksjonellException.class, () -> distribuerJournalpost.utfør(prosessinstans));
     }
 
     @Test
-    void utførFeilerVedManglendeMottaker() throws Exception {
+    void utførFeilerVedManglendeMottaker() {
         Prosessinstans prosessinstans = new Prosessinstans();
         Behandling behandling = TestdataFactory.lagBehandling();
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, "123");
-        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling());
+        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling.Builder<>().build());
         assertThrows(FunksjonellException.class, () -> distribuerJournalpost.utfør(prosessinstans));
     }
 
     @Test
-    void utførDistribuerJournalpostUtenAdresse() throws Exception {
+    void utførDistribuerJournalpostUtenAdresse() {
         String journalpostId = "12345";
         Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.BRUKER);
 
