@@ -112,7 +112,7 @@ class EndreBehandlingstemaServiceTest {
     void endreBehandlingstema_gyldigEndringForSøknad_behandlingLagresBehandlingsresultatTømmesOgOppgaveOppdateres() {
         behandling.setTema(ARBEID_FLERE_LAND);
         setup_endreBehandlingstemaTester();
-        Oppgave behandlingsOppgaveForType = OppgaveFactory.lagBehandlingsOppgaveForType(ARBEID_FLERE_LAND, behandling.getType()).build();
+        Oppgave behandlingsOppgaveForType = OppgaveFactory.lagBehandlingsOppgaveForType(UTSENDT_ARBEIDSTAKER, behandling.getType()).build();
 
 
         endreBehandlingstemaService.endreBehandlingstemaTilBehandling(id, UTSENDT_ARBEIDSTAKER);
@@ -128,7 +128,7 @@ class EndreBehandlingstemaServiceTest {
     void endreBehandlingstema_gyldigEndringForSED_behandlingLagresBehandlingsresultatTømmesOgOppgaveOppdateres() {
         behandling.setTema(TRYGDETID);
         setup_endreBehandlingstemaTester();
-        Oppgave behandlingsOppgaveForType = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()).build();
+        Oppgave behandlingsOppgaveForType = OppgaveFactory.lagBehandlingsOppgaveForType(ØVRIGE_SED_MED, behandling.getType()).build();
 
         endreBehandlingstemaService.endreBehandlingstemaTilBehandling(id, ØVRIGE_SED_MED);
         verify(behandlingService).lagre(behandlingArgumentCaptor.capture());
