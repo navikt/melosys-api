@@ -11,6 +11,7 @@ public class OppgaveOppdatering {
     private final Oppgavetyper oppgavetype;
     private final Tema tema;
     private final String behandlingstema;
+    private final String behandlingstype;
     private final Fagsystem behandlesAvApplikasjon;
     private final String saksnummer;
     private final String beskrivelse;
@@ -23,6 +24,7 @@ public class OppgaveOppdatering {
         this.oppgavetype = builder.oppgavetype;
         this.tema = builder.tema;
         this.behandlingstema = builder.behandlingstema;
+        this.behandlingstype = builder.behandlingstype;
         this.behandlesAvApplikasjon = builder.behandlesAvApplikasjon;
         this.saksnummer = builder.saksnummer;
         this.beskrivelse = builder.beskrivelse;
@@ -47,6 +49,8 @@ public class OppgaveOppdatering {
     public String getBehandlingstema() {
         return behandlingstema;
     }
+
+    public String getBehandlingstype() { return behandlingstype; }
 
     public Fagsystem getBehandlesAvApplikasjon() {
         return behandlesAvApplikasjon;
@@ -80,6 +84,7 @@ public class OppgaveOppdatering {
         private Oppgavetyper oppgavetype;
         private Tema tema;
         private String behandlingstema;
+        private String behandlingstype;
         private Fagsystem behandlesAvApplikasjon;
         private String saksnummer;
         private String beskrivelse;
@@ -103,6 +108,11 @@ public class OppgaveOppdatering {
 
         public OppgaveOppdateringBuilder behandlingstema(String behandlingstema) {
             this.behandlingstema = behandlingstema;
+            return this;
+        }
+
+        public OppgaveOppdateringBuilder behandlingstype(String behandlingstype) {
+            this.behandlingstype = behandlingstype;
             return this;
         }
 
