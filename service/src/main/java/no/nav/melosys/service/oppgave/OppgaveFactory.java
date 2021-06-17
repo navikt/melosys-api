@@ -44,7 +44,7 @@ public final class OppgaveFactory {
             .setBehandlesAvApplikasjon(Fagsystem.MELOSYS);
     }
 
-    public static OppgaveParametere hentOppgaveParametere(Behandlingstema behandlingstema) {
+    static OppgaveParametere hentOppgaveParametere(Behandlingstema behandlingstema) {
 
         OppgaveParametere oppgaveParametere;
 
@@ -108,8 +108,8 @@ public final class OppgaveFactory {
         return LocalDate.now().plusDays(dager);
     }
 
-    public static class OppgaveParametere {
-        public final String behandlingstema;
+    static class OppgaveParametere {
+        final String behandlingstema;
         final String behandlingstype;
         final Tema tema;
         Oppgavetyper oppgavetype;
