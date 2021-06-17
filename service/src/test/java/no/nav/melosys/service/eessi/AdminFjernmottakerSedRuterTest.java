@@ -138,16 +138,16 @@ class AdminFjernmottakerSedRuterTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setBehandling(sistAktiveBehandling);
 
-        Lovvalgsperiode anmodningsperiode = new Lovvalgsperiode();
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
         anmodningsperiode.setMedlPeriodeID(20L);
-        behandlingsresultat.setLovvalgsperioder(Set.of(anmodningsperiode));
+        behandlingsresultat.setAnmodningsperioder(Set.of(anmodningsperiode));
 
         when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
         adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
 
         verify(fagsakService).oppdaterStatus(fagsak, Saksstatuser.ANNULLERT);
-        verify(medlPeriodeService).avvisPeriodeOpphørt(behandlingsresultat.hentValidertLovvalgsperiode().getMedlPeriodeID());
+        verify(medlPeriodeService).avvisPeriodeOpphørt(anmodningsperiode.getMedlPeriodeID());
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(sistAktiveBehandling, melosysEessiMelding);
     }
 

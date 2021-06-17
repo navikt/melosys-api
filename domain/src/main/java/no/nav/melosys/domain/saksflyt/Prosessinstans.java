@@ -218,6 +218,10 @@ public class Prosessinstans {
             .orElse(getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class, new MelosysEessiMelding()).getAktoerId());
     }
 
+    public MelosysEessiMelding hentMelosysEessiMelding() {
+        return getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
+    }
+
     public void leggTilHendelse(ProsessSteg steg, Throwable t) {
         this.hendelser.add(
             new ProsessinstansHendelse(

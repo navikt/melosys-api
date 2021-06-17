@@ -58,7 +58,7 @@ public class AdminFjernmottakerSedRuter extends AdminSedRuter implements SedRute
 
     @Override
     public void rutSedTilBehandling(Prosessinstans prosessinstans, Long arkivsakID) {
-        final MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(prosessinstans);
+        final MelosysEessiMelding melosysEessiMelding = prosessinstans.hentMelosysEessiMelding();
         Optional<Fagsak> fagsak = hentFagsakDersomArkivsakIDEksisterer(arkivsakID);
 
         if (fagsak.isEmpty()) {
@@ -72,7 +72,7 @@ public class AdminFjernmottakerSedRuter extends AdminSedRuter implements SedRute
         if (erMottakerInstitusjonFraMelding) {
             annullerSakOgBehandling(sistAktiveBehandling);
         } else {
-            log.info("Mottakerinstitusjon på sed {} i RINA-sak {} er ikke norsk", melosysEessiMelding.getSedId(), melosysEessiMelding.getRinaSaksnummer());
+            log.info("Mottakerinstitusjon på sed {} i RINA-sak {} er ikke Nav", melosysEessiMelding.getSedId(), melosysEessiMelding.getRinaSaksnummer());
         }
 
         opprettJournalføringProsess(melosysEessiMelding, sistAktiveBehandling);

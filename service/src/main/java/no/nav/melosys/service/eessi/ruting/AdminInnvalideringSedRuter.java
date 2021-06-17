@@ -36,7 +36,9 @@ public class AdminInnvalideringSedRuter extends AdminSedRuter implements SedRute
                                       ProsessinstansService prosessinstansService,
                                       @Qualifier("system") OppgaveService oppgaveService,
                                       BehandlingsresultatService behandlingsresultatService,
-                                      MedlPeriodeService medlPeriodeService, EessiService eessiService, Unleash unleash) {
+                                      MedlPeriodeService medlPeriodeService,
+                                      @Qualifier("system") EessiService eessiService,
+                                      Unleash unleash) {
         super(fagsakService,
             behandlingsresultatService,
             medlPeriodeService,
@@ -60,7 +62,7 @@ public class AdminInnvalideringSedRuter extends AdminSedRuter implements SedRute
     @Override
     public void rutSedTilBehandling(Prosessinstans prosessinstans, Long arkivsakID) {
 
-        final MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(prosessinstans);
+        final MelosysEessiMelding melosysEessiMelding = prosessinstans.hentMelosysEessiMelding();
         Optional<Fagsak> fagsak = hentFagsakDersomArkivsakIDEksisterer(arkivsakID);
 
         if (fagsak.isEmpty()) {
@@ -72,7 +74,6 @@ public class AdminInnvalideringSedRuter extends AdminSedRuter implements SedRute
         var sistAktiveBehandling = fagsak.get().hentSistAktiveBehandling();
         var sedDokument = sistAktiveBehandling.finnSedDokument();
         boolean aktivBehandlingErInvalidert = erAktivBehandlingInvalidert(sedDokument, arkivsakID);
-        ;
 
         if (aktivBehandlingErInvalidert && (sistAktiveBehandling.erRegisteringAvUnntak() || sistAktiveBehandling.erAnmodningOmUnntak())) {
             annullerSakOgBehandling(sistAktiveBehandling);

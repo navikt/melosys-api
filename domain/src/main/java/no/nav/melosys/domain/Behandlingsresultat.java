@@ -316,6 +316,17 @@ public class Behandlingsresultat extends RegistreringsInfo {
         throw new NoSuchElementException("Ingen periode om lovvalg finnes for behandling " + id);
     }
 
+    public Optional<PeriodeOmLovvalg> finnValidertPeriodeOmLOvvalg() {
+        if (!behandling.erAktiv() && !lovvalgsperioder.isEmpty()) {
+            return Optional.ofNullable(hentValidertLovvalgsperiode());
+        }
+
+        if (!anmodningsperioder.isEmpty()) {
+            return Optional.ofNullable(hentValidertAnmodningsperiode());
+        }
+        return Optional.empty();
+    }
+
     public Lovvalgsperiode hentValidertLovvalgsperiode() {
         return finnValidertLovvalgsperiode()
             .orElseThrow(() -> new NoSuchElementException("Ingen lovvalgsperiode finnes for behandlingsresultat " + id));

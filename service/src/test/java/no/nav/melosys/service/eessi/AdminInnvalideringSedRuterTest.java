@@ -110,7 +110,10 @@ class AdminInnvalideringSedRuterTest {
     void rutSedTilBehandling_behandlingErUtlandUtpektOgAvsluttetHarMedlPeriode_oppdaterSaksstatusAnnullertOgOpphørMEDLPeriode() {
         var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, Behandlingsstatus.AVSLUTTET);
         fagsak.hentSistAktiveBehandling().getSaksopplysninger().add(lagSedDokument());
-        var behandlingsresultat = lagBehandlingsresultat(true);
+        Behandling sistAktiveBehandling = fagsak.hentSistAktiveBehandling();
+
+        Behandlingsresultat behandlingsresultat = lagBehandlingsresultat(true);
+        behandlingsresultat.setBehandling(sistAktiveBehandling);
 
         when(eessiService.hentTilknyttedeBucer(arkivsakID, List.of())).thenReturn(lagBucInformasjon("AVBRUTT"));
         when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
@@ -126,10 +129,17 @@ class AdminInnvalideringSedRuterTest {
     void rutSedTilBehandling_behandlingErUtstasjoneringOgAktiv_oppdaterSaksstatusAnnullert() {
         var fagsak = lagFagsak(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, Behandlingsstatus.UNDER_BEHANDLING);
         fagsak.hentSistAktiveBehandling().getSaksopplysninger().add(lagSedDokument());
+        Behandling sistAktiveBehandling = fagsak.hentSistAktiveBehandling();
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setBehandling(sistAktiveBehandling);
+
+        Anmodningsperiode periode = new Anmodningsperiode();
+        behandlingsresultat.getAnmodningsperioder().add(periode);
 
         when(eessiService.hentTilknyttedeBucer(arkivsakID, List.of())).thenReturn(lagBucInformasjon("AVBRUTT"));
         when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
-        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(lagBehandlingsresultat(false));
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
 
         adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
 
