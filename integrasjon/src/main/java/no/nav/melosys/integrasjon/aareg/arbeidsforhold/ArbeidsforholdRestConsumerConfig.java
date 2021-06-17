@@ -3,10 +3,6 @@ package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
 import no.nav.melosys.integrasjon.felles.RestConsumer;
 import no.nav.melosys.integrasjon.felles.SystemContextExchangeFilter;
-import no.nav.melosys.integrasjon.medl.MedlemskapRestConsumerConfig;
-import no.nav.melosys.sikkerhet.sts.NAVSTSClient;
-import no.nav.melosys.sikkerhet.sts.StsConfigurationUtil;
-import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.ArbeidsforholdV3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

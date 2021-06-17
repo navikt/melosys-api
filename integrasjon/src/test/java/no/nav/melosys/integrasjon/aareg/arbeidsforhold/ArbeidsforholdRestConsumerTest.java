@@ -67,11 +67,11 @@ class ArbeidsforholdRestConsumerTest {
         ArbeidsforholdResponse.Arbeidsforhold[] arbeidsforholds = arbeidsforholdResponse.getArbeidsforhold();
         assertThat(arbeidsforholds.length).isEqualTo(1);
         ArbeidsforholdResponse.Arbeidsforhold arbeidsforhold = arbeidsforholds[0];
-        assertThat(arbeidsforhold.getNavArbeidsforholdId()).isEqualTo(3065458);
+        assertThat(arbeidsforhold.getNavArbeidsforholdId()).isEqualTo(123456);
 
         ArbeidsforholdResponse.Arbeidstaker arbeidstaker = arbeidsforhold.getArbeidstaker();
-        assertThat(arbeidstaker.type).isEqualTo("Person");
-        assertThat(arbeidstaker.aktoerId).isEqualTo("1685359155300");
+//        assertThat(arbeidstaker.type).isEqualTo("Person");
+        assertThat(arbeidstaker.aktoerId).isEqualTo("1234567890");
 
         ArbeidsforholdResponse.Arbeidsavtaler arbeidsavtaler = arbeidsforhold.getArbeidsavtaler().get(0);
 
@@ -79,88 +79,158 @@ class ArbeidsforholdRestConsumerTest {
 
     }
 
-    String responsBody = """
+    private final String responsBody = """
         [
-            {
-                "navArbeidsforholdId": 3065458,
-                "arbeidstaker": {
-                    "type": "Person",
-                    "offentligIdent": "64068648643",
-                    "aktoerId": "1685359155300"
+          {
+            "ansettelsesperiode": {
+              "bruksperiode": {
+                "fom": "2015-01-06T21:44:04.748",
+                "tom": "2015-12-06T19:45:04"
+              },
+              "periode": {
+                "fom": "2014-07-01",
+                "tom": "2015-12-31"
+              },
+              "sluttaarsak": "arbeidstakerHarSagtOppSelv",
+              "sporingsinformasjon": {
+                "endretAv": "Z990693",
+                "endretKilde": "AAREG",
+                "endretKildereferanse": "referanse-fra-kilde",
+                "endretTidspunkt": "2018-09-19T12:11:20.79",
+                "opprettetAv": "srvappserver",
+                "opprettetKilde": "EDAG",
+                "opprettetKildereferanse": "22a26849-aeef-4b81-9174-e238c11e1081",
+                "opprettetTidspunkt": "2018-09-19T12:10:58.059"
+              },
+              "varslingskode": "ERKONK"
+            },
+            "antallTimerForTimeloennet": [
+              {
+                "antallTimer": 37.5,
+                "periode": {
+                  "fom": "2014-07-01",
+                  "tom": "2015-12-31"
                 },
-                "arbeidsgiver": {
-                    "type": "Organisasjon",
-                    "organisasjonsnummer": "990013608"
-                },
-                "opplysningspliktig": {
-                    "type": "Organisasjon",
-                    "organisasjonsnummer": "991609407"
-                },
-                "type": "ordinaertArbeidsforhold",
-                "ansettelsesperiode": {
-                    "periode": {
-                        "fom": "2021-01-01"
-                    },
-                    "bruksperiode": {
-                        "fom": "2021-03-16T08:49:54.329"
-                    },
-                    "sporingsinformasjon": {
-                        "opprettetTidspunkt": "2021-03-16T08:49:54.33",
-                        "opprettetAv": "Z990860",
-                        "opprettetKilde": "AAREG",
-                        "opprettetKildereferanse": "brevtest",
-                        "endretTidspunkt": "2021-03-16T08:49:54.33",
-                        "endretAv": "Z990860",
-                        "endretKilde": "AAREG",
-                        "endretKildereferanse": "brevtest"
-                    }
-                },
-                "arbeidsavtaler": [
-                    {
-                        "type": "Ordinaer",
-                        "arbeidstidsordning": "ikkeSkift",
-                        "yrke": "3113145",
-                        "stillingsprosent": 100.0,
-                        "antallTimerPrUke": 37.5,
-                        "beregnetAntallTimerPrUke": 37.5,
-                        "bruksperiode": {
-                            "fom": "2021-03-16T08:49:54.329"
-                        },
-                        "gyldighetsperiode": {
-                            "fom": "2021-01-01"
-                        },
-                        "sporingsinformasjon": {
-                            "opprettetTidspunkt": "2021-03-16T08:49:54.33",
-                            "opprettetAv": "Z990860",
-                            "opprettetKilde": "AAREG",
-                            "opprettetKildereferanse": "brevtest",
-                            "endretTidspunkt": "2021-03-16T08:49:54.33",
-                            "endretAv": "Z990860",
-                            "endretKilde": "AAREG",
-                            "endretKildereferanse": "brevtest"
-                        }
-                    }
-                ],
-                "varsler": [
-                    {
-                        "entitet": "ARBEIDSFORHOLD",
-                        "varslingskode": "NAVEND"
-                    }
-                ],
-                "innrapportertEtterAOrdningen": true,
-                "registrert": "2021-03-16T08:49:54.267",
-                "sistBekreftet": "2021-03-16T08:49:54",
+                "rapporteringsperiode": "2018-05",
                 "sporingsinformasjon": {
-                    "opprettetTidspunkt": "2021-03-16T08:49:54.33",
-                    "opprettetAv": "Z990860",
-                    "opprettetKilde": "AAREG",
-                    "opprettetKildereferanse": "brevtest",
-                    "endretTidspunkt": "2021-03-16T08:49:54.33",
-                    "endretAv": "Z990860",
-                    "endretKilde": "AAREG",
-                    "endretKildereferanse": "brevtest"
+                  "endretAv": "Z990693",
+                  "endretKilde": "AAREG",
+                  "endretKildereferanse": "referanse-fra-kilde",
+                  "endretTidspunkt": "2018-09-19T12:11:20.79",
+                  "opprettetAv": "srvappserver",
+                  "opprettetKilde": "EDAG",
+                  "opprettetKildereferanse": "22a26849-aeef-4b81-9174-e238c11e1081",
+                  "opprettetTidspunkt": "2018-09-19T12:10:58.059"
                 }
-            }
-        ]""";
+              }
+            ],
+            "arbeidsavtaler": [
+              {
+                "ansettelsesform": "fast",
+                "antallTimerPrUke": 37.5,
+                "arbeidstidsordning": "ikkeSkift",
+                "beregnetAntallTimerPrUke": 37.5,
+                "bruksperiode": {
+                  "fom": "2015-01-06T21:44:04.748",
+                  "tom": "2015-12-06T19:45:04"
+                },
+                "gyldighetsperiode": {
+                  "fom": "2014-07-01",
+                  "tom": "2015-12-31"
+                },
+                "sistLoennsendring": "string",
+                "sistStillingsendring": "string",
+                "sporingsinformasjon": {
+                  "endretAv": "Z990693",
+                  "endretKilde": "AAREG",
+                  "endretKildereferanse": "referanse-fra-kilde",
+                  "endretTidspunkt": "2018-09-19T12:11:20.79",
+                  "opprettetAv": "srvappserver",
+                  "opprettetKilde": "EDAG",
+                  "opprettetKildereferanse": "22a26849-aeef-4b81-9174-e238c11e1081",
+                  "opprettetTidspunkt": "2018-09-19T12:10:58.059"
+                },
+                "stillingsprosent": 49.5,
+                "type": "Forenklet",
+                "yrke": "2130123"
+              }
+            ],
+            "arbeidsforholdId": "abc-321",
+            "arbeidsgiver": {
+              "type": "Organisasjon"
+            },
+            "arbeidstaker": {
+              "aktoerId": "1234567890",
+              "offentligIdent": "31126700000"
+            },
+            "innrapportertEtterAOrdningen": false,
+            "navArbeidsforholdId": 123456,
+            "opplysningspliktig": {
+              "type": "Organisasjon"
+            },
+            "permisjonPermitteringer": [
+              {
+                "periode": {
+                  "fom": "2014-07-01",
+                  "tom": "2015-12-31"
+                },
+                "permisjonPermitteringId": "123-xyz",
+                "prosent": 50.5,
+                "sporingsinformasjon": {
+                  "endretAv": "Z990693",
+                  "endretKilde": "AAREG",
+                  "endretKildereferanse": "referanse-fra-kilde",
+                  "endretTidspunkt": "2018-09-19T12:11:20.79",
+                  "opprettetAv": "srvappserver",
+                  "opprettetKilde": "EDAG",
+                  "opprettetKildereferanse": "22a26849-aeef-4b81-9174-e238c11e1081",
+                  "opprettetTidspunkt": "2018-09-19T12:10:58.059"
+                },
+                "type": "permisjonMedForeldrepenger",
+                "varslingskode": "string"
+              }
+            ],
+            "registrert": "2018-09-18T11:12:29",
+            "sistBekreftet": "2018-09-19T12:10:31",
+            "sporingsinformasjon": {
+              "endretAv": "Z990693",
+              "endretKilde": "AAREG",
+              "endretKildereferanse": "referanse-fra-kilde",
+              "endretTidspunkt": "2018-09-19T12:11:20.79",
+              "opprettetAv": "srvappserver",
+              "opprettetKilde": "EDAG",
+              "opprettetKildereferanse": "22a26849-aeef-4b81-9174-e238c11e1081",
+              "opprettetTidspunkt": "2018-09-19T12:10:58.059"
+            },
+            "type": "ordinaertArbeidsforhold",
+            "utenlandsopphold": [
+              {
+                "landkode": "JPN",
+                "periode": {
+                  "fom": "2014-07-01",
+                  "tom": "2015-12-31"
+                },
+                "rapporteringsperiode": "2017-12",
+                "sporingsinformasjon": {
+                  "endretAv": "Z990693",
+                  "endretKilde": "AAREG",
+                  "endretKildereferanse": "referanse-fra-kilde",
+                  "endretTidspunkt": "2018-09-19T12:11:20.79",
+                  "opprettetAv": "srvappserver",
+                  "opprettetKilde": "EDAG",
+                  "opprettetKildereferanse": "22a26849-aeef-4b81-9174-e238c11e1081",
+                  "opprettetTidspunkt": "2018-09-19T12:10:58.059"
+                }
+              }
+            ],
+            "varsler": [
+              {
+                "entitet": "ANSETTELSESPERIODE",
+                "varslingskode": "string"
+              }
+            ]
+          }
+        ]
+        """;
 
 }

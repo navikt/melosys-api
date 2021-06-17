@@ -59,7 +59,6 @@ public class AaregService implements AaregFasade {
     }
 
     private Saksopplysning finnArbeidsforholdPrArbeidstakerRest(String ident, LocalDate fom, LocalDate tom) {
-        // TODO: use fom and tom
         ArbeidsforholdQuery arbeidsfoholdQuery = new ArbeidsforholdQuery
             .Builder()
             .arbeidsforholdType(ArbeidsforholdQuery.ArbeidsforholdType.ALLE)

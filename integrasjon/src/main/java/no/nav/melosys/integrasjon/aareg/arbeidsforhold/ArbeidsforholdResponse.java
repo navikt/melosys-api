@@ -7,10 +7,12 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import no.nav.melosys.domain.dokument.arbeidsforhold.PermisjonOgPermittering;
 import no.nav.melosys.exception.TekniskException;
 
 public class ArbeidsforholdResponse {
@@ -43,6 +45,9 @@ public class ArbeidsforholdResponse {
         private Arbeidstaker arbeidstaker;
         private List<Arbeidsavtaler> arbeidsavtaler;
 
+        @JsonIgnore // TODO: legg til innhold i PermisjonPermitteringer
+        private List<PermisjonPermitteringer> permisjonPermitteringer = List.of();
+
         public Arbeidstaker getArbeidstaker() {
             return arbeidstaker;
         }
@@ -53,6 +58,10 @@ public class ArbeidsforholdResponse {
 
         public List<Arbeidsavtaler> getArbeidsavtaler() {
             return arbeidsavtaler;
+        }
+
+        public List<PermisjonPermitteringer> getPermisjonPermitteringer() {
+            return permisjonPermitteringer;
         }
 
         @JsonAnySetter
@@ -79,6 +88,10 @@ public class ArbeidsforholdResponse {
 
         @JsonProperty
         String aktoerId;
+    }
+
+    public static class PermisjonPermitteringer {
+
     }
 
     public static class Arbeidsgiver {

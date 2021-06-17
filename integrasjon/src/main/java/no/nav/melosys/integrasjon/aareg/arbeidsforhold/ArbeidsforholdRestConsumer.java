@@ -31,8 +31,8 @@ public class ArbeidsforholdRestConsumer implements RestConsumer {
                     // TODO: add more params
                     .build())
                 .header("Nav-Personident", fnr)
-                .header(HttpHeaders.AUTHORIZATION, getAuth())
-                .header("Nav-Consumer-Token", getAuth())
+//                .header(HttpHeaders.AUTHORIZATION, getAuth())
+//                .header("Nav-Consumer-Token", getAuth())
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(ArbeidsforholdResponse.Arbeidsforhold[].class)

@@ -24,12 +24,24 @@ public class ArbeidsforholdKonvertering {
             dst.arbeidsforholdstype = src.getType();
             dst.arbeidsavtaler = getArbeidsAvtaler(src.getArbeidsavtaler());
             arbeidsforholdList.add(dst);
+            // dst.arbeidsavtaler - vi har arbeidsgiver
+            dst.permisjonOgPermittering = getPermisjonPermitteringer(src.getPermisjonPermitteringer());
         }
 
         ArbeidsforholdDokument arbeidsforholdDokument = new ArbeidsforholdDokument(arbeidsforholdList);
 
         saksopplysning.setDokument(arbeidsforholdDokument);
         return saksopplysning;
+    }
+
+    private List<PermisjonOgPermittering> getPermisjonPermitteringer(List<ArbeidsforholdResponse.PermisjonPermitteringer> permisjonPermitteringer) {
+        List<PermisjonOgPermittering> permisjonOgPermitteringer = new ArrayList<>();
+        for(var src : permisjonPermitteringer) {
+            PermisjonOgPermittering dst = new PermisjonOgPermittering();
+
+            permisjonOgPermitteringer.add(dst);
+        }
+        return permisjonOgPermitteringer;
     }
 
     private List<Arbeidsavtale> getArbeidsAvtaler(List<ArbeidsforholdResponse.Arbeidsavtaler> arbeidsavtalerSrc) {
