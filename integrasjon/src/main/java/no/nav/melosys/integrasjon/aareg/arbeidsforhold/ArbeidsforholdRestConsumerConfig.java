@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -27,23 +26,12 @@ public class ArbeidsforholdRestConsumerConfig implements RestConsumer {
     }
 
     @Bean
-    ArbeidsforholdRestConsumer arbeidsforholdRestConsumer(WebClient.Builder webClientBuilder, SystemContextExchangeFilter systemContextExchangeFilter) {
+    ArbeidsforholdRestConsumer arbeidsforholdRestConsumer(WebClient.Builder webClientBuilder, ArbeidsforholdContextExchangeFilter systemContextExchangeFilter) {
         return new ArbeidsforholdRestConsumer(webClientBuilder
             .baseUrl(url)
             .filter(systemContextExchangeFilter)
-            .filter(headerFilter())
             .filter(errorFilter())
             .build());
-    }
-
-    // TODO: this is duplicated from MedlemskapRestConsumerConfig. Move to common place
-    private ExchangeFilterFunction headerFilter() {
-        return ExchangeFilterFunction.ofRequestProcessor(
-            request -> Mono.just(ClientRequest.from(request)
-                .header("Nav-Call-Id", getCallID())
-                .header("Nav-Consumer-Id", CONSUMER_ID)
-                .build())
-        );
     }
 
     private ExchangeFilterFunction errorFilter() {
@@ -51,7 +39,7 @@ public class ArbeidsforholdRestConsumerConfig implements RestConsumer {
             if (response.statusCode().isError()) {
                 return response.bodyToMono(String.class)
                     .flatMap(errorBody -> {
-                        log.error("Kall mot MEDL feilet. {} - {}", response.statusCode(), errorBody);
+                        log.error("Kall mot arreg-rest feilet. {} - {}", response.statusCode(), errorBody);
                         return Mono.error(new RuntimeException(errorBody));
                     });
             }

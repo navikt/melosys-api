@@ -28,11 +28,9 @@ public class ArbeidsforholdRestConsumer implements RestConsumer {
                     .queryParamIfPresent("arbeidsforholdType", arbeidsfoholdQuery.getArbeidsforholdType())
                     .queryParamIfPresent("ansettelsesperiodeFom", arbeidsfoholdQuery.getAnsettelsesperiodeFom())
                     .queryParamIfPresent("ansettelsesperiodeTom", arbeidsfoholdQuery.getAnsettelsesperiodeTom())
-                    // TODO: add more params
+                    // TODO: sjekk om metriks får url uten detaljer så det funker i grafana
                     .build())
                 .header("Nav-Personident", fnr)
-//                .header(HttpHeaders.AUTHORIZATION, getAuth())
-//                .header("Nav-Consumer-Token", getAuth())
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(ArbeidsforholdResponse.Arbeidsforhold[].class)
