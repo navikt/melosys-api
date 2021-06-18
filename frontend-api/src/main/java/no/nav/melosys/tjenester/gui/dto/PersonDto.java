@@ -7,11 +7,12 @@ import java.util.List;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.*;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
+import no.nav.melosys.domain.person.Persondata;
 
 public class PersonDto {
 
-    public PersonDto(PersonDokument person) {
-        fnr = person.getFnr();
+    public PersonDto(Persondata person) {
+        fnr = person.hentFolkeregisterIdent();
         sivilstand = person.getSivilstand();
         statsborgerskap = person.getStatsborgerskap();
         sammensattNavn = person.getSammensattNavn();

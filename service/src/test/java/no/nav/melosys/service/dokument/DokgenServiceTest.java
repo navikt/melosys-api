@@ -16,6 +16,7 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.FunksjonellException;
@@ -127,7 +128,7 @@ class DokgenServiceTest {
     }
 
     @Test
-    void produserBrevTilRepresentantOk() throws Exception {
+    void produserBrevTilRepresentantOk() {
         when(mockDokgenConsumer.lagPdf(anyString(), any(), anyBoolean())).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
@@ -154,7 +155,7 @@ class DokgenServiceTest {
     }
 
     @Test
-    void produserUtkastUtenRepresentantForBrukerOk() throws Exception {
+    void produserUtkastUtenRepresentantForBrukerOk() {
         when(mockDokgenConsumer.lagPdf(anyString(), any(), anyBoolean())).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
@@ -181,7 +182,7 @@ class DokgenServiceTest {
     }
 
     @Test
-    void produserUtkastTilRepresentantForBrukerOk() throws Exception {
+    void produserUtkastTilRepresentantForBrukerOk() {
         when(mockDokgenConsumer.lagPdf(anyString(), any(), anyBoolean())).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
@@ -364,7 +365,8 @@ class DokgenServiceTest {
     private Fagsak lagFagsak(Behandling behandling) {
         Fagsak fagsak = new Fagsak();
         fagsak.setGsakSaksnummer(123L);
-        fagsak.setBehandlinger(asList(behandling));
+        fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setBehandlinger(List.of(behandling));
         return fagsak;
     }
 

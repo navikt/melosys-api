@@ -13,11 +13,11 @@ import no.nav.melosys.domain.brev.FastMottaker;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.person.Informasjonsbehov;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
@@ -188,13 +188,13 @@ public class BrevbestillingService {
     }
 
     private BrevAdresse tilBrevAdresse(Aktoer mottaker, Behandling behandling) {
-        PersonDokument personDokument = null;
+        Persondata persondata = null;
         Kontaktopplysning kontaktopplysning = null;
         OrganisasjonDokument orgDokument = null;
 
         if (mottaker.getRolle() == Aktoersroller.BRUKER) {
-            personDokument = (PersonDokument) persondataFasade.hentPersonFraTps(
-                    behandling.hentPersonDokument().getFnr(), Informasjonsbehov.STANDARD).getDokument();
+            persondata = (Persondata) persondataFasade.hentPersonFraTps(
+                    behandling.hentPersonDokument().hentFolkeregisterIdent(), Informasjonsbehov.STANDARD).getDokument();
 
             } else if (mottaker.getRolle() == Aktoersroller.ARBEIDSGIVER || mottaker.getRolle() == Aktoersroller.REPRESENTANT) {
                 kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), mottaker.getOrgnr()).orElse(null);
@@ -203,12 +203,12 @@ public class BrevbestillingService {
         }
 
         return new BrevAdresse.Builder()
-            .medMottakerNavn(mapMottakerNavn(orgDokument, personDokument))
+            .medMottakerNavn(mapMottakerNavn(orgDokument, persondata))
             .medOrgnr(orgDokument != null ? orgDokument.getOrgnummer() : null)
-            .medAdresselinjer(mapAdresselinjer(orgDokument, null, kontaktopplysning, personDokument))
-            .medPostnr(mapPostnr(orgDokument, personDokument))
-            .medPoststed(orgDokument != null ? mapPoststed(orgDokument) : kodeverkService.dekod(FellesKodeverk.POSTNUMMER, personDokument.getGjeldendePostadresse().postnr, LocalDate.now()))
-            .medLand(mapLandForAdresse(orgDokument, personDokument))
+            .medAdresselinjer(mapAdresselinjer(orgDokument, null, kontaktopplysning, persondata))
+            .medPostnr(mapPostnr(orgDokument, persondata))
+            .medPoststed(orgDokument != null ? mapPoststed(orgDokument) : kodeverkService.dekod(FellesKodeverk.POSTNUMMER, persondata.getGjeldendePostadresse().postnr, LocalDate.now()))
+            .medLand(mapLandForAdresse(orgDokument, persondata))
             .build();
     }
 

@@ -244,7 +244,7 @@ public class OppgaveService {
             saksopplysningerService.finnPersonOpplysninger(behandling.getId()).ifPresent(
                 personDokument -> {
                     behOppgaveDto.setSammensattNavn(personDokument.getSammensattNavn());
-                    behOppgaveDto.setFnr(personDokument.getFnr());
+                    behOppgaveDto.setFnr(personDokument.hentFolkeregisterIdent());
                 }
             );
 

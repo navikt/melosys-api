@@ -10,7 +10,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 public class OppgaveOppdatering {
     private final Oppgavetyper oppgavetype;
     private final Tema tema;
-    private final Behandlingstema behandlingstema;
+    private final String behandlingstema;
+    private final String behandlingstype;
     private final Fagsystem behandlesAvApplikasjon;
     private final String saksnummer;
     private final String beskrivelse;
@@ -23,6 +24,7 @@ public class OppgaveOppdatering {
         this.oppgavetype = builder.oppgavetype;
         this.tema = builder.tema;
         this.behandlingstema = builder.behandlingstema;
+        this.behandlingstype = builder.behandlingstype;
         this.behandlesAvApplikasjon = builder.behandlesAvApplikasjon;
         this.saksnummer = builder.saksnummer;
         this.beskrivelse = builder.beskrivelse;
@@ -44,9 +46,11 @@ public class OppgaveOppdatering {
         return tema;
     }
 
-    public Behandlingstema getBehandlingstema() {
+    public String getBehandlingstema() {
         return behandlingstema;
     }
+
+    public String getBehandlingstype() { return behandlingstype; }
 
     public Fagsystem getBehandlesAvApplikasjon() {
         return behandlesAvApplikasjon;
@@ -79,7 +83,8 @@ public class OppgaveOppdatering {
     public static class OppgaveOppdateringBuilder {
         private Oppgavetyper oppgavetype;
         private Tema tema;
-        private Behandlingstema behandlingstema;
+        private String behandlingstema;
+        private String behandlingstype;
         private Fagsystem behandlesAvApplikasjon;
         private String saksnummer;
         private String beskrivelse;
@@ -101,8 +106,13 @@ public class OppgaveOppdatering {
             return this;
         }
 
-        public OppgaveOppdateringBuilder behandlingstema(Behandlingstema behandlingstema) {
+        public OppgaveOppdateringBuilder behandlingstema(String behandlingstema) {
             this.behandlingstema = behandlingstema;
+            return this;
+        }
+
+        public OppgaveOppdateringBuilder behandlingstype(String behandlingstype) {
+            this.behandlingstype = behandlingstype;
             return this;
         }
 

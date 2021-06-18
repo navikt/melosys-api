@@ -18,6 +18,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.DokgenDto;
@@ -237,6 +238,7 @@ class DokgenMalMapperTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setRegistrertDato(Instant.now());
         fagsak.setBehandlinger(lagBehandlinger());
+        fagsak.setType(Sakstyper.EU_EOS);
         if (medRepresentant) {
             Aktoer representant = new Aktoer();
             representant.setRolle(Aktoersroller.REPRESENTANT);

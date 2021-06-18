@@ -9,8 +9,8 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.PersonnavnType;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.person.Persondata;
 import org.apache.commons.lang3.StringUtils;
 
 import static no.nav.melosys.domain.adresse.Adresse.sammenslå;
@@ -108,11 +108,11 @@ public final class BrevDataUtils {
             .build();
     }
 
-    public static PersonnavnType lagPersonnavn(PersonDokument personDokument) {
+    public static PersonnavnType lagPersonnavn(Persondata persondata) {
         PersonnavnType navn = new PersonnavnType();
-        navn.setFornavn(personDokument.getFornavn());
-        navn.setMellomnavn(personDokument.getMellomnavn());
-        navn.setEtternavn(personDokument.getEtternavn());
+        navn.setFornavn(persondata.getFornavn());
+        navn.setMellomnavn(persondata.getMellomnavn());
+        navn.setEtternavn(persondata.getEtternavn());
         return navn;
     }
 }

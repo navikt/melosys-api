@@ -4,7 +4,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.TemaFactory;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -72,7 +72,7 @@ public class SobService {
     }
 
     private String hentAktørIdFraTps(Behandling behandling) {
-        PersonDokument personDokument = behandling.hentPersonDokument();
-        return persondataFasade.hentAktørIdForIdent(personDokument.getFnr());
+        Persondata persondata = behandling.hentPersonDokument();
+        return persondataFasade.hentAktørIdForIdent(persondata.hentFolkeregisterIdent());
     }
 }
