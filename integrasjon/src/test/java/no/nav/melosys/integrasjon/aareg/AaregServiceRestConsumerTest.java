@@ -1,5 +1,8 @@
 package no.nav.melosys.integrasjon.aareg;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Saksopplysning;
@@ -52,19 +55,16 @@ public class AaregServiceRestConsumerTest {
     }
 
     @Test
-    public void getArbeidsforholdDokument() {
+    public void getArbeidsforholdDokument() throws JsonProcessingException {
         Saksopplysning saksopplysning = aaregService.finnArbeidsforholdPrArbeidstaker("99999999991", null, null);
         ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) saksopplysning.getDokument();
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
 
         List<Arbeidsforhold> arbeidsforhold = arbeidsforholdDokument.getArbeidsforhold();
         for (var item : arbeidsforhold) {
-            System.out.println(item.arbeidsforholdstype);
-            System.out.println(item.arbeidsforholdID);
-            System.out.println(item.arbeidstakerID);
-            for (var avtale : item.arbeidsavtaler) {
-                System.out.println("-arbeidsavtaler-");
-                System.out.println(avtale.beregnetAntallTimerPrUke);
-            }
+            String s = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(arbeidsforhold);
+            System.out.println(s);
         }
     }
 

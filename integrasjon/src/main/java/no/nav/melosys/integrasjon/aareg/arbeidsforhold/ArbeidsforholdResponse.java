@@ -38,14 +38,49 @@ public class ArbeidsforholdResponse {
     }
 
     public static class Arbeidsforhold {
-        private Map<String, Object> unknownProperties = new HashMap<>();
+        private final Map<String, Object> unknownProperties = new HashMap<>();
 
-        private Integer navArbeidsforholdId;
-        private String type;
-        private Arbeidstaker arbeidstaker;
-        private List<Arbeidsavtaler> arbeidsavtaler;
+        @JsonProperty
+        String arbeidsforholdId;
 
-        private List<PermisjonPermitteringer> permisjonPermitteringer;
+        @JsonProperty
+        Integer navArbeidsforholdId;
+
+        @JsonProperty
+        Ansettelsesperiode ansettelsesperiode;
+
+        @JsonProperty
+        String type;
+
+        @JsonProperty
+        Arbeidstaker arbeidstaker;
+
+        @JsonProperty
+        List<Arbeidsavtaler> arbeidsavtaler;
+
+        @JsonProperty
+        List<PermisjonPermitteringer> permisjonPermitteringer;
+
+        @JsonProperty
+        List<Utenlandsopphold> utenlandsopphold;
+
+        @JsonProperty
+        Arbeidsgiver arbeidsgiver;
+
+        @JsonProperty
+        Opplysningspliktig opplysningspliktig;
+
+        @JsonProperty
+        Boolean innrapportertEtterAOrdningen;
+
+        @JsonProperty
+        String registrert;
+
+        @JsonProperty
+        String sistBekreftet;
+
+        @JsonProperty
+        List<AntallTimerForTimeloennet> antallTimerForTimeloennet;
 
         public Arbeidstaker getArbeidstaker() {
             return arbeidstaker;
@@ -76,6 +111,43 @@ public class ArbeidsforholdResponse {
         public String getType() {
             return type;
         }
+    }
+
+    public static class AntallTimerForTimeloennet {
+        @JsonProperty
+        BigDecimal antallTimer;
+
+        @JsonProperty
+        Periode periode;
+
+        @JsonProperty
+        String rapporteringsperiode;
+    }
+
+    public static class Opplysningspliktig {
+        @JsonProperty
+        String type;
+    }
+
+    public static class Arbeidsgiver {
+        @JsonProperty
+        String type;
+    }
+
+    public static class Utenlandsopphold {
+        @JsonProperty
+        String landkode;
+
+        @JsonProperty
+        Periode periode;
+
+        @JsonProperty
+        String rapporteringsperiode;
+    }
+
+    public static class Ansettelsesperiode {
+        @JsonProperty
+        Periode periode;
     }
 
     public static class Arbeidstaker {
@@ -120,12 +192,6 @@ public class ArbeidsforholdResponse {
 
         @JsonProperty
         String varslingskode;
-    }
-
-    public static class Arbeidsgiver {
-    }
-
-    public static class Opplysningspliktig {
     }
 
     public static class Arbeidsavtaler {
