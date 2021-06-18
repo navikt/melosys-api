@@ -4,8 +4,11 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
+import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.jpa.PropertiesConverter;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import org.junit.jupiter.api.Test;
 
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
@@ -36,7 +39,7 @@ class ProsessinstansTest {
     }
 
     @Test
-    public void testDataList() {
+    void testDataList() {
         List<String> bareHoppeland = Collections.singletonList("HOP");
         Prosessinstans pi1 = new Prosessinstans(), pi2 = new Prosessinstans();
         pi1.setData(OPPHOLDSLAND, bareHoppeland);
@@ -44,5 +47,23 @@ class ProsessinstansTest {
 
         assertThat(pi2.getData(OPPHOLDSLAND, List.class)).hasSize(1);
         assertThat(pi1.getData(OPPHOLDSLAND, List.class).get(0)).isEqualTo(pi2.getData(OPPHOLDSLAND, List.class).get(0));
+    }
+
+    @Test
+    void testBrevbestilling() {
+        MangelbrevBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
+            .medProduserbartdokument(Produserbaredokumenter.MANGELBREV_BRUKER)
+            .medBestillKopi(true)
+            .build();
+
+        Prosessinstans pi1 = new Prosessinstans(), pi2 = new Prosessinstans();
+
+        pi1.setData(BREVBESTILLING, brevbestilling);
+        pi2.setData(new PropertiesConverter().convertToEntityAttribute(new PropertiesConverter().convertToDatabaseColumn(pi1.getData())));
+
+        DokgenBrevbestilling data = pi2.getData(BREVBESTILLING, DokgenBrevbestilling.class);
+        assertThat(data).isInstanceOf(MangelbrevBrevbestilling.class);
+        assertThat(data.getProduserbartdokument()).isEqualTo(Produserbaredokumenter.MANGELBREV_BRUKER);
+        assertThat(data.isBestillKopi()).isTrue();
     }
 }
