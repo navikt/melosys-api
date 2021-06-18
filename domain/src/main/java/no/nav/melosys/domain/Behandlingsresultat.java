@@ -316,15 +316,10 @@ public class Behandlingsresultat extends RegistreringsInfo {
         throw new NoSuchElementException("Ingen periode om lovvalg finnes for behandling " + id);
     }
 
-    public Optional<PeriodeOmLovvalg> finnValidertPeriodeOmLOvvalg() {
-        if (!behandling.erAktiv() && !lovvalgsperioder.isEmpty()) {
-            return Optional.ofNullable(hentValidertLovvalgsperiode());
-        }
+    public Optional<? extends PeriodeOmLovvalg> finnValidertPeriodeOmLovvalg() {
 
-        if (!anmodningsperioder.isEmpty()) {
-            return Optional.ofNullable(hentValidertAnmodningsperiode());
-        }
-        return Optional.empty();
+        var lovvalgsperiode = finnValidertLovvalgsperiode();
+        return lovvalgsperiode.isPresent() ? lovvalgsperiode : finnValidertAnmodningsperiode();
     }
 
     public Lovvalgsperiode hentValidertLovvalgsperiode() {

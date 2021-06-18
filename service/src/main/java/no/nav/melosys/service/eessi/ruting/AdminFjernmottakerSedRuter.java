@@ -3,10 +3,8 @@ package no.nav.melosys.service.eessi.ruting;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.Set;
 
 import no.finn.unleash.Unleash;
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -39,8 +37,7 @@ public class AdminFjernmottakerSedRuter extends AdminSedRuter implements SedRute
         super(fagsakService,
             behandlingsresultatService,
             medlPeriodeService,
-            prosessinstansService,
-            log);
+            prosessinstansService);
 
         this.oppgaveService = oppgaveService;
         this.unleash = unleash;
@@ -67,9 +64,9 @@ public class AdminFjernmottakerSedRuter extends AdminSedRuter implements SedRute
             return;
         }
         var sistAktiveBehandling = fagsak.get().hentSistAktiveBehandling();
-        boolean erMottakerInstitusjonFraMelding = melosysEessiMelding.isX006NavErFjernet();
 
-        if (erMottakerInstitusjonFraMelding) {
+        if (melosysEessiMelding.isX006NavErFjernet()) {
+            log.info("Nav er fjernet på sed {} i RINA-sak {}, og behandlingen vil bli avsluttet", melosysEessiMelding.getSedId(), melosysEessiMelding.getRinaSaksnummer());
             annullerSakOgBehandling(sistAktiveBehandling);
         } else {
             log.info("Mottakerinstitusjon på sed {} i RINA-sak {} er ikke Nav", melosysEessiMelding.getSedId(), melosysEessiMelding.getRinaSaksnummer());

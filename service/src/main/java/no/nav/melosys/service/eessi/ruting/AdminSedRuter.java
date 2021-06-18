@@ -1,43 +1,39 @@
 package no.nav.melosys.service.eessi.ruting;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
-
-import java.util.Optional;
+import org.slf4j.LoggerFactory;
 
 public abstract class AdminSedRuter {
+    private static final Logger log = LoggerFactory.getLogger(AdminSedRuter.class);
 
     private final FagsakService fagsakService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
     private final ProsessinstansService prosessinstansService;
-    private final Logger log;
 
     public AdminSedRuter(FagsakService fagsakService,
                          BehandlingsresultatService behandlingsresultatService,
                          MedlPeriodeService medlPeriodeService,
-                         ProsessinstansService prosessinstansService,
-                         Logger log) {
+                         ProsessinstansService prosessinstansService) {
         this.fagsakService = fagsakService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
         this.prosessinstansService = prosessinstansService;
-        this.log = log;
     }
 
     protected void avvisMedPeriodeOpphørt(Behandling behandling) {
         behandlingsresultatService.hentBehandlingsresultat(behandling.getId())
-            .finnValidertPeriodeOmLOvvalg()
+            .finnValidertPeriodeOmLovvalg()
             .filter(periodeOmLovvalg -> periodeOmLovvalg.getMedlPeriodeID() != null)
             .ifPresent(periodeOmLovvalg -> medlPeriodeService.avvisPeriodeOpphørt(periodeOmLovvalg.getMedlPeriodeID()));
     }
@@ -50,7 +46,7 @@ public abstract class AdminSedRuter {
     }
 
     protected Optional<Fagsak> hentFagsakDersomArkivsakIDEksisterer(Long arkivsakID) {
-        return Optional.ofNullable(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).orElse(Optional.empty());
+        return arkivsakID != null ? fagsakService.finnFagsakFraArkivsakID(arkivsakID) : (Optional.empty());
     }
 
     protected void annullerSakOgBehandling(Behandling behandling) {

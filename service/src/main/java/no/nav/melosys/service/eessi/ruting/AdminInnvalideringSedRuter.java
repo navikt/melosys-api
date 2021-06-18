@@ -3,7 +3,6 @@ package no.nav.melosys.service.eessi.ruting;
 import java.util.*;
 
 import no.finn.unleash.Unleash;
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.SedInformasjon;
@@ -42,8 +41,7 @@ public class AdminInnvalideringSedRuter extends AdminSedRuter implements SedRute
         super(fagsakService,
             behandlingsresultatService,
             medlPeriodeService,
-            prosessinstansService,
-            log);
+            prosessinstansService);
 
         this.oppgaveService = oppgaveService;
         this.eessiService = eessiService;
