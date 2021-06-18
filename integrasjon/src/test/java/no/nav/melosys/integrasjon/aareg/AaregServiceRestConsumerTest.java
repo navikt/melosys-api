@@ -58,6 +58,7 @@ public class AaregServiceRestConsumerTest {
 
         List<Arbeidsforhold> arbeidsforhold = arbeidsforholdDokument.getArbeidsforhold();
         for (var item : arbeidsforhold) {
+            System.out.println(item.arbeidsforholdstype);
             System.out.println(item.arbeidsforholdID);
             System.out.println(item.arbeidstakerID);
             for (var avtale : item.arbeidsavtaler) {

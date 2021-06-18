@@ -2,9 +2,10 @@ package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.arbeidsforhold.*;
+import no.nav.melosys.domain.dokument.felles.Periode;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ArbeidsforholdKonvertering {
     private final ArbeidsforholdResponse arbeidsforholdResponse;
@@ -16,18 +17,15 @@ public class ArbeidsforholdKonvertering {
     public Saksopplysning createSaksopplysning() {
         Saksopplysning saksopplysning = new Saksopplysning();
 
-        List<Arbeidsforhold> arbeidsforholdList = new ArrayList<>();
-
-        for(ArbeidsforholdResponse.Arbeidsforhold src : arbeidsforholdResponse.getArbeidsforhold()) {
+        List<Arbeidsforhold> arbeidsforholdList = arbeidsforholdResponse.getArbeidsforhold().stream().map(src -> {
             Arbeidsforhold dst = new Arbeidsforhold();
+            dst.arbeidstakerID = src.getArbeidstaker().aktoerId; // TODO: sjekk om riktig
             dst.arbeidsforholdID = src.getNavArbeidsforholdId().toString();
             dst.arbeidsforholdstype = src.getType();
             dst.arbeidsavtaler = getArbeidsAvtaler(src.getArbeidsavtaler());
-            arbeidsforholdList.add(dst);
-            // dst.arbeidsavtaler - vi har arbeidsgiver
             dst.permisjonOgPermittering = getPermisjonPermitteringer(src.getPermisjonPermitteringer());
-        }
-
+            return dst;
+        }).collect(Collectors.toList());
         ArbeidsforholdDokument arbeidsforholdDokument = new ArbeidsforholdDokument(arbeidsforholdList);
 
         saksopplysning.setDokument(arbeidsforholdDokument);
@@ -35,24 +33,24 @@ public class ArbeidsforholdKonvertering {
     }
 
     private List<PermisjonOgPermittering> getPermisjonPermitteringer(List<ArbeidsforholdResponse.PermisjonPermitteringer> permisjonPermitteringer) {
-        List<PermisjonOgPermittering> permisjonOgPermitteringer = new ArrayList<>();
-        for(var src : permisjonPermitteringer) {
+        return permisjonPermitteringer.stream().map(src -> {
             PermisjonOgPermittering dst = new PermisjonOgPermittering();
+            dst.setPermisjonsId(src.permisjonPermitteringId);
+            dst.setPermisjonsPeriode(getPeriode(src.periode));
+            return dst;
+        }).collect(Collectors.toList());
+    }
 
-            permisjonOgPermitteringer.add(dst);
-        }
-        return permisjonOgPermitteringer;
+    private static Periode getPeriode(ArbeidsforholdResponse.Periode periode) {
+        return new Periode(periode.getFom(), periode.getTom());
     }
 
     private List<Arbeidsavtale> getArbeidsAvtaler(List<ArbeidsforholdResponse.Arbeidsavtaler> arbeidsavtalerSrc) {
-        List<Arbeidsavtale> arbeidsavtaler = new ArrayList<>();
-        for(var src : arbeidsavtalerSrc) {
+        return arbeidsavtalerSrc.stream().map(src -> {
             Arbeidsavtale dst = new Arbeidsavtale();
             dst.yrke = new Yrke(src.yrke);
             dst.beregnetAntallTimerPrUke = src.beregnetAntallTimerPrUke;
-            arbeidsavtaler.add(dst);
-        }
-
-        return arbeidsavtaler;
+            return dst;
+        }).collect(Collectors.toList());
     }
 }

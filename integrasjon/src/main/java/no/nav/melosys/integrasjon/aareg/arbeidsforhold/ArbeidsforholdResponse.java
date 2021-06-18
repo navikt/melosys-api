@@ -1,28 +1,28 @@
 package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import no.nav.melosys.domain.dokument.arbeidsforhold.PermisjonOgPermittering;
 import no.nav.melosys.exception.TekniskException;
 
 public class ArbeidsforholdResponse {
-    private final Arbeidsforhold[] arbeidsforhold;
+    private final List<Arbeidsforhold> arbeidsforhold;
 
     public ArbeidsforholdResponse(Arbeidsforhold[] arbeidsforhold) {
-        this.arbeidsforhold = arbeidsforhold;
+        this.arbeidsforhold = Arrays.asList(arbeidsforhold);
     }
 
-    public Arbeidsforhold[] getArbeidsforhold() {
+    public List<Arbeidsforhold> getArbeidsforhold() {
         return arbeidsforhold;
     }
 
@@ -45,8 +45,7 @@ public class ArbeidsforholdResponse {
         private Arbeidstaker arbeidstaker;
         private List<Arbeidsavtaler> arbeidsavtaler;
 
-        @JsonIgnore // TODO: legg til innhold i PermisjonPermitteringer
-        private List<PermisjonPermitteringer> permisjonPermitteringer = List.of();
+        private List<PermisjonPermitteringer> permisjonPermitteringer;
 
         public Arbeidstaker getArbeidstaker() {
             return arbeidstaker;
@@ -90,8 +89,37 @@ public class ArbeidsforholdResponse {
         String aktoerId;
     }
 
-    public static class PermisjonPermitteringer {
+    public static class Periode {
+        @JsonProperty
+        String fom;
 
+        @JsonProperty
+        String tom;
+
+        LocalDate getFom() {
+            return LocalDate.parse(fom);
+        }
+
+        LocalDate getTom() {
+            return LocalDate.parse(tom);
+        }
+    }
+
+    public static class PermisjonPermitteringer {
+        @JsonProperty
+        Periode periode;
+
+        @JsonProperty
+        String permisjonPermitteringId;
+
+        @JsonProperty
+        BigDecimal prosent;
+
+        @JsonProperty
+        String type;
+
+        @JsonProperty
+        String varslingskode;
     }
 
     public static class Arbeidsgiver {

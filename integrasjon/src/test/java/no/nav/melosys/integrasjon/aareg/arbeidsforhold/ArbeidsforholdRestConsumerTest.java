@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
@@ -64,9 +65,9 @@ class ArbeidsforholdRestConsumerTest {
             .build();
         ArbeidsforholdResponse arbeidsforholdResponse = restConsumer.finnArbeidsforholdPrArbeidstaker(fnr, arbeidsforholdQuery);
 
-        ArbeidsforholdResponse.Arbeidsforhold[] arbeidsforholds = arbeidsforholdResponse.getArbeidsforhold();
-        assertThat(arbeidsforholds.length).isEqualTo(1);
-        ArbeidsforholdResponse.Arbeidsforhold arbeidsforhold = arbeidsforholds[0];
+        List<ArbeidsforholdResponse.Arbeidsforhold> arbeidsforholds = arbeidsforholdResponse.getArbeidsforhold();
+        assertThat(arbeidsforholds.size()).isEqualTo(1);
+        ArbeidsforholdResponse.Arbeidsforhold arbeidsforhold = arbeidsforholds.get(0);
         assertThat(arbeidsforhold.getNavArbeidsforholdId()).isEqualTo(123456);
 
         ArbeidsforholdResponse.Arbeidstaker arbeidstaker = arbeidsforhold.getArbeidstaker();

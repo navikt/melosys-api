@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
 import no.nav.melosys.integrasjon.felles.RestConsumer;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
