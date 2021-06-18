@@ -2,7 +2,6 @@ package no.nav.melosys.domain.brev;
 
 import java.time.Instant;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import no.nav.melosys.domain.Behandling;
@@ -24,7 +23,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private Instant forsendelseMottatt;
     private String avsenderId;
     private long behandlingId;
-    @JsonFormat(shape = JsonFormat.Shape.BOOLEAN)
     private boolean bestillKopi;
     private Instant vedtaksdato;
     private Persondata persondokument;
