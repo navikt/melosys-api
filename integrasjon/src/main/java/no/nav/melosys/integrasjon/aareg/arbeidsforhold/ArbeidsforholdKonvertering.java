@@ -16,8 +16,12 @@ public class ArbeidsforholdKonvertering {
 
     public Saksopplysning createSaksopplysning() {
         Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setDokument(new ArbeidsforholdDokument(getArbeidsforhold()));
+        return saksopplysning;
+    }
 
-        List<Arbeidsforhold> arbeidsforholdList = arbeidsforholdResponse.getArbeidsforhold().stream().map(src -> {
+    private List<Arbeidsforhold> getArbeidsforhold() {
+        return arbeidsforholdResponse.getArbeidsforhold().stream().map(src -> {
             Arbeidsforhold dst = new Arbeidsforhold();
             dst.arbeidstakerID = src.getArbeidstaker().aktoerId; // TODO: sjekk om riktig
             dst.arbeidsforholdID = src.getNavArbeidsforholdId().toString();
@@ -26,10 +30,6 @@ public class ArbeidsforholdKonvertering {
             dst.permisjonOgPermittering = getPermisjonPermitteringer(src.getPermisjonPermitteringer());
             return dst;
         }).collect(Collectors.toList());
-        ArbeidsforholdDokument arbeidsforholdDokument = new ArbeidsforholdDokument(arbeidsforholdList);
-
-        saksopplysning.setDokument(arbeidsforholdDokument);
-        return saksopplysning;
     }
 
     private List<PermisjonOgPermittering> getPermisjonPermitteringer(List<ArbeidsforholdResponse.PermisjonPermitteringer> permisjonPermitteringer) {
