@@ -12,8 +12,11 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
@@ -31,7 +34,7 @@ public class BehandlingEventListener {
         this.oppgaveService = oppgaveService;
     }
 
-    @TransactionalEventListener
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void dokumentBestilt(DokumentBestiltEvent dokumentBestiltEvent) {
         if (List.of(MELDING_MANGLENDE_OPPLYSNINGER, MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER).contains(dokumentBestiltEvent.getProduserbaredokumenter())) {
             var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(dokumentBestiltEvent.getBehandlingID());
@@ -45,7 +48,7 @@ public class BehandlingEventListener {
         }
     }
 
-    @TransactionalEventListener
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     @Async
     public void behandlingsfristEndret(BehandlingsfristEndretEvent behandlingsfristEndretEvent) {
         var behandling = behandlingService.hentBehandling(behandlingsfristEndretEvent.getBehandlingId());

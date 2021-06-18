@@ -24,7 +24,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private Instant forsendelseMottatt;
     private String avsenderId;
     private long behandlingId;
-    @JsonFormat(shape = JsonFormat.Shape.BOOLEAN)
     private boolean bestillKopi;
     private Instant vedtaksdato;
     private Persondata persondokument;
@@ -71,7 +70,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return behandlingId;
     }
 
-    public boolean bestillKopi() {
+    public boolean isBestillKopi() {
         return bestillKopi;
     }
 
