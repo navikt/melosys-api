@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
@@ -11,6 +12,7 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
+import no.nav.melosys.domain.person.KjoennType;
 import no.nav.melosys.domain.person.Persondata;
 
 
@@ -44,6 +46,11 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
     private boolean erEgenAnsatt;
 
     @Override
+    public boolean erPersonDød() {
+        return dødsdato != null;
+    }
+
+    @Override
     public boolean harIkkeRegistrertAdresse() {
         return bostedsadresse.erTom() &&
             postadresse.erTom() &&
@@ -64,12 +71,26 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
     }
 
     @Override
-    public boolean harBeskyttelsesbehov() {
+    public boolean harStrengtAdressebeskyttelse() {
         return diskresjonskode != null && diskresjonskode.erKode6();
     }
 
     @Override
+    public Set<Land> hentAlleStatsborgerskap() {
+        return Set.of(statsborgerskap);
+    }
+
+    @Override
+    public KjoennType hentKjønnType() {
+        return KjoennType.avKode(kjønn.getKode());
+    }
+
+    @Override
     public String hentFolkeregisterIdent() {
+        return fnr;
+    }
+
+    public String getFnr() {
         return fnr;
     }
 
@@ -96,7 +117,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
     }
 
     /** Kodeverk: Landkoder */
-    @Override
     public Land getStatsborgerskap() {
         return statsborgerskap;
     }
@@ -106,7 +126,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
     }
 
     /** Kodeverk: Kjønnstyper */
-    @Override
     public KjoennsType getKjønn() {
         return kjønn;
     }
@@ -169,7 +188,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.fødselsdato = fødselsdato;
     }
 
-    @Override
     public LocalDate getDødsdato() {
         return dødsdato;
     }
@@ -178,7 +196,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.dødsdato = dødsdato;
     }
 
-    @Override
     public Diskresjonskode getDiskresjonskode() {
         return diskresjonskode;
     }
@@ -239,10 +256,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
 
     public void setGjeldendePostadresse(UstrukturertAdresse gjeldendePostadresse) {
         this.gjeldendePostadresse = gjeldendePostadresse;
-    }
-
-    public boolean isErEgenAnsatt() {
-        return erEgenAnsatt;
     }
 
     public void setErEgenAnsatt(boolean erEgenAnsatt) {

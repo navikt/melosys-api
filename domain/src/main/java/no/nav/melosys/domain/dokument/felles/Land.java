@@ -58,14 +58,6 @@ public class Land extends AbstraktKodeverkHjelper {
         return FellesKodeverk.LANDKODER;
     }
 
-    public boolean erSveits() {
-        return SVEITS.equals(kode);
-    }
-
-    public boolean erStatsløs() {
-        return STATSLØS.equals(kode);
-    }
-
     public boolean erUkjent() {
         return UKJENT.equals(kode);
     }

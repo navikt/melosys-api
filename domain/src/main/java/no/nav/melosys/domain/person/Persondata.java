@@ -3,6 +3,7 @@ package no.nav.melosys.domain.person;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.*;
@@ -11,9 +12,11 @@ import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
 
 public interface Persondata {
+    boolean erPersonDød();
+
     Optional<Familiemedlem> hentAnnenForelder(String fnrGjeldendeForelder);
 
-    boolean harBeskyttelsesbehov();
+    boolean harStrengtAdressebeskyttelse();
 
     boolean harIkkeRegistrertAdresse();
 
@@ -27,9 +30,9 @@ public interface Persondata {
     @Deprecated // Brukes bare til visning, som skal gå gjennom GraphQL
     LocalDate getSivilstandGyldighetsperiodeFom();
 
-    Land getStatsborgerskap();
+    Set<Land> hentAlleStatsborgerskap();
 
-    KjoennsType getKjønn();
+    KjoennType hentKjønnType();
 
     String getFornavn();
 
@@ -43,12 +46,10 @@ public interface Persondata {
 
     LocalDate getFødselsdato();
 
-    LocalDate getDødsdato();
-
-    Diskresjonskode getDiskresjonskode();
-
+    @Deprecated // Brukes bare til visning, som skal gå gjennom GraphQL
     Personstatus getPersonstatus();
 
+    @Deprecated // Brukes bare til visning, som skal gå gjennom GraphQL
     LocalDate getStatsborgerskapDato();
 
     Bostedsadresse getBostedsadresse();

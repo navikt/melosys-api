@@ -9,6 +9,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
@@ -109,7 +110,7 @@ public class FattetVedtakService {
                     null
                 ),
                 new Statsborgerskap(
-                    persondata.getStatsborgerskap().getKode(),
+                    persondata.hentAlleStatsborgerskap().stream().findFirst().map(Land::getKode).orElse(null),
                     null,
                     null,
                     null,

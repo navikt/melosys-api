@@ -18,7 +18,7 @@ public class PersonUtenAdresseDto {
     private String sammensattNavn;
     private List<FamiliemedlemDto> familiemedlemmer = new ArrayList<>();
     private Personstatus personStatus;
-    private KjoennsType kjoenn;
+    private KjoennDto kjoenn;
     private LocalDate foedselsdato;
     @JsonProperty(defaultValue = "false" )
     private boolean erEgenAnsatt; // MELOSYS-1580
@@ -28,14 +28,14 @@ public class PersonUtenAdresseDto {
     public PersonUtenAdresseDto(Persondata person) {
         fnr = person.hentFolkeregisterIdent();
         sivilstand = person.getSivilstand();
-        statsborgerskap = person.getStatsborgerskap();
+        statsborgerskap = person.hentAlleStatsborgerskap().stream().findFirst().orElse(null);
         statsborgerskapDato = person.getStatsborgerskapDato();
         sammensattNavn = person.getSammensattNavn();
         if (person.getFamiliemedlemmer() != null) {
             familiemedlemmer = FamiliemedlemDto.avFamiliemedlemmer(person.getFamiliemedlemmer());
         }
         personStatus = person.getPersonstatus();
-        kjoenn = person.getKjønn();
+        kjoenn = new KjoennDto(person.hentKjønnType().getKode(), person.hentKjønnType().toString());;
         foedselsdato = person.getFødselsdato();
     }
 
@@ -75,7 +75,7 @@ public class PersonUtenAdresseDto {
         return personStatus;
     }
 
-    public KjoennsType getKjoenn() {
+    public KjoennDto getKjoenn() {
         return kjoenn;
     }
 

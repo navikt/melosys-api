@@ -97,8 +97,7 @@ public class InnvilgelseArbeidsgiverBrevMapperTest {
 
     private static Behandling lagBehandling(Fagsak fagsak) {
         PersonDokument pdok = new PersonDokument();
-        pdok.setKjønn(new KjoennsType());
-        pdok.getKjønn().setKode(KjoennKode.U.name());
+        pdok.setKjønn(new KjoennsType(KjoennKode.U.name()));
         pdok.setFornavn("For");
         pdok.setEtternavn("Etter");
         pdok.setSammensattNavn("For Etter");

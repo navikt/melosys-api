@@ -23,7 +23,7 @@ public class SaksopplysningDokumentConverter implements AttributeConverter<Sakso
 
     private static final Logger log = LoggerFactory.getLogger(SaksopplysningDokumentConverter.class);
 
-    private final static ObjectMapper objectMapper = new ObjectMapper()
+    private static final ObjectMapper objectMapper = new ObjectMapper()
         .registerModule(new JavaTimeModule())
         .registerModule(new SimpleModule()
             .addDeserializer(LovvalgBestemmelse.class, new LovvalgBestemmelseDeserializer()))
@@ -58,7 +58,7 @@ public class SaksopplysningDokumentConverter implements AttributeConverter<Sakso
             return objectMapper.readValue(s, SaksopplysningDokument.class);
         } catch (JsonProcessingException e) {
             log.error("Kunne ikke lese saksopplysning av type '{}' fra database",
-                s.indexOf("\"type\"") > 0 ? s.substring(9, s.indexOf("\"", 9)) : "Ukjent"                );
+                s.contains("\"type\"") ? s.substring(9, s.indexOf("\"", 9)) : "Ukjent", e);
             return null;
         }
     }

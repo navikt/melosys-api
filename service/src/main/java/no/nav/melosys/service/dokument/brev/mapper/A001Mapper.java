@@ -142,7 +142,7 @@ class A001Mapper {
         PersonType person = new PersonType();
         person.setPersonnavn(lagPersonnavn(personDok));
         person.setStatsborgerskapListe(mapStatsborgerskapListe(personDok));
-        person.setKjønn(KjoennKode.fromValue(personDok.getKjønn().getKode()));
+        person.setKjønn(KjoennKode.fromValue(personDok.hentKjønnType().getKode()));
         person.setBostedsadresse(mapBostedAdresse(bostedsadresse));
         person.setFødselsnummer(personDok.hentFolkeregisterIdent());
         //Fødeland og Fødested skal ikke fylles ut
@@ -156,14 +156,19 @@ class A001Mapper {
         return person;
     }
 
-    private StatsborgerskapListeType mapStatsborgerskapListe(Persondata personDok) {
-        StatsborgerskapType statsborgerskap = new StatsborgerskapType();
-        statsborgerskap.setStatsborgerskap(hentIso3Landkode(personDok.getStatsborgerskap().getKode()));
-
+    private StatsborgerskapListeType mapStatsborgerskapListe(Persondata persondata) {
         StatsborgerskapListeType statsborgerskapListe = new StatsborgerskapListeType();
-        statsborgerskapListe.getStatsborgerskap().add(statsborgerskap);
-
+        persondata.hentAlleStatsborgerskap().forEach(
+            land -> leggTilStatsborgerskap(statsborgerskapListe, land)
+        );
         return statsborgerskapListe;
+    }
+
+    private static void leggTilStatsborgerskap(StatsborgerskapListeType statsborgerskapListe,
+                                        no.nav.melosys.domain.dokument.felles.Land land) {
+        StatsborgerskapType statsborgerskap = new StatsborgerskapType();
+        statsborgerskap.setStatsborgerskap(hentIso3Landkode(land.getKode()));
+        statsborgerskapListe.getStatsborgerskap().add(statsborgerskap);
     }
 
     private static VilkaarBegrunnelseType mapArt16Anmodning(Art161AnmodningBegrunnelseKode begrunnelseKode) {

@@ -4,14 +4,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import no.nav.melosys.domain.dokument.felles.Land;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
 import org.assertj.core.api.Assertions;
@@ -32,7 +33,7 @@ class PersonMapperTest {
         assertThat(personDokument.hentFolkeregisterIdent()).isEqualTo("11111111111");
         assertThat(personDokument.getSivilstand().getKode()).isEqualTo("UGIF");
         assertThat(personDokument.getSivilstandGyldighetsperiodeFom()).isEqualTo(LocalDate.parse("2010-08-09"));
-        assertThat(personDokument.getStatsborgerskap().getKode()).isEqualTo(Land.SVERIGE);
+        assertThat(personDokument.hentAlleStatsborgerskap()).isEqualTo(Set.of(Land.av(Land.SVERIGE)));
         assertThat(personDokument.getKjønn().getKode()).isEqualTo("K");
         assertThat(personDokument.getFornavn()).isEqualTo("MAGICA");
         assertThat(personDokument.getMellomnavn()).isEqualTo("FRA");

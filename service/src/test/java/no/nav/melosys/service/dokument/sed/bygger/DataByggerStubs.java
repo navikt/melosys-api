@@ -92,9 +92,7 @@ class DataByggerStubs {
         familiemedlem.familierelasjon = Familierelasjon.FARA;
         personDokument.setFamiliemedlemmer(Collections.singletonList(familiemedlem));
 
-        KjoennsType kjønn = new KjoennsType();
-        kjønn.setKode("M");
-        personDokument.setKjønn(kjønn);
+        personDokument.setKjønn(new KjoennsType("M"));
 
         personDokument.setFornavn("Mrfornavn");
         personDokument.setEtternavn("Spock");
