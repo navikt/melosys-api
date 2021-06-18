@@ -131,7 +131,8 @@ public class InngangsvilkaarService {
             return avgjørStatsborgerskapPåStartDato(
                 saksopplysningerService.hentPersonhistorikk(behandlingID).statsborgerskapListe, periode.getFom());
         } else {
-            return saksopplysningerService.hentPersonOpplysninger(behandlingID).getStatsborgerskap();
+            return saksopplysningerService.hentPersonOpplysninger(behandlingID).hentAlleStatsborgerskap().stream()
+                .findFirst().orElse(null);
         }
     }
 

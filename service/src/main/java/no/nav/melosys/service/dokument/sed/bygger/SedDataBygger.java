@@ -8,6 +8,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.UtenlandskIdent;
+import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.dokument.person.Familierelasjon;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
@@ -195,8 +196,7 @@ public class SedDataBygger {
             FysiskArbeidssted fysiskArbeidssted = (FysiskArbeidssted) arb;
             arbeidssted.setAdresse(fraStrukturertAdresse(fysiskArbeidssted.getAdresse()));
             arbeidssted.setNavn(arb.getForetakNavn());
-        } else if (arb instanceof FlyvendeArbeidssted) {
-            FlyvendeArbeidssted flyvendeArbeidssted = (FlyvendeArbeidssted) arb;
+        } else if (arb instanceof FlyvendeArbeidssted flyvendeArbeidssted) {
             arbeidssted.setNavn(flyvendeArbeidssted.getEnhetNavn());
             arbeidssted.setAdresse(Adresse.lagAdresseMedBareLandkode(flyvendeArbeidssted.getLandkode()));
             arbeidssted.setHjemmebase(flyvendeArbeidssted.getLandkode());
@@ -216,7 +216,8 @@ public class SedDataBygger {
         bruker.setFnr(persondata.hentFolkeregisterIdent());
         bruker.setFoedseldato(persondata.getFødselsdato());
         bruker.setKjoenn(persondata.hentKjønnType().getKode());
-        bruker.setStatsborgerskap(persondata.getStatsborgerskap().getKode());
+        bruker.setStatsborgerskap(
+            persondata.hentAlleStatsborgerskap().stream().findFirst().map(Land::getKode).orElse(null));
         bruker.setHarSensitiveOpplysninger(persondata.harStrengtAdressebeskyttelse());
 
         return bruker;

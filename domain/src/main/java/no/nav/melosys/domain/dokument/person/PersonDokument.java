@@ -90,6 +90,10 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         return fnr;
     }
 
+    public String getFnr() {
+        return fnr;
+    }
+
     public void setFnr(String fnr) {
         this.fnr = fnr;
     }
@@ -113,7 +117,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
     }
 
     /** Kodeverk: Landkoder */
-    @Override
     public Land getStatsborgerskap() {
         return statsborgerskap;
     }

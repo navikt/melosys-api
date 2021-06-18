@@ -30,9 +30,6 @@ public interface Persondata {
     @Deprecated // Brukes bare til visning, som skal gå gjennom GraphQL
     LocalDate getSivilstandGyldighetsperiodeFom();
 
-    @Deprecated // Flere statsborgerskap må støttes
-    Land getStatsborgerskap();
-
     Set<Land> hentAlleStatsborgerskap();
 
     KjoennType hentKjønnType();
