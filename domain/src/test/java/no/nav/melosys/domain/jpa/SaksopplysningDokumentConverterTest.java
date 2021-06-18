@@ -100,13 +100,9 @@ class SaksopplysningDokumentConverterTest {
     }
 
     private <T extends SaksopplysningDokument> void testKonvertering(Class<T> clazz) {
-        T dokument = random.nextObject(clazz);
-        assertThat(dokument).isNotNull();
-        String json = converter.convertToDatabaseColumn(dokument);
-        assertThat(json).isNotBlank();
-        SaksopplysningDokument nyttDokument = converter.convertToEntityAttribute(json);
-        assertThat(nyttDokument).isNotNull();
-        String nyJson = converter.convertToDatabaseColumn(nyttDokument);
-        assertThat(nyJson).isEqualTo(json);
+        T opprinneligTestDokument = random.nextObject(clazz);
+        String json = converter.convertToDatabaseColumn(opprinneligTestDokument);
+        SaksopplysningDokument deserialisertDokument = converter.convertToEntityAttribute(json);
+        assertThat(deserialisertDokument).usingRecursiveComparison().isEqualTo(opprinneligTestDokument);
     }
 }
