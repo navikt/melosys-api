@@ -11,7 +11,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.SelvstendigForetak;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -64,11 +64,11 @@ class BrevDataByggerA1Test {
             .thenReturn(avklarteOrganisasjoner);
 
         StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
-        oppgittAdresse.gatenavn = "HjemmeGata";
-        oppgittAdresse.husnummer = "23B";
-        oppgittAdresse.postnummer = "0165";
-        oppgittAdresse.poststed = "Oslo";
-        oppgittAdresse.landkode = Landkoder.NO.getKode();
+        oppgittAdresse.setGatenavn("HjemmeGata");
+        oppgittAdresse.setHusnummerEtasjeLeilighet("23B");
+        oppgittAdresse.setPostnummer("0165");
+        oppgittAdresse.setPoststed("Oslo");
+        oppgittAdresse.setLandkode(Landkoder.NO.getKode());
 
         søknad = new Soeknad();
         søknad.bosted.oppgittAdresse = oppgittAdresse;
@@ -156,11 +156,11 @@ class BrevDataByggerA1Test {
 
     private StrukturertAdresse lagStrukturertAdresse() {
         StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
-        oppgittAdresse.gatenavn = "HjemmeGata";
-        oppgittAdresse.husnummer = "23B";
-        oppgittAdresse.postnummer = "0165";
-        oppgittAdresse.poststed = "Oslo";
-        oppgittAdresse.landkode = Landkoder.NO.getKode();
+        oppgittAdresse.setGatenavn("HjemmeGata");
+        oppgittAdresse.setHusnummerEtasjeLeilighet("23B");
+        oppgittAdresse.setPostnummer("0165");
+        oppgittAdresse.setPoststed("Oslo");
+        oppgittAdresse.setLandkode(Landkoder.NO.getKode());
         return oppgittAdresse;
     }
 

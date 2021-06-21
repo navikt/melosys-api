@@ -7,6 +7,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.*;
+import no.nav.melosys.domain.person.Persondata;
 
 public class PersonUtenAdresseDto {
 
@@ -17,25 +18,25 @@ public class PersonUtenAdresseDto {
     private String sammensattNavn;
     private List<FamiliemedlemDto> familiemedlemmer = new ArrayList<>();
     private Personstatus personStatus;
-    private KjoennsType kjoenn;
+    private KjoennDto kjoenn;
     private LocalDate foedselsdato;
     @JsonProperty(defaultValue = "false" )
     private boolean erEgenAnsatt; // MELOSYS-1580
 
     public PersonUtenAdresseDto() {}
 
-    public PersonUtenAdresseDto(PersonDokument person) {
-        fnr = person.fnr;
-        sivilstand = person.sivilstand;
-        statsborgerskap = person.statsborgerskap;
-        statsborgerskapDato = person.statsborgerskapDato;
-        sammensattNavn = person.sammensattNavn;
-        if (person.familiemedlemmer != null) {
-            familiemedlemmer = FamiliemedlemDto.avFamiliemedlemmer(person.familiemedlemmer);
+    public PersonUtenAdresseDto(Persondata person) {
+        fnr = person.hentFolkeregisterIdent();
+        sivilstand = person.getSivilstand();
+        statsborgerskap = person.hentAlleStatsborgerskap().stream().findFirst().orElse(null);
+        statsborgerskapDato = person.getStatsborgerskapDato();
+        sammensattNavn = person.getSammensattNavn();
+        if (person.getFamiliemedlemmer() != null) {
+            familiemedlemmer = FamiliemedlemDto.avFamiliemedlemmer(person.getFamiliemedlemmer());
         }
-        personStatus = person.personstatus;
-        kjoenn = person.kjønn;
-        foedselsdato = person.fødselsdato;
+        personStatus = person.getPersonstatus();
+        kjoenn = new KjoennDto(person.hentKjønnType().getKode(), person.hentKjønnType().toString());;
+        foedselsdato = person.getFødselsdato();
     }
 
     public String getFnr() {
@@ -74,7 +75,7 @@ public class PersonUtenAdresseDto {
         return personStatus;
     }
 
-    public KjoennsType getKjoenn() {
+    public KjoennDto getKjoenn() {
         return kjoenn;
     }
 

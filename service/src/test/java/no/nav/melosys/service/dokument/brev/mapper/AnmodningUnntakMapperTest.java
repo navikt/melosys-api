@@ -16,7 +16,7 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -156,7 +156,7 @@ public class AnmodningUnntakMapperTest {
 
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
         fysiskArbeidssted.adresse = new StrukturertAdresse();
-        fysiskArbeidssted.adresse.landkode = "NO";
+        fysiskArbeidssted.adresse.setLandkode("NO");
 
         Soeknad soeknad = new Soeknad();
         soeknad.arbeidPaaLand.fysiskeArbeidssteder = new ArrayList<>();

@@ -74,14 +74,14 @@ public class DefaultSedRuterTest {
         Fagsak fagsak = hentFagsak();
 
         when(fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER)).thenReturn(Optional.of(fagsak));
-        when(oppgaveService.finnOppgaveMedFagsaksnummer(eq(SAKSNUMMER))).thenReturn(Optional.of(oppgave));
+        when(oppgaveService.finnÅpenOppgaveMedFagsaksnummer(eq(SAKSNUMMER))).thenReturn(Optional.of(oppgave));
 
         defaultSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER);
 
         assertThat(prosessinstans.getBehandling()).isNotNull();
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(eq(fagsak.hentAktivBehandling()), eq(melosysEessiMelding));
         verify(behandlingService).oppdaterStatus(anyLong(), eq(Behandlingsstatus.VURDER_DOKUMENT));
-        verify(oppgaveService).finnOppgaveMedFagsaksnummer(eq(SAKSNUMMER));
+        verify(oppgaveService).finnÅpenOppgaveMedFagsaksnummer(eq(SAKSNUMMER));
         verify(oppgaveService).oppdaterOppgave(eq(oppgaveId), any(OppgaveOppdatering.class));
     }
 
@@ -101,7 +101,7 @@ public class DefaultSedRuterTest {
         assertThat(prosessinstans.getBehandling()).isNotNull();
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(eq(fagsak.hentSistAktiveBehandling()), eq(melosysEessiMelding));
         verify(behandlingService, never()).oppdaterStatus(anyLong(), any());
-        verify(oppgaveService, never()).finnOppgaveMedFagsaksnummer(any());
+        verify(oppgaveService, never()).finnÅpenOppgaveMedFagsaksnummer(any());
         verify(oppgaveService, never()).oppdaterOppgave(any(), any());
     }
 

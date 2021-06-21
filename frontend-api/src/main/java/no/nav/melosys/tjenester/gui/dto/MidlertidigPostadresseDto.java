@@ -1,9 +1,11 @@
-package no.nav.melosys.domain.dokument.adresse;
+package no.nav.melosys.tjenester.gui.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.adresse.UstrukturertAdresse;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class MidlertidigPostadresse {
+public class MidlertidigPostadresseDto {
 
     public enum Adressetype {
         STRUKTURERT, USTRUKTURERT
@@ -11,7 +13,7 @@ public class MidlertidigPostadresse {
 
     public Adressetype adressetype;
 
-    public StrukturertAdresse strukturertAdresse;
+    public StrukturertAdresseDto strukturertAdresse;
 
     public UstrukturertAdresse ustrukturertAdresse;
 }

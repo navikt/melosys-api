@@ -69,7 +69,7 @@ class RegisteropplysningerServiceTest {
         when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(AKTØR_ID);
 
         when(aaregFasade.finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.ARBFORH));
-        when(persondataFasade.hentPerson(anyString(), eq(Informasjonsbehov.STANDARD))).thenReturn(lagSaksopplysning(SaksopplysningType.PERSOPL));
+        when(persondataFasade.hentPersonFraTps(anyString(), eq(Informasjonsbehov.STANDARD))).thenReturn(lagSaksopplysning(SaksopplysningType.PERSOPL));
         when(medlPeriodeService.hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.MEDL));
         when(inntektService.hentInntektListe(anyString(), anyYearMonth(), anyYearMonth())).thenReturn(lagSaksopplysning(SaksopplysningType.INNTK));
         when(utbetaldataService.hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.UTBETAL));
@@ -114,7 +114,7 @@ class RegisteropplysningerServiceTest {
         verify(medlPeriodeService).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
         verify(eregFasade).hentOrganisasjon(anyString());
         verify(persondataFasade).hentPersonhistorikk(anyString(), anyLocalDate());
-        verify(persondataFasade).hentPerson(anyString(), eq(Informasjonsbehov.STANDARD));
+        verify(persondataFasade).hentPersonFraTps(anyString(), eq(Informasjonsbehov.STANDARD));
         verify(sobService).finnSakOgBehandlingskjedeListe(AKTØR_ID);
         verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
     }
@@ -155,7 +155,7 @@ class RegisteropplysningerServiceTest {
 
         verify(medlPeriodeService).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
         verify(persondataFasade).hentPersonhistorikk(anyString(), anyLocalDate());
-        verify(persondataFasade).hentPerson(anyString(), eq(Informasjonsbehov.STANDARD));
+        verify(persondataFasade).hentPersonFraTps(anyString(), eq(Informasjonsbehov.STANDARD));
         verify(sobService).finnSakOgBehandlingskjedeListe(eq(AKTØR_ID));
         verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
     }
@@ -186,7 +186,7 @@ class RegisteropplysningerServiceTest {
             .saksopplysningTyper(saksopplysningstyper().personopplysninger().build())
             .build());
 
-        verify(persondataFasade).hentPerson(FNR, Informasjonsbehov.STANDARD);
+        verify(persondataFasade).hentPersonFraTps(FNR, Informasjonsbehov.STANDARD);
         verify(behandlingService).lagre(any(Behandling.class));
     }
 
@@ -254,9 +254,13 @@ class RegisteropplysningerServiceTest {
         LocalDate fom = LocalDate.now().plusYears(2);
         LocalDate tom = LocalDate.now();
 
-        registeropplysningerService.hentOgLagreOpplysninger(new RegisteropplysningerRequest(
-            2L, RegisteropplysningerRequest.hentAlleSaksopplysningTyper().getOpplysningstyper(), FNR, fom, tom, null
-        ));
+        registeropplysningerService.hentOgLagreOpplysninger(RegisteropplysningerRequest.builder()
+            .behandlingID(2L)
+            .saksopplysningTyper(RegisteropplysningerRequest.hentAlleSaksopplysningTyper())
+            .fnr(FNR)
+            .fom(fom)
+            .tom(tom)
+            .build());
 
         verify(aaregFasade, never()).finnArbeidsforholdPrArbeidstaker(anyString(), any(), any());
         verify(inntektService, never()).hentInntektListe(anyString(), any(), any());
@@ -265,7 +269,7 @@ class RegisteropplysningerServiceTest {
         verify(utbetaldataService, never()).hentUtbetalingerBarnetrygd(anyString(), any(), any());
 
         verify(eregFasade).hentOrganisasjon(anyString());
-        verify(persondataFasade).hentPerson(anyString(), eq(Informasjonsbehov.STANDARD));
+        verify(persondataFasade).hentPersonFraTps(anyString(), eq(Informasjonsbehov.STANDARD));
         verify(sobService).finnSakOgBehandlingskjedeListe(eq(AKTØR_ID));
         verify(behandlingService).lagre(any(Behandling.class));
     }

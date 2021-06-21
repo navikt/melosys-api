@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.pdl;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -15,21 +16,22 @@ import no.nav.melosys.integrasjon.felles.graphql.GraphQLRequest;
 import no.nav.melosys.integrasjon.felles.graphql.GraphQLResponse;
 import no.nav.melosys.integrasjon.pdl.dto.identer.HentIdenterResponse;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste;
-import no.nav.melosys.integrasjon.pdl.dto.person.HentPersonResponse;
-import no.nav.melosys.integrasjon.pdl.dto.person.Person;
+import no.nav.melosys.integrasjon.pdl.dto.person.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static no.nav.melosys.integrasjon.pdl.dto.identer.Query.HENT_IDENTER_QUERY;
-import static no.nav.melosys.integrasjon.pdl.dto.person.Query.HENT_PERSON_QUERY;
+import static no.nav.melosys.integrasjon.pdl.dto.person.Query.*;
 
 public class PDLConsumerImpl implements PDLConsumer {
     private static final Logger log = LoggerFactory.getLogger(PDLConsumerImpl.class);
     private static final ObjectWriter JSON_WRITER = new ObjectMapper().writer();
     private static final String CALL_ID = "Nav-Call-Id";
+    private static final String HISTORIKK = "historikk";
     private static final String IDENT = "ident";
 
     private final WebClient webClient;
@@ -39,12 +41,13 @@ public class PDLConsumerImpl implements PDLConsumer {
     }
 
     @Override
+    @Retryable
     public Identliste hentIdenter(String ident) {
-        GraphQLRequest request = new GraphQLRequest(HENT_IDENTER_QUERY, Map.of(IDENT, ident));
+        var graphQLRequest = new GraphQLRequest(HENT_IDENTER_QUERY, Map.of(IDENT, ident));
 
         GraphQLResponse<HentIdenterResponse> response = webClient.post()
             .header(CALL_ID, UUID.randomUUID().toString())
-            .bodyValue(request)
+            .bodyValue(graphQLRequest)
             .retrieve().bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentIdenterResponse>>() {})
             .block();
 
@@ -53,12 +56,35 @@ public class PDLConsumerImpl implements PDLConsumer {
     }
 
     @Override
+    @Retryable
     public Person hentPerson(String ident) {
-        GraphQLRequest request = new GraphQLRequest(HENT_PERSON_QUERY, Map.of(IDENT, ident));
+        return hentPersondata(HENT_PERSON_QUERY, ident, false);
+    }
+
+    @Override
+    @Retryable
+    public Collection<Adressebeskyttelse> hentAdressebeskyttelser(String ident) {
+        return hentPersondata(HENT_ADRESSEBESKYTTELSE_QUERY, ident, false).adressebeskyttelse();
+    }
+
+    @Override
+    @Retryable
+    public Collection<Navn> hentNavn(String ident) {
+        return hentPersondata(HENT_SAMMENSATT_NAVN_QUERY, ident, false).navn();
+    }
+
+    @Override
+    @Retryable
+    public Collection<Statsborgerskap> hentStatsborgerskap(String ident) {
+        return hentPersondata(HENT_STATSBORGERSKAP_QUERY, ident, true).statsborgerskap();
+    }
+
+    private Person hentPersondata(String query, String ident, boolean historikk) throws IkkeFunnetException {
+        var graphQLRequest = new GraphQLRequest(query, Map.of(HISTORIKK, historikk, IDENT, ident));
 
         GraphQLResponse<HentPersonResponse> response = webClient.post()
             .header(CALL_ID, UUID.randomUUID().toString())
-            .bodyValue(request)
+            .bodyValue(graphQLRequest)
             .retrieve().bodyToMono(new ParameterizedTypeReference<GraphQLResponse<HentPersonResponse>>() {})
             .block();
 

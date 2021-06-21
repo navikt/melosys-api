@@ -19,7 +19,6 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.brev.BrevbestillingService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
-import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -47,8 +46,6 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     @Mock
     private DokumentServiceFasade mockDokServiceFasade;
     @Mock
-    private DokgenService mockDokgenService;
-    @Mock
     private BrevmottakerService mockBrevmottakerService;
     @Mock
     private PersondataFasade mockPersondataFasade;
@@ -62,12 +59,12 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     @BeforeEach
     void init() {
         BrevmottakerService brevmottakerService = new BrevmottakerService(mockKontaktopplysningService, mock(AvklarteVirksomheterService.class), mock(UtenlandskMyndighetService.class), mock(BehandlingsresultatService.class), mock(TrygdeavgiftsberegningService.class));
-        BrevbestillingService brevbestillingService = new BrevbestillingService(mockDokServiceFasade, mockDokgenService, mockBrevmottakerService, mockPersondataFasade, mockEregFasade, mockKontaktopplysningService, mock(KodeverkService.class));
+        BrevbestillingService brevbestillingService = new BrevbestillingService(mockDokServiceFasade, mockBrevmottakerService, mockPersondataFasade, mockEregFasade, mockKontaktopplysningService, mock(KodeverkService.class));
         brevbestillingTjeneste = new BrevbestillingTjeneste(brevbestillingService, mockBehandlingService, brevmottakerService);
     }
 
     @Test
-    void skalReturnereTilgjengeligeBrevmaler() throws Exception {
+    void skalReturnereTilgjengeligeBrevmaler() {
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(null));
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
@@ -148,8 +145,6 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(responseEntity.getBody()).isEqualTo(forventetPdf);
 
-        verifyNoInteractions(mockDokgenService);
-
         valider(brevbestillingDto, "dokumenter-v2-utkast-post-schema.json", new ObjectMapper());
     }
 
@@ -163,8 +158,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
             .build();
         brevbestillingTjeneste.produserBrev(123L, brevbestillingDto);
 
-        verify(mockDokgenService).produserOgDistribuerBrev(123L, brevbestillingDto);
-        verifyNoInteractions(mockDokServiceFasade);
+        verify(mockDokServiceFasade).produserDokument(123L, brevbestillingDto);
 
         valider(brevbestillingDto, "dokumenter-v2-opprett-post-schema.json", new ObjectMapper());
     }

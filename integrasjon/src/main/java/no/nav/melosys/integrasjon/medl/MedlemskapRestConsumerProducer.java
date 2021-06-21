@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.medl;
 
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.felles.RestConsumer;
 import no.nav.melosys.integrasjon.felles.SystemContextExchangeFilter;
 import org.slf4j.Logger;
@@ -15,14 +16,14 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 @Configuration
-public class MedlemskapRestConsumerConfig implements RestConsumer {
-    private static final Logger log = LoggerFactory.getLogger(MedlemskapRestConsumerConfig.class);
+public class MedlemskapRestConsumerProducer implements RestConsumer {
+    private static final Logger log = LoggerFactory.getLogger(MedlemskapRestConsumerProducer.class);
     private static final String CONSUMER_ID = "srvmelosys";
 
     private String url;
 
     @Autowired
-    public MedlemskapRestConsumerConfig(@Value("${medlemskap.rest.url}") String url) {
+    public MedlemskapRestConsumerProducer(@Value("${medlemskap.rest.url}") String url) {
         this.url = url;
     }
 
@@ -55,7 +56,7 @@ public class MedlemskapRestConsumerConfig implements RestConsumer {
                 return response.bodyToMono(String.class)
                     .flatMap(errorBody -> {
                         log.error("Kall mot MEDL feilet. {} - {}", response.statusCode(), errorBody);
-                        return Mono.error(new RuntimeException(errorBody));
+                        return Mono.error(new TekniskException(errorBody));
                     });
             }
             return Mono.just(response);

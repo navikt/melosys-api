@@ -139,9 +139,9 @@ class OppgaveServiceTest {
 
     @Test
     void hentOppgaveForFagsaksnummer_oppgaveEksisterer_forventOppgave() {
-        when(oppgaveFasade.finnOppgaverMedSaksnummer(eq(saksnummer))).thenReturn(List.of(oppgave));
+        when(oppgaveFasade.finnÅpneOppgaverMedSaksnummer(eq(saksnummer))).thenReturn(List.of(oppgave));
 
-        Oppgave oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(saksnummer);
+        Oppgave oppgave = oppgaveService.hentÅpenOppgaveMedFagsaksnummer(saksnummer);
         assertThat(oppgave.erBehandling()).isTrue();
     }
 
@@ -185,7 +185,7 @@ class OppgaveServiceTest {
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer(saksnummer);
-        when(oppgaveFasade.finnOppgaverMedSaksnummer(eq(saksnummer))).thenReturn(List.of(oppgave));
+        when(oppgaveFasade.finnÅpneOppgaverMedSaksnummer(eq(saksnummer))).thenReturn(List.of(oppgave));
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", oppgave.getTilordnetRessurs());
         verify(oppgaveFasade, never()).opprettOppgave(any());
@@ -200,7 +200,7 @@ class OppgaveServiceTest {
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer(saksnummer);
-        when(oppgaveFasade.finnOppgaverMedSaksnummer(eq(saksnummer))).thenReturn(List.of(oppgave));
+        when(oppgaveFasade.finnÅpneOppgaverMedSaksnummer(eq(saksnummer))).thenReturn(List.of(oppgave));
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", tilordnetRessurs);
         verify(oppgaveFasade, never()).opprettOppgave(any());
@@ -215,7 +215,7 @@ class OppgaveServiceTest {
         behandling.getFagsak().setSaksnummer("MEL-11111");
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
-        behandling.hentPersonDokument().diskresjonskode = new Diskresjonskode("SPSF");
+        behandling.hentPersonDokument().setDiskresjonskode(new Diskresjonskode("SPSF"));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
@@ -263,9 +263,9 @@ class OppgaveServiceTest {
 
     private static PersonDokument lagPersonDokument() {
         PersonDokument personDokument = new PersonDokument();
-        personDokument.fnr = "fnr";
-        personDokument.sammensattNavn = "sammensattNavn";
-        personDokument.diskresjonskode = new Diskresjonskode(null);
+        personDokument.setFnr("fnr");
+        personDokument.setSammensattNavn("sammensattNavn");
+        personDokument.setDiskresjonskode(new Diskresjonskode(null));
         return personDokument;
     }
 
@@ -278,7 +278,7 @@ class OppgaveServiceTest {
     private static Soeknad lagSoeknadDokument() {
         Soeknad soeknad = new Soeknad();
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
-        fysiskArbeidssted.adresse.landkode = new Land(Land.NORGE).getKode();
+        fysiskArbeidssted.adresse.setLandkode(new Land(Land.NORGE).getKode());
         soeknad.arbeidPaaLand.fysiskeArbeidssteder = Collections.singletonList(fysiskArbeidssted);
 
         soeknad.oppholdUtland.oppholdslandkoder = Collections.singletonList(Landkoder.NO.getKode());

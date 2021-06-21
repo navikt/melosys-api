@@ -176,6 +176,7 @@ class AdminInnvalideringSedRuterTest {
     private List<BucInformasjon> lagBucInformasjon(String status) {
         return List.of(new BucInformasjon(
             rinaSaksnummer,
+            true,
             "LA_BUC_04",
             LocalDate.now(),
             Set.of(),

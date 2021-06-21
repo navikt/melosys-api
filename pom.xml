@@ -39,9 +39,9 @@
         <java.version>15</java.version>
 
         <!-- Melosys -->
-        <melosys.jsonschema.version>1.35.125</melosys.jsonschema.version>
+        <melosys.jsonschema.version>1.35.132</melosys.jsonschema.version>
         <melosys.internt.kodeverk.version>5.15.70</melosys.internt.kodeverk.version>
-        <melosys.brev.version>1.2.67</melosys.brev.version>
+        <melosys.brev.version>1.2.82</melosys.brev.version>
 
         <!-- NAV -->
         <nav.tjenestespesifikasjoner.version>1.2020.01.09-12.44-3713b7c04e1c</nav.tjenestespesifikasjoner.version>
@@ -50,28 +50,29 @@
         <doksys.dokumentproduksjon.version>3.3.4</doksys.dokumentproduksjon.version>
         <joark.journalfoerinngaaende.version>0.0.21</joark.journalfoerinngaaende.version>
         <sakogbehandling.version>1.0.0-alpha011</sakogbehandling.version>
-        <token-support.version>1.3.3</token-support.version>
+        <token-support.version>1.3.7</token-support.version>
         <utbetaling.version>1.1.3</utbetaling.version>
 
         <!-- Versjoner av eksterne biblioteker -->
-        <archunit.version>0.17.0</archunit.version>
+        <archunit.version>0.19.0</archunit.version>
         <apache-httpclients.version>4.5.13</apache-httpclients.version>
         <caffeine.version>3.0.2</caffeine.version>
-        <cxf.version>3.4.2</cxf.version>
+        <cxf.version>3.4.3</cxf.version>
         <commons-collections4.version>4.4</commons-collections4.version>
         <commons-lang.version>3.9</commons-lang.version>
         <commons-text.version>1.8</commons-text.version>
         <findbugs.jsr305.version>3.0.2</findbugs.jsr305.version>
         <guava.version>30.1.1-jre</guava.version>
+        <graphql-java.version>16.2</graphql-java.version>
         <logback.version>1.2.3</logback.version>
         <logstash.version>6.6</logstash.version>
-        <hikaricp.version>4.0.1</hikaricp.version>
+        <hikaricp.version>4.0.3</hikaricp.version>
         <ibmmq.version>9.0.5.0</ibmmq.version>
-        <jackson.version>2.12.2</jackson.version>
+        <jackson.version>2.12.3</jackson.version>
         <javax.ws.rs-api.version>2.1</javax.ws.rs-api.version>
-        <json-smart.version>2.3</json-smart.version>
+        <json-smart.version>2.4.7</json-smart.version>
         <jms-api.version>2.0.1</jms-api.version>
-        <micrometer-jvm-extras.version>0.2.1</micrometer-jvm-extras.version>
+        <micrometer-jvm-extras.version>0.2.2</micrometer-jvm-extras.version>
         <networknt.json-schema-validator.version>1.0.47</networknt.json-schema-validator.version>
         <nimbus-jose-jwt.version>8.20.1</nimbus-jose-jwt.version>
         <ojdbc.version>18.3.0.0</ojdbc.version>
@@ -80,19 +81,19 @@
         <oxmlparserv2.version>11.2.0.1.nojaxpservice</oxmlparserv2.version>
         <easy-random.version>5.0.0</easy-random.version>
         <restFixture.version>4.4</restFixture.version>
-        <shedlock.version>4.20.0</shedlock.version>
+        <shedlock.version>4.23.0</shedlock.version>
         <slf4j.version>1.7.30</slf4j.version>
         <springfox.version>3.0.0</springfox.version>
         <swagger.version>1.5.21</swagger.version>
         <unleash.version>3.3.4</unleash.version>
 
         <!-- Transitive avhengiheter -->
-        <asm.version>9.0</asm.version>
+        <asm.version>9.1</asm.version>
         <bcprov-jdk15on.version>1.68</bcprov-jdk15on.version>
         <commons-logging.version>1.2</commons-logging.version>
         <javassist.version>3.27.0-GA</javassist.version>
         <jaxb2-basics-runtime.version>0.12.0</jaxb2-basics-runtime.version>
-        <joda-time.version>2.9.4</joda-time.version>
+        <joda-time.version>2.10.10</joda-time.version>
         <objenesis.version>3.1</objenesis.version>
         <stax2-api.version>4.2.1</stax2-api.version>
         <woodstox.version>6.2.3</woodstox.version>
@@ -209,6 +210,11 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.graphql-java</groupId>
+                <artifactId>graphql-java</artifactId>
+                <version>${graphql-java.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.ibm.mq</groupId>
@@ -401,7 +407,7 @@
             <dependency>
                 <groupId>org.checkerframework</groupId>
                 <artifactId>checker-qual</artifactId>
-                <version>3.12.0</version>
+                <version>3.13.0</version>
             </dependency>
             <dependency>
                 <groupId>org.codehaus.woodstox</groupId>
@@ -650,15 +656,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
                     <version>3.1.2</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>versions-maven-plugin</artifactId>
-                    <version>2.7</version>
-                    <configuration>
-                        <outputFile>utdatert_avhengigheter.txt</outputFile>
-                        <generateBackupPoms>false</generateBackupPoms>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <artifactId>maven-failsafe-plugin</artifactId>

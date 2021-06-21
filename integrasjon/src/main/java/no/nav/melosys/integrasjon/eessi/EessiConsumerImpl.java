@@ -113,6 +113,12 @@ public class EessiConsumerImpl implements EessiConsumer, JsonRestIntegrasjon {
             }, rinaSaksnummer, rinaDokumentID);
     }
 
+    @Override
+    public void lukkBuc(String rinaSaksnummer) {
+        exchange("/buc/{rinaSaksnummer}/lukk", HttpMethod.POST,
+            new HttpEntity<>(getDefaultHeaders()), new ParameterizedTypeReference<Void>(){}, rinaSaksnummer);
+    }
+
     private <T> T exchange(String uri, HttpMethod method, HttpEntity<?> entity, ParameterizedTypeReference<T> responseType, Object... variabler) {
         try {
             return restTemplate.exchange(uri, method, entity, responseType, variabler).getBody();

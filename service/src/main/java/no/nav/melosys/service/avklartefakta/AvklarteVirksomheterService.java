@@ -11,8 +11,8 @@ import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.dokument.adresse.Adresse;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.adresse.Adresse;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
@@ -156,17 +156,18 @@ public class AvklarteVirksomheterService {
 
     StrukturertAdresse utfyllManglendeAdressefelter(OrganisasjonDokument org) {
         StrukturertAdresse adresse = org.getOrganisasjonDetaljer().hentStrukturertForretningsadresse();
-        if (adresse == null || StringUtils.isEmpty(adresse.postnummer)) {
+        if (adresse == null || StringUtils.isEmpty(adresse.getPostnummer())) {
             adresse = org.getOrganisasjonDetaljer().hentStrukturertPostadresse();
         }
-        if (StringUtils.isEmpty(adresse.gatenavn)) {
-            adresse.gatenavn = " ";
+        if (StringUtils.isEmpty(adresse.getGatenavn())) {
+            adresse.setGatenavn(" ");
         }
         if (adresse.erNorsk()) {
-            adresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
-        } else if (StringUtils.isEmpty(adresse.postnummer)) {
+            adresse.setPoststed(
+                kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.getPostnummer(), LocalDate.now()));
+        } else if (StringUtils.isEmpty(adresse.getPostnummer())) {
             //Utenlandske adresser har ikke alltid postnummer
-            adresse.postnummer = " ";
+            adresse.setPostnummer(" ");
         }
         return adresse;
     }

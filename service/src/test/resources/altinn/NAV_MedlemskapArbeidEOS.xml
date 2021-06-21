@@ -28,6 +28,8 @@
             <utenlandskIDnummer>utenlandskIDnummer</utenlandskIDnummer>
         </arbeidstaker>
         <midlertidigUtsendt>
+            <beskrivArbeidSisteMnd>Arbeid siste mnd</beskrivArbeidSisteMnd>
+            <beskrivelseAnnetArbeid>Annet arbeid</beskrivelseAnnetArbeid>
             <arbeidsland>FI</arbeidsland>
             <andreArbeidsgivereIUtsendingsperioden>false</andreArbeidsgivereIUtsendingsperioden>
             <mottaYtelserNorge>false</mottaYtelserNorge>

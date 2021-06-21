@@ -1,14 +1,18 @@
 package no.nav.melosys.saksflyt.steg.sed;
 
+import java.util.Collections;
+import java.util.List;
+
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -37,6 +41,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     private final BrevBestiller brevBestiller;
     private final SedSomBrevService sedSomBrevService;
     private final UtpekingService utpekingService;
+    private final Unleash unleash;
 
     @Autowired
     public SendVedtakUtland(@Qualifier("system") EessiService eessiService,
@@ -44,12 +49,13 @@ public class SendVedtakUtland extends AbstraktSendUtland {
                             BehandlingsresultatService behandlingsresultatService,
                             BrevBestiller brevBestiller,
                             SedSomBrevService sedSomBrevService,
-                            UtpekingService utpekingService) {
+                            UtpekingService utpekingService, Unleash unleash) {
         super(eessiService, behandlingsresultatService);
         this.behandlingService = behandlingService;
         this.brevBestiller = brevBestiller;
         this.sedSomBrevService = sedSomBrevService;
         this.utpekingService = utpekingService;
+        this.unleash = unleash;
     }
 
     @Override
@@ -63,15 +69,21 @@ public class SendVedtakUtland extends AbstraktSendUtland {
         final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
 
         if (behandling.erNorgeUtpekt()) {
-            eessiService.sendGodkjenningArbeidFlereLand(behandling.getId(), prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
+            var bucer = eessiService.hentTilknyttedeBucer(behandling.getFagsak().getGsakSaksnummer(), Collections.emptyList());
+            if (bucer.stream().anyMatch(buc -> buc.getBucType().equals(BucType.LA_BUC_02.name()) && buc.erÅpen())) {
+                eessiService.sendGodkjenningArbeidFlereLand(behandling.getId(), prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
+            } else {
+                log.info("Sender ikke godkjenning av utpeking da behandling {} ikke er tilknyttet en åpen LA_BUC_02", behandling.getId());
+            }
         } else if (behandlingsresultat.erUtpeking()) {
             utpekingService.oppdaterSendtUtland(behandlingsresultat.hentValidertUtpekingsperiode());
             SendUtlandStatus status = sendSedA003(prosessinstans);
             log.info("SendUtlandStatus for behandling {}: {}", behandling.getId(), status);
         } else if (skalSendesUtland(behandlingsresultat)) {
             super.sendUtland(avklarBucType(behandling), prosessinstans);
+        } else if (unleash.isEnabled("melosys.labuc01.lukk_etter_vedtak") && behandlingsresultat.erArt16EtterUtlandMedRegistrertSvar()) {
+            finnOgLukkTilhørendeBUC(behandlingsresultat);
         }
-
     }
 
     private SendUtlandStatus sendSedA003(Prosessinstans prosessinstans) {
@@ -82,7 +94,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
 
     private DoksysBrevbestilling lagBrevBestilling(Prosessinstans prosessinstans) {
         Long behandlingID = prosessinstans.getBehandling().getId();
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        var behandling = behandlingService.hentBehandling(behandlingID);
         return new DoksysBrevbestilling.Builder().medProduserbartDokument(ATTEST_A1)
             .medAvsenderNavn(hentSaksbehandler(prosessinstans))
             .medMottakere(Mottaker.av(MYNDIGHET))
@@ -93,7 +105,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
 
     @Override
     protected void sendBrev(Prosessinstans prosessinstans) {
-        Behandling behandling = prosessinstans.getBehandling();
+        var behandling = prosessinstans.getBehandling();
         if (prosessinstans.getData(ProsessDataKey.UTPEKT_LAND) != null) {
             Landkoder utpektLand = prosessinstans.getData(ProsessDataKey.UTPEKT_LAND, Landkoder.class);
             String journalpostID = sedSomBrevService
@@ -107,13 +119,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
 
     @Override
     protected boolean skalSendesUtland(Behandlingsresultat behandlingsresultat) {
-        return (behandlingsresultat.erInnvilgelse() && !erArtikkel16_1(behandlingsresultat))
-            || behandlingsresultat.erInnvilgelseFlereLand()
-            || behandlingsresultat.erUtpeking();
-    }
-
-    private boolean erArtikkel16_1(Behandlingsresultat behandlingsresultat) {
-        return behandlingsresultat.hentValidertLovvalgsperiode().getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1;
+        return behandlingsresultat.utlandSkalVarslesOmVedtak();
     }
 
     private BucType avklarBucType(Behandling behandling) {
@@ -122,5 +128,14 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             .map(Lovvalgsperiode::getBestemmelse)
             .map(BucType::fraBestemmelse)
             .orElseThrow(() -> new TekniskException("Finner ikke lovvalgsbestemmelse for behandling " + behandling.getId()));
+    }
+
+    private void finnOgLukkTilhørendeBUC(Behandlingsresultat behandlingsresultat) {
+        eessiService.hentTilknyttedeBucer(behandlingsresultat.getBehandling().getFagsak().getGsakSaksnummer(), List.of())
+            .stream()
+            .filter(buc -> BucType.LA_BUC_01.name().equalsIgnoreCase(buc.getBucType()))
+            .findFirst()
+            .map(BucInformasjon::getId)
+            .ifPresent(eessiService::lukkBuc);
     }
 }

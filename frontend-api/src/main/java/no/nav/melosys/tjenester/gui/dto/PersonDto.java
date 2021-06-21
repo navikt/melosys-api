@@ -7,20 +7,21 @@ import java.util.List;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.*;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
+import no.nav.melosys.domain.person.Persondata;
 
 public class PersonDto {
 
-    public PersonDto(PersonDokument person) {
-        fnr = person.fnr;
-        sivilstand = person.sivilstand;
-        statsborgerskap = person.statsborgerskap;
-        sammensattNavn = person.sammensattNavn;
-        personstatus = person.personstatus;
-        kjoenn = person.kjønn;
-        foedselsdato = person.fødselsdato;
-        bostedsadresse = person.bostedsadresse;
-        familiemedlemmer = person.familiemedlemmer == null ? new ArrayList<>()
-            : FamiliemedlemDto.avFamiliemedlemmer(person.familiemedlemmer);
+    public PersonDto(Persondata person) {
+        fnr = person.hentFolkeregisterIdent();
+        sivilstand = person.getSivilstand();
+        statsborgerskap = person.hentAlleStatsborgerskap().stream().findFirst().orElse(null);
+        sammensattNavn = person.getSammensattNavn();
+        personstatus = person.getPersonstatus();
+        kjoenn = new KjoennDto(person.hentKjønnType().getKode(), person.hentKjønnType().toString());
+        foedselsdato = person.getFødselsdato();
+        bostedsadresse = person.getBostedsadresse();
+        familiemedlemmer = person.getFamiliemedlemmer() == null ? new ArrayList<>()
+            : FamiliemedlemDto.avFamiliemedlemmer(person.getFamiliemedlemmer());
     }
 
     public String fnr;
@@ -33,7 +34,7 @@ public class PersonDto {
 
     public Personstatus personstatus;
 
-    public KjoennsType kjoenn;
+    public KjoennDto kjoenn;
 
     public LocalDate foedselsdato;
 

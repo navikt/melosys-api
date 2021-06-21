@@ -18,7 +18,7 @@ public class RegisteropplysningerRequest {
     private final LocalDate tom;
     private final Informasjonsbehov informasjonsbehov;
 
-    public RegisteropplysningerRequest(Long behandlingID, Set<SaksopplysningType> opplysningstyper,
+    private RegisteropplysningerRequest(Long behandlingID, Set<SaksopplysningType> opplysningstyper,
                                        String fnr, LocalDate fom, LocalDate tom, Informasjonsbehov informasjonsbehov) {
         this.behandlingID = behandlingID;
         this.opplysningstyper = opplysningstyper;
@@ -129,13 +129,6 @@ public class RegisteropplysningerRequest {
                     .stream().map(SaksopplysningType::getBeskrivelse).collect(Collectors.joining(", "));
 
                 throw new TekniskException(String.format("Krever at fnr er satt ved henting av %s", påkrevdeSaksopplysningstyper));
-            }
-
-            if (PeriodeKontroller.feilIPeriode(fom, tom) && !Collections.disjoint(SaksopplysningType.KREVER_PERIODE, saksopplysningTyper.getOpplysningstyper())) {
-                String påkrevdeSaksopplysningstyper = intersect(SaksopplysningType.KREVER_PERIODE, saksopplysningTyper.getOpplysningstyper())
-                    .stream().map(SaksopplysningType::getBeskrivelse).collect(Collectors.joining(", "));
-
-                throw new TekniskException(String.format("Feil i periode: %s krever en gyldig periode", påkrevdeSaksopplysningstyper));
             }
         }
 

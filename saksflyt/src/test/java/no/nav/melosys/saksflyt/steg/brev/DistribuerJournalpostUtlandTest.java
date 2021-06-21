@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -51,9 +51,9 @@ class DistribuerJournalpostUtlandTest {
 
         StrukturertAdresse strukturertAdresse = captor.getValue();
         assertThat(strukturertAdresse).isNotNull();
-        assertThat(strukturertAdresse.gatenavn).isEqualTo("Svenskegatan 38");
-        assertThat(strukturertAdresse.postnummer).isEqualTo("8080");
-        assertThat(strukturertAdresse.landkode).isEqualTo(Landkoder.SE.getKode());
+        assertThat(strukturertAdresse.getGatenavn()).isEqualTo("Svenskegatan 38");
+        assertThat(strukturertAdresse.getPostnummer()).isEqualTo("8080");
+        assertThat(strukturertAdresse.getLandkode()).isEqualTo(Landkoder.SE.getKode());
     }
 
     @Test

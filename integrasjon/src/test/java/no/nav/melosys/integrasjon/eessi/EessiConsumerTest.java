@@ -51,7 +51,7 @@ class EessiConsumerTest {
     }
 
     @Test
-    void opprettOgSend_forventMap() throws Exception {
+    void opprettOgSend_forventMap() {
 
         BucType bucType = BucType.LA_BUC_01;
         server.expect(requestTo("/buc/" + bucType + "?sendAutomatisk=true&oppdaterEksisterende=true"))
@@ -203,5 +203,12 @@ class EessiConsumerTest {
         SedGrunnlagDto response = eessiConsumer.hentSedGrunnlag(rinaSaksnummer, rinaDokumentID);
 
         assertThat(response).isInstanceOf(SedGrunnlagA003Dto.class);
+    }
+
+    @Test
+    void lukkBuc() {
+        final var rinaSaksnummer = "1424";
+        server.expect(requestTo("/buc/" + rinaSaksnummer + "/lukk")).andRespond(withSuccess());
+        eessiConsumer.lukkBuc(rinaSaksnummer);
     }
 }

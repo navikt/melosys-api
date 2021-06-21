@@ -19,7 +19,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.kodeverk.Saksstatuser.OPPRETTET;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.doReturn;
@@ -65,12 +64,14 @@ class ReplikerBehandlingTest {
         Behandling replikertBehandling = new Behandling();
         replikertBehandling.setFagsak(fagsak);
         replikertBehandling.setId(11L);
-        doReturn(replikertBehandling).when(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling,  Behandlingsstatus.OPPRETTET, Behandlingstyper.ENDRET_PERIODE);
+        doReturn(replikertBehandling)
+            .when(behandlingService)
+            .replikerBehandlingOgBehandlingsresultat(behandling,  Behandlingsstatus.OPPRETTET, Behandlingstyper.ENDRET_PERIODE);
 
         replikerBehandling.utfør(prosessinstans);
 
         verify(fagsakService).lagre(fagsak);
-        assertThat(fagsak.getStatus()).isEqualTo(OPPRETTET);
+        assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.LOVVALG_AVKLART);
         assertThat(prosessinstans.getBehandling()).isEqualTo(replikertBehandling);
     }
 }

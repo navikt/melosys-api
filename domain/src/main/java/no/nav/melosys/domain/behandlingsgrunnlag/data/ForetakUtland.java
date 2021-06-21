@@ -1,7 +1,7 @@
 package no.nav.melosys.domain.behandlingsgrunnlag.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 
 /**
  * Opplysninger om foretak i utlandet

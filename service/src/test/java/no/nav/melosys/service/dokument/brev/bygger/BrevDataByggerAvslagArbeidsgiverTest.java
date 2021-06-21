@@ -75,7 +75,7 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
         behandling.getSaksopplysninger().add(lagPersonsaksopplysning(new PersonDokument()));
 
         PersonDokument personDokument = new PersonDokument();
-        personDokument.sammensattNavn = "Navn Navnesen";
+        personDokument.setSammensattNavn("Navn Navnesen");
         Saksopplysning person = new Saksopplysning();
         person.setDokument(personDokument);
         person.setType(SaksopplysningType.PERSOPL);

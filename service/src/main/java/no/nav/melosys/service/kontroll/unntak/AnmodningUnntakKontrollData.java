@@ -2,23 +2,23 @@ package no.nav.melosys.service.kontroll.unntak;
 
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.person.Persondata;
 
 public class AnmodningUnntakKontrollData {
-    private final PersonDokument personDokument;
+    private final Persondata persondata;
     private final BehandlingsgrunnlagData behandlingsgrunnlagData;
     private final Anmodningsperiode anmodningsperiode;
 
-    public AnmodningUnntakKontrollData(PersonDokument personDokument,
+    public AnmodningUnntakKontrollData(Persondata persondata,
                                        BehandlingsgrunnlagData behandlingsgrunnlagData,
                                        Anmodningsperiode anmodningsperiode) {
-        this.personDokument = personDokument;
+        this.persondata = persondata;
         this.behandlingsgrunnlagData = behandlingsgrunnlagData;
         this.anmodningsperiode = anmodningsperiode;
     }
 
-    public PersonDokument getPersonDokument() {
-        return personDokument;
+    public Persondata getPersonDokument() {
+        return persondata;
     }
 
     public BehandlingsgrunnlagData getBehandlingsgrunnlagData() {

@@ -38,7 +38,7 @@ public class OppdaterOppgaveAnmodningUnntakSendt implements StegBehandler {
         LocalDate frist = LocalDate.from(prosessinstans.getBehandling().getDokumentasjonSvarfristDato().atZone(ZoneId.systemDefault()).toLocalDate());
 
         String saksnummer = prosessinstans.getBehandling().getFagsak().getSaksnummer();
-        Oppgave oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(saksnummer);
+        Oppgave oppgave = oppgaveService.hentÅpenOppgaveMedFagsaksnummer(saksnummer);
 
         OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder()
             .beskrivelse(ANMODNING_OM_UNNTAK_SENDT)

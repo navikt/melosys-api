@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.dokument.adresse;
+package no.nav.melosys.domain.adresse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,10 +11,13 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdress
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
 import org.apache.commons.lang3.StringUtils;
 
-public class UstrukturertAdresse extends Adresse {
-    private final List<String> adresselinjer = new ArrayList<>();
+import static no.nav.melosys.domain.adresse.Adresse.sammenslå;
 
-    private UstrukturertAdresse(String l1, String l2, String l3, String l4, String landKode) {
+public class UstrukturertAdresse implements Adresse {
+    private final List<String> adresselinjer = new ArrayList<>();
+    private String landkode;
+
+    public UstrukturertAdresse(String l1, String l2, String l3, String l4, String landKode) {
         if (StringUtils.isNotEmpty(l1)) {
             adresselinjer.add(l1);
         }
@@ -63,17 +66,21 @@ public class UstrukturertAdresse extends Adresse {
     }
 
     public static UstrukturertAdresse av(StrukturertAdresse sAdresse) {
-        String linje1 = sammenslå(sAdresse.gatenavn, sAdresse.husnummer);
+        String linje1 = sammenslå(sAdresse.getTilleggsnavn(), sAdresse.getGatenavn(),
+            sAdresse.getHusnummerEtasjeLeilighet());
 
-        return new UstrukturertAdresse(linje1,
-                                       sAdresse.postnummer,
-                                       sAdresse.poststed,
-                                       sAdresse.region,
-                                       sAdresse.landkode);
+        return new UstrukturertAdresse(linje1, sAdresse.getPostboks(),
+                                       sammenslå(sAdresse.getPostnummer(), sAdresse.getPoststed()),
+            sAdresse.getRegion(), sAdresse.getLandkode());
     }
 
     public List<String> getAdresselinjer() {
         return adresselinjer;
+    }
+
+    @Override
+    public String getLandkode() {
+        return landkode;
     }
 
     @JsonIgnore
@@ -85,6 +92,7 @@ public class UstrukturertAdresse extends Adresse {
         }
     }
 
+    @Override
     public boolean erTom() {
         return adresselinjer.isEmpty() && StringUtils.isEmpty(landkode);
     }

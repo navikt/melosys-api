@@ -1,15 +1,15 @@
 package no.nav.melosys.domain.dokument.person.adresse;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonView;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.dokument.felles.Land;
+import no.nav.melosys.domain.util.LandkoderUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class Bostedsadresse {
-
     private Gateadresse gateadresse;
     private String tilleggsadresse;
     private String tilleggsadresseType;
@@ -72,7 +72,6 @@ public class Bostedsadresse {
         this.land = land;
     }
 
-    @JsonIgnore
     public boolean erTom() {
         return gateadresse.erTom() &&
             StringUtils.isEmpty(postnr) &&
@@ -80,18 +79,38 @@ public class Bostedsadresse {
             StringUtils.isEmpty(land.getKode());
     }
 
+    public StrukturertAdresse tilStrukturertAdresse() {
+        StrukturertAdresse adresse = new StrukturertAdresse();
+        if (gateadresse != null) {
+            adresse.setGatenavn(gateadresse.getGatenavn());
+            adresse.setHusnummerEtasjeLeilighet(Objects.toString(gateadresse.getHusnummer(), ""));
+            adresse.setHusnummerEtasjeLeilighet(
+                    adresse.getHusnummerEtasjeLeilighet() + Objects.toString(gateadresse.getHusbokstav(), ""));
+        }
+
+        adresse.setPostnummer(getPostnr());
+        adresse.setPoststed(getPoststed());
+        if (StringUtils.isNotEmpty(getLand().getKode())) {
+            adresse.setLandkode(LandkoderUtils.tilIso2(getLand().getKode()));
+        }
+
+        return adresse;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) {return true;}
-        if (!(o instanceof Bostedsadresse)) {return false;}
-
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Bostedsadresse that = (Bostedsadresse) o;
-
-        return new EqualsBuilder().append(gateadresse, that.gateadresse).append(postnr, that.postnr).append(poststed, that.poststed).append(land, that.land).isEquals();
+        return Objects.equals(gateadresse, that.gateadresse) && Objects.equals(tilleggsadresse,
+            that.tilleggsadresse) && Objects.equals(tilleggsadresseType, that.tilleggsadresseType) && Objects.equals(
+            postnr, that.postnr) && Objects.equals(poststed, that.poststed) && Objects.equals(land, that.land);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder().append(gateadresse).append(postnr).append(poststed).append(land).toHashCode();
+        return Objects.hash(gateadresse, tilleggsadresse, tilleggsadresseType, postnr, poststed, land);
     }
 }

@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import no.nav.melosys.domain.AbstraktOrganisasjon;
 import no.nav.melosys.domain.FellesKodeverk;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.dto.AdresseDto;
 import no.nav.melosys.tjenester.gui.dto.GateadresseDto;
@@ -53,16 +53,16 @@ public class OrganisasjonSerializer extends StdSerializer<AbstraktOrganisasjon> 
             return dto;
         }
 
-        gateadresse.setGatenavn(adresse.gatenavn);
+        gateadresse.setGatenavn(adresse.getGatenavn());
 
-        dto.setPostnr(adresse.postnummer);
-        String poststed = StringUtils.isNotEmpty(adresse.poststed) ? adresse.poststed
-            : kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.postnummer, LocalDate.now());
+        dto.setPostnr(adresse.getPostnummer());
+        String poststed = StringUtils.isNotEmpty(adresse.getPoststed()) ? adresse.getPoststed()
+            : kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.getPostnummer(), LocalDate.now());
         dto.setPoststed(poststed);
 
-        final String landISO2 = kodeverkService.dekod(FellesKodeverk.LANDKODERISO2, adresse.landkode, LocalDate.now());
+        final String landISO2 = kodeverkService.dekod(FellesKodeverk.LANDKODERISO2, adresse.getLandkode(), LocalDate.now());
         final String landkode = !UKJENT.equals(landISO2) ? landISO2
-            :  kodeverkService.dekod(FellesKodeverk.LANDKODER, adresse.landkode, LocalDate.now());
+            :  kodeverkService.dekod(FellesKodeverk.LANDKODER, adresse.getLandkode(), LocalDate.now());
         dto.setLand(landkode);
 
         return dto;

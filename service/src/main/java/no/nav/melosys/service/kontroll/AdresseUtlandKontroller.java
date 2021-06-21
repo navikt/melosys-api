@@ -24,7 +24,7 @@ public abstract class AdresseUtlandKontroller {
             if (fysiskArbeidssted.virksomhetNavn == null) {
                 felter.add(String.format(ARBEIDSSTED_FIRMANAVN, i));
             }
-            if (fysiskArbeidssted.adresse.landkode == null) {
+            if (fysiskArbeidssted.adresse.getLandkode() == null) {
                 felter.add(String.format(ARBEIDSSTED_LAND, i));
             }
         }
@@ -41,7 +41,7 @@ public abstract class AdresseUtlandKontroller {
             if (foretakUtland.navn == null) {
                 felter.add(String.format(FORETAK_UTLAND_NAVN, i));
             }
-            if (foretakUtland.adresse.landkode == null) {
+            if (foretakUtland.adresse.getLandkode() == null) {
                 felter.add(String.format(FORETAK_UTLAND_LAND, i));
             }
         }

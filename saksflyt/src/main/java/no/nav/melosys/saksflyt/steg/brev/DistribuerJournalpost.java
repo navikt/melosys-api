@@ -6,7 +6,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -85,8 +85,9 @@ public class DistribuerJournalpost implements StegBehandler {
         String bestillingsId;
         if (org != null) {
             StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
-            if (orgAdresse.erNorsk() && isEmpty(orgAdresse.poststed)) {
-                orgAdresse.poststed = kodeverkService.dekod(FellesKodeverk.POSTNUMMER, orgAdresse.postnummer, LocalDate.now());
+            if (orgAdresse.erNorsk() && isEmpty(orgAdresse.getPoststed())) {
+                orgAdresse.setPoststed(
+                    kodeverkService.dekod(FellesKodeverk.POSTNUMMER, orgAdresse.getPostnummer(), LocalDate.now()));
             }
             bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, orgAdresse, kontaktopplysning, brevbestilling.getKontaktpersonNavn());
         } else {

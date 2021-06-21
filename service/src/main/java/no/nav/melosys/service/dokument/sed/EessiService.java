@@ -336,4 +336,8 @@ public class EessiService {
     public SedGrunnlag hentSedGrunnlag(String rinaSaksnummer, String rinaDokumentID) {
         return SedGrunnlagMapper.tilSedGrunnlag(eessiConsumer.hentSedGrunnlag(rinaSaksnummer, rinaDokumentID));
     }
+
+    public void lukkBuc(String rinaSaksnummer) {
+        eessiConsumer.lukkBuc(rinaSaksnummer);
+    }
 }

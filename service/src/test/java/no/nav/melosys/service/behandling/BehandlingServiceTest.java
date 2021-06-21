@@ -297,7 +297,7 @@ class BehandlingServiceTest {
 
         Oppgave.Builder oppgaveBuilder = new Oppgave.Builder().setTilordnetRessurs(SAKSBEHANDLER);
 
-        when(oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.of(oppgaveBuilder.build()));
+        when(oppgaveService.finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.of(oppgaveBuilder.build()));
 
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
         assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isTrue();
@@ -323,12 +323,12 @@ class BehandlingServiceTest {
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         oppgaveBuilder.setTilordnetRessurs("noen andre");
         Oppgave oppgave2 = oppgaveBuilder.build();
-        when(oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.ofNullable(oppgave2));
+        when(oppgaveService.finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.ofNullable(oppgave2));
         assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isFalse();
 
         oppgaveBuilder.setTilordnetRessurs(null);
         Oppgave oppgave3 = oppgaveBuilder.build();
-        when(oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.ofNullable(oppgave3));
+        when(oppgaveService.finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.ofNullable(oppgave3));
         assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isFalse();
     }
 
@@ -341,7 +341,7 @@ class BehandlingServiceTest {
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
-        when(oppgaveService.finnOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer()))
+        when(oppgaveService.finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer()))
             .thenThrow(new TekniskException("Finner ingen oppgave for fagsak"));
 
         assertThatExceptionOfType(TekniskException.class)

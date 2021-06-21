@@ -20,8 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @JsonTest
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {KafkaConfig.class, KafkaProperties.class })
-class KafkaConfigTest {
+@ContextConfiguration(classes = {LegacyKafkaConfig.class, KafkaProperties.class })
+class LegacyKafkaConfigTest {
 
     @Autowired
     private JsonDeserializer<MelosysEessiMelding> jsonDeserializer;

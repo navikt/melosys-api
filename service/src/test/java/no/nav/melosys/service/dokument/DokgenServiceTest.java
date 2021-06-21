@@ -18,7 +18,6 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.person.Informasjonsbehov;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
@@ -107,7 +106,7 @@ class DokgenServiceTest {
         when(mockDokgenConsumer.lagPdf(anyString(), any(), anyBoolean())).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
-        when(mockPersondataFasade.hentPerson(any(), any())).thenReturn(lagPersonopplysning());
+        when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
 
         Aktoer mottaker = new Aktoer();
         mottaker.setRolle(Aktoersroller.BRUKER);
@@ -159,7 +158,7 @@ class DokgenServiceTest {
         when(mockDokgenConsumer.lagPdf(anyString(), any(), anyBoolean())).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
-        when(mockPersondataFasade.hentPerson(any(), any())).thenReturn(lagPersonopplysning());
+        when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
         Aktoer mottaker = new Aktoer();
         mottaker.setRolle(Aktoersroller.BRUKER);
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false))).thenReturn(asList(mottaker));
@@ -175,7 +174,7 @@ class DokgenServiceTest {
         assertThat(pdfResponse).isEqualTo(expectedPdf);
 
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(true));
-        verify(mockPersondataFasade).hentPerson(any(), eq(Informasjonsbehov.STANDARD));
+        verify(mockPersondataFasade).hentPersonFraTps(any(), eq(Informasjonsbehov.STANDARD));
 
         verifyNoInteractions(mockEregFasade);
         verifyNoInteractions(mockKontaktOpplysningService);
@@ -357,7 +356,7 @@ class DokgenServiceTest {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.PERSOPL);
         PersonDokument personDokument = new PersonDokument();
-        personDokument.fnr = "99887766554";
+        personDokument.setFnr("99887766554");
         saksopplysning.setDokument(personDokument);
         return saksopplysning;
     }

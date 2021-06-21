@@ -12,9 +12,9 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
+import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
@@ -25,15 +25,11 @@ import org.jeasy.random.EasyRandomParameters;
 import org.jeasy.random.randomizers.misc.EnumRandomizer;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.jeasy.random.FieldPredicates.*;
 
-@ExtendWith(MockitoExtension.class)
 class SaksopplysningDokumentConverterTest {
-
     private static SaksopplysningDokumentConverter converter;
     private static EasyRandom random;
 
@@ -104,13 +100,9 @@ class SaksopplysningDokumentConverterTest {
     }
 
     private <T extends SaksopplysningDokument> void testKonvertering(Class<T> clazz) {
-        T dokument = random.nextObject(clazz);
-        assertThat(dokument).isNotNull();
-        String json = converter.convertToDatabaseColumn(dokument);
-        assertThat(json).isNotBlank();
-        SaksopplysningDokument nyttDokument = converter.convertToEntityAttribute(json);
-        assertThat(nyttDokument).isNotNull();
-        String nyJson = converter.convertToDatabaseColumn(nyttDokument);
-        assertThat(nyJson).isEqualTo(json);
+        T opprinneligTestDokument = random.nextObject(clazz);
+        String json = converter.convertToDatabaseColumn(opprinneligTestDokument);
+        SaksopplysningDokument deserialisertDokument = converter.convertToEntityAttribute(json);
+        assertThat(deserialisertDokument).usingRecursiveComparison().isEqualTo(opprinneligTestDokument);
     }
 }

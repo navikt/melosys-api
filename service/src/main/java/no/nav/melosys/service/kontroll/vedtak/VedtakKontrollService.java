@@ -10,8 +10,8 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.validering.Kontrollfeil;
@@ -43,9 +43,8 @@ public class VedtakKontrollService {
     ) {
         BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
-        PersonDokument personDokument = behandling.hentPersonDokument();
-        VedtakKontrollData vedtakKontrollData = new VedtakKontrollData(medlemskapDokument,
-            personDokument, behandlingsgrunnlagData, lovvalgsperiode);
+        Persondata persondata = behandling.hentPersonDokument();
+        VedtakKontrollData vedtakKontrollData = new VedtakKontrollData(medlemskapDokument, persondata, behandlingsgrunnlagData, lovvalgsperiode);
         return kontroller.stream()
             .map(f -> f.apply(vedtakKontrollData))
             .filter(Objects::nonNull)

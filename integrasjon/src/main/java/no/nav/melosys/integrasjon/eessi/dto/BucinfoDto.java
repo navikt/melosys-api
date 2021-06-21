@@ -12,6 +12,7 @@ import no.nav.melosys.domain.eessi.BucInformasjon;
 public class BucinfoDto {
 
     private String id;
+    private boolean erÅpen;
     private String bucType;
     private Long opprettetDato;
     private Set<String> mottakerinstitusjoner = new HashSet<>();
@@ -20,8 +21,9 @@ public class BucinfoDto {
     public BucinfoDto() {
     }
 
-    public BucinfoDto(String id, String bucType, Long opprettetDato, List<SedinfoDto> seder) {
+    public BucinfoDto(String id, boolean erÅpen, String bucType, Long opprettetDato, List<SedinfoDto> seder) {
         this.id = id;
+        this.erÅpen = erÅpen;
         this.bucType = bucType;
         this.opprettetDato = opprettetDato;
         this.seder = seder;
@@ -30,6 +32,7 @@ public class BucinfoDto {
     public BucInformasjon tilDomene() {
         return new BucInformasjon(
             id,
+            erÅpen,
             bucType,
             Instant.ofEpochMilli(opprettetDato).atZone(ZoneId.systemDefault()).toLocalDate(),
             mottakerinstitusjoner,
@@ -42,6 +45,7 @@ public class BucinfoDto {
     public static BucinfoDto av(BucInformasjon bucInformasjon) {
         return new BucinfoDto(
             bucInformasjon.getId(),
+            bucInformasjon.erÅpen(),
             bucInformasjon.getBucType(),
             bucInformasjon.getOpprettetDato().toEpochDay(),
             bucInformasjon.getSeder().stream()
