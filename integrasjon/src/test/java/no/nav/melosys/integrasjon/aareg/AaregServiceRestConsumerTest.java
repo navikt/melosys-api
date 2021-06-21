@@ -12,8 +12,10 @@ import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsume
 import org.junit.jupiter.api.*;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.LocalDate;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 
@@ -56,18 +58,88 @@ public class AaregServiceRestConsumerTest {
 
     @Test
     public void getArbeidsforholdDokument() throws JsonProcessingException {
-        Saksopplysning saksopplysning = aaregService.finnArbeidsforholdPrArbeidstaker("99999999991", null, null);
+        Saksopplysning saksopplysning = aaregService.finnArbeidsforholdPrArbeidstaker(
+            "abc-321",
+            LocalDate.of(2014, 7, 1),
+            LocalDate.of(2015, 12, 31));
         ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) saksopplysning.getDokument();
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
 
         List<Arbeidsforhold> arbeidsforhold = arbeidsforholdDokument.getArbeidsforhold();
-        for (var item : arbeidsforhold) {
-            String s = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(arbeidsforhold);
-            System.out.println(s);
-        }
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        String result = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(arbeidsforhold);
+        assertThat(result).isEqualTo(expectedResult);
     }
 
+    private final String expectedResult = """
+        [ {
+          "arbeidsforholdID" : "abc-321",
+          "arbeidsforholdIDnav" : 123456,
+          "ansettelsesPeriode" : {
+            "fom" : [ 2014, 7, 1 ],
+            "tom" : [ 2015, 12, 31 ]
+          },
+          "arbeidsforholdstype" : "ordinaertArbeidsforhold",
+          "arbeidsavtaler" : [ {
+            "arbeidstidsordning" : {
+              "kode" : "ikkeSkift"
+            },
+            "avloenningstype" : "",
+            "yrke" : {
+              "kode" : "2130123",
+              "term" : ""
+            },
+            "gyldighetsperiode" : {
+              "fom" : [ 2014, 7, 1 ],
+              "tom" : [ 2015, 12, 31 ]
+            },
+            "avtaltArbeidstimerPerUke" : 37.5,
+            "stillingsprosent" : 49.5,
+            "sisteLoennsendringsdato" : [ 2014, 7, 1 ],
+            "beregnetAntallTimerPrUke" : 26.5,
+            "endringsdatoStillingsprosent" : [ 2014, 7, 1 ],
+            "skipsregister" : null,
+            "skipstype" : null,
+            "maritimArbeidsavtale" : false,
+            "beregnetStillingsprosent" : 0.7,
+            "antallTimerGammeltAa" : null,
+            "fartsomraade" : null
+          } ],
+          "permisjonOgPermittering" : [ {
+            "permisjonsId" : "123-xyz",
+            "permisjonsPeriode" : {
+              "fom" : [ 2014, 7, 1 ],
+              "tom" : [ 2015, 12, 31 ]
+            },
+            "permisjonsprosent" : 50.5,
+            "permisjonOgPermittering" : "permisjonMedForeldrepenger"
+          } ],
+          "utenlandsopphold" : [ {
+            "periode" : {
+              "fom" : [ 2014, 7, 1 ],
+              "tom" : [ 2015, 12, 31 ]
+            },
+            "land" : "JPN",
+            "rapporteringsAarMaaned" : [ 2017, 12 ]
+          } ],
+          "arbeidsgivertype" : "ORGANISASJON",
+          "arbeidsgiverID" : "991609407",
+          "arbeidstakerID" : "31126700000",
+          "opplysningspliktigtype" : "ORGANISASJON",
+          "opplysningspliktigID" : "991609407",
+          "opprettelsestidspunkt" : 1537269149.000000000,
+          "sistBekreftet" : 1537359031.000000000,
+          "Aordning" : false,
+          "timerTimelonnet" : [ {
+            "antallTimer" : 37.5,
+            "timelonnetPeriode" : {
+              "fom" : [ 2014, 7, 1 ],
+              "tom" : [ 2015, 12, 31 ]
+            },
+            "rapporteringsAarMaaned" : [ 2018, 5 ]
+          } ]
+        } ]""";
 
     private AaregService lagAaregService() {
         FakeUnleash unleash = new FakeUnleash();
@@ -125,7 +197,7 @@ public class AaregServiceRestConsumerTest {
                 "ansettelsesform": "fast",
                 "antallTimerPrUke": 37.5,
                 "arbeidstidsordning": "ikkeSkift",
-                "beregnetAntallTimerPrUke": 37.5,
+                "beregnetAntallTimerPrUke": 26.5,
                 "bruksperiode": {
                   "fom": "2015-01-06T21:44:04.748",
                   "tom": "2015-12-06T19:45:04"
@@ -134,8 +206,8 @@ public class AaregServiceRestConsumerTest {
                   "fom": "2014-07-01",
                   "tom": "2015-12-31"
                 },
-                "sistLoennsendring": "string",
-                "sistStillingsendring": "string",
+                "sistLoennsendring": "2014-07-01",
+                "sistStillingsendring": "2014-07-01",
                 "sporingsinformasjon": {
                   "endretAv": "Z990693",
                   "endretKilde": "AAREG",
@@ -153,7 +225,8 @@ public class AaregServiceRestConsumerTest {
             ],
             "arbeidsforholdId": "abc-321",
             "arbeidsgiver": {
-              "type": "Organisasjon"
+              "type": "Organisasjon",
+              "organisasjonsnummer": "991609407"
             },
             "arbeidstaker": {
               "aktoerId": "1234567890",
@@ -162,7 +235,8 @@ public class AaregServiceRestConsumerTest {
             "innrapportertEtterAOrdningen": false,
             "navArbeidsforholdId": 123456,
             "opplysningspliktig": {
-              "type": "Organisasjon"
+              "type": "Organisasjon",
+              "organisasjonsnummer": "991609407"
             },
             "permisjonPermitteringer": [
               {
@@ -228,5 +302,4 @@ public class AaregServiceRestConsumerTest {
           }
         ]
         """;
-
 }

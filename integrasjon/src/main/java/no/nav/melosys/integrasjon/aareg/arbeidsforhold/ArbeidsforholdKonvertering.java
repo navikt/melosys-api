@@ -33,10 +33,10 @@ public class ArbeidsforholdKonvertering {
             dst.permisjonOgPermittering = getPermisjonPermitteringer(src.getPermisjonPermitteringer());
             dst.utenlandsopphold = getUtenlandsopphold(src.utenlandsopphold);
             dst.arbeidsgivertype = Aktoertype.valueOf(src.arbeidsgiver.type.toUpperCase());
-            dst.arbeidsgiverID = null; // finnes ikke i rest api
-            dst.arbeidstakerID = src.getArbeidstaker().aktoerId; // TODO: sjekk om riktig
+            dst.arbeidsgiverID = src.arbeidsgiver.organisasjonsnummer;
+            dst.arbeidstakerID = src.getArbeidstaker().offentligIdent; // Er arbeidstakerID=arbeidstaker.offentligIdent?
             dst.opplysningspliktigtype = Aktoertype.valueOf(src.opplysningspliktig.type.toUpperCase());
-            dst.opplysningspliktigID = null; // finnes ikke i rest api
+            dst.opplysningspliktigID = src.opplysningspliktig.organisasjonsnummer;
             dst.arbeidsforholdInnrapportertEtterAOrdningen = src.innrapportertEtterAOrdningen;
             dst.opprettelsestidspunkt = getOffsetDateTime(src.registrert);
             dst.sistBekreftet = getOffsetDateTime(src.sistBekreftet);
@@ -73,6 +73,7 @@ public class ArbeidsforholdKonvertering {
             Utenlandsopphold dst = new Utenlandsopphold();
             dst.setLand(src.landkode);
             dst.setPeriode(getPeriode(src.periode));
+            dst.setRapporteringsperiode(YearMonth.parse(src.rapporteringsperiode));
             return dst;
         }).collect(Collectors.toList());
     }
@@ -82,6 +83,11 @@ public class ArbeidsforholdKonvertering {
             PermisjonOgPermittering dst = new PermisjonOgPermittering();
             dst.setPermisjonsId(src.permisjonPermitteringId);
             dst.setPermisjonsPeriode(getPeriode(src.periode));
+            dst.setPermisjonsprosent(src.prosent);
+
+            // Ser ut til vi kan bruke type her. Eks. "permisjonMedForeldrepenger"
+            // xml eksemple har "Permisjon"
+            dst.setPermisjonOgPermittering(src.type);
             return dst;
         }).collect(Collectors.toList());
     }
@@ -94,9 +100,29 @@ public class ArbeidsforholdKonvertering {
         return arbeidsavtalerSrc.stream().map(src -> {
             Arbeidsavtale dst = new Arbeidsavtale();
             dst.yrke = new Yrke(src.yrke);
+            dst.yrke.setTerm(""); // Hvor kan vi finne dette. (Ser det er "" om det ikke finnes fra xml mapping)
+
             dst.beregnetAntallTimerPrUke = src.beregnetAntallTimerPrUke;
-            // src.arbeidstidsordning har "ikkeSkift", hvordan sette det?
-            dst.arbeidstidsordning = new Arbeidstidsordning(); // ?
+            dst.arbeidstidsordning = new Arbeidstidsordning();
+            dst.arbeidstidsordning.setKode(src.arbeidstidsordning); // Jeg tror dette blir rikig
+
+            dst.avloenningstype = ""; // soap api gir f.eks "Fastlønn" eller tom string "";
+            dst.gyldighetsperiode = getPeriode(src.gyldighetsperiode);
+            dst.beregnetAntallTimerPrUke = src.beregnetAntallTimerPrUke;
+            dst.stillingsprosent = src.stillingsprosent;
+            // Finner ikk denne i rest api men kan regnes ut
+            dst.beregnetStillingsprosent = src.calculateBergnetStillingsprosent();
+            dst.sisteLoennsendringsdato = src.getSisteLoennsendringsDato();
+            dst.endringsdatoStillingsprosent = src.getSistStillingsendringDato();
+            dst.avtaltArbeidstimerPerUke = src.antallTimerPrUke;
+
+
+            // Ser disse ikke er med xml i tester
+            dst.maritimArbeidsavtale = false;
+            dst.skipsregister = null;
+            dst.skipstype = null;
+            dst.fartsområde = null;
+
             return dst;
         }).collect(Collectors.toList());
     }

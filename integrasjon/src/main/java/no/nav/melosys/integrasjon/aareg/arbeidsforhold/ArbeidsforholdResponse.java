@@ -1,7 +1,9 @@
 package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -127,11 +129,17 @@ public class ArbeidsforholdResponse {
     public static class Opplysningspliktig {
         @JsonProperty
         String type;
+
+        @JsonProperty
+        String organisasjonsnummer;
     }
 
     public static class Arbeidsgiver {
         @JsonProperty
         String type;
+
+        @JsonProperty
+        String organisasjonsnummer;
     }
 
     public static class Utenlandsopphold {
@@ -205,9 +213,43 @@ public class ArbeidsforholdResponse {
         String yrke;
 
         @JsonProperty
-        String stillingsprosent;
+        BigDecimal stillingsprosent;
 
         @JsonProperty
         BigDecimal beregnetAntallTimerPrUke;
+
+        @JsonProperty
+        Periode gyldighetsperiode;
+
+        @JsonProperty
+        String sistStillingsendring;
+
+        @JsonProperty
+        String sistLoennsendring;
+
+        @JsonProperty
+        BigDecimal antallTimerPrUke;
+
+        BigDecimal calculateBergnetStillingsprosent() {
+            if (beregnetAntallTimerPrUke == null) return null;
+            return beregnetAntallTimerPrUke.divide(antallTimerPrUke, RoundingMode.HALF_EVEN);
+        }
+
+        LocalDate getSisteLoennsendringsDato() {
+            return parseLocalDate(sistLoennsendring);
+        }
+
+        LocalDate getSistStillingsendringDato() {
+            return parseLocalDate(sistStillingsendring);
+        }
+
+        private LocalDate parseLocalDate(String date) {
+            try {
+                if (date == null) return null;
+                return LocalDate.parse(date);
+            } catch (DateTimeParseException e) {
+                return null;
+            }
+        }
     }
 }
