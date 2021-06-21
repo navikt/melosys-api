@@ -20,13 +20,13 @@ import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDet
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.abac.TilgangService;
@@ -292,8 +292,8 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         VideresendSoknadService videresendSoknadService = mock(VideresendSoknadService.class);
         SaksopplysningerService saksopplysningerService = mock(SaksopplysningerService.class);
         BehandlingsgrunnlagService behandlingsgrunnlagService = mock(BehandlingsgrunnlagService.class);
-        PersonDokument personDokument = (PersonDokument)FagsakBehandlingFactory.lagPersonSaksopplysning().getDokument();
-        when(saksopplysningerService.finnPersonOpplysninger(1L)).thenReturn(Optional.ofNullable(personDokument));
+        Persondata persondata = (Persondata)FagsakBehandlingFactory.lagPersonSaksopplysning().getDokument();
+        when(saksopplysningerService.finnPersonOpplysninger(1L)).thenReturn(Optional.ofNullable(persondata));
         Soeknad søknadDokument = FagsakBehandlingFactory.lagSøknadDokument();
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknadDokument);

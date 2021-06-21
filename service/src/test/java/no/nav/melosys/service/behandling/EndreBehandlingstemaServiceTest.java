@@ -13,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
+import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -111,6 +112,8 @@ class EndreBehandlingstemaServiceTest {
     void endreBehandlingstema_gyldigEndringForSøknad_behandlingLagresBehandlingsresultatTømmesOgOppgaveOppdateres() {
         behandling.setTema(ARBEID_FLERE_LAND);
         setup_endreBehandlingstemaTester();
+        Oppgave behandlingsOppgaveForType = OppgaveFactory.lagBehandlingsOppgaveForType(UTSENDT_ARBEIDSTAKER, behandling.getType()).build();
+
 
         endreBehandlingstemaService.endreBehandlingstemaTilBehandling(id, UTSENDT_ARBEIDSTAKER);
         verify(behandlingService).lagre(behandlingArgumentCaptor.capture());
@@ -118,13 +121,14 @@ class EndreBehandlingstemaServiceTest {
         verify(oppgaveService).oppdaterOppgave(any(String.class), oppgaveOppdateringArgumentCaptor.capture());
         assertThat(behandlingArgumentCaptor.getValue().getTema()).isEqualTo(UTSENDT_ARBEIDSTAKER);
         assertThat(behandlingArgumentCaptor.getValue().getId()).isEqualTo(id);
-        assertThat(oppgaveOppdateringArgumentCaptor.getValue().getBehandlingstema()).isEqualTo(UTSENDT_ARBEIDSTAKER);
+        assertThat(oppgaveOppdateringArgumentCaptor.getValue().getBehandlingstema()).isEqualTo(behandlingsOppgaveForType.getBehandlingstema());
     }
 
     @Test
     void endreBehandlingstema_gyldigEndringForSED_behandlingLagresBehandlingsresultatTømmesOgOppgaveOppdateres() {
         behandling.setTema(TRYGDETID);
         setup_endreBehandlingstemaTester();
+        Oppgave behandlingsOppgaveForType = OppgaveFactory.lagBehandlingsOppgaveForType(ØVRIGE_SED_MED, behandling.getType()).build();
 
         endreBehandlingstemaService.endreBehandlingstemaTilBehandling(id, ØVRIGE_SED_MED);
         verify(behandlingService).lagre(behandlingArgumentCaptor.capture());
@@ -132,11 +136,11 @@ class EndreBehandlingstemaServiceTest {
         verify(oppgaveService).oppdaterOppgave(any(String.class), oppgaveOppdateringArgumentCaptor.capture());
         assertThat(behandlingArgumentCaptor.getValue().getTema()).isEqualTo(ØVRIGE_SED_MED);
         assertThat(behandlingArgumentCaptor.getValue().getId()).isEqualTo(id);
-        assertThat(oppgaveOppdateringArgumentCaptor.getValue().getBehandlingstema()).isEqualTo(ØVRIGE_SED_MED);
+        assertThat(oppgaveOppdateringArgumentCaptor.getValue().getBehandlingstema()).isEqualTo(behandlingsOppgaveForType.getBehandlingstema());
     }
 
     @Test
-    void endreBehandlingstema_ugyldigNyttTemaForSøknad_exceptionKastes()  {
+    void endreBehandlingstema_ugyldigNyttTemaForSøknad_exceptionKastes() {
         behandling.setTema(ARBEID_FLERE_LAND);
         when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
 
@@ -157,7 +161,7 @@ class EndreBehandlingstemaServiceTest {
             .setSaksnummer(behandling.getFagsak().getSaksnummer())
             .build();
         when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
-        when(oppgaveService.finnOppgaveMedFagsaksnummer(fagsak.getSaksnummer())).thenReturn(Optional.of(oppgave));
+        when(oppgaveService.finnÅpenOppgaveMedFagsaksnummer(fagsak.getSaksnummer())).thenReturn(Optional.of(oppgave));
     }
 
 }

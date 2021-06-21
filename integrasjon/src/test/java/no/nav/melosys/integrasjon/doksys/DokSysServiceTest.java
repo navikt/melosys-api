@@ -84,12 +84,12 @@ class DokSysServiceTest {
     @Test
     void produserIkkeredigerbartDokument_forBrukerMedPostadresse_girPostadresseOgNavn() throws Exception {
         StrukturertAdresse postadresse = new StrukturertAdresse();
-        postadresse.gatenavn = "Gatenavn";
-        postadresse.husnummer = "123";
-        postadresse.postnummer = "1337";
-        postadresse.poststed = "Poststed";
-        postadresse.region = "Region";
-        postadresse.landkode = "BE";
+        postadresse.setGatenavn("Gatenavn");
+        postadresse.setHusnummerEtasjeLeilighet("123");
+        postadresse.setPostnummer("1337");
+        postadresse.setPoststed("Poststed");
+        postadresse.setRegion("Region");
+        postadresse.setLandkode("BE");
         DokumentbestillingMetadata metadata = lagMetadataForBruker(postadresse);
         when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
 
@@ -102,10 +102,11 @@ class DokSysServiceTest {
         assertThat(dokInfo.getMottaker().isBerik()).isFalse();
 
         UtenlandskPostadresse adresse = (UtenlandskPostadresse) dokInfo.getAdresse();
-        assertThat(adresse.getAdresselinje1()).isEqualTo(postadresse.gatenavn+" "+postadresse.husnummer);
-        assertThat(adresse.getAdresselinje2()).isEqualTo(postadresse.postnummer+" "+postadresse.poststed);
-        assertThat(adresse.getAdresselinje3()).isEqualTo(postadresse.region);
-        assertThat(adresse.getLand().getValue()).isEqualTo(postadresse.landkode);
+        assertThat(adresse.getAdresselinje1()).isEqualTo(
+                postadresse.getGatenavn() +" "+ postadresse.getHusnummerEtasjeLeilighet());
+        assertThat(adresse.getAdresselinje2()).isEqualTo(postadresse.getPostnummer() +" "+ postadresse.getPoststed());
+        assertThat(adresse.getAdresselinje3()).isEqualTo(postadresse.getRegion());
+        assertThat(adresse.getLand().getValue()).isEqualTo(postadresse.getLandkode());
         assertThat(((Person) dokInfo.getBruker()).getNavn()).isEqualTo("Kim Se");
     }
 
@@ -160,12 +161,12 @@ class DokSysServiceTest {
     @Test
     void distribuerJournalpost_norskAdresse() {
         StrukturertAdresse mottakeradresse = new StrukturertAdresse();
-        mottakeradresse.landkode = "NO";
-        mottakeradresse.gatenavn = "gate";
-        mottakeradresse.postnummer = "0463";
-        mottakeradresse.region = "Oslo";
-        mottakeradresse.husnummer = "4B";
-        mottakeradresse.poststed = "Oslo";
+        mottakeradresse.setLandkode("NO");
+        mottakeradresse.setGatenavn("gate");
+        mottakeradresse.setPostnummer("0463");
+        mottakeradresse.setRegion("Oslo");
+        mottakeradresse.setHusnummerEtasjeLeilighet("4B");
+        mottakeradresse.setPoststed("Oslo");
 
         when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
             .thenReturn(new DistribuerJournalpostResponse("123"));
@@ -182,12 +183,12 @@ class DokSysServiceTest {
     @Test
     void distribuerJournalpost_utenlandskAdresse() {
         StrukturertAdresse mottakeradresse = new StrukturertAdresse();
-        mottakeradresse.landkode = "SE";
-        mottakeradresse.gatenavn = "svensk gate";
-        mottakeradresse.postnummer = "9999";
-        mottakeradresse.region = "Sverige";
-        mottakeradresse.husnummer = "4B";
-        mottakeradresse.poststed = "Stockholm";
+        mottakeradresse.setLandkode("SE");
+        mottakeradresse.setGatenavn("svensk gate");
+        mottakeradresse.setPostnummer("9999");
+        mottakeradresse.setRegion("Sverige");
+        mottakeradresse.setHusnummerEtasjeLeilighet("4B");
+        mottakeradresse.setPoststed("Stockholm");
 
         when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
             .thenReturn(new DistribuerJournalpostResponse("123"));
@@ -221,9 +222,9 @@ class DokSysServiceTest {
     void distribuerJournalpost_medStrukturertNorskAdresse_utenKontaktopplysning() {
         String journalpostId = "123456";
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.gatenavn = "Postboks 222";
-        strukturertAdresse.postnummer = "9999";
-        strukturertAdresse.landkode = "NO";
+        strukturertAdresse.setGatenavn("Postboks 222");
+        strukturertAdresse.setPostnummer("9999");
+        strukturertAdresse.setLandkode("NO");
 
         when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
             .thenReturn(new DistribuerJournalpostResponse("123"));
@@ -236,17 +237,17 @@ class DokSysServiceTest {
         DistribuerJournalpostRequest request = captor.getValue();
         assertEquals(journalpostId, request.getJournalpostId());
         assertEquals("norskPostadresse", request.getAdresse().getAdresseType());
-        assertEquals(strukturertAdresse.gatenavn, request.getAdresse().getAdresselinje1());
-        assertEquals(strukturertAdresse.postnummer, request.getAdresse().getPostnummer());
+        assertEquals(strukturertAdresse.getGatenavn(), request.getAdresse().getAdresselinje1());
+        assertEquals(strukturertAdresse.getPostnummer(), request.getAdresse().getPostnummer());
     }
 
     @Test
     void distribuerJournalpost_medStrukturertUtenlandskAdresse_utenKontaktopplysning() {
         String journalpostId = "123456";
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.gatenavn = "Postboks 222";
-        strukturertAdresse.postnummer = "9999";
-        strukturertAdresse.landkode = "BE";
+        strukturertAdresse.setGatenavn("Postboks 222");
+        strukturertAdresse.setPostnummer("9999");
+        strukturertAdresse.setLandkode("BE");
 
         when(distribuerJournalpostConsumer.distribuerJournalpost(any(DistribuerJournalpostRequest.class)))
             .thenReturn(new DistribuerJournalpostResponse("123"));
@@ -259,7 +260,7 @@ class DokSysServiceTest {
         DistribuerJournalpostRequest request = captor.getValue();
         assertEquals(journalpostId, request.getJournalpostId());
         assertEquals("utenlandskPostadresse", request.getAdresse().getAdresseType());
-        assertEquals(strukturertAdresse.gatenavn, request.getAdresse().getAdresselinje1());
+        assertEquals(strukturertAdresse.getGatenavn(), request.getAdresse().getAdresselinje1());
         assertNull(request.getAdresse().getPostnummer());
     }
 
@@ -267,9 +268,9 @@ class DokSysServiceTest {
     void distribuerJournalpost_medStrukturertNorskAdresse_medKontaktopplysning() {
         String journalpostId = "123456";
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.gatenavn = "Postboks 222";
-        strukturertAdresse.postnummer = "9999";
-        strukturertAdresse.landkode = "NO";
+        strukturertAdresse.setGatenavn("Postboks 222");
+        strukturertAdresse.setPostnummer("9999");
+        strukturertAdresse.setLandkode("NO");
 
         Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
         kontaktopplysning.setKontaktNavn("Fetter Anton");
@@ -286,17 +287,17 @@ class DokSysServiceTest {
         assertEquals(journalpostId, request.getJournalpostId());
         assertEquals("norskPostadresse", request.getAdresse().getAdresseType());
         assertEquals("Att: Fetter Anton", request.getAdresse().getAdresselinje1());
-        assertEquals(strukturertAdresse.gatenavn, request.getAdresse().getAdresselinje2());
-        assertEquals(strukturertAdresse.postnummer, request.getAdresse().getPostnummer());
+        assertEquals(strukturertAdresse.getGatenavn(), request.getAdresse().getAdresselinje2());
+        assertEquals(strukturertAdresse.getPostnummer(), request.getAdresse().getPostnummer());
     }
 
     @Test
     void distribuerJournalpost_medStrukturertNorskAdresse_medKontaktopplysningOgOverstyrtKontaktpersonNavn() {
         String journalpostId = "123456";
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.gatenavn = "Postboks 222";
-        strukturertAdresse.postnummer = "9999";
-        strukturertAdresse.landkode = "NO";
+        strukturertAdresse.setGatenavn("Postboks 222");
+        strukturertAdresse.setPostnummer("9999");
+        strukturertAdresse.setLandkode("NO");
 
         Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
         kontaktopplysning.setKontaktNavn("Fetter Anton");
@@ -313,8 +314,8 @@ class DokSysServiceTest {
         assertEquals(journalpostId, request.getJournalpostId());
         assertEquals("norskPostadresse", request.getAdresse().getAdresseType());
         assertEquals("Att: Kari Kontakt", request.getAdresse().getAdresselinje1());
-        assertEquals(strukturertAdresse.gatenavn, request.getAdresse().getAdresselinje2());
-        assertEquals(strukturertAdresse.postnummer, request.getAdresse().getPostnummer());
+        assertEquals(strukturertAdresse.getGatenavn(), request.getAdresse().getAdresselinje2());
+        assertEquals(strukturertAdresse.getPostnummer(), request.getAdresse().getPostnummer());
     }
 
     private DokumentbestillingMetadata lagMetadataMedMyndighet() {

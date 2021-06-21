@@ -27,7 +27,7 @@ public class Adresse {
 
         Adresse adresse = fraStrukturertAdresse(strukturertAdresse);
         adresse.setAdressetype(adressetype);
-        adresse.setLand(tilIso3(strukturertAdresse.landkode));
+        adresse.setLand(tilIso3(strukturertAdresse.getLandkode()));
         return adresse;
     }
 
@@ -52,11 +52,13 @@ public class Adresse {
 
     public static Adresse fraStrukturertAdresse(StrukturertAdresse strukturertAdresse) {
         Adresse adresse = new Adresse();
-        adresse.setGateadresse(lagGateadresse(strukturertAdresse.gatenavn, strukturertAdresse.husnummer));
-        adresse.setLand(strukturertAdresse.landkode);
-        adresse.setPostnr(strukturertAdresse.postnummer);
-        adresse.setPoststed(StringUtils.isBlank(strukturertAdresse.poststed) ? UKJENT : strukturertAdresse.poststed);
-        adresse.setRegion(strukturertAdresse.region);
+        adresse.setGateadresse(lagGateadresse(strukturertAdresse.getGatenavn(),
+            strukturertAdresse.getHusnummerEtasjeLeilighet()));
+        adresse.setLand(strukturertAdresse.getLandkode());
+        adresse.setPostnr(strukturertAdresse.getPostnummer());
+        adresse.setPoststed(StringUtils.isBlank(
+            strukturertAdresse.getPoststed()) ? UKJENT : strukturertAdresse.getPoststed());
+        adresse.setRegion(strukturertAdresse.getRegion());
         return adresse;
     }
 
@@ -69,11 +71,11 @@ public class Adresse {
 
     public StrukturertAdresse tilStrukturertAdresse() {
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.landkode = land;
-        strukturertAdresse.gatenavn = gateadresse;
-        strukturertAdresse.region = region;
-        strukturertAdresse.postnummer = postnr;
-        strukturertAdresse.poststed = poststed;
+        strukturertAdresse.setLandkode(land);
+        strukturertAdresse.setGatenavn(gateadresse);
+        strukturertAdresse.setRegion(region);
+        strukturertAdresse.setPostnummer(postnr);
+        strukturertAdresse.setPoststed(poststed);
         return strukturertAdresse;
     }
 

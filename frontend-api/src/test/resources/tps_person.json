@@ -1,0 +1,61 @@
+{
+  "type": "PersonDokument",
+  "fnr": "99999917165",
+  "sivilstand": {
+    "kode": "GIFT"
+  },
+  "sivilstandGyldighetsperiodeFom": null,
+  "statsborgerskap": {
+    "kode": "NOR"
+  },
+  "fornavn": "NATURLIG",
+  "mellomnavn": "",
+  "etternavn": "BAMSE",
+  "sammensattNavn": "BAMSE NATURLIG",
+  "familiemedlemmer": [],
+  "dødsdato": null,
+  "diskresjonskode": {
+    "kode": ""
+  },
+  "personstatus": "BOSA",
+  "statsborgerskapDato": null,
+  "bostedsadresse": {
+    "gateadresse": {
+      "gatenavn": null,
+      "gatenummer": null,
+      "husnummer": null,
+      "husbokstav": null
+    },
+    "tilleggsadresse": null,
+    "tilleggsadresseType": null,
+    "postnr": null,
+    "poststed": null,
+    "land": {
+      "kode": null
+    }
+  },
+  "postadresse": {
+    "adresselinje1": null,
+    "adresselinje2": null,
+    "adresselinje3": null,
+    "adresselinje4": null,
+    "postnr": null,
+    "poststed": null,
+    "land": null
+  },
+  "midlertidigPostadresse": {
+    "type": "MidlertidigPostadresse",
+    "endringstidspunkt": null,
+    "land": null,
+    "postleveringsPeriode": null
+  },
+  "erEgenAnsatt": false,
+  "kjoenn": {
+    "kode": "M"
+  },
+  "foedselsdato": [
+    1999,
+    9,
+    9
+  ]
+}

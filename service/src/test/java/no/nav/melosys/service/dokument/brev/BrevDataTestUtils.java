@@ -30,11 +30,11 @@ public class BrevDataTestUtils {
 
     public static StrukturertAdresse lagStrukturertAdresse() {
         StrukturertAdresse addr = new StrukturertAdresse();
-        addr.gatenavn = "Strukturert Gate";
-        addr.husnummer = "12B";
-        addr.poststed = "Poststed";
-        addr.postnummer = "4321";
-        addr.landkode = Landkoder.BG.getKode();
+        addr.setGatenavn("Strukturert Gate");
+        addr.setHusnummerEtasjeLeilighet("12B");
+        addr.setPoststed("Poststed");
+        addr.setPostnummer("4321");
+        addr.setLandkode(Landkoder.BG.getKode());
         return addr;
     }
 
@@ -67,7 +67,7 @@ public class BrevDataTestUtils {
         foretakUtland.orgnr = "12345678910";
         foretakUtland.uuid = "49m8gf-9dk4j0";
         foretakUtland.adresse = lagStrukturertAdresse();
-        foretakUtland.adresse.landkode = "NO";
+        foretakUtland.adresse.setLandkode("NO");
         foretakUtland.selvstendigNæringsvirksomhet = selvstendig;
         return foretakUtland;
     }

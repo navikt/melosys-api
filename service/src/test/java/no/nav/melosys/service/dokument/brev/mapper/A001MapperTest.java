@@ -66,21 +66,19 @@ public class A001MapperTest {
         when(behandlingsresultat.getRegistrertDato()).thenReturn(Instant.now());
 
         StrukturertAdresse boAdresse = new StrukturertAdresse();
-        boAdresse.gatenavn = "Gatenavn";
-        boAdresse.husnummer = "23A";
-        boAdresse.postnummer = "0165";
-        boAdresse.poststed = "Oslo";
-        boAdresse.landkode = Landkoder.NO.getKode();
+        boAdresse.setGatenavn("Gatenavn");
+        boAdresse.setHusnummerEtasjeLeilighet("23A");
+        boAdresse.setPostnummer("0165");
+        boAdresse.setPoststed("Oslo");
+        boAdresse.setLandkode(Landkoder.NO.getKode());
 
         PersonDokument person = new PersonDokument();
-        person.kjønn = new KjoennsType();
-        person.kjønn.setKode("K");
-        person.fornavn = "Ola";
-        person.etternavn = "Nordmann";
-        person.fødselsdato = LocalDate.now();
-        person.fnr = "123456789";
-        person.statsborgerskap = new Land();
-        person.statsborgerskap.setKode("NO");
+        person.setKjønn(new KjoennsType("K"));
+        person.setFornavn("Ola");
+        person.setEtternavn("Nordmann");
+        person.setFødselsdato(LocalDate.now());
+        person.setFnr("123456789");
+        person.setStatsborgerskap(new Land(Land.NORGE));
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.PERSOPL);
@@ -121,7 +119,7 @@ public class A001MapperTest {
         brevData.arbeidsgivendeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet));   // Hovedvirksomhet
         brevData.selvstendigeVirksomheter = new ArrayList<>();
         brevData.arbeidssteder = new ArrayList<>(Arrays.asList(fysiskArbeidssted, maritimtArbeidssted));
-        brevData.personDokument = person;
+        brevData.persondata = person;
         brevData.bostedsadresse = boAdresse;
         brevData.utenlandskMyndighet = myndighet;
         brevData.anmodningsperioder = Arrays.asList(anmodningsperiode);

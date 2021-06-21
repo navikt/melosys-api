@@ -65,7 +65,7 @@ class HentMottakerinstitusjonerForkortetPeriodeTest {
 
         when(eessiService.landErEessiReady(eq(BucType.LA_BUC_04.name()), any(Collection.class))).thenReturn(true);
         when(eessiService.hentTilknyttedeBucer(anyLong(), anyList())).thenReturn(List.of(
-            new BucInformasjon("123", BucType.LA_BUC_04.name(), LocalDate.now(), mottakerInstitusjoner, Collections.emptyList())
+            new BucInformasjon("123", true, BucType.LA_BUC_04.name(), LocalDate.now(), mottakerInstitusjoner, Collections.emptyList())
         ));
 
         hentMottakerinstitusjonerForkortetPeriode.utfør(p);
@@ -81,7 +81,7 @@ class HentMottakerinstitusjonerForkortetPeriodeTest {
 
         when(eessiService.landErEessiReady(eq(BucType.LA_BUC_04.name()), any(Collection.class))).thenReturn(true);
         when(eessiService.hentTilknyttedeBucer(anyLong(), anyList())).thenReturn(List.of(
-            new BucInformasjon("123", BucType.LA_BUC_04.name(), LocalDate.now(), mottakerInstitusjoner, Collections.emptyList())
+            new BucInformasjon("123", true, BucType.LA_BUC_04.name(), LocalDate.now(), mottakerInstitusjoner, Collections.emptyList())
         ));
 
         hentMottakerinstitusjonerForkortetPeriode.utfør(p);

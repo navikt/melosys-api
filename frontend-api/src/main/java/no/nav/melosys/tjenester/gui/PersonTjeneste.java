@@ -5,6 +5,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import no.nav.melosys.tjenester.gui.dto.PersonDto;
@@ -43,8 +44,8 @@ public class PersonTjeneste {
         if (personnummer == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-        PersonDokument personDokument = registerOppslag.hentPerson(personnummer);
+        Persondata persondata = registerOppslag.hentPerson(personnummer);
         tilgangService.sjekkFnr(personnummer);
-        return ResponseEntity.ok(new PersonDto(personDokument));
+        return ResponseEntity.ok(new PersonDto(persondata));
     }
 }

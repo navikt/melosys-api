@@ -63,7 +63,7 @@ public class AvslagYrkesaktivMapperTest {
 
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
         fysiskArbeidssted.adresse = new StrukturertAdresse();
-        fysiskArbeidssted.adresse.landkode = "NO";
+        fysiskArbeidssted.adresse.setLandkode("NO");
 
         Soeknad soeknad = new Soeknad();
         soeknad.arbeidPaaLand.fysiskeArbeidssteder = new ArrayList<>();

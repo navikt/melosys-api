@@ -61,12 +61,12 @@ class OpprettJournalforBrevTest {
     }
 
     @Test
-    void utførFeilerVedManglendeMottaker() throws Exception {
+    void utførFeilerVedManglendeMottaker() {
         Prosessinstans prosessinstans = new Prosessinstans();
         Behandling behandling = TestdataFactory.lagBehandling();
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling());
+        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, new DokgenBrevbestilling.Builder<>().build());
 
         assertThatThrownBy(() -> opprettJournalforBrev.utfør(prosessinstans))
             .isInstanceOf(FunksjonellException.class)
@@ -74,7 +74,7 @@ class OpprettJournalforBrevTest {
     }
 
     @Test
-    void utførOpprettJournalforBrevTilBruker() throws Exception {
+    void utførOpprettJournalforBrevTilBruker() {
         Behandling behandling = TestdataFactory.lagBehandling();
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
@@ -102,7 +102,7 @@ class OpprettJournalforBrevTest {
     }
 
     @Test
-    void utførOpprettJournalforBrevTilRepresentant() throws Exception {
+    void utførOpprettJournalforBrevTilRepresentant() {
         Behandling behandling = TestdataFactory.lagBehandling();
 
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
@@ -132,7 +132,7 @@ class OpprettJournalforBrevTest {
     }
 
     @Test
-    void utførOpprettJournalforMangelbrevTilBruker() throws Exception {
+    void utførOpprettJournalforMangelbrevTilBruker() {
         Behandling behandling = TestdataFactory.lagBehandling();
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
@@ -157,6 +157,36 @@ class OpprettJournalforBrevTest {
 
         verify(mockBehandlingService).hentBehandling(anyLong());
         verify(mockDokgenService).produserBrev(any(Aktoer.class), any(MangelbrevBrevbestilling.class));
+        verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
+    }
+
+    @Test
+    void utførOpprettJournalforMangelbrevKopiTilBruker() {
+        Behandling behandling = TestdataFactory.lagBehandling();
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
+        when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
+
+        Aktoer mottaker = new Aktoer();
+        mottaker.setRolle(Aktoersroller.BRUKER);
+        mottaker.setAktørId("1234");
+
+        MangelbrevBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
+            .medProduserbartdokument(MANGELBREV_BRUKER)
+            .medManglerInfoFritekst("Mangler")
+            .medBestillKopi(true)
+            .build();
+
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+        prosessinstans.setData(ProsessDataKey.BREVBESTILLING, brevbestilling);
+        prosessinstans.setData(ProsessDataKey.MOTTAKER, mottaker.getRolle());
+        prosessinstans.setData(ProsessDataKey.AKTØR_ID, mottaker.getAktørId());
+
+        opprettJournalforBrev.utfør(prosessinstans);
+
+        verify(mockBehandlingService).hentBehandling(anyLong());
+        verify(mockDokgenService).produserBrev(any(Aktoer.class), refEq(brevbestilling));
         verify(mockJoarkFasade).opprettJournalpost(any(), anyBoolean());
     }
 }

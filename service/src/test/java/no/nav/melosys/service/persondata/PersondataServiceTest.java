@@ -14,6 +14,8 @@ import no.nav.melosys.integrasjon.pdl.dto.Endring;
 import no.nav.melosys.integrasjon.pdl.dto.Metadata;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste;
+import no.nav.melosys.integrasjon.pdl.dto.person.Adressebeskyttelse;
+import no.nav.melosys.integrasjon.pdl.dto.person.AdressebeskyttelseGradering;
 import no.nav.melosys.integrasjon.pdl.dto.person.Navn;
 import no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap;
 import no.nav.melosys.integrasjon.tps.TpsService;
@@ -94,6 +96,16 @@ class PersondataServiceTest {
                 "AIA", LocalDate.parse("2021-05-08"), LocalDate.parse("1979-11-18"), LocalDate.parse("1980-11-18"),
                 "PDL", "Dolly", false)
             );
+    }
+
+    @Test
+    void harStrengtFortroligAdresse() {
+        fakeUnleash.enable("melosys.pdl.adressebeskyttelse");
+        when(pdlConsumer.hentAdressebeskyttelser(anyString())).thenReturn(
+            List.of(new Adressebeskyttelse(AdressebeskyttelseGradering.UGRADERT),
+                new Adressebeskyttelse(AdressebeskyttelseGradering.STRENGT_FORTROLIG)));
+
+        assertThat(persondataService.harStrengtFortroligAdresse("")).isTrue();
     }
 
     private Identliste lagIdentliste() {

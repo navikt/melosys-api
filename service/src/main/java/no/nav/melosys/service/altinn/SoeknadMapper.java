@@ -198,11 +198,11 @@ public final class SoeknadMapper {
         foretakUtland.navn = virksomhetIUtlandet.getNavn();
         foretakUtland.orgnr = virksomhetIUtlandet.getRegistreringsnummer();
         final PostadresseUtland postadresseUtland = virksomhetIUtlandet.getAdresse();
-        foretakUtland.adresse.gatenavn = postadresseUtland.getGatenavn();
-        foretakUtland.adresse.postnummer = postadresseUtland.getPostkode();
-        foretakUtland.adresse.poststed = postadresseUtland.getBy();
-        foretakUtland.adresse.region = postadresseUtland.getRegion();
-        foretakUtland.adresse.landkode = tilIso2FraEuEosLandnavn(postadresseUtland.getLand());
+        foretakUtland.adresse.setGatenavn(postadresseUtland.getGatenavn());
+        foretakUtland.adresse.setPostnummer(postadresseUtland.getPostkode());
+        foretakUtland.adresse.setPoststed(postadresseUtland.getBy());
+        foretakUtland.adresse.setRegion(postadresseUtland.getRegion());
+        foretakUtland.adresse.setLandkode(tilIso2FraEuEosLandnavn(postadresseUtland.getLand()));
         return foretakUtland;
     }
 

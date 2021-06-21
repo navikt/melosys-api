@@ -23,7 +23,10 @@ import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
-import no.nav.melosys.service.dokument.*;
+import no.nav.melosys.service.dokument.BrevmottakerService;
+import no.nav.melosys.service.dokument.DokumentServiceFasade;
+import no.nav.melosys.service.dokument.MuligMottakerDto;
+import no.nav.melosys.service.dokument.MuligeMottakereDto;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -50,8 +53,6 @@ class BrevbestillingServiceTest {
     @Mock
     private BrevmottakerService mockBrevmottakerService;
     @Mock
-    private DokgenService mockDokgenService;
-    @Mock
     private PersondataFasade mockPersondataFasade;
     @Mock
     private EregFasade mockEregFasade;
@@ -67,7 +68,7 @@ class BrevbestillingServiceTest {
     @BeforeEach
     void init() {
         brevbestillingService = new BrevbestillingService(
-            mockDokServiceFasade, mockDokgenService, mockBrevmottakerService, mockPersondataFasade,
+            mockDokServiceFasade, mockBrevmottakerService, mockPersondataFasade,
             mockEregFasade, mockKontaktopplysningService, mockKodeverkService
         );
     }
@@ -172,7 +173,6 @@ class BrevbestillingServiceTest {
             .thenReturn(lagAktoer(REPRESENTANT, "orgnrTilFullmektig"));
         mockHentOrganisasjon("orgnr", "Ola Nordmann Rørleggerfirma");
         mockHentOrganisasjon("orgnrTilFullmektig", "Fullmektig Virksomhet");
-
 
 
         var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, behandling, "orgnr");
@@ -343,7 +343,7 @@ class BrevbestillingServiceTest {
 
         when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.BRUKER)), any(), eq(false), eq(false)))
             .thenReturn(List.of(lagAktoer(Aktoersroller.BRUKER, null)));
-        when(mockPersondataFasade.hentPerson(any(), eq(Informasjonsbehov.STANDARD)))
+        when(mockPersondataFasade.hentPersonFraTps(any(), eq(Informasjonsbehov.STANDARD)))
             .thenReturn(saksbehandling);
         when(mockKodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), anyString(), any())).thenReturn("Oslo");
 
@@ -426,7 +426,7 @@ class BrevbestillingServiceTest {
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().medProduserbardokument(MANGELBREV_BRUKER).build();
         brevbestillingService.produserBrev(123L, brevbestillingDto);
 
-        verify(mockDokgenService).produserOgDistribuerBrev(anyLong(), eq(brevbestillingDto));
+        verify(mockDokServiceFasade).produserDokument(anyLong(), eq(brevbestillingDto));
     }
 
     @Test
@@ -458,7 +458,7 @@ class BrevbestillingServiceTest {
 
     private void leggPersondokumentTilBehandling() {
         var dokument = new PersonDokument();
-        dokument.sammensattNavn = "Ola Nordmann";
+        dokument.setSammensattNavn("Ola Nordmann");
         when(behandling.hentPersonDokument()).thenReturn(dokument);
     }
 
@@ -497,11 +497,11 @@ class BrevbestillingServiceTest {
 
     private Saksopplysning lagPERSOPLSaksopplysning() {
         var dokument = new PersonDokument();
-        dokument.fnr = "12345678910";
-        dokument.sammensattNavn = "Ola Nordmann";
-        dokument.gjeldendePostadresse.adresselinje1 = "Gateadresse 43A";
-        dokument.gjeldendePostadresse.postnr = "0123";
-        dokument.gjeldendePostadresse.land = Land.av(Land.NORGE);
+        dokument.setFnr("12345678910");
+        dokument.setSammensattNavn("Ola Nordmann");
+        dokument.getGjeldendePostadresse().adresselinje1 = "Gateadresse 43A";
+        dokument.getGjeldendePostadresse().postnr = "0123";
+        dokument.getGjeldendePostadresse().land = Land.av(Land.NORGE);
         var saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(dokument);
         saksopplysning.setType(SaksopplysningType.PERSOPL);

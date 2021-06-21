@@ -66,33 +66,31 @@ public class AttestMapperTest {
         when(behandlingsresultat.hentValidertLovvalgsperiode()).thenReturn(lovvalgsperiode);
 
         StrukturertAdresse boAdresse = new StrukturertAdresse();
-        boAdresse.gatenavn = "HjemmeGata";
-        boAdresse.husnummer = "25";
-        boAdresse.postnummer = "0165";
-        boAdresse.poststed = "Poststed";
-        boAdresse.region = "Region";
-        boAdresse.landkode = Landkoder.NO.getKode();
+        boAdresse.setGatenavn("HjemmeGata");
+        boAdresse.setHusnummerEtasjeLeilighet("25");
+        boAdresse.setPostnummer("0165");
+        boAdresse.setPoststed("Poststed");
+        boAdresse.setRegion("Region");
+        boAdresse.setLandkode(Landkoder.NO.getKode());
 
         PersonDokument person = new PersonDokument();
-        person.kjønn = new KjoennsType();
-        person.kjønn.setKode("K");
-        person.fornavn = "Ola";
-        person.etternavn = "Nordmann";
-        person.fødselsdato = LocalDate.now();
-        person.statsborgerskap = new Land();
-        person.statsborgerskap.setKode(Land.NORGE);
+        person.setKjønn(new KjoennsType("K"));
+        person.setFornavn("Ola");
+        person.setEtternavn("Nordmann");
+        person.setFødselsdato(LocalDate.now());
+        person.setStatsborgerskap(new Land(Land.NORGE));
 
         behandling = mock(Behandling.class);
         when(behandling.getRegistrertDato()).thenReturn(Instant.now());
         when(behandling.getFagsak()).thenReturn(new Fagsak());
 
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.husnummer = "25";
-        strukturertAdresse.gatenavn = "Gatenavn";
-        strukturertAdresse.postnummer = "0165";
-        strukturertAdresse.poststed = "Poststed";
-        strukturertAdresse.region = "Region";
-        strukturertAdresse.landkode = Landkoder.NO.getKode();
+        strukturertAdresse.setHusnummerEtasjeLeilighet("25");
+        strukturertAdresse.setGatenavn("Gatenavn");
+        strukturertAdresse.setPostnummer("0165");
+        strukturertAdresse.setPoststed("Poststed");
+        strukturertAdresse.setRegion("Region");
+        strukturertAdresse.setLandkode(Landkoder.NO.getKode());
 
         FysiskArbeidssted arbeidssted = new FysiskArbeidssted();
         arbeidssted.adresse = strukturertAdresse;

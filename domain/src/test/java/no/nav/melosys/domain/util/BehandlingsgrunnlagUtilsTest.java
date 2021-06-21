@@ -30,8 +30,8 @@ public class BehandlingsgrunnlagUtilsTest {
     public void hentOppgittAdresse_medGatenavnOgLand_ErIkkeNull() {
         Soeknad søknad = new Soeknad();
         StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
-        oppgittAdresse.gatenavn = "HjemGata";
-        oppgittAdresse.landkode = "NO";
+        oppgittAdresse.setGatenavn("HjemGata");
+        oppgittAdresse.setLandkode("NO");
         søknad.bosted.oppgittAdresse = oppgittAdresse;
         assertThat(BehandlingsgrunnlagUtils.hentBostedsadresse(søknad)).isNotNull();
     }
@@ -58,7 +58,7 @@ public class BehandlingsgrunnlagUtilsTest {
     @Test
     public void hentOppgittBostedsland_landkodeSverige_girLandkode() {
         Soeknad soeknad = new Soeknad();
-        soeknad.bosted.oppgittAdresse.landkode = "SE";
+        soeknad.bosted.oppgittAdresse.setLandkode("SE");
 
         Optional<Landkoder> landkoder = BehandlingsgrunnlagUtils.hentOppgittBostedsland(soeknad);
         assertThat(landkoder).isPresent()
@@ -76,7 +76,7 @@ public class BehandlingsgrunnlagUtilsTest {
     private void leggTilFysiskArbeidssted(Soeknad soeknad) {
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
         fysiskArbeidssted.adresse = new StrukturertAdresse();
-        fysiskArbeidssted.adresse.landkode = Landkoder.BE.getKode();
+        fysiskArbeidssted.adresse.setLandkode(Landkoder.BE.getKode());
         soeknad.arbeidPaaLand.fysiskeArbeidssteder = Collections.singletonList(fysiskArbeidssted);
     }
 }

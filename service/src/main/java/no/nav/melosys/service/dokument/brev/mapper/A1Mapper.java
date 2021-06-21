@@ -14,11 +14,11 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
@@ -36,7 +36,7 @@ class A1Mapper {
     private static final int ANTALL_PÅKREVDE_FELTER_I_LISTE_5_1 = 15;
     private static final int ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2 = 13;
     static final int MAKS_ANTALL_TEGN_PER_LINJE_5_2 = 70;
-    private static final String STATSLØS = "Stateless";
+    private static final String STATSLØS_TEKST = "Stateless";
 
     private BrevDataA1 brevData;
 
@@ -68,15 +68,15 @@ class A1Mapper {
         return a1;
     }
 
-    private PersonType mapPerson(PersonDokument personDokument) {
+    private PersonType mapPerson(Persondata persondata) {
         PersonType person = new PersonType();
-        person.setKjoenn(KjoennKode.fromValue(personDokument.kjønn.getKode()));
-        person.setStatsborgerskap(mapStatsborgerskap(personDokument.statsborgerskap));
+        person.setKjoenn(KjoennKode.fromValue(persondata.hentKjønnType().getKode()));
+        person.setStatsborgerskap(mapStatsborgerskap(persondata.hentAlleStatsborgerskap()));
 
-        person.setPersonnavn(lagPersonnavn(personDokument));
+        person.setPersonnavn(lagPersonnavn(persondata));
 
         try {
-            person.setFoedselsdato(convertToXMLGregorianCalendarRemoveTimezone(personDokument.fødselsdato));
+            person.setFoedselsdato(convertToXMLGregorianCalendarRemoveTimezone(persondata.getFødselsdato()));
         } catch (DatatypeConfigurationException e) {
             throw new TekniskException("Konverteringsfeil ved konvertering av fødselsdato", e);
         }
@@ -85,12 +85,11 @@ class A1Mapper {
         return person;
     }
 
-    private static String mapStatsborgerskap(Land statsborgerskap) {
-        if (statsborgerskap.erStatsløs()) {
-            return STATSLØS;
-        } else {
-            return LandkoderUtils.tilIso2(statsborgerskap.getKode());
+    private static String mapStatsborgerskap(Set<Land> statsborgerskap) {
+        if (statsborgerskap.contains(Land.av(Land.STATSLØS))) {
+            return STATSLØS_TEKST;
         }
+        return statsborgerskap.stream().map(s -> LandkoderUtils.tilIso2(s.getKode())).collect(Collectors.joining(","));
     }
 
     private LovvalgsperiodeType mapLovvalgsperiode(Lovvalgsperiode lovvalgsperiode) {
@@ -118,10 +117,10 @@ class A1Mapper {
         String orgnr = StringUtils.isNotEmpty(virksomhet.orgnr) ? virksomhet.orgnr : " ";
         hovedvirksomhetBrev.setOrgnummer(orgnr);
         hovedvirksomhetBrev.setNavn(virksomhet.navn);
-        hovedvirksomhetBrev.setGatenavn(adresse.gatenavn);
-        hovedvirksomhetBrev.setPostnr(adresse.postnummer);
-        hovedvirksomhetBrev.setPoststed(adresse.poststed);
-        hovedvirksomhetBrev.setLandkode(adresse.landkode);
+        hovedvirksomhetBrev.setGatenavn(adresse.getGatenavn());
+        hovedvirksomhetBrev.setPostnr(adresse.getPostnummer());
+        hovedvirksomhetBrev.setPoststed(adresse.getPoststed());
+        hovedvirksomhetBrev.setLandkode(adresse.getLandkode());
         if (virksomhet.yrkesaktivitet != null) {
             hovedvirksomhetBrev.setYrkesaktivitet(YrkesaktivitetsKode.valueOf(virksomhet.yrkesaktivitet.getKode()));
         }

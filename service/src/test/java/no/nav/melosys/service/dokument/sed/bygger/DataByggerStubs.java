@@ -78,27 +78,25 @@ class DataByggerStubs {
         søknadDokument.maritimtArbeid = Collections.singletonList(maritimtArbeid);
 
         PersonDokument personDokument = new PersonDokument();
-        personDokument.erEgenAnsatt = true;
-        personDokument.fødselsdato = LocalDate.now();
+        personDokument.setErEgenAnsatt(true);
+        personDokument.setFødselsdato(LocalDate.now());
         Bostedsadresse bostedsadresse = new Bostedsadresse();
         bostedsadresse.setLand(new Land(Land.NORGE));
         bostedsadresse.setPoststed("1212");
         bostedsadresse.setGateadresse(new Gateadresse());
-        personDokument.bostedsadresse = bostedsadresse;
+        personDokument.setBostedsadresse(bostedsadresse);
 
         Familiemedlem familiemedlem = new Familiemedlem();
         familiemedlem.navn = "farnavn";
         familiemedlem.fnr = "111111111";
         familiemedlem.familierelasjon = Familierelasjon.FARA;
-        personDokument.familiemedlemmer = Collections.singletonList(familiemedlem);
+        personDokument.setFamiliemedlemmer(Collections.singletonList(familiemedlem));
 
-        KjoennsType kjønn = new KjoennsType();
-        kjønn.setKode("M");
-        personDokument.kjønn = kjønn;
+        personDokument.setKjønn(new KjoennsType("M"));
 
-        personDokument.fornavn = "Mrfornavn";
-        personDokument.etternavn = "Spock";
-        personDokument.statsborgerskap = new Land(Land.NORGE);
+        personDokument.setFornavn("Mrfornavn");
+        personDokument.setEtternavn("Spock");
+        personDokument.setStatsborgerskap(new Land(Land.NORGE));
 
         saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.PERSOPL);
@@ -115,17 +113,17 @@ class DataByggerStubs {
         BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
 
         FysiskArbeidssted fysiskArbeidssted = behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidssteder.remove(0);
-        fysiskArbeidssted.adresse.poststed = null;
+        fysiskArbeidssted.adresse.setPoststed(null);
         if (fysiskArbeidsstedManglerLandkode) {
-            fysiskArbeidssted.adresse.landkode = null;
+            fysiskArbeidssted.adresse.setLandkode(null);
         }
         behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
 
         ForetakUtland foretakUtland = behandlingsgrunnlagData.foretakUtland.remove(0);
-        foretakUtland.adresse.postnummer = null;
-        foretakUtland.adresse.poststed = null;
+        foretakUtland.adresse.setPostnummer(null);
+        foretakUtland.adresse.setPoststed(null);
         if (arbeidsgivendeForetakUtlandManglerLandkode || selvstendigForetakUtlandManglerLandkode) {
-            foretakUtland.adresse.landkode = null;
+            foretakUtland.adresse.setLandkode(null);
         }
         foretakUtland.selvstendigNæringsvirksomhet = selvstendigForetakUtlandManglerLandkode;
         behandlingsgrunnlagData.foretakUtland.add(foretakUtland);
@@ -135,11 +133,11 @@ class DataByggerStubs {
 
     private static StrukturertAdresse hentStrukturertAddresseStub() {
         StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        strukturertAdresse.husnummer = "25";
-        strukturertAdresse.gatenavn = "Gatenavn";
-        strukturertAdresse.postnummer = "0165";
-        strukturertAdresse.region = "Region";
-        strukturertAdresse.landkode = Landkoder.NO.getKode();
+        strukturertAdresse.setHusnummerEtasjeLeilighet("25");
+        strukturertAdresse.setGatenavn("Gatenavn");
+        strukturertAdresse.setPostnummer("0165");
+        strukturertAdresse.setRegion("Region");
+        strukturertAdresse.setLandkode(Landkoder.NO.getKode());
         return strukturertAdresse;
     }
 

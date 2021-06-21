@@ -108,7 +108,7 @@ public class Oppgaveplukker {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(tilbakelegging.getBehandlingID());
 
         Fagsak fagsak = behandling.getFagsak();
-        Oppgave oppgave = oppgaveService.hentOppgaveMedFagsaksnummer(fagsak.getSaksnummer());
+        Oppgave oppgave = oppgaveService.hentÅpenOppgaveMedFagsaksnummer(fagsak.getSaksnummer());
 
         String oppgaveId = oppgave.getOppgaveId();
         if (!tilbakelegging.isVenterPåDokumentasjon()) {

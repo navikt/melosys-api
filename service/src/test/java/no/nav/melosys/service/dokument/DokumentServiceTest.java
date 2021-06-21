@@ -198,11 +198,11 @@ public final class DokumentServiceTest {
 
     private static StrukturertAdresse lagStrukturertAdresse() {
         StrukturertAdresse sadr = new StrukturertAdresse();
-        sadr.landkode = "NL";
-        sadr.poststed = "Sted";
-        sadr.postnummer = "1234";
-        sadr.gatenavn = "Gate";
-        sadr.husnummer = "1";
+        sadr.setLandkode("NL");
+        sadr.setPoststed("Sted");
+        sadr.setPostnummer("1234");
+        sadr.setGatenavn("Gate");
+        sadr.setHusnummerEtasjeLeilighet("1");
         return sadr;
     }
 
@@ -285,20 +285,18 @@ public final class DokumentServiceTest {
 
     private static PersonDokument lagPersonDokument() {
         PersonDokument resultat = new PersonDokument();
-        resultat.kjønn = lagKjoennsType();
-        resultat.statsborgerskap = new Land(Land.BELGIA);
-        resultat.fornavn = "For";
-        resultat.etternavn = "Etter";
-        resultat.sammensattNavn = "For Etter";
-        resultat.fødselsdato = LocalDate.ofYearDay(1900, 1);
-        resultat.bostedsadresse = lagBostedsadresse();
+        resultat.setKjønn(lagKjoennsType());
+        resultat.setStatsborgerskap(new Land(Land.BELGIA));
+        resultat.setFornavn("For");
+        resultat.setEtternavn("Etter");
+        resultat.setSammensattNavn("For Etter");
+        resultat.setFødselsdato(LocalDate.ofYearDay(1900, 1));
+        resultat.setBostedsadresse(lagBostedsadresse());
         return resultat;
     }
 
     private static KjoennsType lagKjoennsType() {
-        KjoennsType kjønn = new KjoennsType();
-        kjønn.setKode("K");
-        return kjønn;
+        return new KjoennsType("K");
     }
 
     private static AvklarteFaktaRepository mockAvklarteFaktaRepository(Avklartefakta arbeidsgiverFaktum, Avklartefakta yrkesgruppeFaktum) {

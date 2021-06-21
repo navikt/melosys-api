@@ -78,7 +78,7 @@ class VideresendSoknadServiceTest {
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
 
-        behandlingsgrunnlagData.bosted.oppgittAdresse.gatenavn = "gate 123";
+        behandlingsgrunnlagData.bosted.oppgittAdresse.setGatenavn("gate 123");
 
         Saksopplysning personOpplysning = new Saksopplysning();
         personOpplysning.setType(SaksopplysningType.PERSOPL);

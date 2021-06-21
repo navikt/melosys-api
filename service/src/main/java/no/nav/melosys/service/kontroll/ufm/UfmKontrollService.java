@@ -8,10 +8,10 @@ import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
 import org.springframework.stereotype.Service;
 
@@ -38,11 +38,11 @@ public class UfmKontrollService {
             return Collections.singletonList(Kontroll_begrunnelser.FEIL_I_PERIODEN);
         }
 
-        PersonDokument personDokument = behandling.hentPersonDokument();
+        Persondata persondata = behandling.hentPersonDokument();
         MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
         InntektDokument inntektDokument = behandling.hentInntektDokument();
         UtbetalingDokument utbetalingDokument = behandling.finnUtbetalingDokument().orElse(null);
-        UfmKontrollData kontrollData = new UfmKontrollData(sedDokument, personDokument, medlemskapDokument, inntektDokument, utbetalingDokument);
+        UfmKontrollData kontrollData = new UfmKontrollData(sedDokument, persondata, medlemskapDokument, inntektDokument, utbetalingDokument);
 
         return utførKontroller(kontrollData, kontrollFactory.hentKontrollerForSedType(sedDokument.getSedType()));
     }

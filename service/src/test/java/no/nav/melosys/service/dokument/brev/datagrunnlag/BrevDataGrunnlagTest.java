@@ -64,7 +64,7 @@ class BrevDataGrunnlagTest {
         boAdresseFraRegister.setLand(new Land(Land.NORGE));
 
         person = new PersonDokument();
-        person.bostedsadresse = boAdresseFraRegister;
+        person.setBostedsadresse(boAdresseFraRegister);
 
         søknad = new Soeknad();
         behandling = lagBehandling(søknad, person);
@@ -86,7 +86,7 @@ class BrevDataGrunnlagTest {
 
     @Test
     void hentBostedsadresse_manglerOppgittOgTpsBostedsadresse_girUnntak() {
-        person.bostedsadresse = new Bostedsadresse();
+        person.setBostedsadresse(new Bostedsadresse());
         søknad.bosted.oppgittAdresse = new StrukturertAdresse();
         var bostedsgrunnlag = dataGrunnlag.getBostedGrunnlag();
 
@@ -98,31 +98,31 @@ class BrevDataGrunnlagTest {
     @Test
     void hentBostedsadresse_brukerBostedFraPersonDokument() {
         StrukturertAdresse bostedsadresse = dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
-        assertThat(bostedsadresse.gatenavn).isEqualTo("Hjemgata");
-        assertThat(bostedsadresse.husnummer).isEqualTo("23");
-        assertThat(bostedsadresse.postnummer).isEqualTo("0165");
-        assertThat(bostedsadresse.poststed).isEqualTo("Oslo");
-        assertThat(bostedsadresse.landkode).isEqualTo(Landkoder.NO.getKode());
+        assertThat(bostedsadresse.getGatenavn()).isEqualTo("Hjemgata");
+        assertThat(bostedsadresse.getHusnummerEtasjeLeilighet()).isEqualTo("23");
+        assertThat(bostedsadresse.getPostnummer()).isEqualTo("0165");
+        assertThat(bostedsadresse.getPoststed()).isEqualTo("Oslo");
+        assertThat(bostedsadresse.getLandkode()).isEqualTo(Landkoder.NO.getKode());
     }
 
     @Test
     void hentBostedsadresse_oppgittAdresseOverstyrerTPS_nårOppgittAdresseISøknad() {
         StrukturertAdresse oppgittBosted = new StrukturertAdresse();
-        oppgittBosted.gatenavn = "HerBorJegGata";
-        oppgittBosted.husnummer = "123";
-        oppgittBosted.postnummer = "0166";
-        oppgittBosted.poststed = "Oslo";
-        oppgittBosted.region = "Østlandet";
-        oppgittBosted.landkode = "NO";
+        oppgittBosted.setGatenavn("HerBorJegGata");
+        oppgittBosted.setHusnummerEtasjeLeilighet("123");
+        oppgittBosted.setPostnummer("0166");
+        oppgittBosted.setPoststed("Oslo");
+        oppgittBosted.setRegion("Østlandet");
+        oppgittBosted.setLandkode("NO");
         søknad.bosted.oppgittAdresse = oppgittBosted;
 
         StrukturertAdresse bostedsadresse = dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
-        assertThat(bostedsadresse.gatenavn).isEqualTo("HerBorJegGata");
-        assertThat(bostedsadresse.husnummer).isEqualTo("123");
-        assertThat(bostedsadresse.postnummer).isEqualTo("0166");
-        assertThat(bostedsadresse.poststed).isEqualTo("Oslo");
-        assertThat(bostedsadresse.region).isEqualTo("Østlandet");
-        assertThat(bostedsadresse.landkode).isEqualTo(Landkoder.NO.getKode());
+        assertThat(bostedsadresse.getGatenavn()).isEqualTo("HerBorJegGata");
+        assertThat(bostedsadresse.getHusnummerEtasjeLeilighet()).isEqualTo("123");
+        assertThat(bostedsadresse.getPostnummer()).isEqualTo("0166");
+        assertThat(bostedsadresse.getPoststed()).isEqualTo("Oslo");
+        assertThat(bostedsadresse.getRegion()).isEqualTo("Østlandet");
+        assertThat(bostedsadresse.getLandkode()).isEqualTo(Landkoder.NO.getKode());
     }
 
     @Test

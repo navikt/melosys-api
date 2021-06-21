@@ -7,14 +7,14 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.person.Persondata;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION, defaultImpl = DokgenBrevbestilling.class)
 @JsonSubTypes(
     {
-        @JsonSubTypes.Type(value = MangelbrevBrevbestilling.class, name = "MangelbrevBrevbestilling"),
-        @JsonSubTypes.Type(value = InnvilgelseBrevbestilling.class, name = "InnvilgelseBrevbestilling")
+        @JsonSubTypes.Type(value = MangelbrevBrevbestilling.class),
+        @JsonSubTypes.Type(value = InnvilgelseBrevbestilling.class)
     }
 )
 public class DokgenBrevbestilling extends Brevbestilling {
@@ -26,7 +26,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private long behandlingId;
     private boolean bestillKopi;
     private Instant vedtaksdato;
-    private PersonDokument persondokument;
+    private Persondata persondokument;
 
     public DokgenBrevbestilling() {
         super();
@@ -70,7 +70,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return behandlingId;
     }
 
-    public boolean bestillKopi() {
+    public boolean isBestillKopi() {
         return bestillKopi;
     }
 
@@ -78,7 +78,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return vedtaksdato;
     }
 
-    public PersonDokument getPersondokument() {
+    public Persondata getPersondokument() {
         return persondokument;
     }
 
@@ -98,7 +98,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private long behandlingId;
         private boolean bestillKopi;
         private Instant vedtaksdato;
-        private PersonDokument persondokument;
+        private Persondata persondokument;
 
         public Builder() {
         }
@@ -173,8 +173,8 @@ public class DokgenBrevbestilling extends Brevbestilling {
             return (T) this;
         }
 
-        public T medPersonDokument(PersonDokument personDokument) {
-            this.persondokument = personDokument;
+        public T medPersonDokument(Persondata persondata) {
+            this.persondokument = persondata;
             return (T) this;
         }
 

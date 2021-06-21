@@ -315,6 +315,12 @@ public class Behandlingsresultat extends RegistreringsInfo {
         throw new NoSuchElementException("Ingen periode om lovvalg finnes for behandling " + id);
     }
 
+    public Optional<? extends PeriodeOmLovvalg> finnValidertPeriodeOmLovvalg() {
+
+        var lovvalgsperiode = finnValidertLovvalgsperiode();
+        return lovvalgsperiode.isPresent() ? lovvalgsperiode : finnValidertAnmodningsperiode();
+    }
+
     public Lovvalgsperiode hentValidertLovvalgsperiode() {
         return finnValidertLovvalgsperiode()
             .orElseThrow(() -> new NoSuchElementException("Ingen lovvalgsperiode finnes for behandlingsresultat " + id));

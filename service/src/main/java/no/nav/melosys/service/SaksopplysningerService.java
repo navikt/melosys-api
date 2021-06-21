@@ -5,9 +5,9 @@ import java.util.Optional;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.SaksopplysningRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +22,12 @@ public class SaksopplysningerService {
         this.saksopplysningRepo = saksopplysningRepo;
     }
 
-    public Optional<PersonDokument> finnPersonOpplysninger(long behandlingID) {
+    public Optional<Persondata> finnPersonOpplysninger(long behandlingID) {
         return saksopplysningRepo.findByBehandling_IdAndType(behandlingID, SaksopplysningType.PERSOPL)
-            .map(s -> (PersonDokument) s.getDokument());
+            .map(s -> (Persondata) s.getDokument());
     }
 
-    public PersonDokument hentPersonOpplysninger(long behandlingID) {
+    public Persondata hentPersonOpplysninger(long behandlingID) {
         return finnPersonOpplysninger(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke persondokument for behandling " + behandlingID));
     }

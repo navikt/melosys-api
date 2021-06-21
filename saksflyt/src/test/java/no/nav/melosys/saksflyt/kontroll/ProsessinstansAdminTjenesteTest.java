@@ -3,10 +3,7 @@ package no.nav.melosys.saksflyt.kontroll;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import no.nav.melosys.domain.saksflyt.ProsessStatus;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.ProsessType;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.repository.ProsessinstansRepository;
@@ -25,7 +22,8 @@ import org.springframework.http.HttpStatus;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -46,10 +44,13 @@ class ProsessinstansAdminTjenesteTest {
     }
 
     @Test
-    void hentFeiledeProsessinstanser() {
+    void hentFeiledeProsessinstanser_enProsessinstansFlereHendelser_viserFeilmeldingSisteHendelse() {
+        final var sisteFeilmelding = "siste feilmelding";
         Prosessinstans prosessinstans = lagProsessinstans();
+        prosessinstans.getHendelser().add(new ProsessinstansHendelse(prosessinstans, LocalDateTime.now().minusDays(1), null, null, "første"));
+        prosessinstans.getHendelser().add(new ProsessinstansHendelse(prosessinstans, LocalDateTime.now(), null, null, sisteFeilmelding));
 
-        when(prosessinstansRepository.findAllByStatus(eq(ProsessStatus.FEILET)))
+        when(prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET))
             .thenReturn(singletonList(prosessinstans));
 
         var response = prosessinstansAdminTjeneste.hentFeiledeProsessinstanser(apiKey);
@@ -58,9 +59,11 @@ class ProsessinstansAdminTjenesteTest {
         var body = response.getBody();
         assertThat(body)
             .flatExtracting(HentProsessinstansDto::getId, HentProsessinstansDto::getEndretDato,
-                HentProsessinstansDto::getProsessType, HentProsessinstansDto::getSistFullførtSteg)
+                HentProsessinstansDto::getProsessType, HentProsessinstansDto::getSistFullførtSteg,
+                HentProsessinstansDto::getSisteFeilmelding)
             .containsExactly(prosessinstans.getId(), prosessinstans.getEndretDato(),
-                prosessinstans.getType().getKode(), prosessinstans.getSistFullførtSteg().getKode());
+                prosessinstans.getType().getKode(), prosessinstans.getSistFullførtSteg().getKode(),
+                sisteFeilmelding);
     }
 
     @Test
@@ -90,8 +93,9 @@ class ProsessinstansAdminTjenesteTest {
         when(prosessinstansRepository.findAllById(anyList()))
             .thenReturn(singletonList(prosessinstans));
 
+        final var request = new RestartProsessinstanserRequest(singletonList(uuid));
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> prosessinstansAdminTjeneste.restartProsessinstans(apiKey, new RestartProsessinstanserRequest(singletonList(uuid))))
+            .isThrownBy(() -> prosessinstansAdminTjeneste.restartProsessinstans(apiKey, request))
             .withMessageContaining("har status");
     }
 
@@ -107,17 +111,22 @@ class ProsessinstansAdminTjenesteTest {
         prosessinstansAdminTjeneste.restartProsessinstans(apiKey, new RestartProsessinstanserRequest(singletonList(uuid)));
 
         assertThat(prosessinstans.getStatus()).isEqualTo(ProsessStatus.RESTARTET);
-        verify(prosessinstansRepository).saveAll(eq(singletonList(prosessinstans)));
-        verify(behandleProsessinstansDelegate).behandleProsessinstans(eq(prosessinstans));
+        verify(prosessinstansRepository).saveAll(singletonList(prosessinstans));
+        verify(behandleProsessinstansDelegate).behandleProsessinstans(prosessinstans);
     }
 
     @Test
-    void feilApiKeyOppgittForventForbidden() {
+    void hentFeiledeProsessinstanser_feilApiKeyOppgitt_forventForbidden() {
         assertThatExceptionOfType(SikkerhetsbegrensningException.class)
             .isThrownBy(() -> prosessinstansAdminTjeneste.hentFeiledeProsessinstanser("Dum dummy"))
             .withMessageContaining("apikey");
+    }
+
+    @Test
+    void restartProsessinstans_feilApiKeyOppgitt_forventForbidden() {
+        final var request = new RestartProsessinstanserRequest(List.of());
         assertThatExceptionOfType(SikkerhetsbegrensningException.class)
-            .isThrownBy(() -> prosessinstansAdminTjeneste.restartProsessinstans("Dumdum", new RestartProsessinstanserRequest(List.of())))
+            .isThrownBy(() -> prosessinstansAdminTjeneste.restartProsessinstans("Dumdum", request))
             .withMessageContaining("apikey");
     }
 

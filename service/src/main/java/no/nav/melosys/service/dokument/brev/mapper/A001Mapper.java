@@ -16,8 +16,8 @@ import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
@@ -45,7 +45,7 @@ class A001Mapper {
 
         seda001.setTrygdemyndighet(mapTrygdemyndighet(brevData.utenlandskMyndighet));
 
-        seda001.setPerson(mapPerson(brevData.personDokument, brevData.bostedsadresse, brevData.utenlandskIdent));
+        seda001.setPerson(mapPerson(brevData.persondata, brevData.bostedsadresse, brevData.utenlandskIdent));
 
         seda001.setSelvstendigNæringsvirksomhetListe(mapSelvstendigvirksometliste(brevData.selvstendigeVirksomheter));
         seda001.setForetakListe(mapForetakliste(brevData.arbeidsgivendeVirksomheter));
@@ -138,17 +138,17 @@ class A001Mapper {
         return trygdemyndighet;
     }
 
-    private PersonType mapPerson(PersonDokument personDok, StrukturertAdresse bostedsadresse, Optional<String> utenlandskIdent) {
+    private PersonType mapPerson(Persondata personDok, StrukturertAdresse bostedsadresse, Optional<String> utenlandskIdent) {
         PersonType person = new PersonType();
         person.setPersonnavn(lagPersonnavn(personDok));
         person.setStatsborgerskapListe(mapStatsborgerskapListe(personDok));
-        person.setKjønn(KjoennKode.fromValue(personDok.kjønn.getKode()));
+        person.setKjønn(KjoennKode.fromValue(personDok.hentKjønnType().getKode()));
         person.setBostedsadresse(mapBostedAdresse(bostedsadresse));
-        person.setFødselsnummer(personDok.fnr);
+        person.setFødselsnummer(personDok.hentFolkeregisterIdent());
         //Fødeland og Fødested skal ikke fylles ut
         utenlandskIdent.ifPresent(person::setUtenlandskID);
         try {
-            person.setFødselsdato(convertToXMLGregorianCalendarRemoveTimezone(personDok.fødselsdato));
+            person.setFødselsdato(convertToXMLGregorianCalendarRemoveTimezone(personDok.getFødselsdato()));
         } catch (DatatypeConfigurationException e) {
             throw new TekniskException("Konverteringsfeil ved konvertering av fødselsdato", e);
         }
@@ -156,14 +156,19 @@ class A001Mapper {
         return person;
     }
 
-    private StatsborgerskapListeType mapStatsborgerskapListe(PersonDokument personDok) {
-        StatsborgerskapType statsborgerskap = new StatsborgerskapType();
-        statsborgerskap.setStatsborgerskap(hentIso3Landkode(personDok.statsborgerskap.getKode()));
-
+    private StatsborgerskapListeType mapStatsborgerskapListe(Persondata persondata) {
         StatsborgerskapListeType statsborgerskapListe = new StatsborgerskapListeType();
-        statsborgerskapListe.getStatsborgerskap().add(statsborgerskap);
-
+        persondata.hentAlleStatsborgerskap().forEach(
+            land -> leggTilStatsborgerskap(statsborgerskapListe, land)
+        );
         return statsborgerskapListe;
+    }
+
+    private static void leggTilStatsborgerskap(StatsborgerskapListeType statsborgerskapListe,
+                                        no.nav.melosys.domain.dokument.felles.Land land) {
+        StatsborgerskapType statsborgerskap = new StatsborgerskapType();
+        statsborgerskap.setStatsborgerskap(hentIso3Landkode(land.getKode()));
+        statsborgerskapListe.getStatsborgerskap().add(statsborgerskap);
     }
 
     private static VilkaarBegrunnelseType mapArt16Anmodning(Art161AnmodningBegrunnelseKode begrunnelseKode) {
@@ -202,12 +207,12 @@ class A001Mapper {
 
         StrukturertAdresse adresse = arbeidssted.getAdresse();
         AdresseType3 adresseBrev = new AdresseType3();
-        adresseBrev.setGatenavn(adresse.gatenavn);
-        adresseBrev.setHusnummer(adresse.husnummer);
-        adresseBrev.setPostnummer(adresse.postnummer);
-        adresseBrev.setPoststed(adresse.poststed);
-        adresseBrev.setRegion(adresse.region);
-        adresseBrev.setLand(hentIso3Landkode(adresse.landkode));
+        adresseBrev.setGatenavn(adresse.getGatenavn());
+        adresseBrev.setHusnummer(adresse.getHusnummerEtasjeLeilighet());
+        adresseBrev.setPostnummer(adresse.getPostnummer());
+        adresseBrev.setPoststed(adresse.getPoststed());
+        adresseBrev.setRegion(adresse.getRegion());
+        adresseBrev.setLand(hentIso3Landkode(adresse.getLandkode()));
         arbeidsstedBrev.setAdresse(adresseBrev);
 
         return arbeidsstedBrev;
@@ -227,12 +232,12 @@ class A001Mapper {
 
     private BostedsadresseType mapBostedAdresse(StrukturertAdresse bosted) {
         BostedsadresseType bostedsadresse = new BostedsadresseType();
-        bostedsadresse.setGatenavn(bosted.gatenavn);
-        bostedsadresse.setHusnummer(bosted.husnummer);
-        bostedsadresse.setPostnummer(bosted.postnummer);
-        bostedsadresse.setPoststed(bosted.poststed);
-        bostedsadresse.setRegion(bosted.region);
-        bostedsadresse.setLand(hentIso3Landkode(bosted.landkode));
+        bostedsadresse.setGatenavn(bosted.getGatenavn());
+        bostedsadresse.setHusnummer(bosted.getHusnummerEtasjeLeilighet());
+        bostedsadresse.setPostnummer(bosted.getPostnummer());
+        bostedsadresse.setPoststed(bosted.getPoststed());
+        bostedsadresse.setRegion(bosted.getRegion());
+        bostedsadresse.setLand(hentIso3Landkode(bosted.getLandkode()));
         bostedsadresse.setAdresseType(BostedsadresseTypeKode.BOSTEDSLAND); // Lev1 kun bostedsland
         return bostedsadresse;
     }
@@ -248,11 +253,11 @@ class A001Mapper {
 
             StrukturertAdresse adresse = (StrukturertAdresse) virksomhet.adresse;
             AdresseType adresseBrev = new AdresseType();
-            adresseBrev.setAdresselinje1(sammenslå(adresse.gatenavn, adresse.husnummer));
-            adresseBrev.setAdresselinje2(adresse.poststed);
-            adresseBrev.setAdresselinje3(StringUtils.isEmpty(adresse.postnummer) ? " " : adresse.postnummer);
-            adresseBrev.setAdresselinje4(adresse.region);
-            adresseBrev.setLand(hentIso3Landkode(adresse.landkode));
+            adresseBrev.setAdresselinje1(sammenslå(adresse.getGatenavn(), adresse.getHusnummerEtasjeLeilighet()));
+            adresseBrev.setAdresselinje2(adresse.getPoststed());
+            adresseBrev.setAdresselinje3(StringUtils.isEmpty(adresse.getPostnummer()) ? " " : adresse.getPostnummer());
+            adresseBrev.setAdresselinje4(adresse.getRegion());
+            adresseBrev.setLand(hentIso3Landkode(adresse.getLandkode()));
             foretak.setAdresse(adresseBrev);
             foretakListe.getForetak().add(foretak);
         }
@@ -269,11 +274,11 @@ class A001Mapper {
 
             AdresseType2 adresseBrev = new AdresseType2();
             StrukturertAdresse adresse = (StrukturertAdresse) virksomhet.adresse;
-            adresseBrev.setAdresselinje1(sammenslå(adresse.gatenavn, adresse.husnummer));
-            adresseBrev.setAdresselinje2(adresse.poststed);
-            adresseBrev.setAdresselinje3(adresse.postnummer);
-            adresseBrev.setAdresselinje4(adresse.region);
-            adresseBrev.setLand(hentIso3Landkode(adresse.landkode));
+            adresseBrev.setAdresselinje1(sammenslå(adresse.getGatenavn(), adresse.getHusnummerEtasjeLeilighet()));
+            adresseBrev.setAdresselinje2(adresse.getPoststed());
+            adresseBrev.setAdresselinje3(adresse.getPostnummer());
+            adresseBrev.setAdresselinje4(adresse.getRegion());
+            adresseBrev.setLand(hentIso3Landkode(adresse.getLandkode()));
 
             selvstendigVirksomhet.setAdresse(adresseBrev);
             selvstendigeVirksomheter.getSelvstendigNæringsvirksomhet().add(selvstendigVirksomhet);

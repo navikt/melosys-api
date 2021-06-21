@@ -1,0 +1,31 @@
+# ISO-8601 representasjon for en kalenderdato. YYYY-MM-DD. Eksempel: 2018-01-01.
+scalar Date
+
+# ISO-8601 representasjon for en kalenderdato med tid, trunkert til nærmeste sekund. YYYY-MM-DD'T'hh:mm:ss.
+# Eksempel: 2018-01-01T12:00:00.
+scalar DateTime
+
+scalar Long
+
+type Query {
+    hentSaksopplysninger(behandlingID: Long!): Saksopplysninger
+}
+
+type Saksopplysninger {
+    behandlingID: Long!
+    persondata: Personopplysninger
+}
+
+type Personopplysninger {
+    statsborgerskap: [Statsborgerskap!]!
+}
+
+type Statsborgerskap {
+    land: String!
+    bekreftelsesdato: Date
+    gyldigFraOgMed: Date
+    gyldigTilOgMed: Date
+    master: String
+    kilde: String
+    erHistorisk: Boolean
+}

@@ -18,6 +18,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.DokgenDto;
@@ -73,7 +74,7 @@ class DokgenMalMapperTest {
 
     @Test
     void feilerNårProduserbartDokumentIkkeErStøttet() {
-        when(mockPersondataFasade.hentPerson(any(), any())).thenReturn(lagPersonopplysning());
+        when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(ATTEST_A1)
@@ -88,7 +89,7 @@ class DokgenMalMapperTest {
     @Test
     void skalMappeMedBrukerAdresse() {
         when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
-        when(mockPersondataFasade.hentPerson(any(), any())).thenReturn(lagPersonopplysning());
+        when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
 
         Behandling behandling = lagBehandling(lagFagsak());
 
@@ -237,6 +238,7 @@ class DokgenMalMapperTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setRegistrertDato(Instant.now());
         fagsak.setBehandlinger(lagBehandlinger());
+        fagsak.setType(Sakstyper.EU_EOS);
         if (medRepresentant) {
             Aktoer representant = new Aktoer();
             representant.setRolle(Aktoersroller.REPRESENTANT);
@@ -264,9 +266,9 @@ class DokgenMalMapperTest {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.PERSOPL);
         PersonDokument personDokument = new PersonDokument();
-        personDokument.fnr = "99887766554";
-        personDokument.sammensattNavn = SAMMENSATT_NAVN;
-        personDokument.gjeldendePostadresse = lagAdresse();
+        personDokument.setFnr("99887766554");
+        personDokument.setSammensattNavn(SAMMENSATT_NAVN);
+        personDokument.setGjeldendePostadresse(lagAdresse());
         saksopplysning.setDokument(personDokument);
         return saksopplysning;
     }

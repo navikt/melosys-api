@@ -47,7 +47,7 @@ public class AnmodningUnntakKontrollServiceTest {
         Saksopplysning persopplysning = new Saksopplysning();
         persopplysning.setType(SaksopplysningType.PERSOPL);
         persopplysning.setDokument(personDokument);
-        personDokument.bostedsadresse.setPoststed("altOK");
+        personDokument.getBostedsadresse().setPoststed("altOK");
 
         Behandling behandling = new Behandling();
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
@@ -64,7 +64,7 @@ public class AnmodningUnntakKontrollServiceTest {
 
     @Test
     public void utførKontroller_manglerBostedsadresse_returnererKode() {
-        personDokument.bostedsadresse = new Bostedsadresse();
+        personDokument.setBostedsadresse(new Bostedsadresse());
 
         Collection<Kontrollfeil> resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID);
         assertThat(resultat)

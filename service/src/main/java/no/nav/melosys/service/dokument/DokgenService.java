@@ -116,7 +116,7 @@ public class DokgenService {
 
         DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(builder.build());
 
-        return dokgenConsumer.lagPdf(malnavn, dokgenDto, brevbestilling.bestillKopi());
+        return dokgenConsumer.lagPdf(malnavn, dokgenDto, brevbestilling.isBestillKopi());
     }
 
     public void produserOgDistribuerBrev(long behandlingId, BrevbestillingDto brevbestillingDto) {

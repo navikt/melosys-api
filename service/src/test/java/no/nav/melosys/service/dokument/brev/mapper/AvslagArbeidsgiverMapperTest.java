@@ -42,7 +42,7 @@ public class AvslagArbeidsgiverMapperTest {
         BrevDataAvslagArbeidsgiver brevData = new BrevDataAvslagArbeidsgiver("Z12345");
 
         PersonDokument person = new PersonDokument();
-        person.sammensattNavn = "Gunnar Granskau";
+        person.setSammensattNavn("Gunnar Granskau");
         brevData.person = person;
 
         brevData.arbeidsland = "Danmark";

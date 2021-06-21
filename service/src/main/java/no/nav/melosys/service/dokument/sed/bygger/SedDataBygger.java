@@ -1,23 +1,21 @@
 package no.nav.melosys.service.dokument.sed.bygger;
 
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.UtenlandskIdent;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.Diskresjonskode;
+import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.dokument.person.Familierelasjon;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -108,7 +106,7 @@ public class SedDataBygger {
 
         sedDataDto.setBruker(hentBrukerFraPersonDokument(dataGrunnlag.getPerson()));
 
-        sedDataDto.setFamilieMedlem(dataGrunnlag.getPerson().familiemedlemmer.stream()
+        sedDataDto.setFamilieMedlem(dataGrunnlag.getPerson().getFamiliemedlemmer().stream()
             .filter(f -> f.familierelasjon == Familierelasjon.FARA || f.familierelasjon == Familierelasjon.MORA)
             .map(SedDataBygger::hentFamilieMedlem).collect(Collectors.toList()));
 
@@ -129,7 +127,7 @@ public class SedDataBygger {
 
         sedDataDto.setBruker(hentBrukerFraPersonDokument(dataGrunnlag.getPerson()));
 
-        sedDataDto.setFamilieMedlem(dataGrunnlag.getPerson().familiemedlemmer.stream()
+        sedDataDto.setFamilieMedlem(dataGrunnlag.getPerson().getFamiliemedlemmer().stream()
             .filter(f -> f.familierelasjon == Familierelasjon.FARA || f.familierelasjon == Familierelasjon.MORA)
             .map(SedDataBygger::hentFamilieMedlem).collect(Collectors.toList()));
 
@@ -198,8 +196,7 @@ public class SedDataBygger {
             FysiskArbeidssted fysiskArbeidssted = (FysiskArbeidssted) arb;
             arbeidssted.setAdresse(fraStrukturertAdresse(fysiskArbeidssted.getAdresse()));
             arbeidssted.setNavn(arb.getForetakNavn());
-        } else if (arb instanceof FlyvendeArbeidssted) {
-            FlyvendeArbeidssted flyvendeArbeidssted = (FlyvendeArbeidssted) arb;
+        } else if (arb instanceof FlyvendeArbeidssted flyvendeArbeidssted) {
             arbeidssted.setNavn(flyvendeArbeidssted.getEnhetNavn());
             arbeidssted.setAdresse(Adresse.lagAdresseMedBareLandkode(flyvendeArbeidssted.getLandkode()));
             arbeidssted.setHjemmebase(flyvendeArbeidssted.getLandkode());
@@ -212,26 +209,18 @@ public class SedDataBygger {
         return arbeidssted;
     }
 
-    private static Bruker hentBrukerFraPersonDokument(PersonDokument personDokument) {
+    private static Bruker hentBrukerFraPersonDokument(Persondata persondata) {
         Bruker bruker = new Bruker();
-        bruker.setEtternavn(personDokument.etternavn);
-        bruker.setFornavn(personDokument.fornavn);
-        bruker.setFnr(personDokument.fnr);
-        bruker.setFoedseldato(personDokument.fødselsdato);
-        bruker.setKjoenn(personDokument.kjønn.getKode());
-        bruker.setStatsborgerskap(personDokument.statsborgerskap.getKode());
-        bruker.setHarSensitiveOpplysninger(hentHarSensitiveOpplysninger(personDokument.diskresjonskode));
+        bruker.setEtternavn(persondata.getEtternavn());
+        bruker.setFornavn(persondata.getFornavn());
+        bruker.setFnr(persondata.hentFolkeregisterIdent());
+        bruker.setFoedseldato(persondata.getFødselsdato());
+        bruker.setKjoenn(persondata.hentKjønnType().getKode());
+        bruker.setStatsborgerskap(
+            persondata.hentAlleStatsborgerskap().stream().findFirst().map(Land::getKode).orElse(null));
+        bruker.setHarSensitiveOpplysninger(persondata.harStrengtAdressebeskyttelse());
 
         return bruker;
-
-    }
-
-    private static boolean hentHarSensitiveOpplysninger(Diskresjonskode diskresjonskode) {
-        if (diskresjonskode == null) {
-            return false;
-        }
-
-        return diskresjonskode.erKode6();
     }
 
     private static List<no.nav.melosys.domain.eessi.sed.Lovvalgsperiode> lagLovvalgsperioderDto(Behandlingsresultat behandlingsresultat, PeriodeType periodeType) {
