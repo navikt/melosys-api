@@ -112,7 +112,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.fnr = fnr;
     }
 
-    @Override
     public Sivilstand getSivilstand() {
         return sivilstand;
     }
@@ -121,7 +120,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.sivilstand = sivilstand;
     }
 
-    @Override
     public LocalDate getSivilstandGyldighetsperiodeFom() {
         return sivilstandGyldighetsperiodeFom;
     }
@@ -218,7 +216,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.diskresjonskode = diskresjonskode;
     }
 
-    @Override
     public Personstatus getPersonstatus() {
         return personstatus;
     }
@@ -227,7 +224,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.personstatus = personstatus;
     }
 
-    @Override
     public LocalDate getStatsborgerskapDato() {
         return statsborgerskapDato;
     }

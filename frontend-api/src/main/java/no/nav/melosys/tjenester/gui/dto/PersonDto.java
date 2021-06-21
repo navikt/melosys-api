@@ -5,13 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.*;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.person.Personstatus;
+import no.nav.melosys.domain.dokument.person.Sivilstand;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
-import no.nav.melosys.domain.person.Persondata;
 
 public class PersonDto {
 
-    public PersonDto(Persondata person) {
+    public PersonDto(PersonDokument person) {
         fnr = person.hentFolkeregisterIdent();
         sivilstand = person.getSivilstand();
         statsborgerskap = person.hentAlleStatsborgerskap().stream().findFirst().orElse(null);
