@@ -1,4 +1,4 @@
-package no.nav.melosys.service.eessi.ruting;
+package no.nav.melosys.service.eessi;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -20,6 +20,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.eessi.ruting.AdminInnvalideringSedRuter;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -36,7 +37,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class InnvalideringSedRuterTest {
+class AdminInnvalideringSedRuterTest {
 
     @Mock
     private FagsakService fagsakService;
@@ -51,9 +52,9 @@ class InnvalideringSedRuterTest {
     @Mock
     private EessiService eessiService;
 
-    private FakeUnleash fakeUnleash = new FakeUnleash();
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
-    private InnvalideringSedRuter innvalideringSedRuter;
+    private AdminInnvalideringSedRuter adminInnvalideringSedRuter;
 
     private final long behandlingID = 111;
     private final long arkivsakID = 123321;
@@ -64,7 +65,7 @@ class InnvalideringSedRuterTest {
 
     @BeforeEach
     void setup() {
-        innvalideringSedRuter = new InnvalideringSedRuter(fagsakService, prosessinstansService, oppgaveService,
+        adminInnvalideringSedRuter = new AdminInnvalideringSedRuter(fagsakService, prosessinstansService, oppgaveService,
             behandlingsresultatService, medlPeriodeService, eessiService, fakeUnleash);
 
         melosysEessiMelding.setAktoerId("12312412");
@@ -75,80 +76,89 @@ class InnvalideringSedRuterTest {
     @Test
     void gjelderSedTyper_featureTogglePå_collectionMedX008() {
         fakeUnleash.enableAll();
-        assertThat(innvalideringSedRuter.gjelderSedTyper()).containsExactly(SedType.X008);
+        assertThat(adminInnvalideringSedRuter.gjelderSedTyper()).containsExactly(SedType.X008);
     }
 
     @Test
     void gjelderSedTyper_featureToggleAv_tomCollection() {
         fakeUnleash.disableAll();
-        assertThat(innvalideringSedRuter.gjelderSedTyper()).isEmpty();
+        assertThat(adminInnvalideringSedRuter.gjelderSedTyper()).isEmpty();
     }
 
     @Test
-    void rutSedTilBehandling_arkivsaksIdErNull_opprettJournalFøringsOppgave(){
-        innvalideringSedRuter.rutSedTilBehandling(prosessinstans, null);
+    void rutSedTilBehandling_arkivsaksIdErNull_opprettJournalFøringsOppgave() {
+        adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, null);
         verify(oppgaveService).opprettJournalføringsoppgave(melosysEessiMelding.getJournalpostId(), melosysEessiMelding.getAktoerId());
 
     }
 
     @Test
     void rutSedTilBehandling_finnesIngenTilhørendeFagsak_opprettesJfrOppgave() {
-        innvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
+        adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
         verify(oppgaveService).opprettJournalføringsoppgave(melosysEessiMelding.getJournalpostId(), melosysEessiMelding.getAktoerId());
     }
 
     @Test
     void rutSedTilBehandling_tilhørendeFagsakFinnesOgBehandlingErNorgeUtpekt_opprettesJfrProsessOgBehandlingsoppgave() {
         when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING)));
-        innvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
+        adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
 
         verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(any(Behandling.class), eq(melosysEessiMelding.getJournalpostId()), eq(melosysEessiMelding.getAktoerId()), isNull());
     }
 
     @Test
-    void rutSedTilBehandling_behandlingErUtlandUtpektOgAvsluttetHarMedlPeriode_oppdaterSaksstatusAnnullertOgOpphørMEDLPeriode(){
+    void rutSedTilBehandling_behandlingErUtlandUtpektOgAvsluttetHarMedlPeriode_oppdaterSaksstatusAnnullertOgOpphørMEDLPeriode() {
         var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, Behandlingsstatus.AVSLUTTET);
         fagsak.hentSistAktiveBehandling().getSaksopplysninger().add(lagSedDokument());
-        var behandlingsresultat = lagBehandlingsresultat(true);
+        Behandling sistAktiveBehandling = fagsak.hentSistAktiveBehandling();
+
+        Behandlingsresultat behandlingsresultat = lagBehandlingsresultat(true);
+        behandlingsresultat.setBehandling(sistAktiveBehandling);
 
         when(eessiService.hentTilknyttedeBucer(arkivsakID, List.of())).thenReturn(lagBucInformasjon("AVBRUTT"));
         when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
 
-        innvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
+        adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
 
         verify(fagsakService).oppdaterStatus(fagsak, Saksstatuser.ANNULLERT);
         verify(medlPeriodeService).avvisPeriodeOpphørt(behandlingsresultat.hentValidertLovvalgsperiode().getMedlPeriodeID());
     }
 
     @Test
-    void rutSedTilBehandling_behandlingErUtstasjoneringOgAktiv_oppdaterSaksstatusAnnullert(){
+    void rutSedTilBehandling_behandlingErUtstasjoneringOgAktiv_oppdaterSaksstatusAnnullert() {
         var fagsak = lagFagsak(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, Behandlingsstatus.UNDER_BEHANDLING);
         fagsak.hentSistAktiveBehandling().getSaksopplysninger().add(lagSedDokument());
+        Behandling sistAktiveBehandling = fagsak.hentSistAktiveBehandling();
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setBehandling(sistAktiveBehandling);
+
+        Anmodningsperiode periode = new Anmodningsperiode();
+        behandlingsresultat.getAnmodningsperioder().add(periode);
 
         when(eessiService.hentTilknyttedeBucer(arkivsakID, List.of())).thenReturn(lagBucInformasjon("AVBRUTT"));
         when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
-        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(lagBehandlingsresultat(false));
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
 
-        innvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
+        adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
 
         verify(fagsakService).avsluttFagsakOgBehandling(fagsak, Saksstatuser.ANNULLERT);
 
     }
 
     @Test
-    void rutSedTilBehandling_behandlingErUnntakNorskTrygvØvrigAktivSedIkkeAnnullert_oppretterBehandlingsoppgave(){
+    void rutSedTilBehandling_behandlingErUnntakNorskTrygvØvrigAktivSedIkkeAnnullert_oppretterBehandlingsoppgave() {
         var fagsak = lagFagsak(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, Behandlingsstatus.UNDER_BEHANDLING);
         fagsak.hentSistAktiveBehandling().getSaksopplysninger().add(lagSedDokument());
 
         when(eessiService.hentTilknyttedeBucer(arkivsakID, List.of())).thenReturn(lagBucInformasjon("ÅPEN"));
         when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
 
-        innvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
+        adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
         verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(any(Behandling.class),
             eq(melosysEessiMelding.getJournalpostId()), eq(melosysEessiMelding.getAktoerId()), isNull());
     }
-
 
 
     private Behandlingsresultat lagBehandlingsresultat(boolean medMedlperiode) {
