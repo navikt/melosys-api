@@ -10,10 +10,10 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.person.Persondata;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
+@JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION, defaultImpl = DokgenBrevbestilling.class)
 @JsonSubTypes(
     {
-        @JsonSubTypes.Type(value = MangelbrevBrevbestilling.class, name = "MangelbrevBrevbestilling")
+        @JsonSubTypes.Type(value = MangelbrevBrevbestilling.class)
     }
 )
 public class DokgenBrevbestilling extends Brevbestilling {
@@ -69,7 +69,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return behandlingId;
     }
 
-    public boolean bestillKopi() {
+    public boolean isBestillKopi() {
         return bestillKopi;
     }
 

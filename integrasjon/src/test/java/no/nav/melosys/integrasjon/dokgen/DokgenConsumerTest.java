@@ -11,6 +11,8 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.integrasjon.dokgen.dto.MangelbrevBruker;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -81,14 +83,17 @@ class DokgenConsumerTest {
 
     private Behandling lagBehandling() {
         Behandling behandling = new Behandling();
-        behandling.setFagsak(lagFagsak());
+        behandling.setFagsak(lagFagsak(behandling));
+        behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setSaksopplysninger(Collections.singleton(lagPersondokument()));
         return behandling;
     }
 
-    private Fagsak lagFagsak() {
+    private Fagsak lagFagsak(Behandling behandling) {
         Fagsak fagsak = new Fagsak();
-        fagsak.setBehandlinger(List.of(new Behandling()));
+        fagsak.setType(Sakstyper.EU_EOS);
+        behandling.setType(Behandlingstyper.SOEKNAD);
+        fagsak.setBehandlinger(List.of(behandling));
         return fagsak;
     }
 
