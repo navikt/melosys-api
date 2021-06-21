@@ -47,6 +47,7 @@ public class DefaultSedRuter implements SedRuter {
      * Hvis SED'en er tilknyttet en sak går den til ferdigstilling av journalpost
      * Ellers opprettes det en journalføringsoppgave
      */
+    @Override
     public void rutSedTilBehandling(Prosessinstans prosessinstans, Long arkivsakID) {
         final MelosysEessiMelding eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
         SedType sedType = SedType.valueOf(eessiMelding.getSedType());
@@ -87,31 +88,28 @@ public class DefaultSedRuter implements SedRuter {
 
         String oppgaveID;
         if (oppgave.isEmpty()) {
-            oppgaveID = opprettBehandlingsoppgave(behandling, prosessinstans.getData(ProsessDataKey.AKTØR_ID), sedType);
+            oppgaveID = opprettBehandlingsoppgave(behandling, prosessinstans.getData(ProsessDataKey.AKTØR_ID));
         } else {
             oppgaveID = oppgave.get().getOppgaveId();
         }
 
+        var oppdaterOppgaveBuilder = OppgaveOppdatering.builder();
+
         if (sedType.erPurring()) {
-            oppdaterOppgavePrioritet(oppgaveID);
+            log.info("Setter prioritet til HØY for oppgave {}", oppgaveID);
+            oppdaterOppgaveBuilder.beskrivelse("PURRING SED X009")
+                .prioritet(PrioritetType.HOY.name());
+        } else {
+            oppdaterOppgaveBuilder.beskrivelse("Mottatt SED " + sedType);
         }
+
+        oppgaveService.oppdaterOppgave(oppgaveID, oppdaterOppgaveBuilder.build());
     }
 
-    private void oppdaterOppgavePrioritet(String oppgaveID) {
-        log.info("Setter prioritet til HØY for oppgave {}", oppgaveID);
-        oppgaveService.oppdaterOppgave(oppgaveID,
-            OppgaveOppdatering.builder()
-                .prioritet(PrioritetType.HOY.name())
-                .beskrivelse("PURRING SEDX009")
-                .build()
-        );
-    }
-
-    private String opprettBehandlingsoppgave(Behandling behandling, String aktørID, SedType sedType) {
-        Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType())
+    private String opprettBehandlingsoppgave(Behandling behandling, String aktørID) {
+        var oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType())
             .setAktørId(aktørID)
             .setSaksnummer(behandling.getFagsak().getSaksnummer())
-            .setBeskrivelse("Mottatt SED " + sedType)
             .build();
         return oppgaveService.opprettOppgave(oppgave);
     }
