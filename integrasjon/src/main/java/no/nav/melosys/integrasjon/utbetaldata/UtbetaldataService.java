@@ -6,8 +6,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.ws.WebServiceException;
 
 import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningKildesystem;
-import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -26,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UtbetaldataService implements UtbetaldataFasade {
-    private static final String UTBETAL_VERSJON = "1.0";
     private static final String BARNETRYGD = "BARNETRYGD";
     private static final String RETTIGHETSHAVER = "Rettighetshaver";
     private static final String YTELSESPERIODE = "Ytelsesperiode";
@@ -53,14 +50,7 @@ public class UtbetaldataService implements UtbetaldataFasade {
             );
         }
 
-        // Response -> xml
-        StringWriter xmlWriter = lagXml(response);
-        Saksopplysning saksopplysning = lagSaksopplysning(xmlWriter);
-
-        // xml -> java objekter
-        dokumentFactory.lagDokument(saksopplysning);
-
-        return saksopplysning;
+        return UtbetaldataMapper.tilSaksopplysning(response, lagXml(response).toString());
     }
 
     private WSHentUtbetalingsinformasjonResponse hentUtbetalingsinformasjon(WSHentUtbetalingsinformasjonRequest request) {
@@ -89,15 +79,6 @@ public class UtbetaldataService implements UtbetaldataFasade {
         }
 
         return xmlWriter;
-    }
-
-    private static Saksopplysning lagSaksopplysning(StringWriter xmlWriter) {
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.leggTilKildesystemOgMottattDokument(
-            SaksopplysningKildesystem.UTBETALDATA, xmlWriter.toString());
-        saksopplysning.setType(SaksopplysningType.UTBETAL);
-        saksopplysning.setVersjon(UTBETAL_VERSJON);
-        return saksopplysning;
     }
 
     private static WSHentUtbetalingsinformasjonRequest lagRequest(String fnr, LocalDate fom, LocalDate tom) {

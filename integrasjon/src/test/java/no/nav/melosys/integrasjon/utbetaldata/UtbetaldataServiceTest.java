@@ -4,10 +4,7 @@ import java.time.LocalDate;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.Templates;
 import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.WebServiceException;
 
 import no.nav.melosys.domain.Saksopplysning;
@@ -46,10 +43,11 @@ class UtbetaldataServiceTest {
 
     @Mock
     private UtbetalingConsumer utbetalingConsumer;
+    @Mock
+    private XsltTemplatesFactory xsltTemplatesFactory;
 
     private UtbetaldataService utbetaldataService;
 
-    private XsltTemplatesFactory xsltTemplatesFactory;
 
     @BeforeEach
     public void setup() throws TransformerConfigurationException {
@@ -61,9 +59,6 @@ class UtbetaldataServiceTest {
 
     @Test
     void hentUtbetalingerBarnetrygd_medTreff_verifiserSaksopplysning() throws Exception {
-        Templates xsltTemplates = TransformerFactory.newInstance().newTemplates(new StreamSource(
-            ClassLoader.getSystemResourceAsStream("utbetaling/utbetaldata_1.0.xslt")));
-        when(xsltTemplatesFactory.getXsltTemplates(any(), anyString())).thenReturn(xsltTemplates);
         when(utbetalingConsumer.hentUtbetalingsinformasjon(any())).thenReturn(hentResponse("77777777776"));
 
         Saksopplysning saksopplysning = utbetaldataService.hentUtbetalingerBarnetrygd("123", LocalDate.now(), LocalDate.now().plusYears(1));
@@ -87,9 +82,6 @@ class UtbetaldataServiceTest {
 
     @Test
     void hentUtbetalingerBarnetrygd_medForskjelligeYtelserIEnUtbetaling_verifiserSaksopplysning() throws Exception {
-        Templates xsltTemplates = TransformerFactory.newInstance().newTemplates(new StreamSource(
-            ClassLoader.getSystemResourceAsStream("utbetaling/utbetaldata_1.0.xslt")));
-        when(xsltTemplatesFactory.getXsltTemplates(any(), anyString())).thenReturn(xsltTemplates);
         when(utbetalingConsumer.hentUtbetalingsinformasjon(any())).thenReturn(hentResponse("77777777777"));
 
         Saksopplysning saksopplysning = utbetaldataService.hentUtbetalingerBarnetrygd("123", LocalDate.now(), LocalDate.now().plusYears(1));
@@ -146,9 +138,6 @@ class UtbetaldataServiceTest {
 
     @Test
     void hentUtbetalingerBarnetrygd_tomDatoEldreEnnTreÅr_forventTomResponsIngenKall() throws Exception {
-        Templates xsltTemplates = TransformerFactory.newInstance().newTemplates(new StreamSource(
-            ClassLoader.getSystemResourceAsStream("utbetaling/utbetaldata_1.0.xslt")));
-        when(xsltTemplatesFactory.getXsltTemplates(any(), anyString())).thenReturn(xsltTemplates);
         var saksopplysning = utbetaldataService.hentUtbetalingerBarnetrygd("123", LocalDate.now().minusYears(5), LocalDate.now().minusYears(4));
         UtbetalingDokument dokument = (UtbetalingDokument) saksopplysning.getDokument();
         assertThat(dokument.utbetalinger.size()).isZero();
@@ -161,9 +150,6 @@ class UtbetaldataServiceTest {
         final LocalDate tom = LocalDate.now();
         final ArgumentCaptor<WSHentUtbetalingsinformasjonRequest> captor = ArgumentCaptor.forClass(WSHentUtbetalingsinformasjonRequest.class);
 
-        Templates xsltTemplates = TransformerFactory.newInstance().newTemplates(new StreamSource(
-            ClassLoader.getSystemResourceAsStream("utbetaling/utbetaldata_1.0.xslt")));
-        when(xsltTemplatesFactory.getXsltTemplates(any(), anyString())).thenReturn(xsltTemplates);
         when(utbetalingConsumer.hentUtbetalingsinformasjon(any())).thenReturn(new WSHentUtbetalingsinformasjonResponse());
         assertThat(utbetaldataService.hentUtbetalingerBarnetrygd("123", fom, tom)).isNotNull();
         verify(utbetalingConsumer).hentUtbetalingsinformasjon(captor.capture());

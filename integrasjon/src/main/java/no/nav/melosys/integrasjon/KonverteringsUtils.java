@@ -80,6 +80,7 @@ public final class KonverteringsUtils {
         if (date == null) {
             return null;
         }
-        return LocalDate.parse(date.toString());
+
+        return LocalDate.parse(date.toLocalDate().toString());
     }
 }
