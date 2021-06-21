@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -17,13 +18,11 @@ import java.nio.file.Paths;
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class AvgiftOverforingConsumerTest {
+class AvgiftOverforingConsumerTest {
 
     private static MockWebServer mockWebServer;
 
     private AvgiftOverforingConsumer avgiftOverforingConsumer;
-
-    private final String url = format("http://localhost:%s", mockWebServer.getPort());
 
     @BeforeAll
     static void setupServer() throws IOException {
@@ -33,7 +32,12 @@ public class AvgiftOverforingConsumerTest {
 
     @BeforeEach
     void setup() {
-        avgiftOverforingConsumer = new AvgiftOverforingConsumer(url);
+
+        WebClient webClient = WebClient.builder()
+            .baseUrl("http://localhost:" + mockWebServer.getPort())
+            .build();
+
+        avgiftOverforingConsumer = new AvgiftOverforingConsumer(webClient);
     }
 
     @Test

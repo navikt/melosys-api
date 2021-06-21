@@ -48,7 +48,7 @@ class DokumentServiceFasadeTest {
     }
 
     @Test
-    void skalKalleDokgenProduserUtkast() throws Exception {
+    void skalKalleDokgenProduserUtkast() {
         when(mockDokgenService.erTilgjengeligDokgenmal(any(Produserbaredokumenter.class))).thenReturn(true);
 
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
@@ -62,7 +62,7 @@ class DokumentServiceFasadeTest {
     }
 
     @Test
-    void skalKalleDokumentServiceProduserUtkast() throws Exception {
+    void skalKalleDokumentServiceProduserUtkast() {
         when(mockDokgenService.erTilgjengeligDokgenmal(any(Produserbaredokumenter.class))).thenReturn(false);
 
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
@@ -75,7 +75,7 @@ class DokumentServiceFasadeTest {
     }
 
     @Test
-    void skalKalleDokumentServiceProduserDokument() throws Exception {
+    void skalKalleDokumentServiceProduserDokument() {
         when(mockDokgenService.erTilgjengeligDokgenmal(any())).thenReturn(false);
 
         dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.av(Aktoersroller.BRUKER), 123L, new DoksysBrevbestilling.Builder().build());
@@ -84,7 +84,7 @@ class DokumentServiceFasadeTest {
     }
 
     @Test
-    void skalKalleDokgenServiceProduserOgDistribuer() throws Exception {
+    void skalKalleDokgenServiceProduserOgDistribuer() {
         when(mockDokgenService.erTilgjengeligDokgenmal(any())).thenReturn(true);
 
         dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.av(Aktoersroller.BRUKER), 123L, new DoksysBrevbestilling.Builder().build());
@@ -94,7 +94,7 @@ class DokumentServiceFasadeTest {
     }
 
     @Test
-    void skalKalleDokgenServiceProduserOgDistribuer_dto() throws Exception {
+    void skalKalleDokgenServiceProduserOgDistribuer_dto() {
         when(mockDokgenService.erTilgjengeligDokgenmal(any())).thenReturn(true);
 
         dokumentServiceFasade.produserDokument(1, new BrevbestillingDto());

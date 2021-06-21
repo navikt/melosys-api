@@ -20,11 +20,13 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarConsumer;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.persondata.PersondataService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_INNGANGSVILKAAR;
 import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
@@ -36,7 +38,7 @@ public class InngangsvilkaarService {
 
     private final BehandlingService behandlingService;
     private final InngangsvilkaarConsumer inngangsvilkaarConsumer;
-    private final PersondataService persondataService;
+    private final PersondataFasade persondataFasade;
     private final SaksopplysningerService saksopplysningerService;
     private final Unleash unleash;
     private final VilkaarsresultatService vilkaarsresultatService;
@@ -44,13 +46,13 @@ public class InngangsvilkaarService {
     @Autowired
     public InngangsvilkaarService(BehandlingService behandlingService,
                                   InngangsvilkaarConsumer inngangsvilkaarConsumer,
-                                  PersondataService persondataService,
+                                  @Qualifier("system") PersondataFasade persondataFasade,
                                   SaksopplysningerService saksopplysningerService,
                                   Unleash unleash,
                                   VilkaarsresultatService vilkaarsresultatService) {
         this.behandlingService = behandlingService;
         this.inngangsvilkaarConsumer = inngangsvilkaarConsumer;
-        this.persondataService = persondataService;
+        this.persondataFasade = persondataFasade;
         this.saksopplysningerService = saksopplysningerService;
         this.unleash = unleash;
         this.vilkaarsresultatService = vilkaarsresultatService;
@@ -103,7 +105,7 @@ public class InngangsvilkaarService {
         if (unleash.isEnabled("melosys.pdl.statsborgerskap")) {
             final var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
             final String brukerIdent = behandling.getFagsak().hentBruker().getAktørId();
-            return avgjørGyldigeStatsborgerskapFraPdlForPerioden(persondataService.hentStatsborgerskap(brukerIdent), periode);
+            return avgjørGyldigeStatsborgerskapFraPdlForPerioden(persondataFasade.hentStatsborgerskap(brukerIdent), periode);
         }
         return Optional.ofNullable(avgjørStatsborgerskapFraTPS(behandlingID, periode))
             .stream().collect(Collectors.toUnmodifiableSet());
@@ -129,7 +131,8 @@ public class InngangsvilkaarService {
             return avgjørStatsborgerskapPåStartDato(
                 saksopplysningerService.hentPersonhistorikk(behandlingID).statsborgerskapListe, periode.getFom());
         } else {
-            return saksopplysningerService.hentPersonOpplysninger(behandlingID).statsborgerskap;
+            return saksopplysningerService.hentPersonOpplysninger(behandlingID).hentAlleStatsborgerskap().stream()
+                .findFirst().orElse(null);
         }
     }
 
@@ -154,6 +157,7 @@ public class InngangsvilkaarService {
         }
     }
 
+    @Transactional
     public void overstyrInngangsvilkårTilOppfylt(long behandlingID) {
         final var inngangsvilkaar = vilkaarsresultatService.finnVilkaarsresultat(behandlingID, FO_883_2004_INNGANGSVILKAAR);
         if (inngangsvilkaar.isEmpty()) {

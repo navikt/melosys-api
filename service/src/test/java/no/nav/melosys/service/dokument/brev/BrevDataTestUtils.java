@@ -5,19 +5,19 @@ import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
-import no.nav.melosys.domain.dokument.person.adresse.Gateadresse;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.MaritimtArbeid;
+import no.nav.melosys.domain.dokument.SaksopplysningDokument;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.felles.Land;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
+import no.nav.melosys.domain.dokument.person.adresse.Gateadresse;
+import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetBarn;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
-import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
@@ -30,11 +30,11 @@ public class BrevDataTestUtils {
 
     public static StrukturertAdresse lagStrukturertAdresse() {
         StrukturertAdresse addr = new StrukturertAdresse();
-        addr.gatenavn = "Strukturert Gate";
-        addr.husnummer = "12B";
-        addr.poststed = "Poststed";
-        addr.postnummer = "4321";
-        addr.landkode = Landkoder.BG.getKode();
+        addr.setGatenavn("Strukturert Gate");
+        addr.setHusnummerEtasjeLeilighet("12B");
+        addr.setPoststed("Poststed");
+        addr.setPostnummer("4321");
+        addr.setLandkode(Landkoder.BG.getKode());
         return addr;
     }
 
@@ -67,7 +67,7 @@ public class BrevDataTestUtils {
         foretakUtland.orgnr = "12345678910";
         foretakUtland.uuid = "49m8gf-9dk4j0";
         foretakUtland.adresse = lagStrukturertAdresse();
-        foretakUtland.adresse.landkode = "NO";
+        foretakUtland.adresse.setLandkode("NO");
         foretakUtland.selvstendigNæringsvirksomhet = selvstendig;
         return foretakUtland;
     }
@@ -140,8 +140,10 @@ public class BrevDataTestUtils {
     public static AvklarteMedfolgendeBarn lagAvklarteMedfølgendeBarn() {
         OmfattetFamilie omfattetBarn = new OmfattetFamilie("fnrOmfattet");
         omfattetBarn.setSammensattNavn("Omfattet Barn");
+        omfattetBarn.setIdent("123321123");
         IkkeOmfattetBarn ikkeOmfattetBarn = new IkkeOmfattetBarn("fnrIkkeOmfattet", OVER_18_AR.getKode(), null);
         ikkeOmfattetBarn.sammensattNavn = "Ikke Omfattet Barn";
+        ikkeOmfattetBarn.ident = "1111111111";
 
         return new AvklarteMedfolgendeBarn(Set.of(omfattetBarn), Set.of(ikkeOmfattetBarn));
     }

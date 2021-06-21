@@ -6,8 +6,8 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.adresse.UstrukturertAdresse;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
@@ -134,18 +134,19 @@ public class OrganisasjonsDetaljer {
             }
             String adresseLinje = stringBuilder.toString();
 
-            strukturertAdresse.gatenavn = adresseLinje.replaceAll("\\s+", " ");
-            strukturertAdresse.landkode = sAdresse.getLandkode();
-            strukturertAdresse.postnummer = sAdresse.getPostnr();
+            strukturertAdresse.setGatenavn(adresseLinje.replaceAll("\\s+", " "));
+            strukturertAdresse.setLandkode(sAdresse.getLandkode());
+            strukturertAdresse.setPostnummer(sAdresse.getPostnr());
 
             if (sAdresse.erUtenlandsk()) {
-                strukturertAdresse.poststed = StringUtils.isEmpty(sAdresse.getPoststedUtland()) ? sAdresse.getPoststed() : sAdresse.getPoststedUtland();
+                strukturertAdresse.setPoststed(
+                        StringUtils.isEmpty(sAdresse.getPoststedUtland()) ? sAdresse.getPoststed() : sAdresse.getPoststedUtland());
                 // Utenlandsk adresse kan ha postnummer som en del av poststed
-                if (strukturertAdresse.postnummer == null) {
-                    strukturertAdresse.postnummer = " ";
+                if (strukturertAdresse.getPostnummer() == null) {
+                    strukturertAdresse.setPostnummer(" ");
                 }
             } else {
-                strukturertAdresse.poststed = sAdresse.getPoststed() == null ? "" : sAdresse.getPoststed();
+                strukturertAdresse.setPoststed(sAdresse.getPoststed() == null ? "" : sAdresse.getPoststed());
             }
         }
         else {

@@ -9,10 +9,11 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.pdl.dto.person.Navn;
 import no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap;
@@ -54,7 +55,7 @@ public class FattetVedtakService {
     @Transactional
     public void publiserFattetVedtak(long behandlingId) throws IkkeFunnetException {
         var behandling = behandlingService.hentBehandling(behandlingId);
-        fattetVedtakProducer.publiserMelding(lagMelding(behandling));
+        fattetVedtakProducer.produserMelding(lagMelding(behandling));
     }
 
     private FattetVedtak lagMelding(Behandling behandling) throws IkkeFunnetException {
@@ -71,9 +72,8 @@ public class FattetVedtakService {
         );
     }
 
-    private Sak lagSak(Behandling behandling, Fagsak fagsak, PersonDokument personDokument) {
-        return new Sak(
-            personDokument.fnr,
+    private Sak lagSak(Behandling behandling, Fagsak fagsak, Persondata persondata) {
+        return new Sak(persondata.hentFolkeregisterIdent(),
             behandling.getId(),
             fagsak.getSaksnummer(),
             fagsak.getType(),
@@ -103,18 +103,14 @@ public class FattetVedtakService {
         );
     }
 
-    private Saksopplysninger lagSaksopplysninger(PersonDokument personDokument) {
+    private Saksopplysninger lagSaksopplysninger(Persondata persondata) {
         return new Saksopplysninger(
-            new Person(
-                personDokument.fnr,
-                new Navn(
-                    personDokument.fornavn,
-                    personDokument.mellomnavn,
-                    personDokument.etternavn,
+            new Person(persondata.hentFolkeregisterIdent(),
+                new Navn(persondata.getFornavn(), persondata.getMellomnavn(), persondata.getEtternavn(),
                     null
                 ),
                 new Statsborgerskap(
-                    personDokument.statsborgerskap.getKode(),
+                    persondata.hentAlleStatsborgerskap().stream().findFirst().map(Land::getKode).orElse(null),
                     null,
                     null,
                     null,

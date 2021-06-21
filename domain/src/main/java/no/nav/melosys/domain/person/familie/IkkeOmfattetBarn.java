@@ -8,6 +8,7 @@ public class IkkeOmfattetBarn {
     public final Medfolgende_barn_begrunnelser begrunnelse;
     private final String begrunnelseFritekst;
     public String sammensattNavn;
+    public String ident;
 
     public IkkeOmfattetBarn(String uuid, String begrunnelse, String begrunnelseFritekst) {
         this.uuid = uuid;

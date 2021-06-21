@@ -14,6 +14,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.ArbeidsstedT
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.LuftfartBase;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.MaritimtArbeid;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.ArbeidssituasjonOgOevrig;
 import no.nav.melosys.domain.kodeverk.Innretningstyper;
 import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM;
 import no.nav.melosys.soknad_altinn.ObjectFactory;
@@ -41,12 +42,12 @@ class SoeknadMapperTest {
         assertThat(soeknad.arbeidPaaLand.erHjemmekontor).isTrue();
         final FysiskArbeidssted fysiskArbeidssted = soeknad.arbeidPaaLand.fysiskeArbeidssteder.get(0);
         assertThat(fysiskArbeidssted.virksomhetNavn).isEqualTo("Firmaet");
-        assertThat(fysiskArbeidssted.adresse.gatenavn).isEqualTo("Gaten 1");
-        assertThat(fysiskArbeidssted.adresse.husnummer).isNull();
-        assertThat(fysiskArbeidssted.adresse.postnummer).isEqualTo("1234");
-        assertThat(fysiskArbeidssted.adresse.poststed).isEqualTo("Stedet");
-        assertThat(fysiskArbeidssted.adresse.region).isEqualTo("Region");
-        assertThat(fysiskArbeidssted.adresse.landkode).isEqualTo("BE");
+        assertThat(fysiskArbeidssted.adresse.getGatenavn()).isEqualTo("Gaten 1");
+        assertThat(fysiskArbeidssted.adresse.getHusnummerEtasjeLeilighet()).isNull();
+        assertThat(fysiskArbeidssted.adresse.getPostnummer()).isEqualTo("1234");
+        assertThat(fysiskArbeidssted.adresse.getPoststed()).isEqualTo("Stedet");
+        assertThat(fysiskArbeidssted.adresse.getRegion()).isEqualTo("Region");
+        assertThat(fysiskArbeidssted.adresse.getLandkode()).isEqualTo("BE");
         final var loennOgGodtgjoerelse = soeknad.loennOgGodtgjoerelse;
         assertThat(loennOgGodtgjoerelse.norskArbgUtbetalerLoenn).isTrue();
         assertThat(loennOgGodtgjoerelse.erArbeidstakerAnsattHelePerioden).isTrue();
@@ -61,13 +62,14 @@ class SoeknadMapperTest {
         final var foretakUtland = soeknad.foretakUtland.get(0);
         assertThat(foretakUtland.navn).isEqualTo("Virskomheten i utlandet");
         assertThat(foretakUtland.orgnr).isEqualTo("XYZ123456789");
-        assertThat(foretakUtland.adresse.gatenavn).isEqualTo("gatenavn med mer");
-        assertThat(foretakUtland.adresse.poststed).isEqualTo("testbyen");
-        assertThat(foretakUtland.adresse.postnummer).isEqualTo("UTLAND-1234");
-        assertThat(foretakUtland.adresse.landkode).isEqualTo("BE");
+        assertThat(foretakUtland.adresse.getGatenavn()).isEqualTo("gatenavn med mer");
+        assertThat(foretakUtland.adresse.getPoststed()).isEqualTo("testbyen");
+        assertThat(foretakUtland.adresse.getPostnummer()).isEqualTo("UTLAND-1234");
+        assertThat(foretakUtland.adresse.getLandkode()).isEqualTo("BE");
         final var utenlandsoppdraget = soeknad.utenlandsoppdraget;
         assertThat(utenlandsoppdraget.erErstatningTidligereUtsendte).isFalse();
-        assertThat(utenlandsoppdraget.samletUtsendingsperiode).isNull();
+        assertThat(utenlandsoppdraget.samletUtsendingsperiode).isNotNull();
+        assertThat(utenlandsoppdraget.samletUtsendingsperiode.getFom()).isNull();
         assertThat(utenlandsoppdraget.erUtsendelseForOppdragIUtlandet).isFalse();
         assertThat(utenlandsoppdraget.erFortsattAnsattEtterOppdraget).isNull();
         assertThat(utenlandsoppdraget.erAnsattForOppdragIUtlandet).isFalse();
@@ -172,6 +174,22 @@ class SoeknadMapperTest {
                 LocalDate.of(2019, 8, 1),
                 LocalDate.of(2019, 8, 6)
             );
+    }
+
+    @Test
+    void testArbeidssituasjonOgOevrig() throws JAXBException {
+        final MedlemskapArbeidEOSM medlemskapArbeidEOSM = parseSøknadXML();
+
+        final Soeknad soeknad = SoeknadMapper.lagSoeknad(medlemskapArbeidEOSM);
+
+        final ArbeidssituasjonOgOevrig arbeidssituasjonOgOevrig = soeknad.arbeidssituasjonOgOevrig;
+        assertThat(arbeidssituasjonOgOevrig.harLoennetArbeidMinstEnMndFoerUtsending).isTrue();
+        assertThat(arbeidssituasjonOgOevrig.beskrivelseArbeidSisteMnd).isEqualTo("Arbeid siste mnd");
+        assertThat(arbeidssituasjonOgOevrig.harAndreArbeidsgivereIUtsendingsperioden).isFalse();
+        assertThat(arbeidssituasjonOgOevrig.beskrivelseAnnetArbeid).isEqualTo("Annet arbeid");
+        assertThat(arbeidssituasjonOgOevrig.erSkattepliktig).isTrue();
+        assertThat(arbeidssituasjonOgOevrig.mottarYtelserNorge).isFalse();
+        assertThat(arbeidssituasjonOgOevrig.mottarYtelserUtlandet).isFalse();
     }
 
     private MedlemskapArbeidEOSM parseSøknadXML() throws JAXBException {

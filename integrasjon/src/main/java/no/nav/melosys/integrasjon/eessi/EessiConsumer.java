@@ -37,4 +37,6 @@ public interface EessiConsumer {
     byte[] genererSedPdf(SedDataDto sedDataDto, SedType sedType);
 
     SedGrunnlagDto hentSedGrunnlag(String rinaSaksnummer, String rinaDokumentID);
+
+    void lukkBuc(String rinaSaksnummer);
 }

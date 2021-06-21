@@ -24,6 +24,8 @@ public class SedDataDto extends SedGrunnlagDto {
 
     private UtpekingAvvisDto utpekingAvvis;
 
+    private VedtakDto vedtakDto;
+
     public List<FamilieMedlem> getFamilieMedlem() {
         return familieMedlem;
     }
@@ -86,5 +88,13 @@ public class SedDataDto extends SedGrunnlagDto {
 
     public void setUtpekingAvvis(UtpekingAvvisDto utpekingAvvis) {
         this.utpekingAvvis = utpekingAvvis;
+    }
+
+    public VedtakDto getVedtakDto() {
+        return vedtakDto;
+    }
+
+    public void setVedtakDto(VedtakDto vedtakDto) {
+        this.vedtakDto = vedtakDto;
     }
 }

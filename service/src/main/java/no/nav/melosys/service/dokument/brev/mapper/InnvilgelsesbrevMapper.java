@@ -147,9 +147,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             );
             fag.setBarnIkkeOmfattetAvNorskTrygdListe(hentBarnIkkeOmfattetAvNorskTrygd(brevdata.avklarteMedfolgendeBarn));
             fag.setBarnOmfattetAvNorskTrygdListe(hentBarnOmfattetAvNorskTrygd(brevdata.avklarteMedfolgendeBarn));
-            if (brevdata.avklarteMedfolgendeBarn.hentBegrunnelseFritekst().isPresent()) {
-                fag.setMedfoelgendeBarnFritekst(brevdata.avklarteMedfolgendeBarn.hentBegrunnelseFritekst().get());
-            }
+            brevdata.avklarteMedfolgendeBarn.hentBegrunnelseFritekst().ifPresent(fag::setMedfoelgendeBarnFritekst);
         } else {
             fag.setAntallBarnOmfattetAvNorskTrygd(BigInteger.valueOf(0));
         }
@@ -162,23 +160,17 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             return null;
         }
 
-        switch (vedtakstype) {
-            case FØRSTEGANGSVEDTAK:
-                return VedtaksTypeKode.FOERSTEGANGSVEDTAK;
-            case KORRIGERT_VEDTAK:
-                return VedtaksTypeKode.KORRIGERT_VEDTAK;
-            case OMGJØRINGSVEDTAK:
-                return VedtaksTypeKode.OMGJOERINGSVEDTAK;
-            case ENDRINGSVEDTAK:
-                return null; //Brev har ikke koder for ENDRINGSVEDTAK
-            default:
-                throw new TekniskException("Ukjent vedtakstype " + vedtakstype + " kan ikke mappes til VedtaksTypeKode");
-        }
+        return switch (vedtakstype) {
+            case FØRSTEGANGSVEDTAK -> VedtaksTypeKode.FOERSTEGANGSVEDTAK;
+            case KORRIGERT_VEDTAK -> VedtaksTypeKode.KORRIGERT_VEDTAK;
+            case OMGJØRINGSVEDTAK -> VedtaksTypeKode.OMGJOERINGSVEDTAK;
+            case ENDRINGSVEDTAK -> null; //Brev har ikke koder for ENDRINGSVEDTAK
+        };
     }
 
     private BarnOmfattetAvNorskTrygdListeType hentBarnOmfattetAvNorskTrygd(AvklarteMedfolgendeBarn avklarteMedfolgendeBarn) {
         List<BarnInnvilgelseType> barnInnvilgelse = avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd.stream()
-            .map(InnvilgelsesbrevMapper::lagBarnInnvilgelseType)
+            .map(this::lagBarnInnvilgelseType)
             .collect(Collectors.toList());
         return BarnOmfattetAvNorskTrygdListeType.builder()
             .withBarnInnvilgelse(barnInnvilgelse).build();
@@ -193,13 +185,17 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             .withBarnAvslag(barnAvslag).build();
     }
 
-    private static BarnInnvilgelseType lagBarnInnvilgelseType(OmfattetFamilie omfattetBarn) {
-        return BarnInnvilgelseType.builder().withBarnOmfattetAvNorskTrygd(omfattetBarn.getSammensattNavn()).build();
+    private BarnInnvilgelseType lagBarnInnvilgelseType(OmfattetFamilie omfattetBarn) {
+        return BarnInnvilgelseType.builder()
+            .withBarnOmfattetAvNorskTrygd(omfattetBarn.getSammensattNavn())
+            .withBarnFodselsnummer(omfattetBarn.getIdent())
+            .build();
     }
 
     private BarnAvslagType lagBarnAvslagType(IkkeOmfattetBarn ikkeOmfattetBarn) {
         return BarnAvslagType.builder()
             .withBarnAvslagBegrunnelse(tilBarnAvslagBegrunnelseKode(ikkeOmfattetBarn.begrunnelse))
+            .withBarnFodselsnummer(ikkeOmfattetBarn.ident)
             .withBarnIkkeOmfattetAvNorskTrygd(ikkeOmfattetBarn.sammensattNavn).build();
     }
 

@@ -218,8 +218,8 @@ class EessiServiceTest {
     @Test
     void hentMottakerinstitusjoner_forventListeMedRettType() {
         when(eessiConsumer.hentMottakerinstitusjoner(anyString(), anyList())).thenReturn(Arrays.asList(
-            easyRandom.nextObject(Institusjon.class),
-            easyRandom.nextObject(Institusjon.class)
+            new Institusjon("1","Test1","NO"),
+            new Institusjon("2","Test2","NO")
         ));
 
         List<Institusjon> mottakerinstitusjoner = eessiService.hentEessiMottakerinstitusjoner("LA_BUC_01", List.of("FR"));

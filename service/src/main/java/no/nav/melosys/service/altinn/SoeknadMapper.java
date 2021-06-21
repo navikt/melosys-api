@@ -17,7 +17,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.ArbeidPaaLan
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.LuftfartBase;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.*;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Flyvningstyper;
 import no.nav.melosys.domain.kodeverk.Innretningstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
@@ -49,6 +49,7 @@ public final class SoeknadMapper {
         }
         soeknad.juridiskArbeidsgiverNorge = lagJuridiskArbeidsgiverNorge(innhold.getArbeidsgiver());
         soeknad.utenlandsoppdraget = lagUtenlandsoppdraget(innhold.getMidlertidigUtsendt().getUtenlandsoppdraget());
+        soeknad.arbeidssituasjonOgOevrig = lagArbeidssituasjonOgOevrig(innhold.getMidlertidigUtsendt());
         return soeknad;
     }
 
@@ -93,20 +94,11 @@ public final class SoeknadMapper {
         final ArbeidsstedType arbeidsstedType = ArbeidsstedType.valueOf(arbeidssted.getTypeArbeidssted().toUpperCase());
 
         switch (arbeidsstedType) {
-            case LAND:
-                soeknad.arbeidPaaLand = lagArbeidPåLand(arbeidssted.getArbeidPaaLand());
-                break;
-            case OFFSHORE:
-                soeknad.maritimtArbeid = lagOffshoreArbeid(arbeidssted.getOffshoreEnheter());
-                break;
-            case SKIPSFART:
-                soeknad.maritimtArbeid = lagArbeidPåSkip(arbeidssted.getSkipListe());
-                break;
-            case LUFTFART:
-                soeknad.luftfartBaser = lagLuftfartBaser(arbeidssted.getLuftfart());
-                break;
-            default:
-                throw new IllegalArgumentException("ArbeidsstedType ikke støttet: " + arbeidsstedType);
+            case LAND -> soeknad.arbeidPaaLand = lagArbeidPåLand(arbeidssted.getArbeidPaaLand());
+            case OFFSHORE -> soeknad.maritimtArbeid = lagOffshoreArbeid(arbeidssted.getOffshoreEnheter());
+            case SKIPSFART -> soeknad.maritimtArbeid = lagArbeidPåSkip(arbeidssted.getSkipListe());
+            case LUFTFART -> soeknad.luftfartBaser = lagLuftfartBaser(arbeidssted.getLuftfart());
+            default -> throw new IllegalArgumentException("ArbeidsstedType ikke støttet: " + arbeidsstedType);
         }
     }
 
@@ -142,15 +134,10 @@ public final class SoeknadMapper {
     }
 
     private static Innretningstyper mapInnretningstyper(OffshoreEnhetstype offshoreEnhetstype) {
-        switch (offshoreEnhetstype) {
-            case BORESKIP:
-                return Innretningstyper.BORESKIP;
-            case PLATTFORM:
-            case ANNEN_STASJONAER_ENHET:
-                return Innretningstyper.PLATTFORM;
-            default:
-                return Innretningstyper.valueOf(offshoreEnhetstype.toString().toUpperCase());
-        }
+        return switch (offshoreEnhetstype) {
+            case BORESKIP -> Innretningstyper.BORESKIP;
+            case PLATTFORM, ANNEN_STASJONAER_ENHET -> Innretningstyper.PLATTFORM;
+        };
     }
 
     private static List<MaritimtArbeid> lagArbeidPåSkip(SkipListe skipListe) {
@@ -211,11 +198,11 @@ public final class SoeknadMapper {
         foretakUtland.navn = virksomhetIUtlandet.getNavn();
         foretakUtland.orgnr = virksomhetIUtlandet.getRegistreringsnummer();
         final PostadresseUtland postadresseUtland = virksomhetIUtlandet.getAdresse();
-        foretakUtland.adresse.gatenavn = postadresseUtland.getGatenavn();
-        foretakUtland.adresse.postnummer = postadresseUtland.getPostkode();
-        foretakUtland.adresse.poststed = postadresseUtland.getBy();
-        foretakUtland.adresse.region = postadresseUtland.getRegion();
-        foretakUtland.adresse.landkode = tilIso2FraEuEosLandnavn(postadresseUtland.getLand());
+        foretakUtland.adresse.setGatenavn(postadresseUtland.getGatenavn());
+        foretakUtland.adresse.setPostnummer(postadresseUtland.getPostkode());
+        foretakUtland.adresse.setPoststed(postadresseUtland.getBy());
+        foretakUtland.adresse.setRegion(postadresseUtland.getRegion());
+        foretakUtland.adresse.setLandkode(tilIso2FraEuEosLandnavn(postadresseUtland.getLand()));
         return foretakUtland;
     }
 
@@ -240,7 +227,7 @@ public final class SoeknadMapper {
     }
 
     private static Utenlandsoppdraget lagUtenlandsoppdraget(no.nav.melosys.soknad_altinn.Utenlandsoppdraget utenlandsoppdraget) {
-        Periode samletUtsendingsperiode = null;
+        Periode samletUtsendingsperiode = new Periode();
         if (Boolean.TRUE.equals(utenlandsoppdraget.isErstatterTidligereUtsendte())
             && utenlandsoppdraget.getSamletUtsendingsperiode() != null) {
             samletUtsendingsperiode = lagPeriode(utenlandsoppdraget.getSamletUtsendingsperiode());
@@ -254,6 +241,18 @@ public final class SoeknadMapper {
             utenlandsoppdraget.isDrattPaaEgetInitiativ(),
             utenlandsoppdraget.isErstatterTidligereUtsendte()
         );
+    }
+
+    private static ArbeidssituasjonOgOevrig lagArbeidssituasjonOgOevrig(MidlertidigUtsendt midlertidigUtsendt) {
+        ArbeidssituasjonOgOevrig arbeidssituasjonOgOevrig = new ArbeidssituasjonOgOevrig();
+        arbeidssituasjonOgOevrig.harLoennetArbeidMinstEnMndFoerUtsending = midlertidigUtsendt.isLoennetArbeidMinstEnMnd();
+        arbeidssituasjonOgOevrig.beskrivelseArbeidSisteMnd = midlertidigUtsendt.getBeskrivArbeidSisteMnd();
+        arbeidssituasjonOgOevrig.harAndreArbeidsgivereIUtsendingsperioden = midlertidigUtsendt.isAndreArbeidsgivereIUtsendingsperioden();
+        arbeidssituasjonOgOevrig.beskrivelseAnnetArbeid = midlertidigUtsendt.getBeskrivelseAnnetArbeid();
+        arbeidssituasjonOgOevrig.erSkattepliktig = midlertidigUtsendt.isSkattepliktig();
+        arbeidssituasjonOgOevrig.mottarYtelserNorge = midlertidigUtsendt.isMottaYtelserNorge();
+        arbeidssituasjonOgOevrig.mottarYtelserUtlandet = midlertidigUtsendt.isMottaYtelserUtlandet();
+        return arbeidssituasjonOgOevrig;
     }
 
     private static LocalDate xmlCalTilLocalDate(XMLGregorianCalendar calendar) {

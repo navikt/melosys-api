@@ -1,0 +1,41 @@
+package no.nav.melosys.service.oppgave;
+
+import no.nav.melosys.service.AdminTjeneste;
+import no.nav.security.token.support.core.api.Unprotected;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@Unprotected
+@RestController
+@RequestMapping("/admin/oppgaver")
+public class OppgaveAdminTjeneste implements AdminTjeneste {
+
+    private final OppgaveService oppgaveService;
+    private final String apiKey;
+
+    public OppgaveAdminTjeneste(@Qualifier("system") OppgaveService oppgaveService,
+                                @Value("${Melosys-admin.apikey}") String apiKey) {
+        this.oppgaveService = oppgaveService;
+        this.apiKey = apiKey;
+    }
+
+    /**
+     * Oppdateroppgave-endepunktet støtter ikke per nå å endre oppgaver med status FERDIGSTILT
+     * Denne tjenesten funker dermed ikke før dette blir løst, evt blir endret til å skape en kopi av oppgaven med ny status
+     */
+    @PostMapping("/gjenaapne/{saksnummer}")
+    public ResponseEntity<String> gjenåpneOppgave(@RequestHeader(API_KEY_HEADER) String apiKey,
+                                                  @PathVariable String saksnummer) {
+        validerApikey(apiKey);
+
+        String oppdatertOppgaveId = oppgaveService.gjenåpneSisteAvsluttetOppgaveMedFagsaksnummer(saksnummer);
+        return ResponseEntity.ok(String.format("Gjenåpnet oppgave med id %s", oppdatertOppgaveId));
+    }
+
+    @Override
+    public String getApiKey() {
+        return apiKey;
+    }
+}

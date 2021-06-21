@@ -22,6 +22,7 @@ public class MelosysEessiMelding {
     private String artikkel;
     private boolean erEndring;
     private boolean midlertidigBestemmelse;
+    private boolean x006NavErFjernet;
     private String ytterligereInformasjon;
     private String bucType;
     private String sedType;
@@ -190,6 +191,14 @@ public class MelosysEessiMelding {
         return sedVersjon;
     }
 
+    public boolean isX006NavErFjernet(){
+        return x006NavErFjernet;
+    }
+
+    public void setX006NavErFjernet(boolean x006NavErFjernet) {
+        this.x006NavErFjernet = x006NavErFjernet;
+    }
+
     @Override
     public String toString() {
         return "MelosysEessiMelding{" +
@@ -205,6 +214,7 @@ public class MelosysEessiMelding {
             ", artikkel='" + artikkel + '\'' +
             ", erEndring=" + erEndring +
             ", midlertidigBestemmelse=" + midlertidigBestemmelse +
+            ", erX006Mottaker=" + x006NavErFjernet +
             ", bucType='" + bucType + '\'' +
             ", sedType='" + sedType + '\'' +
             '}';
@@ -233,12 +243,13 @@ public class MelosysEessiMelding {
             Objects.equals(bucType, that.bucType) &&
             Objects.equals(sedType, that.sedType) &&
             Objects.equals(svarAnmodningUnntak, that.svarAnmodningUnntak) &&
-            Objects.equals(anmodningUnntak, that.anmodningUnntak);
+            Objects.equals(anmodningUnntak, that.anmodningUnntak) &&
+            Objects.equals(x006NavErFjernet, that.x006NavErFjernet);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sedId, rinaSaksnummer, avsender, journalpostId, dokumentId, gsakSaksnummer, aktoerId, statsborgerskap, arbeidssteder, periode, lovvalgsland, artikkel, erEndring, midlertidigBestemmelse, ytterligereInformasjon, bucType, sedType, svarAnmodningUnntak, anmodningUnntak);
+        return Objects.hash(sedId, rinaSaksnummer, avsender, journalpostId, dokumentId, gsakSaksnummer, aktoerId, statsborgerskap, arbeidssteder, periode, lovvalgsland, artikkel, erEndring, midlertidigBestemmelse, ytterligereInformasjon, bucType, sedType, svarAnmodningUnntak, anmodningUnntak, x006NavErFjernet);
     }
 
     public boolean inneholderYtterligereInformasjon() {

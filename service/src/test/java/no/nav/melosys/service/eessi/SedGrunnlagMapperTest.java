@@ -27,9 +27,9 @@ class SedGrunnlagMapperTest {
 
         assertThat(sedGrunnlag.bosted.oppgittAdresse)
             .extracting(
-                strukturertAdresse -> strukturertAdresse.landkode,
-                strukturertAdresse -> strukturertAdresse.postnummer,
-                strukturertAdresse -> strukturertAdresse.poststed)
+                strukturertAdresse -> strukturertAdresse.getLandkode(),
+                strukturertAdresse -> strukturertAdresse.getPostnummer(),
+                strukturertAdresse -> strukturertAdresse.getPoststed())
             .containsExactly("BE", "Testpostkode", "Testby");
 
         assertThat(sedGrunnlag.personOpplysninger.utenlandskIdent)

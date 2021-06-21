@@ -4,19 +4,16 @@ import java.util.List;
 
 import no.nav.melosys.integrasjon.avgiftoverforing.dto.AvgiftOverforingRepresentantDataDto;
 import no.nav.melosys.integrasjon.avgiftoverforing.dto.AvgiftOverforingRepresentantDto;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 
-@Component
 public class AvgiftOverforingConsumer {
     private final WebClient webClient;
 
-    public AvgiftOverforingConsumer(@Value("${melosysavgiftoverforing.url}") String url){
-        this.webClient = WebClient.create(url);
+    public AvgiftOverforingConsumer(WebClient webClient) {
+        this.webClient = webClient;
     }
 
     public List<AvgiftOverforingRepresentantDto> hentRepresentantListe(){

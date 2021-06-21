@@ -49,7 +49,7 @@ public class BehandlingsgrunnlagData {
 
     public List<String> hentUtenlandskeArbeidsstederLandkode() {
         return arbeidPaaLand.fysiskeArbeidssteder.stream()
-            .map(a -> a.adresse != null ? a.adresse.landkode : null)
+            .map(a -> a.adresse != null ? a.adresse.getLandkode() : null)
             .filter(Objects::nonNull)
             .distinct()
             .collect(Collectors.toList());
@@ -65,7 +65,7 @@ public class BehandlingsgrunnlagData {
 
     public List<String> hentUtenlandskeArbeidsgivereLandkode() {
         return foretakUtland.stream()
-            .map(f -> f.adresse != null ? f.adresse.landkode : null)
+            .map(f -> f.adresse != null ? f.adresse.getLandkode() : null)
             .filter(Objects::nonNull)
             .distinct()
             .collect(Collectors.toList());

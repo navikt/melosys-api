@@ -18,8 +18,10 @@
     "fysiskeArbeidssteder": [
       {
         "adresse": {
+          "tilleggsnavn": null,
           "gatenavn": "Adresseveien 123",
-          "husnummer": "123",
+          "husnummerEtasjeLeilighet": "123",
+          "postboks": null,
           "region": "Brandenburger",
           "postnummer": "1234",
           "poststed": "Poststedet",
@@ -38,8 +40,10 @@
       "orgnr": "372384726",
       "selvstendigNaeringsvirksomhet": true,
       "adresse": {
+        "tilleggsnavn": null,
         "gatenavn": "Deutschlandstrasse",
-        "husnummer": "123",
+        "husnummerEtasjeLeilighet": "123",
+        "postboks": null,
         "region": "Brandenburger",
         "postnummer": "3388",
         "poststed": "Berlin",
@@ -63,8 +67,10 @@
     "intensjonOmRetur": true,
     "antallMaanederINorge": 8,
     "oppgittAdresse": {
+      "tilleggsnavn": null,
       "gatenavn": "Gateadressen",
-      "husnummer": "14B",
+      "husnummerEtasjeLeilighet": "14B",
+      "postboks": null,
       "region": "St.Hanshaugen Distrikt",
       "postnummer": "12345",
       "poststed": "Poststeder",

@@ -51,7 +51,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
         Landkoder landkode = anmodningsperioder.iterator().next().getUnntakFraLovvalgsland();
 
         BrevDataA001 brevData = new BrevDataA001();
-        brevData.personDokument = dataGrunnlag.getPerson();
+        brevData.persondata = dataGrunnlag.getPerson();
         brevData.utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(landkode);
 
         brevData.arbeidsgivendeVirksomheter =

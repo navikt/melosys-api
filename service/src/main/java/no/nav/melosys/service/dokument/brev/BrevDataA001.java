@@ -6,8 +6,8 @@ import java.util.*;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 
 /*
@@ -17,7 +17,7 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 public class BrevDataA001 extends BrevData {
     public UtenlandskMyndighet utenlandskMyndighet;
 
-    public PersonDokument personDokument;
+    public Persondata persondata;
     public StrukturertAdresse bostedsadresse;
     public Optional<String> utenlandskIdent;
 

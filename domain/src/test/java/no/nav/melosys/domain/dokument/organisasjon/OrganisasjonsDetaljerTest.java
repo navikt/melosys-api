@@ -2,8 +2,8 @@ package no.nav.melosys.domain.dokument.organisasjon;
 
 import java.util.Arrays;
 
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.adresse.UstrukturertAdresse;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +14,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class OrganisasjonsDetaljerTest {
-
     private SemistrukturertAdresse adresse;
 
     private String linje1 = "LINJE1  ";
@@ -55,7 +54,7 @@ public class OrganisasjonsDetaljerTest {
         assertThat(resultatAdresse.getAdresselinje(2)).isEqualTo(linje2);
         assertThat(resultatAdresse.getAdresselinje(3)).isEqualTo(linje3);
         assertThat(resultatAdresse.getAdresselinje(4)).isEqualTo(postnr + " " + poststed);
-        assertThat(resultatAdresse.landkode).isEqualTo(landkode);
+        assertThat(resultatAdresse.getLandkode()).isEqualTo(landkode);
     }
 
     @Test
@@ -71,7 +70,7 @@ public class OrganisasjonsDetaljerTest {
         assertThat(resultatAdresse.getAdresselinje(2)).isEqualTo(linje2);
         assertThat(resultatAdresse.getAdresselinje(3)).isEqualTo(linje3);
         assertThat(resultatAdresse.getAdresselinje(4)).isEqualTo(poststedUtland);
-        assertThat(resultatAdresse.landkode).isEqualTo(landkode);
+        assertThat(resultatAdresse.getLandkode()).isEqualTo(landkode);
     }
 
     @Test
@@ -83,12 +82,12 @@ public class OrganisasjonsDetaljerTest {
         orgDetaljer.forretningsadresse = Arrays.asList(adresse);
 
         StrukturertAdresse resultatAdresse = orgDetaljer.hentStrukturertForretningsadresse();
-        assertThat(resultatAdresse.gatenavn).isEqualTo(linje1.trim() + " " + linje2 + " " + linje3);
-        assertThat(resultatAdresse.landkode).isEqualTo(landkode);
+        assertThat(resultatAdresse.getGatenavn()).isEqualTo(linje1.trim() + " " + linje2 + " " + linje3);
+        assertThat(resultatAdresse.getLandkode()).isEqualTo(landkode);
 
-        assertThat(resultatAdresse.postnummer).isEqualTo(postnr);
+        assertThat(resultatAdresse.getPostnummer()).isEqualTo(postnr);
         // Ikke alltid poststed for norske registeradresser. Slåes opp med kodeverkservice ved behov
-        assertThat(resultatAdresse.poststed).isEqualTo(poststed);
+        assertThat(resultatAdresse.getPoststed()).isEqualTo(poststed);
     }
 
     @Test
@@ -100,10 +99,10 @@ public class OrganisasjonsDetaljerTest {
         orgDetaljer.forretningsadresse = Arrays.asList(adresse);
 
         StrukturertAdresse resultatAdresse = orgDetaljer.hentStrukturertForretningsadresse();
-        assertThat(resultatAdresse.gatenavn).isEqualTo(linje1.trim() + " " + linje2 + " " + linje3);
-        assertThat(resultatAdresse.landkode).isEqualTo(landkode);
-        assertThat(resultatAdresse.postnummer).isEqualTo(postnr);
-        assertThat(resultatAdresse.poststed).isEqualTo(poststedUtland);
+        assertThat(resultatAdresse.getGatenavn()).isEqualTo(linje1.trim() + " " + linje2 + " " + linje3);
+        assertThat(resultatAdresse.getLandkode()).isEqualTo(landkode);
+        assertThat(resultatAdresse.getPostnummer()).isEqualTo(postnr);
+        assertThat(resultatAdresse.getPoststed()).isEqualTo(poststedUtland);
     }
 
     @Test

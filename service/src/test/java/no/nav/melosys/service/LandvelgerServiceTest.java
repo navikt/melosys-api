@@ -8,7 +8,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.MaritimtArbeid;
-import no.nav.melosys.domain.dokument.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -54,7 +54,7 @@ class LandvelgerServiceTest {
     public void setUp() {
         søknad = new Soeknad();
         søknad.oppholdUtland.oppholdslandkoder.add("NO");
-        søknad.bosted.oppgittAdresse.landkode = oppgittbostedsland.getKode();
+        søknad.bosted.oppgittAdresse.setLandkode(oppgittbostedsland.getKode());
         MaritimtArbeid maritimtArbeid = new MaritimtArbeid();
         maritimtArbeid.territorialfarvann = territorialfarvannLand.getKode();
         søknad.maritimtArbeid.add(maritimtArbeid);
@@ -225,7 +225,7 @@ class LandvelgerServiceTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A);
         lovvalgsperiode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
 
-        søknad.bosted.oppgittAdresse.landkode = null;
+        søknad.bosted.oppgittAdresse.setLandkode(null);
 
         Collection<Landkoder> land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
         assertThat(land).isEmpty();
@@ -370,7 +370,7 @@ class LandvelgerServiceTest {
 
     private static StrukturertAdresse lagUtenlandskAdresse(Landkoder landkode) {
         StrukturertAdresse utenlandskAdresse = new StrukturertAdresse();
-        utenlandskAdresse.landkode = landkode.toString();
+        utenlandskAdresse.setLandkode(landkode.toString());
         return utenlandskAdresse;
     }
 

@@ -51,7 +51,7 @@ class EessiConsumerTest {
     }
 
     @Test
-    void opprettOgSend_forventMap() throws Exception {
+    void opprettOgSend_forventMap() {
 
         BucType bucType = BucType.LA_BUC_01;
         server.expect(requestTo("/buc/" + bucType + "?sendAutomatisk=true&oppdaterEksisterende=true"))
@@ -125,7 +125,7 @@ class EessiConsumerTest {
                 MediaType.APPLICATION_JSON));
 
         List<Institusjon> institusjoner = eessiConsumer.hentMottakerinstitusjoner("LA_BUC_01", List.of("DE", "PL"));
-        assertThat(institusjoner).extracting(Institusjon::getId, Institusjon::getNavn, Institusjon::getLandkode)
+        assertThat(institusjoner).extracting(Institusjon::id, Institusjon::navn, Institusjon::landkode)
             .contains(tuple("NO:NAVT002", "NAVT002", "NO"));
     }
 
@@ -203,5 +203,12 @@ class EessiConsumerTest {
         SedGrunnlagDto response = eessiConsumer.hentSedGrunnlag(rinaSaksnummer, rinaDokumentID);
 
         assertThat(response).isInstanceOf(SedGrunnlagA003Dto.class);
+    }
+
+    @Test
+    void lukkBuc() {
+        final var rinaSaksnummer = "1424";
+        server.expect(requestTo("/buc/" + rinaSaksnummer + "/lukk")).andRespond(withSuccess());
+        eessiConsumer.lukkBuc(rinaSaksnummer);
     }
 }

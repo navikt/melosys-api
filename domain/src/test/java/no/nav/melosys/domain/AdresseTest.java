@@ -2,7 +2,7 @@ package no.nav.melosys.domain;
 
 import org.junit.jupiter.api.Test;
 
-import static no.nav.melosys.domain.dokument.adresse.Adresse.sammenslå;
+import static no.nav.melosys.domain.adresse.Adresse.sammenslå;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class AdresseTest {

@@ -206,7 +206,7 @@ class AnmodningUnntakServiceTest {
 
     private static Saksopplysning lagPersonSaksopplysning() {
         PersonDokument personDokument = new PersonDokument();
-        personDokument.bostedsadresse.setPostnr("2123");
+        personDokument.getBostedsadresse().setPostnr("2123");
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.PERSOPL);
         saksopplysning.setDokument(personDokument);

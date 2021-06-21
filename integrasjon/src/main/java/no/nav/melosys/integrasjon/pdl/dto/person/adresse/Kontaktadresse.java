@@ -2,8 +2,10 @@ package no.nav.melosys.integrasjon.pdl.dto.person.adresse;
 
 import java.time.LocalDateTime;
 
+import no.nav.melosys.integrasjon.pdl.dto.HarMetadata;
+import no.nav.melosys.integrasjon.pdl.dto.Metadata;
+
 public record Kontaktadresse(
-    KontaktadresseType type,
     LocalDateTime gyldigFraOgMed,
     LocalDateTime gyldigTilOgMed,
     String coAdressenavn,
@@ -11,6 +13,6 @@ public record Kontaktadresse(
     PostadresseIFrittFormat postadresseIFrittFormat,
     UtenlandskAdresse utenlandskAdresse,
     UtenlandskAdresseIFrittFormat utenlandskAdresseIFrittFormat,
-    Vegadresse vegadresse
-) {
+    Vegadresse vegadresse,
+    Metadata metadata) implements HarMetadata {
 }

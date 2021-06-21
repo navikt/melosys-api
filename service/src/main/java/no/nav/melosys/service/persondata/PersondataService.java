@@ -1,6 +1,7 @@
 package no.nav.melosys.service.persondata;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -11,6 +12,7 @@ import no.nav.melosys.domain.person.Statsborgerskap;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
+import no.nav.melosys.integrasjon.pdl.dto.person.Adressebeskyttelse;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -53,20 +55,27 @@ public class PersondataService implements PersondataFasade {
     }
 
     @Override
-    public Saksopplysning hentPerson(String ident, Informasjonsbehov behov) {
-        return tpsService.hentPerson(ident, behov);
+    public Saksopplysning hentPersonFraTps(String fnr, Informasjonsbehov behov) {
+        return tpsService.hentPerson(fnr, behov);
     }
 
     @Override
-    public Saksopplysning hentPersonhistorikk(String ident, LocalDate dato) {
-        return tpsService.hentPersonhistorikk(ident, dato);
+    public Saksopplysning hentPersonhistorikk(String fnr, LocalDate dato) {
+        return tpsService.hentPersonhistorikk(fnr, dato);
     }
 
     @Override
     public String hentSammensattNavn(String fnr) {
+        if (unleash.isEnabled("melosys.pdl.sammensatt-navn")) {
+            return pdlConsumer.hentNavn(fnr).stream()
+                .max(Comparator.comparing(n -> n.metadata().datoSistRegistrert()))
+                .map(NavnOversetter::tilSammensattNavn)
+                .orElse(NavnOversetter.UKJENT);
+        }
         return tpsService.hentSammensattNavn(fnr);
     }
 
+    @Override
     public Set<Statsborgerskap> hentStatsborgerskap(String ident) {
         return pdlConsumer.hentStatsborgerskap(ident).stream()
             .filter(s -> !s.erOpphørt())
@@ -76,6 +85,9 @@ public class PersondataService implements PersondataFasade {
 
     @Override
     public boolean harStrengtFortroligAdresse(String fnr) {
+        if (unleash.isEnabled("melosys.pdl.adressebeskyttelse")) {
+            return pdlConsumer.hentAdressebeskyttelser(fnr).stream().anyMatch(Adressebeskyttelse::erStrengtFortrolig);
+        }
         return tpsService.harStrengtFortroligAdresse(fnr);
     }
 }

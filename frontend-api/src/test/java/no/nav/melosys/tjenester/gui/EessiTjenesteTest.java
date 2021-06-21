@@ -61,9 +61,9 @@ class EessiTjenesteTest extends JsonSchemaTestParent {
     void hentMottakerInstitusjoner() throws IOException {
         when(eessiService.hentEessiMottakerinstitusjoner(anyString(), anyList()))
             .thenReturn(Arrays.asList(
-                defaultEasyRandom().nextObject(Institusjon.class),
-                defaultEasyRandom().nextObject(Institusjon.class),
-                defaultEasyRandom().nextObject(Institusjon.class)
+                new Institusjon("1","Test1","NO"),
+                new Institusjon("2","Test2","NO"),
+                new Institusjon("3","Test3","NO")
             ));
 
         ResponseEntity<List<Institusjon>> response = eessiTjeneste.hentMottakerinstitusjoner("LA_BUC_01", List.of("SE"));
@@ -124,6 +124,7 @@ class EessiTjenesteTest extends JsonSchemaTestParent {
     private BucInformasjon bucInformasjon() {
         return new BucInformasjon(
             defaultEasyRandom().nextObject(String.class),
+            true,
             defaultEasyRandom().nextObject(String.class),
             defaultEasyRandom().nextObject(LocalDate.class),
             Collections.singleton(defaultEasyRandom().toString()),
