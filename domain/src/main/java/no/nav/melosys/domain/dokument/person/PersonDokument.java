@@ -261,8 +261,12 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.midlertidigPostadresse = midlertidigPostadresse;
     }
 
-    @Override
     public UstrukturertAdresse getGjeldendePostadresse() {
+        return gjeldendePostadresse;
+    }
+
+    @Override
+    public UstrukturertAdresse hentGjeldendePostadresse() {
         return gjeldendePostadresse;
     }
 

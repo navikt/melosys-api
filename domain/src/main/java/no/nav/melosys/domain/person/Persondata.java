@@ -58,6 +58,5 @@ public interface Persondata {
 
     Bostedsadresse hentBostedsadresse();
 
-    @Deprecated // knyttet til TPS
-    UstrukturertAdresse getGjeldendePostadresse();
+    UstrukturertAdresse hentGjeldendePostadresse();
 }

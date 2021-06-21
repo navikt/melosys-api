@@ -22,7 +22,7 @@ public final class DokgenAdresseMapper {
     public static List<String> mapAdresselinjer(OrganisasjonDokument org, String kontaktperson, Kontaktopplysning kontaktopplysning, Persondata persondata) {
         List<String> adresselinjer;
         if (org == null) {
-            adresselinjer = persondata.getGjeldendePostadresse().adresselinjer();
+            adresselinjer = persondata.hentGjeldendePostadresse().adresselinjer();
         } else {
             StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
             adresselinjer = new ArrayList<>();
@@ -41,7 +41,7 @@ public final class DokgenAdresseMapper {
     public static String mapPostnr(OrganisasjonDokument org, Persondata persondata) {
         String postNr;
         if (org == null) {
-            postNr = persondata.getGjeldendePostadresse().postnr;
+            postNr = persondata.hentGjeldendePostadresse().postnr;
         } else {
             StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
             postNr = orgAdresse.getPostnummer();
@@ -56,7 +56,7 @@ public final class DokgenAdresseMapper {
     public static String mapPoststed(OrganisasjonDokument org, Persondata persondata) {
         String poststed;
         if (org == null) {
-            poststed = persondata.getGjeldendePostadresse().poststed;
+            poststed = persondata.hentGjeldendePostadresse().poststed;
         } else {
             StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
             poststed = orgAdresse.getPoststed();
@@ -67,7 +67,7 @@ public final class DokgenAdresseMapper {
     public static String mapLandForAdresse(OrganisasjonDokument org, Persondata persondata) {
         String land;
         if (org == null) {
-            land = persondata.getGjeldendePostadresse().land != null ? persondata.getGjeldendePostadresse().land.toString() : null;
+            land = persondata.hentGjeldendePostadresse().land != null ? persondata.hentGjeldendePostadresse().land.toString() : null;
         } else {
             StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
             land = orgAdresse.getLandkode() != null ? orgAdresse.getLandkode() : null;
