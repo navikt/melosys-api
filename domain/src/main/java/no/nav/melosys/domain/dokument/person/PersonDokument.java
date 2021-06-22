@@ -72,16 +72,13 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
     }
 
     @Override
-    public no.nav.melosys.domain.person.adresse.Bostedsadresse hentBostedsadresse() {
-        return new no.nav.melosys.domain.person.adresse.Bostedsadresse(
-            bostedsadresse.tilStrukturertAdresse(),
-            null,
-            null,
-            null,
-            Datakilde.TPS.name(),
-            Datakilde.TPS.name(),
-            false
-        );
+    public Optional<no.nav.melosys.domain.person.adresse.Bostedsadresse> hentBostedsadresse() {
+        if (bostedsadresse == null || bostedsadresse.erTom()) {
+            return Optional.empty();
+        }
+        return Optional.of(
+            new no.nav.melosys.domain.person.adresse.Bostedsadresse(bostedsadresse.tilStrukturertAdresse(), null, null,
+                null, Datakilde.TPS.name(), Datakilde.TPS.name(), false));
     }
 
     @Override

@@ -1,5 +1,7 @@
 package no.nav.melosys.service.persondata.adresse;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -9,7 +11,7 @@ public class BostedsadresseOversetter {
         throw new IllegalStateException("Ikke ment å bli instantiert");
     }
 
-    public static no.nav.melosys.domain.person.adresse.Bostedsadresse oversett(
+    public static Optional<Bostedsadresse> oversett(
         no.nav.melosys.integrasjon.pdl.dto.person.adresse.Bostedsadresse bostedsadressePDL,
         KodeverkService kodeverkService) {
         StrukturertAdresse strukturertAdresse = null;
@@ -22,15 +24,13 @@ public class BostedsadresseOversetter {
         } else if (bostedsadressePDL.matrikkeladresse() != null) {
             strukturertAdresse = PdlAdresseformatOversetter.lagStrukturertAdresse(bostedsadressePDL.matrikkeladresse(),
                 kodeverkService);
-        }  // Ukjent bosted
+        } else if (bostedsadressePDL.ukjentBosted() != null) {
+            return Optional.empty();
+        }
 
-        return new Bostedsadresse(strukturertAdresse,
-            bostedsadressePDL.coAdressenavn(),
-            bostedsadressePDL.gyldigFraOgMed(),
-            bostedsadressePDL.gyldigTilOgMed(),
-            bostedsadressePDL.metadata().master(),
-            bostedsadressePDL.hentKilde(),
-            bostedsadressePDL.metadata().historisk()
-            );
+        return Optional.of(new Bostedsadresse(strukturertAdresse, bostedsadressePDL.coAdressenavn(),
+            bostedsadressePDL.gyldigFraOgMed(), bostedsadressePDL.gyldigTilOgMed(),
+            bostedsadressePDL.metadata().master(), bostedsadressePDL.hentKilde(),
+            bostedsadressePDL.metadata().historisk()));
     }
 }

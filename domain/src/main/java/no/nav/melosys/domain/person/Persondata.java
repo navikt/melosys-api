@@ -42,7 +42,7 @@ public interface Persondata {
     @Deprecated // knyttet til TPS
     no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse getBostedsadresse();
 
-    Bostedsadresse hentBostedsadresse();
+    Optional<Bostedsadresse> hentBostedsadresse();
 
     UstrukturertAdresse hentGjeldendePostadresse();
 }
