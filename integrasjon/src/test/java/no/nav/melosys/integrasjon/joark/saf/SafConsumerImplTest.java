@@ -244,7 +244,15 @@ class SafConsumerImplTest {
             new AvsenderMottaker("123", AvsenderMottakerType.FNR, "navn"),
             "SED",
             Collections.emptyList(),
-            Collections.emptyList()
+            List.of(
+                new DokumentInfo(
+                    "1",
+                    "dok-tittel",
+                    "brevkode",
+                    Collections.emptyList(),
+                    List.of(new DokumentVariant(true, "ARKIV"))
+                )
+            )
         );
     }
 }

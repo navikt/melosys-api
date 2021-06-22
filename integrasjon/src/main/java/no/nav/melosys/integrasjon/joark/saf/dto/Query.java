@@ -40,6 +40,14 @@ public final class Query {
                   logiskVedleggId
                   tittel
                 }
+                dokumentvarianter {
+                  filnavn
+                  filuuid
+                  filtype
+                  skjerming
+                  saksbehandlerHarTilgang
+                  variantformat
+                }
               }
             }
           }
@@ -93,6 +101,14 @@ public final class Query {
                 logiskeVedlegg {
                   logiskVedleggId
                   tittel
+                }
+                dokumentvarianter {
+                  filnavn
+                  filuuid
+                  filtype
+                  skjerming
+                  saksbehandlerHarTilgang
+                  variantformat
                 }
               }
             }

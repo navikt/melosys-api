@@ -21,6 +21,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -52,6 +53,8 @@ class VideresendSoknadServiceTest {
     private LandvelgerService landvelgerService;
     @Mock
     private ProsessinstansService prosessinstansService;
+    @Mock
+    private JoarkFasade joarkFasade;
 
     private VideresendSoknadService videresendSoknadService;
 
@@ -65,8 +68,8 @@ class VideresendSoknadServiceTest {
     @BeforeEach
     public void setup() {
         videresendSoknadService = new VideresendSoknadService(
-            fagsakService, behandlingsresultatService, prosessinstansService, landvelgerService, eessiService, oppgaveService
-        );
+            fagsakService, behandlingsresultatService, prosessinstansService, landvelgerService, eessiService, oppgaveService,
+            joarkFasade);
 
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         behandling.setFagsak(fagsak);

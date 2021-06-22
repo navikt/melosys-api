@@ -128,9 +128,10 @@ class JoarkServiceTest {
         unleash.enable(JoarkService.SAF_FEATURE_TOGGLE_NAVN);
 
         final var saksnummer = "191919";
+        final var arkivsakID = 12345L;
         when(safConsumer.hentDokumentoversikt(saksnummer)).thenReturn(List.of(safJournalpost("111"), safJournalpost("222")));
 
-        var journalposter = joarkService.hentJournalposterTilknyttetSak(new HentJournalposterTilknyttetSakRequest(null, saksnummer));
+        var journalposter = joarkService.hentJournalposterTilknyttetSak(new HentJournalposterTilknyttetSakRequest(arkivsakID, saksnummer));
         assertThat(journalposter).hasSize(2);
     }
 
@@ -499,6 +500,7 @@ class JoarkServiceTest {
 
     private no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost safJournalpost(String journalpostID) {
         var logiskVedlegg = new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.LogiskVedlegg("4143", "Tittel logisk vedlegg");
+        var dokumentVedlegg = new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.DokumentVariant(true, Variantformat.ARKIV.toString());
         return new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost(
             journalpostID,
             "Tittel",
@@ -513,8 +515,8 @@ class JoarkServiceTest {
                 new RelevantDato(LocalDateTime.now(), Datotype.DATO_REGISTRERT)
             ),
             List.of(
-                new DokumentInfo("123", "hoveddokument kommer først", null, List.of(logiskVedlegg)),
-                new DokumentInfo("123", "vedlegg kommer etterpå", null, List.of())
+                new DokumentInfo("123", "hoveddokument kommer først", null, List.of(logiskVedlegg), List.of(dokumentVedlegg)),
+                new DokumentInfo("123", "vedlegg kommer etterpå", null, List.of(), List.of(dokumentVedlegg))
             )
         );
     }

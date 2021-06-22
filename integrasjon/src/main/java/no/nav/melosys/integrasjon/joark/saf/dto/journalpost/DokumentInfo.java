@@ -8,7 +8,8 @@ public record DokumentInfo(
     String dokumentInfoId,
     String tittel,
     String brevkode,
-    List<LogiskVedlegg> logiskeVedlegg
+    List<LogiskVedlegg> logiskeVedlegg,
+    List<DokumentVariant> dokumentvarianter
 ) {
     public ArkivDokument tilArkivDokument() {
         ArkivDokument arkivDokument = new ArkivDokument();
@@ -19,6 +20,11 @@ public record DokumentInfo(
         if (logiskeVedlegg != null) {
             logiskeVedlegg.stream().map(LogiskVedlegg::tilDomene).forEach(arkivDokument.getLogiskeVedlegg()::add);
         }
+
+        if (dokumentvarianter != null) {
+            dokumentvarianter.stream().map(DokumentVariant::tilDomene).forEach(arkivDokument.getDokumentVarianter()::add);
+        }
+
         return arkivDokument;
     }
 }
