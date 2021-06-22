@@ -1,19 +1,20 @@
 package no.nav.melosys.domain.person;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.brev.Postadresse;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Familiemedlem;
-import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.person.adresse.Adressebeskyttelse;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
+import no.nav.melosys.exception.IkkeFunnetException;
+
+import static no.nav.melosys.domain.person.Master.FREG;
+import static no.nav.melosys.domain.person.Master.PDL;
 
 public record Personopplysninger(
     Collection<Adressebeskyttelse> adressebeskyttelser,
@@ -54,7 +55,7 @@ public record Personopplysninger(
 
     @Override
     public String hentFolkeregisterIdent() {
-        return (folkeregisteridentifikator == null) ? null : folkeregisteridentifikator.identifikasjonsnumme();
+        return (folkeregisteridentifikator == null) ? null : folkeregisteridentifikator.identifikasjonsnummer();
     }
 
     @Override
@@ -116,7 +117,41 @@ public record Personopplysninger(
      * Oppholdsadresse med master Freg
      * Bostedsadresse
      */
-    public UstrukturertAdresse hentGjeldendePostadresse() {
-        return null;
+    public Postadresse hentGjeldendePostadresse() {
+        return lagPostadresseFraKontaktadresser()
+            .or(this::lagPostadresseFraOppholdsadresser)
+            .orElse(lagPostadresseFraBostedsadresse());
+    }
+
+    private Optional<Postadresse> lagPostadresseFraKontaktadresser() {
+        return hentGjeldendeKontaktadresseFraMaster(PDL)
+            .or(() -> hentGjeldendeKontaktadresseFraMaster(FREG))
+            .map(Kontaktadresse::tilPostadresse);
+    }
+
+    private Optional<Kontaktadresse> hentGjeldendeKontaktadresseFraMaster(Master master) {
+        return kontaktadresser.stream()
+            .filter(a -> master.name().equals(a.master()))
+            .max(Comparator.comparing(Kontaktadresse::registrertDato));
+    }
+
+    private Optional<Postadresse> lagPostadresseFraOppholdsadresser() {
+        return hentGjeldendeOppholdsadresseFraMaster(PDL)
+            .or(() -> hentGjeldendeOppholdsadresseFraMaster(FREG))
+            .map(Oppholdsadresse::strukturertAdresse)
+            .map(Postadresse::lagPostadresse);
+    }
+
+    private Optional<Oppholdsadresse> hentGjeldendeOppholdsadresseFraMaster(Master master) {
+        return oppholdsadresser.stream()
+            .filter(a -> master.name().equals(a.master()))
+            .max(Comparator.comparing(Oppholdsadresse::registrertDato));
+    }
+
+    private Postadresse lagPostadresseFraBostedsadresse() {
+        return hentBostedsadresse()
+            .map(Bostedsadresse::strukturertAdresse)
+            .map(Postadresse::lagPostadresse)
+            .orElseThrow(() -> new IkkeFunnetException("Forventer bostedsadresse"));
     }
 }

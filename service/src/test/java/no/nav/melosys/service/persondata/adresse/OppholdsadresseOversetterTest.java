@@ -25,7 +25,7 @@ class OppholdsadresseOversetterTest {
 
     @Test
     void oversettVegadresse() {
-        var OppholdsadressePDL = new Oppholdsadresse(
+        var oppholdsadressePDL = new Oppholdsadresse(
             LocalDateTime.parse("2020-01-01T00:00:00"),
             LocalDateTime.parse("2020-05-05T00:00:00"),
             "Kari Hansen",
@@ -42,24 +42,25 @@ class OppholdsadresseOversetterTest {
         );
         when(kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234"))).thenReturn("Bergen");
 
-        final var Oppholdsadresse = OppholdsadresseOversetter.oversett(OppholdsadressePDL, kodeverkService);
+        final var oppholdsadresse = OppholdsadresseOversetter.oversett(oppholdsadressePDL, kodeverkService);
 
-        assertThat(Oppholdsadresse.coAdressenavn()).isEqualTo("Kari Hansen");
-        assertThat(Oppholdsadresse.gyldigFraOgMed()).isEqualTo(LocalDateTime.parse("2020-01-01T00:00:00"));
-        assertThat(Oppholdsadresse.strukturertAdresse().getGatenavn()).isEqualTo("Kirkegata");
-        assertThat(Oppholdsadresse.strukturertAdresse().getHusnummerEtasjeLeilighet()).isEqualTo("12 B");
-        assertThat(Oppholdsadresse.strukturertAdresse().getTilleggsnavn()).isEqualTo("Storgården");
-        assertThat(Oppholdsadresse.strukturertAdresse().getPostnummer()).isEqualTo("1234");
-        assertThat(Oppholdsadresse.strukturertAdresse().getPoststed()).isEqualTo("Bergen");
-        assertThat(Oppholdsadresse.strukturertAdresse().getRegion()).isNull();
-        assertThat(Oppholdsadresse.strukturertAdresse().getLandkode()).isEqualTo("NO");
-        assertThat(Oppholdsadresse.master()).isEqualTo("PDL");
-        assertThat(Oppholdsadresse.kilde()).isEqualTo("Dolly");
+        assertThat(oppholdsadresse.coAdressenavn()).isEqualTo("Kari Hansen");
+        assertThat(oppholdsadresse.gyldigFraOgMed()).isEqualTo(LocalDateTime.parse("2020-01-01T00:00:00"));
+        assertThat(oppholdsadresse.strukturertAdresse().getGatenavn()).isEqualTo("Kirkegata");
+        assertThat(oppholdsadresse.strukturertAdresse().getHusnummerEtasjeLeilighet()).isEqualTo("12 B");
+        assertThat(oppholdsadresse.strukturertAdresse().getTilleggsnavn()).isEqualTo("Storgården");
+        assertThat(oppholdsadresse.strukturertAdresse().getPostnummer()).isEqualTo("1234");
+        assertThat(oppholdsadresse.strukturertAdresse().getPoststed()).isEqualTo("Bergen");
+        assertThat(oppholdsadresse.strukturertAdresse().getRegion()).isNull();
+        assertThat(oppholdsadresse.strukturertAdresse().getLandkode()).isEqualTo("NO");
+        assertThat(oppholdsadresse.registrertDato()).isEqualTo(oppholdsadressePDL.metadata().datoSistRegistrert());
+        assertThat(oppholdsadresse.master()).isEqualTo("PDL");
+        assertThat(oppholdsadresse.kilde()).isEqualTo("Dolly");
     }
 
     @Test
     void oversettUtenlandskAdresse() {
-        var OppholdsadressePDL = new Oppholdsadresse(
+        var oppholdsadressePDL = new Oppholdsadresse(
             null,
             null,
             null,
@@ -77,14 +78,14 @@ class OppholdsadresseOversetterTest {
             metadata()
         );
 
-        final var Oppholdsadresse = OppholdsadresseOversetter.oversett(OppholdsadressePDL, kodeverkService);
+        final var oppholdsadresse = OppholdsadresseOversetter.oversett(oppholdsadressePDL, kodeverkService);
 
-        assertThat(Oppholdsadresse.strukturertAdresse().getGatenavn()).isEqualTo("adressenavnNummer");
-        assertThat(Oppholdsadresse.strukturertAdresse().getHusnummerEtasjeLeilighet()).isEqualTo("bygningEtasjeLeilighet");
-        assertThat(Oppholdsadresse.strukturertAdresse().getPostboks()).isEqualTo("P.O.Box 1234 Place");
-        assertThat(Oppholdsadresse.strukturertAdresse().getPostnummer()).isEqualTo("SE-12345");
-        assertThat(Oppholdsadresse.strukturertAdresse().getPoststed()).isEqualTo("Haworth");
-        assertThat(Oppholdsadresse.strukturertAdresse().getRegion()).isEqualTo("Yorkshire");
-        assertThat(Oppholdsadresse.strukturertAdresse().getLandkode()).isEqualTo("SE");
+        assertThat(oppholdsadresse.strukturertAdresse().getGatenavn()).isEqualTo("adressenavnNummer");
+        assertThat(oppholdsadresse.strukturertAdresse().getHusnummerEtasjeLeilighet()).isEqualTo("bygningEtasjeLeilighet");
+        assertThat(oppholdsadresse.strukturertAdresse().getPostboks()).isEqualTo("P.O.Box 1234 Place");
+        assertThat(oppholdsadresse.strukturertAdresse().getPostnummer()).isEqualTo("SE-12345");
+        assertThat(oppholdsadresse.strukturertAdresse().getPoststed()).isEqualTo("Haworth");
+        assertThat(oppholdsadresse.strukturertAdresse().getRegion()).isEqualTo("Yorkshire");
+        assertThat(oppholdsadresse.strukturertAdresse().getLandkode()).isEqualTo("SE");
     }
 }

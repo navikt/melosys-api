@@ -41,7 +41,7 @@ public final class DokgenAdresseMapper {
     public static String mapPostnr(OrganisasjonDokument org, Persondata persondata) {
         String postNr;
         if (org == null) {
-            postNr = persondata.hentGjeldendePostadresse().postnr;
+            postNr = persondata.hentGjeldendePostadresse().postnr();
         } else {
             StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
             postNr = orgAdresse.getPostnummer();
@@ -56,7 +56,7 @@ public final class DokgenAdresseMapper {
     public static String mapPoststed(OrganisasjonDokument org, Persondata persondata) {
         String poststed;
         if (org == null) {
-            poststed = persondata.hentGjeldendePostadresse().poststed;
+            poststed = persondata.hentGjeldendePostadresse().poststed();
         } else {
             StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
             poststed = orgAdresse.getPoststed();
@@ -65,13 +65,13 @@ public final class DokgenAdresseMapper {
     }
 
     public static String mapLandForAdresse(OrganisasjonDokument org, Persondata persondata) {
-        String land;
+        String landkode;
         if (org == null) {
-            land = persondata.hentGjeldendePostadresse().land != null ? persondata.hentGjeldendePostadresse().land.toString() : null;
+            landkode = persondata.hentGjeldendePostadresse().landkode();
         } else {
             StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
-            land = orgAdresse.getLandkode() != null ? orgAdresse.getLandkode() : null;
+            landkode = orgAdresse.getLandkode() != null ? orgAdresse.getLandkode() : null;
         }
-        return land;
+        return landkode;
     }
 }
