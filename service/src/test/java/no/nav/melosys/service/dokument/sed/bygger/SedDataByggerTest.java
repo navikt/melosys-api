@@ -199,9 +199,9 @@ class SedDataByggerTest {
         Bostedsadresse bostedsadresse = new Bostedsadresse();
         bostedsadresse.setGateadresse(null);
         bostedsadresse.setLand(new Land(Land.SVERIGE));
+        behandling.hentPersonDokument().setBostedsadresse(bostedsadresse);
 
         SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagDokumentressurser();
-        sedDataGrunnlagMedSoknad.getPerson().setBostedsadresse(bostedsadresse);
 
         SedDataDto sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 
@@ -217,9 +217,9 @@ class SedDataByggerTest {
         Bostedsadresse bostedsadresse = new Bostedsadresse();
         bostedsadresse.setGateadresse(gateadresse);
         bostedsadresse.setLand(new Land(Land.SVERIGE));
+        behandling.hentPersonDokument().setBostedsadresse(bostedsadresse);
 
         SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagDokumentressurser();
-        sedDataGrunnlagMedSoknad.getPerson().setBostedsadresse(bostedsadresse);
 
         SedDataDto sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 
@@ -235,9 +235,9 @@ class SedDataByggerTest {
         Bostedsadresse bostedsadresse = new Bostedsadresse();
         bostedsadresse.setGateadresse(gateadresse);
         bostedsadresse.setLand(new Land(Land.SVERIGE));
+        behandling.hentPersonDokument().setBostedsadresse(bostedsadresse);
 
         SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagDokumentressurser();
-        sedDataGrunnlagMedSoknad.getPerson().setBostedsadresse(bostedsadresse);
 
         SedDataDto sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 
@@ -253,9 +253,9 @@ class SedDataByggerTest {
         Bostedsadresse bostedsadresse = new Bostedsadresse();
         bostedsadresse.setGateadresse(gateadresse);
         bostedsadresse.setLand(new Land(Land.SVERIGE));
+        behandling.hentPersonDokument().setBostedsadresse(bostedsadresse);
 
         SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagDokumentressurser();
-        sedDataGrunnlagMedSoknad.getPerson().setBostedsadresse(bostedsadresse);
 
         SedDataDto sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 
@@ -264,10 +264,10 @@ class SedDataByggerTest {
 
     @Test
     public void lag_bostedsadresseFinnesIkke_kasterException() {
-
+        behandling.hentPersonDokument().setBostedsadresse(new Bostedsadresse());
         SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagDokumentressurser();
         sedDataGrunnlagMedSoknad.getBehandlingsgrunnlagData().bosted = new Bosted();
-        sedDataGrunnlagMedSoknad.getPerson().setBostedsadresse(new Bostedsadresse());
+
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE))
@@ -363,8 +363,8 @@ class SedDataByggerTest {
 
     @Test
     public void lagUtkast_ingenAdresse_forventTomAdresse() {
+        behandling.hentPersonDokument().setBostedsadresse(new Bostedsadresse());
         SedDataGrunnlagMedSoknad dataGrunnlag = lagDokumentressurser();
-        dataGrunnlag.getPerson().setBostedsadresse(new Bostedsadresse());
 
         SedDataDto sedData = dataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 

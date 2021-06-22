@@ -5,8 +5,8 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.person.Informasjonsbehov;
-import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -52,9 +52,9 @@ public class RegisterOppslagService {
      * @deprecated /personer forsvinner ifm. overgang til PDL.
      */
     @Deprecated
-    public Persondata hentPerson(String personnummer) {
+    public PersonDokument hentPerson(String personnummer) {
         Saksopplysning saksopplysning = persondataFasade.hentPersonFraTps(personnummer, Informasjonsbehov.STANDARD);
-        return (Persondata) saksopplysning.getDokument();
+        return (PersonDokument) saksopplysning.getDokument();
     }
 
     /**

@@ -43,8 +43,10 @@ class BostedsadresseOversetterTest {
         );
         when(kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234"), any())).thenReturn("Bergen");
 
-        final var bostedsadresse = BostedsadresseOversetter.oversett(bostedsadressePDL, kodeverkService);
+        final var bostedsadresseOptional = BostedsadresseOversetter.oversett(bostedsadressePDL, kodeverkService);
 
+        assertThat(bostedsadresseOptional).isPresent();
+        final var bostedsadresse = bostedsadresseOptional.get();
         assertThat(bostedsadresse.coAdressenavn()).isEqualTo("Kari Hansen");
         assertThat(bostedsadresse.gyldigFraOgMed()).isEqualTo(LocalDateTime.parse("2020-01-01T00:00:00"));
         assertThat(bostedsadresse.strukturertAdresse().getGatenavn()).isEqualTo("Kirkegata");
@@ -79,8 +81,10 @@ class BostedsadresseOversetterTest {
             metadata()
         );
 
-        final var bostedsadresse = BostedsadresseOversetter.oversett(bostedsadressePDL, kodeverkService);
+        final var bostedsadresseOptional = BostedsadresseOversetter.oversett(bostedsadressePDL, kodeverkService);
 
+        assertThat(bostedsadresseOptional).isPresent();
+        final var bostedsadresse = bostedsadresseOptional.get();
         assertThat(bostedsadresse.strukturertAdresse().getGatenavn()).isEqualTo("adressenavnNummer");
         assertThat(bostedsadresse.strukturertAdresse().getHusnummerEtasjeLeilighet()).isEqualTo("bygningEtasjeLeilighet");
         assertThat(bostedsadresse.strukturertAdresse().getPostboks()).isEqualTo("P.O.Box 1234 Place");
