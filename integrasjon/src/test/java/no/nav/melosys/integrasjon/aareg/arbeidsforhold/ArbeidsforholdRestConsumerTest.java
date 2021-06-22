@@ -1,5 +1,8 @@
 package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -41,7 +44,7 @@ class ArbeidsforholdRestConsumerTest {
     }
 
     @Test
-    void skalFinneArbeidsforholdPrArbeidstaker() {
+    void skalFinneArbeidsforholdPrArbeidstaker() throws JsonProcessingException {
         String fnr = "12345678990";
 
         wireMockServer.stubFor(get(urlPathEqualTo("/"))
@@ -65,20 +68,81 @@ class ArbeidsforholdRestConsumerTest {
             .build();
         ArbeidsforholdResponse arbeidsforholdResponse = restConsumer.finnArbeidsforholdPrArbeidstaker(fnr, arbeidsforholdQuery);
 
-        List<ArbeidsforholdResponse.Arbeidsforhold> arbeidsforholds = arbeidsforholdResponse.getArbeidsforhold();
-        assertThat(arbeidsforholds.size()).isEqualTo(1);
-        ArbeidsforholdResponse.Arbeidsforhold arbeidsforhold = arbeidsforholds.get(0);
-        assertThat(arbeidsforhold.getNavArbeidsforholdId()).isEqualTo(123456);
-
-        ArbeidsforholdResponse.Arbeidstaker arbeidstaker = arbeidsforhold.getArbeidstaker();
-//        assertThat(arbeidstaker.type).isEqualTo("Person");
-        assertThat(arbeidstaker.aktoerId).isEqualTo("1234567890");
-
-        ArbeidsforholdResponse.Arbeidsavtaler arbeidsavtaler = arbeidsforhold.getArbeidsavtaler().get(0);
-
-        System.out.println(arbeidsavtaler.type);
-
+        List<ArbeidsforholdResponse.Arbeidsforhold> arbeidsforhold = arbeidsforholdResponse.getArbeidsforhold();
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        String result = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(arbeidsforhold);
+        assertThat(result).isEqualTo(expectedResult);
     }
+
+    private final String expectedResult = """
+        [ {
+          "arbeidsforholdId" : "abc-321",
+          "navArbeidsforholdId" : 123456,
+          "ansettelsesperiode" : {
+            "periode" : {
+              "fom" : "2014-07-01",
+              "tom" : "2015-12-31"
+            }
+          },
+          "type" : "ordinaertArbeidsforhold",
+          "arbeidstaker" : {
+            "type" : null,
+            "offentligIdent" : "31126700000",
+            "aktoerId" : "1234567890"
+          },
+          "arbeidsavtaler" : [ {
+            "type" : "Forenklet",
+            "arbeidstidsordning" : "ikkeSkift",
+            "yrke" : "2130123",
+            "stillingsprosent" : 49.5,
+            "beregnetAntallTimerPrUke" : 37.5,
+            "gyldighetsperiode" : {
+              "fom" : "2014-07-01",
+              "tom" : "2015-12-31"
+            },
+            "sistStillingsendring" : "string",
+            "sistLoennsendring" : "string",
+            "antallTimerPrUke" : 37.5
+          } ],
+          "permisjonPermitteringer" : [ {
+            "periode" : {
+              "fom" : "2014-07-01",
+              "tom" : "2015-12-31"
+            },
+            "permisjonPermitteringId" : "123-xyz",
+            "prosent" : 50.5,
+            "type" : "permisjonMedForeldrepenger",
+            "varslingskode" : "string"
+          } ],
+          "utenlandsopphold" : [ {
+            "landkode" : "JPN",
+            "periode" : {
+              "fom" : "2014-07-01",
+              "tom" : "2015-12-31"
+            },
+            "rapporteringsperiode" : "2017-12"
+          } ],
+          "arbeidsgiver" : {
+            "type" : "Organisasjon",
+            "organisasjonsnummer" : null
+          },
+          "opplysningspliktig" : {
+            "type" : "Organisasjon",
+            "organisasjonsnummer" : null
+          },
+          "innrapportertEtterAOrdningen" : false,
+          "registrert" : "2018-09-18T11:12:29",
+          "sistBekreftet" : "2018-09-19T12:10:31",
+          "antallTimerForTimeloennet" : [ {
+            "antallTimer" : 37.5,
+            "periode" : {
+              "fom" : "2014-07-01",
+              "tom" : "2015-12-31"
+            },
+            "rapporteringsperiode" : "2018-05"
+          } ]
+        } ]""";
 
     private final String responsBody = """
         [
