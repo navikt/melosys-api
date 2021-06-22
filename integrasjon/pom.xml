@@ -131,9 +131,8 @@
             <artifactId>nav-virksomhet-hendelsehandterer-behandlingstatus-v1-meldingsdefinisjon</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.tjenester.fim</groupId>
-            <artifactId>nav-fim-sakOgBehandling-v1-tjenestespesifikasjon</artifactId>
-            <classifier>jaxws</classifier>
+            <groupId>no.nav.tjenestespesifikasjoner</groupId>
+            <artifactId>sakogbehandling-tjenestespesifikasjon</artifactId>
         </dependency>
 
         <!-- DokSys -->
@@ -182,9 +181,8 @@
         </dependency>
         <!-- Utbetaling -->
         <dependency>
-            <groupId>no.nav.tjenester.fim</groupId>
-            <artifactId>nav-fim-utbetaling-v1-tjenestespesifikasjon</artifactId>
-            <classifier>jaxws</classifier>
+            <groupId>no.nav.tjenestespesifikasjoner</groupId>
+            <artifactId>utbetaling-tjenestespesifikasjon</artifactId>
         </dependency>
 
         <!--Test-->

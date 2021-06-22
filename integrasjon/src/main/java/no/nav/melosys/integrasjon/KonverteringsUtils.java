@@ -9,6 +9,8 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.joda.time.DateTime;
+
 public final class KonverteringsUtils {
 
     private KonverteringsUtils() {
@@ -65,5 +67,20 @@ public final class KonverteringsUtils {
             return null;
         }
         return LocalDate.parse(date.toString());
+    }
+
+    public static DateTime javaLocalDateToJodaDateTime(LocalDate date) {
+        if (date == null) {
+            return null;
+        }
+        return DateTime.parse(date.toString());
+    }
+
+    public static LocalDate jodaDateTimeToJavaLocalDate(DateTime date) {
+        if (date == null) {
+            return null;
+        }
+
+        return LocalDate.parse(date.toLocalDate().toString());
     }
 }
