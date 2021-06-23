@@ -9,10 +9,10 @@ import java.time.YearMonth;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ArbeidsforholdKonvertering {
+public class ArbeidsforholdKonverter {
     private final ArbeidsforholdResponse arbeidsforholdResponse;
 
-    public ArbeidsforholdKonvertering(ArbeidsforholdResponse arbeidsforholdResponse) {
+    public ArbeidsforholdKonverter(ArbeidsforholdResponse arbeidsforholdResponse) {
         this.arbeidsforholdResponse = arbeidsforholdResponse;
     }
 
