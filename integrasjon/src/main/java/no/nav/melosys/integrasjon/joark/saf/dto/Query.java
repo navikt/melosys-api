@@ -41,10 +41,6 @@ public final class Query {
                   tittel
                 }
                 dokumentvarianter {
-                  filnavn
-                  filuuid
-                  filtype
-                  skjerming
                   saksbehandlerHarTilgang
                   variantformat
                 }
@@ -103,10 +99,6 @@ public final class Query {
                   tittel
                 }
                 dokumentvarianter {
-                  filnavn
-                  filuuid
-                  filtype
-                  skjerming
                   saksbehandlerHarTilgang
                   variantformat
                 }

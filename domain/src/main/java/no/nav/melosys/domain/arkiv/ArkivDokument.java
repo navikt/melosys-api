@@ -13,6 +13,7 @@ public class ArkivDokument {
 
     public ArkivDokument() {
         this.logiskeVedlegg = new ArrayList<>();
+        this.dokumentVarianter = new ArrayList<>();
     }
 
     public String getDokumentId() {
@@ -44,7 +45,7 @@ public class ArkivDokument {
     }
 
     public List<String> hentLogiskeVedleggTitler() {
-        return logiskeVedlegg.stream().map(LogiskVedlegg::getTittel).collect(Collectors.toList());
+        return logiskeVedlegg.stream().map(LogiskVedlegg::tittel).collect(Collectors.toList());
     }
 
     public List<DokumentVariant> getDokumentVarianter() {

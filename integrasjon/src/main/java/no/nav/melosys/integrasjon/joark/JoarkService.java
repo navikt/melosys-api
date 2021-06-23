@@ -8,12 +8,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import no.finn.unleash.Unleash;
-import no.nav.dok.tjenester.journalfoerinngaaende.Avsender;
-import no.nav.dok.tjenester.journalfoerinngaaende.Bruker;
-import no.nav.dok.tjenester.journalfoerinngaaende.Dokument;
-import no.nav.dok.tjenester.journalfoerinngaaende.GetJournalpostResponse;
+import no.nav.dok.tjenester.journalfoerinngaaende.*;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.arkiv.*;
+import no.nav.melosys.domain.arkiv.LogiskVedlegg;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
@@ -200,9 +198,6 @@ public class JoarkService implements JoarkFasade {
         dokument.getLogiskVedleggListe().forEach(
             l -> arkivDokument.getLogiskeVedlegg().add(new LogiskVedlegg(l.getLogiskVedleggId(), l.getLogiskVedleggTittel()))
         );
-        /*dokument.getVariant().forEach(
-            v -> arkivDokument.getDokumentVarianter().add(new DokumentVariant(v.getVariantFormat(),v.))
-        );*/
         return arkivDokument;
     }
 
@@ -343,7 +338,7 @@ public class JoarkService implements JoarkFasade {
         if (journalpost.getHoveddokument() != null) {
             var hoveddokument = journalpost.getHoveddokument();
             for (var logiskVedlegg : hoveddokument.getLogiskeVedlegg()) {
-                journalpostapiConsumer.fjernLogiskeVedlegg(hoveddokument.getDokumentId(), logiskVedlegg.getLogiskVedleggID());
+                journalpostapiConsumer.fjernLogiskeVedlegg(hoveddokument.getDokumentId(), logiskVedlegg.logiskVedleggID());
             }
         }
     }
