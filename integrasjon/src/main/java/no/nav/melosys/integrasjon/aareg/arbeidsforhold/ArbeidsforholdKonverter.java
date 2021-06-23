@@ -34,7 +34,7 @@ public class ArbeidsforholdKonverter {
             dst.utenlandsopphold = getUtenlandsopphold(src.utenlandsopphold);
             dst.arbeidsgivertype = Aktoertype.valueOf(src.arbeidsgiver.type.toUpperCase());
             dst.arbeidsgiverID = src.arbeidsgiver.organisasjonsnummer;
-            dst.arbeidstakerID = src.getArbeidstaker().offentligIdent; // Er arbeidstakerID=arbeidstaker.offentligIdent?
+            dst.arbeidstakerID = src.getArbeidstaker().offentligIdent;
             dst.opplysningspliktigtype = Aktoertype.valueOf(src.opplysningspliktig.type.toUpperCase());
             dst.opplysningspliktigID = src.opplysningspliktig.organisasjonsnummer;
             dst.arbeidsforholdInnrapportertEtterAOrdningen = src.innrapportertEtterAOrdningen;
@@ -62,10 +62,8 @@ public class ArbeidsforholdKonverter {
 
     private OffsetDateTime getOffsetDateTime(String date) {
         // OffsetDateTime is on format 2017-12-03T10:15:30+01:00
-        // But what we get from example is without offset
-        // Should we add offset in norway for this to be correct?
-        // TODO: check if we can do this a better way
-        return OffsetDateTime.parse(date + "+00:00");
+        // TODO: Legg til norsk offset, og må vel ta med "daylight savings"...
+        return OffsetDateTime.parse(date + "+01:00");
     }
 
     private List<Utenlandsopphold> getUtenlandsopphold(List<ArbeidsforholdResponse.Utenlandsopphold> utenlandsopphold) {
@@ -87,6 +85,7 @@ public class ArbeidsforholdKonverter {
 
             // Ser ut til vi kan bruke type her. Eks. "permisjonMedForeldrepenger"
             // xml eksemple har "Permisjon"
+            // TODO: hent fra KodeverkService for å få dette riktig
             dst.setPermisjonOgPermittering(src.type);
             return dst;
         }).collect(Collectors.toList());
@@ -100,17 +99,20 @@ public class ArbeidsforholdKonverter {
         return arbeidsavtalerSrc.stream().map(src -> {
             Arbeidsavtale dst = new Arbeidsavtale();
             dst.yrke = new Yrke(src.yrke);
-            dst.yrke.setTerm(""); // Hvor kan vi finne dette. (Ser det er "" om det ikke finnes fra xml mapping)
+            // TODO: Bruke KodeverkService for å finne yrke
+            dst.yrke.setTerm(""); // Ser det er "" om det ikke finnes fra xml mapping
 
             dst.beregnetAntallTimerPrUke = src.beregnetAntallTimerPrUke;
             dst.arbeidstidsordning = new Arbeidstidsordning();
+            // TODO: Du kan nok stille spørsmål til #team-registre og/eller Anders Bryhni.
             dst.arbeidstidsordning.setKode(src.arbeidstidsordning); // Jeg tror dette blir rikig
 
             dst.avloenningstype = ""; // soap api gir f.eks "Fastlønn" eller tom string "";
             dst.gyldighetsperiode = getPeriode(src.gyldighetsperiode);
             dst.beregnetAntallTimerPrUke = src.beregnetAntallTimerPrUke;
             dst.stillingsprosent = src.stillingsprosent;
-            // Finner ikk denne i rest api men kan regnes ut
+            // Finner ikke denne i rest api men kan regnes ut -
+            // TODO:  Spør fag om det brukes til noe
             dst.beregnetStillingsprosent = src.calculateBergnetStillingsprosent();
             dst.sisteLoennsendringsdato = src.getSisteLoennsendringsDato();
             dst.endringsdatoStillingsprosent = src.getSistStillingsendringDato();

@@ -64,7 +64,7 @@ public class AaregService implements AaregFasade {
             .arbeidsforholdType(ArbeidsforholdQuery.ArbeidsforholdType.ALLE)
             .regelverk(ArbeidsforholdQuery.Regelverk.A_ORDNINGEN)
             .ansettelsesperiodeFom(fom)
-            .ansettelsesperiodeFom(tom)
+            .ansettelsesperiodeTom(tom)
             .build();
 
         ArbeidsforholdResponse response = arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker(ident, arbeidsforholdQuery);

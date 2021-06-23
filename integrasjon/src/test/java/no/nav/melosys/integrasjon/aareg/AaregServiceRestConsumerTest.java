@@ -22,6 +22,7 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class AaregServiceRestConsumerTest {
     private static final Long SIKKERHETSBEGRENSET_ID = 1L;
+    private static final String NAV_PERSONIDENT = "12345678990";
 
     private AaregService aaregService;
     private WireMockServer wireMockServer;
@@ -38,6 +39,10 @@ public class AaregServiceRestConsumerTest {
         restConsumer = new ArbeidsforholdRestConsumer(webClient);
 
         wireMockServer.stubFor(get(urlPathEqualTo("/"))
+            .withHeader("Nav-Personident", equalTo(NAV_PERSONIDENT))
+            .withQueryParam("regelverk", equalTo("A_ORDNINGEN"))
+            .withQueryParam("ansettelsesperiodeFom", equalTo("2014-07-01"))
+            .withQueryParam("ansettelsesperiodeTom", equalTo("2015-12-31"))
             .willReturn(aResponse()
                 .withStatus(200)
                 .withHeader("Content-Type", "application/json")
@@ -59,7 +64,7 @@ public class AaregServiceRestConsumerTest {
     @Test
     public void getArbeidsforholdDokument() throws JsonProcessingException {
         Saksopplysning saksopplysning = aaregService.finnArbeidsforholdPrArbeidstaker(
-            "abc-321",
+            NAV_PERSONIDENT,
             LocalDate.of(2014, 7, 1),
             LocalDate.of(2015, 12, 31));
         ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) saksopplysning.getDokument();
@@ -128,8 +133,8 @@ public class AaregServiceRestConsumerTest {
           "arbeidstakerID" : "31126700000",
           "opplysningspliktigtype" : "ORGANISASJON",
           "opplysningspliktigID" : "991609407",
-          "opprettelsestidspunkt" : 1537269149.000000000,
-          "sistBekreftet" : 1537359031.000000000,
+          "opprettelsestidspunkt" : 1537265549.000000000,
+          "sistBekreftet" : 1537355431.000000000,
           "Aordning" : false,
           "timerTimelonnet" : [ {
             "antallTimer" : 37.5,
