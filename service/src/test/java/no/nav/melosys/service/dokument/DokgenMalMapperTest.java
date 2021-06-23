@@ -69,7 +69,7 @@ class DokgenMalMapperTest {
 
     @BeforeEach
     void init() {
-        dokgenMalMapper = new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService, mockEregFasade, mockPersondataFasade);
+        dokgenMalMapper = new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService, mockEregFasade, mockPersondataFasade, medlemAvFolketrygdenService);
     }
 
     @Test

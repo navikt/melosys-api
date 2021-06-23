@@ -10,12 +10,14 @@ import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
+import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -33,16 +35,18 @@ public class DokgenMalMapper {
     private final BehandlingsresultatService behandlingsresultatService;
     private final EregFasade eregFasade;
     private final PersondataFasade persondataFasade;
+    private final MedlemAvFolketrygdenService medlemAvFolketrygdenService;
 
     @Autowired
     public DokgenMalMapper(KodeverkService kodeverkService,
                            BehandlingsresultatService behandlingsresultatService,
                            @Qualifier("system") EregFasade eregFasade,
-                           @Qualifier("system") PersondataFasade persondataFasade) {
+                           @Qualifier("system") PersondataFasade persondataFasade, MedlemAvFolketrygdenService medlemAvFolketrygdenService) {
         this.kodeverkService = kodeverkService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.eregFasade = eregFasade;
         this.persondataFasade = persondataFasade;
+        this.medlemAvFolketrygdenService = medlemAvFolketrygdenService;
     }
 
     public DokgenDto mapBehandling(DokgenBrevbestilling brevbestilling) {
@@ -50,7 +54,7 @@ public class DokgenMalMapper {
         if (brevbestilling.getOrg() == null) {
             String fnr = brevbestilling.getBehandling().hentPersonDokument().hentFolkeregisterIdent();
             //NOTE Henter opplysninger på nytt for å sikre at korrekt adresse benyttes
-            Persondata persondata = (Persondata) persondataFasade.hentPersonFraTps(fnr, Informasjonsbehov.STANDARD).getDokument();
+            var persondata = (Persondata) persondataFasade.hentPersonFraTps(fnr, Informasjonsbehov.STANDARD).getDokument();
             brevbestilling.toBuilder().medPersonDokument(persondata).build();
         }
         dto = switch (brevbestilling.getProduserbartdokument()) {
@@ -63,7 +67,7 @@ public class DokgenMalMapper {
                 .medVedtaksdato(hentVedtaksdato(brevbestilling.getBehandling().getId()))
                 .medFullmektigNavn(hentFullmektigNavn(brevbestilling.getBehandling().getFagsak()))
                 .build());
-            case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> InnvilgelseFtrl.av((InnvilgelseBrevbestilling) brevbestilling);
+            case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> InnvilgelseFtrl.av((InnvilgelseBrevbestilling) brevbestilling, hentMedlemAvFolketrygden(brevbestilling.getBehandlingId()));
 
             default -> throw new FunksjonellException(format("ProduserbartDokument %s er ikke støttet av melosys-dokgen", brevbestilling.getProduserbartdokument()));
         };
@@ -99,5 +103,9 @@ public class DokgenMalMapper {
             }
         }
         return landnavn.equals("UKJENT") ? "" : landnavn;
+    }
+
+    private MedlemAvFolketrygden hentMedlemAvFolketrygden(long behandlingId) {
+        return medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingId);
     }
 }

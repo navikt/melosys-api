@@ -3,7 +3,8 @@ package no.nav.melosys.tjenester.gui.dto;
 public class FattFtrlVedtakDto extends FattVedtakDto {
     private String fritekstInnledning;
     private String fritekstBegrunnelse;
-    private String fritekstFamilie;
+    private String fritekstEktefelle;
+    private String fritekstBarn;
 
     public String getFritekstInnledning() {
         return fritekstInnledning;
@@ -13,8 +14,12 @@ public class FattFtrlVedtakDto extends FattVedtakDto {
         return fritekstBegrunnelse;
     }
 
-    public String getFritekstFamilie() {
-        return fritekstFamilie;
+    public String getFritekstEktefelle() {
+        return fritekstEktefelle;
+    }
+
+    public String getFritekstBarn() {
+        return fritekstBarn;
     }
 
     public void setFritekstInnledning(String fritekstInnledning) {
@@ -25,7 +30,11 @@ public class FattFtrlVedtakDto extends FattVedtakDto {
         this.fritekstBegrunnelse = fritekstBegrunnelse;
     }
 
-    public void setFritekstFamilie(String fritekstFamilie) {
-        this.fritekstFamilie = fritekstFamilie;
+    public void setFritekstEktefelle(String fritekstEktefelle) {
+        this.fritekstEktefelle = fritekstEktefelle;
+    }
+
+    public void setFritekstBarn(String fritekstBarn) {
+        this.fritekstBarn = fritekstBarn;
     }
 }

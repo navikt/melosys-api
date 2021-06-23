@@ -86,7 +86,7 @@ class DokgenServiceTest {
     @BeforeEach
     void init() {
         dokgenService = new DokgenService(mockDokgenConsumer, new DokumentproduksjonsInfoMapper(unleash), mockJoarkFasade,
-            new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService, mockEregFasade, mockPersondataFasade),
+            new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService, mockEregFasade, mockPersondataFasade, medlemAvFolketrygdenService),
             mockBehandlingsService,
             mockEregFasade, mockKontaktOpplysningService, mockBrevMottakerService, mockProsessinstansService);
     }

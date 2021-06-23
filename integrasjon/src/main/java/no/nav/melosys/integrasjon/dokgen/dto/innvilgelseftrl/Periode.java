@@ -1,10 +1,11 @@
-package no.nav.melosys.integrasjon.dokgen.dto.support;
+package no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl;
 
 import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import no.nav.melosys.domain.Medlemskapsperiode;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
@@ -22,6 +23,15 @@ public class Periode {
     private final String innvilgelsesResultat;
     private final String medlemskapstype;
     private final String dekning;
+
+    public Periode(Medlemskapsperiode m) {
+        this.fom = m.getFom();
+        this.tom = m.getTom();
+        this.bestemmelse = m.getBestemmelse().getKode();
+        this.innvilgelsesResultat = m.getInnvilgelsesresultat().getKode();
+        this.medlemskapstype = m.getMedlemskapstype().getKode();
+        this.dekning = m.getDekning().getKode();
+    }
 
     public LocalDate getFom() {
         return fom;

@@ -2,12 +2,16 @@ package no.nav.melosys.integrasjon.dokgen.dto;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
-import no.nav.melosys.integrasjon.dokgen.dto.support.Periode;
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
+import no.nav.melosys.domain.person.familie.OmfattetFamilie;
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.Periode;
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.Trygdeavgift;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
@@ -42,11 +46,12 @@ public class InnvilgelseFtrl extends DokgenDto {
     private final boolean loennNorgeSkattepliktig;
     private final boolean loennUtlandSkattepliktig;
 
-    private InnvilgelseFtrl(InnvilgelseBrevbestilling brevbestilling) {
+    private InnvilgelseFtrl(InnvilgelseBrevbestilling brevbestilling, MedlemAvFolketrygden medlemAvFolketrygden) {
         super(brevbestilling);
+        perioder = medlemAvFolketrygden.getMedlemskapsperioder().stream().map(Periode::new).collect(Collectors.toList());
     }
 
-    public static InnvilgelseFtrl av(InnvilgelseBrevbestilling brevbestilling) {
-        return new InnvilgelseFtrl(brevbestilling);
+    public static InnvilgelseFtrl av(InnvilgelseBrevbestilling brevbestilling, MedlemAvFolketrygden medlemAvFolketrygden) {
+        return new InnvilgelseFtrl(brevbestilling, medlemAvFolketrygden);
     }
 }

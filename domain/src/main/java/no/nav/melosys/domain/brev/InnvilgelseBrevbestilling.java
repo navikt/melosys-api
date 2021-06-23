@@ -19,6 +19,22 @@ public class InnvilgelseBrevbestilling extends DokgenBrevbestilling {
         this.barnFritekst = builder.barnFritekst;
     }
 
+    public String getInnledningFritekst() {
+        return innledningFritekst;
+    }
+
+    public String getBegrunnelseFritekst() {
+        return begrunnelseFritekst;
+    }
+
+    public String getEktefelleFritekst() {
+        return ektefelleFritekst;
+    }
+
+    public String getBarnFritekst() {
+        return barnFritekst;
+    }
+
     public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
         private String innledningFritekst;
         private String begrunnelseFritekst;
