@@ -54,6 +54,7 @@ class ProsessinstansTest {
         MangelbrevBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
             .medProduserbartdokument(Produserbaredokumenter.MANGELBREV_BRUKER)
             .medBestillKopi(true)
+            .medBestillUtkast(true)
             .build();
 
         Prosessinstans pi1 = new Prosessinstans(), pi2 = new Prosessinstans();
@@ -65,5 +66,6 @@ class ProsessinstansTest {
         assertThat(data).isInstanceOf(MangelbrevBrevbestilling.class);
         assertThat(data.getProduserbartdokument()).isEqualTo(Produserbaredokumenter.MANGELBREV_BRUKER);
         assertThat(data.isBestillKopi()).isTrue();
+        assertThat(data.isBestillUtkast()).isTrue();
     }
 }

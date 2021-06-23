@@ -59,7 +59,7 @@ class DokgenConsumerTest {
                 .withBody("pdf".getBytes(StandardCharsets.UTF_8)))
         );
 
-        assertThat(dokgenConsumer.lagPdf("mangelbrev_bruker", getMangelbrevBruker(), false)).isNotNull();
+        assertThat(dokgenConsumer.lagPdf("mangelbrev_bruker", getMangelbrevBruker(), false, false)).isNotNull();
     }
 
     @Test
@@ -71,7 +71,20 @@ class DokgenConsumerTest {
                 .withBody("pdf".getBytes(StandardCharsets.UTF_8)))
         );
 
-        assertThat(dokgenConsumer.lagPdf("mangelbrev_bruker", getMangelbrevBruker(), true)).isNotNull();
+        assertThat(dokgenConsumer.lagPdf("mangelbrev_bruker", getMangelbrevBruker(), true, false)).isNotNull();
+    }
+
+    @Test
+    void skalBestilleBrevSomUtkast() {
+        wireMockServer.stubFor(post(urlPathEqualTo("/mal/mangelbrev_bruker/lag-pdf"))
+            .withQueryParam("somKopi", equalTo("true"))
+            .withQueryParam("utkast", equalTo("true"))
+            .willReturn(aResponse()
+                .withStatus(200)
+                .withBody("pdf".getBytes(StandardCharsets.UTF_8)))
+        );
+
+        assertThat(dokgenConsumer.lagPdf("mangelbrev_bruker", getMangelbrevBruker(), true, true)).isNotNull();
     }
 
     private MangelbrevBruker getMangelbrevBruker() {

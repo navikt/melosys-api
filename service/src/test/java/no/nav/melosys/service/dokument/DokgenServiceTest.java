@@ -89,6 +89,8 @@ class DokgenServiceTest {
             new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService, mockEregFasade, mockPersondataFasade),
             mockBehandlingsService,
             mockEregFasade, mockKontaktOpplysningService, mockBrevMottakerService, mockProsessinstansService);
+
+        reset(mockDokgenConsumer);
     }
 
     @Test
@@ -103,8 +105,8 @@ class DokgenServiceTest {
     }
 
     @Test
-    void produserBrevTilBrukerOk() throws Exception {
-        when(mockDokgenConsumer.lagPdf(anyString(), any(), anyBoolean())).thenReturn(expectedPdf);
+    void produserBrevTilBrukerOk() {
+        when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(false))).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
@@ -122,14 +124,14 @@ class DokgenServiceTest {
         assertThat(pdfResponse).isNotNull();
         assertThat(pdfResponse).isEqualTo(expectedPdf);
 
-        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false));
+        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(false));
         verifyNoInteractions(mockEregFasade);
         verifyNoInteractions(mockKontaktOpplysningService);
     }
 
     @Test
     void produserBrevTilRepresentantOk() {
-        when(mockDokgenConsumer.lagPdf(anyString(), any(), anyBoolean())).thenReturn(expectedPdf);
+        when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(false))).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         when(mockEregFasade.hentOrganisasjon(any())).thenReturn(lagSaksopplysning());
@@ -149,14 +151,14 @@ class DokgenServiceTest {
         assertThat(pdfResponse).isNotNull();
         assertThat(pdfResponse).isEqualTo(expectedPdf);
 
-        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false));
+        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(false));
         verify(mockEregFasade).hentOrganisasjon(any());
         verify(mockKontaktOpplysningService).hentKontaktopplysning(any(), any());
     }
 
     @Test
     void produserUtkastUtenRepresentantForBrukerOk() {
-        when(mockDokgenConsumer.lagPdf(anyString(), any(), anyBoolean())).thenReturn(expectedPdf);
+        when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(true))).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
@@ -174,7 +176,7 @@ class DokgenServiceTest {
         assertThat(pdfResponse).isNotNull();
         assertThat(pdfResponse).isEqualTo(expectedPdf);
 
-        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(true));
+        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(true));
         verify(mockPersondataFasade).hentPersonFraTps(any(), eq(Informasjonsbehov.STANDARD));
 
         verifyNoInteractions(mockEregFasade);
@@ -183,7 +185,7 @@ class DokgenServiceTest {
 
     @Test
     void produserUtkastTilRepresentantForBrukerOk() {
-        when(mockDokgenConsumer.lagPdf(anyString(), any(), anyBoolean())).thenReturn(expectedPdf);
+        when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(true))).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         when(mockEregFasade.hentOrganisasjon(any())).thenReturn(lagSaksopplysning());
@@ -207,14 +209,14 @@ class DokgenServiceTest {
         assertThat(pdfResponse).isNotNull();
         assertThat(pdfResponse).isEqualTo(expectedPdf);
 
-        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(true));
+        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(true));
         verify(mockEregFasade).hentOrganisasjon(eq("987654321"));
         verify(mockKontaktOpplysningService).hentKontaktopplysning(any(), any());
     }
 
     @Test
-    void produserUtkastTilRepresentantForArbeidsgiverOk() throws Exception {
-        when(mockDokgenConsumer.lagPdf(anyString(), any(), anyBoolean())).thenReturn(expectedPdf);
+    void produserUtkastTilRepresentantForArbeidsgiverOk() {
+        when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(true))).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         when(mockEregFasade.hentOrganisasjon(any())).thenReturn(lagSaksopplysning());
@@ -239,13 +241,13 @@ class DokgenServiceTest {
         assertThat(pdfResponse).isNotNull();
         assertThat(pdfResponse).isEqualTo(expectedPdf);
 
-        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(true));
+        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(true));
         verify(mockEregFasade).hentOrganisasjon(eq("987654321"));
         verify(mockKontaktOpplysningService).hentKontaktopplysning(any(), any());
     }
 
     @Test
-    void skalProdusereOgDistribuereBrevTilBruker() throws Exception {
+    void skalProdusereOgDistribuereBrevTilBruker() {
         Aktoer bruker = new Aktoer();
         bruker.setRolle(Aktoersroller.BRUKER);
 
@@ -270,7 +272,7 @@ class DokgenServiceTest {
     }
 
     @Test
-    void skalProdusereOgDistribuereBrevTilOrgnrUtenKopi() throws Exception {
+    void skalProdusereOgDistribuereBrevTilOrgnrUtenKopi() {
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(new Behandling());
 
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
@@ -293,7 +295,7 @@ class DokgenServiceTest {
     }
 
     @Test
-    void skalProdusereOgDistribuereBrevTilOrgnrMedKopi() throws Exception {
+    void skalProdusereOgDistribuereBrevTilOrgnrMedKopi() {
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(new Behandling());
 
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
