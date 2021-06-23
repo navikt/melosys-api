@@ -121,16 +121,16 @@ public class ArbeidsforholdQuery {
         }
 
         public ArbeidsforholdQuery build() {
-            ArbeidsforholdQuery arbeidsfoholdQuery = new ArbeidsforholdQuery();
-            arbeidsfoholdQuery.regelverk = regelverk.toString();
-            arbeidsfoholdQuery.arbeidsforholdType = arbeidsforholdType.toString();
+            ArbeidsforholdQuery arbeidsforholdQuery = new ArbeidsforholdQuery();
+            arbeidsforholdQuery.regelverk = regelverk.toString();
+            arbeidsforholdQuery.arbeidsforholdType = arbeidsforholdType.toString();
             if (ansettelsesperiodeFom != null) {
-                arbeidsfoholdQuery.ansettelsesperiodeFom = ansettelsesperiodeFom.toString();
+                arbeidsforholdQuery.ansettelsesperiodeFom = ansettelsesperiodeFom.toString();
             }
             if (ansettelsesperiodeTom != null) {
-                arbeidsfoholdQuery.ansettelsesperiodeTom = ansettelsesperiodeTom.toString();
+                arbeidsforholdQuery.ansettelsesperiodeTom = ansettelsesperiodeTom.toString();
             }
-            return arbeidsfoholdQuery;
+            return arbeidsforholdQuery;
         }
     }
 }

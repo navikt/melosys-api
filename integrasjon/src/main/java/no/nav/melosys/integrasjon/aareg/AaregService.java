@@ -59,7 +59,7 @@ public class AaregService implements AaregFasade {
     }
 
     private Saksopplysning finnArbeidsforholdPrArbeidstakerRest(String ident, LocalDate fom, LocalDate tom) {
-        ArbeidsforholdQuery arbeidsfoholdQuery = new ArbeidsforholdQuery
+        ArbeidsforholdQuery arbeidsforholdQuery = new ArbeidsforholdQuery
             .Builder()
             .arbeidsforholdType(ArbeidsforholdQuery.ArbeidsforholdType.ALLE)
             .regelverk(ArbeidsforholdQuery.Regelverk.A_ORDNINGEN)
@@ -67,7 +67,7 @@ public class AaregService implements AaregFasade {
             .ansettelsesperiodeFom(tom)
             .build();
 
-        ArbeidsforholdResponse response = arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker(ident, arbeidsfoholdQuery);
+        ArbeidsforholdResponse response = arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker(ident, arbeidsforholdQuery);
         ArbeidsforholdKonvertering arbeidsforholdKonvertering = new ArbeidsforholdKonvertering(response);
 
         Saksopplysning saksopplysning = arbeidsforholdKonvertering.createSaksopplysning();

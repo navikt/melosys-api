@@ -14,19 +14,19 @@ public class ArbeidsforholdRestConsumer implements RestConsumer {
         this.webClient = webClient;
     }
 
-    public ArbeidsforholdResponse finnArbeidsforholdPrArbeidstaker(String fnr, ArbeidsforholdQuery arbeidsfoholdQuery) {
-        ArbeidsforholdResponse.Arbeidsforhold[] arbeidsforholdResponse = hentArbeidsfohold(fnr, arbeidsfoholdQuery);
+    public ArbeidsforholdResponse finnArbeidsforholdPrArbeidstaker(String fnr, ArbeidsforholdQuery arbeidsforholdQuery) {
+        ArbeidsforholdResponse.Arbeidsforhold[] arbeidsforholdResponse = hentArbeidsforhold(fnr, arbeidsforholdQuery);
         return new ArbeidsforholdResponse(arbeidsforholdResponse);
     }
 
-    private ArbeidsforholdResponse.Arbeidsforhold[] hentArbeidsfohold(String fnr, ArbeidsforholdQuery arbeidsfoholdQuery) {
+    private ArbeidsforholdResponse.Arbeidsforhold[] hentArbeidsforhold(String fnr, ArbeidsforholdQuery arbeidsforholdQuery) {
         return requireNonNull(
             webClient.get().uri("", uriBuilder ->
                 uriBuilder
-                    .queryParam("regelverk", arbeidsfoholdQuery.getRegelverk())
-                    .queryParamIfPresent("arbeidsforholdType", arbeidsfoholdQuery.getArbeidsforholdType())
-                    .queryParamIfPresent("ansettelsesperiodeFom", arbeidsfoholdQuery.getAnsettelsesperiodeFom())
-                    .queryParamIfPresent("ansettelsesperiodeTom", arbeidsfoholdQuery.getAnsettelsesperiodeTom())
+                    .queryParam("regelverk", arbeidsforholdQuery.getRegelverk())
+                    .queryParamIfPresent("arbeidsforholdType", arbeidsforholdQuery.getArbeidsforholdType())
+                    .queryParamIfPresent("ansettelsesperiodeFom", arbeidsforholdQuery.getAnsettelsesperiodeFom())
+                    .queryParamIfPresent("ansettelsesperiodeTom", arbeidsforholdQuery.getAnsettelsesperiodeTom())
                     // TODO: sjekk om metriks får url uten detaljer så det funker i grafana
                     .build())
                 .header("Nav-Personident", fnr)
