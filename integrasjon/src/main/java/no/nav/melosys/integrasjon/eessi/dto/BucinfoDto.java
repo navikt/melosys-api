@@ -62,6 +62,14 @@ public class BucinfoDto {
         this.id = id;
     }
 
+    public boolean isErÅpen() {
+        return erÅpen;
+    }
+
+    public void setErÅpen(boolean erÅpen) {
+        this.erÅpen = erÅpen;
+    }
+
     public String getBucType() {
         return bucType;
     }

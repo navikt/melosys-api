@@ -84,10 +84,10 @@ class EessiConsumerTest {
 
         List<BucInformasjon> bucInformasjonListe = eessiConsumer.hentTilknyttedeBucer(1L, Collections.singletonList("UTKAST"));
         assertThat(bucInformasjonListe)
-            .extracting(BucInformasjon::getId, BucInformasjon::getBucType)
+            .extracting(BucInformasjon::getId, BucInformasjon::getBucType, BucInformasjon::erÅpen)
             .contains(
-                tuple("111111", "LA_BUC_03"),
-                tuple("222222", "LA_BUC_01")
+                tuple("111111", "LA_BUC_03", true),
+                tuple("222222", "LA_BUC_01", false)
             );
 
         assertThat(bucInformasjonListe.get(0).getSeder())
