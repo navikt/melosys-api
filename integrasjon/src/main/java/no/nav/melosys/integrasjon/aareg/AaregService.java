@@ -32,7 +32,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AaregService implements AaregFasade {
-    private static final String ARBEIDSFORHOLD_VERSJON = "REST 1.0";
+    private static final String ARBEIDSFORHOLD_VERSJON = "3.0";
+    private static final String ARBEIDSFORHOLD_REST_VERSJON = "REST 1.0";
     private static final String REGELVERK_A_ORDNINGEN = "A_ORDNINGEN";
 
     private final ArbeidsforholdConsumer arbeidsforholdConsumer;
@@ -74,7 +75,7 @@ public class AaregService implements AaregFasade {
         saksopplysning.leggTilKildesystemOgMottattDokument(
             SaksopplysningKildesystem.AAREG, response.getJsonDocument());
         saksopplysning.setType(SaksopplysningType.ARBFORH);
-        saksopplysning.setVersjon(ARBEIDSFORHOLD_VERSJON);
+        saksopplysning.setVersjon(ARBEIDSFORHOLD_REST_VERSJON);
 
         return saksopplysning;
     }
