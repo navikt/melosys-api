@@ -26,6 +26,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private boolean bestillKopi;
     private boolean bestillUtkast;
     private Instant vedtaksdato;
+    private String saksbehandlerNavn;
     private Persondata persondokument;
 
     public DokgenBrevbestilling() {
@@ -44,6 +45,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         this.bestillKopi = builder.bestillKopi;
         this.bestillUtkast = builder.bestillUtkast;
         this.vedtaksdato = builder.vedtaksdato;
+        this.saksbehandlerNavn = builder.saksbehandlerNavn;
         this.persondokument = builder.persondokument;
     }
 
@@ -83,6 +85,10 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return vedtaksdato;
     }
 
+    public String getSaksbehandlerNavn() {
+        return saksbehandlerNavn;
+    }
+
     public Persondata getPersondokument() {
         return persondokument;
     }
@@ -104,6 +110,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private boolean bestillKopi;
         private boolean bestillUtkast;
         private Instant vedtaksdato;
+        private String saksbehandlerNavn;
         private Persondata persondokument;
 
         public Builder() {
@@ -122,6 +129,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.bestillKopi = brevbestilling.bestillKopi;
             this.bestillUtkast = brevbestilling.bestillUtkast;
             this.vedtaksdato = brevbestilling.vedtaksdato;
+            this.saksbehandlerNavn = brevbestilling.saksbehandlerNavn;
             this.persondokument = brevbestilling.persondokument;
         }
 
@@ -182,6 +190,11 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
         public T medVedtaksdato(Instant vedtaksdato) {
             this.vedtaksdato = vedtaksdato;
+            return (T) this;
+        }
+
+        public T medSaksbehandlerNavn(String saksbehandlerNavn) {
+            this.saksbehandlerNavn = saksbehandlerNavn;
             return (T) this;
         }
 
