@@ -14,10 +14,10 @@ public class DokgenConsumer {
         this.webClient = webClient;
     }
 
-    public byte[] lagPdf(String malNavn, DokgenDto dokgenDto, boolean bestillKopi) {
+    public byte[] lagPdf(String malNavn, DokgenDto dokgenDto, boolean bestillKopi, boolean bestillUtkast) {
         log.info("Produserer PDF i melosys-dokgen. Mal: {}, som kopi {}", malNavn, bestillKopi);
         return webClient.post()
-            .uri("/mal/{malNavn}/lag-pdf?somKopi={somKopi}", malNavn, bestillKopi)
+            .uri("/mal/{malNavn}/lag-pdf?somKopi={bestillKopi}&utkast={bestillUtkast}", malNavn, bestillKopi, bestillUtkast)
             .bodyValue(dokgenDto)
             .retrieve()
             .bodyToMono(byte[].class)

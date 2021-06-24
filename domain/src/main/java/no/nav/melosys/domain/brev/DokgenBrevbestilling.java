@@ -24,6 +24,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private String avsenderId;
     private long behandlingId;
     private boolean bestillKopi;
+    private boolean bestillUtkast;
     private Instant vedtaksdato;
     private Persondata persondokument;
 
@@ -41,6 +42,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         this.avsenderId = builder.avsenderId;
         this.behandlingId = builder.behandlingId;
         this.bestillKopi = builder.bestillKopi;
+        this.bestillUtkast = builder.bestillUtkast;
         this.vedtaksdato = builder.vedtaksdato;
         this.persondokument = builder.persondokument;
     }
@@ -73,6 +75,10 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return bestillKopi;
     }
 
+    public boolean isBestillUtkast() {
+        return bestillUtkast;
+    }
+
     public Instant getVedtaksdato() {
         return vedtaksdato;
     }
@@ -96,6 +102,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private String avsenderId;
         private long behandlingId;
         private boolean bestillKopi;
+        private boolean bestillUtkast;
         private Instant vedtaksdato;
         private Persondata persondokument;
 
@@ -113,6 +120,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.avsenderId = brevbestilling.avsenderId;
             this.behandlingId = brevbestilling.behandlingId;
             this.bestillKopi = brevbestilling.bestillKopi;
+            this.bestillUtkast = brevbestilling.bestillUtkast;
             this.vedtaksdato = brevbestilling.vedtaksdato;
             this.persondokument = brevbestilling.persondokument;
         }
@@ -164,6 +172,11 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
         public T medBestillKopi(boolean bestillKopi) {
             this.bestillKopi = bestillKopi;
+            return (T) this;
+        }
+
+        public T medBestillUtkast(boolean bestillUtkast) {
+            this.bestillUtkast = bestillUtkast;
             return (T) this;
         }
 

@@ -86,7 +86,7 @@ public class DokgenService {
         brevbestilling
             .medProduserbartdokument(produserbartdokument)
             .medBehandlingId(behandlingId)
-            .medBestillKopi(true);
+            .medBestillUtkast(true);
 
         return produserBrev(mottaker, brevbestilling.build());
     }
@@ -107,7 +107,7 @@ public class DokgenService {
 
         DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(builder.build());
 
-        return dokgenConsumer.lagPdf(malnavn, dokgenDto, brevbestilling.isBestillKopi());
+        return dokgenConsumer.lagPdf(malnavn, dokgenDto, brevbestilling.isBestillKopi(), brevbestilling.isBestillUtkast());
     }
 
     public void produserOgDistribuerBrev(long behandlingId, BrevbestillingDto brevbestillingDto) {
