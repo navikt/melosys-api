@@ -26,9 +26,10 @@ import no.nav.melosys.integrasjon.dokgen.dto.MangelbrevArbeidsgiver;
 import no.nav.melosys.integrasjon.dokgen.dto.MangelbrevBruker;
 import no.nav.melosys.integrasjon.dokgen.dto.SaksbehandlingstidSoknad;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.ldap.SaksbehandlerService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,9 +37,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Collections.*;
+import static java.util.Optional.of;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -65,15 +68,19 @@ class DokgenMalMapperTest {
     @Mock
     private PersondataFasade mockPersondataFasade;
 
+    @Mock
+    private SaksbehandlerService mockSaksbehandlerService;
+
     private DokgenMalMapper dokgenMalMapper;
 
     @BeforeEach
     void init() {
-        dokgenMalMapper = new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService, mockEregFasade, mockPersondataFasade);
+        dokgenMalMapper = new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService,
+            mockEregFasade, mockPersondataFasade, mockSaksbehandlerService);
     }
 
     @Test
-    void feilerNårProduserbartDokumentIkkeErStøttet() throws Exception {
+    void feilerNårProduserbartDokumentIkkeErStøttet() {
         when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
@@ -87,7 +94,31 @@ class DokgenMalMapperTest {
     }
 
     @Test
-    void skalMappeMedBrukerAdresse() throws Exception {
+    void skalMappeMedMangelbrevMedSaksbehandlerNavn() {
+        when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
+        when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
+        when(mockSaksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Ole Saksbehandler");
+
+        Behandling behandling = lagBehandling(lagFagsak());
+
+        DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
+            .medProduserbartdokument(MANGELBREV_BRUKER)
+            .medBehandling(behandling)
+            .medForsendelseMottatt(Instant.now())
+            .build();
+
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling);
+
+        assertTrue(dokgenDto instanceof MangelbrevBruker);
+        assertEquals(SAMMENSATT_NAVN, dokgenDto.getNavnBruker());
+        assertEquals("Ole Saksbehandler", ((MangelbrevBruker)dokgenDto).getSaksbehandlerNavn());
+        assertEquals(SAMMENSATT_NAVN, dokgenDto.getNavnMottaker());
+        assertEquals(ADRESSELINJE_1_BRUKER, dokgenDto.getAdresselinjer().get(0));
+        assertEquals(POSTNR_BRUKER, dokgenDto.getPostnr());
+    }
+
+    @Test
+    void skalMappeMedBrukerAdresse() {
         when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
         when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
 
@@ -109,7 +140,7 @@ class DokgenMalMapperTest {
     }
 
     @Test
-    void skalMappeMedFullmektigAdresse() throws Exception {
+    void skalMappeMedFullmektigAdresse() {
         when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
 
         Behandling behandling = lagBehandling(lagFagsak());
@@ -131,7 +162,7 @@ class DokgenMalMapperTest {
     }
 
     @Test
-    void skalMappeMedFullmektigForretningsAdresse() throws Exception {
+    void skalMappeMedFullmektigForretningsAdresse() {
         when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
 
         Behandling behandling = lagBehandling(lagFagsak());
@@ -157,7 +188,7 @@ class DokgenMalMapperTest {
     }
 
     @Test
-    void skalMappeMedFullmektigMedKontaktpersonAdresse() throws Exception {
+    void skalMappeMedFullmektigMedKontaktpersonAdresse() {
         when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
 
         Behandling behandling = lagBehandling(lagFagsak());
@@ -181,7 +212,7 @@ class DokgenMalMapperTest {
     }
 
     @Test
-    void skalMappeMangelbrevTilBruker() throws Exception {
+    void skalMappeMangelbrevTilBruker() {
         when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
 
         Behandling behandling = lagBehandling(lagFagsak(true));
@@ -205,7 +236,7 @@ class DokgenMalMapperTest {
     }
 
     @Test
-    void skalMappeMangelbrevTilArbeidsgiver() throws Exception {
+    void skalMappeMangelbrevTilArbeidsgiver() {
         when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
         when(mockEregFasade.hentOrganisasjonNavn(any())).thenReturn("Fullmektig AS");
 
@@ -239,6 +270,7 @@ class DokgenMalMapperTest {
         fagsak.setRegistrertDato(Instant.now());
         fagsak.setBehandlinger(lagBehandlinger());
         fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setEndretAv("L12345");
         if (medRepresentant) {
             Aktoer representant = new Aktoer();
             representant.setRolle(Aktoersroller.REPRESENTANT);

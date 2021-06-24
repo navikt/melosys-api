@@ -29,6 +29,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
@@ -73,6 +74,8 @@ class DokgenServiceTest {
     private BrevmottakerService mockBrevMottakerService;
     @Mock
     private ProsessinstansService mockProsessinstansService;
+    @Mock
+    private SaksbehandlerService mockSaksbehandlerService;
 
     @Captor
     private ArgumentCaptor<DokgenBrevbestilling> brevbestillingCaptor;
@@ -86,7 +89,7 @@ class DokgenServiceTest {
     @BeforeEach
     void init() {
         dokgenService = new DokgenService(mockDokgenConsumer, new DokumentproduksjonsInfoMapper(unleash), mockJoarkFasade,
-            new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService, mockEregFasade, mockPersondataFasade),
+            new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService, mockEregFasade, mockPersondataFasade, mockSaksbehandlerService),
             mockBehandlingsService,
             mockEregFasade, mockKontaktOpplysningService, mockBrevMottakerService, mockProsessinstansService);
 
