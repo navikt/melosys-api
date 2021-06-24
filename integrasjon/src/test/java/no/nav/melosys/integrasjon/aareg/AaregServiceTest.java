@@ -19,10 +19,7 @@ import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsume
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.HentArbeidsforholdHistorikkSikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.HentArbeidsforholdHistorikkRequest;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -44,11 +41,10 @@ public class AaregServiceTest {
 
     private AaregService aaregService;
     private Jaxb2Marshaller marshaller;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private WireMockServer wireMockServer;
-    private ArbeidsforholdRestConsumer restConsumer;
-    private FakeUnleash fakeUnleash = new FakeUnleash();
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     @BeforeAll
     public void setupBeforeAll() {
@@ -60,8 +56,13 @@ public class AaregServiceTest {
         WebClient webClient = WebClient.builder()
             .baseUrl("http://localhost:" + wireMockServer.port())
             .build();
-        restConsumer = new ArbeidsforholdRestConsumer(webClient);
+        ArbeidsforholdRestConsumer restConsumer = new ArbeidsforholdRestConsumer(webClient);
         aaregService = lagAaregService(new ArbeidsforholdMock(), fakeUnleash, restConsumer);
+    }
+
+    @AfterAll
+    public void tearDown() {
+        wireMockServer.stop();
     }
 
     @BeforeEach
@@ -79,7 +80,7 @@ public class AaregServiceTest {
             .willReturn(aResponse()
                 .withStatus(200)
                 .withHeader("Content-Type", "application/json")
-                .withBody(responsBody)
+                .withBody(responsAaregRestBody)
             )
         );
         fakeUnleash.enable("melosys.aareg.rest");
@@ -94,7 +95,7 @@ public class AaregServiceTest {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         String result = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(arbeidsforhold);
-        Assertions.assertThat(result).isEqualTo(expectedResult);
+        Assertions.assertThat(result).isEqualTo(expectedRestResult);
     }
 
     @Test
@@ -199,7 +200,7 @@ public class AaregServiceTest {
           "timerTimelonnet" : [ ]
         } ]""";
 
-    private final String expectedResult = """
+    private final String expectedRestResult = """
         [ {
           "arbeidsforholdID" : "abc-321",
           "arbeidsforholdIDnav" : 123456,
@@ -268,7 +269,7 @@ public class AaregServiceTest {
           } ]
         } ]""";
 
-    private final String responsBody = """
+    private final String responsAaregRestBody = """
         [
           {
             "ansettelsesperiode": {
