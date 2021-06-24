@@ -40,7 +40,8 @@ public class DokgenMalMapper {
     public DokgenMalMapper(KodeverkService kodeverkService,
                            BehandlingsresultatService behandlingsresultatService,
                            @Qualifier("system") EregFasade eregFasade,
-                           @Qualifier("system") PersondataFasade persondataFasade, SaksbehandlerService saksbehandlerService) {
+                           @Qualifier("system") PersondataFasade persondataFasade,
+                           SaksbehandlerService saksbehandlerService) {
         this.kodeverkService = kodeverkService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.eregFasade = eregFasade;
@@ -104,8 +105,9 @@ public class DokgenMalMapper {
     }
 
     private String hentFullmektigNavn(Fagsak fagsak) {
-        Optional<Aktoer> representant = fagsak.hentRepresentant(Representerer.BRUKER);
-        return representant.map(aktoer -> eregFasade.hentOrganisasjonNavn(aktoer.getOrgnr())).orElse(null);
+        return fagsak.hentRepresentant(Representerer.BRUKER)
+            .map(aktoer -> eregFasade.hentOrganisasjonNavn(aktoer.getOrgnr()))
+            .orElse(null);
     }
 
     private String hentLandnavn(String landkode) {
