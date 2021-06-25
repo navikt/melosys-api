@@ -74,7 +74,7 @@ class BrevDataGrunnlagTest {
 
     @Test
     void hentBostedsadresse_brukerBostedFraPersonDokument() {
-        when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
+        when(kodeverkService.dekod(any(), any())).thenReturn("Oslo");
         StrukturertAdresse bostedsadresse = dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
         assertThat(bostedsadresse.getGatenavn()).isEqualTo("Hjemgata");
         assertThat(bostedsadresse.getHusnummerEtasjeLeilighet()).isEqualTo("23");

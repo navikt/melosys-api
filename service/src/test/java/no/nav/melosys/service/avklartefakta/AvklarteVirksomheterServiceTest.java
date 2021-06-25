@@ -84,7 +84,7 @@ class AvklarteVirksomheterServiceTest {
         behandling.setId(1L);
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(new HashSet<>(Arrays.asList(orgnr1, uuid1)));
 
-        when(mockKodeverkService.dekod(any(FellesKodeverk.class), anyString(), any(LocalDate.class))).thenReturn("Poststed");
+        when(mockKodeverkService.dekod(any(FellesKodeverk.class), anyString())).thenReturn("Poststed");
 
         avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, behandlingService, mockKodeverkService);
     }
@@ -248,7 +248,7 @@ class AvklarteVirksomheterServiceTest {
         assertThat(adresse.getPoststed()).isEqualTo("Poststed");
         assertThat(adresse.getLandkode()).isEqualTo("NO");
 
-        verify(mockKodeverkService).dekod(eq(FellesKodeverk.POSTNUMMER), eq("2345"), any(LocalDate.class));
+        verify(mockKodeverkService).dekod(eq(FellesKodeverk.POSTNUMMER), eq("2345"));
     }
 
     @Test
@@ -260,7 +260,7 @@ class AvklarteVirksomheterServiceTest {
         assertThat(adresse.getPoststed()).isEqualTo("Poststed");
         assertThat(adresse.getLandkode()).isEqualTo("NO");
 
-        verify(mockKodeverkService).dekod(eq(FellesKodeverk.POSTNUMMER), eq("2345"), any(LocalDate.class));
+        verify(mockKodeverkService).dekod(eq(FellesKodeverk.POSTNUMMER), eq("2345"));
     }
 
     @Test
@@ -275,7 +275,7 @@ class AvklarteVirksomheterServiceTest {
         assertThat(adresse.getPoststed()).isEqualTo("Postpoststed");
         assertThat(adresse.getLandkode()).isEqualTo("DK");
 
-        verify(mockKodeverkService, never()).dekod(any(), any(), any());
+        verify(mockKodeverkService, never()).dekod(any(), any());
     }
 
     @Test
@@ -287,7 +287,7 @@ class AvklarteVirksomheterServiceTest {
         assertThat(adresse.getPoststed()).isEqualTo("Poststed");
         assertThat(adresse.getLandkode()).isEqualTo("NO");
 
-        verify(mockKodeverkService).dekod(eq(FellesKodeverk.POSTNUMMER), eq("6789"), any(LocalDate.class));
+        verify(mockKodeverkService).dekod(eq(FellesKodeverk.POSTNUMMER), eq("6789"));
     }
 
     private void forberedValidering() {

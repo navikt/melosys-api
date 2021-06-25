@@ -1,6 +1,5 @@
 package no.nav.melosys.service.dokument;
 
-import java.time.LocalDate;
 import java.util.Optional;
 
 import no.nav.melosys.domain.FellesKodeverk;
@@ -48,8 +47,7 @@ public class BostedGrunnlag {
         }
         final var strukturertAdresse = bostedsadresseFraRegister.strukturertAdresse();
         if (Datakilde.TPS.name().equals(bostedsadresseFraRegister.kilde())) {
-            strukturertAdresse.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, strukturertAdresse.getPostnummer(),
-                LocalDate.now()));
+            strukturertAdresse.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, strukturertAdresse.getPostnummer()));
         }
         return Optional.of(strukturertAdresse);
     }

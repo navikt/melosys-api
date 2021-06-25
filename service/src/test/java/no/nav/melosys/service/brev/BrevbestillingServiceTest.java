@@ -343,7 +343,7 @@ class BrevbestillingServiceTest {
             .thenReturn(List.of(lagAktoer(Aktoersroller.BRUKER, null)));
         when(mockPersondataFasade.hentPersonFraTps(any(), eq(Informasjonsbehov.STANDARD)))
             .thenReturn(saksbehandling);
-        when(mockKodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), anyString(), any())).thenReturn("Oslo");
+        when(mockKodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), anyString())).thenReturn("Oslo");
 
         var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(MANGELBREV_BRUKER, Aktoersroller.BRUKER, behandling);
 

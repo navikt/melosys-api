@@ -40,7 +40,7 @@ class KontaktadresseOversetterTest {
             ),
             metadata()
         );
-        when(kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234"), any())).thenReturn("Bergen");
+        when(kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234"))).thenReturn("Bergen");
 
         final var kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService);
 
@@ -69,7 +69,7 @@ class KontaktadresseOversetterTest {
             null,
             metadata()
         );
-        when(kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234"), any())).thenReturn("Enby");
+        when(kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234"))).thenReturn("Enby");
 
         final var kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService);
 

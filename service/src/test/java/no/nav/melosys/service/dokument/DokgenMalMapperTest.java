@@ -37,7 +37,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Collections.*;
-import static java.util.Optional.of;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -95,7 +94,7 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeMedMangelbrevMedSaksbehandlerNavn() {
-        when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
+        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
         when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
         when(mockSaksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Ole Saksbehandler");
 
@@ -119,7 +118,7 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeMedBrukerAdresse() {
-        when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
+        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
         when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
 
         Behandling behandling = lagBehandling(lagFagsak());
@@ -141,7 +140,7 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeMedFullmektigAdresse() {
-        when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
+        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
 
         Behandling behandling = lagBehandling(lagFagsak());
 
@@ -163,7 +162,7 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeMedFullmektigForretningsAdresse() {
-        when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
+        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
 
         Behandling behandling = lagBehandling(lagFagsak());
 
@@ -189,7 +188,7 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeMedFullmektigMedKontaktpersonAdresse() {
-        when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
+        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
 
         Behandling behandling = lagBehandling(lagFagsak());
 
@@ -213,7 +212,7 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeMangelbrevTilBruker() {
-        when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
+        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
 
         Behandling behandling = lagBehandling(lagFagsak(true));
 
@@ -237,7 +236,7 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeMangelbrevTilArbeidsgiver() {
-        when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
+        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
         when(mockEregFasade.hentOrganisasjonNavn(any())).thenReturn("Fullmektig AS");
 
         Behandling behandling = lagBehandling(lagFagsak(true));

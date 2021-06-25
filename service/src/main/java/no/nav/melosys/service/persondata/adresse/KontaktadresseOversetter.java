@@ -1,7 +1,5 @@
 package no.nav.melosys.service.persondata.adresse;
 
-import java.time.LocalDate;
-
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -51,7 +49,7 @@ public class KontaktadresseOversetter {
         return new StrukturertAdresse(null, null,
             null, postboksadresse.postboks(),
             postboksadresse.postnummer(),
-            kodeverkService.dekod(POSTNUMMER, postboksadresse.postnummer(), LocalDate.now()),
+            kodeverkService.dekod(POSTNUMMER, postboksadresse.postnummer()),
             null,
             Landkoder.NO.getKode()
         );
@@ -63,7 +61,7 @@ public class KontaktadresseOversetter {
             postadresseIFrittFormat.adresselinje1(),
             postadresseIFrittFormat.adresselinje2(),
             postadresseIFrittFormat.adresselinje3(),
-            postadresseIFrittFormat.postnummer() + " " + kodeverkService.dekod(POSTNUMMER, postadresseIFrittFormat.postnummer(), LocalDate.now()),
+            postadresseIFrittFormat.postnummer() + " " + kodeverkService.dekod(POSTNUMMER, postadresseIFrittFormat.postnummer()),
             Landkoder.NO.getKode()
         );
     }

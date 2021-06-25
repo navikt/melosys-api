@@ -40,7 +40,7 @@ class OppholdsadresseOversetterTest {
             null,
             metadata()
         );
-        when(kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234"), any())).thenReturn("Bergen");
+        when(kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234"))).thenReturn("Bergen");
 
         final var Oppholdsadresse = OppholdsadresseOversetter.oversett(OppholdsadressePDL, kodeverkService);
 
