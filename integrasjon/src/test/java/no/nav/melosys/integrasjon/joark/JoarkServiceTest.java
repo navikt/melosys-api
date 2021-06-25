@@ -347,6 +347,22 @@ class JoarkServiceTest {
                 dokumentReferanser));
     }
 
+    @Test
+    void validerTilgangTilArkivVariant_dokumentReferanserCollectionErTom_returnerer() {
+        unleash.enable(JoarkService.SAF_FEATURE_TOGGLE_NAVN);
+
+        final var journalpostId = "11122233";
+        final var saksnummer = "191919";
+        final var arkivsakID = 12345L;
+
+        Collection<DokumentReferanse> dokumentReferanser = Collections.emptyList();
+
+        joarkService.validerDokumenterTilhørerSakOgHarTilgang(
+            new HentJournalposterTilknyttetSakRequest(arkivsakID, saksnummer),
+            dokumentReferanser);
+
+        verify(safConsumer, never()).hentDokumentoversikt(anyString());
+    }
 
     @Test
     void validerTilgangTilArkivVariant_harikkeTilgangTilVedlegg_kasterSikkerhetsbegrensningException() {
@@ -618,7 +634,7 @@ class JoarkServiceTest {
     }
 
     private no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost safJournalpostUtenVedlegg(String journalpostID) {
-         return new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost(
+        return new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost(
             journalpostID,
             "Tittel",
             Journalstatus.MOTTATT,
@@ -633,7 +649,7 @@ class JoarkServiceTest {
             ),
             List.of(new DokumentInfo("123", "hoveddokument kommer først", null, List.of(), List.of())
             )
-         );
+        );
     }
 
 
