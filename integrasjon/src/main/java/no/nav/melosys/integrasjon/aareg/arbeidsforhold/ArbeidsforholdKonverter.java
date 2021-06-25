@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.arbeidsforhold.*;
+import no.nav.melosys.domain.dokument.felles.KodeverkHjelper;
 import no.nav.melosys.domain.dokument.felles.Periode;
 
 import java.time.OffsetDateTime;
@@ -14,9 +15,11 @@ import java.util.stream.Collectors;
 
 public class ArbeidsforholdKonverter {
     private final ArbeidsforholdResponse arbeidsforholdResponse;
+    private final KodeOppslag kodeOppslag;
 
-    public ArbeidsforholdKonverter(ArbeidsforholdResponse arbeidsforholdResponse) {
+    public ArbeidsforholdKonverter(ArbeidsforholdResponse arbeidsforholdResponse, KodeOppslag kodeOppslag) {
         this.arbeidsforholdResponse = arbeidsforholdResponse;
+        this.kodeOppslag = kodeOppslag;
     }
 
     public Saksopplysning createSaksopplysning() {
@@ -91,10 +94,10 @@ public class ArbeidsforholdKonverter {
             dst.setPermisjonsPeriode(getPeriode(src.periode));
             dst.setPermisjonsprosent(src.prosent);
 
-            // Ser ut til vi kan bruke type her. Eks. "permisjonMedForeldrepenger"
-            // xml eksemple har "Permisjon"
-            // TODO: hent fra KodeverkService for å få dette riktig
-            dst.setPermisjonOgPermittering(src.type);
+            // Permisjon-/permitteringstype (kodeverk: PermisjonsOgPermitteringsBeskrivelse)
+            // Finnes det en Enum med "PermisjonsOgPermitteringsBeskrivelse" ?
+            String term = kodeOppslag.getTerm("PermisjonsOgPermitteringsBeskrivelse", src.type);
+            dst.setPermisjonOgPermittering(term);
             return dst;
         }).collect(Collectors.toList());
     }
@@ -107,8 +110,9 @@ public class ArbeidsforholdKonverter {
         return arbeidsavtalerSrc.stream().map(src -> {
             Arbeidsavtale dst = new Arbeidsavtale();
             dst.yrke = new Yrke(src.yrke);
-            // TODO: Bruke KodeverkService for å finne yrke
-            dst.yrke.setTerm(""); // Ser det er "" om det ikke finnes fra xml mapping
+            // TODO: avklar om det finner en Enum klasse for dette
+            String term = kodeOppslag.getTerm("Yrker", src.yrke);
+            dst.yrke.setTerm(term);
 
             dst.beregnetAntallTimerPrUke = src.beregnetAntallTimerPrUke;
             dst.arbeidstidsordning = new Arbeidstidsordning();

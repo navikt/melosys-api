@@ -41,14 +41,19 @@ public class AaregService implements AaregFasade {
 
     private final ArbeidsforholdRestConsumer arbeidsforholdRestConsumer;
     private final Unleash unleash;
+    private final KodeOppslag kodeOppslag;
 
     @Autowired
-    AaregService(ArbeidsforholdConsumer arbeidsforholdConsumer, DokumentFactory dokumentFactory,
-                 ArbeidsforholdRestConsumer arbeidsforholdRestConsumer, Unleash unleash) {
+    AaregService(ArbeidsforholdConsumer arbeidsforholdConsumer,
+                 DokumentFactory dokumentFactory,
+                 ArbeidsforholdRestConsumer arbeidsforholdRestConsumer,
+                 Unleash unleash,
+                 KodeOppslag kodeOppslag) {
         this.arbeidsforholdConsumer = arbeidsforholdConsumer;
         this.dokumentFactory = dokumentFactory;
         this.arbeidsforholdRestConsumer = arbeidsforholdRestConsumer;
         this.unleash = unleash;
+        this.kodeOppslag = kodeOppslag;
     }
 
     @Override
@@ -69,7 +74,7 @@ public class AaregService implements AaregFasade {
             .build();
 
         ArbeidsforholdResponse response = arbeidsforholdRestConsumer.finnArbeidsforholdPrArbeidstaker(ident, arbeidsforholdQuery);
-        ArbeidsforholdKonverter arbeidsforholdKonverter = new ArbeidsforholdKonverter(response);
+        ArbeidsforholdKonverter arbeidsforholdKonverter = new ArbeidsforholdKonverter(response, kodeOppslag);
 
         Saksopplysning saksopplysning = arbeidsforholdKonverter.createSaksopplysning();
         saksopplysning.leggTilKildesystemOgMottattDokument(

@@ -15,12 +15,11 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumer;
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdMock;
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer;
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.*;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.HentArbeidsforholdHistorikkSikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.HentArbeidsforholdHistorikkRequest;
 import org.assertj.core.api.Assertions;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -157,7 +156,23 @@ public class AaregServiceTest {
                                          Unleash unleash,
                                          ArbeidsforholdRestConsumer arbeidsforholdRestConsumer) {
         DokumentFactory dokumentFactory = new DokumentFactory(marshaller, new XsltTemplatesFactory());
-        return new AaregService(arbeidsforholdConsumer, dokumentFactory, arbeidsforholdRestConsumer, unleash);
+        return new AaregService(arbeidsforholdConsumer, dokumentFactory, arbeidsforholdRestConsumer, unleash, getKodeOppslag());
+    }
+
+    @NotNull
+    private KodeOppslag getKodeOppslag() {
+        return (kodeverk, kode) -> {
+            switch (kodeverk) {
+                case "PermisjonsOgPermitteringsBeskrivelse":
+                    if (kode.equals("permisjonMedForeldrepenger"))
+                        return "Permisjon med foreldrepenger";
+                case "Yrker":
+                    if(kode.equals("2130123"))
+                        return "IT-KONSULENT";
+                default:
+                    throw new IllegalStateException("Ingen test data for kodeverk:" + kodeverk);
+            }
+        };
     }
 
     private final String expectedSoapApiResult = """
@@ -227,7 +242,7 @@ public class AaregServiceTest {
             "avloenningstype" : "",
             "yrke" : {
               "kode" : "2130123",
-              "term" : ""
+              "term" : "IT-KONSULENT"
             },
             "gyldighetsperiode" : {
               "fom" : [ 2014, 7, 1 ],
@@ -252,7 +267,7 @@ public class AaregServiceTest {
               "tom" : [ 2015, 12, 31 ]
             },
             "permisjonsprosent" : 50.5,
-            "permisjonOgPermittering" : "permisjonMedForeldrepenger"
+            "permisjonOgPermittering" : "Permisjon med foreldrepenger"
           } ],
           "utenlandsopphold" : [ {
             "periode" : {
