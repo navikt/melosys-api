@@ -6,6 +6,7 @@ import graphql.execution.DataFetcherResult;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.tjenester.gui.graphql.dto.PersonopplysningerDto;
 import no.nav.melosys.tjenester.gui.graphql.dto.SaksopplysningerDto;
@@ -15,10 +16,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class SaksopplysningerDataFetcher implements DataFetcher<Object> {
     private final BehandlingService behandlingService;
+    private final KodeverkService kodeverkService;
     private final PersondataFasade persondataFasade;
 
-    public SaksopplysningerDataFetcher(BehandlingService behandlingService, PersondataFasade persondataFasade) {
+    public SaksopplysningerDataFetcher(BehandlingService behandlingService,
+                                       KodeverkService kodeverkService,
+                                       PersondataFasade persondataFasade) {
         this.behandlingService = behandlingService;
+        this.kodeverkService = kodeverkService;
         this.persondataFasade = persondataFasade;
     }
 
@@ -31,7 +36,7 @@ public class SaksopplysningerDataFetcher implements DataFetcher<Object> {
         // TODO erstattes med hentPerson som tar behandlingID for å sjekke om data skal returneres fra gammel
         //  TPS-data eller fra PDL
         final var statsborgerskapDto = persondataFasade.hentStatsborgerskap(ident).stream().map(
-            StatsborgerskapTilDtoConverter::tilDto).collect(Collectors.toUnmodifiableList());
+            s -> StatsborgerskapTilDtoConverter.tilDto(s, kodeverkService)).collect(Collectors.toUnmodifiableList());
         return DataFetcherResult.newResult().data(new SaksopplysningerDto(behandlingID,
             new PersonopplysningerDto(statsborgerskapDto))).build();
     }
