@@ -6,7 +6,10 @@ import no.nav.melosys.domain.dokument.felles.Periode;
 
 import java.time.OffsetDateTime;
 import java.time.YearMonth;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 public class ArbeidsforholdKonverter {
@@ -61,9 +64,14 @@ public class ArbeidsforholdKonverter {
     }
 
     private OffsetDateTime getOffsetDateTime(String date) {
-        // OffsetDateTime is on format 2017-12-03T10:15:30+01:00
-        // TODO: Legg til norsk offset, og må vel ta med "daylight savings"...
-        return OffsetDateTime.parse(date + "+01:00");
+        return OffsetDateTime.parse(date + String.format("+%02d:00", getOffsetFraUTCForNorgeMedDTSavings()));
+    }
+
+    private int getOffsetFraUTCForNorgeMedDTSavings() {
+        TimeZone tz = TimeZone.getTimeZone("Europe/Oslo");
+        TimeZone.setDefault(tz);
+        Calendar cal = Calendar.getInstance(tz, Locale.forLanguageTag("nb_NO"));
+        return cal.getTimeZone().getDSTSavings() / (1000 * 60 * 24);
     }
 
     private List<Utenlandsopphold> getUtenlandsopphold(List<ArbeidsforholdResponse.Utenlandsopphold> utenlandsopphold) {

@@ -20,7 +20,7 @@ public class ArbeidsforholdRestConsumer implements RestConsumer {
     }
 
     private ArbeidsforholdResponse.Arbeidsforhold[] hentArbeidsforhold(String fnr, ArbeidsforholdQuery arbeidsforholdQuery) {
-        return requireNonNull(
+        return requireNonNull( // TODO: sjekk om tjenesten kan returnere null;
             webClient.get().uri("", uriBuilder ->
                 uriBuilder
                     .queryParam("regelverk", arbeidsforholdQuery.getRegelverk())
