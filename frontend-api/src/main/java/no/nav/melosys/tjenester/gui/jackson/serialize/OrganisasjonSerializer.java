@@ -1,7 +1,6 @@
 package no.nav.melosys.tjenester.gui.jackson.serialize;
 
 import java.io.IOException;
-import java.time.LocalDate;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -34,7 +33,7 @@ public class OrganisasjonSerializer extends StdSerializer<AbstraktOrganisasjon> 
         organisasjonDto.setNavn(organisasjon.getNavn());
         organisasjonDto.setOppstartdato(organisasjon.getOppstartsdato());
         if (StringUtils.isNotEmpty(organisasjon.getEnhetstype())) {
-            organisasjonDto.setOrganisasjonsform(kodeverkService.dekod(FellesKodeverk.ENHETSTYPER_JURIDISK_ENHET, organisasjon.getEnhetstype(), LocalDate.now()));
+            organisasjonDto.setOrganisasjonsform(kodeverkService.dekod(FellesKodeverk.ENHETSTYPER_JURIDISK_ENHET, organisasjon.getEnhetstype()));
         }
 
         organisasjonDto.setForretningsadresse(tilAdresseDto(organisasjon.getForretningsadresse()));
@@ -57,12 +56,12 @@ public class OrganisasjonSerializer extends StdSerializer<AbstraktOrganisasjon> 
 
         dto.setPostnr(adresse.getPostnummer());
         String poststed = StringUtils.isNotEmpty(adresse.getPoststed()) ? adresse.getPoststed()
-            : kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.getPostnummer(), LocalDate.now());
+            : kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.getPostnummer());
         dto.setPoststed(poststed);
 
-        final String landISO2 = kodeverkService.dekod(FellesKodeverk.LANDKODERISO2, adresse.getLandkode(), LocalDate.now());
+        final String landISO2 = kodeverkService.dekod(FellesKodeverk.LANDKODERISO2, adresse.getLandkode());
         final String landkode = !UKJENT.equals(landISO2) ? landISO2
-            :  kodeverkService.dekod(FellesKodeverk.LANDKODER, adresse.getLandkode(), LocalDate.now());
+            :  kodeverkService.dekod(FellesKodeverk.LANDKODER, adresse.getLandkode());
         dto.setLand(landkode);
 
         return dto;

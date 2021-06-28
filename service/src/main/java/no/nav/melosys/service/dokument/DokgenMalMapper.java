@@ -1,10 +1,7 @@
 package no.nav.melosys.service.dokument;
 
 import java.time.Instant;
-import java.time.LocalDate;
-import java.util.Optional;
 
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FellesKodeverk;
@@ -91,7 +88,7 @@ public class DokgenMalMapper {
     }
 
     private String hentPoststed(String postnr) {
-        return kodeverkService.dekod(FellesKodeverk.POSTNUMMER, postnr, LocalDate.now());
+        return kodeverkService.dekod(FellesKodeverk.POSTNUMMER, postnr);
     }
 
     private Instant hentVedtaksdato(Long behandlingId) {
@@ -113,9 +110,9 @@ public class DokgenMalMapper {
     private String hentLandnavn(String landkode) {
         String landnavn = "";
         if (hasText(landkode)) {
-            landnavn = kodeverkService.dekod(FellesKodeverk.LANDKODER, landkode, LocalDate.now());
+            landnavn = kodeverkService.dekod(FellesKodeverk.LANDKODER, landkode);
             if (landnavn.equals("UKJENT")) {
-                landnavn = kodeverkService.dekod(FellesKodeverk.LANDKODERISO2, landkode, LocalDate.now());
+                landnavn = kodeverkService.dekod(FellesKodeverk.LANDKODERISO2, landkode);
             }
         }
         return landnavn.equals("UKJENT") ? "" : landnavn;

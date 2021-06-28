@@ -41,7 +41,7 @@ class BostedsadresseOversetterTest {
             null,
             metadata()
         );
-        when(kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234"), any())).thenReturn("Bergen");
+        when(kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234"))).thenReturn("Bergen");
 
         final var bostedsadresseOptional = BostedsadresseOversetter.oversett(bostedsadressePDL, kodeverkService);
 

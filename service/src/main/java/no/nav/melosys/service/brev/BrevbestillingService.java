@@ -1,6 +1,5 @@
 package no.nav.melosys.service.brev;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -207,7 +206,7 @@ public class BrevbestillingService {
             .medOrgnr(orgDokument != null ? orgDokument.getOrgnummer() : null)
             .medAdresselinjer(mapAdresselinjer(orgDokument, null, kontaktopplysning, persondata))
             .medPostnr(mapPostnr(orgDokument, persondata))
-            .medPoststed(orgDokument != null ? mapPoststed(orgDokument) : kodeverkService.dekod(FellesKodeverk.POSTNUMMER, persondata.hentGjeldendePostadresse().postnr, LocalDate.now()))
+            .medPoststed(orgDokument != null ? mapPoststed(orgDokument) : kodeverkService.dekod(FellesKodeverk.POSTNUMMER, persondata.hentGjeldendePostadresse().postnr))
             .medLand(mapLandForAdresse(orgDokument, persondata))
             .build();
     }
