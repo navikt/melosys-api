@@ -196,7 +196,7 @@ public class ArbeidsforholdResponse {
         BigDecimal prosent;
 
         @JsonProperty
-        String type;
+        String type; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/PermisjonsOgPermitteringsBeskrivelse
 
         @JsonProperty
         String varslingskode;
@@ -204,13 +204,16 @@ public class ArbeidsforholdResponse {
 
     public static class Arbeidsavtaler {
         @JsonProperty
-        String type;
+        String type; // Type for arbeidsavtale - Forenklet, Frilanser, Maritim, Ordinaer
 
         @JsonProperty
-        String arbeidstidsordning;
+        String arbeidstidsordning; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/Arbeidstidsordninger
 
         @JsonProperty
-        String yrke;
+        String yrke; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/Yrker
+
+        @JsonProperty
+        String ansettelsesform; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/AnsettelsesformAareg
 
         @JsonProperty
         BigDecimal stillingsprosent;

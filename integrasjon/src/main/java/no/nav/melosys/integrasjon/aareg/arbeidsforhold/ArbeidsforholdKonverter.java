@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.arbeidsforhold.*;
-import no.nav.melosys.domain.dokument.felles.KodeverkHjelper;
 import no.nav.melosys.domain.dokument.felles.Periode;
 
 import java.time.OffsetDateTime;
@@ -72,7 +71,6 @@ public class ArbeidsforholdKonverter {
 
     private int getOffsetFraUTCForNorgeMedDTSavings() {
         TimeZone tz = TimeZone.getTimeZone("Europe/Oslo");
-        TimeZone.setDefault(tz);
         Calendar cal = Calendar.getInstance(tz, Locale.forLanguageTag("nb_NO"));
         return cal.getTimeZone().getDSTSavings() / (1000 * 60 * 24);
     }
@@ -96,8 +94,7 @@ public class ArbeidsforholdKonverter {
 
             // Permisjon-/permitteringstype (kodeverk: PermisjonsOgPermitteringsBeskrivelse)
             // Finnes det en Enum med "PermisjonsOgPermitteringsBeskrivelse" ?
-            String term = kodeOppslag.getTerm("PermisjonsOgPermitteringsBeskrivelse", src.type);
-            dst.setPermisjonOgPermittering(term);
+            dst.setPermisjonOgPermittering(getTermFraKode("PermisjonsOgPermitteringsBeskrivelse", src.type));
             return dst;
         }).collect(Collectors.toList());
     }
@@ -110,20 +107,20 @@ public class ArbeidsforholdKonverter {
         return arbeidsavtalerSrc.stream().map(src -> {
             Arbeidsavtale dst = new Arbeidsavtale();
             dst.yrke = new Yrke(src.yrke);
-            // TODO: avklar om det finner en Enum klasse for dette
-            String term = kodeOppslag.getTerm("Yrker", src.yrke);
-            dst.yrke.setTerm(term);
+            // TODO: avklar om det finner en Enum klasse for Kodeverksoversikt navn
+            dst.yrke.setTerm(getTermFraKode("Yrker", src.yrke));
 
             dst.beregnetAntallTimerPrUke = src.beregnetAntallTimerPrUke;
             dst.arbeidstidsordning = new Arbeidstidsordning();
-            // TODO: Du kan nok stille spørsmål til #team-registre og/eller Anders Bryhni.
-            dst.arbeidstidsordning.setKode(src.arbeidstidsordning); // Jeg tror dette blir rikig
+            dst.arbeidstidsordning.setKode(src.arbeidstidsordning);
 
-            dst.avloenningstype = ""; // soap api gir f.eks "Fastlønn" eller tom string "";
+            // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/Avl%C3%B8nningstyper
+            dst.avloenningstype = ""; // Finnes ikke i nytt rest api
+
             dst.gyldighetsperiode = getPeriode(src.gyldighetsperiode);
             dst.beregnetAntallTimerPrUke = src.beregnetAntallTimerPrUke;
             dst.stillingsprosent = src.stillingsprosent;
-            // Finner ikke denne i rest api men kan regnes ut -
+            // Finner ikke denne i rest api men kan regnes ut
             // TODO:  Spør fag om det brukes til noe
             dst.beregnetStillingsprosent = src.calculateBergnetStillingsprosent();
             dst.sisteLoennsendringsdato = src.getSisteLoennsendringsDato();
@@ -131,7 +128,7 @@ public class ArbeidsforholdKonverter {
             dst.avtaltArbeidstimerPerUke = src.antallTimerPrUke;
 
 
-            // Ser disse ikke er med xml i tester
+            // Ser disse ikke er med i ny aareg rest api
             dst.maritimArbeidsavtale = false;
             dst.skipsregister = null;
             dst.skipstype = null;
@@ -139,5 +136,9 @@ public class ArbeidsforholdKonverter {
 
             return dst;
         }).collect(Collectors.toList());
+    }
+
+    private String getTermFraKode(String kodeverk, String kode) {
+        return kodeOppslag.getTerm(kodeverk, kode);
     }
 }
