@@ -32,6 +32,8 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -89,9 +91,9 @@ class DokgenServiceTest {
     @BeforeEach
     void init() {
         dokgenService = new DokgenService(mockDokgenConsumer, new DokumentproduksjonsInfoMapper(unleash), mockJoarkFasade,
-            new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService, mockEregFasade, mockPersondataFasade, mockSaksbehandlerService),
+            new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService, mockEregFasade, mockPersondataFasade),
             mockBehandlingsService,
-            mockEregFasade, mockKontaktOpplysningService, mockBrevMottakerService, mockProsessinstansService);
+            mockEregFasade, mockKontaktOpplysningService, mockBrevMottakerService, mockProsessinstansService, mockSaksbehandlerService);
 
         reset(mockDokgenConsumer);
     }
@@ -109,6 +111,11 @@ class DokgenServiceTest {
 
     @Test
     void produserBrevTilBrukerOk() {
+        String saksbehandler = "Z123456";
+        SubjectHandler subjectHandler = mock(SpringSubjectHandler.class);
+        SubjectHandler.set(subjectHandler);
+
+        when(subjectHandler.getUserID()).thenReturn(saksbehandler);
         when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(false))).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
@@ -130,6 +137,7 @@ class DokgenServiceTest {
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(false));
         verifyNoInteractions(mockEregFasade);
         verifyNoInteractions(mockKontaktOpplysningService);
+        verify(mockSaksbehandlerService).hentNavnForIdent(anyString());
     }
 
     @Test
@@ -333,7 +341,7 @@ class DokgenServiceTest {
     }
 
     @Test
-    void skalHenteDokumentInfo() throws Exception {
+    void skalHenteDokumentInfo() {
         DokumentproduksjonsInfo dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
 
         assertThat(dokumentproduksjonsInfo.dokgenMalnavn()).isEqualTo("saksbehandlingstid_soknad");

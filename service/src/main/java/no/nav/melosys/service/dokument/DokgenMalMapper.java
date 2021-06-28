@@ -15,7 +15,6 @@ import no.nav.melosys.integrasjon.dokgen.dto.*;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,19 +30,16 @@ public class DokgenMalMapper {
     private final BehandlingsresultatService behandlingsresultatService;
     private final EregFasade eregFasade;
     private final PersondataFasade persondataFasade;
-    private final SaksbehandlerService saksbehandlerService;
 
     @Autowired
     public DokgenMalMapper(KodeverkService kodeverkService,
                            BehandlingsresultatService behandlingsresultatService,
                            @Qualifier("system") EregFasade eregFasade,
-                           @Qualifier("system") PersondataFasade persondataFasade,
-                           SaksbehandlerService saksbehandlerService) {
+                           @Qualifier("system") PersondataFasade persondataFasade) {
         this.kodeverkService = kodeverkService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.eregFasade = eregFasade;
         this.persondataFasade = persondataFasade;
-        this.saksbehandlerService = saksbehandlerService;
     }
 
     public DokgenDto mapBehandling(DokgenBrevbestilling brevbestilling) {
@@ -65,14 +61,12 @@ public class DokgenMalMapper {
             case MANGELBREV_BRUKER:
                 dto = MangelbrevBruker.av(((MangelbrevBrevbestilling) brevbestilling).toBuilder()
                     .medVedtaksdato(hentVedtaksdato(brevbestilling.getBehandling().getId()))
-                    .medSaksbehandlerNavn(hentSaksbehandlerNavn(brevbestilling.getBehandling().getFagsak().getEndretAv()))
                     .build());
                 break;
             case MANGELBREV_ARBEIDSGIVER:
                 MangelbrevBrevbestilling bestilling = (MangelbrevBrevbestilling) brevbestilling;
                 dto = MangelbrevArbeidsgiver.av(bestilling.toBuilder()
                     .medVedtaksdato(hentVedtaksdato(brevbestilling.getBehandling().getId()))
-                    .medSaksbehandlerNavn(hentSaksbehandlerNavn(brevbestilling.getBehandling().getFagsak().getEndretAv()))
                     .medFullmektigNavn(hentFullmektigNavn(brevbestilling.getBehandling().getFagsak()))
                     .build());
                 break;
@@ -95,10 +89,6 @@ public class DokgenMalMapper {
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
         return (behandlingsresultat != null && behandlingsresultat.harVedtak()) ?
             behandlingsresultat.getVedtakMetadata().getVedtaksdato() : null;
-    }
-
-    private String hentSaksbehandlerNavn(String ident) {
-        return ident != null ? saksbehandlerService.hentNavnForIdent(ident) : "N/A";
     }
 
     private String hentFullmektigNavn(Fagsak fagsak) {

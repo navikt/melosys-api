@@ -21,7 +21,9 @@ import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
+import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -42,14 +44,17 @@ public class DokgenService {
     private final KontaktopplysningService kontaktopplysningService;
     private final BrevmottakerService brevmottakerService;
     private final ProsessinstansService prosessinstansService;
+    private final SaksbehandlerService saksbehandlerService;
 
     @Autowired
-    public DokgenService(DokgenConsumer dokgenConsumer, DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper,
+    public DokgenService(DokgenConsumer dokgenConsumer,
+                         DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper,
                          @Qualifier("system") JoarkFasade joarkFasade,
                          DokgenMalMapper dokgenMalMapper, BehandlingService behandlingService,
                          @Qualifier("system") EregFasade eregFasade,
                          KontaktopplysningService kontaktopplysningService,
-                         BrevmottakerService brevmottakerService, ProsessinstansService prosessinstansService) {
+                         BrevmottakerService brevmottakerService, ProsessinstansService prosessinstansService,
+                         SaksbehandlerService saksbehandlerService) {
         this.dokgenConsumer = dokgenConsumer;
         this.dokumentproduksjonsInfoMapper = dokumentproduksjonsInfoMapper;
         this.joarkFasade = joarkFasade;
@@ -59,6 +64,7 @@ public class DokgenService {
         this.kontaktopplysningService = kontaktopplysningService;
         this.brevmottakerService = brevmottakerService;
         this.prosessinstansService = prosessinstansService;
+        this.saksbehandlerService = saksbehandlerService;
     }
 
     public byte[] produserUtkast(long behandlingId, BrevbestillingDto brevbestillingDto) {
@@ -104,6 +110,8 @@ public class DokgenService {
         }
 
         settJournalpostOpplysninger(behandling, builder);
+
+        builder.medSaksbehandlerNavn(hentSaksbehandlerNavn());
 
         DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(builder.build());
 
@@ -180,5 +188,10 @@ public class DokgenService {
             .medForsendelseMottatt(journalpost.getForsendelseMottatt())
             .medAvsenderNavn(journalpost.getAvsenderNavn())
             .medAvsenderId(journalpost.getAvsenderId());
+    }
+
+    private String hentSaksbehandlerNavn() {
+        String innloggetBruker = SubjectHandler.getInstance().getUserID();
+        return innloggetBruker != null ? saksbehandlerService.hentNavnForIdent(innloggetBruker) : "N/A";
     }
 }
