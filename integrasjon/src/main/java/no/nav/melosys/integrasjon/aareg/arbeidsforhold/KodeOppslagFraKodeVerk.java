@@ -11,6 +11,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class KodeOppslagFraKodeVerk implements KodeOppslag {
     private final KodeverkRegister kodeverkRegister;
 
+    // TODO: Discus this solution
+    //  We could use Guava Cache to set time to live
+    //  Or reload each morning as KodeverkService does.
     ConcurrentHashMap<String, KodeHolder> map = new ConcurrentHashMap<>();
 
     public KodeOppslagFraKodeVerk(KodeverkRegister kodeverkRegister) {
