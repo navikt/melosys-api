@@ -38,7 +38,7 @@
       ]
     },
     "trygdeavgift": {
-      "type": "object",
+      "type": ["object", "null"],
       "properties": {
         "avgiftspliktigInntekt": {
           "type": "integer"
@@ -128,7 +128,7 @@
         },
         "vedtakstype": {
           "type": "string",
-          "enum":[
+          "enum": [
             "FØRSTEGANGSVEDTAK",
             "KORRIGERT_VEDTAK",
             "OMGJØRINGSVEDTAK",
@@ -308,13 +308,47 @@
               "type": "null"
             },
             "adresser": {
-              "type": "null"
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "adressetype": {
+                    "type": "string",
+                    "enum": [
+                      "BOSTEDSADRESSE",
+                      "KONTAKTADRESSE",
+                      "POSTADRESSE",
+                      "ANNET"
+                    ]
+                  },
+                  "gatenavn": {
+                    "type": "string"
+                  },
+                  "gatenummer": {
+                    "type": "string"
+                  },
+                  "postnummer": {
+                    "type": "string"
+                  },
+                  "poststed": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "adressetype",
+                  "gatenavn",
+                  "gatenummer",
+                  "postnummer",
+                  "poststed"
+                ]
+              }
             }
           },
           "required": [
             "ident",
             "navn",
-            "statsborgerskap"
+            "statsborgerskap",
+            "adresser"
           ]
         },
         "hentetDato": {
@@ -331,7 +365,54 @@
       ]
     },
     "avklarteFakta": {
-      "type": "null"
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "VIRKSOMHET",
+                "TIDLIGERE_LOVVALGSPERIODE",
+                "ARBEIDSLAND",
+                "ARBEID_SOKKEL_SKIP",
+                "YRKESGRUPPE",
+                "SOKKEL_ELLER_SKIP",
+                "BOSTEDSLAND",
+                "AARSAK_ENDRING_PERIODE",
+                "VURDERING_UNNTAK_PERIODE",
+                "MARGINALT_ARBEID",
+                "VESENTLIG_AKTIVITET_I_NORGE",
+                "ARBEIDSGIVERS_FORRETNINGSSTED",
+                "INFORMERT_MYNDIGHET",
+                "VURDERING_LOVVALG_BARN",
+                "LØNN_FORHOLD_VIRKSOMHET",
+                "LØNN_NORGE_ARBEIDSGIVERAVGIFT",
+                "LØNN_UTL_ARBEIDSGIVERAVGIFT",
+                "LØNN_NORGE_SKATTEPLIKTIG_NORGE",
+                "LØNN_UTL_SKATTEPLIKTIG_NORGE",
+                "LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE",
+                "LØNN_UTL_SÆRLIG_AVGIFTS_GRUPPE",
+                "VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER"
+              ]
+            },
+            "fakta": {
+              "type": "string"
+            },
+            "begrunnelse": {
+              "type": "string"
+            },
+            "begrunnelseFritekst": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "fakta"
+          ]
+        }
+      ]
     },
     "lovvalgOgMedlemskapsperioder": {
       "type": "array",
@@ -343,7 +424,7 @@
               "type": "string"
             },
             "tilleggsbestemmelse": {
-              "type": "string"
+              "type": ["string", "null"]
             },
             "lovvalgslandKode": {
               "type": "string"

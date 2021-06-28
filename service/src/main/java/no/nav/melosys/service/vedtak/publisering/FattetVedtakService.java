@@ -76,7 +76,7 @@ public class FattetVedtakService {
         return new Sak(persondata.hentFolkeregisterIdent(),
             behandling.getId(),
             fagsak.getSaksnummer(),
-            fagsak.getType(),
+            fagsak.getType().getKode(),
             ofInstant(fagsak.getRegistrertDato(), ZoneId.of("Europe/Paris"))
         );
     }
@@ -85,7 +85,7 @@ public class FattetVedtakService {
         return new Vedtak(
             ofInstant(vedtakMetadata.getVedtaksdato(), ZoneId.of("Europe/Paris")),
             vedtakMetadata.getVedtakKlagefrist(),
-            vedtakMetadata.getVedtakstype(),
+            vedtakMetadata.getVedtakstype().getKode(),
             vedtakMetadata.getRegistrertAv(),
             null
         );
