@@ -1,4 +1,4 @@
-package no.nav.melosys.service.persondata.adresse;
+package no.nav.melosys.service.persondata.mapping.adresse;
 
 import java.time.LocalDateTime;
 

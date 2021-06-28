@@ -1,8 +1,8 @@
-package no.nav.melosys.service.persondata;
+package no.nav.melosys.service.persondata.mapping;
 
 import no.nav.melosys.domain.person.Statsborgerskap;
 
-public class StasborgerskapOversetter {
+public final class StasborgerskapOversetter {
     private StasborgerskapOversetter() {
         throw new IllegalStateException("Ikke ment å bli instantiert");
     }

@@ -1,7 +1,6 @@
 package no.nav.melosys.service.persondata;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -10,8 +9,6 @@ import java.util.Set;
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
-import no.nav.melosys.integrasjon.pdl.dto.Endring;
-import no.nav.melosys.integrasjon.pdl.dto.Metadata;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste;
 import no.nav.melosys.integrasjon.pdl.dto.person.Adressebeskyttelse;
@@ -19,6 +16,7 @@ import no.nav.melosys.integrasjon.pdl.dto.person.AdressebeskyttelseGradering;
 import no.nav.melosys.integrasjon.pdl.dto.person.Navn;
 import no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap;
 import no.nav.melosys.integrasjon.tps.TpsService;
+import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.integrasjon.pdl.dto.identer.IdentGruppe.*;
+import static no.nav.melosys.service.persondata.PdlObjectFactory.metadata;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -33,6 +32,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PersondataServiceTest {
+    @Mock
+    private KodeverkService kodeverkService;
     @Mock
     private PDLConsumer pdlConsumer;
     @Mock
@@ -43,7 +44,7 @@ class PersondataServiceTest {
 
     @BeforeEach
     public void setup() {
-        persondataService = new PersondataService(pdlConsumer, tpsService, fakeUnleash);
+        persondataService = new PersondataService(kodeverkService, pdlConsumer, tpsService, fakeUnleash);
     }
 
     @Test
@@ -78,7 +79,7 @@ class PersondataServiceTest {
     void hentSammensatNavn() {
         fakeUnleash.enable("melosys.pdl.sammensatt-navn");
         when(pdlConsumer.hentNavn(anyString())).thenReturn(Set.of(
-            new Navn("Fornavn", "Mellom", "Etternavnsen", lagMetadata())
+            new Navn("Fornavn", "Mellom", "Etternavnsen", metadata())
         ));
 
         assertThat(persondataService.hentSammensattNavn("")).isEqualTo("Etternavnsen Mellom Fornavn");
@@ -88,7 +89,7 @@ class PersondataServiceTest {
     void hentStatsborgerskap() {
         when(pdlConsumer.hentStatsborgerskap("ident")).thenReturn(Set.of(
             new Statsborgerskap("AIA", LocalDate.parse("2021-05-08"), LocalDate.parse("1979-11-18"),
-                LocalDate.parse("1980-11-18"), lagMetadata()))
+                LocalDate.parse("1980-11-18"), metadata()))
         );
 
         assertThat(persondataService.hentStatsborgerskap("ident")).containsExactly(
@@ -102,8 +103,8 @@ class PersondataServiceTest {
     void harStrengtFortroligAdresse() {
         fakeUnleash.enable("melosys.pdl.adressebeskyttelse");
         when(pdlConsumer.hentAdressebeskyttelser(anyString())).thenReturn(
-            List.of(new Adressebeskyttelse(AdressebeskyttelseGradering.UGRADERT),
-                new Adressebeskyttelse(AdressebeskyttelseGradering.STRENGT_FORTROLIG)));
+            List.of(new Adressebeskyttelse(AdressebeskyttelseGradering.UGRADERT, metadata()),
+                new Adressebeskyttelse(AdressebeskyttelseGradering.STRENGT_FORTROLIG, metadata())));
 
         assertThat(persondataService.harStrengtFortroligAdresse("")).isTrue();
     }
@@ -119,10 +120,5 @@ class PersondataServiceTest {
 
     private Identliste lagTomIdentliste() {
         return new Identliste(Collections.emptySet());
-    }
-
-    private Metadata lagMetadata() {
-        return new Metadata("PDL", false,
-            List.of(new Endring("OPPRETT", LocalDateTime.parse("2021-05-07T10:04:52"), "Dolly")));
     }
 }
