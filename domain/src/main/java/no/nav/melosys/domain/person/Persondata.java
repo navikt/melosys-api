@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import no.nav.melosys.domain.brev.Postadresse;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Familiemedlem;
-import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 
 public interface Persondata {
@@ -44,5 +44,5 @@ public interface Persondata {
 
     Optional<Bostedsadresse> hentBostedsadresse();
 
-    UstrukturertAdresse hentGjeldendePostadresse();
+    Postadresse hentGjeldendePostadresse();
 }

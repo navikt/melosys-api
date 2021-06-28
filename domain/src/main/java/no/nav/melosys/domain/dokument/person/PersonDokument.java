@@ -7,13 +7,14 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import no.nav.melosys.domain.brev.Postadresse;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
-import no.nav.melosys.domain.person.Datakilde;
 import no.nav.melosys.domain.person.KjoennType;
+import no.nav.melosys.domain.person.Master;
 import no.nav.melosys.domain.person.Persondata;
 
 
@@ -78,7 +79,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         }
         return Optional.of(
             new no.nav.melosys.domain.person.adresse.Bostedsadresse(bostedsadresse.tilStrukturertAdresse(), null, null,
-                null, Datakilde.TPS.name(), Datakilde.TPS.name(), false));
+                null, Master.TPS.name(), Master.TPS.name(), false));
     }
 
     @Override
@@ -259,8 +260,16 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
     }
 
     @Override
-    public UstrukturertAdresse hentGjeldendePostadresse() {
-        return gjeldendePostadresse;
+    public Postadresse hentGjeldendePostadresse() {
+        return new Postadresse(
+            gjeldendePostadresse.adresselinje1,
+            gjeldendePostadresse.adresselinje2,
+            gjeldendePostadresse.adresselinje3,
+            gjeldendePostadresse.adresselinje4,
+            gjeldendePostadresse.postnr,
+            gjeldendePostadresse.poststed,
+            gjeldendePostadresse.land != null ? gjeldendePostadresse.land.getKode() : null
+        );
     }
 
     public void setGjeldendePostadresse(UstrukturertAdresse gjeldendePostadresse) {

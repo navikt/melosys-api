@@ -9,7 +9,7 @@ public class StatsborgerskapTilDtoConverter {
 
     public static StatsborgerskapDto tilDto(Statsborgerskap statsborgerskap, KodeverkService kodeverkService) {
         return new StatsborgerskapDto(
-            kodeverkService.dekod(FellesKodeverk.STATSBORGERSKAP_FREG, statsborgerskap.land()),
+            kodeverkService.dekod(FellesKodeverk.STATSBORGERSKAP_FREG, statsborgerskap.landkode()),
             statsborgerskap.bekreftelsesdato(),
             statsborgerskap.gyldigFraOgMed(),
             statsborgerskap.gyldigTilOgMed(),

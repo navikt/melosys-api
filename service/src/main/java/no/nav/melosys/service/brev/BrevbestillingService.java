@@ -20,7 +20,10 @@ import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
-import no.nav.melosys.service.dokument.*;
+import no.nav.melosys.service.dokument.BrevmottakerService;
+import no.nav.melosys.service.dokument.DokumentServiceFasade;
+import no.nav.melosys.service.dokument.MuligMottakerDto;
+import no.nav.melosys.service.dokument.MuligeMottakereDto;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -206,7 +209,8 @@ public class BrevbestillingService {
             .medOrgnr(orgDokument != null ? orgDokument.getOrgnummer() : null)
             .medAdresselinjer(mapAdresselinjer(orgDokument, null, kontaktopplysning, persondata))
             .medPostnr(mapPostnr(orgDokument, persondata))
-            .medPoststed(orgDokument != null ? mapPoststed(orgDokument) : kodeverkService.dekod(FellesKodeverk.POSTNUMMER, persondata.hentGjeldendePostadresse().postnr))
+            .medPoststed(orgDokument != null ? mapPoststed(orgDokument) :
+                kodeverkService.dekod(FellesKodeverk.POSTNUMMER, persondata.hentGjeldendePostadresse().postnr()))
             .medLand(mapLandForAdresse(orgDokument, persondata))
             .build();
     }

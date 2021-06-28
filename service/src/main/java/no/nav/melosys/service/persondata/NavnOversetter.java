@@ -1,6 +1,6 @@
 package no.nav.melosys.service.persondata;
 
-import no.nav.melosys.integrasjon.pdl.dto.person.Navn;
+import no.nav.melosys.domain.person.Navn;
 
 public class NavnOversetter {
     public static final String UKJENT = "UKJENT";
@@ -9,11 +9,7 @@ public class NavnOversetter {
         throw new IllegalStateException("Ikke ment å bli instantiert");
     }
 
-    public static String tilSammensattNavn(Navn navn) {
-        return navn.etternavn() + getMellomnavn(navn) + " " + navn.fornavn();
-    }
-
-    private static String getMellomnavn(Navn navn) {
-        return navn.mellomnavn() == null ? "" : " " + navn.mellomnavn();
+    public static String tilSammensattNavn(no.nav.melosys.integrasjon.pdl.dto.person.Navn navn) {
+        return new Navn(navn.fornavn(), navn.mellomnavn(), navn.etternavn()).tilSammensattNavn();
     }
 }
