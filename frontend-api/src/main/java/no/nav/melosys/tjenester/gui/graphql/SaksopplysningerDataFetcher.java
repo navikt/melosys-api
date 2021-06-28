@@ -39,7 +39,8 @@ public class SaksopplysningerDataFetcher implements DataFetcher<Object> {
         //  TPS-data eller fra PDL
         final var statsborgerskapDto = persondataFasade.hentStatsborgerskap(ident).stream()
             .map(s -> StatsborgerskapTilDtoConverter.tilDto(s, kodeverkService))
-            .sorted(Comparator.nullsLast(Comparator.comparing(StatsborgerskapDto::gyldigFraOgMed)).reversed())
+            .sorted(Comparator.comparing(StatsborgerskapDto::gyldigFraOgMed,
+                Comparator.nullsFirst(Comparator.reverseOrder())))
             .collect(Collectors.toUnmodifiableList());
         return DataFetcherResult.newResult().data(new SaksopplysningerDto(behandlingID,
             new PersonopplysningerDto(statsborgerskapDto))).build();
