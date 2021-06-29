@@ -17,6 +17,7 @@ public class BrevbestillingDto {
     private String begrunnelseFritekst;
     private String kontaktpersonNavn;
     private List<KopiMottaker> kopiMottakere;
+    private String bestillersId;
 
     /**
      * @deprecated Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel
@@ -44,6 +45,10 @@ public class BrevbestillingDto {
         this.produserbardokument = produserbardokument;
     }
 
+    public void setBestillersId(String bestillersId) {
+        this.bestillersId = bestillersId;
+    }
+
     public BrevbestillingDto(Builder builder) {
         this.produserbardokument = builder.produserbardokument;
         this.mottaker = builder.mottaker;
@@ -52,6 +57,7 @@ public class BrevbestillingDto {
         this.manglerFritekst = builder.manglerFritekst;
         this.kontaktpersonNavn = builder.kontaktpersonNavn;
         this.kopiMottakere = builder.kopiMottakere;
+        this.bestillersId = builder.bestillersId;
         this.fritekst = builder.fritekst;
         this.begrunnelseKode = builder.begrunnelseKode;
         this.ytterligereInformasjon = builder.ytterligereInformasjon;
@@ -92,6 +98,10 @@ public class BrevbestillingDto {
         return kopiMottakere;
     }
 
+    public String getBestillersId() {
+        return bestillersId;
+    }
+
     public String getFritekst() {
         return fritekst;
     }
@@ -113,6 +123,7 @@ public class BrevbestillingDto {
         private String begrunnelseFritekst;
         private String kontaktpersonNavn;
         private List<KopiMottaker> kopiMottakere;
+        private String bestillersId;
         private String fritekst;
         private String begrunnelseKode;
         private String ytterligereInformasjon;
@@ -154,6 +165,11 @@ public class BrevbestillingDto {
 
         public Builder medKopiMottakere(List<KopiMottaker> kopiMottakere) {
             this.kopiMottakere = kopiMottakere;
+            return this;
+        }
+
+        public Builder medBestillersId(String bestillersId) {
+            this.bestillersId = bestillersId;
             return this;
         }
 

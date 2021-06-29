@@ -23,6 +23,7 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import no.nav.melosys.sikkerhet.context.SaksflytSubjektHolder;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -92,6 +93,7 @@ public class DokgenService {
         brevbestilling
             .medProduserbartdokument(produserbartdokument)
             .medBehandlingId(behandlingId)
+            .medSaksbehandlerNavn(hentSaksbehandlerNavn(brevbestillingDto.getBestillersId()))
             .medBestillUtkast(true);
 
         return produserBrev(mottaker, brevbestilling.build());
@@ -110,8 +112,6 @@ public class DokgenService {
         }
 
         settJournalpostOpplysninger(behandling, builder);
-
-        builder.medSaksbehandlerNavn(hentSaksbehandlerNavn());
 
         DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(builder.build());
 
@@ -133,7 +133,8 @@ public class DokgenService {
 
         brevbestilling
             .medProduserbartdokument(produserbartDokument)
-            .medBehandlingId(behandlingId);
+            .medBehandlingId(behandlingId)
+            .medSaksbehandlerNavn(hentSaksbehandlerNavn(brevbestillingDto.getBestillersId()));
 
         List<Aktoer> mottakere = new ArrayList<>();
         if (hasText(brevbestillingDto.getOrgNr())) {
@@ -190,8 +191,11 @@ public class DokgenService {
             .medAvsenderId(journalpost.getAvsenderId());
     }
 
-    private String hentSaksbehandlerNavn() {
-        String innloggetBruker = SubjectHandler.getInstance().getUserID();
-        return innloggetBruker != null ? saksbehandlerService.hentNavnForIdent(innloggetBruker) : "N/A";
+    private String hentSaksbehandlerNavn(String ident) {
+        if (ident == null || ident.isBlank()) {
+            //Fallback for automatisk bestilte brev
+            ident = SaksflytSubjektHolder.get();
+        }
+        return ident != null ? saksbehandlerService.hentNavnForIdent(ident) : "N/A";
     }
 }

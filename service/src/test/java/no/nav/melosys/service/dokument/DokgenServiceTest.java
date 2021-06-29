@@ -32,8 +32,6 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -111,11 +109,6 @@ class DokgenServiceTest {
 
     @Test
     void produserBrevTilBrukerOk() {
-        String saksbehandler = "Z123456";
-        SubjectHandler subjectHandler = mock(SpringSubjectHandler.class);
-        SubjectHandler.set(subjectHandler);
-
-        when(subjectHandler.getUserID()).thenReturn(saksbehandler);
         when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(false))).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
@@ -137,7 +130,6 @@ class DokgenServiceTest {
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(false));
         verifyNoInteractions(mockEregFasade);
         verifyNoInteractions(mockKontaktOpplysningService);
-        verify(mockSaksbehandlerService).hentNavnForIdent(anyString());
     }
 
     @Test
@@ -180,6 +172,7 @@ class DokgenServiceTest {
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
             .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
             .medMottaker(Aktoersroller.BRUKER)
+            .medBestillersId("Z123456")
             .build();
 
         byte[] pdfResponse = dokgenService.produserUtkast(123L, brevbestillingDto);
@@ -192,6 +185,7 @@ class DokgenServiceTest {
 
         verifyNoInteractions(mockEregFasade);
         verifyNoInteractions(mockKontaktOpplysningService);
+        verify(mockSaksbehandlerService).hentNavnForIdent(anyString());
     }
 
     @Test
@@ -213,6 +207,7 @@ class DokgenServiceTest {
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
             .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
             .medMottaker(Aktoersroller.BRUKER)
+            .medBestillersId("Z123456")
             .build();
 
         byte[] pdfResponse = dokgenService.produserUtkast(123L, brevbestillingDto);
@@ -245,6 +240,7 @@ class DokgenServiceTest {
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
             .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
             .medMottaker(Aktoersroller.BRUKER)
+            .medBestillersId("Z123456")
             .build();
 
         byte[] pdfResponse = dokgenService.produserUtkast(123L, brevbestillingDto);
@@ -262,24 +258,28 @@ class DokgenServiceTest {
         Aktoer bruker = new Aktoer();
         bruker.setRolle(Aktoersroller.BRUKER);
 
+        when(mockSaksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Ole Saksbehandler");
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(new Behandling());
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(bruker));
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
             .medProduserbardokument(MANGELBREV_BRUKER)
             .medMottaker(Aktoersroller.BRUKER)
+            .medBestillersId("Z123456")
             .build();
 
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
 
         verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Aktoer.class), brevbestillingCaptor.capture());
         verify(mockBrevMottakerService).avklarMottakere(any(), any(), any(), eq(false), eq(false));
+        verify(mockSaksbehandlerService).hentNavnForIdent(anyString());
 
         MangelbrevBrevbestilling brevbestilling = (MangelbrevBrevbestilling) brevbestillingCaptor.getValue();
         assertThat(brevbestilling).isNotNull();
         assertThat(brevbestilling).extracting(
             DokgenBrevbestilling::getProduserbartdokument,
-            DokgenBrevbestilling::getBehandlingId
-        ).containsExactly(MANGELBREV_BRUKER, 123L);
+            DokgenBrevbestilling::getBehandlingId,
+            DokgenBrevbestilling::getSaksbehandlerNavn
+        ).containsExactly(MANGELBREV_BRUKER, 123L, "Ole Saksbehandler");
     }
 
     @Test
@@ -290,6 +290,7 @@ class DokgenServiceTest {
             .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
             .medMottaker(Aktoersroller.ARBEIDSGIVER)
             .medOrgNr("987654321")
+            .medBestillersId("Z123456")
             .build();
 
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
@@ -311,6 +312,7 @@ class DokgenServiceTest {
 
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
             .medProduserbardokument(MANGELBREV_BRUKER)
+            .medBestillersId("Z123456")
             .medManglerFritekst("Mangler")
             .medMottaker(Aktoersroller.ARBEIDSGIVER)
             .medOrgNr("987654321")
