@@ -47,9 +47,10 @@ class FattetVedtakServiceTest {
 
     @Test
     void fattetVedtakFtrl_skalPubliseres() {
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(FattetVedtakTestData.lagBehandling());
-        when(mockBehandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(FattetVedtakTestData.lagBehandlingsresultat());
-        fattetVedtakService.publiserFattetVedtak(123L);
+        final long behandlingId = 123L;
+        when(mockBehandlingService.hentBehandling(behandlingId)).thenReturn(FattetVedtakTestData.lagBehandling());
+        when(mockBehandlingsresultatService.hentBehandlingsresultat(behandlingId)).thenReturn(FattetVedtakTestData.lagBehandlingsresultat());
+        fattetVedtakService.publiserFattetVedtak(behandlingId);
 
         verify(mockFattetVedtakProducer).produserMelding(fattetVedtakCaptor.capture());
 

@@ -123,6 +123,7 @@ public class FattetVedtakTestData {
     private static VedtakMetadata lagVedtakMetadata() {
         VedtakMetadata vedtakMetadata = new VedtakMetadata();
         vedtakMetadata.setVedtaksdato(Instant.now());
+        vedtakMetadata.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
         return vedtakMetadata;
     }
 
