@@ -77,14 +77,10 @@ public class OppgaveService {
     }
 
     public void ferdigstillOppgaveMedSaksnummer(String fagSaksnummer) {
-        Oppgave oppgave;
-        try {
-            oppgave = hentÅpenOppgaveMedFagsaksnummer(fagSaksnummer);
-        } catch (IkkeFunnetException e) {
-            log.debug("Sak {} har ingen oppgaver å ferdigstille.", fagSaksnummer);
-            return;
-        }
-        ferdigstillOppgave(oppgave.getOppgaveId());
+        finnÅpenOppgaveMedFagsaksnummer(fagSaksnummer).ifPresentOrElse(
+            oppgave -> ferdigstillOppgave(oppgave.getOppgaveId()),
+            () -> log.debug("Sak {} har ingen oppgaver å ferdigstille.", fagSaksnummer)
+        );
     }
 
     public void leggTilbakeOppgaveMedSaksnummer(String fagSaksnummer) {
@@ -137,7 +133,7 @@ public class OppgaveService {
         Optional<Oppgave> eksisterendeOppgave = finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         if (eksisterendeOppgave.isEmpty()) {
-            String beskrivelse = behandling.erElektroniskSøknad() ? "Mottatt elektronisk søknad"  : null;
+            String beskrivelse = behandling.erElektroniskSøknad() ? "Mottatt elektronisk søknad" : null;
             Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType())
                 .setTilordnetRessurs(tilordnetRessurs)
                 .setJournalpostId(journalpostID)
@@ -167,6 +163,13 @@ public class OppgaveService {
 
     public void oppdaterOppgave(String oppgaveID, OppgaveOppdatering oppgaveOppdatering) {
         oppgaveFasade.oppdaterOppgave(oppgaveID, oppgaveOppdatering);
+    }
+
+    public void oppdaterOppgaveMedSaksnummer(String fagSaksnummer, OppgaveOppdatering oppgaveOppdatering) {
+        finnÅpenOppgaveMedFagsaksnummer(fagSaksnummer).ifPresentOrElse(
+            oppg -> oppdaterOppgave(oppg.getOppgaveId(), oppgaveOppdatering),
+            () -> log.debug("Sak {} har ingen åpne oppgaver å oppdatere.", fagSaksnummer)
+        );
     }
 
     public void tildelOppgave(String oppgaveID, String saksbehandler) {
@@ -208,11 +211,10 @@ public class OppgaveService {
             dest = jfrOppgaveDto;
             String aktørId = oppgave.getAktørId();
             String fnr = aktørId != null ? persondataFasade.hentFolkeregisterIdent(aktørId) : null;
-            if (StringUtils.isNotEmpty(fnr)){
+            if (StringUtils.isNotEmpty(fnr)) {
                 dest.setFnr(fnr);
                 dest.setSammensattNavn(persondataFasade.hentSammensattNavn(fnr));
-            }
-            else {
+            } else {
                 dest.setFnr(UKJENT);
                 dest.setSammensattNavn(UKJENT);
             }
