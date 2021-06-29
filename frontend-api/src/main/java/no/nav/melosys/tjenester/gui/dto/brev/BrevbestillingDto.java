@@ -1,10 +1,12 @@
-package no.nav.melosys.service.dokument.brev;
+package no.nav.melosys.tjenester.gui.dto.brev;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.service.dokument.brev.KopiMottaker;
 
 public class BrevbestillingDto {
 
@@ -16,7 +18,6 @@ public class BrevbestillingDto {
     private String begrunnelseFritekst;
     private String kontaktpersonNavn;
     private List<KopiMottaker> kopiMottakere;
-    private String bestillersId;
 
     /**
      * @deprecated Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel
@@ -52,7 +53,6 @@ public class BrevbestillingDto {
         this.manglerFritekst = builder.manglerFritekst;
         this.kontaktpersonNavn = builder.kontaktpersonNavn;
         this.kopiMottakere = builder.kopiMottakere;
-        this.bestillersId = builder.bestillersId;
         this.fritekst = builder.fritekst;
         this.begrunnelseKode = builder.begrunnelseKode;
         this.ytterligereInformasjon = builder.ytterligereInformasjon;
@@ -93,10 +93,6 @@ public class BrevbestillingDto {
         return kopiMottakere;
     }
 
-    public String getBestillersId() {
-        return bestillersId;
-    }
-
     public String getFritekst() {
         return fritekst;
     }
@@ -118,7 +114,6 @@ public class BrevbestillingDto {
         private String begrunnelseFritekst;
         private String kontaktpersonNavn;
         private List<KopiMottaker> kopiMottakere;
-        private String bestillersId;
         private String fritekst;
         private String begrunnelseKode;
         private String ytterligereInformasjon;
@@ -163,11 +158,6 @@ public class BrevbestillingDto {
             return this;
         }
 
-        public Builder medBestillersId(String bestillersId) {
-            this.bestillersId = bestillersId;
-            return this;
-        }
-
         public Builder medFritekst(String fritekst) {
             this.fritekst = fritekst;
             return this;
@@ -186,5 +176,35 @@ public class BrevbestillingDto {
         public BrevbestillingDto build() {
             return new BrevbestillingDto(this);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BrevbestillingDto that = (BrevbestillingDto) o;
+        return mottaker == that.mottaker && Objects.equals(orgNr, that.orgNr) &&
+            Objects.equals(innledningFritekst, that.innledningFritekst) && Objects.equals(manglerFritekst, that.manglerFritekst) &&
+            Objects.equals(kontaktpersonNavn, that.kontaktpersonNavn) && Objects.equals(fritekst, that.fritekst) &&
+            Objects.equals(begrunnelseKode, that.begrunnelseKode) && Objects.equals(ytterligereInformasjon, that.ytterligereInformasjon);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mottaker, orgNr, innledningFritekst, manglerFritekst, kontaktpersonNavn, fritekst, begrunnelseKode, ytterligereInformasjon);
+    }
+
+    @Override
+    public String toString() {
+        return "BrevbestillingDto{" +
+            "mottaker=" + mottaker +
+            ", orgNr='" + orgNr + '\'' +
+            ", innledningFritekst='" + innledningFritekst + '\'' +
+            ", manglerFritekst='" + manglerFritekst + '\'' +
+            ", kontaktpersonNavn='" + kontaktpersonNavn + '\'' +
+            ", fritekst='" + fritekst + '\'' +
+            ", begrunnelseKode='" + begrunnelseKode + '\'' +
+            ", ytterligereInformasjon='" + ytterligereInformasjon + '\'' +
+            '}';
     }
 }

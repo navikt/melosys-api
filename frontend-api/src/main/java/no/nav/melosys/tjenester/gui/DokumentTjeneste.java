@@ -12,9 +12,10 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.SedPdfData;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import no.nav.melosys.tjenester.gui.dto.brev.BrevbestillingDto;
 import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.JournalpostInfoDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,9 +79,7 @@ public class DokumentTjeneste {
         byte[] dokument;
         tilgangService.sjekkTilgang(behandlingID);
 
-        brevBestillingDto.setProduserbardokument(produserbartDokument);
-
-        dokument = dokumentServiceFasade.produserUtkast(behandlingID, brevBestillingDto);
+        dokument = dokumentServiceFasade.produserUtkast(behandlingID, mapBrevbestilling(brevBestillingDto, produserbartDokument));
         return lagResponseAvDokument(dokument, produserbartDokument.getKode() + "_utkast.pdf");
     }
 
@@ -105,11 +104,9 @@ public class DokumentTjeneste {
         }
         tilgangService.sjekkTilgang(behandlingID);
 
-        brevBestillingDto.setProduserbardokument(produserbartDokument);
-
         // Produserer utkast for å få eventuelle feil før bestilling i saksflyt.
-        dokumentServiceFasade.produserUtkast(behandlingID, brevBestillingDto);
-        dokumentServiceFasade.produserDokument(behandlingID, brevBestillingDto);
+        dokumentServiceFasade.produserUtkast(behandlingID, mapBrevbestilling(brevBestillingDto, produserbartDokument));
+        dokumentServiceFasade.produserDokument(behandlingID, mapBrevbestilling(brevBestillingDto, produserbartDokument));
         return ResponseEntity.noContent().build();
     }
 
@@ -118,5 +115,22 @@ public class DokumentTjeneste {
             .header(HttpHeaders.CONTENT_LENGTH, Integer.toString(dokument.length))
             .header(HttpHeaders.CONTENT_DISPOSITION, "inline; attachment; filename=" + filnavn)
             .body(dokument);
+    }
+
+    private no.nav.melosys.service.dokument.brev.BrevbestillingDto mapBrevbestilling(BrevbestillingDto brevbestillingDto, Produserbaredokumenter produserbartDokument) {
+        return new no.nav.melosys.service.dokument.brev.BrevbestillingDto.Builder()
+            .medProduserbardokument(produserbartDokument)
+            .medMottaker(brevbestillingDto.getMottaker())
+            .medOrgNr(brevbestillingDto.getOrgNr())
+            .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
+            .medManglerFritekst(brevbestillingDto.getManglerFritekst())
+            .medBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst())
+            .medKontaktpersonNavn(brevbestillingDto.getKontaktpersonNavn())
+            .medKopiMottakere(brevbestillingDto.getKopiMottakere())
+            .medBestillersId(SubjectHandler.getInstance().getUserID())
+            .medFritekst(brevbestillingDto.getFritekst())
+            .medBegrunnelseKode(brevbestillingDto.getBegrunnelseKode())
+            .medYtterligereInformasjon(brevbestillingDto.getYtterligereInformasjon())
+            .build();
     }
 }
