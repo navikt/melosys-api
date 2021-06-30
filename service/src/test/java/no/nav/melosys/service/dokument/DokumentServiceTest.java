@@ -77,7 +77,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.Mockito.*;
 
-public final class DokumentServiceTest {
+final class DokumentServiceTest {
     private static final long BEHANDLINGSID = 13L;
     private static final long GSAKSNUMMER = 321L;
     private static final String ORGNR = "123456789";
@@ -96,7 +96,7 @@ public final class DokumentServiceTest {
     }
 
     @Test
-    public final void produserInnvilgelsesbrev_medFullmektig_senderTilBrukerOgFullmektig() throws Exception {
+    void produserInnvilgelsesbrev_medFullmektig_senderTilBrukerOgFullmektig() throws Exception {
         DokumentService dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock());
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(INNVILGELSE_YRKESAKTIV).build();
         dokumentServiceMedMockVelger.produserDokument(INNVILGELSE_YRKESAKTIV, Mottaker.av(BRUKER), BEHANDLINGSID, brevbestilling);
@@ -104,7 +104,7 @@ public final class DokumentServiceTest {
     }
 
     @Test
-    public final void produser_avslagArbeidsgiver_funker() throws Exception {
+    void produser_avslagArbeidsgiver_funker() throws Exception {
         DoksysBrevbestilling brevbestilling = lagBrevbestillingAvslagArbeidsgiver();
         Set<String> arbeidsgivendeOrgnumre = Collections.singleton("987654321");
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any(Behandling.class))).thenReturn(arbeidsgivendeOrgnumre);
@@ -114,8 +114,8 @@ public final class DokumentServiceTest {
     }
 
     @Test
-    public final void produserUtkast_innvilgelsesBrev_funker() throws Exception {
-        BrevbestillingDto brevbestilling = lagBrevBestillingDto(INNVILGELSE_YRKESAKTIV, BRUKER);
+    void produserUtkast_innvilgelsesBrev_funker() throws Exception {
+        BrevbestillingRequest brevbestilling = lagBrevBestillingDto(INNVILGELSE_YRKESAKTIV, BRUKER);
 
         DokumentService dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock(brevbestilling));
         byte[] resultat = dokumentServiceMedMockVelger.produserUtkast(BEHANDLINGSID, brevbestilling);
@@ -124,8 +124,8 @@ public final class DokumentServiceTest {
     }
 
     @Test
-    public final void produserUtkast_avslagArbeidsgiver_funker() throws Exception {
-        BrevbestillingDto brevbestilling = lagBrevBestillingDto(AVSLAG_ARBEIDSGIVER, ARBEIDSGIVER);
+    void produserUtkast_avslagArbeidsgiver_funker() throws Exception {
+        BrevbestillingRequest brevbestilling = lagBrevBestillingDto(AVSLAG_ARBEIDSGIVER, ARBEIDSGIVER);
         Set<String> arbeidsgivendeOrgnumre = Collections.singleton("987654321");
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any(Behandling.class))).thenReturn(arbeidsgivendeOrgnumre);
 
@@ -135,23 +135,23 @@ public final class DokumentServiceTest {
         verify(dokSysFasade).produserDokumentutkast(any(Dokumentbestilling.class));
     }
 
-    private static BrevbestillingDto lagBrevBestillingDto(Produserbaredokumenter produserbartdokument, Aktoersroller rolle) {
-        return new BrevbestillingDto.Builder()
-            .medProduserbardokument(produserbartdokument)
-            .medMottaker(rolle)
-            .build();
-    }
-
     @Test
-    public final void produserDokumentUtenBehandlingKasterUnntak() {
+    void produserDokumentUtenBehandlingKasterUnntak() {
         Throwable unntak = catchThrowable(() -> instans.produserDokument(ATTEST_A1, Mottaker.av(ARBEIDSGIVER), ~BEHANDLINGSID, new DoksysBrevbestilling.Builder().build()));
         assertThat(unntak).isInstanceOf(IkkeFunnetException.class).hasNoCause().hasMessageContaining("finnes ikke");
     }
 
     @Test
-    public final void produserDokumentUtenDokumenttypeKasterUnntak() {
+    void produserDokumentUtenDokumenttypeKasterUnntak() {
         Throwable unntak = catchThrowable(() -> instans.produserDokument(null, Mottaker.av(ARBEIDSGIVER), BEHANDLINGSID, new DoksysBrevbestilling.Builder().build()));
         assertThat(unntak).isInstanceOf(IllegalArgumentException.class).hasNoCause().hasMessageContaining("Ingen gyldig");
+    }
+
+    private static BrevbestillingRequest lagBrevBestillingDto(Produserbaredokumenter produserbartdokument, Aktoersroller rolle) {
+        return new BrevbestillingRequest.Builder()
+            .medProduserbardokument(produserbartdokument)
+            .medMottaker(rolle)
+            .build();
     }
 
     private static BrevData lagBrevDataInnvilgelse() {
@@ -164,7 +164,7 @@ public final class DokumentServiceTest {
         brevDataA1.person = lagPersonDokument();
         brevDataA1.arbeidssteder = new ArrayList<>();
         brevDataA1.arbeidsland = new ArrayList<>();
-        BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse(new BrevbestillingDto(), "SAKSBEHANDLER");
+        BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse(new BrevbestillingRequest(), "SAKSBEHANDLER");
         brevdataInnvilgelse.vedleggA1 = brevDataA1;
         brevdataInnvilgelse.hovedvirksomhet = arbeidsgiver;
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
@@ -328,10 +328,10 @@ public final class DokumentServiceTest {
     }
 
     private BrevDataByggerVelger lagBrevdatabyggerVelgerMock() {
-        return lagBrevdatabyggerVelgerMock(new BrevbestillingDto());
+        return lagBrevdatabyggerVelgerMock(new BrevbestillingRequest());
     }
 
-    private BrevDataByggerVelger lagBrevdatabyggerVelgerMock(BrevbestillingDto bestillingDto) {
+    private BrevDataByggerVelger lagBrevdatabyggerVelgerMock(BrevbestillingRequest bestillingDto) {
         BrevDataByggerInnvilgelse brevDataByggerInnvilgelse = mock(BrevDataByggerInnvilgelse.class);
         BrevDataByggerAvslagArbeidsgiver brevDataByggerAvslagArbeidsgiver = mock(BrevDataByggerAvslagArbeidsgiver.class);
         BrevDataByggerVedlegg brevDataByggerVedlegg = mock(BrevDataByggerVedlegg.class);
@@ -339,7 +339,7 @@ public final class DokumentServiceTest {
         BrevDataByggerVelger brevdatabyggervelger = mock(BrevDataByggerVelger.class);
         if (bestillingDto != null) {
             if (bestillingDto.getMottaker() == ARBEIDSGIVER) {
-                when(brevdatabyggervelger.hent(any(), eq(bestillingDto))).thenReturn(brevDataByggerAvslagArbeidsgiver);
+                when(brevdatabyggervelger.hent(any(), any(BrevbestillingRequest.class))).thenReturn(brevDataByggerAvslagArbeidsgiver);
                 when(brevDataByggerAvslagArbeidsgiver.lag(any(), any())).thenReturn(lagBrevDataAvslagArbeidsgiver());
             } else {
                 when(brevdatabyggervelger.hent(any(), any())).thenReturn(brevDataByggerVedlegg);

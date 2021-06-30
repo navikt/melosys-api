@@ -12,9 +12,11 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.SedPdfData;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import no.nav.melosys.tjenester.gui.dto.brev.BrevbestillingDto;
 import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.JournalpostInfoDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,9 +80,12 @@ public class DokumentTjeneste {
         byte[] dokument;
         tilgangService.sjekkTilgang(behandlingID);
 
-        brevBestillingDto.setProduserbardokument(produserbartDokument);
+        BrevbestillingRequest brevbestillingRequest = brevBestillingDto.tilRequestBuilder()
+            .medProduserbardokument(produserbartDokument)
+            .medBestillersId(SubjectHandler.getInstance().getUserID())
+            .build();
 
-        dokument = dokumentServiceFasade.produserUtkast(behandlingID, brevBestillingDto);
+        dokument = dokumentServiceFasade.produserUtkast(behandlingID, brevbestillingRequest);
         return lagResponseAvDokument(dokument, produserbartDokument.getKode() + "_utkast.pdf");
     }
 
@@ -105,11 +110,13 @@ public class DokumentTjeneste {
         }
         tilgangService.sjekkTilgang(behandlingID);
 
-        brevBestillingDto.setProduserbardokument(produserbartDokument);
-
+        BrevbestillingRequest brevbestillingRequest = brevBestillingDto.tilRequestBuilder()
+            .medProduserbardokument(produserbartDokument)
+            .medBestillersId(SubjectHandler.getInstance().getUserID())
+            .build();
         // Produserer utkast for å få eventuelle feil før bestilling i saksflyt.
-        dokumentServiceFasade.produserUtkast(behandlingID, brevBestillingDto);
-        dokumentServiceFasade.produserDokument(behandlingID, brevBestillingDto);
+        dokumentServiceFasade.produserUtkast(behandlingID, brevbestillingRequest);
+        dokumentServiceFasade.produserDokument(behandlingID, brevbestillingRequest);
         return ResponseEntity.noContent().build();
     }
 
@@ -119,4 +126,5 @@ public class DokumentTjeneste {
             .header(HttpHeaders.CONTENT_DISPOSITION, "inline; attachment; filename=" + filnavn)
             .body(dokument);
     }
+
 }

@@ -8,7 +8,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,7 +42,7 @@ public class ForvaltningsmeldingMapperTest {
 
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.UTSENDT_SELVSTENDIG);
-        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
         String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, null, brevData);
@@ -52,7 +52,7 @@ public class ForvaltningsmeldingMapperTest {
 
     @Test
     public void mapFag() throws Exception {
-        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);

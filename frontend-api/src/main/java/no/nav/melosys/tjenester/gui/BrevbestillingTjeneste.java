@@ -16,7 +16,8 @@ import no.nav.melosys.service.brev.BrevAdresse;
 import no.nav.melosys.service.brev.BrevbestillingService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.MuligeMottakereDto;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.brev.*;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,8 +67,10 @@ public class BrevbestillingTjeneste {
     @ApiOperation(value = "Produser utkast")
     public ResponseEntity<byte[]> produserUtkast(@PathVariable long behandlingID,
                                                  @RequestBody BrevbestillingDto brevbestillingDto) {
-
-        byte[] pdf = brevbestillingService.produserUtkast(behandlingID, brevbestillingDto);
+        BrevbestillingRequest brevbestillingRequest = brevbestillingDto.tilRequestBuilder()
+            .medBestillersId(SubjectHandler.getInstance().getUserID())
+            .build();
+        byte[] pdf = brevbestillingService.produserUtkast(behandlingID, brevbestillingRequest);
         return new ResponseEntity<>(pdf, genPdfHeaders("utkast_" + behandlingID, false), HttpStatus.OK);
     }
 
@@ -75,7 +78,10 @@ public class BrevbestillingTjeneste {
     @ApiOperation(value = "Produser brev gjennom melosys-dokgen")
     public void produserBrev(@PathVariable("behandlingID") long behandlingID,
                              @RequestBody BrevbestillingDto brevbestillingDto) {
-        brevbestillingService.produserBrev(behandlingID, brevbestillingDto);
+        BrevbestillingRequest brevbestillingRequest = brevbestillingDto.tilRequestBuilder()
+            .medBestillersId(SubjectHandler.getInstance().getUserID())
+            .build();
+        brevbestillingService.produserBrev(behandlingID, brevbestillingRequest);
     }
 
     private List<BrevmalDto> byggBrevmalListe(long behandlingId) {

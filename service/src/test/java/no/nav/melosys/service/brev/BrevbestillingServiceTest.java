@@ -26,7 +26,7 @@ import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.dokument.MuligMottakerDto;
 import no.nav.melosys.service.dokument.MuligeMottakereDto;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
@@ -334,7 +334,7 @@ class BrevbestillingServiceTest {
     }
 
     @Test
-    void hentBrevAdresseTilMottakere_brukerSomMottaker_returnererBrukeradresse() throws Exception {
+    void hentBrevAdresseTilMottakere_brukerSomMottaker_returnererBrukeradresse() {
         var saksbehandling = lagPERSOPLSaksopplysning();
         var behandling = new Behandling();
         behandling.setSaksopplysninger(Set.of(saksbehandling));
@@ -354,7 +354,7 @@ class BrevbestillingServiceTest {
     }
 
     @Test
-    void hentBrevAdresseTilMottakere_brukersFullmaktSomMottaker_returnererFullmektigsAdresse() throws Exception {
+    void hentBrevAdresseTilMottakere_brukersFullmaktSomMottaker_returnererFullmektigsAdresse() {
         var behandling = new Behandling();
         behandling.setFagsak(new Fagsak());
 
@@ -371,7 +371,7 @@ class BrevbestillingServiceTest {
     }
 
     @Test
-    void hentBrevAdresseTilMottakere_arbeidsgiverSomMottaker_returnererArbeidsgiverAdresser() throws Exception {
+    void hentBrevAdresseTilMottakere_arbeidsgiverSomMottaker_returnererArbeidsgiverAdresser() {
         var behandling = new Behandling();
         behandling.setFagsak(new Fagsak());
 
@@ -392,7 +392,7 @@ class BrevbestillingServiceTest {
     }
 
     @Test
-    void hentBrevAdresseTilMottakere_arbeidsgiverSomMottakerMenIngenArbeidsgivere_returnererTomListe() throws Exception {
+    void hentBrevAdresseTilMottakere_arbeidsgiverSomMottakerMenIngenArbeidsgivere_returnererTomListe() {
         when(mockBrevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.ARBEIDSGIVER)), any(), eq(false), eq(false)))
             .thenReturn(emptyList());
 
@@ -402,7 +402,7 @@ class BrevbestillingServiceTest {
     }
 
     @Test
-    void hentBrevAdresseTilMottakere_arbeidsgiversFullmaktSomMottaker_returnererFullmektigsAdresse() throws Exception {
+    void hentBrevAdresseTilMottakere_arbeidsgiversFullmaktSomMottaker_returnererFullmektigsAdresse() {
         var behandling = new Behandling();
         behandling.setFagsak(new Fagsak());
 
@@ -420,23 +420,23 @@ class BrevbestillingServiceTest {
 
 
     @Test
-    void skalBestilleProduseringAvBrev() throws Exception {
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().medProduserbardokument(MANGELBREV_BRUKER).build();
-        brevbestillingService.produserBrev(123L, brevbestillingDto);
+    void skalBestilleProduseringAvBrev() {
+        BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder().medProduserbardokument(MANGELBREV_BRUKER).build();
+        brevbestillingService.produserBrev(123L, brevbestillingRequest);
 
-        verify(mockDokServiceFasade).produserDokument(anyLong(), eq(brevbestillingDto));
+        verify(mockDokServiceFasade).produserDokument(anyLong(), any(BrevbestillingRequest.class));
     }
 
     @Test
-    void skalReturnereUtkast() throws Exception {
+    void skalReturnereUtkast() {
         byte[] pdf = "UTKAST".getBytes(StandardCharsets.UTF_8);
         when(mockDokServiceFasade.produserUtkast(anyLong(), any())).thenReturn(pdf);
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().medProduserbardokument(MANGELBREV_BRUKER).build();
+        BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder().medProduserbardokument(MANGELBREV_BRUKER).build();
 
-        byte[] utkast = brevbestillingService.produserUtkast(123L, brevbestillingDto);
+        byte[] utkast = brevbestillingService.produserUtkast(123L, brevbestillingRequest);
 
         assertThat(utkast).isEqualTo(pdf);
-        verify(mockDokServiceFasade).produserUtkast(123L, brevbestillingDto);
+        verify(mockDokServiceFasade).produserUtkast(123L, brevbestillingRequest);
     }
 
     private Aktoer lagAktoer(Aktoersroller aktoersroller, String orgNummer) {

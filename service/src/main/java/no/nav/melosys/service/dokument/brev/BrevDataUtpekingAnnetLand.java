@@ -5,7 +5,7 @@ import no.nav.melosys.domain.Utpekingsperiode;
 public class BrevDataUtpekingAnnetLand extends BrevData {
     public Utpekingsperiode utpekingsperiode;
 
-    public BrevDataUtpekingAnnetLand(BrevbestillingDto brevbestillingDto, String saksbehandler) {
-        super(brevbestillingDto, saksbehandler);
+    public BrevDataUtpekingAnnetLand(BrevbestillingRequest brevbestillingRequest, String saksbehandler) {
+        super(brevbestillingRequest, saksbehandler);
     }
 }

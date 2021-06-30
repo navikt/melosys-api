@@ -10,7 +10,7 @@ import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.utpeking.UtpekingService;
@@ -95,20 +95,20 @@ public class BrevDataByggerVelgerTest {
 
     @Test
     public void testMangelbrev() {
-        BrevbestillingDto bestilling = new BrevbestillingDto();
+        BrevbestillingRequest bestilling = new BrevbestillingRequest();
         BrevDataBygger bygger = brevDataByggerVelger.hent(Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER, bestilling);
         assertThat(bygger).isInstanceOf(BrevDataByggerMedMottattDato.class);
     }
 
     @Test
     public void testForvaltningsmelding() {
-        BrevbestillingDto bestilling = new BrevbestillingDto();
+        BrevbestillingRequest bestilling = new BrevbestillingRequest();
         BrevDataBygger bygger = brevDataByggerVelger.hent(Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID, bestilling);
         assertThat(bygger).isInstanceOf(BrevDataByggerMedMottattDato.class);
     }
 
     private void testHent(Produserbaredokumenter type, Class<? extends BrevDataBygger> forventetKlasse) {
-        BrevDataBygger resultat = brevDataByggerVelger.hent(type, new BrevbestillingDto());
+        BrevDataBygger resultat = brevDataByggerVelger.hent(type, new BrevbestillingRequest());
         assertThat(resultat).isInstanceOf(forventetKlasse);
     }
 }

@@ -28,7 +28,6 @@ import no.nav.melosys.integrasjon.dokgen.dto.SaksbehandlingstidSoknad;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,7 +39,6 @@ import static java.util.Collections.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -67,15 +65,12 @@ class DokgenMalMapperTest {
     @Mock
     private PersondataFasade mockPersondataFasade;
 
-    @Mock
-    private SaksbehandlerService mockSaksbehandlerService;
-
     private DokgenMalMapper dokgenMalMapper;
 
     @BeforeEach
     void init() {
         dokgenMalMapper = new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService,
-            mockEregFasade, mockPersondataFasade, mockSaksbehandlerService);
+            mockEregFasade, mockPersondataFasade);
     }
 
     @Test
@@ -90,30 +85,6 @@ class DokgenMalMapperTest {
         assertThrows(FunksjonellException.class, () ->
             dokgenMalMapper.mapBehandling(brevbestilling)
         );
-    }
-
-    @Test
-    void skalMappeMedMangelbrevMedSaksbehandlerNavn() {
-        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
-        when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
-        when(mockSaksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Ole Saksbehandler");
-
-        Behandling behandling = lagBehandling(lagFagsak());
-
-        DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
-            .medProduserbartdokument(MANGELBREV_BRUKER)
-            .medBehandling(behandling)
-            .medForsendelseMottatt(Instant.now())
-            .build();
-
-        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling);
-
-        assertTrue(dokgenDto instanceof MangelbrevBruker);
-        assertEquals(SAMMENSATT_NAVN, dokgenDto.getNavnBruker());
-        assertEquals("Ole Saksbehandler", ((MangelbrevBruker)dokgenDto).getSaksbehandlerNavn());
-        assertEquals(SAMMENSATT_NAVN, dokgenDto.getNavnMottaker());
-        assertEquals(ADRESSELINJE_1_BRUKER, dokgenDto.getAdresselinjer().get(0));
-        assertEquals(POSTNR_BRUKER, dokgenDto.getPostnr());
     }
 
     @Test
