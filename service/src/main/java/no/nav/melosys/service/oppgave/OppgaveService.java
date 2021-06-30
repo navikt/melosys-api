@@ -79,7 +79,7 @@ public class OppgaveService {
     public void ferdigstillOppgaveMedSaksnummer(String fagSaksnummer) {
         finnÅpenOppgaveMedFagsaksnummer(fagSaksnummer).ifPresentOrElse(
             oppgave -> ferdigstillOppgave(oppgave.getOppgaveId()),
-            () -> log.debug("Sak {} har ingen oppgaver å ferdigstille.", fagSaksnummer)
+            () -> log.warn("Sak {} har ingen oppgaver å ferdigstille.", fagSaksnummer)
         );
     }
 
@@ -168,7 +168,7 @@ public class OppgaveService {
     public void oppdaterOppgaveMedSaksnummer(String fagSaksnummer, OppgaveOppdatering oppgaveOppdatering) {
         finnÅpenOppgaveMedFagsaksnummer(fagSaksnummer).ifPresentOrElse(
             oppg -> oppdaterOppgave(oppg.getOppgaveId(), oppgaveOppdatering),
-            () -> log.debug("Sak {} har ingen åpne oppgaver å oppdatere.", fagSaksnummer)
+            () -> log.warn("Sak {} har ingen åpne oppgaver å oppdatere.", fagSaksnummer)
         );
     }
 

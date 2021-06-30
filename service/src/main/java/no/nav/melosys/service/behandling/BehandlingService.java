@@ -119,15 +119,13 @@ public class BehandlingService {
 
         behandlingRepository.save(behandling);
 
-        if (status == Behandlingsstatus.AVSLUTTET) {
-            oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
-        }
-
         if (List.of(AVVENT_FAGLIG_AVKLARING, AVVENT_DOK_PART, AVVENT_DOK_UTL).contains(status)) {
             oppgaveService.oppdaterOppgaveMedSaksnummer(
                 behandling.getFagsak().getSaksnummer(),
                 OppgaveOppdatering.builder().beskrivelse(status.getBeskrivelse()).build()
             );
+        } else if (status == Behandlingsstatus.AVSLUTTET) {
+            oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
         }
     }
 
