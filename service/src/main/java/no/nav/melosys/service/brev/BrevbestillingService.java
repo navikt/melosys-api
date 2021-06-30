@@ -24,7 +24,7 @@ import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.dokument.MuligMottakerDto;
 import no.nav.melosys.service.dokument.MuligeMottakereDto;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -216,11 +216,11 @@ public class BrevbestillingService {
     }
 
     @Transactional
-    public void produserBrev(long behandlingId, BrevbestillingDto brevbestillingDto) {
-        dokumentServiceFasade.produserDokument(behandlingId, brevbestillingDto);
+    public void produserBrev(long behandlingId, BrevbestillingRequest brevbestillingRequest) {
+        dokumentServiceFasade.produserDokument(behandlingId, brevbestillingRequest);
     }
 
-    public byte[] produserUtkast(long behandlingID, BrevbestillingDto brevbestillingDto) {
-        return dokumentServiceFasade.produserUtkast(behandlingID, brevbestillingDto);
+    public byte[] produserUtkast(long behandlingID, BrevbestillingRequest brevbestillingRequest) {
+        return dokumentServiceFasade.produserUtkast(behandlingID, brevbestillingRequest);
     }
 }

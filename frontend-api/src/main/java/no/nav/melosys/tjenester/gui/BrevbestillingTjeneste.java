@@ -16,6 +16,7 @@ import no.nav.melosys.service.brev.BrevAdresse;
 import no.nav.melosys.service.brev.BrevbestillingService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.MuligeMottakereDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.brev.*;
 import no.nav.security.token.support.core.api.Protected;
@@ -66,7 +67,10 @@ public class BrevbestillingTjeneste {
     @ApiOperation(value = "Produser utkast")
     public ResponseEntity<byte[]> produserUtkast(@PathVariable long behandlingID,
                                                  @RequestBody BrevbestillingDto brevbestillingDto) {
-        byte[] pdf = brevbestillingService.produserUtkast(behandlingID, mapBrevbestilling(brevbestillingDto));
+        BrevbestillingRequest brevbestillingRequest = brevbestillingDto.tilRequestBuilder()
+            .medBestillersId(SubjectHandler.getInstance().getUserID())
+            .build();
+        byte[] pdf = brevbestillingService.produserUtkast(behandlingID, brevbestillingRequest);
         return new ResponseEntity<>(pdf, genPdfHeaders("utkast_" + behandlingID, false), HttpStatus.OK);
     }
 
@@ -74,7 +78,10 @@ public class BrevbestillingTjeneste {
     @ApiOperation(value = "Produser brev gjennom melosys-dokgen")
     public void produserBrev(@PathVariable("behandlingID") long behandlingID,
                              @RequestBody BrevbestillingDto brevbestillingDto) {
-        brevbestillingService.produserBrev(behandlingID, mapBrevbestilling(brevbestillingDto));
+        BrevbestillingRequest brevbestillingRequest = brevbestillingDto.tilRequestBuilder()
+            .medBestillersId(SubjectHandler.getInstance().getUserID())
+            .build();
+        brevbestillingService.produserBrev(behandlingID, brevbestillingRequest);
     }
 
     private List<BrevmalDto> byggBrevmalListe(long behandlingId) {
@@ -187,22 +194,5 @@ public class BrevbestillingTjeneste {
         headers.setContentDisposition(contentDisposition.build());
         headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
         return headers;
-    }
-
-    private no.nav.melosys.service.dokument.brev.BrevbestillingDto mapBrevbestilling(BrevbestillingDto brevbestillingDto) {
-        return new no.nav.melosys.service.dokument.brev.BrevbestillingDto.Builder()
-            .medProduserbardokument(brevbestillingDto.getProduserbardokument())
-            .medMottaker(brevbestillingDto.getMottaker())
-            .medOrgNr(brevbestillingDto.getOrgNr())
-            .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
-            .medManglerFritekst(brevbestillingDto.getManglerFritekst())
-            .medBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst())
-            .medKontaktpersonNavn(brevbestillingDto.getKontaktpersonNavn())
-            .medKopiMottakere(brevbestillingDto.getKopiMottakere())
-            .medBestillersId(SubjectHandler.getInstance().getUserID())
-            .medFritekst(brevbestillingDto.getFritekst())
-            .medBegrunnelseKode(brevbestillingDto.getBegrunnelseKode())
-            .medYtterligereInformasjon(brevbestillingDto.getYtterligereInformasjon())
-            .build();
     }
 }

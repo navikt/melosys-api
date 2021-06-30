@@ -19,12 +19,10 @@ import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
-import no.nav.melosys.sikkerhet.context.SaksflytSubjektHolder;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -68,32 +66,32 @@ public class DokgenService {
         this.saksbehandlerService = saksbehandlerService;
     }
 
-    public byte[] produserUtkast(long behandlingId, BrevbestillingDto brevbestillingDto) {
-        Produserbaredokumenter produserbartdokument = brevbestillingDto.getProduserbardokument();
+    public byte[] produserUtkast(long behandlingId, BrevbestillingRequest brevbestillingRequest) {
+        Produserbaredokumenter produserbartdokument = brevbestillingRequest.getProduserbardokument();
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         Aktoer mottaker;
-        if (hasText(brevbestillingDto.getOrgNr())) {
+        if (hasText(brevbestillingRequest.getOrgNr())) {
             mottaker = new Aktoer();
-            mottaker.setRolle(brevbestillingDto.getMottaker());
-            mottaker.setOrgnr(brevbestillingDto.getOrgNr());
+            mottaker.setRolle(brevbestillingRequest.getMottaker());
+            mottaker.setOrgnr(brevbestillingRequest.getOrgNr());
         } else {
             mottaker = brevmottakerService.avklarMottakere(produserbartdokument,
-                Mottaker.av(brevbestillingDto.getMottaker()), behandling, true, false).get(0);
+                Mottaker.av(brevbestillingRequest.getMottaker()), behandling, true, false).get(0);
         }
 
         DokgenBrevbestilling.Builder<?> brevbestilling = new DokgenBrevbestilling.Builder<>();
 
         if (List.of(MANGELBREV_ARBEIDSGIVER, MANGELBREV_BRUKER).contains(produserbartdokument)) {
             brevbestilling = new MangelbrevBrevbestilling.Builder()
-                .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
-                .medManglerInfoFritekst(brevbestillingDto.getManglerFritekst())
-                .medKontaktpersonNavn(brevbestillingDto.getKontaktpersonNavn());
+                .medInnledningFritekst(brevbestillingRequest.getInnledningFritekst())
+                .medManglerInfoFritekst(brevbestillingRequest.getManglerFritekst())
+                .medKontaktpersonNavn(brevbestillingRequest.getKontaktpersonNavn());
         }
 
         brevbestilling
             .medProduserbartdokument(produserbartdokument)
             .medBehandlingId(behandlingId)
-            .medSaksbehandlerNavn(hentSaksbehandlerNavn(brevbestillingDto.getBestillersId()))
+            .medSaksbehandlerNavn(hentSaksbehandlerNavn(brevbestillingRequest.getBestillersId()))
             .medBestillUtkast(true);
 
         return produserBrev(mottaker, brevbestilling.build());
@@ -118,40 +116,40 @@ public class DokgenService {
         return dokgenConsumer.lagPdf(malnavn, dokgenDto, brevbestilling.isBestillKopi(), brevbestilling.isBestillUtkast());
     }
 
-    public void produserOgDistribuerBrev(long behandlingId, BrevbestillingDto brevbestillingDto) {
-        Produserbaredokumenter produserbartDokument = brevbestillingDto.getProduserbardokument();
+    public void produserOgDistribuerBrev(long behandlingId, BrevbestillingRequest brevbestillingRequest) {
+        Produserbaredokumenter produserbartDokument = brevbestillingRequest.getProduserbardokument();
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
 
         DokgenBrevbestilling.Builder<?> brevbestilling = new DokgenBrevbestilling.Builder<>();
 
         if (List.of(MANGELBREV_ARBEIDSGIVER, MANGELBREV_BRUKER).contains(produserbartDokument)) {
             brevbestilling = new MangelbrevBrevbestilling.Builder()
-                .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
-                .medManglerInfoFritekst(brevbestillingDto.getManglerFritekst())
-                .medKontaktpersonNavn(brevbestillingDto.getKontaktpersonNavn());
+                .medInnledningFritekst(brevbestillingRequest.getInnledningFritekst())
+                .medManglerInfoFritekst(brevbestillingRequest.getManglerFritekst())
+                .medKontaktpersonNavn(brevbestillingRequest.getKontaktpersonNavn());
         }
 
         brevbestilling
             .medProduserbartdokument(produserbartDokument)
             .medBehandlingId(behandlingId)
-            .medSaksbehandlerNavn(hentSaksbehandlerNavn(brevbestillingDto.getBestillersId()));
+            .medSaksbehandlerNavn(hentSaksbehandlerNavn(brevbestillingRequest.getBestillersId()));
 
         List<Aktoer> mottakere = new ArrayList<>();
-        if (hasText(brevbestillingDto.getOrgNr())) {
+        if (hasText(brevbestillingRequest.getOrgNr())) {
             Aktoer mottaker = new Aktoer();
-            mottaker.setRolle(brevbestillingDto.getMottaker());
-            mottaker.setOrgnr(brevbestillingDto.getOrgNr());
+            mottaker.setRolle(brevbestillingRequest.getMottaker());
+            mottaker.setOrgnr(brevbestillingRequest.getOrgNr());
             mottakere.add(mottaker);
         } else {
             mottakere = brevmottakerService.avklarMottakere(produserbartDokument,
-                Mottaker.av(brevbestillingDto.getMottaker()), behandling, false, false);
+                Mottaker.av(brevbestillingRequest.getMottaker()), behandling, false, false);
         }
 
         for (Aktoer aktoer : mottakere) {
             produserOgDistribuerBrev(behandling, aktoer, brevbestilling.build());
         }
 
-        for (KopiMottaker kopiMottaker : brevbestillingDto.getKopiMottakere()) {
+        for (KopiMottaker kopiMottaker : brevbestillingRequest.getKopiMottakere()) {
             Aktoer aktoer = new Aktoer();
             aktoer.setRolle(kopiMottaker.getRolle());
             aktoer.setOrgnr(kopiMottaker.getOrgnr());
@@ -192,10 +190,6 @@ public class DokgenService {
     }
 
     private String hentSaksbehandlerNavn(String ident) {
-        if (ident == null || ident.isBlank()) {
-            //Fallback for automatisk bestilte brev
-            ident = SaksflytSubjektHolder.get();
-        }
         return ident != null ? saksbehandlerService.hentNavnForIdent(ident) : "N/A";
     }
 }

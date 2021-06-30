@@ -11,7 +11,7 @@ import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.service.dokument.brev.BrevDataUtpekingAnnetLand;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
@@ -41,7 +41,7 @@ public class UtpekingAnnetLandMapperTest {
     }
 
     private BrevDataUtpekingAnnetLand lagDataUtpekingAnnetLand() {
-        BrevDataUtpekingAnnetLand brevDataUtpekingAnnetLand = new BrevDataUtpekingAnnetLand(new BrevbestillingDto(), "Saksbehandler");
+        BrevDataUtpekingAnnetLand brevDataUtpekingAnnetLand = new BrevDataUtpekingAnnetLand(new BrevbestillingRequest(), "Saksbehandler");
         brevDataUtpekingAnnetLand.utpekingsperiode = new Utpekingsperiode(LocalDate.now(), null, Landkoder.EE,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3, null);
         return brevDataUtpekingAnnetLand;

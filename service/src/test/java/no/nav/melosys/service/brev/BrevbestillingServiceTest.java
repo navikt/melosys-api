@@ -26,7 +26,7 @@ import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.dokument.MuligMottakerDto;
 import no.nav.melosys.service.dokument.MuligeMottakereDto;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
@@ -421,22 +421,22 @@ class BrevbestillingServiceTest {
 
     @Test
     void skalBestilleProduseringAvBrev() {
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().medProduserbardokument(MANGELBREV_BRUKER).build();
-        brevbestillingService.produserBrev(123L, brevbestillingDto);
+        BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder().medProduserbardokument(MANGELBREV_BRUKER).build();
+        brevbestillingService.produserBrev(123L, brevbestillingRequest);
 
-        verify(mockDokServiceFasade).produserDokument(anyLong(), any(no.nav.melosys.service.dokument.brev.BrevbestillingDto.class));
+        verify(mockDokServiceFasade).produserDokument(anyLong(), any(BrevbestillingRequest.class));
     }
 
     @Test
     void skalReturnereUtkast() {
         byte[] pdf = "UTKAST".getBytes(StandardCharsets.UTF_8);
         when(mockDokServiceFasade.produserUtkast(anyLong(), any())).thenReturn(pdf);
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().medProduserbardokument(MANGELBREV_BRUKER).build();
+        BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder().medProduserbardokument(MANGELBREV_BRUKER).build();
 
-        byte[] utkast = brevbestillingService.produserUtkast(123L, brevbestillingDto);
+        byte[] utkast = brevbestillingService.produserUtkast(123L, brevbestillingRequest);
 
         assertThat(utkast).isEqualTo(pdf);
-        verify(mockDokServiceFasade).produserUtkast(123L, brevbestillingDto);
+        verify(mockDokServiceFasade).produserUtkast(123L, brevbestillingRequest);
     }
 
     private Aktoer lagAktoer(Aktoersroller aktoersroller, String orgNummer) {

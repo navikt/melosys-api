@@ -6,7 +6,7 @@ import java.util.List;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
-public class BrevbestillingDto {
+public class BrevbestillingRequest {
 
     private Produserbaredokumenter produserbardokument;
     private Aktoersroller mottaker;
@@ -36,7 +36,7 @@ public class BrevbestillingDto {
     @Deprecated
     private String ytterligereInformasjon;
 
-    public BrevbestillingDto() {
+    public BrevbestillingRequest() {
     }
 
     // Må ha mulighet for å sette produserbartdokument pga bakoverkompabilitet
@@ -44,7 +44,7 @@ public class BrevbestillingDto {
         this.produserbardokument = produserbardokument;
     }
 
-    public BrevbestillingDto(Builder builder) {
+    public BrevbestillingRequest(Builder builder) {
         this.produserbardokument = builder.produserbardokument;
         this.mottaker = builder.mottaker;
         this.orgNr = builder.orgNr;
@@ -183,8 +183,8 @@ public class BrevbestillingDto {
             return this;
         }
 
-        public BrevbestillingDto build() {
-            return new BrevbestillingDto(this);
+        public BrevbestillingRequest build() {
+            return new BrevbestillingRequest(this);
         }
     }
 }

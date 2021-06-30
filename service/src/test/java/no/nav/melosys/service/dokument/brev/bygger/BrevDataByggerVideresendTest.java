@@ -5,7 +5,7 @@ import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,7 +37,7 @@ public class BrevDataByggerVideresendTest {
         behandling.setId(1L);
         when(brevDataGrunnlag.getBehandling()).thenReturn(behandling);
 
-        brevDataByggerVideresend = new BrevDataByggerVideresend(landvelgerService, utenlandskMyndighetService, new BrevbestillingDto());
+        brevDataByggerVideresend = new BrevDataByggerVideresend(landvelgerService, utenlandskMyndighetService, new BrevbestillingRequest());
     }
 
     @Test

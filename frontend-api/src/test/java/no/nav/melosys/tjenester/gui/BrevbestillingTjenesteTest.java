@@ -7,10 +7,8 @@ import java.util.List;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
@@ -22,6 +20,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.brev.BrevbestillingService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
@@ -29,7 +28,6 @@ import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevbestillingDto;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalDto;
 import no.nav.melosys.tjenester.gui.dto.brev.FeltvalgDto;
-import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,7 +60,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     @Mock
     private KontaktopplysningService mockKontaktopplysningService;
     @Captor
-    private ArgumentCaptor<no.nav.melosys.service.dokument.brev.BrevbestillingDto> brevbestillingDtoCaptor;
+    private ArgumentCaptor<BrevbestillingRequest> brevbestillingDtoCaptor;
 
     private BrevbestillingTjeneste brevbestillingTjeneste;
 
@@ -173,10 +171,10 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         verify(mockDokServiceFasade).produserDokument(anyLong(), brevbestillingDtoCaptor.capture());
 
         assertThat(brevbestillingDtoCaptor.getValue()).extracting(
-            no.nav.melosys.service.dokument.brev.BrevbestillingDto::getProduserbardokument,
-            no.nav.melosys.service.dokument.brev.BrevbestillingDto::getMottaker,
-            no.nav.melosys.service.dokument.brev.BrevbestillingDto::getInnledningFritekst,
-            no.nav.melosys.service.dokument.brev.BrevbestillingDto::getBestillersId
+            BrevbestillingRequest::getProduserbardokument,
+            BrevbestillingRequest::getMottaker,
+            BrevbestillingRequest::getInnledningFritekst,
+            BrevbestillingRequest::getBestillersId
         ).containsExactly(MANGELBREV_BRUKER, Aktoersroller.BRUKER, "Innledning", SAKSBEHANDLER);
 
         valider(brevbestillingDto, "dokumenter-v2-opprett-post-schema.json", new ObjectMapper());
