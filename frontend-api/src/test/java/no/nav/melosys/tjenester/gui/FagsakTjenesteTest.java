@@ -123,7 +123,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
 
         List<FagsakOppsummeringDto> fagsakOppsummeringDtoList = random.objects(FagsakOppsummeringDto.class, 1).collect(Collectors.toList());
         List<BehandlingOversiktDto> behandlingOversiktDtoer = random.objects(BehandlingOversiktDto.class, 1).collect(Collectors.toList());
-        behandlingOversiktDtoer.get(0).setLand(Collections.singletonList(Landkoder.NO.getKode()));
+        behandlingOversiktDtoer.get(0).setLand(new SoeknadslandDto(Collections.singletonList(Landkoder.NO.getKode()), false));
         fagsakOppsummeringDtoList.get(0).setBehandlingOversikter(behandlingOversiktDtoer);
 
         validerArray(fagsakOppsummeringDtoList, SOK_FAGSAKER_SCHEMA, log);
@@ -212,7 +212,8 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         assertThat(behandlingFørst.getBehandlingsstatus().getKode()).isEqualTo("UNDER_BEHANDLING");
         assertThat(behandlingFørst.getBehandlingstype().getKode()).isEqualTo("SOEKNAD");
         assertThat(behandlingFørst.getOpprettetDato()).isEqualTo(Instant.parse("2019-01-10T10:37:30.00Z"));
-        assertThat(behandlingFørst.getLand().get(0)).isEqualTo("DK");
+        assertThat(behandlingFørst.getLand().landkoder.get(0)).isEqualTo("DK");
+        assertThat(behandlingFørst.getLand().erUkjenteEllerAlleEosLand).isEqualTo(false);
 
         assertThat(behandlingFørst.getPeriode().getFom()).isEqualTo(LocalDate.of(2019,1,1));
         assertThat(behandlingFørst.getPeriode().getTom()).isEqualTo(LocalDate.of(2019,2,1));

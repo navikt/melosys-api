@@ -243,14 +243,15 @@ public class FagsakTjeneste {
         if (behandling.erBehandlingAvSøknad()) {
             behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId())
                 .map(Behandlingsgrunnlag::getBehandlingsgrunnlagdata).ifPresent(grunnlagData -> {
-                    behandlingOversiktDto.setLand(hentSøknadsland(grunnlagData));
+                    SoeknadslandDto land = SoeknadslandDto.av(hentSøknadsland((grunnlagData)));
+                    behandlingOversiktDto.setLand(land);
                     Periode periode = hentPeriode(grunnlagData);
                     behandlingOversiktDto.setPeriode(new PeriodeDto(periode.getFom(), periode.getTom()));
                 });
         } else {
             saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresent(sedDokument -> {
-                behandlingOversiktDto.setLand(Collections.singletonList(sedDokument.getLovvalgslandKode() != null
-                    ? sedDokument.getLovvalgslandKode().getKode() : null));
+                SoeknadslandDto land = SoeknadslandDto.av(sedDokument.getLovvalgslandKode());
+                behandlingOversiktDto.setLand(land);
                 behandlingOversiktDto.setPeriode(new PeriodeDto(
                     sedDokument.getLovvalgsperiode().getFom(), sedDokument.getLovvalgsperiode().getTom())
                 );

@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import org.apache.commons.lang3.StringUtils;
 
@@ -28,7 +29,7 @@ public final class BehandlingsgrunnlagUtils {
      * og sjekker at det er minst et søknadsland oppgitt i søknad
      */
     public static List<Landkoder> hentSøknadslandkoder(BehandlingsgrunnlagData grunnlagdata) {
-        List<String> søknadsland = hentSøknadsland(grunnlagdata);
+        List<String> søknadsland = hentSøknadsland(grunnlagdata).landkoder;
         if (søknadsland.isEmpty()) {
             throw new IllegalStateException("Søknad mangler søknadsland");
         }
@@ -37,8 +38,8 @@ public final class BehandlingsgrunnlagUtils {
             .collect(Collectors.toList());
     }
 
-    public static List<String> hentSøknadsland(BehandlingsgrunnlagData grunnlagdata) {
-        return grunnlagdata.soeknadsland.landkoder;
+    public static Soeknadsland hentSøknadsland(BehandlingsgrunnlagData grunnlagdata) {
+        return grunnlagdata.soeknadsland;
     }
 
     public static StrukturertAdresse hentBostedsadresse(BehandlingsgrunnlagData grunnlagdata) {
