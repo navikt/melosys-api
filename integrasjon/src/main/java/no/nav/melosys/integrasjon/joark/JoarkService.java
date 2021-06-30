@@ -170,19 +170,28 @@ public class JoarkService implements JoarkFasade {
 
         for (var dokumentReferanse : dokumentReferanser) {
             if (!journalposterTilknyttetSak.containsKey(dokumentReferanse.getJournalpostID())) {
-                throw new FunksjonellException("Journalpost med ID " + dokumentReferanse.getJournalpostID() +
-                    " tilhører ikke sak " + hentJournalposterTilknyttetSakRequest.saksnummer());
+                throw new FunksjonellException(String.format("Journalpost med ID %s tilhører ikke sak %s",
+                    dokumentReferanse.getJournalpostID(),
+                    hentJournalposterTilknyttetSakRequest.saksnummer()));
             }
-            var arkivDokument = journalposterTilknyttetSak.get(dokumentReferanse.getJournalpostID()).finnArkivDokument(dokumentReferanse.getDokumentID());
-            if (arkivDokument.isEmpty()) {
-                throw new IkkeFunnetException("Finner ikke dokument med id" + dokumentReferanse.getDokumentID() +
-                    "for journalpost " + dokumentReferanse.getJournalpostID());
-            } else if (!arkivDokument.get().harTilgangTilArkivVariant()) {
-                throw new SikkerhetsbegrensningException("Ikke tilgang til arkivdokument " + dokumentReferanse.getDokumentID() +
-                    " i journalpost " + dokumentReferanse.getJournalpostID());
-            }
-        }
 
+            journalposterTilknyttetSak.get(dokumentReferanse.getJournalpostID()).finnArkivDokument(dokumentReferanse.getDokumentID())
+                .ifPresentOrElse(
+                    (arkivDokument) -> {
+                        if (!arkivDokument.harTilgangTilArkivVariant())
+                            throw new SikkerhetsbegrensningException(String.format(
+                                "Ikke tilgang til arkivdokument %s i journalpost %s",
+                                dokumentReferanse.getDokumentID(),
+                                dokumentReferanse.getJournalpostID()
+                            ));
+                    },
+                    () -> {
+                        throw new IkkeFunnetException(String.format(
+                            "Finner ikke dokument med id %s for journalpost %s",
+                            dokumentReferanse.getDokumentID(),
+                            dokumentReferanse.getJournalpostID()));
+                    });
+        }
     }
 
     @Override
@@ -274,6 +283,7 @@ public class JoarkService implements JoarkFasade {
 
     private List<DokumentVariant> lagDokumentVarianter(List<DokumentInnhold> dokumentInnhold) {
         return dokumentInnhold.stream()
+            // saksbehandlerHarTilgang finnes ikke i joarkService og er derfor satt til true her
             .map(d -> new DokumentVariant(DokumentVariant.VariantFormat.valueOf(d.getVariantformat().getValue()), true))
             .collect(Collectors.toList());
     }

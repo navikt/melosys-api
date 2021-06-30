@@ -1,17 +1,9 @@
 package no.nav.melosys.domain.arkiv;
 
-public class DokumentVariant {
-    private final byte[] data;
-    private final Filtype filtype;
-    private final VariantFormat variantFormat;
-    private final boolean saksbehandlerHarTilgang;
+public record DokumentVariant(byte[] data, Filtype filtype,
+                              VariantFormat variantFormat,
+                              boolean saksbehandlerHarTilgang) {
 
-    private DokumentVariant(byte[] data, Filtype filtype, VariantFormat variantFormat, boolean saksbehandlerHarTilgang) {
-        this.data = data;
-        this.filtype = filtype;
-        this.variantFormat = variantFormat;
-        this.saksbehandlerHarTilgang = saksbehandlerHarTilgang;
-    }
 
     public DokumentVariant(VariantFormat variantFormat, boolean saksbehandlerHarTilgang) {
         this(null, null, variantFormat, saksbehandlerHarTilgang);
@@ -37,6 +29,10 @@ public class DokumentVariant {
         );
     }
 
+    public boolean erVariantArkiv() {
+        return variantFormat == DokumentVariant.VariantFormat.ARKIV;
+    }
+
     public byte[] getData() {
         return data;
     }
@@ -49,7 +45,7 @@ public class DokumentVariant {
         return variantFormat;
     }
 
-    public boolean getSaksbehandlerTilgang() {
+    public boolean getSaksbehandlerHarTilgang() {
         return saksbehandlerHarTilgang;
     }
 

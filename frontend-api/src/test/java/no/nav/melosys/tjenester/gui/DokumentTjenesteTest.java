@@ -61,7 +61,7 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void hentDokumenter() throws Exception {
-        List<Journalpost> journalposter = lagJournalPoster(3);
+        List<Journalpost> journalposter = lagJournalposter(3);
         given(dokumentHentingService.hentDokumenter(anyString())).willReturn(journalposter);
 
         ResponseEntity<List<JournalpostInfoDto>> response = dokumentTjeneste.hentDokumenter("MEL-1873");
@@ -122,7 +122,7 @@ public class DokumentTjenesteTest extends JsonSchemaTestParent {
             .withMessageContaining("Mottaker trengs for å bestille");
     }
 
-    private static List<Journalpost> lagJournalPoster(int antall) {
+    private static List<Journalpost> lagJournalposter(int antall) {
         return Stream.generate(DokumentTjenesteTest::lagJournalpost).limit(antall).collect(Collectors.toList());
     }
 

@@ -149,17 +149,4 @@ class VideresendSoknadServiceTest {
             .isThrownBy(() -> videresendSoknadService.videresend(saksnummer, "", "", Collections.emptySet()))
             .withMessageContaining("mangler bostedsadresse");
     }
-
-    @Test
-    void henleggOgVideresend_ikkeTilgang_kasterException() {
-        when(landvelgerService.hentBostedsland(behandling)).thenReturn(Landkoder.SE);
-        behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
-        behandlingsgrunnlagData.bosted = new Bosted();
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> videresendSoknadService.videresend(saksnummer, "", "", Collections.emptySet()))
-            .withMessageContaining("mangler bostedsadresse");
-    }
-
-
 }

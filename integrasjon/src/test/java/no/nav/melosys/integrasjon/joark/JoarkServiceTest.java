@@ -34,6 +34,7 @@ import no.nav.tjeneste.virksomhet.journal.v3.informasjon.Journalposttyper;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.ArkivSak;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.DetaljertDokumentinformasjon;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.KorrespendansePart;
+import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentKjerneJournalpostListeRequest;
 import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentKjerneJournalpostListeResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import javax.xml.datatype.DatatypeConfigurationException;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -83,32 +86,15 @@ class JoarkServiceTest {
     @Test
     void hentJournalposterTilknyttetSak_brukerGammelIntegrasjon_verifiserMapping() throws Exception {
 
+        final String partID = "partID";
+        final String partNavn = "Ola N";
+        final String tittel = "Tittel 1";
+        final String dokID = "dokID_1";
         final var fagsak = new Fagsak();
         fagsak.setGsakSaksnummer(1L);
         fagsak.setSaksnummer("MEL-111");
         HentKjerneJournalpostListeResponse response = new HentKjerneJournalpostListeResponse();
-        no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.Journalpost journalpost = new no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.Journalpost();
-        ArkivSak arkivSak = new ArkivSak();
-        arkivSak.setArkivSakId("123");
-        journalpost.setGjelderArkivSak(arkivSak);
-        journalpost.setForsendelseMottatt(KonverteringsUtils.localDateToXMLGregorianCalendar(LocalDate.now()));
-        journalpost.setForsendelseJournalfoert(KonverteringsUtils.localDateToXMLGregorianCalendar(LocalDate.now().plusDays(2)));
-        KorrespendansePart korrespendansePart = new KorrespendansePart();
-        String partID = "partID";
-        String partNavn = "Ola N";
-        korrespendansePart.setKorrespondansepartId(partID);
-        korrespendansePart.setKorrespondansepartNavn(partNavn);
-        journalpost.setKorrespondansePart(korrespendansePart);
-        DetaljertDokumentinformasjon dokumentInfo = new DetaljertDokumentinformasjon();
-        String dokID = "dokID_1";
-        String tittel = "Tittel 1";
-        dokumentInfo.setDokumentId(dokID);
-        dokumentInfo.setTittel(tittel);
-        journalpost.setHoveddokument(dokumentInfo);
-        Journalposttyper type = new Journalposttyper();
-        type.setValue("I");
-        journalpost.setJournalposttype(type);
-        response.getJournalpostListe().add(journalpost);
+        response.getJournalpostListe().add(kjerneJournalpost("123",partID,partNavn, dokID, tittel));
         when(journalConsumer.hentKjerneJournalpostListe(any())).thenReturn(response);
 
         List<Journalpost> journalpostListe = joarkService.hentJournalposterTilknyttetSak(
@@ -330,6 +316,14 @@ class JoarkServiceTest {
     }
 
     @Test
+    void validerTilgangTilArkivVariant_disableEnleash_kasterIngenException() {
+        final var journalpostId = "11122233";
+        final var saksnummer = "191919";
+        final var arkivsakID = 12345L;
+        final var safJournalpost = safJournalpost(journalpostId);
+    }
+
+    @Test
     void validerTilgangTilArkivVariant_harTilgangTilVedlegg_kasterIngenException() {
         unleash.enable(JoarkService.SAF_FEATURE_TOGGLE_NAVN);
 
@@ -348,7 +342,7 @@ class JoarkServiceTest {
     }
 
     @Test
-    void validerTilgangTilArkivVariant_dokumentReferanserCollectionErTom_returnerer() {
+    void validerTilgangTilArkivVariant_dokumentReferanserCollectionErTom_henterIkkeDokumentoversikt() {
         unleash.enable(JoarkService.SAF_FEATURE_TOGGLE_NAVN);
 
         final var journalpostId = "11122233";
@@ -381,6 +375,26 @@ class JoarkServiceTest {
                 new HentJournalposterTilknyttetSakRequest(arkivsakID, saksnummer),
                 dokumentReferanser))
             .withMessageContaining("Ikke tilgang");
+    }
+
+    @Test
+    void validerTilgangTilArkivVariant_harikkeTilgangTilVedleggUnleashDisabled_kasterSikkerhetsbegrensningException() throws Exception  {
+
+        final var arkivsakID = 12345L;
+        final var saksnummer = "191919";
+        final var journalpostId = "11122233";
+        final var kjernejournPost = kjerneJournalpost("12345", "191919", "11122233", "dokID_1", "Tittel 1");
+        HentKjerneJournalpostListeResponse response = new HentKjerneJournalpostListeResponse();
+        response.getJournalpostListe().add(kjernejournPost);
+        Collection<DokumentReferanse> dokumentReferanser = Collections.singletonList(new DokumentReferanse(journalpostId, VEDLEGG_MED_TILGANG_ID));
+
+        when(journalConsumer.hentKjerneJournalpostListe(any())).thenReturn(response);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> joarkService.validerDokumenterTilhørerSakOgHarTilgang(
+                new HentJournalposterTilknyttetSakRequest(arkivsakID, saksnummer),
+                dokumentReferanser))
+            .withMessageContaining("tilhører ikke");
     }
 
     @Test
@@ -482,7 +496,7 @@ class JoarkServiceTest {
 
         assertThat(journalpost.getHoveddokument().getDokumentVarianter())
             .flatExtracting(
-                DokumentVariant::getSaksbehandlerTilgang,
+                DokumentVariant::getSaksbehandlerHarTilgang,
                 dokumentVariant -> dokumentVariant.getVariantFormat().name())
             .containsExactly(
                 safDokumentVariant.saksbehandlerHarTilgang(),
@@ -599,6 +613,32 @@ class JoarkServiceTest {
         opprettJournalpost.setHoveddokument(hoveddokument);
 
         return opprettJournalpost;
+    }
+
+    private static no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.Journalpost kjerneJournalpost(
+        String arkivsakID, String partId, String partNavn, String dokID, String tittel
+    ) throws DatatypeConfigurationException {
+
+        HentKjerneJournalpostListeResponse response = new HentKjerneJournalpostListeResponse();
+        no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.Journalpost journalpost = new no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.Journalpost();
+        ArkivSak arkivSak = new ArkivSak();
+        arkivSak.setArkivSakId(arkivsakID);
+        journalpost.setGjelderArkivSak(arkivSak);
+        journalpost.setForsendelseMottatt(KonverteringsUtils.localDateToXMLGregorianCalendar(LocalDate.now()));
+        journalpost.setForsendelseJournalfoert(KonverteringsUtils.localDateToXMLGregorianCalendar(LocalDate.now().plusDays(2)));
+        KorrespendansePart korrespendansePart = new KorrespendansePart();
+
+        korrespendansePart.setKorrespondansepartId(partId);
+        korrespendansePart.setKorrespondansepartNavn(partNavn);
+        journalpost.setKorrespondansePart(korrespendansePart);
+        DetaljertDokumentinformasjon dokumentInfo = new DetaljertDokumentinformasjon();
+        dokumentInfo.setDokumentId(dokID);
+        dokumentInfo.setTittel(tittel);
+        journalpost.setHoveddokument(dokumentInfo);
+        Journalposttyper type = new Journalposttyper();
+        type.setValue("I");
+        journalpost.setJournalposttype(type);
+        return journalpost;
     }
 
     private no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost safJournalpost(String journalpostID) {
