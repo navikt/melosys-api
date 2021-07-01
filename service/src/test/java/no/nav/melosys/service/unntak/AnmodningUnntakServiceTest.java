@@ -13,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -53,6 +54,8 @@ class AnmodningUnntakServiceTest {
     private EessiService eessiService;
     @Mock
     private AnmodningUnntakKontrollService anmodningUnntakKontrollService;
+    @Mock
+    private JoarkFasade joarkFasade;
 
     private AnmodningUnntakService anmodningUnntakService;
 
@@ -65,7 +68,7 @@ class AnmodningUnntakServiceTest {
     public void setUp() {
         anmodningUnntakService = new AnmodningUnntakService(
             behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, anmodningsperiodeService,
-            lovvalgsperiodeService, landvelgerService, eessiService, anmodningUnntakKontrollService);
+            lovvalgsperiodeService, landvelgerService, eessiService, anmodningUnntakKontrollService, joarkFasade);
     }
 
     @Test

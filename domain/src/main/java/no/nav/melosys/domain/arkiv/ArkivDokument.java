@@ -6,12 +6,14 @@ import java.util.stream.Collectors;
 
 public class ArkivDokument {
     private String dokumentId;
-    private List<LogiskVedlegg> logiskeVedlegg; // Til sammensatte dokumenter der vedlegg er scannet inn i ett dokument.
+    private final List<LogiskVedlegg> logiskeVedlegg; // Til sammensatte dokumenter der vedlegg er scannet inn i ett dokument.
+    private final List<DokumentVariant> dokumentVarianter;
     private String tittel;
     private String navSkjemaID;
 
     public ArkivDokument() {
         this.logiskeVedlegg = new ArrayList<>();
+        this.dokumentVarianter = new ArrayList<>();
     }
 
     public String getDokumentId() {
@@ -43,6 +45,25 @@ public class ArkivDokument {
     }
 
     public List<String> hentLogiskeVedleggTitler() {
-        return logiskeVedlegg.stream().map(LogiskVedlegg::getTittel).collect(Collectors.toList());
+        return logiskeVedlegg.stream().map(LogiskVedlegg::tittel).collect(Collectors.toList());
+    }
+
+    public void setLogiskeVedleggTitler(List<LogiskVedlegg> logiskeVedlegg) {
+        this.logiskeVedlegg.addAll(logiskeVedlegg);
+    }
+
+    public List<DokumentVariant> getDokumentVarianter() {
+        return dokumentVarianter;
+    }
+
+    public void setDokumentVarianter(List<DokumentVariant> dokumentVarianter) {
+        this.dokumentVarianter.addAll(dokumentVarianter);
+    }
+
+
+    public boolean harTilgangTilArkivVariant() {
+        return dokumentVarianter.stream()
+            .filter(DokumentVariant::erVariantArkiv)
+            .allMatch(DokumentVariant::getSaksbehandlerHarTilgang);
     }
 }
