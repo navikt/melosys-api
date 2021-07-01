@@ -8,10 +8,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import no.finn.unleash.Unleash;
-import no.nav.dok.tjenester.journalfoerinngaaende.*;
+import no.nav.dok.tjenester.journalfoerinngaaende.Avsender;
+import no.nav.dok.tjenester.journalfoerinngaaende.Bruker;
+import no.nav.dok.tjenester.journalfoerinngaaende.Dokument;
+import no.nav.dok.tjenester.journalfoerinngaaende.GetJournalpostResponse;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.arkiv.*;
-import no.nav.melosys.domain.arkiv.LogiskVedlegg;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
