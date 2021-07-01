@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.joark.saf.dto.journalpost;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -21,14 +22,14 @@ public record DokumentInfo(
 
         arkivDokument.setLogiskeVedleggTitler(logiskeVedlegg
             .stream()
-            .flatMap(Stream::ofNullable)
+            .filter(Objects::nonNull)
             .map(LogiskVedlegg::tilDomene)
             .collect(Collectors.toList())
         );
 
         arkivDokument.setDokumentVarianter(dokumentvarianter
             .stream()
-            .flatMap(Stream::ofNullable)
+            .filter(Objects::nonNull)
             .map(DokumentVariant::tilDomene)
             .collect(Collectors.toList())
         );

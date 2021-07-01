@@ -41,9 +41,6 @@ public interface JoarkFasade {
     void oppdaterJournalpost(String journalpostID, JournalpostOppdatering journalpostOppdatering, boolean forsøkFerdigstill)
     ;
 
-    /**
-     * Valider at dokumenter tilhører sak og at tilgang er gitt
-     */
     void validerDokumenterTilhørerSakOgHarTilgang(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest,
                                                   Collection<DokumentReferanse> dokumentReferanser);
 
