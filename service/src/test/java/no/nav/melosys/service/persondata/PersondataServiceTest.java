@@ -7,6 +7,11 @@ import java.util.List;
 import java.util.Set;
 
 import no.finn.unleash.FakeUnleash;
+import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
@@ -16,6 +21,7 @@ import no.nav.melosys.integrasjon.pdl.dto.person.AdressebeskyttelseGradering;
 import no.nav.melosys.integrasjon.pdl.dto.person.Navn;
 import no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap;
 import no.nav.melosys.integrasjon.tps.TpsService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +39,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class PersondataServiceTest {
     @Mock
+    private BehandlingService behandlingService;
+    @Mock
     private KodeverkService kodeverkService;
     @Mock
     private PDLConsumer pdlConsumer;
@@ -44,7 +52,7 @@ class PersondataServiceTest {
 
     @BeforeEach
     public void setup() {
-        persondataService = new PersondataService(kodeverkService, pdlConsumer, tpsService, fakeUnleash);
+        persondataService = new PersondataService(behandlingService, kodeverkService, pdlConsumer, tpsService, fakeUnleash);
     }
 
     @Test
@@ -120,5 +128,23 @@ class PersondataServiceTest {
 
     private Identliste lagTomIdentliste() {
         return new Identliste(Collections.emptySet());
+    }
+
+
+    // TODO
+    private static Behandling lagBehandling() {
+        final String aktørID = "123";
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        Fagsak fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
+        Aktoer aktør = new Aktoer();
+        aktør.setAktørId(aktørID);
+        aktør.setRolle(Aktoersroller.BRUKER);
+        HashSet<Aktoer> aktører = new HashSet<>();
+        aktører.add(aktør);
+        fagsak.setAktører(aktører);
+        behandling.setFagsak(fagsak);
+        return behandling;
     }
 }

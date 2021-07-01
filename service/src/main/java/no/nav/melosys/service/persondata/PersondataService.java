@@ -15,6 +15,7 @@ import no.nav.melosys.integrasjon.pdl.PDLConsumer;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
 import no.nav.melosys.integrasjon.pdl.dto.person.Adressebeskyttelse;
 import no.nav.melosys.integrasjon.tps.TpsService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.mapping.NavnOversetter;
 import no.nav.melosys.service.persondata.mapping.PersondataOversetter;
@@ -28,16 +29,19 @@ import org.springframework.stereotype.Service;
 @Service
 @Primary
 public class PersondataService implements PersondataFasade {
+    private final BehandlingService behandlingService;
     private final KodeverkService kodeverkService;
     private final PDLConsumer pdlConsumer;
     private final TpsService tpsService;
     private final Unleash unleash;
 
     @Autowired
-    public PersondataService(KodeverkService kodeverkService,
+    public PersondataService(BehandlingService behandlingService,
+                             KodeverkService kodeverkService,
                              @Qualifier("saksbehandler") PDLConsumer pdlConsumer,
                              TpsService tpsService,
                              Unleash unleash) {
+        this.behandlingService = behandlingService;
         this.kodeverkService = kodeverkService;
         this.pdlConsumer = pdlConsumer;
         this.tpsService = tpsService;
@@ -70,6 +74,12 @@ public class PersondataService implements PersondataFasade {
     @Override
     public Persondata hentPerson(String ident) {
         return PersondataOversetter.oversett(pdlConsumer.hentPerson(ident), kodeverkService);
+    }
+
+    public PersonMedHistorikk hentPersonMedHistorikk(long behandlingID) {
+        final String ident = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)
+            .getFagsak().hentBruker().getAktørId();
+        return null;
     }
 
     @Override
