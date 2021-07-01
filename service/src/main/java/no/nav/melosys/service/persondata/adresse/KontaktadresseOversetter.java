@@ -1,13 +1,13 @@
 package no.nav.melosys.service.persondata.adresse;
 
-import java.time.LocalDate;
-
+import no.nav.melosys.domain.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.util.LandkoderUtils;
-import no.nav.melosys.integrasjon.pdl.dto.person.adresse.*;
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.PostadresseIFrittFormat;
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Postboksadresse;
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.UtenlandskAdresseIFrittFormat;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
 import static no.nav.melosys.domain.FellesKodeverk.POSTNUMMER;
@@ -21,27 +21,28 @@ public class KontaktadresseOversetter {
         no.nav.melosys.integrasjon.pdl.dto.person.adresse.Kontaktadresse kontaktadressePDL,
         KodeverkService kodeverkService) {
         StrukturertAdresse strukturertAdresse = null;
-        UstrukturertAdresse ustrukturertAdresse = null;
+        SemistrukturertAdresse semistrukturertAdresse = null;
 
         if (kontaktadressePDL.vegadresse() != null) {
             strukturertAdresse = PdlAdresseformatOversetter.lagStrukturertAdresse(kontaktadressePDL.vegadresse(), kodeverkService);
         } else if (kontaktadressePDL.utenlandskAdresse() != null) {
             strukturertAdresse = PdlAdresseformatOversetter.lagStrukturertAdresse(kontaktadressePDL.utenlandskAdresse());
         } else if (kontaktadressePDL.postadresseIFrittFormat() != null) {
-            ustrukturertAdresse = lagUstrukturertAdresse(kontaktadressePDL.postadresseIFrittFormat(), kodeverkService);
+            semistrukturertAdresse = lagPostadresse(kontaktadressePDL.postadresseIFrittFormat(), kodeverkService);
         } else if (kontaktadressePDL.utenlandskAdresseIFrittFormat() != null) {
-            ustrukturertAdresse = lagUstrukturertAdresse(kontaktadressePDL.utenlandskAdresseIFrittFormat());
+            semistrukturertAdresse = lagPostadresse(kontaktadressePDL.utenlandskAdresseIFrittFormat());
         } else if (kontaktadressePDL.postboksadresse() != null) {
             strukturertAdresse = lagStrukturertAdresse(kontaktadressePDL.postboksadresse(), kodeverkService);
         }
 
         return new Kontaktadresse(strukturertAdresse,
-            ustrukturertAdresse,
+            semistrukturertAdresse,
             kontaktadressePDL.coAdressenavn(),
             kontaktadressePDL.gyldigFraOgMed(),
             kontaktadressePDL.gyldigTilOgMed(),
             kontaktadressePDL.metadata().master(),
             kontaktadressePDL.hentKilde(),
+            kontaktadressePDL.hentDatoSistRegistrert(),
             kontaktadressePDL.metadata().historisk()
         );
     }
@@ -51,30 +52,33 @@ public class KontaktadresseOversetter {
         return new StrukturertAdresse(null, null,
             null, postboksadresse.postboks(),
             postboksadresse.postnummer(),
-            kodeverkService.dekod(POSTNUMMER, postboksadresse.postnummer(), LocalDate.now()),
+            kodeverkService.dekod(POSTNUMMER, postboksadresse.postnummer()),
             null,
             Landkoder.NO.getKode()
         );
     }
 
-    private static UstrukturertAdresse lagUstrukturertAdresse(PostadresseIFrittFormat postadresseIFrittFormat,
-                                                              KodeverkService kodeverkService) {
-        return new UstrukturertAdresse(
+    private static SemistrukturertAdresse lagPostadresse(PostadresseIFrittFormat postadresseIFrittFormat,
+                                                         KodeverkService kodeverkService) {
+        return new SemistrukturertAdresse(
             postadresseIFrittFormat.adresselinje1(),
             postadresseIFrittFormat.adresselinje2(),
             postadresseIFrittFormat.adresselinje3(),
-            postadresseIFrittFormat.postnummer() + " " + kodeverkService.dekod(POSTNUMMER, postadresseIFrittFormat.postnummer(), LocalDate.now()),
+            null,
+            postadresseIFrittFormat.postnummer(),
+            kodeverkService.dekod(POSTNUMMER, postadresseIFrittFormat.postnummer()),
             Landkoder.NO.getKode()
         );
     }
 
-    private static UstrukturertAdresse lagUstrukturertAdresse(
-        UtenlandskAdresseIFrittFormat utenlandskAdresseIFrittFormat) {
-        return new UstrukturertAdresse(
+    private static SemistrukturertAdresse lagPostadresse(UtenlandskAdresseIFrittFormat utenlandskAdresseIFrittFormat) {
+        return new SemistrukturertAdresse(
             utenlandskAdresseIFrittFormat.adresselinje1(),
             utenlandskAdresseIFrittFormat.adresselinje2(),
             utenlandskAdresseIFrittFormat.adresselinje3(),
-            utenlandskAdresseIFrittFormat.postkode() + " " + utenlandskAdresseIFrittFormat.byEllerStedsnavn(),
+            null,
+            utenlandskAdresseIFrittFormat.postkode(),
+            utenlandskAdresseIFrittFormat.byEllerStedsnavn(),
             LandkoderUtils.tilIso2(utenlandskAdresseIFrittFormat.landkode()));
     }
 }

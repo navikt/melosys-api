@@ -2,6 +2,7 @@
   {
     "id": "111111",
     "bucType": "LA_BUC_03",
+    "erÅpen": true,
     "opprettetDato": 1554400129480,
     "seder": [
       {
@@ -18,6 +19,7 @@
   {
     "id": "222222",
     "bucType": "LA_BUC_01",
+    "erÅpen": false,
     "opprettetDato": 1554400129480,
     "seder": [
       {

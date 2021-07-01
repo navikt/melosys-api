@@ -3,28 +3,27 @@ package no.nav.melosys.integrasjon.utbetaldata;
 import java.io.StringWriter;
 import java.time.LocalDate;
 import javax.xml.bind.JAXBException;
-import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.ws.WebServiceException;
 
 import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningKildesystem;
-import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.DokumentFactory;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.utbetaldata.utbetaling.UtbetalingConsumer;
-import no.nav.tjeneste.virksomhet.utbetaling.v1.binding.HentUtbetalingsinformasjonIkkeTilgang;
-import no.nav.tjeneste.virksomhet.utbetaling.v1.binding.HentUtbetalingsinformasjonPeriodeIkkeGyldig;
-import no.nav.tjeneste.virksomhet.utbetaling.v1.binding.HentUtbetalingsinformasjonPersonIkkeFunnet;
+import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonIkkeTilgang;
+import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonPeriodeIkkeGyldig;
+import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonPersonIkkeFunnet;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.informasjon.*;
-import no.nav.tjeneste.virksomhet.utbetaling.v1.meldinger.HentUtbetalingsinformasjonRequest;
-import no.nav.tjeneste.virksomhet.utbetaling.v1.meldinger.HentUtbetalingsinformasjonResponse;
+import no.nav.tjeneste.virksomhet.utbetaling.v1.meldinger.WSHentUtbetalingsinformasjonRequest;
+import no.nav.tjeneste.virksomhet.utbetaling.v1.meldinger.WSHentUtbetalingsinformasjonResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UtbetaldataService implements UtbetaldataFasade {
-    private static final String UTBETAL_VERSJON = "1.0";
     private static final String BARNETRYGD = "BARNETRYGD";
     private static final String RETTIGHETSHAVER = "Rettighetshaver";
     private static final String YTELSESPERIODE = "Ytelsesperiode";
@@ -40,28 +39,21 @@ public class UtbetaldataService implements UtbetaldataFasade {
 
     @Override
     public Saksopplysning hentUtbetalingerBarnetrygd(String fnr, LocalDate fom, LocalDate tom) {
-        HentUtbetalingsinformasjonResponse response;
+        WSHentUtbetalingsinformasjonResponse response;
 
         // Utbetldata støtter ikke uthenting av data for lenger tilbake enn 3 år
         if (tom != null && datoErEldreEnnTreÅr(tom)) {
-            response = new HentUtbetalingsinformasjonResponse();
+            response = new WSHentUtbetalingsinformasjonResponse();
         } else {
             response = filtrerYtelserAvTypeBarnetrygd(
                     hentUtbetalingsinformasjon(lagRequest(fnr, fom, tom))
             );
         }
 
-        // Response -> xml
-        StringWriter xmlWriter = lagXml(response);
-        Saksopplysning saksopplysning = lagSaksopplysning(xmlWriter);
-
-        // xml -> java objekter
-        dokumentFactory.lagDokument(saksopplysning);
-
-        return saksopplysning;
+        return UtbetaldataMapper.tilSaksopplysning(response, lagXml(response).toString());
     }
 
-    private HentUtbetalingsinformasjonResponse hentUtbetalingsinformasjon(HentUtbetalingsinformasjonRequest request) {
+    private WSHentUtbetalingsinformasjonResponse hentUtbetalingsinformasjon(WSHentUtbetalingsinformasjonRequest request) {
         try {
             return utbetalingConsumer.hentUtbetalingsinformasjon(request);
         } catch (HentUtbetalingsinformasjonPersonIkkeFunnet hentUtbetalingsinformasjonPersonIkkeFunnet) {
@@ -75,7 +67,7 @@ public class UtbetaldataService implements UtbetaldataFasade {
         }
     }
 
-    private StringWriter lagXml(HentUtbetalingsinformasjonResponse response) {
+    private StringWriter lagXml(WSHentUtbetalingsinformasjonResponse response) {
         StringWriter xmlWriter = new StringWriter();
         try {
             no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonResponse xmlRoot =
@@ -89,34 +81,25 @@ public class UtbetaldataService implements UtbetaldataFasade {
         return xmlWriter;
     }
 
-    private static Saksopplysning lagSaksopplysning(StringWriter xmlWriter) {
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.leggTilKildesystemOgMottattDokument(
-            SaksopplysningKildesystem.UTBETALDATA, xmlWriter.toString());
-        saksopplysning.setType(SaksopplysningType.UTBETAL);
-        saksopplysning.setVersjon(UTBETAL_VERSJON);
-        return saksopplysning;
-    }
-
-    private static HentUtbetalingsinformasjonRequest lagRequest(String fnr, LocalDate fom, LocalDate tom) {
-        HentUtbetalingsinformasjonRequest request = new HentUtbetalingsinformasjonRequest();
+    private static WSHentUtbetalingsinformasjonRequest lagRequest(String fnr, LocalDate fom, LocalDate tom) {
+        var request = new WSHentUtbetalingsinformasjonRequest();
         request.setId(lagIdent(fnr));
         request.setPeriode(lagPeriode(fom, tom));
         return request;
     }
 
-    private static Ident lagIdent(String fnr) {
-        Ident ident = new Ident();
-        Identroller identrolle = new Identroller();
+    private static WSIdent lagIdent(String fnr) {
+        var ident = new WSIdent();
+        var identrolle = new WSIdentroller();
         identrolle.setValue(RETTIGHETSHAVER);
         ident.setRolle(identrolle);
         ident.setIdent(fnr);
         return ident;
     }
 
-    private static ForespurtPeriode lagPeriode(LocalDate fom, LocalDate tom) {
-        ForespurtPeriode periode = new ForespurtPeriode();
-        Periodetyper periodetype = new Periodetyper();
+    private static WSForespurtPeriode lagPeriode(LocalDate fom, LocalDate tom) {
+        var periode = new WSForespurtPeriode();
+        var periodetype = new WSPeriodetyper();
         periodetype.setValue(YTELSESPERIODE);
         periode.setPeriodeType(periodetype);
 
@@ -124,17 +107,13 @@ public class UtbetaldataService implements UtbetaldataFasade {
             fom = LocalDate.now().minusYears(3);
         }
 
-        try {
-            periode.setFom(KonverteringsUtils.localDateToXMLGregorianCalendar(fom));
-            periode.setTom(KonverteringsUtils.localDateToXMLGregorianCalendar(tom));
-        } catch (DatatypeConfigurationException e) {
-            throw new TekniskException("Kan ikke opprette periode mot utbetaltjeneste", e);
-        }
+        periode.setFom(KonverteringsUtils.javaLocalDateToJodaDateTime(fom));
+        periode.setTom(KonverteringsUtils.javaLocalDateToJodaDateTime(tom));
 
         return periode;
     }
 
-    private static HentUtbetalingsinformasjonResponse filtrerYtelserAvTypeBarnetrygd(HentUtbetalingsinformasjonResponse response) {
+    private static WSHentUtbetalingsinformasjonResponse filtrerYtelserAvTypeBarnetrygd(WSHentUtbetalingsinformasjonResponse response) {
         // Fjerner utbetalinger uten barnetrygd
         response.getUtbetalingListe().removeIf(utbetaling ->  utbetaling.getYtelseListe().stream()
             .noneMatch(UtbetaldataService::erBarnetrygdytelse));
@@ -146,7 +125,7 @@ public class UtbetaldataService implements UtbetaldataFasade {
         return response;
     }
 
-    private static boolean erBarnetrygdytelse(Ytelse ytelse) {
+    private static boolean erBarnetrygdytelse(WSYtelse ytelse) {
         return ytelse.getYtelsestype() != null
             && ytelse.getYtelsestype().getValue() != null
             && ytelse.getYtelsestype().getValue().trim().equalsIgnoreCase(BARNETRYGD);

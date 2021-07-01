@@ -6,20 +6,20 @@ import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataVideresend;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 
 public class BrevDataByggerVideresend implements BrevDataBygger {
     private final LandvelgerService landvelgerService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
-    private final BrevbestillingDto brevbestillingDto;
+    private final BrevbestillingRequest brevbestillingRequest;
 
     public BrevDataByggerVideresend(LandvelgerService landvelgerService,
                                     UtenlandskMyndighetService utenlandskMyndighetService,
-                                    BrevbestillingDto brevbestillingDto) {
+                                    BrevbestillingRequest brevbestillingRequest) {
         this.landvelgerService = landvelgerService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
-        this.brevbestillingDto = brevbestillingDto;
+        this.brevbestillingRequest = brevbestillingRequest;
     }
 
     @Override
@@ -31,7 +31,7 @@ public class BrevDataByggerVideresend implements BrevDataBygger {
             throw new FunksjonellException("Bostedslandet kan ikke være Norge ved videresending av søknad");
         }
 
-        BrevDataVideresend brevdata = new BrevDataVideresend(brevbestillingDto, saksbehandler);
+        BrevDataVideresend brevdata = new BrevDataVideresend(brevbestillingRequest, saksbehandler);
         brevdata.bostedsland = bostedsland.getBeskrivelse();
         brevdata.trygdemyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(bostedsland);
 

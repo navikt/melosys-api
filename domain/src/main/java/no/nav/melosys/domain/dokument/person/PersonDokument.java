@@ -7,12 +7,14 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import no.nav.melosys.domain.brev.Postadresse;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.person.KjoennType;
+import no.nav.melosys.domain.person.Master;
 import no.nav.melosys.domain.person.Persondata;
 
 
@@ -71,6 +73,16 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
     }
 
     @Override
+    public Optional<no.nav.melosys.domain.person.adresse.Bostedsadresse> hentBostedsadresse() {
+        if (bostedsadresse == null || bostedsadresse.erTom()) {
+            return Optional.empty();
+        }
+        return Optional.of(
+            new no.nav.melosys.domain.person.adresse.Bostedsadresse(bostedsadresse.tilStrukturertAdresse(), null, null,
+                null, Master.TPS.name(), Master.TPS.name(), false));
+    }
+
+    @Override
     public boolean harStrengtAdressebeskyttelse() {
         return diskresjonskode != null && diskresjonskode.erKode6();
     }
@@ -98,7 +110,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.fnr = fnr;
     }
 
-    @Override
     public Sivilstand getSivilstand() {
         return sivilstand;
     }
@@ -107,7 +118,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.sivilstand = sivilstand;
     }
 
-    @Override
     public LocalDate getSivilstandGyldighetsperiodeFom() {
         return sivilstandGyldighetsperiodeFom;
     }
@@ -204,7 +214,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.diskresjonskode = diskresjonskode;
     }
 
-    @Override
     public Personstatus getPersonstatus() {
         return personstatus;
     }
@@ -213,7 +222,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.personstatus = personstatus;
     }
 
-    @Override
     public LocalDate getStatsborgerskapDato() {
         return statsborgerskapDato;
     }
@@ -231,7 +239,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.bostedsadresse = bostedsadresse;
     }
 
-    @Override
     public UstrukturertAdresse getPostadresse() {
         return postadresse;
     }
@@ -240,7 +247,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.postadresse = postadresse;
     }
 
-    @Override
     public MidlertidigPostadresse getMidlertidigPostadresse() {
         return midlertidigPostadresse;
     }
@@ -249,9 +255,21 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.midlertidigPostadresse = midlertidigPostadresse;
     }
 
-    @Override
     public UstrukturertAdresse getGjeldendePostadresse() {
         return gjeldendePostadresse;
+    }
+
+    @Override
+    public Postadresse hentGjeldendePostadresse() {
+        return new Postadresse(
+            gjeldendePostadresse.adresselinje1,
+            gjeldendePostadresse.adresselinje2,
+            gjeldendePostadresse.adresselinje3,
+            gjeldendePostadresse.adresselinje4,
+            gjeldendePostadresse.postnr,
+            gjeldendePostadresse.poststed,
+            gjeldendePostadresse.land != null ? gjeldendePostadresse.land.getKode() : null
+        );
     }
 
     public void setGjeldendePostadresse(UstrukturertAdresse gjeldendePostadresse) {

@@ -5,7 +5,7 @@ import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,11 +51,11 @@ class DokumentServiceFasadeTest {
     void skalKalleDokgenProduserUtkast() {
         when(mockDokgenService.erTilgjengeligDokgenmal(any(Produserbaredokumenter.class))).thenReturn(true);
 
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+        BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
             .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
             .medMottaker(Aktoersroller.BRUKER)
             .build();
-        dokumentServiceFasade.produserUtkast(1, brevbestillingDto);
+        dokumentServiceFasade.produserUtkast(1, brevbestillingRequest);
 
         verify(mockDokgenService).produserUtkast(anyLong(), any());
         verifyNoInteractions(mockDokumentService);
@@ -65,13 +65,13 @@ class DokumentServiceFasadeTest {
     void skalKalleDokumentServiceProduserUtkast() {
         when(mockDokgenService.erTilgjengeligDokgenmal(any(Produserbaredokumenter.class))).thenReturn(false);
 
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+        BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
             .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
             .build();
 
-        dokumentServiceFasade.produserUtkast(1, brevbestillingDto);
+        dokumentServiceFasade.produserUtkast(1, brevbestillingRequest);
 
-        verify(mockDokumentService).produserUtkast(anyLong(), eq(brevbestillingDto));
+        verify(mockDokumentService).produserUtkast(anyLong(), eq(brevbestillingRequest));
     }
 
     @Test
@@ -97,7 +97,7 @@ class DokumentServiceFasadeTest {
     void skalKalleDokgenServiceProduserOgDistribuer_dto() {
         when(mockDokgenService.erTilgjengeligDokgenmal(any())).thenReturn(true);
 
-        dokumentServiceFasade.produserDokument(1, new BrevbestillingDto());
+        dokumentServiceFasade.produserDokument(1, new BrevbestillingRequest());
 
         verify(mockDokgenService).produserOgDistribuerBrev(anyLong(), any());
         verifyNoInteractions(mockDokumentService);

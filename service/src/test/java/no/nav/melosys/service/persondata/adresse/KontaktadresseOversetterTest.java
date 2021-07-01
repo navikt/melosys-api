@@ -40,7 +40,7 @@ class KontaktadresseOversetterTest {
             ),
             metadata()
         );
-        when(kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234"), any())).thenReturn("Bergen");
+        when(kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234"))).thenReturn("Bergen");
 
         final var kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService);
 
@@ -52,6 +52,7 @@ class KontaktadresseOversetterTest {
         assertThat(kontaktadresse.strukturertAdresse().getPoststed()).isEqualTo("Bergen");
         assertThat(kontaktadresse.strukturertAdresse().getRegion()).isNull();
         assertThat(kontaktadresse.strukturertAdresse().getLandkode()).isEqualTo("NO");
+        assertThat(kontaktadresse.registrertDato()).isEqualTo(kontaktadressePDL.metadata().datoSistRegistrert());
         assertThat(kontaktadresse.master()).isEqualTo("PDL");
         assertThat(kontaktadresse.kilde()).isEqualTo("Dolly");
     }
@@ -69,15 +70,17 @@ class KontaktadresseOversetterTest {
             null,
             metadata()
         );
-        when(kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234"), any())).thenReturn("Enby");
+        when(kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234"))).thenReturn("Enby");
 
         final var kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService);
 
-        assertThat(kontaktadresse.ustrukturertAdresse().getAdresselinje(1)).isEqualTo("1");
-        assertThat(kontaktadresse.ustrukturertAdresse().getAdresselinje(2)).isEqualTo("2");
-        assertThat(kontaktadresse.ustrukturertAdresse().getAdresselinje(3)).isEqualTo("3");
-        assertThat(kontaktadresse.ustrukturertAdresse().getAdresselinje(4)).isEqualTo("1234 Enby");
-        assertThat(kontaktadresse.ustrukturertAdresse().getLandkode()).isEqualTo("NO");
+        assertThat(kontaktadresse.semistrukturertAdresse().adresselinje1()).isEqualTo("1");
+        assertThat(kontaktadresse.semistrukturertAdresse().adresselinje2()).isEqualTo("2");
+        assertThat(kontaktadresse.semistrukturertAdresse().adresselinje3()).isEqualTo("3");
+        assertThat(kontaktadresse.semistrukturertAdresse().adresselinje4()).isNull();
+        assertThat(kontaktadresse.semistrukturertAdresse().postnr()).isEqualTo("1234");
+        assertThat(kontaktadresse.semistrukturertAdresse().poststed()).isEqualTo("Enby");
+        assertThat(kontaktadresse.semistrukturertAdresse().landkode()).isEqualTo("NO");
     }
 
     @Test
@@ -136,10 +139,12 @@ class KontaktadresseOversetterTest {
 
         final var kontaktadresse = KontaktadresseOversetter.oversett(kontaktadressePDL, kodeverkService);
 
-        assertThat(kontaktadresse.ustrukturertAdresse().getAdresselinje(1)).isEqualTo("1");
-        assertThat(kontaktadresse.ustrukturertAdresse().getAdresselinje(2)).isEqualTo("2");
-        assertThat(kontaktadresse.ustrukturertAdresse().getAdresselinje(3)).isEqualTo("3");
-        assertThat(kontaktadresse.ustrukturertAdresse().getAdresselinje(4)).isEqualTo("postkode by");
-        assertThat(kontaktadresse.ustrukturertAdresse().getLandkode()).isEqualTo("FR");
+        assertThat(kontaktadresse.semistrukturertAdresse().adresselinje1()).isEqualTo("1");
+        assertThat(kontaktadresse.semistrukturertAdresse().adresselinje2()).isEqualTo("2");
+        assertThat(kontaktadresse.semistrukturertAdresse().adresselinje3()).isEqualTo("3");
+        assertThat(kontaktadresse.semistrukturertAdresse().adresselinje4()).isNull();
+        assertThat(kontaktadresse.semistrukturertAdresse().postnr()).isEqualTo("postkode");
+        assertThat(kontaktadresse.semistrukturertAdresse().poststed()).isEqualTo("by");
+        assertThat(kontaktadresse.semistrukturertAdresse().landkode()).isEqualTo("FR");
     }
 }

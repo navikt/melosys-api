@@ -25,7 +25,7 @@ type Statsborgerskap {
     bekreftelsesdato: Date
     gyldigFraOgMed: Date
     gyldigTilOgMed: Date
-    master: String
+    master: String!
     kilde: String
-    erHistorisk: Boolean
+    erHistorisk: Boolean!
 }

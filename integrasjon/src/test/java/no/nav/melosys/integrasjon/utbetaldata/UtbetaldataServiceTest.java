@@ -4,10 +4,7 @@ import java.time.LocalDate;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.Templates;
 import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamSource;
 import javax.xml.ws.WebServiceException;
 
 import no.nav.melosys.domain.Saksopplysning;
@@ -24,11 +21,11 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.utbetaldata.utbetaling.UtbetalingConsumer;
-import no.nav.tjeneste.virksomhet.utbetaling.v1.binding.HentUtbetalingsinformasjonIkkeTilgang;
-import no.nav.tjeneste.virksomhet.utbetaling.v1.binding.HentUtbetalingsinformasjonPeriodeIkkeGyldig;
-import no.nav.tjeneste.virksomhet.utbetaling.v1.binding.HentUtbetalingsinformasjonPersonIkkeFunnet;
-import no.nav.tjeneste.virksomhet.utbetaling.v1.meldinger.HentUtbetalingsinformasjonRequest;
-import no.nav.tjeneste.virksomhet.utbetaling.v1.meldinger.HentUtbetalingsinformasjonResponse;
+import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonIkkeTilgang;
+import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonPeriodeIkkeGyldig;
+import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonPersonIkkeFunnet;
+import no.nav.tjeneste.virksomhet.utbetaling.v1.meldinger.WSHentUtbetalingsinformasjonRequest;
+import no.nav.tjeneste.virksomhet.utbetaling.v1.meldinger.WSHentUtbetalingsinformasjonResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,10 +43,11 @@ class UtbetaldataServiceTest {
 
     @Mock
     private UtbetalingConsumer utbetalingConsumer;
+    @Mock
+    private XsltTemplatesFactory xsltTemplatesFactory;
 
     private UtbetaldataService utbetaldataService;
 
-    private XsltTemplatesFactory xsltTemplatesFactory;
 
     @BeforeEach
     public void setup() throws TransformerConfigurationException {
@@ -61,9 +59,6 @@ class UtbetaldataServiceTest {
 
     @Test
     void hentUtbetalingerBarnetrygd_medTreff_verifiserSaksopplysning() throws Exception {
-        Templates xsltTemplates = TransformerFactory.newInstance().newTemplates(new StreamSource(
-            ClassLoader.getSystemResourceAsStream("utbetaling/utbetaldata_1.0.xslt")));
-        when(xsltTemplatesFactory.getXsltTemplates(any(), anyString())).thenReturn(xsltTemplates);
         when(utbetalingConsumer.hentUtbetalingsinformasjon(any())).thenReturn(hentResponse("77777777776"));
 
         Saksopplysning saksopplysning = utbetaldataService.hentUtbetalingerBarnetrygd("123", LocalDate.now(), LocalDate.now().plusYears(1));
@@ -87,9 +82,6 @@ class UtbetaldataServiceTest {
 
     @Test
     void hentUtbetalingerBarnetrygd_medForskjelligeYtelserIEnUtbetaling_verifiserSaksopplysning() throws Exception {
-        Templates xsltTemplates = TransformerFactory.newInstance().newTemplates(new StreamSource(
-            ClassLoader.getSystemResourceAsStream("utbetaling/utbetaldata_1.0.xslt")));
-        when(xsltTemplatesFactory.getXsltTemplates(any(), anyString())).thenReturn(xsltTemplates);
         when(utbetalingConsumer.hentUtbetalingsinformasjon(any())).thenReturn(hentResponse("77777777777"));
 
         Saksopplysning saksopplysning = utbetaldataService.hentUtbetalingerBarnetrygd("123", LocalDate.now(), LocalDate.now().plusYears(1));
@@ -146,9 +138,6 @@ class UtbetaldataServiceTest {
 
     @Test
     void hentUtbetalingerBarnetrygd_tomDatoEldreEnnTreÅr_forventTomResponsIngenKall() throws Exception {
-        Templates xsltTemplates = TransformerFactory.newInstance().newTemplates(new StreamSource(
-            ClassLoader.getSystemResourceAsStream("utbetaling/utbetaldata_1.0.xslt")));
-        when(xsltTemplatesFactory.getXsltTemplates(any(), anyString())).thenReturn(xsltTemplates);
         var saksopplysning = utbetaldataService.hentUtbetalingerBarnetrygd("123", LocalDate.now().minusYears(5), LocalDate.now().minusYears(4));
         UtbetalingDokument dokument = (UtbetalingDokument) saksopplysning.getDokument();
         assertThat(dokument.utbetalinger.size()).isZero();
@@ -159,21 +148,18 @@ class UtbetaldataServiceTest {
     void hentUtbetalingerBarnetrygd_fomDatoEldreEnnTreÅrTomDatoIDag_forventKallMedFomTreÅrSiden() throws Exception {
         final LocalDate fom = LocalDate.now().minusYears(4);
         final LocalDate tom = LocalDate.now();
-        final ArgumentCaptor<HentUtbetalingsinformasjonRequest> captor = ArgumentCaptor.forClass(HentUtbetalingsinformasjonRequest.class);
+        final ArgumentCaptor<WSHentUtbetalingsinformasjonRequest> captor = ArgumentCaptor.forClass(WSHentUtbetalingsinformasjonRequest.class);
 
-        Templates xsltTemplates = TransformerFactory.newInstance().newTemplates(new StreamSource(
-            ClassLoader.getSystemResourceAsStream("utbetaling/utbetaldata_1.0.xslt")));
-        when(xsltTemplatesFactory.getXsltTemplates(any(), anyString())).thenReturn(xsltTemplates);
-        when(utbetalingConsumer.hentUtbetalingsinformasjon(any())).thenReturn(new HentUtbetalingsinformasjonResponse());
+        when(utbetalingConsumer.hentUtbetalingsinformasjon(any())).thenReturn(new WSHentUtbetalingsinformasjonResponse());
         assertThat(utbetaldataService.hentUtbetalingerBarnetrygd("123", fom, tom)).isNotNull();
         verify(utbetalingConsumer).hentUtbetalingsinformasjon(captor.capture());
 
         var periode = captor.getValue().getPeriode();
-        assertThat(KonverteringsUtils.xmlGregorianCalendarToLocalDate(periode.getFom())).isEqualTo(tom.minusYears(3));
-        assertThat(KonverteringsUtils.xmlGregorianCalendarToLocalDate(periode.getTom())).isEqualTo(tom);
+        assertThat(KonverteringsUtils.jodaDateTimeToJavaLocalDate(periode.getFom())).isEqualTo(tom.minusYears(3));
+        assertThat(KonverteringsUtils.jodaDateTimeToJavaLocalDate(periode.getTom())).isEqualTo(tom);
     }
 
-    private HentUtbetalingsinformasjonResponse hentResponse(String fnr) throws JAXBException {
+    private WSHentUtbetalingsinformasjonResponse hentResponse(String fnr) throws JAXBException {
         Unmarshaller unmarshaller = JAXBContext.newInstance(
             no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonResponse.class).createUnmarshaller();
 

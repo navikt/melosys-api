@@ -26,9 +26,10 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
@@ -73,6 +74,8 @@ class DokgenServiceTest {
     private BrevmottakerService mockBrevMottakerService;
     @Mock
     private ProsessinstansService mockProsessinstansService;
+    @Mock
+    private SaksbehandlerService mockSaksbehandlerService;
 
     @Captor
     private ArgumentCaptor<DokgenBrevbestilling> brevbestillingCaptor;
@@ -88,7 +91,9 @@ class DokgenServiceTest {
         dokgenService = new DokgenService(mockDokgenConsumer, new DokumentproduksjonsInfoMapper(unleash), mockJoarkFasade,
             new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService, mockEregFasade, mockPersondataFasade, medlemAvFolketrygdenService),
             mockBehandlingsService,
-            mockEregFasade, mockKontaktOpplysningService, mockBrevMottakerService, mockProsessinstansService);
+            mockEregFasade, mockKontaktOpplysningService, mockBrevMottakerService, mockProsessinstansService, mockSaksbehandlerService);
+
+        reset(mockDokgenConsumer);
     }
 
     @Test
@@ -103,8 +108,8 @@ class DokgenServiceTest {
     }
 
     @Test
-    void produserBrevTilBrukerOk() throws Exception {
-        when(mockDokgenConsumer.lagPdf(anyString(), any(), anyBoolean())).thenReturn(expectedPdf);
+    void produserBrevTilBrukerOk() {
+        when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(false))).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
@@ -122,14 +127,14 @@ class DokgenServiceTest {
         assertThat(pdfResponse).isNotNull();
         assertThat(pdfResponse).isEqualTo(expectedPdf);
 
-        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false));
+        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(false));
         verifyNoInteractions(mockEregFasade);
         verifyNoInteractions(mockKontaktOpplysningService);
     }
 
     @Test
     void produserBrevTilRepresentantOk() {
-        when(mockDokgenConsumer.lagPdf(anyString(), any(), anyBoolean())).thenReturn(expectedPdf);
+        when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(false))).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         when(mockEregFasade.hentOrganisasjon(any())).thenReturn(lagSaksopplysning());
@@ -149,14 +154,14 @@ class DokgenServiceTest {
         assertThat(pdfResponse).isNotNull();
         assertThat(pdfResponse).isEqualTo(expectedPdf);
 
-        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false));
+        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(false));
         verify(mockEregFasade).hentOrganisasjon(any());
         verify(mockKontaktOpplysningService).hentKontaktopplysning(any(), any());
     }
 
     @Test
     void produserUtkastUtenRepresentantForBrukerOk() {
-        when(mockDokgenConsumer.lagPdf(anyString(), any(), anyBoolean())).thenReturn(expectedPdf);
+        when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(true))).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
@@ -164,26 +169,28 @@ class DokgenServiceTest {
         mottaker.setRolle(Aktoersroller.BRUKER);
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false))).thenReturn(asList(mottaker));
 
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+        BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
             .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
             .medMottaker(Aktoersroller.BRUKER)
+            .medBestillersId("Z123456")
             .build();
 
-        byte[] pdfResponse = dokgenService.produserUtkast(123L, brevbestillingDto);
+        byte[] pdfResponse = dokgenService.produserUtkast(123L, brevbestillingRequest);
 
         assertThat(pdfResponse).isNotNull();
         assertThat(pdfResponse).isEqualTo(expectedPdf);
 
-        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(true));
+        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(true));
         verify(mockPersondataFasade).hentPersonFraTps(any(), eq(Informasjonsbehov.STANDARD));
 
         verifyNoInteractions(mockEregFasade);
         verifyNoInteractions(mockKontaktOpplysningService);
+        verify(mockSaksbehandlerService).hentNavnForIdent(anyString());
     }
 
     @Test
     void produserUtkastTilRepresentantForBrukerOk() {
-        when(mockDokgenConsumer.lagPdf(anyString(), any(), anyBoolean())).thenReturn(expectedPdf);
+        when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(true))).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         when(mockEregFasade.hentOrganisasjon(any())).thenReturn(lagSaksopplysning());
@@ -197,24 +204,25 @@ class DokgenServiceTest {
         Aktoer mottaker = new Aktoer();
         mottaker.setRolle(Aktoersroller.BRUKER);
 
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+        BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
             .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
             .medMottaker(Aktoersroller.BRUKER)
+            .medBestillersId("Z123456")
             .build();
 
-        byte[] pdfResponse = dokgenService.produserUtkast(123L, brevbestillingDto);
+        byte[] pdfResponse = dokgenService.produserUtkast(123L, brevbestillingRequest);
 
         assertThat(pdfResponse).isNotNull();
         assertThat(pdfResponse).isEqualTo(expectedPdf);
 
-        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(true));
+        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(true));
         verify(mockEregFasade).hentOrganisasjon(eq("987654321"));
         verify(mockKontaktOpplysningService).hentKontaktopplysning(any(), any());
     }
 
     @Test
-    void produserUtkastTilRepresentantForArbeidsgiverOk() throws Exception {
-        when(mockDokgenConsumer.lagPdf(anyString(), any(), anyBoolean())).thenReturn(expectedPdf);
+    void produserUtkastTilRepresentantForArbeidsgiverOk() {
+        when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(true))).thenReturn(expectedPdf);
         when(mockJoarkFasade.hentJournalpost(any())).thenReturn(lagJournalpost());
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         when(mockEregFasade.hentOrganisasjon(any())).thenReturn(lagSaksopplysning());
@@ -229,57 +237,63 @@ class DokgenServiceTest {
         mottaker.setRolle(Aktoersroller.ARBEIDSGIVER);
         mottaker.setOrgnr("123456789");
 
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+        BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
             .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
             .medMottaker(Aktoersroller.BRUKER)
+            .medBestillersId("Z123456")
             .build();
 
-        byte[] pdfResponse = dokgenService.produserUtkast(123L, brevbestillingDto);
+        byte[] pdfResponse = dokgenService.produserUtkast(123L, brevbestillingRequest);
 
         assertThat(pdfResponse).isNotNull();
         assertThat(pdfResponse).isEqualTo(expectedPdf);
 
-        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(true));
+        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(true));
         verify(mockEregFasade).hentOrganisasjon(eq("987654321"));
         verify(mockKontaktOpplysningService).hentKontaktopplysning(any(), any());
     }
 
     @Test
-    void skalProdusereOgDistribuereBrevTilBruker() throws Exception {
+    void skalProdusereOgDistribuereBrevTilBruker() {
         Aktoer bruker = new Aktoer();
         bruker.setRolle(Aktoersroller.BRUKER);
 
+        when(mockSaksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Ole Saksbehandler");
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(new Behandling());
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(bruker));
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+        BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
             .medProduserbardokument(MANGELBREV_BRUKER)
             .medMottaker(Aktoersroller.BRUKER)
+            .medBestillersId("Z123456")
             .build();
 
-        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
+        dokgenService.produserOgDistribuerBrev(123L, brevbestillingRequest);
 
         verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Aktoer.class), brevbestillingCaptor.capture());
         verify(mockBrevMottakerService).avklarMottakere(any(), any(), any(), eq(false), eq(false));
+        verify(mockSaksbehandlerService).hentNavnForIdent(anyString());
 
         MangelbrevBrevbestilling brevbestilling = (MangelbrevBrevbestilling) brevbestillingCaptor.getValue();
         assertThat(brevbestilling).isNotNull();
         assertThat(brevbestilling).extracting(
             DokgenBrevbestilling::getProduserbartdokument,
-            DokgenBrevbestilling::getBehandlingId
-        ).containsExactly(MANGELBREV_BRUKER, 123L);
+            DokgenBrevbestilling::getBehandlingId,
+            DokgenBrevbestilling::getSaksbehandlerNavn
+        ).containsExactly(MANGELBREV_BRUKER, 123L, "Ole Saksbehandler");
     }
 
     @Test
-    void skalProdusereOgDistribuereBrevTilOrgnrUtenKopi() throws Exception {
+    void skalProdusereOgDistribuereBrevTilOrgnrUtenKopi() {
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(new Behandling());
 
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+        BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
             .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
             .medMottaker(Aktoersroller.ARBEIDSGIVER)
             .medOrgNr("987654321")
+            .medBestillersId("Z123456")
             .build();
 
-        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
+        dokgenService.produserOgDistribuerBrev(123L, brevbestillingRequest);
 
         verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Aktoer.class), brevbestillingCaptor.capture());
         verifyNoInteractions(mockBrevMottakerService);
@@ -293,18 +307,19 @@ class DokgenServiceTest {
     }
 
     @Test
-    void skalProdusereOgDistribuereBrevTilOrgnrMedKopi() throws Exception {
+    void skalProdusereOgDistribuereBrevTilOrgnrMedKopi() {
         when(mockBehandlingsService.hentBehandling(anyLong())).thenReturn(new Behandling());
 
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
+        BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
             .medProduserbardokument(MANGELBREV_BRUKER)
+            .medBestillersId("Z123456")
             .medManglerFritekst("Mangler")
             .medMottaker(Aktoersroller.ARBEIDSGIVER)
             .medOrgNr("987654321")
             .medKopiMottakere(List.of(new KopiMottaker(Aktoersroller.BRUKER, null, "1223")))
             .build();
 
-        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
+        dokgenService.produserOgDistribuerBrev(123L, brevbestillingRequest);
 
         verify(mockProsessinstansService, times(2)).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class),
             any(Aktoer.class), brevbestillingCaptor.capture());
@@ -328,7 +343,7 @@ class DokgenServiceTest {
     }
 
     @Test
-    void skalHenteDokumentInfo() throws Exception {
+    void skalHenteDokumentInfo() {
         DokumentproduksjonsInfo dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
 
         assertThat(dokumentproduksjonsInfo.dokgenMalnavn()).isEqualTo("saksbehandlingstid_soknad");

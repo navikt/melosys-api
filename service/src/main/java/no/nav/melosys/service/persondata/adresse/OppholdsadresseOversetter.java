@@ -24,12 +24,12 @@ public class OppholdsadresseOversetter {
         }
 
         return new Oppholdsadresse(strukturertAdresse,
-            null,
             oppholdsadressePDL.coAdressenavn(),
             oppholdsadressePDL.gyldigFraOgMed(),
             oppholdsadressePDL.gyldigTilOgMed(),
             oppholdsadressePDL.metadata().master(),
             oppholdsadressePDL.hentKilde(),
+            oppholdsadressePDL.hentDatoSistRegistrert(),
             oppholdsadressePDL.metadata().historisk()
         );
     }

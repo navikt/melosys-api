@@ -71,7 +71,7 @@ public class JsonSchemaTestParent {
             objectMapperMedKodeverkServiceStub.configure(SerializationFeature.INDENT_OUTPUT, true);
             objectMapperMedKodeverkServiceStub.registerModule(new JavaTimeModule());
             KodeverkService kodeverkService = mock(KodeverkService.class);
-            lenient().when(kodeverkService.dekod(any(), any(), any())).thenReturn("DUMMY");
+            lenient().when(kodeverkService.dekod(any(), any())).thenReturn("DUMMY");
             lenient().when(kodeverkService.getKodeverdi(any(), any())).thenReturn(new KodeDto("DUMMY", "DUMMY"));
             objectMapperMedKodeverkServiceStub.registerModule(new MelosysModule(kodeverkService));
         }

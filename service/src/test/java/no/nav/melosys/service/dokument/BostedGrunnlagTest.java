@@ -2,13 +2,9 @@ package no.nav.melosys.service.dokument;
 
 import java.util.Optional;
 
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Bosted;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
-import no.nav.melosys.domain.dokument.person.adresse.Gateadresse;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,14 +15,13 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.mock;
 
 class BostedGrunnlagTest {
-    private Soeknad soeknad = new Soeknad();
-    private PersonDokument personDokument = new PersonDokument();
+    private final Soeknad soeknad = new Soeknad();
     private BostedGrunnlag bostedGrunnlag;
+    private final KodeverkService kodeverkService = mock(KodeverkService.class);
 
     @BeforeEach
     public void setup() {
-        KodeverkService kodeverkService = mock(KodeverkService.class);
-        bostedGrunnlag = new BostedGrunnlag(soeknad, personDokument, kodeverkService);
+        bostedGrunnlag = new BostedGrunnlag(soeknad, null, kodeverkService);
     }
 
     @Test
@@ -65,10 +60,10 @@ class BostedGrunnlagTest {
 
     @Test
     void finnBostedsadresse_harBostedsadresseIRegister_forventBostedsadresse() {
-        personDokument.setBostedsadresse(new Bostedsadresse());
-        personDokument.getBostedsadresse().setLand(new Land("SWE"));
-        personDokument.getBostedsadresse().setGateadresse(new Gateadresse());
-        personDokument.getBostedsadresse().getGateadresse().setGatenavn("gate");
+        var bostedsadresse = new no.nav.melosys.domain.person.adresse.Bostedsadresse(
+            new StrukturertAdresse("gate", null, null, null, null, "SE"),
+            null, null, null, null, null, false);
+        var bostedGrunnlag = new BostedGrunnlag(soeknad, bostedsadresse, kodeverkService);
 
         Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnBostedsadresse();
 

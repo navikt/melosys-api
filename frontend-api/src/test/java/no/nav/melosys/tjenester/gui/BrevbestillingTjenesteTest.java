@@ -20,14 +20,19 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.brev.BrevbestillingService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import no.nav.melosys.tjenester.gui.dto.brev.BrevbestillingDto;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalDto;
 import no.nav.melosys.tjenester.gui.dto.brev.FeltvalgDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
@@ -41,6 +46,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
 
+    public static final String SAKSBEHANDLER = "Z123456";
     @Mock
     private BehandlingService mockBehandlingService;
     @Mock
@@ -53,6 +59,8 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     private EregFasade mockEregFasade;
     @Mock
     private KontaktopplysningService mockKontaktopplysningService;
+    @Captor
+    private ArgumentCaptor<BrevbestillingRequest> brevbestillingDtoCaptor;
 
     private BrevbestillingTjeneste brevbestillingTjeneste;
 
@@ -150,6 +158,8 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void skalBestilleProduseringAvBrev() throws Exception {
+        settInnloggetSaksbehandler();
+
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
             .medProduserbardokument(MANGELBREV_BRUKER)
             .medMottaker(Aktoersroller.BRUKER)
@@ -158,7 +168,14 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
             .build();
         brevbestillingTjeneste.produserBrev(123L, brevbestillingDto);
 
-        verify(mockDokServiceFasade).produserDokument(123L, brevbestillingDto);
+        verify(mockDokServiceFasade).produserDokument(anyLong(), brevbestillingDtoCaptor.capture());
+
+        assertThat(brevbestillingDtoCaptor.getValue()).extracting(
+            BrevbestillingRequest::getProduserbardokument,
+            BrevbestillingRequest::getMottaker,
+            BrevbestillingRequest::getInnledningFritekst,
+            BrevbestillingRequest::getBestillersId
+        ).containsExactly(MANGELBREV_BRUKER, Aktoersroller.BRUKER, "Innledning", SAKSBEHANDLER);
 
         valider(brevbestillingDto, "dokumenter-v2-opprett-post-schema.json", new ObjectMapper());
     }
@@ -169,5 +186,11 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         behandling.setFagsak(new Fagsak());
         behandling.setType(type);
         return behandling;
+    }
+
+    private void settInnloggetSaksbehandler() {
+        SubjectHandler subjectHandler = mock(SpringSubjectHandler.class);
+        SubjectHandler.set(subjectHandler);
+        when(subjectHandler.getUserID()).thenReturn(SAKSBEHANDLER);
     }
 }

@@ -1,6 +1,5 @@
 package no.nav.melosys.service.brev;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -21,8 +20,11 @@ import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
-import no.nav.melosys.service.dokument.*;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.BrevmottakerService;
+import no.nav.melosys.service.dokument.DokumentServiceFasade;
+import no.nav.melosys.service.dokument.MuligMottakerDto;
+import no.nav.melosys.service.dokument.MuligeMottakereDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -210,20 +212,21 @@ public class BrevbestillingService {
             .medOrgnr(orgDokument != null ? orgDokument.getOrgnummer() : null)
             .medAdresselinjer(mapAdresselinjer(orgDokument, null, kontaktopplysning, persondata))
             .medPostnr(mapPostnr(orgDokument, persondata))
-            .medPoststed(orgDokument != null ? mapPoststed(orgDokument) : kodeverkService.dekod(FellesKodeverk.POSTNUMMER, persondata.getGjeldendePostadresse().postnr, LocalDate.now()))
+            .medPoststed(orgDokument != null ? mapPoststed(orgDokument) :
+                kodeverkService.dekod(FellesKodeverk.POSTNUMMER, persondata.hentGjeldendePostadresse().postnr()))
             .medLand(mapLandForAdresse(orgDokument, persondata))
             .build();
     }
 
     @Transactional
-    public void produserBrev(long behandlingId, BrevbestillingDto brevbestillingDto) {
-        if (!BREV_TILGJENGELIG_FOR_MANUELL_BESTILLING.contains(brevbestillingDto.getProduserbardokument())) {
-            throw new FunksjonellException("Manuell bestilling av " + brevbestillingDto.getProduserbardokument() + " er ikke støttet.");
+    public void produserBrev(long behandlingId, BrevbestillingRequest brevbestillingRequest) {
+        if (!BREV_TILGJENGELIG_FOR_MANUELL_BESTILLING.contains(brevbestillingRequest.getProduserbardokument())) {
+            throw new FunksjonellException("Manuell bestilling av " + brevbestillingRequest.getProduserbardokument() + " er ikke støttet.");
         }
-        dokumentServiceFasade.produserDokument(behandlingId, brevbestillingDto);
+        dokumentServiceFasade.produserDokument(behandlingId, brevbestillingRequest);
     }
 
-    public byte[] produserUtkast(long behandlingID, BrevbestillingDto brevbestillingDto) {
-        return dokumentServiceFasade.produserUtkast(behandlingID, brevbestillingDto);
+    public byte[] produserUtkast(long behandlingID, BrevbestillingRequest brevbestillingRequest) {
+        return dokumentServiceFasade.produserUtkast(behandlingID, brevbestillingRequest);
     }
 }

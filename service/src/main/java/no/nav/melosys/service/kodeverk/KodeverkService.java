@@ -52,13 +52,18 @@ public class KodeverkService {
         if (kode == null) {
             return null;
         }
-        return new KodeDto(kode, dekod(kodeverk, kode, LocalDate.now()));
+        return new KodeDto(kode, dekod(kodeverk, kode));
     }
 
     /**
-     * Henter verdien for en kode i et kodeverk på en gitt dato, eller null hvis koden ikke er omfattet av kodeverket på angitt dato.
+     * Henter verdien for en kode i et kodeverk på nåværende tidspunkt, eller null hvis koden ikke er omfattet av
+     * kodeverket.
      */
-    public String dekod(FellesKodeverk kodeverk, String kode, LocalDate dato) {
+    public String dekod(FellesKodeverk kodeverk, String kode) {
+        return dekod(kodeverk, kode, LocalDate.now());
+    }
+
+    private String dekod(FellesKodeverk kodeverk, String kode, LocalDate dato) {
         if (StringUtils.isEmpty(kode)) {
             log.warn("Metode dekod kalt for kodeverk {} med kode {}", kodeverk, kode);
             return UKJENT;
@@ -102,7 +107,7 @@ public class KodeverkService {
     }
 
     /*
-     * Merk: Vi har en forsvinnende liten mulighet for feil hvis dette ikke synkroniseres (også hvis vi aldri tømmer cache). 
+     * Merk: Vi har en forsvinnende liten mulighet for feil hvis dette ikke synkroniseres (også hvis vi aldri tømmer cache).
      * Problemer kan oppstå hvis metoden kalles i parallell der det ene kallet medfører put og resize/rehash.
      * NB! Ikke gjør "smarte" ting her (som f.eks. delvis synkronisering) med mindre du vet om alle konsekvensene.
      */

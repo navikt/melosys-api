@@ -1,7 +1,5 @@
 package no.nav.melosys.tjenester.gui.jackson.serialize;
 
-import java.time.LocalDate;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -43,7 +41,7 @@ class MidlertidigPostadresseSerializerTest {
 
     @Test
     void midlertidigPostadresseNorge() throws Exception {
-        when(kodeverkService.dekod(POSTNUMMER, "0557", LocalDate.now())).thenReturn("Oslo");
+        when(kodeverkService.dekod(POSTNUMMER, "0557")).thenReturn("Oslo");
 
         MidlertidigPostadresseNorge midlertidigPostadresse = new MidlertidigPostadresseNorge();
 

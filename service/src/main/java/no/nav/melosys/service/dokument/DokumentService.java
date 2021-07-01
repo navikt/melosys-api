@@ -17,7 +17,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
 import no.nav.melosys.service.dokument.brev.BrevDataService;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataBygger;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory;
@@ -66,18 +66,18 @@ public class DokumentService {
     // være påkrevd for Hibernate å finne en sesjon via Spring-transaksjonen
     // for å kunne laste lazy collections i objektgrafen.
     @Transactional(readOnly = true)
-    public byte[] produserUtkast(long behandlingID, BrevbestillingDto brevbestillingDto) {
-        Produserbaredokumenter produserbartDokument = brevbestillingDto.getProduserbardokument();
+    public byte[] produserUtkast(long behandlingID, BrevbestillingRequest brevbestillingRequest) {
+        Produserbaredokumenter produserbartDokument = brevbestillingRequest.getProduserbardokument();
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        Aktoersroller mottakerRolle = brevbestillingDto.getMottaker() == null ?
-            brevmottakerService.avklarMottakerRolleFraDokument(produserbartDokument) : brevbestillingDto.getMottaker();
+        Aktoersroller mottakerRolle = brevbestillingRequest.getMottaker() == null ?
+            brevmottakerService.avklarMottakerRolleFraDokument(produserbartDokument) : brevbestillingRequest.getMottaker();
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(produserbartDokument)
             .medAvsenderNavn(SubjectHandler.getInstance().getUserID())
             .medMottakerRolle(mottakerRolle)
             .medBehandling(behandling)
-            .medBegrunnelseKode(brevbestillingDto.getBegrunnelseKode())
-            .medFritekst(brevbestillingDto.getFritekst())
-            .medYtterligereInformasjon(brevbestillingDto.getYtterligereInformasjon())
+            .medBegrunnelseKode(brevbestillingRequest.getBegrunnelseKode())
+            .medFritekst(brevbestillingRequest.getFritekst())
+            .medYtterligereInformasjon(brevbestillingRequest.getYtterligereInformasjon())
             .build();
         BrevData brevData = lagBrevData(brevbestilling);
 
@@ -134,8 +134,8 @@ public class DokumentService {
         return brevDataBygger.lag(brevDataGrunnlag, brevbestilling.getAvsenderNavn());
     }
 
-    private static BrevbestillingDto lagBrevbestillingDto(DoksysBrevbestilling brevbestilling) {
-        return new BrevbestillingDto.Builder()
+    private static BrevbestillingRequest lagBrevbestillingDto(DoksysBrevbestilling brevbestilling) {
+        return new BrevbestillingRequest.Builder()
             .medMottaker(brevbestilling.getMottakerRolle())
             .medBegrunnelseKode(brevbestilling.getBegrunnelseKode())
             .medFritekst(brevbestilling.getFritekst())

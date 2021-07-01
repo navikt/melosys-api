@@ -2,7 +2,7 @@ package no.nav.melosys.domain.person;
 
 import java.time.LocalDate;
 
-public record Statsborgerskap(String land,
+public record Statsborgerskap(String landkode,
                               LocalDate bekreftelsesdato,
                               LocalDate gyldigFraOgMed,
                               LocalDate gyldigTilOgMed,
