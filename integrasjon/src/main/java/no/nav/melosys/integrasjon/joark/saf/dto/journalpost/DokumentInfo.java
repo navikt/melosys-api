@@ -1,8 +1,10 @@
 package no.nav.melosys.integrasjon.joark.saf.dto.journalpost;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 
@@ -18,13 +20,17 @@ public record DokumentInfo(
         arkivDokument.setDokumentId(dokumentInfoId);
         arkivDokument.setTittel(tittel);
         arkivDokument.setNavSkjemaID(brevkode);
-        if (logiskeVedlegg != null) {
-            logiskeVedlegg.stream().map(LogiskVedlegg::tilDomene).forEach(arkivDokument.getLogiskeVedlegg()::add);
-        }
+
+        arkivDokument.setLogiskeVedleggTitler(logiskeVedlegg
+            .stream()
+            .flatMap(Stream::ofNullable)
+            .map(LogiskVedlegg::tilDomene)
+            .collect(Collectors.toList())
+        );
 
         arkivDokument.setDokumentVarianter(dokumentvarianter
             .stream()
-            .filter(Objects::nonNull)
+            .flatMap(Stream::ofNullable)
             .map(DokumentVariant::tilDomene)
             .collect(Collectors.toList())
         );

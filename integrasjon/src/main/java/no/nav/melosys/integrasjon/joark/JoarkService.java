@@ -283,7 +283,7 @@ public class JoarkService implements JoarkFasade {
 
     private List<DokumentVariant> lagDokumentVarianter(List<DokumentInnhold> dokumentInnhold) {
         return dokumentInnhold.stream()
-            // saksbehandlerHarTilgang finnes ikke i joarkService og er derfor satt til true her
+            // saksbehandlerHarTilgang finnes ikke i journal_v3 og settes til true
             .map(d -> new DokumentVariant(DokumentVariant.VariantFormat.valueOf(d.getVariantformat().getValue()), true))
             .collect(Collectors.toList());
     }
