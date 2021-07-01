@@ -10,7 +10,7 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.Statsborgerskap;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
 import no.nav.melosys.integrasjon.pdl.dto.person.Adressebeskyttelse;
@@ -18,7 +18,8 @@ import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.mapping.NavnOversetter;
-import no.nav.melosys.service.persondata.mapping.PersondataOversetter;
+import no.nav.melosys.service.persondata.mapping.PersonMedHistorikkOversetter;
+import no.nav.melosys.service.persondata.mapping.PersonopplysningerOversetter;
 import no.nav.melosys.service.persondata.mapping.StasborgerskapOversetter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -73,13 +74,14 @@ public class PersondataService implements PersondataFasade {
 
     @Override
     public Persondata hentPerson(String ident) {
-        return PersondataOversetter.oversett(pdlConsumer.hentPerson(ident), kodeverkService);
+        return PersonopplysningerOversetter.oversett(pdlConsumer.hentPerson(ident), kodeverkService);
     }
 
+    @Override
     public PersonMedHistorikk hentPersonMedHistorikk(long behandlingID) {
         final String ident = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)
             .getFagsak().hentBruker().getAktørId();
-        return null;
+        return PersonMedHistorikkOversetter.oversett(pdlConsumer.hentPersonMedHistorikk(ident), kodeverkService);
     }
 
     @Override

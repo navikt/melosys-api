@@ -94,9 +94,6 @@ class PDLConsumerImplTest {
         assertThat(person.folkeregisteridentifikator())
             .flatExtracting(Folkeregisteridentifikator::identifikasjonsnummer)
             .containsExactly("58517918383");
-        assertThat(person.folkeregisterpersonstatus())
-            .flatExtracting(Folkeregisterpersonstatus::status)
-            .containsExactly("midlertidig");
         assertThat(person.forelderBarnRelasjon())
             .flatExtracting(ForelderBarnRelasjon::relatertPersonsIdent, ForelderBarnRelasjon::relatertPersonsRolle,
                 ForelderBarnRelasjon::minRolleForPerson)
@@ -110,13 +107,6 @@ class PDLConsumerImplTest {
         assertThat(person.statsborgerskap())
             .flatExtracting(Statsborgerskap::land)
             .containsExactly("ALB", "AIA");
-        assertThat(person.sivilstand())
-            .flatExtracting(Sivilstand::type, Sivilstand::relatertVedSivilstand, Sivilstand::gyldigFraOgMed)
-            .containsExactly(Sivilstandstype.REGISTRERT_PARTNER, "11466927750", LocalDate.parse("2021-03-02"));
-        assertThat(person.utenlandskIdentifikasjonsnummer())
-            .flatExtracting(UtenlandskIdentifikasjonsnummer::identifikasjonsnummer,
-                UtenlandskIdentifikasjonsnummer::utstederland, UtenlandskIdentifikasjonsnummer::opphoert)
-            .containsExactly("ABAVDSPDS1234", "AIA", false, "JA_ODER_NEIN", "DEU", true);
     }
 
     @Test
@@ -159,6 +149,72 @@ class PDLConsumerImplTest {
             new Statsborgerskap("AIA", LocalDate.parse("2021-05-08"), LocalDate.parse("1979-11-18"), null,
                 new Metadata("PDL", false,
                     List.of(new Endring("OPPRETT", LocalDateTime.parse("2021-05-07T10:04:52"), "PDL")))));
+    }
+
+    @Test
+    void hentPersonMedHistorikk_mottarPersonResponseUtenFeil() {
+        mockServer.enqueue(
+            new MockResponse()
+                .setBody(lastFil("mock/pdl/hentPersonHistorikk.json"))
+                .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        );
+
+        var person = pdlConsumer.hentPerson("23487505536");
+        assertThat(person.doedsfall())
+            .flatExtracting(Doedsfall::doedsdato)
+            .containsExactly(LocalDate.parse("2021-07-06"));
+        assertThat(person.foedsel())
+            .flatExtracting(Foedsel::foedselsdato)
+            .contains(LocalDate.of(1975, 8, 23));
+        assertThat(person.folkeregisteridentifikator())
+            .flatExtracting(Folkeregisteridentifikator::identifikasjonsnummer)
+            .containsExactly("23487505536");
+        assertThat(person.folkeregisterpersonstatus())
+            .flatExtracting(Folkeregisterpersonstatus::status)
+            .containsExactly("doed");
+       assertThat(person.forelderBarnRelasjon())
+            .flatExtracting(ForelderBarnRelasjon::relatertPersonsIdent, ForelderBarnRelasjon::relatertPersonsRolle,
+                ForelderBarnRelasjon::minRolleForPerson)
+            .containsExactly("01421474318",Familierelasjonsrolle.BARN, Familierelasjonsrolle.FAR);
+        assertThat(person.kjoenn())
+            .flatExtracting(Kjoenn::kjoenn)
+            .containsExactly(KjoennType.MANN);
+        assertThat(person.navn())
+            .flatExtracting(Navn::fornavn, Navn::mellomnavn, Navn::etternavn)
+            .containsExactly("ABSURD", null, "HEST");
+        assertThat(person.statsborgerskap())
+            .flatExtracting(Statsborgerskap::land)
+            .containsExactly("EST");
+        assertThat(person.sivilstand())
+            .flatExtracting(Sivilstand::type, Sivilstand::relatertVedSivilstand, Sivilstand::gyldigFraOgMed)
+            .containsExactly(Sivilstandstype.UOPPGITT, null, null,
+                Sivilstandstype.GIFT, "04507445824", LocalDate.parse("2021-07-06"));
+    }
+
+    @Test
+    void hentPersonMedHistorikk_mottarAdresserUtenFeil() {
+        mockServer.enqueue(
+            new MockResponse()
+                .setBody(lastFil("mock/pdl/hentPersonHistorikk.json"))
+                .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        );
+
+        var person = pdlConsumer.hentPerson("23487505536");
+
+        assertThat(person.bostedsadresse()).extracting(Bostedsadresse::vegadresse).contains(
+            new Vegadresse("Akkarfjordneset", "153", null, null, "9190"));
+
+        assertThat(person.kontaktadresse()).hasSize(2).flatExtracting(Kontaktadresse::gyldigFraOgMed,
+            Kontaktadresse::gyldigTilOgMed).contains(
+            LocalDateTime.parse("2020-07-06T00:00"), LocalDateTime.parse("2031-07-06T23:59:59"));
+        assertThat(person.kontaktadresse()).extracting(Kontaktadresse::postadresseIFrittFormat).contains(
+            new PostadresseIFrittFormat("POSTLINJE 1", "POSTLINJE 2", null, "9650"));
+        assertThat(person.kontaktadresse()).extracting(Kontaktadresse::utenlandskAdresseIFrittFormat).contains(
+            new UtenlandskAdresseIFrittFormat("POSTLINJE 1", "POSTLINJE 2", "POSTLINJE 3", null, null,
+                "BMU"));
+
+        assertThat(person.oppholdsadresse()).extracting(Oppholdsadresse::utenlandskAdresse).contains(
+            new UtenlandskAdresse("1KOLEJOWA 6/5, 18-500 KOLNO, CAPITAL WEST 3000", "", null, null, null, "", "ARG"));
     }
 
     private String lastFil(String filnavn) {

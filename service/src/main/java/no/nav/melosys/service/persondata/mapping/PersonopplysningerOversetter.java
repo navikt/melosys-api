@@ -9,8 +9,8 @@ import no.nav.melosys.service.persondata.mapping.adresse.BostedsadresseOversette
 import no.nav.melosys.service.persondata.mapping.adresse.KontaktadresseOversetter;
 import no.nav.melosys.service.persondata.mapping.adresse.OppholdsadresseOversetter;
 
-public final class PersondataOversetter {
-    private PersondataOversetter() {
+public final class PersonopplysningerOversetter {
+    private PersonopplysningerOversetter() {
         throw new IllegalStateException("Ikke ment å bli instantiert");
     }
 

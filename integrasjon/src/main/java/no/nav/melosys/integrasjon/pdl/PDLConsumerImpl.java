@@ -63,6 +63,12 @@ public class PDLConsumerImpl implements PDLConsumer {
 
     @Override
     @Retryable
+    public Person hentPersonMedHistorikk(String ident) {
+        return hentPersondata(HENT_PERSON_HISTORIKK_QUERY, ident, true);
+    }
+
+    @Override
+    @Retryable
     public Collection<Adressebeskyttelse> hentAdressebeskyttelser(String ident) {
         return hentPersondata(HENT_ADRESSEBESKYTTELSE_QUERY, ident, false).adressebeskyttelse();
     }
