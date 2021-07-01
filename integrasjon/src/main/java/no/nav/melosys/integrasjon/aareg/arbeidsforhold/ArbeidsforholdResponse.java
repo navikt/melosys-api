@@ -11,6 +11,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,10 +44,10 @@ public class ArbeidsforholdResponse {
         private final Map<String, Object> unknownProperties = new HashMap<>();
 
         @JsonProperty
-        String arbeidsforholdId;
+        String arbeidsforholdId; // Arbeidsforhold-id fra opplysningspliktig
 
         @JsonProperty
-        Integer navArbeidsforholdId;
+        Integer navArbeidsforholdId; // Arbeidsforhold-id i AAREG
 
         @JsonProperty
         Ansettelsesperiode ansettelsesperiode;
@@ -58,10 +59,10 @@ public class ArbeidsforholdResponse {
         Arbeidstaker arbeidstaker;
 
         @JsonProperty
-        List<Arbeidsavtaler> arbeidsavtaler;
+        List<Arbeidsavtale> arbeidsavtaler;
 
         @JsonProperty
-        List<PermisjonPermitteringer> permisjonPermitteringer;
+        List<PermisjonPermittering> permisjonPermitteringer;
 
         @JsonProperty
         List<Utenlandsopphold> utenlandsopphold;
@@ -84,6 +85,17 @@ public class ArbeidsforholdResponse {
         @JsonProperty
         List<AntallTimerForTimeloennet> antallTimerForTimeloennet;
 
+        Periode getPeriode() {
+            if (ansettelsesperiode == null) return null;
+            return ansettelsesperiode.periode;
+        }
+
+        String getOpplysningspliktigtype() {
+            if (opplysningspliktig == null) return null;
+            if (opplysningspliktig.type == null) return null;
+            return opplysningspliktig.type.toUpperCase();
+        }
+
         public Arbeidstaker getArbeidstaker() {
             return arbeidstaker;
         }
@@ -92,11 +104,12 @@ public class ArbeidsforholdResponse {
             return navArbeidsforholdId;
         }
 
-        public List<Arbeidsavtaler> getArbeidsavtaler() {
+        public List<Arbeidsavtale> getArbeidsavtaler() {
             return arbeidsavtaler;
         }
 
-        public List<PermisjonPermitteringer> getPermisjonPermitteringer() {
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        public List<PermisjonPermittering> getPermisjonPermitteringer() {
             return permisjonPermitteringer;
         }
 
@@ -128,10 +141,10 @@ public class ArbeidsforholdResponse {
 
     public static class Opplysningspliktig {
         @JsonProperty
-        String type;
+        String type; //  Organisasjon eller Person
 
         @JsonProperty
-        String organisasjonsnummer;
+        String organisasjonsnummer; // Ligger i respons fra service, men ikke i swagger doc.
     }
 
     public static class Arbeidsgiver {
@@ -177,15 +190,21 @@ public class ArbeidsforholdResponse {
         String tom;
 
         LocalDate getFom() {
+            if (fom == null) {
+                return null;
+            }
             return LocalDate.parse(fom);
         }
 
         LocalDate getTom() {
+            if (tom == null) {
+                return null;
+            }
             return LocalDate.parse(tom);
         }
     }
 
-    public static class PermisjonPermitteringer {
+    public static class PermisjonPermittering {
         @JsonProperty
         Periode periode;
 
@@ -202,7 +221,7 @@ public class ArbeidsforholdResponse {
         String varslingskode;
     }
 
-    public static class Arbeidsavtaler {
+    public static class Arbeidsavtale {
         @JsonProperty
         String type; // Type for arbeidsavtale - Forenklet, Frilanser, Maritim, Ordinaer
 

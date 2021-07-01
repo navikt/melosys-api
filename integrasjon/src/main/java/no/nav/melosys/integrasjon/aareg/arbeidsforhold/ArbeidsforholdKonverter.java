@@ -32,7 +32,7 @@ public class ArbeidsforholdKonverter {
             Arbeidsforhold dst = new Arbeidsforhold();
             dst.arbeidsforholdID = src.arbeidsforholdId;
             dst.arbeidsforholdIDnav = src.navArbeidsforholdId;
-            dst.ansettelsesPeriode = getPeriode(src.ansettelsesperiode.periode);
+            dst.ansettelsesPeriode = getPeriode(src.getPeriode());
             dst.arbeidsforholdstype = src.getType();
             dst.arbeidsavtaler = getArbeidsAvtaler(src.getArbeidsavtaler());
             dst.permisjonOgPermittering = getPermisjonPermitteringer(src.getPermisjonPermitteringer());
@@ -40,7 +40,7 @@ public class ArbeidsforholdKonverter {
             dst.arbeidsgivertype = Aktoertype.valueOf(src.arbeidsgiver.type.toUpperCase());
             dst.arbeidsgiverID = src.arbeidsgiver.organisasjonsnummer;
             dst.arbeidstakerID = src.getArbeidstaker().offentligIdent;
-            dst.opplysningspliktigtype = Aktoertype.valueOf(src.opplysningspliktig.type.toUpperCase());
+            dst.opplysningspliktigtype = Aktoertype.valueOf(src.getOpplysningspliktigtype());
             dst.opplysningspliktigID = src.opplysningspliktig.organisasjonsnummer;
             dst.arbeidsforholdInnrapportertEtterAOrdningen = src.innrapportertEtterAOrdningen;
             dst.opprettelsestidspunkt = getOffsetDateTime(src.registrert);
@@ -52,6 +52,9 @@ public class ArbeidsforholdKonverter {
     }
 
     private List<AntallTimerIPerioden> getAntallTimerForTimeloennet(List<ArbeidsforholdResponse.AntallTimerForTimeloennet> antallTimerForTimeloennet) {
+        if(antallTimerForTimeloennet == null) {
+            return List.of();
+        }
         return antallTimerForTimeloennet.stream().map(src -> {
             AntallTimerIPerioden dst = new AntallTimerIPerioden();
             dst.setAntallTimer(src.antallTimer);
@@ -66,6 +69,9 @@ public class ArbeidsforholdKonverter {
     }
 
     private OffsetDateTime getOffsetDateTime(String date) {
+        if(date == null) {
+            return OffsetDateTime.now();
+        }
         return OffsetDateTime.parse(date + String.format("+%02d:00", getOffsetFraUTCForNorgeMedDTSavings()));
     }
 
@@ -76,6 +82,9 @@ public class ArbeidsforholdKonverter {
     }
 
     private List<Utenlandsopphold> getUtenlandsopphold(List<ArbeidsforholdResponse.Utenlandsopphold> utenlandsopphold) {
+        if (utenlandsopphold == null) {
+            return List.of();
+        }
         return utenlandsopphold.stream().map(src -> {
             Utenlandsopphold dst = new Utenlandsopphold();
             dst.setLand(src.landkode);
@@ -85,7 +94,10 @@ public class ArbeidsforholdKonverter {
         }).collect(Collectors.toList());
     }
 
-    private List<PermisjonOgPermittering> getPermisjonPermitteringer(List<ArbeidsforholdResponse.PermisjonPermitteringer> permisjonPermitteringer) {
+    private List<PermisjonOgPermittering> getPermisjonPermitteringer(List<ArbeidsforholdResponse.PermisjonPermittering> permisjonPermitteringer) {
+        if (permisjonPermitteringer == null) {
+            return List.of();
+        }
         return permisjonPermitteringer.stream().map(src -> {
             PermisjonOgPermittering dst = new PermisjonOgPermittering();
             dst.setPermisjonsId(src.permisjonPermitteringId);
@@ -100,10 +112,14 @@ public class ArbeidsforholdKonverter {
     }
 
     private static Periode getPeriode(ArbeidsforholdResponse.Periode periode) {
+        if (periode == null) return null;
         return new Periode(periode.getFom(), periode.getTom());
     }
 
-    private List<Arbeidsavtale> getArbeidsAvtaler(List<ArbeidsforholdResponse.Arbeidsavtaler> arbeidsavtalerSrc) {
+    private List<Arbeidsavtale> getArbeidsAvtaler(List<ArbeidsforholdResponse.Arbeidsavtale> arbeidsavtalerSrc) {
+        if (arbeidsavtalerSrc == null) {
+            return List.of();
+        }
         return arbeidsavtalerSrc.stream().map(src -> {
             Arbeidsavtale dst = new Arbeidsavtale();
             dst.yrke = new Yrke(src.yrke);
