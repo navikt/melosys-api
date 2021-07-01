@@ -92,9 +92,8 @@ class PDLConsumerImplTest {
             .flatExtracting(Foedsel::foedselsdato)
             .containsExactly(LocalDate.of(1979, 11, 18));
         assertThat(person.folkeregisteridentifikator())
-            .flatExtracting(Folkeregisteridentifikator::identifikasjonsnummer, Folkeregisteridentifikator::type,
-                Folkeregisteridentifikator::status)
-            .containsExactly("58517918383", "DNR", "I_BRUK");
+            .flatExtracting(Folkeregisteridentifikator::identifikasjonsnummer)
+            .containsExactly("58517918383");
         assertThat(person.folkeregisterpersonstatus())
             .flatExtracting(Folkeregisterpersonstatus::status)
             .containsExactly("midlertidig");

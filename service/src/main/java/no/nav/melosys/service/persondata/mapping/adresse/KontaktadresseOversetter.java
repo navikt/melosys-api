@@ -1,4 +1,4 @@
-package no.nav.melosys.service.persondata.adresse;
+package no.nav.melosys.service.persondata.mapping.adresse;
 
 import no.nav.melosys.domain.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
@@ -12,7 +12,7 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 
 import static no.nav.melosys.domain.FellesKodeverk.POSTNUMMER;
 
-public class KontaktadresseOversetter {
+public final class KontaktadresseOversetter {
     private KontaktadresseOversetter() {
         throw new IllegalStateException("Ikke ment å bli instantiert");
     }

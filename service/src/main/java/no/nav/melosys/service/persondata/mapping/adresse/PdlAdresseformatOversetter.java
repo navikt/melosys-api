@@ -1,4 +1,4 @@
-package no.nav.melosys.service.persondata.adresse;
+package no.nav.melosys.service.persondata.mapping.adresse;
 
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -10,7 +10,7 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 
 import static no.nav.melosys.domain.FellesKodeverk.POSTNUMMER;
 
-class PdlAdresseformatOversetter {
+final class PdlAdresseformatOversetter {
     private PdlAdresseformatOversetter() {
         throw new IllegalStateException("Ikke ment å bli instantiert");
     }

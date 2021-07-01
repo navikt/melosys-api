@@ -6,6 +6,9 @@ query($ident: ID!) {
   hentPerson(ident: $ident) {
     adressebeskyttelse {
       gradering
+      metadata {
+        master
+      }
     }
     bostedsadresse {
       gyldigFraOgMed
@@ -48,6 +51,13 @@ query($ident: ID!) {
     }
     doedsfall {
       doedsdato
+      metadata {
+        master
+        endringer {
+          registrert
+          type
+        }
+      }
     }
     foedsel {
       foedselsdato
@@ -64,8 +74,13 @@ query($ident: ID!) {
     }
     folkeregisteridentifikator {
       identifikasjonsnummer
-      type
-      status
+      metadata {
+        master
+        endringer {
+          registrert
+          type
+        }
+      }
     }
     folkeregisterpersonstatus {
       status
