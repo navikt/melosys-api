@@ -22,6 +22,8 @@ public class KodeOppslagFraKodeverk implements KodeOppslag {
         return getKodeverk(kodeverk).getTerm(kode);
     }
 
+    // Diskutert med Andreas og det blir en egen PR på en bedre løsning her
+    // Bør bli en felles løsning som også kan brukes av KodeverkService så den ikke gjør cahing selv
     @Cacheable("kodeverk")
     public KodeHolder getKodeverk(String kodeverkName) {
         Kodeverk Kodeverk = kodeverkRegister.hentKodeverk(kodeverkName);
