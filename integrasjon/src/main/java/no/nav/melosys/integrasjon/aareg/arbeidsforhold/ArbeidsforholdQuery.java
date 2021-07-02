@@ -6,25 +6,31 @@ import java.util.Optional;
 public class ArbeidsforholdQuery {
     // Filter for regelverk (default = ALLE)
     // Available values : ALLE, A_ORDNINGEN, FOER_A_ORDNINGEN
-    private String regelverk;
+    private final String regelverk;
 
     // Filter for regelverk (default = ALLE)
     // Available values : forenkletOppgjoersordning, frilanserOppdragstakerHonorarPersonerMm, maritimtArbeidsforhold, ordinaertArbeidsforhold
-    private String arbeidsforholdType;
+    private final String arbeidsforholdType;
 
     // Filter for fra-og-med-dato for ansettelsesperiode, format (ISO-8601): yyyy-MM-dd
-    private String ansettelsesperiodeFom;
+    private final String ansettelsesperiodeFom;
 
     // Filter for til-og-med-dato for ansettelsesperiode, format (ISO-8601): yyyy-MM-dd
-    private String ansettelsesperiodeTom;
+    private final String ansettelsesperiodeTom;
 
-    // Skal historikk inkluderes i respons? (default = false)
-    private Boolean historikk;
-
-    // Skal sporingsinformasjon inkluderes i respons? (default = true)
-    private Boolean sporingsinformasjon;
-
-    private ArbeidsforholdQuery() {
+    private ArbeidsforholdQuery(Builder builder) {
+        this.regelverk = builder.regelverk.toString();
+        this.arbeidsforholdType = builder.arbeidsforholdType.toString();
+        if (builder.ansettelsesperiodeFom != null) {
+            this.ansettelsesperiodeFom = builder.ansettelsesperiodeFom.toString();
+        } else {
+            this.ansettelsesperiodeFom = null;
+        }
+        if (builder.ansettelsesperiodeTom != null) {
+            this.ansettelsesperiodeTom = builder.ansettelsesperiodeTom.toString();
+        } else {
+            this.ansettelsesperiodeTom = null;
+        }
     }
 
     public String getRegelverk() {
@@ -41,14 +47,6 @@ public class ArbeidsforholdQuery {
 
     public Optional<String> getAnsettelsesperiodeTom() {
         return Optional.ofNullable(ansettelsesperiodeTom);
-    }
-
-    public Boolean getHistorikk() {
-        return historikk;
-    }
-
-    public Boolean getSporingsinformasjon() {
-        return sporingsinformasjon;
     }
 
     public enum Regelverk {
@@ -74,13 +72,11 @@ public class ArbeidsforholdQuery {
         }
     }
 
-    static public class Builder {
+    public static class Builder {
         private Regelverk regelverk = Regelverk.ALLE; // set til default
         private ArbeidsforholdType arbeidsforholdType = ArbeidsforholdType.ALLE;
         private LocalDate ansettelsesperiodeFom;
         private LocalDate ansettelsesperiodeTom;
-        private Boolean historikk;
-        private Boolean sporingsinformasjon;
 
         /**
          * @param regelverk Filter for regelverk (default = ALLE)
@@ -121,16 +117,7 @@ public class ArbeidsforholdQuery {
         }
 
         public ArbeidsforholdQuery build() {
-            ArbeidsforholdQuery arbeidsforholdQuery = new ArbeidsforholdQuery();
-            arbeidsforholdQuery.regelverk = regelverk.toString();
-            arbeidsforholdQuery.arbeidsforholdType = arbeidsforholdType.toString();
-            if (ansettelsesperiodeFom != null) {
-                arbeidsforholdQuery.ansettelsesperiodeFom = ansettelsesperiodeFom.toString();
-            }
-            if (ansettelsesperiodeTom != null) {
-                arbeidsforholdQuery.ansettelsesperiodeTom = ansettelsesperiodeTom.toString();
-            }
-            return arbeidsforholdQuery;
+            return new ArbeidsforholdQuery(this);
         }
     }
 }
