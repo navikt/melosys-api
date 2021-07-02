@@ -3,20 +3,15 @@ package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 import no.nav.melosys.integrasjon.kodeverk.Kode;
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class KodeOppslagFraKodeverk implements KodeOppslag {
     private final KodeverkRegister kodeverkRegister;
-
-    // TODO: Discus this solution
-    //  We could use Guava Cache to set time to live
-    //  Or reload each morning as KodeverkService does.
-    ConcurrentHashMap<String, KodeHolder> map = new ConcurrentHashMap<>();
 
     public KodeOppslagFraKodeverk(KodeverkRegister kodeverkRegister) {
         this.kodeverkRegister = kodeverkRegister;
@@ -27,14 +22,10 @@ public class KodeOppslagFraKodeverk implements KodeOppslag {
         return getKodeverk(kodeverk).getTerm(kode);
     }
 
-    private KodeHolder getKodeverk(String kodeverkName) {
-        if (map.contains(kodeverkName)) {
-            return map.get(kodeverkName);
-        }
+    @Cacheable("kodeverk")
+    public KodeHolder getKodeverk(String kodeverkName) {
         Kodeverk Kodeverk = kodeverkRegister.hentKodeverk(kodeverkName);
-        KodeHolder kodeHolder = new KodeHolder(Kodeverk);
-        map.put(kodeverkName, kodeHolder);
-        return kodeHolder;
+        return new KodeHolder(Kodeverk);
     }
 
     private static class KodeHolder {
