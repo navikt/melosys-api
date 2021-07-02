@@ -3,12 +3,14 @@ package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 import no.nav.melosys.integrasjon.kodeverk.Kode;
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class KodeOppslagFraKodeVerk implements KodeOppslag {
+@Component
+public class KodeOppslagFraKodeverk implements KodeOppslag {
     private final KodeverkRegister kodeverkRegister;
 
     // TODO: Discus this solution
@@ -16,14 +18,14 @@ public class KodeOppslagFraKodeVerk implements KodeOppslag {
     //  Or reload each morning as KodeverkService does.
     ConcurrentHashMap<String, KodeHolder> map = new ConcurrentHashMap<>();
 
-    public KodeOppslagFraKodeVerk(KodeverkRegister kodeverkRegister) {
+    public KodeOppslagFraKodeverk(KodeverkRegister kodeverkRegister) {
         this.kodeverkRegister = kodeverkRegister;
     }
 
     @Override
     public String getTerm(String kodeverk, String kode) {
         return getKodeverk(kodeverk).getTerm(kode);
-}
+    }
 
     private KodeHolder getKodeverk(String kodeverkName) {
         if (map.contains(kodeverkName)) {
