@@ -23,9 +23,10 @@ public class ArbeidsforholdContextExchangeFilter implements ExchangeFilterFuncti
     @Nonnull
     public Mono<ClientResponse> filter(@Nonnull final ClientRequest clientRequest,
                                        @Nonnull final ExchangeFunction exchangeFunction) {
+        String token = restStsClient.bearerToken();
         ClientRequest clientRequestWithBearerAuth = ClientRequest.from(clientRequest)
-            .header(HttpHeaders.AUTHORIZATION, restStsClient.bearerToken())
-            .header("Nav-Consumer-Token", restStsClient.bearerToken())
+            .header(HttpHeaders.AUTHORIZATION, token)
+            .header("Nav-Consumer-Token", token)
             .build();
         return exchangeFunction.exchange(clientRequestWithBearerAuth);
     }
