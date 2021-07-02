@@ -14,7 +14,6 @@ import org.apache.kafka.clients.producer.MockProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
@@ -22,7 +21,6 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Disabled // FIXME
 class UtstedtA1ProducerTest {
 
     private UtstedtA1Producer utstedtA1Producer;
@@ -59,7 +57,7 @@ class UtstedtA1ProducerTest {
     private static class MockA1UtstedtMeldingProducerFactory implements ProducerFactory<String, UtstedtA1Melding> {
         @Override
         public Producer<String, UtstedtA1Melding> createProducer() {
-            return new MockProducer<>(true, new StringSerializer(), new JsonSerializer<>(new ObjectMapper()));
+            return new MockProducer<>(true, new StringSerializer(), new JsonSerializer<>(OBJECT_MAPPER));
         }
 
         @Override
