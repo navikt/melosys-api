@@ -232,7 +232,7 @@ public class AaregServiceTest {
           "arbeidsforholdIDnav" : 123456,
           "ansettelsesPeriode" : {
             "fom" : [ 2014, 7, 1 ],
-            "tom" : [ 2015, 12, 31 ]
+            "tom" : null
           },
           "arbeidsforholdstype" : "ordinaertArbeidsforhold",
           "arbeidsavtaler" : [ {
@@ -256,7 +256,7 @@ public class AaregServiceTest {
             "skipsregister" : null,
             "skipstype" : null,
             "maritimArbeidsavtale" : false,
-            "beregnetStillingsprosent" : 0.7,
+            "beregnetStillingsprosent" : null,
             "antallTimerGammeltAa" : null,
             "fartsomraade" : null
           } ],
@@ -302,8 +302,7 @@ public class AaregServiceTest {
                 "tom": "2015-12-06T19:45:04"
               },
               "periode": {
-                "fom": "2014-07-01",
-                "tom": "2015-12-31"
+                "fom": "2014-07-01"
               },
               "sluttaarsak": "arbeidstakerHarSagtOppSelv",
               "sporingsinformasjon": {

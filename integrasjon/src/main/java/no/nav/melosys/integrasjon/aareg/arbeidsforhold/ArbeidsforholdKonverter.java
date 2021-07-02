@@ -37,11 +37,11 @@ public class ArbeidsforholdKonverter {
             dst.arbeidsavtaler = getArbeidsAvtaler(src.getArbeidsavtaler());
             dst.permisjonOgPermittering = getPermisjonPermitteringer(src.getPermisjonPermitteringer());
             dst.utenlandsopphold = getUtenlandsopphold(src.utenlandsopphold);
-            dst.arbeidsgivertype = Aktoertype.valueOf(src.arbeidsgiver.type.toUpperCase());
-            dst.arbeidsgiverID = src.arbeidsgiver.organisasjonsnummer;
-            dst.arbeidstakerID = src.getArbeidstaker().offentligIdent;
+            dst.arbeidsgivertype = Aktoertype.valueOf(src.arbeidsgiver.type().toUpperCase());
+            dst.arbeidsgiverID = src.arbeidsgiver.organisasjonsnummer();
+            dst.arbeidstakerID = src.getArbeidstaker().offentligIdent();
             dst.opplysningspliktigtype = Aktoertype.valueOf(src.getOpplysningspliktigtype());
-            dst.opplysningspliktigID = src.opplysningspliktig.organisasjonsnummer;
+            dst.opplysningspliktigID = src.opplysningspliktig.organisasjonsnummer();
             dst.arbeidsforholdInnrapportertEtterAOrdningen = src.innrapportertEtterAOrdningen;
             dst.opprettelsestidspunkt = getOffsetDateTime(src.registrert);
             dst.sistBekreftet = getOffsetDateTime(src.sistBekreftet);
@@ -57,9 +57,9 @@ public class ArbeidsforholdKonverter {
         }
         return antallTimerForTimeloennet.stream().map(src -> {
             AntallTimerIPerioden dst = new AntallTimerIPerioden();
-            dst.setAntallTimer(src.antallTimer);
-            dst.setPeriode(getPeriode(src.periode));
-            dst.setRapporteringsperiode(getRapporteringsperiode(src.rapporteringsperiode));
+            dst.setAntallTimer(src.antallTimer());
+            dst.setPeriode(getPeriode(src.periode()));
+            dst.setRapporteringsperiode(getRapporteringsperiode(src.rapporteringsperiode()));
             return dst;
         }).collect(Collectors.toList());
     }
@@ -87,9 +87,9 @@ public class ArbeidsforholdKonverter {
         }
         return utenlandsopphold.stream().map(src -> {
             Utenlandsopphold dst = new Utenlandsopphold();
-            dst.setLand(src.landkode);
-            dst.setPeriode(getPeriode(src.periode));
-            dst.setRapporteringsperiode(YearMonth.parse(src.rapporteringsperiode));
+            dst.setLand(src.landkode());
+            dst.setPeriode(getPeriode(src.periode()));
+            dst.setRapporteringsperiode(YearMonth.parse(src.rapporteringsperiode()));
             return dst;
         }).collect(Collectors.toList());
     }
@@ -100,20 +100,20 @@ public class ArbeidsforholdKonverter {
         }
         return permisjonPermitteringer.stream().map(src -> {
             PermisjonOgPermittering dst = new PermisjonOgPermittering();
-            dst.setPermisjonsId(src.permisjonPermitteringId);
-            dst.setPermisjonsPeriode(getPeriode(src.periode));
-            dst.setPermisjonsprosent(src.prosent);
+            dst.setPermisjonsId(src.permisjonPermitteringId());
+            dst.setPermisjonsPeriode(getPeriode(src.periode()));
+            dst.setPermisjonsprosent(src.prosent());
 
             // Permisjon-/permitteringstype (kodeverk: PermisjonsOgPermitteringsBeskrivelse)
             // Finnes det en Enum med "PermisjonsOgPermitteringsBeskrivelse" ?
-            dst.setPermisjonOgPermittering(getTermFraKode("PermisjonsOgPermitteringsBeskrivelse", src.type));
+            dst.setPermisjonOgPermittering(getTermFraKode("PermisjonsOgPermitteringsBeskrivelse", src.type()));
             return dst;
         }).collect(Collectors.toList());
     }
 
     private static Periode getPeriode(ArbeidsforholdResponse.Periode periode) {
         if (periode == null) return null;
-        return new Periode(periode.getFom(), periode.getTom());
+        return new Periode(periode.fom(), periode.tom());
     }
 
     private List<Arbeidsavtale> getArbeidsAvtaler(List<ArbeidsforholdResponse.Arbeidsavtale> arbeidsavtalerSrc) {
@@ -122,27 +122,23 @@ public class ArbeidsforholdKonverter {
         }
         return arbeidsavtalerSrc.stream().map(src -> {
             Arbeidsavtale dst = new Arbeidsavtale();
-            dst.yrke = new Yrke(src.yrke);
+            dst.yrke = new Yrke(src.yrke());
             // TODO: avklar om det finner en Enum klasse for Kodeverksoversikt navn
-            dst.yrke.setTerm(getTermFraKode("Yrker", src.yrke));
+            dst.yrke.setTerm(getTermFraKode("Yrker", src.yrke()));
 
-            dst.beregnetAntallTimerPrUke = src.beregnetAntallTimerPrUke;
+            dst.beregnetAntallTimerPrUke = src.beregnetAntallTimerPrUke();
             dst.arbeidstidsordning = new Arbeidstidsordning();
-            dst.arbeidstidsordning.setKode(src.arbeidstidsordning);
+            dst.arbeidstidsordning.setKode(src.arbeidstidsordning());
 
             // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/Avl%C3%B8nningstyper
             dst.avloenningstype = ""; // Finnes ikke i nytt rest api
 
-            dst.gyldighetsperiode = getPeriode(src.gyldighetsperiode);
-            dst.beregnetAntallTimerPrUke = src.beregnetAntallTimerPrUke;
-            dst.stillingsprosent = src.stillingsprosent;
-            // Finner ikke denne i rest api men kan regnes ut
-            // TODO:  Spør fag om det brukes til noe
-            dst.beregnetStillingsprosent = src.calculateBergnetStillingsprosent();
-            dst.sisteLoennsendringsdato = src.getSisteLoennsendringsDato();
-            dst.endringsdatoStillingsprosent = src.getSistStillingsendringDato();
-            dst.avtaltArbeidstimerPerUke = src.antallTimerPrUke;
-
+            dst.gyldighetsperiode = getPeriode(src.gyldighetsperiode());
+            dst.beregnetAntallTimerPrUke = src.beregnetAntallTimerPrUke();
+            dst.stillingsprosent = src.stillingsprosent();
+            dst.sisteLoennsendringsdato = src.sistLoennsendring();
+            dst.endringsdatoStillingsprosent = src.sistStillingsendring();
+            dst.avtaltArbeidstimerPerUke = src.antallTimerPrUke();
 
             // Ser disse ikke er med i ny aareg rest api
             dst.maritimArbeidsavtale = false;

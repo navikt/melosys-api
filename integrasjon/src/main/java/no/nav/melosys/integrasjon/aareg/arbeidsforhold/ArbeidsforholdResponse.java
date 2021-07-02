@@ -100,10 +100,6 @@ public class ArbeidsforholdResponse {
             return arbeidstaker;
         }
 
-        public Integer getNavArbeidsforholdId() {
-            return navArbeidsforholdId;
-        }
-
         public List<Arbeidsavtale> getArbeidsavtaler() {
             return arbeidsavtaler;
         }
@@ -128,150 +124,54 @@ public class ArbeidsforholdResponse {
         }
     }
 
-    public static class AntallTimerForTimeloennet {
-        @JsonProperty
-        BigDecimal antallTimer;
-
-        @JsonProperty
-        Periode periode;
-
-        @JsonProperty
-        String rapporteringsperiode;
+    public static record AntallTimerForTimeloennet(
+        BigDecimal antallTimer,
+        Periode periode,
+        String rapporteringsperiode) {
     }
 
-    public static class Opplysningspliktig {
-        @JsonProperty
-        String type; //  Organisasjon eller Person
-
-        @JsonProperty
-        String organisasjonsnummer; // Ligger i respons fra service, men ikke i swagger doc.
+    public static record Opplysningspliktig(
+        String type, //  Organisasjon eller Person
+        String organisasjonsnummer // Ligger i respons fra service, men ikke i swagger doc.
+    ) {
     }
 
-    public static class Arbeidsgiver {
-        @JsonProperty
-        String type;
-
-        @JsonProperty
-        String organisasjonsnummer;
+    public static record Arbeidsgiver(
+        String type,
+        String organisasjonsnummer) {
     }
 
-    public static class Utenlandsopphold {
-        @JsonProperty
-        String landkode;
-
-        @JsonProperty
-        Periode periode;
-
-        @JsonProperty
-        String rapporteringsperiode;
+    public static record Utenlandsopphold(String landkode, Periode periode, String rapporteringsperiode) {
     }
 
-    public static class Ansettelsesperiode {
-        @JsonProperty
-        Periode periode;
+    public static record Ansettelsesperiode(Periode periode) {
     }
 
-    public static class Arbeidstaker {
-        @JsonProperty
-        String type;
-
-        @JsonProperty
-        String offentligIdent;
-
-        @JsonProperty
-        String aktoerId;
+    public static record Arbeidstaker(String type, String offentligIdent, String aktoerId) {
     }
 
-    public static class Periode {
-        @JsonProperty
-        String fom;
-
-        @JsonProperty
-        String tom;
-
-        LocalDate getFom() {
-            if (fom == null) {
-                return null;
-            }
-            return LocalDate.parse(fom);
-        }
-
-        LocalDate getTom() {
-            if (tom == null) {
-                return null;
-            }
-            return LocalDate.parse(tom);
-        }
+    public static record Periode(LocalDate fom, LocalDate tom) {
     }
 
-    public static class PermisjonPermittering {
-        @JsonProperty
-        Periode periode;
-
-        @JsonProperty
-        String permisjonPermitteringId;
-
-        @JsonProperty
-        BigDecimal prosent;
-
-        @JsonProperty
-        String type; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/PermisjonsOgPermitteringsBeskrivelse
-
-        @JsonProperty
-        String varslingskode;
+    public static record PermisjonPermittering(
+        Periode periode,
+        String permisjonPermitteringId,
+        BigDecimal prosent,
+        String type, // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/PermisjonsOgPermitteringsBeskrivelse
+        String varslingskode
+    ) {
     }
 
-    public static class Arbeidsavtale {
-        @JsonProperty
-        String type; // Type for arbeidsavtale - Forenklet, Frilanser, Maritim, Ordinaer
-
-        @JsonProperty
-        String arbeidstidsordning; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/Arbeidstidsordninger
-
-        @JsonProperty
-        String yrke; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/Yrker
-
-        @JsonProperty
-        String ansettelsesform; // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/AnsettelsesformAareg
-
-        @JsonProperty
-        BigDecimal stillingsprosent;
-
-        @JsonProperty
-        BigDecimal beregnetAntallTimerPrUke;
-
-        @JsonProperty
-        Periode gyldighetsperiode;
-
-        @JsonProperty
-        String sistStillingsendring;
-
-        @JsonProperty
-        String sistLoennsendring;
-
-        @JsonProperty
-        BigDecimal antallTimerPrUke;
-
-        BigDecimal calculateBergnetStillingsprosent() {
-            if (beregnetAntallTimerPrUke == null) return null;
-            return beregnetAntallTimerPrUke.divide(antallTimerPrUke, RoundingMode.HALF_EVEN);
-        }
-
-        LocalDate getSisteLoennsendringsDato() {
-            return parseLocalDate(sistLoennsendring);
-        }
-
-        LocalDate getSistStillingsendringDato() {
-            return parseLocalDate(sistStillingsendring);
-        }
-
-        private LocalDate parseLocalDate(String date) {
-            try {
-                if (date == null) return null;
-                return LocalDate.parse(date);
-            } catch (DateTimeParseException e) {
-                return null;
-            }
-        }
-    }
+    public static record Arbeidsavtale (
+        String type, // Type for arbeidsavtale - Forenklet, Frilanser, Maritim, Ordinaer
+        String arbeidstidsordning, // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/Arbeidstidsordninger
+        String yrke, // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/Yrker
+        String ansettelsesform, // https://kodeverk-web.dev.adeo.no/kodeverksoversikt/kodeverk/AnsettelsesformAareg
+        BigDecimal stillingsprosent,
+        BigDecimal beregnetAntallTimerPrUke,
+        Periode gyldighetsperiode,
+        LocalDate sistStillingsendring,
+        LocalDate sistLoennsendring,
+        BigDecimal antallTimerPrUke
+    ) {}
 }
