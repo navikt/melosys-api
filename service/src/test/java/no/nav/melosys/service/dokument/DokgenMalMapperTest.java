@@ -65,12 +65,15 @@ class DokgenMalMapperTest {
     @Mock
     private PersondataFasade mockPersondataFasade;
 
+    @Mock
+    private InnvilgelseFtrlMapper mockInnvilgelseFtrlMapper;
+
     private DokgenMalMapper dokgenMalMapper;
 
     @BeforeEach
     void init() {
         dokgenMalMapper = new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService,
-            mockEregFasade, mockPersondataFasade, medlemAvFolketrygdenService);
+            mockEregFasade, mockPersondataFasade, mockInnvilgelseFtrlMapper);
     }
 
     @Test

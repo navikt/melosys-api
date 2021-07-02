@@ -54,6 +54,8 @@ public class BrevbestillingDto {
             .medBegrunnelseFritekst(this.getBegrunnelseFritekst())
             .medKontaktpersonNavn(this.getKontaktpersonNavn())
             .medKopiMottakere(this.getKopiMottakere())
+            .medEktefelleFritekst(this.getEktefelleFritekst())
+            .medBarnFritekst(this.getBarnFritekst())
             .medFritekst(this.getFritekst())
             .medBegrunnelseKode(this.getBegrunnelseKode())
             .medYtterligereInformasjon(this.getYtterligereInformasjon());

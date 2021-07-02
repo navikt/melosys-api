@@ -2,21 +2,17 @@ package no.nav.melosys.service.dokument;
 
 import java.time.Instant;
 
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -34,18 +30,19 @@ public class DokgenMalMapper {
     private final BehandlingsresultatService behandlingsresultatService;
     private final EregFasade eregFasade;
     private final PersondataFasade persondataFasade;
-    private final MedlemAvFolketrygdenService medlemAvFolketrygdenService;
+    private final InnvilgelseFtrlMapper innvilgelseFtrlMapper;
 
     @Autowired
     public DokgenMalMapper(KodeverkService kodeverkService,
                            BehandlingsresultatService behandlingsresultatService,
                            @Qualifier("system") EregFasade eregFasade,
-                           @Qualifier("system") PersondataFasade persondataFasade, MedlemAvFolketrygdenService medlemAvFolketrygdenService) {
+                           @Qualifier("system") PersondataFasade persondataFasade,
+                           InnvilgelseFtrlMapper innvilgelseFtrlMapper) {
         this.kodeverkService = kodeverkService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.eregFasade = eregFasade;
         this.persondataFasade = persondataFasade;
-        this.medlemAvFolketrygdenService = medlemAvFolketrygdenService;
+        this.innvilgelseFtrlMapper = innvilgelseFtrlMapper;
     }
 
     public DokgenDto mapBehandling(DokgenBrevbestilling brevbestilling) {
@@ -66,7 +63,7 @@ public class DokgenMalMapper {
                 .medVedtaksdato(hentVedtaksdato(brevbestilling.getBehandling().getId()))
                 .medFullmektigNavn(hentFullmektigNavn(brevbestilling.getBehandling().getFagsak()))
                 .build());
-            case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> InnvilgelseFtrl.av((InnvilgelseBrevbestilling) brevbestilling, hentMedlemAvFolketrygden(brevbestilling.getBehandlingId()));
+            case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> innvilgelseFtrlMapper.map((InnvilgelseBrevbestilling) brevbestilling);
 
             default -> throw new FunksjonellException(format("ProduserbartDokument %s er ikke støttet av melosys-dokgen", brevbestilling.getProduserbartdokument()));
         };
@@ -103,9 +100,5 @@ public class DokgenMalMapper {
             }
         }
         return landnavn.equals("UKJENT") ? "" : landnavn;
-    }
-
-    private MedlemAvFolketrygden hentMedlemAvFolketrygden(long behandlingId) {
-        return medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingId);
     }
 }

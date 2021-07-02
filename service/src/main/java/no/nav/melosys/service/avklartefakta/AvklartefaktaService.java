@@ -11,10 +11,9 @@ import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
-import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
-import no.nav.melosys.domain.person.familie.IkkeOmfattetBarn;
-import no.nav.melosys.domain.person.familie.OmfattetFamilie;
+import no.nav.melosys.domain.person.familie.*;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.IkkeOmfattetEktefelle;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.avklartefakta.Avklartefakta.VALGT_FAKTA;
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_LOVVALG_BARN;
+import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER;
 
 @Service
 public class AvklartefaktaService {
@@ -139,6 +139,21 @@ public class AvklartefaktaService {
             }
         }
         return new AvklarteMedfolgendeBarn(barnOmfattetAvNorskTrygd, barnIkkeOmfattetAvNorskTrygd);
+    }
+
+    public AvklarteMedfolgendeFamilie hentAvklarteMedfølgendeEktefelle(long behandlingId) {
+        Set<OmfattetFamilie> omfattetFamilie = new HashSet<>();
+        Set<IkkeOmfattetFamilie> ikkeOmfattetFamilie = new HashSet<>();
+        for (Avklartefakta avklartefakta : avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingId, VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER)) {
+            if (avklartefakta.getFakta().equals(VALGT_FAKTA)) {
+                omfattetFamilie.add(new OmfattetFamilie(avklartefakta.getSubjekt()));
+            } else {
+                String begrunnelse = avklartefakta.getRegistreringer().iterator().next().getBegrunnelseKode();
+                ikkeOmfattetFamilie.add(
+                    new IkkeOmfattetFamilie(avklartefakta.getSubjekt(), begrunnelse, avklartefakta.getBegrunnelseFritekst()));
+            }
+        }
+        return new AvklarteMedfolgendeFamilie(omfattetFamilie, ikkeOmfattetFamilie);
     }
 
     private Map<String, List<Avklartefakta>> grupperForSubjekt(Collection<Avklartefakta> avklartefakta) {
