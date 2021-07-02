@@ -78,7 +78,7 @@ public class AaregService implements AaregFasade {
 
         Saksopplysning saksopplysning = arbeidsforholdKonverter.createSaksopplysning();
         saksopplysning.leggTilKildesystemOgMottattDokument(
-            SaksopplysningKildesystem.AAREG, response.getJsonDocument());
+            SaksopplysningKildesystem.AAREG, response.tilSaksopplysning());
         saksopplysning.setType(SaksopplysningType.ARBFORH);
         saksopplysning.setVersjon(ARBEIDSFORHOLD_REST_VERSJON);
 

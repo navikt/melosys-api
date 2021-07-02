@@ -21,15 +21,15 @@ import no.nav.melosys.exception.TekniskException;
 public class ArbeidsforholdResponse {
     private final List<Arbeidsforhold> arbeidsforhold;
 
-    public ArbeidsforholdResponse(Arbeidsforhold[] arbeidsforhold) {
-        this.arbeidsforhold = Arrays.asList(arbeidsforhold);
+    public ArbeidsforholdResponse(List<Arbeidsforhold> arbeidsforhold) {
+        this.arbeidsforhold = arbeidsforhold;
     }
 
     public List<Arbeidsforhold> getArbeidsforhold() {
         return arbeidsforhold;
     }
 
-    public String getJsonDocument() {
+    public String tilSaksopplysning() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         try {

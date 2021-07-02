@@ -1,8 +1,11 @@
 package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
+import java.util.List;
+
 import no.nav.melosys.integrasjon.felles.RestConsumer;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.core.ParameterizedTypeReference;
 
 public class ArbeidsforholdRestConsumer implements RestConsumer {
 
@@ -16,7 +19,7 @@ public class ArbeidsforholdRestConsumer implements RestConsumer {
         return new ArbeidsforholdResponse(hentArbeidsforhold(fnr, arbeidsforholdQuery));
     }
 
-    private ArbeidsforholdResponse.Arbeidsforhold[] hentArbeidsforhold(String fnr, ArbeidsforholdQuery arbeidsforholdQuery) {
+    private List<ArbeidsforholdResponse.Arbeidsforhold> hentArbeidsforhold(String fnr, ArbeidsforholdQuery arbeidsforholdQuery) {
         return webClient.get().uri("", uriBuilder ->
             uriBuilder
                 .queryParam("regelverk", arbeidsforholdQuery.getRegelverk())
@@ -28,7 +31,7 @@ public class ArbeidsforholdRestConsumer implements RestConsumer {
             .header("Nav-Personident", fnr)
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
-            .bodyToMono(ArbeidsforholdResponse.Arbeidsforhold[].class)
+            .bodyToMono(new ParameterizedTypeReference<List<ArbeidsforholdResponse.Arbeidsforhold>>(){})
             .block();
     }
 }
