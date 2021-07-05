@@ -1,5 +1,9 @@
 package no.nav.melosys.integrasjon.aareg;
 
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
@@ -15,7 +19,10 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.*;
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumer;
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdMock;
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer;
+import no.nav.melosys.integrasjon.aareg.arbeidsforhold.KodeOppslag;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.HentArbeidsforholdHistorikkSikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.HentArbeidsforholdHistorikkRequest;
 import org.assertj.core.api.Assertions;
@@ -23,10 +30,6 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
@@ -37,7 +40,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class AaregServiceTest {
+class AaregServiceTest {
     private static final Long SIKKERHETSBEGRENSET_ID = 1L;
     private static final String NAV_PERSONIDENT = "12345678990";
 
@@ -49,7 +52,7 @@ public class AaregServiceTest {
     private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     @BeforeAll
-    public void setupBeforeAll() {
+    void setupBeforeAll() {
         marshaller = JaxbConfig.jaxb2Marshaller();
         objectMapper.registerModule(new JavaTimeModule());
         wireMockServer = new WireMockServer(wireMockConfig().dynamicPort());
@@ -63,17 +66,17 @@ public class AaregServiceTest {
     }
 
     @AfterAll
-    public void tearDown() {
+    void tearDown() {
         wireMockServer.stop();
     }
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         fakeUnleash.disable("melosys.aareg.rest");
     }
 
     @Test
-    public void getArbeidsforholdDokumentFromRestService() throws JsonProcessingException {
+    void getArbeidsforholdDokumentFromRestService() throws JsonProcessingException {
         wireMockServer.stubFor(get(urlPathEqualTo("/"))
             .withHeader("Nav-Personident", equalTo(NAV_PERSONIDENT))
             .withQueryParam("regelverk", equalTo("A_ORDNINGEN"))
@@ -105,36 +108,36 @@ public class AaregServiceTest {
             }
         });
         String result = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(arbeidsforhold);
-        Assertions.assertThat(result).isEqualTo(expectedRestResult);
+        Assertions.assertThat(result).isEqualToIgnoringNewLines(expectedRestResult);
     }
 
     @Test
-    public void getArbeidsforholdDokument() throws Exception {
+    void getArbeidsforholdDokument() {
         Saksopplysning saksopplysning = aaregService.finnArbeidsforholdPrArbeidstaker("99999999991", null, null);
         ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) saksopplysning.getDokument();
-        assertThat(arbeidsforholdDokument.getArbeidsforhold().size()).isGreaterThan(0);
+        assertThat(arbeidsforholdDokument.getArbeidsforhold().size()).isPositive();
     }
 
     @Test
-    public void getArbeidsforholdDokument_CheckJsonResult() throws Exception {
+    void getArbeidsforholdDokument_CheckJsonResult() throws Exception {
         Saksopplysning saksopplysning = aaregService.finnArbeidsforholdPrArbeidstaker("88888888885", null, null);
         ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) saksopplysning.getDokument();
 
         String result = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(arbeidsforholdDokument);
-        assertThat(result).isEqualTo(expectedSoapApiResult);
+        assertThat(result).isEqualToIgnoringNewLines(expectedSoapApiResult);
     }
 
 
     @Test
-    public void getHistoriskArbeidsforholdDokument() throws Exception {
+    void getHistoriskArbeidsforholdDokument() {
         Saksopplysning saksopplysning = aaregService.hentArbeidsforholdHistorikk(12608035L);
         ArbeidsforholdDokument arbeidsforholdDokument = (ArbeidsforholdDokument) saksopplysning.getDokument();
-        assertThat(arbeidsforholdDokument.getArbeidsforhold().size()).isGreaterThan(0);
+        assertThat(arbeidsforholdDokument.getArbeidsforhold().size()).isPositive();
         assertThat(arbeidsforholdDokument.getArbeidsforhold().get(0).getArbeidsavtaler().size()).isGreaterThan(1);
     }
 
     @Test
-    public void hentSikkerhetsbegrensetArbeidsforholdHistorikkKasterUnntak() throws Exception {
+    void hentSikkerhetsbegrensetArbeidsforholdHistorikkKasterUnntak() throws Exception {
         ArbeidsforholdConsumer arbeidsforholdConsumer = mockArbeidsforholdConsumer();
         AaregService instans = lagAaregService(arbeidsforholdConsumer, new FakeUnleash(), null);
         Throwable unntak = catchThrowable(() -> instans.hentArbeidsforholdHistorikk(SIKKERHETSBEGRENSET_ID));
@@ -175,7 +178,7 @@ public class AaregServiceTest {
         };
     }
 
-    private final String expectedSoapApiResult = """
+    private static final String expectedSoapApiResult = """
         [ {
           "arbeidsforholdID" : "V974600951R131438S1001L0001",
           "arbeidsforholdIDnav" : 39525427,
@@ -226,7 +229,7 @@ public class AaregServiceTest {
           "timerTimelonnet" : [ ]
         } ]""";
 
-    private final String expectedRestResult = """
+    private static final String expectedRestResult = """
         [ {
           "arbeidsforholdID" : "abc-321",
           "arbeidsforholdIDnav" : 123456,
@@ -293,7 +296,7 @@ public class AaregServiceTest {
           } ]
         } ]""";
 
-    private final String responsAaregRestBody = """
+    private static final String responsAaregRestBody = """
         [
           {
             "ansettelsesperiode": {
