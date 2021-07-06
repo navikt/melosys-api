@@ -1,5 +1,9 @@
 package no.nav.melosys.service.persondata.mapping;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.integrasjon.pdl.dto.person.Person;
@@ -15,6 +19,36 @@ public final class PersonMedHistorikkOversetter {
     }
 
     public static PersonMedHistorikk oversett(Person person, KodeverkService kodeverkService) {
+        return lagPersonMedHistorikk(person, kodeverkService);
+    }
+
+    public static PersonMedHistorikk oversettTilInnsyn(Person person,
+                                                       KodeverkService kodeverkService,
+                                                       Instant behandlingSistEndretDato) {
+        return lagPersonMedHistorikk(gjennskapPersonPå(person, behandlingSistEndretDato), kodeverkService);
+    }
+
+    private static Person gjennskapPersonPå(Person person, Instant instant) {
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+        return new Person(
+            Collections.emptyList(),
+            person.bostedsadresse().stream().filter(x -> x.erGyldigFør(localDateTime)).collect(Collectors.toUnmodifiableList()),
+            person.doedsfall().stream().filter(x -> x.erGyldigFør(localDateTime)).collect(Collectors.toUnmodifiableList()),
+            person.foedsel().stream().filter(x -> x.erGyldigFør(localDateTime)).collect(Collectors.toUnmodifiableList()),
+            person.folkeregisteridentifikator().stream().filter(x -> x.erGyldigFør(localDateTime)).collect(Collectors.toUnmodifiableList()),
+            person.folkeregisterpersonstatus().stream().collect(Collectors.toUnmodifiableList()),
+            Collections.emptyList(),
+            person.kjoenn().stream().filter(x -> x.erGyldigFør(localDateTime)).collect(Collectors.toUnmodifiableList()),
+            person.kontaktadresse().stream().filter(x -> x.erGyldigFør(localDateTime)).collect(Collectors.toUnmodifiableList()),
+            person.navn().stream().filter(x -> x.erGyldigFør(localDateTime)).collect(Collectors.toUnmodifiableList()),
+            person.oppholdsadresse().stream().filter(x -> x.erGyldigFør(localDateTime)).collect(Collectors.toUnmodifiableList()),
+            person.sivilstand().stream().filter(x -> x.erGyldigFør(localDateTime)).collect(Collectors.toUnmodifiableList()),
+            person.statsborgerskap().stream().filter(x -> x.erGyldigFør(localDateTime)).collect(Collectors.toUnmodifiableList()),
+            Collections.emptyList()
+        );
+    }
+
+    private static PersonMedHistorikk lagPersonMedHistorikk(Person person, KodeverkService kodeverkService) {
         return new PersonMedHistorikk(
             BostedsadresseOversetter.oversett(person.bostedsadresse(), kodeverkService),
             DoedsfallOversetter.oversett(person.doedsfall()), FoedselOversetter.oversett(person.foedsel()),

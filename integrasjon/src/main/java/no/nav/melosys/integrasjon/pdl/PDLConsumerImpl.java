@@ -63,7 +63,7 @@ public class PDLConsumerImpl implements PDLConsumer {
 
     @Override
     @Retryable
-    public Person hentPersonMedHistorikk(String ident) {
+    public Person hentPersonMedHistorikk(String ident, boolean innsynn) {
         return hentPersondata(HENT_PERSON_HISTORIKK_QUERY, ident, true);
     }
 

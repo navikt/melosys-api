@@ -12,6 +12,7 @@ import java.util.Objects;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.pdl.dto.Endring;
+import no.nav.melosys.integrasjon.pdl.dto.Endringstype;
 import no.nav.melosys.integrasjon.pdl.dto.Metadata;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
 import no.nav.melosys.integrasjon.pdl.dto.person.*;
@@ -145,10 +146,10 @@ class PDLConsumerImplTest {
         assertThat(pdlConsumer.hentStatsborgerskap("123")).containsExactlyInAnyOrder(
             new Statsborgerskap("ALB", null, LocalDate.parse("1961-02-01"), LocalDate.parse("1981-09-07"),
                 new Metadata("FREG", true,
-                    List.of(new Endring("OPPRETT", LocalDateTime.parse("2021-05-07T10:04:52"), "Dolly")))),
+                    List.of(new Endring(Endringstype.OPPRETT, LocalDateTime.parse("2021-05-07T10:04:52"), "Dolly")))),
             new Statsborgerskap("AIA", LocalDate.parse("2021-05-08"), LocalDate.parse("1979-11-18"), null,
                 new Metadata("PDL", false,
-                    List.of(new Endring("OPPRETT", LocalDateTime.parse("2021-05-07T10:04:52"), "PDL")))));
+                    List.of(new Endring(Endringstype.OPPRETT, LocalDateTime.parse("2021-05-07T10:04:52"), "PDL")))));
     }
 
     @Test

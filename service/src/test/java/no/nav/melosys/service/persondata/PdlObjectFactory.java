@@ -13,6 +13,8 @@ import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Bostedsadresse;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.UtenlandskAdresse;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Vegadresse;
 
+import static no.nav.melosys.integrasjon.pdl.dto.Endringstype.OPPRETT;
+
 public class PdlObjectFactory {
     private static final Metadata METADATA = lagMetadata();
 
@@ -124,11 +126,11 @@ public class PdlObjectFactory {
 
     public static Metadata lagMetadata(LocalDateTime registrertDato) {
         return new Metadata("PDL", false,
-            List.of(new Endring("OPPRETT", registrertDato, "Dolly")));
+            List.of(new Endring(OPPRETT, registrertDato, "Dolly")));
     }
 
     static Metadata lagMetadata() {
         return new Metadata("PDL", false,
-            List.of(new Endring("OPPRETT", LocalDateTime.parse("2021-05-07T10:04:52"), "Dolly")));
+            List.of(new Endring(OPPRETT, LocalDateTime.parse("2021-05-07T10:04:52"), "Dolly")));
     }
 }

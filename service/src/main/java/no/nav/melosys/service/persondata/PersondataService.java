@@ -79,9 +79,19 @@ public class PersondataService implements PersondataFasade {
 
     @Override
     public PersonMedHistorikk hentPersonMedHistorikk(long behandlingID) {
-        final String ident = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)
-            .getFagsak().hentBruker().getAktørId();
-        return PersonMedHistorikkOversetter.oversett(pdlConsumer.hentPersonMedHistorikk(ident), kodeverkService);
+        final var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        final String ident = behandling.getFagsak().hentBruker().getAktørId();
+        if (behandling.erInaktiv()) {
+            /*TODO
+               - Mapping fra TPS for gamle behandlinger opprettet før PDL
+               - Det ville være mest riktig å se på vedtakstidspunktet om det finnes et vedtak (default behandling.getEndretDato()
+               fordi behandling kan endres automatisk etter vedtak (art. 13)
+             */
+            return PersonMedHistorikkOversetter.oversettTilInnsyn(pdlConsumer.hentPersonMedHistorikk(ident, true),
+                kodeverkService, behandling.getEndretDato());
+        } else {
+            return PersonMedHistorikkOversetter.oversett(pdlConsumer.hentPersonMedHistorikk(ident, false), kodeverkService);
+        }
     }
 
     @Override
