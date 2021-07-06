@@ -4,13 +4,14 @@ import java.time.LocalDate;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import graphql.execution.ExecutionStepInfo;
 import graphql.schema.DataFetchingEnvironment;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.person.Statsborgerskap;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersonMedHistorikk;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.tjenester.gui.graphql.dto.SaksopplysningerDto;
+import no.nav.melosys.tjenester.gui.graphql.dto.PersonopplysningerDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -21,18 +22,20 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class SaksopplysningerDataFetcherTest {
+class PersonopplysningerDataFetcherTest {
     @Mock
     private KodeverkService kodeverkService;
     @Mock
     private PersondataFasade persondataFasade;
     @Mock
     private DataFetchingEnvironment dataFetchingEnvironment;
+    @Mock
+    private ExecutionStepInfo executionStepInfo;
 
     @Test
     void get() throws Exception {
-        SaksopplysningerDataFetcher saksopplysningerDataFetcher = new SaksopplysningerDataFetcher(kodeverkService, persondataFasade
-        );
+        PersonopplysningerDataFetcher personopplysningerDataFetcher = new PersonopplysningerDataFetcher(kodeverkService,
+            persondataFasade);
         final var statsborgerskap_1 = new Statsborgerskap("AAA", null, LocalDate.parse("2009-11-18"),
             LocalDate.parse("1980-11-18"), "PDL", "Dolly", false);
         final var statsborgerskap_2 = new Statsborgerskap("BBB", null, LocalDate.parse("1979-11-18"),
@@ -40,7 +43,9 @@ class SaksopplysningerDataFetcherTest {
         final var statsborgerskap_3 = new Statsborgerskap("CCC", null, null, LocalDate.parse("1980-11-18"), "PDL",
             "Dolly", false);
 
-        when(dataFetchingEnvironment.getArgument("behandlingID")).thenReturn(1L);
+        when(dataFetchingEnvironment.getExecutionStepInfo()).thenReturn(executionStepInfo);
+        when(executionStepInfo.getParent()).thenReturn(executionStepInfo);
+        when(executionStepInfo.getArgument("behandlingID")).thenReturn(1L);
         when(persondataFasade.hentPersonMedHistorikk(anyLong())).thenReturn(
             new PersonMedHistorikk(null, null, null, null, null, null, null, null,
                 Set.of(statsborgerskap_1, statsborgerskap_2, statsborgerskap_3))
@@ -49,13 +54,12 @@ class SaksopplysningerDataFetcherTest {
         when(kodeverkService.dekod(FellesKodeverk.STATSBORGERSKAP_FREG, "BBB")).thenReturn("Testland B");
         when(kodeverkService.dekod(FellesKodeverk.STATSBORGERSKAP_FREG, "CCC")).thenReturn("Testland C");
 
-        final var dataFetcherResult = saksopplysningerDataFetcher.get(dataFetchingEnvironment);
-        Consumer<SaksopplysningerDto> statsborgerskapErSortert = saksopplysningerDto -> {
-            assertThat(saksopplysningerDto.persondata().statsborgerskap().get(0).land()).isEqualTo("Testland C");
-            assertThat(saksopplysningerDto.persondata().statsborgerskap().get(1).land()).isEqualTo("Testland A");
-            assertThat(saksopplysningerDto.persondata().statsborgerskap().get(2).land()).isEqualTo("Testland B");
+        final var dataFetcherResult = personopplysningerDataFetcher.get(dataFetchingEnvironment);
+        Consumer<PersonopplysningerDto> statsborgerskapErSortert = personopplysningerDto -> {
+            assertThat(personopplysningerDto.statsborgerskap().get(0).land()).isEqualTo("Testland C");
+            assertThat(personopplysningerDto.statsborgerskap().get(1).land()).isEqualTo("Testland A");
+            assertThat(personopplysningerDto.statsborgerskap().get(2).land()).isEqualTo("Testland B");
         };
-        assertThat(dataFetcherResult.getData())
-            .isInstanceOfSatisfying(SaksopplysningerDto.class, statsborgerskapErSortert);
+        assertThat(dataFetcherResult).isInstanceOfSatisfying(PersonopplysningerDto.class, statsborgerskapErSortert);
     }
 }
