@@ -8,7 +8,7 @@ import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 
 public record PersonMedHistorikk(
-    Bostedsadresse bostedsadresse,
+    Collection<Bostedsadresse> bostedsadresser,
     Doedsfall dødsfall,
     Foedsel fødsel,
     Folkeregisteridentifikator folkeregisteridentifikator,

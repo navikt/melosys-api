@@ -7,7 +7,9 @@ import java.util.function.Consumer;
 import graphql.execution.ExecutionStepInfo;
 import graphql.schema.DataFetchingEnvironment;
 import no.nav.melosys.domain.FellesKodeverk;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.person.Statsborgerskap;
+import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersonMedHistorikk;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -36,6 +38,13 @@ class PersonopplysningerDataFetcherTest {
     void get() throws Exception {
         PersonopplysningerDataFetcher personopplysningerDataFetcher = new PersonopplysningerDataFetcher(kodeverkService,
             persondataFasade);
+        final var bostedsadresse_1 = new Bostedsadresse(
+            new StrukturertAdresse("gate1", null, null, null, null, null),
+            null, null, null, null, null, false);
+        final var bostedsadresse_2 = new Bostedsadresse(
+            new StrukturertAdresse("gate2", null, null, null, null, null),
+            null, null, null, null, null, true);
+
         final var statsborgerskap_1 = new Statsborgerskap("AAA", null, LocalDate.parse("2009-11-18"),
             LocalDate.parse("1980-11-18"), "PDL", "Dolly", false);
         final var statsborgerskap_2 = new Statsborgerskap("BBB", null, LocalDate.parse("1979-11-18"),
@@ -47,7 +56,7 @@ class PersonopplysningerDataFetcherTest {
         when(executionStepInfo.getParent()).thenReturn(executionStepInfo);
         when(executionStepInfo.getArgument("behandlingID")).thenReturn(1L);
         when(persondataFasade.hentPersonMedHistorikk(anyLong())).thenReturn(
-            new PersonMedHistorikk(null, null, null, null, null, null, null, null,
+            new PersonMedHistorikk(Set.of(bostedsadresse_1, bostedsadresse_2), null, null, null, null, null, null, null,
                 Set.of(statsborgerskap_1, statsborgerskap_2, statsborgerskap_3))
         );
         when(kodeverkService.dekod(FellesKodeverk.STATSBORGERSKAP_FREG, "AAA")).thenReturn("Testland A");
@@ -55,6 +64,9 @@ class PersonopplysningerDataFetcherTest {
         when(kodeverkService.dekod(FellesKodeverk.STATSBORGERSKAP_FREG, "CCC")).thenReturn("Testland C");
 
         final var dataFetcherResult = personopplysningerDataFetcher.get(dataFetchingEnvironment);
+        assertThat(dataFetcherResult.bostedsadresser()).extracting("adresse")
+            .extracting("gatenavn").containsExactlyInAnyOrder("gate1", "gate2");
+
         Consumer<PersonopplysningerDto> statsborgerskapErSortert = personopplysningerDto -> {
             assertThat(personopplysningerDto.statsborgerskap().get(0).land()).isEqualTo("Testland C");
             assertThat(personopplysningerDto.statsborgerskap().get(1).land()).isEqualTo("Testland A");
