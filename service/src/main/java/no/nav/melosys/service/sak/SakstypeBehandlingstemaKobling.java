@@ -34,7 +34,8 @@ public final class SakstypeBehandlingstemaKobling {
                 Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
             ),
             Sakstyper.FTRL, Set.of(
-                Behandlingstema.ARBEID_I_UTLANDET
+                Behandlingstema.ARBEID_I_UTLANDET,
+                Behandlingstema.TRYGDEAVTALE_UK
             ),
             Sakstyper.TRYGDEAVTALE, Set.of()
         );

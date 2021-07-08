@@ -91,6 +91,13 @@ public final class OppgaveFactory {
                 break;
             case ARBEID_I_UTLANDET:
                 oppgaveParametere = new OppgaveParametere("ab0388", null, Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
+                // Er ingen test som fanger opp om det er feil her...
+                // oppgaveParametere = new OppgaveParametere("ab----", null, Tema.UFM, Oppgavetyper.BEH_SAK_MK, fristDager(30));
+                break;
+            case TRYGDEAVTALE_UK:
+                // Ref møte ista: Snakket med Yvonne, og mens hun ikke var helt sikker så mente hun vi skulle kunne bruke innslaget:
+                // ARB_AA_MED;ab0387;;MED i mappingen brukt av Gosys for å bestemme “Gjelder”-feltet.
+                oppgaveParametere = new OppgaveParametere("ab0387", null, Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
                 break;
             default:
                 throw new IllegalArgumentException("Melosys støtter ikke mapping for behandlingstema  " + behandlingstema);
