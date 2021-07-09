@@ -29,6 +29,8 @@ public class TrygdeavtaleTjeneste {
     @GetMapping
     public ResponseEntity<TrygdeavtaleInfoDto> hentTrygdeavtaleInfo(@RequestParam long behandlingId) {
         return ResponseEntity.ok(new TrygdeavtaleInfoDto(
-            OrgIdNavnDto.av(trygdeavtaleService.hentVirksomheter(behandlingId)), null,null));
+            OrgIdNavnDto.av(trygdeavtaleService.hentVirksomheter(behandlingId)),
+            trygdeavtaleService.hentFamiliemedlemmer(behandlingId)
+        ));
     }
 }

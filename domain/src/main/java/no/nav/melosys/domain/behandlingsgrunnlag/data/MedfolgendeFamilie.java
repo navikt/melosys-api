@@ -33,6 +33,10 @@ public class MedfolgendeFamilie {
         return uuid;
     }
 
+    public String getNavn() {
+        return navn;
+    }
+
     public String getFnr() {
         return fnr;
     }

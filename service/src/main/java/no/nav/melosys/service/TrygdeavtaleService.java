@@ -1,14 +1,15 @@
 package no.nav.melosys.service;
 
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
-import org.springframework.stereotype.Service;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
+import org.springframework.stereotype.Service;
 
 @Service
 public class TrygdeavtaleService {
@@ -41,5 +42,9 @@ public class TrygdeavtaleService {
         return organisasjonDokumenter.stream()
             .filter(organisasjonDokument -> orgnr.equals(organisasjonDokument.getOrgnummer()))
             .findFirst().orElse(registerOppslagService.hentOrganisasjon(orgnr)).getNavn();
+    }
+
+    public List<MedfolgendeFamilie> hentFamiliemedlemmer(long behandlingID) {
+        return behandlingService.hentBehandling(behandlingID).getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().personOpplysninger.medfolgendeFamilie;
     }
 }
