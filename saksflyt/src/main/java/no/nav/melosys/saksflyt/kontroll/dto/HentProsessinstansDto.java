@@ -11,6 +11,7 @@ import no.nav.melosys.domain.saksflyt.ProsessinstansHendelse;
 
 public class HentProsessinstansDto {
     private final UUID id;
+    private final long behandlingId;
     private final String prosessType;
     private final LocalDateTime endretDato;
     private final String sistFullførtSteg;
@@ -18,6 +19,7 @@ public class HentProsessinstansDto {
 
     public HentProsessinstansDto(Prosessinstans prosessinstans) {
         this.id = prosessinstans.getId();
+        this.behandlingId = prosessinstans.getBehandling().getId();
         this.prosessType = prosessinstans.getType().getKode();
         this.endretDato = prosessinstans.getEndretDato();
         this.sistFullførtSteg = Optional.ofNullable(prosessinstans.getSistFullførtSteg())
@@ -32,6 +34,10 @@ public class HentProsessinstansDto {
 
     public UUID getId() {
         return id;
+    }
+
+    public long getBehandlingId() {
+        return behandlingId;
     }
 
     public String getProsessType() {
