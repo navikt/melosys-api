@@ -72,7 +72,7 @@
         <jms-api.version>2.0.1</jms-api.version>
         <micrometer-jvm-extras.version>0.2.2</micrometer-jvm-extras.version>
         <networknt.json-schema-validator.version>1.0.47</networknt.json-schema-validator.version>
-        <nimbus-jose-jwt.version>8.20.1</nimbus-jose-jwt.version>
+        <nimbus-jose-jwt.version>9.11</nimbus-jose-jwt.version>
         <ojdbc.version>18.3.0.0</ojdbc.version>
         <okhttp.version>4.9.1</okhttp.version>
         <oracle.version>18</oracle.version>
