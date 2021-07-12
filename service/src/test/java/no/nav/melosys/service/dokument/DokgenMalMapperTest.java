@@ -26,9 +26,9 @@ import no.nav.melosys.integrasjon.dokgen.dto.MangelbrevArbeidsgiver;
 import no.nav.melosys.integrasjon.dokgen.dto.MangelbrevBruker;
 import no.nav.melosys.integrasjon.dokgen.dto.SaksbehandlingstidSoknad;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -69,11 +69,12 @@ class DokgenMalMapperTest {
 
     @BeforeEach
     void init() {
-        dokgenMalMapper = new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService, mockEregFasade, mockPersondataFasade);
+        dokgenMalMapper = new DokgenMalMapper(mockKodeverkService, mockBehandlingsresultatService,
+            mockEregFasade, mockPersondataFasade);
     }
 
     @Test
-    void feilerNårProduserbartDokumentIkkeErStøttet() throws Exception {
+    void feilerNårProduserbartDokumentIkkeErStøttet() {
         when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
@@ -87,8 +88,8 @@ class DokgenMalMapperTest {
     }
 
     @Test
-    void skalMappeMedBrukerAdresse() throws Exception {
-        when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
+    void skalMappeMedBrukerAdresse() {
+        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
         when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
 
         Behandling behandling = lagBehandling(lagFagsak());
@@ -109,8 +110,8 @@ class DokgenMalMapperTest {
     }
 
     @Test
-    void skalMappeMedFullmektigAdresse() throws Exception {
-        when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
+    void skalMappeMedFullmektigAdresse() {
+        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
 
         Behandling behandling = lagBehandling(lagFagsak());
 
@@ -131,8 +132,8 @@ class DokgenMalMapperTest {
     }
 
     @Test
-    void skalMappeMedFullmektigForretningsAdresse() throws Exception {
-        when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
+    void skalMappeMedFullmektigForretningsAdresse() {
+        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
 
         Behandling behandling = lagBehandling(lagFagsak());
 
@@ -157,8 +158,8 @@ class DokgenMalMapperTest {
     }
 
     @Test
-    void skalMappeMedFullmektigMedKontaktpersonAdresse() throws Exception {
-        when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
+    void skalMappeMedFullmektigMedKontaktpersonAdresse() {
+        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
 
         Behandling behandling = lagBehandling(lagFagsak());
 
@@ -181,8 +182,8 @@ class DokgenMalMapperTest {
     }
 
     @Test
-    void skalMappeMangelbrevTilBruker() throws Exception {
-        when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
+    void skalMappeMangelbrevTilBruker() {
+        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
 
         Behandling behandling = lagBehandling(lagFagsak(true));
 
@@ -205,8 +206,8 @@ class DokgenMalMapperTest {
     }
 
     @Test
-    void skalMappeMangelbrevTilArbeidsgiver() throws Exception {
-        when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
+    void skalMappeMangelbrevTilArbeidsgiver() {
+        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
         when(mockEregFasade.hentOrganisasjonNavn(any())).thenReturn("Fullmektig AS");
 
         Behandling behandling = lagBehandling(lagFagsak(true));
@@ -239,6 +240,7 @@ class DokgenMalMapperTest {
         fagsak.setRegistrertDato(Instant.now());
         fagsak.setBehandlinger(lagBehandlinger());
         fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setEndretAv("L12345");
         if (medRepresentant) {
             Aktoer representant = new Aktoer();
             representant.setRolle(Aktoersroller.REPRESENTANT);

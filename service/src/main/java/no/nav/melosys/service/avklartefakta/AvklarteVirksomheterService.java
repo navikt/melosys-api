@@ -1,6 +1,5 @@
 package no.nav.melosys.service.avklartefakta;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -164,7 +163,7 @@ public class AvklarteVirksomheterService {
         }
         if (adresse.erNorsk()) {
             adresse.setPoststed(
-                kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.getPostnummer(), LocalDate.now()));
+                kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.getPostnummer()));
         } else if (StringUtils.isEmpty(adresse.getPostnummer())) {
             //Utenlandske adresser har ikke alltid postnummer
             adresse.setPostnummer(" ");

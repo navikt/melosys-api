@@ -1,6 +1,4 @@
-package no.nav.melosys.service.persondata.adresse;
-
-import java.time.LocalDate;
+package no.nav.melosys.service.persondata.mapping.adresse;
 
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -12,7 +10,7 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 
 import static no.nav.melosys.domain.FellesKodeverk.POSTNUMMER;
 
-class PdlAdresseformatOversetter {
+final class PdlAdresseformatOversetter {
     private PdlAdresseformatOversetter() {
         throw new IllegalStateException("Ikke ment å bli instantiert");
     }
@@ -24,7 +22,7 @@ class PdlAdresseformatOversetter {
             vegadresse.husnummer() + leggTilHusBokstav(vegadresse),
             null,
             vegadresse.postnummer(),
-            kodeverkService.dekod(POSTNUMMER, vegadresse.postnummer(), LocalDate.now()),
+            kodeverkService.dekod(POSTNUMMER, vegadresse.postnummer()),
             null,
             Landkoder.NO.getKode()
         );
@@ -52,7 +50,7 @@ class PdlAdresseformatOversetter {
             matrikkeladresse.tilleggsnavn(),
             null,
             matrikkeladresse.postnummer(),
-            kodeverkService.dekod(POSTNUMMER, matrikkeladresse.postnummer(), LocalDate.now()),
+            kodeverkService.dekod(POSTNUMMER, matrikkeladresse.postnummer()),
             null,
             Landkoder.NO.getKode()
         );

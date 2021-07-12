@@ -113,7 +113,7 @@ public class InngangsvilkaarService {
 
     Set<Land> avgjørGyldigeStatsborgerskapFraPdlForPerioden(Set<Statsborgerskap> statsborgerskap, ErPeriode periode) {
         return statsborgerskap.stream().filter(s -> erGyldigStatsborgerskapForPeriode(s, periode))
-            .map(s -> Land.av(s.land())).collect(Collectors.toUnmodifiableSet());
+            .map(s -> Land.av(s.landkode())).collect(Collectors.toUnmodifiableSet());
     }
 
     private boolean erGyldigStatsborgerskapForPeriode(Statsborgerskap s, ErPeriode periode) {

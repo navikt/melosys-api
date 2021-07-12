@@ -1,7 +1,7 @@
 package no.nav.melosys.domain;
 
 public enum FellesKodeverk {
-    
+
     ARBEIDSTIDSORDNINGER("Arbeidstidsordninger"),
     DEKNING_MEDL("DekningMedl"),
     DISKRESJONSKODER("Diskresjonskoder"),
@@ -22,14 +22,15 @@ public enum FellesKodeverk {
     POSTNUMMER("Postnummer"),
     SKIPSREGISTRE("Skipsregistre"),
     SKIPSTYPER("Skipstyper"),
-    SIVILSTANDER("Sivilstander");
+    SIVILSTANDER("Sivilstander"),
+    STATSBORGERSKAP_FREG("StatsborgerskapFreg");
 
     FellesKodeverk(String navn) {
         this.navn = navn;
     }
-    
+
     private String navn;
-    
+
     public String getNavn() {
         return navn;
     }

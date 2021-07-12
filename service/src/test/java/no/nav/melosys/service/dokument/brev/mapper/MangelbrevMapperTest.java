@@ -9,7 +9,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,7 +43,7 @@ class MangelbrevMapperTest {
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
-        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
         brevData.fritekst = "Test";
@@ -55,7 +55,7 @@ class MangelbrevMapperTest {
 
     @Test
     void mapFag() {
-        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
         brevData.fritekst = "Test";
 
@@ -75,7 +75,7 @@ class MangelbrevMapperTest {
 
     @Test
     void mapFag_manglerFritekst() {
-        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
         assertThatExceptionOfType(IntegrasjonException.class)

@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokument.brev;
+package no.nav.melosys.tjenester.gui.dto.brev;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +6,9 @@ import java.util.Objects;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
+import no.nav.melosys.service.dokument.brev.KopiMottaker;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 
 public class BrevbestillingDto {
 
@@ -39,9 +42,19 @@ public class BrevbestillingDto {
     public BrevbestillingDto() {
     }
 
-    // Må ha mulighet for å sette produserbartdokument pga bakoverkompabilitet
-    public void setProduserbardokument(Produserbaredokumenter produserbardokument) {
-        this.produserbardokument = produserbardokument;
+    public BrevbestillingRequest.Builder tilRequestBuilder() {
+        return new BrevbestillingRequest.Builder()
+            .medProduserbardokument(this.getProduserbardokument())
+            .medMottaker(this.getMottaker())
+            .medOrgNr(this.getOrgNr())
+            .medInnledningFritekst(this.getInnledningFritekst())
+            .medManglerFritekst(this.getManglerFritekst())
+            .medBegrunnelseFritekst(this.getBegrunnelseFritekst())
+            .medKontaktpersonNavn(this.getKontaktpersonNavn())
+            .medKopiMottakere(this.getKopiMottakere())
+            .medFritekst(this.getFritekst())
+            .medBegrunnelseKode(this.getBegrunnelseKode())
+            .medYtterligereInformasjon(this.getYtterligereInformasjon());
     }
 
     public BrevbestillingDto(Builder builder) {

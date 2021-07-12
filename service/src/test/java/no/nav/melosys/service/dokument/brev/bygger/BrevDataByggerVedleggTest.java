@@ -4,7 +4,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataVedlegg;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import org.junit.jupiter.api.Test;
 
@@ -48,7 +48,7 @@ public class BrevDataByggerVedleggTest {
 
     @Test
     public void testByggA1FraForhåndsvisning() {
-        BrevbestillingDto brevbestilling = new BrevbestillingDto.Builder()
+        BrevbestillingRequest brevbestilling = new BrevbestillingRequest.Builder()
             .medMottaker(Aktoersroller.BRUKER)
             .medFritekst("FRITEKST")
             .medBegrunnelseKode("tom")

@@ -37,6 +37,7 @@ class BehandlingServiceTest {
 
     private static final String SAKSBEHANDLER = "Z990007";
     private static final long BEHANDLING_ID = 11L;
+    private static final String SAKSNUMMER = "12";
     private static final List<Long> PERIODE_IDS = Arrays.asList(2L, 3L);
 
     @Mock
@@ -73,11 +74,17 @@ class BehandlingServiceTest {
 
     @Test
     void oppdaterStatus_statusAvventDok_dokumentasjonSvarfristOppdatert() {
-        Behandling behandling = new Behandling();
+        var fagsak = new Fagsak();
+        fagsak.setSaksnummer(SAKSNUMMER);
+        var behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.VURDER_DOKUMENT);
+        behandling.setFagsak(fagsak);
         when(behandlingRepo.findById(anyLong())).thenReturn(Optional.of(behandling));
+
         behandlingService.oppdaterStatus(BEHANDLING_ID, Behandlingsstatus.AVVENT_DOK_PART);
+
         assertThat(behandling.getDokumentasjonSvarfristDato()).isNotNull();
+        verify(oppgaveService).oppdaterOppgaveMedSaksnummer(eq(SAKSNUMMER), any());
     }
 
     @Test

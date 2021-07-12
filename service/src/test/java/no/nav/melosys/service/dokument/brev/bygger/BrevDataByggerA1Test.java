@@ -90,7 +90,7 @@ class BrevDataByggerA1Test {
         behandling.setSaksopplysninger(new HashSet<>(Arrays.asList(person, arbeidsforhold)));
 
         KodeverkService kodeverkService = mock(KodeverkService.class);
-        when(kodeverkService.dekod(any(), any(), any())).thenReturn("Oslo");
+        when(kodeverkService.dekod(any(), any())).thenReturn("Oslo");
 
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
             registerOppslagService,

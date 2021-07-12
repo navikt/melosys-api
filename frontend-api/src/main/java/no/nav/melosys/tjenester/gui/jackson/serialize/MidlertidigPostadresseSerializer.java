@@ -1,7 +1,6 @@
 package no.nav.melosys.tjenester.gui.jackson.serialize;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -39,7 +38,7 @@ public class MidlertidigPostadresseSerializer extends StdSerializer<no.nav.melos
                     adresse.gateadresse.getHusnummer()
                 ).filter(Objects::nonNull).map(Objects::toString).collect(Collectors.joining(" ")),
                 adresse.poststed,
-                kodeverkService.dekod(POSTNUMMER, adresse.poststed, LocalDate.now()),
+                kodeverkService.dekod(POSTNUMMER, adresse.poststed),
                 null,
                 midlertidigPostadresse.land != null ? midlertidigPostadresse.land.getKode() : null
             );

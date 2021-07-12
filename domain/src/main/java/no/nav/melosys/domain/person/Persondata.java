@@ -5,11 +5,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import no.nav.melosys.domain.brev.Postadresse;
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.*;
-import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
-import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
-import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
+import no.nav.melosys.domain.dokument.person.Familiemedlem;
+import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 
 public interface Persondata {
     boolean erPersonDød();
@@ -23,12 +22,6 @@ public interface Persondata {
     boolean manglerBostedsadresse();
 
     String hentFolkeregisterIdent();
-
-    @Deprecated // Brukes bare til visning, som skal gå gjennom GraphQL
-    Sivilstand getSivilstand();
-
-    @Deprecated // Brukes bare til visning, som skal gå gjennom GraphQL
-    LocalDate getSivilstandGyldighetsperiodeFom();
 
     Set<Land> hentAlleStatsborgerskap();
 
@@ -46,17 +39,10 @@ public interface Persondata {
 
     LocalDate getFødselsdato();
 
-    @Deprecated // Brukes bare til visning, som skal gå gjennom GraphQL
-    Personstatus getPersonstatus();
+    @Deprecated // knyttet til TPS
+    no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse getBostedsadresse();
 
-    @Deprecated // Brukes bare til visning, som skal gå gjennom GraphQL
-    LocalDate getStatsborgerskapDato();
+    Optional<Bostedsadresse> hentBostedsadresse();
 
-    Bostedsadresse getBostedsadresse();
-
-    UstrukturertAdresse getPostadresse();
-
-    MidlertidigPostadresse getMidlertidigPostadresse();
-
-    UstrukturertAdresse getGjeldendePostadresse();
+    Postadresse hentGjeldendePostadresse();
 }

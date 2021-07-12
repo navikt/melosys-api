@@ -15,7 +15,7 @@ import static no.nav.melosys.domain.adresse.Adresse.sammenslå;
 
 public class UstrukturertAdresse implements Adresse {
     private final List<String> adresselinjer = new ArrayList<>();
-    private String landkode;
+    private final String landkode;
 
     public UstrukturertAdresse(String l1, String l2, String l3, String l4, String landKode) {
         if (StringUtils.isNotEmpty(l1)) {
@@ -30,9 +30,7 @@ public class UstrukturertAdresse implements Adresse {
         if (StringUtils.isNotEmpty(l4)) {
             adresselinjer.add(l4);
         }
-        if (StringUtils.isNotEmpty(landKode)) {
-            this.landkode = landKode;
-        }
+        this.landkode = landKode;
     }
 
     public static UstrukturertAdresse av(MidlertidigPostadresseUtland adresse) {

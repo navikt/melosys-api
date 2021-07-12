@@ -8,12 +8,12 @@ scalar DateTime
 scalar Long
 
 type Query {
-    hentSaksopplysninger(behandlingID: Long!): Saksopplysninger
+    hentSaksopplysninger(behandlingID: Long!): Saksopplysninger!
 }
 
 type Saksopplysninger {
     behandlingID: Long!
-    persondata: Personopplysninger
+    persondata: Personopplysninger!
 }
 
 type Personopplysninger {
@@ -25,7 +25,7 @@ type Statsborgerskap {
     bekreftelsesdato: Date
     gyldigFraOgMed: Date
     gyldigTilOgMed: Date
-    master: String
+    master: String!
     kilde: String
-    erHistorisk: Boolean
+    erHistorisk: Boolean!
 }

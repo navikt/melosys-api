@@ -2,7 +2,7 @@ package no.nav.melosys.service.dokument.brev.bygger;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.service.dokument.brev.BrevData;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -11,7 +11,7 @@ public class BrevDataByggerStandardTest {
 
     @Test
     public void lagBrevData() {
-        BrevbestillingDto bestilling = new BrevbestillingDto.Builder()
+        BrevbestillingRequest bestilling = new BrevbestillingRequest.Builder()
             .medMottaker(Aktoersroller.BRUKER)
             .medFritekst("FRITEKST")
             .build();

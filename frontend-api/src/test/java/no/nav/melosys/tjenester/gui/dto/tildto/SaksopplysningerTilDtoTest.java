@@ -61,7 +61,7 @@ class SaksopplysningerTilDtoTest {
         XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();
         dokumentFactory = new DokumentFactory(marshaller, xsltTemplatesFactory);
 
-        when(kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), anyString(), any(LocalDate.class))).thenReturn("sted");
+        when(kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), anyString())).thenReturn("sted");
     }
 
     @Test

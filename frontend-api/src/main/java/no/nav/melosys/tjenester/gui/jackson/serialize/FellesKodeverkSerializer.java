@@ -1,7 +1,6 @@
 package no.nav.melosys.tjenester.gui.jackson.serialize;
 
 import java.io.IOException;
-import java.time.LocalDate;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -27,7 +26,7 @@ public class FellesKodeverkSerializer extends StdSerializer<KodeverkHjelper> {
         if (StringUtils.isEmpty(kode)) {
             kode = null;
         } else {
-            term = kodeverkService.dekod(kodeverkHjelper.hentKodeverkNavn(), kodeverkHjelper.getKode(), LocalDate.now());
+            term = kodeverkService.dekod(kodeverkHjelper.hentKodeverkNavn(), kodeverkHjelper.getKode());
         }
 
         generator.writeStartObject();

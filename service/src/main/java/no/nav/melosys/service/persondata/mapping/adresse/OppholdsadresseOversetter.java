@@ -1,10 +1,10 @@
-package no.nav.melosys.service.persondata.adresse;
+package no.nav.melosys.service.persondata.mapping.adresse;
 
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 
-public class OppholdsadresseOversetter {
+public final class OppholdsadresseOversetter {
     private OppholdsadresseOversetter() {
         throw new IllegalStateException("Ikke ment å bli instantiert");
     }
@@ -24,12 +24,12 @@ public class OppholdsadresseOversetter {
         }
 
         return new Oppholdsadresse(strukturertAdresse,
-            null,
             oppholdsadressePDL.coAdressenavn(),
             oppholdsadressePDL.gyldigFraOgMed(),
             oppholdsadressePDL.gyldigTilOgMed(),
             oppholdsadressePDL.metadata().master(),
             oppholdsadressePDL.hentKilde(),
+            oppholdsadressePDL.hentDatoSistRegistrert(),
             oppholdsadressePDL.metadata().historisk()
         );
     }

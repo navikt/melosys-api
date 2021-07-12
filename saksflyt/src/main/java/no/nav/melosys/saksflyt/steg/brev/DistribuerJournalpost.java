@@ -1,7 +1,5 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
-import java.time.LocalDate;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Kontaktopplysning;
@@ -87,7 +85,7 @@ public class DistribuerJournalpost implements StegBehandler {
             StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
             if (orgAdresse.erNorsk() && isEmpty(orgAdresse.getPoststed())) {
                 orgAdresse.setPoststed(
-                    kodeverkService.dekod(FellesKodeverk.POSTNUMMER, orgAdresse.getPostnummer(), LocalDate.now()));
+                    kodeverkService.dekod(FellesKodeverk.POSTNUMMER, orgAdresse.getPostnummer()));
             }
             bestillingsId = doksysFasade.distribuerJournalpost(journalpostId, orgAdresse, kontaktopplysning, brevbestilling.getKontaktpersonNavn());
         } else {

@@ -22,8 +22,8 @@ public class BrevDataInnvilgelse extends BrevData {
     public boolean erTuristskip;
     public AvklarteMedfolgendeBarn avklarteMedfolgendeBarn;
 
-    public BrevDataInnvilgelse(BrevbestillingDto brevbestillingDto, String saksbehandler) {
-        super(brevbestillingDto, saksbehandler);
+    public BrevDataInnvilgelse(BrevbestillingRequest brevbestillingRequest, String saksbehandler) {
+        super(brevbestillingRequest, saksbehandler);
     }
 
     public Optional<AnmodningsperiodeSvar> getAnmodningsperiodesvar() {

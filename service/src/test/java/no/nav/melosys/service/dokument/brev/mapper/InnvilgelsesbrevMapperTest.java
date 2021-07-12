@@ -28,7 +28,7 @@ import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import org.junit.jupiter.api.Test;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
@@ -76,7 +76,7 @@ public class InnvilgelsesbrevMapperTest {
         brevdataA1.person = lagPersonDokument();
         brevdataA1.arbeidssteder = new ArrayList<>();
         brevdataA1.arbeidsland = new ArrayList<>();
-        BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse(new BrevbestillingDto(),"SAKSBEHANDLER");
+        BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse(new BrevbestillingRequest(),"SAKSBEHANDLER");
         brevdataInnvilgelse.vedleggA1 = brevdataA1;
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
         brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;

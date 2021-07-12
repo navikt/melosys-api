@@ -9,14 +9,14 @@ public class BrevData {
 
     public String begrunnelseKode;
 
-    public BrevData(BrevbestillingDto brevbestillingDto) {
-        this(brevbestillingDto, SubjectHandler.getInstance().getUserID());
+    public BrevData(BrevbestillingRequest brevbestillingRequest) {
+        this(brevbestillingRequest, SubjectHandler.getInstance().getUserID());
     }
 
-    public BrevData(BrevbestillingDto brevbestillingDto, String saksbehandler) {
+    public BrevData(BrevbestillingRequest brevbestillingRequest, String saksbehandler) {
         this.saksbehandler = saksbehandler;
-        this.fritekst = brevbestillingDto.getFritekst();
-        this.begrunnelseKode = brevbestillingDto.getBegrunnelseKode();
+        this.fritekst = brevbestillingRequest.getFritekst();
+        this.begrunnelseKode = brevbestillingRequest.getBegrunnelseKode();
     }
 
     public BrevData() { }
