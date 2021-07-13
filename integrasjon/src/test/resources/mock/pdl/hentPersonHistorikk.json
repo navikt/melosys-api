@@ -1,20 +1,19 @@
 {
   "data": {
     "hentPerson": {
-      "adressebeskyttelse": [],
       "bostedsadresse": [
         {
-          "gyldigFraOgMed": "1979-11-18T00:00",
+          "gyldigFraOgMed": "1975-08-23T00:00",
           "gyldigTilOgMed": null,
-          "coAdressenavn": null,
+          "coAdressenavn": "C/O KRIMINELL KARAFFEL",
           "matrikkeladresse": null,
           "ukjentBosted": null,
           "vegadresse": {
-            "adressenavn": "HALÅSVEGEN",
-            "husnummer": "5",
+            "adressenavn": "Akkarfjordneset",
+            "husnummer": "153",
             "husbokstav": null,
             "tilleggsnavn": null,
-            "postnummer": "6713"
+            "postnummer": "9190"
           },
           "utenlandskAdresse": null,
           "metadata": {
@@ -23,25 +22,53 @@
             "endringer": [
               {
                 "type": "OPPRETT",
-                "registrert": "2021-05-07T10:04:52",
+                "registrert": "2021-07-06T11:28:38",
                 "kilde": "Dolly"
               }
             ]
           }
         }
       ],
-      "doedsfall": [],
-      "foedsel": [
+      "doedsfall": [
         {
-          "foedselsdato": "1979-11-18",
-          "foedselsaar": 1979,
-          "foedeland": "ARG",
-          "foedested": "Fødested i/på ARGENTINA",
+          "doedsdato": "2021-07-06",
           "metadata": {
             "master": "FREG",
             "endringer": [
               {
-                "registrert": "2021-05-07T10:04:51",
+                "registrert": "2021-07-06T11:28:39",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        }
+      ],
+      "foedsel": [
+        {
+          "foedselsdato": "1975-08-23",
+          "foedselsaar": 1975,
+          "foedeland": "NOR",
+          "foedested": "Fødested i/på NORGE",
+          "metadata": {
+            "master": "FREG",
+            "endringer": [
+              {
+                "registrert": "2021-07-06T11:28:37",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        },
+        {
+          "foedselsdato": "1975-08-23",
+          "foedselsaar": 1975,
+          "foedeland": "HRV",
+          "foedested": "Fødested i/på KROATIA",
+          "metadata": {
+            "master": "FREG",
+            "endringer": [
+              {
+                "registrert": "2021-07-06T11:28:37",
                 "type": "OPPRETT"
               }
             ]
@@ -50,21 +77,26 @@
       ],
       "folkeregisteridentifikator": [
         {
-          "identifikasjonsnummer": "58517918383",
+          "identifikasjonsnummer": "23487505536",
           "metadata": {
             "master": "FREG",
             "endringer": [
               {
-                "registrert": "2021-05-31T11:48:50",
-                "type": "KORRIGER"
+                "registrert": "2021-07-06T11:28:37",
+                "type": "OPPRETT"
               }
             ]
           }
         }
       ],
+      "folkeregisterpersonstatus": [
+        {
+          "status": "doed"
+        }
+      ],
       "forelderBarnRelasjon": [
         {
-          "relatertPersonsIdent": "22511596061",
+          "relatertPersonsIdent": "01421474318",
           "relatertPersonsRolle": "BARN",
           "minRolleForPerson": "FAR"
         }
@@ -76,7 +108,7 @@
             "master": "FREG",
             "endringer": [
               {
-                "registrert": "2021-05-07T10:04:51",
+                "registrert": "2021-07-06T11:28:38",
                 "type": "OPPRETT"
               }
             ]
@@ -85,44 +117,44 @@
       ],
       "kontaktadresse": [
         {
-          "gyldigFraOgMed": "2020-03-30T00:00",
-          "gyldigTilOgMed": "2021-04-01T00:00",
-          "coAdressenavn": "C/O RAKRYGGET STAFFELI",
+          "gyldigFraOgMed": "2020-07-06T00:00",
+          "gyldigTilOgMed": "2031-07-06T23:59:59",
+          "coAdressenavn": null,
           "postboksadresse": null,
           "postadresseIFrittFormat": {
             "adresselinje1": "POSTLINJE 1",
-            "adresselinje2": "OG 2",
+            "adresselinje2": "POSTLINJE 2",
             "adresselinje3": null,
-            "postnummer": "4994"
+            "postnummer": "9650"
           },
           "utenlandskAdresse": null,
           "utenlandskAdresseIFrittFormat": null,
           "vegadresse": null,
           "metadata": {
-            "master": "FREG",
+            "master": "PDL",
             "historisk": false,
             "endringer": [
               {
                 "type": "OPPRETT",
-                "registrert": "2021-05-07T10:04:52",
+                "registrert": "2021-07-06T11:28:38",
                 "kilde": "Dolly"
               }
             ]
           }
         },
         {
-          "gyldigFraOgMed": "2021-05-07T10:04:52",
-          "gyldigTilOgMed": null,
+          "gyldigFraOgMed": "2021-07-06T00:00",
+          "gyldigTilOgMed": "2022-07-06T00:00",
           "coAdressenavn": null,
           "postboksadresse": null,
           "postadresseIFrittFormat": null,
           "utenlandskAdresse": null,
           "utenlandskAdresseIFrittFormat": {
-            "adresselinje1": "1KOLEJOWA 6/5",
-            "adresselinje2": "18-500 KOLNO",
-            "adresselinje3": "CAPITAL WEST 3000",
+            "adresselinje1": "POSTLINJE 1",
+            "adresselinje2": "POSTLINJE 2",
+            "adresselinje3": "POSTLINJE 3",
             "byEllerStedsnavn": null,
-            "landkode": "ARG",
+            "landkode": "BMU",
             "postkode": null
           },
           "vegadresse": null,
@@ -132,7 +164,7 @@
             "endringer": [
               {
                 "type": "OPPRETT",
-                "registrert": "2021-05-07T10:04:52",
+                "registrert": "2021-07-06T11:28:38",
                 "kilde": "Dolly"
               }
             ]
@@ -141,33 +173,34 @@
       ],
       "navn": [
         {
-          "fornavn": "ÅPENHJERTIG",
+          "fornavn": "ABSURD",
           "mellomnavn": null,
-          "etternavn": "BLYANT",
+          "etternavn": "HEST",
           "metadata": {
             "master": "FREG",
             "endringer": [
               {
-                "registrert": "2021-05-07T10:04:51",
+                "registrert": "2021-07-06T11:28:38",
                 "type": "OPPRETT"
               }
             ]
           }
         }
       ],
-      "oppholdsadresse": [
+      "oppholdsadresse":  [
         {
           "gyldigFraOgMed": null,
           "gyldigTilOgMed": null,
-          "coAdressenavn": "Estate of",
+          "coAdressenavn": null,
           "matrikkeladresse": null,
           "utenlandskAdresse": {
-            "adressenavnNummer": "Adresse er påkrevd",
-            "bygningEtasjeLeilighet": "Bygning",
-            "postkode": "Postkode",
-            "bySted": "By",
-            "regionDistriktOmraade": "Region",
-            "landkode": "ABW"
+            "adressenavnNummer": "1KOLEJOWA 6/5, 18-500 KOLNO, CAPITAL WEST 3000",
+            "bygningEtasjeLeilighet": "",
+            "postboksNummerNavn": null,
+            "postkode": null,
+            "bySted": null,
+            "regionDistriktOmraade": "",
+            "landkode": "ARG"
           },
           "vegadresse": null,
           "metadata": {
@@ -176,7 +209,7 @@
             "endringer": [
               {
                 "type": "OPPRETT",
-                "registrert": "2021-05-07T10:04:51",
+                "registrert": "2021-05-31T11:48:51",
                 "kilde": "Dolly"
               }
             ]
@@ -185,26 +218,9 @@
       ],
       "statsborgerskap": [
         {
-          "land": "ALB",
+          "land": "EST",
           "bekreftelsesdato": null,
-          "gyldigFraOgMed": "1961-02-01",
-          "gyldigTilOgMed": "1981-09-07",
-          "metadata": {
-            "master": "FREG",
-            "historisk": false,
-            "endringer": [
-              {
-                "type": "OPPRETT",
-                "registrert": "2021-05-31T11:48:52",
-                "kilde": "Dolly"
-              }
-            ]
-          }
-        },
-        {
-          "land": "AIA",
-          "bekreftelsesdato": null,
-          "gyldigFraOgMed": "1979-11-18",
+          "gyldigFraOgMed": "2021-06-28",
           "gyldigTilOgMed": null,
           "metadata": {
             "master": "FREG",
@@ -212,7 +228,41 @@
             "endringer": [
               {
                 "type": "OPPRETT",
-                "registrert": "2021-05-31T11:48:52",
+                "registrert": "2021-07-06T11:28:39",
+                "kilde": "Dolly"
+              }
+            ]
+          }
+        }
+      ],
+      "sivilstand": [
+        {
+          "type": "UOPPGITT",
+          "relatertVedSivilstand": null,
+          "gyldigFraOgMed": null,
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2021-07-06T11:28:37",
+                "kilde": "Dolly"
+              }
+            ]
+          }
+        },
+        {
+          "type": "GIFT",
+          "relatertVedSivilstand": "04507445824",
+          "gyldigFraOgMed": "2021-07-06",
+          "metadata": {
+            "master": "FREG",
+            "historisk": true,
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2021-07-06T11:28:39",
                 "kilde": "Dolly"
               }
             ]

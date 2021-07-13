@@ -18,7 +18,10 @@ public interface PersondataFasade {
 
     Persondata hentPerson(String ident);
 
+    @Deprecated
     Saksopplysning hentPersonhistorikk(String fnr, LocalDate dato);
+
+    PersonMedHistorikk hentPersonMedHistorikk(long behandlingID);
 
     String hentSammensattNavn(String fnr);
 

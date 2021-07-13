@@ -2,10 +2,15 @@ package no.nav.melosys.integrasjon.pdl.dto;
 
 import java.time.LocalDateTime;
 
-public record Endring(String type, LocalDateTime registrert, String kilde) {
-    private static final String ENDRINGSTYPE_OPPHØR = "OPPHOER";
+import static no.nav.melosys.integrasjon.pdl.dto.Endringstype.OPPHOER;
+import static no.nav.melosys.integrasjon.pdl.dto.Endringstype.OPPRETT;
 
+public record Endring(Endringstype type, LocalDateTime registrert, String kilde) {
     public boolean erOpphør() {
-        return ENDRINGSTYPE_OPPHØR.equals(type);
+        return type == OPPHOER;
+    }
+
+    public boolean erOpprettelse() {
+        return type == OPPRETT;
     }
 }

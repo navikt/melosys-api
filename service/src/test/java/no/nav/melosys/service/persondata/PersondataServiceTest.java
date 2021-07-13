@@ -7,15 +7,20 @@ import java.util.List;
 import java.util.Set;
 
 import no.finn.unleash.FakeUnleash;
+import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.person.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Identliste;
 import no.nav.melosys.integrasjon.pdl.dto.person.Adressebeskyttelse;
 import no.nav.melosys.integrasjon.pdl.dto.person.AdressebeskyttelseGradering;
-import no.nav.melosys.integrasjon.pdl.dto.person.Navn;
-import no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap;
 import no.nav.melosys.integrasjon.tps.TpsService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,14 +29,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.integrasjon.pdl.dto.identer.IdentGruppe.*;
+import static no.nav.melosys.service.persondata.PdlObjectFactory.lagPerson;
 import static no.nav.melosys.service.persondata.PdlObjectFactory.metadata;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PersondataServiceTest {
+    @Mock
+    private BehandlingService behandlingService;
     @Mock
     private KodeverkService kodeverkService;
     @Mock
@@ -44,7 +53,7 @@ class PersondataServiceTest {
 
     @BeforeEach
     public void setup() {
-        persondataService = new PersondataService(kodeverkService, pdlConsumer, tpsService, fakeUnleash);
+        persondataService = new PersondataService(behandlingService, kodeverkService, pdlConsumer, tpsService, fakeUnleash);
     }
 
     @Test
@@ -76,10 +85,30 @@ class PersondataServiceTest {
     }
 
     @Test
+    void hentPersonMedHistorikk() {
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(lagBehandling());
+        when(pdlConsumer.hentPersonMedHistorikk(anyString(), anyBoolean())).thenReturn(lagPerson());
+
+        final var personMedHistorikk = persondataService.hentPersonMedHistorikk(1L);
+        assertThat(personMedHistorikk.bostedsadresse()).isNotNull();
+        assertThat(personMedHistorikk.dødsfall()).isEqualTo(new Doedsfall(LocalDate.MAX));
+        assertThat(personMedHistorikk.fødsel()).isEqualTo(new Foedsel(LocalDate.parse("1970-01-01"), 1970, "NOR", "fødested"));
+        assertThat(personMedHistorikk.folkeregisteridentifikator()).isEqualTo(new Folkeregisteridentifikator("IdNr"));
+        assertThat(personMedHistorikk.kjønn()).isEqualTo(KjoennType.UKJENT);
+        assertThat(personMedHistorikk.navn()).isEqualTo(new Navn("fornavn", "mellomnavn", "etternavn"));
+        assertThat(personMedHistorikk.statsborgerskap()).containsExactlyInAnyOrder(
+            new Statsborgerskap("AIA", null, LocalDate.parse("1979-11-18"),
+                LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
+            new Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null,
+                null, "PDL", "Dolly", false)
+        );
+    }
+
+    @Test
     void hentSammensatNavn() {
         fakeUnleash.enable("melosys.pdl.sammensatt-navn");
         when(pdlConsumer.hentNavn(anyString())).thenReturn(Set.of(
-            new Navn("Fornavn", "Mellom", "Etternavnsen", metadata())
+            new no.nav.melosys.integrasjon.pdl.dto.person.Navn("Fornavn", "Mellom", "Etternavnsen", metadata())
         ));
 
         assertThat(persondataService.hentSammensattNavn("")).isEqualTo("Etternavnsen Mellom Fornavn");
@@ -88,12 +117,13 @@ class PersondataServiceTest {
     @Test
     void hentStatsborgerskap() {
         when(pdlConsumer.hentStatsborgerskap("ident")).thenReturn(Set.of(
-            new Statsborgerskap("AIA", LocalDate.parse("2021-05-08"), LocalDate.parse("1979-11-18"),
+            new no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap("AIA", LocalDate.parse("2021-05-08"), LocalDate.parse(
+                "1979-11-18"),
                 LocalDate.parse("1980-11-18"), metadata()))
         );
 
         assertThat(persondataService.hentStatsborgerskap("ident")).containsExactly(
-            new no.nav.melosys.domain.person.Statsborgerskap(
+            new Statsborgerskap(
                 "AIA", LocalDate.parse("2021-05-08"), LocalDate.parse("1979-11-18"), LocalDate.parse("1980-11-18"),
                 "PDL", "Dolly", false)
             );
@@ -120,5 +150,21 @@ class PersondataServiceTest {
 
     private Identliste lagTomIdentliste() {
         return new Identliste(Collections.emptySet());
+    }
+
+    private static Behandling lagBehandling() {
+        final String aktørID = "123";
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        Fagsak fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
+        Aktoer aktør = new Aktoer();
+        aktør.setAktørId(aktørID);
+        aktør.setRolle(Aktoersroller.BRUKER);
+        HashSet<Aktoer> aktører = new HashSet<>();
+        aktører.add(aktør);
+        fagsak.setAktører(aktører);
+        behandling.setFagsak(fagsak);
+        return behandling;
     }
 }

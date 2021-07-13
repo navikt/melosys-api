@@ -10,14 +10,16 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.Statsborgerskap;
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
 import no.nav.melosys.integrasjon.pdl.dto.person.Adressebeskyttelse;
 import no.nav.melosys.integrasjon.tps.TpsService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.mapping.NavnOversetter;
-import no.nav.melosys.service.persondata.mapping.PersondataOversetter;
+import no.nav.melosys.service.persondata.mapping.PersonMedHistorikkOversetter;
+import no.nav.melosys.service.persondata.mapping.PersonopplysningerOversetter;
 import no.nav.melosys.service.persondata.mapping.StasborgerskapOversetter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,16 +30,19 @@ import org.springframework.stereotype.Service;
 @Service
 @Primary
 public class PersondataService implements PersondataFasade {
+    private final BehandlingService behandlingService;
     private final KodeverkService kodeverkService;
     private final PDLConsumer pdlConsumer;
     private final TpsService tpsService;
     private final Unleash unleash;
 
     @Autowired
-    public PersondataService(KodeverkService kodeverkService,
+    public PersondataService(BehandlingService behandlingService,
+                             KodeverkService kodeverkService,
                              @Qualifier("saksbehandler") PDLConsumer pdlConsumer,
                              TpsService tpsService,
                              Unleash unleash) {
+        this.behandlingService = behandlingService;
         this.kodeverkService = kodeverkService;
         this.pdlConsumer = pdlConsumer;
         this.tpsService = tpsService;
@@ -69,7 +74,24 @@ public class PersondataService implements PersondataFasade {
 
     @Override
     public Persondata hentPerson(String ident) {
-        return PersondataOversetter.oversett(pdlConsumer.hentPerson(ident), kodeverkService);
+        return PersonopplysningerOversetter.oversett(pdlConsumer.hentPerson(ident), kodeverkService);
+    }
+
+    @Override
+    public PersonMedHistorikk hentPersonMedHistorikk(long behandlingID) {
+        final var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        final String ident = behandling.getFagsak().hentBruker().getAktørId();
+        if (behandling.erInaktiv()) {
+            /*TODO
+               - Mapping fra TPS for gamle behandlinger opprettet før PDL
+               - Det ville være mest riktig å se på vedtakstidspunktet om det finnes et vedtak (default behandling.getEndretDato()
+               fordi behandling kan endres automatisk etter vedtak (art. 13)
+             */
+            return PersonMedHistorikkOversetter.oversettTilInnsyn(pdlConsumer.hentPersonMedHistorikk(ident, true),
+                kodeverkService, behandling.getEndretDato());
+        } else {
+            return PersonMedHistorikkOversetter.oversett(pdlConsumer.hentPersonMedHistorikk(ident, false), kodeverkService);
+        }
     }
 
     @Override
