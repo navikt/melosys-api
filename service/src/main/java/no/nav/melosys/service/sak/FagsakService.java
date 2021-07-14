@@ -384,7 +384,7 @@ public class FagsakService {
     }
 
     private void validerOpprettNyVurdering(Behandling behandling, Behandlingsresultat behandlingsresultat) {
-        if (behandling.erAktiv() && !behandlingsresultat.erArtikkel16MedSendtAnmodningOmUnntak()) {
+        if (behandling.erAktiv() && behandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak()) {
             throw new FunksjonellException("Kan ikke revurdere en aktiv behandling");
         } else if (behandling.erEndretPeriode()) {
             throw new FunksjonellException("Kan ikke revurdere en behandling av type " + Behandlingstyper.ENDRET_PERIODE.getBeskrivelse());
