@@ -7,11 +7,14 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.service.kodeverk.KodeDto;
 
-public record TrygdeavtaleInfoDto(List<OrgIdNavnDto> virksomheter, List<KodeDto> barn,
+public record TrygdeavtaleInfoDto(String aktoerId, String behandlingstema,
+                                  List<OrgIdNavnDto> virksomheter, List<KodeDto> barn,
                                   KodeDto ektefelleSamboer) {
 
-    public TrygdeavtaleInfoDto(List<OrgIdNavnDto> virksomheter, List<MedfolgendeFamilie> familie) {
+    public TrygdeavtaleInfoDto(String aktoerId, String behandlingstema, List<OrgIdNavnDto> virksomheter, List<MedfolgendeFamilie> familie) {
         this(
+            aktoerId,
+            behandlingstema,
             virksomheter,
             filtrerOgMapFamilie(familie, MedfolgendeFamilie::erBarn),
             filtrerOgMapFamilie(familie, MedfolgendeFamilie::erEktefelleSamboer)

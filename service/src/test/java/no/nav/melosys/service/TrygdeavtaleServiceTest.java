@@ -29,14 +29,10 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TrygdeavtaleServiceTest {
-    private final static long BEH_ID = 1L;
     private final static String ORGNR_1 = "11111111111";
     private final static String ORGNR_2 = "22222222222";
     private final static String NAVN_1 = "Navn 1";
     private final static String NAVN_2 = "Navn 2";
-
-    @Mock
-    private BehandlingService behandlingService;
 
     @Mock
     private RegisterOppslagService registerOppslagService;
@@ -45,7 +41,7 @@ public class TrygdeavtaleServiceTest {
 
     @BeforeEach
     void init() {
-        trygdeavtaleService = new TrygdeavtaleService(behandlingService, registerOppslagService);
+        trygdeavtaleService = new TrygdeavtaleService(registerOppslagService);
     }
 
     @Test
@@ -58,16 +54,17 @@ public class TrygdeavtaleServiceTest {
         var juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
         juridiskArbeidsgiverNorge.ekstraArbeidsgivere = List.of(ORGNR_2);
 
-        when(behandlingService.hentBehandling(BEH_ID)).thenReturn(lagBehandlingMedVirksomheter(
+        var behandling = lagBehandlingMedVirksomheter(
             selvstendigArbeid,
             juridiskArbeidsgiverNorge,
             emptyList(),
             Set.of(lagArbForhSaksopplysning(emptyList()))
-        ));
+        );
+
         when(registerOppslagService.hentOrganisasjon(ORGNR_1)).thenReturn(lagOrganisasjonsDokument(ORGNR_1, NAVN_1));
         when(registerOppslagService.hentOrganisasjon(ORGNR_2)).thenReturn(lagOrganisasjonsDokument(ORGNR_2, NAVN_2));
 
-        var response = trygdeavtaleService.hentVirksomheter(BEH_ID);
+        var response = trygdeavtaleService.hentVirksomheter(behandling);
 
         assertThat(response).size().isEqualTo(2);
         assertThat(response).containsEntry(ORGNR_1, NAVN_1);
@@ -76,7 +73,7 @@ public class TrygdeavtaleServiceTest {
 
     @Test
     void hentVirksomheter_fraBehandlingSaksopplysning_mappesKorrekt() {
-        when(behandlingService.hentBehandling(BEH_ID)).thenReturn(lagBehandlingMedVirksomheter(
+        var behandling = lagBehandlingMedVirksomheter(
             new SelvstendigArbeid(),
             new JuridiskArbeidsgiverNorge(),
             emptyList(),
@@ -84,9 +81,9 @@ public class TrygdeavtaleServiceTest {
                 lagArbForhSaksopplysning(List.of(ORGNR_1, ORGNR_2)),
                 lagOrgSaksopplysning(ORGNR_1, NAVN_1),
                 lagOrgSaksopplysning(ORGNR_2, NAVN_2))
-        ));
+        );
 
-        var response = trygdeavtaleService.hentVirksomheter(BEH_ID);
+        var response = trygdeavtaleService.hentVirksomheter(behandling);
 
         assertThat(response).size().isEqualTo(2);
         assertThat(response).containsEntry(ORGNR_1, NAVN_1);
@@ -95,14 +92,14 @@ public class TrygdeavtaleServiceTest {
 
     @Test
     void hentVirksomheter_fraBehandlingsgrunnlagForetakUtland_mappesKorrekt() {
-        when(behandlingService.hentBehandling(BEH_ID)).thenReturn(lagBehandlingMedVirksomheter(
+        var behandling = lagBehandlingMedVirksomheter(
             new SelvstendigArbeid(),
             new JuridiskArbeidsgiverNorge(),
             lagForetakUtland(Map.of(ORGNR_1, NAVN_1, ORGNR_2, NAVN_2)),
             Set.of(lagArbForhSaksopplysning(emptyList()))
-        ));
+        );
 
-        var response = trygdeavtaleService.hentVirksomheter(BEH_ID);
+        var response = trygdeavtaleService.hentVirksomheter(behandling);
 
         assertThat(response).size().isEqualTo(2);
         assertThat(response).containsEntry(ORGNR_1, NAVN_1);
@@ -111,28 +108,27 @@ public class TrygdeavtaleServiceTest {
 
     @Test
     void hentVirksomheter_ingenVirksomheter_tomMap() {
-        when(behandlingService.hentBehandling(BEH_ID)).thenReturn(lagBehandlingMedVirksomheter(
+        var behandling = lagBehandlingMedVirksomheter(
             new SelvstendigArbeid(),
             new JuridiskArbeidsgiverNorge(),
             emptyList(),
             Set.of(lagArbForhSaksopplysning(emptyList()))
-        ));
+        );
 
-        var response = trygdeavtaleService.hentVirksomheter(BEH_ID);
+        var response = trygdeavtaleService.hentVirksomheter(behandling);
 
         assertThat(response).size().isEqualTo(0);
     }
 
     @Test
     void hentFamiliemedlemmer_barnOgEktefelle_fyltListe() {
-        when(behandlingService.hentBehandling(BEH_ID)).thenReturn(
-            lagBehandlingMedFamilie(List.of(
-                lagMedfolgendeFamilie("uuid1", "navn1", MedfolgendeFamilie.Relasjonsrolle.BARN),
-                lagMedfolgendeFamilie("uuid2", "navn2", MedfolgendeFamilie.Relasjonsrolle.BARN),
-                lagMedfolgendeFamilie("uuid3", "navn3", MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER)
-            )));
+        var behandling = lagBehandlingMedFamilie(List.of(
+            lagMedfolgendeFamilie("uuid1", "navn1", MedfolgendeFamilie.Relasjonsrolle.BARN),
+            lagMedfolgendeFamilie("uuid2", "navn2", MedfolgendeFamilie.Relasjonsrolle.BARN),
+            lagMedfolgendeFamilie("uuid3", "navn3", MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER)
+        ));
 
-        var response = trygdeavtaleService.hentFamiliemedlemmer(BEH_ID);
+        var response = trygdeavtaleService.hentFamiliemedlemmer(behandling);
 
         assertThat(response).size().isEqualTo(3);
         assertThat(response)
@@ -149,8 +145,8 @@ public class TrygdeavtaleServiceTest {
 
     @Test
     void hentFamiliemedlemmer_ingenFamilie_tomListe() {
-        when(behandlingService.hentBehandling(BEH_ID)).thenReturn(lagBehandlingMedFamilie(emptyList()));
-        var response = trygdeavtaleService.hentFamiliemedlemmer(BEH_ID);
+        var behandling = lagBehandlingMedFamilie(emptyList());
+        var response = trygdeavtaleService.hentFamiliemedlemmer(behandling);
         assertThat(response).size().isEqualTo(0);
     }
 
