@@ -21,6 +21,7 @@ import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.VedleggDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucBestillingDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucerTilknyttetBehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.OpprettBucSvarDto;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
@@ -106,7 +108,8 @@ class EessiTjenesteTest extends JsonSchemaTestParent {
         ResponseEntity<BucerTilknyttetBehandlingDto> response = eessiTjeneste.hentBucer(123L, Arrays.asList("utkast", "sendt"));
 
         BucerTilknyttetBehandlingDto dto = response.getBody();
-        assertThat(dto).extracting(BucerTilknyttetBehandlingDto::getBucer).hasNoNullFieldsOrProperties();
+        assertThat(dto).extracting(BucerTilknyttetBehandlingDto::getBucer, as(InstanceOfAssertFactories.LIST))
+            .allSatisfy(x -> assertThat(x).hasNoNullFieldsOrProperties());
 
         valider(dto, BUCER_UNDER_ARBEID_SCHEMA, log);
     }

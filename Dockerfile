@@ -1,6 +1,6 @@
-FROM navikt/java:15
+FROM navikt/java:16
 LABEL maintainer="Team Melosys"
 
-ENV JAVA_OPTS="${JAVA_OPTS} -Xms512m -Xmx2048m --enable-preview"
+ENV JAVA_OPTS="${JAVA_OPTS} -Xms512m -Xmx2048m"
 
 COPY /app/target/melosys.jar "/app/app.jar"
