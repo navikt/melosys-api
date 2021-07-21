@@ -59,6 +59,7 @@ public class BrevbestillingRequest {
         this.bestillersId = builder.bestillersId;
         this.fritekst = builder.fritekst;
         this.begrunnelseKode = builder.begrunnelseKode;
+        this.begrunnelseFritekst = builder.begrunnelseFritekst;
         this.ytterligereInformasjon = builder.ytterligereInformasjon;
     }
 

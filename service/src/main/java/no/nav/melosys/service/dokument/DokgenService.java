@@ -6,7 +6,6 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
@@ -26,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.springframework.util.StringUtils.hasText;
 
 @Service
@@ -120,7 +118,7 @@ public class DokgenService {
 
         List<Aktoer> mottakere = new ArrayList<>();
         if (hasText(brevbestillingRequest.getOrgNr())) {
-            var mottaker = new Aktoer();
+            Aktoer mottaker = new Aktoer();
             mottaker.setRolle(brevbestillingRequest.getMottaker());
             mottaker.setOrgnr(brevbestillingRequest.getOrgNr());
             mottakere.add(mottaker);

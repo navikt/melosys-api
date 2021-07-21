@@ -46,14 +46,13 @@ public class DokgenMalMapper {
     }
 
     public DokgenDto mapBehandling(DokgenBrevbestilling brevbestilling) {
-        DokgenDto dto;
         if (brevbestilling.getOrg() == null) {
             String fnr = brevbestilling.getBehandling().hentPersonDokument().hentFolkeregisterIdent();
             //NOTE Henter opplysninger på nytt for å sikre at korrekt adresse benyttes
             var persondata = (Persondata) persondataFasade.hentPersonFraTps(fnr, Informasjonsbehov.STANDARD).getDokument();
             brevbestilling.toBuilder().medPersonDokument(persondata).build();
         }
-        dto = switch (brevbestilling.getProduserbartdokument()) {
+        DokgenDto dto = switch (brevbestilling.getProduserbartdokument()) {
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD -> SaksbehandlingstidSoknad.av(brevbestilling);
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> SaksbehandlingstidKlage.av(brevbestilling);
             case MANGELBREV_BRUKER -> MangelbrevBruker.av(((MangelbrevBrevbestilling) brevbestilling).toBuilder()

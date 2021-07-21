@@ -218,7 +218,7 @@ class DokgenServiceTest {
         assertThat(pdfResponse).isEqualTo(expectedPdf);
 
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(true));
-        verify(mockEregFasade).hentOrganisasjon(eq("987654321"));
+        verify(mockEregFasade).hentOrganisasjon("987654321");
         verify(mockKontaktOpplysningService).hentKontaktopplysning(any(), any());
     }
 
@@ -251,7 +251,7 @@ class DokgenServiceTest {
         assertThat(pdfResponse).isEqualTo(expectedPdf);
 
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(true));
-        verify(mockEregFasade).hentOrganisasjon(eq("987654321"));
+        verify(mockEregFasade).hentOrganisasjon("987654321");
         verify(mockKontaktOpplysningService).hentKontaktopplysning(any(), any());
     }
 

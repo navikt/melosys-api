@@ -8,7 +8,6 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
 
 public class BrevbestillingDto {
 
@@ -219,15 +218,26 @@ public class BrevbestillingDto {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         BrevbestillingDto that = (BrevbestillingDto) o;
-        return produserbardokument == that.produserbardokument && mottaker == that.mottaker && Objects.equals(orgNr, that.orgNr) && Objects.equals(innledningFritekst, that.innledningFritekst) && Objects.equals(manglerFritekst, that.manglerFritekst) && Objects.equals(begrunnelseFritekst, that.begrunnelseFritekst) && Objects.equals(ektefelleFritekst, that.ektefelleFritekst) && Objects.equals(barnFritekst, that.barnFritekst) && Objects.equals(kontaktpersonNavn, that.kontaktpersonNavn) && Objects.equals(kopiMottakere, that.kopiMottakere) && Objects.equals(fritekst, that.fritekst) && Objects.equals(begrunnelseKode, that.begrunnelseKode) && Objects.equals(ytterligereInformasjon, that.ytterligereInformasjon);
+        return produserbardokument == that.produserbardokument && mottaker == that.mottaker && Objects.equals(orgNr,
+            that.orgNr) && Objects.equals(innledningFritekst, that.innledningFritekst) && Objects.equals(
+            manglerFritekst, that.manglerFritekst) && Objects.equals(begrunnelseFritekst,
+            that.begrunnelseFritekst) && Objects.equals(ektefelleFritekst, that.ektefelleFritekst) && Objects.equals(
+            barnFritekst, that.barnFritekst) && Objects.equals(kontaktpersonNavn,
+            that.kontaktpersonNavn) && Objects.equals(kopiMottakere, that.kopiMottakere) && Objects.equals(fritekst,
+            that.fritekst) && Objects.equals(begrunnelseKode, that.begrunnelseKode) && Objects.equals(
+            ytterligereInformasjon, that.ytterligereInformasjon);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(produserbardokument, mottaker, orgNr, innledningFritekst, manglerFritekst, begrunnelseFritekst, ektefelleFritekst, barnFritekst, kontaktpersonNavn, kopiMottakere, fritekst, begrunnelseKode, ytterligereInformasjon);
+        return Objects.hash(produserbardokument, mottaker, orgNr, innledningFritekst, manglerFritekst,
+            begrunnelseFritekst, ektefelleFritekst, barnFritekst, kontaktpersonNavn, kopiMottakere, fritekst,
+            begrunnelseKode, ytterligereInformasjon);
     }
 
     @Override
