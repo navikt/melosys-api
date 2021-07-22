@@ -17,11 +17,22 @@ type Saksopplysninger {
 }
 
 type Personopplysninger {
-    bostedsadresser: [Bostedsadresse]!
+    bostedsadresser: [Bostedsadresse!]!
+    oppholdsadresser: [Oppholdsadresse!]!
     statsborgerskap: [Statsborgerskap!]!
 }
 
 type Bostedsadresse {
+    coAdressenavn: String
+    adresse: StrukturertAdresseformat!
+    gyldigFraOgMed: DateTime
+    gyldigTilOgMed: DateTime
+    master: String!
+    kilde: String
+    erHistorisk: Boolean!
+}
+
+type Oppholdsadresse {
     coAdressenavn: String
     adresse: StrukturertAdresseformat!
     gyldigFraOgMed: DateTime

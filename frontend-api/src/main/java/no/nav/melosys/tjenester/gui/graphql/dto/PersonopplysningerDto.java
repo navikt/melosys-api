@@ -4,6 +4,7 @@ import java.util.List;
 
 public record PersonopplysningerDto(
     List<BostedsadresseDto> bostedsadresser,
+    List<OppholdsadresseDto> oppholdsadresser,
     List<StatsborgerskapDto> statsborgerskap
 ) {
 }
