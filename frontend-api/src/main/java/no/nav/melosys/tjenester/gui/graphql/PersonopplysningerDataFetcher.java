@@ -2,7 +2,6 @@ package no.nav.melosys.tjenester.gui.graphql;
 
 import java.util.Comparator;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
@@ -10,10 +9,10 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.tjenester.gui.graphql.dto.PersonopplysningerDto;
 import no.nav.melosys.tjenester.gui.graphql.dto.StatsborgerskapDto;
-import no.nav.melosys.tjenester.gui.graphql.mapping.BostedsadresseTilDtoConverter;
-import no.nav.melosys.tjenester.gui.graphql.mapping.KontaktadresseTilDtoConverter;
-import no.nav.melosys.tjenester.gui.graphql.mapping.OppholdsadresseTilDtoConverter;
-import no.nav.melosys.tjenester.gui.graphql.mapping.StatsborgerskapTilDtoConverter;
+import no.nav.melosys.tjenester.gui.graphql.mapping.BostedsadresseTilDtoKonverter;
+import no.nav.melosys.tjenester.gui.graphql.mapping.KontaktadresseTilDtoKonverter;
+import no.nav.melosys.tjenester.gui.graphql.mapping.OppholdsadresseTilDtoKonverter;
+import no.nav.melosys.tjenester.gui.graphql.mapping.StatsborgerskapTilDtoKonverter;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -33,20 +32,16 @@ public class PersonopplysningerDataFetcher implements DataFetcher<Personopplysni
 
         final var personMedHistorikk = persondataFasade.hentPersonMedHistorikk(behandlingID);
         final var bostedsadresseDtoList = personMedHistorikk.bostedsadresser().stream()
-            .map(BostedsadresseTilDtoConverter::tilDto)
-            .collect(Collectors.toUnmodifiableList());
+            .map(bostedsadresse -> BostedsadresseTilDtoKonverter.tilDto(bostedsadresse, kodeverkService)).toList();
         final var kontaktadresseDtoList = personMedHistorikk.kontaktadresser().stream()
-            .map(KontaktadresseTilDtoConverter::tilDto)
-            .collect(Collectors.toUnmodifiableList());
+            .map(kontaktadresse -> KontaktadresseTilDtoKonverter.tilDto(kontaktadresse, kodeverkService)).toList();
         final var oppholdsadresseDtoList = personMedHistorikk.oppholdsadresser().stream()
-            .map(OppholdsadresseTilDtoConverter::tilDto)
-            .collect(Collectors.toUnmodifiableList());
-        final var statsborgerskapDtoList = personMedHistorikk
-            .statsborgerskap().stream()
-            .map(s -> StatsborgerskapTilDtoConverter.tilDto(s, kodeverkService))
+            .map(oppholdsadresse -> OppholdsadresseTilDtoKonverter.tilDto(oppholdsadresse, kodeverkService)).toList();
+        final var statsborgerskapDtoList = personMedHistorikk.statsborgerskap().stream()
+            .map(s -> StatsborgerskapTilDtoKonverter.tilDto(s, kodeverkService))
             .sorted(Comparator.comparing(StatsborgerskapDto::gyldigFraOgMed,
                 Comparator.nullsFirst(Comparator.reverseOrder())))
-            .collect(Collectors.toUnmodifiableList());
+            .toList();
         return new PersonopplysningerDto(bostedsadresseDtoList, kontaktadresseDtoList, oppholdsadresseDtoList,
             statsborgerskapDtoList);
     }

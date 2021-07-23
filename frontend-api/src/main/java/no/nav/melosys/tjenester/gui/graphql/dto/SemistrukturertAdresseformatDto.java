@@ -7,6 +7,6 @@ public record SemistrukturertAdresseformatDto(
     String adresselinje4,
     String postnummer,
     String poststed,
-    String landkode
+    String land
 ) {
 }

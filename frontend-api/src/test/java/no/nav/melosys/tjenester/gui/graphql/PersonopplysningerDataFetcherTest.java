@@ -26,7 +26,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -80,6 +80,7 @@ class PersonopplysningerDataFetcherTest {
                 Set.of(kontaktadresse_1, kontaktadresse_2), null, Set.of(oppholdsadresse_1, oppholdsadresse_2),
                 Set.of(statsborgerskap_1, statsborgerskap_2, statsborgerskap_3))
         );
+        when(kodeverkService.dekod(eq(FellesKodeverk.LANDKODER_ISO2), any())).thenReturn("My country");
         when(kodeverkService.dekod(FellesKodeverk.STATSBORGERSKAP_FREG, "AAA")).thenReturn("Testland A");
         when(kodeverkService.dekod(FellesKodeverk.STATSBORGERSKAP_FREG, "BBB")).thenReturn("Testland B");
         when(kodeverkService.dekod(FellesKodeverk.STATSBORGERSKAP_FREG, "CCC")).thenReturn("Testland C");

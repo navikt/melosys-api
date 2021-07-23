@@ -8,6 +8,6 @@ public record StrukturertAdresseformatDto(
     String postnummer,
     String poststed,
     String region,
-    String landkode
+    String land
 ) {
 }

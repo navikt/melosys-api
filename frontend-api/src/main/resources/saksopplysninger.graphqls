@@ -61,7 +61,7 @@ type SemistrukturertAdresseformat {
     adresselinje4: String
     postnummer: String
     poststed: String
-    landkode: String
+    land: String
 }
 
 type StrukturertAdresseformat {
@@ -72,7 +72,7 @@ type StrukturertAdresseformat {
     postnummer: String
     poststed: String
     region: String
-    landkode: String!
+    land: String!
 }
 
 type Statsborgerskap {

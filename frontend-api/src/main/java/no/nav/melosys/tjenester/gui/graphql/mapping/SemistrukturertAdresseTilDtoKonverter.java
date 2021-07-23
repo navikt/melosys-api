@@ -1,13 +1,16 @@
 package no.nav.melosys.tjenester.gui.graphql.mapping;
 
+import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.adresse.SemistrukturertAdresse;
+import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.graphql.dto.SemistrukturertAdresseformatDto;
 
-public final class SemistrukturertAdresseTilDtoConverter {
-    private SemistrukturertAdresseTilDtoConverter() {
+public final class SemistrukturertAdresseTilDtoKonverter {
+    private SemistrukturertAdresseTilDtoKonverter() {
     }
 
-    public static SemistrukturertAdresseformatDto tilDto(SemistrukturertAdresse semistrukturertAdresse) {
+    public static SemistrukturertAdresseformatDto tilDto(SemistrukturertAdresse semistrukturertAdresse,
+                                                         KodeverkService kodeverkService) {
         if (semistrukturertAdresse == null) {
             return null;
         }
@@ -18,7 +21,7 @@ public final class SemistrukturertAdresseTilDtoConverter {
             semistrukturertAdresse.adresselinje4(),
             semistrukturertAdresse.postnr(),
             semistrukturertAdresse.poststed(),
-            semistrukturertAdresse.landkode()
+            kodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, semistrukturertAdresse.landkode())
         );
     }
 }
