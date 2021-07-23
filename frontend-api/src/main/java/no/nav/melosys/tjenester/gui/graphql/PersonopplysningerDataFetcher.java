@@ -11,6 +11,7 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.tjenester.gui.graphql.dto.PersonopplysningerDto;
 import no.nav.melosys.tjenester.gui.graphql.dto.StatsborgerskapDto;
 import no.nav.melosys.tjenester.gui.graphql.mapping.BostedsadresseTilDtoConverter;
+import no.nav.melosys.tjenester.gui.graphql.mapping.KontaktadresseTilDtoConverter;
 import no.nav.melosys.tjenester.gui.graphql.mapping.OppholdsadresseTilDtoConverter;
 import no.nav.melosys.tjenester.gui.graphql.mapping.StatsborgerskapTilDtoConverter;
 import org.springframework.stereotype.Component;
@@ -34,6 +35,9 @@ public class PersonopplysningerDataFetcher implements DataFetcher<Personopplysni
         final var bostedsadresseDtoList = personMedHistorikk.bostedsadresser().stream()
             .map(BostedsadresseTilDtoConverter::tilDto)
             .collect(Collectors.toUnmodifiableList());
+        final var kontaktadresseDtoList = personMedHistorikk.kontaktadresser().stream()
+            .map(KontaktadresseTilDtoConverter::tilDto)
+            .collect(Collectors.toUnmodifiableList());
         final var oppholdsadresseDtoList = personMedHistorikk.oppholdsadresser().stream()
             .map(OppholdsadresseTilDtoConverter::tilDto)
             .collect(Collectors.toUnmodifiableList());
@@ -43,6 +47,7 @@ public class PersonopplysningerDataFetcher implements DataFetcher<Personopplysni
             .sorted(Comparator.comparing(StatsborgerskapDto::gyldigFraOgMed,
                 Comparator.nullsFirst(Comparator.reverseOrder())))
             .collect(Collectors.toUnmodifiableList());
-        return new PersonopplysningerDto(bostedsadresseDtoList, oppholdsadresseDtoList, statsborgerskapDtoList);
+        return new PersonopplysningerDto(bostedsadresseDtoList, kontaktadresseDtoList, oppholdsadresseDtoList,
+            statsborgerskapDtoList);
     }
 }

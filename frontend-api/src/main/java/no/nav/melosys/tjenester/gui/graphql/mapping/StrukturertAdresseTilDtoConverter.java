@@ -8,6 +8,9 @@ public final class StrukturertAdresseTilDtoConverter {
     }
 
     public static StrukturertAdresseformatDto tilDto(StrukturertAdresse strukturertAdresse) {
+        if (strukturertAdresse == null) {
+            return null;
+        }
         return new StrukturertAdresseformatDto(
             strukturertAdresse.getTilleggsnavn(),
             strukturertAdresse.getGatenavn(),
