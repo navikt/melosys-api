@@ -1,7 +1,6 @@
 package no.nav.melosys.domain;
 
 public enum FellesKodeverk {
-
     ARBEIDSTIDSORDNINGER("Arbeidstidsordninger"),
     DEKNING_MEDL("DekningMedl"),
     DISKRESJONSKODER("Diskresjonskoder"),
@@ -14,7 +13,7 @@ public enum FellesKodeverk {
     KILDESYSTEM_MEDL("KildesystemMedl"),
     KJØNNSTYPER("Kjønnstyper"),
     LANDKODER("Landkoder"),
-    LANDKODERISO2("LandkoderISO2"),
+    LANDKODER_ISO2("LandkoderISO2"),
     LOVVALG_MEDL("LovvalgMedl"),
     PERIODESTATUS_MEDL("PeriodestatusMedl"),
     PERIODETYPE_MEDL("PeriodetypeMedl"),
@@ -29,7 +28,7 @@ public enum FellesKodeverk {
         this.navn = navn;
     }
 
-    private String navn;
+    private final String navn;
 
     public String getNavn() {
         return navn;

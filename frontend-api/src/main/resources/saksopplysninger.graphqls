@@ -17,7 +17,9 @@ type Saksopplysninger {
 }
 
 type Personopplysninger {
-    bostedsadresser: [Bostedsadresse]!
+    bostedsadresser: [Bostedsadresse!]!
+    kontaktadresser: [Kontaktadresse!]!
+    oppholdsadresser: [Oppholdsadresse!]!
     statsborgerskap: [Statsborgerskap!]!
 }
 
@@ -31,6 +33,37 @@ type Bostedsadresse {
     erHistorisk: Boolean!
 }
 
+type Kontaktadresse {
+    coAdressenavn: String
+    semistrukturertAdresse: SemistrukturertAdresseformat
+    strukturertAdresse: StrukturertAdresseformat
+    gyldigFraOgMed: DateTime
+    gyldigTilOgMed: DateTime
+    master: String!
+    kilde: String
+    erHistorisk: Boolean!
+}
+
+type Oppholdsadresse {
+    coAdressenavn: String
+    adresse: StrukturertAdresseformat!
+    gyldigFraOgMed: DateTime
+    gyldigTilOgMed: DateTime
+    master: String!
+    kilde: String
+    erHistorisk: Boolean!
+}
+
+type SemistrukturertAdresseformat {
+    adresselinje1: String
+    adresselinje2: String
+    adresselinje3: String
+    adresselinje4: String
+    postnummer: String
+    poststed: String
+    land: String!
+}
+
 type StrukturertAdresseformat {
     tilleggsnavn: String
     gatenavn: String
@@ -39,7 +72,7 @@ type StrukturertAdresseformat {
     postnummer: String
     poststed: String
     region: String
-    landkode: String!
+    land: String!
 }
 
 type Statsborgerskap {

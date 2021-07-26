@@ -5,8 +5,8 @@ import no.nav.melosys.domain.person.Statsborgerskap;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.graphql.dto.StatsborgerskapDto;
 
-public final class StatsborgerskapTilDtoConverter {
-    private StatsborgerskapTilDtoConverter() {
+public final class StatsborgerskapTilDtoKonverter {
+    private StatsborgerskapTilDtoKonverter() {
     }
 
     public static StatsborgerskapDto tilDto(Statsborgerskap statsborgerskap, KodeverkService kodeverkService) {

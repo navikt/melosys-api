@@ -5,9 +5,9 @@ public record StrukturertAdresseformatDto(
     String gatenavn,
     String husnummeEtasjeLeilighet,
     String postboks,
-    String postnummr,
+    String postnummer,
     String poststed,
     String region,
-    String landkode
+    String land
 ) {
 }
