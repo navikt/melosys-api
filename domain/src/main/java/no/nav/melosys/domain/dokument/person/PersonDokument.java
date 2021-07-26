@@ -16,6 +16,7 @@ import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.person.KjoennType;
 import no.nav.melosys.domain.person.Master;
 import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.domain.util.LandkoderUtils;
 
 
 /**
@@ -268,7 +269,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
             gjeldendePostadresse.adresselinje4,
             gjeldendePostadresse.postnr,
             gjeldendePostadresse.poststed,
-            gjeldendePostadresse.land != null ? gjeldendePostadresse.land.getKode() : null
+            gjeldendePostadresse.land != null ? LandkoderUtils.tilIso2(gjeldendePostadresse.land.getKode()) : null
         );
     }
 

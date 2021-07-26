@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
@@ -41,26 +42,27 @@ import static no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper.*;
 @Service
 public class BrevbestillingService {
 
-    private final DokumentServiceFasade dokumentServiceFasade;
     private final BrevmottakerService brevmottakerService;
-    private final PersondataFasade persondataFasade;
+    private final DokumentServiceFasade dokumentServiceFasade;
     private final EregFasade eregFasade;
-    private final KontaktopplysningService kontaktopplysningService;
     private final KodeverkService kodeverkService;
+    private final KontaktopplysningService kontaktopplysningService;
+    private final PersondataFasade persondataFasade;
+    private final Unleash unleash;
 
     @Autowired
-    public BrevbestillingService(DokumentServiceFasade dokumentServiceFasade,
-                                 BrevmottakerService brevmottakerService, PersondataFasade persondataFasade,
-                                 EregFasade eregFasade, KontaktopplysningService kontaktopplysningService,
-                                 KodeverkService kodeverkService) {
-        this.dokumentServiceFasade = dokumentServiceFasade;
+    public BrevbestillingService(BrevmottakerService brevmottakerService, DokumentServiceFasade dokumentServiceFasade,
+                                 EregFasade eregFasade, KodeverkService kodeverkService,
+                                 KontaktopplysningService kontaktopplysningService, PersondataFasade persondataFasade,
+                                 Unleash unleash) {
         this.brevmottakerService = brevmottakerService;
-        this.persondataFasade = persondataFasade;
+        this.dokumentServiceFasade = dokumentServiceFasade;
         this.eregFasade = eregFasade;
-        this.kontaktopplysningService = kontaktopplysningService;
         this.kodeverkService = kodeverkService;
+        this.kontaktopplysningService = kontaktopplysningService;
+        this.persondataFasade = persondataFasade;
+        this.unleash = unleash;
     }
-
 
     public MuligeMottakereDto hentMuligeMottakere(Produserbaredokumenter produserbaredokumenter, Behandling behandling, String orgnrTilValgtArbeidsgiver) {
         Mottakerliste mottakerliste = brevmottakerService.hentMottakerliste(produserbaredokumenter, behandling);
@@ -115,7 +117,7 @@ public class BrevbestillingService {
                 .medDokumentNavn("Kopi til bruker")
                 .medMottakerNavn(behandling.hentPersonDokument().getSammensattNavn())
                 .medRolle(BRUKER)
-                .medAktørId(behandling.getFagsak().hentBruker().getAktørId())
+                .medAktørId(behandling.getFagsak().hentBrukerID())
                 .build();
         } else {
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartKopi.getOrgnr());
@@ -195,11 +197,10 @@ public class BrevbestillingService {
         OrganisasjonDokument orgDokument = null;
 
         if (mottaker.getRolle() == Aktoersroller.BRUKER) {
-            persondata = (Persondata) persondataFasade.hentPersonFraTps(
-                    behandling.hentPersonDokument().hentFolkeregisterIdent(), Informasjonsbehov.STANDARD).getDokument();
-
-            } else if (mottaker.getRolle() == Aktoersroller.ARBEIDSGIVER || mottaker.getRolle() == Aktoersroller.REPRESENTANT) {
-                kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), mottaker.getOrgnr()).orElse(null);
+            persondata = hentPersondata(behandling);
+        } else if (mottaker.getRolle() == Aktoersroller.ARBEIDSGIVER || mottaker.getRolle() == Aktoersroller.REPRESENTANT) {
+            kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(),
+                mottaker.getOrgnr()).orElse(null);
             String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : mottaker.getOrgnr();
             orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();
         }
@@ -213,6 +214,14 @@ public class BrevbestillingService {
                 kodeverkService.dekod(FellesKodeverk.POSTNUMMER, persondata.hentGjeldendePostadresse().postnr()))
             .medLand(mapLandForAdresse(orgDokument, persondata))
             .build();
+    }
+
+    private Persondata hentPersondata(Behandling behandling) {
+        if (unleash.isEnabled("melosys.brev.adresser.pdl")) {
+            return persondataFasade.hentPerson(behandling.getFagsak().hentBrukerID());
+        }
+        return (Persondata) persondataFasade.hentPersonFraTps(behandling.hentPersonDokument().hentFolkeregisterIdent(),
+            Informasjonsbehov.STANDARD).getDokument();
     }
 
     @Transactional

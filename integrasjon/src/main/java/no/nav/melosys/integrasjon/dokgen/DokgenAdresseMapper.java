@@ -18,7 +18,8 @@ public final class DokgenAdresseMapper {
         return org == null ? persondata.getSammensattNavn() : org.getNavn();
     }
 
-    public static List<String> mapAdresselinjer(OrganisasjonDokument org, String kontaktperson, Kontaktopplysning kontaktopplysning, Persondata persondata) {
+    public static List<String> mapAdresselinjer(OrganisasjonDokument org, String kontaktperson,
+                                                Kontaktopplysning kontaktopplysning, Persondata persondata) {
         List<String> adresselinjer;
         if (org == null) {
             adresselinjer = persondata.hentGjeldendePostadresse().adresselinjer();
