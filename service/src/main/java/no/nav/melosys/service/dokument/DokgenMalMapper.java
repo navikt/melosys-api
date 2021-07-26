@@ -102,7 +102,7 @@ public class DokgenMalMapper {
         if (hasText(landkode)) {
             landnavn = kodeverkService.dekod(FellesKodeverk.LANDKODER, landkode);
             if (landnavn.equals("UKJENT")) {
-                landnavn = kodeverkService.dekod(FellesKodeverk.LANDKODERISO2, landkode);
+                landnavn = kodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, landkode);
             }
         }
         return landnavn.equals("UKJENT") ? "" : landnavn;

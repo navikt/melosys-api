@@ -30,7 +30,9 @@ public interface HarMetadata {
     }
 
     default String hentKilde() {
-        return metadata().endringer().stream().max(Comparator.comparing(Endring::registrert)).map(Endring::kilde)
-            .orElseThrow(() -> new IllegalArgumentException("Kilde er obligatorisk i PDL-endringer."));
+        return metadata().endringer().stream().
+            max(Comparator.comparing(Endring::registrert))
+            .map(Endring::kilde)
+            .orElse(null);
     }
 }

@@ -50,7 +50,7 @@ public final class PersonMedHistorikkOversetter {
 
     private static PersonMedHistorikk lagPersonMedHistorikk(Person person, KodeverkService kodeverkService) {
         return new PersonMedHistorikk(
-            BostedsadresseOversetter.oversett(person.bostedsadresse(), kodeverkService),
+            BostedsadresseOversetter.oversettMedHistorikk(person.bostedsadresse(), kodeverkService),
             DoedsfallOversetter.oversett(person.doedsfall()), FoedselOversetter.oversett(person.foedsel()),
             FolkeregisteridentOversetter.oversett(person.folkeregisteridentifikator()),
             KjoennOversetter.oversett(person.kjoenn()),

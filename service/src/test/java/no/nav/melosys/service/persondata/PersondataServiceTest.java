@@ -90,7 +90,7 @@ class PersondataServiceTest {
         when(pdlConsumer.hentPersonMedHistorikk(anyString(), anyBoolean())).thenReturn(lagPerson());
 
         final var personMedHistorikk = persondataService.hentPersonMedHistorikk(1L);
-        assertThat(personMedHistorikk.bostedsadresse()).isNotNull();
+        assertThat(personMedHistorikk.bostedsadresser()).isNotEmpty();
         assertThat(personMedHistorikk.dødsfall()).isEqualTo(new Doedsfall(LocalDate.MAX));
         assertThat(personMedHistorikk.fødsel()).isEqualTo(new Foedsel(LocalDate.parse("1970-01-01"), 1970, "NOR", "fødested"));
         assertThat(personMedHistorikk.folkeregisteridentifikator()).isEqualTo(new Folkeregisteridentifikator("IdNr"));
