@@ -104,7 +104,7 @@ public class InngangsvilkaarService {
     private Set<Land> hentStatsborgerskapForPerioden(long behandlingID, ErPeriode periode) {
         if (unleash.isEnabled("melosys.pdl.statsborgerskap")) {
             final var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
-            final String brukerIdent = behandling.getFagsak().hentBruker().getAktørId();
+            final String brukerIdent = behandling.getFagsak().hentBrukerID();
             return avgjørGyldigeStatsborgerskapFraPdlForPerioden(persondataFasade.hentStatsborgerskap(brukerIdent), periode);
         }
         return Optional.ofNullable(avgjørStatsborgerskapFraTPS(behandlingID, periode))

@@ -377,7 +377,7 @@ public class FagsakService {
         }
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
-            replikertBehandling, replikertBehandling.getInitierendeJournalpostId(), fagsak.hentBruker().getAktørId(), SubjectHandler.getInstance().getUserID()
+            replikertBehandling, replikertBehandling.getInitierendeJournalpostId(), fagsak.hentBrukerID(), SubjectHandler.getInstance().getUserID()
         );
         avsluttTidligereMedlPeriode(behandlingsresultat);
         return replikertBehandling.getId();
