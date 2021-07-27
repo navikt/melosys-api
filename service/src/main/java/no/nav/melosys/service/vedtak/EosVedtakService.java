@@ -113,7 +113,7 @@ public class EosVedtakService {
         final long behandlingID = behandling.getId();
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         if (!behandlingsresultat.hentValidertLovvalgsperiode().erArtikkel12()) {
-            throw new FunksjonellException("Endring av vedtaksperiode er bare tilpasset art. 12");
+            throw new FunksjonellException("Behandling av forkortet periode gjelder kun art. 12.");
         }
         if (prosessinstansService.harAktivProsessinstans(behandlingID)) {
             throw new FunksjonellException("Det finnes allerede en aktiv prosess for behandling " + behandling);
