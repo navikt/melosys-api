@@ -1,18 +1,17 @@
 package no.nav.melosys.domain.behandlingsgrunnlag.data;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class Soeknadsland {
     public List<String> landkoder = new ArrayList<>();
 
-    public boolean erUkjenteEllerAlleEosLand = false;
+    public boolean erUkjenteEllerAlleEosLand;
 
-    public static Soeknadsland av(Collection<String> landkoder) {
-        Soeknadsland soeknadsland = new Soeknadsland();
-        soeknadsland.landkoder = List.copyOf(landkoder);
-        soeknadsland.erUkjenteEllerAlleEosLand = false;
-        return soeknadsland;
+    public Soeknadsland() {}
+
+    public Soeknadsland(List<String> landkoder, boolean erUkjenteEllerAlleEosLand) {
+        this.landkoder = landkoder;
+        this.erUkjenteEllerAlleEosLand = erUkjenteEllerAlleEosLand;
     }
 }
