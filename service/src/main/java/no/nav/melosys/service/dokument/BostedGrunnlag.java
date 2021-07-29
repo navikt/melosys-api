@@ -1,6 +1,5 @@
 package no.nav.melosys.service.dokument;
 
-import java.time.LocalDate;
 import java.util.Optional;
 
 import no.nav.melosys.domain.FellesKodeverk;

@@ -50,7 +50,7 @@ public record Personopplysninger(
 
     @Override
     public boolean manglerBostedsadresse() {
-        return hentBostedsadresse().isEmpty();
+        return finnBostedsadresse().isEmpty();
     }
 
     @Override
@@ -90,7 +90,7 @@ public record Personopplysninger(
 
     @Override
     public List<Familiemedlem> getFamiliemedlemmer() {
-        throw new UnsupportedOperationException(); // TODO
+        return Collections.emptyList(); // TODO
     }
 
     @Override
@@ -104,8 +104,18 @@ public record Personopplysninger(
     }
 
     @Override
-    public Optional<Bostedsadresse> hentBostedsadresse() {
+    public Optional<Bostedsadresse> finnBostedsadresse() {
         return Optional.ofNullable(bostedsadresse);
+    }
+
+    @Override
+    public Optional<Kontaktadresse> finnKontaktadresse() {
+        return kontaktadresser.stream().max(Comparator.comparing(Kontaktadresse::registrertDato));
+    }
+
+    @Override
+    public Optional<Oppholdsadresse> finnOppholdsadresse() {
+        return oppholdsadresser.stream().max(Comparator.comparing(Oppholdsadresse::registrertDato));
     }
 
     @Override
@@ -149,7 +159,7 @@ public record Personopplysninger(
     }
 
     private Postadresse lagPostadresseFraBostedsadresse() {
-        return hentBostedsadresse()
+        return finnBostedsadresse()
             .map(Bostedsadresse::strukturertAdresse)
             .map(Postadresse::lagPostadresse)
             .orElseThrow(() -> new IkkeFunnetException("Forventer bostedsadresse"));

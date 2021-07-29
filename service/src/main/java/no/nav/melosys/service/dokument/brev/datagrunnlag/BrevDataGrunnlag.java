@@ -28,7 +28,7 @@ public class BrevDataGrunnlag implements DataGrunnlag {
         this.behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         this.person = behandling.hentPersonDokument();
         this.avklarteVirksomheterGrunnlag = new AvklarteVirksomheterGrunnlag(behandling, avklarteVirksomheterService);
-        this.bostedGrunnlag = new BostedGrunnlag(behandlingsgrunnlagData, person.hentBostedsadresse().orElse(null),
+        this.bostedGrunnlag = new BostedGrunnlag(behandlingsgrunnlagData, person.finnBostedsadresse().orElse(null),
             kodeverkService);
         this.arbeidsstedGrunnlag = new ArbeidsstedGrunnlag(
             avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(behandling.getId()),
