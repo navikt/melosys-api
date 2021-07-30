@@ -4,16 +4,19 @@ import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.Behandling.*;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 
 @Service
 public class EndreBehandlingstemaService {
@@ -21,11 +24,16 @@ public class EndreBehandlingstemaService {
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final OppgaveService oppgaveService;
+    private final BehandlingsgrunnlagService behandlingsgrunnlagService;
 
-    public EndreBehandlingstemaService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService, OppgaveService oppgaveService) {
+    public EndreBehandlingstemaService(BehandlingService behandlingService,
+                                       BehandlingsresultatService behandlingsresultatService,
+                                       OppgaveService oppgaveService,
+                                       BehandlingsgrunnlagService behandlingsgrunnlagService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
+        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
     }
 
     @Transactional(readOnly = true)
@@ -53,6 +61,9 @@ public class EndreBehandlingstemaService {
             behandlingService.lagre(behandling);
             behandlingsresultatService.tømBehandlingsresultat(behandlingsID);
             oppdaterOppgave(behandling);
+            if (nyttTema != ARBEID_FLERE_LAND) {
+                oppdaterBehandlingsgrunnlag(behandlingsID);
+            }
         } else {
             throw new FunksjonellException("Ikke mulig å endre behandlingstema");
         }
@@ -74,5 +85,11 @@ public class EndreBehandlingstemaService {
 
     private boolean kanOppdatereBehandlingstema(Behandling behandling) {
         return behandling.erAktiv() && !behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).erArtikkel16MedSendtAnmodningOmUnntak();
+    }
+
+    private void oppdaterBehandlingsgrunnlag(long behandlingsID) {
+        Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingsID);
+        behandlingsgrunnlag.getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand = false;
+        behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandlingsgrunnlag);
     }
 }
