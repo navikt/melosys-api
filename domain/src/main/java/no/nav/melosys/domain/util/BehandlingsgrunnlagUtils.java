@@ -29,9 +29,10 @@ public final class BehandlingsgrunnlagUtils {
      * og sjekker at det er minst et søknadsland oppgitt i søknad
      */
     public static List<Landkoder> hentSøknadslandkoder(BehandlingsgrunnlagData grunnlagdata) {
-        List<String> søknadsland = hentSøknadsland(grunnlagdata).landkoder;
-        if (søknadsland.isEmpty()) {
-            throw new IllegalStateException("Søknad mangler søknadsland");
+        Soeknadsland soeknadsland = hentSøknadsland(grunnlagdata);
+        List<String> søknadsland = soeknadsland.landkoder;
+        if (søknadsland.isEmpty() && soeknadsland.erUkjenteEllerAlleEosLand == false) {
+            throw new IllegalStateException("Søknad mangler søknadsland og land er ikke markert som ukjente eller alle Eøs-land.");
         }
         return søknadsland.stream()
             .map(Landkoder::valueOf)
