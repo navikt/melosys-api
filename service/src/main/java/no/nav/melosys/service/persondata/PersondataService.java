@@ -80,7 +80,7 @@ public class PersondataService implements PersondataFasade {
     @Override
     public PersonMedHistorikk hentPersonMedHistorikk(long behandlingID) {
         final var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
-        final String ident = behandling.getFagsak().hentBruker().getAktørId();
+        final String ident = behandling.getFagsak().hentAktørID();
         if (behandling.erInaktiv()) {
             /*TODO
                - Mapping fra TPS for gamle behandlinger opprettet før PDL
