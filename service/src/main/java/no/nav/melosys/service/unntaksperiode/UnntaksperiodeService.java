@@ -49,7 +49,7 @@ public class UnntaksperiodeService {
     @Transactional
     public void godkjennPeriode(long behandlingID, boolean varsleUtland, String fritekst) {
         Behandling behandling = hentOgValiderBehandling(behandlingID);
-        validerPeriode(behandling);
+        validerPeriode(behandling.hentPeriode(), behandlingID);
         opprettLovvalgsperiodeHvisIkkeEksisterer(behandling);
         behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.GODKJENT);
         prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(behandling, varsleUtland, fritekst);
@@ -105,10 +105,9 @@ public class UnntaksperiodeService {
         }
     }
 
-    private void validerPeriode(Behandling behandling) {
-        ErPeriode periode = behandling.hentPeriode();
+    private void validerPeriode(ErPeriode periode, long behandlingID) {
         if (PeriodeKontroller.feilIPeriode(periode.getFom(), periode.getTom())) {
-            throw new FunksjonellException(String.format("Behandling %s har feil i perioden", behandling.getId()));
+            throw new FunksjonellException(String.format("Behandling %s har feil i perioden", behandlingID));
         }
     }
 
