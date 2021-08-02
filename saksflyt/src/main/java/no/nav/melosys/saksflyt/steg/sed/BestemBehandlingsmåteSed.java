@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.steg.sed;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsmaate;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -60,7 +59,7 @@ public class BestemBehandlingsmåteSed implements StegBehandler {
             oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
                 behandling,
                 prosessinstans.hentJournalpostID(),
-                behandling.getFagsak().hentBrukerID(),
+                behandling.getFagsak().hentAktørID(),
                 prosessinstans.hentSaksbehandlerHvisTilordnes()
             );
         }

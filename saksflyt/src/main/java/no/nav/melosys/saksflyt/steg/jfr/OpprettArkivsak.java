@@ -45,7 +45,7 @@ public class OpprettArkivsak implements StegBehandler {
             throw new FunksjonellException("Kan ikke knytte fagsak " + fagsak.getSaksnummer() + " til ny arkivsak: allerede knyttet til " + fagsak.getGsakSaksnummer());
         }
 
-        String aktørId = fagsak.hentBrukerID();
+        String aktørId = fagsak.hentAktørID();
         String saksnummer = fagsak.getSaksnummer();
         Behandlingstema behandlingstema = behandling.getTema();
 

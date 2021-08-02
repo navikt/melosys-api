@@ -351,7 +351,7 @@ class BrevbestillingServiceTest {
         assertThat(brevAdresser.get(0))
             .extracting(BrevAdresse::getMottakerNavn, BrevAdresse::getOrgnr, BrevAdresse::getAdresselinjer, BrevAdresse::getPostnr, BrevAdresse::getPoststed, BrevAdresse::getLand)
             .containsExactly("Nordmann Ola", null, List.of("gatenavnKontaktadressePDL"), "0123", "Oslo", "NO");
-        fakeUnleash.disableAll();
+        //fakeUnleash.disableAll();
     }
 
     @Test

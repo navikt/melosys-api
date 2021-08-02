@@ -117,7 +117,7 @@ public class BrevbestillingService {
                 .medDokumentNavn("Kopi til bruker")
                 .medMottakerNavn(behandling.hentPersonDokument().getSammensattNavn())
                 .medRolle(BRUKER)
-                .medAktørId(behandling.getFagsak().hentBrukerID())
+                .medAktørId(behandling.getFagsak().hentAktørID())
                 .build();
         } else {
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartKopi.getOrgnr());
@@ -218,7 +218,7 @@ public class BrevbestillingService {
 
     private Persondata hentPersondata(Behandling behandling) {
         if (unleash.isEnabled("melosys.brev.adresser.pdl")) {
-            return persondataFasade.hentPerson(behandling.getFagsak().hentBrukerID());
+            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
         }
         return (Persondata) persondataFasade.hentPersonFraTps(behandling.hentPersonDokument().hentFolkeregisterIdent(),
             Informasjonsbehov.STANDARD).getDokument();
