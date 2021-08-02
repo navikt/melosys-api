@@ -13,6 +13,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.person.*;
+import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
@@ -82,6 +83,31 @@ class PersondataServiceTest {
         assertThatExceptionOfType(IkkeFunnetException.class)
             .isThrownBy(() -> persondataService.hentFolkeregisterIdent("123"))
             .withMessageContaining("Finner ikke folkeregisterident");
+    }
+
+    @Test
+    void hentPersonMedFamilie() {
+        when(pdlConsumer.hentPerson(anyString())).thenReturn(lagPerson());
+        when(pdlConsumer.hentBarnEllerForelder(anyString())).thenReturn(lagPerson());
+        when(pdlConsumer.hentRelatertVedSivilstand(anyString())).thenReturn(lagPerson());
+
+        final Personopplysninger persondata = (Personopplysninger) persondataService.hentPerson("ident",
+            Informasjonsbehov.MED_FAMILIERELASJONER);
+
+        assertThat(persondata.bostedsadresse()).isNotNull();
+        assertThat(persondata.dødsfall()).isEqualTo(new Doedsfall(LocalDate.MAX));
+        assertThat(persondata.fødsel()).isEqualTo(new Foedsel(LocalDate.parse("1970-01-01"), 1970, "NOR", "fødested"));
+        assertThat(persondata.folkeregisteridentifikator()).isEqualTo(new Folkeregisteridentifikator("IdNr"));
+        assertThat(persondata.kjønn()).isEqualTo(KjoennType.UKJENT);
+        assertThat(persondata.navn()).isEqualTo(new Navn("fornavn", "mellomnavn", "etternavn"));
+        assertThat(persondata.statsborgerskap()).containsExactlyInAnyOrder(
+            new Statsborgerskap("AIA", null, LocalDate.parse("1979-11-18"),
+                LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
+            new Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null,
+                null, "PDL", "Dolly", false));
+        assertThat(persondata.familiemedlemmer()).isNotEmpty()
+            .anyMatch(Familiemedlem::erBarn)
+            .anyMatch(Familiemedlem::erRelatertVedSivilstand);
     }
 
     @Test

@@ -1,8 +1,7 @@
 package no.nav.melosys.service.persondata;
 
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import no.finn.unleash.Unleash;
@@ -10,22 +9,25 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.Statsborgerskap;
+import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
 import no.nav.melosys.integrasjon.pdl.dto.person.Adressebeskyttelse;
+import no.nav.melosys.integrasjon.pdl.dto.person.ForelderBarnRelasjon;
+import no.nav.melosys.integrasjon.pdl.dto.person.Person;
+import no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.persondata.mapping.NavnOversetter;
-import no.nav.melosys.service.persondata.mapping.PersonMedHistorikkOversetter;
-import no.nav.melosys.service.persondata.mapping.PersonopplysningerOversetter;
-import no.nav.melosys.service.persondata.mapping.StasborgerskapOversetter;
+import no.nav.melosys.service.persondata.mapping.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+
+import static java.time.temporal.ChronoUnit.YEARS;
 
 @Service
 @Primary
@@ -74,7 +76,63 @@ public class PersondataService implements PersondataFasade {
 
     @Override
     public Persondata hentPerson(String ident) {
-        return PersonopplysningerOversetter.oversett(pdlConsumer.hentPerson(ident), kodeverkService);
+        return hentPerson(ident, Informasjonsbehov.STANDARD);
+    }
+
+    @Override
+    public Persondata hentPerson(String ident, Informasjonsbehov informasjonsbehov) {
+        return switch (informasjonsbehov) {
+            case INGEN, STANDARD -> PersonopplysningerOversetter.oversett(pdlConsumer.hentPerson(ident),
+                kodeverkService);
+            case MED_FAMILIERELASJONER -> lagPersondataMedFamilie(ident);
+        };
+    }
+
+    private Persondata lagPersondataMedFamilie(String ident) {
+        final var person = pdlConsumer.hentPerson(ident);
+        final Set<Familiemedlem> familiemedlemmer = new HashSet<>();
+        if (opplysningerOmForeldreTilPersonØnskes(person)) {
+            familiemedlemmer.addAll(hentForeldre(person.forelderBarnRelasjon()));
+        }
+        familiemedlemmer.addAll(hentRelatertVedSivilstand(person.sivilstand()));
+        familiemedlemmer.addAll(hentBarn(person.forelderBarnRelasjon()));
+        return PersonopplysningerOversetter.oversettMedFamilie(person, familiemedlemmer, kodeverkService);
+    }
+
+    private boolean opplysningerOmForeldreTilPersonØnskes(Person person) {
+        // TODO spør fag!
+        return YEARS.between(FoedselOversetter.oversett(person.foedsel()).fødselsdato(), LocalDate.now()) < 18;
+    }
+
+    private Set<Familiemedlem> hentForeldre(Collection<ForelderBarnRelasjon> forelderBarnRelasjoner) {
+        Set<Familiemedlem> set = new HashSet<>();
+        for (ForelderBarnRelasjon forelderBarnRelasjon : forelderBarnRelasjoner) {
+            if (forelderBarnRelasjon.erForelder()) {
+                Person person = pdlConsumer.hentBarnEllerForelder(forelderBarnRelasjon.relatertPersonsIdent());
+                Familiemedlem forelder = FamiliemedlemOversetter.oversettForelder(person,
+                    forelderBarnRelasjon.relatertPersonsRolle());
+                set.add(forelder);
+            }
+        }
+        return Collections.unmodifiableSet(set);
+    }
+
+    private Set<Familiemedlem> hentRelatertVedSivilstand(Collection<Sivilstand> sivilstandRelasjoner) {
+        return sivilstandRelasjoner.stream()
+            .map(Sivilstand::relatertVedSivilstand)
+            .filter(Objects::nonNull)
+            .map(pdlConsumer::hentRelatertVedSivilstand)
+            .map(FamiliemedlemOversetter::oversettRelatertVedSivilstand)
+            .collect(Collectors.toUnmodifiableSet());
+    }
+
+    private Set<Familiemedlem> hentBarn(Collection<ForelderBarnRelasjon> forelderBarnRelasjoner) {
+        return forelderBarnRelasjoner.stream()
+            .filter(ForelderBarnRelasjon::erBarn)
+            .map(ForelderBarnRelasjon::relatertPersonsIdent)
+            .map(pdlConsumer::hentBarnEllerForelder)
+            .map(FamiliemedlemOversetter::oversettBarn)
+            .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override

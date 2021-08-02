@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.brev.Postadresse;
@@ -67,7 +68,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         return bostedsadresse.erTom();
     }
 
-    @Override
     public Optional<Familiemedlem> hentAnnenForelder(String fnrGjeldendeForelder) {
         return familiemedlemmer.stream()
             .filter(Familiemedlem::erForelder)
@@ -193,9 +193,13 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.sammensattNavn = sammensattNavn;
     }
 
-    @Override
     public List<Familiemedlem> getFamiliemedlemmer() {
         return familiemedlemmer;
+    }
+
+    @Override
+    public Set<no.nav.melosys.domain.person.familie.Familiemedlem> hentFamiliemedlemmer() {
+        return familiemedlemmer.stream().map(Familiemedlem::tilDomene).collect(Collectors.toUnmodifiableSet());
     }
 
     public void setFamiliemedlemmer(List<Familiemedlem> familiemedlemmer) {

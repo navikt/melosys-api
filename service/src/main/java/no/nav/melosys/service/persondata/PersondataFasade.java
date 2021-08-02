@@ -18,6 +18,8 @@ public interface PersondataFasade {
 
     Persondata hentPerson(String ident);
 
+    Persondata hentPerson(String ident, Informasjonsbehov informasjonsbehov);
+
     @Deprecated
     Saksopplysning hentPersonhistorikk(String fnr, LocalDate dato);
 
