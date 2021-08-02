@@ -57,7 +57,7 @@ class UtstedtA1ProducerTest {
     private static class MockA1UtstedtMeldingProducerFactory implements ProducerFactory<String, UtstedtA1Melding> {
         @Override
         public Producer<String, UtstedtA1Melding> createProducer() {
-            return new MockProducer<>(true, new StringSerializer(), new JsonSerializer<>(new ObjectMapper()));
+            return new MockProducer<>(true, new StringSerializer(), new JsonSerializer<>(OBJECT_MAPPER));
         }
 
         @Override

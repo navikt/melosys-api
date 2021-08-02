@@ -87,7 +87,11 @@ public class OrganisasjonDokument extends AbstraktOrganisasjon implements Saksop
         this.enhetstype = enhetstype;
     }
 
-    public static StrukturertAdresse hentTilgjengeligAdresse(OrganisasjonDokument org) {
-        return org.getPostadresse() == null ? org.getForretningsadresse() : org.getPostadresse();
+    public StrukturertAdresse hentTilgjengeligAdresse() {
+        return postadresseMangler() ? getForretningsadresse() : getPostadresse();
+    }
+
+    private boolean postadresseMangler() {
+        return getPostadresse() == null || getPostadresse().erTom();
     }
 }
