@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.jackson.serialize;
+package no.nav.melosys.tjenester.gui.config.jackson.serialize;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
