@@ -1,7 +1,6 @@
 package no.nav.melosys.tjenester.gui.config;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
@@ -34,8 +33,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        converters.removeAll(converters.stream()
-            .filter(MappingJackson2HttpMessageConverter.class::isInstance).collect(Collectors.toSet()));
+        converters.removeIf(MappingJackson2HttpMessageConverter.class::isInstance);
         converters.add(new MappingJackson2HttpMessageConverter(apiObjectMapper()));
     }
 
