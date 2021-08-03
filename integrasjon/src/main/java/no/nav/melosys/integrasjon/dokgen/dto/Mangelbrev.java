@@ -6,10 +6,7 @@ import java.time.Period;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
@@ -35,14 +32,14 @@ public class Mangelbrev extends DokgenDto {
 
     protected Mangelbrev(MangelbrevBrevbestilling brevbestilling) {
         super(brevbestilling);
-        Fagsak fagsak = brevbestilling.getBehandling().getFagsak();
+        var fagsak = brevbestilling.getBehandling().getFagsak();
 
         this.datoMottatt = brevbestilling.getForsendelseMottatt();
         this.datoVedtatt = brevbestilling.getVedtaksdato();
         this.datoInnsendingsfrist = Instant.now().plus(Period.ofWeeks(DOKUMENTASJON_SVARFRIST_UKER_MANGELBREV));
         this.sakstype = fagsak.getType().getKode();
         this.behandlingstype = fagsak.getSistOppdaterteBehandling().getType().getKode();
-        this.saksbehandlerNavn = fagsak.getEndretAv();
+        this.saksbehandlerNavn = brevbestilling.getSaksbehandlerNavn();
         this.manglerInfoFritekst = brevbestilling.getManglerInfoFritekst();
         this.innledningFritekst = brevbestilling.getInnledningFritekst();
     }

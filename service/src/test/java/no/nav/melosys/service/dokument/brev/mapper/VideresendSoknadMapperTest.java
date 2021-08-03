@@ -9,7 +9,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.service.dokument.brev.BrevDataVideresend;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 
@@ -36,7 +36,7 @@ public class VideresendSoknadMapperTest {
     }
 
     private BrevDataVideresend lagBrevDataVideresend() {
-        BrevDataVideresend brevDataVideresend = new BrevDataVideresend(new BrevbestillingDto(), "Saksbehandler");
+        BrevDataVideresend brevDataVideresend = new BrevDataVideresend(new BrevbestillingRequest(), "Saksbehandler");
         brevDataVideresend.bostedsland = Landkoder.NO.getBeskrivelse();
 
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();

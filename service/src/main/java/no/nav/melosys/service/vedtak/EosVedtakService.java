@@ -109,19 +109,23 @@ public class EosVedtakService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    public void endreVedtak(Behandling behandling, Endretperiode endretperiode, String fritekst, String fritekstSed) {
-        long behandlingID = behandling.getId();
-        log.info("Endrer vedtak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
-        avklartefaktaService.leggTilBegrunnelse(behandlingID, Avklartefaktatyper.AARSAK_ENDRING_PERIODE, endretperiode.getKode());
-
+    public void endreVedtaksperiode(Behandling behandling, Endretperiode endretperiode, String fritekst, String fritekstSed) {
+        final long behandlingID = behandling.getId();
+        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+        if (!behandlingsresultat.hentValidertLovvalgsperiode().erArtikkel12()) {
+            throw new FunksjonellException("Behandling av forkortet periode gjelder kun art. 12.");
+        }
         if (prosessinstansService.harAktivProsessinstans(behandlingID)) {
             throw new FunksjonellException("Det finnes allerede en aktiv prosess for behandling " + behandling);
         }
+        avklartefaktaService.leggTilBegrunnelse(behandlingID, Avklartefaktatyper.AARSAK_ENDRING_PERIODE, endretperiode.getKode());
         prosessinstansService.opprettProsessinstansForkortPeriode(
             behandling,
             fritekst,
             fritekstSed
         );
+        log.info("Endrer vedtaksperiode for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(),
+            behandlingID);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
@@ -146,7 +150,7 @@ public class EosVedtakService {
                                     Behandling behandling,
                                     Behandlingsresultat behandlingsresultat) throws ValideringException {
         Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
-        String fnr = persondataFasade.hentFolkeregisterIdent(behandling.getFagsak().hentBruker().getAktørId());
+        String fnr = persondataFasade.hentFolkeregisterIdent(behandling.getFagsak().hentAktørID());
 
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()

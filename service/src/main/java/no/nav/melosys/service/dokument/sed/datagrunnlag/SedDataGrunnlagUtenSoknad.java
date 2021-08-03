@@ -13,7 +13,7 @@ public class SedDataGrunnlagUtenSoknad implements SedDataGrunnlag {
     public SedDataGrunnlagUtenSoknad(Behandling behandling, KodeverkService kodeverkService) {
         this.behandling = behandling;
         this.persondata = behandling.hentPersonDokument();
-        this.bostedGrunnlag = new BostedGrunnlag(null, persondata, kodeverkService);
+        this.bostedGrunnlag = new BostedGrunnlag(null, persondata.hentBostedsadresse().orElse(null), kodeverkService);
     }
 
     @Override

@@ -8,7 +8,6 @@ import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.person.Persondata;
 
-import static no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument.hentTilgjengeligAdresse;
 import static org.springframework.util.StringUtils.hasText;
 
 public final class DokgenAdresseMapper {
@@ -19,12 +18,13 @@ public final class DokgenAdresseMapper {
         return org == null ? persondata.getSammensattNavn() : org.getNavn();
     }
 
-    public static List<String> mapAdresselinjer(OrganisasjonDokument org, String kontaktperson, Kontaktopplysning kontaktopplysning, Persondata persondata) {
+    public static List<String> mapAdresselinjer(OrganisasjonDokument org, String kontaktperson,
+                                                Kontaktopplysning kontaktopplysning, Persondata persondata) {
         List<String> adresselinjer;
         if (org == null) {
-            adresselinjer = persondata.getGjeldendePostadresse().adresselinjer();
+            adresselinjer = persondata.hentGjeldendePostadresse().adresselinjer();
         } else {
-            StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
+            StrukturertAdresse orgAdresse = org.hentTilgjengeligAdresse();
             adresselinjer = new ArrayList<>();
             if (hasText(kontaktperson)) {
                 adresselinjer.add("Att: " + kontaktperson);
@@ -41,9 +41,9 @@ public final class DokgenAdresseMapper {
     public static String mapPostnr(OrganisasjonDokument org, Persondata persondata) {
         String postNr;
         if (org == null) {
-            postNr = persondata.getGjeldendePostadresse().postnr;
+            postNr = persondata.hentGjeldendePostadresse().postnr();
         } else {
-            StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
+            StrukturertAdresse orgAdresse = org.hentTilgjengeligAdresse();
             postNr = orgAdresse.getPostnummer();
         }
         return postNr;
@@ -56,22 +56,22 @@ public final class DokgenAdresseMapper {
     public static String mapPoststed(OrganisasjonDokument org, Persondata persondata) {
         String poststed;
         if (org == null) {
-            poststed = persondata.getGjeldendePostadresse().poststed;
+            poststed = persondata.hentGjeldendePostadresse().poststed();
         } else {
-            StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
+            StrukturertAdresse orgAdresse = org.hentTilgjengeligAdresse();
             poststed = orgAdresse.getPoststed();
         }
         return poststed;
     }
 
     public static String mapLandForAdresse(OrganisasjonDokument org, Persondata persondata) {
-        String land;
+        String landkode;
         if (org == null) {
-            land = persondata.getGjeldendePostadresse().land != null ? persondata.getGjeldendePostadresse().land.toString() : null;
+            landkode = persondata.hentGjeldendePostadresse().landkode();
         } else {
-            StrukturertAdresse orgAdresse = hentTilgjengeligAdresse(org);
-            land = orgAdresse.getLandkode() != null ? orgAdresse.getLandkode() : null;
+            StrukturertAdresse orgAdresse = org.hentTilgjengeligAdresse();
+            landkode = orgAdresse.getLandkode() != null ? orgAdresse.getLandkode() : null;
         }
-        return land;
+        return landkode;
     }
 }

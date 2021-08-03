@@ -73,10 +73,10 @@ public class Bostedsadresse {
     }
 
     public boolean erTom() {
-        return gateadresse.erTom() &&
-            StringUtils.isEmpty(postnr) &&
-            StringUtils.isEmpty(poststed) &&
-            StringUtils.isEmpty(land.getKode());
+        return (gateadresse == null || gateadresse.erTom())
+            && StringUtils.isEmpty(postnr)
+            && StringUtils.isEmpty(poststed)
+            && StringUtils.isEmpty(land.getKode());
     }
 
     public StrukturertAdresse tilStrukturertAdresse() {

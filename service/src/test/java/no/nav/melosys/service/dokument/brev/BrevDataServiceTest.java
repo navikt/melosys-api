@@ -123,7 +123,7 @@ class BrevDataServiceTest {
     @Test
     void lagForvaltningsmelding_representantErNull_tilBruker() {
         Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
-        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
         Aktoer mottaker = lagAktør(Aktoersroller.BRUKER);
 
@@ -156,7 +156,7 @@ class BrevDataServiceTest {
         Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
         behandling.getFagsak().getAktører().add(hentRepresentantAktør());
 
-        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
         Aktoer mottaker = lagAktør(Aktoersroller.REPRESENTANT);
@@ -174,7 +174,7 @@ class BrevDataServiceTest {
     @Test
     void lagMangelbrevXml_mottakerErbrukerID() {
         Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
-        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
         Aktoer mottakerAktør = lagAktør(Aktoersroller.BRUKER);
@@ -200,7 +200,7 @@ class BrevDataServiceTest {
     @Test
     void lagMangelbrevXml_mottakerErArbeidsgiver() {
         Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
-        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
         Aktoer mottakerAktør = lagAktør(Aktoersroller.ARBEIDSGIVER);
@@ -226,7 +226,7 @@ class BrevDataServiceTest {
     void lagBrevXml_medBrukerMedAdresseIRegister_skalBerikes() {
         Behandling behandling = lagBehandling(lagSaksopplysninger(), lagSøknadDokument());
 
-        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
         brevData.fritekst = "Test";
 
@@ -239,7 +239,7 @@ class BrevDataServiceTest {
     void lagBrevXml_medBrukerUtenAdresseIRegister_skalIkkeBerikes() {
         Behandling behandling = lagBehandling(lagSaksopplysningerUtenAdresseIRegister(), lagSøknadDokument());
 
-        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
         brevData.fritekst = "Test";
 

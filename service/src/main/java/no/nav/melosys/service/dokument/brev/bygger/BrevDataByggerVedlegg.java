@@ -4,21 +4,21 @@ import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 
 public class BrevDataByggerVedlegg implements BrevDataBygger {
-    private BrevbestillingDto brevbestillingDto;
+    private BrevbestillingRequest brevbestillingRequest;
 
     private BrevDataByggerA1 a1Bygger;
     private BrevDataByggerA001 a001Bygger;
 
-    public BrevDataByggerVedlegg(BrevDataByggerA1 a1Bygger, BrevbestillingDto brevbestillingDto) {
+    public BrevDataByggerVedlegg(BrevDataByggerA1 a1Bygger, BrevbestillingRequest brevbestillingRequest) {
         this.a1Bygger = a1Bygger;
         this.a001Bygger = null;
-        this.brevbestillingDto = brevbestillingDto;
+        this.brevbestillingRequest = brevbestillingRequest;
     }
 
-    public BrevDataByggerVedlegg(BrevDataByggerA001 a001Bygger, BrevbestillingDto brevbestillingDto) {
+    public BrevDataByggerVedlegg(BrevDataByggerA001 a001Bygger, BrevbestillingRequest brevbestillingRequest) {
         this.a1Bygger = null;
         this.a001Bygger = a001Bygger;
-        this.brevbestillingDto = brevbestillingDto;
+        this.brevbestillingRequest = brevbestillingRequest;
     }
 
     @Override
@@ -32,9 +32,9 @@ public class BrevDataByggerVedlegg implements BrevDataBygger {
             brevData.brevDataA001 = (BrevDataA001) a001Bygger.lag(dataGrunnlag, saksbehandler);
         }
 
-        if (brevbestillingDto != null) {
-            brevData.fritekst = brevbestillingDto.getFritekst();
-            brevData.begrunnelseKode = brevbestillingDto.getBegrunnelseKode();
+        if (brevbestillingRequest != null) {
+            brevData.fritekst = brevbestillingRequest.getFritekst();
+            brevData.begrunnelseKode = brevbestillingRequest.getBegrunnelseKode();
         }
 
         return brevData;

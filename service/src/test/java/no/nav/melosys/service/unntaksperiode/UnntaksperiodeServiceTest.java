@@ -22,6 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
@@ -102,6 +103,21 @@ class UnntaksperiodeServiceTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L, false, null))
             .withMessageContaining("har feil i perioden");
+    }
+
+    @Test
+    void ikkeGodkjennPeriode_oppNedPeriode_forventIngenException() {
+        Saksopplysning sedSaksopplysning = new Saksopplysning();
+        sedSaksopplysning.setType(SaksopplysningType.SEDOPPL);
+        SedDokument sedDokument = new SedDokument();
+        sedDokument.setLovvalgsperiode(PERIODE_BAD);
+        sedSaksopplysning.setDokument(sedDokument);
+        behandling.getSaksopplysninger().add(sedSaksopplysning);
+        Set<String> begrunnelser = new HashSet<>();
+        begrunnelser.add(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.getKode());
+
+        assertThatCode(() -> unntaksperiodeService.ikkeGodkjennPeriode(1L, begrunnelser, null))
+            .doesNotThrowAnyException();
     }
 
     @Test

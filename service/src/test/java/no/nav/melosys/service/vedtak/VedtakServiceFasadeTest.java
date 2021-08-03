@@ -115,7 +115,7 @@ class VedtakServiceFasadeTest {
 
         vedtakServiceFasade.endreVedtak(behandlingID, ENDRINGER_ARBEIDSSITUASJON, null, null);
 
-        verify(mockEosVedtakService).endreVedtak(eq(behandling), eq(ENDRINGER_ARBEIDSSITUASJON), isNull(), isNull());
+        verify(mockEosVedtakService).endreVedtaksperiode(eq(behandling), eq(ENDRINGER_ARBEIDSSITUASJON), isNull(), isNull());
         verifyNoInteractions(mockEosVedtakSystemService);
     }
 

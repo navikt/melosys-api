@@ -13,15 +13,12 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@ExtendWith(MockitoExtension.class)
 class FattetVedtakProducerTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
@@ -46,7 +43,7 @@ class FattetVedtakProducerTest {
     private static class MockFattetVedtakProducerFactory implements ProducerFactory<String, FattetVedtak> {
         @Override
         public Producer<String, FattetVedtak> createProducer() {
-            return new MockProducer<>(true, new StringSerializer(), new JsonSerializer<>(new ObjectMapper()));
+            return new MockProducer<>(true, new StringSerializer(), new JsonSerializer<>(OBJECT_MAPPER));
         }
 
         @Override

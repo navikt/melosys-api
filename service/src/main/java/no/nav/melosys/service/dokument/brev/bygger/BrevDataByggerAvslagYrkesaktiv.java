@@ -11,7 +11,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagYrkesaktiv;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
@@ -21,12 +21,12 @@ import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART16_1;
 public class BrevDataByggerAvslagYrkesaktiv implements BrevDataBygger {
     private final LandvelgerService landvelgerService;
     private final AnmodningsperiodeService anmodningsperiodeService;
-    private final BrevbestillingDto brevbestilling;
+    private final BrevbestillingRequest brevbestilling;
     private final VilkaarsresultatService vilkaarsresultatService;
 
     public BrevDataByggerAvslagYrkesaktiv(LandvelgerService landvelgerService,
                                           AnmodningsperiodeService anmodningsperiodeService,
-                                          BrevbestillingDto brebestilling,
+                                          BrevbestillingRequest brebestilling,
                                           VilkaarsresultatService vilkaarsresultatService) {
         this.landvelgerService = landvelgerService;
         this.anmodningsperiodeService = anmodningsperiodeService;

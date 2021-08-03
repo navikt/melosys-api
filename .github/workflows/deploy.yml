@@ -32,7 +32,7 @@ jobs:
       exists: ${{ steps.set_output.outputs.exists }}
 
   build:
-    runs-on: [self-hosted, java-15]
+    runs-on: [self-hosted, java-16]
     needs: check_docker_image_exists
     if: needs.check_docker_image_exists.outputs.exists != 'true'
     steps:
@@ -45,7 +45,7 @@ jobs:
             ${{ runner.os }}-maven-
       - name: Build
         run: |
-          JAVA_HOME=/usr/local/openjdk-15
+          JAVA_HOME=/usr/local/openjdk-16
           mvn clean package -B -e -U
       - uses: actions/upload-artifact@v2
         with:

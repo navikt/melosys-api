@@ -12,23 +12,23 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 
 public class BrevDataByggerHenleggelse implements BrevDataBygger {
     private final JoarkService joarkService;
-    private BrevbestillingDto brevbestillingDto;
+    private BrevbestillingRequest brevbestillingRequest;
 
-    public BrevDataByggerHenleggelse(JoarkService joarkService, BrevbestillingDto brevbestillingDto) {
+    public BrevDataByggerHenleggelse(JoarkService joarkService, BrevbestillingRequest brevbestillingRequest) {
         this.joarkService = joarkService;
-        this.brevbestillingDto = brevbestillingDto;
+        this.brevbestillingRequest = brevbestillingRequest;
     }
 
     @Override
     public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) {
         Instant forsendelseMottattTidspunkt = hentInitierendeJournalpostMottattTidspunktFraFørsteBehandling(dataGrunnlag.getBehandling());
 
-        BrevDataMottattDato brevData = new BrevDataMottattDato(saksbehandler, brevbestillingDto);
+        BrevDataMottattDato brevData = new BrevDataMottattDato(saksbehandler, brevbestillingRequest);
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = forsendelseMottattTidspunkt;
         return brevData;
     }

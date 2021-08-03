@@ -1,8 +1,10 @@
 package no.nav.melosys.integrasjon.joark;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
+import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 
@@ -38,6 +40,9 @@ public interface JoarkFasade {
      */
     void oppdaterJournalpost(String journalpostID, JournalpostOppdatering journalpostOppdatering, boolean forsøkFerdigstill)
     ;
+
+    void validerDokumenterTilhørerSakOgHarTilgang(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest,
+                                                  Collection<DokumentReferanse> dokumentReferanser);
 
     LocalDate hentMottaksDatoForJournalpost(String journalpostID);
 }

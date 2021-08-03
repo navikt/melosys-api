@@ -61,7 +61,7 @@ public class VedtakServiceFasade {
         Sakstyper sakstype = behandling.getFagsak().getType();
 
         if (sakstype == EU_EOS) {
-            eosVedtakService.endreVedtak(behandling, endretperiode, fritekst, fritekstSed);
+            eosVedtakService.endreVedtaksperiode(behandling, endretperiode, fritekst, fritekstSed);
         } else {
             throw new FunksjonellException("Vedtaksendring for sakstype " + sakstype + " er ikke støttet.");
         }

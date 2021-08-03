@@ -1,4 +1,7 @@
 package no.nav.melosys.integrasjon.pdl.dto.person;
 
-public record Folkeregisteridentifikator(String identifikasjonsnummer, String type, String status) {
+import no.nav.melosys.integrasjon.pdl.dto.HarMetadata;
+import no.nav.melosys.integrasjon.pdl.dto.Metadata;
+
+public record Folkeregisteridentifikator(String identifikasjonsnummer, Metadata metadata) implements HarMetadata {
 }

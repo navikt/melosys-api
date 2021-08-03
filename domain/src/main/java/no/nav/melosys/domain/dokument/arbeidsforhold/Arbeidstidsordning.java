@@ -8,5 +8,4 @@ public class Arbeidstidsordning extends AbstraktKodeverkHjelper {
     public FellesKodeverk hentKodeverkNavn() {
         return FellesKodeverk.ARBEIDSTIDSORDNINGER;
     }
-
 }

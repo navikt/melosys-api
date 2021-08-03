@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -13,6 +14,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
+import no.nav.melosys.integrasjon.joark.HentJournalposterTilknyttetSakRequest;
+import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -41,6 +44,7 @@ public class AnmodningUnntakService {
     private final LandvelgerService landvelgerService;
     private final EessiService eessiService;
     private final AnmodningUnntakKontrollService anmodningUnntakKontrollService;
+    private final JoarkFasade joarkFasade;
 
     public AnmodningUnntakService(BehandlingService behandlingService,
                                   BehandlingsresultatService behandlingsresultatService, OppgaveService oppgaveService,
@@ -49,7 +53,7 @@ public class AnmodningUnntakService {
                                   LovvalgsperiodeService lovvalgsperiodeService,
                                   LandvelgerService landvelgerService,
                                   EessiService eessiService,
-                                  AnmodningUnntakKontrollService anmodningUnntakKontrollService) {
+                                  AnmodningUnntakKontrollService anmodningUnntakKontrollService, JoarkFasade joarkFasade) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
@@ -59,6 +63,7 @@ public class AnmodningUnntakService {
         this.landvelgerService = landvelgerService;
         this.eessiService = eessiService;
         this.anmodningUnntakKontrollService = anmodningUnntakKontrollService;
+        this.joarkFasade = joarkFasade;
     }
 
     @Transactional
@@ -67,9 +72,11 @@ public class AnmodningUnntakService {
         Set<String> mottakerinstitusjoner = validerMottakerInstitusjon(behandlingID, mottakerinstitusjon);
 
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        Fagsak fagsak = behandling.getFagsak();
         log.info("Anmodning om unntak for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
 
         kontrollerAnmodningOmUnntak(behandlingID);
+        joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(new HentJournalposterTilknyttetSakRequest(fagsak.getGsakSaksnummer(), fagsak.getSaksnummer()), vedleggReferanser);
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
 
         prosessinstansService.opprettProsessinstansAnmodningOmUnntak(behandling, mottakerinstitusjoner,
