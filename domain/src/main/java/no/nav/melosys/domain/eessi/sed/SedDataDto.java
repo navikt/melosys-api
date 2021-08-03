@@ -7,8 +7,10 @@ import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 
 public class SedDataDto extends SedGrunnlagDto {
     //Persondok.
-    private List<FamilieMedlem> familieMedlem = new ArrayList<>();
     private Bruker bruker;
+    private Adresse kontaktadresse;
+    private Adresse oppholdsadresse;
+    private List<FamilieMedlem> familieMedlem = new ArrayList<>();
 
     //Videresending av søknad
     private String avklartBostedsland;
@@ -96,5 +98,21 @@ public class SedDataDto extends SedGrunnlagDto {
 
     public void setVedtakDto(VedtakDto vedtakDto) {
         this.vedtakDto = vedtakDto;
+    }
+
+    public Adresse getKontaktadresse() {
+        return kontaktadresse;
+    }
+
+    public void setKontaktadresse(Adresse kontaktadresse) {
+        this.kontaktadresse = kontaktadresse;
+    }
+
+    public Adresse getOppholdsadresse() {
+        return oppholdsadresse;
+    }
+
+    public void setOppholdsadresse(Adresse oppholdsadresse) {
+        this.oppholdsadresse = oppholdsadresse;
     }
 }

@@ -9,6 +9,8 @@ import no.nav.melosys.domain.brev.Postadresse;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
+import no.nav.melosys.domain.person.adresse.Kontaktadresse;
+import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 
 public interface Persondata {
     boolean erPersonDød();
@@ -42,7 +44,11 @@ public interface Persondata {
     @Deprecated // knyttet til TPS
     no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse getBostedsadresse();
 
-    Optional<Bostedsadresse> hentBostedsadresse();
+    Optional<Bostedsadresse> finnBostedsadresse();
+
+    Optional<Kontaktadresse> finnKontaktadresse();
+
+    Optional<Oppholdsadresse> finnOppholdsadresse();
 
     Postadresse hentGjeldendePostadresse();
 }

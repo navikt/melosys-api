@@ -3,7 +3,6 @@ package no.nav.melosys.domain.eessi.sed;
 import java.util.UUID;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
-import no.nav.melosys.domain.eessi.SedOrganisasjon;
 import org.apache.commons.lang3.StringUtils;
 
 public class Virksomhet {
@@ -40,21 +39,6 @@ public class Virksomhet {
         foretakUtland.selvstendigNæringsvirksomhet = erSelvstendig;
 
         return foretakUtland;
-    }
-
-    public SedOrganisasjon tilOrganisasjon() {
-        SedOrganisasjon organisasjon = new SedOrganisasjon();
-
-        organisasjon.setOrgnummer(orgnr);
-        organisasjon.setNavn(navn);
-
-        if (adresse.getAdressetype() == Adressetype.POSTADRESSE) {
-            organisasjon.setPostadresse(adresse.tilStrukturertAdresse());
-        } else {
-            organisasjon.setForretningsadresse(adresse.tilStrukturertAdresse());
-        }
-
-        return organisasjon;
     }
 
     public String getNavn() {

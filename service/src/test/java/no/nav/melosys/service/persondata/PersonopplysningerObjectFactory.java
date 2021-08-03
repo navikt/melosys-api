@@ -1,26 +1,33 @@
 package no.nav.melosys.service.persondata;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.person.Master;
-import no.nav.melosys.domain.person.Navn;
-import no.nav.melosys.domain.person.Personopplysninger;
+import no.nav.melosys.domain.person.*;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 
 public class PersonopplysningerObjectFactory {
     public static Personopplysninger lagPersonopplysninger() {
-        return new Personopplysninger(Collections.emptyList(), lagBostedsadresse(), null, null, null, null,
+        return new Personopplysninger(Collections.emptyList(), lagBostedsadresse(), null, lagFødesel(), null, lagKjønn(),
             lagKontaktadresser(), lagNavn(), lagOppholdsadresser(), Collections.emptyList());
     }
 
+    private static Foedsel lagFødesel() {
+        return new Foedsel(LocalDate.MIN, null, null, null);
+    }
+
+    private static KjoennType lagKjønn() {
+        return KjoennType.UKJENT;
+    }
+
     private static Bostedsadresse lagBostedsadresse() {
-        return new Bostedsadresse(new StrukturertAdresse("gatenavnFraBostedsadresse", null, null, null, null, null),
+        return new Bostedsadresse(new StrukturertAdresse("gatenavnFraBostedsadresse", null, null, null, null, "NO"),
             null, null, null, null, null, false);
     }
 
@@ -34,7 +41,7 @@ public class PersonopplysningerObjectFactory {
                 null,
                 Master.PDL.name(),
                 null,
-                LocalDateTime.MAX,
+                LocalDateTime.MAX.minusYears(42),
                 false
             ),
             new Kontaktadresse(

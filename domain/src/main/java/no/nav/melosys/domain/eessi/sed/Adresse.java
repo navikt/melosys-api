@@ -1,8 +1,11 @@
 package no.nav.melosys.domain.eessi.sed;
 
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.person.adresse.Kontaktadresse;
+import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 import org.apache.commons.lang3.StringUtils;
 
+import static no.nav.melosys.domain.eessi.sed.Adressetype.KONTAKTADRESSE;
 import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
 
 public class Adresse {
@@ -46,6 +49,21 @@ public class Adresse {
         return adresse;
     }
 
+    public static Adresse lagKontaktadresse(Kontaktadresse kontaktadresse) {
+        if (kontaktadresse.strukturertAdresse() != null) {
+            return lagAdresse(KONTAKTADRESSE, kontaktadresse.strukturertAdresse());
+        }
+        if (kontaktadresse.semistrukturertAdresse() != null) {
+            return lagAdresse(KONTAKTADRESSE, kontaktadresse.semistrukturertAdresse().tilStrukturertAdresse());
+        }
+        return lagTomAdresse();
+    }
+
+    public static Adresse lagOppholdsadresse(Oppholdsadresse oppholdsadresse) {
+        // Adressetype POSTADRESSE svarer til opphold i Rina
+        return lagAdresse(Adressetype.POSTADRESSE, oppholdsadresse.strukturertAdresse());
+    }
+
     public static Adresse lagTomAdresse() {
         return new Adresse();
     }
@@ -54,11 +72,11 @@ public class Adresse {
         Adresse adresse = new Adresse();
         adresse.setGateadresse(lagGateadresse(strukturertAdresse.getGatenavn(),
             strukturertAdresse.getHusnummerEtasjeLeilighet()));
-        adresse.setLand(strukturertAdresse.getLandkode());
         adresse.setPostnr(strukturertAdresse.getPostnummer());
         adresse.setPoststed(StringUtils.isBlank(
             strukturertAdresse.getPoststed()) ? UKJENT : strukturertAdresse.getPoststed());
         adresse.setRegion(strukturertAdresse.getRegion());
+        adresse.setLand(strukturertAdresse.getLandkode());
         return adresse;
     }
 
