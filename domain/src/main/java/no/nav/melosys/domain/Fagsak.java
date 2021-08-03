@@ -113,6 +113,10 @@ public class Fagsak extends RegistreringsInfo {
         return hentAktørMedRolleType(Aktoersroller.BRUKER);
     }
 
+    public String hentAktørID() {
+        return hentBruker().getAktørId();
+    }
+
     public List<Aktoer> hentMyndigheter() {
         return hentAktørerMedRolleType(MYNDIGHET);
     }

@@ -253,21 +253,13 @@ public class Behandlingsresultat extends RegistreringsInfo {
     public boolean erInnvilgelse() {
         if (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
             || type == Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND) {
-            Lovvalgsperiode lovvalgsperiode = hentValidertLovvalgsperiode();
-            return lovvalgsperiode.erInnvilget();
-        } else {
-            return false;
+            return finnValidertLovvalgsperiode().filter(Lovvalgsperiode::erInnvilget).isPresent();
         }
+        return false;
     }
 
     public boolean erInnvilgelseFlereLand() {
-        if (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-            || type == Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND) {
-            Lovvalgsperiode lovvalgsperiode = hentValidertLovvalgsperiode();
-            return lovvalgsperiode.erInnvilget() && lovvalgsperiode.erArtikkel13();
-        } else {
-            return false;
-        }
+        return erInnvilgelse() && finnValidertLovvalgsperiode().stream().anyMatch(PeriodeOmLovvalg::erArtikkel13);
     }
 
     public boolean erUtpeking() {
@@ -278,8 +270,8 @@ public class Behandlingsresultat extends RegistreringsInfo {
         }
     }
 
-    public boolean erArtikkel16MedSendtAnmodningOmUnntak() {
-        return anmodningsperioder.stream().anyMatch(Anmodningsperiode::erSendtUtland);
+    public boolean erIkkeArtikkel16MedSendtAnmodningOmUnntak() {
+        return anmodningsperioder.stream().noneMatch(Anmodningsperiode::erSendtUtland);
     }
 
     public boolean erArt16EtterUtlandMedRegistrertSvar() {
@@ -315,10 +307,11 @@ public class Behandlingsresultat extends RegistreringsInfo {
         throw new NoSuchElementException("Ingen periode om lovvalg finnes for behandling " + id);
     }
 
-    public Optional<? extends PeriodeOmLovvalg> finnValidertPeriodeOmLovvalg() {
-
-        var lovvalgsperiode = finnValidertLovvalgsperiode();
-        return lovvalgsperiode.isPresent() ? lovvalgsperiode : finnValidertAnmodningsperiode();
+    public Optional<PeriodeOmLovvalg> finnValidertPeriodeOmLovvalg() {
+        var lovvalgsperiodeOptional = finnValidertLovvalgsperiode();
+        Optional<? extends PeriodeOmLovvalg> periodeOmLovvalgOptional = lovvalgsperiodeOptional.isPresent() ?
+            lovvalgsperiodeOptional : finnValidertAnmodningsperiode();
+        return periodeOmLovvalgOptional.map(PeriodeOmLovvalg.class::cast);
     }
 
     public Lovvalgsperiode hentValidertLovvalgsperiode() {

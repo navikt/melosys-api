@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.kontroll;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -58,10 +59,10 @@ class ProsessinstansAdminTjenesteTest {
 
         var body = response.getBody();
         assertThat(body)
-            .flatExtracting(HentProsessinstansDto::getId, HentProsessinstansDto::getEndretDato,
+            .flatExtracting(HentProsessinstansDto::getId, HentProsessinstansDto::getBehandlingId, HentProsessinstansDto::getEndretDato,
                 HentProsessinstansDto::getProsessType, HentProsessinstansDto::getSistFullførtSteg,
                 HentProsessinstansDto::getSisteFeilmelding)
-            .containsExactly(prosessinstans.getId(), prosessinstans.getEndretDato(),
+            .containsExactly(prosessinstans.getId(), prosessinstans.getBehandling().getId(), prosessinstans.getEndretDato(),
                 prosessinstans.getType().getKode(), prosessinstans.getSistFullførtSteg().getKode(),
                 sisteFeilmelding);
     }
@@ -138,11 +139,18 @@ class ProsessinstansAdminTjenesteTest {
     private Prosessinstans lagProsessinstans(LocalDateTime registrertDato) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setId(UUID.randomUUID());
+        prosessinstans.setBehandling(lagBehandling());
         prosessinstans.setStatus(ProsessStatus.FEILET);
         prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
         prosessinstans.setSistFullførtSteg(ProsessSteg.AVKLAR_ARBEIDSGIVER);
         prosessinstans.setRegistrertDato(registrertDato);
         prosessinstans.setEndretDato(registrertDato);
         return prosessinstans;
+    }
+
+    private Behandling lagBehandling() {
+        var behandling = new Behandling();
+        behandling.setId(1L);
+        return behandling;
     }
 }

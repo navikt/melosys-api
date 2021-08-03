@@ -73,6 +73,7 @@ public class EndreBehandlingstemaService {
     }
 
     private boolean kanOppdatereBehandlingstema(Behandling behandling) {
-        return behandling.erAktiv() && !behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).erArtikkel16MedSendtAnmodningOmUnntak();
+        return behandling.erAktiv() && behandlingsresultatService.hentBehandlingsresultat(
+            behandling.getId()).erIkkeArtikkel16MedSendtAnmodningOmUnntak();
     }
 }

@@ -3,6 +3,7 @@ package no.nav.melosys.service.persondata.mapping.adresse;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
@@ -46,5 +47,14 @@ public final class BostedsadresseOversetter {
             bostedsadressePDL.gyldigFraOgMed(), bostedsadressePDL.gyldigTilOgMed(),
             bostedsadressePDL.metadata().master(), bostedsadressePDL.hentKilde(),
             bostedsadressePDL.metadata().historisk()));
+    }
+
+    public static Collection<Bostedsadresse> oversettMedHistorikk(
+        Collection<no.nav.melosys.integrasjon.pdl.dto.person.adresse.Bostedsadresse> bostedsadresser,
+        KodeverkService kodeverkService) {
+        return bostedsadresser.stream()
+            .map(a -> BostedsadresseOversetter.oversett(a, kodeverkService))
+            .flatMap(Optional::stream)
+            .collect(Collectors.toUnmodifiableList());
     }
 }

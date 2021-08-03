@@ -1,15 +1,11 @@
-package no.nav.melosys.tjenester.gui.jackson;
+package no.nav.melosys.tjenester.gui.config.jackson;
 
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.tjenester.gui.jackson.serialize.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import no.nav.melosys.tjenester.gui.config.jackson.serialize.*;
 
-@Component
 public class MelosysModule extends SimpleModule {
 
-    @Autowired
     public MelosysModule(KodeverkService kodeverkService) {
         super();
 

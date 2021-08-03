@@ -54,7 +54,7 @@ public class OpprettAvgiftsoppgave implements StegBehandler {
             .setTema(Tema.TRY).setOppgavetype(Oppgavetyper.VUR)
             .setJournalpostId(behandling.getInitierendeJournalpostId())
             .setBehandlesAvApplikasjon(Fagsystem.INTET)
-            .setAktørId(fagsak.hentBruker().getAktørId())
+            .setAktørId(fagsak.hentAktørID())
             .setBeskrivelse(AVGIFTSVURDERING_BESKRIVELSE)
             .setFristFerdigstillelse(LocalDate.now().plusMonths(FRIST_AVGIFTSVURDERING_MD))
             .setSaksnummer(fagsak.getSaksnummer())

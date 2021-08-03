@@ -31,11 +31,6 @@ public class ExceptionMapper {
         return håndter(e, HttpStatus.BAD_REQUEST, Level.WARN);
     }
 
-    @ExceptionHandler(value = TekniskException.class)
-    public ResponseEntity<Map<String, Object>> håndter(TekniskException e) {
-        return håndter(e, HttpStatus.INTERNAL_SERVER_ERROR, Level.ERROR);
-    }
-
     @ExceptionHandler(value = SikkerhetsbegrensningException.class)
     public ResponseEntity<Map<String, Object>> håndter(SikkerhetsbegrensningException e) {
         return håndter(e, HttpStatus.FORBIDDEN, Level.WARN);
@@ -44,6 +39,11 @@ public class ExceptionMapper {
     @ExceptionHandler(value = ValideringException.class)
     public ResponseEntity<Map<String, Object>> håndter(ValideringException e) {
         return håndter(e, HttpStatus.BAD_REQUEST, Level.INFO, e.getFeilkoder());
+    }
+
+    @ExceptionHandler(value = Exception.class)
+    public ResponseEntity<Map<String, Object>> håndter(Exception e) {
+        return håndter(e, HttpStatus.INTERNAL_SERVER_ERROR, Level.ERROR);
     }
 
     private ResponseEntity<Map<String, Object>> håndter(Exception e, HttpStatus httpStatus, Level loggnivå){
