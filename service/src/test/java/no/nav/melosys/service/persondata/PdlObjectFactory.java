@@ -1,15 +1,19 @@
 package no.nav.melosys.service.persondata;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import no.nav.melosys.integrasjon.pdl.dto.Endring;
 import no.nav.melosys.integrasjon.pdl.dto.Metadata;
-import no.nav.melosys.integrasjon.pdl.dto.person.Adressebeskyttelse;
-import no.nav.melosys.integrasjon.pdl.dto.person.AdressebeskyttelseGradering;
+import no.nav.melosys.integrasjon.pdl.dto.person.*;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Bostedsadresse;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.UtenlandskAdresse;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Vegadresse;
+
+import static no.nav.melosys.integrasjon.pdl.dto.Endringstype.OPPRETT;
 
 public class PdlObjectFactory {
     private static final Metadata METADATA = lagMetadata();
@@ -18,8 +22,28 @@ public class PdlObjectFactory {
         return METADATA;
     }
 
-    public static Adressebeskyttelse lagAdressebeskyttelse(AdressebeskyttelseGradering adressebeskyttelseGradering) {
-        return new Adressebeskyttelse(adressebeskyttelseGradering, metadata());
+    public static Person lagPerson() {
+        return new Person(
+            Set.of(new Adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG, metadata())),
+            Set.of(lagUtenlandskBostedsadresse("adresse utland", LocalDateTime.MIN), lagNorskBostedsadresse("gata",
+                LocalDateTime.MAX)),
+            Set.of(new no.nav.melosys.integrasjon.pdl.dto.person.Doedsfall(LocalDate.MAX, metadata())),
+            Set.of(new no.nav.melosys.integrasjon.pdl.dto.person.Foedsel(LocalDate.EPOCH, 1970, "NOR", "fødested",
+                metadata())),
+            Set.of(new no.nav.melosys.integrasjon.pdl.dto.person.Folkeregisteridentifikator("IdNr", metadata())),
+            null,
+            null,
+            Set.of(new Kjoenn(KjoennType.UKJENT, lagMetadata(LocalDateTime.MIN)), new Kjoenn(KjoennType.UKJENT, lagMetadata(LocalDateTime.MAX))),
+            Collections.emptyList(),
+            Set.of(new no.nav.melosys.integrasjon.pdl.dto.person.Navn("fornavn", "mellomnavn", "etternavn", metadata())),
+            Collections.emptyList(),
+            null,
+            Set.of(new no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap("AIA", null,
+                    LocalDate.parse("1979-11-18"), LocalDate.parse("1980-11-18"), lagMetadata(LocalDateTime.MIN)),
+                new no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null,
+                    null, lagMetadata(LocalDateTime.MAX))),
+            null
+        );
     }
 
     public static Bostedsadresse lagNorskBostedsadresse() {
@@ -102,11 +126,11 @@ public class PdlObjectFactory {
 
     public static Metadata lagMetadata(LocalDateTime registrertDato) {
         return new Metadata("PDL", false,
-            List.of(new Endring("OPPRETT", registrertDato, "Dolly")));
+            List.of(new Endring(OPPRETT, registrertDato, "Dolly")));
     }
 
     static Metadata lagMetadata() {
         return new Metadata("PDL", false,
-            List.of(new Endring("OPPRETT", LocalDateTime.parse("2021-05-07T10:04:52"), "Dolly")));
+            List.of(new Endring(OPPRETT, LocalDateTime.parse("2021-05-07T10:04:52"), "Dolly")));
     }
 }

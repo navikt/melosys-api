@@ -11,6 +11,7 @@ import no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap;
 public interface PDLConsumer {
     Identliste hentIdenter(String ident);
     Person hentPerson(String ident);
+    Person hentPersonMedHistorikk(String ident, boolean innsynn);
     Collection<Adressebeskyttelse> hentAdressebeskyttelser(String ident);
     Collection<Navn> hentNavn(String fnr);
     Collection<Statsborgerskap> hentStatsborgerskap(String ident);

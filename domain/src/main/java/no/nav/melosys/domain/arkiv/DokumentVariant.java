@@ -76,6 +76,8 @@ public record DokumentVariant(byte[] data, Filtype filtype,
         BREVBESTILLING,
         FULLVERSJON,
         PRODUKSJON,
-        SKANNING_META
+        SKANNING_META,
+        PRODUKSJON_DLF,
+        SLADDET
     }
 }

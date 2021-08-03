@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -67,7 +68,9 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     @BeforeEach
     void init() {
         BrevmottakerService brevmottakerService = new BrevmottakerService(mockKontaktopplysningService, mock(AvklarteVirksomheterService.class), mock(UtenlandskMyndighetService.class), mock(BehandlingsresultatService.class), mock(TrygdeavgiftsberegningService.class));
-        BrevbestillingService brevbestillingService = new BrevbestillingService(mockDokServiceFasade, mockBrevmottakerService, mockPersondataFasade, mockEregFasade, mockKontaktopplysningService, mock(KodeverkService.class));
+        BrevbestillingService brevbestillingService = new BrevbestillingService(mockBrevmottakerService,
+                mockDokServiceFasade, mockEregFasade, mock(KodeverkService.class), mockKontaktopplysningService,
+                mockPersondataFasade, new FakeUnleash());
         brevbestillingTjeneste = new BrevbestillingTjeneste(brevbestillingService, mockBehandlingService, brevmottakerService);
     }
 

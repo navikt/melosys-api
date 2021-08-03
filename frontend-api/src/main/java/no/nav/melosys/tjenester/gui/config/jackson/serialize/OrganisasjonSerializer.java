@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.jackson.serialize;
+package no.nav.melosys.tjenester.gui.config.jackson.serialize;
 
 import java.io.IOException;
 
@@ -59,7 +59,7 @@ public class OrganisasjonSerializer extends StdSerializer<AbstraktOrganisasjon> 
             : kodeverkService.dekod(FellesKodeverk.POSTNUMMER, adresse.getPostnummer());
         dto.setPoststed(poststed);
 
-        final String landISO2 = kodeverkService.dekod(FellesKodeverk.LANDKODERISO2, adresse.getLandkode());
+        final String landISO2 = kodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, adresse.getLandkode());
         final String landkode = !UKJENT.equals(landISO2) ? landISO2
             :  kodeverkService.dekod(FellesKodeverk.LANDKODER, adresse.getLandkode());
         dto.setLand(landkode);
