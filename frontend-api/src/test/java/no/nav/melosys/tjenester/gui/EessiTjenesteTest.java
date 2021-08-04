@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -84,7 +84,7 @@ class EessiTjenesteTest extends JsonSchemaTestParent {
         BucBestillingDto nyBucDto = new BucBestillingDto(
             BucType.LA_BUC_01,
             List.of("NAVT002"),
-            defaultEasyRandom().objects(VedleggDto.class, 3).collect(Collectors.toSet())
+            Set.of(new VedleggDto("1", "1"), new VedleggDto("2", "2"))
         );
         ResponseEntity<OpprettBucSvarDto> response = eessiTjeneste.opprettBuc(nyBucDto, 123L);
         OpprettBucSvarDto opprettBucSvarDto = response.getBody();

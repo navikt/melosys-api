@@ -6,8 +6,8 @@ import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
-import no.nav.melosys.tjenester.gui.dto.saksflyt.anmodningunntak.AnmodningUnntakDto;
 import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.VedleggDto;
+import no.nav.melosys.tjenester.gui.dto.saksflyt.anmodningunntak.AnmodningUnntakDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,7 +47,7 @@ class AnmodningUnntakTjenesteTest extends JsonSchemaTestParent {
 
         verify(tilgangService).sjekkTilgang(behandlingID);
         verify(anmodningUnntakService).anmodningOmUnntak(behandlingID, mottakerInstitusjon,
-            Set.of(new DokumentReferanse(vedleggDto.getJournalpostID(), vedleggDto.getDokumentID())), fritekstSed);
+            Set.of(new DokumentReferanse(vedleggDto.journalpostID(), vedleggDto.dokumentID())), fritekstSed);
 
         valider(dto, ANMODNING_UNNTAK_POST_SCHEMA);
     }

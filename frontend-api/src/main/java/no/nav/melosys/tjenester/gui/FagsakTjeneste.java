@@ -136,7 +136,7 @@ public class FagsakTjeneste {
             videresendDto.getMottakerinstitusjon(),
             videresendDto.getFritekst(),
             videresendDto.getVedlegg().stream().map(
-                v -> new DokumentReferanse(v.getJournalpostID(), v.getDokumentID())).collect(
+                v -> new DokumentReferanse(v.journalpostID(), v.dokumentID())).collect(
                 Collectors.toUnmodifiableSet())
         );
         return ResponseEntity.ok().build();
