@@ -119,6 +119,7 @@ public class EosVedtakService {
             throw new FunksjonellException("Det finnes allerede en aktiv prosess for behandling " + behandling);
         }
         avklartefaktaService.leggTilBegrunnelse(behandlingID, Avklartefaktatyper.AARSAK_ENDRING_PERIODE, endretperiode.getKode());
+        oppdaterBehandlingsresultat(behandlingsresultat, Vedtakstyper.ENDRINGSVEDTAK, fritekst, null);
         prosessinstansService.opprettProsessinstansForkortPeriode(
             behandling,
             fritekst,
