@@ -2,10 +2,7 @@ package no.nav.melosys.tjenester.gui;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,6 +34,7 @@ import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.sak.VideresendSoknadService;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.*;
+import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.VedleggDto;
 import no.nav.melosys.tjenester.gui.util.FagsakBehandlingFactory;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
@@ -87,9 +85,12 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void videresendSchemaValidering() throws Exception {
-        VideresendDto fagsakDto = random.nextObject(VideresendDto.class);
+        VideresendDto videresendDto = new VideresendDto();
+        videresendDto.setMottakerinstitusjon("SE:123");
+        videresendDto.setFritekst("fri som fuglen");
+        videresendDto.setVedlegg(Set.of(new VedleggDto("1", "1")));
 
-        String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(fagsakDto);
+        String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(videresendDto);
         valider(jsonString, FAGSAKER_VIDERESEND_POST_SCHEMA, log);
     }
 
@@ -284,7 +285,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
             .withMessageContaining("uten vedlegg");
     }
 
-    private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) throws Exception {
+    private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) {
         tilgangService = mock(TilgangService.class);
         fagsakService = mock(FagsakService.class);
         henleggFagsakService = mock(HenleggFagsakService.class);
