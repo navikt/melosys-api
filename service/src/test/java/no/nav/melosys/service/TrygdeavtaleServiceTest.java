@@ -10,10 +10,7 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.JuridiskArbeidsgiverNorge;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.SelvstendigArbeid;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.SelvstendigForetak;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.*;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
@@ -61,7 +58,7 @@ public class TrygdeavtaleServiceTest {
         var juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
         juridiskArbeidsgiverNorge.ekstraArbeidsgivere = List.of(ORGNR_2);
 
-        when(behandlingService.hentBehandling(BEH_ID)).thenReturn(lagBehandling(
+        when(behandlingService.hentBehandling(BEH_ID)).thenReturn(lagBehandlingMedVirksomheter(
             selvstendigArbeid,
             juridiskArbeidsgiverNorge,
             emptyList(),
@@ -79,7 +76,7 @@ public class TrygdeavtaleServiceTest {
 
     @Test
     void hentVirksomheter_fraBehandlingSaksopplysning_mappesKorrekt() {
-        when(behandlingService.hentBehandling(BEH_ID)).thenReturn(lagBehandling(
+        when(behandlingService.hentBehandling(BEH_ID)).thenReturn(lagBehandlingMedVirksomheter(
             new SelvstendigArbeid(),
             new JuridiskArbeidsgiverNorge(),
             emptyList(),
@@ -98,7 +95,7 @@ public class TrygdeavtaleServiceTest {
 
     @Test
     void hentVirksomheter_fraBehandlingsgrunnlagForetakUtland_mappesKorrekt() {
-        when(behandlingService.hentBehandling(BEH_ID)).thenReturn(lagBehandling(
+        when(behandlingService.hentBehandling(BEH_ID)).thenReturn(lagBehandlingMedVirksomheter(
             new SelvstendigArbeid(),
             new JuridiskArbeidsgiverNorge(),
             lagForetakUtland(Map.of(ORGNR_1, NAVN_1, ORGNR_2, NAVN_2)),
@@ -114,7 +111,7 @@ public class TrygdeavtaleServiceTest {
 
     @Test
     void hentVirksomheter_ingenVirksomheter_tomMap() {
-        when(behandlingService.hentBehandling(BEH_ID)).thenReturn(lagBehandling(
+        when(behandlingService.hentBehandling(BEH_ID)).thenReturn(lagBehandlingMedVirksomheter(
             new SelvstendigArbeid(),
             new JuridiskArbeidsgiverNorge(),
             emptyList(),
@@ -126,10 +123,57 @@ public class TrygdeavtaleServiceTest {
         assertThat(response).size().isEqualTo(0);
     }
 
-    private Behandling lagBehandling(SelvstendigArbeid selvstendigArbeid,
-                                     JuridiskArbeidsgiverNorge juridiskArbeidsgiverNorge,
-                                     List<ForetakUtland> foretakUtland,
-                                     Set<Saksopplysning> saksopplysninger) {
+    @Test
+    void hentFamiliemedlemmer_barnOgEktefelle_fyltListe() {
+        when(behandlingService.hentBehandling(BEH_ID)).thenReturn(
+            lagBehandlingMedFamilie(List.of(
+                lagMedfolgendeFamilie("uuid1", "navn1", MedfolgendeFamilie.Relasjonsrolle.BARN),
+                lagMedfolgendeFamilie("uuid2", "navn2", MedfolgendeFamilie.Relasjonsrolle.BARN),
+                lagMedfolgendeFamilie("uuid3", "navn3", MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER)
+            )));
+
+        var response = trygdeavtaleService.hentFamiliemedlemmer(BEH_ID);
+
+        assertThat(response).size().isEqualTo(3);
+        assertThat(response)
+            .flatExtracting(
+                MedfolgendeFamilie::getUuid,
+                MedfolgendeFamilie::getNavn,
+                MedfolgendeFamilie::getRelasjonsrolle)
+            .containsExactlyInAnyOrder(
+                "uuid1", "navn1", MedfolgendeFamilie.Relasjonsrolle.BARN,
+                "uuid2", "navn2", MedfolgendeFamilie.Relasjonsrolle.BARN,
+                "uuid3", "navn3", MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER
+            );
+    }
+
+    @Test
+    void hentFamiliemedlemmer_ingenFamilie_tomListe() {
+        when(behandlingService.hentBehandling(BEH_ID)).thenReturn(lagBehandlingMedFamilie(emptyList()));
+        var response = trygdeavtaleService.hentFamiliemedlemmer(BEH_ID);
+        assertThat(response).size().isEqualTo(0);
+    }
+
+
+    private Behandling lagBehandlingMedFamilie(List<MedfolgendeFamilie> familie) {
+        var personOpplysninger = new OpplysningerOmBrukeren();
+        personOpplysninger.medfolgendeFamilie.addAll(familie);
+
+        var behandlingsgrunnlagdata = new BehandlingsgrunnlagData();
+        behandlingsgrunnlagdata.personOpplysninger = personOpplysninger;
+
+        var behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagdata);
+
+        var behandling = new Behandling();
+        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
+        return behandling;
+    }
+
+    private Behandling lagBehandlingMedVirksomheter(SelvstendigArbeid selvstendigArbeid,
+                                                    JuridiskArbeidsgiverNorge juridiskArbeidsgiverNorge,
+                                                    List<ForetakUtland> foretakUtland,
+                                                    Set<Saksopplysning> saksopplysninger) {
         var behandlingsgrunnlagdata = new BehandlingsgrunnlagData();
         behandlingsgrunnlagdata.selvstendigArbeid = selvstendigArbeid;
         behandlingsgrunnlagdata.juridiskArbeidsgiverNorge = juridiskArbeidsgiverNorge;
@@ -142,6 +186,14 @@ public class TrygdeavtaleServiceTest {
         behandling.setSaksopplysninger(saksopplysninger);
         behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
         return behandling;
+    }
+
+    private MedfolgendeFamilie lagMedfolgendeFamilie(String uuid, String navn, MedfolgendeFamilie.Relasjonsrolle rolle) {
+        var medfolgendeFamilie = new MedfolgendeFamilie();
+        medfolgendeFamilie.uuid = uuid;
+        medfolgendeFamilie.navn = navn;
+        medfolgendeFamilie.relasjonsrolle = rolle;
+        return medfolgendeFamilie;
     }
 
     private List<ForetakUtland> lagForetakUtland(Map<String, String> uuidNavn) {
