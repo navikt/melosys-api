@@ -32,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
-import static no.nav.melosys.domain.Fagsak.erSakstypeFtrl;
+import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 import static no.nav.melosys.service.sak.SakstypeBehandlingstemaKobling.erGyldigBehandlingstemaForSakstype;
 
 @Service
@@ -144,7 +144,7 @@ public class JournalfoeringService {
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, erBehandlingAvSøknad(behandlingstema) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED);
 
-        if (!erSakstypeFtrl(sakstype) && erBehandlingAvSøknad(behandlingstema)) {
+        if (erSakstypeEøs(sakstype) && erBehandlingAvSøknad(behandlingstema)) {
             validerOpprettSakForSøknadBehandlingFelter(journalfoeringDto);
             prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringDto.getFagsak().getLand());
             prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringDto.getFagsak().getSoknadsperiode());
