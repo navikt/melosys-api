@@ -1,6 +1,10 @@
 package no.nav.melosys.integrasjon.pdl.dto.person;
 
 public final class Query {
+    private Query() {
+        throw new UnsupportedOperationException();
+    }
+
     public static final String HENT_PERSON_QUERY = """
 query($ident: ID!) {
   hentPerson(ident: $ident) {
@@ -446,6 +450,187 @@ query($ident: ID!, $historikk: Boolean!) {
 }
         """;
 
+    public static final String HENT_RELATERT_VED_SIVILSTAND_QUERY = """
+query($ident: ID!) {
+  hentPerson(ident: $ident) {
+    bostedsadresse {
+      gyldigFraOgMed
+      gyldigTilOgMed
+      coAdressenavn
+      matrikkeladresse {
+        bruksenhetsnummer
+        kommunenummer
+        tilleggsnavn
+        postnummer
+      }
+      ukjentBosted {
+        bostedskommune
+      }
+      vegadresse {
+        adressenavn
+        husnummer
+        husbokstav
+        tilleggsnavn
+        postnummer
+      }
+      utenlandskAdresse {
+        adressenavnNummer
+        bygningEtasjeLeilighet
+        postboksNummerNavn
+        postkode
+        bySted
+        regionDistriktOmraade
+        landkode
+      }
+      metadata {
+        master
+        historisk
+        endringer {
+          type
+          registrert
+          kilde
+        }
+      }
+    }
+    foedsel {
+      foedselsdato
+      foedselsaar
+      foedeland
+      foedested
+      metadata {
+        master
+        endringer {
+          registrert
+          type
+        }
+      }
+    }
+    folkeregisteridentifikator {
+      identifikasjonsnummer
+      metadata {
+        master
+        endringer {
+          registrert
+          type
+        }
+      }
+    }
+    navn {
+      fornavn
+      mellomnavn
+      etternavn
+      metadata {
+        master
+        endringer {
+          registrert
+          type
+        }
+      }
+    }
+    sivilstand {
+      type
+      relatertVedSivilstand
+      gyldigFraOgMed
+      metadata {
+        master
+        historisk
+        endringer {
+          type
+          registrert
+          kilde
+        }
+      }
+    }
+  }
+}
+        """;
+
+    public static final String HENT_BARN_QUERY = """
+query($ident: ID!) {
+  hentPerson(ident: $ident) {
+    bostedsadresse {
+      gyldigFraOgMed
+      gyldigTilOgMed
+      coAdressenavn
+      matrikkeladresse {
+        bruksenhetsnummer
+        kommunenummer
+        tilleggsnavn
+        postnummer
+      }
+      ukjentBosted {
+        bostedskommune
+      }
+      vegadresse {
+        adressenavn
+        husnummer
+        husbokstav
+        tilleggsnavn
+        postnummer
+      }
+      utenlandskAdresse {
+        adressenavnNummer
+        bygningEtasjeLeilighet
+        postboksNummerNavn
+        postkode
+        bySted
+        regionDistriktOmraade
+        landkode
+      }
+      metadata {
+        master
+        historisk
+        endringer {
+          type
+          registrert
+          kilde
+        }
+      }
+    }
+    foedsel {
+      foedselsdato
+      foedselsaar
+      foedeland
+      foedested
+      metadata {
+        master
+        endringer {
+          registrert
+          type
+        }
+      }
+    }
+    folkeregisteridentifikator {
+      identifikasjonsnummer
+      metadata {
+        master
+        endringer {
+          registrert
+          type
+        }
+      }
+    }
+    forelderBarnRelasjon {
+      relatertPersonsIdent
+      relatertPersonsRolle
+      minRolleForPerson
+    }
+    navn {
+      fornavn
+      mellomnavn
+      etternavn
+      metadata {
+        master
+        endringer {
+          registrert
+          type
+        }
+      }
+    }
+  }
+}
+        """;
+
     public static final String HENT_SAMMENSATT_NAVN_QUERY = """
 query($ident: ID!, $historikk: Boolean!) {
   hentPerson(ident: $ident) {
@@ -486,8 +671,4 @@ query($ident: ID!, $historikk: Boolean!) {
             }
         }
         """;
-
-    private Query() {
-        throw new UnsupportedOperationException();
-    }
 }

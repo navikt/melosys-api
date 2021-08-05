@@ -57,6 +57,12 @@ public class PDLConsumerImpl implements PDLConsumer {
 
     @Override
     @Retryable
+    public Person hentBarnEllerForelder(String ident) {
+        return hentPersondata(HENT_BARN_QUERY, ident, false);
+    }
+
+    @Override
+    @Retryable
     public Person hentPerson(String ident) {
         return hentPersondata(HENT_PERSON_QUERY, ident, false);
     }
@@ -65,6 +71,12 @@ public class PDLConsumerImpl implements PDLConsumer {
     @Retryable
     public Person hentPersonMedHistorikk(String ident, boolean innsynn) {
         return hentPersondata(HENT_PERSON_HISTORIKK_QUERY, ident, true);
+    }
+
+    @Override
+    @Retryable
+    public Person hentRelatertVedSivilstand(String ident) {
+        return hentPersondata(HENT_RELATERT_VED_SIVILSTAND_QUERY, ident, false);
     }
 
     @Override

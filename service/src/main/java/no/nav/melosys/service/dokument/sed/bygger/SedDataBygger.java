@@ -9,13 +9,13 @@ import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.UtenlandskIdent;
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.Familiemedlem;
-import no.nav.melosys.domain.dokument.person.Familierelasjon;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.domain.person.familie.Familiemedlem;
+import no.nav.melosys.domain.person.familie.Familierelasjon;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -106,9 +106,9 @@ public class SedDataBygger {
     private static SedDataDto lagDataDtoMedPersonopplysninger(SedDataGrunnlagUtenSoknad grunnlagUtenSøknad) {
         SedDataDto sedDataDto = new SedDataDto();
         sedDataDto.setBruker(lagBrukerFraPersondata(grunnlagUtenSøknad.getPersondata()));
-        sedDataDto.setFamilieMedlem(grunnlagUtenSøknad.getPersondata().getFamiliemedlemmer().stream()
-            .filter(f -> f.familierelasjon == Familierelasjon.FARA || f.familierelasjon == Familierelasjon.MORA)
-            .map(SedDataBygger::hentFamilieMedlem).collect(Collectors.toList()));
+        sedDataDto.setFamilieMedlem(grunnlagUtenSøknad.getPersondata().hentFamiliemedlemmer().stream()
+            .filter(Familiemedlem::erForelder)
+            .map(SedDataBygger::lagForelder).toList());
         return sedDataDto;
     }
 
@@ -121,9 +121,9 @@ public class SedDataBygger {
             landvelgerService.hentBostedsland(grunnlagMedSøknad.getBehandling().getId(), grunnlagMedSøknad.getBehandlingsgrunnlagData()).getKode()
         );
         sedDataDto.setBruker(lagBrukerFraPersondata(grunnlagMedSøknad.getPersondata()));
-        sedDataDto.setFamilieMedlem(grunnlagMedSøknad.getPersondata().getFamiliemedlemmer().stream()
-            .filter(f -> f.familierelasjon == Familierelasjon.FARA || f.familierelasjon == Familierelasjon.MORA)
-            .map(SedDataBygger::hentFamilieMedlem).collect(Collectors.toList()));
+        sedDataDto.setFamilieMedlem(grunnlagMedSøknad.getPersondata().hentFamiliemedlemmer().stream()
+            .filter(Familiemedlem::erForelder)
+            .map(SedDataBygger::lagForelder).toList());
         sedDataDto.setUtenlandskIdent(grunnlagMedSøknad.getBehandlingsgrunnlagData().personOpplysninger.utenlandskIdent.stream()
             .map(SedDataBygger::tilUtenlandskIdentDto).collect(Collectors.toList()));
         return sedDataDto;
@@ -306,22 +306,11 @@ public class SedDataBygger {
             .collect(Collectors.joining("\n\n"));
     }
 
-    private static String[] splitFulltNavn(String navn) {
-        if (navn == null || navn.isEmpty()) {
-            return new String[2];
-        } else if (!navn.contains(" ")) {
-            return new String[]{navn, null};
-        } else {
-            return navn.split(" ", 2);
-        }
-    }
-
-    private static FamilieMedlem hentFamilieMedlem(Familiemedlem f) {
+    private static FamilieMedlem lagForelder(Familiemedlem forelder) {
         FamilieMedlem familieMedlem = new FamilieMedlem();
-        String[] navn = splitFulltNavn(f.navn);
-        familieMedlem.setFornavn(navn[0]);
-        familieMedlem.setEtternavn(navn[1]);
-        familieMedlem.setRelasjon(f.familierelasjon == Familierelasjon.FARA ? "FAR" : "MOR");
+        familieMedlem.setFornavn(forelder.navn().fornavn());
+        familieMedlem.setEtternavn(forelder.navn().etternavn());
+        familieMedlem.setRelasjon(forelder.familierelasjon() == Familierelasjon.FAR ? "FAR" : "MOR");
         return familieMedlem;
     }
 
