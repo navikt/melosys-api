@@ -1,7 +1,9 @@
 package no.nav.melosys.tjenester.gui;
 
 import io.swagger.annotations.Api;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.service.TrygdeavtaleService;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.tjenester.gui.dto.OrgIdNavnDto;
 import no.nav.melosys.tjenester.gui.dto.TrygdeavtaleInfoDto;
 import no.nav.security.token.support.core.api.Unprotected;
@@ -20,17 +22,22 @@ import org.springframework.web.context.WebApplicationContext;
 public class TrygdeavtaleTjeneste {
 
     private final TrygdeavtaleService trygdeavtaleService;
+    private final BehandlingService behandlingService;
 
-    public TrygdeavtaleTjeneste(TrygdeavtaleService trygdeavtaleService) {
+    public TrygdeavtaleTjeneste(TrygdeavtaleService trygdeavtaleService, BehandlingService behandlingService) {
         this.trygdeavtaleService = trygdeavtaleService;
+        this.behandlingService = behandlingService;
     }
 
     @Unprotected
     @GetMapping
     public ResponseEntity<TrygdeavtaleInfoDto> hentTrygdeavtaleInfo(@RequestParam long behandlingId) {
+        Behandling behandling = behandlingService.hentBehandling(behandlingId);
         return ResponseEntity.ok(new TrygdeavtaleInfoDto(
-            OrgIdNavnDto.av(trygdeavtaleService.hentVirksomheter(behandlingId)),
-            trygdeavtaleService.hentFamiliemedlemmer(behandlingId)
+            behandling.getFagsak().hentBruker().getAktørId(),
+            behandling.getTema().getKode(),
+            OrgIdNavnDto.av(trygdeavtaleService.hentVirksomheter(behandling)),
+            trygdeavtaleService.hentFamiliemedlemmer(behandling)
         ));
     }
 }

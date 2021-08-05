@@ -5,25 +5,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TrygdeavtaleService {
 
-    private final BehandlingService behandlingService;
     private final RegisterOppslagService registerOppslagService;
 
-    public TrygdeavtaleService(BehandlingService behandlingService, RegisterOppslagService registerOppslagService) {
-        this.behandlingService = behandlingService;
+    public TrygdeavtaleService(RegisterOppslagService registerOppslagService) {
         this.registerOppslagService = registerOppslagService;
     }
 
-    public Map<String, String> hentVirksomheter(long behandlingID) {
-        var behandling = behandlingService.hentBehandling(behandlingID);
+    public Map<String, String> hentVirksomheter(Behandling behandling) {
         var behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         var organisasjonDokumenter = behandling.hentOrganisasjonDokumenter();
 
@@ -44,7 +41,7 @@ public class TrygdeavtaleService {
             .findFirst().orElse(registerOppslagService.hentOrganisasjon(orgnr)).getNavn();
     }
 
-    public List<MedfolgendeFamilie> hentFamiliemedlemmer(long behandlingID) {
-        return behandlingService.hentBehandling(behandlingID).getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().personOpplysninger.medfolgendeFamilie;
+    public List<MedfolgendeFamilie> hentFamiliemedlemmer(Behandling behandling) {
+        return behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().personOpplysninger.medfolgendeFamilie;
     }
 }
