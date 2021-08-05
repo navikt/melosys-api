@@ -9,7 +9,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 
 public final class SakstypeBehandlingstemaKobling {
 
-    private SakstypeBehandlingstemaKobling() {}
+    private SakstypeBehandlingstemaKobling() {
+    }
 
     public static boolean erGyldigBehandlingstemaForSakstype(Sakstyper sakstype, Behandlingstema behandlingstema) {
         return lagSakstypeBehandlingstemaMap().get(sakstype).contains(behandlingstema);
@@ -34,10 +35,11 @@ public final class SakstypeBehandlingstemaKobling {
                 Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
             ),
             Sakstyper.FTRL, Set.of(
-                Behandlingstema.ARBEID_I_UTLANDET,
-                Behandlingstema.TRYGDEAVTALE_UK
+                Behandlingstema.ARBEID_I_UTLANDET
             ),
-            Sakstyper.TRYGDEAVTALE, Set.of()
+            Sakstyper.TRYGDEAVTALE, Set.of(
+                Behandlingstema.TRYGDEAVTALE_UK
+            )
         );
     }
 }
