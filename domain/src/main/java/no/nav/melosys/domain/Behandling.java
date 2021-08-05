@@ -3,6 +3,7 @@ package no.nav.melosys.domain;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -10,6 +11,7 @@ import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
@@ -221,6 +223,14 @@ public class Behandling extends RegistreringsInfo {
         Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.ARBFORH);
         return (ArbeidsforholdDokument) saksopplysning
             .orElseThrow(() -> new TekniskException("Finner ikke arbeidsforholddokument"));
+    }
+
+    public List<OrganisasjonDokument> hentOrganisasjonDokumenter() {
+        return getSaksopplysninger().stream()
+            .filter(saksopplysning -> saksopplysning.getType().equals(SaksopplysningType.ORG))
+            .map(Saksopplysning::getDokument)
+            .map(OrganisasjonDokument.class::cast)
+            .collect(Collectors.toList());
     }
 
     public SedDokument hentSedDokument() {
