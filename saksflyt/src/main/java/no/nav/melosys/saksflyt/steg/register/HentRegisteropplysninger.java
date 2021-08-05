@@ -52,7 +52,7 @@ public class HentRegisteropplysninger implements StegBehandler {
             .behandlingID(prosessinstans.getBehandling().getId())
             .fnr(brukerId);
 
-        if (behandling.getFagsak().getType() == Sakstyper.FTRL) {
+        if (behandling.getFagsak().getType() == Sakstyper.FTRL || behandling.getFagsak().getType() == Sakstyper.TRYGDEAVTALE) {
             registeropplysningerRequestBuilder
                 .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder().personopplysninger().build());
         } else {
