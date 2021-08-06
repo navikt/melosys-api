@@ -245,7 +245,9 @@ public class FagsakTjeneste {
                 .map(Behandlingsgrunnlag::getBehandlingsgrunnlagdata).ifPresent(grunnlagData -> {
                     behandlingOversiktDto.setLand(hentSøknadsland(grunnlagData));
                     Periode periode = hentPeriode(grunnlagData);
-                    behandlingOversiktDto.setPeriode(new PeriodeDto(periode.getFom(), periode.getTom()));
+                    if (periode != null) {
+                        behandlingOversiktDto.setPeriode(new PeriodeDto(periode.getFom(), periode.getTom()));
+                    }
                 });
         } else {
             saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresent(sedDokument -> {
