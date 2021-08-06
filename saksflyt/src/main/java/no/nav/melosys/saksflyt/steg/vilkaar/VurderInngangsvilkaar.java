@@ -35,7 +35,7 @@ public class VurderInngangsvilkaar implements StegBehandler {
         final long behandlingID = prosessinstans.getBehandling().getId();
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
-        if (behandling.getFagsak().getType() != Sakstyper.FTRL && behandling.kanResultereIVedtak()) {
+        if (behandling.getFagsak().getType() == Sakstyper.EU_EOS && behandling.kanResultereIVedtak()) {
             var søknadsland = behandling.finnSøknadsLand();
             var periode = behandling.hentPeriode();
 
