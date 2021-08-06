@@ -47,7 +47,7 @@ public class OpprettSoeknad implements StegBehandler {
             soeknad.periode = periode;
             soeknad.soeknadsland.landkoder = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, new TypeReference<List<String>>() {});
             Sakstyper sakstype = prosessinstans.getBehandling().getFagsak().getType();
-            if (sakstype == Sakstyper.FTRL) {
+            if (sakstype == Sakstyper.FTRL || sakstype == Sakstyper.TRYGDEAVTALE) {
                 behandlingsgrunnlagService.opprettSøknadFolketrygden(behandlingID, new SoeknadFtrl());
             } else {
                 behandlingsgrunnlagService.opprettSøknadYrkesaktiveEøs(behandlingID, soeknad);
