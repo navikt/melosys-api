@@ -9,11 +9,10 @@ import no.nav.melosys.tjenester.gui.dto.TrygdeavtaleInfoDto;
 import no.nav.security.token.support.core.api.Unprotected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
+
+import java.util.Collections;
 
 @RestController
 @RequestMapping("/trygdeavtale")
@@ -30,14 +29,16 @@ public class TrygdeavtaleTjeneste {
     }
 
     @Unprotected
-    @GetMapping
-    public ResponseEntity<TrygdeavtaleInfoDto> hentTrygdeavtaleInfo(@RequestParam long behandlingId) {
+    @GetMapping("{behandlingID}")
+    public ResponseEntity<TrygdeavtaleInfoDto> hentTrygdeavtaleInfo(@PathVariable("behandlingID") long behandlingId,
+                                                                    @RequestParam(value = "virksomheter", required = false) boolean hentVirksomheter,
+                                                                    @RequestParam(value = "barnEktefeller", required = false) boolean hentBarnEktefeller) {
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         return ResponseEntity.ok(new TrygdeavtaleInfoDto(
             behandling.getFagsak().hentBruker().getAktørId(),
             behandling.getTema().getKode(),
-            OrgIdNavnDto.av(trygdeavtaleService.hentVirksomheter(behandling)),
-            trygdeavtaleService.hentFamiliemedlemmer(behandling)
+            hentVirksomheter ? OrgIdNavnDto.av(trygdeavtaleService.hentVirksomheter(behandling)) : Collections.emptyList(),
+            hentBarnEktefeller ? trygdeavtaleService.hentFamiliemedlemmer(behandling) : Collections.emptyList()
         ));
     }
 }
