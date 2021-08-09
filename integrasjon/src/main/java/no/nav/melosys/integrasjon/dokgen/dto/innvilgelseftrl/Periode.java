@@ -60,4 +60,8 @@ public class Periode {
     public String getDekning() {
         return dekning;
     }
+
+    public List<Trygdeavgift> getTrygdeavgift() {
+        return trygdeavgift;
+    }
 }

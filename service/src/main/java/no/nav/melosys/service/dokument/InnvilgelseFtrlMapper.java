@@ -13,8 +13,6 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
-import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
-import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
@@ -91,8 +89,8 @@ public class InnvilgelseFtrlMapper {
         return vilkaarsresultater.isEmpty() ? null : vilkaarsresultater.iterator().next().getBegrunnelser().iterator().next().getKode();
     }
 
-    private List<FamilieInfo> mapOmfattetFamilie(long behandlingID, Set<OmfattetFamilie> omfattetEktefelle, Set<OmfattetFamilie> omfattetBarn) {
-        List<FamilieInfo> omfattetFamilie = new ArrayList<>();
+    private List<FamiliemedlemInfo> mapOmfattetFamilie(long behandlingID, Set<OmfattetFamilie> omfattetEktefelle, Set<OmfattetFamilie> omfattetBarn) {
+        List<FamiliemedlemInfo> omfattetFamilie = new ArrayList<>();
         Map<String, MedfolgendeFamilie> medfoelgendeBarn = hentMedfølgendeBarn(behandlingID);
         Map<String, MedfolgendeFamilie> medfolgendeEktefelle = hentMedfølgendEktefelle(behandlingID);
         for (OmfattetFamilie omfattetEkte : omfattetEktefelle) {
@@ -101,7 +99,7 @@ public class InnvilgelseFtrlMapper {
             }
             MedfolgendeFamilie ektefelle = medfolgendeEktefelle.get(omfattetEkte.getUuid());
             String sammensattNavn = ektefelle.fnr != null ? persondataFasade.hentSammensattNavn(ektefelle.fnr) : ektefelle.navn;
-            omfattetFamilie.add(new FamilieInfo(sammensattNavn, ektefelle.fnr, IdentType.FNR));
+            omfattetFamilie.add(new FamiliemedlemInfo(sammensattNavn, ektefelle.fnr, IdentType.FNR));
         }
         for (OmfattetFamilie omfattetB : omfattetBarn) {
             if (!medfoelgendeBarn.containsKey(omfattetB.getUuid())) {
@@ -109,7 +107,7 @@ public class InnvilgelseFtrlMapper {
             }
             MedfolgendeFamilie barn = medfolgendeEktefelle.get(omfattetB.getUuid());
             String sammensattNavn = barn.fnr != null ? persondataFasade.hentSammensattNavn(barn.fnr) : barn.navn;
-            omfattetFamilie.add(new FamilieInfo(sammensattNavn, barn.fnr, IdentType.FNR));
+            omfattetFamilie.add(new FamiliemedlemInfo(sammensattNavn, barn.fnr, IdentType.FNR));
         }
         return omfattetFamilie;
     }
@@ -123,8 +121,8 @@ public class InnvilgelseFtrlMapper {
             }
             MedfolgendeFamilie barn = medfoelgendeBarn.get(ikkeOmfattetBarn.uuid);
             String sammensattNavn = barn.fnr != null ? persondataFasade.hentSammensattNavn(barn.fnr) : barn.navn;
-            FamilieInfo familieInfo = new FamilieInfo(sammensattNavn, barn.fnr, IdentType.FNR);
-            ikkeOmfattet.add(new IkkeOmfattetBarn(familieInfo, ikkeOmfattetBarn.begrunnelse));
+            FamiliemedlemInfo familiemedlemInfo = new FamiliemedlemInfo(sammensattNavn, barn.fnr, IdentType.FNR);
+            ikkeOmfattet.add(new IkkeOmfattetBarn(familiemedlemInfo, ikkeOmfattetBarn.begrunnelse));
         }
         return ikkeOmfattet;
     }
@@ -138,8 +136,8 @@ public class InnvilgelseFtrlMapper {
 
         MedfolgendeFamilie ektefelle = medfolgendeEktefelle.get(ikkeOmfattetEktefelle.getUuid());
         String sammensattNavn = ektefelle.fnr != null ? persondataFasade.hentSammensattNavn(ektefelle.fnr) : ektefelle.navn;
-        FamilieInfo familieInfo = new FamilieInfo(sammensattNavn, ektefelle.fnr, IdentType.FNR);
-        return new IkkeOmfattetEktefelle(familieInfo, ikkeOmfattetEktefelle.getBegrunnelse());
+        FamiliemedlemInfo familiemedlemInfo = new FamiliemedlemInfo(sammensattNavn, ektefelle.fnr, IdentType.FNR);
+        return new IkkeOmfattetEktefelle(familiemedlemInfo, ikkeOmfattetEktefelle.getBegrunnelse());
     }
 
     private Map<String, MedfolgendeFamilie> hentMedfølgendeBarn(long behandlingID) {

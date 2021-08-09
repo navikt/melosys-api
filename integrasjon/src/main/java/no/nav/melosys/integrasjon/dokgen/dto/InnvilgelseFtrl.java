@@ -1,21 +1,15 @@
 package no.nav.melosys.integrasjon.dokgen.dto;
 
 import java.time.Instant;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
-import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
-import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
-import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.*;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
-import static no.nav.melosys.domain.avklartefakta.Avklartefakta.VALGT_FAKTA;
 
 public class InnvilgelseFtrl extends DokgenDto {
 
@@ -28,7 +22,7 @@ public class InnvilgelseFtrl extends DokgenDto {
     private final String ftrl_2_8_begrunnelse;
     private final boolean vurderingMedlemskapEktefelle;
     private final boolean vurderingLovvalgBarn;
-    private final List<FamilieInfo> omfattetFamilie;
+    private final List<FamiliemedlemInfo> omfattetFamilie;
     private final List<IkkeOmfattetBarn> ikkeOmfattetBarn;
     private final IkkeOmfattetEktefelle ikkeOmfattetEktefelle;
     private final String fritekstInnledning;
@@ -53,7 +47,7 @@ public class InnvilgelseFtrl extends DokgenDto {
                            String ftrl_2_8_begrunnelse,
                            boolean vurderingMedlemskapEktefelle,
                            boolean vurderingLovvalgBarn,
-                           List<FamilieInfo> omfattetFamilie,
+                           List<FamiliemedlemInfo> omfattetFamilie,
                            List<IkkeOmfattetBarn> ikkeOmfattetBarn,
                            IkkeOmfattetEktefelle ikkeOmfattetEktefelle,
                            String arbeidsgiverNavn,
@@ -93,21 +87,6 @@ public class InnvilgelseFtrl extends DokgenDto {
         this.loennUtlandSkattepliktig = loennUtlandSkattepliktig;
     }
 
-    private AvklarteMedfolgendeBarn hentAvklartMedfølgendeBarn(Set<Avklartefakta> avklartefakta) {
-        Set<OmfattetFamilie> barnOmfattetAvNorskTrygd = new HashSet<>();
-        Set<no.nav.melosys.domain.person.familie.IkkeOmfattetBarn> barnIkkeOmfattetAvNorskTrygd = new HashSet<>();
-
-        for (Avklartefakta a : avklartefakta) {
-            if (a.getFakta().equals(VALGT_FAKTA)) {
-                barnOmfattetAvNorskTrygd.add(new OmfattetFamilie(a.getSubjekt()));
-            } else {
-                String begrunnelse = a.getRegistreringer().iterator().next().getBegrunnelseKode();
-                new no.nav.melosys.domain.person.familie.IkkeOmfattetBarn(a.getSubjekt(), begrunnelse, a.getBegrunnelseFritekst());
-            }
-        }
-        return new AvklarteMedfolgendeBarn(barnOmfattetAvNorskTrygd, barnIkkeOmfattetAvNorskTrygd);
-    }
-
     public Instant getDatoMottatt() {
         return datoMottatt;
     }
@@ -132,7 +111,7 @@ public class InnvilgelseFtrl extends DokgenDto {
         return vurderingLovvalgBarn;
     }
 
-    public List<FamilieInfo> getOmfattetFamilie() {
+    public List<FamiliemedlemInfo> getOmfattetFamilie() {
         return omfattetFamilie;
     }
 

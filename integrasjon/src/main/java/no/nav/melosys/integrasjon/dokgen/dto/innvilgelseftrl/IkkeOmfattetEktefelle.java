@@ -1,15 +1,15 @@
 package no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl;
 
 public class IkkeOmfattetEktefelle {
-    private FamilieInfo info;
+    private FamiliemedlemInfo info;
     private String begrunnelse;
 
-    public IkkeOmfattetEktefelle(FamilieInfo info, String begrunnelse) {
+    public IkkeOmfattetEktefelle(FamiliemedlemInfo info, String begrunnelse) {
         this.info = info;
         this.begrunnelse = begrunnelse;
     }
 
-    public FamilieInfo getInfo() {
+    public FamiliemedlemInfo getInfo() {
         return info;
     }
 
