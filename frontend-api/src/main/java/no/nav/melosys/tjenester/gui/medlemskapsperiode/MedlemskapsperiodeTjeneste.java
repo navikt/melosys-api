@@ -55,10 +55,10 @@ public class MedlemskapsperiodeTjeneste {
             MedlemskapsperiodeDto.av(
                 medlemskapsperiodeService.opprettMedlemskapsperiode(
                     behandlingID,
-                    medlemskapsperiodeOppdatering.getFomDato(),
-                    medlemskapsperiodeOppdatering.getTomDato(),
-                    medlemskapsperiodeOppdatering.getInnvilgelsesResultat(),
-                    medlemskapsperiodeOppdatering.getTrygdedekning())
+                    medlemskapsperiodeOppdatering.fomDato(),
+                    medlemskapsperiodeOppdatering.tomDato(),
+                    medlemskapsperiodeOppdatering.innvilgelsesResultat(),
+                    medlemskapsperiodeOppdatering.trygdedekning())
             )
         );
     }
@@ -73,10 +73,10 @@ public class MedlemskapsperiodeTjeneste {
                 medlemskapsperiodeService.oppdaterMedlemskapsperiode(
                     behandlingID,
                     medlemskapsperiodeID,
-                    medlemskapsperiodeOppdatering.getFomDato(),
-                    medlemskapsperiodeOppdatering.getTomDato(),
-                    medlemskapsperiodeOppdatering.getInnvilgelsesResultat(),
-                    medlemskapsperiodeOppdatering.getTrygdedekning()
+                    medlemskapsperiodeOppdatering.fomDato(),
+                    medlemskapsperiodeOppdatering.tomDato(),
+                    medlemskapsperiodeOppdatering.innvilgelsesResultat(),
+                    medlemskapsperiodeOppdatering.trygdedekning()
                 )
             )
         );

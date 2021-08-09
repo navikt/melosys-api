@@ -99,27 +99,27 @@ class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
         valider(response, AVKLARTEFAKTA_OPPSUMMERING_SCHEMA, log);
 
         List<MedfolgendeFamilieDto> medFolgendeFamilieFraResponse = response.getMedfolgendeFamilie()
-            .stream().sorted(Comparator.comparing(MedfolgendeFamilieDto::getUuid)).collect(Collectors.toList());
-        List<MedfolgendeFamilieDto> forventetMedfolgendeFamilie = lagreMedfolgendeFamilieDto.getMedfolgendeFamilie()
-            .stream().sorted(Comparator.comparing(MedfolgendeFamilieDto::getUuid)).collect(Collectors.toList());
+            .stream().sorted(Comparator.comparing(MedfolgendeFamilieDto::uuid)).collect(Collectors.toList());
+        List<MedfolgendeFamilieDto> forventetMedfolgendeFamilie = lagreMedfolgendeFamilieDto.medfolgendeFamilie()
+            .stream().sorted(Comparator.comparing(MedfolgendeFamilieDto::uuid)).collect(Collectors.toList());
 
         assertThat(medFolgendeFamilieFraResponse.size()).isEqualTo(forventetMedfolgendeFamilie.size());
 
-        assertThat(medFolgendeFamilieFraResponse.get(0).getUuid()).isEqualTo(forventetMedfolgendeFamilie.get(0).getUuid());
-        assertThat(medFolgendeFamilieFraResponse.get(0).getBegrunnelseKode()).isEqualTo(forventetMedfolgendeFamilie.get(0).getBegrunnelseKode());
-        assertThat(medFolgendeFamilieFraResponse.get(0).getBegrunnelseFritekst()).isEqualTo(forventetMedfolgendeFamilie.get(0).getBegrunnelseFritekst());
+        assertThat(medFolgendeFamilieFraResponse.get(0).uuid()).isEqualTo(forventetMedfolgendeFamilie.get(0).uuid());
+        assertThat(medFolgendeFamilieFraResponse.get(0).begrunnelseKode()).isEqualTo(forventetMedfolgendeFamilie.get(0).begrunnelseKode());
+        assertThat(medFolgendeFamilieFraResponse.get(0).begrunnelseFritekst()).isEqualTo(forventetMedfolgendeFamilie.get(0).begrunnelseFritekst());
 
-        assertThat(medFolgendeFamilieFraResponse.get(1).getUuid()).isEqualTo(forventetMedfolgendeFamilie.get(1).getUuid());
-        assertThat(medFolgendeFamilieFraResponse.get(1).getBegrunnelseKode()).isEqualTo(forventetMedfolgendeFamilie.get(1).getBegrunnelseKode());
-        assertThat(medFolgendeFamilieFraResponse.get(1).getBegrunnelseFritekst()).isEqualTo(forventetMedfolgendeFamilie.get(1).getBegrunnelseFritekst());
+        assertThat(medFolgendeFamilieFraResponse.get(1).uuid()).isEqualTo(forventetMedfolgendeFamilie.get(1).uuid());
+        assertThat(medFolgendeFamilieFraResponse.get(1).begrunnelseKode()).isEqualTo(forventetMedfolgendeFamilie.get(1).begrunnelseKode());
+        assertThat(medFolgendeFamilieFraResponse.get(1).begrunnelseFritekst()).isEqualTo(forventetMedfolgendeFamilie.get(1).begrunnelseFritekst());
 
-        assertThat(medFolgendeFamilieFraResponse.get(2).getUuid()).isEqualTo(forventetMedfolgendeFamilie.get(2).getUuid());
-        assertThat(medFolgendeFamilieFraResponse.get(2).getBegrunnelseKode()).isEqualTo(forventetMedfolgendeFamilie.get(2).getBegrunnelseKode());
-        assertThat(medFolgendeFamilieFraResponse.get(2).getBegrunnelseFritekst()).isEqualTo(forventetMedfolgendeFamilie.get(2).getBegrunnelseFritekst());
+        assertThat(medFolgendeFamilieFraResponse.get(2).uuid()).isEqualTo(forventetMedfolgendeFamilie.get(2).uuid());
+        assertThat(medFolgendeFamilieFraResponse.get(2).begrunnelseKode()).isEqualTo(forventetMedfolgendeFamilie.get(2).begrunnelseKode());
+        assertThat(medFolgendeFamilieFraResponse.get(2).begrunnelseFritekst()).isEqualTo(forventetMedfolgendeFamilie.get(2).begrunnelseFritekst());
 
-        assertThat(medFolgendeFamilieFraResponse.get(3).getUuid()).isEqualTo(forventetMedfolgendeFamilie.get(3).getUuid());
-        assertThat(medFolgendeFamilieFraResponse.get(3).getBegrunnelseKode()).isEqualTo(forventetMedfolgendeFamilie.get(3).getBegrunnelseKode());
-        assertThat(medFolgendeFamilieFraResponse.get(3).getBegrunnelseFritekst()).isEqualTo(forventetMedfolgendeFamilie.get(3).getBegrunnelseFritekst());
+        assertThat(medFolgendeFamilieFraResponse.get(3).uuid()).isEqualTo(forventetMedfolgendeFamilie.get(3).uuid());
+        assertThat(medFolgendeFamilieFraResponse.get(3).begrunnelseKode()).isEqualTo(forventetMedfolgendeFamilie.get(3).begrunnelseKode());
+        assertThat(medFolgendeFamilieFraResponse.get(3).begrunnelseFritekst()).isEqualTo(forventetMedfolgendeFamilie.get(3).begrunnelseFritekst());
     }
 
     private static AvklartefaktaDto lagAvklartefaktaDto(String subjektID, Avklartefaktatyper type, boolean fakta, String begrunnelseFritekst, String begrunnelsekode) {
