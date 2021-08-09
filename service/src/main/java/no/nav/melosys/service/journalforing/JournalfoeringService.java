@@ -136,7 +136,13 @@ public class JournalfoeringService {
         }
 
         if (behandlingstema == Behandlingstema.ARBEID_I_UTLANDET && !unleash.isEnabled("melosys.folketrygden.mvp")) {
-            throw new FunksjonellException("Kan ikke opprett ny sak med behandlingstema " + behandlingstema);
+            throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema +
+                "siden 'melosys.folketrygden.mvp' ikke er aktivert i unleash");
+        }
+
+        if (behandlingstema == Behandlingstema.TRYGDEAVTALE_UK && !unleash.isEnabled("melosys.trygdeavtale")) {
+            throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema +
+                "siden 'melosys.trygdeavtale' ikke er aktivert i unleash");
         }
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
