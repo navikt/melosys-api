@@ -67,7 +67,7 @@ class UtpekingsperiodeTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void lagreUtpekingsperioder() throws IOException {
-        UtpekingsperioderDto utpekingsperioderDto = new UtpekingsperioderDto(lagUtpekingsperioder());
+        UtpekingsperioderDto utpekingsperioderDto = UtpekingsperioderDto.av(lagUtpekingsperioder());
 
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(utpekingsperioderDto);
         valider(jsonString, UTPEKINGSPERIODER_SCHEMA, log);

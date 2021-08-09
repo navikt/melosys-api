@@ -73,7 +73,7 @@ class EndreBehandlingstemaServiceTest {
     }
 
     @Test
-    void hentMuligeBehandlingstema_gyldigSøknadBehandlingstema_returnererSøknadBehandlinstema() {
+    void hentMuligeBehandlingstema_gyldigSøknadBehandlingstema_returnererSøknadBehandlingstema() {
         behandling.setTema(ARBEID_FLERE_LAND);
         when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
 

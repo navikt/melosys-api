@@ -112,7 +112,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void fagsakUtpekSchemaValidering() throws Exception {
-        UtpekDto utpekDto = random.nextObject(UtpekDto.class);
+        UtpekDto utpekDto = new UtpekDto(Set.of("SE:123"), "fri SED", "fri brev");
 
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(utpekDto);
         valider(jsonString, FAGSAKER_UTPEK_POST_SCHEMA, log);
@@ -240,11 +240,9 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void henleggFagsakSenderSaksnummerFritekstOgBegrunnelseTilService() throws Exception {
-        HenleggelseDto henleggelseDto = new HenleggelseDto();
         String begrunnelseKode = Henleggelsesgrunner.OPPHOLD_UTL_AVLYST.getKode();
         String fritekst = "Dette er fritekst";
-        henleggelseDto.setBegrunnelseKode(begrunnelseKode);
-        henleggelseDto.setFritekst(fritekst);
+        HenleggelseDto henleggelseDto = new HenleggelseDto(fritekst, begrunnelseKode);
 
         valider(henleggelseDto, FAGSAKSER_HENLEGG_POST_SCHEMA);
 
@@ -337,16 +335,16 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void utpekLovvalgsland() throws Exception {
+    void utpekLovvalgsland() {
         Fagsak fagsak = lagFagsak();
         FagsakTjeneste fagsakTjeneste = lagFagsakTjeneste(fagsak);
-        UtpekDto utpekDto = random.nextObject(UtpekDto.class);
+        UtpekDto utpekDto = new UtpekDto(Set.of("SE:123"), "Fri SED", "Fri brev");
 
         when(fagsakService.hentFagsak(any())).thenReturn(fagsak);
 
         fagsakTjeneste.utpekLovvalgsland(fagsak.getSaksnummer(), utpekDto);
 
         verify(tilgangService).sjekkSak(fagsak);
-        verify(utpekingService).utpekLovvalgsland(fagsak, utpekDto.getMottakerinstitusjoner(), utpekDto.getFritekstSed(), utpekDto.getFritekstBrev());
+        verify(utpekingService).utpekLovvalgsland(fagsak, utpekDto.mottakerinstitusjoner(), utpekDto.fritekstSed(), utpekDto.fritekstBrev());
     }
 }

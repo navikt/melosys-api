@@ -109,16 +109,15 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentMuligeBehandlinstemaValidering() throws IOException {
+    void hentMuligeBehandlingstemaValidering() throws IOException {
         when(endreBehandlingstemaService.hentMuligeBehandlingstema(BEHANDLING_ID)).thenReturn(BEHANDLINGSTEMA_SØKNAD);
         List<Behandlingstema> muligeBehandlingstema = behandlingTjeneste.hentEndreBehandlingstema(BEHANDLING_ID).getBody();
         validerArray(muligeBehandlingstema, ENDRE_BEHANDLINGSTEMA_SCHEMA, log);
     }
 
     @Test
-    void endreBehandlinstemaValidering() throws Exception {
-        EndreBehandlingstemaDto endreBehandlingstemaDto = new EndreBehandlingstemaDto();
-        endreBehandlingstemaDto.setBehandlingstema(Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND.getKode());
+    void endreBehandlingstemaValidering() throws Exception {
+        EndreBehandlingstemaDto endreBehandlingstemaDto = new EndreBehandlingstemaDto(Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND.getKode());
         valider(endreBehandlingstemaDto, ENDRE_BEHANDLINGSTEMA_POST_SCHEMA, log);
     }
 
@@ -135,7 +134,7 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void knyttMedlemsperioder() throws Exception {
+    void knyttMedlemsperioder() {
         TidligereMedlemsperioderDto tidligereMedlemsperioderDto = new TidligereMedlemsperioderDto();
         tidligereMedlemsperioderDto.periodeIder = PERIODE_IDER;
 
@@ -144,7 +143,7 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentMedlemsperioder() throws Exception {
+    void hentMedlemsperioder() {
         when(behandlingService.hentMedlemsperioder(BEHANDLING_ID)).thenReturn(PERIODE_IDER);
 
         ResponseEntity<TidligereMedlemsperioderDto> response = behandlingTjeneste.hentMedlemsperioder(BEHANDLING_ID);
@@ -158,10 +157,9 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void endreBehandlingsfrist() throws Exception {
+    void endreBehandlingsfrist() {
         LocalDate frist = LocalDate.now().plusWeeks(1);
-        EndreBehandlingsfristDto endreBehandlingsfristDto = new EndreBehandlingsfristDto();
-        endreBehandlingsfristDto.setBehandlingsfrist(frist);
+        EndreBehandlingsfristDto endreBehandlingsfristDto = new EndreBehandlingsfristDto(frist);
 
         behandlingTjeneste.endreBehandlingsfrist(BEHANDLING_ID, endreBehandlingsfristDto);
         verify(behandlingService).endreBehandlingsfrist(BEHANDLING_ID, frist);

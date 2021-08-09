@@ -99,11 +99,11 @@ public class FagsakTjeneste {
         responseContainer = "List")
     public List<FagsakOppsummeringDto> hentFagsaker(@RequestBody FagsakSokDto fagsakSokDto) {
 
-        if (StringUtils.isNotEmpty(fagsakSokDto.getIdent())) {
-            tilgangService.sjekkFnr(fagsakSokDto.getIdent());
-            return tilFagsakOppsummeringDtoer(fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, fagsakSokDto.getIdent()));
-        } else if (StringUtils.isNotEmpty(fagsakSokDto.getSaksnummer())) {
-            Optional<Fagsak> fagsak = fagsakService.finnFagsakFraSaksnummer(fagsakSokDto.getSaksnummer());
+        if (StringUtils.isNotEmpty(fagsakSokDto.ident())) {
+            tilgangService.sjekkFnr(fagsakSokDto.ident());
+            return tilFagsakOppsummeringDtoer(fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, fagsakSokDto.ident()));
+        } else if (StringUtils.isNotEmpty(fagsakSokDto.saksnummer())) {
+            Optional<Fagsak> fagsak = fagsakService.finnFagsakFraSaksnummer(fagsakSokDto.saksnummer());
             if (fagsak.isPresent()) {
                 tilgangService.sjekkSak(fagsak.get());
                 return tilFagsakOppsummeringDtoer(Collections.singletonList(fagsak.get()));
@@ -117,7 +117,7 @@ public class FagsakTjeneste {
     @ApiOperation(value = "Henlegger en fagsak")
     public ResponseEntity<Void> henleggFagsak(@PathVariable("saksnr") String saksnummer, @RequestBody HenleggelseDto henleggelseDto) {
         tilgangService.sjekkSak(saksnummer);
-        henleggFagsakService.henleggFagsak(saksnummer, henleggelseDto.getBegrunnelseKode(), henleggelseDto.getFritekst());
+        henleggFagsakService.henleggFagsak(saksnummer, henleggelseDto.begrunnelseKode(), henleggelseDto.fritekst());
         return ResponseEntity.ok().build();
     }
 
@@ -172,9 +172,9 @@ public class FagsakTjeneste {
 
         utpekingService.utpekLovvalgsland(
             fagsak,
-            utpekDto.getMottakerinstitusjoner(),
-            utpekDto.getFritekstSed(),
-            utpekDto.getFritekstBrev()
+            utpekDto.mottakerinstitusjoner(),
+            utpekDto.fritekstSed(),
+            utpekDto.fritekstBrev()
         );
 
         return ResponseEntity.noContent().build();

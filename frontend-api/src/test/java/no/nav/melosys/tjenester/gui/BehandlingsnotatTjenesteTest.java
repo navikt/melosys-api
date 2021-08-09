@@ -79,8 +79,7 @@ public class BehandlingsnotatTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void oppdaterBehandlingsnotat_blirOppdatert_validerSchema() throws IOException {
 
-        BehandlingsnotatPostDto req = new BehandlingsnotatPostDto();
-        req.setTekst("teteteksssst");
+        BehandlingsnotatPostDto req = new BehandlingsnotatPostDto("teteteksssst");
         valider(req, BEHANDLINGNOTAT_PUT_SCHEMA);
 
         final String saksnummer = "MEL-222";
@@ -95,8 +94,7 @@ public class BehandlingsnotatTjenesteTest extends JsonSchemaTestParent {
     @Test
     public void opprettBehandlingsnotat_blirOpprettet_validerSchema() throws IOException {
 
-        BehandlingsnotatPostDto req = new BehandlingsnotatPostDto();
-        req.setTekst("teteteksssst");
+        BehandlingsnotatPostDto req = new BehandlingsnotatPostDto("teteteksssst");
         valider(req, BEHANDLINGNOTAT_POST_SCHEMA);
 
         final String saksnummer = "MEL-222";
