@@ -109,14 +109,14 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentMuligeBehandlinstemaValidering() throws IOException {
+    void hentMuligeBehandlingstemaValidering() throws IOException {
         when(endreBehandlingstemaService.hentMuligeBehandlingstema(BEHANDLING_ID)).thenReturn(BEHANDLINGSTEMA_SØKNAD);
         List<Behandlingstema> muligeBehandlingstema = behandlingTjeneste.hentEndreBehandlingstema(BEHANDLING_ID).getBody();
         validerArray(muligeBehandlingstema, ENDRE_BEHANDLINGSTEMA_SCHEMA, log);
     }
 
     @Test
-    void endreBehandlinstemaValidering() throws Exception {
+    void endreBehandlingstemaValidering() throws Exception {
         EndreBehandlingstemaDto endreBehandlingstemaDto = new EndreBehandlingstemaDto(Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND.getKode());
         valider(endreBehandlingstemaDto, ENDRE_BEHANDLINGSTEMA_POST_SCHEMA, log);
     }
