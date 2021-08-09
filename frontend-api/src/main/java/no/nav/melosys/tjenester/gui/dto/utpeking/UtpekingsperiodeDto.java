@@ -1,12 +1,13 @@
 package no.nav.melosys.tjenester.gui.dto.utpeking;
 
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import java.time.LocalDate;
+
 import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 
-public record UtpekingsperiodeDto(@JsonUnwrapped(suffix = "Dato") PeriodeDto periode,
+public record UtpekingsperiodeDto(LocalDate fomDato,
+                                  LocalDate tomDato,
                                   String lovvalgsbestemmelse,
                                   String tilleggsbestemmelse,
                                   String lovvalgsland) {
@@ -14,7 +15,8 @@ public record UtpekingsperiodeDto(@JsonUnwrapped(suffix = "Dato") PeriodeDto per
 
     public static UtpekingsperiodeDto av(Utpekingsperiode utpekingsperiode) {
         return new UtpekingsperiodeDto(
-            new PeriodeDto(utpekingsperiode.getFom(), utpekingsperiode.getTom()),
+            utpekingsperiode.getFom(),
+            utpekingsperiode.getTom(),
             utpekingsperiode.getBestemmelse().name(),
             utpekingsperiode.getTilleggsbestemmelse() != null ? utpekingsperiode.getTilleggsbestemmelse().name() : null,
             utpekingsperiode.getLovvalgsland().name()
@@ -23,8 +25,8 @@ public record UtpekingsperiodeDto(@JsonUnwrapped(suffix = "Dato") PeriodeDto per
 
     public final Utpekingsperiode tilDomene() {
         return new Utpekingsperiode(
-            periode.getFom(),
-            periode.getTom(),
+            fomDato,
+            tomDato,
             enumVerdiEllerNull(Landkoder.class, lovvalgsland),
             konverterer.convertToEntityAttribute(lovvalgsbestemmelse),
             konverterer.convertToEntityAttribute(tilleggsbestemmelse));
