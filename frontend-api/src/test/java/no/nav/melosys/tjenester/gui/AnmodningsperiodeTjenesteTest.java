@@ -59,7 +59,7 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void hentAnmodningsperioder() throws Exception {
+    void hentAnmodningsperioder() throws Exception {
         when(anmodningsperiodeService.hentAnmodningsperioder(1L)).thenReturn(mockAnmodningsperioder());
 
         AnmodningsperiodeGetDto anmodningsperiodeGetDto = anmodningsperiodeTjeneste.hentAnmodningsperioder(1L);
@@ -68,7 +68,7 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void lagreAnmodningsperioder() throws Exception {
+    void lagreAnmodningsperioder() throws Exception {
         Set<Anmodningsperiode> mockAnmodninger = random.objects(Anmodningsperiode.class, 3).collect(Collectors.toSet());
         when(anmodningsperiodeService.lagreAnmodningsperioder(anyLong(), anyCollection()))
             .thenReturn(mockAnmodninger);
@@ -85,7 +85,7 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void hentAnmodningsperiodeSvar() throws Exception {
+    void hentAnmodningsperiodeSvar() throws Exception {
 
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
@@ -100,13 +100,13 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
 
         AnmodningsperiodeSvarDto svarDto = anmodningsperiodeTjeneste.hentAnmodningsperiodeSvar(1L);
         assertThat(svarDto).isNotNull();
-        assertThat(svarDto.begrunnelseFritekst).isNotEmpty();
-        assertThat(svarDto.anmodningsperiodeSvarType).isEqualTo(Anmodningsperiodesvartyper.INNVILGELSE.name());
+        assertThat(svarDto.begrunnelseFritekst()).isNotEmpty();
+        assertThat(svarDto.anmodningsperiodeSvarType()).isEqualTo(Anmodningsperiodesvartyper.INNVILGELSE.name());
         valider(svarDto, ANMODNINGSPERIODER_SVAR_SCHEMA, logger);
     }
 
     @Test
-    public void lagreAnmodningsperiodeSvar() throws Exception {
+    void lagreAnmodningsperiodeSvar() throws Exception {
 
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
@@ -123,9 +123,9 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
         when(anmodningsperiodeService.lagreAnmodningsperiodeSvar(anyLong(), any()))
             .thenReturn(svar);
 
-        AnmodningsperiodeSvarDto svarDto = anmodningsperiodeTjeneste.lagreAnmodningsperiodeSvar(1L, new AnmodningsperiodeSvarDto());
+        AnmodningsperiodeSvarDto svarDto = anmodningsperiodeTjeneste.lagreAnmodningsperiodeSvar(1L, AnmodningsperiodeSvarDto.tom());
         assertThat(svarDto).isNotNull();
-        assertThat(svarDto.anmodningsperiodeSvarType).isEqualTo(Anmodningsperiodesvartyper.INNVILGELSE.name());
+        assertThat(svarDto.anmodningsperiodeSvarType()).isEqualTo(Anmodningsperiodesvartyper.INNVILGELSE.name());
         verify(tilgangService).sjekkRedigerbarOgTilgang(anyLong());
         valider(svarDto, ANMODNINGSPERIODER_SVAR_SCHEMA, logger);
     }

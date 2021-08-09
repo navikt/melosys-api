@@ -6,20 +6,10 @@ import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 
-public class AnmodningsperiodeSvarDto {
+public record AnmodningsperiodeSvarDto(String anmodningsperiodeSvarType, PeriodeDto endretPeriode, String begrunnelseFritekst) {
 
-    public final String anmodningsperiodeSvarType;
-    public final PeriodeDto endretPeriode;
-    public final String begrunnelseFritekst;
-
-    public AnmodningsperiodeSvarDto() {
-        this(null, new PeriodeDto(), null);
-    }
-
-    public AnmodningsperiodeSvarDto(String anmodningsperiodeSvarType, PeriodeDto endretPeriode, String begrunnelseFritekst) {
-        this.anmodningsperiodeSvarType = anmodningsperiodeSvarType;
-        this.endretPeriode = endretPeriode;
-        this.begrunnelseFritekst = begrunnelseFritekst;
+    public static AnmodningsperiodeSvarDto tom() {
+        return new AnmodningsperiodeSvarDto(null, new PeriodeDto(), null);
     }
 
     public final AnmodningsperiodeSvar til() {

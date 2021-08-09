@@ -1,26 +1,14 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
-
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
+
 import static no.nav.melosys.domain.avklartefakta.Avklartefakta.VALGT_FAKTA;
 
-public class MedfolgendeFamilieDto {
-    private final String uuid;
-    private final boolean omfattet;
-    private final String begrunnelseKode;
-    private final String begrunnelseFritekst;
-
-    public MedfolgendeFamilieDto(String uuid, boolean omfattet, String begrunnelseKode, String begrunnelseFritekst) {
-        this.uuid = uuid;
-        this.omfattet = omfattet;
-        this.begrunnelseKode = begrunnelseKode;
-        this.begrunnelseFritekst = begrunnelseFritekst;
-    }
-
+public record MedfolgendeFamilieDto(String uuid, boolean omfattet, String begrunnelseKode, String begrunnelseFritekst) {
     public static Set<MedfolgendeFamilieDto> av(Set<AvklartefaktaDto> avklartefaktas) {
         return avklartefaktas.stream()
             .map(avklartefakta -> new MedfolgendeFamilieDto(
@@ -35,23 +23,7 @@ public class MedfolgendeFamilieDto {
         return VALGT_FAKTA.equals(fakta.get(0));
     }
 
-    public String getUuid() {
-        return uuid;
-    }
-
-    public boolean isOmfattet() {
-        return omfattet;
-    }
-
     public boolean erIkkeOmfattet() {
-        return !isOmfattet();
-    }
-
-    public String getBegrunnelseKode() {
-        return begrunnelseKode;
-    }
-
-    public String getBegrunnelseFritekst() {
-        return begrunnelseFritekst;
+        return !omfattet;
     }
 }
