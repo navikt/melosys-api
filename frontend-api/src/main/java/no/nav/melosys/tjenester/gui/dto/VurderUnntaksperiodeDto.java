@@ -1,5 +1,8 @@
 package no.nav.melosys.tjenester.gui.dto;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Set;
 
 public class VurderUnntaksperiodeDto {
@@ -7,7 +10,9 @@ public class VurderUnntaksperiodeDto {
     private final Set<String> ikkeGodkjentBegrunnelseKoder;
     private final String begrunnelseFritekst;
 
-    public VurderUnntaksperiodeDto(Set<String> ikkeGodkjentBegrunnelseKoder, String begrunnelseFritekst) {
+    @JsonCreator
+    public VurderUnntaksperiodeDto(@JsonProperty("ikkeGodkjentBegrunnelseKoder") Set<String> ikkeGodkjentBegrunnelseKoder,
+                                   @JsonProperty("begrunnelseFritekst") String begrunnelseFritekst) {
         this.ikkeGodkjentBegrunnelseKoder = ikkeGodkjentBegrunnelseKoder;
         this.begrunnelseFritekst = begrunnelseFritekst;
     }

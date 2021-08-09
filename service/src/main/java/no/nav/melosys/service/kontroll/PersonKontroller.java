@@ -17,7 +17,7 @@ public final class PersonKontroller {
     }
 
     public static boolean personBosattINorge(Persondata persondata) {
-        Optional<Bostedsadresse> bostedsadresseOptional = persondata.hentBostedsadresse();
+        Optional<Bostedsadresse> bostedsadresseOptional = persondata.finnBostedsadresse();
 
         return bostedsadresseOptional.isPresent()
             && bostedsadresseOptional.get().strukturertAdresse().getLandkode() != null

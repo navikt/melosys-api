@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.joark;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -14,10 +15,7 @@ import no.nav.dok.tjenester.journalfoerinngaaende.GetJournalpostResponse;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IkkeInngaaendeJournalpostException;
-import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.*;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.joark.journal.JournalConsumer;
 import no.nav.melosys.integrasjon.joark.journalfoerinngaaende.JournalfoerInngaaendeConsumer;
@@ -30,6 +28,7 @@ import no.nav.melosys.integrasjon.joark.saf.SafConsumer;
 import no.nav.tjeneste.virksomhet.journal.v3.*;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.Variantformater;
 import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.DetaljertDokumentinformasjon;
+import no.nav.tjeneste.virksomhet.journal.v3.informasjon.hentkjernejournalpostliste.DokumentInnhold;
 import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentDokumentRequest;
 import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentDokumentResponse;
 import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentKjerneJournalpostListeRequest;
@@ -37,6 +36,7 @@ import no.nav.tjeneste.virksomhet.journal.v3.meldinger.HentKjerneJournalpostList
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 
 import static no.nav.tjeneste.virksomhet.journal.v3.informasjon.Journaltilstand.UTGAAR;
@@ -154,10 +154,46 @@ public class JoarkService implements JoarkFasade {
     }
 
     private BrukerIdType tilBrukerIdType(Bruker.BrukerType brukerType) {
-        return switch (brukerType){
+        return switch (brukerType) {
             case PERSON -> BrukerIdType.FOLKEREGISTERIDENT;
             case ORGANISASJON -> BrukerIdType.ORGNR;
         };
+    }
+
+    public void validerDokumenterTilhørerSakOgHarTilgang(HentJournalposterTilknyttetSakRequest hentJournalposterTilknyttetSakRequest,
+                                                         Collection<DokumentReferanse> dokumentReferanser) {
+        if (CollectionUtils.isEmpty(dokumentReferanser)) {
+            return;
+        }
+
+        Map<String, Journalpost> journalposterTilknyttetSak = hentJournalposterTilknyttetSak(hentJournalposterTilknyttetSakRequest)
+            .stream()
+            .collect(Collectors.toMap(Journalpost::getJournalpostId, j -> j));
+
+        for (var dokumentReferanse : dokumentReferanser) {
+            if (!journalposterTilknyttetSak.containsKey(dokumentReferanse.getJournalpostID())) {
+                throw new FunksjonellException(String.format("Journalpost med ID %s tilhører ikke sak %s",
+                    dokumentReferanse.getJournalpostID(),
+                    hentJournalposterTilknyttetSakRequest.saksnummer()));
+            }
+
+            journalposterTilknyttetSak.get(dokumentReferanse.getJournalpostID()).finnArkivDokument(dokumentReferanse.getDokumentID())
+                .ifPresentOrElse(
+                    (arkivDokument) -> {
+                        if (!arkivDokument.harTilgangTilArkivVariant())
+                            throw new SikkerhetsbegrensningException(String.format(
+                                "Ikke tilgang til arkivdokument %s i journalpost %s",
+                                dokumentReferanse.getDokumentID(),
+                                dokumentReferanse.getJournalpostID()
+                            ));
+                    },
+                    () -> {
+                        throw new IkkeFunnetException(String.format(
+                            "Finner ikke dokument med id %s for journalpost %s",
+                            dokumentReferanse.getDokumentID(),
+                            dokumentReferanse.getJournalpostID()));
+                    });
+        }
     }
 
     @Override
@@ -240,10 +276,18 @@ public class JoarkService implements JoarkFasade {
         ArkivDokument arkivDokument = new ArkivDokument();
         arkivDokument.setDokumentId(detaljertDokumentinformasjon.getDokumentId());
         arkivDokument.setTittel(detaljertDokumentinformasjon.getTittel());
+        arkivDokument.setDokumentVarianter(lagDokumentVarianter(detaljertDokumentinformasjon.getDokumentInnholdListe()));
 
         detaljertDokumentinformasjon.getSkannetInnholdListe()
             .forEach(vedlegg -> arkivDokument.getLogiskeVedlegg().add(new LogiskVedlegg(null, vedlegg.getVedleggInnhold())));
         return arkivDokument;
+    }
+
+    private List<DokumentVariant> lagDokumentVarianter(List<DokumentInnhold> dokumentInnhold) {
+        return dokumentInnhold.stream()
+            // saksbehandlerHarTilgang finnes ikke i journal_v3 og settes til true
+            .map(d -> new DokumentVariant(DokumentVariant.VariantFormat.valueOf(d.getVariantformat().getValue()), true))
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -306,7 +350,7 @@ public class JoarkService implements JoarkFasade {
         if (journalpost.getHoveddokument() != null) {
             var hoveddokument = journalpost.getHoveddokument();
             for (var logiskVedlegg : hoveddokument.getLogiskeVedlegg()) {
-                journalpostapiConsumer.fjernLogiskeVedlegg(hoveddokument.getDokumentId(), logiskVedlegg.getLogiskVedleggID());
+                journalpostapiConsumer.fjernLogiskeVedlegg(hoveddokument.getDokumentId(), logiskVedlegg.logiskVedleggID());
             }
         }
     }

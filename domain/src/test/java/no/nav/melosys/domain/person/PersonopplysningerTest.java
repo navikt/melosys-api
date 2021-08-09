@@ -42,7 +42,7 @@ class PersonopplysningerTest {
 
     private Personopplysninger lagPersonopplysninger(Collection<Kontaktadresse> kontaktadresser,
                                                      Collection<Oppholdsadresse> oppholdsadresser) {
-        return new Personopplysninger(Collections.emptyList(), lagBostedsadresse(), null, null, null, null,
+        return new Personopplysninger(Collections.emptyList(), lagBostedsadresse(), null, null, null, null, null,
             kontaktadresser, null, oppholdsadresser, Collections.emptyList());
     }
 

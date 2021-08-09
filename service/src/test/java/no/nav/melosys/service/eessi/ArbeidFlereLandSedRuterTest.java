@@ -12,9 +12,11 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.eessi.ruting.ArbeidFlereLandSedRuter;
@@ -24,11 +26,13 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -79,7 +83,7 @@ class ArbeidFlereLandSedRuterTest {
         behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setBehandling(behandling);
 
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingID))).thenReturn(behandlingsresultat);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
         when(fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer)).thenReturn(Optional.of(fagsak));
     }
 
@@ -89,7 +93,7 @@ class ArbeidFlereLandSedRuterTest {
 
         arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, null);
         verify(prosessinstansService).opprettProsessinstansNySakArbeidFlereLand(
-            eq(melosysEessiMelding), eq(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND), eq(melosysEessiMelding.getAktoerId())
+            melosysEessiMelding, Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, melosysEessiMelding.getAktoerId()
         );
     }
 
@@ -109,7 +113,7 @@ class ArbeidFlereLandSedRuterTest {
         arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer);
 
         verify(prosessinstansService).opprettProsessinstansNyBehandlingArbeidFlereLand(
-            eq(melosysEessiMelding), eq(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND), eq(gsakSaksnummer)
+            melosysEessiMelding, Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, gsakSaksnummer
         );
     }
 
@@ -134,7 +138,7 @@ class ArbeidFlereLandSedRuterTest {
         arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer);
 
         verify(prosessinstansService).opprettProsessinstansNyBehandlingArbeidFlereLand(
-            eq(melosysEessiMelding), eq(Behandlingstema.BESLUTNING_LOVVALG_NORGE), eq(gsakSaksnummer)
+            melosysEessiMelding, Behandlingstema.BESLUTNING_LOVVALG_NORGE, gsakSaksnummer
         );
     }
 
@@ -148,19 +152,30 @@ class ArbeidFlereLandSedRuterTest {
         arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer);
 
         verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(eq(behandling), any(), any(), any());
-        verify(prosessinstansService).opprettProsessinstansSedJournalføring(eq(behandling), eq(melosysEessiMelding));
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(behandling, melosysEessiMelding);
     }
 
     @Test
-    void finnSakOgBestemRuting_norgeUtpektNyttTemaNorgeUtpektBehandlingAktiv_forventIngenBehandlingStatusVurderDokument() {
+    void finnSakOgBestemRuting_norgeUtpektNyttTemaNorgeUtpektBehandlingAktiv_forventIngenBehandlingStatusVurderDokumentOppdaterOppgave() {
+        final var oppgaveID = "4231432";
+        final var oppgaveOppdateringCaptor = ArgumentCaptor.forClass(OppgaveOppdatering.class);
+
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         melosysEessiMelding.setLovvalgsland(Landkoder.NO.getKode());
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
+        when(oppgaveService.finnÅpenOppgaveMedFagsaksnummer(fagsak.getSaksnummer()))
+            .thenReturn(Optional.of(new Oppgave.Builder().setOppgaveId(oppgaveID).build()));
+
         arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer);
 
-        verify(behandlingService).oppdaterStatus(eq(behandlingID), eq(Behandlingsstatus.VURDER_DOKUMENT));
-        verify(prosessinstansService).opprettProsessinstansSedJournalføring(eq(behandling), eq(melosysEessiMelding));
+        verify(behandlingService).oppdaterStatus(behandlingID, Behandlingsstatus.VURDER_DOKUMENT);
+        verify(oppgaveService).oppdaterOppgave(eq(oppgaveID), oppgaveOppdateringCaptor.capture());
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(behandling, melosysEessiMelding);
+
+        assertThat(oppgaveOppdateringCaptor.getValue())
+            .extracting(OppgaveOppdatering::getBeskrivelse)
+            .isEqualTo("Mottatt SED A003");
     }
 
     @Test
@@ -179,7 +194,7 @@ class ArbeidFlereLandSedRuterTest {
 
         arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer);
 
-        verify(prosessinstansService).opprettProsessinstansSedJournalføring(eq(behandling), eq(melosysEessiMelding));
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(behandling, melosysEessiMelding);
     }
 
     @Test
@@ -199,7 +214,7 @@ class ArbeidFlereLandSedRuterTest {
         arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer);
 
         verify(prosessinstansService).opprettProsessinstansNyBehandlingArbeidFlereLand(
-            eq(melosysEessiMelding), eq(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND), eq(gsakSaksnummer)
+            melosysEessiMelding, Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, gsakSaksnummer
         );
     }
 }

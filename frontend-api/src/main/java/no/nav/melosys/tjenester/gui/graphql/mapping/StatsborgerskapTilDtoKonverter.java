@@ -1,0 +1,23 @@
+package no.nav.melosys.tjenester.gui.graphql.mapping;
+
+import no.nav.melosys.domain.FellesKodeverk;
+import no.nav.melosys.domain.person.Statsborgerskap;
+import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.tjenester.gui.graphql.dto.StatsborgerskapDto;
+
+public final class StatsborgerskapTilDtoKonverter {
+    private StatsborgerskapTilDtoKonverter() {
+    }
+
+    public static StatsborgerskapDto tilDto(Statsborgerskap statsborgerskap, KodeverkService kodeverkService) {
+        return new StatsborgerskapDto(
+            kodeverkService.dekod(FellesKodeverk.STATSBORGERSKAP_FREG, statsborgerskap.landkode()),
+            statsborgerskap.bekreftelsesdato(),
+            statsborgerskap.gyldigFraOgMed(),
+            statsborgerskap.gyldigTilOgMed(),
+            statsborgerskap.master(),
+            statsborgerskap.kilde(),
+            statsborgerskap.erHistorisk()
+        );
+    }
+}

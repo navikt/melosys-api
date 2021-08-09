@@ -2,6 +2,8 @@ package no.nav.melosys.service.dokument;
 
 import java.time.Instant;
 
+import no.finn.unleash.Unleash;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
@@ -26,53 +28,69 @@ import static org.springframework.util.StringUtils.hasText;
 @Component
 public class DokgenMalMapper {
 
-    private final KodeverkService kodeverkService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final EregFasade eregFasade;
+    private final KodeverkService kodeverkService;
     private final PersondataFasade persondataFasade;
+    private final Unleash unleash;
     private final InnvilgelseFtrlMapper innvilgelseFtrlMapper;
 
     @Autowired
-    public DokgenMalMapper(KodeverkService kodeverkService,
-                           BehandlingsresultatService behandlingsresultatService,
-                           @Qualifier("system") EregFasade eregFasade,
-                           @Qualifier("system") PersondataFasade persondataFasade,
+
+    public DokgenMalMapper(BehandlingsresultatService behandlingsresultatService,
+                           @Qualifier("system") EregFasade eregFasade, KodeverkService kodeverkService,
+                           @Qualifier("system") PersondataFasade persondataFasade, Unleash unleash,
                            InnvilgelseFtrlMapper innvilgelseFtrlMapper) {
-        this.kodeverkService = kodeverkService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.eregFasade = eregFasade;
+        this.kodeverkService = kodeverkService;
         this.persondataFasade = persondataFasade;
+        this.unleash = unleash;
         this.innvilgelseFtrlMapper = innvilgelseFtrlMapper;
     }
 
-    public DokgenDto mapBehandling(DokgenBrevbestilling brevbestilling) {
-        DokgenDto dto;
-        if (brevbestilling.getOrg() == null) {
-            String fnr = brevbestilling.getBehandling().hentPersonDokument().hentFolkeregisterIdent();
-            //NOTE Henter opplysninger på nytt for å sikre at korrekt adresse benyttes
-            var persondata = (Persondata) persondataFasade.hentPersonFraTps(fnr, Informasjonsbehov.STANDARD).getDokument();
-            brevbestilling.toBuilder().medPersonDokument(persondata).build();
-        }
-        dto = switch (brevbestilling.getProduserbartdokument()) {
-            case MELDING_FORVENTET_SAKSBEHANDLINGSTID, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD -> SaksbehandlingstidSoknad.av(brevbestilling);
-            case MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> SaksbehandlingstidKlage.av(brevbestilling);
-            case MANGELBREV_BRUKER -> MangelbrevBruker.av(((MangelbrevBrevbestilling) brevbestilling).toBuilder()
-                .medVedtaksdato(hentVedtaksdato(brevbestilling.getBehandling().getId()))
-                .build());
-            case MANGELBREV_ARBEIDSGIVER -> MangelbrevArbeidsgiver.av(((MangelbrevBrevbestilling) brevbestilling).toBuilder()
-                .medVedtaksdato(hentVedtaksdato(brevbestilling.getBehandling().getId()))
-                .medFullmektigNavn(hentFullmektigNavn(brevbestilling.getBehandling().getFagsak()))
-                .build());
-            case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> innvilgelseFtrlMapper.map((InnvilgelseBrevbestilling) brevbestilling);
-
-            default -> throw new FunksjonellException(format("ProduserbartDokument %s er ikke støttet av melosys-dokgen", brevbestilling.getProduserbartdokument()));
-        };
+    public DokgenDto mapBehandling(DokgenBrevbestilling mottattBrevbestilling) {
+        //NOTE Henter opplysninger på nytt for å sikre at korrekt adresse benyttes
+        DokgenBrevbestilling brevbestilling = berikBestillingMedPersondata(mottattBrevbestilling);
+        DokgenDto dto = lagDokgenDtoFraBestilling(brevbestilling);
 
         if (hasText(dto.getPostnr())) {
             dto.setPoststed(hentPoststed(dto.getPostnr()));
         }
         dto.setLand(hentLandnavn(dto.getLand()));
         return dto;
+    }
+
+    private DokgenBrevbestilling berikBestillingMedPersondata(DokgenBrevbestilling mottattBrevbestilling) {
+        return mottattBrevbestilling.toBuilder().medPersonDokument(hentPersondata(mottattBrevbestilling)).build();
+    }
+
+    private DokgenDto lagDokgenDtoFraBestilling(DokgenBrevbestilling brevbestilling) {
+        return switch (brevbestilling.getProduserbartdokument()) {
+            case MELDING_FORVENTET_SAKSBEHANDLINGSTID, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD -> SaksbehandlingstidSoknad.av(
+                brevbestilling);
+            case MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> SaksbehandlingstidKlage.av(brevbestilling);
+            case MANGELBREV_BRUKER -> MangelbrevBruker.av(
+                ((MangelbrevBrevbestilling) brevbestilling).toBuilder().medVedtaksdato(
+                    hentVedtaksdato(brevbestilling.getBehandling().getId())).build());
+            case MANGELBREV_ARBEIDSGIVER -> MangelbrevArbeidsgiver.av(
+                ((MangelbrevBrevbestilling) brevbestilling).toBuilder().medVedtaksdato(
+                    hentVedtaksdato(brevbestilling.getBehandling().getId())).medFullmektigNavn(
+                    hentFullmektigNavn(brevbestilling.getBehandling().getFagsak())).build());
+            case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> innvilgelseFtrlMapper.map((InnvilgelseBrevbestilling) brevbestilling);
+            default -> throw new FunksjonellException(
+                format("ProduserbartDokument %s er ikke støttet av melosys-dokgen",
+                    brevbestilling.getProduserbartdokument()));
+        };
+    }
+
+    private Persondata hentPersondata(DokgenBrevbestilling brevbestilling) {
+        final var behandling = brevbestilling.getBehandling();
+        if (unleash.isEnabled("melosys.brev.adresser.pdl")) {
+            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
+        }
+        String fnr = behandling.hentPersonDokument().hentFolkeregisterIdent();
+        return (Persondata) persondataFasade.hentPersonFraTps(fnr, Informasjonsbehov.STANDARD).getDokument();
     }
 
     private String hentPoststed(String postnr) {
@@ -96,7 +114,7 @@ public class DokgenMalMapper {
         if (hasText(landkode)) {
             landnavn = kodeverkService.dekod(FellesKodeverk.LANDKODER, landkode);
             if (landnavn.equals("UKJENT")) {
-                landnavn = kodeverkService.dekod(FellesKodeverk.LANDKODERISO2, landkode);
+                landnavn = kodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, landkode);
             }
         }
         return landnavn.equals("UKJENT") ? "" : landnavn;

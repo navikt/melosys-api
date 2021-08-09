@@ -1,13 +1,17 @@
 package no.nav.melosys.tjenester.gui;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Comparators;
+import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
+import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -57,12 +61,12 @@ class DokumentTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void hentDokumenter() throws Exception {
-        List<Journalpost> journalposter = defaultEasyRandom().objects(Journalpost.class, 3).collect(Collectors.toList());
+        List<Journalpost> journalposter = lagJournalposter(3);
         given(dokumentHentingService.hentDokumenter(anyString())).willReturn(journalposter);
 
-        ResponseEntity response = dokumentTjeneste.hentDokumenter("MEL-1873");
-        @SuppressWarnings("unchecked")
-        List<JournalpostInfoDto> dtos = (List<JournalpostInfoDto>) response.getBody();
+        ResponseEntity<List<JournalpostInfoDto>> response = dokumentTjeneste.hentDokumenter("MEL-1873");
+        List<JournalpostInfoDto> dtos = response.getBody();
+        assertThat(dtos).isNotNull();
         boolean inOrder = Comparators.isInOrder(dtos, Comparator.comparing(JournalpostInfoDto::hentGjeldendeTidspunkt, Comparator.nullsFirst(Comparator.reverseOrder())));
         assertThat(inOrder).isTrue();
 
@@ -117,4 +121,24 @@ class DokumentTjenesteTest extends JsonSchemaTestParent {
                 Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID, new BrevbestillingDto()))
             .withMessageContaining("Mottaker trengs for å bestille");
     }
+
+    private static List<Journalpost> lagJournalposter(int antall) {
+        return Stream.generate(DokumentTjenesteTest::lagJournalpost).limit(antall).collect(Collectors.toList());
+    }
+
+    private static Journalpost lagJournalpost() {
+        Journalpost journalpost = new Journalpost("jpID");
+        journalpost.setJournalposttype(Journalposttype.UT);
+        journalpost.setAvsenderId("nav");
+        journalpost.setAvsenderId("NAVAT:07");
+        journalpost.setKorrespondansepartNavn("Test12345");
+        ArkivDokument arkivDokument = new ArkivDokument();
+        arkivDokument.setDokumentId("2456");
+        arkivDokument.setTittel("Tittel 234");
+
+        journalpost.setHoveddokument(arkivDokument);
+
+        return journalpost;
+    }
+
 }

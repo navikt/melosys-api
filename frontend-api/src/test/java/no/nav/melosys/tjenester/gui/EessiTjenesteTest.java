@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -21,6 +21,7 @@ import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.VedleggDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucBestillingDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucerTilknyttetBehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.OpprettBucSvarDto;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
@@ -82,7 +84,7 @@ class EessiTjenesteTest extends JsonSchemaTestParent {
         BucBestillingDto nyBucDto = new BucBestillingDto(
             BucType.LA_BUC_01,
             List.of("NAVT002"),
-            defaultEasyRandom().objects(VedleggDto.class, 3).collect(Collectors.toSet())
+            Set.of(new VedleggDto("1", "1"), new VedleggDto("2", "2"))
         );
         ResponseEntity<OpprettBucSvarDto> response = eessiTjeneste.opprettBuc(nyBucDto, 123L);
         OpprettBucSvarDto opprettBucSvarDto = response.getBody();
@@ -106,7 +108,8 @@ class EessiTjenesteTest extends JsonSchemaTestParent {
         ResponseEntity<BucerTilknyttetBehandlingDto> response = eessiTjeneste.hentBucer(123L, Arrays.asList("utkast", "sendt"));
 
         BucerTilknyttetBehandlingDto dto = response.getBody();
-        assertThat(dto).extracting(BucerTilknyttetBehandlingDto::getBucer).hasNoNullFieldsOrProperties();
+        assertThat(dto).extracting(BucerTilknyttetBehandlingDto::getBucer, as(InstanceOfAssertFactories.LIST))
+            .allSatisfy(x -> assertThat(x).hasNoNullFieldsOrProperties());
 
         valider(dto, BUCER_UNDER_ARBEID_SCHEMA, log);
     }

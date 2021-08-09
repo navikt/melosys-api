@@ -233,14 +233,14 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_prosessinstansFinnes_kasterException() throws Exception {
+    void fattVedtak_prosessinstansFinnes_kasterException() {
         mockBehandlingsresultat();
         when(prosessinstansService.harVedtakInstans(behandlingID)).thenReturn(true);
 
         leggTilLovvalgsperiode(InnvilgelsesResultat.AVSLAATT);
 
-        assertThatThrownBy(() -> vedtakService.fattVedtak(behandling, lagRequest(FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK, null, null,
-            null)))
+        final var fattEosVedtakRequest = lagRequest(FASTSATT_LOVVALGSLAND, FØRSTEGANGSVEDTAK, null, null, null);
+        assertThatThrownBy(() -> vedtakService.fattVedtak(behandling, fattEosVedtakRequest))
             .isInstanceOf(FunksjonellException.class)
             .hasMessageContaining("vedtak-prosess");
 
@@ -249,7 +249,7 @@ class EosVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_feilFraKontroller_kasterExceptionMedFeilkode() throws Exception {
+    void fattVedtak_feilFraKontroller_kasterExceptionMedFeilkode() {
         mockBehandlingsresultat();
         mockFeilendeValidering();
         leggTilLovvalgsperiode(InnvilgelsesResultat.INNVILGET);
@@ -267,8 +267,13 @@ class EosVedtakServiceTest {
     void endreVedtak_fungerer() {
         final Endretperiode endretperiodeBegrunnelse = Endretperiode.ENDRINGER_ARBEIDSSITUASJON;
         leggTilMyndighetAktoer();
+        leggTilLovvalgsperiode();
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        vedtakService.endreVedtak(behandling, endretperiodeBegrunnelse, "FRITEKST", "FRITEKST_SED");
+        vedtakService.endreVedtaksperiode(behandling, endretperiodeBegrunnelse, "FRITEKST", "FRITEKST_SED");
+
+        assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull();
+        assertThat(behandlingsresultat.getBegrunnelseFritekst()).isEqualTo("FRITEKST");
 
         verify(avklartefaktaService).leggTilBegrunnelse(
             behandlingID,
@@ -286,18 +291,16 @@ class EosVedtakServiceTest {
 
     @Test
     void endreVedtak_harEksisterendeProsess_kasterException() {
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+        leggTilLovvalgsperiode();
         when(prosessinstansService.harAktivProsessinstans(behandlingID)).thenReturn(true);
 
-        assertThatThrownBy(() -> vedtakService.endreVedtak(behandling, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, "FRITEKST", "FRITEKST_SED"))
+        assertThatThrownBy(() -> vedtakService.endreVedtaksperiode(behandling, Endretperiode.ENDRINGER_ARBEIDSSITUASJON, "FRITEKST", "FRITEKST_SED"))
             .isInstanceOf(FunksjonellException.class)
             .hasMessageContaining("Det finnes allerede en aktiv prosess for behandling");
 
-        verify(avklartefaktaService).leggTilBegrunnelse(
-            eq(behandlingID),
-            eq(Avklartefaktatyper.AARSAK_ENDRING_PERIODE),
-            any()
-        );
         verify(prosessinstansService).harAktivProsessinstans(behandlingID);
+        verifyNoMoreInteractions(avklartefaktaService);
         verifyNoMoreInteractions(prosessinstansService);
         verifyNoInteractions(oppgaveService);
     }
@@ -306,7 +309,7 @@ class EosVedtakServiceTest {
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
     }
 
-    private void mockEesiReady() throws Exception {
+    private void mockEesiReady() {
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID)).thenReturn(Collections.singletonList(Landkoder.SE));
         when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(anySet(), anyCollection(), any(BucType.class))).thenCallRealMethod();
         when(eessiService.hentEessiMottakerinstitusjoner(BucType.LA_BUC_04.name(), Set.of(Landkoder.SE.getKode())))

@@ -15,7 +15,7 @@ import com.networknt.schema.uri.URIFetcher;
 import no.nav.melosys.service.JsonSchemaValidator;
 import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.tjenester.gui.jackson.MelosysModule;
+import no.nav.melosys.tjenester.gui.config.jackson.MelosysModule;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;

@@ -13,6 +13,7 @@ import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.integrasjon.dokgen.dto.MangelbrevBruker;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -90,6 +91,7 @@ class DokgenConsumerTest {
     private MangelbrevBruker getMangelbrevBruker() {
         MangelbrevBrevbestilling mangelbrevBrevbestilling = new MangelbrevBrevbestilling.Builder()
             .medBehandling(lagBehandling())
+            .medPersonDokument((Persondata) lagPersondokument().getDokument())
             .build();
         return MangelbrevBruker.av(mangelbrevBrevbestilling);
     }
@@ -115,7 +117,6 @@ class DokgenConsumerTest {
         PersonDokument personDok = new PersonDokument();
         person.setDokument(personDok);
         person.setType(SaksopplysningType.PERSOPL);
-
         return person;
     }
 }
