@@ -5,6 +5,7 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.person.Informasjonsbehov;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.Statsborgerskap;
 
 public interface PersondataFasade {
@@ -15,7 +16,14 @@ public interface PersondataFasade {
     @Deprecated
     Saksopplysning hentPersonFraTps(String fnr, Informasjonsbehov behov);
 
+    Persondata hentPerson(String ident);
+
+    Persondata hentPerson(String ident, Informasjonsbehov informasjonsbehov);
+
+    @Deprecated
     Saksopplysning hentPersonhistorikk(String fnr, LocalDate dato);
+
+    PersonMedHistorikk hentPersonMedHistorikk(long behandlingID);
 
     String hentSammensattNavn(String fnr);
 

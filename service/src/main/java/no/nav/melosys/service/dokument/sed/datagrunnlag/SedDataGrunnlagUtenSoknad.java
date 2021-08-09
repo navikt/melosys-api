@@ -7,13 +7,13 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 
 public class SedDataGrunnlagUtenSoknad implements SedDataGrunnlag {
     private final Behandling behandling;
-    private final Persondata persondata;
     private final BostedGrunnlag bostedGrunnlag;
+    private final Persondata persondata;
 
-    public SedDataGrunnlagUtenSoknad(Behandling behandling, KodeverkService kodeverkService) {
+    public SedDataGrunnlagUtenSoknad(Behandling behandling, KodeverkService kodeverkService, Persondata persondata) {
         this.behandling = behandling;
-        this.persondata = behandling.hentPersonDokument();
-        this.bostedGrunnlag = new BostedGrunnlag(null, persondata.hentBostedsadresse().orElse(null), kodeverkService);
+        this.persondata = persondata;
+        this.bostedGrunnlag = new BostedGrunnlag(null, persondata.finnBostedsadresse().orElse(null), kodeverkService);
     }
 
     @Override
@@ -21,12 +21,13 @@ public class SedDataGrunnlagUtenSoknad implements SedDataGrunnlag {
         return behandling;
     }
 
-    public Persondata getPerson() {
-        return persondata;
-    }
-
     @Override
     public BostedGrunnlag getBostedGrunnlag() {
         return bostedGrunnlag;
+    }
+
+    @Override
+    public Persondata getPersondata() {
+        return persondata;
     }
 }

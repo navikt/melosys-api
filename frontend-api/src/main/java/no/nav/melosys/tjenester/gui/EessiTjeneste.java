@@ -65,10 +65,10 @@ public class EessiTjeneste {
         OpprettBucSvarDto opprettBucSvarDto = new OpprettBucSvarDto(
             eessiService.opprettBucOgSed(
                 behandling,
-                nyBucDto.getBucType(),
-                nyBucDto.getMottakerInstitusjoner(),
-                nyBucDto.getVedlegg().stream()
-                    .map(v -> new DokumentReferanse(v.getJournalpostID(), v.getDokumentID()))
+                nyBucDto.bucType(),
+                nyBucDto.mottakerInstitusjoner(),
+                nyBucDto.vedlegg().stream()
+                    .map(v -> new DokumentReferanse(v.journalpostID(), v.dokumentID()))
                     .collect(Collectors.toSet())
             )
         );

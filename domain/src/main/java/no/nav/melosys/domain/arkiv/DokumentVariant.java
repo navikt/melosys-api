@@ -1,21 +1,20 @@
 package no.nav.melosys.domain.arkiv;
 
-public class DokumentVariant {
-    private final byte[] data;
-    private final Filtype filtype;
-    private final VariantFormat variantFormat;
+public record DokumentVariant(byte[] data, Filtype filtype,
+                              VariantFormat variantFormat,
+                              boolean saksbehandlerHarTilgang) {
 
-    private DokumentVariant(byte[] data, Filtype filtype, VariantFormat variantFormat) {
-        this.data = data;
-        this.filtype = filtype;
-        this.variantFormat = variantFormat;
+
+    public DokumentVariant(VariantFormat variantFormat, boolean saksbehandlerHarTilgang) {
+        this(null, null, variantFormat, saksbehandlerHarTilgang);
     }
 
     public static DokumentVariant lagDokumentVariant(byte[] data) {
         return new DokumentVariant(
             data,
             DokumentVariant.Filtype.PDFA,
-            VariantFormat.ARKIV
+            VariantFormat.ARKIV,
+            true
         );
     }
 
@@ -25,8 +24,13 @@ public class DokumentVariant {
         return new DokumentVariant(
             data,
             filtype,
-            variantFormat
+            variantFormat,
+            true
         );
+    }
+
+    public boolean erVariantArkiv() {
+        return variantFormat == DokumentVariant.VariantFormat.ARKIV;
     }
 
     public byte[] getData() {
@@ -39,6 +43,10 @@ public class DokumentVariant {
 
     public VariantFormat getVariantFormat() {
         return variantFormat;
+    }
+
+    public boolean getSaksbehandlerHarTilgang() {
+        return saksbehandlerHarTilgang;
     }
 
     public enum Filtype {
@@ -63,6 +71,13 @@ public class DokumentVariant {
 
     public enum VariantFormat {
         ARKIV,
-        ORIGINAL
+        ORIGINAL,
+        // Brukes ikke ved opprettelse fra Melosys:
+        BREVBESTILLING,
+        FULLVERSJON,
+        PRODUKSJON,
+        SKANNING_META,
+        PRODUKSJON_DLF,
+        SLADDET
     }
 }

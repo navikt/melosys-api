@@ -15,6 +15,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -83,6 +84,8 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
             if (eksisterendeBehandling.erAktiv()) {
                 log.info("Mottatt oppdatert A003 norge utpekt sak {}, oppdaterer status til {}",
                     fagsak.get().getSaksnummer(), Behandlingsstatus.VURDER_DOKUMENT);
+                oppgaveService.finnÅpenOppgaveMedFagsaksnummer(fagsak.get().getSaksnummer())
+                    .ifPresent(o -> oppgaveService.oppdaterOppgave(o.getOppgaveId(), OppgaveOppdatering.builder().beskrivelse("Mottatt SED " + SedType.A003).build()));
                 behandlingService.oppdaterStatus(eksisterendeBehandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
             } else {
                 log.info("Mottatt oppdatert A003 norge utpekt sak {}. Behandling er avsluttet, oppretter oppgave", fagsak.get().getSaksnummer());

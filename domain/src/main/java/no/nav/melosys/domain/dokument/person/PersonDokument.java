@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.brev.Postadresse;
@@ -16,6 +17,9 @@ import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.person.KjoennType;
 import no.nav.melosys.domain.person.Master;
 import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.domain.person.adresse.Kontaktadresse;
+import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
+import no.nav.melosys.domain.util.LandkoderUtils;
 
 
 /**
@@ -64,7 +68,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         return bostedsadresse.erTom();
     }
 
-    @Override
     public Optional<Familiemedlem> hentAnnenForelder(String fnrGjeldendeForelder) {
         return familiemedlemmer.stream()
             .filter(Familiemedlem::erForelder)
@@ -73,13 +76,23 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
     }
 
     @Override
-    public Optional<no.nav.melosys.domain.person.adresse.Bostedsadresse> hentBostedsadresse() {
+    public Optional<no.nav.melosys.domain.person.adresse.Bostedsadresse> finnBostedsadresse() {
         if (bostedsadresse == null || bostedsadresse.erTom()) {
             return Optional.empty();
         }
         return Optional.of(
             new no.nav.melosys.domain.person.adresse.Bostedsadresse(bostedsadresse.tilStrukturertAdresse(), null, null,
                 null, Master.TPS.name(), Master.TPS.name(), false));
+    }
+
+    @Override
+    public Optional<Kontaktadresse> finnKontaktadresse() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Oppholdsadresse> finnOppholdsadresse() {
+        return Optional.empty();
     }
 
     @Override
@@ -180,9 +193,13 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         this.sammensattNavn = sammensattNavn;
     }
 
-    @Override
     public List<Familiemedlem> getFamiliemedlemmer() {
         return familiemedlemmer;
+    }
+
+    @Override
+    public Set<no.nav.melosys.domain.person.familie.Familiemedlem> hentFamiliemedlemmer() {
+        return familiemedlemmer.stream().map(Familiemedlem::tilDomene).collect(Collectors.toUnmodifiableSet());
     }
 
     public void setFamiliemedlemmer(List<Familiemedlem> familiemedlemmer) {
@@ -268,7 +285,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
             gjeldendePostadresse.adresselinje4,
             gjeldendePostadresse.postnr,
             gjeldendePostadresse.poststed,
-            gjeldendePostadresse.land != null ? gjeldendePostadresse.land.getKode() : null
+            gjeldendePostadresse.land != null ? LandkoderUtils.tilIso2(gjeldendePostadresse.land.getKode()) : null
         );
     }
 

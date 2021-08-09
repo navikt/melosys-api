@@ -12,6 +12,9 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.integrasjon.joark.HentJournalposterTilknyttetSakRequest;
+import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -33,19 +36,21 @@ public class VideresendSoknadService {
     private final LandvelgerService landvelgerService;
     private final EessiService eessiService;
     private final OppgaveService oppgaveService;
+    private final JoarkFasade joarkFasade;
 
     public VideresendSoknadService(FagsakService fagsakService,
                                    BehandlingsresultatService behandlingsresultatService,
                                    ProsessinstansService prosessinstansService,
                                    LandvelgerService landvelgerService,
                                    EessiService eessiService,
-                                   OppgaveService oppgaveService) {
+                                   OppgaveService oppgaveService, JoarkFasade joarkFasade) {
         this.fagsakService = fagsakService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.prosessinstansService = prosessinstansService;
         this.landvelgerService = landvelgerService;
         this.eessiService = eessiService;
         this.oppgaveService = oppgaveService;
+        this.joarkFasade = joarkFasade;
     }
 
     @Transactional
@@ -59,6 +64,7 @@ public class VideresendSoknadService {
 
         final Landkoder bostedsland = landvelgerService.hentBostedsland(behandling);
         validerBehandlingOgBosted(behandling, bostedsland);
+        joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(new HentJournalposterTilknyttetSakRequest(fagsak.getGsakSaksnummer(), saksnummer), vedleggReferanser);
 
         fagsakService.avsluttFagsakOgBehandling(fagsak, Saksstatuser.VIDERESENDT);
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE);

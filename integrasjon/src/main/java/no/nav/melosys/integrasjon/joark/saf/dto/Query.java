@@ -40,6 +40,10 @@ public final class Query {
                   logiskVedleggId
                   tittel
                 }
+                dokumentvarianter {
+                  saksbehandlerHarTilgang
+                  variantformat
+                }
               }
             }
           }
@@ -93,6 +97,10 @@ public final class Query {
                 logiskeVedlegg {
                   logiskVedleggId
                   tittel
+                }
+                dokumentvarianter {
+                  saksbehandlerHarTilgang
+                  variantformat
                 }
               }
             }
