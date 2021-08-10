@@ -80,7 +80,7 @@ public class AnmodningsperiodeTjeneste {
 
         Optional<AnmodningsperiodeSvar> svar = anmodningsperiodeOptional.map(Anmodningsperiode::getAnmodningsperiodeSvar);
 
-        return svar.map(AnmodningsperiodeSvarDto::av).orElseGet(AnmodningsperiodeSvarDto::new);
+        return svar.map(AnmodningsperiodeSvarDto::av).orElseGet(AnmodningsperiodeSvarDto::tom);
     }
 
     @PostMapping("{anmodningsperiodeID}/svar")

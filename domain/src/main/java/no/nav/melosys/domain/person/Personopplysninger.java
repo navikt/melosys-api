@@ -1,16 +1,19 @@
 package no.nav.melosys.domain.person;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.brev.Postadresse;
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.Familiemedlem;
 import no.nav.melosys.domain.person.adresse.Adressebeskyttelse;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
+import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.exception.IkkeFunnetException;
 
 import static no.nav.melosys.domain.person.Master.FREG;
@@ -20,6 +23,7 @@ public record Personopplysninger(
     Collection<Adressebeskyttelse> adressebeskyttelser,
     Bostedsadresse bostedsadresse,
     Doedsfall dødsfall,
+    Set<Familiemedlem> familiemedlemmer,
     Foedsel fødsel,
     Folkeregisteridentifikator folkeregisteridentifikator,
     KjoennType kjønn,
@@ -31,11 +35,6 @@ public record Personopplysninger(
     @Override
     public boolean erPersonDød() {
         return dødsfall != null && dødsfall.dødsdato() != null;
-    }
-
-    @Override
-    public Optional<Familiemedlem> hentAnnenForelder(String fnrGjeldendeForelder) {
-        throw new UnsupportedOperationException(); // TODO
     }
 
     @Override
@@ -89,8 +88,8 @@ public record Personopplysninger(
     }
 
     @Override
-    public List<Familiemedlem> getFamiliemedlemmer() {
-        return Collections.emptyList(); // TODO
+    public Set<Familiemedlem> hentFamiliemedlemmer() {
+        return familiemedlemmer;
     }
 
     @Override

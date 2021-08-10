@@ -3,7 +3,6 @@ package no.nav.melosys.service.persondata;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Set;
 
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
@@ -12,10 +11,13 @@ import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
+
 public class PersonopplysningerObjectFactory {
     public static Personopplysninger lagPersonopplysninger() {
-        return new Personopplysninger(Collections.emptyList(), lagBostedsadresse(), null, lagFødesel(), null, lagKjønn(),
-            lagKontaktadresser(), lagNavn(), lagOppholdsadresser(), Collections.emptyList());
+        return new Personopplysninger(emptyList(), lagBostedsadresse(), null, emptySet(), lagFødesel(), null,
+            lagKjønn(), lagKontaktadresser(), lagNavn(), lagOppholdsadresser(), emptyList());
     }
 
     private static Foedsel lagFødesel() {

@@ -15,6 +15,8 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.person.Informasjonsbehov.MED_FAMILIERELASJONER;
+
 @Component
 public class SedDataGrunnlagFactory {
     private final AvklartefaktaService avklartefaktaService;
@@ -46,7 +48,7 @@ public class SedDataGrunnlagFactory {
 
     private Persondata hentPersondata(Behandling behandling) {
         if (unleash.isEnabled("melosys.sed.adresser.pdl")) {
-            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
+            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID(), MED_FAMILIERELASJONER);
         }
         return behandling.hentPersonDokument();
     }

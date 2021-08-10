@@ -272,6 +272,9 @@ class EosVedtakServiceTest {
 
         vedtakService.endreVedtaksperiode(behandling, endretperiodeBegrunnelse, "FRITEKST", "FRITEKST_SED");
 
+        assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull();
+        assertThat(behandlingsresultat.getBegrunnelseFritekst()).isEqualTo("FRITEKST");
+
         verify(avklartefaktaService).leggTilBegrunnelse(
             behandlingID,
             Avklartefaktatyper.AARSAK_ENDRING_PERIODE,

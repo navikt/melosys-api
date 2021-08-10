@@ -56,7 +56,7 @@ public class KontaktopplysningTjenesteTest {
         ResponseEntity response = kontaktopplysningTjeneste.lagKontaktopplysning(SAK_NUMMER, ORG_NUMMER, KONTAKT_INFO);
 
         verify(kontaktopplysningService).lagEllerOppdaterKontaktopplysning(
-            SAK_NUMMER, ORG_NUMMER, KONTAKT_INFO.getKontaktorgnr(), KONTAKT_INFO.getKontaktnavn(), KONTAKT_INFO.getKontakttelefon());
+            SAK_NUMMER, ORG_NUMMER, KONTAKT_INFO.kontaktorgnr(), KONTAKT_INFO.kontaktnavn(), KONTAKT_INFO.kontakttelefon());
         assertThat(response.getStatusCode().value()).isEqualTo(200);
     }
 
