@@ -204,7 +204,7 @@ class JournalfoeringServiceTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
-            .withMessageContaining("Kan ikke opprett ny sak med behandlingstema " + Behandlingstema.ARBEID_I_UTLANDET);
+            .withMessageContaining("Kan ikke opprette ny sak med behandlingstema " + Behandlingstema.ARBEID_I_UTLANDET);
     }
 
     @Test
