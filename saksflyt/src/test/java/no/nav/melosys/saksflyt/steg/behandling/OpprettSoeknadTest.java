@@ -41,13 +41,13 @@ class OpprettSoeknadTest {
     @Test
     void utfør_behandlingstemaArbeidIUtlandet_oppretterSøknadFtrl() {
         opprettSoeknad.utfør(lagProsessinstans(Sakstyper.FTRL, Behandlingstema.ARBEID_I_UTLANDET));
-        verify(behandlingsgrunnlagService).opprettSøknadFolketrygden(eq(behandlingID), any(SoeknadFtrl.class));
+        verify(behandlingsgrunnlagService).opprettSøknadOmMedlemskapIFolketrygden(eq(behandlingID), any(SoeknadFtrl.class));
     }
 
     @Test
     void utfør_behandlingstemaArbeidIUtlandet_oppretterSøknadFtrlUk() {
         opprettSoeknad.utfør(lagProsessinstans(Sakstyper.FTRL, Behandlingstema.TRYGDEAVTALE_UK));
-        verify(behandlingsgrunnlagService).opprettSøknadFolketrygden(eq(behandlingID), any(SoeknadFtrl.class));
+        verify(behandlingsgrunnlagService).opprettSøknadOmMedlemskapIFolketrygden(eq(behandlingID), any(SoeknadFtrl.class));
     }
 
     @Test
