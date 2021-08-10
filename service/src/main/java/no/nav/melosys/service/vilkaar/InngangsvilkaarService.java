@@ -127,7 +127,7 @@ public class InngangsvilkaarService {
     private Land avgjørStatsborgerskapFraTPS(long behandlingID, ErPeriode periode) {
         // Hent statsborgerskap fra saksopplysningene...
         // Ved søknad tilbake i tid brukes historisk statsborgerskap
-        if (periode.getFom().isBefore(LocalDate.now())) {
+        if (periode.getFom() != null && periode.getFom().isBefore(LocalDate.now())) {
             return avgjørStatsborgerskapPåStartDato(
                 saksopplysningerService.hentPersonhistorikk(behandlingID).statsborgerskapListe, periode.getFom());
         } else {

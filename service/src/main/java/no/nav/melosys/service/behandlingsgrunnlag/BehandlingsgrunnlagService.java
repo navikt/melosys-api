@@ -65,8 +65,8 @@ public class BehandlingsgrunnlagService {
             eksternReferanseID);
     }
 
-    public void opprettSøknadFolketrygden(long behandlingID,
-                                          SoeknadFtrl soeknad) {
+    public void opprettSøknadOmMedlemskapIFolketrygden(long behandlingID,
+                                                       SoeknadFtrl soeknad) {
         opprettBehandlingsgrunnlag(behandlingID, soeknad, SØKNAD_FOLKETRYGDEN,
             VERSJON_SOEKNAD_GRUNNLAG);
     }

@@ -82,7 +82,7 @@ public class Behandling extends RegistreringsInfo {
     private Behandlingsgrunnlag behandlingsgrunnlag;
 
     @ManyToOne()
-    @JoinColumn(name="opprinnelig_behandling_id")
+    @JoinColumn(name = "opprinnelig_behandling_id")
     private Behandling opprinneligBehandling;
 
     public Long getId() {
@@ -272,7 +272,7 @@ public class Behandling extends RegistreringsInfo {
         Collection<String> søknadsland;
         if (erNorgeUtpekt()) {
             søknadsland = behandlingsgrunnlag.getBehandlingsgrunnlagdata().hentUtenlandskeArbeidsstederLandkode();
-            if (søknadsland.isEmpty()){
+            if (søknadsland.isEmpty()) {
                 søknadsland.add(Landkoder.NO.getKode());
             }
         } else {
@@ -402,7 +402,8 @@ public class Behandling extends RegistreringsInfo {
             || Behandlingstema.ARBEID_ETT_LAND_ØVRIG.getKode().equalsIgnoreCase(behandlingstemaKode)
             || Behandlingstema.IKKE_YRKESAKTIV.getKode().equalsIgnoreCase(behandlingstemaKode)
             || Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND.getKode().equalsIgnoreCase(behandlingstemaKode)
-            || Behandlingstema.ARBEID_I_UTLANDET.getKode().equalsIgnoreCase(behandlingstemaKode);
+            || Behandlingstema.ARBEID_I_UTLANDET.getKode().equalsIgnoreCase(behandlingstemaKode)
+            || Behandlingstema.TRYGDEAVTALE_UK.getKode().equalsIgnoreCase(behandlingstemaKode);
     }
 
     public static boolean erBehandlingAvSøknadUtsendtArbeidstaker(String behandlingstemaKode) {

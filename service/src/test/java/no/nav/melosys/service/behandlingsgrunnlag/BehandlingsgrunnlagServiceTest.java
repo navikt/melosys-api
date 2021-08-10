@@ -132,7 +132,7 @@ class BehandlingsgrunnlbagServiceTest {
         final SoeknadFtrl soeknadFtrl = new SoeknadFtrl();
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> behandlingsgrunnlagService.opprettSøknadFolketrygden(behandlingID, soeknadFtrl))
+            .isThrownBy(() -> behandlingsgrunnlagService.opprettSøknadOmMedlemskapIFolketrygden(behandlingID, soeknadFtrl))
             .withMessageContaining("Mottaksdato trenges");
     }
 
@@ -160,7 +160,7 @@ class BehandlingsgrunnlbagServiceTest {
         when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
         SoeknadFtrl soeknadFtrl = new SoeknadFtrl();
-        behandlingsgrunnlagService.opprettSøknadFolketrygden(behandlingID, soeknadFtrl);
+        behandlingsgrunnlagService.opprettSøknadOmMedlemskapIFolketrygden(behandlingID, soeknadFtrl);
 
         verify(behandlingsgrunnlagRepository).save(behandlingsgrunnlagArgumentCaptor.capture());
         Behandlingsgrunnlag opprettet = behandlingsgrunnlagArgumentCaptor.getValue();

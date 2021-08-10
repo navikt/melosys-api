@@ -9,7 +9,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 
 public final class SakstypeBehandlingstemaKobling {
 
-    private SakstypeBehandlingstemaKobling() {}
+    private SakstypeBehandlingstemaKobling() {
+    }
 
     public static boolean erGyldigBehandlingstemaForSakstype(Sakstyper sakstype, Behandlingstema behandlingstema) {
         return lagSakstypeBehandlingstemaMap().get(sakstype).contains(behandlingstema);
@@ -36,7 +37,9 @@ public final class SakstypeBehandlingstemaKobling {
             Sakstyper.FTRL, Set.of(
                 Behandlingstema.ARBEID_I_UTLANDET
             ),
-            Sakstyper.TRYGDEAVTALE, Set.of()
+            Sakstyper.TRYGDEAVTALE, Set.of(
+                Behandlingstema.TRYGDEAVTALE_UK
+            )
         );
     }
 }

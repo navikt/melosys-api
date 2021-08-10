@@ -246,7 +246,9 @@ public class FagsakTjeneste {
                     SoeknadslandDto land = SoeknadslandDto.av(hentSøknadsland((grunnlagData)));
                     behandlingOversiktDto.setLand(land);
                     Periode periode = hentPeriode(grunnlagData);
-                    behandlingOversiktDto.setPeriode(new PeriodeDto(periode.getFom(), periode.getTom()));
+                    if (periode != null) {
+                        behandlingOversiktDto.setPeriode(new PeriodeDto(periode.getFom(), periode.getTom()));
+                    }
                 });
         } else {
             saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresent(sedDokument -> {

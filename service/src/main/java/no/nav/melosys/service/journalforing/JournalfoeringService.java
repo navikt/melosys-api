@@ -32,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
-import static no.nav.melosys.domain.Fagsak.erSakstypeFtrl;
+import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 import static no.nav.melosys.service.sak.SakstypeBehandlingstemaKobling.erGyldigBehandlingstemaForSakstype;
 
 @Service
@@ -136,7 +136,13 @@ public class JournalfoeringService {
         }
 
         if (behandlingstema == Behandlingstema.ARBEID_I_UTLANDET && !unleash.isEnabled("melosys.folketrygden.mvp")) {
-            throw new FunksjonellException("Kan ikke opprett ny sak med behandlingstema " + behandlingstema);
+            throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema +
+                "siden 'melosys.folketrygden.mvp' ikke er aktivert i unleash");
+        }
+
+        if (behandlingstema == Behandlingstema.TRYGDEAVTALE_UK && !unleash.isEnabled("melosys.trygdeavtale")) {
+            throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema +
+                "siden 'melosys.trygdeavtale' ikke er aktivert i unleash");
         }
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
@@ -144,7 +150,7 @@ public class JournalfoeringService {
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, erBehandlingAvSøknad(behandlingstema) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED);
 
-        if (!erSakstypeFtrl(sakstype) && erBehandlingAvSøknad(behandlingstema)) {
+        if (erSakstypeEøs(sakstype) && erBehandlingAvSøknad(behandlingstema)) {
             validerOpprettSakForSøknadBehandlingFelter(journalfoeringDto);
             prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringDto.getFagsak().getLand());
             prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringDto.getFagsak().getSoknadsperiode());
