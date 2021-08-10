@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -34,7 +33,12 @@ public class Periode {
         this.innvilgelsesResultat = m.getInnvilgelsesresultat().getKode();
         this.medlemskapstype = m.getMedlemskapstype().getKode();
         this.dekning = m.getDekning().getKode();
-        this.trygdeavgift = m.getTrygdeavgift().stream().map(Trygdeavgift::new).collect(Collectors.toList());
+        this.trygdeavgift = m.getTrygdeavgift().stream().map(t -> new Trygdeavgift(
+            t.getTrygdeavgiftsbeløpMd().toPlainString(),
+            t.getTrygdesats().toPlainString(),
+            t.getAvgiftskode(),
+            t.getAvgiftForInntekt().name())
+        ).toList();
     }
 
     public LocalDate getFom() {

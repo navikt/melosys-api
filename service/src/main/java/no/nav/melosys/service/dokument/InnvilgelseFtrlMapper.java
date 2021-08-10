@@ -156,19 +156,23 @@ public class InnvilgelseFtrlMapper {
         TrygdeavgiftInfo norsk = null;
         TrygdeavgiftInfo utenlandsk = null;
         if (trygdeavgiftsgrunnlag.getAvgiftsGrunnlagNorge() != null) {
+            AvgiftsgrunnlagInfoNorge avgiftsGrunnlagNorge = trygdeavgiftsgrunnlag.getAvgiftsGrunnlagNorge();
             norsk = new TrygdeavgiftInfo(
                 fastsattTrygdeavgift.getAvgiftspliktigNorskInntektMnd(),
-                trygdeavgiftsgrunnlag.getAvgiftsGrunnlagNorge().erAvgiftspliktig(),
-                Avgiftskode.E.name(), //TODO Flytte
-                trygdeavgiftsgrunnlag.getAvgiftsGrunnlagNorge().getSærligAvgiftsgruppe().getKode()
+                avgiftsGrunnlagNorge.erAvgiftspliktig(),
+                avgiftsGrunnlagNorge.erSkattepliktig(),
+                avgiftsGrunnlagNorge.betalerArbeidsgiverAvgift(),
+                avgiftsGrunnlagNorge.getSærligAvgiftsgruppe().getKode()
             );
         }
         if (trygdeavgiftsgrunnlag.getAvgiftsGrunnlagUtland() != null) {
+            AvgiftsgrunnlagInfoUtland avgiftsGrunnlagUtland = trygdeavgiftsgrunnlag.getAvgiftsGrunnlagUtland();
             utenlandsk = new TrygdeavgiftInfo(
                 fastsattTrygdeavgift.getAvgiftspliktigUtenlandskInntektMnd(),
-                trygdeavgiftsgrunnlag.getAvgiftsGrunnlagUtland().erAvgiftspliktig(),
-                Avgiftskode.E.name(), //TODO
-                trygdeavgiftsgrunnlag.getAvgiftsGrunnlagUtland().getSærligAvgiftsgruppe().getKode()
+                avgiftsGrunnlagUtland.erAvgiftspliktig(),
+                avgiftsGrunnlagUtland.erSkattepliktig(),
+                avgiftsGrunnlagUtland.betalerArbeidsgiverAvgift(),
+                avgiftsGrunnlagUtland.getSærligAvgiftsgruppe().getKode()
             );
         }
         return new VurderingTrygdeavgift(norsk, utenlandsk);
