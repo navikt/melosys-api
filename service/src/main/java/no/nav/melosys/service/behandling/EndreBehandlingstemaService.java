@@ -62,7 +62,7 @@ public class EndreBehandlingstemaService {
             behandlingsresultatService.tømBehandlingsresultat(behandlingsID);
             oppdaterOppgave(behandling);
             if (nyttTema != ARBEID_FLERE_LAND) {
-                oppdaterBehandlingsgrunnlag(behandlingsID);
+                oppdaterBehandlingsgrunnlag(behandling.getBehandlingsgrunnlag());
             }
         } else {
             throw new FunksjonellException("Ikke mulig å endre behandlingstema");
@@ -88,8 +88,7 @@ public class EndreBehandlingstemaService {
             behandling.getId()).erIkkeArtikkel16MedSendtAnmodningOmUnntak();
     }
 
-    private void oppdaterBehandlingsgrunnlag(long behandlingsID) {
-        Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingsID);
+    private void oppdaterBehandlingsgrunnlag(Behandlingsgrunnlag behandlingsgrunnlag) {
         behandlingsgrunnlag.getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand = false;
         behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandlingsgrunnlag);
     }

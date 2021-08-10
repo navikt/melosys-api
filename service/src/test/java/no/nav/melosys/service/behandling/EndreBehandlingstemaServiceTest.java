@@ -69,6 +69,9 @@ class EndreBehandlingstemaServiceTest {
         );
 
         behandling.setId(id);
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
+        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
         when(behandlingService.hentBehandlingUtenSaksopplysninger(id)).thenReturn(behandling);
     }
 
@@ -185,12 +188,5 @@ class EndreBehandlingstemaServiceTest {
             .build();
         when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
         when(oppgaveService.finnÅpenOppgaveMedFagsaksnummer(fagsak.getSaksnummer())).thenReturn(Optional.of(oppgave));
-
-        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
-        behandlingsgrunnlagData.soeknadsland.erUkjenteEllerAlleEosLand = true;
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
-        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(id)).thenReturn(behandlingsgrunnlag);
     }
-
 }
