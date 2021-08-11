@@ -13,6 +13,8 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
+import no.nav.melosys.domain.kodeverk.Avtaleland;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
@@ -54,10 +56,13 @@ public class InnvilgelseFtrlMapper {
         var trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(brevbestilling.getBehandlingId());
         var avklarteMedfolgendeBarn = avklartefaktaService.hentAvklarteMedfølgendeBarn(brevbestilling.getBehandlingId());
         var avklarteMedfolgendeEktefelle = avklartefaktaService.hentAvklarteMedfølgendeEktefelle(brevbestilling.getBehandlingId());
+        Set<String> avklarteVirksomheter = avklartefaktaService.hentAvklarteOrgnrOgUuid(brevbestilling.getBehandlingId());
 
+
+        Landkoder arbeidsland = avklartefaktaService.hentAlleAvklarteArbeidsland(brevbestilling.getBehandlingId()).iterator().next();
         return new InnvilgelseFtrl(
             brevbestilling,
-            medlemAvFolketrygden.getMedlemskapsperioder().stream().map(Periode::new).collect(Collectors.toList()),
+            medlemAvFolketrygden.getMedlemskapsperioder().stream().map(Periode::new).toList(),
             erFullstendigInnvilget(medlemAvFolketrygden.getMedlemskapsperioder()),
             hentSaerligBegrunnelse(behandlingsresultat),
             avklarteMedfolgendeEktefelle.finnes(),
@@ -66,8 +71,8 @@ public class InnvilgelseFtrlMapper {
             hentIkkeOmfattetBarn(brevbestilling.getBehandlingId(), avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd),
             hentIkkeOmfattetEktefelle(brevbestilling.getBehandlingId(), avklarteMedfolgendeEktefelle.getFamilieIkkeOmfattetAvNorskTrygd()),
             "arbeidsgivernavn", //TODO
-            (avklartefaktaService.hentAlleAvklarteArbeidsland(brevbestilling.getBehandlingId()).iterator().next().getBeskrivelse()),
-            false, //TODO Hvor finnes det oversikt over land med trygdeavtale?
+            arbeidsland.getBeskrivelse(),
+            harTrygdeavtaleMedArbeidsland(arbeidsland),
             mapVurderingTrygdeavgift(trygdeavgiftsgrunnlag, medlemAvFolketrygden.getFastsattTrygdeavgift()),
             trygdeavgiftsgrunnlag.getLønnsforhold().getKode(),
             "", //TODO
@@ -184,5 +189,14 @@ public class InnvilgelseFtrlMapper {
 
     private boolean harLønnUtlandSkattepliktigNorge(AvgiftsgrunnlagInfoUtland avgiftsgrunnlagInfoUtland) {
         return avgiftsgrunnlagInfoUtland != null && avgiftsgrunnlagInfoUtland.erSkattepliktig();
+    }
+
+    private boolean harTrygdeavtaleMedArbeidsland(Landkoder arbeidsland) {
+        for (Avtaleland a : Avtaleland.values()) {
+            if (a.name().equals(arbeidsland.name())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

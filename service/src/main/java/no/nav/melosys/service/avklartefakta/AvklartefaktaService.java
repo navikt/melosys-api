@@ -13,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.domain.person.familie.*;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.IkkeOmfattetEktefelle;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,10 +70,10 @@ public class AvklartefaktaService {
     // Denne leverer enten norske orgnr eller uuid for identifikasjon av utenlandske foretak
     public Set<String> hentAvklarteOrgnrOgUuid(long behandlingID) {
         Set<Avklartefakta> avklartefakta =
-                avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingID, Avklartefaktatyper.VIRKSOMHET, VALGT_FAKTA);
+            avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingID, Avklartefaktatyper.VIRKSOMHET, VALGT_FAKTA);
         return avklartefakta.stream()
-                .map(Avklartefakta::getSubjekt)
-                .collect(Collectors.toSet());
+            .map(Avklartefakta::getSubjekt)
+            .collect(Collectors.toSet());
     }
 
     public Optional<Yrkesgrupper> finnYrkesGruppe(long behandlingID) {
