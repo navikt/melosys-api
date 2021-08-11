@@ -7,6 +7,8 @@ import java.util.Optional;
 import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -141,6 +143,18 @@ public class BehandlingsgrunnlagService {
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlingsgrunnlag for behandling " + behandlingID));
 
         behandlingsgrunnlag.setJsonData(behandlingsgrunnlagDataJson.toString());
+        return behandlingsgrunnlagRepository.saveAndFlush(behandlingsgrunnlag);
+    }
+
+    @Transactional
+    public Behandlingsgrunnlag oppdaterBehandlingsgrunnlagPeriodeOgLand(long behandlingID, Periode periode, Soeknadsland soeknadsland) {
+
+        Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagRepository.findByBehandling_Id(behandlingID)
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlingsgrunnlag for behandling " + behandlingID));
+
+        behandlingsgrunnlag.getBehandlingsgrunnlagdata().periode = periode;
+        behandlingsgrunnlag.getBehandlingsgrunnlagdata().soeknadsland = soeknadsland;
+        BehandlingsgrunnlagKonverterer.oppdaterBehandlingsgrunnlag(behandlingsgrunnlag);
         return behandlingsgrunnlagRepository.saveAndFlush(behandlingsgrunnlag);
     }
 
