@@ -253,7 +253,7 @@ public class Behandling extends RegistreringsInfo {
         return hentDokument(SaksopplysningType.UTBETAL).map(d -> (UtbetalingDokument) d);
     }
 
-    private Optional<SaksopplysningDokument> hentDokument(SaksopplysningType saksopplysningType) {
+    public Optional<SaksopplysningDokument> hentDokument(SaksopplysningType saksopplysningType) {
         return getSaksopplysninger().stream()
             .filter(saksopplysning -> saksopplysning.getType().equals(saksopplysningType))
             .findFirst().map(Saksopplysning::getDokument);

@@ -6,7 +6,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import org.springframework.stereotype.Service;
@@ -26,8 +28,10 @@ public class TrygdeavtaleService {
 
         Map<String, String> orgIdOgNavn = new HashMap<>();
 
-        orgIdOgNavn.putAll(behandling.hentArbeidsforholdDokument().hentOrgnumre().stream()
-            .collect(Collectors.toMap(orgnr -> orgnr, orgnr -> finnNavnFraOrganisasjonsdokument(orgnr, organisasjonDokumenter))));
+        orgIdOgNavn.putAll(
+            ((ArbeidsforholdDokument) behandling.hentDokument(SaksopplysningType.ARBFORH).orElse(new ArbeidsforholdDokument()))
+                .hentOrgnumre().stream()
+                .collect(Collectors.toMap(orgnr -> orgnr, orgnr -> finnNavnFraOrganisasjonsdokument(orgnr, organisasjonDokumenter))));
         orgIdOgNavn.putAll(behandlingsgrunnlagData.hentAlleOrganisasjonsnumre().stream()
             .collect(Collectors.toMap(orgnr -> orgnr, orgnr -> finnNavnFraOrganisasjonsdokument(orgnr, organisasjonDokumenter))));
         orgIdOgNavn.putAll(behandlingsgrunnlagData.hentUtenlandskeArbeidsgivereUuidOgNavn());

@@ -24,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -58,7 +59,7 @@ public class TrygdeavtaleServiceTest {
             selvstendigArbeid,
             juridiskArbeidsgiverNorge,
             emptyList(),
-            Set.of(lagArbForhSaksopplysning(emptyList()))
+            emptySet()
         );
 
         when(registerOppslagService.hentOrganisasjon(ORGNR_1)).thenReturn(lagOrganisasjonsDokument(ORGNR_1, NAVN_1));
@@ -96,7 +97,7 @@ public class TrygdeavtaleServiceTest {
             new SelvstendigArbeid(),
             new JuridiskArbeidsgiverNorge(),
             lagForetakUtland(Map.of(ORGNR_1, NAVN_1, ORGNR_2, NAVN_2)),
-            Set.of(lagArbForhSaksopplysning(emptyList()))
+            emptySet()
         );
 
         var response = trygdeavtaleService.hentVirksomheter(behandling);
@@ -112,7 +113,7 @@ public class TrygdeavtaleServiceTest {
             new SelvstendigArbeid(),
             new JuridiskArbeidsgiverNorge(),
             emptyList(),
-            Set.of(lagArbForhSaksopplysning(emptyList()))
+            emptySet()
         );
 
         var response = trygdeavtaleService.hentVirksomheter(behandling);
