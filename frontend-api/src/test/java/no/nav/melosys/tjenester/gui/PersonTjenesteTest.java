@@ -20,7 +20,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class PersonTjenesteTest extends JsonSchemaTestParent {
+class PersonTjenesteTest extends JsonSchemaTestParent {
     private static final Logger log = LoggerFactory.getLogger(PersonTjenesteTest.class);
 
     @Mock
@@ -35,7 +35,7 @@ public class PersonTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void personSchemaValidering() throws Exception {
+    void personSchemaValidering() throws Exception {
         ResponseEntity person = personTjeneste.getPerson("12345678910");
         ObjectMapper mapper = objectMapperMedKodeverkServiceStub();
         String jsonInString = mapper

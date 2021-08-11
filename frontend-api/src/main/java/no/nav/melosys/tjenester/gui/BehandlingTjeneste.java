@@ -145,17 +145,17 @@ public class BehandlingTjeneste {
         log.debug("Saksbehandler {} ber om å sette behandlingstema for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingsID, endreBehandlingstemaDto);
         tilgangService.sjekkRedigerbarOgTilordnetSaksbehandlerOgTilgang(behandlingsID);
 
-        endreBehandlingstemaService.endreBehandlingstemaTilBehandling(behandlingsID, Behandlingstema.valueOf(endreBehandlingstemaDto.getBehandlingstema()));
+        endreBehandlingstemaService.endreBehandlingstemaTilBehandling(behandlingsID, Behandlingstema.valueOf(endreBehandlingstemaDto.behandlingstema()));
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("{behandlingID}/behandlingsfrist")
     @ApiOperation("Endre behandlingsfristen for en gitt behandling samt tilhørende oppgave i Gosys")
     public ResponseEntity<Void> endreBehandlingsfrist(@PathVariable("behandlingID") long behandlingID, @RequestBody EndreBehandlingsfristDto endreBehandlingsfristDto) {
-        log.debug("Saksbehandler {} ber om å sette behandlingsfrist for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingID, endreBehandlingsfristDto.getBehandlingsfrist());
+        log.debug("Saksbehandler {} ber om å sette behandlingsfrist for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingID, endreBehandlingsfristDto.behandlingsfrist());
         tilgangService.sjekkRedigerbarOgTilordnetSaksbehandlerOgTilgang(behandlingID);
 
-        behandlingService.endreBehandlingsfrist(behandlingID, endreBehandlingsfristDto.getBehandlingsfrist());
+        behandlingService.endreBehandlingsfrist(behandlingID, endreBehandlingsfristDto.behandlingsfrist());
         return ResponseEntity.noContent().build();
     }
 

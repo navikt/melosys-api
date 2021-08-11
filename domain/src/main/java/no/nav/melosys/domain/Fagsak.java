@@ -210,7 +210,9 @@ public class Fagsak extends RegistreringsInfo {
         return 31;
     }
 
-    public static boolean erSakstypeFtrl(Sakstyper sakstype) {
-        return Sakstyper.FTRL == sakstype;
+    public static boolean erSakstypeEøs(Sakstyper sakstype) {
+        return Sakstyper.EU_EOS == sakstype;
     }
+
+
 }

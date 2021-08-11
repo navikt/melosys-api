@@ -47,10 +47,10 @@ public class OpprettSoeknad implements StegBehandler {
             soeknad.periode = periode;
             soeknad.soeknadsland.landkoder = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, new TypeReference<List<String>>() {});
             Sakstyper sakstype = prosessinstans.getBehandling().getFagsak().getType();
-            if (sakstype == Sakstyper.FTRL) {
-                behandlingsgrunnlagService.opprettSøknadFolketrygden(behandlingID, new SoeknadFtrl());
-            } else {
+            if(sakstype == Sakstyper.EU_EOS) {
                 behandlingsgrunnlagService.opprettSøknadYrkesaktiveEøs(behandlingID, soeknad);
+            } else {
+                behandlingsgrunnlagService.opprettSøknadOmMedlemskapIFolketrygden(behandlingID, new SoeknadFtrl());
             }
             log.info("Opprettet søknad for behandling {}.", behandlingID);
         } else {

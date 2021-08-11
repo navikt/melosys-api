@@ -91,7 +91,7 @@ class EessiTjenesteTest extends JsonSchemaTestParent {
 
         valider(nyBucDto, OPPRETT_BUC_SCHEMA, log);
         assertThat(opprettBucSvarDto).isNotNull()
-            .extracting(OpprettBucSvarDto::getRinaUrl).isEqualTo(MOCK_RINA_URL);
+            .extracting(OpprettBucSvarDto::rinaUrl).isEqualTo(MOCK_RINA_URL);
         verify(eessiService).opprettBucOgSed(any(), eq(BucType.LA_BUC_01), anyList(), anyCollection());
     }
 
@@ -108,7 +108,7 @@ class EessiTjenesteTest extends JsonSchemaTestParent {
         ResponseEntity<BucerTilknyttetBehandlingDto> response = eessiTjeneste.hentBucer(123L, Arrays.asList("utkast", "sendt"));
 
         BucerTilknyttetBehandlingDto dto = response.getBody();
-        assertThat(dto).extracting(BucerTilknyttetBehandlingDto::getBucer, as(InstanceOfAssertFactories.LIST))
+        assertThat(dto).extracting(BucerTilknyttetBehandlingDto::bucer, as(InstanceOfAssertFactories.LIST))
             .allSatisfy(x -> assertThat(x).hasNoNullFieldsOrProperties());
 
         valider(dto, BUCER_UNDER_ARBEID_SCHEMA, log);
