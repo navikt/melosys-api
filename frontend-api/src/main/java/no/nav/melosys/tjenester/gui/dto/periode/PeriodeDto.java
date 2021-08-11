@@ -15,7 +15,7 @@ public class PeriodeDto {
     private LocalDate fom;
     @JsonProperty("tom")
     private LocalDate tom;
-    
+
     public PeriodeDto() {
     }
 
@@ -38,5 +38,9 @@ public class PeriodeDto {
 
     public void setTom(LocalDate tom) {
         this.tom = tom;
+    }
+
+    public boolean erTom() {
+        return fom == null && tom == null;
     }
 }

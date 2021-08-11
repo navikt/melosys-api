@@ -1,3 +1,5 @@
 package no.nav.melosys.tjenester.gui.dto;
 
-public record GodkjennUnntaksperiodeDto(boolean varsleUtland, String fritekst) { }
+import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
+
+public record GodkjennUnntaksperiodeDto(boolean varsleUtland, String fritekst, PeriodeDto endretPeriode) { }

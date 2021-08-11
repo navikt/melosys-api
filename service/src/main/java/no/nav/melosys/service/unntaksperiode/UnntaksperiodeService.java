@@ -6,9 +6,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
 import no.nav.melosys.domain.ErPeriode;
+import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
@@ -49,22 +50,52 @@ public class UnntaksperiodeService {
     @Transactional
     public void godkjennPeriode(long behandlingID, boolean varsleUtland, String fritekst) {
         Behandling behandling = hentOgValiderBehandling(behandlingID);
-        validerPeriode(behandling.hentPeriode(), behandlingID);
-        opprettLovvalgsperiodeHvisIkkeEksisterer(behandling);
+
+        validerPeriodeFraBehandling(behandling);
+        opprettLovvalgsperiodeFraSedDokument(behandlingID, behandling.hentSedDokument());
+
         behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.GODKJENT);
-        prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(behandling, varsleUtland, fritekst);
+        prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(
+            behandling,
+            varsleUtland,
+            fritekst
+        );
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    //Lovvalgsperiode finnes ikke om automatisk behandlet, eller om saksbehandler godkjenner periode fra SED uten å endre den
-    private void opprettLovvalgsperiodeHvisIkkeEksisterer(Behandling behandling) {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        if (behandlingsresultat.finnValidertLovvalgsperiode().isEmpty()) {
-            lovvalgsperiodeService.lagreLovvalgsperioder(
-                behandling.getId(),
-                Collections.singleton(behandling.hentSedDokument().opprettInnvilgetLovvalgsperiode())
-            );
-        }
+    @Transactional
+    public void godkjennOgEndrePeriode(long behandlingID, EndretUnntaksperiodeGodkjenning endretUnntaksperiodeGodkjenning) {
+        Behandling behandling = hentOgValiderBehandling(behandlingID);
+
+        var endretPeriode = endretUnntaksperiodeGodkjenning.endretPeriode();
+        validerEndretPeriode(endretPeriode);
+        opprettEndretLovvalgsperiode(behandlingID, endretPeriode);
+
+        behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.GODKJENT);
+        prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(
+            behandling,
+            endretUnntaksperiodeGodkjenning.varsleUtland(),
+            endretUnntaksperiodeGodkjenning.fritekst()
+        );
+        oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
+    }
+
+    private void opprettEndretLovvalgsperiode(long behandlingID, Unntaksperiode unntaksperiodeDto) {
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setFom(unntaksperiodeDto.fom());
+        lovvalgsperiode.setTom(unntaksperiodeDto.tom());
+
+        lovvalgsperiodeService.lagreLovvalgsperioder(
+            behandlingID,
+            Collections.singleton(lovvalgsperiode)
+        );
+    }
+
+    private void opprettLovvalgsperiodeFraSedDokument(long behandlingID, SedDokument sedDokument) {
+        lovvalgsperiodeService.lagreLovvalgsperioder(
+            behandlingID,
+            Collections.singleton(sedDokument.opprettInnvilgetLovvalgsperiode())
+        );
     }
 
     @Transactional
@@ -105,9 +136,17 @@ public class UnntaksperiodeService {
         }
     }
 
-    private void validerPeriode(ErPeriode periode, long behandlingID) {
+    private void validerEndretPeriode(Unntaksperiode unntaksperiodeDto) {
+        if (PeriodeKontroller.feilIPeriode(unntaksperiodeDto.fom(), unntaksperiodeDto.tom())) {
+            throw new FunksjonellException(
+                String.format("Feil i perioden %s - %s som det forsøkes å endre til", unntaksperiodeDto.fom(), unntaksperiodeDto.tom()));
+        }
+    }
+
+    private void validerPeriodeFraBehandling(Behandling behandling) {
+        ErPeriode periode = behandling.hentPeriode();
         if (PeriodeKontroller.feilIPeriode(periode.getFom(), periode.getTom())) {
-            throw new FunksjonellException(String.format("Behandling %s har feil i perioden", behandlingID));
+            throw new FunksjonellException(String.format("Behandling %s har feil i perioden", behandling.getId()));
         }
     }
 
