@@ -22,7 +22,10 @@ public final class StatsborgerskapTilDtoKonverter {
     }
 
     private static String mapMaster(String master) {
-        if (master.equals("PDL")) return "NAV (PDL)";
+        final String PDL = "PDL";
+        final String NAV_PDL = "NAV (PDL)";
+
+        if (PDL.equals(master)) return NAV_PDL;
 
         return master;
     }
