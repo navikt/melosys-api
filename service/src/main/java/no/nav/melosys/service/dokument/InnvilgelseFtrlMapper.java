@@ -4,27 +4,34 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import no.nav.dok.melosysbrev._000072.Fag;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoNorge;
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoUtland;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.kodeverk.Avtaleland;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrl;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.*;
+import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE;
@@ -36,18 +43,24 @@ public class InnvilgelseFtrlMapper {
     private final TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final AvklartefaktaService avklartefaktaService;
+    private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private final EregFasade eregFasade;
 
     public InnvilgelseFtrlMapper(PersondataFasade persondataFasade,
                                  TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService,
                                  BehandlingsresultatService behandlingsresultatService,
                                  AvklartefaktaService avklartefaktaService,
-                                 BehandlingsgrunnlagService behandlingsgrunnlagService) {
+                                 AvklarteVirksomheterService avklarteVirksomheterService,
+                                 BehandlingsgrunnlagService behandlingsgrunnlagService,
+                                 @Qualifier("system") EregFasade eregFasade) {
         this.persondataFasade = persondataFasade;
         this.trygdeavgiftsgrunnlagService = trygdeavgiftsgrunnlagService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.avklartefaktaService = avklartefaktaService;
+        this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
+        this.eregFasade = eregFasade;
     }
 
     public InnvilgelseFtrl map(InnvilgelseBrevbestilling brevbestilling) {
@@ -56,8 +69,7 @@ public class InnvilgelseFtrlMapper {
         var trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(brevbestilling.getBehandlingId());
         var avklarteMedfolgendeBarn = avklartefaktaService.hentAvklarteMedfølgendeBarn(brevbestilling.getBehandlingId());
         var avklarteMedfolgendeEktefelle = avklartefaktaService.hentAvklarteMedfølgendeEktefelle(brevbestilling.getBehandlingId());
-        Set<String> avklarteVirksomheter = avklartefaktaService.hentAvklarteOrgnrOgUuid(brevbestilling.getBehandlingId());
-
+        List<AvklartVirksomhet> norskeArbeidsgivere = avklarteVirksomheterService.hentNorskeArbeidsgivere(brevbestilling.getBehandling());
 
         Landkoder arbeidsland = avklartefaktaService.hentAlleAvklarteArbeidsland(brevbestilling.getBehandlingId()).iterator().next();
         return new InnvilgelseFtrl(
@@ -70,13 +82,13 @@ public class InnvilgelseFtrlMapper {
             mapOmfattetFamilie(brevbestilling.getBehandlingId(), avklarteMedfolgendeEktefelle.getFamilieOmfattetAvNorskTrygd(), avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd),
             hentIkkeOmfattetBarn(brevbestilling.getBehandlingId(), avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd),
             hentIkkeOmfattetEktefelle(brevbestilling.getBehandlingId(), avklarteMedfolgendeEktefelle.getFamilieIkkeOmfattetAvNorskTrygd()),
-            "arbeidsgivernavn", //TODO
+            norskeArbeidsgivere.get(0).navn,
             arbeidsland.getBeskrivelse(),
             harTrygdeavtaleMedArbeidsland(arbeidsland),
             mapVurderingTrygdeavgift(trygdeavgiftsgrunnlag, medlemAvFolketrygden.getFastsattTrygdeavgift()),
             trygdeavgiftsgrunnlag.getLønnsforhold().getKode(),
-            "", //TODO
-            false, //TODO
+            hentFullmektigNavnArbeidsgiver(brevbestilling.getBehandling().getFagsak()),
+            brevbestilling.getBehandling().getFagsak().hentRepresentant(Representerer.BRUKER).isPresent(),
             String.valueOf(LocalDate.now().getYear()),
             harLønnNorgeSkattepliktigNorge(trygdeavgiftsgrunnlag.getAvgiftsGrunnlagNorge()),
             harLønnUtlandSkattepliktigNorge(trygdeavgiftsgrunnlag.getAvgiftsGrunnlagUtland())
@@ -198,5 +210,11 @@ public class InnvilgelseFtrlMapper {
             }
         }
         return false;
+    }
+
+    private String hentFullmektigNavnArbeidsgiver(Fagsak fagsak) {
+        return fagsak.hentRepresentant(Representerer.ARBEIDSGIVER)
+            .map(aktoer -> eregFasade.hentOrganisasjonNavn(aktoer.getOrgnr()))
+            .orElse(null);
     }
 }
