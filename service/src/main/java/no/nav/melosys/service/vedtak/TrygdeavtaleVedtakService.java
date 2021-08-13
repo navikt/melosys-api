@@ -66,6 +66,7 @@ public class TrygdeavtaleVedtakService {
             throw new FunksjonellException("Fant ingen oppgave med saksnummer:" + saksnummer);
         }
 
+        // Må sikkert juster på dette når vi har resten av flyten oppe
         OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder()
             .tema(Tema.TRY)
             .oppgavetype(Oppgavetyper.VUR)
