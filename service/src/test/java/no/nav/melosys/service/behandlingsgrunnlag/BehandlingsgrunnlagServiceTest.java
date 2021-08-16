@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -83,7 +84,7 @@ class BehandlingsgrunnlbagServiceTest {
     }
 
     @Test
-    void oppdaterBehandlingsgrunnlag_eksisterer_oppdatererBehandlingsgrunnlagData() throws JsonProcessingException {
+    void oppdaterBehandlingsgrunnlagJson_behandlingsgrunnlagEksisterer_oppdatererBehandlingsgrunnlagData() throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
 
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
@@ -100,6 +101,26 @@ class BehandlingsgrunnlbagServiceTest {
         verify(behandlingsgrunnlagRepository).saveAndFlush(any(Behandlingsgrunnlag.class));
 
         assertThat(behandlingsgrunnlag.getJsonData()).isNotEqualTo(originalJsonData);
+    }
+
+    @Test
+    void oppdaterBehandlingsgrunnlag_behandlingsgrunnlagJsonDataIkkeSatt_setterJsonDataOgLagrerBehandlingsgrunnlag() {
+        BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
+        behandlingsgrunnlagData.periode = new Periode(
+            LocalDate.of(2000, 1, 1),
+            LocalDate.of(2010, 1, 1)
+        );
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+
+        behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandlingsgrunnlag);
+
+        verify(behandlingsgrunnlagRepository).saveAndFlush(behandlingsgrunnlagArgumentCaptor.capture());
+        assertThat(behandlingsgrunnlagArgumentCaptor.getValue().getJsonData())
+            .contains("\"periode\":{" +
+                "\"fom\":[2000,1,1]," +
+                "\"tom\":[2010,1,1]" +
+                "}");
     }
 
     @Test

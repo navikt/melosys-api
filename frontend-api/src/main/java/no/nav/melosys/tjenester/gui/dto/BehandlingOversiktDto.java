@@ -15,7 +15,7 @@ public class BehandlingOversiktDto {
     private Behandlingstyper behandlingstype;
     private Behandlingstema behandlingstema;
     private PeriodeDto periode;
-    private List<String> land;
+    private SoeknadslandDto land;
     private Instant opprettetDato;
 
     public Long getBehandlingID() {
@@ -58,11 +58,11 @@ public class BehandlingOversiktDto {
         this.periode = søknadsperiode;
     }
 
-    public List<String> getLand() {
+    public SoeknadslandDto getLand() {
         return land;
     }
 
-    public void setLand(List<String> land) {
+    public void setLand(SoeknadslandDto land) {
         this.land = land;
     }
 
