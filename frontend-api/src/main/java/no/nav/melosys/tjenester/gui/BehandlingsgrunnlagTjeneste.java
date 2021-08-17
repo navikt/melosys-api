@@ -49,7 +49,6 @@ public class BehandlingsgrunnlagTjeneste {
         return ResponseEntity.ok(new BehandlingsgrunnlagGetDto(behandlingsgrunnlag));
     }
 
-    @Unprotected
     @PostMapping("/{behandlingID}/periodeOgLand")
     public ResponseEntity<Void> oppdaterBehandlingsgrunnlagPeriodeOgLand(
         @PathVariable(value = "behandlingID") long behandlingID,
