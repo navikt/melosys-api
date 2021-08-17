@@ -1,7 +1,7 @@
 package no.nav.melosys.service.behandlingsgrunnlag;
 
 import java.time.LocalDate;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -134,7 +134,7 @@ class BehandlingsgrunnlbagServiceTest {
         when(behandlingsgrunnlagRepository.findByBehandling_Id(behandlingID)).thenReturn(Optional.of(behandlingsgrunnlag));
 
         var periode = new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31));
-        var soeknadsland = Soeknadsland.av(Collections.singleton("UK"));
+        var soeknadsland = new Soeknadsland(List.of("UK"), false);
 
         behandlingsgrunnlagService.oppdaterBehandlingsgrunnlagPeriodeOgLand(behandlingID, periode, soeknadsland);
 

@@ -10,7 +10,6 @@ import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.BehandlingsgrunnlagG
 import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.BehandlingsgrunnlagPostDto;
 import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.PeriodeOgLandPostDto;
 import no.nav.security.token.support.core.api.Protected;
-import no.nav.security.token.support.core.api.Unprotected;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -56,7 +55,7 @@ public class BehandlingsgrunnlagTjeneste {
     ) {
         behandlingsgrunnlagService.oppdaterBehandlingsgrunnlagPeriodeOgLand(behandlingID,
             new Periode(periodeOgLandPostDto.fom(), periodeOgLandPostDto.tom()),
-            Soeknadsland.av(periodeOgLandPostDto.land()));
+            new Soeknadsland(periodeOgLandPostDto.land(), false));
         return ResponseEntity.ok().build();
     }
 }
