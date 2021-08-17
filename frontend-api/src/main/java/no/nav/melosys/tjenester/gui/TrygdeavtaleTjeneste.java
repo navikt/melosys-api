@@ -40,7 +40,7 @@ public class TrygdeavtaleTjeneste {
         tilgangService.sjekkTilgang(behandlingId);
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         return ResponseEntity.ok(new TrygdeavtaleInfoDto(
-            behandling.getFagsak().hentBruker().getAktørId(),
+            behandling.getFagsak().hentAktørID(),
             behandling.getTema().getKode(),
             hentVirksomheter ? OrgIdNavnDto.av(trygdeavtaleService.hentVirksomheter(behandling)) : Collections.emptyList(),
             hentBarnEktefeller ? trygdeavtaleService.hentFamiliemedlemmer(behandling) : Collections.emptyList()
