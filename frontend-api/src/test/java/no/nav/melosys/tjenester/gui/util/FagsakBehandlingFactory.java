@@ -75,6 +75,7 @@ public class FagsakBehandlingFactory {
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
         fysiskArbeidssted.adresse.setLandkode("SE");
         soeknad.soeknadsland.landkoder.add(Landkoder.DK.getKode());
+        soeknad.soeknadsland.erUkjenteEllerAlleEosLand = false;
         soeknad.arbeidPaaLand.fysiskeArbeidssteder = new ArrayList<>();
         soeknad.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
         soeknad.oppholdUtland.oppholdslandkoder.add("FI");

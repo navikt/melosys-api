@@ -33,12 +33,14 @@ public class SakOgBehandlingService implements SakOgBehandlingFasade {
 
     @Override
     public void sendBehandlingOpprettet(BehandlingStatusMapper mapper) {
-        behandlingstatusClient.sendBehandlingOpprettet(mapper);
+        //FIXME: MELOSYS-4655
+        //behandlingstatusClient.sendBehandlingOpprettet(mapper);
     }
 
     @Override
     public void sendBehandlingAvsluttet(BehandlingStatusMapper mapper) {
-        behandlingstatusClient.sendBehandlingAvsluttet(mapper);
+        //FIXME: MELOSYS-4655
+        //behandlingstatusClient.sendBehandlingAvsluttet(mapper);
     }
 
     @Override
