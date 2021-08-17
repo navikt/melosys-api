@@ -20,6 +20,7 @@ import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class AvklarteMedfolgendeFamilieServiceTest {
+class AvklarteMedfolgendeFamilieServiceTest {
     @Mock
     private AvklarteFaktaRepository avklarteFaktaRepository;
     @Mock
@@ -46,6 +47,8 @@ public class AvklarteMedfolgendeFamilieServiceTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private AvklartefaktaDtoKonverterer avklartefaktaDtoKonverterer;
+    @Mock
+    private BehandlingsgrunnlagService mockBehandlingsgrunnlagService;
 
     private AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
 
@@ -58,13 +61,13 @@ public class AvklarteMedfolgendeFamilieServiceTest {
     private static final String fritekstEktefelleSamboer = "fritekstEktefelleSamboer";
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         AvklartefaktaService avklartefaktaService = new AvklartefaktaService(avklarteFaktaRepository, behandlingsresultatRepository, avklartefaktaDtoKonverterer);
-        avklarteMedfolgendeFamilieService = new AvklarteMedfolgendeFamilieService(behandlingService, behandlingsresultatService, avklartefaktaService);
+        avklarteMedfolgendeFamilieService = new AvklarteMedfolgendeFamilieService(behandlingService, behandlingsresultatService, avklartefaktaService, mockBehandlingsgrunnlagService);
     }
 
     @Test
-    public void lagreMedfolgendeFamilieSomAvklartefakta_ikkeOmfattetFamilie_lagresKorrekt() {
+    void lagreMedfolgendeFamilieSomAvklartefakta_ikkeOmfattetFamilie_lagresKorrekt() {
         AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie =
             new AvklarteMedfolgendeFamilie(Set.of(), Set.of(
                 new IkkeOmfattetFamilie(uuidBarn, OVER_18_AR.getKode(), fritekstBarn),
@@ -110,7 +113,7 @@ public class AvklarteMedfolgendeFamilieServiceTest {
     }
 
     @Test
-    public void lagreMedfolgendeFamilieSomAvklartefakta_omfattetFamilie_lagresKorrekt() {
+    void lagreMedfolgendeFamilieSomAvklartefakta_omfattetFamilie_lagresKorrekt() {
         AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie =
             new AvklarteMedfolgendeFamilie(
                 Set.of(new OmfattetFamilie(uuidBarn), new OmfattetFamilie(uuidEktefelleSamboer)),
@@ -150,7 +153,7 @@ public class AvklarteMedfolgendeFamilieServiceTest {
     }
 
     @Test
-    public void lagreMedfolgendeFamilieSomAvklartefakta_omfattetFamilieIkkeLagretIBehandlingsgrunnlaget_kasterFeilmelding() {
+    void lagreMedfolgendeFamilieSomAvklartefakta_omfattetFamilieIkkeLagretIBehandlingsgrunnlaget_kasterFeilmelding() {
         AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie =
             new AvklarteMedfolgendeFamilie(Set.of(new OmfattetFamilie("uuid3")), Set.of());
 
@@ -164,7 +167,7 @@ public class AvklarteMedfolgendeFamilieServiceTest {
     }
 
     @Test
-    public void lagreMedfolgendeFamilieSomAvklartefakta_ikkeOmfattetFamilieIkkeLagretIBehandlingsgrunnlaget_kasterFeilmelding() {
+    void lagreMedfolgendeFamilieSomAvklartefakta_ikkeOmfattetFamilieIkkeLagretIBehandlingsgrunnlaget_kasterFeilmelding() {
         AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie =
             new AvklarteMedfolgendeFamilie(Set.of(), Set.of(
                 new IkkeOmfattetFamilie("uuid3", OVER_18_AR.getKode(), fritekstBarn)));
@@ -179,7 +182,7 @@ public class AvklarteMedfolgendeFamilieServiceTest {
     }
 
     @Test
-    public void lagreMedfolgendeFamilieSomAvklartefakta_ugyldigBegrunnelseKodeForBarn_kasterFeilmelding() {
+    void lagreMedfolgendeFamilieSomAvklartefakta_ugyldigBegrunnelseKodeForBarn_kasterFeilmelding() {
         AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie =
             new AvklarteMedfolgendeFamilie(Set.of(), Set.of(
                 new IkkeOmfattetFamilie(uuidBarn, SAMBOER_UTEN_FELLES_BARN.getKode(), fritekstBarn)));
@@ -194,7 +197,7 @@ public class AvklarteMedfolgendeFamilieServiceTest {
     }
 
     @Test
-    public void lagreMedfolgendeFamilieSomAvklartefakta_ugyldigBegrunnelseKodeForEktefelleSamboer_kasterFeilmelding() {
+    void lagreMedfolgendeFamilieSomAvklartefakta_ugyldigBegrunnelseKodeForEktefelleSamboer_kasterFeilmelding() {
         AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie =
             new AvklarteMedfolgendeFamilie(Set.of(), Set.of(
                 new IkkeOmfattetFamilie(uuidEktefelleSamboer, OVER_18_AR.getKode(), fritekstEktefelleSamboer)));
@@ -209,7 +212,7 @@ public class AvklarteMedfolgendeFamilieServiceTest {
     }
 
     @Test
-    public void lagreMedfolgendeFamilieSomAvklartefakta_ikkeSattBegrunnelseKode_kasterFeilmelding() {
+    void lagreMedfolgendeFamilieSomAvklartefakta_ikkeSattBegrunnelseKode_kasterFeilmelding() {
         AvklarteMedfolgendeFamilie avklarteMedfolgendeFamilie =
             new AvklarteMedfolgendeFamilie(Set.of(), Set.of(
                 new IkkeOmfattetFamilie(uuidBarn, null, fritekstBarn)));

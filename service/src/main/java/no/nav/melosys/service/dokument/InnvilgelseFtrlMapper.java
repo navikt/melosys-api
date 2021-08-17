@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import no.nav.dok.melosysbrev._000072.Fag;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Medlemskapsperiode;
@@ -21,15 +20,14 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrl;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.*;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
+import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -44,7 +42,7 @@ public class InnvilgelseFtrlMapper {
     private final BehandlingsresultatService behandlingsresultatService;
     private final AvklartefaktaService avklartefaktaService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
-    private final BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private final AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
     private final EregFasade eregFasade;
 
     public InnvilgelseFtrlMapper(PersondataFasade persondataFasade,
@@ -52,26 +50,29 @@ public class InnvilgelseFtrlMapper {
                                  BehandlingsresultatService behandlingsresultatService,
                                  AvklartefaktaService avklartefaktaService,
                                  AvklarteVirksomheterService avklarteVirksomheterService,
-                                 BehandlingsgrunnlagService behandlingsgrunnlagService,
+                                 AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService,
                                  @Qualifier("system") EregFasade eregFasade) {
         this.persondataFasade = persondataFasade;
         this.trygdeavgiftsgrunnlagService = trygdeavgiftsgrunnlagService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.avklartefaktaService = avklartefaktaService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
-        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
+        this.avklarteMedfolgendeFamilieService = avklarteMedfolgendeFamilieService;
         this.eregFasade = eregFasade;
     }
 
     public InnvilgelseFtrl map(InnvilgelseBrevbestilling brevbestilling) {
-        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(brevbestilling.getBehandlingId());
+        long behandlingId = brevbestilling.getBehandlingId();
+        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
         var medlemAvFolketrygden = behandlingsresultat.getMedlemAvFolketrygden();
-        var trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(brevbestilling.getBehandlingId());
-        var avklarteMedfolgendeBarn = avklartefaktaService.hentAvklarteMedfølgendeBarn(brevbestilling.getBehandlingId());
-        var avklarteMedfolgendeEktefelle = avklartefaktaService.hentAvklarteMedfølgendeEktefelle(brevbestilling.getBehandlingId());
-        List<AvklartVirksomhet> norskeArbeidsgivere = avklarteVirksomheterService.hentNorskeArbeidsgivere(brevbestilling.getBehandling());
+        var trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(behandlingId);
+        var avklarteMedfolgendeBarn = avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingId);
+        var avklarteMedfolgendeEktefelle = avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingId);
 
-        Landkoder arbeidsland = avklartefaktaService.hentAlleAvklarteArbeidsland(brevbestilling.getBehandlingId()).iterator().next();
+        //NOTE Henter i første versjon av FTRL kun en norsk arbeidsgiver og første registrerte arbeidsland
+        AvklartVirksomhet norskeArbeidsgivere = avklarteVirksomheterService.hentNorskeArbeidsgivere(brevbestilling.getBehandling()).get(0);
+        Landkoder arbeidsland = avklartefaktaService.hentAlleAvklarteArbeidsland(behandlingId).iterator().next();
+
         return new InnvilgelseFtrl(
             brevbestilling,
             medlemAvFolketrygden.getMedlemskapsperioder().stream().map(Periode::new).toList(),
@@ -79,10 +80,10 @@ public class InnvilgelseFtrlMapper {
             hentSaerligBegrunnelse(behandlingsresultat),
             avklarteMedfolgendeEktefelle.finnes(),
             avklarteMedfolgendeBarn.finnes(),
-            mapOmfattetFamilie(brevbestilling.getBehandlingId(), avklarteMedfolgendeEktefelle.getFamilieOmfattetAvNorskTrygd(), avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd),
-            hentIkkeOmfattetBarn(brevbestilling.getBehandlingId(), avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd),
-            hentIkkeOmfattetEktefelle(brevbestilling.getBehandlingId(), avklarteMedfolgendeEktefelle.getFamilieIkkeOmfattetAvNorskTrygd()),
-            norskeArbeidsgivere.get(0).navn,
+            mapOmfattetFamilie(behandlingId, avklarteMedfolgendeEktefelle.getFamilieOmfattetAvNorskTrygd(), avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd),
+            mapIkkeOmfattetBarn(behandlingId, avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd),
+            mapIkkeOmfattetEktefelle(behandlingId, avklarteMedfolgendeEktefelle.getFamilieIkkeOmfattetAvNorskTrygd()),
+            norskeArbeidsgivere.navn,
             arbeidsland.getBeskrivelse(),
             harTrygdeavtaleMedArbeidsland(arbeidsland),
             mapVurderingTrygdeavgift(trygdeavgiftsgrunnlag, medlemAvFolketrygden.getFastsattTrygdeavgift()),
@@ -108,65 +109,41 @@ public class InnvilgelseFtrlMapper {
 
     private List<FamiliemedlemInfo> mapOmfattetFamilie(long behandlingID, Set<OmfattetFamilie> omfattetEktefelle, Set<OmfattetFamilie> omfattetBarn) {
         List<FamiliemedlemInfo> omfattetFamilie = new ArrayList<>();
-        Map<String, MedfolgendeFamilie> medfoelgendeBarn = hentMedfølgendeBarn(behandlingID);
-        Map<String, MedfolgendeFamilie> medfolgendeEktefelle = hentMedfølgendEktefelle(behandlingID);
-        for (OmfattetFamilie omfattetEkte : omfattetEktefelle) {
-            if (!medfolgendeEktefelle.containsKey(omfattetEkte.getUuid())) {
-                throw new FunksjonellException("Avklart medfølgende ektefelle/samboer " + omfattetEkte.getUuid() + " finnes ikke i behandlingsgrunnlaget");
-            }
-            MedfolgendeFamilie ektefelle = medfolgendeEktefelle.get(omfattetEkte.getUuid());
+        Map<String, MedfolgendeFamilie> medfolgendeEktefelle = avklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(behandlingID);
+
+        omfattetEktefelle.stream().map(omfattetEkte -> medfolgendeEktefelle.get(omfattetEkte.getUuid())).forEach(ektefelle -> {
             String sammensattNavn = ektefelle.fnr != null ? persondataFasade.hentSammensattNavn(ektefelle.fnr) : ektefelle.navn;
             omfattetFamilie.add(new FamiliemedlemInfo(sammensattNavn, ektefelle.fnr, IdentType.FNR));
-        }
-        for (OmfattetFamilie omfattetB : omfattetBarn) {
-            if (!medfoelgendeBarn.containsKey(omfattetB.getUuid())) {
-                throw new FunksjonellException("Avklart medfølgende barn " + omfattetB.getUuid() + " finnes ikke i behandlingsgrunnlaget");
-            }
-            MedfolgendeFamilie barn = medfolgendeEktefelle.get(omfattetB.getUuid());
+        });
+
+        omfattetBarn.stream().map(omfattetB -> medfolgendeEktefelle.get(omfattetB.getUuid())).forEach(barn -> {
             String sammensattNavn = barn.fnr != null ? persondataFasade.hentSammensattNavn(barn.fnr) : barn.navn;
             omfattetFamilie.add(new FamiliemedlemInfo(sammensattNavn, barn.fnr, IdentType.FNR));
-        }
+        });
         return omfattetFamilie;
     }
 
-    private List<IkkeOmfattetBarn> hentIkkeOmfattetBarn(long behandlingID, Set<no.nav.melosys.domain.person.familie.IkkeOmfattetBarn> barnIkkeOmfattetAvNorskTrygd) {
+    private List<IkkeOmfattetBarn> mapIkkeOmfattetBarn(long behandlingID, Set<no.nav.melosys.domain.person.familie.IkkeOmfattetBarn> barnIkkeOmfattetAvNorskTrygd) {
         List<IkkeOmfattetBarn> ikkeOmfattet = new ArrayList<>();
-        Map<String, MedfolgendeFamilie> medfoelgendeBarn = hentMedfølgendeBarn(behandlingID);
-        for (no.nav.melosys.domain.person.familie.IkkeOmfattetBarn ikkeOmfattetBarn : barnIkkeOmfattetAvNorskTrygd) {
-            if (!medfoelgendeBarn.containsKey(ikkeOmfattetBarn.uuid)) {
-                throw new FunksjonellException("Avklart medfølgende barn " + ikkeOmfattetBarn.uuid + " finnes ikke i behandlingsgrunnlaget");
-            }
+        Map<String, MedfolgendeFamilie> medfoelgendeBarn = avklarteMedfolgendeFamilieService.hentMedfølgendeBarn(behandlingID);
+
+        barnIkkeOmfattetAvNorskTrygd.forEach(ikkeOmfattetBarn -> {
             MedfolgendeFamilie barn = medfoelgendeBarn.get(ikkeOmfattetBarn.uuid);
             String sammensattNavn = barn.fnr != null ? persondataFasade.hentSammensattNavn(barn.fnr) : barn.navn;
             FamiliemedlemInfo familiemedlemInfo = new FamiliemedlemInfo(sammensattNavn, barn.fnr, IdentType.FNR);
             ikkeOmfattet.add(new IkkeOmfattetBarn(familiemedlemInfo, ikkeOmfattetBarn.begrunnelse));
-        }
+        });
         return ikkeOmfattet;
     }
 
-    private IkkeOmfattetEktefelle hentIkkeOmfattetEktefelle(long behandlingId, Set<no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie> ektefelleIkkeOmfattet) {
-        Map<String, MedfolgendeFamilie> medfolgendeEktefelle = hentMedfølgendEktefelle(behandlingId);
+    private IkkeOmfattetEktefelle mapIkkeOmfattetEktefelle(long behandlingId, Set<no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie> ektefelleIkkeOmfattet) {
+        Map<String, MedfolgendeFamilie> medfolgendeEktefelle = avklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(behandlingId);
         IkkeOmfattetFamilie ikkeOmfattetEktefelle = ektefelleIkkeOmfattet.iterator().next();
-        if (!medfolgendeEktefelle.containsKey(ikkeOmfattetEktefelle.getUuid())) {
-            throw new FunksjonellException("Avklart medfølgende ektefelle/samboer " + ikkeOmfattetEktefelle.getUuid() + " finnes ikke i behandlingsgrunnlaget");
-        }
 
         MedfolgendeFamilie ektefelle = medfolgendeEktefelle.get(ikkeOmfattetEktefelle.getUuid());
         String sammensattNavn = ektefelle.fnr != null ? persondataFasade.hentSammensattNavn(ektefelle.fnr) : ektefelle.navn;
         FamiliemedlemInfo familiemedlemInfo = new FamiliemedlemInfo(sammensattNavn, ektefelle.fnr, IdentType.FNR);
         return new IkkeOmfattetEktefelle(familiemedlemInfo, ikkeOmfattetEktefelle.getBegrunnelse());
-    }
-
-    private Map<String, MedfolgendeFamilie> hentMedfølgendeBarn(long behandlingID) {
-        var behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID);
-        return behandlingsgrunnlag == null ? Collections.emptyMap()
-            : behandlingsgrunnlag.getBehandlingsgrunnlagdata().hentMedfølgendeBarn();
-    }
-
-    private Map<String, MedfolgendeFamilie> hentMedfølgendEktefelle(long behandlingID) {
-        var behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID);
-        return behandlingsgrunnlag == null ? Collections.emptyMap()
-            : behandlingsgrunnlag.getBehandlingsgrunnlagdata().hentMedfølgendeEktefelle();
     }
 
     private VurderingTrygdeavgift mapVurderingTrygdeavgift(Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag, FastsattTrygdeavgift fastsattTrygdeavgift) {
