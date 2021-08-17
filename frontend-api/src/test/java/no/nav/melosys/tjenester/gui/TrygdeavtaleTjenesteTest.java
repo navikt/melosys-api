@@ -6,6 +6,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.service.TrygdeavtaleService;
+import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,12 +24,14 @@ public class TrygdeavtaleTjenesteTest {
     private TrygdeavtaleService trygdeavtaleService;
     @Mock
     private BehandlingService behandlingService;
+    @Mock
+    private TilgangService tilgangService;
 
     private TrygdeavtaleTjeneste trygdeavtaleTjeneste;
 
     @BeforeEach
     void init() {
-        trygdeavtaleTjeneste = new TrygdeavtaleTjeneste(trygdeavtaleService, behandlingService);
+        trygdeavtaleTjeneste = new TrygdeavtaleTjeneste(trygdeavtaleService, behandlingService, tilgangService);
     }
 
     @Test
