@@ -20,13 +20,13 @@ public final class LovvalgBestemmelseUtils {
     private static final Map<String, LovvalgBestemmelse> kodeTilLovvalgBestemmelse = new HashMap<>();
 
     static {
-        for (var item : List.of(
+        for (var lovBestemelser : List.of(
             Lovvalgbestemmelser_883_2004.values(),
             Lovvalgbestemmelser_987_2009.values(),
             Tilleggsbestemmelser_883_2004.values(),
             Lovvalgbestemmelser_trygdeavtale_uk.values()
         )) {
-            for (var lovBestemmelse : item) {
+            for (var lovBestemmelse : lovBestemelser) {
                 kodeTilLovvalgBestemmelse.put(lovBestemmelse.getKode(), lovBestemmelse);
             }
         }
