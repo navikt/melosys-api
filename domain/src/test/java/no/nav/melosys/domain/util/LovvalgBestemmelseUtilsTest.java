@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 class LovvalgBestemmelseUtilsTest {
 
-    @Test()
+    @Test
     void dbDataTilLovvalgBestemmelseIkkeFunnet() {
         assertThatExceptionOfType(IllegalArgumentException.class)
             .isThrownBy(() -> LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse("test"))
