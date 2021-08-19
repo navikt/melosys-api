@@ -61,18 +61,6 @@ public class TrygdeavtaleVedtakService {
         behandlingService.lagre(behandling);
 
         prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, request);
-        Optional<Oppgave> oppgave = oppgaveService.finnÅpenOppgaveMedFagsaksnummer(saksnummer);
-        if (oppgave.isEmpty()) {
-            throw new FunksjonellException("Fant ingen oppgave med saksnummer:" + saksnummer);
-        }
-
-        // Må sikkert juster på dette når vi har resten av flyten oppe
-        OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder()
-            .tema(Tema.TRY)
-            .oppgavetype(Oppgavetyper.VUR)
-            .beskrivelse("Vurderes for innregistrering i Avgiftssystemet")
-            .build();
-        oppgaveService.oppdaterOppgave(oppgave.get().getOppgaveId(), oppgaveOppdatering);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
     }
 
