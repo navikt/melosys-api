@@ -2,7 +2,7 @@ package no.nav.melosys.tjenester.gui.saksflyt;
 
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.service.unntaksperiode.EndretUnntaksperiodeGodkjenning;
+import no.nav.melosys.service.unntaksperiode.UnntaksperiodeGodkjenning;
 import no.nav.melosys.service.unntaksperiode.Unntaksperiode;
 import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
 import no.nav.melosys.tjenester.gui.dto.GodkjennUnntaksperiodeDto;
@@ -36,14 +36,17 @@ public class UnntakTjeneste {
 
     @PostMapping(value = "/{behandlingID}/godkjenn")
     public ResponseEntity<Void> godkjennUnntaksperiode(@PathVariable("behandlingID") Long behandlingId, @RequestBody GodkjennUnntaksperiodeDto godkjennUnntaksperiodeDto) {
+        UnntaksperiodeGodkjenning unntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
+            .varsleUtland(godkjennUnntaksperiodeDto.varsleUtland())
+            .fritekst(godkjennUnntaksperiodeDto.fritekst())
+            .unnntaksperiode(new Unntaksperiode(godkjennUnntaksperiodeDto.endretPeriode().getFom(), godkjennUnntaksperiodeDto.endretPeriode().getTom()))
+            .lovvalgsbestemmelse(godkjennUnntaksperiodeDto.lovvalgsbestemmelse())
+            .build();
+
         if (godkjennUnntaksperiodeDto.endretPeriode().erTom()) {
-            unntaksperiodeService.godkjennPeriode(behandlingId, godkjennUnntaksperiodeDto.varsleUtland(), godkjennUnntaksperiodeDto.fritekst());
+            unntaksperiodeService.godkjennPeriode(behandlingId, unntaksperiodeGodkjenning);
         } else {
-            unntaksperiodeService.godkjennOgEndrePeriode(behandlingId, new EndretUnntaksperiodeGodkjenning(
-                godkjennUnntaksperiodeDto.varsleUtland(),
-                godkjennUnntaksperiodeDto.fritekst(),
-                new Unntaksperiode(godkjennUnntaksperiodeDto.endretPeriode().getFom(), godkjennUnntaksperiodeDto.endretPeriode().getTom())
-            ));
+            unntaksperiodeService.godkjennOgEndrePeriode(behandlingId, unntaksperiodeGodkjenning);
         }
 
         return ResponseEntity.noContent().build();

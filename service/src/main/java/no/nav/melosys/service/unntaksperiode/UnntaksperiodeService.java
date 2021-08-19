@@ -48,7 +48,7 @@ public class UnntaksperiodeService {
     }
 
     @Transactional
-    public void godkjennPeriode(long behandlingID, boolean varsleUtland, String fritekst) {
+    public void godkjennPeriode(long behandlingID, UnntaksperiodeGodkjenning unntaksperiodeGodkjenning) {
         Behandling behandling = hentOgValiderBehandling(behandlingID);
 
         validerPeriodeFraBehandling(behandling);
@@ -57,25 +57,25 @@ public class UnntaksperiodeService {
         behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.GODKJENT);
         prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(
             behandling,
-            varsleUtland,
-            fritekst
+            unntaksperiodeGodkjenning.isVarsleUtland(),
+            unntaksperiodeGodkjenning.getFritekst()
         );
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
     @Transactional
-    public void godkjennOgEndrePeriode(long behandlingID, EndretUnntaksperiodeGodkjenning endretUnntaksperiodeGodkjenning) {
+    public void godkjennOgEndrePeriode(long behandlingID, UnntaksperiodeGodkjenning endretUnntaksperiodeGodkjenning) {
         Behandling behandling = hentOgValiderBehandling(behandlingID);
 
-        var endretPeriode = endretUnntaksperiodeGodkjenning.endretPeriode();
+        var endretPeriode = endretUnntaksperiodeGodkjenning.getEndretPeriode();
         validerEndretPeriode(endretPeriode);
         opprettEndretLovvalgsperiode(behandlingID, endretPeriode);
 
         behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.GODKJENT);
         prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(
             behandling,
-            endretUnntaksperiodeGodkjenning.varsleUtland(),
-            endretUnntaksperiodeGodkjenning.fritekst()
+            endretUnntaksperiodeGodkjenning.isVarsleUtland(),
+            endretUnntaksperiodeGodkjenning.getFritekst()
         );
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
@@ -84,6 +84,7 @@ public class UnntaksperiodeService {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(unntaksperiodeDto.fom());
         lovvalgsperiode.setTom(unntaksperiodeDto.tom());
+        //TODO: mangler å sette noe data på lovvalgsperioden her
 
         lovvalgsperiodeService.lagreLovvalgsperioder(
             behandlingID,

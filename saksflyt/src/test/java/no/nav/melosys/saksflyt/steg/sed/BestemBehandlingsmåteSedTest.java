@@ -10,7 +10,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.unntaksperiode.EndretUnntaksperiodeGodkjenning;
+import no.nav.melosys.service.unntaksperiode.UnntaksperiodeGodkjenning;
 import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 class BestemBehandlingsmåteSedTest {
@@ -35,6 +36,9 @@ class BestemBehandlingsmåteSedTest {
     private OppgaveService oppgaveService;
     @Mock
     private UnntaksperiodeService unntaksperiodeService;
+
+    @Captor
+    private ArgumentCaptor<UnntaksperiodeGodkjenning> unntaksperiodeGodkjenningArgumentCaptor;
 
     private BestemBehandlingsmåteSed bestemBehandlingsmåteSed;
 
@@ -63,7 +67,9 @@ class BestemBehandlingsmåteSedTest {
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         bestemBehandlingsmåteSed.utfør(prosessinstans);
 
-        verify(unntaksperiodeService).godkjennPeriode(eq(behandling.getId()), eq(false), eq(null));
+        verify(unntaksperiodeService).godkjennPeriode(eq(behandling.getId()), unntaksperiodeGodkjenningArgumentCaptor.capture());
+        assertThat(unntaksperiodeGodkjenningArgumentCaptor.getValue().isVarsleUtland()).isFalse();
+        assertThat(unntaksperiodeGodkjenningArgumentCaptor.getValue().getFritekst()).isNull();
     }
 
     @Test
