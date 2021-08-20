@@ -52,7 +52,7 @@ public class UnntaksperiodeService {
         Behandling behandling = hentOgValiderBehandling(behandlingID);
 
         validerPeriodeFraBehandling(behandling);
-        opprettLovvalgsperiodeFraSedDokument(behandlingID, behandling.hentSedDokument());
+        opprettLovvalgsperiode(behandlingID, behandling.hentSedDokument(), unntaksperiodeGodkjenning);
 
         behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.GODKJENT);
         prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(
@@ -63,40 +63,37 @@ public class UnntaksperiodeService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
+    private void opprettLovvalgsperiode(long behandlingID, SedDokument sedDokument, UnntaksperiodeGodkjenning unntaksperiodeGodkjenning) {
+        Lovvalgsperiode lovvalgsperiode = sedDokument.opprettInnvilgetLovvalgsperiode();
+        lovvalgsperiode.setBestemmelse(unntaksperiodeGodkjenning.getLovvalgsbestemmelse());
+
+        lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, Collections.singleton(lovvalgsperiode));
+    }
+
     @Transactional
-    public void godkjennOgEndrePeriode(long behandlingID, UnntaksperiodeGodkjenning endretUnntaksperiodeGodkjenning) {
+    public void godkjennOgEndrePeriode(long behandlingID, UnntaksperiodeGodkjenning unntaksperiodeGodkjenning) {
         Behandling behandling = hentOgValiderBehandling(behandlingID);
 
-        var endretPeriode = endretUnntaksperiodeGodkjenning.getEndretPeriode();
+        var endretPeriode = unntaksperiodeGodkjenning.getEndretPeriode();
         validerEndretPeriode(endretPeriode);
-        opprettEndretLovvalgsperiode(behandlingID, endretPeriode);
+        opprettEndretLovvalgsperiode(behandlingID, behandling.hentSedDokument(), unntaksperiodeGodkjenning);
 
         behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.GODKJENT);
         prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(
             behandling,
-            endretUnntaksperiodeGodkjenning.isVarsleUtland(),
-            endretUnntaksperiodeGodkjenning.getFritekst()
+            unntaksperiodeGodkjenning.isVarsleUtland(),
+            unntaksperiodeGodkjenning.getFritekst()
         );
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private void opprettEndretLovvalgsperiode(long behandlingID, Unntaksperiode unntaksperiodeDto) {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setFom(unntaksperiodeDto.fom());
-        lovvalgsperiode.setTom(unntaksperiodeDto.tom());
-        //TODO: mangler å sette noe data på lovvalgsperioden her
+    private void opprettEndretLovvalgsperiode(long behandlingID, SedDokument sedDokument, UnntaksperiodeGodkjenning unntaksperiodeGodkjenning) {
+        Lovvalgsperiode lovvalgsperiode = sedDokument.opprettInnvilgetLovvalgsperiode();
+        lovvalgsperiode.setBestemmelse(unntaksperiodeGodkjenning.getLovvalgsbestemmelse());
+        lovvalgsperiode.setFom(unntaksperiodeGodkjenning.getEndretPeriode().fom());
+        lovvalgsperiode.setTom(unntaksperiodeGodkjenning.getEndretPeriode().tom());
 
-        lovvalgsperiodeService.lagreLovvalgsperioder(
-            behandlingID,
-            Collections.singleton(lovvalgsperiode)
-        );
-    }
-
-    private void opprettLovvalgsperiodeFraSedDokument(long behandlingID, SedDokument sedDokument) {
-        lovvalgsperiodeService.lagreLovvalgsperioder(
-            behandlingID,
-            Collections.singleton(sedDokument.opprettInnvilgetLovvalgsperiode())
-        );
+        lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, Collections.singleton(lovvalgsperiode));
     }
 
     @Transactional

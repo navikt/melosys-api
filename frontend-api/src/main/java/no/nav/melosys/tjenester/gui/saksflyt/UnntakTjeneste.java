@@ -3,7 +3,6 @@ package no.nav.melosys.tjenester.gui.saksflyt;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.service.unntaksperiode.UnntaksperiodeGodkjenning;
-import no.nav.melosys.service.unntaksperiode.Unntaksperiode;
 import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
 import no.nav.melosys.tjenester.gui.dto.GodkjennUnntaksperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.IkkeGodkjennUnntaksperiodeDto;
@@ -36,12 +35,7 @@ public class UnntakTjeneste {
 
     @PostMapping(value = "/{behandlingID}/godkjenn")
     public ResponseEntity<Void> godkjennUnntaksperiode(@PathVariable("behandlingID") Long behandlingId, @RequestBody GodkjennUnntaksperiodeDto godkjennUnntaksperiodeDto) {
-        UnntaksperiodeGodkjenning unntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
-            .varsleUtland(godkjennUnntaksperiodeDto.varsleUtland())
-            .fritekst(godkjennUnntaksperiodeDto.fritekst())
-            .unnntaksperiode(new Unntaksperiode(godkjennUnntaksperiodeDto.endretPeriode().getFom(), godkjennUnntaksperiodeDto.endretPeriode().getTom()))
-            .lovvalgsbestemmelse(godkjennUnntaksperiodeDto.lovvalgsbestemmelse())
-            .build();
+        UnntaksperiodeGodkjenning unntaksperiodeGodkjenning = godkjennUnntaksperiodeDto.til();
 
         if (godkjennUnntaksperiodeDto.endretPeriode().erTom()) {
             unntaksperiodeService.godkjennPeriode(behandlingId, unntaksperiodeGodkjenning);

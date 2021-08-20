@@ -1,11 +1,13 @@
 package no.nav.melosys.service.unntaksperiode;
 
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+
 public class UnntaksperiodeGodkjenning {
 
     private final boolean varsleUtland;
     private final String fritekst;
     private final Unntaksperiode endretPeriode;
-    private final String lovvalgsbestemmelse;
+    private final LovvalgBestemmelse lovvalgsbestemmelse;
 
     private UnntaksperiodeGodkjenning(Builder builder) {
         this.varsleUtland = builder.varsleUtland;
@@ -26,7 +28,7 @@ public class UnntaksperiodeGodkjenning {
         return endretPeriode;
     }
 
-    public String getLovvalgsbestemmelse() {
+    public LovvalgBestemmelse getLovvalgsbestemmelse() {
         return lovvalgsbestemmelse;
     }
 
@@ -38,7 +40,7 @@ public class UnntaksperiodeGodkjenning {
         private boolean varsleUtland;
         private String fritekst;
         private Unntaksperiode endretPeriode;
-        private String lovvalgsbestemmelse;
+        private LovvalgBestemmelse lovvalgsbestemmelse;
 
         public Builder varsleUtland(boolean varsleUtland) {
             this.varsleUtland = varsleUtland;
@@ -55,7 +57,7 @@ public class UnntaksperiodeGodkjenning {
             return this;
         }
 
-        public Builder lovvalgsbestemmelse(String lovvalgsbestemmelse) {
+        public Builder lovvalgsbestemmelse(LovvalgBestemmelse lovvalgsbestemmelse) {
             this.lovvalgsbestemmelse = lovvalgsbestemmelse;
             return this;
         }

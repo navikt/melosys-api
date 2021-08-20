@@ -11,6 +11,7 @@ import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -145,11 +146,18 @@ class UnntaksperiodeServiceTest {
 
     @Test
     void godkjennOgEndrePeriode_periodeUtenFeil_verifiserKall() {
+        Saksopplysning sedSaksopplysning = new Saksopplysning();
+        sedSaksopplysning.setType(SaksopplysningType.SEDOPPL);
+        SedDokument sedDokument = new SedDokument();
+        sedDokument.setLovvalgsperiode(PERIODE_BAD);
+        sedSaksopplysning.setDokument(sedDokument);
+        behandling.getSaksopplysninger().add(sedSaksopplysning);
         Unntaksperiode unntaksperiode = new Unntaksperiode(LocalDate.of(2000, 1, 1), LocalDate.of(2001, 1, 1));
         UnntaksperiodeGodkjenning endretUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
             .varsleUtland(false)
             .fritekst(null)
             .unnntaksperiode(unntaksperiode)
+            .lovvalgsbestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1)
             .build();
 
         unntaksperiodeService.godkjennOgEndrePeriode(1L, endretUnntaksperiodeGodkjenning);
@@ -157,6 +165,7 @@ class UnntaksperiodeServiceTest {
         Lovvalgsperiode capturedLovvalgsperiode = lovvalgsperioderCaptor.getValue().stream().findFirst().get();
         assertThat(capturedLovvalgsperiode.getFom()).isEqualTo(LocalDate.of(2000, 1, 1));
         assertThat(capturedLovvalgsperiode.getTom()).isEqualTo(LocalDate.of(2001, 1, 1));
+        assertThat(capturedLovvalgsperiode.getBestemmelse()).isEqualTo(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         verify(prosessinstansService).opprettProsessinstansGodkjennUnntaksperiode(any(), eq(false), eq(null));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(behandling.getFagsak().getSaksnummer()));
     }
