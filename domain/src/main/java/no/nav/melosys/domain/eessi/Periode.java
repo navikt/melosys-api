@@ -34,8 +34,7 @@ public class Periode {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Periode)) return false;
-        Periode periode = (Periode) o;
+        if (!(o instanceof Periode periode)) return false;
         return getFom().equals(periode.getFom()) &&
             Objects.equals(getTom(), periode.getTom());
     }
