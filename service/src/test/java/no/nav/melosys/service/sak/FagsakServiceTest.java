@@ -18,6 +18,7 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -127,6 +128,7 @@ class FagsakServiceTest {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        opprettSakDto.getSoknadDto().setLand(lagSoeknadslandDto(true));
         opprettSakDto.setOppgaveID("");
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> fagsakService.bestillNySakOgBehandling(opprettSakDto))
@@ -150,6 +152,7 @@ class FagsakServiceTest {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        opprettSakDto.getSoknadDto().setLand(lagSoeknadslandDto(false));
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.JFR).setJournalpostId("33").build();
         when(oppgaveService.hentOppgaveMedOppgaveID(eq(opprettSakDto.getOppgaveID()))).thenReturn(oppgave);
         assertThatExceptionOfType(FunksjonellException.class)
@@ -194,7 +197,20 @@ class FagsakServiceTest {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        opprettSakDto.getSoknadDto().getLand().setErUkjenteEllerAlleEosLand(false);
         opprettSakDto.getSoknadDto().getLand().getLandkoder().clear();
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> fagsakService.bestillNySakOgBehandling(opprettSakDto))
+            .withMessageContaining("land");
+    }
+
+    @Test
+    void validerOpprettSakDto_søknadMedLandOgAlleLand_feiler() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setSakstype(Sakstyper.EU_EOS);
+        opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        opprettSakDto.getSoknadDto().getLand().setErUkjenteEllerAlleEosLand(true);
+        opprettSakDto.getSoknadDto().getLand().setLandkoder(Collections.singletonList("DK"));
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> fagsakService.bestillNySakOgBehandling(opprettSakDto))
             .withMessageContaining("land");
@@ -547,5 +563,10 @@ class FagsakServiceTest {
         fagsak.setRegistrertDato(Instant.now());
         fagsak.setEndretDato(Instant.now());
         return fagsak;
+    }
+
+    private SoeknadslandDto lagSoeknadslandDto(boolean erUkjenteEllerAlleEosLand) {
+        List<String> landkoder = erUkjenteEllerAlleEosLand ? Collections.emptyList() : Collections.singletonList("DK");
+        return new SoeknadslandDto(landkoder, erUkjenteEllerAlleEosLand);
     }
 }
