@@ -280,7 +280,7 @@ public class JournalfoeringService {
         if (søknadsperiode.getTom() != null && søknadsperiode.getFom().isAfter(søknadsperiode.getTom())) {
             throw new FunksjonellException("Fra og med dato kan ikke være etter til og med dato.");
         }
-        if (journalfoeringDto.getFagsak().getLand() == null || journalfoeringDto.getFagsak().getLand().getLandkoder() == null || journalfoeringDto.getFagsak().getLand().getLandkoder().isEmpty()) {
+        if (!journalfoeringDto.getFagsak().getLand().erGyldig()) {
             throw new FunksjonellException("Land mangler");
         }
         if (journalfoeringDto.getFagsak().getLand().getLandkoder().contains(null)) {

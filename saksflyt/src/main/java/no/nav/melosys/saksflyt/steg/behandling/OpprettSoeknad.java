@@ -6,12 +6,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +47,7 @@ public class OpprettSoeknad implements StegBehandler {
             Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
             Soeknad soeknad = new Soeknad();
             soeknad.periode = periode;
-            soeknad.soeknadsland.landkoder = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, new TypeReference<List<String>>() {});
+            soeknad.soeknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, new TypeReference<Soeknadsland>() {});
             Sakstyper sakstype = prosessinstans.getBehandling().getFagsak().getType();
             if(sakstype == Sakstyper.EU_EOS) {
                 behandlingsgrunnlagService.opprettSøknadYrkesaktiveEøs(behandlingID, soeknad);

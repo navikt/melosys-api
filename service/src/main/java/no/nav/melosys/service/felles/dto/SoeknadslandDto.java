@@ -35,6 +35,12 @@ public class SoeknadslandDto {
         this.erUkjenteEllerAlleEosLand = erUkjenteEllerAlleEosLand;
     }
 
+    public boolean erGyldig() {
+        if (getLandkoder() == null) return false;
+        if (isErUkjenteEllerAlleEosLand()) return getLandkoder().isEmpty();
+        return !getLandkoder().isEmpty();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
