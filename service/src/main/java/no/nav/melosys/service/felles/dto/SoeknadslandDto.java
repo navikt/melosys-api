@@ -8,13 +8,15 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 
 public class SoeknadslandDto {
+    @JsonProperty("landkoder")
     private List<String> landkoder;
+    @JsonProperty("erUkjenteEllerAlleEosLand")
     private boolean erUkjenteEllerAlleEosLand;
 
     public SoeknadslandDto() {
     }
 
-    public SoeknadslandDto(@JsonProperty("landkoder") List<String> landkoder, @JsonProperty("erUkjenteEllerAlleEosLand") boolean erUkjenteEllerAlleEosLand) {
+    public SoeknadslandDto(List<String> landkoder, boolean erUkjenteEllerAlleEosLand) {
         this.landkoder = landkoder;
         this.erUkjenteEllerAlleEosLand = erUkjenteEllerAlleEosLand;
     }
