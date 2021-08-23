@@ -27,7 +27,7 @@ public class SoeknadslandDto {
         this.landkoder = landkoder;
     }
 
-    public boolean isErUkjenteEllerAlleEosLand() {
+    public boolean erUkjenteEllerAlleEosLand() {
         return erUkjenteEllerAlleEosLand;
     }
 
@@ -37,7 +37,7 @@ public class SoeknadslandDto {
 
     public boolean erGyldig() {
         if (getLandkoder() == null) return false;
-        if (isErUkjenteEllerAlleEosLand()) return getLandkoder().isEmpty();
+        if (erUkjenteEllerAlleEosLand()) return getLandkoder().isEmpty();
         return !getLandkoder().isEmpty();
     }
 
