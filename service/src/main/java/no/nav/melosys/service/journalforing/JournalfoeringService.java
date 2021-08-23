@@ -280,10 +280,10 @@ public class JournalfoeringService {
         if (søknadsperiode.getTom() != null && søknadsperiode.getFom().isAfter(søknadsperiode.getTom())) {
             throw new FunksjonellException("Fra og med dato kan ikke være etter til og med dato.");
         }
-        if (journalfoeringDto.getFagsak().getLand() == null || journalfoeringDto.getFagsak().getLand().isEmpty()) {
+        if (journalfoeringDto.getFagsak().getLand() == null || journalfoeringDto.getFagsak().getLand().getLandkoder() == null || journalfoeringDto.getFagsak().getLand().getLandkoder().isEmpty()) {
             throw new FunksjonellException("Land mangler");
         }
-        if (journalfoeringDto.getFagsak().getLand().contains(null)) {
+        if (journalfoeringDto.getFagsak().getLand().getLandkoder().contains(null)) {
             throw new FunksjonellException("Et søknadsland er null!");
         }
         validerAntallLand(journalfoeringDto);
@@ -291,7 +291,7 @@ public class JournalfoeringService {
 
     private void validerAntallLand(JournalfoeringOpprettDto journalfoeringDto) {
         String behandlingstemaKode = journalfoeringDto.getBehandlingstemaKode();
-        int antallLand = journalfoeringDto.getFagsak().getLand().size();
+        int antallLand = journalfoeringDto.getFagsak().getLand().getLandkoder().size();
 
         if (Behandling.erBehandlingAvSøknadArbeidIFlereLand(behandlingstemaKode) && antallLand < 2) {
             throw new FunksjonellException("Det er påkrevd med to eller flere land for behandlingstema " + behandlingstemaKode);

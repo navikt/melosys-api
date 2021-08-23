@@ -194,7 +194,7 @@ class FagsakServiceTest {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        opprettSakDto.getSoknadDto().getLand().clear();
+        opprettSakDto.getSoknadDto().getLand().getLandkoder().clear();
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> fagsakService.bestillNySakOgBehandling(opprettSakDto))
             .withMessageContaining("land");

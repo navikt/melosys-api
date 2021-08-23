@@ -149,7 +149,7 @@ public class FagsakService {
                 feilet = true;
                 feilmeldingBuilder.append("søknadsperiodes fra og med dato, ");
             }
-            if (soknadDto.getLand() == null || soknadDto.getLand().isEmpty()) {
+            if (soknadDto.getLand() == null || soknadDto.getLand().getLandkoder() == null || soknadDto.getLand().getLandkoder().isEmpty()) {
                 feilet = true;
                 feilmeldingBuilder.append("land, ");
             }
