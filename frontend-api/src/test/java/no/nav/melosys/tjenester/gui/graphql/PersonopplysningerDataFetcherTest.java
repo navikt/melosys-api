@@ -94,6 +94,7 @@ class PersonopplysningerDataFetcherTest {
 
         Consumer<PersonopplysningerDto> statsborgerskapErSortert = personopplysningerDto -> {
             assertThat(personopplysningerDto.statsborgerskap().get(0).land()).isEqualTo("Testland C");
+            assertThat(personopplysningerDto.statsborgerskap().get(0).master()).isEqualTo("NAV (PDL)");
             assertThat(personopplysningerDto.statsborgerskap().get(1).land()).isEqualTo("Testland A");
             assertThat(personopplysningerDto.statsborgerskap().get(2).land()).isEqualTo("Testland B");
         };

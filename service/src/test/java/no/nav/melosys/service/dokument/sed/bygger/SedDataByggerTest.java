@@ -14,6 +14,7 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Diskresjonskode;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.adresse.Gateadresse;
+import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.sed.Adresse;
 import no.nav.melosys.domain.eessi.sed.Arbeidssted;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;
@@ -22,6 +23,7 @@ import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
@@ -545,6 +547,17 @@ class SedDataByggerTest {
         assertThat(sedData.getArbeidsgivendeVirksomheter())
             .extracting(Virksomhet::getOrgnr)
             .contains("orgnr");
+    }
+
+    @Test
+    void lag_erBehandlingAvSøknad_søknadsperiodeBlirSatt() {
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        var søknad = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        var sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
+
+        assertThat(sedData.getSøknadsperiode())
+            .extracting(Periode::getFom, Periode::getTom)
+            .containsExactly(søknad.periode.getFom(), søknad.periode.getTom());
     }
 
     private void lagUtkastAssertions(SedDataDto sedData, boolean forventAdresse) {

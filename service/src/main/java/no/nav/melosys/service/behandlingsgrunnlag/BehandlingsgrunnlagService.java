@@ -136,11 +136,14 @@ public class BehandlingsgrunnlagService {
 
     @Transactional
     public Behandlingsgrunnlag oppdaterBehandlingsgrunnlag(long behandlingID, JsonNode behandlingsgrunnlagDataJson) {
-
-        Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagRepository.findByBehandling_Id(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlingsgrunnlag for behandling " + behandlingID));
-
+        Behandlingsgrunnlag behandlingsgrunnlag = hentBehandlingsgrunnlag(behandlingID);
         behandlingsgrunnlag.setJsonData(behandlingsgrunnlagDataJson.toString());
+        return behandlingsgrunnlagRepository.saveAndFlush(behandlingsgrunnlag);
+    }
+
+    @Transactional
+    public Behandlingsgrunnlag oppdaterBehandlingsgrunnlag(Behandlingsgrunnlag behandlingsgrunnlag) {
+        BehandlingsgrunnlagKonverterer.oppdaterBehandlingsgrunnlag(behandlingsgrunnlag);
         return behandlingsgrunnlagRepository.saveAndFlush(behandlingsgrunnlag);
     }
 
