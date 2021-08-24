@@ -281,7 +281,7 @@ public class JournalfoeringService {
             throw new FunksjonellException("Fra og med dato kan ikke være etter til og med dato.");
         }
         if (!journalfoeringDto.getFagsak().getLand().erGyldig()) {
-            throw new FunksjonellException("Land mangler");
+            throw new FunksjonellException("Informasjon om land er ugyldig");
         }
         if (journalfoeringDto.getFagsak().getLand().getLandkoder().contains(null)) {
             throw new FunksjonellException("Et søknadsland er null!");
