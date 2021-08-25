@@ -5,7 +5,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.service.TrygdeavtaleService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.tjenester.gui.dto.OrgIdNavnDto;
 import no.nav.melosys.tjenester.gui.dto.TrygdeavtaleInfoDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
@@ -42,7 +41,7 @@ public class TrygdeavtaleTjeneste {
         return ResponseEntity.ok(new TrygdeavtaleInfoDto(
             behandling.getFagsak().hentAktørID(),
             behandling.getTema().getKode(),
-            hentVirksomheter ? OrgIdNavnDto.av(trygdeavtaleService.hentVirksomheter(behandling)) : Collections.emptyList(),
+            hentVirksomheter ? trygdeavtaleService.hentVirksomheter(behandling) : Collections.emptyMap(),
             hentBarnEktefeller ? trygdeavtaleService.hentFamiliemedlemmer(behandling) : Collections.emptyList()
         ));
     }
