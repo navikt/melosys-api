@@ -2,6 +2,8 @@ package no.nav.melosys.service.unntaksperiode;
 
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 
+import java.util.Objects;
+
 public class UnntaksperiodeGodkjenning {
 
     private final boolean varsleUtland;
@@ -34,6 +36,22 @@ public class UnntaksperiodeGodkjenning {
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UnntaksperiodeGodkjenning that = (UnntaksperiodeGodkjenning) o;
+        return varsleUtland == that.varsleUtland
+            && Objects.equals(fritekst, that.fritekst)
+            && Objects.equals(endretPeriode, that.endretPeriode)
+            && Objects.equals(lovvalgsbestemmelse, that.lovvalgsbestemmelse);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(varsleUtland, fritekst, endretPeriode, lovvalgsbestemmelse);
     }
 
     public static class Builder {
