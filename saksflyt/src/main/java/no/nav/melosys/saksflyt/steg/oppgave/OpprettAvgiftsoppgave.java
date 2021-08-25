@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -39,8 +40,7 @@ public class OpprettAvgiftsoppgave implements StegBehandler {
         final Behandling behandling = prosessinstans.getBehandling();
         final long behandlingID = behandling.getId();
         final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-
-        if (!behandlingsresultat.erAvslag()) {
+        if (!behandlingsresultat.erAvslag() && behandling.getFagsak().getType() != Sakstyper.FTRL) {
             Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
             if (!lovvalgsperiode.erArtikkel11() && !lovvalgsperiode.erArtikkel13()) {
                 oppgaveService.opprettOppgave(lagOppgaveTilTrygdeavgift(behandling));

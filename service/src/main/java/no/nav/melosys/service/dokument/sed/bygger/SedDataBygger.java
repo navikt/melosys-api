@@ -9,6 +9,7 @@ import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.UtenlandskIdent;
 import no.nav.melosys.domain.dokument.felles.Land;
+import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -126,6 +127,14 @@ public class SedDataBygger {
             .map(SedDataBygger::lagForelder).toList());
         sedDataDto.setUtenlandskIdent(grunnlagMedSøknad.getBehandlingsgrunnlagData().personOpplysninger.utenlandskIdent.stream()
             .map(SedDataBygger::tilUtenlandskIdentDto).collect(Collectors.toList()));
+
+        if (grunnlagMedSøknad.getBehandling().erBehandlingAvSøknad()) {
+            sedDataDto.setSøknadsperiode(new Periode(
+                grunnlagMedSøknad.getBehandlingsgrunnlagData().periode.getFom(),
+                grunnlagMedSøknad.getBehandlingsgrunnlagData().periode.getTom()
+            ));
+        }
+
         return sedDataDto;
     }
 

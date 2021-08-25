@@ -1,6 +1,7 @@
 package no.nav.melosys.service.oppgave.dto;
 
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 
 public class BehandlingsoppgaveDto extends OppgaveDto {
     private BehandlingDto behandling;

@@ -3,6 +3,7 @@ package no.nav.melosys.domain.eessi.sed;
 import java.util.ArrayList;
 import java.util.List;
 
+import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 
 public class SedDataDto extends SedGrunnlagDto {
@@ -11,6 +12,7 @@ public class SedDataDto extends SedGrunnlagDto {
     private Adresse kontaktadresse;
     private Adresse oppholdsadresse;
     private List<FamilieMedlem> familieMedlem = new ArrayList<>();
+    private Periode søknadsperiode;
 
     //Videresending av søknad
     private String avklartBostedsland;
@@ -34,6 +36,14 @@ public class SedDataDto extends SedGrunnlagDto {
 
     public void setFamilieMedlem(List<FamilieMedlem> familieMedlem) {
         this.familieMedlem = familieMedlem;
+    }
+
+    public Periode getSøknadsperiode() {
+        return søknadsperiode;
+    }
+
+    public void setSøknadsperiode(Periode søknadsperiode) {
+        this.søknadsperiode = søknadsperiode;
     }
 
     public Bruker getBruker() {
