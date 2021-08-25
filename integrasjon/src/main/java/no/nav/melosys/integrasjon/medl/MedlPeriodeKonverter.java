@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.exception.TekniskException;
 
@@ -55,6 +56,12 @@ public final class MedlPeriodeKonverter {
         tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4, GrunnlagMedl.FO_13_4);
         tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART15, GrunnlagMedl.FO_15);
         tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1, GrunnlagMedl.FO_16);
+
+        tbl.put(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1, GrunnlagMedl.Storbrit_NIrland_6_1);
+        tbl.put(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_5, GrunnlagMedl.Storbrit_NIrland_6_5);
+        tbl.put(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART7, GrunnlagMedl.Storbrit_NIrland_7_1);
+        tbl.put(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2, GrunnlagMedl.Storbrit_NIrland_8_2);
+        tbl.put(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART9, GrunnlagMedl.Storbrit_NIrland_9);
         lovvalgsbestemmelseTilGrunnlagMedlTabell = tbl;
 
 
