@@ -1,6 +1,7 @@
 package no.nav.melosys.service.behandlingsgrunnlag;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -8,6 +9,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -83,7 +86,7 @@ class BehandlingsgrunnlbagServiceTest {
     }
 
     @Test
-    void oppdaterBehandlingsgrunnlag_eksisterer_oppdatererBehandlingsgrunnlagData() throws JsonProcessingException {
+    void oppdaterBehandlingsgrunnlagJson_behandlingsgrunnlagEksisterer_oppdatererBehandlingsgrunnlagData() throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
 
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
@@ -100,6 +103,44 @@ class BehandlingsgrunnlbagServiceTest {
         verify(behandlingsgrunnlagRepository).saveAndFlush(any(Behandlingsgrunnlag.class));
 
         assertThat(behandlingsgrunnlag.getJsonData()).isNotEqualTo(originalJsonData);
+    }
+
+    @Test
+    void oppdaterBehandlingsgrunnlag_behandlingsgrunnlagJsonDataIkkeSatt_setterJsonDataOgLagrerBehandlingsgrunnlag() {
+        BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
+        behandlingsgrunnlagData.periode = new Periode(
+            LocalDate.of(2000, 1, 1),
+            LocalDate.of(2010, 1, 1)
+        );
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+
+        behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandlingsgrunnlag);
+
+        verify(behandlingsgrunnlagRepository).saveAndFlush(behandlingsgrunnlagArgumentCaptor.capture());
+        assertThat(behandlingsgrunnlagArgumentCaptor.getValue().getJsonData())
+            .contains("\"periode\":{" +
+                "\"fom\":[2000,1,1]," +
+                "\"tom\":[2010,1,1]" +
+                "}");
+    }
+
+    @Test
+    void oppdaterBehandlingsgrunnlagPeriodeOgLand_eksisterer_oppdatererPeriodeOgLand() {
+        ArgumentCaptor<Behandlingsgrunnlag> captor = ArgumentCaptor.forClass(Behandlingsgrunnlag.class);
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
+
+        when(behandlingsgrunnlagRepository.findByBehandling_Id(behandlingID)).thenReturn(Optional.of(behandlingsgrunnlag));
+
+        var periode = new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31));
+        var soeknadsland = new Soeknadsland(List.of("UK"), false);
+
+        behandlingsgrunnlagService.oppdaterBehandlingsgrunnlagPeriodeOgLand(behandlingID, periode, soeknadsland);
+
+        verify(behandlingsgrunnlagRepository).saveAndFlush(captor.capture());
+        assertThat(captor.getValue().getBehandlingsgrunnlagdata().periode).isEqualTo(periode);
+        assertThat(captor.getValue().getBehandlingsgrunnlagdata().soeknadsland).isEqualTo(soeknadsland);
     }
 
     @Test

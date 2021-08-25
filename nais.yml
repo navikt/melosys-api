@@ -29,6 +29,9 @@ spec:
       memory: 1024Mi
   vault:
     enabled: true
+    paths:
+      - mountPath: /var/run/secrets/nais.io/serviceuser
+        kvPath: /serviceuser/data/{{VAULT_CLUSTER}}/srvmelosys
   prometheus:
     enabled: true
     path: /internal/prometheus

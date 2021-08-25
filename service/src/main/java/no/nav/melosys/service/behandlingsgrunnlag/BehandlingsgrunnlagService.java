@@ -7,6 +7,8 @@ import java.util.Optional;
 import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -136,11 +138,23 @@ public class BehandlingsgrunnlagService {
 
     @Transactional
     public Behandlingsgrunnlag oppdaterBehandlingsgrunnlag(long behandlingID, JsonNode behandlingsgrunnlagDataJson) {
-
-        Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagRepository.findByBehandling_Id(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlingsgrunnlag for behandling " + behandlingID));
-
+        Behandlingsgrunnlag behandlingsgrunnlag = hentBehandlingsgrunnlag(behandlingID);
         behandlingsgrunnlag.setJsonData(behandlingsgrunnlagDataJson.toString());
+        return behandlingsgrunnlagRepository.saveAndFlush(behandlingsgrunnlag);
+    }
+
+    @Transactional
+    public Behandlingsgrunnlag oppdaterBehandlingsgrunnlag(Behandlingsgrunnlag behandlingsgrunnlag) {
+        BehandlingsgrunnlagKonverterer.oppdaterBehandlingsgrunnlag(behandlingsgrunnlag);
+        return behandlingsgrunnlagRepository.saveAndFlush(behandlingsgrunnlag);
+    }
+
+    @Transactional
+    public Behandlingsgrunnlag oppdaterBehandlingsgrunnlagPeriodeOgLand(long behandlingID, Periode periode, Soeknadsland soeknadsland) {
+        Behandlingsgrunnlag behandlingsgrunnlag = hentBehandlingsgrunnlag(behandlingID);
+        behandlingsgrunnlag.getBehandlingsgrunnlagdata().periode = periode;
+        behandlingsgrunnlag.getBehandlingsgrunnlagdata().soeknadsland = soeknadsland;
+        BehandlingsgrunnlagKonverterer.oppdaterBehandlingsgrunnlag(behandlingsgrunnlag);
         return behandlingsgrunnlagRepository.saveAndFlush(behandlingsgrunnlag);
     }
 

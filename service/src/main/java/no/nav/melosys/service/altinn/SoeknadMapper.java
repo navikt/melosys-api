@@ -3,7 +3,6 @@ package no.nav.melosys.service.altinn;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -54,8 +53,8 @@ public final class SoeknadMapper {
     }
 
     private static Soeknadsland hentsoeknadsland(Innhold innhold) {
-        Collection<String> landFraAltinn = List.of(innhold.getMidlertidigUtsendt().getArbeidsland());
-        return Soeknadsland.av(landFraAltinn);
+        List<String> landFraAltinn = List.of(innhold.getMidlertidigUtsendt().getArbeidsland());
+        return new Soeknadsland(landFraAltinn, false);
     }
 
     private static Periode lagPeriode(Innhold innhold) {

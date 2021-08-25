@@ -219,7 +219,8 @@ public class EessiService {
         sedDataDto.setYtterligereInformasjon(ytterligereInformasjon);
         String rinaSaksnummer = behandling.hentSedDokument().getRinaSaksnummer();
 
-        log.info("Sender svar på anmodning om unntak for behandling {}", behandlingID);
+        final var sedType = sedTypeAvklarer.apply(behandlingsresultat);
+        log.info("Forsøker å sende sed {} for behandling {}", sedType, behandlingID);
         eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, sedTypeAvklarer.apply(behandlingsresultat));
     }
 
