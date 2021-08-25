@@ -2,10 +2,13 @@ package no.nav.melosys.tjenester.gui;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.BehandlingsgrunnlagGetDto;
 import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.BehandlingsgrunnlagPostDto;
+import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.PeriodeOgLandPostDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,5 +46,17 @@ public class BehandlingsgrunnlagTjeneste {
         tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
         Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandlingID, behandlingsgrunnlagPostDto.getData());
         return ResponseEntity.ok(new BehandlingsgrunnlagGetDto(behandlingsgrunnlag));
+    }
+
+    @PostMapping("/{behandlingID}/periodeOgLand")
+    public ResponseEntity<Void> oppdaterBehandlingsgrunnlagPeriodeOgLand(
+        @PathVariable(value = "behandlingID") long behandlingID,
+        @RequestBody PeriodeOgLandPostDto periodeOgLandPostDto
+    ) {
+        tilgangService.sjekkTilgang(behandlingID);
+        behandlingsgrunnlagService.oppdaterBehandlingsgrunnlagPeriodeOgLand(behandlingID,
+            new Periode(periodeOgLandPostDto.fom(), periodeOgLandPostDto.tom()),
+            new Soeknadsland(periodeOgLandPostDto.land(), false));
+        return ResponseEntity.ok().build();
     }
 }
