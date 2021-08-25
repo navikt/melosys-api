@@ -60,7 +60,7 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void godkjennUnntaksperiode_endretPeriodeErIkkeSatt_godkjennerPeriode() {
-        PeriodeDto periodeDto = new PeriodeDto(null,null);
+        PeriodeDto periodeDto = null;
         GodkjennUnntaksperiodeDto dto = new GodkjennUnntaksperiodeDto(true, "tekst", periodeDto, null);
 
         unntakTjeneste.godkjennUnntaksperiode(1L, dto);

@@ -37,7 +37,7 @@ public class UnntakTjeneste {
     public ResponseEntity<Void> godkjennUnntaksperiode(@PathVariable("behandlingID") Long behandlingId, @RequestBody GodkjennUnntaksperiodeDto godkjennUnntaksperiodeDto) {
         UnntaksperiodeGodkjenning unntaksperiodeGodkjenning = godkjennUnntaksperiodeDto.til();
 
-        if (godkjennUnntaksperiodeDto.endretPeriode().erTom()) {
+        if (godkjennUnntaksperiodeDto.endretPeriode() == null || godkjennUnntaksperiodeDto.endretPeriode().erTom()) {
             unntaksperiodeService.godkjennPeriode(behandlingId, unntaksperiodeGodkjenning);
         } else {
             unntaksperiodeService.godkjennOgEndrePeriode(behandlingId, unntaksperiodeGodkjenning);

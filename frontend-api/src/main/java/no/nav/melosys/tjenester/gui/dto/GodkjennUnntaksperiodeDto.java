@@ -13,10 +13,13 @@ public record GodkjennUnntaksperiodeDto(boolean varsleUtland,
     public UnntaksperiodeGodkjenning til() {
         final LovvalgBestemmelsekonverterer lovvalgBestemmelsekonverterer = new LovvalgBestemmelsekonverterer();
 
+        Unntaksperiode unntaksperiode = this.endretPeriode == null ?
+            new Unntaksperiode(null, null) : new Unntaksperiode(this.endretPeriode.getFom(), this.endretPeriode.getTom());
+
         return UnntaksperiodeGodkjenning.builder()
             .varsleUtland(this.varsleUtland)
             .fritekst(this.fritekst)
-            .unnntaksperiode(new Unntaksperiode(this.endretPeriode.getFom(), this.endretPeriode.getTom()))
+            .unnntaksperiode(unntaksperiode)
             .lovvalgsbestemmelse(lovvalgBestemmelsekonverterer.convertToEntityAttribute(this.lovvalgsbestemmelse))
             .build();
     }
