@@ -53,6 +53,7 @@ public class BehandlingsgrunnlagTjeneste {
         @PathVariable(value = "behandlingID") long behandlingID,
         @RequestBody PeriodeOgLandPostDto periodeOgLandPostDto
     ) {
+        tilgangService.sjekkTilgang(behandlingID);
         behandlingsgrunnlagService.oppdaterBehandlingsgrunnlagPeriodeOgLand(behandlingID,
             new Periode(periodeOgLandPostDto.fom(), periodeOgLandPostDto.tom()),
             new Soeknadsland(periodeOgLandPostDto.land(), false));
