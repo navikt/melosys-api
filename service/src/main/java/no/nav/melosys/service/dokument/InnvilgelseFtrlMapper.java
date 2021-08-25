@@ -4,10 +4,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Medlemskapsperiode;
-import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoNorge;
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoUtland;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
@@ -23,10 +20,10 @@ import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrl;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.*;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
+import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -40,24 +37,24 @@ public class InnvilgelseFtrlMapper {
     private final PersondataFasade persondataFasade;
     private final TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final AvklartefaktaService avklartefaktaService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
+    private final LandvelgerService landvelgerService;
     private final EregFasade eregFasade;
 
     public InnvilgelseFtrlMapper(PersondataFasade persondataFasade,
                                  TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService,
                                  BehandlingsresultatService behandlingsresultatService,
-                                 AvklartefaktaService avklartefaktaService,
                                  AvklarteVirksomheterService avklarteVirksomheterService,
                                  AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService,
+                                 LandvelgerService landvelgerService,
                                  @Qualifier("system") EregFasade eregFasade) {
         this.persondataFasade = persondataFasade;
         this.trygdeavgiftsgrunnlagService = trygdeavgiftsgrunnlagService;
         this.behandlingsresultatService = behandlingsresultatService;
-        this.avklartefaktaService = avklartefaktaService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.avklarteMedfolgendeFamilieService = avklarteMedfolgendeFamilieService;
+        this.landvelgerService = landvelgerService;
         this.eregFasade = eregFasade;
     }
 
@@ -69,9 +66,9 @@ public class InnvilgelseFtrlMapper {
         var avklarteMedfolgendeBarn = avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingId);
         var avklarteMedfolgendeEktefelle = avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingId);
 
-        //NOTE Henter i første versjon av FTRL kun en norsk arbeidsgiver og første registrerte arbeidsland
+        //NOTE Henter i første versjon av FTRL kun en norsk arbeidsgiver og forventer ett registert arbeidsland
         AvklartVirksomhet norskeArbeidsgivere = avklarteVirksomheterService.hentNorskeArbeidsgivere(brevbestilling.getBehandling()).get(0);
-        Landkoder arbeidsland = avklartefaktaService.hentAlleAvklarteArbeidsland(behandlingId).iterator().next();
+        Landkoder arbeidsland = landvelgerService.hentArbeidsland(behandlingId);
 
         return new InnvilgelseFtrl(
             brevbestilling,
@@ -97,7 +94,8 @@ public class InnvilgelseFtrlMapper {
     }
 
     private boolean erFullstendigInnvilget(Collection<Medlemskapsperiode> medlemskapsperioder) {
-        return medlemskapsperioder.stream().filter(Medlemskapsperiode::erInnvilget).count() == medlemskapsperioder.size();
+        return medlemskapsperioder.stream()
+            .filter(p -> p.getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET).count() == medlemskapsperioder.size();
     }
 
     private String hentSaerligBegrunnelse(Behandlingsresultat behandlingsresultat) {
@@ -110,13 +108,14 @@ public class InnvilgelseFtrlMapper {
     private List<FamiliemedlemInfo> mapOmfattetFamilie(long behandlingID, Set<OmfattetFamilie> omfattetEktefelle, Set<OmfattetFamilie> omfattetBarn) {
         List<FamiliemedlemInfo> omfattetFamilie = new ArrayList<>();
         Map<String, MedfolgendeFamilie> medfolgendeEktefelle = avklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(behandlingID);
+        Map<String, MedfolgendeFamilie> avklarteMedfolgendeBarn = avklarteMedfolgendeFamilieService.hentMedfølgendeBarn(behandlingID);
 
         omfattetEktefelle.stream().map(omfattetEkte -> medfolgendeEktefelle.get(omfattetEkte.getUuid())).forEach(ektefelle -> {
             String sammensattNavn = ektefelle.fnr != null ? persondataFasade.hentSammensattNavn(ektefelle.fnr) : ektefelle.navn;
             omfattetFamilie.add(new FamiliemedlemInfo(sammensattNavn, ektefelle.fnr, IdentType.FNR));
         });
 
-        omfattetBarn.stream().map(omfattetB -> medfolgendeEktefelle.get(omfattetB.getUuid())).forEach(barn -> {
+        omfattetBarn.stream().map(omfattetB -> avklarteMedfolgendeBarn.get(omfattetB.getUuid())).forEach(barn -> {
             String sammensattNavn = barn.fnr != null ? persondataFasade.hentSammensattNavn(barn.fnr) : barn.navn;
             omfattetFamilie.add(new FamiliemedlemInfo(sammensattNavn, barn.fnr, IdentType.FNR));
         });
@@ -138,6 +137,10 @@ public class InnvilgelseFtrlMapper {
 
     private IkkeOmfattetEktefelle mapIkkeOmfattetEktefelle(long behandlingId, Set<no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie> ektefelleIkkeOmfattet) {
         Map<String, MedfolgendeFamilie> medfolgendeEktefelle = avklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(behandlingId);
+        if (ektefelleIkkeOmfattet.isEmpty()) {
+            return null;
+        }
+
         IkkeOmfattetFamilie ikkeOmfattetEktefelle = ektefelleIkkeOmfattet.iterator().next();
 
         MedfolgendeFamilie ektefelle = medfolgendeEktefelle.get(ikkeOmfattetEktefelle.getUuid());
@@ -156,7 +159,7 @@ public class InnvilgelseFtrlMapper {
                 avgiftsGrunnlagNorge.erAvgiftspliktig(),
                 avgiftsGrunnlagNorge.erSkattepliktig(),
                 avgiftsGrunnlagNorge.betalerArbeidsgiverAvgift(),
-                avgiftsGrunnlagNorge.getSærligAvgiftsgruppe().getKode()
+                avgiftsGrunnlagNorge.getSærligAvgiftsgruppe() != null ? avgiftsGrunnlagNorge.getSærligAvgiftsgruppe().getKode() : null
             );
         }
         if (trygdeavgiftsgrunnlag.getAvgiftsGrunnlagUtland() != null) {
@@ -166,7 +169,7 @@ public class InnvilgelseFtrlMapper {
                 avgiftsGrunnlagUtland.erAvgiftspliktig(),
                 avgiftsGrunnlagUtland.erSkattepliktig(),
                 avgiftsGrunnlagUtland.betalerArbeidsgiverAvgift(),
-                avgiftsGrunnlagUtland.getSærligAvgiftsgruppe().getKode()
+                avgiftsGrunnlagUtland.getSærligAvgiftsgruppe() != null ? avgiftsGrunnlagUtland.getSærligAvgiftsgruppe().getKode() : null
             );
         }
         return new VurderingTrygdeavgift(norsk, utenlandsk);
