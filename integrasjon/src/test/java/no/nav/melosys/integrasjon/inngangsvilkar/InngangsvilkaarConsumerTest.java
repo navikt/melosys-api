@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon.inngangsvilkar;
 import java.time.LocalDate;
 import java.util.Set;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
@@ -30,7 +29,7 @@ class InngangsvilkaarConsumerTest {
     void setup() {
         RestTemplate restTemplate = new InngangsvilkarConfig().inngangsVilkaarRestTemplate(url, new RestTemplateBuilder());
         server = MockRestServiceServer.createServer(restTemplate);
-        inngangsvilkaarConsumer = new InngangsvilkaarConsumerImpl(restTemplate, new FakeUnleash());
+        inngangsvilkaarConsumer = new InngangsvilkaarConsumerImpl(restTemplate);
     }
 
     @Test
