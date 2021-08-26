@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.service.unntaksperiode.Unntaksperiode;
 import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
 import no.nav.melosys.service.unntaksperiode.UnntaksperiodeGodkjenning;
@@ -15,14 +16,11 @@ import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 public class UnntakTjenesteTest extends JsonSchemaTestParent {
@@ -31,9 +29,6 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
 
     @Mock
     private UnntaksperiodeService unntaksperiodeService;
-
-    @Captor
-    private ArgumentCaptor<UnntaksperiodeGodkjenning> endretUnntaksperiodeGodkjenningArgumentCaptor;
 
     private UnntakTjeneste unntakTjeneste;
 
@@ -65,12 +60,12 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
 
         unntakTjeneste.godkjennUnntaksperiode(1L, dto);
 
-        verify(unntaksperiodeService).godkjennPeriode(eq(1L), endretUnntaksperiodeGodkjenningArgumentCaptor.capture());
-        assertThat(endretUnntaksperiodeGodkjenningArgumentCaptor.getValue().isVarsleUtland()).isTrue();
-        assertThat(endretUnntaksperiodeGodkjenningArgumentCaptor.getValue().getFritekst()).isEqualTo("tekst");
-        assertThat(endretUnntaksperiodeGodkjenningArgumentCaptor.getValue().getEndretPeriode().fom()).isNull();
-        assertThat(endretUnntaksperiodeGodkjenningArgumentCaptor.getValue().getEndretPeriode().tom()).isNull();
-        assertThat(endretUnntaksperiodeGodkjenningArgumentCaptor.getValue().getLovvalgsbestemmelse()).isNull();
+        UnntaksperiodeGodkjenning forventetUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
+            .varsleUtland(true)
+            .fritekst("tekst")
+            .unnntaksperiode(new Unntaksperiode(null, null))
+            .build();
+        verify(unntaksperiodeService).godkjennPeriode(eq(1L), eq(forventetUnntaksperiodeGodkjenning));
     }
 
     @Test
@@ -80,12 +75,13 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
 
         unntakTjeneste.godkjennUnntaksperiode(1L, dto);
 
-        verify(unntaksperiodeService).godkjennOgEndrePeriode(eq(1L), endretUnntaksperiodeGodkjenningArgumentCaptor.capture());
-        assertThat(endretUnntaksperiodeGodkjenningArgumentCaptor.getValue().isVarsleUtland()).isTrue();
-        assertThat(endretUnntaksperiodeGodkjenningArgumentCaptor.getValue().getFritekst()).isEqualTo("tekst");
-        assertThat(endretUnntaksperiodeGodkjenningArgumentCaptor.getValue().getEndretPeriode().fom()).isEqualTo(LocalDate.of(2001,1,1));
-        assertThat(endretUnntaksperiodeGodkjenningArgumentCaptor.getValue().getEndretPeriode().tom()).isEqualTo(LocalDate.of(2002,1,1));
-        assertThat(endretUnntaksperiodeGodkjenningArgumentCaptor.getValue().getLovvalgsbestemmelse()).isEqualTo(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+        UnntaksperiodeGodkjenning forventetUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
+            .varsleUtland(true)
+            .fritekst("tekst")
+            .unnntaksperiode(new Unntaksperiode(LocalDate.of(2001,1,1), LocalDate.of(2002,1,1)))
+            .lovvalgsbestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1)
+            .build();
+        verify(unntaksperiodeService).godkjennOgEndrePeriode(eq(1L), eq(forventetUnntaksperiodeGodkjenning));
     }
 
     @Test
