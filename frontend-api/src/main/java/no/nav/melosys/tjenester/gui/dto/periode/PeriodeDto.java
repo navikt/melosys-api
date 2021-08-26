@@ -39,8 +39,4 @@ public class PeriodeDto {
     public void setTom(LocalDate tom) {
         this.tom = tom;
     }
-
-    public boolean erTom() {
-        return fom == null && tom == null;
-    }
 }

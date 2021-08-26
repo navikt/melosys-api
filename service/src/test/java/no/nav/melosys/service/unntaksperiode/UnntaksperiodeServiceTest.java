@@ -81,21 +81,7 @@ class UnntaksperiodeServiceTest {
     }
 
     @Test
-    void godkjennPeriode_korrektStatusOgType_verifiserKall() {
-        Saksopplysning sedSaksopplysning = new Saksopplysning();
-        sedSaksopplysning.setType(SaksopplysningType.SEDOPPL);
-        SedDokument sedDokument = new SedDokument();
-        sedDokument.setLovvalgsperiode(PERIODE_OK);
-        sedSaksopplysning.setDokument(sedDokument);
-        behandling.getSaksopplysninger().add(sedSaksopplysning);
-        UnntaksperiodeGodkjenning unntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder().build();
-
-        unntaksperiodeService.godkjennPeriode(1L, unntaksperiodeGodkjenning);
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(behandling.getFagsak().getSaksnummer()));
-    }
-
-    @Test
-    void godkjennPeriode_oppNedPeriode_forventException() {
+    void godkjennPeriode_sedDokumentHarOppNedPeriode_forventException() {
         Saksopplysning sedSaksopplysning = new Saksopplysning();
         sedSaksopplysning.setType(SaksopplysningType.SEDOPPL);
         SedDokument sedDokument = new SedDokument();
@@ -110,37 +96,7 @@ class UnntaksperiodeServiceTest {
     }
 
     @Test
-    void godkjennOgEndrePeriode_behandlingAvsluttet_forventException() {
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        Unntaksperiode unntaksperiode = new Unntaksperiode(LocalDate.of(2000, 1, 1), LocalDate.of(2001, 1, 1));
-        UnntaksperiodeGodkjenning endretUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
-            .varsleUtland(false)
-            .fritekst(null)
-            .endretPeriode(unntaksperiode)
-            .build();
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> unntaksperiodeService.godkjennOgEndrePeriode(1L, endretUnntaksperiodeGodkjenning))
-            .withMessageContaining("er inaktiv");
-    }
-
-    @Test
-    void godkjennOgEndrePeriode_feilBehandlingstype_forventException() {
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        Unntaksperiode unntaksperiode = new Unntaksperiode(LocalDate.of(2000, 1, 1), LocalDate.of(2001, 1, 1));
-        UnntaksperiodeGodkjenning endretUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
-            .varsleUtland(false)
-            .fritekst(null)
-            .endretPeriode(unntaksperiode)
-            .build();
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> unntaksperiodeService.godkjennOgEndrePeriode(1L, endretUnntaksperiodeGodkjenning))
-            .withMessageContaining("ikke av tema");
-    }
-
-    @Test
-    void godkjennOgEndrePeriode_periodeUtenFeil_verifiserKall() {
+    void godkjennPeriode_endretPeriodeUtenFeil_verifiserKall() {
         Saksopplysning sedSaksopplysning = new Saksopplysning();
         sedSaksopplysning.setType(SaksopplysningType.SEDOPPL);
         SedDokument sedDokument = new SedDokument();
@@ -155,7 +111,7 @@ class UnntaksperiodeServiceTest {
             .lovvalgsbestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1)
             .build();
 
-        unntaksperiodeService.godkjennOgEndrePeriode(1L, endretUnntaksperiodeGodkjenning);
+        unntaksperiodeService.godkjennPeriode(1L, endretUnntaksperiodeGodkjenning);
 
         Lovvalgsperiode forventetLovvalgsperiode = new Lovvalgsperiode();
         forventetLovvalgsperiode.setFom(LocalDate.of(2000, 1, 1));
@@ -171,17 +127,27 @@ class UnntaksperiodeServiceTest {
     }
 
     @Test
-    void godkjennOgEndrePeriode_oppNedPeriode_forventException() {
+    void godkjennPeriode_endretPeriodeErOppNed_forventException() {
         Unntaksperiode unntaksperiode = new Unntaksperiode(LocalDate.of(2001, 1, 1), LocalDate.of(2000, 1, 1));
         UnntaksperiodeGodkjenning endretUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
-            .varsleUtland(false)
-            .fritekst(null)
             .endretPeriode(unntaksperiode)
             .build();
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> unntaksperiodeService.godkjennOgEndrePeriode(1L, endretUnntaksperiodeGodkjenning))
+            .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L, endretUnntaksperiodeGodkjenning))
             .withMessageContaining("Feil i perioden 2001-01-01 - 2000-01-01 som det forsøkes å endre til");
+    }
+
+    @Test
+    void godkjennPeriode_tomEndretPeriode_forventException() {
+        Unntaksperiode unntaksperiode = new Unntaksperiode(null, null);
+        UnntaksperiodeGodkjenning endretUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
+            .endretPeriode(unntaksperiode)
+            .build();
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> unntaksperiodeService.godkjennPeriode(1L, endretUnntaksperiodeGodkjenning))
+            .withMessageContaining("Oppgi både startdato og sluttdato ved endring av periode");
     }
 
     @Test

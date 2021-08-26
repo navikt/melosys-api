@@ -54,20 +54,7 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void godkjennUnntaksperiode_endretPeriodeErIkkeSatt_godkjennerPeriode() {
-        GodkjennUnntaksperiodeDto dto = new GodkjennUnntaksperiodeDto(true, "tekst", null, null);
-
-        unntakTjeneste.godkjennUnntaksperiode(1L, dto);
-
-        UnntaksperiodeGodkjenning forventetUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
-            .varsleUtland(true)
-            .fritekst("tekst")
-            .build();
-        verify(unntaksperiodeService).godkjennPeriode(eq(1L), eq(forventetUnntaksperiodeGodkjenning));
-    }
-
-    @Test
-    public void godkjennUnntaksPeriode_endretPeriodeErSatt_godkjennerOgEndrerPeriode() {
+    public void godkjennUnntaksPeriode_godkjennerPeriode() {
         PeriodeDto periodeDto = new PeriodeDto(LocalDate.of(2001,1,1),LocalDate.of(2002, 1,1));
         GodkjennUnntaksperiodeDto dto = new GodkjennUnntaksperiodeDto(true, "tekst", periodeDto, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1.toString());
 
@@ -79,7 +66,7 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
             .endretPeriode(new Unntaksperiode(LocalDate.of(2001,1,1), LocalDate.of(2002,1,1)))
             .lovvalgsbestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1)
             .build();
-        verify(unntaksperiodeService).godkjennOgEndrePeriode(eq(1L), eq(forventetUnntaksperiodeGodkjenning));
+        verify(unntaksperiodeService).godkjennPeriode(eq(1L), eq(forventetUnntaksperiodeGodkjenning));
     }
 
     @Test
