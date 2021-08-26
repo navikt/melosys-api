@@ -1,13 +1,13 @@
 package no.nav.melosys.service.unntaksperiode;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -21,8 +21,6 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -44,9 +42,6 @@ class UnntaksperiodeServiceTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
-
-    @Captor
-    private ArgumentCaptor<Collection<Lovvalgsperiode>> lovvalgsperioderCaptor;
 
     private UnntaksperiodeService unntaksperiodeService;
 
@@ -161,15 +156,16 @@ class UnntaksperiodeServiceTest {
             .build();
 
         unntaksperiodeService.godkjennOgEndrePeriode(1L, endretUnntaksperiodeGodkjenning);
-        verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(1L), lovvalgsperioderCaptor.capture());
-        Lovvalgsperiode capturedLovvalgsperiode = lovvalgsperioderCaptor.getValue().stream().findFirst().orElseThrow();
-        assertThat(capturedLovvalgsperiode)
-            .extracting(Lovvalgsperiode::getFom, Lovvalgsperiode::getTom, Lovvalgsperiode::getBestemmelse)
-            .containsExactly(
-                LocalDate.of(2000, 1, 1),
-                LocalDate.of(2001, 1, 1),
-                Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
-            );
+
+        Lovvalgsperiode forventetLovvalgsperiode = new Lovvalgsperiode();
+        forventetLovvalgsperiode.setFom(LocalDate.of(2000, 1, 1));
+        forventetLovvalgsperiode.setTom(LocalDate.of(2001, 1, 1));
+        forventetLovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+        forventetLovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
+        forventetLovvalgsperiode.setMedlemskapstype(Medlemskapstyper.UNNTATT);
+        forventetLovvalgsperiode.setDekning(Trygdedekninger.UTEN_DEKNING);
+        Collection<Lovvalgsperiode> forventedeLovvalgsperioder = Collections.singleton(forventetLovvalgsperiode);
+        verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(1L), eq(forventedeLovvalgsperioder));
         verify(prosessinstansService).opprettProsessinstansGodkjennUnntaksperiode(any(), eq(false), eq(null));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(behandling.getFagsak().getSaksnummer()));
     }
