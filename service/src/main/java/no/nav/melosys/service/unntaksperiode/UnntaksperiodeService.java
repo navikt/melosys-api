@@ -65,7 +65,9 @@ public class UnntaksperiodeService {
 
     private void opprettLovvalgsperiode(long behandlingID, SedDokument sedDokument, UnntaksperiodeGodkjenning unntaksperiodeGodkjenning) {
         Lovvalgsperiode lovvalgsperiode = sedDokument.opprettInnvilgetLovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(unntaksperiodeGodkjenning.getLovvalgsbestemmelse());
+        if (unntaksperiodeGodkjenning.getLovvalgsbestemmelse() != null) {
+            lovvalgsperiode.setBestemmelse(unntaksperiodeGodkjenning.getLovvalgsbestemmelse());
+        }
 
         lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, Collections.singleton(lovvalgsperiode));
     }
@@ -89,7 +91,9 @@ public class UnntaksperiodeService {
 
     private void opprettEndretLovvalgsperiode(long behandlingID, SedDokument sedDokument, UnntaksperiodeGodkjenning unntaksperiodeGodkjenning) {
         Lovvalgsperiode lovvalgsperiode = sedDokument.opprettInnvilgetLovvalgsperiode();
-        lovvalgsperiode.setBestemmelse(unntaksperiodeGodkjenning.getLovvalgsbestemmelse());
+        if (unntaksperiodeGodkjenning.getLovvalgsbestemmelse() != null) {
+            lovvalgsperiode.setBestemmelse(unntaksperiodeGodkjenning.getLovvalgsbestemmelse());
+        }
         lovvalgsperiode.setFom(unntaksperiodeGodkjenning.getEndretPeriode().fom());
         lovvalgsperiode.setTom(unntaksperiodeGodkjenning.getEndretPeriode().tom());
 
