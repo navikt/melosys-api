@@ -70,7 +70,7 @@ public class UnntaksperiodeGodkjenning {
             return this;
         }
 
-        public Builder unnntaksperiode(Unntaksperiode endretPeriode) {
+        public Builder endretPeriode(Unntaksperiode endretPeriode) {
             this.endretPeriode = endretPeriode;
             return this;
         }

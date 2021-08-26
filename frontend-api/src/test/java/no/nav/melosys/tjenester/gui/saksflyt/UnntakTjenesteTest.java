@@ -63,7 +63,7 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
         UnntaksperiodeGodkjenning forventetUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
             .varsleUtland(true)
             .fritekst("tekst")
-            .unnntaksperiode(new Unntaksperiode(null, null))
+            .endretPeriode(new Unntaksperiode(null, null))
             .build();
         verify(unntaksperiodeService).godkjennPeriode(eq(1L), eq(forventetUnntaksperiodeGodkjenning));
     }
@@ -78,7 +78,7 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
         UnntaksperiodeGodkjenning forventetUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
             .varsleUtland(true)
             .fritekst("tekst")
-            .unnntaksperiode(new Unntaksperiode(LocalDate.of(2001,1,1), LocalDate.of(2002,1,1)))
+            .endretPeriode(new Unntaksperiode(LocalDate.of(2001,1,1), LocalDate.of(2002,1,1)))
             .lovvalgsbestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1)
             .build();
         verify(unntaksperiodeService).godkjennOgEndrePeriode(eq(1L), eq(forventetUnntaksperiodeGodkjenning));

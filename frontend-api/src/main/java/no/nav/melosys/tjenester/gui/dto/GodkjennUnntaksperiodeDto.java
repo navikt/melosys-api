@@ -19,7 +19,7 @@ public record GodkjennUnntaksperiodeDto(boolean varsleUtland,
         return UnntaksperiodeGodkjenning.builder()
             .varsleUtland(this.varsleUtland)
             .fritekst(this.fritekst)
-            .unnntaksperiode(unntaksperiode)
+            .endretPeriode(unntaksperiode)
             .lovvalgsbestemmelse(lovvalgBestemmelsekonverterer.convertToEntityAttribute(this.lovvalgsbestemmelse))
             .build();
     }

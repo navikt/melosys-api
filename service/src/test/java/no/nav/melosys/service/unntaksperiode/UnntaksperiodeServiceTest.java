@@ -121,7 +121,7 @@ class UnntaksperiodeServiceTest {
         UnntaksperiodeGodkjenning endretUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
             .varsleUtland(false)
             .fritekst(null)
-            .unnntaksperiode(unntaksperiode)
+            .endretPeriode(unntaksperiode)
             .build();
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -136,7 +136,7 @@ class UnntaksperiodeServiceTest {
         UnntaksperiodeGodkjenning endretUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
             .varsleUtland(false)
             .fritekst(null)
-            .unnntaksperiode(unntaksperiode)
+            .endretPeriode(unntaksperiode)
             .build();
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -156,7 +156,7 @@ class UnntaksperiodeServiceTest {
         UnntaksperiodeGodkjenning endretUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
             .varsleUtland(false)
             .fritekst(null)
-            .unnntaksperiode(unntaksperiode)
+            .endretPeriode(unntaksperiode)
             .lovvalgsbestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1)
             .build();
 
@@ -176,7 +176,7 @@ class UnntaksperiodeServiceTest {
         UnntaksperiodeGodkjenning endretUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
             .varsleUtland(false)
             .fritekst(null)
-            .unnntaksperiode(unntaksperiode)
+            .endretPeriode(unntaksperiode)
             .build();
 
         assertThatExceptionOfType(FunksjonellException.class)
