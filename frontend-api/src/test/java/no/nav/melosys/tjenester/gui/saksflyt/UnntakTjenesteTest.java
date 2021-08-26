@@ -55,15 +55,13 @@ public class UnntakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     public void godkjennUnntaksperiode_endretPeriodeErIkkeSatt_godkjennerPeriode() {
-        PeriodeDto periodeDto = null;
-        GodkjennUnntaksperiodeDto dto = new GodkjennUnntaksperiodeDto(true, "tekst", periodeDto, null);
+        GodkjennUnntaksperiodeDto dto = new GodkjennUnntaksperiodeDto(true, "tekst", null, null);
 
         unntakTjeneste.godkjennUnntaksperiode(1L, dto);
 
         UnntaksperiodeGodkjenning forventetUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
             .varsleUtland(true)
             .fritekst("tekst")
-            .endretPeriode(new Unntaksperiode(null, null))
             .build();
         verify(unntaksperiodeService).godkjennPeriode(eq(1L), eq(forventetUnntaksperiodeGodkjenning));
     }
