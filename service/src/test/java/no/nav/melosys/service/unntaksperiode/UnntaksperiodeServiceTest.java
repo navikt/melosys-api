@@ -162,10 +162,14 @@ class UnntaksperiodeServiceTest {
 
         unntaksperiodeService.godkjennOgEndrePeriode(1L, endretUnntaksperiodeGodkjenning);
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(1L), lovvalgsperioderCaptor.capture());
-        Lovvalgsperiode capturedLovvalgsperiode = lovvalgsperioderCaptor.getValue().stream().findFirst().get();
-        assertThat(capturedLovvalgsperiode.getFom()).isEqualTo(LocalDate.of(2000, 1, 1));
-        assertThat(capturedLovvalgsperiode.getTom()).isEqualTo(LocalDate.of(2001, 1, 1));
-        assertThat(capturedLovvalgsperiode.getBestemmelse()).isEqualTo(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+        Lovvalgsperiode capturedLovvalgsperiode = lovvalgsperioderCaptor.getValue().stream().findFirst().orElseThrow();
+        assertThat(capturedLovvalgsperiode)
+            .extracting(Lovvalgsperiode::getFom, Lovvalgsperiode::getTom, Lovvalgsperiode::getBestemmelse)
+            .containsExactly(
+                LocalDate.of(2000, 1, 1),
+                LocalDate.of(2001, 1, 1),
+                Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
+            );
         verify(prosessinstansService).opprettProsessinstansGodkjennUnntaksperiode(any(), eq(false), eq(null));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(behandling.getFagsak().getSaksnummer()));
     }
