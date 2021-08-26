@@ -5,14 +5,8 @@ import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.abac.TilgangService;
-import no.nav.melosys.service.vedtak.FattEosVedtakRequest;
-import no.nav.melosys.service.vedtak.FattFtrlVedtakRequest;
-import no.nav.melosys.service.vedtak.FattVedtakRequest;
-import no.nav.melosys.service.vedtak.VedtakServiceFasade;
-import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
-import no.nav.melosys.tjenester.gui.dto.FattEosVedtakDto;
-import no.nav.melosys.tjenester.gui.dto.FattFtrlVedtakDto;
-import no.nav.melosys.tjenester.gui.dto.FattVedtakDto;
+import no.nav.melosys.service.vedtak.*;
+import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -71,6 +65,9 @@ public class VedtakTjeneste {
                 .medRevurderBegrunnelse(eosVedtakDto.getRevurderBegrunnelse());
         } else if (fattVedtakDto instanceof FattFtrlVedtakDto ftrlVedtakDto) {
             fattVedtakRequest = new FattFtrlVedtakRequest.Builder()
+                .medFritekstBegrunnelse(ftrlVedtakDto.getFritekstBegrunnelse());
+        } else if (fattVedtakDto instanceof FattTrygdeavtaleVedtakDto ftrlVedtakDto) {
+            fattVedtakRequest = new FattTrygdeavtaleVedtakRequest.Builder()
                 .medFritekstBegrunnelse(ftrlVedtakDto.getFritekstBegrunnelse());
         } else {
             throw new FunksjonellException("Vedtakstype er ikke støttet");

@@ -21,6 +21,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 import no.nav.melosys.service.journalforing.dto.*;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -204,7 +205,7 @@ class JournalfoeringServiceTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.opprettOgJournalfør(opprettDto))
-            .withMessageContaining("Kan ikke opprett ny sak med behandlingstema " + Behandlingstema.ARBEID_I_UTLANDET);
+            .withMessageContaining("Kan ikke opprette ny sak med behandlingstema " + Behandlingstema.ARBEID_I_UTLANDET);
     }
 
     @Test
@@ -437,7 +438,7 @@ class JournalfoeringServiceTest {
         periode.setFom(fom);
         periode.setTom(tom);
         fagsakDto.setSoknadsperiode(periode);
-        fagsakDto.setLand(Collections.singletonList(land));
+        fagsakDto.setLand(new SoeknadslandDto(Collections.singletonList(land), false));
         return fagsakDto;
     }
 }

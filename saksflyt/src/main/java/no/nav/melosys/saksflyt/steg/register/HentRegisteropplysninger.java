@@ -52,12 +52,12 @@ public class HentRegisteropplysninger implements StegBehandler {
             .behandlingID(prosessinstans.getBehandling().getId())
             .fnr(brukerId);
 
-        if (behandling.getFagsak().getType() == Sakstyper.FTRL) {
-            registeropplysningerRequestBuilder
-                .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder().personopplysninger().build());
-        } else {
+        if(behandling.getFagsak().getType() == Sakstyper.EU_EOS) {
             registeropplysningerRequestBuilder
                 .saksopplysningTyper(utledSaksopplysningTyper(prosessinstans.getBehandling().getTema()));
+        } else {
+            registeropplysningerRequestBuilder
+                .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder().personopplysninger().build());
         }
 
         behandling.finnPeriode().ifPresent(periode -> {

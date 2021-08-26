@@ -75,7 +75,7 @@ public final class LovvalgBestemmelsekonvertererTest {
     @Test
     public void konverterUkjentOppramsverdiKasterUnntak() throws Throwable {
         Throwable thrown = catchThrowable(() -> instans.convertToEntityAttribute("Brottskavl"));
-        assertThat(thrown).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("No enum constant");
+        assertThat(thrown).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Lovvalgbestemmelse kode:Brottskavl ikke funnet");
     }
 }
 

@@ -32,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknad;
-import static no.nav.melosys.domain.Fagsak.erSakstypeFtrl;
+import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 import static no.nav.melosys.service.sak.SakstypeBehandlingstemaKobling.erGyldigBehandlingstemaForSakstype;
 
 @Service
@@ -136,7 +136,13 @@ public class JournalfoeringService {
         }
 
         if (behandlingstema == Behandlingstema.ARBEID_I_UTLANDET && !unleash.isEnabled("melosys.folketrygden.mvp")) {
-            throw new FunksjonellException("Kan ikke opprett ny sak med behandlingstema " + behandlingstema);
+            throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema +
+                "siden 'melosys.folketrygden.mvp' ikke er aktivert i unleash");
+        }
+
+        if (behandlingstema == Behandlingstema.TRYGDEAVTALE_UK && !unleash.isEnabled("melosys.trygdeavtale")) {
+            throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema +
+                "siden 'melosys.trygdeavtale' ikke er aktivert i unleash");
         }
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK, journalfoeringDto);
@@ -144,7 +150,7 @@ public class JournalfoeringService {
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, erBehandlingAvSøknad(behandlingstema) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED);
 
-        if (!erSakstypeFtrl(sakstype) && erBehandlingAvSøknad(behandlingstema)) {
+        if (erSakstypeEøs(sakstype) && erBehandlingAvSøknad(behandlingstema)) {
             validerOpprettSakForSøknadBehandlingFelter(journalfoeringDto);
             prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringDto.getFagsak().getLand());
             prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringDto.getFagsak().getSoknadsperiode());
@@ -274,10 +280,10 @@ public class JournalfoeringService {
         if (søknadsperiode.getTom() != null && søknadsperiode.getFom().isAfter(søknadsperiode.getTom())) {
             throw new FunksjonellException("Fra og med dato kan ikke være etter til og med dato.");
         }
-        if (journalfoeringDto.getFagsak().getLand() == null || journalfoeringDto.getFagsak().getLand().isEmpty()) {
-            throw new FunksjonellException("Land mangler");
+        if (!journalfoeringDto.getFagsak().getLand().erGyldig()) {
+            throw new FunksjonellException("Informasjon om land er ugyldig");
         }
-        if (journalfoeringDto.getFagsak().getLand().contains(null)) {
+        if (journalfoeringDto.getFagsak().getLand().getLandkoder().contains(null)) {
             throw new FunksjonellException("Et søknadsland er null!");
         }
         validerAntallLand(journalfoeringDto);
@@ -285,7 +291,7 @@ public class JournalfoeringService {
 
     private void validerAntallLand(JournalfoeringOpprettDto journalfoeringDto) {
         String behandlingstemaKode = journalfoeringDto.getBehandlingstemaKode();
-        int antallLand = journalfoeringDto.getFagsak().getLand().size();
+        int antallLand = journalfoeringDto.getFagsak().getLand().getLandkoder().size();
 
         if (Behandling.erBehandlingAvSøknadArbeidIFlereLand(behandlingstemaKode) && antallLand < 2) {
             throw new FunksjonellException("Det er påkrevd med to eller flere land for behandlingstema " + behandlingstemaKode);

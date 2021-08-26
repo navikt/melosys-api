@@ -1,12 +1,11 @@
 package no.nav.melosys.service.oppgave.dto;
 
-import java.util.List;
-
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 
 public class BehandlingsoppgaveDto extends OppgaveDto {
     private BehandlingDto behandling;
-    private List<String> land;
+    private SoeknadslandDto land;
     private String saksnummer;
     private Sakstyper sakstype;
     private PeriodeDto periode;
@@ -24,11 +23,11 @@ public class BehandlingsoppgaveDto extends OppgaveDto {
         this.behandling = behandling;
     }
 
-    public List<String> getLand() {
+    public SoeknadslandDto getLand() {
         return land;
     }
 
-    public void setLand(List<String> land) {
+    public void setLand(SoeknadslandDto land) {
         this.land = land;
     }
 

@@ -1,13 +1,18 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
+import java.util.List;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,7 +46,13 @@ class OpprettSoeknadTest {
     @Test
     void utfør_behandlingstemaArbeidIUtlandet_oppretterSøknadFtrl() {
         opprettSoeknad.utfør(lagProsessinstans(Sakstyper.FTRL, Behandlingstema.ARBEID_I_UTLANDET));
-        verify(behandlingsgrunnlagService).opprettSøknadFolketrygden(eq(behandlingID), any(SoeknadFtrl.class));
+        verify(behandlingsgrunnlagService).opprettSøknadOmMedlemskapIFolketrygden(eq(behandlingID), any(SoeknadFtrl.class));
+    }
+
+    @Test
+    void utfør_behandlingstemaArbeidIUtlandet_oppretterSøknadFtrlUk() {
+        opprettSoeknad.utfør(lagProsessinstans(Sakstyper.FTRL, Behandlingstema.TRYGDEAVTALE_UK));
+        verify(behandlingsgrunnlagService).opprettSøknadOmMedlemskapIFolketrygden(eq(behandlingID), any(SoeknadFtrl.class));
     }
 
     @Test
@@ -55,9 +66,10 @@ class OpprettSoeknadTest {
         behandling.setId(behandlingID);
         behandling.setTema(behandlingstema);
         behandling.setFagsak(new Fagsak());
-        behandling.getFagsak().setType(sakstype);
+        behandling.getFagsak().setType(sakstype);;
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
+        prosessinstans.setData(ProsessDataKey.SØKNADSLAND, new SoeknadslandDto(List.of("DK","SE"), true));
         return prosessinstans;
     }
 }
