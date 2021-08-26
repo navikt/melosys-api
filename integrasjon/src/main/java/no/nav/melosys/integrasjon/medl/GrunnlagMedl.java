@@ -26,7 +26,12 @@ public enum GrunnlagMedl {
     FO_16("FO_16"),
     MEDFT("MEDFT"),
     IMEDEOS("IMEDEOS"),
-    FTL_2_8("FTL_2-8");
+    FTL_2_8("FTL_2-8"),
+    Storbrit_NIrland_6_1("Storbrit_NIrland_6_1"),
+    Storbrit_NIrland_6_5("Storbrit_NIrland_6_5"),
+    Storbrit_NIrland_7_1("Storbrit_NIrland_7_1"),
+    Storbrit_NIrland_8_2("Storbrit_NIrland_8_2"),
+    Storbrit_NIrland_9("Storbrit_NIrland_9");
 
     private final String kode;
 
