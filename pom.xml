@@ -439,11 +439,6 @@
                 <version>${nav.tjenestespesifikasjoner.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.tjenestespesifikasjoner</groupId>
-                <artifactId>nav-fim-aktoer-v2-tjenestespesifikasjon</artifactId>
-                <version>${nav.tjenestespesifikasjoner.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>no.nav.tjenester</groupId>
                 <artifactId>nav-dokumentproduksjon-v3-tjenestespesifikasjon</artifactId>
                 <version>${doksys.dokumentproduksjon.version}</version>
