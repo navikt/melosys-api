@@ -51,7 +51,7 @@ public class UnntaksperiodeService {
     public void godkjennPeriode(long behandlingID, UnntaksperiodeGodkjenning unntaksperiodeGodkjenning) {
         Behandling behandling = hentOgValiderBehandling(behandlingID);
 
-        final var endretPeriode = unntaksperiodeGodkjenning.getEndretPeriode();
+        final var endretPeriode = unntaksperiodeGodkjenning.endretPeriode();
         if (endretPeriode == null) {
             validerPeriodeFraBehandling(behandling);
         } else {
@@ -62,8 +62,8 @@ public class UnntaksperiodeService {
         behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.GODKJENT);
         prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(
             behandling,
-            unntaksperiodeGodkjenning.isVarsleUtland(),
-            unntaksperiodeGodkjenning.getFritekst()
+            unntaksperiodeGodkjenning.varsleUtland(),
+            unntaksperiodeGodkjenning.fritekst()
         );
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
@@ -88,12 +88,12 @@ public class UnntaksperiodeService {
     private void opprettLovvalgsperiode(long behandlingID, SedDokument sedDokument, UnntaksperiodeGodkjenning unntaksperiodeGodkjenning) {
         Lovvalgsperiode lovvalgsperiode = sedDokument.opprettInnvilgetLovvalgsperiode();
 
-        if (unntaksperiodeGodkjenning.getLovvalgsbestemmelse() != null) {
-            lovvalgsperiode.setBestemmelse(unntaksperiodeGodkjenning.getLovvalgsbestemmelse());
+        if (unntaksperiodeGodkjenning.lovvalgsbestemmelse() != null) {
+            lovvalgsperiode.setBestemmelse(unntaksperiodeGodkjenning.lovvalgsbestemmelse());
         }
-        if (unntaksperiodeGodkjenning.getEndretPeriode() != null) {
-            lovvalgsperiode.setFom(unntaksperiodeGodkjenning.getEndretPeriode().fom());
-            lovvalgsperiode.setTom(unntaksperiodeGodkjenning.getEndretPeriode().tom());
+        if (unntaksperiodeGodkjenning.endretPeriode() != null) {
+            lovvalgsperiode.setFom(unntaksperiodeGodkjenning.endretPeriode().fom());
+            lovvalgsperiode.setTom(unntaksperiodeGodkjenning.endretPeriode().tom());
         }
 
         lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, Collections.singleton(lovvalgsperiode));
