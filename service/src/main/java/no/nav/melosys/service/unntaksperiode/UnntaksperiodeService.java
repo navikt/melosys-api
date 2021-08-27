@@ -10,6 +10,7 @@ import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
@@ -87,13 +88,15 @@ public class UnntaksperiodeService {
 
     private void opprettLovvalgsperiode(long behandlingID, SedDokument sedDokument, UnntaksperiodeGodkjenning unntaksperiodeGodkjenning) {
         Lovvalgsperiode lovvalgsperiode = sedDokument.opprettInnvilgetLovvalgsperiode();
+        LovvalgBestemmelse lovvalgBestemmelse = unntaksperiodeGodkjenning.lovvalgsbestemmelse();
+        Unntaksperiode endretPeriode = unntaksperiodeGodkjenning.endretPeriode();
 
-        if (unntaksperiodeGodkjenning.lovvalgsbestemmelse() != null) {
-            lovvalgsperiode.setBestemmelse(unntaksperiodeGodkjenning.lovvalgsbestemmelse());
+        if (lovvalgBestemmelse != null) {
+            lovvalgsperiode.setBestemmelse(lovvalgBestemmelse);
         }
-        if (unntaksperiodeGodkjenning.endretPeriode() != null) {
-            lovvalgsperiode.setFom(unntaksperiodeGodkjenning.endretPeriode().fom());
-            lovvalgsperiode.setTom(unntaksperiodeGodkjenning.endretPeriode().tom());
+        if (endretPeriode != null) {
+            lovvalgsperiode.setFom(endretPeriode.fom());
+            lovvalgsperiode.setTom(endretPeriode.tom());
         }
 
         lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, Collections.singleton(lovvalgsperiode));
