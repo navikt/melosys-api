@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoNorge;
@@ -17,6 +18,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrl;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.*;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
@@ -106,47 +108,40 @@ public class InnvilgelseFtrlMapper {
     }
 
     private List<FamiliemedlemInfo> mapOmfattetFamilie(long behandlingID, Set<OmfattetFamilie> omfattetEktefelle, Set<OmfattetFamilie> omfattetBarn) {
-        List<FamiliemedlemInfo> omfattetFamilie = new ArrayList<>();
         Map<String, MedfolgendeFamilie> medfolgendeEktefelle = avklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(behandlingID);
-        Map<String, MedfolgendeFamilie> avklarteMedfolgendeBarn = avklarteMedfolgendeFamilieService.hentMedfølgendeBarn(behandlingID);
+        Map<String, MedfolgendeFamilie> medfolgendeBarn = avklarteMedfolgendeFamilieService.hentMedfølgendeBarn(behandlingID);
 
-        omfattetEktefelle.stream().map(omfattetEkte -> medfolgendeEktefelle.get(omfattetEkte.getUuid())).forEach(ektefelle -> {
-            String sammensattNavn = ektefelle.fnr != null ? persondataFasade.hentSammensattNavn(ektefelle.fnr) : ektefelle.navn;
-            omfattetFamilie.add(new FamiliemedlemInfo(sammensattNavn, ektefelle.fnr, IdentType.FNR));
-        });
-
-        omfattetBarn.stream().map(omfattetB -> avklarteMedfolgendeBarn.get(omfattetB.getUuid())).forEach(barn -> {
-            String sammensattNavn = barn.fnr != null ? persondataFasade.hentSammensattNavn(barn.fnr) : barn.navn;
-            omfattetFamilie.add(new FamiliemedlemInfo(sammensattNavn, barn.fnr, IdentType.FNR));
-        });
-        return omfattetFamilie;
+        return Stream.concat(
+            omfattetEktefelle.stream()
+                .map(ektefelle -> tilFamiliemedlemInfo(medfolgendeEktefelle, ektefelle.getUuid())),
+            omfattetBarn.stream()
+                .map(barn -> tilFamiliemedlemInfo(medfolgendeBarn, barn.getUuid()))
+        ).toList();
     }
 
     private List<IkkeOmfattetBarn> mapIkkeOmfattetBarn(long behandlingID, Set<no.nav.melosys.domain.person.familie.IkkeOmfattetBarn> barnIkkeOmfattetAvNorskTrygd) {
-        List<IkkeOmfattetBarn> ikkeOmfattet = new ArrayList<>();
         Map<String, MedfolgendeFamilie> medfoelgendeBarn = avklarteMedfolgendeFamilieService.hentMedfølgendeBarn(behandlingID);
-
-        barnIkkeOmfattetAvNorskTrygd.forEach(ikkeOmfattetBarn -> {
-            MedfolgendeFamilie barn = medfoelgendeBarn.get(ikkeOmfattetBarn.uuid);
-            String sammensattNavn = barn.fnr != null ? persondataFasade.hentSammensattNavn(barn.fnr) : barn.navn;
-            FamiliemedlemInfo familiemedlemInfo = new FamiliemedlemInfo(sammensattNavn, barn.fnr, IdentType.FNR);
-            ikkeOmfattet.add(new IkkeOmfattetBarn(familiemedlemInfo, ikkeOmfattetBarn.begrunnelse));
-        });
-        return ikkeOmfattet;
+        return barnIkkeOmfattetAvNorskTrygd.stream()
+            .map(ikkeOmfattetBarn -> new IkkeOmfattetBarn(tilFamiliemedlemInfo(medfoelgendeBarn, ikkeOmfattetBarn.uuid), ikkeOmfattetBarn.begrunnelse))
+            .toList();
     }
 
     private IkkeOmfattetEktefelle mapIkkeOmfattetEktefelle(long behandlingId, Set<no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie> ektefelleIkkeOmfattet) {
-        Map<String, MedfolgendeFamilie> medfolgendeEktefelle = avklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(behandlingId);
         if (ektefelleIkkeOmfattet.isEmpty()) {
             return null;
         }
 
+        Map<String, MedfolgendeFamilie> medfolgendeEktefelle = avklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(behandlingId);
         IkkeOmfattetFamilie ikkeOmfattetEktefelle = ektefelleIkkeOmfattet.iterator().next();
 
-        MedfolgendeFamilie ektefelle = medfolgendeEktefelle.get(ikkeOmfattetEktefelle.getUuid());
-        String sammensattNavn = ektefelle.fnr != null ? persondataFasade.hentSammensattNavn(ektefelle.fnr) : ektefelle.navn;
-        FamiliemedlemInfo familiemedlemInfo = new FamiliemedlemInfo(sammensattNavn, ektefelle.fnr, IdentType.FNR);
-        return new IkkeOmfattetEktefelle(familiemedlemInfo, ikkeOmfattetEktefelle.getBegrunnelse());
+        return new IkkeOmfattetEktefelle(tilFamiliemedlemInfo(medfolgendeEktefelle, ikkeOmfattetEktefelle.getUuid()), ikkeOmfattetEktefelle.getBegrunnelse());
+    }
+
+    private FamiliemedlemInfo tilFamiliemedlemInfo(Map<String, MedfolgendeFamilie> avklartMedfolgende, String uuid) {
+        MedfolgendeFamilie medfolgendeFamilie = Optional.of(avklartMedfolgende.get(uuid))
+            .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
+        String sammensattNavn = medfolgendeFamilie.fnr != null ? persondataFasade.hentSammensattNavn(medfolgendeFamilie.fnr) : medfolgendeFamilie.navn;
+        return new FamiliemedlemInfo(sammensattNavn, medfolgendeFamilie.fnr, IdentType.FNR);
     }
 
     private VurderingTrygdeavgift mapVurderingTrygdeavgift(Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag, FastsattTrygdeavgift fastsattTrygdeavgift) {
@@ -184,12 +179,7 @@ public class InnvilgelseFtrlMapper {
     }
 
     private boolean harTrygdeavtaleMedArbeidsland(Landkoder arbeidsland) {
-        for (Avtaleland a : Avtaleland.values()) {
-            if (a.name().equals(arbeidsland.name())) {
-                return true;
-            }
-        }
-        return false;
+        return Arrays.stream(Avtaleland.values()).anyMatch(a -> a.name().equals(arbeidsland.name()));
     }
 
     private String hentFullmektigNavnArbeidsgiver(Fagsak fagsak) {

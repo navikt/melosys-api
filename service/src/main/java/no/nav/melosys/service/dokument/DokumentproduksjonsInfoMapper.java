@@ -26,32 +26,32 @@ public class DokumentproduksjonsInfoMapper {
             .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID,
                 new DokumentproduksjonsInfo("saksbehandlingstid_soknad",
                     DokumentKategoriKode.IB.getKode(),
-                    "Melding om forventet saksbehandlingstid")
+                    JournalforingsTittel.FORVALTNINGSMELDING.getTittel())
             )
             .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
                 new DokumentproduksjonsInfo("saksbehandlingstid_soknad",
                     DokumentKategoriKode.IB.getKode(),
-                    "Melding om forventet saksbehandlingstid")
+                    JournalforingsTittel.FORVALTNINGSMELDING.getTittel())
             )
             .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
                 new DokumentproduksjonsInfo("saksbehandlingstid_klage",
                     DokumentKategoriKode.IB.getKode(),
-                    "Melding om forventet saksbehandlingstid")
+                    JournalforingsTittel.FORVALTNINGSMELDING.getTittel())
             )
             .put(MANGELBREV_BRUKER,
                 new DokumentproduksjonsInfo("mangelbrev_bruker",
                     DokumentKategoriKode.IB.getKode(),
-                    "Melding om manglende opplysninger")
+                    JournalforingsTittel.MANGELBREV.getTittel())
             )
             .put(MANGELBREV_ARBEIDSGIVER,
                 new DokumentproduksjonsInfo("mangelbrev_arbeidsgiver",
                     DokumentKategoriKode.IB.getKode(),
-                    "Melding om manglende opplysninger")
+                    JournalforingsTittel.MANGELBREV.getTittel())
             )
             .put(INNVILGELSE_FOLKETRYGDLOVEN_2_8,
                 new DokumentproduksjonsInfo("innvilgelse_ftrl_2_8",
                     DokumentKategoriKode.VB.getKode(),
-                    "Vedtak om frivillig medlemskap"))
+                    JournalforingsTittel.INNVILGELSE_FTRL_2_8.getTittel()))
             .build());
     }
 
@@ -82,6 +82,22 @@ public class DokumentproduksjonsInfoMapper {
     private void sjekkOmStøttetDokument(Produserbaredokumenter produserbartDokument) {
         if (!DOKUMENTPRODUKSJONS_INFO_MAP.containsKey(produserbartDokument)) {
             throw new FunksjonellException(format("ProduserbartDokument %s er ikke støttet", produserbartDokument));
+        }
+    }
+
+    private enum JournalforingsTittel {
+        FORVALTNINGSMELDING("Melding om forventet saksbehandlingstid"),
+        MANGELBREV("Melding om manglende opplysninger"),
+        INNVILGELSE_FTRL_2_8("Vedtak om frivillig medlemskap");
+
+        private String tittel;
+
+        public String getTittel() {
+            return tittel;
+        }
+
+        JournalforingsTittel(String tittel) {
+            this.tittel = tittel;
         }
     }
 }
