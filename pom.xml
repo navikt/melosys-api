@@ -88,11 +88,15 @@
         <!-- Transitive avhengiheter -->
         <asm.version>9.1</asm.version>
         <bcprov-jdk15on.version>1.68</bcprov-jdk15on.version>
+        <cglib.version>3.3.0</cglib.version>
+        <classgraph.version>4.8.102</classgraph.version>
         <commons-logging.version>1.2</commons-logging.version>
+        <istack.version>3.0.12</istack.version>
         <javassist.version>3.27.0-GA</javassist.version>
         <jaxb2-basics-runtime.version>0.12.0</jaxb2-basics-runtime.version>
         <joda-time.version>2.10.10</joda-time.version>
         <objenesis.version>3.2</objenesis.version>
+        <osgi.version>6.0.0</osgi.version>
         <stax2-api.version>4.2.1</stax2-api.version>
         <woodstox.version>6.2.3</woodstox.version>
         <xmlsec.version>2.2.2</xmlsec.version>
@@ -398,11 +402,6 @@
                 <version>3.13.0</version>
             </dependency>
             <dependency>
-                <groupId>org.codehaus.woodstox</groupId>
-                <artifactId>stax2-api</artifactId>
-                <version>${stax2-api.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.javassist</groupId>
                 <artifactId>javassist</artifactId>
                 <version>${javassist.version}</version>
@@ -421,6 +420,26 @@
                 <groupId>org.ow2.asm</groupId>
                 <artifactId>asm</artifactId>
                 <version>${asm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.core</artifactId>
+                <version>${osgi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cglib</groupId>
+                <artifactId>cglib-nodep</artifactId>
+                <version>${cglib.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.istack</groupId>
+                <artifactId>istack-commons-runtime</artifactId>
+                <version>${istack.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.classgraph</groupId>
+                <artifactId>classgraph</artifactId>
+                <version>${classgraph.version}</version>
             </dependency>
 
             <!-- NAV felleskomponenter -->
@@ -498,6 +517,12 @@
                 <groupId>no.nav.dok.metaforcemal</groupId>
                 <artifactId>melosysbrev</artifactId>
                 <version>${melosys.brev.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.servlet</groupId>
+                        <artifactId>servlet-api</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>no.nav.dok.metaforcemal</groupId>
