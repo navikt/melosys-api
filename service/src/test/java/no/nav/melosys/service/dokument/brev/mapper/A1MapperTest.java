@@ -233,7 +233,7 @@ class A1MapperTest {
     void mapTilBrevXML_harLangAdressePåArbeidssted_brekkerAdresseOverFlereLinjer() {
         StrukturertAdresse adresse = lagStrukturertAdresse();
         adresse.setGatenavn(
-                "Lorem ipsumdolorsitamet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua-veien");
+            "Lorem ipsumdolorsitamet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua-veien");
         adresse.setHusnummerEtasjeLeilighet("47");
         Arbeidssted fysiskArbeidssted = new FysiskArbeidssted("", "", adresse);
 
@@ -249,6 +249,22 @@ class A1MapperTest {
             .collect(Collectors.toList());
 
         assertThat(utfylteAdresselinjer.size()).isGreaterThan(1);
+    }
+
+    @Test
+    void mapTilBrevXML_harUkjentEllerIkkeOppgittArbeidsted_brekkerAdresseOverFlereLinjer() {
+        brevData.erUkjentEllerIKkeOppgit = true;
+        brevData.arbeidssteder = Collections.emptyList();
+        brevData.arbeidsland = Collections.emptyList();
+
+        A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
+        List<String> utfylteAdresselinjer = a1.getFysiskArbeidsstedAdresseListe().getAdresse().stream()
+            .map(AdresseType::getAdresselinje1)
+            .filter(not(StringUtils::isEmpty))
+            .collect(Collectors.toList());
+
+        assertThat(utfylteAdresselinjer.size()).isEqualTo(1);
+        assertThat(utfylteAdresselinjer.stream().findFirst()).isEqualTo(Optional.of("Various EEA-countries/Switzerland"));
     }
 
     @Test
