@@ -21,6 +21,7 @@ public class PersonUtenAdresseDto {
     private Personstatus personStatus;
     private KjoennDto kjoenn;
     private LocalDate foedselsdato;
+    private LocalDate doedsdato;
     @JsonProperty(defaultValue = "false" )
     private boolean erEgenAnsatt; // MELOSYS-1580
 
@@ -38,6 +39,7 @@ public class PersonUtenAdresseDto {
         personStatus = person.getPersonstatus();
         kjoenn = new KjoennDto(person.hentKjønnType().getKode(), person.hentKjønnType().toString());;
         foedselsdato = person.getFødselsdato();
+        doedsdato = person.getDødsdato();
     }
 
     public String getFnr() {
@@ -82,6 +84,10 @@ public class PersonUtenAdresseDto {
 
     public LocalDate getFoedselsdato() {
         return foedselsdato;
+    }
+
+    public LocalDate getDoedsdato() {
+        return doedsdato;
     }
 
     public boolean isErEgenAnsatt() {
