@@ -161,6 +161,10 @@ class A1Mapper {
 
     private Stream<AdresseType> lagAdresserForArbeidsstederOgLandUtenArbeidssted(List<Arbeidssted> arbeidssteder,
                                                                                  Collection<Landkoder> arbeidsland) {
+        if (brevData.erUkjentEllerIKkeOppgit) {
+            return lagAdresselinjeForUkjentEllerIkkeOppgittArbeidssted().stream().map(this::tilAdresseType);
+        }
+
         String landUtenOppgittArbeidsstedBeskrivelse = hentLandUtenOppgittArbeidssted(arbeidsland, arbeidssteder)
             .stream()
             .map(Landkoder::getBeskrivelse)
@@ -179,6 +183,10 @@ class A1Mapper {
             .map(adresselinje -> adresselinje.isBlank() ? "" : adresselinje) //uten dette viser ikke brev alle linjene i en A1
             .flatMap(adresselinje -> brekkTekstTilListe(adresselinje).stream())
             .collect(Collectors.toList());
+    }
+
+    private static List<String> lagAdresselinjeForUkjentEllerIkkeOppgittArbeidssted() {
+        return brekkTekstTilListe("Various EEA-countries/Switzerland");
     }
 
     private static List<String> brekkTekstTilListe(String tekst) {
@@ -205,7 +213,7 @@ class A1Mapper {
         long antallArbeidssteder = fysiskArbeidssteder.size();
 
         return antallArbeidssteder < 1 ||
-               antallArbeidssteder > MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV;
+            antallArbeidssteder > MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV;
     }
 
     private Set<Landkoder> hentLandUtenOppgittArbeidssted(Collection<Landkoder> arbeidsland,
