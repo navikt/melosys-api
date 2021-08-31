@@ -97,7 +97,6 @@
         <joda-time.version>2.10.10</joda-time.version>
         <objenesis.version>3.2</objenesis.version>
         <osgi.version>6.0.0</osgi.version>
-        <stax2-api.version>4.2.1</stax2-api.version>
         <woodstox.version>6.2.3</woodstox.version>
         <xmlsec.version>2.2.2</xmlsec.version>
         <medlemskapsunntak-api-v1.version>1.1</medlemskapsunntak-api-v1.version>
