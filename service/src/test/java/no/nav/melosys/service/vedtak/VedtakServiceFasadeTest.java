@@ -9,6 +9,9 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,14 +54,16 @@ class VedtakServiceFasadeTest {
     void init() {
         vedtakServiceFasade = new VedtakServiceFasade(mockBehandlingService, mockEosVedtakService, mockEosVedtakSystemService, mockFtrlVedtakService, trygdeavtaleVedtakService);
         behandling = lagBehandling();
+
+        SpringSubjectHandler.set(new TestSubjectHandler());
     }
 
     @Test
-    void fattVedtak_feilBehandlingstype_kasterException() throws Exception {
+    void fattVedtak_feilBehandlingstype_kasterException() {
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         when(mockBehandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
 
-        assertThatThrownBy(() -> vedtakServiceFasade.fattVedtak(behandlingID, lagFattFtrlVedtakRequest()))
+        assertThatThrownBy(() -> vedtakServiceFasade.fattVedtak(behandlingID, lagFattFtrlVedtakRequest(), SubjectHandler.getInstance().getUserID()))
             .isInstanceOf(FunksjonellException.class)
             .hasMessage("Kan ikke fatte vedtak ved behandlingstema UFM: Melding om utstasjonering – A009");
     }
@@ -68,7 +73,7 @@ class VedtakServiceFasadeTest {
         setFagsakPåBehandling(Sakstyper.EU_EOS);
         when(mockBehandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
 
-        vedtakServiceFasade.fattVedtak(behandlingID, lagFattEosVedtakRequest());
+        vedtakServiceFasade.fattVedtak(behandlingID, lagFattEosVedtakRequest(), SubjectHandler.getInstance().getUserID());
 
         verify(mockEosVedtakService).fattVedtak(eq(behandling), any(FattEosVedtakRequest.class));
         verifyNoInteractions(mockEosVedtakSystemService);
@@ -91,9 +96,9 @@ class VedtakServiceFasadeTest {
         setFagsakPåBehandling(Sakstyper.FTRL);
         when(mockBehandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
 
-        vedtakServiceFasade.fattVedtak(behandlingID, lagFattFtrlVedtakRequest());
+        vedtakServiceFasade.fattVedtak(behandlingID, lagFattFtrlVedtakRequest(), SubjectHandler.getInstance().getUserID());
 
-        verify(mockFtrlVedtakService).fattVedtak(eq(behandling), any(FattFtrlVedtakRequest.class));
+        verify(mockFtrlVedtakService).fattVedtak(eq(behandling), any(FattFtrlVedtakRequest.class), eq("Z990007"));
         verifyNoInteractions(mockEosVedtakService);
         verifyNoInteractions(mockEosVedtakSystemService);
     }
@@ -103,7 +108,7 @@ class VedtakServiceFasadeTest {
         setFagsakPåBehandling(Sakstyper.TRYGDEAVTALE);
         when(mockBehandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
 
-        vedtakServiceFasade.fattVedtak(behandlingID, lagFattTrygdeavtaleVedtakRequest());
+        vedtakServiceFasade.fattVedtak(behandlingID, lagFattTrygdeavtaleVedtakRequest(), SubjectHandler.getInstance().getUserID());
 
         verify(trygdeavtaleVedtakService).fattVedtak(eq(behandling), any(FattTrygdeavtaleVedtakRequest.class));
         verifyNoInteractions(mockEosVedtakService);
