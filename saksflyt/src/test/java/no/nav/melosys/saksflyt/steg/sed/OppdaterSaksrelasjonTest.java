@@ -6,7 +6,6 @@ import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.IkkeInngaaendeJournalpostException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -63,16 +62,6 @@ class OppdaterSaksrelasjonTest {
             melosysEessiMelding.getRinaSaksnummer(),
             melosysEessiMelding.getBucType()
         );
-    }
-
-    @Test
-    void utfør_journalpostIkkeInngående_verifiserOppdatererIkkeSaksrelasjon() {
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, JOURNALPOST_ID);
-        when(joarkFasade.hentJournalpost(JOURNALPOST_ID)).thenThrow(new IkkeInngaaendeJournalpostException("Nei nei"));
-
-        oppdaterSaksrelasjon.utfør(prosessinstans);
-        verify(eessiService, never()).lagreSaksrelasjon(any(), any(), any());
     }
 
     @Test

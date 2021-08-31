@@ -2,12 +2,10 @@ package no.nav.melosys.saksflyt.steg.sed;
 
 import java.util.Optional;
 
-import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.IkkeInngaaendeJournalpostException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -35,15 +33,11 @@ public class OppdaterSaksrelasjon implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
-
-        Optional<MelosysEessiMelding> eessiMelding = finnEessiMelding(prosessinstans);
-        if (eessiMelding.isPresent()) {
-            eessiService.lagreSaksrelasjon(
+        finnEessiMelding(prosessinstans).ifPresent(melosysEessiMelding -> eessiService.lagreSaksrelasjon(
                 hentArkivsakID(prosessinstans),
-                eessiMelding.get().getRinaSaksnummer(),
-                eessiMelding.get().getBucType()
-            );
-        }
+                melosysEessiMelding.getRinaSaksnummer(),
+                melosysEessiMelding.getBucType()
+            ));
     }
 
     private Optional<MelosysEessiMelding> finnEessiMelding(Prosessinstans prosessinstans) {
@@ -54,13 +48,7 @@ public class OppdaterSaksrelasjon implements StegBehandler {
         }
 
         String journalpostID = prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID);
-        Journalpost journalpost;
-        try {
-            journalpost = joarkFasade.hentJournalpost(journalpostID);
-        } catch (IkkeInngaaendeJournalpostException e) {
-            return Optional.empty();
-        }
-        if (journalpost.mottaksKanalErEessi()) {
+        if (joarkFasade.hentJournalpost(journalpostID).mottaksKanalErEessi()) {
             return Optional.of(eessiService.hentSedTilknyttetJournalpost(journalpostID));
         }
 

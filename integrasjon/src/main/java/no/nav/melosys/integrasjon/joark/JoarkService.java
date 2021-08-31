@@ -5,6 +5,7 @@ import java.time.ZoneId;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
@@ -88,7 +89,9 @@ public class JoarkService implements JoarkFasade {
 
     @Override
     public LocalDate hentMottaksDatoForJournalpost(String journalpostID) {
-        return LocalDate.ofInstant(hentJournalpost(journalpostID).getForsendelseMottatt(), ZoneId.systemDefault());
+        return Optional.ofNullable(hentJournalpost(journalpostID).getForsendelseMottatt())
+            .map(forsendelseMottattDato -> LocalDate.ofInstant(forsendelseMottattDato, ZoneId.systemDefault()))
+            .orElse(null);
     }
 
     @Override
