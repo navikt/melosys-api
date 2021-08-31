@@ -154,21 +154,7 @@
             <artifactId>nav-fim-inntekt-v3-tjenestespesifikasjon</artifactId>
         </dependency>
 
-        <!--JOARK-->
-        <dependency>
-            <groupId>no.nav.tjenestespesifikasjoner</groupId>
-            <artifactId>nav-journal-v3-tjenestespesifikasjon</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.tjenester.fim</groupId>
-            <artifactId>no-nav-dok-tjenester-journalfoerinngaaende</artifactId>
-        </dependency>
-
         <!--TPS-->
-        <dependency>
-            <groupId>no.nav.tjenestespesifikasjoner</groupId>
-            <artifactId>nav-fim-aktoer-v2-tjenestespesifikasjon</artifactId>
-        </dependency>
         <dependency>
             <groupId>no.nav.tjenestespesifikasjoner</groupId>
             <artifactId>person-v3-tjenestespesifikasjon</artifactId>

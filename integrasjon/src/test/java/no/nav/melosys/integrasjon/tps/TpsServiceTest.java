@@ -10,9 +10,6 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
-import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentAktoerIdForIdentPersonIkkeFunnet;
-import no.nav.tjeneste.virksomhet.aktoer.v2.binding.HentIdentForAktoerIdPersonIkkeFunnet;
-import no.nav.tjeneste.virksomhet.aktoer.v2.meldinger.HentIdentForAktoerIdResponse;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.*;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonhistorikkResponse;
@@ -23,7 +20,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class TpsServiceTest {
+class TpsServiceTest {
     private static final String FNR = "88888888888";
     private static final Long AKTØRID_1 = 1000021552067L;
 
@@ -31,11 +28,8 @@ public class TpsServiceTest {
     private TpsService service;
 
     @BeforeEach
-    public void setUp() throws HentAktoerIdForIdentPersonIkkeFunnet, HentIdentForAktoerIdPersonIkkeFunnet {
+    public void setUp() {
         personConsumer = mock(PersonConsumer.class);
-
-        HentIdentForAktoerIdResponse identResponse = new HentIdentForAktoerIdResponse();
-        identResponse.setIdent(FNR);
 
         DokumentFactory dokumentFactory = new DokumentFactory(JaxbConfig.jaxb2Marshaller(), new XsltTemplatesFactory());
 
@@ -43,7 +37,7 @@ public class TpsServiceTest {
     }
 
     @Test
-    public void hentPerson() throws Exception {
+    void hentPerson() throws Exception {
         HentPersonResponse r1 = new HentPersonResponse();
         Person person = new Person().withAktoer(new PersonIdent().withIdent(new NorskIdent().withIdent(AKTØRID_1.toString())));
         r1.setPerson(person);
@@ -57,7 +51,7 @@ public class TpsServiceTest {
     }
 
     @Test
-    public void hentPersonhistorikk() throws Exception {
+    void hentPersonhistorikk() throws Exception {
         HentPersonhistorikkResponse r1 = new HentPersonhistorikkResponse();
         StatsborgerskapPeriode sp = new StatsborgerskapPeriode();
         sp.setStatsborgerskap(new Statsborgerskap());
@@ -74,7 +68,7 @@ public class TpsServiceTest {
     }
 
     @Test
-    public void hentSammensattNavn() throws Exception {
+    void hentSammensattNavn() {
         service = spy(service);
         PersonDokument personDokument = new PersonDokument();
         String sammensattNavn = "sammensattNavn";
