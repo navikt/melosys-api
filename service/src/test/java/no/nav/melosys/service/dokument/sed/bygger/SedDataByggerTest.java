@@ -560,6 +560,19 @@ class SedDataByggerTest {
             .containsExactly(søknad.periode.getFom(), søknad.periode.getTom());
     }
 
+    @Test
+    void lag_medFlereStatsborgerskap_alleStatsborgerSkapMappes() {
+        Persondata personDataFraPDL = PersonopplysningerObjectFactory.lagPersonopplysninger();
+        SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(personDataFraPDL);
+
+        var sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
+        List<String> statsborgerskapList = sedData.getBruker().getStatsborgerskap();
+        assertThat(statsborgerskapList).hasSize(3)
+            .anyMatch("NOR"::equals)
+            .anyMatch("SWE"::equals)
+            .anyMatch("DEN"::equals);
+    }
+
     private void lagUtkastAssertions(SedDataDto sedData, boolean forventAdresse) {
         assertThat(sedData).isNotNull();
         assertThat(sedData.getArbeidsgivendeVirksomheter()).isNotEmpty();
