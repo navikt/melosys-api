@@ -70,4 +70,8 @@ public class AvklarteMedfolgendeFamilie {
     private Avklartefaktatyper tilAvklartefaktaTyper(MedfolgendeFamilie.Relasjonsrolle relasjonsrolle) {
         return MedfolgendeFamilie.Relasjonsrolle.BARN.equals(relasjonsrolle) ? VURDERING_LOVVALG_BARN : VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER;
     }
+
+    public boolean finnes() {
+        return !(familieOmfattetAvNorskTrygd.isEmpty() && familieIkkeOmfattetAvNorskTrygd.isEmpty());
+    }
 }

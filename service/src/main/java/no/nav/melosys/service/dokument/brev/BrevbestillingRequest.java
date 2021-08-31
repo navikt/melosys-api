@@ -14,6 +14,8 @@ public class BrevbestillingRequest {
     private String innledningFritekst;
     private String manglerFritekst;
     private String begrunnelseFritekst;
+    private String ektefelleFritekst;
+    private String barnFritekst;
     private String kontaktpersonNavn;
     private List<KopiMottaker> kopiMottakere;
     private String bestillersId;
@@ -50,11 +52,14 @@ public class BrevbestillingRequest {
         this.orgNr = builder.orgNr;
         this.innledningFritekst = builder.innledningFritekst;
         this.manglerFritekst = builder.manglerFritekst;
+        this.ektefelleFritekst = builder.ektefelleFritekst;
+        this.barnFritekst = builder.barnFritekst;
         this.kontaktpersonNavn = builder.kontaktpersonNavn;
         this.kopiMottakere = builder.kopiMottakere;
         this.bestillersId = builder.bestillersId;
         this.fritekst = builder.fritekst;
         this.begrunnelseKode = builder.begrunnelseKode;
+        this.begrunnelseFritekst = builder.begrunnelseFritekst;
         this.ytterligereInformasjon = builder.ytterligereInformasjon;
     }
 
@@ -80,6 +85,14 @@ public class BrevbestillingRequest {
 
     public String getBegrunnelseFritekst() {
         return begrunnelseFritekst;
+    }
+
+    public String getEktefelleFritekst() {
+        return ektefelleFritekst;
+    }
+
+    public String getBarnFritekst() {
+        return barnFritekst;
     }
 
     public String getKontaktpersonNavn() {
@@ -116,6 +129,8 @@ public class BrevbestillingRequest {
         private String innledningFritekst;
         private String manglerFritekst;
         private String begrunnelseFritekst;
+        private String ektefelleFritekst;
+        private String barnFritekst;
         private String kontaktpersonNavn;
         private List<KopiMottaker> kopiMottakere;
         private String bestillersId;
@@ -150,6 +165,16 @@ public class BrevbestillingRequest {
 
         public Builder medBegrunnelseFritekst(String begrunnelseFritekst) {
             this.begrunnelseFritekst = begrunnelseFritekst;
+            return this;
+        }
+
+        public Builder medEktefelleFritekst(String ektefelleFritekst) {
+            this.ektefelleFritekst = ektefelleFritekst;
+            return this;
+        }
+
+        public Builder medBarnFritekst(String barnFritekst) {
+            this.barnFritekst = barnFritekst;
             return this;
         }
 

@@ -64,14 +64,18 @@ class DokgenMalMapperTest {
     private KodeverkService mockKodeverkService;
     @Mock
     private PersondataFasade mockPersondataFasade;
+
+    @Mock
+    private InnvilgelseFtrlMapper mockInnvilgelseFtrlMapper;
+
     private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     private DokgenMalMapper dokgenMalMapper;
 
     @BeforeEach
     void init() {
-        dokgenMalMapper = new DokgenMalMapper(mockBehandlingsresultatService, mockEregFasade, mockKodeverkService,
-                mockPersondataFasade, fakeUnleash);
+        dokgenMalMapper = new DokgenMalMapper(mockBehandlingsresultatService,
+            mockEregFasade, mockKodeverkService, mockPersondataFasade, fakeUnleash, mockInnvilgelseFtrlMapper);
     }
 
     @Test

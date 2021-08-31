@@ -13,7 +13,8 @@ import no.nav.melosys.domain.person.Persondata;
 @JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION, defaultImpl = DokgenBrevbestilling.class)
 @JsonSubTypes(
     {
-        @JsonSubTypes.Type(value = MangelbrevBrevbestilling.class)
+        @JsonSubTypes.Type(value = MangelbrevBrevbestilling.class),
+        @JsonSubTypes.Type(value = InnvilgelseBrevbestilling.class)
     }
 )
 public class DokgenBrevbestilling extends Brevbestilling {

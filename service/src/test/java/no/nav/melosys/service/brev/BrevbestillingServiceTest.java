@@ -21,6 +21,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
@@ -41,6 +42,7 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -425,6 +427,14 @@ class BrevbestillingServiceTest {
         brevbestillingService.produserBrev(123L, brevbestillingRequest);
 
         verify(mockDokServiceFasade).produserDokument(anyLong(), any(BrevbestillingRequest.class));
+    }
+
+    @Test
+    void produserBrev_InnvilgelseFtrl_skalIkkeTillates() {
+        BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder().medProduserbardokument(INNVILGELSE_FOLKETRYGDLOVEN_2_8).build();
+        assertThatThrownBy(() -> brevbestillingService.produserBrev(123L, brevbestillingRequest))
+            .isInstanceOf(FunksjonellException.class)
+            .hasMessageContaining("Manuell bestilling av INNVILGELSE_FOLKETRYGDLOVEN_2_8 er ikke støttet.");
     }
 
     @Test
