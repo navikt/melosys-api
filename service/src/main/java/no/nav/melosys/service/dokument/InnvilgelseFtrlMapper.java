@@ -2,10 +2,12 @@ package no.nav.melosys.service.dokument;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.InnvilgelsesResultat;
+import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoNorge;
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoUtland;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
@@ -16,7 +18,6 @@ import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.kodeverk.Avtaleland;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
-import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrl;
@@ -88,7 +89,7 @@ public class InnvilgelseFtrlMapper {
             mapVurderingTrygdeavgift(trygdeavgiftsgrunnlag, medlemAvFolketrygden.getFastsattTrygdeavgift()),
             trygdeavgiftsgrunnlag.getLønnsforhold().getKode(),
             hentFullmektigNavnArbeidsgiver(brevbestilling.getBehandling().getFagsak()),
-            brevbestilling.getBehandling().getFagsak().hentRepresentant(Representerer.BRUKER).isPresent(),
+            brevbestilling.getBehandling().getFagsak().finnRepresentant(Representerer.BRUKER).isPresent(),
             String.valueOf(LocalDate.now().getYear()),
             harLønnNorgeSkattepliktigNorge(trygdeavgiftsgrunnlag.getAvgiftsGrunnlagNorge()),
             harLønnUtlandSkattepliktigNorge(trygdeavgiftsgrunnlag.getAvgiftsGrunnlagUtland())
@@ -97,14 +98,15 @@ public class InnvilgelseFtrlMapper {
 
     private boolean erFullstendigInnvilget(Collection<Medlemskapsperiode> medlemskapsperioder) {
         return medlemskapsperioder.stream()
-            .filter(p -> p.getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET).count() == medlemskapsperioder.size();
+            .allMatch(p -> p.getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET);
     }
 
     private String hentSaerligBegrunnelse(Behandlingsresultat behandlingsresultat) {
-        Set<Vilkaarsresultat> vilkaarsresultater = behandlingsresultat.getVilkaarsresultater()
-            .stream().filter(v -> v.getVilkaar().equals(FTRL_2_8_NÆR_TILKNYTNING_NORGE))
-            .collect(Collectors.toSet());
-        return vilkaarsresultater.isEmpty() ? null : vilkaarsresultater.iterator().next().getBegrunnelser().iterator().next().getKode();
+        return behandlingsresultat.getVilkaarsresultater().stream()
+            .findFirst()
+            .filter(v -> v.getVilkaar().equals(FTRL_2_8_NÆR_TILKNYTNING_NORGE))
+            .map(vilkaarsresultat -> vilkaarsresultat.getBegrunnelser().iterator().next().getKode())
+            .orElse(null);
     }
 
     private List<FamiliemedlemInfo> mapOmfattetFamilie(long behandlingID, Set<OmfattetFamilie> omfattetEktefelle, Set<OmfattetFamilie> omfattetBarn) {
@@ -127,14 +129,12 @@ public class InnvilgelseFtrlMapper {
     }
 
     private IkkeOmfattetEktefelle mapIkkeOmfattetEktefelle(long behandlingId, Set<no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie> ektefelleIkkeOmfattet) {
-        if (ektefelleIkkeOmfattet.isEmpty()) {
-            return null;
-        }
-
-        Map<String, MedfolgendeFamilie> medfolgendeEktefelle = avklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(behandlingId);
-        IkkeOmfattetFamilie ikkeOmfattetEktefelle = ektefelleIkkeOmfattet.iterator().next();
-
-        return new IkkeOmfattetEktefelle(tilFamiliemedlemInfo(medfolgendeEktefelle, ikkeOmfattetEktefelle.getUuid()), ikkeOmfattetEktefelle.getBegrunnelse());
+        return ektefelleIkkeOmfattet.stream()
+            .findFirst()
+            .map(ikkeOmfattet -> new IkkeOmfattetEktefelle(
+                tilFamiliemedlemInfo(avklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(behandlingId), ikkeOmfattet.getUuid()),
+                ikkeOmfattet.getBegrunnelse()))
+            .orElse(null);
     }
 
     private FamiliemedlemInfo tilFamiliemedlemInfo(Map<String, MedfolgendeFamilie> avklartMedfolgende, String uuid) {
@@ -183,7 +183,7 @@ public class InnvilgelseFtrlMapper {
     }
 
     private String hentFullmektigNavnArbeidsgiver(Fagsak fagsak) {
-        return fagsak.hentRepresentant(Representerer.ARBEIDSGIVER)
+        return fagsak.finnRepresentant(Representerer.ARBEIDSGIVER)
             .map(aktoer -> eregFasade.hentOrganisasjonNavn(aktoer.getOrgnr()))
             .orElse(null);
     }

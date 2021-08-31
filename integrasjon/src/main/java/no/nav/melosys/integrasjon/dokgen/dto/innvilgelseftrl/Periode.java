@@ -3,21 +3,16 @@ package no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import no.nav.melosys.domain.Medlemskapsperiode;
 
-import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
-
 public class Periode {
 
     @JsonSerialize(using = LocalDateSerializer.class)
-    @JsonFormat(shape = STRING)
     private final LocalDate fom;
 
     @JsonSerialize(using = LocalDateSerializer.class)
-    @JsonFormat(shape = STRING)
     private final LocalDate tom;
 
     private final String bestemmelse;

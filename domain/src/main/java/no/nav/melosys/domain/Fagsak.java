@@ -179,7 +179,7 @@ public class Fagsak extends RegistreringsInfo {
     /**
      * Henter representanten som representerer angitt {@link Representerer} eller {@code null} hvis ingen finnes.
      */
-    public Optional<Aktoer> hentRepresentant(Representerer representerer) {
+    public Optional<Aktoer> finnRepresentant(Representerer representerer) {
         Assert.notNull(representerer, "Representerer trengs for å hente representant.");
         return aktører.stream().filter(a -> REPRESENTANT.equals(a.getRolle()))
             .filter(a -> (representerer.equals(a.getRepresenterer()) || Representerer.BEGGE.equals(a.getRepresenterer())))

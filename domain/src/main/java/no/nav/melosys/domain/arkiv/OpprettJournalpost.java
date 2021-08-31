@@ -81,7 +81,7 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
         opprettJournalpost.setForsendelseMottatt(hovedDokument.getInnsendtTidspunkt());
 
-        fagsak.hentRepresentant(Representerer.BRUKER).ifPresentOrElse(
+        fagsak.finnRepresentant(Representerer.BRUKER).ifPresentOrElse(
             r -> {
                 opprettJournalpost.setKorrespondansepartId(r.getOrgnr());
                 opprettJournalpost.setKorrespondansepartNavn(avsenderNavn);

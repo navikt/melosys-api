@@ -65,6 +65,7 @@ public class AvklarteMedfolgendeFamilieService {
     public AvklarteMedfolgendeBarn hentAvklarteMedfølgendeBarn(long behandlingId) {
         AvklarteMedfolgendeBarn avklarteMedfolgendeBarn = avklartefaktaService.hentAvklarteMedfølgendeBarn(behandlingId);
         Map<String, MedfolgendeFamilie> medfølgendeBarn = hentMedfølgendeBarn(behandlingId);
+
         avklarteMedfolgendeBarn.barnOmfattetAvNorskTrygd.stream()
             .filter(omfattetBarn -> !medfølgendeBarn.containsKey(omfattetBarn.getUuid()))
             .forEach(omfattetBarn -> {
@@ -83,6 +84,7 @@ public class AvklarteMedfolgendeFamilieService {
     public AvklarteMedfolgendeFamilie hentAvklartMedfølgendeEktefelle(long behandlingId) {
         AvklarteMedfolgendeFamilie avklarteMedfølgendeEktefelle = avklartefaktaService.hentAvklarteMedfølgendeEktefelle(behandlingId);
         Map<String, MedfolgendeFamilie> medfolgendeEktefelle = hentMedfølgendEktefelle(behandlingId);
+
         avklarteMedfølgendeEktefelle.getFamilieOmfattetAvNorskTrygd().stream()
             .filter(omfattetEkte -> !medfolgendeEktefelle.containsKey(omfattetEkte.getUuid()))
             .forEach(omfattetEkte -> {

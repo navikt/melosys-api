@@ -3,7 +3,6 @@ package no.nav.melosys.service.dokument;
 import java.time.Instant;
 
 import no.finn.unleash.Unleash;
-import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
@@ -104,7 +103,7 @@ public class DokgenMalMapper {
     }
 
     private String hentFullmektigNavn(Fagsak fagsak) {
-        return fagsak.hentRepresentant(Representerer.BRUKER)
+        return fagsak.finnRepresentant(Representerer.BRUKER)
             .map(aktoer -> eregFasade.hentOrganisasjonNavn(aktoer.getOrgnr()))
             .orElse(null);
     }
