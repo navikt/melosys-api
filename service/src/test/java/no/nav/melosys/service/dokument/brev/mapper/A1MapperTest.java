@@ -253,7 +253,7 @@ class A1MapperTest {
 
     @Test
     void mapTilBrevXML_harUkjentEllerIkkeOppgittArbeidsted_brekkerAdresseOverFlereLinjer() {
-        brevData.erUkjentEllerIKkeOppgit = true;
+        brevData.erUkjenteEllerAlleEosLand = true;
         brevData.arbeidssteder = Collections.emptyList();
         brevData.arbeidsland = Collections.emptyList();
 

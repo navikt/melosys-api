@@ -161,7 +161,7 @@ class A1Mapper {
 
     private Stream<AdresseType> lagAdresserForArbeidsstederOgLandUtenArbeidssted(List<Arbeidssted> arbeidssteder,
                                                                                  Collection<Landkoder> arbeidsland) {
-        if (brevData.erUkjentEllerIKkeOppgit) {
+        if (brevData.erUkjenteEllerAlleEosLand) {
             return lagAdresselinjeForUkjentEllerIkkeOppgittArbeidssted().stream().map(this::tilAdresseType);
         }
 

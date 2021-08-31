@@ -17,7 +17,7 @@ public class BrevDataA1 extends BrevData {
 
     public List<Arbeidssted> arbeidssteder;
     public Collection<Landkoder> arbeidsland;
-    public boolean erUkjentEllerIKkeOppgit;
+    public boolean erUkjenteEllerAlleEosLand;
 
     public StrukturertAdresse bostedsadresse;
     public Collection<AvklartVirksomhet> bivirksomheter;
