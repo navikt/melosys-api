@@ -223,7 +223,7 @@ class A1MapperTest {
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
         List<String> utfylteAdresselinjer = a1.getFysiskArbeidsstedAdresseListe().getAdresse().stream()
             .map(AdresseType::getAdresselinje1)
-            .filter(not(StringUtils::isEmpty))
+            .filter(StringUtils::isNotEmpty)
             .collect(Collectors.toList());
 
         assertThat(utfylteAdresselinjer.size()).isEqualTo(1);
@@ -245,7 +245,7 @@ class A1MapperTest {
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
         List<String> utfylteAdresselinjer = a1.getFysiskArbeidsstedAdresseListe().getAdresse().stream()
             .map(AdresseType::getAdresselinje1)
-            .filter(not(StringUtils::isEmpty))
+            .filter(StringUtils::isNotEmpty)
             .collect(Collectors.toList());
 
         assertThat(utfylteAdresselinjer.size()).isGreaterThan(1);
@@ -260,11 +260,10 @@ class A1MapperTest {
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
         List<String> utfylteAdresselinjer = a1.getFysiskArbeidsstedAdresseListe().getAdresse().stream()
             .map(AdresseType::getAdresselinje1)
-            .filter(not(StringUtils::isEmpty))
+            .filter(StringUtils::isNotEmpty)
             .collect(Collectors.toList());
 
-        assertThat(utfylteAdresselinjer.size()).isEqualTo(1);
-        assertThat(utfylteAdresselinjer.stream().findFirst()).isEqualTo(Optional.of("Various EEA-countries/Switzerland"));
+        assertThat(utfylteAdresselinjer).containsExactly("Various EEA-countries/Switzerland");
     }
 
     @Test
