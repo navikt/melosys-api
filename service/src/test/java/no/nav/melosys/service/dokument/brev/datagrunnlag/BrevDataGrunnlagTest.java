@@ -21,6 +21,7 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +38,8 @@ class BrevDataGrunnlagTest {
     private KodeverkService kodeverkService;
     @Mock
     private AvklartefaktaService avklartefaktaService;
+    @Mock
+    private PersondataFasade persondataFasade;
 
     private DoksysBrevbestilling brevbestilling;
     private Soeknad søknad;
@@ -58,7 +61,7 @@ class BrevDataGrunnlagTest {
         Behandling behandling = lagBehandling(søknad, person);
 
         brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
-        dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, mock(AvklarteVirksomheterService.class), avklartefaktaService);
+        dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, mock(AvklarteVirksomheterService.class), avklartefaktaService, persondataFasade);
     }
 
     private Behandling lagBehandling(Soeknad søknad, PersonDokument person) {
@@ -108,7 +111,7 @@ class BrevDataGrunnlagTest {
         AvklartMaritimtArbeid maritimtArbeid = lagAvklartMaritimtArbeid();
         when(avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(anyLong()))
             .thenReturn(Collections.singletonMap("Dunfjæder", maritimtArbeid));
-        dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, mock(AvklarteVirksomheterService.class), avklartefaktaService);
+        dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, mock(AvklarteVirksomheterService.class), avklartefaktaService, persondataFasade);
 
         MaritimtArbeid maritimtArbeidISøknad = lagMaritimtArbeid();
         this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
@@ -133,7 +136,8 @@ class BrevDataGrunnlagTest {
             brevbestilling,
             kodeverkService,
             mock(AvklarteVirksomheterService.class),
-            avklartefaktaService
+            avklartefaktaService,
+            persondataFasade
         );
 
         Collection<Arbeidssted> arbeidssteder = dataGrunnlagUtenAvklartMaritimtArbeid.getArbeidsstedGrunnlag().hentArbeidssteder();

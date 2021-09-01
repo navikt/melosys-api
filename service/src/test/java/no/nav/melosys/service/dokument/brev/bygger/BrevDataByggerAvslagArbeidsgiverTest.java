@@ -24,6 +24,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagArbeidsgiver;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,6 +57,8 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
     VilkaarsresultatRepository vilkaarsresultatRepository;
     @Mock
     LovvalgsperiodeService lovvalgsperiodeService;
+    @Mock
+    private PersondataFasade persondataFasade;
 
     private BrevDataByggerAvslagArbeidsgiver brevDataByggerAvslagArbeidsgiver;
 
@@ -114,7 +117,7 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
 
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), kodeverkService);
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
-        BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+        BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondataFasade);
         String saksbehandler = "saksbehandler";
         BrevDataAvslagArbeidsgiver brevData = (BrevDataAvslagArbeidsgiver) brevDataByggerAvslagArbeidsgiver.lag(dataGrunnlag, saksbehandler);
         assertThat(brevData.hovedvirksomhet.orgnr).isEqualTo("987654321");

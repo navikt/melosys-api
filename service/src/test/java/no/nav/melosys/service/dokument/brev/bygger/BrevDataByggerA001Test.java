@@ -68,6 +68,8 @@ class BrevDataByggerA001Test {
     private VilkaarsresultatService vilkaarsresultatService;
     @Mock
     private EregFasade ereg;
+    @Mock
+    private PersondataFasade persondataFasade;
 
     private Behandling behandling;
 
@@ -161,7 +163,7 @@ class BrevDataByggerA001Test {
     private BrevDataGrunnlag lagBrevDataGrunnlag(DoksysBrevbestilling brevbestilling) {
         RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(ereg, mock(PersondataFasade.class));
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), mock(KodeverkService.class));
-        return new BrevDataGrunnlag(brevbestilling, mock(KodeverkService.class), avklarteVirksomheterService, avklartefaktaService);
+        return new BrevDataGrunnlag(brevbestilling, mock(KodeverkService.class), avklarteVirksomheterService, avklartefaktaService, persondataFasade);
     }
 
     private void leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) {

@@ -19,6 +19,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataAvslagYrkesaktiv;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
@@ -51,6 +52,8 @@ class BrevDataByggerAvslagYrkesaktivTest {
     KodeverkService kodeverkService;
     @Mock
     VilkaarsresultatService vilkaarsresultatService;
+    @Mock
+    private PersondataFasade persondataFasade;
 
     private BrevDataByggerAvslagYrkesaktiv brevDataByggerAvslagYrkesaktiv;
     private AnmodningsperiodeSvar anmodningsperiodeSvar;
@@ -119,6 +122,6 @@ class BrevDataByggerAvslagYrkesaktivTest {
     public BrevDataGrunnlag lagBrevressurser(Behandling behandling) {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), kodeverkService);
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
-        return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+        return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondataFasade);
     }
 }

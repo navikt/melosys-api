@@ -46,11 +46,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.xml.sax.SAXException;
 
+import static java.util.Collections.emptyList;
 import static java.util.function.Predicate.not;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
 import static no.nav.melosys.service.dokument.brev.mapper.A1Mapper.MAKS_ANTALL_TEGN_PER_LINJE_5_2;
+import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -124,7 +126,7 @@ class A1MapperTest {
         brevData.bostedsadresse = boAdresse;
         brevData.arbeidssteder = new ArrayList<>(Arrays.asList(fysiskArbeidssted, maritimtArbeidsstedSkip, maritimtArbeidsstedSokkel));
         brevData.arbeidsland = List.of(Landkoder.SE);
-        brevData.person = lagPersonDokument();
+        brevData.person = lagPersonopplysninger();
         brevData.hovedvirksomhet = virksomhet;
         brevData.bivirksomheter = new ArrayList<>(Collections.singletonList(utenlandskVirksomhet));
 
@@ -268,9 +270,8 @@ class A1MapperTest {
 
     @Test
     void mapTilBrevXML_brukerErStatsløs_forventStatløsTekst() {
-        brevData.person.setStatsborgerskap(Land.av(Land.STATSLØS));
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
-        assertThat(a1.getPerson().getStatsborgerskap()).isEqualTo("Stateless");
+        assertThat(a1.getPerson().getStatsborgerskap()).isEqualTo(emptyList());
     }
 
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException {

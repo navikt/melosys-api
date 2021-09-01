@@ -247,7 +247,7 @@ final class DokumentServiceTest {
         RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(eregFasade, persondataFasade);
         AvklarteVirksomheterSystemService avklarteVirksomheterSystemService = new AvklarteVirksomheterSystemService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), mock(KodeverkService.class));
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(lagBehandling()).build();
-        BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterSystemService, avklartefaktaService);
+        BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterSystemService, avklartefaktaService, persondataFasade);
         BrevdataGrunnlagFactory brevdataGrunnlagFactory = mock(BrevdataGrunnlagFactory.class);
         when(brevdataGrunnlagFactory.av(any())).thenReturn(dataGrunnlag);
         return brevdataGrunnlagFactory;

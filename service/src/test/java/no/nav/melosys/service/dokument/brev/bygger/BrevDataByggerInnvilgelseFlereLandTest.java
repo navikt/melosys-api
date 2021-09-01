@@ -25,6 +25,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,6 +52,8 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     SaksopplysningerService saksopplysningerService;
     @Mock
     BrevDataByggerA1 brevDataByggerA1;
+    @Mock
+    private PersondataFasade persondataFasade;
 
     private Behandling behandling;
     private BrevbestillingRequest brevbestillingRequest;
@@ -89,7 +92,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
 
     private BrevDataGrunnlag lagBrevressurser() {
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
-        return new BrevDataGrunnlag(brevbestilling, null, avklarteVirksomheterService, avklartefaktaService);
+        return new BrevDataGrunnlag(brevbestilling, null, avklarteVirksomheterService, avklartefaktaService, persondataFasade);
     }
 
     private static Saksopplysning lagPersonsopplysning() {

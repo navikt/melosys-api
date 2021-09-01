@@ -123,7 +123,7 @@ public class BrevDataByggerInnvilgelseTest {
 
     public BrevDataGrunnlag lagBrevdataGrunnlag() {
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
-        return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+        return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondataFasade);
     }
 
     @Test
