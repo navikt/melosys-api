@@ -64,7 +64,7 @@
         <logback.version>1.2.3</logback.version>
         <logstash.version>6.6</logstash.version>
         <hikaricp.version>4.0.3</hikaricp.version>
-        <ibmmq.version>9.0.5.0</ibmmq.version>
+        <ibmmq.version>9.2.3.0</ibmmq.version>
         <jackson.version>2.12.3</jackson.version>
         <javax.ws.rs-api.version>2.1</javax.ws.rs-api.version>
         <json-smart.version>2.4.7</json-smart.version>
@@ -82,10 +82,10 @@
         <slf4j.version>1.7.30</slf4j.version>
         <springfox.version>3.0.0</springfox.version>
         <swagger.version>1.5.21</swagger.version>
-        <unleash.version>3.3.4</unleash.version>
+        <unleash.version>4.4.0</unleash.version>
 
         <!-- Transitive avhengiheter -->
-        <asm.version>9.1</asm.version>
+        <asm.version>9.2</asm.version>
         <bcprov-jdk15on.version>1.68</bcprov-jdk15on.version>
         <cglib.version>3.3.0</cglib.version>
         <classgraph.version>4.8.102</classgraph.version>
@@ -96,7 +96,7 @@
         <joda-time.version>2.10.10</joda-time.version>
         <objenesis.version>3.2</objenesis.version>
         <osgi.version>6.0.0</osgi.version>
-        <woodstox.version>6.2.3</woodstox.version>
+        <woodstox.version>6.2.6</woodstox.version>
         <xmlsec.version>2.2.2</xmlsec.version>
         <medlemskapsunntak-api-v1.version>1.1</medlemskapsunntak-api-v1.version>
         <wiremock-standalone.version>2.27.2</wiremock-standalone.version>
