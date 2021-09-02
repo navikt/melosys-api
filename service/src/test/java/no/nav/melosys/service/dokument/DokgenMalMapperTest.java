@@ -9,6 +9,7 @@ import java.util.List;
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
+import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -20,18 +21,17 @@ import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.integrasjon.dokgen.dto.DokgenDto;
-import no.nav.melosys.integrasjon.dokgen.dto.MangelbrevArbeidsgiver;
-import no.nav.melosys.integrasjon.dokgen.dto.MangelbrevBruker;
-import no.nav.melosys.integrasjon.dokgen.dto.SaksbehandlingstidSoknad;
+import no.nav.melosys.integrasjon.dokgen.dto.*;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -263,6 +263,56 @@ class DokgenMalMapperTest {
         assertEquals("Dummy", result.getManglerInfoFritekst());
         assertEquals("Fullmektig AS", result.getNavnFullmektig());
         assertEquals(Instant.now().plus(Period.ofWeeks(4)).truncatedTo(ChronoUnit.DAYS), result.getDatoInnsendingsfrist().truncatedTo(ChronoUnit.DAYS));
+    }
+
+    @Test
+    @Disabled
+    void skalMappeInnvilgelsesbrevTilBruker() {
+        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
+        when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
+        when(mockInnvilgelseFtrlMapper.map(any())).thenReturn(lagInnvilgelseFtrl());
+
+        Behandling behandling = lagBehandling(lagFagsak(true));
+
+        DokgenBrevbestilling brevbestilling = new InnvilgelseBrevbestilling.Builder()
+            .medProduserbartdokument(INNVILGELSE_FOLKETRYGDLOVEN_2_8)
+            .medBehandling(behandling)
+            .medOrg(lagOrg())
+            .medKontaktopplysning(lagKontaktOpplysning())
+            .medForsendelseMottatt(Instant.now())
+            .medInnledningFritekst("Dummy")
+            .build();
+
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling);
+        assertTrue(dokgenDto instanceof MangelbrevBruker);
+        MangelbrevBruker result = (MangelbrevBruker) dokgenDto;
+        assertEquals("Dummy", result.getInnledningFritekst());
+        assertEquals("Dummy", result.getManglerInfoFritekst());
+        assertEquals(Instant.now().plus(Period.ofWeeks(4)).truncatedTo(ChronoUnit.DAYS), result.getDatoInnsendingsfrist().truncatedTo(ChronoUnit.DAYS));
+    }
+
+    private InnvilgelseFtrl lagInnvilgelseFtrl() {
+        return new InnvilgelseFtrl(
+            new InnvilgelseBrevbestilling(),
+            null,
+            true,
+            Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_MULTINASJONALT_SELSKAP.getBeskrivelse(),
+            false,
+            false,
+            null,
+            null,
+            null,
+            "Egon Olsen AS",
+            "USA",
+            false,
+            null,
+            null,
+            null,
+            false,
+            String.valueOf(LocalDate.now().getYear()),
+            false,
+            false
+        );
     }
 
     private Fagsak lagFagsak() {
