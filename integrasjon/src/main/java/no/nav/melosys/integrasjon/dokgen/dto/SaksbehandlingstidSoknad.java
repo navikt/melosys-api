@@ -72,7 +72,7 @@ public class SaksbehandlingstidSoknad extends DokgenDto {
         }
         return switch (avsendertype) {
             case PERSON -> BRUKER;
-            case ORGANISASJON -> ARBEIDSGIVER; //NOTE Gir samme tekst som REPRESENTANT i brevmalen i dokgen
+            case ORGANISASJON -> REPRESENTANT;
             case UTENLANDSK_TRYGDEMYNDIGHET -> MYNDIGHET;
         };
     }
