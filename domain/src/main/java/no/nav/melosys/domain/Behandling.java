@@ -3,7 +3,6 @@ package no.nav.melosys.domain;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -204,23 +203,23 @@ public class Behandling extends RegistreringsInfo {
      */
     @Deprecated
     public PersonDokument hentPersonDokument() {
-        Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.PERSOPL);
+        Optional<SaksopplysningDokument> saksopplysning = finnDokument(SaksopplysningType.PERSOPL);
         return (PersonDokument) saksopplysning
             .orElseThrow(() -> new TekniskException("Finner ikke persondokument"));
     }
 
     public Optional<Persondata> finnPersonDokument() {
-        return hentDokument(SaksopplysningType.PERSOPL).map(s -> (Persondata) s);
+        return finnDokument(SaksopplysningType.PERSOPL).map(Persondata.class::cast);
     }
 
     public MedlemskapDokument hentMedlemskapDokument() {
-        Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.MEDL);
+        Optional<SaksopplysningDokument> saksopplysning = finnDokument(SaksopplysningType.MEDL);
         return (MedlemskapDokument) saksopplysning
             .orElseThrow(() -> new TekniskException("Finner ikke medlemskapdokument"));
     }
 
     public ArbeidsforholdDokument hentArbeidsforholdDokument() {
-        Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.ARBFORH);
+        Optional<SaksopplysningDokument> saksopplysning = finnDokument(SaksopplysningType.ARBFORH);
         return (ArbeidsforholdDokument) saksopplysning
             .orElseThrow(() -> new TekniskException("Finner ikke arbeidsforholddokument"));
     }
@@ -230,30 +229,30 @@ public class Behandling extends RegistreringsInfo {
             .filter(saksopplysning -> saksopplysning.getType().equals(SaksopplysningType.ORG))
             .map(Saksopplysning::getDokument)
             .map(OrganisasjonDokument.class::cast)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     public SedDokument hentSedDokument() {
-        Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.SEDOPPL);
+        Optional<SaksopplysningDokument> saksopplysning = finnDokument(SaksopplysningType.SEDOPPL);
         return (SedDokument) saksopplysning
             .orElseThrow(() -> new TekniskException("Finner ikke seddokument"));
     }
 
     public Optional<SedDokument> finnSedDokument() {
-        return hentDokument(SaksopplysningType.SEDOPPL).map(s -> (SedDokument) s);
+        return finnDokument(SaksopplysningType.SEDOPPL).map(SedDokument.class::cast);
     }
 
     public InntektDokument hentInntektDokument() {
-        Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.INNTK);
+        Optional<SaksopplysningDokument> saksopplysning = finnDokument(SaksopplysningType.INNTK);
         return (InntektDokument) saksopplysning
             .orElseThrow(() -> new TekniskException("Finner ikke inntektdokument"));
     }
 
     public Optional<UtbetalingDokument> finnUtbetalingDokument() {
-        return hentDokument(SaksopplysningType.UTBETAL).map(d -> (UtbetalingDokument) d);
+        return finnDokument(SaksopplysningType.UTBETAL).map(UtbetalingDokument.class::cast);
     }
 
-    public Optional<SaksopplysningDokument> hentDokument(SaksopplysningType saksopplysningType) {
+    public Optional<SaksopplysningDokument> finnDokument(SaksopplysningType saksopplysningType) {
         return getSaksopplysninger().stream()
             .filter(saksopplysning -> saksopplysning.getType().equals(saksopplysningType))
             .findFirst().map(Saksopplysning::getDokument);

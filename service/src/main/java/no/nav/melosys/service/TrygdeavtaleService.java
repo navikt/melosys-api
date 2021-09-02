@@ -29,7 +29,7 @@ public class TrygdeavtaleService {
         Map<String, String> orgIdOgNavn = new HashMap<>();
 
         orgIdOgNavn.putAll(
-            ((ArbeidsforholdDokument) behandling.hentDokument(SaksopplysningType.ARBFORH).orElse(new ArbeidsforholdDokument()))
+            ((ArbeidsforholdDokument) behandling.finnDokument(SaksopplysningType.ARBFORH).orElse(new ArbeidsforholdDokument()))
                 .hentOrgnumre().stream()
                 .collect(Collectors.toMap(orgnr -> orgnr, orgnr -> finnNavnFraOrganisasjonsdokument(orgnr, organisasjonDokumenter))));
         orgIdOgNavn.putAll(behandlingsgrunnlagData.hentAlleOrganisasjonsnumre().stream()

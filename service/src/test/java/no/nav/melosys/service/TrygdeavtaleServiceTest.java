@@ -3,7 +3,6 @@ package no.nav.melosys.service;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
@@ -15,7 +14,6 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -201,7 +199,7 @@ public class TrygdeavtaleServiceTest {
                 foretakUtland.navn = un.getValue();
                 return foretakUtland;
             })
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private Saksopplysning lagOrgSaksopplysning(String orgnr, String navn) {
@@ -228,7 +226,7 @@ public class TrygdeavtaleServiceTest {
                 arbeidsforhold.arbeidsgiverID = orgnr;
                 return arbeidsforhold;
             })
-            .collect(Collectors.toList());
+            .toList();
 
         var saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.ARBFORH);
