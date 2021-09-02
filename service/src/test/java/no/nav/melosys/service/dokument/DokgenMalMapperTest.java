@@ -171,9 +171,17 @@ class DokgenMalMapperTest {
 
         DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling);
 
-        assertTrue(dokgenDto instanceof SaksbehandlingstidSoknad);
-        assertEquals(MYNDIGHET, ((SaksbehandlingstidSoknad) dokgenDto).getAvsenderTypeSoknad());
-        assertEquals("Finland", ((SaksbehandlingstidSoknad) dokgenDto).getAvsenderLand());
+        assertThat(dokgenDto)
+            .isInstanceOf(SaksbehandlingstidSoknad.class);
+
+        assertThat((SaksbehandlingstidSoknad) dokgenDto)
+            .extracting(
+                SaksbehandlingstidSoknad::getAvsenderTypeSoknad,
+                SaksbehandlingstidSoknad::getAvsenderLand
+            ).containsExactly(
+                MYNDIGHET,
+                "Finland"
+            );
     }
 
     @Test
