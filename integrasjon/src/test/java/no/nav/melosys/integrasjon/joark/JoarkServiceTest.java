@@ -275,6 +275,7 @@ class JoarkServiceTest {
             Journalpost::getAvsenderId,
             Journalpost::getAvsenderNavn,
             Journalpost::getAvsenderType,
+            Journalpost::getAvsenderLand,
             Journalpost::getForsendelseJournalfoert,
             Journalpost::getForsendelseMottatt,
             Journalpost::getInnhold,
@@ -290,6 +291,7 @@ class JoarkServiceTest {
             safJournalpost.avsenderMottaker().id(),
             safJournalpost.avsenderMottaker().navn(),
             Avsendertyper.ORGANISASJON,
+            "FINLAND",
             null,
             safJournalpost.relevanteDatoer().stream().filter(RelevantDato::harDatotypeRegistrert)
                 .map(RelevantDato::dato).map(this::tilInstant).findFirst().orElseThrow(),
@@ -451,7 +453,7 @@ class JoarkServiceTest {
             no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalposttype.I,
             new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Sak("MEL-123"),
             new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Bruker("123123", Brukertype.FNR),
-            new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.AvsenderMottaker("010101", AvsenderMottakerType.ORGNR, "Org AS"),
+            new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.AvsenderMottaker("010101", AvsenderMottakerType.ORGNR, "Org AS", "FINLAND"),
             "SKAN_NETS",
             Set.of(
                 new RelevantDato(LocalDateTime.now(), Datotype.DATO_REGISTRERT)
@@ -481,7 +483,7 @@ class JoarkServiceTest {
             no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalposttype.I,
             new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Sak("MEL-123"),
             new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Bruker("123123", Brukertype.FNR),
-            new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.AvsenderMottaker("010101", AvsenderMottakerType.ORGNR, "Org AS"),
+            new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.AvsenderMottaker("010101", AvsenderMottakerType.ORGNR, "Org AS", null),
             "SKAN_NETS",
             Set.of(
                 new RelevantDato(LocalDateTime.now(), Datotype.DATO_REGISTRERT)
