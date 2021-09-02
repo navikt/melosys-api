@@ -39,7 +39,7 @@ public class VedtakTjeneste {
         }
         tilgangService.sjekkTilgang(behandlingID);
 
-        vedtakServiceFasade.fattVedtak(behandlingID, lagFattVedtakRequest(fattVedtakDto), SubjectHandler.getInstance().getUserID());
+        vedtakServiceFasade.fattVedtak(behandlingID, lagFattVedtakRequest(fattVedtakDto, SubjectHandler.getInstance().getUserID()));
         return ResponseEntity.ok().build();
     }
 
@@ -55,7 +55,7 @@ public class VedtakTjeneste {
         return ResponseEntity.ok().build();
     }
 
-    private FattVedtakRequest lagFattVedtakRequest(FattVedtakDto fattVedtakDto) {
+    private FattVedtakRequest lagFattVedtakRequest(FattVedtakDto fattVedtakDto, String bestillersId) {
         FattVedtakRequest.Builder<?> fattVedtakRequest;
 
         if (fattVedtakDto instanceof FattEosVedtakDto eosVedtakDto) {
@@ -70,7 +70,8 @@ public class VedtakTjeneste {
                 .medFritekstBegrunnelse(ftrlVedtakDto.getFritekstBegrunnelse())
                 .medFritekstEktefelle(ftrlVedtakDto.getFritekstEktefelle())
                 .medFritekstBarn(ftrlVedtakDto.getFritekstBarn())
-                .medKopiMottakere(ftrlVedtakDto.getKopiMottakere());
+                .medKopiMottakere(ftrlVedtakDto.getKopiMottakere())
+                .medBestillersId(bestillersId);
         } else if (fattVedtakDto instanceof FattTrygdeavtaleVedtakDto ftrlVedtakDto) {
             fattVedtakRequest = new FattTrygdeavtaleVedtakRequest.Builder()
                 .medFritekstBegrunnelse(ftrlVedtakDto.getFritekstBegrunnelse());

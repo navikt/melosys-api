@@ -47,7 +47,7 @@ public class VedtakServiceFasade {
     }
 
     @Transactional(noRollbackFor = {ValideringException.class})
-    public void fattVedtak(long behandlingID, FattVedtakRequest fattVedtakRequest, String bestillersId) throws ValideringException {
+    public void fattVedtak(long behandlingID, FattVedtakRequest fattVedtakRequest) throws ValideringException {
         var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
 
         validerKanFattesVedtakAvTema(behandling);
@@ -56,7 +56,7 @@ public class VedtakServiceFasade {
 
         switch (sakstype) {
             case EU_EOS -> eosVedtakService.fattVedtak(behandling, (FattEosVedtakRequest) fattVedtakRequest);
-            case FTRL -> ftrlVedtakService.fattVedtak(behandling, (FattFtrlVedtakRequest) fattVedtakRequest, bestillersId);
+            case FTRL -> ftrlVedtakService.fattVedtak(behandling, (FattFtrlVedtakRequest) fattVedtakRequest);
             case TRYGDEAVTALE -> trygdeavtaleVedtakService.fattVedtak(behandling, (FattTrygdeavtaleVedtakRequest) fattVedtakRequest);
             default -> throw new FunksjonellException("Vedtaksfatting for sakstype " + sakstype + " er ikke støttet.");
         }

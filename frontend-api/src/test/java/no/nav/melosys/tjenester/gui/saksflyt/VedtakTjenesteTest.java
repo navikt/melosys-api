@@ -64,7 +64,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
         verify(tilgangService).sjekkTilgang(behandlingID);
-        verify(vedtakServiceFasade).fattVedtak(eq(behandlingID), any(FattEosVedtakRequest.class), anyString());
+        verify(vedtakServiceFasade).fattVedtak(eq(behandlingID), any(FattEosVedtakRequest.class));
 
         valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }
@@ -79,7 +79,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
         vedtakTjeneste.fattVedtak(behandlingID, fattVedtakDto);
 
         verify(tilgangService).sjekkTilgang(behandlingID);
-        verify(vedtakServiceFasade).fattVedtak(eq(behandlingID), any(FattFtrlVedtakRequest.class), anyString());
+        verify(vedtakServiceFasade).fattVedtak(eq(behandlingID), any(FattFtrlVedtakRequest.class));
 
         valider(fattVedtakDto, FATT_VEDTAK_SCHEMA);
     }

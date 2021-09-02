@@ -80,7 +80,7 @@ class FtrlVedtakServiceTest {
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         FattFtrlVedtakRequest request = lagFattVedtakRequest();
-        ftrlVedtakService.fattVedtak(lagBehandling(), request, SubjectHandler.getInstance().getUserID());
+        ftrlVedtakService.fattVedtak(lagBehandling(), request);
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
         verify(behandlingService).lagre(behandlingCaptor.capture());
@@ -116,6 +116,7 @@ class FtrlVedtakServiceTest {
             .medFritekstEktefelle("Ektefelle omfattet")
             .medFritekstBarn("Barn omfattet")
             .medKopiMottakere(List.of(new KopiMottaker(Aktoersroller.ARBEIDSGIVER, "987654321", null)))
+            .medBestillersId(SubjectHandler.getInstance().getUserID())
             .build();
     }
 

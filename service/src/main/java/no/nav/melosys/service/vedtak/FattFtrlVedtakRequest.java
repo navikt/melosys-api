@@ -10,6 +10,7 @@ public class FattFtrlVedtakRequest extends FattVedtakRequest {
     private final String fritekstEktefelle;
     private final String fritekstBarn;
     private final List<KopiMottaker> kopiMottakere;
+    private final String bestillersId;
 
     private FattFtrlVedtakRequest(Builder builder) {
         super(builder);
@@ -18,6 +19,7 @@ public class FattFtrlVedtakRequest extends FattVedtakRequest {
         this.fritekstEktefelle = builder.fritekstEktefelle;
         this.fritekstBarn = builder.fritekstBarn;
         this.kopiMottakere = builder.kopiMottakere;
+        this.bestillersId = builder.bestillersId;
     }
 
     public String getFritekstInnledning() {
@@ -40,12 +42,17 @@ public class FattFtrlVedtakRequest extends FattVedtakRequest {
         return kopiMottakere;
     }
 
+    public String getBestillersId() {
+        return bestillersId;
+    }
+
     public static class Builder extends FattVedtakRequest.Builder<Builder> {
         private String fritekstInnledning;
         private String fritekstBegrunnelse;
         private String fritekstEktefelle;
         private String fritekstBarn;
         private List<KopiMottaker> kopiMottakere;
+        private String bestillersId;
 
         @Override
         public Builder getThis() {
@@ -74,6 +81,11 @@ public class FattFtrlVedtakRequest extends FattVedtakRequest {
 
         public Builder medKopiMottakere(List<KopiMottaker> kopiMottakere) {
             this.kopiMottakere = kopiMottakere;
+            return this;
+        }
+
+        public Builder medBestillersId(String bestillersId) {
+            this.bestillersId = bestillersId;
             return this;
         }
 

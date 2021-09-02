@@ -46,7 +46,7 @@ public class FtrlVedtakService {
         this.dokgenService = dokgenService;
     }
 
-    public void fattVedtak(Behandling behandling, FattFtrlVedtakRequest request, String bestillersId) {
+    public void fattVedtak(Behandling behandling, FattFtrlVedtakRequest request) {
         long behandlingID = behandling.getId();
 
         log.info("Fatter vedtak for (FTRL) sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandlingID);
@@ -62,11 +62,11 @@ public class FtrlVedtakService {
         behandlingService.lagre(behandling);
 
         prosessinstansService.opprettProsessinstansIverksettVedtak(behandling, request);
-        dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestilling(request, bestillersId));
+        dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestilling(request));
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private BrevbestillingRequest lagBrevbestilling(FattFtrlVedtakRequest request, String bestillersId) {
+    private BrevbestillingRequest lagBrevbestilling(FattFtrlVedtakRequest request) {
         return new BrevbestillingRequest.Builder()
             .medProduserbardokument(Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN_2_8)
             .medMottaker(Aktoersroller.BRUKER)
@@ -75,7 +75,7 @@ public class FtrlVedtakService {
             .medBegrunnelseFritekst(request.getFritekstBegrunnelse())
             .medEktefelleFritekst(request.getFritekstEktefelle())
             .medBarnFritekst(request.getFritekstBarn())
-            .medBestillersId(bestillersId)
+            .medBestillersId(request.getBestillersId())
             .build();
     }
 
