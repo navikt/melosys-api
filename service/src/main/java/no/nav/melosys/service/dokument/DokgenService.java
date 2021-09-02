@@ -168,7 +168,9 @@ public class DokgenService {
         brevbestilling
             .medForsendelseMottatt(journalpost.getForsendelseMottatt())
             .medAvsenderNavn(journalpost.getAvsenderNavn())
-            .medAvsenderId(journalpost.getAvsenderId());
+            .medAvsenderId(journalpost.getAvsenderId())
+            .medAvsendertype(journalpost.getAvsenderType())
+            .medAvsenderLand(journalpost.getAvsenderLand());
     }
 
     private String hentSaksbehandlerNavn(String ident) {

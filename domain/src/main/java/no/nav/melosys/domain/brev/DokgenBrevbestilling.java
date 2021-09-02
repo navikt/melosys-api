@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.person.Persondata;
 
@@ -23,6 +24,8 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private String kontaktpersonNavn;
     private Instant forsendelseMottatt;
     private String avsenderId;
+    private String avsenderLand;
+    private Avsendertyper avsendertype;
     private long behandlingId;
     private boolean bestillKopi;
     private boolean bestillUtkast;
@@ -42,6 +45,8 @@ public class DokgenBrevbestilling extends Brevbestilling {
         this.kontaktpersonNavn = builder.kontaktpersonNavn;
         this.forsendelseMottatt = builder.forsendelseMottatt;
         this.avsenderId = builder.avsenderId;
+        this.avsendertype = builder.avsendertype;
+        this.avsenderLand = builder.avsenderLand;
         this.behandlingId = builder.behandlingId;
         this.bestillKopi = builder.bestillKopi;
         this.bestillUtkast = builder.bestillUtkast;
@@ -68,6 +73,14 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
     public String getAvsenderId() {
         return avsenderId;
+    }
+
+    public String getAvsenderLand() {
+        return avsenderLand;
+    }
+
+    public Avsendertyper getAvsendertype() {
+        return avsendertype;
     }
 
     public long getBehandlingId() {
@@ -107,6 +120,8 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private Instant forsendelseMottatt;
         private String avsenderNavn;
         private String avsenderId;
+        private String avsenderLand;
+        private Avsendertyper avsendertype;
         private long behandlingId;
         private boolean bestillKopi;
         private boolean bestillUtkast;
@@ -126,6 +141,8 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.forsendelseMottatt = brevbestilling.forsendelseMottatt;
             this.avsenderNavn = brevbestilling.avsenderNavn;
             this.avsenderId = brevbestilling.avsenderId;
+            this.avsendertype = brevbestilling.avsendertype;
+            this.avsenderLand = brevbestilling.avsenderLand;
             this.behandlingId = brevbestilling.behandlingId;
             this.bestillKopi = brevbestilling.bestillKopi;
             this.bestillUtkast = brevbestilling.bestillUtkast;
@@ -171,6 +188,16 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
         public T medAvsenderId(String avsenderId) {
             this.avsenderId = avsenderId;
+            return (T) this;
+        }
+
+        public T medAvsendertype(Avsendertyper avsendertype) {
+            this.avsendertype = avsendertype;
+            return (T) this;
+        }
+
+        public T medAvsenderLand(String avsenderLand) {
+            this.avsenderLand = avsenderLand;
             return (T) this;
         }
 
