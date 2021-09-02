@@ -67,6 +67,9 @@ public class SaksbehandlingstidSoknad extends DokgenDto {
     }
 
     private Aktoersroller utledAvsendertype(Avsendertyper avsendertype) {
+        if (avsendertype == null) {
+            return BRUKER;
+        }
         return switch (avsendertype) {
             case PERSON -> BRUKER;
             case ORGANISASJON -> ARBEIDSGIVER; //NOTE Gir samme tekst som REPRESENTANT i brevmalen i dokgen

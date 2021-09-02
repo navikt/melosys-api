@@ -23,7 +23,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private Kontaktopplysning kontaktopplysning;
     private String kontaktpersonNavn;
     private Instant forsendelseMottatt;
-    private String avsenderId;
     private String avsenderLand;
     private Avsendertyper avsendertype;
     private long behandlingId;
@@ -44,7 +43,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
         this.kontaktopplysning = builder.kontaktopplysning;
         this.kontaktpersonNavn = builder.kontaktpersonNavn;
         this.forsendelseMottatt = builder.forsendelseMottatt;
-        this.avsenderId = builder.avsenderId;
         this.avsendertype = builder.avsendertype;
         this.avsenderLand = builder.avsenderLand;
         this.behandlingId = builder.behandlingId;
@@ -69,10 +67,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
     public Instant getForsendelseMottatt() {
         return forsendelseMottatt;
-    }
-
-    public String getAvsenderId() {
-        return avsenderId;
     }
 
     public String getAvsenderLand() {
@@ -119,7 +113,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private String kontaktpersonNavn;
         private Instant forsendelseMottatt;
         private String avsenderNavn;
-        private String avsenderId;
         private String avsenderLand;
         private Avsendertyper avsendertype;
         private long behandlingId;
@@ -140,7 +133,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.kontaktpersonNavn = brevbestilling.kontaktpersonNavn;
             this.forsendelseMottatt = brevbestilling.forsendelseMottatt;
             this.avsenderNavn = brevbestilling.avsenderNavn;
-            this.avsenderId = brevbestilling.avsenderId;
             this.avsendertype = brevbestilling.avsendertype;
             this.avsenderLand = brevbestilling.avsenderLand;
             this.behandlingId = brevbestilling.behandlingId;
@@ -183,11 +175,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
         public T medAvsenderNavn(String avsenderNavn) {
             this.avsenderNavn = avsenderNavn;
-            return (T) this;
-        }
-
-        public T medAvsenderId(String avsenderId) {
-            this.avsenderId = avsenderId;
             return (T) this;
         }
 
