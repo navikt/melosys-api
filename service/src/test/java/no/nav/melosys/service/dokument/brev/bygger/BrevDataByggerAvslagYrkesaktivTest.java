@@ -2,15 +2,13 @@ package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.util.*;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -55,6 +53,8 @@ class BrevDataByggerAvslagYrkesaktivTest {
     @Mock
     private PersondataFasade persondataFasade;
 
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
+
     private BrevDataByggerAvslagYrkesaktiv brevDataByggerAvslagYrkesaktiv;
     private AnmodningsperiodeSvar anmodningsperiodeSvar;
 
@@ -74,10 +74,15 @@ class BrevDataByggerAvslagYrkesaktivTest {
 
     @Test
     void lag_annmodningUnntakBrev_avklarVirksomhetSomSelvstendigForetak() throws Exception {
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.BRUKER);
+        aktoer.setAktørId("ident");
+
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setAktører(Set.of(aktoer));
         behandling.setFagsak(fagsak);
 
         List<String> selvstendigeForetak = Collections.singletonList("987654321");
@@ -122,6 +127,6 @@ class BrevDataByggerAvslagYrkesaktivTest {
     public BrevDataGrunnlag lagBrevressurser(Behandling behandling) {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), kodeverkService);
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
-        return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondataFasade);
+        return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondataFasade, fakeUnleash);
     }
 }

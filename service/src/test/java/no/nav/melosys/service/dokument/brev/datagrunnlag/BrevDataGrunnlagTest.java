@@ -3,8 +3,12 @@ package no.nav.melosys.service.dokument.brev.datagrunnlag;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
+import no.finn.unleash.FakeUnleash;
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
@@ -13,6 +17,7 @@ import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
@@ -41,6 +46,8 @@ class BrevDataGrunnlagTest {
     @Mock
     private PersondataFasade persondataFasade;
 
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
+
     private DoksysBrevbestilling brevbestilling;
     private Soeknad søknad;
     private BrevDataGrunnlag dataGrunnlag;
@@ -61,12 +68,20 @@ class BrevDataGrunnlagTest {
         Behandling behandling = lagBehandling(søknad, person);
 
         brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
-        dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, mock(AvklarteVirksomheterService.class), avklartefaktaService, persondataFasade);
+        dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, mock(AvklarteVirksomheterService.class), avklartefaktaService, persondataFasade, fakeUnleash);
     }
 
     private Behandling lagBehandling(Soeknad søknad, PersonDokument person) {
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.BRUKER);
+        aktoer.setAktørId("ident");
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setAktører(Set.of(aktoer));
+
         Behandling behandling = new Behandling();
         behandling.setId(1L);
+        behandling.setFagsak(fagsak);
         behandling.getSaksopplysninger().add(lagPersonsaksopplysning(person));
 
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
@@ -111,7 +126,7 @@ class BrevDataGrunnlagTest {
         AvklartMaritimtArbeid maritimtArbeid = lagAvklartMaritimtArbeid();
         when(avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(anyLong()))
             .thenReturn(Collections.singletonMap("Dunfjæder", maritimtArbeid));
-        dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, mock(AvklarteVirksomheterService.class), avklartefaktaService, persondataFasade);
+        dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, mock(AvklarteVirksomheterService.class), avklartefaktaService, persondataFasade, fakeUnleash);
 
         MaritimtArbeid maritimtArbeidISøknad = lagMaritimtArbeid();
         this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
@@ -137,7 +152,8 @@ class BrevDataGrunnlagTest {
             kodeverkService,
             mock(AvklarteVirksomheterService.class),
             avklartefaktaService,
-            persondataFasade
+            persondataFasade,
+            fakeUnleash
         );
 
         Collection<Arbeidssted> arbeidssteder = dataGrunnlagUtenAvklartMaritimtArbeid.getArbeidsstedGrunnlag().hentArbeidssteder();

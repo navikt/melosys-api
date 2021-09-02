@@ -3,9 +3,11 @@ package no.nav.melosys.service.persondata;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.person.*;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
@@ -17,11 +19,16 @@ import static java.util.Collections.emptySet;
 public class PersonopplysningerObjectFactory {
     public static Personopplysninger lagPersonopplysninger() {
         return new Personopplysninger(emptyList(), lagBostedsadresse(), null, emptySet(), lagFødesel(), null,
-            lagKjønn(), lagKontaktadresser(), lagNavn(), lagOppholdsadresser(), emptyList());
+            lagKjønn(), lagKontaktadresser(), lagNavn(), lagOppholdsadresser(), lagStatsborgerskap(false));
+    }
+
+    public static Personopplysninger lagPersonopplysningerStatløs() {
+        return new Personopplysninger(emptyList(), lagBostedsadresse(), null, emptySet(), lagFødesel(), null,
+            lagKjønn(), lagKontaktadresser(), lagNavn(), lagOppholdsadresser(), lagStatsborgerskap(true));
     }
 
     private static Foedsel lagFødesel() {
-        return new Foedsel(LocalDate.MIN, null, null, null);
+        return new Foedsel(LocalDate.EPOCH, null, null, null);
     }
 
     private static KjoennType lagKjønn() {
@@ -102,5 +109,27 @@ public class PersonopplysningerObjectFactory {
 
     private static Navn lagNavn() {
         return new Navn("Ola", null, "Nordmann");
+    }
+
+    private static Collection<Statsborgerskap> lagStatsborgerskap(boolean erStatløs) {
+        if (erStatløs) {
+            return List.of(new Statsborgerskap(Land.STATSLØS,
+                null,
+                LocalDate.EPOCH,
+                LocalDate.now(),
+                "PDL",
+                "Dolly",
+                false));
+        }
+
+        return List.of(
+            new Statsborgerskap("NOR", null, LocalDate.parse("2009-11-18"),
+                LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
+            new Statsborgerskap("SWE", null, LocalDate.parse("1979-11-18"),
+                LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
+            new Statsborgerskap("DEN", null, null,
+                LocalDate.parse("1980-11-18"), "PDL",
+                "Dolly", false)
+        );
     }
 }
