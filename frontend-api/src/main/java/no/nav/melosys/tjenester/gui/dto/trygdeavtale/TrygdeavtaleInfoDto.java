@@ -7,8 +7,8 @@ import java.util.function.Predicate;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 
 public record TrygdeavtaleInfoDto(String aktoerId, String behandlingstema,
-                                  List<OrgIdOgNavnDto> virksomheter, List<UuidOgNavnDto> barn,
-                                  UuidOgNavnDto ektefelleSamboer) {
+                                  List<VirksomhetDto> virksomheter, List<FamilieDto> barn,
+                                  FamilieDto ektefelleSamboer) {
 
     public TrygdeavtaleInfoDto(String aktoerId, String behandlingstema, Map<String, String> virksomheter, List<MedfolgendeFamilie> familie) {
         this(
@@ -21,16 +21,16 @@ public record TrygdeavtaleInfoDto(String aktoerId, String behandlingstema,
         );
     }
 
-    public static List<OrgIdOgNavnDto> mapVirksomheter(Map<String, String> virksomheter) {
+    public static List<VirksomhetDto> mapVirksomheter(Map<String, String> virksomheter) {
         return virksomheter.entrySet().stream()
-            .map(virksomhet -> new OrgIdOgNavnDto(virksomhet.getKey(), virksomhet.getValue()))
+            .map(virksomhet -> new VirksomhetDto(virksomhet.getKey(), virksomhet.getValue()))
             .toList();
     }
 
-    public static List<UuidOgNavnDto> filtrerOgMapFamilie(List<MedfolgendeFamilie> familie, Predicate<MedfolgendeFamilie> filterfunksjon) {
+    public static List<FamilieDto> filtrerOgMapFamilie(List<MedfolgendeFamilie> familie, Predicate<MedfolgendeFamilie> filterfunksjon) {
         return familie.stream()
             .filter(filterfunksjon)
-            .map(familiemedlem -> new UuidOgNavnDto(familiemedlem.uuid, familiemedlem.navn))
+            .map(familiemedlem -> new FamilieDto(familiemedlem.uuid, familiemedlem.navn))
             .toList();
     }
 }
