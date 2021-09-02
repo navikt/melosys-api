@@ -19,6 +19,7 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdress
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser;
@@ -38,6 +39,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Collections.*;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -150,6 +152,28 @@ class DokgenMalMapperTest {
             );
         assertThat(dokgenDto.getAdresselinjer()).contains(ADRESSELINJE_1_BRUKER);
         fakeUnleash.disableAll();
+    }
+
+    @Test
+    void mapping_avsenderMyndighet_ok() {
+        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
+        when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
+
+        Behandling behandling = lagBehandling(lagFagsak());
+
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
+            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
+            .medBehandling(behandling)
+            .medForsendelseMottatt(Instant.now())
+            .medAvsendertype(Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET)
+            .medAvsenderLand("Finland")
+            .build();
+
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling);
+
+        assertTrue(dokgenDto instanceof SaksbehandlingstidSoknad);
+        assertEquals(MYNDIGHET, ((SaksbehandlingstidSoknad) dokgenDto).getAvsenderTypeSoknad());
+        assertEquals("Finland", ((SaksbehandlingstidSoknad) dokgenDto).getAvsenderLand());
     }
 
     @Test
