@@ -5,7 +5,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.service.TrygdeavtaleService;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.tjenester.gui.dto.TrygdeavtaleInfoDto;
+import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeavtaleInfoDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
