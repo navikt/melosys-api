@@ -18,13 +18,16 @@ import static java.util.Collections.emptySet;
 
 public class PersonopplysningerObjectFactory {
     public static Personopplysninger lagPersonopplysninger() {
-        return new Personopplysninger(emptyList(), lagBostedsadresse(), null, emptySet(), lagFødesel(), null,
-            lagKjønn(), lagKontaktadresser(), lagNavn(), lagOppholdsadresser(), lagStatsborgerskap(false));
+        return lagPersonopplysninger(false);
     }
 
     public static Personopplysninger lagPersonopplysningerStatløs() {
+        return lagPersonopplysninger(true);
+    }
+    
+    private static Personopplysninger lagPersonopplysninger(boolean erStatløs) {
         return new Personopplysninger(emptyList(), lagBostedsadresse(), null, emptySet(), lagFødesel(), null,
-            lagKjønn(), lagKontaktadresser(), lagNavn(), lagOppholdsadresser(), lagStatsborgerskap(true));
+            lagKjønn(), lagKontaktadresser(), lagNavn(), lagOppholdsadresser(), lagStatsborgerskap(erStatløs));
     }
 
     private static Foedsel lagFødesel() {
