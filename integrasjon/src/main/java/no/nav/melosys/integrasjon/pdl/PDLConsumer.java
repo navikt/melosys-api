@@ -10,7 +10,9 @@ import no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap;
 
 public interface PDLConsumer {
     Identliste hentIdenter(String ident);
-    Person hentBarnEllerForelder(String ident);
+    Person hentBarn(String ident);
+    Person hentForelder(String ident);
+    Person hentFamilierelasjoner(String ident);
     Person hentPerson(String ident);
     Person hentPersonMedHistorikk(String ident, boolean innsynn);
     Person hentRelatertVedSivilstand(String ident);

@@ -34,17 +34,17 @@ public class PdlObjectFactory {
             null,
             Set.of(new ForelderBarnRelasjon("barnIdent", Familierelasjonsrolle.BARN, Familierelasjonsrolle.MOR),
                 new ForelderBarnRelasjon("forelderIdent", Familierelasjonsrolle.MOR, Familierelasjonsrolle.BARN)),
+            Set.of(new Foreldreansvar("felles", metadata())),
             Set.of(new Kjoenn(KjoennType.UKJENT, lagMetadata(LocalDateTime.MIN)), new Kjoenn(KjoennType.UKJENT, lagMetadata(LocalDateTime.MAX))),
             Collections.emptyList(),
             Set.of(new no.nav.melosys.integrasjon.pdl.dto.person.Navn("fornavn", "mellomnavn", "etternavn", metadata())),
             Collections.emptyList(),
-            Set.of(new Sivilstand(Sivilstandstype.GIFT, "relatertVedSivilstand", LocalDate.MIN, lagMetadata())),
+            Set.of(new Sivilstand(Sivilstandstype.GIFT, "relatertVedSivilstandID", LocalDate.MIN, lagMetadata())),
             Set.of(new no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap("AIA", null,
                     LocalDate.parse("1979-11-18"), LocalDate.parse("1980-11-18"), lagMetadata(LocalDateTime.MIN)),
                 new no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null,
                     null, lagMetadata(LocalDateTime.MAX))),
-            null
-        );
+            null);
     }
 
     public static Bostedsadresse lagNorskBostedsadresse() {

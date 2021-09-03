@@ -38,6 +38,7 @@ public final class PersonMedHistorikkOversetter {
             person.folkeregisteridentifikator().stream().filter(x -> x.erGyldigFør(localDateTime)).collect(Collectors.toUnmodifiableList()),
             person.folkeregisterpersonstatus().stream().collect(Collectors.toUnmodifiableList()),
             Collections.emptyList(),
+            Collections.emptyList(),
             person.kjoenn().stream().filter(x -> x.erGyldigFør(localDateTime)).collect(Collectors.toUnmodifiableList()),
             person.kontaktadresse().stream().filter(x -> x.erGyldigFør(localDateTime)).collect(Collectors.toUnmodifiableList()),
             person.navn().stream().filter(x -> x.erGyldigFør(localDateTime)).collect(Collectors.toUnmodifiableList()),
@@ -58,7 +59,7 @@ public final class PersonMedHistorikkOversetter {
                 Collectors.toUnmodifiableSet()), NavnOversetter.oversett(person.navn()),
             person.oppholdsadresse().stream().map(o -> OppholdsadresseOversetter.oversett(o, kodeverkService)).collect(
                 Collectors.toUnmodifiableSet()),
-            person.statsborgerskap().stream().map(StasborgerskapOversetter::oversett).collect(
+            person.statsborgerskap().stream().map(StatsborgerskapOversetter::oversett).collect(
                 Collectors.toUnmodifiableSet()));
     }
 }

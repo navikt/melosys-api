@@ -18,6 +18,7 @@ type Saksopplysninger {
 
 type Personopplysninger {
     bostedsadresser: [Bostedsadresse!]!
+    familiemedlemmer: [Familiemedlem!]!
     kontaktadresser: [Kontaktadresse!]!
     oppholdsadresser: [Oppholdsadresse!]!
     statsborgerskap: [Statsborgerskap!]!
@@ -31,6 +32,24 @@ type Bostedsadresse {
     master: String!
     kilde: String
     erHistorisk: Boolean!
+}
+
+type Familiemedlem {
+    navn: String!
+    ident: String!
+    relasjonsrolle: Familierelasjonsrolle!
+    alder: Int
+    foreldreansvar: String
+    fnrAnnenForelder: String
+    sivilstand: String
+    sivilstandGyldighetsperiodeFom: Date
+}
+
+enum Familierelasjonsrolle {
+    BARN,
+    FAR,
+    MOR,
+    RELATERT_VED_SIVILSTAND
 }
 
 type Kontaktadresse {

@@ -44,4 +44,11 @@ class GraphQLConfig {
             .dataFetcher("persondata", personopplysningerDataFetcher)
             .build();
     }
+
+    @Bean
+    static TypeRuntimeWiring familiemedlemmerWiring(FamiliemedlemmerDataFetcher familiemedlemmerDataFetcher) {
+        return TypeRuntimeWiring.newTypeWiring("Personopplysninger")
+            .dataFetcher("familiemedlemmer", familiemedlemmerDataFetcher)
+            .build();
+    }
 }

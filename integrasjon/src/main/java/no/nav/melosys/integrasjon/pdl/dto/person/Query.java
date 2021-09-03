@@ -450,6 +450,64 @@ query($ident: ID!, $historikk: Boolean!) {
 }
         """;
 
+    public static final String HENT_FAMILIERELASJONER_QUERY = """
+query($ident: ID!, $historikk: Boolean!) {
+  hentPerson(ident: $ident) {
+    foedsel {
+      foedselsdato
+      foedselsaar
+      foedeland
+      foedested
+      metadata {
+        master
+        endringer {
+          registrert
+          type
+        }
+      }
+    }
+    folkeregisteridentifikator {
+      identifikasjonsnummer
+      metadata {
+        master
+        endringer {
+          registrert
+          type
+        }
+      }
+    }
+    forelderBarnRelasjon {
+      relatertPersonsIdent
+      relatertPersonsRolle
+      minRolleForPerson
+      metadata {
+        master
+        historisk
+        endringer {
+          type
+          registrert
+          kilde
+        }
+      }
+    }
+    sivilstand(historikk: $historikk) {
+      type
+      relatertVedSivilstand
+      gyldigFraOgMed
+      metadata {
+        master
+        historisk
+        endringer {
+          type
+          registrert
+          kilde
+        }
+      }
+    }
+  }
+}
+ """;
+
     public static final String HENT_RELATERT_VED_SIVILSTAND_QUERY = """
 query($ident: ID!) {
   hentPerson(ident: $ident) {
@@ -548,45 +606,6 @@ query($ident: ID!) {
     public static final String HENT_BARN_QUERY = """
 query($ident: ID!) {
   hentPerson(ident: $ident) {
-    bostedsadresse {
-      gyldigFraOgMed
-      gyldigTilOgMed
-      coAdressenavn
-      matrikkeladresse {
-        bruksenhetsnummer
-        kommunenummer
-        tilleggsnavn
-        postnummer
-      }
-      ukjentBosted {
-        bostedskommune
-      }
-      vegadresse {
-        adressenavn
-        husnummer
-        husbokstav
-        tilleggsnavn
-        postnummer
-      }
-      utenlandskAdresse {
-        adressenavnNummer
-        bygningEtasjeLeilighet
-        postboksNummerNavn
-        postkode
-        bySted
-        regionDistriktOmraade
-        landkode
-      }
-      metadata {
-        master
-        historisk
-        endringer {
-          type
-          registrert
-          kilde
-        }
-      }
-    }
     foedsel {
       foedselsdato
       foedselsaar
@@ -614,6 +633,65 @@ query($ident: ID!) {
       relatertPersonsIdent
       relatertPersonsRolle
       minRolleForPerson
+      metadata {
+        master
+        endringer {
+          registrert
+          type
+        }
+      }
+    }
+    foreldreansvar {
+      ansvar
+      metadata {
+        master
+        endringer {
+          registrert
+          type
+        }
+      }
+    }
+    navn {
+      fornavn
+      mellomnavn
+      etternavn
+      metadata {
+        master
+        endringer {
+          registrert
+          type
+        }
+      }
+    }
+  }
+}
+        """;
+
+    public static final String HENT_FORELDER_QUERY = """
+query($ident: ID!) {
+  hentPerson(ident: $ident) {
+    foedsel {
+      foedselsdato
+      foedselsaar
+      foedeland
+      foedested
+      metadata {
+        master
+        endringer {
+          registrert
+          type
+        }
+      }
+    }
+    folkeregisteridentifikator {
+      identifikasjonsnummer
+      metadata {
+        master
+        endringer {
+          registrert
+          type
+        }
+      }
     }
     navn {
       fornavn

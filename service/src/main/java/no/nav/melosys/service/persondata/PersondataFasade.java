@@ -7,9 +7,12 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.Statsborgerskap;
+import no.nav.melosys.domain.person.familie.Familiemedlem;
 
 public interface PersondataFasade {
     String hentAktørIdForIdent(String ident);
+
+    Set<Familiemedlem> hentFamiliemedlemmerMedHistorikk(long behandlingID);
 
     String hentFolkeregisterIdent(String ident);
 
