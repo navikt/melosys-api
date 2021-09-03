@@ -120,7 +120,7 @@ public class BehandlingsgrunnlagService {
     }
 
     private Optional<LocalDate> finnMottaksdato(String journalpostID) {
-        return Optional.of(journalpostID)
+        return Optional.ofNullable(journalpostID)
             .map(joarkFasade::hentMottaksDatoForJournalpost);
     }
 
