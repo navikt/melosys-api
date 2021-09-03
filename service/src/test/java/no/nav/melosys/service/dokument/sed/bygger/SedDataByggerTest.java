@@ -566,7 +566,7 @@ class SedDataByggerTest {
         SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(personDataFraPDL);
 
         var sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
-        List<String> statsborgerskapList = sedData.getBruker().getStatsborgerskap();
+        Collection<String> statsborgerskapList = sedData.getBruker().getStatsborgerskap();
         assertThat(statsborgerskapList).hasSize(3)
             .anyMatch("NOR"::equals)
             .anyMatch("SWE"::equals)
