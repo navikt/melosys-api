@@ -234,7 +234,7 @@ public class SedDataBygger {
         bruker.setFoedseldato(persondata.getFødselsdato());
         bruker.setKjoenn(persondata.hentKjønnType().getKode());
         bruker.setStatsborgerskap(
-            persondata.hentAlleStatsborgerskap().stream().map(Land::getKode).collect(Collectors.toList()));
+            persondata.hentAlleStatsborgerskap().stream().map(Land::getKode).toList());
         bruker.setHarSensitiveOpplysninger(persondata.harStrengtAdressebeskyttelse());
         return bruker;
     }

@@ -1,7 +1,7 @@
 package no.nav.melosys.domain.eessi.sed;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Collection;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
@@ -20,7 +20,7 @@ public class Bruker {
     private LocalDate foedseldato;
 
     private String kjoenn;
-    private List<String> statsborgerskap;
+    private Collection<String> statsborgerskap;
     private String fnr;
     private boolean harSensitiveOpplysninger;
 
@@ -56,11 +56,11 @@ public class Bruker {
         this.kjoenn = kjoenn;
     }
 
-    public List<String> getStatsborgerskap() {
+    public Collection<String> getStatsborgerskap() {
         return statsborgerskap;
     }
 
-    public void setStatsborgerskap(List<String> statsborgerskap) {
+    public void setStatsborgerskap(Collection<String> statsborgerskap) {
         this.statsborgerskap = statsborgerskap;
     }
 
