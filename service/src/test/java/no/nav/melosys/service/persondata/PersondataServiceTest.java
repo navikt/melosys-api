@@ -11,6 +11,7 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Personstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.person.*;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
@@ -121,6 +122,7 @@ class PersondataServiceTest {
         assertThat(personMedHistorikk.dødsfall()).isEqualTo(new Doedsfall(LocalDate.MAX));
         assertThat(personMedHistorikk.fødsel()).isEqualTo(new Foedsel(LocalDate.parse("1970-01-01"), 1970, "NOR", "fødested"));
         assertThat(personMedHistorikk.folkeregisteridentifikator()).isEqualTo(new Folkeregisteridentifikator("IdNr"));
+        assertThat(personMedHistorikk.folkeregisterpersonstatus().personstatus()).isEqualTo(Personstatuser.IKKE_BOSATT);
         assertThat(personMedHistorikk.kjønn()).isEqualTo(KjoennType.UKJENT);
         assertThat(personMedHistorikk.navn()).isEqualTo(new Navn("fornavn", "mellomnavn", "etternavn"));
         assertThat(personMedHistorikk.statsborgerskap()).containsExactlyInAnyOrder(

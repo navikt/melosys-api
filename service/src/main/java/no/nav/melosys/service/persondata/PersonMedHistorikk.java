@@ -12,6 +12,7 @@ public record PersonMedHistorikk(
     Doedsfall dødsfall,
     Foedsel fødsel,
     Folkeregisteridentifikator folkeregisteridentifikator,
+    Folkeregisterpersonstatus folkeregisterpersonstatus,
     KjoennType kjønn,
     Collection<Kontaktadresse> kontaktadresser,
     Navn navn,

@@ -52,11 +52,14 @@ public final class PersonMedHistorikkOversetter {
     private static PersonMedHistorikk lagPersonMedHistorikk(Person person, KodeverkService kodeverkService) {
         return new PersonMedHistorikk(
             BostedsadresseOversetter.oversettMedHistorikk(person.bostedsadresse(), kodeverkService),
-            DoedsfallOversetter.oversett(person.doedsfall()), FoedselOversetter.oversett(person.foedsel()),
+            DoedsfallOversetter.oversett(person.doedsfall()),
+            FoedselOversetter.oversett(person.foedsel()),
             FolkeregisteridentOversetter.oversett(person.folkeregisteridentifikator()),
+            FolkeregisterpersonstatusOversetter.oversett(person.folkeregisterpersonstatus()),
             KjoennOversetter.oversett(person.kjoenn()),
             person.kontaktadresse().stream().map(k -> KontaktadresseOversetter.oversett(k, kodeverkService)).collect(
-                Collectors.toUnmodifiableSet()), NavnOversetter.oversett(person.navn()),
+                Collectors.toUnmodifiableSet()),
+            NavnOversetter.oversett(person.navn()),
             person.oppholdsadresse().stream().map(o -> OppholdsadresseOversetter.oversett(o, kodeverkService)).collect(
                 Collectors.toUnmodifiableSet()),
             person.statsborgerskap().stream().map(StatsborgerskapOversetter::oversett).collect(
