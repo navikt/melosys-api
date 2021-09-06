@@ -12,8 +12,6 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IkkeInngaaendeJournalpostException;
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -122,18 +120,8 @@ public class BehandlingsgrunnlagService {
     }
 
     private Optional<LocalDate> finnMottaksdato(String journalpostID) {
-        LocalDate mottaksDatoFraJournalpostID;
-        if (journalpostID == null) {
-            return Optional.empty();
-        }
-        try {
-             mottaksDatoFraJournalpostID = joarkFasade.hentMottaksDatoForJournalpost(journalpostID);
-        } catch (IkkeInngaaendeJournalpostException e) {
-            return Optional.empty();
-        } catch (IntegrasjonException e) {
-            throw new IllegalStateException(e);
-        }
-        return Optional.of(mottaksDatoFraJournalpostID);
+        return Optional.ofNullable(journalpostID)
+            .map(joarkFasade::hentMottaksDatoForJournalpost);
     }
 
     @Transactional

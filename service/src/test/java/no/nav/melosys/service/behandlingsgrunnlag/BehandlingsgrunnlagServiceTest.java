@@ -12,9 +12,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IkkeInngaaendeJournalpostException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -141,19 +139,6 @@ class BehandlingsgrunnlbagServiceTest {
         verify(behandlingsgrunnlagRepository).saveAndFlush(captor.capture());
         assertThat(captor.getValue().getBehandlingsgrunnlagdata().periode).isEqualTo(periode);
         assertThat(captor.getValue().getBehandlingsgrunnlagdata().soeknadsland).isEqualTo(soeknadsland);
-    }
-
-    @Test
-    void opprettSøknadFolketrygden_mottaksdatoFeiler_feiler() {
-        Behandling behandling = lagBehandling();
-        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
-        when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId()))
-            .thenThrow(new IkkeInngaaendeJournalpostException("Ikke inngående"));
-        final SoeknadFtrl soeknadFtrl = new SoeknadFtrl();
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> behandlingsgrunnlagService.opprettSøknadOmMedlemskapIFolketrygden(behandlingID, soeknadFtrl))
-            .withMessageContaining("Mottaksdato trenges");
     }
 
     @Test

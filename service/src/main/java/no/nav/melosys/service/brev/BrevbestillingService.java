@@ -42,8 +42,11 @@ import static no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper.*;
 @Service
 public class BrevbestillingService {
 
-    private final BrevmottakerService brevmottakerService;
+    private static final List<Produserbaredokumenter> BREV_TILGJENGELIG_FOR_MANUELL_BESTILLING =
+        List.of(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE, MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER);
+
     private final DokumentServiceFasade dokumentServiceFasade;
+    private final BrevmottakerService brevmottakerService;
     private final EregFasade eregFasade;
     private final KodeverkService kodeverkService;
     private final KontaktopplysningService kontaktopplysningService;
@@ -137,7 +140,7 @@ public class BrevbestillingService {
         for (Aktoer avklartKopi : avklarteKopier) {
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartKopi.getOrgnr());
             muligMottakerDtos.add(new MuligMottakerDto.Builder()
-                .medDokumentNavn(avklartKopi.getRolle() == ARBEIDSGIVER ? "Kopi til arbeidsgiver" :  "Kopi til arbeidsgivers fullmektig")
+                .medDokumentNavn(avklartKopi.getRolle() == ARBEIDSGIVER ? "Kopi til arbeidsgiver" : "Kopi til arbeidsgivers fullmektig")
                 .medMottakerNavn(orgDokument.getNavn())
                 .medRolle(avklartKopi.getRolle())
                 .medOrgnr(orgDokument.getOrgnummer())
@@ -226,6 +229,9 @@ public class BrevbestillingService {
 
     @Transactional
     public void produserBrev(long behandlingId, BrevbestillingRequest brevbestillingRequest) {
+        if (!BREV_TILGJENGELIG_FOR_MANUELL_BESTILLING.contains(brevbestillingRequest.getProduserbardokument())) {
+            throw new FunksjonellException("Manuell bestilling av " + brevbestillingRequest.getProduserbardokument() + " er ikke støttet.");
+        }
         dokumentServiceFasade.produserDokument(behandlingId, brevbestillingRequest);
     }
 

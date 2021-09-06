@@ -5,6 +5,7 @@ import java.util.Optional;
 import com.google.common.collect.Lists;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -24,7 +25,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -70,12 +70,16 @@ class OpprettNyBehandlingFraSedTest {
         final Behandlingstema behandlingstema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
         final String journalpostID = "jp123";
         final String dokumentID = "dok123";
+        final var eessiMelding = new MelosysEessiMelding();
+        eessiMelding.setJournalpostId(journalpostID);
+        eessiMelding.setDokumentId(dokumentID);
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, gsakSaksnummer);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
         prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, dokumentID);
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
 
         Behandling behandling = new Behandling();
         behandling.setId(123L);
@@ -90,15 +94,15 @@ class OpprettNyBehandlingFraSedTest {
 
         when(fagsakService.hentFagsakFraArkivsakID(gsakSaksnummer)).thenReturn(fagsak);
         when(behandlingService.nyBehandling(any(), any(), any(), any(), any(), any())).thenReturn(new Behandling());
-        when(oppgaveFasade.finnÅpenOppgaveMedFagsaksnummer(eq(fagsak.getSaksnummer())))
+        when(oppgaveFasade.finnÅpenOppgaveMedFagsaksnummer(fagsak.getSaksnummer()))
             .thenReturn(Optional.of(oppgave));
 
         opprettNyBehandlingFraSed.utfør(prosessinstans);
 
-        verify(oppgaveFasade).ferdigstillOppgave(eq(oppgave.getOppgaveId()));
-        verify(behandlingService).avsluttBehandling(eq(behandling.getId()));
+        verify(oppgaveFasade).ferdigstillOppgave(oppgave.getOppgaveId());
+        verify(behandlingService).avsluttBehandling(behandling.getId());
         verify(behandlingService).nyBehandling(
-            eq(fagsak), eq(Behandlingsstatus.UNDER_BEHANDLING), eq(Behandlingstyper.SED), eq(behandlingstema), eq(journalpostID), eq(dokumentID)
+            fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.SED, behandlingstema, journalpostID, dokumentID
         );
         assertThat(prosessinstans.getBehandling()).isNotNull();
     }

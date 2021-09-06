@@ -3,10 +3,10 @@ package no.nav.melosys.service.dokument;
 import java.time.Instant;
 
 import no.finn.unleash.Unleash;
-import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
+import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.person.Informasjonsbehov;
@@ -32,16 +32,20 @@ public class DokgenMalMapper {
     private final KodeverkService kodeverkService;
     private final PersondataFasade persondataFasade;
     private final Unleash unleash;
+    private final InnvilgelseFtrlMapper innvilgelseFtrlMapper;
 
     @Autowired
+
     public DokgenMalMapper(BehandlingsresultatService behandlingsresultatService,
                            @Qualifier("system") EregFasade eregFasade, KodeverkService kodeverkService,
-                           @Qualifier("system") PersondataFasade persondataFasade, Unleash unleash) {
+                           @Qualifier("system") PersondataFasade persondataFasade, Unleash unleash,
+                           InnvilgelseFtrlMapper innvilgelseFtrlMapper) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.eregFasade = eregFasade;
         this.kodeverkService = kodeverkService;
         this.persondataFasade = persondataFasade;
         this.unleash = unleash;
+        this.innvilgelseFtrlMapper = innvilgelseFtrlMapper;
     }
 
     public DokgenDto mapBehandling(DokgenBrevbestilling mottattBrevbestilling) {
@@ -72,6 +76,7 @@ public class DokgenMalMapper {
                 ((MangelbrevBrevbestilling) brevbestilling).toBuilder().medVedtaksdato(
                     hentVedtaksdato(brevbestilling.getBehandling().getId())).medFullmektigNavn(
                     hentFullmektigNavn(brevbestilling.getBehandling().getFagsak())).build());
+            case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> innvilgelseFtrlMapper.map((InnvilgelseBrevbestilling) brevbestilling);
             default -> throw new FunksjonellException(
                 format("ProduserbartDokument %s er ikke støttet av melosys-dokgen",
                     brevbestilling.getProduserbartdokument()));
@@ -92,19 +97,19 @@ public class DokgenMalMapper {
     }
 
     private Instant hentVedtaksdato(Long behandlingId) {
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
+        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
         return (behandlingsresultat != null && behandlingsresultat.harVedtak()) ?
             behandlingsresultat.getVedtakMetadata().getVedtaksdato() : null;
     }
 
     private String hentFullmektigNavn(Fagsak fagsak) {
-        return fagsak.hentRepresentant(Representerer.BRUKER)
+        return fagsak.finnRepresentant(Representerer.BRUKER)
             .map(aktoer -> eregFasade.hentOrganisasjonNavn(aktoer.getOrgnr()))
             .orElse(null);
     }
 
     private String hentLandnavn(String landkode) {
-        String landnavn = "";
+        var landnavn = "";
         if (hasText(landkode)) {
             landnavn = kodeverkService.dekod(FellesKodeverk.LANDKODER, landkode);
             if (landnavn.equals("UKJENT")) {

@@ -245,7 +245,7 @@ class FagsakServiceTest {
         forventetFullmektig.setRolle(Aktoersroller.REPRESENTANT);
         forventetFullmektig.setOrgnr("orgnr");
         forventetFullmektig.setRepresenterer(Representerer.ARBEIDSGIVER);
-        assertThat(fagsak.hentRepresentant(Representerer.ARBEIDSGIVER)).isPresent().get()
+        assertThat(fagsak.finnRepresentant(Representerer.ARBEIDSGIVER)).isPresent().get()
             .isEqualToComparingFieldByField(forventetFullmektig);
     }
 

@@ -34,7 +34,7 @@ public final class PersonopplysningerOversetter {
             person.kontaktadresse().stream().map(k -> KontaktadresseOversetter.oversett(k, kodeverkService)).collect(Collectors.toUnmodifiableSet()),
             NavnOversetter.oversett(person.navn()),
             person.oppholdsadresse().stream().map(o -> OppholdsadresseOversetter.oversett(o, kodeverkService)).collect(Collectors.toUnmodifiableSet()),
-            person.statsborgerskap().stream().map(StasborgerskapOversetter::oversett).collect(Collectors.toUnmodifiableSet())
+            person.statsborgerskap().stream().map(StatsborgerskapOversetter::oversett).collect(Collectors.toUnmodifiableSet())
         );
     }
 }

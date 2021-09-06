@@ -14,6 +14,7 @@ public record Person(
     Collection<Folkeregisteridentifikator> folkeregisteridentifikator,
     Collection<Folkeregisterpersonstatus> folkeregisterpersonstatus,
     Collection<ForelderBarnRelasjon> forelderBarnRelasjon,
+    Collection<Foreldreansvar> foreldreansvar,
     Collection<Kjoenn> kjoenn,
     Collection<Kontaktadresse> kontaktadresse,
     Collection<Navn> navn,

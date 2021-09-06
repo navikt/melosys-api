@@ -40,6 +40,7 @@ public record Journalpost(
             journalpost.setAvsenderId(avsenderMottaker.id());
             journalpost.setAvsenderNavn(avsenderMottaker.navn());
             journalpost.setAvsenderType(AvsenderMottakerType.tilDomene(avsenderMottaker.type()));
+            journalpost.setAvsenderLand(avsenderMottaker.land());
             journalpost.setKorrespondansepartId(avsenderMottaker.id());
             journalpost.setKorrespondansepartNavn(avsenderMottaker.navn());
         }

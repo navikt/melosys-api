@@ -8,10 +8,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.arkiv.DokumentVariant;
-import no.nav.melosys.domain.arkiv.FysiskDokument;
-import no.nav.melosys.domain.arkiv.Journalposttype;
-import no.nav.melosys.domain.arkiv.OpprettJournalpost;
+import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.SedType;
@@ -132,6 +129,7 @@ class SedMottakTestIT {
         hovedDokument.setDokumentVarianter(Collections.singletonList(DokumentVariant.lagDokumentVariant(new byte[0])));
         request.setHoveddokument(hovedDokument);
         request.setBrukerId("123123123");
+        request.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
 
         request.setJournalposttype(Journalposttype.INN);
         request.setJournalførendeEnhet("4530");

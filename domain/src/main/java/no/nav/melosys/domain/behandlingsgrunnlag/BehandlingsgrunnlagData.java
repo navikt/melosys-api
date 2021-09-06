@@ -88,4 +88,10 @@ public class BehandlingsgrunnlagData {
             .filter(MedfolgendeFamilie::erBarn)
             .collect(Collectors.toMap(MedfolgendeFamilie::getUuid, mf -> mf));
     }
+
+    public Map<String, MedfolgendeFamilie> hentMedfølgendeEktefelle() {
+        return personOpplysninger.medfolgendeFamilie.stream()
+            .filter(MedfolgendeFamilie::erEktefelleSamboer)
+            .collect(Collectors.toMap(MedfolgendeFamilie::getUuid, mf -> mf));
+    }
 }

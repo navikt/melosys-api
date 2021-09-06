@@ -172,7 +172,7 @@ public class FattetVedtakService {
     }
 
     private Fullmektig lagFullmektig(Fagsak fagsak) {
-        return fagsak.hentRepresentant(Representerer.BRUKER)
+        return fagsak.finnRepresentant(Representerer.BRUKER)
             .map(f -> {
                 String fnr = null;
                 if (isEmpty(f.getOrgnr())) {
