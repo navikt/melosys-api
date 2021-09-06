@@ -59,7 +59,7 @@ public class DistribuerJournalpostConsumer {
 
     private String hentFeilmelding(HttpStatusCodeException e) {
         String feilmelding = e.getResponseBodyAsString();
-        if (StringUtils.isEmpty(feilmelding)) return e.getMessage();
+        if (!StringUtils.hasText(feilmelding)) return e.getMessage();
         try {
             JsonNode json = objectMapper.readTree(feilmelding).path("message");
             return json.isMissingNode() ? e.getMessage() : json.toString();
