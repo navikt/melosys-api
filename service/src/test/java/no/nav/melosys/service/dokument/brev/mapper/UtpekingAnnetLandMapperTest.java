@@ -30,7 +30,7 @@ public class UtpekingAnnetLandMapperTest {
     }
 
     @Test
-    public void mapTilBrevXML() throws JAXBException, SAXException {
+    void mapTilBrevXML() throws JAXBException, SAXException {
         FellesType fellesType = lagFellesType();
         MelosysNAVFelles navFelles = lagNAVFelles();
         BrevDataUtpekingAnnetLand brevDataUtpekingAnnetLand = lagDataUtpekingAnnetLand();

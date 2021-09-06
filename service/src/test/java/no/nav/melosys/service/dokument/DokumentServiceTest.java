@@ -415,8 +415,6 @@ final class DokumentServiceTest {
         PersondataFasade persondataFasade = mock(PersondataFasade.class);
         when(persondataFasade.hentFolkeregisterIdent(anyString()))
             .thenReturn(String.format("IDENT%s", aktør.getAktørId()));
-        when(persondataFasade.hentPerson(anyString(), eq(Informasjonsbehov.MED_FAMILIERELASJONER)))
-            .thenReturn(lagPersonopplysninger());
         return persondataFasade;
     }
 

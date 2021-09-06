@@ -24,7 +24,7 @@ public class PersonopplysningerObjectFactory {
     public static Personopplysninger lagPersonopplysningerStatløs() {
         return lagPersonopplysninger(true);
     }
-    
+
     private static Personopplysninger lagPersonopplysninger(boolean erStatløs) {
         return new Personopplysninger(emptyList(), lagBostedsadresse(), null, emptySet(), lagFødesel(), null,
             lagKjønn(), lagKontaktadresser(), lagNavn(), lagOppholdsadresser(), lagStatsborgerskap(erStatløs));
@@ -130,7 +130,7 @@ public class PersonopplysningerObjectFactory {
                 LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
             new Statsborgerskap("SWE", null, LocalDate.parse("1979-11-18"),
                 LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
-            new Statsborgerskap("DEN", null, null,
+            new Statsborgerskap("DNK", null, null,
                 LocalDate.parse("1980-11-18"), "PDL",
                 "Dolly", false)
         );

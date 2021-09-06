@@ -33,7 +33,7 @@ import static no.nav.melosys.service.dokument.brev.mapper.felles.FellesBrevtypeM
 import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class InnvilgelsesbrevFlereLandMapperTest {
+class InnvilgelsesbrevFlereLandMapperTest {
     private final InnvilgelsesbrevFlereLandMapper instans;
 
     public InnvilgelsesbrevFlereLandMapperTest() {
@@ -41,7 +41,7 @@ public class InnvilgelsesbrevFlereLandMapperTest {
     }
 
     @Test
-    public void testSakstypeKode() throws Exception {
+    void testSakstypeKode() throws Exception {
         List<String> koderSomIkkeErAktuelleForBrev = Collections.singletonList(
             "UKJENT" // Det er ikke aktuelt med brev for denne
         );
@@ -52,7 +52,7 @@ public class InnvilgelsesbrevFlereLandMapperTest {
     }
 
     @Test
-    public void mapTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
+    void mapTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
         testMapTilBrevXml(lagBehandling(lagFagsak()), lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode())));
     }
 

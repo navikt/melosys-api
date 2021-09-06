@@ -40,10 +40,9 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
 import org.apache.commons.lang3.StringUtils;
 import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
@@ -72,7 +71,7 @@ class A1MapperTest {
     private MelosysNAVFelles navFelles;
 
     @BeforeAll
-    public void felleSetup() {
+     void felleSetup() {
         mapper = new A1Mapper();
         easyRandom = EasyRandomConfigurer.randomForDokProd();
 
@@ -266,6 +265,13 @@ class A1MapperTest {
             .collect(Collectors.toList());
 
         assertThat(utfylteAdresselinjer).containsExactly("Various EEA-countries/Switzerland");
+    }
+
+    @Test
+    void mapTilBrevXML_brukerHarFlere_forventStatløsTekst() {
+        A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
+        List<String> statsborgerskap = List.of("NO","SE","DK");
+        assertThat(Arrays.stream(a1.getPerson().getStatsborgerskap().split(",")).toList()).isEqualTo(statsborgerskap);
     }
 
     @Test

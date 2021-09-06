@@ -37,7 +37,7 @@ import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.l
 import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class InnvilgelsesbrevMapperTest {
+class InnvilgelsesbrevMapperTest {
 
     private final InnvilgelsesbrevMapper instans;
 
@@ -46,12 +46,12 @@ public class InnvilgelsesbrevMapperTest {
     }
 
     @Test
-    public void mapTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
+    void mapTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
         testMapTilBrevXml();
     }
 
     @Test
-    public void mapArbeidslandFraSøknadsTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
+    void mapArbeidslandFraSøknadsTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
         testMapTilBrevXml(lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()),
             Collections.singleton(lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789"))));
     }

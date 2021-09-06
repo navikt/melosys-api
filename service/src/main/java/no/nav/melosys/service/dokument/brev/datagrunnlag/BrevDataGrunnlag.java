@@ -4,6 +4,7 @@ import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
+import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -74,8 +75,8 @@ public class BrevDataGrunnlag implements DataGrunnlag {
     }
 
     private Persondata hentPersondata(Behandling behandling, PersondataFasade persondataFasade) {
-        if (unleash.isEnabled("<melosys.pdl.brevdata.hentPerson>")) {
-            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
+        if (unleash.isEnabled("melosys.pdl.brevdata.hentPerson")) {
+            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID(), Informasjonsbehov.MED_FAMILIERELASJONER);
         }
         return behandling.hentPersonDokument();
     }
