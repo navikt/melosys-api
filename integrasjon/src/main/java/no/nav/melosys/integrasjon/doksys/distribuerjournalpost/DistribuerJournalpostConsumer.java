@@ -3,9 +3,9 @@ package no.nav.melosys.integrasjon.doksys.distribuerjournalpost;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.exception.IntegrasjonException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostRequest;
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostResponse;
+import no.nav.melosys.integrasjon.felles.RestConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -19,7 +19,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 
-public class DistribuerJournalpostConsumer {
+public class DistribuerJournalpostConsumer implements RestConsumer {
     private static final Logger log = LoggerFactory.getLogger(DistribuerJournalpostConsumer.class);
 
     private final RestTemplate restTemplate;
@@ -45,13 +45,7 @@ public class DistribuerJournalpostConsumer {
             return restTemplate.exchange(uri, method, entity, DistribuerJournalpostResponse.class).getBody();
         } catch (HttpStatusCodeException ex) {
             String feilmelding = hentFeilmelding(ex);
-            switch (ex.getStatusCode()) {
-                case UNAUTHORIZED:
-                case FORBIDDEN:
-                    throw new SikkerhetsbegrensningException(feilmelding, ex);
-                default:
-                    throw new IntegrasjonException(feilmelding, ex);
-            }
+            throw tilException(feilmelding, ex.getStatusCode());
         } catch (RestClientException ex) {
             throw new IntegrasjonException("Ukjent feil mot distribuerjournalpost", ex);
         }
