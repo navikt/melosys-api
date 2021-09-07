@@ -75,7 +75,7 @@ public class BrevDataGrunnlag implements DataGrunnlag {
     }
 
     private Persondata hentPersondata(Behandling behandling, PersondataFasade persondataFasade) {
-        if (unleash.isEnabled("melosys.pdl.brevdata.hentPerson")) {
+        if (unleash.isEnabled("melosys.brev.person.pdl")) {
             return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID(), Informasjonsbehov.MED_FAMILIERELASJONER);
         }
         return behandling.hentPersonDokument();
