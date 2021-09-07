@@ -40,9 +40,10 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
 import org.apache.commons.lang3.StringUtils;
 import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
@@ -53,7 +54,6 @@ import static no.nav.melosys.service.dokument.brev.mapper.A1Mapper.STATSLØS_TEK
 import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger;
 import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysningerStatløs;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -72,7 +72,7 @@ class A1MapperTest {
     private MelosysNAVFelles navFelles;
 
     @BeforeAll
-     void felleSetup() {
+    void felleSetup() {
         mapper = new A1Mapper();
         easyRandom = EasyRandomConfigurer.randomForDokProd();
 
@@ -271,10 +271,12 @@ class A1MapperTest {
     @Test
     void mapTilBrevXML_brukerHarFlere_forventNorskSvenskOgDanskStatsborgerskap() {
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
-        List<String> statsborgerskap = Arrays.asList(a1.getPerson().getStatsborgerskap().split(","));
-        Assertions.assertTrue(statsborgerskap.contains("NO"));
-        Assertions.assertTrue(statsborgerskap.contains("DK"));
-        Assertions.assertTrue(statsborgerskap.contains("SE"));
+        final List<String> statsborgerskap = Arrays.asList(a1.getPerson().getStatsborgerskap().split(","));
+        assertThat(statsborgerskap)
+            .hasSize(3)
+            .anyMatch("NO"::equals)
+            .anyMatch("SE"::equals)
+            .anyMatch("DK"::equals);
     }
 
     @Test
