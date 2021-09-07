@@ -33,7 +33,7 @@ import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.l
 import static no.nav.melosys.service.dokument.brev.mapper.felles.FellesBrevtypeMappingTest.hentAlleVerdierFraKodeverk;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class InnvilgelsesbrevFlereLandMapperTest {
+class InnvilgelsesbrevFlereLandMapperTest {
     private final InnvilgelsesbrevFlereLandMapper instans;
 
     public InnvilgelsesbrevFlereLandMapperTest() {
@@ -41,7 +41,7 @@ public class InnvilgelsesbrevFlereLandMapperTest {
     }
 
     @Test
-    public void testSakstypeKode() throws Exception {
+    void testSakstypeKode() throws Exception {
         List<String> koderSomIkkeErAktuelleForBrev = Collections.singletonList(
             "UKJENT" // Det er ikke aktuelt med brev for denne
         );
@@ -52,7 +52,7 @@ public class InnvilgelsesbrevFlereLandMapperTest {
     }
 
     @Test
-    public void mapTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
+    void mapTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
         testMapTilBrevXml(lagBehandling(lagFagsak()), lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode())));
     }
 
@@ -75,7 +75,7 @@ public class InnvilgelsesbrevFlereLandMapperTest {
         brevdataInnvilgelse.arbeidsgivere = norskeVirksomheter;
         brevdataInnvilgelse.bostedsland = "Norge";
         brevdataInnvilgelse.trydemyndighetsland = Landkoder.DE;
-        brevdataInnvilgelse.alleArbeidsland = Collections.singletonList("Sverige");
+        brevdataInnvilgelse.alleArbeidsland = List.of("Sverige", "Danmark", "Finland", "Spania");
         brevdataInnvilgelse.erMarginaltArbeid = true;
         brevdataInnvilgelse.erBegrensetPeriode = true;
         brevdataInnvilgelse.vedleggA1 = lagBrevdataA1(norskeVirksomheter);
