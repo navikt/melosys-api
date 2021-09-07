@@ -198,6 +198,20 @@ query($ident: ID!) {
         }
       }
     }
+    sivilstand {
+      type
+      relatertVedSivilstand
+      gyldigFraOgMed
+      metadata {
+        master
+        historisk
+        endringer {
+          type
+          registrert
+          kilde
+        }
+      }
+    }
     statsborgerskap {
       land
       bekreftelsesdato

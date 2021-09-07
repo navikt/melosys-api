@@ -105,6 +105,9 @@ class PDLConsumerImplTest {
         assertThat(person.navn())
             .flatExtracting(Navn::fornavn, Navn::mellomnavn, Navn::etternavn)
             .containsExactly("ÅPENHJERTIG", null, "BLYANT");
+        assertThat(person.sivilstand())
+            .flatExtracting(Sivilstand::type, Sivilstand::relatertVedSivilstand, Sivilstand::gyldigFraOgMed)
+            .containsExactly(Sivilstandstype.REGISTRERT_PARTNER, "11466927750", LocalDate.parse("2021-03-02"));
         assertThat(person.statsborgerskap())
             .flatExtracting(Statsborgerskap::land)
             .containsExactly("ALB", "AIA");
