@@ -257,9 +257,9 @@ class A1MapperTest {
     }
 
     @Test
-    void mapTilBrevXML_brukerHarFlereStatsborgerskap_forventNorskSvenskOgDanskStatsborgerskap() {
+    void mapTilBrevXML_brukerHarFlereStatsborgerskap_forventNorskSvenskOgDanskStatsborgerskapIAlfabetiskRekkefølge() {
         final A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
-        final Collection<String> statsborgerskap = Arrays.stream(a1.getPerson().getStatsborgerskap().split(",")).sorted(Comparator.naturalOrder()).toList();
+        final Collection<String> statsborgerskap = Arrays.stream(a1.getPerson().getStatsborgerskap().split(",")).toList();
         assertThat(statsborgerskap).isEqualTo(List.of("DK", "NO", "SE"));
     }
 

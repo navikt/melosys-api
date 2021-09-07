@@ -2,6 +2,7 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -89,7 +90,9 @@ class A1Mapper {
         if (statsborgerskap.contains(Land.av(Land.STATSLØS))) {
             return STATSLØS_TEKST;
         }
-        return statsborgerskap.stream().map(s -> LandkoderUtils.tilIso2(s.getKode())).collect(Collectors.joining(","));
+        return statsborgerskap.stream()
+            .sorted(Comparator.comparing(Land::getKode))
+            .map(s -> LandkoderUtils.tilIso2(s.getKode())).collect(Collectors.joining(","));
     }
 
     private LovvalgsperiodeType mapLovvalgsperiode(Lovvalgsperiode lovvalgsperiode) {
