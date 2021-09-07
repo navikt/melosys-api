@@ -8,26 +8,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class BrevDataMapperRuterTest {
     @Test
-    void oppslagAvInnvilgelseYrkesaktivGirInnvelgelsesbrevMapper() throws Exception {
+    void oppslagAvInnvilgelseYrkesaktivGirInnvelgelsesbrevMapper() {
         BrevDataMapper resultat = BrevDataMapperRuter.brevDataMapper(Produserbaredokumenter.INNVILGELSE_YRKESAKTIV);
         assertThat(resultat).isInstanceOf(InnvilgelsesbrevMapper.class);
     }
 
     @Test
-    void oppslagAvHenleggelsebrevGirHenleggelsesbrevMapper() throws Exception {
+    void oppslagAvHenleggelsebrevGirHenleggelsesbrevMapper() {
         BrevDataMapper resultat = BrevDataMapperRuter.brevDataMapper(Produserbaredokumenter.MELDING_HENLAGT_SAK);
         assertThat(resultat).isInstanceOf(HenleggelsesbrevMapper.class);
     }
 
     @Test
-    void oppslagAvAvslagArbeidsgiverbrevGirAvslagArbeidsgiverMapper() throws Exception {
+    void oppslagAvAvslagArbeidsgiverbrevGirAvslagArbeidsgiverMapper() {
         BrevDataMapper resultat = BrevDataMapperRuter.brevDataMapper(Produserbaredokumenter.AVSLAG_ARBEIDSGIVER);
         assertThat(resultat).isInstanceOf(AvslagArbeidsgiverMapper.class);
     }
 
 
     @Test
-    void oppslagAvAvslagManglendeOpplysningerGirAvslagManglendeOpplysningerMapper() throws Exception {
+    void oppslagAvAvslagManglendeOpplysningerGirAvslagManglendeOpplysningerMapper() {
         BrevDataMapper resultat = BrevDataMapperRuter.brevDataMapper(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER);
         assertThat(resultat).isInstanceOf(AvslagManglendeOpplysningerMapper.class);
     }

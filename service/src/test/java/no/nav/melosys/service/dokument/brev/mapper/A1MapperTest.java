@@ -53,6 +53,7 @@ import static no.nav.melosys.service.dokument.brev.mapper.A1Mapper.STATSLØS_TEK
 import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger;
 import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysningerStatløs;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -270,8 +271,10 @@ class A1MapperTest {
     @Test
     void mapTilBrevXML_brukerHarFlere_forventStatløsTekst() {
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
-        List<String> statsborgerskap = List.of("NO","SE","DK");
-        assertThat(Arrays.stream(a1.getPerson().getStatsborgerskap().split(",")).toList()).isEqualTo(statsborgerskap);
+        List<String> statsborgerskap = Arrays.asList(a1.getPerson().getStatsborgerskap().split(","));
+        Assertions.assertTrue(statsborgerskap.contains("NO"));
+        Assertions.assertTrue(statsborgerskap.contains("DK"));
+        Assertions.assertTrue(statsborgerskap.contains("SE"));
     }
 
     @Test
