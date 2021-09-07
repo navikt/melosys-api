@@ -23,9 +23,6 @@ import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.LuftfartBase;
-import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.KjoennsType;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -139,15 +136,6 @@ class A1MapperTest {
 
     }
 
-    static PersonDokument lagPersonDokument() {
-        PersonDokument person = new PersonDokument();
-        person.setKjønn(new KjoennsType("K"));
-        person.setFornavn("Ola");
-        person.setEtternavn("Nordmann");
-        person.setFødselsdato(LocalDate.now());
-        person.setStatsborgerskap(new Land(Land.NORGE));
-        return person;
-    }
 
     @Test
     void mapTilBrevXML() throws Exception {
@@ -270,13 +258,9 @@ class A1MapperTest {
 
     @Test
     void mapTilBrevXML_brukerHarFlereStatsborgerskap_forventNorskSvenskOgDanskStatsborgerskap() {
-        A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
-        final List<String> statsborgerskap = Arrays.asList(a1.getPerson().getStatsborgerskap().split(","));
-        assertThat(statsborgerskap)
-            .hasSize(3)
-            .anyMatch("NO"::equals)
-            .anyMatch("SE"::equals)
-            .anyMatch("DK"::equals);
+        final A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
+        final Collection<String> statsborgerskap = Arrays.stream(a1.getPerson().getStatsborgerskap().split(",")).sorted(Comparator.naturalOrder()).toList();
+        assertThat(statsborgerskap).isEqualTo(List.of("DK", "NO", "SE"));
     }
 
     @Test
