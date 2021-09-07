@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.time.LocalDate;
 import java.util.*;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -17,6 +18,7 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
@@ -68,6 +70,10 @@ class BrevDataByggerA001Test {
     private VilkaarsresultatService vilkaarsresultatService;
     @Mock
     private EregFasade ereg;
+    @Mock
+    private PersondataFasade persondataFasade;
+
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     private Behandling behandling;
 
@@ -84,8 +90,16 @@ class BrevDataByggerA001Test {
 
     @BeforeEach
     public void setUp() {
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.BRUKER);
+        aktoer.setAktørId("ident");
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setAktører(Set.of(aktoer));
+
         behandling = new Behandling();
         behandling.setId(123L);
+        behandling.setFagsak(fagsak);
 
         avklarteOrganisasjoner = new HashSet<>();
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(avklarteOrganisasjoner);
@@ -122,8 +136,8 @@ class BrevDataByggerA001Test {
 
         arbDokument = new ArbeidsforholdDokument();
         lagArbeidsforhold(orgnr2,
-                LocalDate.of(2005, 1, 11),
-                LocalDate.of(2017, 8, 11));
+            LocalDate.of(2005, 1, 11),
+            LocalDate.of(2017, 8, 11));
 
         Saksopplysning aareg = new Saksopplysning();
         aareg.setDokument(arbDokument);
@@ -161,7 +175,7 @@ class BrevDataByggerA001Test {
     private BrevDataGrunnlag lagBrevDataGrunnlag(DoksysBrevbestilling brevbestilling) {
         RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(ereg, mock(PersondataFasade.class));
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), mock(KodeverkService.class));
-        return new BrevDataGrunnlag(brevbestilling, mock(KodeverkService.class), avklarteVirksomheterService, avklartefaktaService);
+        return new BrevDataGrunnlag(brevbestilling, mock(KodeverkService.class), avklarteVirksomheterService, avklartefaktaService, persondataFasade, fakeUnleash);
     }
 
     private void leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) {
@@ -198,7 +212,7 @@ class BrevDataByggerA001Test {
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
         assertThat(brevDataA001.selvstendigeVirksomheter.stream()
-                .map(nv -> nv.orgnr)).containsOnly(foretak.orgnr);
+            .map(nv -> nv.orgnr)).containsOnly(foretak.orgnr);
     }
 
     @Test
@@ -213,9 +227,9 @@ class BrevDataByggerA001Test {
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
         assertThat(brevDataA001.selvstendigeVirksomheter.stream()
-                .map(nv -> nv.orgnr)).containsOnly(orgnr1);
+            .map(nv -> nv.orgnr)).containsOnly(orgnr1);
         assertThat(brevDataA001.arbeidsgivendeVirksomheter.stream()
-                .map(nv -> nv.orgnr)).containsOnly(orgnr1);
+            .map(nv -> nv.orgnr)).containsOnly(orgnr1);
     }
 
     @Test
@@ -272,17 +286,17 @@ class BrevDataByggerA001Test {
         avklarteOrganisasjoner.add(orgnr1);
 
         lagArbeidsforhold(orgnr1,
-                          LocalDate.of(1976, 10, 23),
-                          LocalDate.of(1978, 10, 23));
+            LocalDate.of(1976, 10, 23),
+            LocalDate.of(1978, 10, 23));
 
         Arbeidsforhold forventet = lagArbeidsforhold(orgnr1,
-                          LocalDate.of(2005, 1, 11),
-                          LocalDate.of(2018, 8, 11));
+            LocalDate.of(2005, 1, 11),
+            LocalDate.of(2018, 8, 11));
 
         // Senere arbeidsforhold, men ikke et valgt arbeidsforhold
         lagArbeidsforhold(orgnr2,
-                LocalDate.of(2010, 10, 23),
-                LocalDate.of(2017, 10, 23));
+            LocalDate.of(2010, 10, 23),
+            LocalDate.of(2017, 10, 23));
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(lagBrevDataGrunnlag(), SAKSBEHANDLER_ID);
         assertThat((brevDataA001).ansettelsesperiode).contains(forventet.ansettelsesPeriode);
@@ -302,7 +316,7 @@ class BrevDataByggerA001Test {
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
             .medBehandling(behandling)
             .medYtterligereInformasjon(forventetInfo).build();
-        BrevDataGrunnlag brevdataGrunnlag =  lagBrevDataGrunnlag(brevbestilling);
+        BrevDataGrunnlag brevdataGrunnlag = lagBrevDataGrunnlag(brevbestilling);
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(brevdataGrunnlag, SAKSBEHANDLER_ID);
         assertThat(brevDataA001.ytterligereInformasjon).isEqualTo(forventetInfo);

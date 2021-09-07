@@ -18,12 +18,21 @@ import static java.util.Collections.emptySet;
 
 public class PersonopplysningerObjectFactory {
     public static Personopplysninger lagPersonopplysninger() {
+        return lagPersonopplysninger(false);
+    }
+
+    public static Personopplysninger lagPersonopplysningerStatløs() {
+        return lagPersonopplysninger(true);
+    }
+
+    private static Personopplysninger lagPersonopplysninger(boolean erStatløs) {
         return new Personopplysninger(emptyList(), lagBostedsadresse(), null, emptySet(), lagFødesel(), null,
-            lagKjønn(), lagKontaktadresser(), lagNavn(), lagOppholdsadresser(), lagStatsborgerskap());
+            lagKjønn(), lagKontaktadresser(), lagNavn(), lagOppholdsadresser(), lagStatsborgerskap(erStatløs));
+
     }
 
     private static Foedsel lagFødesel() {
-        return new Foedsel(LocalDate.MIN, null, null, null);
+        return new Foedsel(LocalDate.EPOCH, null, null, null);
     }
 
     private static KjoennType lagKjønn() {
@@ -106,15 +115,24 @@ public class PersonopplysningerObjectFactory {
         return new Navn("Ola", null, "Nordmann");
     }
 
-    private static Collection<Statsborgerskap> lagStatsborgerskap() {
+    private static Collection<Statsborgerskap> lagStatsborgerskap(boolean erStatløs) {
+        if (erStatløs) {
+            return List.of(new Statsborgerskap(Land.STATSLØS,
+                null,
+                LocalDate.EPOCH,
+                LocalDate.now(),
+                "PDL",
+                "Dolly",
+                false));
+        }
         return List.of(
             new Statsborgerskap("NOR", null, LocalDate.parse("2009-11-18"),
                 LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
             new Statsborgerskap("SWE", null, LocalDate.parse("1979-11-18"),
                 LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
-            new Statsborgerskap("DEN", null, null,
+            new Statsborgerskap("DNK", null, null,
                 LocalDate.parse("1980-11-18"), "PDL",
-            "Dolly", false)
+                "Dolly", false)
         );
     }
 }

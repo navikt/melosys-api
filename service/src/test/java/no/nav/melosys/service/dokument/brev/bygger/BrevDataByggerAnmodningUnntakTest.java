@@ -2,6 +2,7 @@ package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.util.*;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Saksopplysning;
@@ -20,6 +21,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntak;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,6 +56,10 @@ class BrevDataByggerAnmodningUnntakTest {
     LandvelgerService landvelgerService;
     @Mock
     KodeverkService kodeverkService;
+    @Mock
+    PersondataFasade persondataFasade;
+
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     private BrevDataByggerAnmodningUnntak brevDataByggerAnmodningUnntak;
 
@@ -112,7 +118,7 @@ class BrevDataByggerAnmodningUnntakTest {
 
         when(registerOppslagService.hentOrganisasjoner(orgSet)).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
-        return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+        return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondataFasade, fakeUnleash);
     }
 
     @Test
