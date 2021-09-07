@@ -269,7 +269,7 @@ class A1MapperTest {
     }
 
     @Test
-    void mapTilBrevXML_brukerHarFlere_forventStatløsTekst() {
+    void mapTilBrevXML_brukerHarFlere_forventNorskSvenskOgDanskStatsborgerskap() {
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
         List<String> statsborgerskap = Arrays.asList(a1.getPerson().getStatsborgerskap().split(","));
         Assertions.assertTrue(statsborgerskap.contains("NO"));
