@@ -183,6 +183,24 @@
           }
         }
       ],
+      "sivilstand": [
+        {
+          "type": "REGISTRERT_PARTNER",
+          "relatertVedSivilstand": "11466927750",
+          "gyldigFraOgMed": "2021-03-02",
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2021-03-30T12:23:07",
+                "kilde": "Dolly"
+              }
+            ]
+          }
+        }
+      ],
       "statsborgerskap": [
         {
           "land": "ALB",
