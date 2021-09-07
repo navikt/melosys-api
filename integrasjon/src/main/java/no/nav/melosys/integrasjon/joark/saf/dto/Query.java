@@ -26,6 +26,7 @@ public final class Query {
                 id
                 type
                 navn
+                land
               }
               kanal
               relevanteDatoer {

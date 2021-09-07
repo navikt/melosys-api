@@ -45,7 +45,10 @@ public class Familiemedlem {
             new Folkeregisteridentifikator(fnr),
             lagNavn(splittetNavn),
             mapFamilierelasjon(familierelasjon),
-            new Foedsel(fødselsdato, null, null, null)
+            new Foedsel(fødselsdato, null, null, null),
+            null,
+            null,
+            null
         );
     }
 

@@ -14,6 +14,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.person.*;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
+import no.nav.melosys.domain.person.familie.Familierelasjon;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
@@ -88,7 +89,7 @@ class PersondataServiceTest {
     @Test
     void hentPersonMedFamilie() {
         when(pdlConsumer.hentPerson(anyString())).thenReturn(lagPerson());
-        when(pdlConsumer.hentBarnEllerForelder(anyString())).thenReturn(lagPerson());
+        when(pdlConsumer.hentBarn(anyString())).thenReturn(lagPerson());
         when(pdlConsumer.hentRelatertVedSivilstand(anyString())).thenReturn(lagPerson());
 
         final Personopplysninger persondata = (Personopplysninger) persondataService.hentPerson("ident",
@@ -128,6 +129,18 @@ class PersondataServiceTest {
             new Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null,
                 null, "PDL", "Dolly", false)
         );
+    }
+
+    @Test
+    void hentFamiliemedlemmerMedHistorikk() {
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(lagBehandling());
+        when(pdlConsumer.hentFamilierelasjoner(anyString())).thenReturn(lagPerson());
+        when(pdlConsumer.hentBarn("barnIdent")).thenReturn(lagPerson());
+        when(pdlConsumer.hentRelatertVedSivilstand("relatertVedSivilstandID")).thenReturn(lagPerson());
+
+        final Set<Familiemedlem> familiemedlemmer = persondataService.hentFamiliemedlemmerMedHistorikk(1L);
+        assertThat(familiemedlemmer).extracting(Familiemedlem::familierelasjon).contains(Familierelasjon.BARN,
+            Familierelasjon.RELATERT_VED_SIVILSTAND);
     }
 
     @Test

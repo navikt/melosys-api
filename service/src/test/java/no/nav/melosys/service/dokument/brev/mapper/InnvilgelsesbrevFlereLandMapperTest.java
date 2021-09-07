@@ -75,7 +75,7 @@ class InnvilgelsesbrevFlereLandMapperTest {
         brevdataInnvilgelse.arbeidsgivere = norskeVirksomheter;
         brevdataInnvilgelse.bostedsland = "Norge";
         brevdataInnvilgelse.trydemyndighetsland = Landkoder.DE;
-        brevdataInnvilgelse.alleArbeidsland = Collections.singletonList("Sverige");
+        brevdataInnvilgelse.alleArbeidsland = List.of("Sverige", "Danmark", "Finland", "Spania");
         brevdataInnvilgelse.erMarginaltArbeid = true;
         brevdataInnvilgelse.erBegrensetPeriode = true;
         brevdataInnvilgelse.vedleggA1 = lagBrevdataA1(norskeVirksomheter);

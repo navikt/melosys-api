@@ -47,7 +47,7 @@ public class SedDataGrunnlagFactory {
     }
 
     private Persondata hentPersondata(Behandling behandling) {
-        if (unleash.isEnabled("melosys.sed.adresser.pdl")) {
+        if (unleash.isEnabled("melosys.pdl.sed.mapping")) {
             return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID(), MED_FAMILIERELASJONER);
         }
         return behandling.hentPersonDokument();

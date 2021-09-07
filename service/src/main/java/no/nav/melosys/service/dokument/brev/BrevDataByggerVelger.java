@@ -2,7 +2,6 @@ package no.nav.melosys.service.dokument.brev;
 
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.integrasjon.joark.JoarkService;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -11,6 +10,7 @@ import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.dokument.brev.bygger.*;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
@@ -36,7 +36,7 @@ public class BrevDataByggerVelger {
     @Autowired
     public BrevDataByggerVelger(AnmodningsperiodeService anmodningsperiodeService,
                                 AvklartefaktaService avklartefaktaService,
-                                JoarkService joarkService,
+                                @Qualifier("system") JoarkService joarkService,
                                 LandvelgerService landvelgerService,
                                 LovvalgsperiodeService lovvalgsperiodeService,
                                 SaksopplysningerService saksopplysningerService,
