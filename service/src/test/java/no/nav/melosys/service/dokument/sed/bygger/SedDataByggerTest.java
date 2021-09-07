@@ -570,7 +570,7 @@ class SedDataByggerTest {
         assertThat(statsborgerskapList).hasSize(3)
             .anyMatch("NOR"::equals)
             .anyMatch("SWE"::equals)
-            .anyMatch("DEN"::equals);
+            .anyMatch("DNK"::equals);
     }
 
     private void lagUtkastAssertions(SedDataDto sedData, boolean forventAdresse) {
