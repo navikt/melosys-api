@@ -85,7 +85,7 @@
 
         <!-- Transitive avhengiheter -->
         <asm.version>9.2</asm.version>
-        <bcprov-jdk15on.version>1.68</bcprov-jdk15on.version>
+        <bcprov-jdk15on.version>1.69</bcprov-jdk15on.version>
         <cglib.version>3.3.0</cglib.version>
         <classgraph.version>4.8.102</classgraph.version>
         <commons-logging.version>1.2</commons-logging.version>
