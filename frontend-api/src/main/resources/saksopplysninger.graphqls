@@ -19,6 +19,7 @@ type Saksopplysninger {
 type Personopplysninger {
     bostedsadresser: [Bostedsadresse!]!
     familiemedlemmer: [Familiemedlem!]!
+    folkeregisteridentifikator: String
     folkeregisterpersonstatus: Folkeregisterpersonstatus
     kjoenn: KjoennType!
     kontaktadresser: [Kontaktadresse!]!

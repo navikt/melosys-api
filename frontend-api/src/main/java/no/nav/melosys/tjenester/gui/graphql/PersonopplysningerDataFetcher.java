@@ -40,6 +40,7 @@ public class PersonopplysningerDataFetcher implements DataFetcher<Personopplysni
                 Comparator.nullsFirst(Comparator.reverseOrder())))
             .toList();
         return new PersonopplysningerDto(bostedsadresseDtoList,
+            FolkeregisteridentifikatorTilDtoKonverter.tilDto(personMedHistorikk.folkeregisteridentifikator()),
             FolkeregisterpersonstatusTilDtoKonverter.tilDto(personMedHistorikk.folkeregisterpersonstatus()),
             personMedHistorikk.kjønn(),
             kontaktadresseDtoList,
