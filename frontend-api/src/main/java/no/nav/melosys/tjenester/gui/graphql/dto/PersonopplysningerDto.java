@@ -6,6 +6,7 @@ public record PersonopplysningerDto(
     List<BostedsadresseDto> bostedsadresser,
     FolkeregisterpersonstatusDto folkeregisterpersonstatus,
     List<KontaktadresseDto> kontaktadresser,
+    NavnDto navn,
     List<OppholdsadresseDto> oppholdsadresser,
     List<StatsborgerskapDto> statsborgerskap
 ) {
