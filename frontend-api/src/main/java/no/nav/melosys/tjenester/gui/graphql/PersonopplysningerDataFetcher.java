@@ -41,6 +41,7 @@ public class PersonopplysningerDataFetcher implements DataFetcher<Personopplysni
             .toList();
         return new PersonopplysningerDto(bostedsadresseDtoList,
             FolkeregisterpersonstatusTilDtoKonverter.tilDto(personMedHistorikk.folkeregisterpersonstatus()),
+            personMedHistorikk.kjønn(),
             kontaktadresseDtoList,
             NavnTilDtoKonverter.tilDto(personMedHistorikk.navn()),
             oppholdsadresseDtoList,
