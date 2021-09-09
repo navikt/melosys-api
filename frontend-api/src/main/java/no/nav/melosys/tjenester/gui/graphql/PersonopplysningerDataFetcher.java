@@ -34,6 +34,8 @@ public class PersonopplysningerDataFetcher implements DataFetcher<Personopplysni
             .map(kontaktadresse -> KontaktadresseTilDtoKonverter.tilDto(kontaktadresse, kodeverkService)).toList();
         final var oppholdsadresseDtoList = personMedHistorikk.oppholdsadresser().stream()
             .map(oppholdsadresse -> OppholdsadresseTilDtoKonverter.tilDto(oppholdsadresse, kodeverkService)).toList();
+        final var sivilstandDtoList =
+            personMedHistorikk.sivilstand().stream().map(SivilstandTilDtoKonverter::tilDto).toList();
         final var statsborgerskapDtoList = personMedHistorikk.statsborgerskap().stream()
             .map(s -> StatsborgerskapTilDtoKonverter.tilDto(s, kodeverkService))
             .sorted(Comparator.comparing(StatsborgerskapDto::gyldigFraOgMed,
@@ -46,6 +48,7 @@ public class PersonopplysningerDataFetcher implements DataFetcher<Personopplysni
             kontaktadresseDtoList,
             NavnTilDtoKonverter.tilDto(personMedHistorikk.navn()),
             oppholdsadresseDtoList,
+            sivilstandDtoList,
             statsborgerskapDtoList);
     }
 }

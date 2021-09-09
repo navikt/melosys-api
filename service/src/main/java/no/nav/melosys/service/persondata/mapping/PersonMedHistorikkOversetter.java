@@ -62,6 +62,8 @@ public final class PersonMedHistorikkOversetter {
             NavnOversetter.oversett(person.navn()),
             person.oppholdsadresse().stream().map(o -> OppholdsadresseOversetter.oversett(o, kodeverkService)).collect(
                 Collectors.toUnmodifiableSet()),
+            person.sivilstand().stream().map(SivilstandOversetter::oversett).collect(
+                Collectors.toUnmodifiableSet()),
             person.statsborgerskap().stream().map(StatsborgerskapOversetter::oversett).collect(
                 Collectors.toUnmodifiableSet()));
     }

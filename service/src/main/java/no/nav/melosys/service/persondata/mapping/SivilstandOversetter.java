@@ -19,14 +19,14 @@ public final class SivilstandOversetter {
             .orElse(null);
     }
 
-    private static Sivilstand oversett(no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand sivilstand) {
+    static Sivilstand oversett(no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand sivilstand) {
         return new Sivilstand(
             Sivilstandstype.valueOf(sivilstand.type().name()),
             sivilstand.relatertVedSivilstand(),
             sivilstand.gyldigFraOgMed(),
-            null,
-            sivilstand.hentKilde(),
+            sivilstand.bekreftelsesdato(),
             sivilstand.metadata().master(),
+            sivilstand.hentKilde(),
             sivilstand.metadata().historisk()
         );
     }

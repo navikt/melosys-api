@@ -78,7 +78,9 @@ class PersonopplysningerDataFetcherTest {
                 new Folkeregisteridentifikator("identNr"),
                 new Folkeregisterpersonstatus(Personstatuser.UDEFINERT, "ny status fra PDL"), KjoennType.UKJENT,
                 Set.of(kontaktadresse_1, kontaktadresse_2), new Navn("Ola", "Oops", "King"),
-                Set.of(oppholdsadresse_1, oppholdsadresse_2),
+                Set.of(oppholdsadresse_1, oppholdsadresse_2), Set.of(
+                new Sivilstand(Sivilstandstype.REGISTRERT_PARTNER, "relatertVedSivilstandID", LocalDate.MIN,
+                    LocalDate.EPOCH, "master", "kilde", false)),
                 Set.of(statsborgerskap_1, statsborgerskap_2, statsborgerskap_3))
         );
         when(kodeverkService.dekod(eq(FellesKodeverk.LANDKODER_ISO2), any())).thenReturn("My country");
@@ -97,6 +99,11 @@ class PersonopplysningerDataFetcherTest {
         assertThat(personopplysninger.navn()).isEqualTo(new NavnDto("Ola", "Oops", "King"));
         assertThat(personopplysninger.oppholdsadresser()).extracting(OppholdsadresseDto::adresse)
             .extracting(StrukturertAdresseformatDto::gatenavn).containsExactlyInAnyOrder("opphold 1", "opphold 2");
+        assertThat(personopplysninger.sivilstand()).flatExtracting(SivilstandDto::type,
+            SivilstandDto::relatertVedSivilstand, SivilstandDto::gyldigFraOgMed, SivilstandDto::bekreftelsesdato,
+            SivilstandDto::master, SivilstandDto::kilde, SivilstandDto::erHistorisk)
+            .containsExactly("Registrert partner", "relatertVedSivilstandID", LocalDate.MIN, LocalDate.EPOCH, "master",
+                "kilde", false);
 
         Consumer<PersonopplysningerDto> statsborgerskapErSortert = personopplysningerDto -> {
             assertThat(personopplysningerDto.statsborgerskap().get(0).land()).isEqualTo("Testland C");

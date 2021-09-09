@@ -240,6 +240,7 @@
           "type": "UOPPGITT",
           "relatertVedSivilstand": null,
           "gyldigFraOgMed": null,
+          "bekreftelsesdato": "2019-05-07",
           "metadata": {
             "master": "FREG",
             "historisk": false,
@@ -256,6 +257,7 @@
           "type": "GIFT",
           "relatertVedSivilstand": "04507445824",
           "gyldigFraOgMed": "2021-07-06",
+          "bekreftelsesdato": null,
           "metadata": {
             "master": "FREG",
             "historisk": true,

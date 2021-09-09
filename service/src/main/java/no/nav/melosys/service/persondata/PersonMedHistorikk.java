@@ -17,6 +17,6 @@ public record PersonMedHistorikk(
     Collection<Kontaktadresse> kontaktadresser,
     Navn navn,
     Collection<Oppholdsadresse> oppholdsadresser,
-    Collection<Statsborgerskap> statsborgerskap
-) {
+    Collection<Sivilstand> sivilstand,
+    Collection<Statsborgerskap> statsborgerskap) {
 }
