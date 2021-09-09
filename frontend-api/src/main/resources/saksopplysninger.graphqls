@@ -19,6 +19,7 @@ type Saksopplysninger {
 type Personopplysninger {
     bostedsadresser: [Bostedsadresse!]!
     familiemedlemmer: [Familiemedlem!]!
+    folkeregisterpersonstatus: Folkeregisterpersonstatus
     kontaktadresser: [Kontaktadresse!]!
     oppholdsadresser: [Oppholdsadresse!]!
     statsborgerskap: [Statsborgerskap!]!
@@ -50,6 +51,11 @@ enum Familierelasjonsrolle {
     FAR,
     MOR,
     RELATERT_VED_SIVILSTAND
+}
+
+type Folkeregisterpersonstatus {
+    kode: String!
+    tekst: String!
 }
 
 type Kontaktadresse {

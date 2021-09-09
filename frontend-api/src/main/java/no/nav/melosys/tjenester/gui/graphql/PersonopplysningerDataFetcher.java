@@ -9,10 +9,7 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.tjenester.gui.graphql.dto.PersonopplysningerDto;
 import no.nav.melosys.tjenester.gui.graphql.dto.StatsborgerskapDto;
-import no.nav.melosys.tjenester.gui.graphql.mapping.BostedsadresseTilDtoKonverter;
-import no.nav.melosys.tjenester.gui.graphql.mapping.KontaktadresseTilDtoKonverter;
-import no.nav.melosys.tjenester.gui.graphql.mapping.OppholdsadresseTilDtoKonverter;
-import no.nav.melosys.tjenester.gui.graphql.mapping.StatsborgerskapTilDtoKonverter;
+import no.nav.melosys.tjenester.gui.graphql.mapping.*;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -42,7 +39,10 @@ public class PersonopplysningerDataFetcher implements DataFetcher<Personopplysni
             .sorted(Comparator.comparing(StatsborgerskapDto::gyldigFraOgMed,
                 Comparator.nullsFirst(Comparator.reverseOrder())))
             .toList();
-        return new PersonopplysningerDto(bostedsadresseDtoList, kontaktadresseDtoList, oppholdsadresseDtoList,
+        return new PersonopplysningerDto(bostedsadresseDtoList,
+            FolkeregisterpersonstatusTilDtoKonverter.tilDto(personMedHistorikk.folkeregisterpersonstatus()),
+            kontaktadresseDtoList,
+            oppholdsadresseDtoList,
             statsborgerskapDtoList);
     }
 }

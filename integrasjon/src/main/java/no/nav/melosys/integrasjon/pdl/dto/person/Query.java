@@ -308,6 +308,13 @@ query($ident: ID!, $historikk: Boolean!) {
     }
     folkeregisterpersonstatus {
       status
+      metadata {
+        master
+        endringer {
+          registrert
+          type
+        }
+      }
     }
     forelderBarnRelasjon {
       relatertPersonsIdent
