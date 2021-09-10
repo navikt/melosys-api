@@ -25,6 +25,7 @@ type Personopplysninger {
     kontaktadresser: [Kontaktadresse!]!
     navn: Navn!
     oppholdsadresser: [Oppholdsadresse!]!
+    sivilstand: [Sivilstand!]!
     statsborgerskap: [Statsborgerskap!]!
 }
 
@@ -111,6 +112,16 @@ type StrukturertAdresseformat {
     poststed: String
     region: String
     land: String!
+}
+
+type Sivilstand {
+    type: String!
+    relatertVedSivilstand: String
+    gyldigFraOgMed: Date
+    bekreftelsesdato: Date
+    master: String!
+    kilde: String
+    erHistorisk: Boolean!
 }
 
 type Statsborgerskap {

@@ -202,6 +202,7 @@ query($ident: ID!) {
       type
       relatertVedSivilstand
       gyldigFraOgMed
+      bekreftelsesdato
       metadata {
         master
         historisk
@@ -447,6 +448,7 @@ query($ident: ID!, $historikk: Boolean!) {
       type
       relatertVedSivilstand
       gyldigFraOgMed
+      bekreftelsesdato
       metadata {
         master
         historisk
@@ -515,6 +517,7 @@ query($ident: ID!, $historikk: Boolean!) {
       type
       relatertVedSivilstand
       gyldigFraOgMed
+      bekreftelsesdato
       metadata {
         master
         historisk

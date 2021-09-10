@@ -12,5 +12,6 @@ public record PersonopplysningerDto(
     List<KontaktadresseDto> kontaktadresser,
     NavnDto navn,
     List<OppholdsadresseDto> oppholdsadresser,
+    List<SivilstandDto> sivilstand,
     List<StatsborgerskapDto> statsborgerskap) {
 }
