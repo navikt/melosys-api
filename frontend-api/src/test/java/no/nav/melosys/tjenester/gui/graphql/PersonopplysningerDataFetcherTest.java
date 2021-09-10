@@ -10,8 +10,7 @@ import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Personstatuser;
-import no.nav.melosys.domain.person.Folkeregisterpersonstatus;
-import no.nav.melosys.domain.person.Statsborgerskap;
+import no.nav.melosys.domain.person.*;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
@@ -75,9 +74,11 @@ class PersonopplysningerDataFetcherTest {
         when(executionStepInfo.getParent()).thenReturn(executionStepInfo);
         when(executionStepInfo.getArgument("behandlingID")).thenReturn(1L);
         when(persondataFasade.hentPersonMedHistorikk(anyLong())).thenReturn(
-            new PersonMedHistorikk(Set.of(bostedsadresse_1, bostedsadresse_2), null, null, null,
-                new Folkeregisterpersonstatus(Personstatuser.UDEFINERT, "ny status fra PDL"), null,
-                Set.of(kontaktadresse_1, kontaktadresse_2), null, Set.of(oppholdsadresse_1, oppholdsadresse_2),
+            new PersonMedHistorikk(Set.of(bostedsadresse_1, bostedsadresse_2), null, null,
+                new Folkeregisteridentifikator("identNr"),
+                new Folkeregisterpersonstatus(Personstatuser.UDEFINERT, "ny status fra PDL"), KjoennType.UKJENT,
+                Set.of(kontaktadresse_1, kontaktadresse_2), new Navn("Ola", "Oops", "King"),
+                Set.of(oppholdsadresse_1, oppholdsadresse_2),
                 Set.of(statsborgerskap_1, statsborgerskap_2, statsborgerskap_3))
         );
         when(kodeverkService.dekod(eq(FellesKodeverk.LANDKODER_ISO2), any())).thenReturn("My country");
@@ -88,9 +89,12 @@ class PersonopplysningerDataFetcherTest {
         final var personopplysninger = personopplysningerDataFetcher.get(dataFetchingEnvironment);
         assertThat(personopplysninger.bostedsadresser()).extracting(BostedsadresseDto::adresse)
             .extracting(StrukturertAdresseformatDto::gatenavn).containsExactlyInAnyOrder("gate1", "gate2");
+        assertThat(personopplysninger.folkeregisteridentifikator()).isEqualTo("identNr");
         assertThat(personopplysninger.folkeregisterpersonstatus()).isEqualTo(
             new FolkeregisterpersonstatusDto(Personstatuser.UDEFINERT.getKode(), "ny status fra PDL"));
+        assertThat(personopplysninger.kjoenn()).isEqualTo(KjoennType.UKJENT);
         assertThat(personopplysninger.kontaktadresser()).hasSize(2);
+        assertThat(personopplysninger.navn()).isEqualTo(new NavnDto("Ola", "Oops", "King"));
         assertThat(personopplysninger.oppholdsadresser()).extracting(OppholdsadresseDto::adresse)
             .extracting(StrukturertAdresseformatDto::gatenavn).containsExactlyInAnyOrder("opphold 1", "opphold 2");
 
