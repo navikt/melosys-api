@@ -62,7 +62,7 @@ public class PersondataService implements PersondataFasade {
 
     @Override
     @Cacheable("folkeregisterIdent")
-    public String hentFolkeregisterIdent(String ident) {
+    public String hentFolkeregisterident(String ident) {
         return pdlConsumer.hentIdenter(ident).identer()
             .stream().filter(Ident::erFolkeregisterIdent)
             .findFirst().map(Ident::ident)

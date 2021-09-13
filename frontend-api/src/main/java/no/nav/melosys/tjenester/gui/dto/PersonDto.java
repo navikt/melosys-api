@@ -13,7 +13,7 @@ import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 public class PersonDto {
 
     public PersonDto(PersonDokument person) {
-        fnr = person.hentFolkeregisterIdent();
+        fnr = person.hentFolkeregisterident();
         sivilstand = person.getSivilstand();
         statsborgerskap = person.hentAlleStatsborgerskap().stream().findFirst().orElse(null);
         sammensattNavn = person.getSammensattNavn();

@@ -13,8 +13,8 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.*;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.person.Persondata;
@@ -144,7 +144,7 @@ class A001Mapper {
         person.setStatsborgerskapListe(mapStatsborgerskapListe(personDok));
         person.setKjønn(KjoennKode.fromValue(personDok.hentKjønnType().getKode()));
         person.setBostedsadresse(mapBostedAdresse(bostedsadresse));
-        person.setFødselsnummer(personDok.hentFolkeregisterIdent());
+        person.setFødselsnummer(personDok.hentFolkeregisterident());
         //Fødeland og Fødested skal ikke fylles ut
         utenlandskIdent.ifPresent(person::setUtenlandskID);
         try {

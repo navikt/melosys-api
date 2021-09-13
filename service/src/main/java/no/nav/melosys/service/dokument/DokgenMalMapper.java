@@ -88,7 +88,7 @@ public class DokgenMalMapper {
         if (unleash.isEnabled("melosys.brev.adresser.pdl")) {
             return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
         }
-        String fnr = behandling.hentPersonDokument().hentFolkeregisterIdent();
+        String fnr = behandling.hentPersonDokument().hentFolkeregisterident();
         return (Persondata) persondataFasade.hentPersonFraTps(fnr, Informasjonsbehov.STANDARD).getDokument();
     }
 

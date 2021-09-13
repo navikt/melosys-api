@@ -14,7 +14,7 @@ public interface PersondataFasade {
 
     Set<Familiemedlem> hentFamiliemedlemmerMedHistorikk(long behandlingID);
 
-    String hentFolkeregisterIdent(String ident);
+    String hentFolkeregisterident(String ident);
 
     @Deprecated
     Saksopplysning hentPersonFraTps(String fnr, Informasjonsbehov behov);

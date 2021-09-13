@@ -81,7 +81,7 @@ public class OpprettJournalforBrev implements StegBehandler {
 
         if (isEmpty(orgnr)) {
             mottaker.setAktørId(aktørId);
-            fnr = persondataFasade.hentFolkeregisterIdent(aktørId);
+            fnr = persondataFasade.hentFolkeregisterident(aktørId);
             sammensattNavn = persondataFasade.hentSammensattNavn(fnr);
         } else {
             mottaker.setOrgnr(orgnr);
@@ -112,7 +112,7 @@ public class OpprettJournalforBrev implements StegBehandler {
 
     private String hentBrukerFolkeregisterIdent(Behandling behandling) {
         if (unleash.isEnabled("melosys.brev.person.pdl")) {
-            return persondataFasade.hentFolkeregisterIdent(behandling.getFagsak().hentAktørID());
+            return persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID());
         }
         return behandling.hentPersonDokument().hentFolkeregisterident();
     }

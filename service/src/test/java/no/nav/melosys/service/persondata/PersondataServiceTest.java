@@ -76,14 +76,14 @@ class PersondataServiceTest {
     @Test
     void hentFolkeregisterIdent_finnes_verifiserIdent() {
         when(pdlConsumer.hentIdenter(anyString())).thenReturn(lagIdentliste());
-        assertThat(persondataService.hentFolkeregisterIdent("123")).isEqualTo("22222");
+        assertThat(persondataService.hentFolkeregisterident("123")).isEqualTo("22222");
     }
 
     @Test
     void hentFolkeregisterIdent_finnesIkke_feiler() {
         when(pdlConsumer.hentIdenter(anyString())).thenReturn(lagTomIdentliste());
         assertThatExceptionOfType(IkkeFunnetException.class)
-            .isThrownBy(() -> persondataService.hentFolkeregisterIdent("123"))
+            .isThrownBy(() -> persondataService.hentFolkeregisterident("123"))
             .withMessageContaining("Finner ikke folkeregisterident");
     }
 

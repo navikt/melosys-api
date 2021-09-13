@@ -216,7 +216,7 @@ public class OppgaveService {
             jfrOppgaveDto.setJournalpostID(oppgave.getJournalpostId());
             dest = jfrOppgaveDto;
             String aktørId = oppgave.getAktørId();
-            String fnr = aktørId != null ? persondataFasade.hentFolkeregisterIdent(aktørId) : null;
+            String fnr = aktørId != null ? persondataFasade.hentFolkeregisterident(aktørId) : null;
             if (StringUtils.isNotEmpty(fnr)) {
                 dest.setFnr(fnr);
                 dest.setSammensattNavn(persondataFasade.hentSammensattNavn(fnr));
@@ -253,7 +253,7 @@ public class OppgaveService {
             saksopplysningerService.finnPersonOpplysninger(behandling.getId()).ifPresent(
                 personDokument -> {
                     behOppgaveDto.setSammensattNavn(personDokument.getSammensattNavn());
-                    behOppgaveDto.setFnr(personDokument.hentFolkeregisterIdent());
+                    behOppgaveDto.setFnr(personDokument.hentFolkeregisterident());
                 }
             );
 

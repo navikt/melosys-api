@@ -30,7 +30,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
-import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.doksys.Dokumentbestilling;
@@ -413,7 +412,7 @@ final class DokumentServiceTest {
 
     private static PersondataFasade mockPersondataFasade(Aktoer aktør) {
         PersondataFasade persondataFasade = mock(PersondataFasade.class);
-        when(persondataFasade.hentFolkeregisterIdent(anyString()))
+        when(persondataFasade.hentFolkeregisterident(anyString()))
             .thenReturn(String.format("IDENT%s", aktør.getAktørId()));
         return persondataFasade;
     }
