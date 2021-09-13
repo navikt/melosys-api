@@ -32,5 +32,5 @@ public interface PersondataFasade {
 
     Set<Statsborgerskap> hentStatsborgerskap(String ident);
 
-    boolean harStrengtFortroligAdresse(String fnr);
+    boolean harStrengtFortroligAdresse(String ident);
 }
