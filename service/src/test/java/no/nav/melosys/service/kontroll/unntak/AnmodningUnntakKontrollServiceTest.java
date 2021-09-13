@@ -4,18 +4,15 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,47 +21,43 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class AnmodningUnntakKontrollServiceTest {
+class AnmodningUnntakKontrollServiceTest {
+    @Mock
+    private AnmodningsperiodeService anmodningsperiodeService;
     @Mock
     private BehandlingService behandlingService;
     @Mock
-    private AnmodningsperiodeService anmodningsperiodeService;
+    private PersondataFasade persondataFasade;
 
     private final long behandlingID = 33L;
-    private final PersonDokument personDokument = new PersonDokument();
-    private final BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
     private final Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
 
     private AnmodningUnntakKontrollService anmodningUnntakKontrollService;
 
     @BeforeEach
-    public void setup() {
-        Saksopplysning persopplysning = new Saksopplysning();
-        persopplysning.setType(SaksopplysningType.PERSOPL);
-        persopplysning.setDokument(personDokument);
-        personDokument.getBostedsadresse().setPoststed("altOK");
-
-        Behandling behandling = new Behandling();
-        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
-        behandling.getSaksopplysninger().add(persopplysning);
-        when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
-
+    void setup() {
         anmodningsperiode.setFom(LocalDate.now());
         anmodningsperiode.setTom(LocalDate.now().plusYears(2));
-        when(anmodningsperiodeService.hentFørsteAnmodningsperiode(eq(behandlingID))).thenReturn(anmodningsperiode);
+        when(anmodningsperiodeService.hentFørsteAnmodningsperiode(behandlingID)).thenReturn(anmodningsperiode);
 
-        anmodningUnntakKontrollService = new AnmodningUnntakKontrollService(behandlingService, anmodningsperiodeService);
+        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
+
+        final FakeUnleash unleash = new FakeUnleash();
+        unleash.enable("melosys.kontroller.pdl");
+        anmodningUnntakKontrollService = new AnmodningUnntakKontrollService(anmodningsperiodeService, behandlingService,
+                persondataFasade, unleash);
     }
 
     @Test
-    public void utførKontroller_manglerBostedsadresse_returnererKode() {
-        personDokument.setBostedsadresse(new Bostedsadresse());
+    void utførKontroller_manglerBostedsadresse_returnererKode() {
+        when(behandlingService.hentBehandling(behandlingID)).thenReturn(lagBehandling());
+        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenBostedsadresse());
 
         Collection<Kontrollfeil> resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID);
         assertThat(resultat)
@@ -73,7 +66,8 @@ public class AnmodningUnntakKontrollServiceTest {
     }
 
     @Test
-    public void utførKontroller_anmodningsperiodeManglerSluttdato_returnererKode() {
+    void utførKontroller_anmodningsperiodeManglerSluttdato_returnererKode() {
+        when(behandlingService.hentBehandling(behandlingID)).thenReturn(lagBehandling());
         anmodningsperiode.setTom(null);
 
         Collection<Kontrollfeil> resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID);
@@ -83,8 +77,10 @@ public class AnmodningUnntakKontrollServiceTest {
     }
 
     @Test
-    public void utførKontroller_arbeidsstedManglerFelter_returnererKode() {
+    void utførKontroller_arbeidsstedManglerFelter_returnererKode() {
+        BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
         behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidssteder = List.of(new FysiskArbeidssted());
+        when(behandlingService.hentBehandling(behandlingID)).thenReturn(lagBehandling(behandlingsgrunnlagData));
 
         Collection<Kontrollfeil> resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID);
         assertThat(resultat)
@@ -93,8 +89,10 @@ public class AnmodningUnntakKontrollServiceTest {
     }
 
     @Test
-    public void utførKontroller_foretakUtlandManglerFelter_returnererKode() {
+    void utførKontroller_foretakUtlandManglerFelter_returnererKode() {
+        BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
         behandlingsgrunnlagData.foretakUtland = List.of(new ForetakUtland());
+        when(behandlingService.hentBehandling(behandlingID)).thenReturn(lagBehandling(behandlingsgrunnlagData));
 
         Collection<Kontrollfeil> resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID);
         assertThat(resultat)
