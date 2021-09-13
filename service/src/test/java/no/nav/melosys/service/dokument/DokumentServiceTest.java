@@ -231,10 +231,8 @@ final class DokumentServiceTest {
         SaksbehandlerService saksbehandlerService = mock(SaksbehandlerService.class);
         when(saksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Bob Lastname");
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
-        BrevDataService brevDataService = new BrevDataService(behandlingsresultatRepository,
-            saksbehandlerService,
-            persondataFasade,
-            utenlandskMyndighetRepository);
+        BrevDataService brevDataService = new BrevDataService(behandlingsresultatRepository, persondataFasade,
+            saksbehandlerService, utenlandskMyndighetRepository, new FakeUnleash());
         BrevmottakerService brevmottakerService = new BrevmottakerService(mock(KontaktopplysningService.class),
             avklarteVirksomheterService,
             mock(UtenlandskMyndighetService.class),
