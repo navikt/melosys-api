@@ -4,26 +4,21 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.TemaFactory;
-import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.integrasjon.sakogbehandling.SakOgBehandlingFasade;
 import no.nav.melosys.integrasjon.sakogbehandling.behandlingstatus.BehandlingStatusMapper;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SobService {
-
-    private final SakOgBehandlingFasade sakOgBehandlingFasade;
-    private final PersondataFasade persondataFasade;
     private final BehandlingService behandlingService;
+    private final SakOgBehandlingFasade sakOgBehandlingFasade;
 
     @Autowired
-    public SobService(SakOgBehandlingFasade sakOgBehandlingFasade, PersondataFasade persondataFasade, BehandlingService behandlingService) {
-        this.sakOgBehandlingFasade = sakOgBehandlingFasade;
-        this.persondataFasade = persondataFasade;
+    public SobService(BehandlingService behandlingService, SakOgBehandlingFasade sakOgBehandlingFasade) {
         this.behandlingService = behandlingService;
+        this.sakOgBehandlingFasade = sakOgBehandlingFasade;
     }
 
     private static BehandlingStatusMapper lagBehandlingStatusMapper(String saksnummer, Behandling behandling, String aktørID) {
@@ -47,32 +42,11 @@ public class SobService {
         );
     }
 
-    @Deprecated(forRemoval = true)
-    public void sakOgBehandlingOpprettet(String saksnummer, Long behandlingId, String aktørID) {
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingId);
-        sakOgBehandlingFasade.sendBehandlingOpprettet(lagBehandlingStatusMapper(saksnummer, behandling, aktørID));
-    }
-
     public void sakOgBehandlingAvsluttet(long behandlingID) {
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         Fagsak fagsak = behandling.getFagsak();
         sakOgBehandlingFasade.sendBehandlingAvsluttet(
             lagBehandlingStatusMapper(fagsak.getSaksnummer(), behandling, fagsak.hentAktørID())
         );
-    }
-
-    @Deprecated(forRemoval = true)
-    public void sakOgBehandlingAvsluttet(String saksnummer, Long behandlingId, String aktørID) {
-        Behandling behandling = behandlingService.hentBehandling(behandlingId);
-        if (aktørID == null) {
-            aktørID = hentAktørIdFraTps(behandling);
-        }
-
-        sakOgBehandlingFasade.sendBehandlingAvsluttet(lagBehandlingStatusMapper(saksnummer, behandling, aktørID));
-    }
-
-    private String hentAktørIdFraTps(Behandling behandling) {
-        Persondata persondata = behandling.hentPersonDokument();
-        return persondataFasade.hentAktørIdForIdent(persondata.hentFolkeregisterident());
     }
 }
