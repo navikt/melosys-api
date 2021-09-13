@@ -42,7 +42,7 @@ public class BrevDataByggerVideresendTest {
 
     @Test
     public void lag_medBostedSverigeOgTrygdemyndighetslandSverige_girBrevdata() {
-        when(landvelgerService.hentBostedsland(eq(1L), any())).thenReturn(Landkoder.SE);
+        when(landvelgerService.hentBostedsland(eq(1L), any())).thenReturn(Landkoder.SE.getKode());
 
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
         utenlandskMyndighet.navn = "Försäkringskassan";

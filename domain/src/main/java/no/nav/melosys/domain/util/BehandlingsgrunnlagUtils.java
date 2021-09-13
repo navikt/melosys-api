@@ -57,7 +57,7 @@ public final class BehandlingsgrunnlagUtils {
         }
     }
 
-    public static Optional<Landkoder> hentOppgittBostedsland(BehandlingsgrunnlagData grunnlagdata) {
-        return Optional.ofNullable(grunnlagdata.bosted.oppgittAdresse.getLandkode()).map(Landkoder::valueOf);
+    public static Optional<String> hentOppgittBostedsland(BehandlingsgrunnlagData grunnlagdata) {
+        return Optional.ofNullable(grunnlagdata.bosted.oppgittAdresse.getLandkode());
     }
 }

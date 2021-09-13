@@ -61,9 +61,9 @@ public class AvklartefaktaService {
             .collect(Collectors.toSet());
     }
 
-    public Optional<Landkoder> hentBostedland(long behandlingID) {
+    public Optional<String> hentBostedland(long behandlingID) {
         return avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingID, Avklartefaktatyper.BOSTEDSLAND).stream()
-            .map(af -> Landkoder.valueOf(af.getFakta()))
+            .map(af -> af.getFakta())
             .findFirst();
     }
 

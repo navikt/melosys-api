@@ -62,16 +62,16 @@ public class BehandlingsgrunnlagUtilsTest {
         Soeknad soeknad = new Soeknad();
         soeknad.bosted.oppgittAdresse.setLandkode("SE");
 
-        Optional<Landkoder> landkoder = BehandlingsgrunnlagUtils.hentOppgittBostedsland(soeknad);
+        Optional<String> landkoder = BehandlingsgrunnlagUtils.hentOppgittBostedsland(soeknad);
         assertThat(landkoder).isPresent()
-            .contains(Landkoder.SE);
+            .contains(Landkoder.SE.getKode());
     }
 
     @Test
     public void hentOppgittBostedsland_eksistererIkke_girEmpty() {
         Soeknad soeknad = new Soeknad();
 
-        Optional<Landkoder> landkoder = BehandlingsgrunnlagUtils.hentOppgittBostedsland(soeknad);
+        Optional<String> landkoder = BehandlingsgrunnlagUtils.hentOppgittBostedsland(soeknad);
         assertThat(landkoder).isEmpty();
     }
 

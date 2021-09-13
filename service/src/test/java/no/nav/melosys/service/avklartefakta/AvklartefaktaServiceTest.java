@@ -97,11 +97,12 @@ class AvklartefaktaServiceTest {
 
     @Test
     void hentBostedsland() {
+        String bostedsland = Landkoder.NO.getKode();
         when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(anyLong(), eq(Avklartefaktatyper.BOSTEDSLAND)))
-            .thenReturn(Set.of(lagAvklartefakta(Avklartefaktatyper.BOSTEDSLAND, null, "NO")));
+            .thenReturn(Set.of(lagAvklartefakta(Avklartefaktatyper.BOSTEDSLAND, null, bostedsland)));
 
-        Optional<Landkoder> landkoder = avklartefaktaService.hentBostedland(1L);
-        assertThat(landkoder).isPresent().get().isEqualTo(Landkoder.NO);
+        Optional<String> landkoder = avklartefaktaService.hentBostedland(1L);
+        assertThat(landkoder).isPresent().get().isEqualTo(bostedsland);
     }
 
     @Test

@@ -62,7 +62,7 @@ public class VideresendSoknadService {
         final Behandling behandling = fagsak.hentAktivBehandling();
         log.info("Videresender søknad for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandling.getId());
 
-        final Landkoder bostedsland = landvelgerService.hentBostedsland(behandling);
+        final String bostedsland = landvelgerService.hentBostedsland(behandling);
         validerBehandlingOgBosted(behandling, bostedsland);
         joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(new HentJournalposterTilknyttetSakRequest(fagsak.getGsakSaksnummer(), saksnummer), vedleggReferanser);
 
@@ -71,7 +71,7 @@ public class VideresendSoknadService {
 
         final Set<String> avklarteEessiMottakere = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
             mottakerinstitusjon != null ? Set.of(mottakerinstitusjon) : Collections.emptySet(),
-            List.of(bostedsland),
+            List.of(Landkoder.valueOf(bostedsland)),
             BucType.LA_BUC_03
         );
 
@@ -83,14 +83,14 @@ public class VideresendSoknadService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private void validerBehandlingOgBosted(Behandling behandling, Landkoder bostedsland) {
+    private void validerBehandlingOgBosted(Behandling behandling, String bostedsland) {
         if (!behandling.erBehandlingAvSøknad()) {
             throw new FunksjonellException("Behandling " + behandling.getId() + " er ikke behandling av en søknad!");
         }
         if (bostedsland == null) {
             throw new FunksjonellException("Bostedsland ikke avklart for behandling " + behandling.getId());
         }
-        if (bostedsland == Landkoder.NO) {
+        if (bostedsland == Landkoder.NO.getKode()) {
             throw new FunksjonellException("Kan ikke videresende søknad tilknyttet behandling " + behandling.getId() + " til Norge");
         }
         if (!PersonKontroller.harRegistrertBostedsadresse(behandling.hentPersonDokument(), behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata())) {

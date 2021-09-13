@@ -129,23 +129,23 @@ public class LandvelgerService {
         BehandlingsgrunnlagData grunnlagdata = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID).getBehandlingsgrunnlagdata();
 
         if (behandlingsresultat.erInnvilgetArbeidPåSkipOmfattetAvArbeidsland() || erVideresendt(behandlingsresultat)) {
-            return Lists.newArrayList(hentBostedsland(behandlingID, grunnlagdata));
+            return Lists.newArrayList(Landkoder.valueOf(hentBostedsland(behandlingID, grunnlagdata)));
         } else {
             return new ArrayList<>(hentAlleArbeidslandUtenMarginaltArbeid(behandlingID));
         }
     }
 
-    public Landkoder hentBostedsland(Behandling behandling) {
+    public String hentBostedsland(Behandling behandling) {
         return hentBostedsland(behandling.getId(), behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata());
     }
 
-    public Landkoder hentBostedsland(long behandlingID, BehandlingsgrunnlagData grunnlagData) {
-        Optional<Landkoder> bostedslandOppgittAvSaksbehandler = hentBostedslandOppgittAvSaksbehandler(behandlingID, grunnlagData);
-        return bostedslandOppgittAvSaksbehandler.orElse(Landkoder.NO);
+    public String hentBostedsland(long behandlingID, BehandlingsgrunnlagData grunnlagData) {
+        Optional<String> bostedslandOppgittAvSaksbehandler = hentBostedslandOppgittAvSaksbehandler(behandlingID, grunnlagData);
+        return bostedslandOppgittAvSaksbehandler.orElse(Landkoder.NO.getKode());
     }
 
-    private Optional<Landkoder> hentBostedslandOppgittAvSaksbehandler(long behandlingID, BehandlingsgrunnlagData grunnlagData) {
-        Optional<Landkoder> bostedsland = avklartefaktaService.hentBostedland(behandlingID);
+    private Optional<String> hentBostedslandOppgittAvSaksbehandler(long behandlingID, BehandlingsgrunnlagData grunnlagData) {
+        Optional<String> bostedsland = avklartefaktaService.hentBostedland(behandlingID);
         if (bostedsland.isPresent()) {
             return bostedsland;
         } else {
