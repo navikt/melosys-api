@@ -194,10 +194,10 @@ public class PersondataService implements PersondataFasade {
     }
 
     @Override
-    public boolean harStrengtFortroligAdresse(String fnr) {
+    public boolean harStrengtFortroligAdresse(String ident) {
         if (unleash.isEnabled("melosys.pdl.adressebeskyttelse")) {
-            return pdlConsumer.hentAdressebeskyttelser(fnr).stream().anyMatch(Adressebeskyttelse::erStrengtFortrolig);
+            return pdlConsumer.hentAdressebeskyttelser(ident).stream().anyMatch(Adressebeskyttelse::erStrengtFortrolig);
         }
-        return tpsService.harStrengtFortroligAdresse(fnr);
+        return tpsService.harStrengtFortroligAdresse(ident);
     }
 }
