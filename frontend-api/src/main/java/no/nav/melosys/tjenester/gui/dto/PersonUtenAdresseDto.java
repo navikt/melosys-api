@@ -27,7 +27,7 @@ public class PersonUtenAdresseDto {
     public PersonUtenAdresseDto() {}
 
     public PersonUtenAdresseDto(PersonDokument person) {
-        fnr = person.hentFolkeregisterIdent();
+        fnr = person.hentFolkeregisterident();
         sivilstand = person.getSivilstand();
         statsborgerskap = person.hentAlleStatsborgerskap().stream().findFirst().orElse(null);
         statsborgerskapDato = person.getStatsborgerskapDato();
@@ -36,7 +36,7 @@ public class PersonUtenAdresseDto {
             familiemedlemmer = FamiliemedlemDto.avFamiliemedlemmer(person.getFamiliemedlemmer());
         }
         personStatus = person.getPersonstatus();
-        kjoenn = new KjoennDto(person.hentKjønnType().getKode(), person.hentKjønnType().toString());;
+        kjoenn = new KjoennDto(person.hentKjønnType().getKode(), person.hentKjønnType().toString());
         foedselsdato = person.getFødselsdato();
     }
 

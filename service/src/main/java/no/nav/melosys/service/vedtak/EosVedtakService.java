@@ -151,7 +151,7 @@ public class EosVedtakService {
                                     Behandling behandling,
                                     Behandlingsresultat behandlingsresultat) throws ValideringException {
         Lovvalgsperiode lovvalgsperiode = behandlingsresultat.hentValidertLovvalgsperiode();
-        String fnr = persondataFasade.hentFolkeregisterIdent(behandling.getFagsak().hentAktørID());
+        String fnr = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID());
 
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()

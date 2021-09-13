@@ -134,7 +134,7 @@ public class MedlPeriodeService {
         Behandling behandling = behandlingsresultatService.hentBehandlingsresultat(behandlingID).getBehandling();
         Fagsak fagsak = behandling.getFagsak();
         Aktoer bruker = fagsak.hentBruker();
-        return persondataFasade.hentFolkeregisterIdent(bruker.getAktørId());
+        return persondataFasade.hentFolkeregisterident(bruker.getAktørId());
     }
 
     private Optional<Lovvalgsperiode> finnLovvalgsperiode(Behandling behandling) {

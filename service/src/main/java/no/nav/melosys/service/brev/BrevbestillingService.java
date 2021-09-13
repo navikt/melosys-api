@@ -223,7 +223,7 @@ public class BrevbestillingService {
         if (unleash.isEnabled("melosys.brev.adresser.pdl")) {
             return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
         }
-        return (Persondata) persondataFasade.hentPersonFraTps(behandling.hentPersonDokument().hentFolkeregisterIdent(),
+        return (Persondata) persondataFasade.hentPersonFraTps(behandling.hentPersonDokument().hentFolkeregisterident(),
             Informasjonsbehov.STANDARD).getDokument();
     }
 

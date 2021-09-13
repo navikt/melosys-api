@@ -65,7 +65,7 @@ class BrevDataServiceTest {
 
         when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(new Behandlingsresultat()));
         when(saksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Joe Moe");
-        when(persondataFasade.hentFolkeregisterIdent(any())).thenReturn(FNR);
+        when(persondataFasade.hentFolkeregisterident(any())).thenReturn(FNR);
         when(persondataFasade.hentSammensattNavn(anyString())).thenReturn(sammensattNavn);
         lagUtenlandskMyndighet();
     }

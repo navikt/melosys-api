@@ -30,7 +30,7 @@ class PersonMapperTest {
 
         PersonDokument personDokument = PersonMapper.mapTilPerson(response.getPerson());
         assertThat(personDokument).isNotNull();
-        assertThat(personDokument.hentFolkeregisterIdent()).isEqualTo("11111111111");
+        assertThat(personDokument.hentFolkeregisterident()).isEqualTo("11111111111");
         assertThat(personDokument.getSivilstand().getKode()).isEqualTo("UGIF");
         assertThat(personDokument.getSivilstandGyldighetsperiodeFom()).isEqualTo(LocalDate.parse("2010-08-09"));
         assertThat(personDokument.hentAlleStatsborgerskap()).isEqualTo(Set.of(Land.av(Land.SVERIGE)));
