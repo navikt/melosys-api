@@ -6,12 +6,12 @@ import no.finn.unleash.strategy.Strategy;
 
 class IsTestStrategy implements Strategy {
 
-    private static final String NAMESPACE_Q2 = "q2";
+    private static final String DEV_ENVIRONMENT = "dev";
 
-    private final String currentNamespace;
+    private final String currentEnvironment;
 
-    IsTestStrategy(String currentNamespace) {
-        this.currentNamespace = currentNamespace;
+    IsTestStrategy(String currentEnvironment) {
+        this.currentEnvironment = currentEnvironment;
     }
 
     @Override
@@ -21,6 +21,6 @@ class IsTestStrategy implements Strategy {
 
     @Override
     public boolean isEnabled(Map<String, String> parameters) {
-        return NAMESPACE_Q2.equalsIgnoreCase(currentNamespace);
+        return DEV_ENVIRONMENT.equalsIgnoreCase(currentEnvironment);
     }
 }

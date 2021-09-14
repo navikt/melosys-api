@@ -27,7 +27,7 @@ public class FeatureToggleConfig {
 
             return new DefaultUnleash(
                 unleashConfig,
-                new IsTestStrategy(environment.getProperty("NAIS_NAMESPACE")),
+                new IsTestStrategy(environment.getProperty("APP_ENVIRONMENT")),
                 new ByUserIdStrategy()
             );
         }
