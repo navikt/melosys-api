@@ -5,10 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
@@ -64,6 +61,7 @@ class VideresendSoknadServiceTest {
     private final PersonDokument personDokument = new PersonDokument();
 
     private final String saksnummer = "MEL-2222";
+    private final Bostedsland bostedsland = new Bostedsland(Landkoder.ES);
 
     @BeforeEach
     public void setup() {
@@ -94,7 +92,7 @@ class VideresendSoknadServiceTest {
     @Test
     void henleggOgVideresend_bostedsLandSpaniaErSøknad_prosessinstansBlirOpprettet() {
         final Set<String> validerteMottakere = Set.of("ES:mottakerID123");
-        when(landvelgerService.hentBostedsland(behandling)).thenReturn(Landkoder.ES);
+        when(landvelgerService.hentBostedsland(behandling)).thenReturn(bostedsland);
         when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), eq(List.of(Landkoder.ES)), eq(BucType.LA_BUC_03)))
             .thenReturn(validerteMottakere);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
@@ -111,7 +109,7 @@ class VideresendSoknadServiceTest {
 
     @Test
     void henleggOgVideresend_ikkeSøknad_kasterException() {
-        when(landvelgerService.hentBostedsland(behandling)).thenReturn(Landkoder.ES);
+        when(landvelgerService.hentBostedsland(behandling)).thenReturn(bostedsland);
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -121,7 +119,7 @@ class VideresendSoknadServiceTest {
 
     @Test
     void henleggOgVideresend_bostedsLandNorgeErSøknad_kasterException() {
-        when(landvelgerService.hentBostedsland(behandling)).thenReturn(Landkoder.NO);
+        when(landvelgerService.hentBostedsland(behandling)).thenReturn(new Bostedsland(Landkoder.NO));
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -141,7 +139,7 @@ class VideresendSoknadServiceTest {
 
     @Test
     void henleggOgVideresend_ikkeLagretBostedsadresseISøknadEllerTPS_kasterException() {
-        when(landvelgerService.hentBostedsland(behandling)).thenReturn(Landkoder.SE);
+        when(landvelgerService.hentBostedsland(behandling)).thenReturn(bostedsland);
         behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
         behandlingsgrunnlagData.bosted = new Bosted();
 

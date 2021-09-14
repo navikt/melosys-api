@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Bostedsland;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
@@ -97,11 +98,12 @@ class AvklartefaktaServiceTest {
 
     @Test
     void hentBostedsland() {
+        Bostedsland bostedsland = new Bostedsland(Landkoder.NO);
         when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(anyLong(), eq(Avklartefaktatyper.BOSTEDSLAND)))
-            .thenReturn(Set.of(lagAvklartefakta(Avklartefaktatyper.BOSTEDSLAND, null, "NO")));
+            .thenReturn(Set.of(lagAvklartefakta(Avklartefaktatyper.BOSTEDSLAND, null, bostedsland.landkode())));
 
-        Optional<Landkoder> landkoder = avklartefaktaService.hentBostedland(1L);
-        assertThat(landkoder).isPresent().get().isEqualTo(Landkoder.NO);
+        Optional<Bostedsland> landkoder = avklartefaktaService.hentBostedland(1L);
+        assertThat(landkoder).isPresent().get().isEqualTo(bostedsland);
     }
 
     @Test
