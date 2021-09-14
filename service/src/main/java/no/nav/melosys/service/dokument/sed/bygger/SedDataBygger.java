@@ -119,7 +119,7 @@ public class SedDataBygger {
         sedDataDto.setSelvstendigeVirksomheter(lagSelvstendigeVirksomheter(grunnlagMedSøknad));
         sedDataDto.setArbeidssteder(hentArbeidssteder(grunnlagMedSøknad));
         sedDataDto.setAvklartBostedsland(
-            landvelgerService.hentBostedsland(grunnlagMedSøknad.getBehandling().getId(), grunnlagMedSøknad.getBehandlingsgrunnlagData())
+            landvelgerService.hentBostedsland(grunnlagMedSøknad.getBehandling().getId(), grunnlagMedSøknad.getBehandlingsgrunnlagData()).getLandkode()
         );
         sedDataDto.setBruker(lagBrukerFraPersondata(grunnlagMedSøknad.getPersondata()));
         sedDataDto.setFamilieMedlem(grunnlagMedSøknad.getPersondata().hentFamiliemedlemmer().stream()

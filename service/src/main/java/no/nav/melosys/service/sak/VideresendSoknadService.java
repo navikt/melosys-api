@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Bostedsland;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.eessi.BucType;
@@ -62,7 +63,7 @@ public class VideresendSoknadService {
         final Behandling behandling = fagsak.hentAktivBehandling();
         log.info("Videresender søknad for sak: {} behandling: {}", behandling.getFagsak().getSaksnummer(), behandling.getId());
 
-        final String bostedsland = landvelgerService.hentBostedsland(behandling);
+        final Bostedsland bostedsland = landvelgerService.hentBostedsland(behandling);
         validerBehandlingOgBosted(behandling, bostedsland);
         joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(new HentJournalposterTilknyttetSakRequest(fagsak.getGsakSaksnummer(), saksnummer), vedleggReferanser);
 
@@ -71,7 +72,7 @@ public class VideresendSoknadService {
 
         final Set<String> avklarteEessiMottakere = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
             mottakerinstitusjon != null ? Set.of(mottakerinstitusjon) : Collections.emptySet(),
-            List.of(Landkoder.valueOf(bostedsland)),
+            List.of(bostedsland.getLandkodeobjekt()),
             BucType.LA_BUC_03
         );
 
@@ -83,14 +84,14 @@ public class VideresendSoknadService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private void validerBehandlingOgBosted(Behandling behandling, String bostedsland) {
+    private void validerBehandlingOgBosted(Behandling behandling, Bostedsland bostedsland) {
         if (!behandling.erBehandlingAvSøknad()) {
             throw new FunksjonellException("Behandling " + behandling.getId() + " er ikke behandling av en søknad!");
         }
         if (bostedsland == null) {
             throw new FunksjonellException("Bostedsland ikke avklart for behandling " + behandling.getId());
         }
-        if (bostedsland == Landkoder.NO.getKode()) {
+        if (bostedsland.getLandkodeobjekt() == Landkoder.NO) {
             throw new FunksjonellException("Kan ikke videresende søknad tilknyttet behandling " + behandling.getId() + " til Norge");
         }
         if (!PersonKontroller.harRegistrertBostedsadresse(behandling.hentPersonDokument(), behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata())) {

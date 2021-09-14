@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 
+import no.nav.melosys.domain.Bostedsland;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
@@ -62,16 +63,16 @@ public class BehandlingsgrunnlagUtilsTest {
         Soeknad soeknad = new Soeknad();
         soeknad.bosted.oppgittAdresse.setLandkode("SE");
 
-        Optional<String> landkoder = BehandlingsgrunnlagUtils.hentOppgittBostedsland(soeknad);
+        Optional<Bostedsland> landkoder = BehandlingsgrunnlagUtils.hentOppgittBostedsland(soeknad);
         assertThat(landkoder).isPresent()
-            .contains(Landkoder.SE.getKode());
+            .contains(new Bostedsland(Landkoder.SE));
     }
 
     @Test
     public void hentOppgittBostedsland_eksistererIkke_girEmpty() {
         Soeknad soeknad = new Soeknad();
 
-        Optional<String> landkoder = BehandlingsgrunnlagUtils.hentOppgittBostedsland(soeknad);
+        Optional<Bostedsland> landkoder = BehandlingsgrunnlagUtils.hentOppgittBostedsland(soeknad);
         assertThat(landkoder).isEmpty();
     }
 

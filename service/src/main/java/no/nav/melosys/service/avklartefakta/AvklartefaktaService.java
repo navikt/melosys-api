@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Bostedsland;
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
@@ -61,9 +62,9 @@ public class AvklartefaktaService {
             .collect(Collectors.toSet());
     }
 
-    public Optional<String> hentBostedland(long behandlingID) {
+    public Optional<Bostedsland> hentBostedland(long behandlingID) {
         return avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingID, Avklartefaktatyper.BOSTEDSLAND).stream()
-            .map(af -> af.getFakta())
+            .map(af -> new Bostedsland(af.getFakta()))
             .findFirst();
     }
 

@@ -5,10 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
@@ -64,7 +61,7 @@ class VideresendSoknadServiceTest {
     private final PersonDokument personDokument = new PersonDokument();
 
     private final String saksnummer = "MEL-2222";
-    private final String bostedsland = Landkoder.ES.getKode();
+    private final Bostedsland bostedsland = new Bostedsland(Landkoder.ES);
 
     @BeforeEach
     public void setup() {
@@ -122,7 +119,7 @@ class VideresendSoknadServiceTest {
 
     @Test
     void henleggOgVideresend_bostedsLandNorgeErSøknad_kasterException() {
-        when(landvelgerService.hentBostedsland(behandling)).thenReturn(Landkoder.NO.getKode());
+        when(landvelgerService.hentBostedsland(behandling)).thenReturn(new Bostedsland(Landkoder.NO));
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
         assertThatExceptionOfType(FunksjonellException.class)

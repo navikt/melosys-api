@@ -26,7 +26,7 @@ public class BrevDataByggerVideresend implements BrevDataBygger {
     public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) {
         long behandlingID = dataGrunnlag.getBehandling().getId();
 
-        Landkoder bostedsland = Landkoder.valueOf(landvelgerService.hentBostedsland(behandlingID, dataGrunnlag.getBehandlingsgrunnlagData()));
+        Landkoder bostedsland = landvelgerService.hentBostedsland(behandlingID, dataGrunnlag.getBehandlingsgrunnlagData()).getLandkodeobjekt();
         if (bostedsland == Landkoder.NO) {
             throw new FunksjonellException("Bostedslandet kan ikke være Norge ved videresending av søknad");
         }

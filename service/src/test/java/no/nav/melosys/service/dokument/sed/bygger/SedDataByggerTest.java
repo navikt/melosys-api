@@ -81,7 +81,7 @@ class SedDataByggerTest {
 
         doReturn(DataByggerStubs.hentOrganisasjonDokumentSetStub()).when(registerOppslagService).hentOrganisasjoner(anySet());
 
-        when(landvelgerService.hentBostedsland(anyLong(), any())).thenReturn(Landkoder.IT.getKode());
+        when(landvelgerService.hentBostedsland(anyLong(), any())).thenReturn(new Bostedsland(Landkoder.IT));
 
         lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
