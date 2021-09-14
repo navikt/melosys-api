@@ -206,7 +206,8 @@ class OppgaveServiceTest {
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(persondataFasade.harStrengtFortroligAdresse("aktørID")).thenReturn(true);
+        when(persondataFasade.hentFolkeregisterident("aktørID")).thenReturn("fnrBruker");
+        when(persondataFasade.harStrengtFortroligAdresse("fnrBruker")).thenReturn(true);
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
         verify(oppgaveFasade, never()).opprettOppgave(any(Oppgave.class));
@@ -220,7 +221,8 @@ class OppgaveServiceTest {
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
         behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().personOpplysninger.medfolgendeFamilie
             = List.of(MedfolgendeFamilie.tilBarnFraFnrOgNavn("fnrBarn", null));
-        when(persondataFasade.harStrengtFortroligAdresse("aktørID")).thenReturn(false);
+        when(persondataFasade.hentFolkeregisterident("aktørID")).thenReturn("fnrBruker");
+        when(persondataFasade.harStrengtFortroligAdresse("fnrBruker")).thenReturn(false);
         when(persondataFasade.harStrengtFortroligAdresse("fnrBarn")).thenReturn(true);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
 
