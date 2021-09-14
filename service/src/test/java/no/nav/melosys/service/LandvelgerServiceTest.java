@@ -215,7 +215,7 @@ class LandvelgerServiceTest {
         when(avklartefaktaService.hentBostedland(anyLong())).thenReturn(Optional.of(avklartBostedsland));
 
         Collection<Landkoder> land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
-        assertThat(land).containsExactly(Landkoder.valueOf(avklartBostedsland.getLandkode()));
+        assertThat(land).containsExactly(Landkoder.valueOf(avklartBostedsland.landkode()));
     }
 
     @Test

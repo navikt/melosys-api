@@ -100,7 +100,7 @@ class AvklartefaktaServiceTest {
     void hentBostedsland() {
         Bostedsland bostedsland = new Bostedsland(Landkoder.NO);
         when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(anyLong(), eq(Avklartefaktatyper.BOSTEDSLAND)))
-            .thenReturn(Set.of(lagAvklartefakta(Avklartefaktatyper.BOSTEDSLAND, null, bostedsland.getLandkode())));
+            .thenReturn(Set.of(lagAvklartefakta(Avklartefaktatyper.BOSTEDSLAND, null, bostedsland.landkode())));
 
         Optional<Bostedsland> landkoder = avklartefaktaService.hentBostedland(1L);
         assertThat(landkoder).isPresent().get().isEqualTo(bostedsland);
