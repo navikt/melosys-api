@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import no.nav.melosys.domain.Behandling;
@@ -195,7 +194,7 @@ public class OppgaveService {
         return oppgaverFraDomain.stream()
             .map(this::tilOppgaveDtoHåndterException)
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     @Nullable
@@ -292,7 +291,9 @@ public class OppgaveService {
 
     private boolean harBeskyttelsesbehov(long behandlingID) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        if (persondataFasade.harStrengtFortroligAdresse(behandling.getFagsak().hentAktørID())) {
+        // TODO TPS krever fnr. Kall til hentFolkeregisterident fjernes etter overgang til PDL.
+        final String brukersFnr = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID());
+        if (persondataFasade.harStrengtFortroligAdresse(brukersFnr)) {
             return true;
         } else if (behandling.getBehandlingsgrunnlag() == null) {
             return false;
