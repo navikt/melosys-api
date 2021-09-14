@@ -21,19 +21,4 @@ public record Bostedsland(String landkode) {
             throw new FunksjonellException(String.format("Prøvde å lese landkode fra %s, men støtter bare EU/EØS land", landkode));
         }
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == this) {
-            return true;
-        }
-
-        if (!(o instanceof Bostedsland)) {
-            return false;
-        }
-
-        Bostedsland bostedsland = (Bostedsland) o;
-
-        return this.landkode.equals(bostedsland.landkode);
-    }
 }
