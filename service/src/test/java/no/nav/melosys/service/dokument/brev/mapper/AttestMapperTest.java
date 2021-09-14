@@ -13,9 +13,9 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagMaritimtArbeidssted;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
+import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -99,14 +100,14 @@ public class AttestMapperTest {
         when(organisasjonsDetaljer.hentStrukturertForretningsadresse()).thenReturn(strukturertAdresse);
 
         AvklartVirksomhet virksomhet = new AvklartVirksomhet("JARLSBERG INTERNATIONAL",
-                                                           "123456789",
-                                                            strukturertAdresse,
-                                                            Yrkesaktivitetstyper.LOENNET_ARBEID);
+            "123456789",
+            strukturertAdresse,
+            Yrkesaktivitetstyper.LOENNET_ARBEID);
 
         AvklartVirksomhet utenlandskVirksomhet = new AvklartVirksomhet("Jarlsberg",
-                                                                        "123456789",
-                                                                        strukturertAdresse,
-                                                                        Yrkesaktivitetstyper.LOENNET_ARBEID);
+            "123456789",
+            strukturertAdresse,
+            Yrkesaktivitetstyper.LOENNET_ARBEID);
 
         no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted fysiskArbeidssted = new no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted("JARLSBERG INTERNATIONAL", "123456789", strukturertAdresse);
 
@@ -117,7 +118,7 @@ public class AttestMapperTest {
         a1Data.bostedsadresse = boAdresse;
         a1Data.arbeidssteder = Arrays.asList(fysiskArbeidssted, ikkeFysiskArbeidssted);
         a1Data.arbeidsland = new ArrayList<>();
-        a1Data.person = person;
+        a1Data.person = lagPersonopplysninger();
         a1Data.hovedvirksomhet = virksomhet;
         a1Data.bivirksomheter = new ArrayList<>(Collections.singletonList(utenlandskVirksomhet));
 

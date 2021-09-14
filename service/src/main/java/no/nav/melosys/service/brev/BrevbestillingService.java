@@ -87,7 +87,7 @@ public class BrevbestillingService {
         if (hovedmottaker == Aktoersroller.BRUKER) {
             Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling);
             if (avklartMottaker.getRolle() == Aktoersroller.BRUKER) {
-                return behandling.hentPersonDokument().getSammensattNavn();
+                return hentSammensattNavn(behandling);
             } else {
                 var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartMottaker.getOrgnr());
                 return orgDokument.getNavn();
@@ -98,6 +98,13 @@ public class BrevbestillingService {
             return orgDokument.getNavn();
         }
         throw new FunksjonellException("Melosys støtter ikke hovedmottakere med rollen " + hovedmottaker);
+    }
+
+    private String hentSammensattNavn(Behandling behandling) {
+        if (unleash.isEnabled("melosys.pdl.sammensatt-navn")) {
+            persondataFasade.hentSammensattNavn(behandling.getFagsak().hentAktørID());
+        }
+        return behandling.hentPersonDokument().getSammensattNavn();
     }
 
     private List<MuligMottakerDto> lagKopiMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<Aktoersroller> kopiMottakere, Aktoersroller hovedmottaker) {
@@ -118,7 +125,7 @@ public class BrevbestillingService {
         if (avklartKopi.getRolle() == Aktoersroller.BRUKER || hovedmottaker == kopiMottaker) {
             return new MuligMottakerDto.Builder()
                 .medDokumentNavn("Kopi til bruker")
-                .medMottakerNavn(behandling.hentPersonDokument().getSammensattNavn())
+                .medMottakerNavn(hentSammensattNavn(behandling))
                 .medRolle(BRUKER)
                 .medAktørId(behandling.getFagsak().hentAktørID())
                 .build();
@@ -223,7 +230,7 @@ public class BrevbestillingService {
         if (unleash.isEnabled("melosys.brev.adresser.pdl")) {
             return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
         }
-        return (Persondata) persondataFasade.hentPersonFraTps(behandling.hentPersonDokument().hentFolkeregisterIdent(),
+        return (Persondata) persondataFasade.hentPersonFraTps(behandling.hentPersonDokument().hentFolkeregisterident(),
             Informasjonsbehov.STANDARD).getDokument();
     }
 

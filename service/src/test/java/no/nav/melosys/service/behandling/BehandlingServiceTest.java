@@ -241,6 +241,7 @@ class BehandlingServiceTest {
         assertThat(replikertBehandling.getStatus()).isEqualTo(OPPRETTET);
         assertThat(replikertBehandling.getDokumentasjonSvarfristDato()).isEqualTo(tidligsteInaktiveBehandling.getDokumentasjonSvarfristDato());
         assertThat(replikertBehandling.getInitierendeJournalpostId()).isEqualTo(tidligsteInaktiveBehandling.getInitierendeJournalpostId());
+        assertThat(replikertBehandling.getBehandlingsfrist()).isEqualTo(LocalDate.now().plusWeeks(4));
 
         assertThat(replikertBehandling.getSaksopplysninger().size()).isEqualTo(1);
         assertThat(replikertBehandling.getSaksopplysninger()).allMatch(saksopplysning -> saksopplysning.getId() == null);
@@ -372,6 +373,7 @@ class BehandlingServiceTest {
 
     private Behandling opprettBehandlingMedData() {
         Behandling behandling = opprettTomBehandlingMedId();
+        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandling.setInitierendeJournalpostId("initierendeJournalpostId");
         behandling.setDokumentasjonSvarfristDato(Instant.parse("2017-12-11T09:37:30.00Z"));

@@ -198,6 +198,21 @@ query($ident: ID!) {
         }
       }
     }
+    sivilstand {
+      type
+      relatertVedSivilstand
+      gyldigFraOgMed
+      bekreftelsesdato
+      metadata {
+        master
+        historisk
+        endringer {
+          type
+          registrert
+          kilde
+        }
+      }
+    }
     statsborgerskap {
       land
       bekreftelsesdato
@@ -294,6 +309,13 @@ query($ident: ID!, $historikk: Boolean!) {
     }
     folkeregisterpersonstatus {
       status
+      metadata {
+        master
+        endringer {
+          registrert
+          type
+        }
+      }
     }
     forelderBarnRelasjon {
       relatertPersonsIdent
@@ -426,6 +448,7 @@ query($ident: ID!, $historikk: Boolean!) {
       type
       relatertVedSivilstand
       gyldigFraOgMed
+      bekreftelsesdato
       metadata {
         master
         historisk
@@ -494,6 +517,7 @@ query($ident: ID!, $historikk: Boolean!) {
       type
       relatertVedSivilstand
       gyldigFraOgMed
+      bekreftelsesdato
       metadata {
         master
         historisk
@@ -709,7 +733,7 @@ query($ident: ID!) {
 }
         """;
 
-    public static final String HENT_SAMMENSATT_NAVN_QUERY = """
+    public static final String HENT_NAVN_QUERY = """
 query($ident: ID!, $historikk: Boolean!) {
   hentPerson(ident: $ident) {
     navn(historikk: $historikk) {

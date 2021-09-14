@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.dok.brevdata.felles.v1.navfelles.Mottaker;
 import no.nav.dok.brevdata.felles.v1.navfelles.Organisasjon;
 import no.nav.dok.brevdata.felles.v1.navfelles.Person;
@@ -61,11 +62,12 @@ class BrevDataServiceTest {
 
     @BeforeEach
     public void setUp() {
-        service = spy(new BrevDataService(behandlingsresultatRepository, saksbehandlerService, persondataFasade, utenlandskMyndighetRepository));
+        service = spy(new BrevDataService(behandlingsresultatRepository, persondataFasade, saksbehandlerService,
+                utenlandskMyndighetRepository, new FakeUnleash()));
 
         when(behandlingsresultatRepository.findById(anyLong())).thenReturn(Optional.of(new Behandlingsresultat()));
         when(saksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Joe Moe");
-        when(persondataFasade.hentFolkeregisterIdent(any())).thenReturn(FNR);
+        when(persondataFasade.hentFolkeregisterident(any())).thenReturn(FNR);
         when(persondataFasade.hentSammensattNavn(anyString())).thenReturn(sammensattNavn);
         lagUtenlandskMyndighet();
     }

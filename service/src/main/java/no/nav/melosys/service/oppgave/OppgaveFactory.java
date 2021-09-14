@@ -94,7 +94,7 @@ public final class OppgaveFactory {
                 break;
             case TRYGDEAVTALE_UK:
                 // https://confluence.adeo.no/display/TEESSI/Storbritannia#Storbritannia-Journalf%C3%B8ring
-                oppgaveParametere = new OppgaveParametere("ab0387", "ae0034", Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
+                oppgaveParametere = new OppgaveParametere("ab0387", null, Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
                 break;
             default:
                 throw new IllegalArgumentException("Melosys støtter ikke mapping for behandlingstema  " + behandlingstema);

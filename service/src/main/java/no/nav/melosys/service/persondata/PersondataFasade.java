@@ -14,7 +14,7 @@ public interface PersondataFasade {
 
     Set<Familiemedlem> hentFamiliemedlemmerMedHistorikk(long behandlingID);
 
-    String hentFolkeregisterIdent(String ident);
+    String hentFolkeregisterident(String ident);
 
     @Deprecated
     Saksopplysning hentPersonFraTps(String fnr, Informasjonsbehov behov);
@@ -28,9 +28,9 @@ public interface PersondataFasade {
 
     PersonMedHistorikk hentPersonMedHistorikk(long behandlingID);
 
-    String hentSammensattNavn(String fnr);
+    String hentSammensattNavn(String ident);
 
     Set<Statsborgerskap> hentStatsborgerskap(String ident);
 
-    boolean harStrengtFortroligAdresse(String fnr);
+    boolean harStrengtFortroligAdresse(String ident);
 }

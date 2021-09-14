@@ -6,11 +6,13 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
@@ -24,6 +26,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagArbeidsgiver;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +40,7 @@ import static no.nav.melosys.service.BehandlingsgrunnlagStub.lagBehandlingsgrunn
 import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysninger;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagPersonsaksopplysning;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
+import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -56,6 +60,10 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
     VilkaarsresultatRepository vilkaarsresultatRepository;
     @Mock
     LovvalgsperiodeService lovvalgsperiodeService;
+    @Mock
+    private PersondataFasade persondataFasade;
+
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     private BrevDataByggerAvslagArbeidsgiver brevDataByggerAvslagArbeidsgiver;
 
@@ -64,13 +72,23 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
         when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Landkoder.AT);
 
         brevDataByggerAvslagArbeidsgiver = new BrevDataByggerAvslagArbeidsgiver(landvelgerService,
-                                                                                lovvalgsperiodeService,
-                                                                                vilkaarsresultatRepository);
+            lovvalgsperiodeService,
+            vilkaarsresultatRepository);
     }
 
     @Test
     public void lag_avslagArbeidsgiverBrev_harVilkaarBegrunnelser() {
+        fakeUnleash.enable("melosys.pdl.sed-mapping");
+
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.BRUKER);
+        aktoer.setAktørId("ident");
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setAktører(Set.of(aktoer));
+
         Behandling behandling = new Behandling();
+        behandling.setFagsak(fagsak);
         behandling.setId(1L);
         behandling.getSaksopplysninger().add(lagPersonsaksopplysning(new PersonDokument()));
 
@@ -114,7 +132,7 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
 
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), kodeverkService);
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
-        BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+        BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondataFasade, fakeUnleash);
         String saksbehandler = "saksbehandler";
         BrevDataAvslagArbeidsgiver brevData = (BrevDataAvslagArbeidsgiver) brevDataByggerAvslagArbeidsgiver.lag(dataGrunnlag, saksbehandler);
         assertThat(brevData.hovedvirksomhet.orgnr).isEqualTo("987654321");

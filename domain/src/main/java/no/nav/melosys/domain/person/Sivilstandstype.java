@@ -10,5 +10,21 @@ public enum Sivilstandstype {
     SKILT,
     SKILT_PARTNER,
     UGIFT,
-    UOPPGITT
+    UOPPGITT;
+
+    @Override
+    public String toString() {
+        return switch (this) {
+            case ENKE_ELLER_ENKEMANN -> "Enke eller enkemann";
+            case GIFT -> "Gift";
+            case GJENLEVENDE_PARTNER -> "Gjenlevende partner";
+            case REGISTRERT_PARTNER -> "Registrert partner";
+            case SEPARERT -> "Separert";
+            case SEPARERT_PARTNER -> "Separert partner";
+            case SKILT -> "Skilt";
+            case SKILT_PARTNER -> "Skilt partner";
+            case UGIFT -> "Ugift";
+            case UOPPGITT -> "Uoppgitt";
+        };
+    }
 }

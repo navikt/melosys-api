@@ -73,7 +73,7 @@ public class JournalfoeringService {
         }
         return switch (journalpost.getBrukerIdType()) {
             case FOLKEREGISTERIDENT -> Optional.of(journalpost.getBrukerId());
-            case AKTØR_ID -> Optional.of(persondataFasade.hentFolkeregisterIdent(journalpost.getBrukerId()));
+            case AKTØR_ID -> Optional.of(persondataFasade.hentFolkeregisterident(journalpost.getBrukerId()));
             case ORGNR -> Optional.empty();
         };
     }

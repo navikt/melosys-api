@@ -212,7 +212,7 @@ class MedlPeriodeServiceTest {
 
     private void setupHappyPathBehandling() {
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(lagBehandlingsResultat());
-        when(persondataFasade.hentFolkeregisterIdent(anyString())).thenReturn(FNR);
+        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn(FNR);
     }
 
     private Behandlingsresultat lagBehandlingsResultat() {

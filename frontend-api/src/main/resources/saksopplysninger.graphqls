@@ -19,8 +19,13 @@ type Saksopplysninger {
 type Personopplysninger {
     bostedsadresser: [Bostedsadresse!]!
     familiemedlemmer: [Familiemedlem!]!
+    folkeregisteridentifikator: String
+    folkeregisterpersonstatus: Folkeregisterpersonstatus
+    kjoenn: KjoennType!
     kontaktadresser: [Kontaktadresse!]!
+    navn: Navn!
     oppholdsadresser: [Oppholdsadresse!]!
+    sivilstand: [Sivilstand!]!
     statsborgerskap: [Statsborgerskap!]!
 }
 
@@ -52,6 +57,15 @@ enum Familierelasjonsrolle {
     RELATERT_VED_SIVILSTAND
 }
 
+type Folkeregisterpersonstatus {
+    kode: String!
+    tekst: String!
+}
+
+enum KjoennType {
+    KVINNE, MANN, UKJENT
+}
+
 type Kontaktadresse {
     coAdressenavn: String
     semistrukturertAdresse: SemistrukturertAdresseformat
@@ -61,6 +75,12 @@ type Kontaktadresse {
     master: String!
     kilde: String
     erHistorisk: Boolean!
+}
+
+type Navn {
+    fornavn: String!
+    mellomnavn: String
+    etternavn: String!
 }
 
 type Oppholdsadresse {
@@ -92,6 +112,16 @@ type StrukturertAdresseformat {
     poststed: String
     region: String
     land: String!
+}
+
+type Sivilstand {
+    type: String!
+    relatertVedSivilstand: String
+    gyldigFraOgMed: Date
+    bekreftelsesdato: Date
+    master: String!
+    kilde: String
+    erHistorisk: Boolean!
 }
 
 type Statsborgerskap {

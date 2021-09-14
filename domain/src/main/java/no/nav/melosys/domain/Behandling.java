@@ -10,6 +10,7 @@ import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
@@ -202,48 +203,56 @@ public class Behandling extends RegistreringsInfo {
      */
     @Deprecated
     public PersonDokument hentPersonDokument() {
-        Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.PERSOPL);
+        Optional<SaksopplysningDokument> saksopplysning = finnDokument(SaksopplysningType.PERSOPL);
         return (PersonDokument) saksopplysning
             .orElseThrow(() -> new TekniskException("Finner ikke persondokument"));
     }
 
     public Optional<Persondata> finnPersonDokument() {
-        return hentDokument(SaksopplysningType.PERSOPL).map(s -> (Persondata) s);
+        return finnDokument(SaksopplysningType.PERSOPL).map(Persondata.class::cast);
     }
 
     public MedlemskapDokument hentMedlemskapDokument() {
-        Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.MEDL);
+        Optional<SaksopplysningDokument> saksopplysning = finnDokument(SaksopplysningType.MEDL);
         return (MedlemskapDokument) saksopplysning
             .orElseThrow(() -> new TekniskException("Finner ikke medlemskapdokument"));
     }
 
     public ArbeidsforholdDokument hentArbeidsforholdDokument() {
-        Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.ARBFORH);
+        Optional<SaksopplysningDokument> saksopplysning = finnDokument(SaksopplysningType.ARBFORH);
         return (ArbeidsforholdDokument) saksopplysning
             .orElseThrow(() -> new TekniskException("Finner ikke arbeidsforholddokument"));
     }
 
+    public List<OrganisasjonDokument> hentOrganisasjonDokumenter() {
+        return getSaksopplysninger().stream()
+            .filter(saksopplysning -> saksopplysning.getType().equals(SaksopplysningType.ORG))
+            .map(Saksopplysning::getDokument)
+            .map(OrganisasjonDokument.class::cast)
+            .toList();
+    }
+
     public SedDokument hentSedDokument() {
-        Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.SEDOPPL);
+        Optional<SaksopplysningDokument> saksopplysning = finnDokument(SaksopplysningType.SEDOPPL);
         return (SedDokument) saksopplysning
             .orElseThrow(() -> new TekniskException("Finner ikke seddokument"));
     }
 
     public Optional<SedDokument> finnSedDokument() {
-        return hentDokument(SaksopplysningType.SEDOPPL).map(s -> (SedDokument) s);
+        return finnDokument(SaksopplysningType.SEDOPPL).map(SedDokument.class::cast);
     }
 
     public InntektDokument hentInntektDokument() {
-        Optional<SaksopplysningDokument> saksopplysning = hentDokument(SaksopplysningType.INNTK);
+        Optional<SaksopplysningDokument> saksopplysning = finnDokument(SaksopplysningType.INNTK);
         return (InntektDokument) saksopplysning
             .orElseThrow(() -> new TekniskException("Finner ikke inntektdokument"));
     }
 
     public Optional<UtbetalingDokument> finnUtbetalingDokument() {
-        return hentDokument(SaksopplysningType.UTBETAL).map(d -> (UtbetalingDokument) d);
+        return finnDokument(SaksopplysningType.UTBETAL).map(UtbetalingDokument.class::cast);
     }
 
-    private Optional<SaksopplysningDokument> hentDokument(SaksopplysningType saksopplysningType) {
+    public Optional<SaksopplysningDokument> finnDokument(SaksopplysningType saksopplysningType) {
         return getSaksopplysninger().stream()
             .filter(saksopplysning -> saksopplysning.getType().equals(saksopplysningType))
             .findFirst().map(Saksopplysning::getDokument);

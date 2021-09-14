@@ -9,10 +9,7 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.tjenester.gui.graphql.dto.PersonopplysningerDto;
 import no.nav.melosys.tjenester.gui.graphql.dto.StatsborgerskapDto;
-import no.nav.melosys.tjenester.gui.graphql.mapping.BostedsadresseTilDtoKonverter;
-import no.nav.melosys.tjenester.gui.graphql.mapping.KontaktadresseTilDtoKonverter;
-import no.nav.melosys.tjenester.gui.graphql.mapping.OppholdsadresseTilDtoKonverter;
-import no.nav.melosys.tjenester.gui.graphql.mapping.StatsborgerskapTilDtoKonverter;
+import no.nav.melosys.tjenester.gui.graphql.mapping.*;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -37,12 +34,21 @@ public class PersonopplysningerDataFetcher implements DataFetcher<Personopplysni
             .map(kontaktadresse -> KontaktadresseTilDtoKonverter.tilDto(kontaktadresse, kodeverkService)).toList();
         final var oppholdsadresseDtoList = personMedHistorikk.oppholdsadresser().stream()
             .map(oppholdsadresse -> OppholdsadresseTilDtoKonverter.tilDto(oppholdsadresse, kodeverkService)).toList();
+        final var sivilstandDtoList =
+            personMedHistorikk.sivilstand().stream().map(SivilstandTilDtoKonverter::tilDto).toList();
         final var statsborgerskapDtoList = personMedHistorikk.statsborgerskap().stream()
             .map(s -> StatsborgerskapTilDtoKonverter.tilDto(s, kodeverkService))
             .sorted(Comparator.comparing(StatsborgerskapDto::gyldigFraOgMed,
                 Comparator.nullsFirst(Comparator.reverseOrder())))
             .toList();
-        return new PersonopplysningerDto(bostedsadresseDtoList, kontaktadresseDtoList, oppholdsadresseDtoList,
+        return new PersonopplysningerDto(bostedsadresseDtoList,
+            FolkeregisteridentifikatorTilDtoKonverter.tilDto(personMedHistorikk.folkeregisteridentifikator()),
+            FolkeregisterpersonstatusTilDtoKonverter.tilDto(personMedHistorikk.folkeregisterpersonstatus()),
+            personMedHistorikk.kjønn(),
+            kontaktadresseDtoList,
+            NavnTilDtoKonverter.tilDto(personMedHistorikk.navn()),
+            oppholdsadresseDtoList,
+            sivilstandDtoList,
             statsborgerskapDtoList);
     }
 }

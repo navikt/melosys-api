@@ -11,6 +11,7 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Personstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.person.*;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
@@ -75,14 +76,14 @@ class PersondataServiceTest {
     @Test
     void hentFolkeregisterIdent_finnes_verifiserIdent() {
         when(pdlConsumer.hentIdenter(anyString())).thenReturn(lagIdentliste());
-        assertThat(persondataService.hentFolkeregisterIdent("123")).isEqualTo("22222");
+        assertThat(persondataService.hentFolkeregisterident("123")).isEqualTo("22222");
     }
 
     @Test
     void hentFolkeregisterIdent_finnesIkke_feiler() {
         when(pdlConsumer.hentIdenter(anyString())).thenReturn(lagTomIdentliste());
         assertThatExceptionOfType(IkkeFunnetException.class)
-            .isThrownBy(() -> persondataService.hentFolkeregisterIdent("123"))
+            .isThrownBy(() -> persondataService.hentFolkeregisterident("123"))
             .withMessageContaining("Finner ikke folkeregisterident");
     }
 
@@ -121,6 +122,7 @@ class PersondataServiceTest {
         assertThat(personMedHistorikk.dødsfall()).isEqualTo(new Doedsfall(LocalDate.MAX));
         assertThat(personMedHistorikk.fødsel()).isEqualTo(new Foedsel(LocalDate.parse("1970-01-01"), 1970, "NOR", "fødested"));
         assertThat(personMedHistorikk.folkeregisteridentifikator()).isEqualTo(new Folkeregisteridentifikator("IdNr"));
+        assertThat(personMedHistorikk.folkeregisterpersonstatus().personstatus()).isEqualTo(Personstatuser.IKKE_BOSATT);
         assertThat(personMedHistorikk.kjønn()).isEqualTo(KjoennType.UKJENT);
         assertThat(personMedHistorikk.navn()).isEqualTo(new Navn("fornavn", "mellomnavn", "etternavn"));
         assertThat(personMedHistorikk.statsborgerskap()).containsExactlyInAnyOrder(
