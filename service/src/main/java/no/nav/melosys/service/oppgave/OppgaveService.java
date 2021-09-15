@@ -133,7 +133,7 @@ public class OppgaveService {
         return fagsakService.hentFagsak(saksnummer).hentSistAktiveBehandling();
     }
 
-    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) {
+    public String opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) {
 
         Optional<Oppgave> eksisterendeOppgave = finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
@@ -151,10 +151,12 @@ public class OppgaveService {
                 ? oppgaveFasade.opprettSensitivOppgave(oppgave)
                 : oppgaveFasade.opprettOppgave(oppgave);
             log.info("Opprettet oppgave {} for behandling {}", oppgaveID, behandling.getId());
+            return oppgaveID;
         } else if (tilordnetRessurs != null && !tilordnetRessurs.equals(eksisterendeOppgave.get().getTilordnetRessurs())) {
             log.info("Oppgave eksisterer, oppdaterer tilordnetRessurs for oppgave tilknyttet behandling {}", behandling.getId());
             tildelOppgave(eksisterendeOppgave.get().getOppgaveId(), tilordnetRessurs);
         }
+        return eksisterendeOppgave.get().getOppgaveId();
     }
 
     public void opprettJournalføringsoppgave(String journalpostID, String aktørID) {
@@ -181,37 +183,13 @@ public class OppgaveService {
         oppgaveFasade.oppdaterOppgave(oppgaveID, OppgaveOppdatering.builder().tilordnetRessurs(saksbehandler).build());
     }
 
-    public String gjenopprettSisteAvsluttetOppgaveMedFagsaksnummer(String saksnummer) {
+    public String opprettOppgaveTilSak(String saksnummer) {
+        log.info("Oppretter ny oppgave for saksnummer {}", saksnummer);
         Oppgave oppgave = hentSisteAvsluttetOppgaveMedFagsaksnummer(saksnummer);
+        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
+        Behandling behandling = fagsak.hentSistAktiveBehandling();
 
-        Oppgave gjenopprettetOppgave = new Oppgave.Builder()
-            .setAktørId(oppgave.getAktørId())
-            .setBehandlingstema(oppgave.getBehandlingstema())
-            .setBehandlingstype(oppgave.getBehandlingstype())
-            .setBeskrivelse(oppgave.getBeskrivelse())
-            .setBehandlesAvApplikasjon(oppgave.getBehandlesAvApplikasjon())
-            .setOpprettetTidspunkt(oppgave.getOpprettetTidspunkt())
-            .setFristFerdigstillelse(oppgave.getFristFerdigstillelse())
-            .setJournalpostId(oppgave.getJournalpostId())
-            .setOppgavetype(oppgave.getOppgavetype())
-            .setPrioritet(oppgave.getPrioritet())
-            .setSaksnummer(oppgave.getSaksnummer())
-            .setTema(oppgave.getTema())
-            .setTemagruppe(oppgave.getTemagruppe())
-            .setTilordnetRessurs(oppgave.getTilordnetRessurs())
-            .setTildeltEnhetsnr(oppgave.getTildeltEnhetsnr())
-            .setVersjon(oppgave.getVersjon())
-            .setAktivDato(oppgave.getAktivDato())
-            .setStatus("UNDER_BEHANDLING")
-            .build();
-
-        String gammelOppgaveId = oppgave.getOppgaveId();
-        log.info("Gjenoppretter oppgave med id {} knyttet til saksnummer {}", gammelOppgaveId, saksnummer);
-
-        String nyOppgaveId = opprettOppgave(gjenopprettetOppgave);
-
-        log.info("Gjenopprettet oppgave med id {} knyttet til saksnummer {} som ny oppgave med id {}", gammelOppgaveId, saksnummer, nyOppgaveId);
-        return oppgave.getOppgaveId();
+        return opprettEllerGjenbrukBehandlingsoppgave(behandling, behandling.getInitierendeJournalpostId(), fagsak.hentAktørID(), oppgave.getTilordnetRessurs());
     }
 
     private List<OppgaveDto> oppgaverTilDtoer(Collection<Oppgave> oppgaverFraDomain) {

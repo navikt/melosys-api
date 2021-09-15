@@ -23,15 +23,15 @@ public class OppgaveAdminTjeneste implements AdminTjeneste {
 
     /**
      * Oppdateroppgave-endepunktet støtter ikke per nå å endre oppgaver med status FERDIGSTILT
-     * Skaper dermed en kopi av oppgaven med ny status UNDER_BEHANDLING
+     * Skaper dermed en ny oppgave og knytter denne til saken
      */
-    @PostMapping("/gjenopprett/{saksnummer}")
-    public ResponseEntity<String> gjenopprettOppgave(@RequestHeader(API_KEY_HEADER) String apiKey,
-                                                     @PathVariable String saksnummer) {
+    @PostMapping("/opprett/{saksnummer}")
+    public ResponseEntity<String> opprettOppgaveTilSak(@RequestHeader(API_KEY_HEADER) String apiKey,
+                                                       @PathVariable String saksnummer) {
         validerApikey(apiKey);
 
-        String oppdatertOppgaveId = oppgaveService.gjenopprettSisteAvsluttetOppgaveMedFagsaksnummer(saksnummer);
-        return ResponseEntity.ok(String.format("Gjenåpnet oppgave med id %s", oppdatertOppgaveId));
+        String oppdatertOppgaveId = oppgaveService.opprettOppgaveTilSak(saksnummer);
+        return ResponseEntity.ok(String.format("Opprettet oppgave med id %s for sak %s", oppdatertOppgaveId, saksnummer));
     }
 
     @Override
