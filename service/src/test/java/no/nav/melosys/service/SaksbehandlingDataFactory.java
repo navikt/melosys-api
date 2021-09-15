@@ -38,7 +38,7 @@ public final class SaksbehandlingDataFactory {
         return fagsak;
     }
 
-    private static Aktoer lagBruker() {
+    public static Aktoer lagBruker() {
         var aktoer = new Aktoer();
         aktoer.setRolle(BRUKER);
         aktoer.setAktørId("aktørID");
