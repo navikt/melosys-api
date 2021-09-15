@@ -182,12 +182,37 @@ public class OppgaveService {
     }
 
     public String gjenåpneSisteAvsluttetOppgaveMedFagsaksnummer(String saksnummer) {
-        String oppgaveId = hentSisteAvsluttetOppgaveMedFagsaksnummer(saksnummer).getOppgaveId();
-        var oppdatering = OppgaveOppdatering.builder().status("UNDER_BEHANDLING").build();
+        Oppgave oppgave = hentSisteAvsluttetOppgaveMedFagsaksnummer(saksnummer);
 
-        log.info("Gjenoppretter oppgave med id {} knyttet til saksnummer {}", oppgaveId, saksnummer);
-        oppdaterOppgave(oppgaveId, oppdatering);
-        return oppgaveId;
+        Oppgave gjenopprettetOppgave = new Oppgave.Builder()
+            .setAktørId(oppgave.getAktørId())
+            .setBehandlingstema(oppgave.getBehandlingstema())
+            .setBehandlingstype(oppgave.getBehandlingstype())
+            .setBeskrivelse(oppgave.getBeskrivelse())
+            .setBehandlesAvApplikasjon(oppgave.getBehandlesAvApplikasjon())
+            .setOpprettetTidspunkt(oppgave.getOpprettetTidspunkt())
+            .setFristFerdigstillelse(oppgave.getFristFerdigstillelse())
+            .setJournalpostId(oppgave.getJournalpostId())
+            .setOppgaveId(oppgave.getOppgaveId())
+            .setOppgavetype(oppgave.getOppgavetype())
+            .setPrioritet(oppgave.getPrioritet())
+            .setSaksnummer(oppgave.getSaksnummer())
+            .setTema(oppgave.getTema())
+            .setTemagruppe(oppgave.getTemagruppe())
+            .setTilordnetRessurs(oppgave.getTilordnetRessurs())
+            .setTildeltEnhetsnr(oppgave.getTildeltEnhetsnr())
+            .setVersjon(oppgave.getVersjon())
+            .setAktivDato(oppgave.getAktivDato())
+            .setStatus("UNDER_BEHANDLING")
+            .build();
+
+        String gammelOppgaveId = oppgave.getOppgaveId();
+        log.info("Gjenoppretter oppgave med id {} knyttet til saksnummer {}", gammelOppgaveId, saksnummer);
+
+        String nyOppgaveId = opprettOppgave(gjenopprettetOppgave);
+
+        log.info("Gjenopprettet oppgave med id {} knyttet til saksnummer {} som ny oppgave med id {}", gammelOppgaveId, saksnummer, nyOppgaveId);
+        return oppgave.getOppgaveId();
     }
 
     private List<OppgaveDto> oppgaverTilDtoer(Collection<Oppgave> oppgaverFraDomain) {
