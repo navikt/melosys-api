@@ -181,7 +181,7 @@ public class OppgaveService {
         oppgaveFasade.oppdaterOppgave(oppgaveID, OppgaveOppdatering.builder().tilordnetRessurs(saksbehandler).build());
     }
 
-    public String gjenåpneSisteAvsluttetOppgaveMedFagsaksnummer(String saksnummer) {
+    public String gjenopprettSisteAvsluttetOppgaveMedFagsaksnummer(String saksnummer) {
         Oppgave oppgave = hentSisteAvsluttetOppgaveMedFagsaksnummer(saksnummer);
 
         Oppgave gjenopprettetOppgave = new Oppgave.Builder()
@@ -193,7 +193,6 @@ public class OppgaveService {
             .setOpprettetTidspunkt(oppgave.getOpprettetTidspunkt())
             .setFristFerdigstillelse(oppgave.getFristFerdigstillelse())
             .setJournalpostId(oppgave.getJournalpostId())
-            .setOppgaveId(oppgave.getOppgaveId())
             .setOppgavetype(oppgave.getOppgavetype())
             .setPrioritet(oppgave.getPrioritet())
             .setSaksnummer(oppgave.getSaksnummer())
