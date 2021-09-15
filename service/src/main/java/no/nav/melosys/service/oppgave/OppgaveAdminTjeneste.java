@@ -21,17 +21,13 @@ public class OppgaveAdminTjeneste implements AdminTjeneste {
         this.apiKey = apiKey;
     }
 
-    /**
-     * Oppdateroppgave-endepunktet støtter ikke per nå å endre oppgaver med status FERDIGSTILT
-     * Skaper dermed en ny oppgave og knytter denne til saken
-     */
     @PostMapping("/opprett/{saksnummer}")
-    public ResponseEntity<String> opprettOppgaveTilSak(@RequestHeader(API_KEY_HEADER) String apiKey,
+    public ResponseEntity<String> opprettOppgaveForSak(@RequestHeader(API_KEY_HEADER) String apiKey,
                                                        @PathVariable String saksnummer) {
         validerApikey(apiKey);
 
-        String oppdatertOppgaveId = oppgaveService.opprettOppgaveTilSak(saksnummer);
-        return ResponseEntity.ok(String.format("Opprettet oppgave med id %s for sak %s", oppdatertOppgaveId, saksnummer));
+        oppgaveService.opprettOppgaveForSak(saksnummer);
+        return ResponseEntity.ok().build();
     }
 
     @Override
