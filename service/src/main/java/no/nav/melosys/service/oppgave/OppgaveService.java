@@ -91,14 +91,9 @@ public class OppgaveService {
     }
 
     public Optional<Oppgave> finnSisteAvsluttetOppgaveMedFagsaksnummer(String saksnummer) {
-        List<Oppgave> oppgaver = oppgaveFasade.finnAvsluttetOppgaverMedSaksnummer(saksnummer);
-
-        if (oppgaver.isEmpty()) {
-            return Optional.empty();
-        }
-        List<Oppgave> modifiableList = new ArrayList<>(oppgaver);
-        modifiableList.sort(Comparator.comparing(Oppgave::getFristFerdigstillelse).reversed());
-        return Optional.of(modifiableList.get(0));
+        return oppgaveFasade.finnAvsluttetOppgaverMedSaksnummer(saksnummer)
+            .stream()
+            .max(Comparator.comparing(Oppgave::getOpprettetTidspunkt));
     }
 
     public Optional<Oppgave> finnÅpenOppgaveMedFagsaksnummer(String saksnummer) {

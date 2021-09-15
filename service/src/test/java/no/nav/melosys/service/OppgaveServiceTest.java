@@ -2,6 +2,7 @@ package no.nav.melosys.service;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
@@ -236,9 +237,9 @@ class OppgaveServiceTest {
         var fagsak = behandling.getFagsak();
         fagsak.setBehandlinger(List.of(behandling));
         var oppgave1 = new Oppgave.Builder()
-            .setTilordnetRessurs("tilordnet ressurs 1").setFristFerdigstillelse(LocalDate.now()).setStatus("FERDIGSTILT").build();
+            .setTilordnetRessurs("tilordnet ressurs 1").setOpprettetTidspunkt(LocalDate.now().atStartOfDay(ZoneId.systemDefault())).setStatus("FERDIGSTILT").build();
         var oppgave2 = new Oppgave.Builder()
-            .setTilordnetRessurs("tilordnet ressurs 2").setFristFerdigstillelse(LocalDate.now().minusDays(2)).setStatus("FERDIGSTILT").build();
+            .setTilordnetRessurs("tilordnet ressurs 2").setOpprettetTidspunkt(LocalDate.now().minusDays(2).atStartOfDay(ZoneId.systemDefault())).setStatus("FERDIGSTILT").build();
 
         when(persondataFasade.hentFolkeregisterident("aktørID")).thenReturn("fnrBruker");
         when(persondataFasade.harStrengtFortroligAdresse("fnrBruker")).thenReturn(false);
