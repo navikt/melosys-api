@@ -21,7 +21,7 @@
       ]
     },
     "periode": {
-      "type": "object",
+      "type": ["object", "null"],
       "properties": {
         "fom": {
           "type": "string",
@@ -38,7 +38,7 @@
       ]
     },
     "trygdeavgift": {
-      "type": "object",
+      "type": ["object", "null"],
       "properties": {
         "avgiftspliktigInntekt": {
           "type": "integer"
@@ -139,7 +139,7 @@
           "type": "string"
         },
         "kontrollertAvSaksbehandler": {
-          "type": "string"
+          "type": ["string", "null"]
         }
       },
       "required": [
@@ -159,34 +159,41 @@
           "type": "object",
           "properties": {
             "norskArbgUtbetalerLoenn": {
-              "type": "boolean"
+              "type": ["boolean", "null"],
+              "default": true
             },
             "erArbeidstakerAnsattHelePerioden": {
-              "type": "boolean"
+              "type": ["boolean", "null"],
+              "default": true
             },
             "utlArbgUtbetalerLoenn": {
-              "type": "boolean"
+              "type": ["boolean", "null"],
+              "default": false
             },
             "utlArbTilhoererSammeKonsern": {
-              "type": "boolean"
+              "type": ["boolean", "null"],
+              "default": false
             },
             "bruttoLoennPerMnd": {
-              "type": "integer"
+              "type": ["integer", "null"]
             },
             "bruttoLoennUtlandPerMnd": {
-              "type": "integer"
+              "type": ["integer", "null"]
             },
             "mottarNaturalytelser": {
-              "type": "boolean"
+              "type": ["boolean", "null"],
+              "default": false
             },
             "samletVerdiNaturalytelser": {
-              "type": "integer"
+              "type": ["integer", "null"]
             },
             "erArbeidsgiveravgiftHelePerioden": {
-              "type": "boolean"
+              "type": ["boolean", "null"],
+              "default": true
             },
             "erTrukketTrygdeavgift": {
-              "type": "boolean"
+              "type": ["boolean", "null"],
+              "default": true
             }
           },
           "required": [
@@ -206,25 +213,25 @@
           "type": "object",
           "properties": {
             "antallAdmAnsatte": {
-              "type": "integer"
+              "type": ["integer", "null"]
             },
             "antallAnsatte": {
-              "type": "integer"
+              "type": ["integer", "null"]
             },
             "antallUtsendte": {
-              "type": "integer"
+              "type": ["integer", "null"]
             },
             "andelOmsetningINorge": {
-              "type": "integer"
+              "type": ["integer", "null"]
             },
             "andelOppdragINorge": {
-              "type": "integer"
+              "type": ["integer", "null"]
             },
             "andelKontrakterINorge": {
-              "type": "integer"
+              "type": ["integer", "null"]
             },
             "andelRekruttertINorge": {
-              "type": "integer"
+              "type": ["integer", "null"]
             },
             "ekstraArbeidsgivere": {
               "type": "array",
@@ -275,7 +282,7 @@
                   "type": "string"
                 },
                 "mellomnavn": {
-                  "type": "string"
+                  "type": ["string", "null"]
                 },
                 "etternavn": {
                   "type": "string"
@@ -318,7 +325,8 @@
           ]
         },
         "hentetDato": {
-          "$ref": "#/definitions/dato"
+          "type": ["string", "null"],
+          "format": "date"
         },
         "hentetPeriode": {
           "$ref": "#/definitions/periode"
@@ -343,10 +351,10 @@
               "type": "string"
             },
             "tilleggsbestemmelse": {
-              "type": "string"
+              "type": ["string", "null"]
             },
             "lovvalgslandKode": {
-              "type": "string"
+              "type": ["string", "null"]
             },
             "periode": {
               "$ref": "#/definitions/periode"
@@ -371,13 +379,13 @@
               ]
             },
             "fastsattTrygdeavgift": {
-              "type": "object",
+              "type": ["object", "null"],
               "properties": {
                 "betalesAv": {
                   "type": "object",
                   "properties": {
                     "orgnr": {
-                      "type": "string"
+                      "type": ["string", "null"]
                     },
                     "rolle": {
                       "type": "string"
@@ -411,7 +419,7 @@
       ]
     },
     "fullmektig": {
-      "type": "object",
+      "type": ["object", "null"],
       "properties": {
         "identifikator": {
           "$ref": "#/definitions/identifikator"
