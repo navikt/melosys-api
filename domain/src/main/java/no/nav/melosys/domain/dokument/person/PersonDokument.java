@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.brev.Postadresse;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
@@ -105,6 +106,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         return Set.of(statsborgerskap);
     }
 
+
     @Override
     public KjoennType hentKjønnType() {
         return KjoennType.avKode(kjønn.getKode());
@@ -114,6 +116,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
     public String hentFolkeregisterIdent() {
         return fnr;
     }
+
 
     public String getFnr() {
         return fnr;
@@ -288,6 +291,10 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
             gjeldendePostadresse.land != null ? LandkoderUtils.tilIso2(gjeldendePostadresse.land.getKode()) : null
         );
     }
+
+
+    @Override
+    public Optional<StrukturertAdresse> hentNyesteStrukturAdresse() { return null;}
 
     public void setGjeldendePostadresse(UstrukturertAdresse gjeldendePostadresse) {
         this.gjeldendePostadresse = gjeldendePostadresse;

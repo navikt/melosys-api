@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.dok.brevdata.felles.v1.navfelles.*;
+import no.nav.dok.melosysbrev._000067.MidlertidigOppholdsadresseType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.BostedsadresseType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.PersonnavnType;
@@ -11,7 +12,13 @@ import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.domain.person.adresse.Bostedsadresse;
+import no.nav.melosys.domain.person.adresse.Kontaktadresse;
+import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.Comparator;
+import java.util.Optional;
 
 import static no.nav.melosys.domain.adresse.Adresse.sammenslå;
 import static no.nav.melosys.service.dokument.brev.BrevDataService.*;
@@ -83,20 +90,36 @@ public final class BrevDataUtils {
         return adresse;
     }
 
-    public static BostedsadresseType lagBostedsadresse(StrukturertAdresse bosted) {
-        BostedsadresseType bostedAdresse = new BostedsadresseType();
-        if (StringUtils.isNotEmpty(bosted.getGatenavn())) {
-            bostedAdresse.setGatenavn(bosted.getGatenavn());
-        } else {
-            bostedAdresse.setGatenavn(" ");
-        }
-        bostedAdresse.setHusnummer(bosted.getHusnummerEtasjeLeilighet());
-        bostedAdresse.setPostnr(bosted.getPostnummer());
-        bostedAdresse.setPoststed(bosted.getPoststed());
-        bostedAdresse.setRegion(bosted.getRegion());
-        bostedAdresse.setLandkode(bosted.getLandkode());
-        return bostedAdresse;
+    public static BostedsadresseType lagBostedsadresse(Bostedsadresse bosted) {
+        final var strukturertadresse = bosted.strukturertAdresse();
+        return BostedsadresseType.builder()
+            .withGatenavn(strukturertadresse.getGatenavn().isEmpty() ? " " : strukturertadresse.getGatenavn())
+            .withHusnummer(strukturertadresse.getHusnummerEtasjeLeilighet())
+            .withPostnr(strukturertadresse.getPostnummer())
+            .withPoststed(strukturertadresse.getPoststed())
+            .withRegion(strukturertadresse.getRegion())
+            .withLandkode(strukturertadresse.getLandkode())
+            .build();
     }
+
+
+    public static StrukturertAdresse finnNyesteRegistrerteAdresse(Kontaktadresse kontaktadresse, Oppholdsadresse oppholdsadresse){
+        if (oppholdsadresse.registrertDato().isAfter(kontaktadresse.registrertDato())){
+            return  oppholdsadresse.strukturertAdresse();
+        }
+        return kontaktadresse.strukturertAdresse();
+    }
+
+    public static MidlertidigOppholdsadresseType lagMidlertidigOppholdsadresse(StrukturertAdresse strukturertAdresse) {
+        return MidlertidigOppholdsadresseType.builder().withGatenavn(strukturertAdresse.getGatenavn())
+            .withHusnummer(strukturertAdresse.getHusnummerEtasjeLeilighet())
+            .withPostnr(strukturertAdresse.getPostnummer())
+            .withPoststed(strukturertAdresse.getPoststed())
+            .withRegion(strukturertAdresse.getRegion())
+            .withLandkode(strukturertAdresse.getLandkode())
+            .build();
+    }
+
 
     public static UtenlandskPostadresse lagAdresse(StrukturertAdresse adresse) {
         return UtenlandskPostadresse.builder()

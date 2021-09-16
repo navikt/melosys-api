@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.brev.Postadresse;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.person.adresse.Adressebeskyttelse;
@@ -162,5 +163,18 @@ public record Personopplysninger(
             .map(Bostedsadresse::strukturertAdresse)
             .map(Postadresse::lagPostadresse)
             .orElseThrow(() -> new IkkeFunnetException("Forventer bostedsadresse"));
+    }
+
+    private StrukturertAdresse finnNyesteRegistrerteStrukturAdresse(Oppholdsadresse oppholdsadresse) {
+
+        return finnKontaktadresse()
+            .filter(kontaktadresse -> oppholdsadresse.registrertDato().isAfter(oppholdsadresse.registrertDato()))
+            .map(Kontaktadresse::strukturertAdresse)
+            .orElse(oppholdsadresse.strukturertAdresse());
+    }
+
+    @Override
+    public Optional<StrukturertAdresse> hentNyesteStrukturAdresse() {
+        return finnOppholdsadresse().map(this::finnNyesteRegistrerteStrukturAdresse);
     }
 }

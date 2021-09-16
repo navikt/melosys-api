@@ -29,6 +29,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
@@ -46,10 +47,8 @@ import org.xml.sax.SAXException;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
-import static no.nav.melosys.service.dokument.brev.mapper.A1Mapper.MAKS_ANTALL_TEGN_PER_LINJE_5_2;
-import static no.nav.melosys.service.dokument.brev.mapper.A1Mapper.STATSLØS_TEKST;
-import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger;
-import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysningerStatløs;
+import static no.nav.melosys.service.dokument.brev.mapper.A1Mapper.*;
+import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -161,7 +160,7 @@ class A1MapperTest {
     void mapTilBrevXML_bostedsAdresseIkkeGyldig_settBostedsadresseSinGateAdresseTom() throws Exception {
         brevData.bostedsadresse.setGatenavn(null);
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
-        assertThat(a1.getPerson().getBostedsadresse().getGatenavn()).isEqualTo(" ");
+        assertThat(a1.getPerson().getBostedsadresse().getGatenavn()).isEqualTo("gatenavnFraBostedsadresse");
 
         String xml = mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData);
 
@@ -264,10 +263,27 @@ class A1MapperTest {
     }
 
     @Test
-    void mapTilBrevXML_brukerErStatsløs_forventStatløsTekst() {
+    void mapTilBrevXML_brukerErStatsløsFraPDL_forventStatløsTekst() {
         brevData.person = lagPersonopplysningerStatløs();
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
         assertThat(a1.getPerson().getStatsborgerskap()).isEqualTo(STATSLØS_TEKST);
+    }
+
+    @Test
+    void mapTilBrevXML_harFlereAdresserRegistrertFraPDL_forventUtfylltMidlertidigAdresseMedNyesteRegistrerteDato() {
+        brevData.person = lagPersonopplysninger();
+        A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
+        assertThat(a1.getPerson().getMidlertidigOppholdsadresse().getGatenavn()).isEqualTo("gatenavnOppholdsadresseFreg");
+    }
+
+    @Test
+    void mapTilBrevXML_harIngenAdresserRegistrertFraPDL_kastIkkeFunnetException() {
+        brevData.person = lagPersonopplysningerUtenAdresser();
+        try {
+            mapper.mapA1(behandling, behandlingsresultat, brevData);
+        } catch (IkkeFunnetException e) {
+            assertThat(e.getMessage()).isEqualTo(MANGLENDE_REGISTRERTE_ADRESSE);
+        }
     }
 
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException {

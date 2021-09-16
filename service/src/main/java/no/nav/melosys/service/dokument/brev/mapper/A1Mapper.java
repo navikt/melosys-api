@@ -1,10 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -20,7 +17,10 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.domain.person.adresse.Kontaktadresse;
+import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 import no.nav.melosys.domain.util.LandkoderUtils;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
@@ -28,8 +28,7 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeids
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 
-import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagBostedsadresse;
-import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
+import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
 class A1Mapper {
@@ -38,6 +37,8 @@ class A1Mapper {
     private static final int ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2 = 13;
     static final int MAKS_ANTALL_TEGN_PER_LINJE_5_2 = 70;
     static final String STATSLØS_TEKST = "Stateless";
+    static final String MANGLENDE_REGISTRERTE_ADRESSE = "Person mangler registrert adresse. Den må registreres for å kunne sende brev og SED.";
+    static final String FLERE_UKJENTE_ELLER_IKKE_OPPGITT_LAND = "Various EEA-countries/Switzerland";
 
     private BrevDataA1 brevData;
 
@@ -82,8 +83,36 @@ class A1Mapper {
             throw new TekniskException("Konverteringsfeil ved konvertering av fødselsdato", e);
         }
 
-        person.setBostedsadresse(lagBostedsadresse(brevData.bostedsadresse));
+
+        person.setBostedsadresse(mapBostedAdresse(persondata));
+        person.setMidlertidigOppholdsadresse(mapMidlertidigOppholdsadresse(persondata));
+
         return person;
+    }
+
+    private static BostedsadresseType mapBostedAdresse(Persondata persondata) {
+        if (persondata.finnBostedsadresse().isPresent()) {
+            return lagBostedsadresse(persondata.finnBostedsadresse().get());
+        }
+
+        if (persondata.harIkkeRegistrertAdresse() ) throw new IkkeFunnetException(MANGLENDE_REGISTRERTE_ADRESSE); else return null;
+    }
+
+    private static MidlertidigOppholdsadresseType mapMidlertidigOppholdsadresse(Persondata persondata) {
+        return lagMidlertidigOppholdsadresse(finnNyestRegistrerteAdresse(persondata));
+    }
+
+    private static StrukturertAdresse finnNyestRegistrerteAdresse(Persondata persondata) {
+
+        Optional<StrukturertAdresse> strukturertAdresse = persondata.hentNyesteStrukturAdresse();
+
+        return strukturertAdresse.orElseGet(() -> persondata.finnKontaktadresse()
+            .map(Kontaktadresse::strukturertAdresse)
+            .orElse(persondata.finnOppholdsadresse()
+                .map(Oppholdsadresse::strukturertAdresse)
+                .orElse(null)
+            )
+        );
     }
 
     private static String mapStatsborgerskap(Set<Land> statsborgerskap) {
@@ -189,7 +218,7 @@ class A1Mapper {
     }
 
     private static List<String> lagAdresselinjeForUkjentEllerIkkeOppgittArbeidssted() {
-        return brekkTekstTilListe("Various EEA-countries/Switzerland");
+        return brekkTekstTilListe(FLERE_UKJENTE_ELLER_IKKE_OPPGITT_LAND);
     }
 
     private static List<String> brekkTekstTilListe(String tekst) {
