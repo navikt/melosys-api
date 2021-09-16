@@ -1,6 +1,9 @@
 package no.nav.melosys.service.persondata;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -146,15 +149,35 @@ public class PersondataService implements PersondataFasade {
         final String ident = behandling.getFagsak().hentAktørID();
         if (behandling.erInaktiv()) {
             /*TODO MELOSYS-4466
-               - Mapping fra TPS for gamle behandlinger opprettet før PDL
+               - Mapping fra TPS dato for gamle behandlinger opprettet før PDL
                - Det ville være mest riktig å se på vedtakstidspunktet om det finnes et vedtak (default behandling.getEndretDato()
                fordi behandling kan endres automatisk etter vedtak (art. 13)
              */
-            return PersonMedHistorikkOversetter.oversettTilInnsyn(pdlConsumer.hentPersonMedHistorikk(ident, true),
-                kodeverkService, behandling.getEndretDato());
+            return PersonMedHistorikkOversetter.oversett(gjennskapPersonPåDatoTilInnsyn(pdlConsumer.hentPersonMedHistorikk(ident, true), behandling.getEndretDato()), kodeverkService);
         } else {
             return PersonMedHistorikkOversetter.oversett(pdlConsumer.hentPersonMedHistorikk(ident, false), kodeverkService);
         }
+    }
+
+    public static Person gjennskapPersonPåDatoTilInnsyn(Person person, Instant instant) {
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+        return new Person(
+            Collections.emptyList(),
+            person.bostedsadresse().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
+            person.doedsfall().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
+            person.foedsel().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
+            person.folkeregisteridentifikator().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
+            person.folkeregisterpersonstatus().stream().toList(),
+            Collections.emptyList(),
+            Collections.emptyList(),
+            person.kjoenn().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
+            person.kontaktadresse().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
+            person.navn().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
+            person.oppholdsadresse().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
+            person.sivilstand().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
+            person.statsborgerskap().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
+            Collections.emptyList()
+        );
     }
 
     @Override
