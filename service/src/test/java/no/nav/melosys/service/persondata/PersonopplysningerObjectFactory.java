@@ -25,19 +25,6 @@ public class PersonopplysningerObjectFactory {
         return lagPersonopplysninger(true, false);
     }
 
-    public static Personopplysninger lagPersonopplysningerUtenAdresser() {
-        return new Personopplysninger(emptyList(), null, null, emptySet(), lagFødesel(), null,
-            lagKjønn(), emptyList(), lagNavn(), emptyList(), lagStatsborgerskap(false));
-    }
-
-    public static Personopplysninger lagPersonopplysningerTomBosted() {
-        return new lagPersonopplysningerUtenBostedsadresse();
-    }
-
-    private static Personopplysninger lagPersonopplysninger(boolean erStatløs) {
-        return new Personopplysninger(emptyList(), lagBostedsadresse(), null, emptySet(), lagFødesel(), null,
-            lagKjønn(), lagKontaktadresser(), lagNavn(), lagOppholdsadresser(), lagStatsborgerskap(erStatløs));
-      
     public static Personopplysninger lagPersonopplysningerUtenBostedsadresse() {
         return lagPersonopplysninger(false, true);
     }
@@ -47,6 +34,11 @@ public class PersonopplysningerObjectFactory {
             lagFødesel(), null, lagKjønn(), lagKontaktadresser(), lagNavn(), lagOppholdsadresser(),
             lagStatsborgerskap(erStatløs));
 
+    }
+
+    public static Personopplysninger lagPersonopplysningerUtenAdresser() {
+        return new Personopplysninger(emptyList(), null, null, emptySet(), lagFødesel(), null,
+            lagKjønn(), emptyList(), lagNavn(), emptyList(), lagStatsborgerskap(false));
     }
 
     private static Foedsel lagFødesel() {

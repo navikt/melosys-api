@@ -302,7 +302,7 @@ class A1MapperTest {
 
     @Test
     void mapTilBrevXML_harIkkeBostedsAdresseFraPDL_bostedsAdresseErTom() {
-        brevData.person = lagPersonopplysningerTomBosted();
+        brevData.person = lagPersonopplysningerUtenBostedsadresse();
         A1 a1 = mapper.mapA1(behandling,behandlingsresultat,brevData);
         assertThat(a1.getPerson().getBostedsadresse()).isEqualTo(new BostedsadresseType());
     }
