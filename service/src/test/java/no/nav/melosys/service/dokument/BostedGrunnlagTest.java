@@ -5,8 +5,6 @@ import java.util.Optional;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Bosted;
-import no.nav.melosys.domain.person.Master;
-import no.nav.melosys.domain.person.Personopplysninger;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +21,9 @@ class BostedGrunnlagTest {
     private final KodeverkService kodeverkService = mock(KodeverkService.class);
 
     @BeforeEach
-    public void setup() { bostedGrunnlag = new BostedGrunnlag(soeknad, null, kodeverkService); }
+    public void setup() {
+        bostedGrunnlag = new BostedGrunnlag(soeknad, null, kodeverkService);
+    }
 
     @Test
     void hentBostedsadresse_forventStrukturertAdresse() {
@@ -63,7 +63,7 @@ class BostedGrunnlagTest {
     void finnBostedsadresse_harBostedsadresseIRegister_forventBostedsadresse() {
         var bostedsadresse = new no.nav.melosys.domain.person.adresse.Bostedsadresse(
             new StrukturertAdresse("gate", null, null, null, null, "SE"),
-            null, null, null, null, Master.PDL.name(), false);
+            null, null, null, null, null, false);
         var bostedGrunnlag = new BostedGrunnlag(soeknad, bostedsadresse, kodeverkService);
 
         Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnBostedsadresse();
@@ -87,7 +87,11 @@ class BostedGrunnlagTest {
         Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnBostedsadresse();
 
         assertThat(strukturertAdresse).isPresent();
-        assertThat(strukturertAdresse.get().getGatenavn()).isEqualTo("gatenavnFraBostedsadresse");
-        assertThat(strukturertAdresse.get().getLandkode()).isEqualTo("NO");
+        StrukturertAdresse adresse = strukturertAdresse.get();
+        assertThat(adresse.getGatenavn()).isEqualTo("gatenavnFraBostedsadresse");
+        assertThat(adresse.getLandkode()).isEqualTo("NO");
+        assertThat(adresse.getPostnummer()).isEqualTo("1234");
+        assertThat(adresse.getPoststed()).isEqualTo("Oslo");
+        assertThat(adresse.getRegion()).isEqualTo("Norge");
     }
 }

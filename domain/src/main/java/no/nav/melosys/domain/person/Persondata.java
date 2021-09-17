@@ -51,5 +51,4 @@ public interface Persondata {
     Optional<StrukturertAdresse> hentNyesteStrukturAdresse();
 
     Postadresse hentGjeldendePostadresse();
-
 }

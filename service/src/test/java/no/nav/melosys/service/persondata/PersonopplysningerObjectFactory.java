@@ -30,6 +30,11 @@ public class PersonopplysningerObjectFactory {
             lagKjønn(), emptyList(), lagNavn(), emptyList(), lagStatsborgerskap(false));
     }
 
+    public static Personopplysninger lagPersonopplysningerTomBosted() {
+        return new Personopplysninger(emptyList(),null ,null ,emptySet(), lagFødesel(), null,
+            lagKjønn(), lagKontaktadresser(), lagNavn(), lagOppholdsadresser(), lagStatsborgerskap(false));
+    }
+
     private static Personopplysninger lagPersonopplysninger(boolean erStatløs) {
         return new Personopplysninger(emptyList(), lagBostedsadresse(), null, emptySet(), lagFødesel(), null,
             lagKjønn(), lagKontaktadresser(), lagNavn(), lagOppholdsadresser(), lagStatsborgerskap(erStatløs));
@@ -48,7 +53,6 @@ public class PersonopplysningerObjectFactory {
         return new Bostedsadresse(new StrukturertAdresse("gatenavnFraBostedsadresse", "3", "1234", "Oslo", "Norge", "NO"),
             null, null, null, null, null, false);
     }
-
 
     public static Collection<Kontaktadresse> lagKontaktadresser() {
         return Set.of(

@@ -83,9 +83,16 @@ class A1Mapper {
             throw new TekniskException("Konverteringsfeil ved konvertering av fødselsdato", e);
         }
 
+        if (persondata.harIkkeRegistrertAdresse()) {
+            throw new IkkeFunnetException(MANGLENDE_REGISTRERTE_ADRESSE);
+        }
 
         person.setBostedsadresse(mapBostedAdresse(persondata));
-        person.setMidlertidigOppholdsadresse(mapMidlertidigOppholdsadresse(persondata));
+        person.setMidlertidigOppholdsadresse(
+            lagMidlertidigOppholdsadresse(
+                finnNyestRegistrerteKontaktOgOppholdsAdresse(persondata)
+            )
+        );
 
         return person;
     }
@@ -94,15 +101,10 @@ class A1Mapper {
         if (persondata.finnBostedsadresse().isPresent()) {
             return lagBostedsadresse(persondata.finnBostedsadresse().get());
         }
-
-        if (persondata.harIkkeRegistrertAdresse() ) throw new IkkeFunnetException(MANGLENDE_REGISTRERTE_ADRESSE); else return null;
+        return new BostedsadresseType();
     }
 
-    private static MidlertidigOppholdsadresseType mapMidlertidigOppholdsadresse(Persondata persondata) {
-        return lagMidlertidigOppholdsadresse(finnNyestRegistrerteAdresse(persondata));
-    }
-
-    private static StrukturertAdresse finnNyestRegistrerteAdresse(Persondata persondata) {
+    private static StrukturertAdresse finnNyestRegistrerteKontaktOgOppholdsAdresse(Persondata persondata) {
 
         Optional<StrukturertAdresse> strukturertAdresse = persondata.hentNyesteStrukturAdresse();
 

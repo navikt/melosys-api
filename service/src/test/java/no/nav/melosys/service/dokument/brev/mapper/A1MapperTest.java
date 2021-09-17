@@ -12,6 +12,7 @@ import no.nav.dok.melosysbrev._000067.AdresseType;
 import no.nav.dok.melosysbrev._000116.BrevdataType;
 import no.nav.dok.melosysbrev._000116.Fag;
 import no.nav.dok.melosysbrev._000116.ObjectFactory;
+import no.nav.dok.melosysbrev.felles.melosys_felles.BostedsadresseType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
@@ -252,7 +253,7 @@ class A1MapperTest {
             .filter(StringUtils::isNotEmpty)
             .collect(Collectors.toList());
 
-        assertThat(utfylteAdresselinjer).containsExactly("Various EEA-countries/Switzerland");
+        assertThat(utfylteAdresselinjer).containsExactly(FLERE_UKJENTE_ELLER_IKKE_OPPGITT_LAND);
     }
 
     @Test
@@ -267,6 +268,19 @@ class A1MapperTest {
         brevData.person = lagPersonopplysningerStatløs();
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
         assertThat(a1.getPerson().getStatsborgerskap()).isEqualTo(STATSLØS_TEKST);
+    }
+
+
+    @Test
+    void mapTilBrevXML_bostedsadresserFraRegisterPDL_forventBostedsadresse(){
+        brevData.person = lagPersonopplysninger();
+        A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
+        assertThat(a1.getPerson().getBostedsadresse().getGatenavn()).isEqualTo("gatenavnFraBostedsadresse");
+        assertThat(a1.getPerson().getBostedsadresse().getHusnummer()).isEqualTo("3");
+        assertThat(a1.getPerson().getBostedsadresse().getPostnr()).isEqualTo("1234");
+        assertThat(a1.getPerson().getBostedsadresse().getPoststed()).isEqualTo("Oslo");
+        assertThat(a1.getPerson().getBostedsadresse().getRegion()).isEqualTo("Norge");
+        assertThat(a1.getPerson().getBostedsadresse().getLandkode()).isEqualTo("NO");
     }
 
     @Test
@@ -284,6 +298,13 @@ class A1MapperTest {
         } catch (IkkeFunnetException e) {
             assertThat(e.getMessage()).isEqualTo(MANGLENDE_REGISTRERTE_ADRESSE);
         }
+    }
+
+    @Test
+    void mapTilBrevXML_harIkkeBostedsAdresseFraPDL_bostedsAdresseErTom() {
+        brevData.person = lagPersonopplysningerTomBosted();
+        A1 a1 = mapper.mapA1(behandling,behandlingsresultat,brevData);
+        assertThat(a1.getPerson().getBostedsadresse()).isEqualTo(new BostedsadresseType());
     }
 
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException {

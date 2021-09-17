@@ -13,12 +13,6 @@ import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
-import no.nav.melosys.domain.person.adresse.Kontaktadresse;
-import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Comparator;
-import java.util.Optional;
 
 import static no.nav.melosys.domain.adresse.Adresse.sammenslå;
 import static no.nav.melosys.service.dokument.brev.BrevDataService.*;
@@ -30,20 +24,20 @@ public final class BrevDataUtils {
     }
 
     static NavAnsatt lagNavAnsatt(String ansattId, String navn) {
-        NavAnsatt navAnsatt = new NavAnsatt();
-        navAnsatt.setAnsattId(ansattId != null ? ansattId : "N/A");
-        navAnsatt.setNavn(navn);
-        return navAnsatt;
+        return NavAnsatt.builder()
+            .withAnsattId(ansattId != null ? ansattId : "N/A")
+            .withNavn(navn)
+            .build();
     }
 
     static NavEnhet lagNavEnhet() {
-        NavEnhet navEnhet = new NavEnhet();
-        navEnhet.setEnhetsId(MELOSYS_ENHET_ID);
-        navEnhet.setEnhetsNavn(PLASSHOLDER_TEKST);
-        return navEnhet;
+        return NavEnhet.builder()
+            .withEnhetsId(MELOSYS_ENHET_ID)
+            .withEnhetsNavn(PLASSHOLDER_TEKST)
+            .build();
     }
 
-    public static LovvalgsperiodeType lagLovvalgsperiodeType(Lovvalgsperiode lovvalgsperiode)  {
+    public static LovvalgsperiodeType lagLovvalgsperiodeType(Lovvalgsperiode lovvalgsperiode) {
         LovvalgsperiodeType lovvalgsperiodeType = new LovvalgsperiodeType();
         try {
             lovvalgsperiodeType.setFomDato(convertToXMLGregorianCalendarRemoveTimezone(lovvalgsperiode.getFom()));
@@ -56,23 +50,22 @@ public final class BrevDataUtils {
 
     // Adresse-stubs
     public static Kontaktinformasjon lagKontaktInformasjon() {
-        Kontaktinformasjon kontaktinformasjon = new Kontaktinformasjon();
-
-        kontaktinformasjon.setBesoksadresse(lagAdresse(new Besoksadresse(), lagNorskPostadresse()));
-        kontaktinformasjon.setPostadresse(lagAdresse(new Postadresse(), lagNorskPostadresse()));
-        //Adressen skal benyttes dersom bruker/mottakerRolle har behov for å kontakte NAV per post.
-        kontaktinformasjon.setReturadresse(lagAdresse(new Returadresse(), lagNorskPostadresse()));
-
-        return kontaktinformasjon;
+        return Kontaktinformasjon.builder()
+            .withBesoksadresse(lagAdresse(new Besoksadresse(), lagNorskPostadresse()))
+            .withPostadresse(lagAdresse(new Postadresse(), lagNorskPostadresse()))
+            //Adressen skal benyttes dersom bruker/mottakerRolle har behov for å kontakte NAV per post.
+            //Adressen skal benyttes dersom bruker/mottakerRolle har behov for å kontakte NAV per post.
+            .withReturadresse(lagAdresse(new Returadresse(), lagNorskPostadresse()))
+            .build();
     }
 
     public static NorskPostadresse lagNorskPostadresse() {
-        NorskPostadresse adresse = new NorskPostadresse();
-        adresse.setAdresselinje1(PLASSHOLDER_TEKST);
-        adresse.setPostnummer(PLASSHOLDER_POSTNUMMER);
-        adresse.setPoststed(PLASSHOLDER_TEKST);
-        adresse.setLand(PLASSHOLDER_TEKST);
-        return adresse;
+        return NorskPostadresse.builder()
+            .withAdresselinje1(PLASSHOLDER_TEKST)
+            .withPostnummer(PLASSHOLDER_POSTNUMMER)
+            .withPoststed(PLASSHOLDER_TEKST)
+            .withLand(PLASSHOLDER_TEKST)
+            .build();
     }
 
     public static UtenlandskPostadresse lagUtendlanskAdresse(UtenlandskMyndighet utenlandskMyndighet) {
@@ -103,13 +96,6 @@ public final class BrevDataUtils {
     }
 
 
-    public static StrukturertAdresse finnNyesteRegistrerteAdresse(Kontaktadresse kontaktadresse, Oppholdsadresse oppholdsadresse){
-        if (oppholdsadresse.registrertDato().isAfter(kontaktadresse.registrertDato())){
-            return  oppholdsadresse.strukturertAdresse();
-        }
-        return kontaktadresse.strukturertAdresse();
-    }
-
     public static MidlertidigOppholdsadresseType lagMidlertidigOppholdsadresse(StrukturertAdresse strukturertAdresse) {
         return MidlertidigOppholdsadresseType.builder().withGatenavn(strukturertAdresse.getGatenavn())
             .withHusnummer(strukturertAdresse.getHusnummerEtasjeLeilighet())
@@ -132,10 +118,10 @@ public final class BrevDataUtils {
     }
 
     public static PersonnavnType lagPersonnavn(Persondata persondata) {
-        PersonnavnType navn = new PersonnavnType();
-        navn.setFornavn(persondata.getFornavn());
-        navn.setMellomnavn(persondata.getMellomnavn());
-        navn.setEtternavn(persondata.getEtternavn());
-        return navn;
+        return PersonnavnType.builder()
+            .withFornavn(persondata.getFornavn())
+            .withMellomnavn(persondata.getMellomnavn())
+            .withEtternavn(persondata.getEtternavn())
+            .build();
     }
 }

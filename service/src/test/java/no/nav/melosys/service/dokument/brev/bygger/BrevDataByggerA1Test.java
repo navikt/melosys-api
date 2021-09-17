@@ -77,7 +77,7 @@ class BrevDataByggerA1Test {
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong()))
             .thenReturn(avklarteOrganisasjoner);
 
-        StrukturertAdresse oppgittAdresse =lagStrukturertAdresse();
+        StrukturertAdresse oppgittAdresse = lagStrukturertAdresse();
         søknad = new Soeknad();
         søknad.bosted.oppgittAdresse = oppgittAdresse;
 

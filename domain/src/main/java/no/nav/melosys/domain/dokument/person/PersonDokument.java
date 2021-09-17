@@ -106,7 +106,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         return Set.of(statsborgerskap);
     }
 
-
     @Override
     public KjoennType hentKjønnType() {
         return KjoennType.avKode(kjønn.getKode());
@@ -116,7 +115,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
     public String hentFolkeregisterIdent() {
         return fnr;
     }
-
 
     public String getFnr() {
         return fnr;
@@ -292,9 +290,8 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         );
     }
 
-
     @Override
-    public Optional<StrukturertAdresse> hentNyesteStrukturAdresse() { return null;}
+    public Optional<StrukturertAdresse> hentNyesteStrukturAdresse() { return Optional.empty();}
 
     public void setGjeldendePostadresse(UstrukturertAdresse gjeldendePostadresse) {
         this.gjeldendePostadresse = gjeldendePostadresse;

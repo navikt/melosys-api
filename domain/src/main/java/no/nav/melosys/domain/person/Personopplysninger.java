@@ -168,7 +168,7 @@ public record Personopplysninger(
     private StrukturertAdresse finnNyesteRegistrerteStrukturAdresse(Oppholdsadresse oppholdsadresse) {
 
         return finnKontaktadresse()
-            .filter(kontaktadresse -> oppholdsadresse.registrertDato().isAfter(oppholdsadresse.registrertDato()))
+            .filter(kontaktadresse -> oppholdsadresse.registrertDato().isAfter(kontaktadresse.registrertDato()))
             .map(Kontaktadresse::strukturertAdresse)
             .orElse(oppholdsadresse.strukturertAdresse());
     }
