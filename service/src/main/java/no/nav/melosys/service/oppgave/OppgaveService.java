@@ -10,6 +10,8 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -127,16 +129,16 @@ public class OppgaveService {
         return fagsakService.hentFagsak(saksnummer).hentSistAktiveBehandling();
     }
 
-    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) {
+    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs, Optional<String> beskrivelse) {
 
         Optional<Oppgave> eksisterendeOppgave = finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         if (eksisterendeOppgave.isEmpty()) {
-            String beskrivelse = behandling.erElektroniskSøknad() ? "Mottatt elektronisk søknad" : null;
+            String oppgavebeskrivelse = beskrivelse.orElse(behandling.erElektroniskSøknad() ? "Mottatt elektronisk søknad" : null);
             Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType())
                 .setTilordnetRessurs(tilordnetRessurs)
                 .setJournalpostId(journalpostID)
-                .setBeskrivelse(beskrivelse)
+                .setBeskrivelse(oppgavebeskrivelse)
                 .setAktørId(aktørID)
                 .setSaksnummer(behandling.getFagsak().getSaksnummer())
                 .build();
@@ -149,6 +151,10 @@ public class OppgaveService {
             log.info("Oppgave eksisterer, oppdaterer tilordnetRessurs for oppgave tilknyttet behandling {}", behandling.getId());
             tildelOppgave(eksisterendeOppgave.get().getOppgaveId(), tilordnetRessurs);
         }
+    }
+
+    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) {
+        opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, Optional.empty());
     }
 
     public void opprettJournalføringsoppgave(String journalpostID, String aktørID) {
@@ -179,9 +185,10 @@ public class OppgaveService {
         log.info("Oppretter ny oppgave for saksnummer {}", saksnummer);
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         Behandling behandling = fagsak.hentSistAktiveBehandling();
-        String tilordnetRessurs = finnSisteAvsluttetOppgaveMedFagsaksnummer(saksnummer).map(Oppgave::getTilordnetRessurs).orElse(null);
+        Optional<Oppgave> oppgave = finnSisteAvsluttetOppgaveMedFagsaksnummer(saksnummer);
+        String tilordnetRessurs = oppgave.map(Oppgave::getTilordnetRessurs).orElse(null);
 
-        opprettEllerGjenbrukBehandlingsoppgave(behandling, behandling.getInitierendeJournalpostId(), fagsak.hentAktørID(), tilordnetRessurs);
+        opprettEllerGjenbrukBehandlingsoppgave(behandling, behandling.getInitierendeJournalpostId(), fagsak.hentAktørID(), tilordnetRessurs, oppgave.map(Oppgave::getBeskrivelse));
     }
 
     private List<OppgaveDto> oppgaverTilDtoer(Collection<Oppgave> oppgaverFraDomain) {
