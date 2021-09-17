@@ -100,7 +100,7 @@ public class PDLConsumerImpl implements PDLConsumer {
     @Override
     @Retryable
     public Collection<Navn> hentNavn(String ident) {
-        return hentPersondata(HENT_SAMMENSATT_NAVN_QUERY, ident, false).navn();
+        return hentPersondata(HENT_NAVN_QUERY, ident, false).navn();
     }
 
     @Override

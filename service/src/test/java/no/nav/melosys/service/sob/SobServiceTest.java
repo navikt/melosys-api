@@ -44,7 +44,7 @@ class SobServiceTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        sobService = new SobService(sakOgBehandlingFasade, persondataFasade, behandlingService);
+        sobService = new SobService(behandlingService, sakOgBehandlingFasade);
         when(behandlingService.hentBehandlingUtenSaksopplysninger(anyLong())).thenReturn(lagBehandling());
     }
 

@@ -112,7 +112,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
     }
 
     @Override
-    public String hentFolkeregisterIdent() {
+    public String hentFolkeregisterident() {
         return fnr;
     }
 

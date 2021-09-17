@@ -44,7 +44,7 @@ public abstract class DokgenDto {
         Fagsak fagsak = behandling.getFagsak();
         Persondata persondata = brevbestilling.getPersondokument();
 
-        this.fnr = persondata.hentFolkeregisterIdent();
+        this.fnr = persondata.hentFolkeregisterident();
         this.saksnummer = fagsak.getSaksnummer();
         this.dagensDato = Instant.now();
         this.navnBruker = persondata.getSammensattNavn();

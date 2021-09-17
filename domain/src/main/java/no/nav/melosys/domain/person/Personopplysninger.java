@@ -54,7 +54,7 @@ public record Personopplysninger(
     }
 
     @Override
-    public String hentFolkeregisterIdent() {
+    public String hentFolkeregisterident() {
         return (folkeregisteridentifikator == null) ? null : folkeregisteridentifikator.identifikasjonsnummer();
     }
 

@@ -15,6 +15,6 @@ class SivilstandOversetterTest {
     void oversettForRelatertVedSivilstand() {
         final Sivilstand sivilstand = SivilstandOversetter.oversettForRelatertVedSivilstand(PdlObjectFactory.lagPerson().sivilstand());
         assertThat(sivilstand).isEqualTo(new Sivilstand(Sivilstandstype.GIFT, "relatertVedSivilstandID",
-            LocalDate.MIN, null, "Dolly", "PDL", false));
+            LocalDate.MIN, LocalDate.EPOCH, "PDL", "Dolly", false));
     }
 }

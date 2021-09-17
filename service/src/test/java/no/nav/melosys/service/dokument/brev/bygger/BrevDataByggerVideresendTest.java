@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Bostedsland;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.service.LandvelgerService;
@@ -42,7 +43,7 @@ public class BrevDataByggerVideresendTest {
 
     @Test
     public void lag_medBostedSverigeOgTrygdemyndighetslandSverige_girBrevdata() {
-        when(landvelgerService.hentBostedsland(eq(1L), any())).thenReturn(Landkoder.SE);
+        when(landvelgerService.hentBostedsland(eq(1L), any())).thenReturn(new Bostedsland(Landkoder.SE));
 
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
         utenlandskMyndighet.navn = "Försäkringskassan";

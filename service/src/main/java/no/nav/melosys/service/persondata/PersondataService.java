@@ -62,7 +62,7 @@ public class PersondataService implements PersondataFasade {
 
     @Override
     @Cacheable("folkeregisterIdent")
-    public String hentFolkeregisterIdent(String ident) {
+    public String hentFolkeregisterident(String ident) {
         return pdlConsumer.hentIdenter(ident).identer()
             .stream().filter(Ident::erFolkeregisterIdent)
             .findFirst().map(Ident::ident)
@@ -175,14 +175,14 @@ public class PersondataService implements PersondataFasade {
     }
 
     @Override
-    public String hentSammensattNavn(String fnr) {
+    public String hentSammensattNavn(String ident) {
         if (unleash.isEnabled("melosys.pdl.sammensatt-navn")) {
-            return pdlConsumer.hentNavn(fnr).stream()
+            return pdlConsumer.hentNavn(ident).stream()
                 .max(Comparator.comparing(n -> n.metadata().datoSistRegistrert()))
                 .map(NavnOversetter::tilSammensattNavn)
                 .orElse(NavnOversetter.UKJENT);
         }
-        return tpsService.hentSammensattNavn(fnr);
+        return tpsService.hentSammensattNavn(ident);
     }
 
     @Override
@@ -194,10 +194,10 @@ public class PersondataService implements PersondataFasade {
     }
 
     @Override
-    public boolean harStrengtFortroligAdresse(String fnr) {
+    public boolean harStrengtFortroligAdresse(String ident) {
         if (unleash.isEnabled("melosys.pdl.adressebeskyttelse")) {
-            return pdlConsumer.hentAdressebeskyttelser(fnr).stream().anyMatch(Adressebeskyttelse::erStrengtFortrolig);
+            return pdlConsumer.hentAdressebeskyttelser(ident).stream().anyMatch(Adressebeskyttelse::erStrengtFortrolig);
         }
-        return tpsService.harStrengtFortroligAdresse(fnr);
+        return tpsService.harStrengtFortroligAdresse(ident);
     }
 }

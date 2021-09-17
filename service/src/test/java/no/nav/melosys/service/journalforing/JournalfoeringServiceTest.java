@@ -112,7 +112,7 @@ class JournalfoeringServiceTest {
         final var ident = "123321";
         journalpost.setBrukerId("123");
         journalpost.setBrukerIdType(BrukerIdType.AKTØR_ID);
-        when(persondataFasade.hentFolkeregisterIdent(journalpost.getBrukerId())).thenReturn(ident);
+        when(persondataFasade.hentFolkeregisterident(journalpost.getBrukerId())).thenReturn(ident);
         assertThat(journalfoeringService.finnBrukerIdent(journalpost)).contains(ident);
     }
 

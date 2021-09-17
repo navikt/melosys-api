@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
@@ -14,6 +14,7 @@ import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import org.springframework.stereotype.Component;
 
@@ -22,10 +23,15 @@ public class VedtakKontrollService {
 
     private final BehandlingService behandlingService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
+    private final PersondataFasade persondataFasade;
+    private final Unleash unleash;
 
-    public VedtakKontrollService(BehandlingService behandlingService, LovvalgsperiodeService lovvalgsperiodeService) {
+    public VedtakKontrollService(BehandlingService behandlingService, LovvalgsperiodeService lovvalgsperiodeService,
+                                 PersondataFasade persondataFasade, Unleash unleash) {
         this.behandlingService = behandlingService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
+        this.persondataFasade = persondataFasade;
+        this.unleash = unleash;
     }
 
     public Collection<Kontrollfeil> utførKontroller(long behandlingID, Vedtakstyper vedtakstype) {
@@ -43,11 +49,18 @@ public class VedtakKontrollService {
     ) {
         BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
         MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
-        Persondata persondata = behandling.hentPersonDokument();
+        Persondata persondata = hentPersondata(behandling);
         VedtakKontrollData vedtakKontrollData = new VedtakKontrollData(medlemskapDokument, persondata, behandlingsgrunnlagData, lovvalgsperiode);
         return kontroller.stream()
             .map(f -> f.apply(vedtakKontrollData))
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .toList();
+    }
+
+    private Persondata hentPersondata(Behandling behandling) {
+        if (unleash.isEnabled("melosys.kontroller.pdl")) {
+            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
+        }
+        return behandling.hentPersonDokument();
     }
 }

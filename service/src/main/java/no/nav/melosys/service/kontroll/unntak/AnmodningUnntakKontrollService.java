@@ -4,14 +4,16 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kontroll.AdresseUtlandKontroller;
 import no.nav.melosys.service.kontroll.PersonKontroller;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import org.springframework.stereotype.Component;
@@ -19,12 +21,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class AnmodningUnntakKontrollService extends AdresseUtlandKontroller {
 
-    private final BehandlingService behandlingService;
     private final AnmodningsperiodeService anmodningsperiodeService;
+    private final BehandlingService behandlingService;
+    private final PersondataFasade persondataFasade;
+    private final Unleash unleash;
 
-    public AnmodningUnntakKontrollService(BehandlingService behandlingService, AnmodningsperiodeService anmodningsperiodeService) {
-        this.behandlingService = behandlingService;
+    public AnmodningUnntakKontrollService(AnmodningsperiodeService anmodningsperiodeService,
+                                          BehandlingService behandlingService,
+                                          PersondataFasade persondataFasade,
+                                          Unleash unleash) {
         this.anmodningsperiodeService = anmodningsperiodeService;
+        this.behandlingService = behandlingService;
+        this.persondataFasade = persondataFasade;
+        this.unleash = unleash;
     }
 
     public Collection<Kontrollfeil> utførKontroller(long behandlingID) {
@@ -49,15 +58,22 @@ public class AnmodningUnntakKontrollService extends AdresseUtlandKontroller {
         Anmodningsperiode anmodningsperiode,
         Set<Function<AnmodningUnntakKontrollData, Kontrollfeil>> kontroller
     ) {
-        AnmodningUnntakKontrollData kontrollData = new AnmodningUnntakKontrollData(
-            behandling.hentPersonDokument(),
+        final var persondata = hentPersondata(behandling);
+        AnmodningUnntakKontrollData kontrollData = new AnmodningUnntakKontrollData(persondata,
             behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata(),
             anmodningsperiode
         );
         return kontroller.stream()
             .map(f -> f.apply(kontrollData))
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .toList();
+    }
+
+    private Persondata hentPersondata(Behandling behandling) {
+        if (unleash.isEnabled("melosys.kontroller.pdl")) {
+            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
+        }
+        return behandling.hentPersonDokument();
     }
 
     static Kontrollfeil bostedsadresseForOrienteringAnmodningUnntak(AnmodningUnntakKontrollData kontrollData) {

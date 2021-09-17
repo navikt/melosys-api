@@ -202,6 +202,7 @@ query($ident: ID!) {
       type
       relatertVedSivilstand
       gyldigFraOgMed
+      bekreftelsesdato
       metadata {
         master
         historisk
@@ -447,6 +448,7 @@ query($ident: ID!, $historikk: Boolean!) {
       type
       relatertVedSivilstand
       gyldigFraOgMed
+      bekreftelsesdato
       metadata {
         master
         historisk
@@ -515,6 +517,7 @@ query($ident: ID!, $historikk: Boolean!) {
       type
       relatertVedSivilstand
       gyldigFraOgMed
+      bekreftelsesdato
       metadata {
         master
         historisk
@@ -730,7 +733,7 @@ query($ident: ID!) {
 }
         """;
 
-    public static final String HENT_SAMMENSATT_NAVN_QUERY = """
+    public static final String HENT_NAVN_QUERY = """
 query($ident: ID!, $historikk: Boolean!) {
   hentPerson(ident: $ident) {
     navn(historikk: $historikk) {

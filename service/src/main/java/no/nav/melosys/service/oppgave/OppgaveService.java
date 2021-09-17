@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import no.nav.melosys.domain.Behandling;
@@ -195,7 +194,7 @@ public class OppgaveService {
         return oppgaverFraDomain.stream()
             .map(this::tilOppgaveDtoHåndterException)
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     @Nullable
@@ -216,7 +215,7 @@ public class OppgaveService {
             jfrOppgaveDto.setJournalpostID(oppgave.getJournalpostId());
             dest = jfrOppgaveDto;
             String aktørId = oppgave.getAktørId();
-            String fnr = aktørId != null ? persondataFasade.hentFolkeregisterIdent(aktørId) : null;
+            String fnr = aktørId != null ? persondataFasade.hentFolkeregisterident(aktørId) : null;
             if (StringUtils.isNotEmpty(fnr)) {
                 dest.setFnr(fnr);
                 dest.setSammensattNavn(persondataFasade.hentSammensattNavn(fnr));
@@ -253,7 +252,7 @@ public class OppgaveService {
             saksopplysningerService.finnPersonOpplysninger(behandling.getId()).ifPresent(
                 personDokument -> {
                     behOppgaveDto.setSammensattNavn(personDokument.getSammensattNavn());
-                    behOppgaveDto.setFnr(personDokument.hentFolkeregisterIdent());
+                    behOppgaveDto.setFnr(personDokument.hentFolkeregisterident());
                 }
             );
 
@@ -292,7 +291,9 @@ public class OppgaveService {
 
     private boolean harBeskyttelsesbehov(long behandlingID) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        if (behandling.hentPersonDokument().harStrengtAdressebeskyttelse()) {
+        // TODO TPS krever fnr. Kall til hentFolkeregisterident fjernes etter overgang til PDL.
+        final String brukersFnr = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID());
+        if (persondataFasade.harStrengtFortroligAdresse(brukersFnr)) {
             return true;
         } else if (behandling.getBehandlingsgrunnlag() == null) {
             return false;
