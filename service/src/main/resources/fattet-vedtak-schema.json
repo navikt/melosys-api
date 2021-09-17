@@ -286,9 +286,6 @@
                 },
                 "etternavn": {
                   "type": "string"
-                },
-                "metadata": {
-                  "type": "null"
                 }
               },
               "required": [
@@ -297,14 +294,11 @@
                 "etternavn"
               ]
             },
-            "statsborgerskap": {
+            "statsborgerskap": { //TODO Liste
               "type": "object",
               "properties": {
                 "land": {
                   "type": "string"
-                },
-                "metadata": {
-                  "type": "null"
                 }
               },
               "required": [
