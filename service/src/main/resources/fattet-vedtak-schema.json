@@ -294,7 +294,7 @@
                 "etternavn"
               ]
             },
-            "statsborgerskap": { //TODO Liste
+            "statsborgerskap": {
               "type": "object",
               "properties": {
                 "land": {
