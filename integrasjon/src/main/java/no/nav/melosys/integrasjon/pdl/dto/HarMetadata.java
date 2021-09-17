@@ -7,22 +7,16 @@ public interface HarMetadata {
     Metadata metadata();
 
     default boolean erGyldigFør(LocalDateTime tidspunkt) {
-        return !erOpphørt() && erOpprettetFør(tidspunkt);
+        return metadata().endringer().stream()
+            .filter(e -> !e.erOpphør())
+            .anyMatch(e -> e.registrert().isBefore(tidspunkt));
     }
 
-    default boolean erOpphørt() {
+    default boolean erGyldig() {
         return metadata().endringer().stream()
             .max(Comparator.comparing(Endring::registrert))
             .filter(Endring::erOpphør)
-            .isPresent();
-    }
-
-    default boolean erOpprettetFør(LocalDateTime tidspunkt) {
-        return metadata().endringer().stream()
-            .filter(Endring::erOpprettelse)
-            .filter(e -> e.registrert().isBefore(tidspunkt))
-            .findAny()
-            .isPresent();
+            .isEmpty();
     }
 
     default LocalDateTime hentDatoSistRegistrert() {

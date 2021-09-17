@@ -8,13 +8,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import no.finn.unleash.Unleash;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.Statsborgerskap;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
+import no.nav.melosys.integrasjon.pdl.dto.HarMetadata;
 import no.nav.melosys.integrasjon.pdl.dto.identer.Ident;
 import no.nav.melosys.integrasjon.pdl.dto.person.Adressebeskyttelse;
 import no.nav.melosys.integrasjon.pdl.dto.person.ForelderBarnRelasjon;
@@ -22,6 +26,7 @@ import no.nav.melosys.integrasjon.pdl.dto.person.Person;
 import no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand;
 import no.nav.melosys.integrasjon.tps.TpsService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.mapping.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,18 +41,23 @@ import static java.time.temporal.ChronoUnit.YEARS;
 @Primary
 public class PersondataService implements PersondataFasade {
     private final BehandlingService behandlingService;
+    private final BehandlingsresultatService behandlingsresultatService;
     private final KodeverkService kodeverkService;
     private final PDLConsumer pdlConsumer;
     private final TpsService tpsService;
     private final Unleash unleash;
 
+    private static final LocalDate PDL_STARTDATO = LocalDate.EPOCH;
+
     @Autowired
     public PersondataService(BehandlingService behandlingService,
+                             BehandlingsresultatService behandlingsresultatService,
                              KodeverkService kodeverkService,
                              @Qualifier("saksbehandler") PDLConsumer pdlConsumer,
                              TpsService tpsService,
                              Unleash unleash) {
         this.behandlingService = behandlingService;
+        this.behandlingsresultatService = behandlingsresultatService;
         this.kodeverkService = kodeverkService;
         this.pdlConsumer = pdlConsumer;
         this.tpsService = tpsService;
@@ -147,20 +157,33 @@ public class PersondataService implements PersondataFasade {
     public PersonMedHistorikk hentPersonMedHistorikk(long behandlingID) {
         final var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         final String ident = behandling.getFagsak().hentAktørID();
-        if (behandling.erInaktiv()) {
-            /*TODO MELOSYS-4466
-               - Mapping fra TPS dato for gamle behandlinger opprettet før PDL
-               - Det ville være mest riktig å se på vedtakstidspunktet om det finnes et vedtak (default behandling.getEndretDato()
-               fordi behandling kan endres automatisk etter vedtak (art. 13)
-             */
-            return PersonMedHistorikkOversetter.oversett(gjennskapPersonPåDatoTilInnsyn(pdlConsumer.hentPersonMedHistorikk(ident, true), behandling.getEndretDato()), kodeverkService);
-        } else {
+        if (behandling.erAktiv()) {
             return PersonMedHistorikkOversetter.oversett(pdlConsumer.hentPersonMedHistorikk(ident, false), kodeverkService);
+        }
+
+        if (LocalDate.ofInstant(behandling.getRegistrertDato(), ZoneId.systemDefault()).isBefore(PDL_STARTDATO)) {
+            throw new TekniskException("Henting av TPS data for behandlinger opprettet før PDL mangler.");
+        }
+
+        final Instant skjæringstidspunkt = avgjørSkjæringstidspunktTilInnsyn(behandling);
+        final var persondataTilInnsyn = filtrerPersondataFørDato(pdlConsumer.hentPersonMedHistorikk(ident, true), skjæringstidspunkt);
+        return PersonMedHistorikkOversetter.oversett(persondataTilInnsyn, kodeverkService);
+    }
+
+    private Instant avgjørSkjæringstidspunktTilInnsyn(Behandling behandling) {
+        if (!behandling.kanResultereIVedtak()) {
+            return behandling.getEndretDato();
+        }
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+        if (behandlingsresultat.harVedtak()) {
+            return behandlingsresultat.getVedtakMetadata().getVedtaksdato();
+        } else {
+            return behandling.getEndretDato();
         }
     }
 
-    public static Person gjennskapPersonPåDatoTilInnsyn(Person person, Instant instant) {
-        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+    private static Person filtrerPersondataFørDato(Person person, Instant skjæringstidspunkt) {
+        final LocalDateTime localDateTime = LocalDateTime.ofInstant(skjæringstidspunkt, ZoneId.systemDefault());
         return new Person(
             Collections.emptyList(),
             person.bostedsadresse().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
@@ -168,8 +191,8 @@ public class PersondataService implements PersondataFasade {
             person.foedsel().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
             person.folkeregisteridentifikator().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
             person.folkeregisterpersonstatus().stream().toList(),
-            Collections.emptyList(),
-            Collections.emptyList(),
+            person.forelderBarnRelasjon().stream().toList(),
+            person.foreldreansvar().stream().toList(),
             person.kjoenn().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
             person.kontaktadresse().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
             person.navn().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
@@ -184,12 +207,17 @@ public class PersondataService implements PersondataFasade {
     public Set<Familiemedlem> hentFamiliemedlemmerMedHistorikk(long behandlingID) {
         final var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         final String ident = behandling.getFagsak().hentAktørID();
-        if (behandling.erInaktiv()) {
-            //TODO MELOSYS-4466
-            return Collections.emptySet();
-        } else {
+        if (behandling.erAktiv()) {
             return hentFamiliemedlemmer(pdlConsumer.hentFamilierelasjoner(ident));
         }
+
+        if (LocalDate.ofInstant(behandling.getRegistrertDato(), ZoneId.systemDefault()).isBefore(PDL_STARTDATO)) {
+            throw new TekniskException("Henting av TPS data for behandlinger opprettet før PDL mangler.");
+        }
+
+        final Instant skjæringstidspunkt = avgjørSkjæringstidspunktTilInnsyn(behandling);
+        final var persondataTilInnsyn = filtrerPersondataFørDato(pdlConsumer.hentFamilierelasjoner(ident), skjæringstidspunkt);
+        return hentFamiliemedlemmer(persondataTilInnsyn);
     }
 
     @Override
@@ -211,7 +239,7 @@ public class PersondataService implements PersondataFasade {
     @Override
     public Set<Statsborgerskap> hentStatsborgerskap(String ident) {
         return pdlConsumer.hentStatsborgerskap(ident).stream()
-            .filter(s -> !s.erOpphørt())
+            .filter(HarMetadata::erGyldig)
             .map(StatsborgerskapOversetter::oversett)
             .collect(Collectors.toUnmodifiableSet());
     }
