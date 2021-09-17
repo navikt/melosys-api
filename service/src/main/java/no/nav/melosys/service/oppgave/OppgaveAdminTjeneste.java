@@ -22,7 +22,7 @@ public class OppgaveAdminTjeneste implements AdminTjeneste {
     }
 
     @PostMapping("/opprett/{saksnummer}")
-    public ResponseEntity<String> opprettOppgaveForSak(@RequestHeader(API_KEY_HEADER) String apiKey,
+    public ResponseEntity<Void> opprettOppgaveForSak(@RequestHeader(API_KEY_HEADER) String apiKey,
                                                        @PathVariable String saksnummer) {
         validerApikey(apiKey);
 
