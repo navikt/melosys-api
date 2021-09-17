@@ -62,7 +62,7 @@ class OppfriskSaksopplysningerServiceTest {
             kontrollresultatService, inngangsvilkaarService,
             registeropplysningerService, persondataFasade);
 
-        when(persondataFasade.hentFolkeregisterIdent(anyString())).thenReturn("322211");
+        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
     }
 
     @Test

@@ -2,9 +2,9 @@ package no.nav.melosys.service.kontroll.ufm;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import io.micrometer.core.instrument.Metrics;
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
@@ -13,6 +13,7 @@ import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.kontroll.PeriodeKontroller;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.metrics.MetrikkerNavn.TAG_BEGRUNNELSE;
@@ -22,9 +23,13 @@ import static no.nav.melosys.metrics.MetrikkerNavn.UNNTAKSPERIODE_KONTROLL_TREFF
 public class UfmKontrollService {
 
     private final KontrollFactory kontrollFactory;
+    private final PersondataFasade persondataFasade;
+    private final Unleash unleash;
 
-    public UfmKontrollService(KontrollFactory kontrollFactory) {
+    public UfmKontrollService(KontrollFactory kontrollFactory, PersondataFasade persondataFasade, Unleash unleash) {
         this.kontrollFactory = kontrollFactory;
+        this.persondataFasade = persondataFasade;
+        this.unleash = unleash;
     }
 
     static {
@@ -38,7 +43,7 @@ public class UfmKontrollService {
             return Collections.singletonList(Kontroll_begrunnelser.FEIL_I_PERIODEN);
         }
 
-        Persondata persondata = behandling.hentPersonDokument();
+        Persondata persondata = hentPersondata(behandling);
         MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
         InntektDokument inntektDokument = behandling.hentInntektDokument();
         UtbetalingDokument utbetalingDokument = behandling.finnUtbetalingDokument().orElse(null);
@@ -47,13 +52,20 @@ public class UfmKontrollService {
         return utførKontroller(kontrollData, kontrollFactory.hentKontrollerForSedType(sedDokument.getSedType()));
     }
 
+    private Persondata hentPersondata(Behandling behandling) {
+        if (unleash.isEnabled("melosys.kontroller.pdl")) {
+            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
+        }
+        return behandling.hentPersonDokument();
+    }
+
     private List<Kontroll_begrunnelser> utførKontroller(UfmKontrollData kontrollData,
                                                               Collection<Function<UfmKontrollData, Kontroll_begrunnelser>> kontroller) {
         return kontroller.stream()
             .map(f -> f.apply(kontrollData))
             .filter(Objects::nonNull)
             .peek(this::registrerMetrikk) //NOSONAR
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private void registrerMetrikk(Kontroll_begrunnelser unntak_periode_begrunnelse) {

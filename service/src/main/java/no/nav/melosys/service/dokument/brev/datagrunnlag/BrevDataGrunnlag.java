@@ -1,32 +1,39 @@
 package no.nav.melosys.service.dokument.brev.datagrunnlag;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.person.Informasjonsbehov;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.ArbeidsstedGrunnlag;
 import no.nav.melosys.service.dokument.BostedGrunnlag;
 import no.nav.melosys.service.dokument.DataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.persondata.PersondataFasade;
 
 public class BrevDataGrunnlag implements DataGrunnlag {
     private final DoksysBrevbestilling brevbestilling;
     private final BehandlingsgrunnlagData behandlingsgrunnlagData;
-    private final PersonDokument person;
     private final AvklarteVirksomheterGrunnlag avklarteVirksomheterGrunnlag;
+    private final Persondata person;
     private final BostedGrunnlag bostedGrunnlag;
     private final ArbeidsstedGrunnlag arbeidsstedGrunnlag;
+    private final Unleash unleash;
 
     public BrevDataGrunnlag(DoksysBrevbestilling brevbestilling,
                             KodeverkService kodeverkService,
                             AvklarteVirksomheterService avklarteVirksomheterService,
-                            AvklartefaktaService avklartefaktaService) {
+                            AvklartefaktaService avklartefaktaService,
+                            PersondataFasade persondataFasade,
+                            Unleash unleash) {
+        this.unleash = unleash;
         this.brevbestilling = brevbestilling;
         final Behandling behandling = brevbestilling.getBehandling();
         this.behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
-        this.person = behandling.hentPersonDokument();
+        this.person = hentPersondata(behandling, persondataFasade);
         this.avklarteVirksomheterGrunnlag = new AvklarteVirksomheterGrunnlag(behandling, avklarteVirksomheterService);
         this.bostedGrunnlag = new BostedGrunnlag(behandlingsgrunnlagData, person.finnBostedsadresse().orElse(null),
             kodeverkService);
@@ -50,7 +57,7 @@ public class BrevDataGrunnlag implements DataGrunnlag {
         return behandlingsgrunnlagData;
     }
 
-    public PersonDokument getPerson() {
+    public Persondata getPerson() {
         return person;
     }
 
@@ -65,5 +72,12 @@ public class BrevDataGrunnlag implements DataGrunnlag {
 
     public ArbeidsstedGrunnlag getArbeidsstedGrunnlag() {
         return arbeidsstedGrunnlag;
+    }
+
+    private Persondata hentPersondata(Behandling behandling, PersondataFasade persondataFasade) {
+        if (unleash.isEnabled("melosys.brev.person.pdl")) {
+            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID(), Informasjonsbehov.MED_FAMILIERELASJONER);
+        }
+        return behandling.hentPersonDokument();
     }
 }

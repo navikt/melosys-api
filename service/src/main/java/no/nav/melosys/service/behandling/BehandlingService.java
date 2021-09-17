@@ -171,7 +171,7 @@ public class BehandlingService {
         behandling.setFagsak(fagsak);
         behandling.setRegistrertDato(nå);
         behandling.setEndretDato(nå);
-        behandling.setBehandlingsfrist(hentBehandlingsfristForBehandlingstemaTema(behandlingstema));
+        behandling.setBehandlingsfrist(hentBehandlingsfristForBehandlingstema(behandlingstema));
 
         behandling.setStatus(behandlingsstatus);
         behandling.setType(behandlingstype);
@@ -222,8 +222,9 @@ public class BehandlingService {
         behandlingsreplika.setType(behandlingstype);
         behandlingsreplika.setStatus(behandlingsstatus);
         behandlingsreplika.setOpprinneligBehandling(tidligsteInaktiveBehandling);
-        behandlingsreplika.setBehandlingsgrunnlag(repolikerBehandlingsgrunnlag(behandlingsreplika, tidligsteInaktiveBehandling.getBehandlingsgrunnlag()));
+        behandlingsreplika.setBehandlingsgrunnlag(replikerBehandlingsgrunnlag(behandlingsreplika, tidligsteInaktiveBehandling.getBehandlingsgrunnlag()));
         behandlingsreplika.setBehandlingsnotater(Collections.emptySet());
+        behandlingsreplika.setBehandlingsfrist(hentBehandlingsfristForBehandlingstema(tidligsteInaktiveBehandling.getTema()));
 
         behandlingsreplika.setSaksopplysninger(new HashSet<>());
         for (Saksopplysning saksopplysning : tidligsteInaktiveBehandling.getSaksopplysninger()) {
@@ -250,7 +251,7 @@ public class BehandlingService {
         return kildereplikas;
     }
 
-    private Behandlingsgrunnlag repolikerBehandlingsgrunnlag(Behandling behandlingsreplika, Behandlingsgrunnlag opprinneligBehandlingsgrunnlag)
+    private Behandlingsgrunnlag replikerBehandlingsgrunnlag(Behandling behandlingsreplika, Behandlingsgrunnlag opprinneligBehandlingsgrunnlag)
         throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         if (opprinneligBehandlingsgrunnlag == null) {
             return null;
@@ -325,7 +326,7 @@ public class BehandlingService {
         applicationEventPublisher.publishEvent(new BehandlingsfristEndretEvent(behandlingId, behandlingsfrist));
     }
 
-    private LocalDate hentBehandlingsfristForBehandlingstemaTema(Behandlingstema behandlingstema) {
+    private LocalDate hentBehandlingsfristForBehandlingstema(Behandlingstema behandlingstema) {
         return switch (behandlingstema) {
             case UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_FLERE_LAND, ARBEID_ETT_LAND_ØVRIG, IKKE_YRKESAKTIV, ARBEID_I_UTLANDET, ARBEID_NORGE_BOSATT_ANNET_LAND, TRYGDEAVTALE_UK -> LocalDate.now().plusDays(30);
             case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE -> LocalDate.now().plusWeeks(2);

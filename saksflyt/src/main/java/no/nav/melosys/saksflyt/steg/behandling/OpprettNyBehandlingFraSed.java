@@ -1,10 +1,7 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
-import java.util.Optional;
-
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -21,9 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.DOKUMENT_ID;
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.JOURNALPOST_ID;
 
 @Component
 public class OpprettNyBehandlingFraSed implements StegBehandler {
@@ -50,9 +44,10 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) {
 
-        Long arkivsakID = prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class);
-        Behandlingstema behandlingstema = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class);
+        var arkivsakID = prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class);
+        var behandlingstema = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class);
         prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, true);
+        var eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
 
         if (arkivsakID == null) {
             throw new TekniskException("ArkivsakID kan ikke være null");
@@ -60,11 +55,11 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
             throw new TekniskException("Behandlingstema kan ikke være null");
         }
 
-        Fagsak fagsak = fagsakService.hentFagsakFraArkivsakID(arkivsakID);
+        var fagsak = fagsakService.hentFagsakFraArkivsakID(arkivsakID);
 
         avsluttTidligereBehandling(fagsak);
-        Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.SED, behandlingstema,
-            prosessinstans.getData(JOURNALPOST_ID), prosessinstans.getData(DOKUMENT_ID));
+        var behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.SED,
+            behandlingstema, eessiMelding.getJournalpostId(), eessiMelding.getDokumentId());
 
         fagsak.getBehandlinger().add(behandling);
         fagsakService.lagre(fagsak);
@@ -75,7 +70,7 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
     }
 
     private void avsluttTidligereBehandling(Fagsak fagsak) {
-        Behandling aktivBehandling = fagsak.hentAktivBehandling();
+        var aktivBehandling = fagsak.hentAktivBehandling();
 
         if (aktivBehandling != null) {
             behandlingService.avsluttBehandling(aktivBehandling.getId());
@@ -83,11 +78,8 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
     }
 
     private void ferdigstillOppgave(String saksnummer) {
-        Optional<String> oppgaveID = oppgaveService.finnÅpenOppgaveMedFagsaksnummer(saksnummer)
-            .map(Oppgave::getOppgaveId);
-
-        if (oppgaveID.isPresent()) {
-            oppgaveService.ferdigstillOppgave(oppgaveID.get());
-        }
+        oppgaveService.finnÅpenOppgaveMedFagsaksnummer(saksnummer)
+            .map(Oppgave::getOppgaveId)
+            .ifPresent(oppgaveService::ferdigstillOppgave);
     }
 }

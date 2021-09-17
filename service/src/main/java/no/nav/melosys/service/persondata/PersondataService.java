@@ -62,7 +62,7 @@ public class PersondataService implements PersondataFasade {
 
     @Override
     @Cacheable("folkeregisterIdent")
-    public String hentFolkeregisterIdent(String ident) {
+    public String hentFolkeregisterident(String ident) {
         return pdlConsumer.hentIdenter(ident).identer()
             .stream().filter(Ident::erFolkeregisterIdent)
             .findFirst().map(Ident::ident)
@@ -90,17 +90,20 @@ public class PersondataService implements PersondataFasade {
 
     private Persondata lagPersondataMedFamilie(String ident) {
         final var person = pdlConsumer.hentPerson(ident);
+        return PersonopplysningerOversetter.oversettMedFamilie(person, hentFamiliemedlemmer(person), kodeverkService);
+    }
+
+    private Set<Familiemedlem> hentFamiliemedlemmer(Person person) {
         final Set<Familiemedlem> familiemedlemmer = new HashSet<>();
-        if (opplysningerOmForeldreTilPersonØnskes(person)) {
+        if (erPersonUnder18(person)) {
             familiemedlemmer.addAll(hentForeldre(person.forelderBarnRelasjon()));
         }
         familiemedlemmer.addAll(hentRelatertVedSivilstand(person.sivilstand()));
-        familiemedlemmer.addAll(hentBarn(person.forelderBarnRelasjon()));
-        return PersonopplysningerOversetter.oversettMedFamilie(person, familiemedlemmer, kodeverkService);
+        familiemedlemmer.addAll(hentBarn(person));
+        return familiemedlemmer;
     }
 
-    private boolean opplysningerOmForeldreTilPersonØnskes(Person person) {
-        // TODO spør fag!
+    private boolean erPersonUnder18(Person person) {
         return YEARS.between(FoedselOversetter.oversett(person.foedsel()).fødselsdato(), LocalDate.now()) < 18;
     }
 
@@ -108,7 +111,7 @@ public class PersondataService implements PersondataFasade {
         Set<Familiemedlem> set = new HashSet<>();
         for (ForelderBarnRelasjon forelderBarnRelasjon : forelderBarnRelasjoner) {
             if (forelderBarnRelasjon.erForelder()) {
-                Person person = pdlConsumer.hentBarnEllerForelder(forelderBarnRelasjon.relatertPersonsIdent());
+                Person person = pdlConsumer.hentForelder(forelderBarnRelasjon.relatertPersonsIdent());
                 Familiemedlem forelder = FamiliemedlemOversetter.oversettForelder(person,
                     forelderBarnRelasjon.relatertPersonsRolle());
                 set.add(forelder);
@@ -126,12 +129,14 @@ public class PersondataService implements PersondataFasade {
             .collect(Collectors.toUnmodifiableSet());
     }
 
-    private Set<Familiemedlem> hentBarn(Collection<ForelderBarnRelasjon> forelderBarnRelasjoner) {
-        return forelderBarnRelasjoner.stream()
+    private Set<Familiemedlem> hentBarn(Person person) {
+        final var folkeregisteridentifikator = FolkeregisteridentOversetter.oversett(
+            person.folkeregisteridentifikator());
+        return person.forelderBarnRelasjon().stream()
             .filter(ForelderBarnRelasjon::erBarn)
             .map(ForelderBarnRelasjon::relatertPersonsIdent)
-            .map(pdlConsumer::hentBarnEllerForelder)
-            .map(FamiliemedlemOversetter::oversettBarn)
+            .map(pdlConsumer::hentBarn)
+            .map(barn -> FamiliemedlemOversetter.oversettBarn(barn, folkeregisteridentifikator))
             .collect(Collectors.toUnmodifiableSet());
     }
 
@@ -140,7 +145,7 @@ public class PersondataService implements PersondataFasade {
         final var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         final String ident = behandling.getFagsak().hentAktørID();
         if (behandling.erInaktiv()) {
-            /*TODO
+            /*TODO MELOSYS-4466
                - Mapping fra TPS for gamle behandlinger opprettet før PDL
                - Det ville være mest riktig å se på vedtakstidspunktet om det finnes et vedtak (default behandling.getEndretDato()
                fordi behandling kan endres automatisk etter vedtak (art. 13)
@@ -153,34 +158,46 @@ public class PersondataService implements PersondataFasade {
     }
 
     @Override
+    public Set<Familiemedlem> hentFamiliemedlemmerMedHistorikk(long behandlingID) {
+        final var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
+        final String ident = behandling.getFagsak().hentAktørID();
+        if (behandling.erInaktiv()) {
+            //TODO MELOSYS-4466
+            return Collections.emptySet();
+        } else {
+            return hentFamiliemedlemmer(pdlConsumer.hentFamilierelasjoner(ident));
+        }
+    }
+
+    @Override
     public Saksopplysning hentPersonhistorikk(String fnr, LocalDate dato) {
         return tpsService.hentPersonhistorikk(fnr, dato);
     }
 
     @Override
-    public String hentSammensattNavn(String fnr) {
+    public String hentSammensattNavn(String ident) {
         if (unleash.isEnabled("melosys.pdl.sammensatt-navn")) {
-            return pdlConsumer.hentNavn(fnr).stream()
+            return pdlConsumer.hentNavn(ident).stream()
                 .max(Comparator.comparing(n -> n.metadata().datoSistRegistrert()))
                 .map(NavnOversetter::tilSammensattNavn)
                 .orElse(NavnOversetter.UKJENT);
         }
-        return tpsService.hentSammensattNavn(fnr);
+        return tpsService.hentSammensattNavn(ident);
     }
 
     @Override
     public Set<Statsborgerskap> hentStatsborgerskap(String ident) {
         return pdlConsumer.hentStatsborgerskap(ident).stream()
             .filter(s -> !s.erOpphørt())
-            .map(StasborgerskapOversetter::oversett)
+            .map(StatsborgerskapOversetter::oversett)
             .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
-    public boolean harStrengtFortroligAdresse(String fnr) {
+    public boolean harStrengtFortroligAdresse(String ident) {
         if (unleash.isEnabled("melosys.pdl.adressebeskyttelse")) {
-            return pdlConsumer.hentAdressebeskyttelser(fnr).stream().anyMatch(Adressebeskyttelse::erStrengtFortrolig);
+            return pdlConsumer.hentAdressebeskyttelser(ident).stream().anyMatch(Adressebeskyttelse::erStrengtFortrolig);
         }
-        return tpsService.harStrengtFortroligAdresse(fnr);
+        return tpsService.harStrengtFortroligAdresse(ident);
     }
 }

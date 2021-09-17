@@ -81,7 +81,7 @@ class SedDataByggerTest {
 
         doReturn(DataByggerStubs.hentOrganisasjonDokumentSetStub()).when(registerOppslagService).hentOrganisasjoner(anySet());
 
-        when(landvelgerService.hentBostedsland(anyLong(), any())).thenReturn(Landkoder.IT);
+        when(landvelgerService.hentBostedsland(anyLong(), any())).thenReturn(new Bostedsland(Landkoder.IT));
 
         lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
@@ -558,6 +558,19 @@ class SedDataByggerTest {
         assertThat(sedData.getSøknadsperiode())
             .extracting(Periode::getFom, Periode::getTom)
             .containsExactly(søknad.periode.getFom(), søknad.periode.getTom());
+    }
+
+    @Test
+    void lag_medFlereStatsborgerskap_alleStatsborgerSkapMappes() {
+        Persondata personDataFraPDL = PersonopplysningerObjectFactory.lagPersonopplysninger();
+        SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(personDataFraPDL);
+
+        var sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
+        Collection<String> statsborgerskapList = sedData.getBruker().getStatsborgerskap();
+        assertThat(statsborgerskapList).hasSize(3)
+            .anyMatch("NOR"::equals)
+            .anyMatch("SWE"::equals)
+            .anyMatch("DNK"::equals);
     }
 
     private void lagUtkastAssertions(SedDataDto sedData, boolean forventAdresse) {

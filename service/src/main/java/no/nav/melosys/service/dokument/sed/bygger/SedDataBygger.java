@@ -119,7 +119,7 @@ public class SedDataBygger {
         sedDataDto.setSelvstendigeVirksomheter(lagSelvstendigeVirksomheter(grunnlagMedSøknad));
         sedDataDto.setArbeidssteder(hentArbeidssteder(grunnlagMedSøknad));
         sedDataDto.setAvklartBostedsland(
-            landvelgerService.hentBostedsland(grunnlagMedSøknad.getBehandling().getId(), grunnlagMedSøknad.getBehandlingsgrunnlagData()).getKode()
+            landvelgerService.hentBostedsland(grunnlagMedSøknad.getBehandling().getId(), grunnlagMedSøknad.getBehandlingsgrunnlagData()).landkode()
         );
         sedDataDto.setBruker(lagBrukerFraPersondata(grunnlagMedSøknad.getPersondata()));
         sedDataDto.setFamilieMedlem(grunnlagMedSøknad.getPersondata().hentFamiliemedlemmer().stream()
@@ -230,11 +230,11 @@ public class SedDataBygger {
         Bruker bruker = new Bruker();
         bruker.setEtternavn(persondata.getEtternavn());
         bruker.setFornavn(persondata.getFornavn());
-        bruker.setFnr(persondata.hentFolkeregisterIdent());
+        bruker.setFnr(persondata.hentFolkeregisterident());
         bruker.setFoedseldato(persondata.getFødselsdato());
         bruker.setKjoenn(persondata.hentKjønnType().getKode());
         bruker.setStatsborgerskap(
-            persondata.hentAlleStatsborgerskap().stream().findFirst().map(Land::getKode).orElse(null));
+            persondata.hentAlleStatsborgerskap().stream().map(Land::getKode).toList());
         bruker.setHarSensitiveOpplysninger(persondata.harStrengtAdressebeskyttelse());
         return bruker;
     }

@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
@@ -50,7 +51,7 @@ class OpprettJournalforBrevTest {
     @BeforeEach
     void init() {
         opprettJournalforBrev = new OpprettJournalforBrev(mockBehandlingService, mockDokgenService,
-            mockJoarkFasade, mockPersondataFasade, mockEregFasade);
+            mockJoarkFasade, mockPersondataFasade, mockEregFasade, new FakeUnleash());
     }
 
     @Test

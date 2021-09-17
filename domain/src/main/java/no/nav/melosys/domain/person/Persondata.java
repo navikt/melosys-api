@@ -20,7 +20,7 @@ public interface Persondata {
 
     boolean manglerBostedsadresse();
 
-    String hentFolkeregisterIdent();
+    String hentFolkeregisterident();
 
     Set<Land> hentAlleStatsborgerskap();
 

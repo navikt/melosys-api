@@ -12,10 +12,11 @@ public record PersonMedHistorikk(
     Doedsfall dødsfall,
     Foedsel fødsel,
     Folkeregisteridentifikator folkeregisteridentifikator,
+    Folkeregisterpersonstatus folkeregisterpersonstatus,
     KjoennType kjønn,
     Collection<Kontaktadresse> kontaktadresser,
     Navn navn,
     Collection<Oppholdsadresse> oppholdsadresser,
-    Collection<Statsborgerskap> statsborgerskap
-) {
+    Collection<Sivilstand> sivilstand,
+    Collection<Statsborgerskap> statsborgerskap) {
 }

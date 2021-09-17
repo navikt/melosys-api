@@ -47,7 +47,7 @@ class LandvelgerServiceTest {
     private final Landkoder søknadsland = Landkoder.DE;
     private final Landkoder avklartArbeidsland = Landkoder.DK;
     private final Landkoder oppgittbostedsland = Landkoder.SE;
-    private final Landkoder avklartBostedsland = Landkoder.FI;
+    private final Bostedsland avklartBostedsland = new Bostedsland(Landkoder.FI);
     private final Landkoder territorialfarvannLand = Landkoder.GB;
 
     @BeforeEach
@@ -215,7 +215,7 @@ class LandvelgerServiceTest {
         when(avklartefaktaService.hentBostedland(anyLong())).thenReturn(Optional.of(avklartBostedsland));
 
         Collection<Landkoder> land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
-        assertThat(land).containsExactly(avklartBostedsland);
+        assertThat(land).containsExactly(Landkoder.valueOf(avklartBostedsland.landkode()));
     }
 
     @Test
@@ -237,12 +237,12 @@ class LandvelgerServiceTest {
         lagBehandlingsresultat(lovvalgsperiode);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
         when(avklartefaktaService.hentAlleAvklarteArbeidsland(anyLong())).thenReturn(new HashSet<>() {{
-            add(avklartBostedsland);
+            add(avklartArbeidsland);
         }});
 
         søknad.soeknadsland.landkoder.add(søknadsland.getKode());
         Collection<Landkoder> land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
-        assertThat(land).containsExactlyInAnyOrder(søknadsland, avklartBostedsland);
+        assertThat(land).containsExactlyInAnyOrder(søknadsland, avklartArbeidsland);
     }
 
     @Test
@@ -269,7 +269,7 @@ class LandvelgerServiceTest {
 
         søknad.foretakUtland = List.of(lagForetakUtland(Landkoder.FR));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-        when(avklartefaktaService.hentBostedland(anyLong())).thenReturn(Optional.of(Landkoder.DE));
+        when(avklartefaktaService.hentBostedland(anyLong())).thenReturn(Optional.of(new Bostedsland(Landkoder.DE)));
 
         søknad.soeknadsland.landkoder = List.of(Landkoder.DE.getKode(), Landkoder.FR.getKode());
         Collection<Landkoder> land = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);

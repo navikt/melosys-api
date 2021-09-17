@@ -16,11 +16,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 class FamiliemedlemOversetterTest {
     @Test
     void oversettBarn() {
-        final var familiemedlem = FamiliemedlemOversetter.oversettBarn(lagPerson());
+        final var familiemedlem = FamiliemedlemOversetter.oversettBarn(lagPerson(),
+            new Folkeregisteridentifikator("identForelder1"));
         assertThat(familiemedlem.folkeregisteridentifikator()).isEqualTo(new Folkeregisteridentifikator("IdNr"));
         assertThat(familiemedlem.fødsel()).isEqualTo(new Foedsel(LocalDate.EPOCH, 1970, "NOR", "fødested"));
         assertThat(familiemedlem.familierelasjon()).isEqualTo(Familierelasjon.BARN);
         assertThat(familiemedlem.navn()).isEqualTo(new Navn("fornavn", "mellomnavn", "etternavn"));
+        assertThat(familiemedlem.foreldreansvarstype()).isEqualTo("felles");
+        assertThat(familiemedlem.folkeregisteridentAnnenForelder()).isEqualTo(new Folkeregisteridentifikator("forelderIdent"));
     }
 
     @Test
@@ -39,5 +42,6 @@ class FamiliemedlemOversetterTest {
         assertThat(familiemedlem.fødsel()).isEqualTo(new Foedsel(LocalDate.EPOCH, 1970, "NOR", "fødested"));
         assertThat(familiemedlem.familierelasjon()).isEqualTo(RELATERT_VED_SIVILSTAND);
         assertThat(familiemedlem.navn()).isEqualTo(new Navn("fornavn", "mellomnavn", "etternavn"));
+        assertThat(familiemedlem.sivilstand()).isNotNull();
     }
 }

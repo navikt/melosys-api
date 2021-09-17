@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -73,6 +74,8 @@ public class BrevDataByggerInnvilgelseTest {
     @Mock
     BehandlingsgrunnlagService behandlingsgrunnlagService;
 
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
+
     private Behandling behandling;
     private BrevbestillingRequest brevbestillingRequest;
 
@@ -81,9 +84,16 @@ public class BrevDataByggerInnvilgelseTest {
 
     @BeforeEach
     public void setUp() {
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.BRUKER);
+        aktoer.setAktørId("ident");
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setAktører(Set.of(aktoer));
+
         behandling = new Behandling();
         behandling.setId(1L);
-        behandling.setFagsak(new Fagsak());
+        behandling.setFagsak(fagsak);
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new Soeknad());
 
@@ -106,7 +116,7 @@ public class BrevDataByggerInnvilgelseTest {
         when(lovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(periode);
 
         when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Landkoder.AT);
-        when(landvelgerService.hentBostedsland(anyLong(), any(BehandlingsgrunnlagData.class))).thenReturn(Landkoder.NO);
+        when(landvelgerService.hentBostedsland(anyLong(), any(BehandlingsgrunnlagData.class))).thenReturn(new Bostedsland(Landkoder.NO));
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Landkoder.DE));
         when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(Collections.emptySet(), Collections.emptySet()));
 
@@ -123,7 +133,7 @@ public class BrevDataByggerInnvilgelseTest {
 
     public BrevDataGrunnlag lagBrevdataGrunnlag() {
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
-        return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+        return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondataFasade, fakeUnleash);
     }
 
     @Test

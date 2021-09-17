@@ -317,7 +317,7 @@ class EosVedtakServiceTest {
     }
 
     private void mockFeilendeValidering() {
-        when(persondataFasade.hentFolkeregisterIdent(anyString())).thenReturn("123");
+        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("123");
         when(vedtakKontrollService.utførKontroller(anyLong(), any(Vedtakstyper.class)))
             .thenReturn(Collections.singletonList(new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)));
     }

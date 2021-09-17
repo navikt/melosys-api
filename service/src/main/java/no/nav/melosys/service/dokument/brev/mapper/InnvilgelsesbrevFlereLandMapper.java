@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
@@ -117,16 +118,12 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
             return null;
         }
 
-        switch (vedtakstype) {
-            case FØRSTEGANGSVEDTAK:
-                return VedtaksTypeKode.FOERSTEGANGSVEDTAK;
-            case KORRIGERT_VEDTAK:
-                return VedtaksTypeKode.KORRIGERT_VEDTAK;
-            case OMGJØRINGSVEDTAK:
-                return VedtaksTypeKode.OMGJOERINGSVEDTAK;
-            default:
-                throw new TekniskException("Ukjent vedtakstype " + vedtakstype + " kan ikke mappes til VedtaksTypeKode");
-        }
+        return switch (vedtakstype) {
+            case FØRSTEGANGSVEDTAK -> VedtaksTypeKode.FOERSTEGANGSVEDTAK;
+            case KORRIGERT_VEDTAK -> VedtaksTypeKode.KORRIGERT_VEDTAK;
+            case OMGJØRINGSVEDTAK -> VedtaksTypeKode.OMGJOERINGSVEDTAK;
+            default -> throw new TekniskException("Ukjent vedtakstype " + vedtakstype + " kan ikke mappes til VedtaksTypeKode");
+        };
     }
 
     private VirksomhetslandListeType mapVirksomhetsListe(List<String> næringsdrivendeILand) {
@@ -141,12 +138,20 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
 
     private ArbeidslandListeType mapArbeidslandListe(Collection<String> alleArbeidsland) {
         ArbeidslandListeType arbeidslandListeType = new ArbeidslandListeType();
-        for (String arbeidsland : alleArbeidsland) {
-            ArbeidslandType arbeidslandType = new ArbeidslandType();
-            arbeidslandType.setArbeidsland(arbeidsland);
-            arbeidslandListeType.getLand().add(arbeidslandType);
-        }
+        arbeidslandListeType.getLand().addAll(
+            alleArbeidsland.stream()
+                .sorted()
+                .map(this::tilArbeidslandType)
+                .collect(Collectors.toList())
+        );
+
         return arbeidslandListeType;
+    }
+
+    private ArbeidslandType tilArbeidslandType(String arbeidsland) {
+        ArbeidslandType arbeidslandType = new ArbeidslandType();
+        arbeidslandType.setArbeidsland(arbeidsland);
+        return arbeidslandType;
     }
 
     private ArbeidsgiverListeType mapArbeidsgiverListe(Collection<AvklartVirksomhet> norskeVirksomheter) {

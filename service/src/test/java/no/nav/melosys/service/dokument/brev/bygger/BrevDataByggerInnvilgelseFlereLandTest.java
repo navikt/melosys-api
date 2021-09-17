@@ -3,9 +3,8 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.util.Collections;
 import java.util.Set;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.Saksopplysning;
+import no.finn.unleash.FakeUnleash;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
@@ -25,6 +24,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,6 +51,10 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     SaksopplysningerService saksopplysningerService;
     @Mock
     BrevDataByggerA1 brevDataByggerA1;
+    @Mock
+    private PersondataFasade persondataFasade;
+
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     private Behandling behandling;
     private BrevbestillingRequest brevbestillingRequest;
@@ -59,8 +63,16 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
 
     @BeforeEach
     public void setUp() {
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.BRUKER);
+        aktoer.setAktørId("ident");
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setAktører(Set.of(aktoer));
+
         behandling = new Behandling();
         behandling.setId(1L);
+        behandling.setFagsak(fagsak);
         behandling.getSaksopplysninger().add(lagPersonsopplysning());
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new Soeknad());
@@ -77,7 +89,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
         when(lovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(periode);
 
         when(landvelgerService.hentAlleArbeidsland(anyLong())).thenReturn(Collections.singleton(Landkoder.AT));
-        when(landvelgerService.hentBostedsland(anyLong(), any())).thenReturn(Landkoder.DE);
+        when(landvelgerService.hentBostedsland(anyLong(), any())).thenReturn(new Bostedsland(Landkoder.DE));
 
         brevDataByggerInnvilgelse = new BrevDataByggerInnvilgelseFlereLand(avklartefaktaService,
             landvelgerService,
@@ -89,7 +101,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
 
     private BrevDataGrunnlag lagBrevressurser() {
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
-        return new BrevDataGrunnlag(brevbestilling, null, avklarteVirksomheterService, avklartefaktaService);
+        return new BrevDataGrunnlag(brevbestilling, null, avklarteVirksomheterService, avklartefaktaService, persondataFasade, fakeUnleash);
     }
 
     private static Saksopplysning lagPersonsopplysning() {

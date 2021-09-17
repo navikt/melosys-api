@@ -93,7 +93,7 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
         dokumenter.add(søknadDokument);
         dokumenter.add(fullmaktDokument);
         when(altinnSoeknadService.hentDokumenterTilknyttetSoknad(søknadID)).thenReturn(dokumenter);
-        when(persondataFasade.hentFolkeregisterIdent(anyString())).thenReturn(ident);
+        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn(ident);
         when(eregFasade.hentOrganisasjonNavn(anyString())).thenReturn("Fullmektig Avsender");
         when(joarkFasade.opprettJournalpost(any(OpprettJournalpost.class), anyBoolean())).thenReturn("journalpostid123");
     }
@@ -102,7 +102,7 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
     public void utfør_journalpostBlirOpprettet_verifiser() {
         opprettOgFerdigstillAltinnJournalpost.utfør(prosessinstans);
 
-        verify(persondataFasade).hentFolkeregisterIdent(anyString());
+        verify(persondataFasade).hentFolkeregisterident(anyString());
         verify(joarkFasade).opprettJournalpost(captor.capture(), eq(true));
         verify(behandlingService).lagre(behandling);
 
@@ -133,7 +133,7 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
 
         opprettOgFerdigstillAltinnJournalpost.utfør(prosessinstans);
 
-        verify(persondataFasade).hentFolkeregisterIdent(anyString());
+        verify(persondataFasade).hentFolkeregisterident(anyString());
         verify(joarkFasade).opprettJournalpost(captor.capture(), eq(true));
         verify(behandlingService).lagre(behandling);
 

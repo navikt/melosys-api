@@ -8,6 +8,7 @@ public record ForelderBarnRelasjon(String relatertPersonsIdent,
     }
 
     public boolean erForelder() {
-        return relatertPersonsRolle == Familierelasjonsrolle.FAR || relatertPersonsRolle == Familierelasjonsrolle.MOR;
+        return relatertPersonsRolle == Familierelasjonsrolle.FAR || relatertPersonsRolle == Familierelasjonsrolle.MOR
+            || relatertPersonsRolle == Familierelasjonsrolle.MEDMOR;
     }
 }

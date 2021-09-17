@@ -6,28 +6,28 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class BrevDataMapperRuterTest {
+class BrevDataMapperRuterTest {
     @Test
-    public void oppslagAvInnvilgelseYrkesaktivGirInnvelgelsesbrevMapper() throws Exception {
+    void oppslagAvInnvilgelseYrkesaktivGirInnvelgelsesbrevMapper() {
         BrevDataMapper resultat = BrevDataMapperRuter.brevDataMapper(Produserbaredokumenter.INNVILGELSE_YRKESAKTIV);
         assertThat(resultat).isInstanceOf(InnvilgelsesbrevMapper.class);
     }
 
     @Test
-    public void oppslagAvHenleggelsebrevGirHenleggelsesbrevMapper() throws Exception {
+    void oppslagAvHenleggelsebrevGirHenleggelsesbrevMapper() {
         BrevDataMapper resultat = BrevDataMapperRuter.brevDataMapper(Produserbaredokumenter.MELDING_HENLAGT_SAK);
         assertThat(resultat).isInstanceOf(HenleggelsesbrevMapper.class);
     }
 
     @Test
-    public void oppslagAvAvslagArbeidsgiverbrevGirAvslagArbeidsgiverMapper() throws Exception {
+    void oppslagAvAvslagArbeidsgiverbrevGirAvslagArbeidsgiverMapper() {
         BrevDataMapper resultat = BrevDataMapperRuter.brevDataMapper(Produserbaredokumenter.AVSLAG_ARBEIDSGIVER);
         assertThat(resultat).isInstanceOf(AvslagArbeidsgiverMapper.class);
     }
 
 
     @Test
-    public void oppslagAvAvslagManglendeOpplysningerGirAvslagManglendeOpplysningerMapper() throws Exception {
+    void oppslagAvAvslagManglendeOpplysningerGirAvslagManglendeOpplysningerMapper() {
         BrevDataMapper resultat = BrevDataMapperRuter.brevDataMapper(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER);
         assertThat(resultat).isInstanceOf(AvslagManglendeOpplysningerMapper.class);
     }
