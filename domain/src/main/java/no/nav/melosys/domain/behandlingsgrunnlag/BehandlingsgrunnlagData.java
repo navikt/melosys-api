@@ -32,7 +32,7 @@ public class BehandlingsgrunnlagData {
 
     // Opplysninger om juridiske arbeidsgiver i Norge
     public JuridiskArbeidsgiverNorge juridiskArbeidsgiverNorge = new JuridiskArbeidsgiverNorge();
-
+Œ
     public List<MaritimtArbeid> maritimtArbeid = new ArrayList<>();
 
     public List<LuftfartBase> luftfartBaser = new ArrayList<>();
