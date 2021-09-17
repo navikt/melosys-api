@@ -129,16 +129,15 @@ public class OppgaveService {
         return fagsakService.hentFagsak(saksnummer).hentSistAktiveBehandling();
     }
 
-    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs, Optional<String> beskrivelse) {
+    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs, @Nullable String beskrivelse) {
 
         Optional<Oppgave> eksisterendeOppgave = finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         if (eksisterendeOppgave.isEmpty()) {
-            String oppgavebeskrivelse = beskrivelse.orElse(behandling.erElektroniskSøknad() ? "Mottatt elektronisk søknad" : null);
             Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType())
                 .setTilordnetRessurs(tilordnetRessurs)
                 .setJournalpostId(journalpostID)
-                .setBeskrivelse(oppgavebeskrivelse)
+                .setBeskrivelse(beskrivelse)
                 .setAktørId(aktørID)
                 .setSaksnummer(behandling.getFagsak().getSaksnummer())
                 .build();
@@ -154,7 +153,7 @@ public class OppgaveService {
     }
 
     public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) {
-        opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, Optional.empty());
+        opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, behandling.erElektroniskSøknad() ? "Mottatt elektronisk søknad" : null);
     }
 
     public void opprettJournalføringsoppgave(String journalpostID, String aktørID) {
@@ -187,8 +186,9 @@ public class OppgaveService {
         Behandling behandling = fagsak.hentSistAktiveBehandling();
         Optional<Oppgave> oppgave = finnSisteAvsluttetOppgaveMedFagsaksnummer(saksnummer);
         String tilordnetRessurs = oppgave.map(Oppgave::getTilordnetRessurs).orElse(null);
+        String beskrivelse = oppgave.map(Oppgave::getBeskrivelse).orElse(null);
 
-        opprettEllerGjenbrukBehandlingsoppgave(behandling, behandling.getInitierendeJournalpostId(), fagsak.hentAktørID(), tilordnetRessurs, oppgave.map(Oppgave::getBeskrivelse));
+        opprettEllerGjenbrukBehandlingsoppgave(behandling, behandling.getInitierendeJournalpostId(), fagsak.hentAktørID(), tilordnetRessurs, beskrivelse);
     }
 
     private List<OppgaveDto> oppgaverTilDtoer(Collection<Oppgave> oppgaverFraDomain) {
