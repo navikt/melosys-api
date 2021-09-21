@@ -43,8 +43,7 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -142,7 +141,7 @@ class DokgenMalMapperTest {
 
     @Test
     void mapping_avsenderMyndighet_ok() {
-        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
+        when(mockKodeverkService.dekod(any(), eq("FI"))).thenReturn("Finland");
         when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
 
         Behandling behandling = lagBehandling(lagFagsak());
@@ -152,7 +151,7 @@ class DokgenMalMapperTest {
             .medBehandling(behandling)
             .medForsendelseMottatt(Instant.now())
             .medAvsendertype(Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET)
-            .medAvsenderLand("Finland")
+            .medAvsenderLand("FI")
             .build();
 
         DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling);
