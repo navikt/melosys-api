@@ -38,7 +38,8 @@ class SoeknadMapperTest {
         assertThat(soeknad.periode.getTom()).isEqualTo("2019-08-06");
         assertThat(soeknad.personOpplysninger.utenlandskIdent)
             .contains(new UtenlandskIdent("utenlandskIDnummer", "FI"));
-        assertThat(soeknad.personOpplysninger.foedestedOgLand).isEqualTo(new FoedestedOgLand("Oslo", "NO"));
+        assertThat(soeknad.personOpplysninger.foedestedOgLand.getFoedested()).isEqualTo("Oslo");
+        assertThat(soeknad.personOpplysninger.foedestedOgLand.getFoedeland()).isEqualTo("NO");
         assertThat(soeknad.arbeidPaaLand.fysiskeArbeidssteder).isNotEmpty();
         assertThat(soeknad.arbeidPaaLand.erFastArbeidssted).isFalse();
         assertThat(soeknad.arbeidPaaLand.erHjemmekontor).isTrue();
