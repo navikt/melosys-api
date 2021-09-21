@@ -1,8 +1,10 @@
 package no.nav.melosys.service.vedtak;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.vedtak.data.FattetVedtakTestData;
 import no.nav.melosys.service.vedtak.publisering.FattetVedtakProducer;
 import no.nav.melosys.service.vedtak.publisering.FattetVedtakService;
@@ -17,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -42,13 +45,17 @@ class FattetVedtakServiceTest {
 
     @BeforeEach
     void setUp() {
-        fattetVedtakService = new FattetVedtakService(mockFattetVedtakProducer, mockBehandlingService, mockBehandlingsresultatService, mockPersondataFasade);
+        final FakeUnleash unleash = new FakeUnleash();
+        unleash.enable("melosys.pdl.vedtaksmelding");
+        fattetVedtakService = new FattetVedtakService(mockFattetVedtakProducer, mockBehandlingService,
+            mockBehandlingsresultatService, mockPersondataFasade, unleash);
     }
 
     @Test
     void fattetVedtakFtrl_skalPubliseres() {
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(FattetVedtakTestData.lagBehandling());
         when(mockBehandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(FattetVedtakTestData.lagBehandlingsresultat());
+        when(mockPersondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
         fattetVedtakService.publiserFattetVedtak(123L);
 
         verify(mockFattetVedtakProducer).produserMelding(fattetVedtakCaptor.capture());
