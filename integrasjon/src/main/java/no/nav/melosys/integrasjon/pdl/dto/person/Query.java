@@ -315,6 +315,13 @@ query($ident: ID!, $historikk: Boolean!) {
       relatertPersonsIdent
       relatertPersonsRolle
       minRolleForPerson
+      metadata {
+        master
+        endringer {
+          registrert
+          type
+        }
+      }
     }
     kjoenn {
       kjoenn
@@ -497,11 +504,9 @@ query($ident: ID!, $historikk: Boolean!) {
       minRolleForPerson
       metadata {
         master
-        historisk
         endringer {
           type
           registrert
-          kilde
         }
       }
     }
