@@ -38,7 +38,7 @@ class BehandleProsessinstansDelegateTest {
     }
 
     @Test
-    void oppdaterProsessinstansstatus_harIkkeLås_settesIkkePåVent() {
+    void oppdaterStatusOmSkalPåVent_harIkkeLås_settesIkkePåVent() {
         prosessinstans.setStatus(ProsessStatus.KLAR);
         behandleProsessinstansDelegate.oppdaterStatusOmSkalPåVent(prosessinstans);
         assertThat(prosessinstans.getStatus()).isEqualTo(ProsessStatus.KLAR);
@@ -46,7 +46,7 @@ class BehandleProsessinstansDelegateTest {
     }
 
     @Test
-    void oppdaterProsessinstansstatus_finnesProsessMedSammeReferanseUnderBehandling_settesIkkePåVent() {
+    void oppdaterStatusOmSkalPåVent_finnesProsessMedSammeReferanseUnderBehandling_settesIkkePåVent() {
         prosessinstans.setStatus(ProsessStatus.KLAR);
         final var låsReferanse = "12_12_1";
         prosessinstans.setLåsReferanse(låsReferanse);
@@ -59,7 +59,7 @@ class BehandleProsessinstansDelegateTest {
     }
 
     @Test
-    void oppdaterProsessinstansstatus_finnesProsessMedSammeReferanseUlikId_settesPåVent() {
+    void oppdaterStatusOmSkalPåVent_finnesProsessMedSammeReferanseUlikId_settesPåVent() {
         prosessinstans.setStatus(ProsessStatus.KLAR);
         final var låsReferanse = "12_12_1";
         prosessinstans.setLåsReferanse(låsReferanse);

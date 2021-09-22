@@ -43,6 +43,15 @@ public class BehandleProsessinstansDelegate {
         }
     }
 
+    /*
+    Settes på vent om det finnes en prosessinstans med samme referanse,
+     men ikke lik identifikator i prosess (ikke på vent/ferdig).
+
+    Settes ikke på vent om
+        1. Prosessinstansen ikke har en låsreferanse
+        2. Det finnes ingen prosessinstans med samme referanse
+        3. Det finnes en prosessinstans med lik referanse og identifikator.
+     */
     private boolean skalSettesPåVent(Prosessinstans prosessinstans) {
         if (prosessinstans.getLåsReferanse() == null) {
             return false;
@@ -51,7 +60,7 @@ public class BehandleProsessinstansDelegate {
         final var låsReferanse = new SedLåsReferanse(prosessinstans.getLåsReferanse());
 
         final var aktiveLåsReferanser = prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
-            Set.of(ProsessStatus.FERDIG), låsReferanse.getReferanse()
+            Set.of(ProsessStatus.PÅ_VENT, ProsessStatus.FERDIG), låsReferanse.getReferanse()
         )
             .stream()
             .filter(p -> !p.getUuid().equals(prosessinstans.getId()))
