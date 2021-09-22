@@ -505,8 +505,8 @@ query($ident: ID!, $historikk: Boolean!) {
       metadata {
         master
         endringer {
-          type
           registrert
+          type
         }
       }
     }
@@ -519,9 +519,9 @@ query($ident: ID!, $historikk: Boolean!) {
         master
         historisk
         endringer {
-          type
-          registrert
           kilde
+          registrert
+          type
         }
       }
     }

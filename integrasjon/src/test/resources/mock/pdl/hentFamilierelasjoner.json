@@ -1,0 +1,80 @@
+{
+  "data": {
+    "hentPerson": {
+      "foedsel": [
+        {
+          "foedselsdato": "1979-11-18",
+          "foedselsaar": 1979,
+          "foedeland": "ARG",
+          "foedested": "Fødested i/på ARGENTINA",
+          "metadata": {
+            "master": "FREG",
+            "endringer": [
+              {
+                "registrert": "2021-05-31T11:48:50",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        }
+      ],
+      "folkeregisteridentifikator": [
+        {
+          "identifikasjonsnummer": "5340907334",
+          "metadata": {
+            "master": "FREG",
+            "endringer": [
+              {
+                "registrert": "2021-05-31T11:48:50",
+                "type": "KORRIGER"
+              }
+            ]
+          }
+        }
+      ],
+      "forelderBarnRelasjon": [
+        {
+          "relatertPersonsIdent": "01421474318",
+          "relatertPersonsRolle": "BARN",
+          "minRolleForPerson": "MOR"
+        }
+      ],
+      "sivilstand": [
+        {
+          "type": "UGIFT",
+          "relatertVedSivilstand": null,
+          "gyldigFraOgMed": null,
+          "bekreftelsesdato": "2019-05-07",
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2021-05-31T11:48:52",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        },
+        {
+          "type": "GIFT",
+          "relatertVedSivilstand": "04507445824",
+          "gyldigFraOgMed": "2021-07-06",
+          "bekreftelsesdato": null,
+          "metadata": {
+            "master": "FREG",
+            "historisk": true,
+            "endringer": [
+              {
+                "kilde": "Dolly",
+                "registrert": "2021-05-31T11:48:52",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
