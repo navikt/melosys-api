@@ -56,6 +56,9 @@ public class Anmodningsperiode implements PeriodeOmLovvalg {
     @Column(name = "sendt_utland")
     private boolean sendtUtland;
 
+    @Column(name = "anmodet_av")
+    private String anmodetAv;
+
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "anmodningsperiode")
     private AnmodningsperiodeSvar anmodningsperiodeSvar;
 
@@ -179,6 +182,14 @@ public class Anmodningsperiode implements PeriodeOmLovvalg {
 
     public void setAnmodningsperiodeSvar(AnmodningsperiodeSvar anmodningsperiodeSvar) {
         this.anmodningsperiodeSvar = anmodningsperiodeSvar;
+    }
+
+    public String getAnmodetAv() {
+        return anmodetAv;
+    }
+
+    public void setAnmodetAv(String anmodetAv) {
+        this.anmodetAv = anmodetAv;
     }
 
     @Override
