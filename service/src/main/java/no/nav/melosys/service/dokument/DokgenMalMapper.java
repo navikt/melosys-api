@@ -35,7 +35,6 @@ public class DokgenMalMapper {
     private final InnvilgelseFtrlMapper innvilgelseFtrlMapper;
 
     @Autowired
-
     public DokgenMalMapper(BehandlingsresultatService behandlingsresultatService,
                            @Qualifier("system") EregFasade eregFasade, KodeverkService kodeverkService,
                            @Qualifier("system") PersondataFasade persondataFasade, Unleash unleash,

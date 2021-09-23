@@ -6,6 +6,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.vedtak.*;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,7 @@ public class VedtakTjeneste {
         }
         tilgangService.sjekkTilgang(behandlingID);
 
-        vedtakServiceFasade.fattVedtak(behandlingID, lagFattVedtakRequest(fattVedtakDto));
+        vedtakServiceFasade.fattVedtak(behandlingID, lagFattVedtakRequest(fattVedtakDto, SubjectHandler.getInstance().getUserID()));
         return ResponseEntity.ok().build();
     }
 
@@ -54,7 +55,7 @@ public class VedtakTjeneste {
         return ResponseEntity.ok().build();
     }
 
-    private FattVedtakRequest lagFattVedtakRequest(FattVedtakDto fattVedtakDto) {
+    private FattVedtakRequest lagFattVedtakRequest(FattVedtakDto fattVedtakDto, String bestillersId) {
         FattVedtakRequest.Builder<?> fattVedtakRequest;
 
         if (fattVedtakDto instanceof FattEosVedtakDto eosVedtakDto) {
@@ -65,7 +66,12 @@ public class VedtakTjeneste {
                 .medRevurderBegrunnelse(eosVedtakDto.getRevurderBegrunnelse());
         } else if (fattVedtakDto instanceof FattFtrlVedtakDto ftrlVedtakDto) {
             fattVedtakRequest = new FattFtrlVedtakRequest.Builder()
-                .medFritekstBegrunnelse(ftrlVedtakDto.getFritekstBegrunnelse());
+                .medFritekstInnledning(ftrlVedtakDto.getFritekstInnledning())
+                .medFritekstBegrunnelse(ftrlVedtakDto.getFritekstBegrunnelse())
+                .medFritekstEktefelle(ftrlVedtakDto.getFritekstEktefelle())
+                .medFritekstBarn(ftrlVedtakDto.getFritekstBarn())
+                .medKopiMottakere(ftrlVedtakDto.getKopiMottakere())
+                .medBestillersId(bestillersId);
         } else if (fattVedtakDto instanceof FattTrygdeavtaleVedtakDto ftrlVedtakDto) {
             fattVedtakRequest = new FattTrygdeavtaleVedtakRequest.Builder()
                 .medFritekstBegrunnelse(ftrlVedtakDto.getFritekstBegrunnelse());
