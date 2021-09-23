@@ -323,7 +323,7 @@ query($ident: ID!, $historikk: Boolean!) {
         }
       }
     }
-    kjoenn {
+    kjoenn(historikk: $historikk) {
       kjoenn
       metadata {
         master
@@ -382,7 +382,7 @@ query($ident: ID!, $historikk: Boolean!) {
         }
       }
     }
-    navn {
+    navn(historikk: $historikk) {
       fornavn
       mellomnavn
       etternavn
