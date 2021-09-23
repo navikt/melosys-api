@@ -241,10 +241,18 @@ class SafConsumerImplTest {
             Journalposttype.I,
             new Sak("123"),
             new Bruker("123", Brukertype.FNR),
-            new AvsenderMottaker("123", AvsenderMottakerType.FNR, "navn"),
+            new AvsenderMottaker("123", AvsenderMottakerType.FNR, "navn", null),
             "SED",
             Collections.emptyList(),
-            Collections.emptyList()
+            List.of(
+                new DokumentInfo(
+                    "1",
+                    "dok-tittel",
+                    "brevkode",
+                    Collections.emptyList(),
+                    List.of(new DokumentVariant(true, "ARKIV"))
+                )
+            )
         );
     }
 }

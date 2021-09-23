@@ -8,16 +8,120 @@ scalar DateTime
 scalar Long
 
 type Query {
-    hentSaksopplysninger(behandlingID: Long!): Saksopplysninger
+    hentSaksopplysninger(behandlingID: Long!): Saksopplysninger!
 }
 
 type Saksopplysninger {
     behandlingID: Long!
-    persondata: Personopplysninger
+    persondata: Personopplysninger!
 }
 
 type Personopplysninger {
+    bostedsadresser: [Bostedsadresse!]!
+    familiemedlemmer: [Familiemedlem!]!
+    folkeregisteridentifikator: String
+    folkeregisterpersonstatus: Folkeregisterpersonstatus
+    kjoenn: KjoennType!
+    kontaktadresser: [Kontaktadresse!]!
+    navn: Navn!
+    oppholdsadresser: [Oppholdsadresse!]!
+    sivilstand: [Sivilstand!]!
     statsborgerskap: [Statsborgerskap!]!
+}
+
+type Bostedsadresse {
+    coAdressenavn: String
+    adresse: StrukturertAdresseformat!
+    gyldigFraOgMed: DateTime
+    gyldigTilOgMed: DateTime
+    master: String!
+    kilde: String
+    erHistorisk: Boolean!
+}
+
+type Familiemedlem {
+    navn: String!
+    ident: String!
+    relasjonsrolle: Familierelasjonsrolle!
+    alder: Int
+    foreldreansvar: String
+    fnrAnnenForelder: String
+    sivilstand: String
+    sivilstandGyldighetsperiodeFom: Date
+}
+
+enum Familierelasjonsrolle {
+    BARN,
+    FAR,
+    MOR,
+    RELATERT_VED_SIVILSTAND
+}
+
+type Folkeregisterpersonstatus {
+    kode: String!
+    tekst: String!
+}
+
+enum KjoennType {
+    KVINNE, MANN, UKJENT
+}
+
+type Kontaktadresse {
+    coAdressenavn: String
+    semistrukturertAdresse: SemistrukturertAdresseformat
+    strukturertAdresse: StrukturertAdresseformat
+    gyldigFraOgMed: DateTime
+    gyldigTilOgMed: DateTime
+    master: String!
+    kilde: String
+    erHistorisk: Boolean!
+}
+
+type Navn {
+    fornavn: String!
+    mellomnavn: String
+    etternavn: String!
+}
+
+type Oppholdsadresse {
+    coAdressenavn: String
+    adresse: StrukturertAdresseformat!
+    gyldigFraOgMed: DateTime
+    gyldigTilOgMed: DateTime
+    master: String!
+    kilde: String
+    erHistorisk: Boolean!
+}
+
+type SemistrukturertAdresseformat {
+    adresselinje1: String
+    adresselinje2: String
+    adresselinje3: String
+    adresselinje4: String
+    postnummer: String
+    poststed: String
+    land: String!
+}
+
+type StrukturertAdresseformat {
+    tilleggsnavn: String
+    gatenavn: String
+    husnummerEtasjeLeilighet: String
+    postboks: String
+    postnummer: String
+    poststed: String
+    region: String
+    land: String!
+}
+
+type Sivilstand {
+    type: String!
+    relatertVedSivilstand: String
+    gyldigFraOgMed: Date
+    bekreftelsesdato: Date
+    master: String!
+    kilde: String
+    erHistorisk: Boolean!
 }
 
 type Statsborgerskap {
@@ -25,7 +129,7 @@ type Statsborgerskap {
     bekreftelsesdato: Date
     gyldigFraOgMed: Date
     gyldigTilOgMed: Date
-    master: String
+    master: String!
     kilde: String
-    erHistorisk: Boolean
+    erHistorisk: Boolean!
 }

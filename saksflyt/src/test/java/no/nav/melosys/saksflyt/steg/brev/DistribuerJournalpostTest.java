@@ -114,7 +114,7 @@ class DistribuerJournalpostTest {
 
         when(mockEregFasade.hentOrganisasjon(any())).thenReturn(saksopplysning);
         when(mockKontaktopplysningService.hentKontaktopplysning(any(), any())).thenReturn(Optional.of(TestdataFactory.lagKontaktOpplysning()));
-        when(mockKodeverkService.dekod(any(), any(), any())).thenReturn("Andeby");
+        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
 
         distribuerJournalpost.utfør(prosessinstans);
 

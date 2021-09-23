@@ -7,11 +7,11 @@ import java.util.Optional;
 import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.behandlingsgrunnlag.*;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.IkkeInngaaendeJournalpostException;
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -65,8 +65,8 @@ public class BehandlingsgrunnlagService {
             eksternReferanseID);
     }
 
-    public void opprettSøknadFolketrygden(long behandlingID,
-                                          SoeknadFtrl soeknad) {
+    public void opprettSøknadOmMedlemskapIFolketrygden(long behandlingID,
+                                                       SoeknadFtrl soeknad) {
         opprettBehandlingsgrunnlag(behandlingID, soeknad, SØKNAD_FOLKETRYGDEN,
             VERSJON_SOEKNAD_GRUNNLAG);
     }
@@ -120,27 +120,29 @@ public class BehandlingsgrunnlagService {
     }
 
     private Optional<LocalDate> finnMottaksdato(String journalpostID) {
-        LocalDate mottaksDatoFraJournalpostID;
-        if (journalpostID == null) {
-            return Optional.empty();
-        }
-        try {
-             mottaksDatoFraJournalpostID = joarkFasade.hentMottaksDatoForJournalpost(journalpostID);
-        } catch (IkkeInngaaendeJournalpostException e) {
-            return Optional.empty();
-        } catch (IntegrasjonException e) {
-            throw new IllegalStateException(e);
-        }
-        return Optional.of(mottaksDatoFraJournalpostID);
+        return Optional.ofNullable(journalpostID)
+            .map(joarkFasade::hentMottaksDatoForJournalpost);
     }
 
     @Transactional
     public Behandlingsgrunnlag oppdaterBehandlingsgrunnlag(long behandlingID, JsonNode behandlingsgrunnlagDataJson) {
-
-        Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagRepository.findByBehandling_Id(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke behandlingsgrunnlag for behandling " + behandlingID));
-
+        Behandlingsgrunnlag behandlingsgrunnlag = hentBehandlingsgrunnlag(behandlingID);
         behandlingsgrunnlag.setJsonData(behandlingsgrunnlagDataJson.toString());
+        return behandlingsgrunnlagRepository.saveAndFlush(behandlingsgrunnlag);
+    }
+
+    @Transactional
+    public Behandlingsgrunnlag oppdaterBehandlingsgrunnlag(Behandlingsgrunnlag behandlingsgrunnlag) {
+        BehandlingsgrunnlagKonverterer.oppdaterBehandlingsgrunnlag(behandlingsgrunnlag);
+        return behandlingsgrunnlagRepository.saveAndFlush(behandlingsgrunnlag);
+    }
+
+    @Transactional
+    public Behandlingsgrunnlag oppdaterBehandlingsgrunnlagPeriodeOgLand(long behandlingID, Periode periode, Soeknadsland soeknadsland) {
+        Behandlingsgrunnlag behandlingsgrunnlag = hentBehandlingsgrunnlag(behandlingID);
+        behandlingsgrunnlag.getBehandlingsgrunnlagdata().periode = periode;
+        behandlingsgrunnlag.getBehandlingsgrunnlagdata().soeknadsland = soeknadsland;
+        BehandlingsgrunnlagKonverterer.oppdaterBehandlingsgrunnlag(behandlingsgrunnlag);
         return behandlingsgrunnlagRepository.saveAndFlush(behandlingsgrunnlag);
     }
 

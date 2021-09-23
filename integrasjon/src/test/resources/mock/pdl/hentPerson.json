@@ -51,14 +51,15 @@
       "folkeregisteridentifikator": [
         {
           "identifikasjonsnummer": "58517918383",
-          "type": "DNR",
-          "status": "I_BRUK"
-        }
-      ],
-      "folkeregisterpersonstatus": [
-        {
-          "forenkletStatus": "dNummer",
-          "status": "midlertidig"
+          "metadata": {
+            "master": "FREG",
+            "endringer": [
+              {
+                "registrert": "2021-05-31T11:48:50",
+                "type": "KORRIGER"
+              }
+            ]
+          }
         }
       ],
       "forelderBarnRelasjon": [
@@ -182,37 +183,59 @@
           }
         }
       ],
-      "statsborgerskap": [
-        {
-          "land": "ALB",
-          "metadata": {
-            "master": "FREG"
-          }
-        },
-        {
-          "land": "AIA",
-          "metadata": {
-            "master": "FREG"
-          }
-        }
-      ],
       "sivilstand": [
         {
           "type": "REGISTRERT_PARTNER",
           "relatertVedSivilstand": "11466927750",
-          "gyldigFraOgMed": "2021-03-02"
+          "gyldigFraOgMed": "2021-03-02",
+          "bekreftelsesdato": null,
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2021-03-30T12:23:07",
+                "kilde": "Dolly"
+              }
+            ]
+          }
         }
       ],
-      "utenlandskIdentifikasjonsnummer": [
+      "statsborgerskap": [
         {
-          "identifikasjonsnummer": "ABAVDSPDS1234",
-          "utstederland": "AIA",
-          "opphoert": false
+          "land": "ALB",
+          "bekreftelsesdato": null,
+          "gyldigFraOgMed": "1961-02-01",
+          "gyldigTilOgMed": "1981-09-07",
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2021-05-31T11:48:52",
+                "kilde": "Dolly"
+              }
+            ]
+          }
         },
         {
-          "identifikasjonsnummer": "JA_ODER_NEIN",
-          "utstederland": "DEU",
-          "opphoert": true
+          "land": "AIA",
+          "bekreftelsesdato": null,
+          "gyldigFraOgMed": "1979-11-18",
+          "gyldigTilOgMed": null,
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2021-05-31T11:48:52",
+                "kilde": "Dolly"
+              }
+            ]
+          }
         }
       ]
     }

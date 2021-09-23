@@ -6,29 +6,13 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Utpekingsperiode;
 
-public class UtpekingsperioderDto {
-    private List<UtpekingsperiodeDto> utpekingsperioder;
-
-    public UtpekingsperioderDto() {
-        // Brukes av Jackson
-    }
-
-    public UtpekingsperioderDto(Collection<Utpekingsperiode> utpekingsperioder) {
-        this.utpekingsperioder = utpekingsperioder.stream()
-            .map(UtpekingsperiodeDto::av)
-            .collect(Collectors.toList());
-    }
-
-    public List<UtpekingsperiodeDto> getUtpekingsperioder() {
-        return utpekingsperioder;
-    }
-
-    public void setUtpekingsperioder(List<UtpekingsperiodeDto> utpekingsperioder) {
-        this.utpekingsperioder = utpekingsperioder;
-    }
-
+public record UtpekingsperioderDto(List<UtpekingsperiodeDto> utpekingsperioder) {
     public static UtpekingsperioderDto av(Collection<Utpekingsperiode> utpekingsperioder) {
-        return new UtpekingsperioderDto(utpekingsperioder);
+        return new UtpekingsperioderDto(
+            utpekingsperioder.stream()
+                .map(UtpekingsperiodeDto::av)
+                .collect(Collectors.toList())
+        );
     }
 
     public static List<Utpekingsperiode> tilDomene(UtpekingsperioderDto utpekingsperioderDto) {

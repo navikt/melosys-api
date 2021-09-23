@@ -70,6 +70,11 @@ public class BehandlingsgrunnlagData {
             .distinct()
             .collect(Collectors.toList());
     }
+    public Map<String, String> hentUtenlandskeArbeidsgivereUuidOgNavn() {
+        return foretakUtland.stream()
+            .filter(f -> Objects.nonNull(f.uuid))
+            .collect(Collectors.toMap(f -> f.uuid, f -> f.navn));
+    }
 
     public Set<String> hentFnrMedfølgendeBarn() {
         return personOpplysninger.medfolgendeFamilie.stream()
@@ -86,6 +91,12 @@ public class BehandlingsgrunnlagData {
     public Map<String, MedfolgendeFamilie> hentMedfølgendeBarn() {
         return personOpplysninger.medfolgendeFamilie.stream()
             .filter(MedfolgendeFamilie::erBarn)
+            .collect(Collectors.toMap(MedfolgendeFamilie::getUuid, mf -> mf));
+    }
+
+    public Map<String, MedfolgendeFamilie> hentMedfølgendeEktefelle() {
+        return personOpplysninger.medfolgendeFamilie.stream()
+            .filter(MedfolgendeFamilie::erEktefelleSamboer)
             .collect(Collectors.toMap(MedfolgendeFamilie::getUuid, mf -> mf));
     }
 }

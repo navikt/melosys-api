@@ -6,7 +6,6 @@ import java.time.Period;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;

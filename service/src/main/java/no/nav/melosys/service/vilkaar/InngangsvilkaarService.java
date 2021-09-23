@@ -104,8 +104,8 @@ public class InngangsvilkaarService {
     private Set<Land> hentStatsborgerskapForPerioden(long behandlingID, ErPeriode periode) {
         if (unleash.isEnabled("melosys.pdl.statsborgerskap")) {
             final var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
-            final String brukerIdent = behandling.getFagsak().hentBruker().getAktørId();
-            return avgjørGyldigeStatsborgerskapFraPdlForPerioden(persondataFasade.hentStatsborgerskap(brukerIdent), periode);
+            final String aktørID = behandling.getFagsak().hentAktørID();
+            return avgjørGyldigeStatsborgerskapFraPdlForPerioden(persondataFasade.hentStatsborgerskap(aktørID), periode);
         }
         return Optional.ofNullable(avgjørStatsborgerskapFraTPS(behandlingID, periode))
             .stream().collect(Collectors.toUnmodifiableSet());
@@ -113,7 +113,7 @@ public class InngangsvilkaarService {
 
     Set<Land> avgjørGyldigeStatsborgerskapFraPdlForPerioden(Set<Statsborgerskap> statsborgerskap, ErPeriode periode) {
         return statsborgerskap.stream().filter(s -> erGyldigStatsborgerskapForPeriode(s, periode))
-            .map(s -> Land.av(s.land())).collect(Collectors.toUnmodifiableSet());
+            .map(s -> Land.av(s.landkode())).collect(Collectors.toUnmodifiableSet());
     }
 
     private boolean erGyldigStatsborgerskapForPeriode(Statsborgerskap s, ErPeriode periode) {
@@ -127,7 +127,7 @@ public class InngangsvilkaarService {
     private Land avgjørStatsborgerskapFraTPS(long behandlingID, ErPeriode periode) {
         // Hent statsborgerskap fra saksopplysningene...
         // Ved søknad tilbake i tid brukes historisk statsborgerskap
-        if (periode.getFom().isBefore(LocalDate.now())) {
+        if (periode.getFom() != null && periode.getFom().isBefore(LocalDate.now())) {
             return avgjørStatsborgerskapPåStartDato(
                 saksopplysningerService.hentPersonhistorikk(behandlingID).statsborgerskapListe, periode.getFom());
         } else {

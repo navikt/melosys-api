@@ -1,11 +1,11 @@
 package no.nav.melosys.service.journalforing.dto;
 
-import java.util.List;
+import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 
 public class FagsakDto {
     private String sakstype;
     private PeriodeDto soknadsperiode;
-    private List<String> land;
+    private SoeknadslandDto land;
 
     public PeriodeDto getSoknadsperiode() {
         return soknadsperiode;
@@ -15,11 +15,11 @@ public class FagsakDto {
         this.soknadsperiode = soknadsperiode;
     }
 
-    public List<String> getLand() {
+    public SoeknadslandDto getLand() {
         return land;
     }
 
-    public void setLand(List<String> land) {
+    public void setLand(SoeknadslandDto land) {
         this.land = land;
     }
 

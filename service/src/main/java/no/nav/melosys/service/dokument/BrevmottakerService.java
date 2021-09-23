@@ -139,7 +139,7 @@ public class BrevmottakerService {
         }
 
         List<Aktoer> mottakere = new ArrayList<>();
-        Optional<Aktoer> representant = fagsak.hentRepresentant(Representerer.BRUKER);
+        Optional<Aktoer> representant = fagsak.finnRepresentant(Representerer.BRUKER);
         if (representant.isPresent()) {
             mottakere.add(representant.get());
             if (tilBegge) {
@@ -154,7 +154,7 @@ public class BrevmottakerService {
     // Dokumenter til arbeidsgiver sendes bare til representant når representant finnes.
     private List<Aktoer> avklarMottakereForArbeidsgiver(Behandling behandling, boolean kunAvklarteVirksomheter) {
         Fagsak fagsak = behandling.getFagsak();
-        Optional<Aktoer> representant = fagsak.hentRepresentant(Representerer.ARBEIDSGIVER);
+        Optional<Aktoer> representant = fagsak.finnRepresentant(Representerer.ARBEIDSGIVER);
         if (representant.isPresent()) {
             return Collections.singletonList(representant.get());
         } else {
@@ -241,7 +241,7 @@ public class BrevmottakerService {
     }
 
     private void leggTilKopier(Behandling behandling, Mottakerliste mottakerliste, Collection<BrevkopiRegel> brevkopiRegler) {
-        boolean brukerHarFullmektig = behandling.getFagsak().hentRepresentant(Representerer.BRUKER).isPresent();
+        boolean brukerHarFullmektig = behandling.getFagsak().finnRepresentant(Representerer.BRUKER).isPresent();
 
         if (brevkopiRegler.contains(BRUKER_FÅR_KOPI) ||
             (brevkopiRegler.contains(BRUKER_FÅR_KOPI_HVIS_FULLMEKTIG_FINNES) && brukerHarFullmektig)) {

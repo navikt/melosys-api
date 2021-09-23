@@ -40,13 +40,16 @@ class VedtakServiceFasadeTest {
     @Mock
     private FtrlVedtakService mockFtrlVedtakService;
 
+    @Mock
+    private TrygdeavtaleVedtakService trygdeavtaleVedtakService;
+
     private VedtakServiceFasade vedtakServiceFasade;
 
     private Behandling behandling;
 
     @BeforeEach
     void init() {
-        vedtakServiceFasade = new VedtakServiceFasade(mockBehandlingService, mockEosVedtakService, mockEosVedtakSystemService, mockFtrlVedtakService);
+        vedtakServiceFasade = new VedtakServiceFasade(mockBehandlingService, mockEosVedtakService, mockEosVedtakSystemService, mockFtrlVedtakService, trygdeavtaleVedtakService);
         behandling = lagBehandling();
     }
 
@@ -100,10 +103,9 @@ class VedtakServiceFasadeTest {
         setFagsakPåBehandling(Sakstyper.TRYGDEAVTALE);
         when(mockBehandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
 
-        assertThatThrownBy(() -> vedtakServiceFasade.fattVedtak(behandlingID, lagFattFtrlVedtakRequest()))
-            .isInstanceOf(FunksjonellException.class)
-            .hasMessage("Vedtaksfatting for sakstype TRYGDEAVTALE er ikke støttet.");
+        vedtakServiceFasade.fattVedtak(behandlingID, lagFattTrygdeavtaleVedtakRequest());
 
+        verify(trygdeavtaleVedtakService).fattVedtak(eq(behandling), any(FattTrygdeavtaleVedtakRequest.class));
         verifyNoInteractions(mockEosVedtakService);
         verifyNoInteractions(mockEosVedtakSystemService);
     }
@@ -115,7 +117,7 @@ class VedtakServiceFasadeTest {
 
         vedtakServiceFasade.endreVedtak(behandlingID, ENDRINGER_ARBEIDSSITUASJON, null, null);
 
-        verify(mockEosVedtakService).endreVedtak(eq(behandling), eq(ENDRINGER_ARBEIDSSITUASJON), isNull(), isNull());
+        verify(mockEosVedtakService).endreVedtaksperiode(eq(behandling), eq(ENDRINGER_ARBEIDSSITUASJON), isNull(), isNull());
         verifyNoInteractions(mockEosVedtakSystemService);
     }
 
@@ -182,6 +184,14 @@ class VedtakServiceFasadeTest {
 
     private FattFtrlVedtakRequest lagFattFtrlVedtakRequest() {
         return new FattFtrlVedtakRequest.Builder()
+            .medBehandlingsresultat(FASTSATT_LOVVALGSLAND)
+            .medVedtakstype(FØRSTEGANGSVEDTAK)
+            .medFritekstBegrunnelse("Begrunnelse")
+            .build();
+    }
+
+    private FattTrygdeavtaleVedtakRequest lagFattTrygdeavtaleVedtakRequest() {
+        return new FattTrygdeavtaleVedtakRequest.Builder()
             .medBehandlingsresultat(FASTSATT_LOVVALGSLAND)
             .medVedtakstype(FØRSTEGANGSVEDTAK)
             .medFritekstBegrunnelse("Begrunnelse")

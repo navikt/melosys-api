@@ -21,16 +21,22 @@ public class VedtakServiceFasade {
     private final EosVedtakService eosVedtakService;
     private final EosVedtakSystemService eosVedtakSystemService;
     private final FtrlVedtakService ftrlVedtakService;
+    private final TrygdeavtaleVedtakService trygdeavtaleVedtakService;
 
     public static final int FRIST_KLAGE_UKER = 6;
 
     @Autowired
-    public VedtakServiceFasade(BehandlingService behandlingService, EosVedtakService eosVedtakService,
-                               EosVedtakSystemService eosVedtakSystemService, FtrlVedtakService ftrlVedtakService) {
+    public VedtakServiceFasade(BehandlingService behandlingService,
+                               EosVedtakService eosVedtakService,
+                               EosVedtakSystemService eosVedtakSystemService,
+                               FtrlVedtakService ftrlVedtakService,
+                               TrygdeavtaleVedtakService trygdeavtaleVedtakService
+    ) {
         this.behandlingService = behandlingService;
         this.eosVedtakService = eosVedtakService;
         this.eosVedtakSystemService = eosVedtakSystemService;
         this.ftrlVedtakService = ftrlVedtakService;
+        this.trygdeavtaleVedtakService = trygdeavtaleVedtakService;
     }
 
     @Transactional(noRollbackFor = {ValideringException.class})
@@ -51,6 +57,7 @@ public class VedtakServiceFasade {
         switch (sakstype) {
             case EU_EOS -> eosVedtakService.fattVedtak(behandling, (FattEosVedtakRequest) fattVedtakRequest);
             case FTRL -> ftrlVedtakService.fattVedtak(behandling, (FattFtrlVedtakRequest) fattVedtakRequest);
+            case TRYGDEAVTALE -> trygdeavtaleVedtakService.fattVedtak(behandling, (FattTrygdeavtaleVedtakRequest) fattVedtakRequest);
             default -> throw new FunksjonellException("Vedtaksfatting for sakstype " + sakstype + " er ikke støttet.");
         }
     }
@@ -61,7 +68,7 @@ public class VedtakServiceFasade {
         Sakstyper sakstype = behandling.getFagsak().getType();
 
         if (sakstype == EU_EOS) {
-            eosVedtakService.endreVedtak(behandling, endretperiode, fritekst, fritekstSed);
+            eosVedtakService.endreVedtaksperiode(behandling, endretperiode, fritekst, fritekstSed);
         } else {
             throw new FunksjonellException("Vedtaksendring for sakstype " + sakstype + " er ikke støttet.");
         }

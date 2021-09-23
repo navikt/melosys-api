@@ -20,12 +20,12 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.eessi.sed.Adressetype;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.integrasjon.pdl.dto.person.Navn;
 import no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap;
+import no.nav.melosys.service.SaksbehandlingDataFactory;
 import no.nav.melosys.service.vedtak.publisering.dto.Fullmektig;
 import no.nav.melosys.service.vedtak.publisering.dto.*;
 
@@ -33,13 +33,13 @@ import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagBostedsa
 
 public class FattetVedtakTestData {
 
-    private static LocalDate NOW = LocalDate.now();
-    private static String ORGNR = "987654321";
-    private static String FNR = "12345678901";
-    private static String FORNAVN = "For";
-    private static String MELLOMNANV = "Mellom";
-    private static String ETTERNAVN = "Etter";
-    private static String LANDKODE_NO = "NO";
+    private static final LocalDate NOW = LocalDate.now();
+    private static final String ORGNR = "987654321";
+    private static final String FNR = "12345678901";
+    private static final String FORNAVN = "For";
+    private static final String MELLOMNANV = "Mellom";
+    private static final String ETTERNAVN = "Etter";
+    private static final String LANDKODE_NO = "NO";
 
     public static Behandling lagBehandling() {
         Behandling behandling = new Behandling();
@@ -135,7 +135,7 @@ public class FattetVedtakTestData {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-123");
         fagsak.setRegistrertDato(Instant.now());
-        fagsak.setAktører(Set.of(rep));
+        fagsak.setAktører(Set.of(SaksbehandlingDataFactory.lagBruker(), rep));
         fagsak.setType(Sakstyper.FTRL);
         return fagsak;
     }
@@ -147,8 +147,7 @@ public class FattetVedtakTestData {
     }
 
     private static BehandlingsgrunnlagData lagSoeknadFtrlData() {
-        SoeknadFtrl soeknadFtrl = new SoeknadFtrl();
-        return soeknadFtrl;
+        return new SoeknadFtrl();
     }
 
     private static Saksopplysning lagPersonDokument() {
@@ -242,10 +241,6 @@ public class FattetVedtakTestData {
         juridiskArbeidsgiverNorge.andelKontrakterINorge = new BigDecimal(11_000);
         juridiskArbeidsgiverNorge.andelRekruttertINorge = new BigDecimal(12_000);
         return juridiskArbeidsgiverNorge;
-    }
-
-    private static Adresse lagAdresse() {
-        return new Adresse(Adressetype.BOSTEDSADRESSE, "Gatenavn", "22", "1000", "POSTSTED");
     }
 
     private static Person lagPerson() {

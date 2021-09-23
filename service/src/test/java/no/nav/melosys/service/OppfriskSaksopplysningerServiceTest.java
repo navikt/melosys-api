@@ -62,7 +62,7 @@ class OppfriskSaksopplysningerServiceTest {
             kontrollresultatService, inngangsvilkaarService,
             registeropplysningerService, persondataFasade);
 
-        when(persondataFasade.hentFolkeregisterIdent(anyString())).thenReturn("322211");
+        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
     }
 
     @Test
@@ -166,7 +166,7 @@ class OppfriskSaksopplysningerServiceTest {
         soeknad.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
 
         soeknad.periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
-        soeknad.soeknadsland = Soeknadsland.av(List.of("SE"));
+        soeknad.soeknadsland = new Soeknadsland(List.of("SE"), false);
 
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(soeknad);

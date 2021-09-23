@@ -13,7 +13,6 @@ import no.nav.melosys.tjenester.gui.dto.saksflyt.anmodningunntak.AnmodningUnntak
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
@@ -42,7 +41,7 @@ public class AnmodningUnntakTjeneste {
         anmodningUnntakService.anmodningOmUnntak(behandlingID,
             anmodningUnntakDto.getMottakerinstitusjon(),
             anmodningUnntakDto.getVedlegg().stream()
-                .map(v -> new DokumentReferanse(v.getJournalpostID(), v.getDokumentID()))
+                .map(v -> new DokumentReferanse(v.journalpostID(), v.dokumentID()))
                 .collect(Collectors.toUnmodifiableSet()),
             anmodningUnntakDto.getFritekstSed());
         return ResponseEntity.ok().build();

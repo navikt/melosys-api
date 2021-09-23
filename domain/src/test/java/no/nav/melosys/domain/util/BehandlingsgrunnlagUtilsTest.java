@@ -3,11 +3,12 @@ package no.nav.melosys.domain.util;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
+import no.nav.melosys.domain.Bostedsland;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -21,9 +22,11 @@ public class BehandlingsgrunnlagUtilsTest {
     public void hentSoeknadsland() {
         Soeknad soeknad = new Soeknad();
         soeknad.soeknadsland.landkoder = Arrays.asList(Landkoder.BE.getKode(), Landkoder.BG.getKode());
+        soeknad.soeknadsland.erUkjenteEllerAlleEosLand = true;
 
-        List<String> strings = BehandlingsgrunnlagUtils.hentSøknadsland(soeknad);
-        assertThat(strings).contains(Landkoder.BE.getKode(), Landkoder.BG.getKode());
+        Soeknadsland soeknadsland = BehandlingsgrunnlagUtils.hentSøknadsland(soeknad);
+        assertThat(soeknadsland.landkoder).contains(Landkoder.BE.getKode(), Landkoder.BG.getKode());
+        assertThat(soeknadsland.erUkjenteEllerAlleEosLand).isTrue();
     }
 
     @Test
@@ -60,16 +63,16 @@ public class BehandlingsgrunnlagUtilsTest {
         Soeknad soeknad = new Soeknad();
         soeknad.bosted.oppgittAdresse.setLandkode("SE");
 
-        Optional<Landkoder> landkoder = BehandlingsgrunnlagUtils.hentOppgittBostedsland(soeknad);
+        Optional<Bostedsland> landkoder = BehandlingsgrunnlagUtils.hentOppgittBostedsland(soeknad);
         assertThat(landkoder).isPresent()
-            .contains(Landkoder.SE);
+            .contains(new Bostedsland(Landkoder.SE));
     }
 
     @Test
     public void hentOppgittBostedsland_eksistererIkke_girEmpty() {
         Soeknad soeknad = new Soeknad();
 
-        Optional<Landkoder> landkoder = BehandlingsgrunnlagUtils.hentOppgittBostedsland(soeknad);
+        Optional<Bostedsland> landkoder = BehandlingsgrunnlagUtils.hentOppgittBostedsland(soeknad);
         assertThat(landkoder).isEmpty();
     }
 

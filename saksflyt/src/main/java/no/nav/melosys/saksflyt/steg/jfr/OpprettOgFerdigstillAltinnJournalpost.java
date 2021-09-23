@@ -51,13 +51,13 @@ public class OpprettOgFerdigstillAltinnJournalpost implements StegBehandler {
         final Behandling behandling = prosessinstans.getBehandling();
         final Fagsak fagsak = behandling.getFagsak();
 
-        String ident = persondataFasade.hentFolkeregisterIdent(fagsak.hentBruker().getAktørId());
+        String ident = persondataFasade.hentFolkeregisterident(fagsak.hentAktørID());
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, ident);
 
         Collection<AltinnDokument> dokumenter = altinnSoeknadService
             .hentDokumenterTilknyttetSoknad(prosessinstans.getData(ProsessDataKey.MOTTATT_SOKNAD_ID));
 
-        Optional<Aktoer> representant = fagsak.hentRepresentant(Representerer.BRUKER);
+        Optional<Aktoer> representant = fagsak.finnRepresentant(Representerer.BRUKER);
         String avsenderNavn;
         if (representant.isPresent()) {
             avsenderNavn = eregFasade.hentOrganisasjonNavn(representant.get().getOrgnr());

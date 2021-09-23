@@ -8,6 +8,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import no.finn.unleash.Unleash;
 import no.nav.dok.brevdata.felles.v1.navfelles.Saksbehandler;
 import no.nav.dok.brevdata.felles.v1.navfelles.*;
 import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType;
@@ -16,11 +17,12 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
@@ -52,19 +54,22 @@ public class BrevDataService {
     static final String PLASSHOLDER_POSTNUMMER = "0000";
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;
-    private final SaksbehandlerService saksbehandlerService;
     private final PersondataFasade persondataFasade;
+    private final SaksbehandlerService saksbehandlerService;
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
+    private final Unleash unleash;
 
     @Autowired
     public BrevDataService(BehandlingsresultatRepository behandlingsresultatRepository,
-                           SaksbehandlerService saksbehandlerService,
                            @Qualifier("system") PersondataFasade persondataFasade,
-                           UtenlandskMyndighetRepository utenlandskMyndighetRepository) {
+                           SaksbehandlerService saksbehandlerService,
+                           UtenlandskMyndighetRepository utenlandskMyndighetRepository,
+                           Unleash unleash) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
-        this.saksbehandlerService = saksbehandlerService;
         this.persondataFasade = persondataFasade;
+        this.saksbehandlerService = saksbehandlerService;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
+        this.unleash = unleash;
     }
 
     /**
@@ -79,7 +84,7 @@ public class BrevDataService {
         metadata.dokumenttypeID = DokumenttypeIdMapper.hentID(produserbartDokument);
         metadata.mottaker = mottaker;
         metadata.mottakerID = avklarMottakerId(mottaker, kontaktopplysning);
-        metadata.brukerID = persondataFasade.hentFolkeregisterIdent(fagsak.hentBruker().getAktørId());
+        metadata.brukerID = persondataFasade.hentFolkeregisterident(fagsak.hentAktørID());
 
         metadata.journalsakID = Long.toString(fagsak.getGsakSaksnummer());
         // Fagområde=MED for alle dokumenter til bruker/arbeidsgiver, men kan være UFM for papir-SED til ikke-elektroniske land
@@ -88,7 +93,7 @@ public class BrevDataService {
         metadata.berik = true;
 
         if (mottaker.getRolle() == BRUKER) {
-            if (brukerHarIkkeAdresseiTps(behandling)) {
+            if (brukerManglerAdresseFraRegister(behandling)) {
                 BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
                 StrukturertAdresse oppgittAdresse = grunnlagData.bosted.oppgittAdresse;
                 if (!oppgittAdresse.erTom()) {
@@ -112,7 +117,7 @@ public class BrevDataService {
             return (kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null) ? kontaktopplysning.getKontaktOrgnr() : mottaker.getOrgnr();
         } else if (mottakerRolle == BRUKER) {
             try {
-                return persondataFasade.hentFolkeregisterIdent(mottaker.getAktørId());
+                return persondataFasade.hentFolkeregisterident(mottaker.getAktørId());
             } catch (IkkeFunnetException e) {
                 throw new TekniskException(e);
             }
@@ -229,30 +234,33 @@ public class BrevDataService {
     }
 
     private Mottaker lagMottakerForBruker(Behandling behandling, String mottakerID) {
-        Mottaker mottakerBrev;
-        mottakerBrev = new Person();
-        mottakerBrev.setTypeKode(AktoerType.PERSON);
-        mottakerBrev.setSpraakkode(Spraakkode.NB);
-        mottakerBrev.setId(mottakerID);
+        Mottaker mottaker = new Person();
+        mottaker.setTypeKode(AktoerType.PERSON);
+        mottaker.setSpraakkode(Spraakkode.NB);
+        mottaker.setId(mottakerID);
 
-        String navn = persondataFasade.hentSammensattNavn(mottakerID);
-        if (brukerHarIkkeAdresseiTps(behandling)) {
-            BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
-            StrukturertAdresse oppgittAdresse = grunnlagData.bosted.oppgittAdresse;
-            if (oppgittAdresse.erTom()) {
-                throw new TekniskException("Bruker har verken adresse i TPS eller oppgitt adresse i søknad");
-            }
-            mottakerBrev.setMottakeradresse(lagAdresse(oppgittAdresse));
-            mottakerBrev.setBerik(false);
-            mottakerBrev.setNavn(navn);
-            mottakerBrev.setKortNavn(navn);
+        if (brukerManglerAdresseFraRegister(behandling)) {
+            brukOppgittBostedsadresse(behandling, mottaker, mottakerID);
         } else {
-            mottakerBrev.setMottakeradresse(lagNorskPostadresse());
-            mottakerBrev.setBerik(true);
-            mottakerBrev.setNavn(PLASSHOLDER_TEKST);
-            mottakerBrev.setKortNavn(PLASSHOLDER_TEKST);
+            mottaker.setMottakeradresse(lagNorskPostadresse());
+            mottaker.setBerik(true);
+            mottaker.setNavn(PLASSHOLDER_TEKST);
+            mottaker.setKortNavn(PLASSHOLDER_TEKST);
         }
-        return mottakerBrev;
+        return mottaker;
+    }
+
+    private void brukOppgittBostedsadresse(Behandling behandling, Mottaker mottaker, String mottakerID) {
+        BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        StrukturertAdresse oppgittAdresse = grunnlagData.bosted.oppgittAdresse;
+        if (oppgittAdresse.erTom()) {
+            throw new FunksjonellException("Bruker har verken adresse i register eller oppgitt adresse i søknad");
+        }
+        String navn = persondataFasade.hentSammensattNavn(mottakerID);
+        mottaker.setMottakeradresse(lagAdresse(oppgittAdresse));
+        mottaker.setBerik(false);
+        mottaker.setNavn(navn);
+        mottaker.setKortNavn(navn);
     }
 
     private Saksbehandler lagSaksbehandler(String ident) {
@@ -271,7 +279,7 @@ public class BrevDataService {
             throw new TekniskException("Det finnes ingen bruker på sak " + behandling.getFagsak().getSaksnummer());
         }
         try {
-            sakspart.setId(persondataFasade.hentFolkeregisterIdent(aktør.getAktørId()));
+            sakspart.setId(persondataFasade.hentFolkeregisterident(aktør.getAktørId()));
         } catch (IkkeFunnetException e) {
             throw new TekniskException("Det finnes ingen ident for aktørID " + aktør.getAktørId());
         }
@@ -281,7 +289,10 @@ public class BrevDataService {
         return sakspart;
     }
 
-    private boolean brukerHarIkkeAdresseiTps(Behandling behandling) {
+    private boolean brukerManglerAdresseFraRegister(Behandling behandling) {
+        if (unleash.isEnabled("melosys.brev.adresser.pdl")) {
+            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID()).harIkkeRegistrertAdresse();
+        }
         return behandling.hentPersonDokument().harIkkeRegistrertAdresse();
     }
 }

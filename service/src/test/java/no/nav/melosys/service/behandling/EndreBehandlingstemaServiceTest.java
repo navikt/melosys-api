@@ -8,11 +8,14 @@ import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,24 +47,36 @@ class EndreBehandlingstemaServiceTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private OppgaveService oppgaveService;
+    @Mock
+    private BehandlingsgrunnlagService behandlingsgrunnlagService;
     @Captor
     private ArgumentCaptor<Behandling> behandlingArgumentCaptor;
     @Captor
     private ArgumentCaptor<OppgaveOppdatering> oppgaveOppdateringArgumentCaptor;
+    @Captor
+    private ArgumentCaptor<Behandlingsgrunnlag> behandlingsgrunnlagArgumentCaptor;
 
 
     private EndreBehandlingstemaService endreBehandlingstemaService;
 
     @BeforeEach
     void setUp() {
-        endreBehandlingstemaService = new EndreBehandlingstemaService(behandlingService, behandlingsresultatService, oppgaveService);
+        endreBehandlingstemaService = new EndreBehandlingstemaService(
+            behandlingService,
+            behandlingsresultatService,
+            oppgaveService,
+            behandlingsgrunnlagService
+        );
 
         behandling.setId(id);
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
+        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
         when(behandlingService.hentBehandlingUtenSaksopplysninger(id)).thenReturn(behandling);
     }
 
     @Test
-    void hentMuligeBehandlingstema_gyldigSøknadBehandlingstema_returnererSøknadBehandlinstema() {
+    void hentMuligeBehandlingstema_gyldigSøknadBehandlingstema_returnererSøknadBehandlingstema() {
         behandling.setTema(ARBEID_FLERE_LAND);
         when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
 
@@ -152,6 +167,17 @@ class EndreBehandlingstemaServiceTest {
         verify(oppgaveService, never()).oppdaterOppgave(any(), any());
     }
 
+    @Test
+    void endreBehandlingstema_nyttTemaErIkkeArbeidIFlereLand_erUkjenteEllerAlleEosLandSettesTilFalse() {
+        behandling.setTema(ARBEID_FLERE_LAND);
+        setup_endreBehandlingstemaTester();
+
+        endreBehandlingstemaService.endreBehandlingstemaTilBehandling(id, UTSENDT_ARBEIDSTAKER);
+
+        verify(behandlingsgrunnlagService).oppdaterBehandlingsgrunnlag(behandlingsgrunnlagArgumentCaptor.capture());
+        assertThat(behandlingsgrunnlagArgumentCaptor.getValue().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand).isFalse();
+    }
+
     void setup_endreBehandlingstemaTester() {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("saksnummer");
@@ -163,5 +189,4 @@ class EndreBehandlingstemaServiceTest {
         when(behandlingsresultatService.hentBehandlingsresultat(id)).thenReturn(behandlingsresultat);
         when(oppgaveService.finnÅpenOppgaveMedFagsaksnummer(fagsak.getSaksnummer())).thenReturn(Optional.of(oppgave));
     }
-
 }

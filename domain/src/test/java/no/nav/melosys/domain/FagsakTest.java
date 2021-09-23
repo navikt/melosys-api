@@ -207,7 +207,7 @@ class FagsakTest {
         a2.setAktørId("456");
         fagsak.getAktører().add(a2);
 
-        Optional<Aktoer> representant = fagsak.hentRepresentant(Representerer.ARBEIDSGIVER);
+        Optional<Aktoer> representant = fagsak.finnRepresentant(Representerer.ARBEIDSGIVER);
 
         assertThat(representant).isEqualTo(Optional.of(a2));
     }
@@ -227,7 +227,7 @@ class FagsakTest {
         a2.setAktørId("456");
         fagsak.getAktører().add(a2);
 
-        Optional<Aktoer> representant = fagsak.hentRepresentant(Representerer.BRUKER);
+        Optional<Aktoer> representant = fagsak.finnRepresentant(Representerer.BRUKER);
 
         assertThat(representant).isEqualTo(Optional.of(a2));
     }

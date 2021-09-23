@@ -1,10 +1,10 @@
 package no.nav.melosys.service.brev;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
@@ -21,8 +21,11 @@ import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
-import no.nav.melosys.service.dokument.*;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.BrevmottakerService;
+import no.nav.melosys.service.dokument.DokumentServiceFasade;
+import no.nav.melosys.service.dokument.MuligMottakerDto;
+import no.nav.melosys.service.dokument.MuligeMottakereDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,26 +42,30 @@ import static no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper.*;
 @Service
 public class BrevbestillingService {
 
+    private static final List<Produserbaredokumenter> BREV_TILGJENGELIG_FOR_MANUELL_BESTILLING =
+        List.of(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE, MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER);
+
     private final DokumentServiceFasade dokumentServiceFasade;
     private final BrevmottakerService brevmottakerService;
-    private final PersondataFasade persondataFasade;
     private final EregFasade eregFasade;
-    private final KontaktopplysningService kontaktopplysningService;
     private final KodeverkService kodeverkService;
+    private final KontaktopplysningService kontaktopplysningService;
+    private final PersondataFasade persondataFasade;
+    private final Unleash unleash;
 
     @Autowired
-    public BrevbestillingService(DokumentServiceFasade dokumentServiceFasade,
-                                 BrevmottakerService brevmottakerService, PersondataFasade persondataFasade,
-                                 EregFasade eregFasade, KontaktopplysningService kontaktopplysningService,
-                                 KodeverkService kodeverkService) {
-        this.dokumentServiceFasade = dokumentServiceFasade;
+    public BrevbestillingService(BrevmottakerService brevmottakerService, DokumentServiceFasade dokumentServiceFasade,
+                                 EregFasade eregFasade, KodeverkService kodeverkService,
+                                 KontaktopplysningService kontaktopplysningService, PersondataFasade persondataFasade,
+                                 Unleash unleash) {
         this.brevmottakerService = brevmottakerService;
-        this.persondataFasade = persondataFasade;
+        this.dokumentServiceFasade = dokumentServiceFasade;
         this.eregFasade = eregFasade;
-        this.kontaktopplysningService = kontaktopplysningService;
         this.kodeverkService = kodeverkService;
+        this.kontaktopplysningService = kontaktopplysningService;
+        this.persondataFasade = persondataFasade;
+        this.unleash = unleash;
     }
-
 
     public MuligeMottakereDto hentMuligeMottakere(Produserbaredokumenter produserbaredokumenter, Behandling behandling, String orgnrTilValgtArbeidsgiver) {
         Mottakerliste mottakerliste = brevmottakerService.hentMottakerliste(produserbaredokumenter, behandling);
@@ -80,7 +87,7 @@ public class BrevbestillingService {
         if (hovedmottaker == Aktoersroller.BRUKER) {
             Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling);
             if (avklartMottaker.getRolle() == Aktoersroller.BRUKER) {
-                return behandling.hentPersonDokument().getSammensattNavn();
+                return hentSammensattNavn(behandling);
             } else {
                 var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartMottaker.getOrgnr());
                 return orgDokument.getNavn();
@@ -91,6 +98,13 @@ public class BrevbestillingService {
             return orgDokument.getNavn();
         }
         throw new FunksjonellException("Melosys støtter ikke hovedmottakere med rollen " + hovedmottaker);
+    }
+
+    private String hentSammensattNavn(Behandling behandling) {
+        if (unleash.isEnabled("melosys.pdl.sammensatt-navn")) {
+            persondataFasade.hentSammensattNavn(behandling.getFagsak().hentAktørID());
+        }
+        return behandling.hentPersonDokument().getSammensattNavn();
     }
 
     private List<MuligMottakerDto> lagKopiMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<Aktoersroller> kopiMottakere, Aktoersroller hovedmottaker) {
@@ -111,9 +125,9 @@ public class BrevbestillingService {
         if (avklartKopi.getRolle() == Aktoersroller.BRUKER || hovedmottaker == kopiMottaker) {
             return new MuligMottakerDto.Builder()
                 .medDokumentNavn("Kopi til bruker")
-                .medMottakerNavn(behandling.hentPersonDokument().getSammensattNavn())
+                .medMottakerNavn(hentSammensattNavn(behandling))
                 .medRolle(BRUKER)
-                .medAktørId(behandling.getFagsak().hentBruker().getAktørId())
+                .medAktørId(behandling.getFagsak().hentAktørID())
                 .build();
         } else {
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartKopi.getOrgnr());
@@ -133,7 +147,7 @@ public class BrevbestillingService {
         for (Aktoer avklartKopi : avklarteKopier) {
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartKopi.getOrgnr());
             muligMottakerDtos.add(new MuligMottakerDto.Builder()
-                .medDokumentNavn(avklartKopi.getRolle() == ARBEIDSGIVER ? "Kopi til arbeidsgiver" :  "Kopi til arbeidsgivers fullmektig")
+                .medDokumentNavn(avklartKopi.getRolle() == ARBEIDSGIVER ? "Kopi til arbeidsgiver" : "Kopi til arbeidsgivers fullmektig")
                 .medMottakerNavn(orgDokument.getNavn())
                 .medRolle(avklartKopi.getRolle())
                 .medOrgnr(orgDokument.getOrgnummer())
@@ -193,11 +207,10 @@ public class BrevbestillingService {
         OrganisasjonDokument orgDokument = null;
 
         if (mottaker.getRolle() == Aktoersroller.BRUKER) {
-            persondata = (Persondata) persondataFasade.hentPersonFraTps(
-                    behandling.hentPersonDokument().hentFolkeregisterIdent(), Informasjonsbehov.STANDARD).getDokument();
-
-            } else if (mottaker.getRolle() == Aktoersroller.ARBEIDSGIVER || mottaker.getRolle() == Aktoersroller.REPRESENTANT) {
-                kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), mottaker.getOrgnr()).orElse(null);
+            persondata = hentPersondata(behandling);
+        } else if (mottaker.getRolle() == Aktoersroller.ARBEIDSGIVER || mottaker.getRolle() == Aktoersroller.REPRESENTANT) {
+            kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(),
+                mottaker.getOrgnr()).orElse(null);
             String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : mottaker.getOrgnr();
             orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();
         }
@@ -207,17 +220,29 @@ public class BrevbestillingService {
             .medOrgnr(orgDokument != null ? orgDokument.getOrgnummer() : null)
             .medAdresselinjer(mapAdresselinjer(orgDokument, null, kontaktopplysning, persondata))
             .medPostnr(mapPostnr(orgDokument, persondata))
-            .medPoststed(orgDokument != null ? mapPoststed(orgDokument) : kodeverkService.dekod(FellesKodeverk.POSTNUMMER, persondata.hentGjeldendePostadresse().postnr, LocalDate.now()))
+            .medPoststed(orgDokument != null ? mapPoststed(orgDokument) :
+                kodeverkService.dekod(FellesKodeverk.POSTNUMMER, persondata.hentGjeldendePostadresse().postnr()))
             .medLand(mapLandForAdresse(orgDokument, persondata))
             .build();
     }
 
-    @Transactional
-    public void produserBrev(long behandlingId, BrevbestillingDto brevbestillingDto) {
-        dokumentServiceFasade.produserDokument(behandlingId, brevbestillingDto);
+    private Persondata hentPersondata(Behandling behandling) {
+        if (unleash.isEnabled("melosys.brev.adresser.pdl")) {
+            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
+        }
+        return (Persondata) persondataFasade.hentPersonFraTps(behandling.hentPersonDokument().hentFolkeregisterident(),
+            Informasjonsbehov.STANDARD).getDokument();
     }
 
-    public byte[] produserUtkast(long behandlingID, BrevbestillingDto brevbestillingDto) {
-        return dokumentServiceFasade.produserUtkast(behandlingID, brevbestillingDto);
+    @Transactional
+    public void produserBrev(long behandlingId, BrevbestillingRequest brevbestillingRequest) {
+        if (!BREV_TILGJENGELIG_FOR_MANUELL_BESTILLING.contains(brevbestillingRequest.getProduserbardokument())) {
+            throw new FunksjonellException("Manuell bestilling av " + brevbestillingRequest.getProduserbardokument() + " er ikke støttet.");
+        }
+        dokumentServiceFasade.produserDokument(behandlingId, brevbestillingRequest);
+    }
+
+    public byte[] produserUtkast(long behandlingID, BrevbestillingRequest brevbestillingRequest) {
+        return dokumentServiceFasade.produserUtkast(behandlingID, brevbestillingRequest);
     }
 }

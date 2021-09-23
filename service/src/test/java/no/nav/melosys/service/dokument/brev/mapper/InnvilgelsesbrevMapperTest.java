@@ -9,6 +9,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -16,7 +17,6 @@ import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.MaritimtArbeid;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
@@ -28,16 +28,16 @@ import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import org.junit.jupiter.api.Test;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
-import static no.nav.melosys.service.dokument.brev.mapper.A1MapperTest.lagPersonDokument;
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagFellesType;
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles;
+import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class InnvilgelsesbrevMapperTest {
+class InnvilgelsesbrevMapperTest {
 
     private final InnvilgelsesbrevMapper instans;
 
@@ -46,14 +46,14 @@ public class InnvilgelsesbrevMapperTest {
     }
 
     @Test
-    public void mapTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
+    void mapTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
         testMapTilBrevXml();
     }
 
     @Test
-    public void mapArbeidslandFraSøknadsTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
+    void mapArbeidslandFraSøknadsTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
         testMapTilBrevXml(lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()),
-                Collections.singleton(lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789"))));
+            Collections.singleton(lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789"))));
     }
 
     private void testMapTilBrevXml() throws Exception {
@@ -73,10 +73,10 @@ public class InnvilgelsesbrevMapperTest {
         brevdataA1.bivirksomheter = Collections.singletonList(virksomhet);
         brevdataA1.bostedsadresse = lagStrukturertAdresse();
         brevdataA1.yrkesgruppe = Yrkesgrupper.FLYENDE_PERSONELL;
-        brevdataA1.person = lagPersonDokument();
+        brevdataA1.person = lagPersonopplysninger();
         brevdataA1.arbeidssteder = new ArrayList<>();
         brevdataA1.arbeidsland = new ArrayList<>();
-        BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse(new BrevbestillingDto(),"SAKSBEHANDLER");
+        BrevDataInnvilgelse brevdataInnvilgelse = new BrevDataInnvilgelse(new BrevbestillingRequest(), "SAKSBEHANDLER");
         brevdataInnvilgelse.vedleggA1 = brevdataA1;
         brevdataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
         brevdataInnvilgelse.avklartMaritimType = Maritimtyper.SKIP;
@@ -95,8 +95,8 @@ public class InnvilgelsesbrevMapperTest {
 
     private static Behandlingsresultat lagBehandlingsresultat() {
         Set<Avklartefakta> fakta = new HashSet<>(Arrays.asList(
-                lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789"),
-                lagAvklarteFakta(Avklartefaktatyper.ARBEIDSLAND, "SE")));
+            lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789"),
+            lagAvklarteFakta(Avklartefaktatyper.ARBEIDSLAND, "SE")));
         return lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()), fakta);
     }
 

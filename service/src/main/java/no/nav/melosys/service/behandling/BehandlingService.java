@@ -19,6 +19,7 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
@@ -118,7 +119,12 @@ public class BehandlingService {
 
         behandlingRepository.save(behandling);
 
-        if (status == Behandlingsstatus.AVSLUTTET) {
+        if (List.of(AVVENT_FAGLIG_AVKLARING, AVVENT_DOK_PART, AVVENT_DOK_UTL).contains(status)) {
+            oppgaveService.oppdaterOppgaveMedSaksnummer(
+                behandling.getFagsak().getSaksnummer(),
+                OppgaveOppdatering.builder().beskrivelse(status.getBeskrivelse()).build()
+            );
+        } else if (status == Behandlingsstatus.AVSLUTTET) {
             oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
         }
     }
@@ -165,7 +171,7 @@ public class BehandlingService {
         behandling.setFagsak(fagsak);
         behandling.setRegistrertDato(nå);
         behandling.setEndretDato(nå);
-        behandling.setBehandlingsfrist(hentBehandlingsfristForBehandlingstemaTema(behandlingstema));
+        behandling.setBehandlingsfrist(hentBehandlingsfristForBehandlingstema(behandlingstema));
 
         behandling.setStatus(behandlingsstatus);
         behandling.setType(behandlingstype);
@@ -216,8 +222,9 @@ public class BehandlingService {
         behandlingsreplika.setType(behandlingstype);
         behandlingsreplika.setStatus(behandlingsstatus);
         behandlingsreplika.setOpprinneligBehandling(tidligsteInaktiveBehandling);
-        behandlingsreplika.setBehandlingsgrunnlag(repolikerBehandlingsgrunnlag(behandlingsreplika, tidligsteInaktiveBehandling.getBehandlingsgrunnlag()));
+        behandlingsreplika.setBehandlingsgrunnlag(replikerBehandlingsgrunnlag(behandlingsreplika, tidligsteInaktiveBehandling.getBehandlingsgrunnlag()));
         behandlingsreplika.setBehandlingsnotater(Collections.emptySet());
+        behandlingsreplika.setBehandlingsfrist(hentBehandlingsfristForBehandlingstema(tidligsteInaktiveBehandling.getTema()));
 
         behandlingsreplika.setSaksopplysninger(new HashSet<>());
         for (Saksopplysning saksopplysning : tidligsteInaktiveBehandling.getSaksopplysninger()) {
@@ -244,7 +251,7 @@ public class BehandlingService {
         return kildereplikas;
     }
 
-    private Behandlingsgrunnlag repolikerBehandlingsgrunnlag(Behandling behandlingsreplika, Behandlingsgrunnlag opprinneligBehandlingsgrunnlag)
+    private Behandlingsgrunnlag replikerBehandlingsgrunnlag(Behandling behandlingsreplika, Behandlingsgrunnlag opprinneligBehandlingsgrunnlag)
         throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         if (opprinneligBehandlingsgrunnlag == null) {
             return null;
@@ -319,16 +326,12 @@ public class BehandlingService {
         applicationEventPublisher.publishEvent(new BehandlingsfristEndretEvent(behandlingId, behandlingsfrist));
     }
 
-    private LocalDate hentBehandlingsfristForBehandlingstemaTema(Behandlingstema behandlingstema) {
+    private LocalDate hentBehandlingsfristForBehandlingstema(Behandlingstema behandlingstema) {
         return switch (behandlingstema) {
-            case UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_FLERE_LAND, ARBEID_ETT_LAND_ØVRIG, IKKE_YRKESAKTIV, ARBEID_I_UTLANDET, ARBEID_NORGE_BOSATT_ANNET_LAND
-                -> LocalDate.now().plusDays(30);
-            case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
-                -> LocalDate.now().plusWeeks(2);
-            case BESLUTNING_LOVVALG_NORGE, BESLUTNING_LOVVALG_ANNET_LAND
-                -> LocalDate.now().plusWeeks(4);
-            case ANMODNING_OM_UNNTAK_HOVEDREGEL, ØVRIGE_SED_UFM, ØVRIGE_SED_MED, TRYGDETID
-                -> LocalDate.now().plusWeeks(8);
+            case UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_FLERE_LAND, ARBEID_ETT_LAND_ØVRIG, IKKE_YRKESAKTIV, ARBEID_I_UTLANDET, ARBEID_NORGE_BOSATT_ANNET_LAND, TRYGDEAVTALE_UK -> LocalDate.now().plusDays(30);
+            case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE -> LocalDate.now().plusWeeks(2);
+            case BESLUTNING_LOVVALG_NORGE, BESLUTNING_LOVVALG_ANNET_LAND -> LocalDate.now().plusWeeks(4);
+            case ANMODNING_OM_UNNTAK_HOVEDREGEL, ØVRIGE_SED_UFM, ØVRIGE_SED_MED, TRYGDETID -> LocalDate.now().plusWeeks(8);
         };
     }
 }

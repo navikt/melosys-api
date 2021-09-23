@@ -93,7 +93,7 @@ public class SaksopplysningerTilDto {
 
                     dto.getPersonhistorikk().bostedsadressePerioder.forEach(bostedsadressePeriodeDto ->
                         bostedsadressePeriodeDto.bostedsadresse.setPoststed(
-                            kodeverkService.dekod(POSTNUMMER, bostedsadressePeriodeDto.bostedsadresse.getPostnr(), LocalDate.now())));
+                            kodeverkService.dekod(POSTNUMMER, bostedsadressePeriodeDto.bostedsadresse.getPostnr())));
 
                     if (!personhistorikk.statsborgerskapListe.isEmpty()) {
                         historiskStatsborgerskap = personhistorikk.statsborgerskapListe.get(0).statsborgerskap;

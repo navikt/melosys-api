@@ -1,19 +1,18 @@
 package no.nav.melosys.domain.person;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import no.nav.melosys.domain.brev.Postadresse;
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.Familiemedlem;
-import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
+import no.nav.melosys.domain.person.adresse.Kontaktadresse;
+import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
+import no.nav.melosys.domain.person.familie.Familiemedlem;
 
 public interface Persondata {
     boolean erPersonDød();
-
-    Optional<Familiemedlem> hentAnnenForelder(String fnrGjeldendeForelder);
 
     boolean harStrengtAdressebeskyttelse();
 
@@ -21,7 +20,7 @@ public interface Persondata {
 
     boolean manglerBostedsadresse();
 
-    String hentFolkeregisterIdent();
+    String hentFolkeregisterident();
 
     Set<Land> hentAlleStatsborgerskap();
 
@@ -35,14 +34,18 @@ public interface Persondata {
 
     String getSammensattNavn();
 
-    List<Familiemedlem> getFamiliemedlemmer();
+    Set<Familiemedlem> hentFamiliemedlemmer();
 
     LocalDate getFødselsdato();
 
     @Deprecated // knyttet til TPS
     no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse getBostedsadresse();
 
-    Optional<Bostedsadresse> hentBostedsadresse();
+    Optional<Bostedsadresse> finnBostedsadresse();
 
-    UstrukturertAdresse hentGjeldendePostadresse();
+    Optional<Kontaktadresse> finnKontaktadresse();
+
+    Optional<Oppholdsadresse> finnOppholdsadresse();
+
+    Postadresse hentGjeldendePostadresse();
 }

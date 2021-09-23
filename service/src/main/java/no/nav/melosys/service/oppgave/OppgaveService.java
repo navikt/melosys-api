@@ -2,13 +2,16 @@ package no.nav.melosys.service.oppgave;
 
 
 import java.util.*;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -17,6 +20,7 @@ import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 import no.nav.melosys.service.oppgave.dto.*;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
@@ -77,14 +81,10 @@ public class OppgaveService {
     }
 
     public void ferdigstillOppgaveMedSaksnummer(String fagSaksnummer) {
-        Oppgave oppgave;
-        try {
-            oppgave = hentÅpenOppgaveMedFagsaksnummer(fagSaksnummer);
-        } catch (IkkeFunnetException e) {
-            log.debug("Sak {} har ingen oppgaver å ferdigstille.", fagSaksnummer);
-            return;
-        }
-        ferdigstillOppgave(oppgave.getOppgaveId());
+        finnÅpenOppgaveMedFagsaksnummer(fagSaksnummer).ifPresentOrElse(
+            oppgave -> ferdigstillOppgave(oppgave.getOppgaveId()),
+            () -> log.warn("Sak {} har ingen oppgaver å ferdigstille.", fagSaksnummer)
+        );
     }
 
     public void leggTilbakeOppgaveMedSaksnummer(String fagSaksnummer) {
@@ -93,12 +93,9 @@ public class OppgaveService {
     }
 
     public Optional<Oppgave> finnSisteAvsluttetOppgaveMedFagsaksnummer(String saksnummer) {
-        List<Oppgave> oppgaver = oppgaveFasade.finnAvsluttetOppgaverMedSaksnummer(saksnummer);
-
-        if (oppgaver.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(oppgaver.get(0));
+        return oppgaveFasade.finnAvsluttetOppgaverMedSaksnummer(saksnummer)
+            .stream()
+            .max(Comparator.comparing(Oppgave::getOpprettetTidspunkt));
     }
 
     public Optional<Oppgave> finnÅpenOppgaveMedFagsaksnummer(String saksnummer) {
@@ -132,12 +129,11 @@ public class OppgaveService {
         return fagsakService.hentFagsak(saksnummer).hentSistAktiveBehandling();
     }
 
-    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) {
+    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs, @Nullable String beskrivelse) {
 
         Optional<Oppgave> eksisterendeOppgave = finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         if (eksisterendeOppgave.isEmpty()) {
-            String beskrivelse = behandling.erElektroniskSøknad() ? "Mottatt elektronisk søknad"  : null;
             Oppgave oppgave = OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType())
                 .setTilordnetRessurs(tilordnetRessurs)
                 .setJournalpostId(journalpostID)
@@ -156,6 +152,10 @@ public class OppgaveService {
         }
     }
 
+    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, String journalpostID, String aktørID, @Nullable String tilordnetRessurs) {
+        opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, behandling.erElektroniskSøknad() ? "Mottatt elektronisk søknad" : null);
+    }
+
     public void opprettJournalføringsoppgave(String journalpostID, String aktørID) {
         final String oppgaveID = opprettOppgave(OppgaveFactory.lagJournalføringsoppgave(journalpostID).setAktørId(aktørID).build());
         log.info("Journalføringsoppgave {} opprettet for journalpost {}", oppgaveID, journalpostID);
@@ -169,24 +169,33 @@ public class OppgaveService {
         oppgaveFasade.oppdaterOppgave(oppgaveID, oppgaveOppdatering);
     }
 
+    public void oppdaterOppgaveMedSaksnummer(String fagSaksnummer, OppgaveOppdatering oppgaveOppdatering) {
+        finnÅpenOppgaveMedFagsaksnummer(fagSaksnummer).ifPresentOrElse(
+            oppg -> oppdaterOppgave(oppg.getOppgaveId(), oppgaveOppdatering),
+            () -> log.warn("Sak {} har ingen åpne oppgaver å oppdatere.", fagSaksnummer)
+        );
+    }
+
     public void tildelOppgave(String oppgaveID, String saksbehandler) {
         oppgaveFasade.oppdaterOppgave(oppgaveID, OppgaveOppdatering.builder().tilordnetRessurs(saksbehandler).build());
     }
 
-    public String gjenåpneSisteAvsluttetOppgaveMedFagsaksnummer(String saksnummer) {
-        String oppgaveId = hentSisteAvsluttetOppgaveMedFagsaksnummer(saksnummer).getOppgaveId();
-        var oppdatering = OppgaveOppdatering.builder().status("UNDER_BEHANDLING").build();
+    public void opprettOppgaveForSak(String saksnummer) {
+        log.info("Oppretter ny oppgave for saksnummer {}", saksnummer);
+        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
+        Behandling behandling = fagsak.hentSistAktiveBehandling();
+        Optional<Oppgave> oppgave = finnSisteAvsluttetOppgaveMedFagsaksnummer(saksnummer);
+        String tilordnetRessurs = oppgave.map(Oppgave::getTilordnetRessurs).orElse(null);
+        String beskrivelse = oppgave.map(Oppgave::getBeskrivelse).orElse(null);
 
-        log.info("Gjenoppretter oppgave med id {} knyttet til saksnummer {}", oppgaveId, saksnummer);
-        oppdaterOppgave(oppgaveId, oppdatering);
-        return oppgaveId;
+        opprettEllerGjenbrukBehandlingsoppgave(behandling, behandling.getInitierendeJournalpostId(), fagsak.hentAktørID(), tilordnetRessurs, beskrivelse);
     }
 
     private List<OppgaveDto> oppgaverTilDtoer(Collection<Oppgave> oppgaverFraDomain) {
         return oppgaverFraDomain.stream()
             .map(this::tilOppgaveDtoHåndterException)
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     @Nullable
@@ -207,12 +216,11 @@ public class OppgaveService {
             jfrOppgaveDto.setJournalpostID(oppgave.getJournalpostId());
             dest = jfrOppgaveDto;
             String aktørId = oppgave.getAktørId();
-            String fnr = aktørId != null ? persondataFasade.hentFolkeregisterIdent(aktørId) : null;
-            if (StringUtils.isNotEmpty(fnr)){
+            String fnr = aktørId != null ? persondataFasade.hentFolkeregisterident(aktørId) : null;
+            if (StringUtils.isNotEmpty(fnr)) {
                 dest.setFnr(fnr);
                 dest.setSammensattNavn(persondataFasade.hentSammensattNavn(fnr));
-            }
-            else {
+            } else {
                 dest.setFnr(UKJENT);
                 dest.setSammensattNavn(UKJENT);
             }
@@ -229,13 +237,14 @@ public class OppgaveService {
             if (behandling.erBehandlingAvSøknad()) {
                 Soeknad søknadDokument = (Soeknad) behandlingsgrunnlagService
                     .hentBehandlingsgrunnlag(behandling.getId()).getBehandlingsgrunnlagdata();
-                behOppgaveDto.setLand(hentSøknadsland(søknadDokument));
+                Soeknadsland søknadsland = hentSøknadsland(søknadDokument);
+                behOppgaveDto.setLand(SoeknadslandDto.av(søknadsland));
                 behOppgaveDto.setPeriode(mapPeriode(søknadDokument));
             } else {
                 saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresent(
                     sedDokument -> {
-                        behOppgaveDto.setLand(Collections.singletonList(sedDokument.getLovvalgslandKode() != null
-                            ? sedDokument.getLovvalgslandKode().getKode() : null));
+                        Landkoder lovvalgslandKode = sedDokument.getLovvalgslandKode();
+                        behOppgaveDto.setLand(SoeknadslandDto.av(lovvalgslandKode));
                         behOppgaveDto.setPeriode(new PeriodeDto(
                             sedDokument.getLovvalgsperiode().getFom(), sedDokument.getLovvalgsperiode().getTom())
                         );
@@ -244,7 +253,7 @@ public class OppgaveService {
             saksopplysningerService.finnPersonOpplysninger(behandling.getId()).ifPresent(
                 personDokument -> {
                     behOppgaveDto.setSammensattNavn(personDokument.getSammensattNavn());
-                    behOppgaveDto.setFnr(personDokument.hentFolkeregisterIdent());
+                    behOppgaveDto.setFnr(personDokument.hentFolkeregisterident());
                 }
             );
 
@@ -283,7 +292,9 @@ public class OppgaveService {
 
     private boolean harBeskyttelsesbehov(long behandlingID) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        if (behandling.hentPersonDokument().harStrengtAdressebeskyttelse()) {
+        // TODO TPS krever fnr. Kall til hentFolkeregisterident fjernes etter overgang til PDL.
+        final String brukersFnr = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID());
+        if (persondataFasade.harStrengtFortroligAdresse(brukersFnr)) {
             return true;
         } else if (behandling.getBehandlingsgrunnlag() == null) {
             return false;

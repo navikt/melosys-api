@@ -33,7 +33,7 @@ class DokumentproduksjonsInfoMapperTest {
     }
 
     @Test
-    void skalHenteDokumentInfo() throws Exception {
+    void skalHenteDokumentInfo() {
         DokumentproduksjonsInfo dokumentproduksjonsInfo = dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(MANGELBREV_BRUKER);
 
         assertThat(dokumentproduksjonsInfo.dokgenMalnavn()).isEqualTo("mangelbrev_bruker");
@@ -42,7 +42,7 @@ class DokumentproduksjonsInfoMapperTest {
     }
 
     @Test
-    void skalHenteMalnavn() throws Exception {
+    void skalHenteMalnavn() {
         String malnavn = dokumentproduksjonsInfoMapper.hentMalnavn(MELDING_FORVENTET_SAKSBEHANDLINGSTID);
         assertThat(malnavn).isEqualTo("saksbehandlingstid_soknad");
     }

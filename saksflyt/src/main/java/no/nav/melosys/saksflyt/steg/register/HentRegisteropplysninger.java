@@ -45,19 +45,19 @@ public class HentRegisteropplysninger implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
 
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
-        String brukerId = persondataFasade.hentFolkeregisterIdent(behandling.getFagsak().hentBruker().getAktørId());
+        String brukerId = persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentAktørID());
 
 
         var registeropplysningerRequestBuilder = RegisteropplysningerRequest.builder()
             .behandlingID(prosessinstans.getBehandling().getId())
             .fnr(brukerId);
 
-        if (behandling.getFagsak().getType() == Sakstyper.FTRL) {
-            registeropplysningerRequestBuilder
-                .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder().personopplysninger().build());
-        } else {
+        if(behandling.getFagsak().getType() == Sakstyper.EU_EOS) {
             registeropplysningerRequestBuilder
                 .saksopplysningTyper(utledSaksopplysningTyper(prosessinstans.getBehandling().getTema()));
+        } else {
+            registeropplysningerRequestBuilder
+                .saksopplysningTyper(RegisteropplysningerRequest.SaksopplysningTyper.builder().personopplysninger().build());
         }
 
         behandling.finnPeriode().ifPresent(periode -> {

@@ -73,10 +73,10 @@ class RepresentantTjenesteTest extends JsonSchemaTestParent {
         var response = representantTjeneste.lagreValgtRepresentant(1L, request).getBody();
 
         assertThat(response).isNotNull();
-        assertThat(response.getRepresentantnummer()).isEqualTo(request.getRepresentantnummer());
-        assertThat(response.isSelvbetalende()).isEqualTo(request.isSelvbetalende());
-        assertThat(response.getOrganisasjonsnummer()).isEqualTo(request.getOrganisasjonsnummer());
-        assertThat(response.getKontaktperson()).isEqualTo(request.getKontaktperson());
+        assertThat(response.representantnummer()).isEqualTo(request.representantnummer());
+        assertThat(response.selvbetalende()).isEqualTo(request.selvbetalende());
+        assertThat(response.organisasjonsnummer()).isEqualTo(request.organisasjonsnummer());
+        assertThat(response.kontaktperson()).isEqualTo(request.kontaktperson());
         valider(response, VALGTREPRESENTANT_SCHEMA, log);
     }
 
@@ -89,10 +89,10 @@ class RepresentantTjenesteTest extends JsonSchemaTestParent {
         var response = representantTjeneste.hentValgtRepresentant(1L).getBody();
 
         assertThat(response).isNotNull();
-        assertThat(response.getRepresentantnummer()).isEqualTo(forventetResponse.getRepresentantnummer());
-        assertThat(response.isSelvbetalende()).isEqualTo(forventetResponse.isSelvbetalende());
-        assertThat(response.getOrganisasjonsnummer()).isEqualTo(forventetResponse.getOrganisasjonsnummer());
-        assertThat(response.getKontaktperson()).isEqualTo(forventetResponse.getKontaktperson());
+        assertThat(response.representantnummer()).isEqualTo(forventetResponse.representantnummer());
+        assertThat(response.selvbetalende()).isEqualTo(forventetResponse.selvbetalende());
+        assertThat(response.organisasjonsnummer()).isEqualTo(forventetResponse.organisasjonsnummer());
+        assertThat(response.kontaktperson()).isEqualTo(forventetResponse.kontaktperson());
         valider(response, VALGTREPRESENTANT_SCHEMA, log);
     }
 }

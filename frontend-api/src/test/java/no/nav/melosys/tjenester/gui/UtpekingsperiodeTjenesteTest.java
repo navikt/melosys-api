@@ -66,8 +66,29 @@ class UtpekingsperiodeTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
+    void deserialiserUtpekingsperioder() throws Exception {
+        String json = """
+            {
+               "utpekingsperioder":[
+                  {
+                     "fomDato":"2021-08-13",
+                     "tomDato":"2021-11-11",
+                     "lovvalgsbestemmelse":"FO_883_2004_ART13_1B1",
+                     "tilleggsbestemmelse":null,
+                     "lovvalgsland":"FR"
+                  }
+               ]
+            }""";
+
+        assertThat(objectMapper().readValue(json, UtpekingsperioderDto.class))
+            .extracting(UtpekingsperioderDto::utpekingsperioder)
+            .asList()
+            .hasSize(1);
+    }
+
+    @Test
     void lagreUtpekingsperioder() throws IOException {
-        UtpekingsperioderDto utpekingsperioderDto = new UtpekingsperioderDto(lagUtpekingsperioder());
+        UtpekingsperioderDto utpekingsperioderDto = UtpekingsperioderDto.av(lagUtpekingsperioder());
 
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(utpekingsperioderDto);
         valider(jsonString, UTPEKINGSPERIODER_SCHEMA, log);

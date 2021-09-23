@@ -15,7 +15,7 @@ import com.networknt.schema.uri.URIFetcher;
 import no.nav.melosys.service.JsonSchemaValidator;
 import no.nav.melosys.service.kodeverk.KodeDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.tjenester.gui.jackson.MelosysModule;
+import no.nav.melosys.tjenester.gui.config.jackson.MelosysModule;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
@@ -71,7 +71,7 @@ public class JsonSchemaTestParent {
             objectMapperMedKodeverkServiceStub.configure(SerializationFeature.INDENT_OUTPUT, true);
             objectMapperMedKodeverkServiceStub.registerModule(new JavaTimeModule());
             KodeverkService kodeverkService = mock(KodeverkService.class);
-            lenient().when(kodeverkService.dekod(any(), any(), any())).thenReturn("DUMMY");
+            lenient().when(kodeverkService.dekod(any(), any())).thenReturn("DUMMY");
             lenient().when(kodeverkService.getKodeverdi(any(), any())).thenReturn(new KodeDto("DUMMY", "DUMMY"));
             objectMapperMedKodeverkServiceStub.registerModule(new MelosysModule(kodeverkService));
         }

@@ -72,6 +72,23 @@ class OpprettAvgiftsoppgaveTest {
     }
 
     @Test
+    void utfør_saktypeErftrl_oppretterIkkeOppgave() {
+        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+        lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
+        behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+
+        Prosessinstans prosessinstans = new Prosessinstans();
+        Fagsak fagsak = lagFagsak();
+        fagsak.setType(Sakstyper.FTRL);
+        prosessinstans.setBehandling(lagBehandling(fagsak));
+
+        opprettAvgiftsoppgave.utfør(prosessinstans);
+
+        verify(oppgaveService, never()).opprettOppgave(any());
+    }
+
+    @Test
     void utfør_art13_oppretterIkkeOppgave() {
         behandlingsresultat.getLovvalgsperioder().add(lagLovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A));
         opprettAvgiftsoppgave.utfør(lagProsessinstans());

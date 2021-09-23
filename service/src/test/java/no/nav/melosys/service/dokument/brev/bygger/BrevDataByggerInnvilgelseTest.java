@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -30,7 +31,7 @@ import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -73,21 +74,30 @@ public class BrevDataByggerInnvilgelseTest {
     @Mock
     BehandlingsgrunnlagService behandlingsgrunnlagService;
 
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
+
     private Behandling behandling;
-    private BrevbestillingDto brevbestillingDto;
+    private BrevbestillingRequest brevbestillingRequest;
 
     private final String saksbehandler = "saksbehandler";
     private BrevDataByggerInnvilgelse brevDataByggerInnvilgelse;
 
     @BeforeEach
     public void setUp() {
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.BRUKER);
+        aktoer.setAktørId("ident");
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setAktører(Set.of(aktoer));
+
         behandling = new Behandling();
         behandling.setId(1L);
-        behandling.setFagsak(new Fagsak());
+        behandling.setFagsak(fagsak);
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
         behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new Soeknad());
 
-        brevbestillingDto = new BrevbestillingDto.Builder()
+        brevbestillingRequest = new BrevbestillingRequest.Builder()
             .medMottaker(Aktoersroller.BRUKER)
             .medBegrunnelseKode("BEGRUNNELSEKODE")
             .medFritekst("FRITEKST")
@@ -106,7 +116,7 @@ public class BrevDataByggerInnvilgelseTest {
         when(lovvalgsperiodeService.hentValidertLovvalgsperiode(anyLong())).thenReturn(periode);
 
         when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Landkoder.AT);
-        when(landvelgerService.hentBostedsland(anyLong(), any(BehandlingsgrunnlagData.class))).thenReturn(Landkoder.NO);
+        when(landvelgerService.hentBostedsland(anyLong(), any(BehandlingsgrunnlagData.class))).thenReturn(new Bostedsland(Landkoder.NO));
         when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Landkoder.DE));
         when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(Collections.emptySet(), Collections.emptySet()));
 
@@ -114,7 +124,7 @@ public class BrevDataByggerInnvilgelseTest {
             landvelgerService,
             lovvalgsperiodeService,
             anmodningsperiodeService,
-            brevbestillingDto,
+            brevbestillingRequest,
             brevDataByggerA1,
             vilkaarsresultatService,
             persondataFasade,
@@ -123,7 +133,7 @@ public class BrevDataByggerInnvilgelseTest {
 
     public BrevDataGrunnlag lagBrevdataGrunnlag() {
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
-        return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService);
+        return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondataFasade, fakeUnleash);
     }
 
     @Test
@@ -156,7 +166,7 @@ public class BrevDataByggerInnvilgelseTest {
     @Test
     public void lag_innvilgelsesBrev_harBestillingsinformasjon() {
         BrevData brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData).isEqualToComparingOnlyGivenFields(brevbestillingDto, "begrunnelseKode", "fritekst");
+        assertThat(brevData).isEqualToComparingOnlyGivenFields(brevbestillingRequest, "begrunnelseKode", "fritekst");
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
     }
 

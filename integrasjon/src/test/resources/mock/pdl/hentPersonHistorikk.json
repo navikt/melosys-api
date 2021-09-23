@@ -1,0 +1,276 @@
+{
+  "data": {
+    "hentPerson": {
+      "bostedsadresse": [
+        {
+          "gyldigFraOgMed": "1975-08-23T00:00",
+          "gyldigTilOgMed": null,
+          "coAdressenavn": "C/O KRIMINELL KARAFFEL",
+          "matrikkeladresse": null,
+          "ukjentBosted": null,
+          "vegadresse": {
+            "adressenavn": "Akkarfjordneset",
+            "husnummer": "153",
+            "husbokstav": null,
+            "tilleggsnavn": null,
+            "postnummer": "9190"
+          },
+          "utenlandskAdresse": null,
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2021-07-06T11:28:38",
+                "kilde": "Dolly"
+              }
+            ]
+          }
+        }
+      ],
+      "doedsfall": [
+        {
+          "doedsdato": "2021-07-06",
+          "metadata": {
+            "master": "FREG",
+            "endringer": [
+              {
+                "registrert": "2021-07-06T11:28:39",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        }
+      ],
+      "foedsel": [
+        {
+          "foedselsdato": "1975-08-23",
+          "foedselsaar": 1975,
+          "foedeland": "NOR",
+          "foedested": "Fødested i/på NORGE",
+          "metadata": {
+            "master": "FREG",
+            "endringer": [
+              {
+                "registrert": "2021-07-06T11:28:37",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        },
+        {
+          "foedselsdato": "1975-08-23",
+          "foedselsaar": 1975,
+          "foedeland": "HRV",
+          "foedested": "Fødested i/på KROATIA",
+          "metadata": {
+            "master": "FREG",
+            "endringer": [
+              {
+                "registrert": "2021-07-06T11:28:37",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        }
+      ],
+      "folkeregisteridentifikator": [
+        {
+          "identifikasjonsnummer": "23487505536",
+          "metadata": {
+            "master": "FREG",
+            "endringer": [
+              {
+                "registrert": "2021-07-06T11:28:37",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        }
+      ],
+      "folkeregisterpersonstatus": [
+        {
+          "status": "doed"
+        }
+      ],
+      "forelderBarnRelasjon": [
+        {
+          "relatertPersonsIdent": "01421474318",
+          "relatertPersonsRolle": "BARN",
+          "minRolleForPerson": "FAR"
+        }
+      ],
+      "kjoenn": [
+        {
+          "kjoenn": "MANN",
+          "metadata": {
+            "master": "FREG",
+            "endringer": [
+              {
+                "registrert": "2021-07-06T11:28:38",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        }
+      ],
+      "kontaktadresse": [
+        {
+          "gyldigFraOgMed": "2020-07-06T00:00",
+          "gyldigTilOgMed": "2031-07-06T23:59:59",
+          "coAdressenavn": null,
+          "postboksadresse": null,
+          "postadresseIFrittFormat": {
+            "adresselinje1": "POSTLINJE 1",
+            "adresselinje2": "POSTLINJE 2",
+            "adresselinje3": null,
+            "postnummer": "9650"
+          },
+          "utenlandskAdresse": null,
+          "utenlandskAdresseIFrittFormat": null,
+          "vegadresse": null,
+          "metadata": {
+            "master": "PDL",
+            "historisk": false,
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2021-07-06T11:28:38",
+                "kilde": "Dolly"
+              }
+            ]
+          }
+        },
+        {
+          "gyldigFraOgMed": "2021-07-06T00:00",
+          "gyldigTilOgMed": "2022-07-06T00:00",
+          "coAdressenavn": null,
+          "postboksadresse": null,
+          "postadresseIFrittFormat": null,
+          "utenlandskAdresse": null,
+          "utenlandskAdresseIFrittFormat": {
+            "adresselinje1": "POSTLINJE 1",
+            "adresselinje2": "POSTLINJE 2",
+            "adresselinje3": "POSTLINJE 3",
+            "byEllerStedsnavn": null,
+            "landkode": "BMU",
+            "postkode": null
+          },
+          "vegadresse": null,
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2021-07-06T11:28:38",
+                "kilde": "Dolly"
+              }
+            ]
+          }
+        }
+      ],
+      "navn": [
+        {
+          "fornavn": "ABSURD",
+          "mellomnavn": null,
+          "etternavn": "HEST",
+          "metadata": {
+            "master": "FREG",
+            "endringer": [
+              {
+                "registrert": "2021-07-06T11:28:38",
+                "type": "OPPRETT"
+              }
+            ]
+          }
+        }
+      ],
+      "oppholdsadresse":  [
+        {
+          "gyldigFraOgMed": null,
+          "gyldigTilOgMed": null,
+          "coAdressenavn": null,
+          "matrikkeladresse": null,
+          "utenlandskAdresse": {
+            "adressenavnNummer": "1KOLEJOWA 6/5, 18-500 KOLNO, CAPITAL WEST 3000",
+            "bygningEtasjeLeilighet": "",
+            "postboksNummerNavn": null,
+            "postkode": null,
+            "bySted": null,
+            "regionDistriktOmraade": "",
+            "landkode": "ARG"
+          },
+          "vegadresse": null,
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2021-05-31T11:48:51",
+                "kilde": "Dolly"
+              }
+            ]
+          }
+        }
+      ],
+      "statsborgerskap": [
+        {
+          "land": "EST",
+          "bekreftelsesdato": null,
+          "gyldigFraOgMed": "2021-06-28",
+          "gyldigTilOgMed": null,
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2021-07-06T11:28:39",
+                "kilde": "Dolly"
+              }
+            ]
+          }
+        }
+      ],
+      "sivilstand": [
+        {
+          "type": "UOPPGITT",
+          "relatertVedSivilstand": null,
+          "gyldigFraOgMed": null,
+          "bekreftelsesdato": "2019-05-07",
+          "metadata": {
+            "master": "FREG",
+            "historisk": false,
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2021-07-06T11:28:37",
+                "kilde": "Dolly"
+              }
+            ]
+          }
+        },
+        {
+          "type": "GIFT",
+          "relatertVedSivilstand": "04507445824",
+          "gyldigFraOgMed": "2021-07-06",
+          "bekreftelsesdato": null,
+          "metadata": {
+            "master": "FREG",
+            "historisk": true,
+            "endringer": [
+              {
+                "type": "OPPRETT",
+                "registrert": "2021-07-06T11:28:39",
+                "kilde": "Dolly"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

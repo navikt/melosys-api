@@ -113,6 +113,10 @@ public class Fagsak extends RegistreringsInfo {
         return hentAktørMedRolleType(Aktoersroller.BRUKER);
     }
 
+    public String hentAktørID() {
+        return hentBruker().getAktørId();
+    }
+
     public List<Aktoer> hentMyndigheter() {
         return hentAktørerMedRolleType(MYNDIGHET);
     }
@@ -175,7 +179,7 @@ public class Fagsak extends RegistreringsInfo {
     /**
      * Henter representanten som representerer angitt {@link Representerer} eller {@code null} hvis ingen finnes.
      */
-    public Optional<Aktoer> hentRepresentant(Representerer representerer) {
+    public Optional<Aktoer> finnRepresentant(Representerer representerer) {
         Assert.notNull(representerer, "Representerer trengs for å hente representant.");
         return aktører.stream().filter(a -> REPRESENTANT.equals(a.getRolle()))
             .filter(a -> (representerer.equals(a.getRepresenterer()) || Representerer.BEGGE.equals(a.getRepresenterer())))
@@ -206,7 +210,9 @@ public class Fagsak extends RegistreringsInfo {
         return 31;
     }
 
-    public static boolean erSakstypeFtrl(Sakstyper sakstype) {
-        return Sakstyper.FTRL == sakstype;
+    public static boolean erSakstypeEøs(Sakstyper sakstype) {
+        return Sakstyper.EU_EOS == sakstype;
     }
+
+
 }

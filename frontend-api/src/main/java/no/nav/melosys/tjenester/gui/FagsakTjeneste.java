@@ -99,11 +99,11 @@ public class FagsakTjeneste {
         responseContainer = "List")
     public List<FagsakOppsummeringDto> hentFagsaker(@RequestBody FagsakSokDto fagsakSokDto) {
 
-        if (StringUtils.isNotEmpty(fagsakSokDto.getIdent())) {
-            tilgangService.sjekkFnr(fagsakSokDto.getIdent());
-            return tilFagsakOppsummeringDtoer(fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, fagsakSokDto.getIdent()));
-        } else if (StringUtils.isNotEmpty(fagsakSokDto.getSaksnummer())) {
-            Optional<Fagsak> fagsak = fagsakService.finnFagsakFraSaksnummer(fagsakSokDto.getSaksnummer());
+        if (StringUtils.isNotEmpty(fagsakSokDto.ident())) {
+            tilgangService.sjekkFnr(fagsakSokDto.ident());
+            return tilFagsakOppsummeringDtoer(fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, fagsakSokDto.ident()));
+        } else if (StringUtils.isNotEmpty(fagsakSokDto.saksnummer())) {
+            Optional<Fagsak> fagsak = fagsakService.finnFagsakFraSaksnummer(fagsakSokDto.saksnummer());
             if (fagsak.isPresent()) {
                 tilgangService.sjekkSak(fagsak.get());
                 return tilFagsakOppsummeringDtoer(Collections.singletonList(fagsak.get()));
@@ -117,7 +117,7 @@ public class FagsakTjeneste {
     @ApiOperation(value = "Henlegger en fagsak")
     public ResponseEntity<Void> henleggFagsak(@PathVariable("saksnr") String saksnummer, @RequestBody HenleggelseDto henleggelseDto) {
         tilgangService.sjekkSak(saksnummer);
-        henleggFagsakService.henleggFagsak(saksnummer, henleggelseDto.getBegrunnelseKode(), henleggelseDto.getFritekst());
+        henleggFagsakService.henleggFagsak(saksnummer, henleggelseDto.begrunnelseKode(), henleggelseDto.fritekst());
         return ResponseEntity.ok().build();
     }
 
@@ -136,7 +136,7 @@ public class FagsakTjeneste {
             videresendDto.getMottakerinstitusjon(),
             videresendDto.getFritekst(),
             videresendDto.getVedlegg().stream().map(
-                v -> new DokumentReferanse(v.getJournalpostID(), v.getDokumentID())).collect(
+                v -> new DokumentReferanse(v.journalpostID(), v.dokumentID())).collect(
                 Collectors.toUnmodifiableSet())
         );
         return ResponseEntity.ok().build();
@@ -172,9 +172,9 @@ public class FagsakTjeneste {
 
         utpekingService.utpekLovvalgsland(
             fagsak,
-            utpekDto.getMottakerinstitusjoner(),
-            utpekDto.getFritekstSed(),
-            utpekDto.getFritekstBrev()
+            utpekDto.mottakerinstitusjoner(),
+            utpekDto.fritekstSed(),
+            utpekDto.fritekstBrev()
         );
 
         return ResponseEntity.noContent().build();
@@ -243,14 +243,17 @@ public class FagsakTjeneste {
         if (behandling.erBehandlingAvSøknad()) {
             behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId())
                 .map(Behandlingsgrunnlag::getBehandlingsgrunnlagdata).ifPresent(grunnlagData -> {
-                    behandlingOversiktDto.setLand(hentSøknadsland(grunnlagData));
+                    SoeknadslandDto land = SoeknadslandDto.av(hentSøknadsland((grunnlagData)));
+                    behandlingOversiktDto.setLand(land);
                     Periode periode = hentPeriode(grunnlagData);
-                    behandlingOversiktDto.setPeriode(new PeriodeDto(periode.getFom(), periode.getTom()));
+                    if (periode != null) {
+                        behandlingOversiktDto.setPeriode(new PeriodeDto(periode.getFom(), periode.getTom()));
+                    }
                 });
         } else {
             saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresent(sedDokument -> {
-                behandlingOversiktDto.setLand(Collections.singletonList(sedDokument.getLovvalgslandKode() != null
-                    ? sedDokument.getLovvalgslandKode().getKode() : null));
+                SoeknadslandDto land = SoeknadslandDto.av(sedDokument.getLovvalgslandKode());
+                behandlingOversiktDto.setLand(land);
                 behandlingOversiktDto.setPeriode(new PeriodeDto(
                     sedDokument.getLovvalgsperiode().getFom(), sedDokument.getLovvalgsperiode().getTom())
                 );

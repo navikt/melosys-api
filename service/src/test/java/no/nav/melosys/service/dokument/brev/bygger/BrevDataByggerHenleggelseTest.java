@@ -8,7 +8,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ public class BrevDataByggerHenleggelseTest {
 
     @BeforeEach
     public void setUp() {
-        brevDataByggerHenleggelse = new BrevDataByggerHenleggelse(joarkService, new BrevbestillingDto());
+        brevDataByggerHenleggelse = new BrevDataByggerHenleggelse(joarkService, new BrevbestillingRequest());
     }
 
     @Test

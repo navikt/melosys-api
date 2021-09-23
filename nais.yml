@@ -1,8 +1,8 @@
 apiVersion: nais.io/v1alpha1
 kind: Application
 metadata:
-  name: melosys
-  namespace: {{ NAMESPACE }}
+  name: {{APP_NAME}}
+  namespace: teammelosys
   labels:
     team: teammelosys
 spec:
@@ -29,6 +29,9 @@ spec:
       memory: 1024Mi
   vault:
     enabled: true
+    paths:
+      - mountPath: /var/run/secrets/nais.io/serviceuser
+        kvPath: /serviceuser/data/{{VAULT_CLUSTER}}/srvmelosys
   prometheus:
     enabled: true
     path: /internal/prometheus

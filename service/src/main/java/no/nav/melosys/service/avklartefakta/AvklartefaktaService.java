@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Bostedsland;
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
@@ -11,9 +12,7 @@ import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
-import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
-import no.nav.melosys.domain.person.familie.IkkeOmfattetBarn;
-import no.nav.melosys.domain.person.familie.OmfattetFamilie;
+import no.nav.melosys.domain.person.familie.*;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -23,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.avklartefakta.Avklartefakta.VALGT_FAKTA;
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_LOVVALG_BARN;
+import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER;
 
 @Service
 public class AvklartefaktaService {
@@ -62,19 +62,19 @@ public class AvklartefaktaService {
             .collect(Collectors.toSet());
     }
 
-    public Optional<Landkoder> hentBostedland(long behandlingID) {
+    public Optional<Bostedsland> hentBostedland(long behandlingID) {
         return avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingID, Avklartefaktatyper.BOSTEDSLAND).stream()
-            .map(af -> Landkoder.valueOf(af.getFakta()))
+            .map(af -> new Bostedsland(af.getFakta()))
             .findFirst();
     }
 
     // Denne leverer enten norske orgnr eller uuid for identifikasjon av utenlandske foretak
     public Set<String> hentAvklarteOrgnrOgUuid(long behandlingID) {
         Set<Avklartefakta> avklartefakta =
-                avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingID, Avklartefaktatyper.VIRKSOMHET, VALGT_FAKTA);
+            avklarteFaktaRepository.findByBehandlingsresultatIdAndTypeAndFakta(behandlingID, Avklartefaktatyper.VIRKSOMHET, VALGT_FAKTA);
         return avklartefakta.stream()
-                .map(Avklartefakta::getSubjekt)
-                .collect(Collectors.toSet());
+            .map(Avklartefakta::getSubjekt)
+            .collect(Collectors.toSet());
     }
 
     public Optional<Yrkesgrupper> finnYrkesGruppe(long behandlingID) {
@@ -139,6 +139,21 @@ public class AvklartefaktaService {
             }
         }
         return new AvklarteMedfolgendeBarn(barnOmfattetAvNorskTrygd, barnIkkeOmfattetAvNorskTrygd);
+    }
+
+    public AvklarteMedfolgendeFamilie hentAvklarteMedfølgendeEktefelle(long behandlingId) {
+        Set<OmfattetFamilie> omfattetFamilie = new HashSet<>();
+        Set<IkkeOmfattetFamilie> ikkeOmfattetFamilie = new HashSet<>();
+        for (Avklartefakta avklartefakta : avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(behandlingId, VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER)) {
+            if (avklartefakta.getFakta().equals(VALGT_FAKTA)) {
+                omfattetFamilie.add(new OmfattetFamilie(avklartefakta.getSubjekt()));
+            } else {
+                String begrunnelse = avklartefakta.getRegistreringer().iterator().next().getBegrunnelseKode();
+                ikkeOmfattetFamilie.add(
+                    new IkkeOmfattetFamilie(avklartefakta.getSubjekt(), begrunnelse, avklartefakta.getBegrunnelseFritekst()));
+            }
+        }
+        return new AvklarteMedfolgendeFamilie(omfattetFamilie, ikkeOmfattetFamilie);
     }
 
     private Map<String, List<Avklartefakta>> grupperForSubjekt(Collection<Avklartefakta> avklartefakta) {

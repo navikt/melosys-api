@@ -78,7 +78,7 @@ public class EessiService {
                 .filter(jp -> jp.getJournalpostId().equals(dokumentReferanse.getJournalpostID()))
                 .findFirst()
                 .orElseThrow(() -> new IkkeFunnetException(String.format("Finner ikke journalpost %s for sak %s",
-                        dokumentReferanse.getJournalpostID(), fagsak.getSaksnummer())));
+                    dokumentReferanse.getJournalpostID(), fagsak.getSaksnummer())));
             vedlegg.add(lagEessiVedlegg(journalpost, dokumentReferanse));
         }
         return vedlegg;
@@ -119,6 +119,12 @@ public class EessiService {
                                   BucType bucType,
                                   List<String> mottakerInstitusjoner,
                                   Collection<DokumentReferanse> vedleggReferanser) {
+
+        Fagsak fagsak = behandling.getFagsak();
+        joarkFasade.validerDokumenterTilhørerSakOgHarTilgang(
+            new HentJournalposterTilknyttetSakRequest(fagsak.getGsakSaksnummer(), fagsak.getSaksnummer()), vedleggReferanser
+        );
+
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, PeriodeType.fraBucType(bucType, behandlingsresultat));
@@ -213,7 +219,8 @@ public class EessiService {
         sedDataDto.setYtterligereInformasjon(ytterligereInformasjon);
         String rinaSaksnummer = behandling.hentSedDokument().getRinaSaksnummer();
 
-        log.info("Sender svar på anmodning om unntak for behandling {}", behandlingID);
+        final var sedType = sedTypeAvklarer.apply(behandlingsresultat);
+        log.info("Forsøker å sende sed {} for behandling {}", sedType, behandlingID);
         eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, sedTypeAvklarer.apply(behandlingsresultat));
     }
 

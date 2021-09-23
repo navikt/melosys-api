@@ -129,23 +129,23 @@ public class LandvelgerService {
         BehandlingsgrunnlagData grunnlagdata = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID).getBehandlingsgrunnlagdata();
 
         if (behandlingsresultat.erInnvilgetArbeidPåSkipOmfattetAvArbeidsland() || erVideresendt(behandlingsresultat)) {
-            return Lists.newArrayList(hentBostedsland(behandlingID, grunnlagdata));
+            return Lists.newArrayList(hentBostedsland(behandlingID, grunnlagdata).getLandkodeobjekt());
         } else {
             return new ArrayList<>(hentAlleArbeidslandUtenMarginaltArbeid(behandlingID));
         }
     }
 
-    public Landkoder hentBostedsland(Behandling behandling) {
+    public Bostedsland hentBostedsland(Behandling behandling) {
         return hentBostedsland(behandling.getId(), behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata());
     }
 
-    public Landkoder hentBostedsland(long behandlingID, BehandlingsgrunnlagData grunnlagData) {
-        Optional<Landkoder> bostedslandOppgittAvSaksbehandler = hentBostedslandOppgittAvSaksbehandler(behandlingID, grunnlagData);
-        return bostedslandOppgittAvSaksbehandler.orElse(Landkoder.NO);
+    public Bostedsland hentBostedsland(long behandlingID, BehandlingsgrunnlagData grunnlagData) {
+        Optional<Bostedsland> bostedslandOppgittAvSaksbehandler = hentBostedslandOppgittAvSaksbehandler(behandlingID, grunnlagData);
+        return bostedslandOppgittAvSaksbehandler.orElse(new Bostedsland(Landkoder.NO));
     }
 
-    private Optional<Landkoder> hentBostedslandOppgittAvSaksbehandler(long behandlingID, BehandlingsgrunnlagData grunnlagData) {
-        Optional<Landkoder> bostedsland = avklartefaktaService.hentBostedland(behandlingID);
+    private Optional<Bostedsland> hentBostedslandOppgittAvSaksbehandler(long behandlingID, BehandlingsgrunnlagData grunnlagData) {
+        Optional<Bostedsland> bostedsland = avklartefaktaService.hentBostedland(behandlingID);
         if (bostedsland.isPresent()) {
             return bostedsland;
         } else {

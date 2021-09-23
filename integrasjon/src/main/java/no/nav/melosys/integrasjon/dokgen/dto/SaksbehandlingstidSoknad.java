@@ -7,16 +7,12 @@ import java.time.temporal.ChronoUnit;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.domain.kodeverk.Avsendertyper;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.REPRESENTANT;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 
 public class SaksbehandlingstidSoknad extends DokgenDto {
     @JsonSerialize(using = InstantSerializer.class)
@@ -34,17 +30,12 @@ public class SaksbehandlingstidSoknad extends DokgenDto {
 
     public SaksbehandlingstidSoknad(DokgenBrevbestilling brevbestilling) {
         super(brevbestilling);
-
-        Behandling behandling = brevbestilling.getBehandling();
-        Fagsak fagsak = behandling.getFagsak();
-        Persondata persondata = behandling.hentPersonDokument();
-
         this.datoMottatt = brevbestilling.getForsendelseMottatt();
         this.datoBehandlingstid = brevbestilling.getForsendelseMottatt().plus(SAKSBEHANDLINGSTID_DAGER, ChronoUnit.DAYS);
-        this.typeSoknad = fagsak.getType().getKode();
-        this.avsenderTypeSoknad = (persondata.hentFolkeregisterIdent().equals(brevbestilling.getAvsenderId()) ? BRUKER : REPRESENTANT);
+        this.typeSoknad = brevbestilling.getBehandling().getFagsak().getType().getKode();
+        this.avsenderTypeSoknad = utledAvsendertype(brevbestilling.getAvsendertype());
         this.avsenderSoknad = brevbestilling.getAvsenderNavn();
-        this.avsenderLand = null; //NOTE Mangler inntil vi kan avgjøre om avsender == MYNDIGHET
+        this.avsenderLand = brevbestilling.getAvsenderLand();
     }
 
     public static SaksbehandlingstidSoknad av(DokgenBrevbestilling brevbestilling) {
@@ -73,5 +64,16 @@ public class SaksbehandlingstidSoknad extends DokgenDto {
 
     public String getAvsenderLand() {
         return avsenderLand;
+    }
+
+    private Aktoersroller utledAvsendertype(Avsendertyper avsendertype) {
+        if (avsendertype == null) {
+            return BRUKER;
+        }
+        return switch (avsendertype) {
+            case PERSON -> BRUKER;
+            case ORGANISASJON -> REPRESENTANT;
+            case UTENLANDSK_TRYGDEMYNDIGHET -> MYNDIGHET;
+        };
     }
 }

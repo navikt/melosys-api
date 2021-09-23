@@ -2,6 +2,7 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,7 +37,7 @@ class A1Mapper {
     private static final int ANTALL_PÅKREVDE_FELTER_I_LISTE_5_1 = 15;
     private static final int ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2 = 13;
     static final int MAKS_ANTALL_TEGN_PER_LINJE_5_2 = 70;
-    private static final String STATSLØS_TEKST = "Stateless";
+    static final String STATSLØS_TEKST = "Stateless";
 
     private BrevDataA1 brevData;
 
@@ -89,7 +90,9 @@ class A1Mapper {
         if (statsborgerskap.contains(Land.av(Land.STATSLØS))) {
             return STATSLØS_TEKST;
         }
-        return statsborgerskap.stream().map(s -> LandkoderUtils.tilIso2(s.getKode())).collect(Collectors.joining(","));
+        return statsborgerskap.stream()
+            .sorted(Comparator.comparing(Land::getKode))
+            .map(s -> LandkoderUtils.tilIso2(s.getKode())).collect(Collectors.joining(","));
     }
 
     private LovvalgsperiodeType mapLovvalgsperiode(Lovvalgsperiode lovvalgsperiode) {
@@ -161,6 +164,10 @@ class A1Mapper {
 
     private Stream<AdresseType> lagAdresserForArbeidsstederOgLandUtenArbeidssted(List<Arbeidssted> arbeidssteder,
                                                                                  Collection<Landkoder> arbeidsland) {
+        if (brevData.erUkjenteEllerAlleEosLand) {
+            return lagAdresselinjeForUkjentEllerIkkeOppgittArbeidssted().stream().map(this::tilAdresseType);
+        }
+
         String landUtenOppgittArbeidsstedBeskrivelse = hentLandUtenOppgittArbeidssted(arbeidsland, arbeidssteder)
             .stream()
             .map(Landkoder::getBeskrivelse)
@@ -179,6 +186,10 @@ class A1Mapper {
             .map(adresselinje -> adresselinje.isBlank() ? "" : adresselinje) //uten dette viser ikke brev alle linjene i en A1
             .flatMap(adresselinje -> brekkTekstTilListe(adresselinje).stream())
             .collect(Collectors.toList());
+    }
+
+    private static List<String> lagAdresselinjeForUkjentEllerIkkeOppgittArbeidssted() {
+        return brekkTekstTilListe("Various EEA-countries/Switzerland");
     }
 
     private static List<String> brekkTekstTilListe(String tekst) {
@@ -205,7 +216,7 @@ class A1Mapper {
         long antallArbeidssteder = fysiskArbeidssteder.size();
 
         return antallArbeidssteder < 1 ||
-               antallArbeidssteder > MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV;
+            antallArbeidssteder > MAKS_ANTALL_ARBEIDSSTEDER_PLASS_I_BREV;
     }
 
     private Set<Landkoder> hentLandUtenOppgittArbeidssted(Collection<Landkoder> arbeidsland,

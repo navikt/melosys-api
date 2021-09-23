@@ -1,12 +1,11 @@
 package no.nav.melosys.service.dokument;
 
-import java.time.LocalDate;
 import java.util.Optional;
 
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.person.Datakilde;
+import no.nav.melosys.domain.person.Master;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.util.BehandlingsgrunnlagUtils;
 import no.nav.melosys.exception.FunksjonellException;
@@ -47,9 +46,8 @@ public class BostedGrunnlag {
             return Optional.empty();
         }
         final var strukturertAdresse = bostedsadresseFraRegister.strukturertAdresse();
-        if (Datakilde.TPS.name().equals(bostedsadresseFraRegister.kilde())) {
-            strukturertAdresse.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, strukturertAdresse.getPostnummer(),
-                LocalDate.now()));
+        if (Master.TPS.name().equals(bostedsadresseFraRegister.kilde())) {
+            strukturertAdresse.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, strukturertAdresse.getPostnummer()));
         }
         return Optional.of(strukturertAdresse);
     }

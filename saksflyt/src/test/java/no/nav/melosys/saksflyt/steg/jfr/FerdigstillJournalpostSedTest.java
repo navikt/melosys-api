@@ -38,7 +38,7 @@ class FerdigstillJournalpostSedTest {
     @BeforeEach
     public void setUp() {
         ferdigstillJournalpostSed = new FerdigstillJournalpostSed(joarkFasade, persondataFasade);
-        when(persondataFasade.hentFolkeregisterIdent(AKTØR_ID)).thenReturn(BRUKER_ID);
+        when(persondataFasade.hentFolkeregisterident(AKTØR_ID)).thenReturn(BRUKER_ID);
     }
 
     @Test

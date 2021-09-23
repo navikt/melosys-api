@@ -18,6 +18,7 @@ public class Journalpost {
     private String avsenderId;
     private String avsenderNavn;
     private Avsendertyper avsenderType;
+    private String avsenderLand;
     private String brukerId;
     private BrukerIdType brukerIdType;
     private String korrespondansepartNavn;
@@ -92,6 +93,14 @@ public class Journalpost {
 
     public void setAvsenderType(Avsendertyper avsenderType) {
         this.avsenderType = avsenderType;
+    }
+
+    public String getAvsenderLand() {
+        return avsenderLand;
+    }
+
+    public void setAvsenderLand(String avsenderLand) {
+        this.avsenderLand = avsenderLand;
     }
 
     public String getBrukerId() {

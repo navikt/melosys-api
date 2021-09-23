@@ -2,10 +2,7 @@ package no.nav.melosys.tjenester.gui;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,6 +34,7 @@ import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.sak.VideresendSoknadService;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.*;
+import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.VedleggDto;
 import no.nav.melosys.tjenester.gui.util.FagsakBehandlingFactory;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
@@ -87,9 +85,12 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void videresendSchemaValidering() throws Exception {
-        VideresendDto fagsakDto = random.nextObject(VideresendDto.class);
+        VideresendDto videresendDto = new VideresendDto();
+        videresendDto.setMottakerinstitusjon("SE:123");
+        videresendDto.setFritekst("fri som fuglen");
+        videresendDto.setVedlegg(Set.of(new VedleggDto("1", "1")));
 
-        String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(fagsakDto);
+        String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(videresendDto);
         valider(jsonString, FAGSAKER_VIDERESEND_POST_SCHEMA, log);
     }
 
@@ -111,7 +112,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void fagsakUtpekSchemaValidering() throws Exception {
-        UtpekDto utpekDto = random.nextObject(UtpekDto.class);
+        UtpekDto utpekDto = new UtpekDto(Set.of("SE:123"), "fri SED", "fri brev");
 
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(utpekDto);
         valider(jsonString, FAGSAKER_UTPEK_POST_SCHEMA, log);
@@ -123,7 +124,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
 
         List<FagsakOppsummeringDto> fagsakOppsummeringDtoList = random.objects(FagsakOppsummeringDto.class, 1).collect(Collectors.toList());
         List<BehandlingOversiktDto> behandlingOversiktDtoer = random.objects(BehandlingOversiktDto.class, 1).collect(Collectors.toList());
-        behandlingOversiktDtoer.get(0).setLand(Collections.singletonList(Landkoder.NO.getKode()));
+        behandlingOversiktDtoer.get(0).setLand(new SoeknadslandDto(Collections.singletonList(Landkoder.NO.getKode()), false));
         fagsakOppsummeringDtoList.get(0).setBehandlingOversikter(behandlingOversiktDtoer);
 
         validerArray(fagsakOppsummeringDtoList, SOK_FAGSAKER_SCHEMA, log);
@@ -212,7 +213,8 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         assertThat(behandlingFørst.getBehandlingsstatus().getKode()).isEqualTo("UNDER_BEHANDLING");
         assertThat(behandlingFørst.getBehandlingstype().getKode()).isEqualTo("SOEKNAD");
         assertThat(behandlingFørst.getOpprettetDato()).isEqualTo(Instant.parse("2019-01-10T10:37:30.00Z"));
-        assertThat(behandlingFørst.getLand().get(0)).isEqualTo("DK");
+        assertThat(behandlingFørst.getLand().landkoder.get(0)).isEqualTo("DK");
+        assertThat(behandlingFørst.getLand().erUkjenteEllerAlleEosLand).isEqualTo(false);
 
         assertThat(behandlingFørst.getPeriode().getFom()).isEqualTo(LocalDate.of(2019,1,1));
         assertThat(behandlingFørst.getPeriode().getTom()).isEqualTo(LocalDate.of(2019,2,1));
@@ -238,11 +240,9 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
 
     @Test
     void henleggFagsakSenderSaksnummerFritekstOgBegrunnelseTilService() throws Exception {
-        HenleggelseDto henleggelseDto = new HenleggelseDto();
         String begrunnelseKode = Henleggelsesgrunner.OPPHOLD_UTL_AVLYST.getKode();
         String fritekst = "Dette er fritekst";
-        henleggelseDto.setBegrunnelseKode(begrunnelseKode);
-        henleggelseDto.setFritekst(fritekst);
+        HenleggelseDto henleggelseDto = new HenleggelseDto(fritekst, begrunnelseKode);
 
         valider(henleggelseDto, FAGSAKSER_HENLEGG_POST_SCHEMA);
 
@@ -284,7 +284,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
             .withMessageContaining("uten vedlegg");
     }
 
-    private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) throws Exception {
+    private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) {
         tilgangService = mock(TilgangService.class);
         fagsakService = mock(FagsakService.class);
         henleggFagsakService = mock(HenleggFagsakService.class);
@@ -335,16 +335,16 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void utpekLovvalgsland() throws Exception {
+    void utpekLovvalgsland() {
         Fagsak fagsak = lagFagsak();
         FagsakTjeneste fagsakTjeneste = lagFagsakTjeneste(fagsak);
-        UtpekDto utpekDto = random.nextObject(UtpekDto.class);
+        UtpekDto utpekDto = new UtpekDto(Set.of("SE:123"), "Fri SED", "Fri brev");
 
         when(fagsakService.hentFagsak(any())).thenReturn(fagsak);
 
         fagsakTjeneste.utpekLovvalgsland(fagsak.getSaksnummer(), utpekDto);
 
         verify(tilgangService).sjekkSak(fagsak);
-        verify(utpekingService).utpekLovvalgsland(fagsak, utpekDto.getMottakerinstitusjoner(), utpekDto.getFritekstSed(), utpekDto.getFritekstBrev());
+        verify(utpekingService).utpekLovvalgsland(fagsak, utpekDto.mottakerinstitusjoner(), utpekDto.fritekstSed(), utpekDto.fritekstBrev());
     }
 }

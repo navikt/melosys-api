@@ -4,14 +4,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Bostedsland;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.AvklarteFaktaRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
@@ -23,6 +26,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.SAMBOER_UTEN_FELLES_BARN;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.*;
@@ -94,11 +98,12 @@ class AvklartefaktaServiceTest {
 
     @Test
     void hentBostedsland() {
+        Bostedsland bostedsland = new Bostedsland(Landkoder.NO);
         when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(anyLong(), eq(Avklartefaktatyper.BOSTEDSLAND)))
-            .thenReturn(Set.of(lagAvklartefakta(Avklartefaktatyper.BOSTEDSLAND, null, "NO")));
+            .thenReturn(Set.of(lagAvklartefakta(Avklartefaktatyper.BOSTEDSLAND, null, bostedsland.landkode())));
 
-        Optional<Landkoder> landkoder = avklartefaktaService.hentBostedland(1L);
-        assertThat(landkoder).isPresent().get().isEqualTo(Landkoder.NO);
+        Optional<Bostedsland> landkoder = avklartefaktaService.hentBostedland(1L);
+        assertThat(landkoder).isPresent().get().isEqualTo(bostedsland);
     }
 
     @Test
@@ -295,8 +300,47 @@ class AvklartefaktaServiceTest {
         assertThat(avklarteMedfølgendeBarn.hentBegrunnelseFritekst().orElse("")).isEqualTo("begrunnelseFritekst");
     }
 
+    @Test
+    void hentAvklartMedfølgendeEktefelle_medMedfølgendeEktefelle() {
+        Avklartefakta ektefelleOmfattet = lagAvklartefakta(Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER,
+            "omfattet", "TRUE");
+
+        when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(anyLong(), any(Avklartefaktatyper.class)))
+            .thenReturn(Set.of(ektefelleOmfattet));
+
+        AvklarteMedfolgendeFamilie avklarteMedfølgendeEktefelle = avklartefaktaService.hentAvklarteMedfølgendeEktefelle(1L);
+
+        assertThat(avklarteMedfølgendeEktefelle.getFamilieOmfattetAvNorskTrygd())
+            .extracting("uuid").containsExactly("omfattet");
+    }
+
+    @Test
+    void hentAvklartMedfølgendeEktefelle_utenMedfølgendeEktefelle() {
+        Avklartefakta ektefelleOmfattet = lagAvklartIkkeOmfattetEktefelle("ikkeOmfattet",
+            SAMBOER_UTEN_FELLES_BARN, "TRUE");
+
+        when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(anyLong(), any(Avklartefaktatyper.class)))
+            .thenReturn(Set.of(ektefelleOmfattet));
+
+        AvklarteMedfolgendeFamilie avklarteMedfølgendeEktefelle = avklartefaktaService.hentAvklarteMedfølgendeEktefelle(1L);
+
+        assertThat(avklarteMedfølgendeEktefelle.getFamilieIkkeOmfattetAvNorskTrygd().iterator().next())
+            .extracting("uuid", "begrunnelse")
+            .containsExactlyInAnyOrder("ikkeOmfattet", SAMBOER_UTEN_FELLES_BARN.name());
+    }
+
     private static Avklartefakta lagAvklartIkkeOmfattetBarn(String subjectID, Medfolgende_barn_begrunnelser begrunnelse, String begrunnelseFritekst) {
         Avklartefakta avklartefakta = lagAvklartefakta(Avklartefaktatyper.VURDERING_LOVVALG_BARN, subjectID, "FALSE");
+        avklartefakta.setBegrunnelseFritekst(begrunnelseFritekst);
+
+        AvklartefaktaRegistrering avklartefaktaRegistrering = new AvklartefaktaRegistrering();
+        avklartefaktaRegistrering.setBegrunnelseKode(begrunnelse.getKode());
+        avklartefakta.setRegistreringer(Set.of(avklartefaktaRegistrering));
+        return avklartefakta;
+    }
+
+    private static Avklartefakta lagAvklartIkkeOmfattetEktefelle(String subjectID, Medfolgende_ektefelle_samboer_begrunnelser_ftrl begrunnelse, String begrunnelseFritekst) {
+        Avklartefakta avklartefakta = lagAvklartefakta(Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER, subjectID, "FALSE");
         avklartefakta.setBegrunnelseFritekst(begrunnelseFritekst);
 
         AvklartefaktaRegistrering avklartefaktaRegistrering = new AvklartefaktaRegistrering();

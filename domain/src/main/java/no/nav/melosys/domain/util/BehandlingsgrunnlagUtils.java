@@ -4,9 +4,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.Bostedsland;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import org.apache.commons.lang3.StringUtils;
 
@@ -28,17 +30,18 @@ public final class BehandlingsgrunnlagUtils {
      * og sjekker at det er minst et søknadsland oppgitt i søknad
      */
     public static List<Landkoder> hentSøknadslandkoder(BehandlingsgrunnlagData grunnlagdata) {
-        List<String> søknadsland = hentSøknadsland(grunnlagdata);
-        if (søknadsland.isEmpty()) {
-            throw new IllegalStateException("Søknad mangler søknadsland");
+        Soeknadsland soeknadsland = hentSøknadsland(grunnlagdata);
+        List<String> søknadsland = soeknadsland.landkoder;
+        if (søknadsland.isEmpty() && soeknadsland.erUkjenteEllerAlleEosLand == false) {
+            throw new IllegalStateException("Søknad mangler søknadsland og land er ikke markert som ukjente eller alle Eøs-land.");
         }
         return søknadsland.stream()
             .map(Landkoder::valueOf)
             .collect(Collectors.toList());
     }
 
-    public static List<String> hentSøknadsland(BehandlingsgrunnlagData grunnlagdata) {
-        return grunnlagdata.soeknadsland.landkoder;
+    public static Soeknadsland hentSøknadsland(BehandlingsgrunnlagData grunnlagdata) {
+        return grunnlagdata.soeknadsland;
     }
 
     public static StrukturertAdresse hentBostedsadresse(BehandlingsgrunnlagData grunnlagdata) {
@@ -55,7 +58,7 @@ public final class BehandlingsgrunnlagUtils {
         }
     }
 
-    public static Optional<Landkoder> hentOppgittBostedsland(BehandlingsgrunnlagData grunnlagdata) {
-        return Optional.ofNullable(grunnlagdata.bosted.oppgittAdresse.getLandkode()).map(Landkoder::valueOf);
+    public static Optional<Bostedsland> hentOppgittBostedsland(BehandlingsgrunnlagData grunnlagdata) {
+        return Optional.ofNullable(grunnlagdata.bosted.oppgittAdresse.getLandkode()).map(lk -> new Bostedsland(lk));
     }
 }

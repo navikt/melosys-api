@@ -26,6 +26,7 @@ public final class Query {
                 id
                 type
                 navn
+                land
               }
               kanal
               relevanteDatoer {
@@ -39,6 +40,10 @@ public final class Query {
                 logiskeVedlegg {
                   logiskVedleggId
                   tittel
+                }
+                dokumentvarianter {
+                  saksbehandlerHarTilgang
+                  variantformat
                 }
               }
             }
@@ -93,6 +98,10 @@ public final class Query {
                 logiskeVedlegg {
                   logiskVedleggId
                   tittel
+                }
+                dokumentvarianter {
+                  saksbehandlerHarTilgang
+                  variantformat
                 }
               }
             }
