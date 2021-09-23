@@ -33,7 +33,6 @@ import static no.nav.melosys.service.persondata.PdlObjectFactory.lagPerson;
 import static no.nav.melosys.service.persondata.PdlObjectFactory.metadata;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -114,7 +113,7 @@ class PersondataServiceTest {
     @Test
     void hentPersonMedHistorikk_aktivBehandling_konverteringOk() {
         when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(lagBehandling());
-        when(pdlConsumer.hentPersonMedHistorikk(anyString(), anyBoolean())).thenReturn(lagPerson());
+        when(pdlConsumer.hentPersonMedHistorikk(anyString())).thenReturn(lagPerson());
 
         final var personMedHistorikk = persondataService.hentPersonMedHistorikk(1L);
         assertThat(personMedHistorikk.bostedsadresser()).isNotEmpty();
@@ -136,7 +135,7 @@ class PersondataServiceTest {
     void hentPersonMedHistorikk_inaktivBehandling_filtrererNyeOpplysninger() {
         when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(lagInaktivBehandling());
         when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(lagBehandlingsresultat());
-        when(pdlConsumer.hentPersonMedHistorikk(anyString(), anyBoolean())).thenReturn(lagPerson());
+        when(pdlConsumer.hentPersonMedHistorikk(anyString())).thenReturn(lagPerson());
 
         final var personMedHistorikk = persondataService.hentPersonMedHistorikk(1L);
         assertThat(personMedHistorikk.statsborgerskap()).containsExactly(

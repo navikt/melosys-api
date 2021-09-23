@@ -14,7 +14,7 @@ public interface PDLConsumer {
     Person hentForelder(String ident);
     Person hentFamilierelasjoner(String ident);
     Person hentPerson(String ident);
-    Person hentPersonMedHistorikk(String ident, boolean innsynn);
+    Person hentPersonMedHistorikk(String ident);
     Person hentRelatertVedSivilstand(String ident);
     Collection<Adressebeskyttelse> hentAdressebeskyttelser(String ident);
     Collection<Navn> hentNavn(String fnr);
