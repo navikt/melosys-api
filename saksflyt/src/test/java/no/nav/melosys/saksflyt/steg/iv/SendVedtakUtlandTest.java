@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
@@ -83,10 +82,7 @@ class SendVedtakUtlandTest {
         behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        var fakeUnleash = new FakeUnleash();
-        fakeUnleash.enableAll();
-
-        sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingService, behandlingsresultatService, brevBestiller, sedSomBrevService, utpekingService, fakeUnleash);
+        sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingService, behandlingsresultatService, brevBestiller, sedSomBrevService, utpekingService);
     }
 
     private Behandlingsresultat lagBehandlingsresultat() {
