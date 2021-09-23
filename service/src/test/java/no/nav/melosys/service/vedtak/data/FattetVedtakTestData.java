@@ -20,6 +20,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.eessi.sed.Adressetype;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.*;
@@ -250,6 +251,10 @@ public class FattetVedtakTestData {
             null,
             List.of(lagAdresse())
         );
+    }
+
+    private static Adresse lagAdresse() {
+        return new Adresse(Adressetype.BOSTEDSADRESSE, "Gatenavn", "22", "1000", "POSTSTED");
     }
 
     private static Saksopplysninger lagSaksopplysninger() {
