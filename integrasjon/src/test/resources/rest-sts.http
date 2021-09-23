@@ -1,0 +1,13 @@
+// @no-cookie-jar
+// @no-log
+GET https://{{sts-url}}/rest/v1/sts/token?grant_type=client_credentials&scope=openid
+Cache-Control: no-cache
+Content-Type: application/json
+Accept: application/json
+Authorization: Basic {{sts-basic-srvMelosys-username}} {{sts-basic-srvMelosys-password}}
+
+> {%
+ client.global.set("sts-auth-token", response.body.access_token);
+ %}
+
+###
