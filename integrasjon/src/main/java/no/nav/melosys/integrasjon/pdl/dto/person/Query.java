@@ -19,8 +19,6 @@ query($ident: ID!) {
       gyldigTilOgMed
       coAdressenavn
       matrikkeladresse {
-        bruksenhetsnummer
-        kommunenummer
         tilleggsnavn
         postnummer
       }
@@ -167,8 +165,6 @@ query($ident: ID!) {
       gyldigTilOgMed
       coAdressenavn
       matrikkeladresse {
-        bruksenhetsnummer
-        kommunenummer
         tilleggsnavn
         postnummer
       }
@@ -240,8 +236,6 @@ query($ident: ID!, $historikk: Boolean!) {
       gyldigTilOgMed
       coAdressenavn
       matrikkeladresse {
-        bruksenhetsnummer
-        kommunenummer
         tilleggsnavn
         postnummer
       }
@@ -398,8 +392,6 @@ query($ident: ID!, $historikk: Boolean!) {
       gyldigTilOgMed
       coAdressenavn
       matrikkeladresse {
-        bruksenhetsnummer
-        kommunenummer
         tilleggsnavn
         postnummer
       }
@@ -540,8 +532,6 @@ query($ident: ID!) {
       gyldigTilOgMed
       coAdressenavn
       matrikkeladresse {
-        bruksenhetsnummer
-        kommunenummer
         tilleggsnavn
         postnummer
       }

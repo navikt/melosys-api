@@ -45,9 +45,11 @@ final class PdlAdresseformatOversetter {
     }
 
     static StrukturertAdresse lagStrukturertAdresse(Matrikkeladresse matrikkeladresse,
-                                                            KodeverkService kodeverkService) {
+                                                    KodeverkService kodeverkService) {
         return new StrukturertAdresse(
             matrikkeladresse.tilleggsnavn(),
+            null,
+            null,
             null,
             matrikkeladresse.postnummer(),
             kodeverkService.dekod(POSTNUMMER, matrikkeladresse.postnummer()),
