@@ -48,7 +48,5 @@ public interface Persondata {
 
     Optional<Oppholdsadresse> finnOppholdsadresse();
 
-    Optional<StrukturertAdresse> hentNyesteStrukturAdresse();
-
     Postadresse hentGjeldendePostadresse();
 }

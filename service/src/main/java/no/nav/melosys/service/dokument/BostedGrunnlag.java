@@ -41,7 +41,6 @@ public class BostedGrunnlag {
     }
 
     private Optional<StrukturertAdresse> finnBostedsadresseFraRegister() {
-
         if (bostedsadresseFraRegister == null
             || StringUtils.isEmpty(bostedsadresseFraRegister.strukturertAdresse().getLandkode())) {
             return Optional.empty();

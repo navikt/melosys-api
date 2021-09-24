@@ -54,6 +54,7 @@ public final class BostedsadresseOversetter {
         KodeverkService kodeverkService) {
         return bostedsadresser.stream()
             .map(a -> BostedsadresseOversetter.oversett(a, kodeverkService))
-            .flatMap(Optional::stream).toList();
+            .flatMap(Optional::stream)
+            .collect(Collectors.toUnmodifiableList());
     }
 }

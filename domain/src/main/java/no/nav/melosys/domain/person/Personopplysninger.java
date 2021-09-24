@@ -172,9 +172,4 @@ public record Personopplysninger(
             .map(Kontaktadresse::strukturertAdresse)
             .orElse(oppholdsadresse.strukturertAdresse());
     }
-
-    @Override
-    public Optional<StrukturertAdresse> hentNyesteStrukturAdresse() {
-        return finnOppholdsadresse().map(this::finnNyesteRegistrerteStrukturAdresse);
-    }
 }

@@ -30,6 +30,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
@@ -295,7 +296,7 @@ class A1MapperTest {
         brevData.person = lagPersonopplysningerUtenAdresser();
         try {
             mapper.mapA1(behandling, behandlingsresultat, brevData);
-        } catch (IkkeFunnetException e) {
+        } catch (FunksjonellException e) {
             assertThat(e.getMessage()).isEqualTo(MANGLENDE_REGISTRERTE_ADRESSE);
         }
     }

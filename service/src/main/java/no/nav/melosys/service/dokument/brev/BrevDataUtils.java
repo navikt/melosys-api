@@ -54,7 +54,6 @@ public final class BrevDataUtils {
             .withBesoksadresse(lagAdresse(new Besoksadresse(), lagNorskPostadresse()))
             .withPostadresse(lagAdresse(new Postadresse(), lagNorskPostadresse()))
             //Adressen skal benyttes dersom bruker/mottakerRolle har behov for å kontakte NAV per post.
-            //Adressen skal benyttes dersom bruker/mottakerRolle har behov for å kontakte NAV per post.
             .withReturadresse(lagAdresse(new Returadresse(), lagNorskPostadresse()))
             .build();
     }
@@ -82,30 +81,6 @@ public final class BrevDataUtils {
         adresse.setAdresse(postadresse);
         return adresse;
     }
-
-    public static BostedsadresseType lagBostedsadresse(Bostedsadresse bosted) {
-        final var strukturertadresse = bosted.strukturertAdresse();
-        return BostedsadresseType.builder()
-            .withGatenavn(strukturertadresse.getGatenavn().isEmpty() ? " " : strukturertadresse.getGatenavn())
-            .withHusnummer(strukturertadresse.getHusnummerEtasjeLeilighet())
-            .withPostnr(strukturertadresse.getPostnummer())
-            .withPoststed(strukturertadresse.getPoststed())
-            .withRegion(strukturertadresse.getRegion())
-            .withLandkode(strukturertadresse.getLandkode())
-            .build();
-    }
-
-
-    public static MidlertidigOppholdsadresseType lagMidlertidigOppholdsadresse(StrukturertAdresse strukturertAdresse) {
-        return MidlertidigOppholdsadresseType.builder().withGatenavn(strukturertAdresse.getGatenavn())
-            .withHusnummer(strukturertAdresse.getHusnummerEtasjeLeilighet())
-            .withPostnr(strukturertAdresse.getPostnummer())
-            .withPoststed(strukturertAdresse.getPoststed())
-            .withRegion(strukturertAdresse.getRegion())
-            .withLandkode(strukturertAdresse.getLandkode())
-            .build();
-    }
-
 
     public static UtenlandskPostadresse lagAdresse(StrukturertAdresse adresse) {
         return UtenlandskPostadresse.builder()

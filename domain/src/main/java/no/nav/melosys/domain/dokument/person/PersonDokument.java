@@ -290,9 +290,6 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
         );
     }
 
-    @Override
-    public Optional<StrukturertAdresse> hentNyesteStrukturAdresse() { return Optional.empty();}
-
     public void setGjeldendePostadresse(UstrukturertAdresse gjeldendePostadresse) {
         this.gjeldendePostadresse = gjeldendePostadresse;
     }

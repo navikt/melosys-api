@@ -17,10 +17,11 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 import no.nav.melosys.domain.util.LandkoderUtils;
-import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
@@ -28,7 +29,7 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeids
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 
-import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
+import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
 class A1Mapper {
@@ -84,37 +85,33 @@ class A1Mapper {
         }
 
         if (persondata.harIkkeRegistrertAdresse()) {
-            throw new IkkeFunnetException(MANGLENDE_REGISTRERTE_ADRESSE);
+            throw new FunksjonellException(MANGLENDE_REGISTRERTE_ADRESSE);
         }
 
         person.setBostedsadresse(mapBostedAdresse(persondata));
-        person.setMidlertidigOppholdsadresse(
-            lagMidlertidigOppholdsadresse(
-                finnNyestRegistrerteKontaktOgOppholdsAdresse(persondata)
-            )
-        );
+        person.setMidlertidigOppholdsadresse(mapMidlertidigOppholdsadresse(persondata));
 
         return person;
     }
 
-    private static BostedsadresseType mapBostedAdresse(Persondata persondata) {
+    private BostedsadresseType mapBostedAdresse(Persondata persondata) {
         if (persondata.finnBostedsadresse().isPresent()) {
             return lagBostedsadresse(persondata.finnBostedsadresse().get());
         }
         return new BostedsadresseType();
     }
 
-    private static StrukturertAdresse finnNyestRegistrerteKontaktOgOppholdsAdresse(Persondata persondata) {
+    private MidlertidigOppholdsadresseType mapMidlertidigOppholdsadresse(Persondata persondata) {
 
-        Optional<StrukturertAdresse> strukturertAdresse = persondata.hentNyesteStrukturAdresse();
+        Optional<StrukturertAdresse> strukturertAdresse = hentNyesteRegistrerteStrukturAdresse(persondata);
 
-        return strukturertAdresse.orElseGet(() -> persondata.finnKontaktadresse()
+        return lagMidlertidigOppholdsadresse(strukturertAdresse.orElseGet(() -> persondata.finnKontaktadresse()
             .map(Kontaktadresse::strukturertAdresse)
             .orElse(persondata.finnOppholdsadresse()
                 .map(Oppholdsadresse::strukturertAdresse)
-                .orElse(null)
+                .orElse(new StrukturertAdresse())
             )
-        );
+        ));
     }
 
     private static String mapStatsborgerskap(Set<Land> statsborgerskap) {
@@ -259,6 +256,41 @@ class A1Mapper {
             .filter(a -> !arbeidslandMedArbeidsted.contains(a.getKode()))
             .collect(Collectors.toSet());
     }
+
+    private Optional<StrukturertAdresse> sammenlignRegistrerteDatoer(Kontaktadresse kontaktadresse, Oppholdsadresse oppholdsadresse) {
+        return kontaktadresse.registrertDato().isAfter((oppholdsadresse.registrertDato())) ?
+            Optional.of(kontaktadresse.strukturertAdresse()) : Optional.of(oppholdsadresse.strukturertAdresse());
+    }
+
+    private Optional<StrukturertAdresse> hentNyesteRegistrerteStrukturAdresse(Persondata persondata) {
+        return persondata.finnOppholdsadresse()
+            .map(oppholdsadresse -> persondata.finnKontaktadresse()
+                .map(kontaktadresse -> sammenlignRegistrerteDatoer(kontaktadresse, oppholdsadresse)))
+            .flatMap(strukturertAdresse -> strukturertAdresse.orElse(Optional.empty()));
+    }
+
+    private MidlertidigOppholdsadresseType lagMidlertidigOppholdsadresse(StrukturertAdresse strukturertAdresse) {
+        return MidlertidigOppholdsadresseType.builder().withGatenavn(strukturertAdresse.getGatenavn())
+            .withHusnummer(strukturertAdresse.getHusnummerEtasjeLeilighet())
+            .withPostnr(strukturertAdresse.getPostnummer())
+            .withPoststed(strukturertAdresse.getPoststed())
+            .withRegion(strukturertAdresse.getRegion())
+            .withLandkode(strukturertAdresse.getLandkode())
+            .build();
+    }
+
+    private BostedsadresseType lagBostedsadresse(Bostedsadresse bosted) {
+        final var strukturertadresse = bosted.strukturertAdresse();
+        return BostedsadresseType.builder()
+            .withGatenavn(strukturertadresse.getGatenavn().isEmpty() ? " " : strukturertadresse.getGatenavn())
+            .withHusnummer(strukturertadresse.getHusnummerEtasjeLeilighet())
+            .withPostnr(strukturertadresse.getPostnummer())
+            .withPoststed(strukturertadresse.getPoststed())
+            .withRegion(strukturertadresse.getRegion())
+            .withLandkode(strukturertadresse.getLandkode())
+            .build();
+    }
+
 
     private static AdresseType lagTomAdresseType() {
         AdresseType adresseType = new AdresseType();
