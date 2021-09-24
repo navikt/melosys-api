@@ -1,6 +1,8 @@
 package no.nav.melosys.saksflyt.impl;
 
+import java.util.Collection;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
@@ -58,19 +60,21 @@ public class BehandleProsessinstansDelegate {
         }
 
         final var låsReferanse = new SedLåsReferanse(prosessinstans.getLåsReferanse());
-
-        final var aktiveLåsReferanser = prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
-            Set.of(ProsessStatus.PÅ_VENT, ProsessStatus.FERDIG), låsReferanse.getReferanse()
-        )
-            .stream()
-            .filter(p -> !p.getUuid().equals(prosessinstans.getId()))
-            .map(p -> new SedLåsReferanse(p.getLåsReferanse()))
-            .collect(Collectors.toSet());
+        final var aktiveLåsReferanser = finnAndreAktiveLåsMedSammeReferanse(prosessinstans.getId(), låsReferanse);
 
         if (aktiveLåsReferanser.contains(låsReferanse)) {
             return false;
         } else {
             return aktiveLåsReferanser.stream().anyMatch(p -> p.getReferanse().equals(låsReferanse.getReferanse()));
         }
+    }
+
+    private Collection<SedLåsReferanse> finnAndreAktiveLåsMedSammeReferanse(UUID id, SedLåsReferanse låsReferanse) {
+        return prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(
+            id, Set.of(ProsessStatus.PÅ_VENT, ProsessStatus.FERDIG), låsReferanse.getReferanse()
+        )
+            .stream()
+            .map(p -> new SedLåsReferanse(p.getLåsReferanse()))
+            .collect(Collectors.toSet());
     }
 }

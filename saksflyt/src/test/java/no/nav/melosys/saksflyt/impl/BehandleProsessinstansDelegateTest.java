@@ -52,7 +52,8 @@ class BehandleProsessinstansDelegateTest {
         prosessinstans.setLåsReferanse(låsReferanse);
 
         var eksisterendeProsessinstans = prosessinstans(låsReferanse, ProsessStatus.UNDER_BEHANDLING);
-        when(prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(any(), any())).thenReturn(Set.of(new ProsessinstansInfo(eksisterendeProsessinstans)));
+        when(prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(eq(prosessinstans.getId()), any(), any()))
+            .thenReturn(Set.of(new ProsessinstansInfo(eksisterendeProsessinstans)));
 
         behandleProsessinstansDelegate.oppdaterStatusOmSkalPåVent(prosessinstans);
         assertThat(prosessinstans.getStatus()).isEqualTo(ProsessStatus.KLAR);
@@ -65,7 +66,8 @@ class BehandleProsessinstansDelegateTest {
         prosessinstans.setLåsReferanse(låsReferanse);
 
         var eksisterendeProsessinstans = prosessinstans("12_13_1", ProsessStatus.UNDER_BEHANDLING);
-        when(prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(any(), any())).thenReturn(Set.of(new ProsessinstansInfo(eksisterendeProsessinstans)));
+        when(prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(eq(prosessinstans.getId()), any(), any()))
+            .thenReturn(Set.of(new ProsessinstansInfo(eksisterendeProsessinstans)));
 
         behandleProsessinstansDelegate.oppdaterStatusOmSkalPåVent(prosessinstans);
         assertThat(prosessinstans.getStatus()).isEqualTo(ProsessStatus.PÅ_VENT);
