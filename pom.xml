@@ -57,7 +57,7 @@
         <cxf.version>3.4.4</cxf.version>
         <commons-collections4.version>4.4</commons-collections4.version>
         <commons-lang.version>3.9</commons-lang.version>
-        <commons-text.version>1.8</commons-text.version>
+        <commons-text.version>1.9</commons-text.version>
         <findbugs.jsr305.version>3.0.2</findbugs.jsr305.version>
         <guava.version>30.1.1-jre</guava.version>
         <graphql-java.version>16.2</graphql-java.version>
