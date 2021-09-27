@@ -47,7 +47,7 @@ public class PersondataService implements PersondataFasade {
     private final TpsService tpsService;
     private final Unleash unleash;
 
-    private static final LocalDate PDL_STARTDATO = LocalDate.EPOCH;
+    private static final LocalDate PDL_STARTDATO = LocalDate.parse("2020-07-01");
 
     @Autowired
     public PersondataService(BehandlingService behandlingService,
