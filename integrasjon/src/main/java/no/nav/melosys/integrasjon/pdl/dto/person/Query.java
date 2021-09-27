@@ -532,43 +532,6 @@ query($ident: ID!, $historikk: Boolean!) {
     public static final String HENT_RELATERT_VED_SIVILSTAND_QUERY = """
 query($ident: ID!) {
   hentPerson(ident: $ident) {
-    bostedsadresse {
-      gyldigFraOgMed
-      gyldigTilOgMed
-      coAdressenavn
-      matrikkeladresse {
-        tilleggsnavn
-        postnummer
-      }
-      ukjentBosted {
-        bostedskommune
-      }
-      vegadresse {
-        adressenavn
-        husnummer
-        husbokstav
-        tilleggsnavn
-        postnummer
-      }
-      utenlandskAdresse {
-        adressenavnNummer
-        bygningEtasjeLeilighet
-        postboksNummerNavn
-        postkode
-        bySted
-        regionDistriktOmraade
-        landkode
-      }
-      metadata {
-        master
-        historisk
-        endringer {
-          type
-          registrert
-          kilde
-        }
-      }
-    }
     foedsel {
       foedselsdato
       foedselsaar
