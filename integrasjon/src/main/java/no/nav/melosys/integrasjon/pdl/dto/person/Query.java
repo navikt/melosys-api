@@ -530,7 +530,7 @@ query($ident: ID!, $historikk: Boolean!) {
  """;
 
     public static final String HENT_RELATERT_VED_SIVILSTAND_QUERY = """
-query($ident: ID!) {
+query($ident: ID!, $historikk: Boolean!) {
   hentPerson(ident: $ident) {
     foedsel {
       foedselsdato
@@ -555,7 +555,7 @@ query($ident: ID!) {
         }
       }
     }
-    navn {
+    navn(historikk: $historikk) {
       fornavn
       mellomnavn
       etternavn
@@ -567,7 +567,7 @@ query($ident: ID!) {
         }
       }
     }
-    sivilstand {
+    sivilstand(historikk: $historikk) {
       type
       relatertVedSivilstand
       gyldigFraOgMed
@@ -586,7 +586,7 @@ query($ident: ID!) {
         """;
 
     public static final String HENT_BARN_QUERY = """
-query($ident: ID!) {
+query($ident: ID!, $historikk: Boolean!) {
   hentPerson(ident: $ident) {
     foedsel {
       foedselsdato
@@ -623,7 +623,7 @@ query($ident: ID!) {
         }
       }
     }
-    foreldreansvar {
+    foreldreansvar(historikk: $historikk) {
       ansvar
       metadata {
         master
@@ -633,7 +633,7 @@ query($ident: ID!) {
         }
       }
     }
-    navn {
+    navn(historikk: $historikk) {
       fornavn
       mellomnavn
       etternavn
@@ -650,7 +650,7 @@ query($ident: ID!) {
         """;
 
     public static final String HENT_FORELDER_QUERY = """
-query($ident: ID!) {
+query($ident: ID!, $historikk: Boolean!) {
   hentPerson(ident: $ident) {
     foedsel {
       foedselsdato
@@ -675,7 +675,7 @@ query($ident: ID!) {
         }
       }
     }
-    navn {
+    navn(historikk: $historikk) {
       fornavn
       mellomnavn
       etternavn

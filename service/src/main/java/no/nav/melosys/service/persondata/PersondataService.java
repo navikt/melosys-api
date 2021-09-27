@@ -121,36 +121,67 @@ public class PersondataService implements PersondataFasade {
     }
 
     private Set<Familiemedlem> hentForeldre(Collection<ForelderBarnRelasjon> forelderBarnRelasjoner) {
-        Set<Familiemedlem> set = new HashSet<>();
-        for (ForelderBarnRelasjon forelderBarnRelasjon : forelderBarnRelasjoner) {
-            if (forelderBarnRelasjon.erForelder()) {
-                Person person = pdlConsumer.hentForelder(forelderBarnRelasjon.relatertPersonsIdent());
-                Familiemedlem forelder = FamiliemedlemOversetter.oversettForelder(person,
-                    forelderBarnRelasjon.relatertPersonsRolle());
-                set.add(forelder);
-            }
-        }
-        return Collections.unmodifiableSet(set);
+        return hentForeldreInntil(forelderBarnRelasjoner, null);
+    }
+
+    private Set<Familiemedlem> hentForeldreInntil(Collection<ForelderBarnRelasjon> forelderBarnRelasjoner,
+                                                  Instant skjæringstidspunkt) {
+        return forelderBarnRelasjoner.stream()
+            .filter(ForelderBarnRelasjon::erForelder)
+            .map(forelderBarnRelasjon -> {
+                final var person = hentForelderInntil(forelderBarnRelasjon, skjæringstidspunkt);
+                return lagFamilieMedlemForelder(forelderBarnRelasjon, person);
+            })
+            .collect(Collectors.toUnmodifiableSet());
+    }
+
+    private Person hentForelderInntil(ForelderBarnRelasjon forelderBarnRelasjon, Instant skjæringstidspunkt) {
+        return skjæringstidspunkt == null ? pdlConsumer.hentForelder(forelderBarnRelasjon.relatertPersonsIdent())
+            : filtrerPersondataFørDato(pdlConsumer.hentForelderMedHistorikk(forelderBarnRelasjon.relatertPersonsIdent()), skjæringstidspunkt);
+    }
+
+    private Familiemedlem lagFamilieMedlemForelder(ForelderBarnRelasjon forelderBarnRelasjon, Person person) {
+        return FamiliemedlemOversetter.oversettForelder(person,
+            forelderBarnRelasjon.relatertPersonsRolle());
     }
 
     private Set<Familiemedlem> hentRelatertVedSivilstand(Collection<Sivilstand> sivilstandRelasjoner) {
+        return hentRelatertVedSivilstandInntil(sivilstandRelasjoner, null);
+    }
+
+    private Set<Familiemedlem> hentRelatertVedSivilstandInntil(Collection<Sivilstand> sivilstandRelasjoner,
+                                                               Instant skjæringstidspunkt) {
         return sivilstandRelasjoner.stream()
             .map(Sivilstand::relatertVedSivilstand)
             .filter(Objects::nonNull)
-            .map(pdlConsumer::hentRelatertVedSivilstand)
+            .map(ident -> hentRelatertVedSivilstandInntil(ident, skjæringstidspunkt))
             .map(FamiliemedlemOversetter::oversettRelatertVedSivilstand)
             .collect(Collectors.toUnmodifiableSet());
     }
 
+    private Person hentRelatertVedSivilstandInntil(String ident, Instant skjæringstidspunkt) {
+        return skjæringstidspunkt == null ? pdlConsumer.hentRelatertVedSivilstand(ident)
+            : filtrerPersondataFørDato(pdlConsumer.hentRelatertVedSivilstandMedHistorikk(ident), skjæringstidspunkt);
+    }
+
     private Set<Familiemedlem> hentBarn(Person person) {
+        return hentBarnInntil(person, null);
+    }
+
+    private Set<Familiemedlem> hentBarnInntil(Person person, Instant skjæringstidspunkt) {
         final var folkeregisteridentifikator = FolkeregisteridentOversetter.oversett(
             person.folkeregisteridentifikator());
         return person.forelderBarnRelasjon().stream()
             .filter(ForelderBarnRelasjon::erBarn)
             .map(ForelderBarnRelasjon::relatertPersonsIdent)
-            .map(pdlConsumer::hentBarn)
+            .map(ident -> hentBarnInntil(ident, skjæringstidspunkt))
             .map(barn -> FamiliemedlemOversetter.oversettBarn(barn, folkeregisteridentifikator))
             .collect(Collectors.toUnmodifiableSet());
+    }
+
+    private Person hentBarnInntil(String ident, Instant skjæringstidspunkt) {
+        return skjæringstidspunkt == null ? pdlConsumer.hentBarn(ident)
+            : filtrerPersondataFørDato(pdlConsumer.hentBarnMedHistorikk(ident), skjæringstidspunkt);
     }
 
     @Override
@@ -216,8 +247,18 @@ public class PersondataService implements PersondataFasade {
         }
 
         final Instant skjæringstidspunkt = avgjørSkjæringstidspunktTilInnsyn(behandling);
+        return hentFamiliemedlemmerTilInnsyn(ident, skjæringstidspunkt);
+    }
+
+    private Set<Familiemedlem> hentFamiliemedlemmerTilInnsyn(String ident, Instant skjæringstidspunkt) {
+        final Set<Familiemedlem> familiemedlemmer = new HashSet<>();
         final var persondataTilInnsyn = filtrerPersondataFørDato(pdlConsumer.hentFamilierelasjoner(ident), skjæringstidspunkt);
-        return hentFamiliemedlemmer(persondataTilInnsyn);
+        if (erPersonUnder18(persondataTilInnsyn)) {
+            familiemedlemmer.addAll(hentForeldreInntil(persondataTilInnsyn.forelderBarnRelasjon(), skjæringstidspunkt));
+        }
+        familiemedlemmer.addAll(hentRelatertVedSivilstandInntil(persondataTilInnsyn.sivilstand(), skjæringstidspunkt));
+        familiemedlemmer.addAll(hentBarnInntil(persondataTilInnsyn, skjæringstidspunkt));
+        return familiemedlemmer;
     }
 
     @Override

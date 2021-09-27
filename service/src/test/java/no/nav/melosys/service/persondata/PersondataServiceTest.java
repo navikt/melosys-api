@@ -161,8 +161,8 @@ class PersondataServiceTest {
         final var inaktivBehandling = lagBehandlingSomIkkeResulterIVedtak();
         when(behandlingService.hentBehandlingUtenSaksopplysninger(1L)).thenReturn(inaktivBehandling);
         when(pdlConsumer.hentFamilierelasjoner(anyString())).thenReturn(lagPerson());
-        when(pdlConsumer.hentBarn("barnIdent")).thenReturn(lagPerson());
-        when(pdlConsumer.hentRelatertVedSivilstand("relatertVedSivilstandID")).thenReturn(lagPerson());
+        when(pdlConsumer.hentBarnMedHistorikk("barnIdent")).thenReturn(lagPerson());
+        when(pdlConsumer.hentRelatertVedSivilstandMedHistorikk("relatertVedSivilstandID")).thenReturn(lagPerson());
 
         final Set<Familiemedlem> familiemedlemmer = persondataService.hentFamiliemedlemmerMedHistorikk(1L);
         assertThat(familiemedlemmer).extracting(Familiemedlem::familierelasjon).contains(Familierelasjon.BARN,
