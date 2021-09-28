@@ -13,6 +13,7 @@ import no.nav.melosys.service.dokument.BostedGrunnlag;
 import no.nav.melosys.service.dokument.DataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 public class BrevDataGrunnlag implements DataGrunnlag {
     private final DoksysBrevbestilling brevbestilling;
@@ -27,7 +28,7 @@ public class BrevDataGrunnlag implements DataGrunnlag {
                             KodeverkService kodeverkService,
                             AvklarteVirksomheterService avklarteVirksomheterService,
                             AvklartefaktaService avklartefaktaService,
-                            PersondataFasade persondataFasade,
+                            @Qualifier("system") PersondataFasade persondataFasade,
                             Unleash unleash) {
         this.unleash = unleash;
         this.brevbestilling = brevbestilling;
