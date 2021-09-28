@@ -76,7 +76,7 @@ public class StrukturertAdresse implements Adresse {
     }
 
     public String getGatenavn() {
-        return StringUtils.isEmpty(gatenavn) ? " " : gatenavn;
+        return gatenavn;
     }
 
     public void setGatenavn(String gatenavn) {

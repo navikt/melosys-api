@@ -278,7 +278,7 @@ class A1Mapper {
     private BostedsadresseType lagBostedsadresse(Bostedsadresse bosted) {
         final var strukturertadresse = bosted.strukturertAdresse();
         return BostedsadresseType.builder()
-            .withGatenavn(strukturertadresse.getGatenavn())
+            .withGatenavn(StringUtils.isEmpty(strukturertadresse.getGatenavn()) ? " " : strukturertadresse.getGatenavn())
             .withHusnummer(strukturertadresse.getHusnummerEtasjeLeilighet())
             .withPostnr(strukturertadresse.getPostnummer())
             .withPoststed(strukturertadresse.getPoststed())

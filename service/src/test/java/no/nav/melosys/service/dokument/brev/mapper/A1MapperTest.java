@@ -294,7 +294,7 @@ class A1MapperTest {
         brevData.person = lagPersonopplysningerUtenAdresser();
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
         assertThat(a1.getPerson().getBostedsadresse().getGatenavn()).isNull();
-        assertThat(a1.getPerson().getMidlertidigOppholdsadresse().getGatenavn()).isEqualTo(" ");
+        assertThat(a1.getPerson().getMidlertidigOppholdsadresse().getGatenavn()).isNull();
 
     }
 
