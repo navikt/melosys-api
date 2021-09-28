@@ -3,8 +3,6 @@ package no.nav.melosys.service.dokument.brev;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import no.nav.dok.brevdata.felles.v1.navfelles.*;
-import no.nav.dok.melosysbrev._000067.MidlertidigOppholdsadresseType;
-import no.nav.dok.melosysbrev.felles.melosys_felles.BostedsadresseType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.LovvalgsperiodeType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.PersonnavnType;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -12,7 +10,6 @@ import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.person.Persondata;
-import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 
 import static no.nav.melosys.domain.adresse.Adresse.sammenslå;
 import static no.nav.melosys.service.dokument.brev.BrevDataService.*;
@@ -84,7 +81,9 @@ public final class BrevDataUtils {
 
     public static UtenlandskPostadresse lagAdresse(StrukturertAdresse adresse) {
         return UtenlandskPostadresse.builder()
-            .withAdresselinje1(sammenslå(adresse.getGatenavn(), adresse.getHusnummerEtasjeLeilighet(),
+            .withAdresselinje1(sammenslå(
+                adresse.getGatenavn(),
+                adresse.getHusnummerEtasjeLeilighet(),
                 adresse.getPostboks()))
             .withAdresselinje2(sammenslå(adresse.getPostnummer(), adresse.getPoststed()))
             .withAdresselinje3(adresse.getRegion())

@@ -38,7 +38,6 @@ class A1Mapper {
     private static final int ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2 = 13;
     static final int MAKS_ANTALL_TEGN_PER_LINJE_5_2 = 70;
     static final String STATSLØS_TEKST = "Stateless";
-    static final String MANGLENDE_REGISTRERTE_ADRESSE = "Person mangler registrert adresse. Den må registreres for å kunne sende brev og SED.";
     static final String FLERE_UKJENTE_ELLER_IKKE_OPPGITT_LAND = "Various EEA-countries/Switzerland";
 
     private BrevDataA1 brevData;
@@ -84,12 +83,8 @@ class A1Mapper {
             throw new TekniskException("Konverteringsfeil ved konvertering av fødselsdato", e);
         }
 
-        if (persondata.harIkkeRegistrertAdresse()) {
-            throw new FunksjonellException(MANGLENDE_REGISTRERTE_ADRESSE);
-        }
-
         person.setBostedsadresse(mapBostedAdresse(persondata));
-        person.setMidlertidigOppholdsadresse(mapMidlertidigOppholdsadresse(persondata));
+        person.setMidlertidigOppholdsadresse(1mapMidlertidigOppholdsadresse(persondata));
 
         return person;
     }
@@ -270,7 +265,8 @@ class A1Mapper {
     }
 
     private MidlertidigOppholdsadresseType lagMidlertidigOppholdsadresse(StrukturertAdresse strukturertAdresse) {
-        return MidlertidigOppholdsadresseType.builder().withGatenavn(strukturertAdresse.getGatenavn())
+        return MidlertidigOppholdsadresseType.builder()
+            .withGatenavn(strukturertAdresse.getGatenavn())
             .withHusnummer(strukturertAdresse.getHusnummerEtasjeLeilighet())
             .withPostnr(strukturertAdresse.getPostnummer())
             .withPoststed(strukturertAdresse.getPoststed())
@@ -282,7 +278,7 @@ class A1Mapper {
     private BostedsadresseType lagBostedsadresse(Bostedsadresse bosted) {
         final var strukturertadresse = bosted.strukturertAdresse();
         return BostedsadresseType.builder()
-            .withGatenavn(strukturertadresse.getGatenavn().isEmpty() ? " " : strukturertadresse.getGatenavn())
+            .withGatenavn(strukturertadresse.getGatenavn())
             .withHusnummer(strukturertadresse.getHusnummerEtasjeLeilighet())
             .withPostnr(strukturertadresse.getPostnummer())
             .withPoststed(strukturertadresse.getPoststed())

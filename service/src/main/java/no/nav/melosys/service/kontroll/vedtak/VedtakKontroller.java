@@ -4,12 +4,16 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.service.kontroll.*;
+import no.nav.melosys.service.kontroll.AdresseUtlandKontroller;
+import no.nav.melosys.service.kontroll.MedlemskapKontroller;
+import no.nav.melosys.service.kontroll.PeriodeKontroller;
+import no.nav.melosys.service.kontroll.PersonKontroller;
 import no.nav.melosys.service.validering.Kontrollfeil;
 
 final class VedtakKontroller extends AdresseUtlandKontroller {
 
-    private VedtakKontroller() {}
+    private VedtakKontroller() {
+    }
 
     static Kontrollfeil bostedsadresseForA1(VedtakKontrollData kontrollData) {
         return PersonKontroller.harRegistrertBostedsadresse(kontrollData.getPersonDokument(), kontrollData.getBehandlingsgrunnlagData())
@@ -44,5 +48,10 @@ final class VedtakKontroller extends AdresseUtlandKontroller {
 
     static Kontrollfeil foretakUtlandManglerFelter(VedtakKontrollData kontrollData) {
         return AdresseUtlandKontroller.foretakUtlandManglerFelter(kontrollData.getBehandlingsgrunnlagData());
+    }
+
+    static Kontrollfeil adresseRegistrertA1(VedtakKontrollData kontrollData) {
+        return PersonKontroller.harIkkeRegistrertAdresse(kontrollData.getPersonDokument(), kontrollData.getBehandlingsgrunnlagData())
+            ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
     }
 }

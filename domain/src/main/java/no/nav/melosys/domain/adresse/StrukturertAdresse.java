@@ -61,8 +61,8 @@ public class StrukturertAdresse implements Adresse {
     @Override
     public String toString() {
         return Stream.of(tilleggsnavn, sammenslå(gatenavn, husnummerEtasjeLeilighet),
-                postboks, postnummer, poststed, region,
-                Landkoder.valueOf(landkode).getBeskrivelse())
+            postboks, postnummer, poststed, region,
+            Landkoder.valueOf(landkode).getBeskrivelse())
             .filter(StringUtils::isNotEmpty)
             .collect(Collectors.joining(", "));
     }
@@ -76,7 +76,7 @@ public class StrukturertAdresse implements Adresse {
     }
 
     public String getGatenavn() {
-        return gatenavn;
+        return StringUtils.isEmpty(gatenavn) ? " " : gatenavn;
     }
 
     public void setGatenavn(String gatenavn) {
