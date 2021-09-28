@@ -1,4 +1,4 @@
-package no.nav.melosys.service.abac;
+package no.nav.melosys.service.tilgang;
 
 import no.nav.freg.abac.core.annotation.context.AbacContext;
 import no.nav.freg.abac.core.dto.request.XacmlRequest;
