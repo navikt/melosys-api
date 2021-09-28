@@ -35,6 +35,10 @@ public class InnvilgelseBrevbestilling extends DokgenBrevbestilling {
         return barnFritekst;
     }
 
+    public Builder toBuilder() {
+        return new Builder(this);
+    }
+
     public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
         private String innledningFritekst;
         private String begrunnelseFritekst;

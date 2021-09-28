@@ -1,6 +1,7 @@
 package no.nav.melosys.service;
 
 import java.io.InputStream;
+import java.net.URI;
 import javax.validation.ValidationException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -124,7 +125,8 @@ public class JsonSchemaValidator {
     }
 
     private void formaterFeil(ValidationResult validationResult, JsonSchema schema, String json, Logger logger) {
-        logger.error(FEILMELDING, schema.getCurrentUri().toString());
+        URI currentUri = schema.getCurrentUri();
+        logger.error(FEILMELDING, (currentUri != null ? currentUri.toString() : schema.getSchemaPath()));
         validationResult.getValidationMessages().forEach(
             validationMessage -> logger.error(formaterMelding(validationMessage, json)));
         throw new ValidationException(String.format("%s: %d schema violations found",
@@ -132,8 +134,8 @@ public class JsonSchemaValidator {
     }
 
     private String formaterMelding(ValidationMessage validationMessage, String json) {
-        final Object objekt = JsonPath.read(json, validationMessage.getPath());
         String sti = validationMessage.getPath();
-        return validationMessage.getMessage().replace(sti, sti + " [" + objekt.toString() + "]");
+        final Object objekt = JsonPath.read(json, sti);
+        return validationMessage.getMessage().replace(sti, sti + " [" + objekt + "]");
     }
 }

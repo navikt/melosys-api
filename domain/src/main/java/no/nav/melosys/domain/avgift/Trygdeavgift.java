@@ -16,7 +16,7 @@ public class Trygdeavgift {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "medlemskapsperiode_id")
     private Medlemskapsperiode medlemskapsperiode;
 
