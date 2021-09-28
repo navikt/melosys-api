@@ -35,7 +35,6 @@ public class DokgenMalMapper {
     private final InnvilgelseFtrlMapper innvilgelseFtrlMapper;
 
     @Autowired
-
     public DokgenMalMapper(BehandlingsresultatService behandlingsresultatService,
                            @Qualifier("system") EregFasade eregFasade, KodeverkService kodeverkService,
                            @Qualifier("system") PersondataFasade persondataFasade, Unleash unleash,
@@ -67,15 +66,22 @@ public class DokgenMalMapper {
     private DokgenDto lagDokgenDtoFraBestilling(DokgenBrevbestilling brevbestilling) {
         return switch (brevbestilling.getProduserbartdokument()) {
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD -> SaksbehandlingstidSoknad.av(
-                brevbestilling);
+                brevbestilling.toBuilder()
+                    .medAvsenderLand(hentLandnavn(brevbestilling.getAvsenderLand()))
+                    .build()
+            );
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> SaksbehandlingstidKlage.av(brevbestilling);
             case MANGELBREV_BRUKER -> MangelbrevBruker.av(
-                ((MangelbrevBrevbestilling) brevbestilling).toBuilder().medVedtaksdato(
-                    hentVedtaksdato(brevbestilling.getBehandling().getId())).build());
+                ((MangelbrevBrevbestilling) brevbestilling).toBuilder()
+                    .medVedtaksdato(hentVedtaksdato(brevbestilling.getBehandling().getId()))
+                    .build()
+            );
             case MANGELBREV_ARBEIDSGIVER -> MangelbrevArbeidsgiver.av(
-                ((MangelbrevBrevbestilling) brevbestilling).toBuilder().medVedtaksdato(
-                    hentVedtaksdato(brevbestilling.getBehandling().getId())).medFullmektigNavn(
-                    hentFullmektigNavn(brevbestilling.getBehandling().getFagsak())).build());
+                ((MangelbrevBrevbestilling) brevbestilling).toBuilder()
+                    .medVedtaksdato(hentVedtaksdato(brevbestilling.getBehandling().getId()))
+                    .medFullmektigNavn(hentFullmektigNavn(brevbestilling.getBehandling().getFagsak()))
+                    .build()
+            );
             case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> innvilgelseFtrlMapper.map((InnvilgelseBrevbestilling) brevbestilling);
             default -> throw new FunksjonellException(
                 format("ProduserbartDokument %s er ikke støttet av melosys-dokgen",

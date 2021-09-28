@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avgift.Trygdeavgift;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
@@ -25,6 +26,7 @@ import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.integrasjon.pdl.dto.person.Navn;
 import no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap;
+import no.nav.melosys.service.SaksbehandlingDataFactory;
 import no.nav.melosys.service.vedtak.publisering.dto.Fullmektig;
 import no.nav.melosys.service.vedtak.publisering.dto.*;
 
@@ -32,13 +34,13 @@ import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagBostedsa
 
 public class FattetVedtakTestData {
 
-    private static LocalDate NOW = LocalDate.now();
-    private static String ORGNR = "987654321";
-    private static String FNR = "12345678901";
-    private static String FORNAVN = "For";
-    private static String MELLOMNANV = "Mellom";
-    private static String ETTERNAVN = "Etter";
-    private static String LANDKODE_NO = "NO";
+    private static final LocalDate NOW = LocalDate.now();
+    private static final String ORGNR = "987654321";
+    private static final String FNR = "12345678901";
+    private static final String FORNAVN = "For";
+    private static final String MELLOMNANV = "Mellom";
+    private static final String ETTERNAVN = "Etter";
+    private static final String LANDKODE_NO = "NO";
 
     public static Behandling lagBehandling() {
         Behandling behandling = new Behandling();
@@ -61,7 +63,7 @@ public class FattetVedtakTestData {
             lagVedtak(),
             lagSoeknad(),
             lagSaksopplysninger(),
-            null,
+            lagAvklarteFakta(),
             lagLovvalgOgMedlemskapsperioder(),
             lagFullmektig(),
             lagRepresentantAvgift()
@@ -122,6 +124,7 @@ public class FattetVedtakTestData {
     private static VedtakMetadata lagVedtakMetadata() {
         VedtakMetadata vedtakMetadata = new VedtakMetadata();
         vedtakMetadata.setVedtaksdato(Instant.now());
+        vedtakMetadata.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
         return vedtakMetadata;
     }
 
@@ -133,7 +136,7 @@ public class FattetVedtakTestData {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-123");
         fagsak.setRegistrertDato(Instant.now());
-        fagsak.setAktører(Set.of(rep));
+        fagsak.setAktører(Set.of(SaksbehandlingDataFactory.lagBruker(), rep));
         fagsak.setType(Sakstyper.FTRL);
         return fagsak;
     }
@@ -145,8 +148,7 @@ public class FattetVedtakTestData {
     }
 
     private static BehandlingsgrunnlagData lagSoeknadFtrlData() {
-        SoeknadFtrl soeknadFtrl = new SoeknadFtrl();
-        return soeknadFtrl;
+        return new SoeknadFtrl();
     }
 
     private static Saksopplysning lagPersonDokument() {
@@ -171,14 +173,14 @@ public class FattetVedtakTestData {
         return new Sak(FNR,
             1001,
             "2001",
-            Sakstyper.FTRL,
+            Sakstyper.FTRL.getKode(),
             NOW);
     }
 
     private static Vedtak lagVedtak() {
         return new Vedtak(NOW,
             NOW.plusDays(1),
-            Vedtakstyper.FØRSTEGANGSVEDTAK,
+            Vedtakstyper.FØRSTEGANGSVEDTAK.getKode(),
             "Saksbehandler",
             "Saksbehandler2"
         );
@@ -201,9 +203,32 @@ public class FattetVedtakTestData {
         return new Soeknad(Trygdedekninger.UTEN_DEKNING,
             lagLoennOgGodtgjørelse(),
             lagJuridiskArbeidsgiverNorge(),
-            List.of(new ForetakUtland()),
+            List.of(lagForetakUtland()),
             NOW,
             new Periode(NOW, NOW)
+        );
+    }
+
+    private static ForetakUtland lagForetakUtland() {
+        var f = new ForetakUtland();
+        f.adresse = lagStrukturertAdresse();
+        f.navn = "Navn";
+        f.orgnr = ORGNR;
+        f.uuid = "300";
+        f.selvstendigNæringsvirksomhet = true;
+        return f;
+    }
+
+    private static StrukturertAdresse lagStrukturertAdresse() {
+        return new StrukturertAdresse(
+            "tilleggsnavn",
+            "gatenavn",
+            "2",
+            "23",
+            "1010",
+            "POSTSTED",
+            "region",
+            LANDKODE_NO
         );
     }
 
@@ -219,17 +244,17 @@ public class FattetVedtakTestData {
         return juridiskArbeidsgiverNorge;
     }
 
-    private static Adresse lagAdresse() {
-        return new Adresse(Adressetype.BOSTEDSADRESSE, "Gatenavn", "22", "1000", "POSTSTED");
-    }
-
     private static Person lagPerson() {
         return new Person("1234",
             new Navn(FORNAVN, MELLOMNANV, ETTERNAVN, null),
             new Statsborgerskap(LANDKODE_NO, NOW, NOW.minusMonths(1), NOW.plusMonths(1), null),
             null,
-            null
+            List.of(lagAdresse())
         );
+    }
+
+    private static Adresse lagAdresse() {
+        return new Adresse(Adressetype.BOSTEDSADRESSE, "Gatenavn", "22", "1000", "POSTSTED");
     }
 
     private static Saksopplysninger lagSaksopplysninger() {
@@ -239,8 +264,23 @@ public class FattetVedtakTestData {
         );
     }
 
+    private static Collection<AvklarteFakta> lagAvklarteFakta() {
+        return List.of(new AvklarteFakta(Avklartefaktatyper.ARBEIDSLAND.getKode(), LANDKODE_NO, "Begrunnelse", "Begrunnelse fritekst"));
+    }
+
     private static Collection<LovvalgOgMedlemskapsperiode> lagLovvalgOgMedlemskapsperioder() {
-        return List.of();
+        return List.of(new LovvalgOgMedlemskapsperiode(
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8,
+            null,
+            LANDKODE_NO, new Periode(NOW, NOW.plusYears(1)),
+            InnvilgelsesResultat.INNVILGET,
+            Trygdedekninger.HELSE_OG_PENSJONSDEL,
+            Medlemskapstyper.FRIVILLIG,
+            new no.nav.melosys.service.vedtak.publisering.dto.FastsattTrygdeavgift(
+                new BetalesAv(ORGNR, Aktoersroller.ARBEIDSGIVER),
+                new no.nav.melosys.service.vedtak.publisering.dto.Trygdeavgift(1_000L, new BigDecimal(1_500), new BigDecimal(2), "avgiftskode"),
+                null
+            )));
     }
 
     private static Identifikator lagIdentifikator() {

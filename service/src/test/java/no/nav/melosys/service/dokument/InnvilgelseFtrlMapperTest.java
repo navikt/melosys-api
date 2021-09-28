@@ -2,7 +2,6 @@ package no.nav.melosys.service.dokument;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +31,8 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.representant.RepresentantService;
+import no.nav.melosys.service.representant.dto.RepresentantDataDto;
 import org.assertj.core.api.Condition;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.BeforeEach;
@@ -69,6 +70,7 @@ class InnvilgelseFtrlMapperTest {
     public static final String POSTSTED_BRUKER = "Andeby";
     public static final String EKTEFELLE_NAVN = "Dolly Duck";
     public static final String BARN1_NAVN = "Doffen Duck";
+    public static final String REPRESENTANT_NAVN = "Representant AS";
     @Mock
     private PersondataFasade mockPersondataFasade;
 
@@ -88,6 +90,9 @@ class InnvilgelseFtrlMapperTest {
     private LandvelgerService mockLandvelgerService;
 
     @Mock
+    private RepresentantService mockRepresentantService;
+
+    @Mock
     private EregFasade mockEregFasade;
 
     private InnvilgelseFtrlMapper innvilgelseFtrlMapper;
@@ -96,7 +101,7 @@ class InnvilgelseFtrlMapperTest {
     void setup() {
         innvilgelseFtrlMapper = new InnvilgelseFtrlMapper(mockPersondataFasade, mockTrygdeavgiftsgrunnlagService,
             mockBehandlingsresultatService, mockAvklarteVirksomheterService,
-            mockAvklarteMedfolgendeFamilieService, mockLandvelgerService, mockEregFasade);
+            mockAvklarteMedfolgendeFamilieService, mockLandvelgerService, mockRepresentantService, mockEregFasade);
     }
 
     @Test
@@ -129,6 +134,8 @@ class InnvilgelseFtrlMapperTest {
         assertThat(innvilgelseFtrl.getArbeidsland()).isEqualTo(Landkoder.AT.getBeskrivelse());
         assertThat(innvilgelseFtrl.isTrygdeavtaleMedArbeidsland()).isFalse();
         assertThat(innvilgelseFtrl.getVurderingTrygdeavgift()).isNotNull();
+        assertThat(innvilgelseFtrl.getVurderingTrygdeavgift().selvbetalende()).isFalse();
+        assertThat(innvilgelseFtrl.getVurderingTrygdeavgift().representantNavn()).isEqualTo(REPRESENTANT_NAVN);
         assertThat(innvilgelseFtrl.getVurderingTrygdeavgift().utenlandsk()).isNull();
 
         TrygdeavgiftInfo trygdeavgiftInfoNorsk = innvilgelseFtrl.getVurderingTrygdeavgift().norsk();
@@ -336,7 +343,15 @@ class InnvilgelseFtrlMapperTest {
         FastsattTrygdeavgift fastsattTrygdeavgift = new FastsattTrygdeavgift();
         fastsattTrygdeavgift.setAvgiftspliktigNorskInntektMnd(50000L);
         fastsattTrygdeavgift.setAvgiftspliktigUtenlandskInntektMnd(50000L);
+        fastsattTrygdeavgift.setBetalesAv(lagBetalesAv());
+        fastsattTrygdeavgift.setRepresentantNr("1234");
         return fastsattTrygdeavgift;
+    }
+
+    private Aktoer lagBetalesAv() {
+        Aktoer aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.REPRESENTANT_TRYGDEAVGIFT);
+        return aktoer;
     }
 
     private void mockHappyCase() {
@@ -348,6 +363,7 @@ class InnvilgelseFtrlMapperTest {
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(anyLong())).thenReturn(lagMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(anyLong())).thenReturn(lagMedfølgendeBarn());
         when(mockLandvelgerService.hentArbeidsland(anyLong())).thenReturn(Landkoder.AT);
+        when(mockRepresentantService.hentRepresentant(anyString())).thenReturn(new RepresentantDataDto("1234", REPRESENTANT_NAVN, null, null, null));
         when(mockPersondataFasade.hentSammensattNavn(anyString())).thenAnswer((Answer<String>) invocationOnMock -> {
             String fnr = invocationOnMock.getArgument(0);
             return switch (fnr) {
