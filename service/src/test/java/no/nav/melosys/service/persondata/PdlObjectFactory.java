@@ -10,6 +10,7 @@ import no.nav.melosys.integrasjon.pdl.dto.Endring;
 import no.nav.melosys.integrasjon.pdl.dto.Metadata;
 import no.nav.melosys.integrasjon.pdl.dto.person.*;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Bostedsadresse;
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Matrikkeladresse;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.UtenlandskAdresse;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Vegadresse;
 
@@ -47,6 +48,20 @@ public class PdlObjectFactory {
                     null, lagMetadata(LocalDateTime.MAX))),
             null);
     }
+
+    public static Bostedsadresse lagBostedsadresseMedMatrikkelAdresse() {
+        return new Bostedsadresse(
+            LocalDateTime.parse("2020-01-01T00:00:00"),
+            LocalDateTime.parse("2020-05-05T00:00:00"),
+            null,
+            null,
+            new Matrikkeladresse("tilleggsnavn", "4321"),
+            null,
+            null,
+            metadata()
+        );
+    }
+
 
     public static Bostedsadresse lagNorskBostedsadresse() {
         return new Bostedsadresse(
