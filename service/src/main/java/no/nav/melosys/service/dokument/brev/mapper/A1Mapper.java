@@ -84,7 +84,7 @@ class A1Mapper {
         }
 
         person.setBostedsadresse(mapBostedAdresse(persondata));
-        person.setMidlertidigOppholdsadresse(1mapMidlertidigOppholdsadresse(persondata));
+        person.setMidlertidigOppholdsadresse(mapMidlertidigOppholdsadresse(persondata));
 
         return person;
     }
