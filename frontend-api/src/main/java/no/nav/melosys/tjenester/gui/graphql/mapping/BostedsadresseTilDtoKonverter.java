@@ -14,7 +14,7 @@ public final class BostedsadresseTilDtoKonverter {
             StrukturertAdresseTilDtoKonverter.tilDto(bostedsadresse.strukturertAdresse(), kodeverkService),
             bostedsadresse.gyldigFraOgMed(),
             bostedsadresse.gyldigTilOgMed(),
-            bostedsadresse.master(),
+            MasterTilDtoKonverter.tilDto(bostedsadresse.master()),
             bostedsadresse.kilde(),
             bostedsadresse.erHistorisk()
         );
