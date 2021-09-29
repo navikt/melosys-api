@@ -27,6 +27,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import static no.nav.melosys.integrasjon.pdl.dto.identer.Query.HENT_IDENTER_QUERY;
 import static no.nav.melosys.integrasjon.pdl.dto.person.Query.*;
 
+@Retryable
 public class PDLConsumerImpl implements PDLConsumer {
     private static final Logger log = LoggerFactory.getLogger(PDLConsumerImpl.class);
     private static final ObjectWriter JSON_WRITER = new ObjectMapper().writer();
@@ -41,7 +42,6 @@ public class PDLConsumerImpl implements PDLConsumer {
     }
 
     @Override
-    @Retryable
     public Identliste hentIdenter(String ident) {
         var graphQLRequest = new GraphQLRequest(HENT_IDENTER_QUERY, Map.of(IDENT, ident));
 
@@ -56,55 +56,61 @@ public class PDLConsumerImpl implements PDLConsumer {
     }
 
     @Override
-    @Retryable
     public Person hentBarn(String ident) {
         return hentPersondata(HENT_BARN_QUERY, ident, false);
     }
 
     @Override
-    @Retryable
+    public Person hentBarnMedHistorikk(String ident) {
+        return hentPersondata(HENT_BARN_QUERY, ident, true);
+    }
+
+    @Override
     public Person hentForelder(String ident) {
         return hentPersondata(HENT_FORELDER_QUERY, ident, false);
     }
 
     @Override
-    @Retryable
-    public Person hentFamilierelasjoner(String ident) {
-        return hentPersondata(HENT_FAMILIERELASJONER_QUERY, ident, false);
+    public Person hentForelderMedHistorikk(String ident) {
+        return hentPersondata(HENT_FORELDER_QUERY, ident, true);
     }
 
     @Override
-    @Retryable
+    public Person hentFamilierelasjoner(String ident) {
+        return hentPersondata(HENT_FAMILIERELASJONER_QUERY, ident, true);
+    }
+
+    @Override
     public Person hentPerson(String ident) {
         return hentPersondata(HENT_PERSON_QUERY, ident, false);
     }
 
     @Override
-    @Retryable
-    public Person hentPersonMedHistorikk(String ident, boolean innsynn) {
+    public Person hentPersonMedHistorikk(String ident) {
         return hentPersondata(HENT_PERSON_HISTORIKK_QUERY, ident, true);
     }
 
     @Override
-    @Retryable
     public Person hentRelatertVedSivilstand(String ident) {
         return hentPersondata(HENT_RELATERT_VED_SIVILSTAND_QUERY, ident, false);
     }
 
     @Override
-    @Retryable
+    public Person hentRelatertVedSivilstandMedHistorikk(String ident) {
+        return hentPersondata(HENT_RELATERT_VED_SIVILSTAND_QUERY, ident, true);
+    }
+
+    @Override
     public Collection<Adressebeskyttelse> hentAdressebeskyttelser(String ident) {
         return hentPersondata(HENT_ADRESSEBESKYTTELSE_QUERY, ident, false).adressebeskyttelse();
     }
 
     @Override
-    @Retryable
     public Collection<Navn> hentNavn(String ident) {
         return hentPersondata(HENT_NAVN_QUERY, ident, false).navn();
     }
 
     @Override
-    @Retryable
     public Collection<Statsborgerskap> hentStatsborgerskap(String ident) {
         return hentPersondata(HENT_STATSBORGERSKAP_QUERY, ident, true).statsborgerskap();
     }
