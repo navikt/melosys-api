@@ -8,6 +8,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,13 +20,22 @@ class RedigerbarKontroll {
     );
 
     private final BehandlingsresultatService behandlingsresultatService;
+    private final OppgaveService oppgaveService;
 
-    RedigerbarKontroll(BehandlingsresultatService behandlingsresultatService) {
+    RedigerbarKontroll(BehandlingsresultatService behandlingsresultatService, OppgaveService oppgaveService) {
         this.behandlingsresultatService = behandlingsresultatService;
+        this.oppgaveService = oppgaveService;
     }
 
-    public void sjekkTilordnetSaksbehandlerOgRedigerbar(Behandling behandling, Ressurs ressurs) {
-        //sjekk om oppgave er tilordnet sbh
+    public void sjekkTilordnetSaksbehandlerOgRedigerbar(Behandling behandling, Ressurs ressurs, String saksbehandler) {
+        final var saksnummer = behandling.getFagsak().getSaksnummer();
+
+        if (!oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, saksnummer)) {
+            throw new FunksjonellException(
+                "Forsøk på å endre behandling med id %s som er ikke-redigerbar eller ikke er tilordnet %s".formatted(behandling.getId(), saksbehandler)
+            );
+        }
+
         sjekkRessursRedigerbar(behandling, ressurs);
     }
 
