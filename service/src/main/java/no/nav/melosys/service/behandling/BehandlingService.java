@@ -301,10 +301,6 @@ public class BehandlingService {
         lagre(behandling);
     }
 
-    public boolean erBehandlingRedigerbarOgTilordnetSaksbehandler(Behandling behandling, String saksbehandler) {
-        return behandling.erRedigerbar() && oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, behandling.getFagsak().getSaksnummer());
-    }
-
     @Transactional
     public void endreBehandlingsfrist(long behandlingId, LocalDate behandlingsfrist) {
         Behandling behandling = hentBehandlingUtenSaksopplysninger(behandlingId);

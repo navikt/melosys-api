@@ -12,7 +12,7 @@ import no.nav.melosys.service.oppgave.OppgaveService;
 import org.springframework.stereotype.Service;
 
 @Service
-class RedigerbarKontroll {
+public class RedigerbarKontroll {
 
     private static final Map<Ressurs, Predicate<Behandlingsresultat>> RESSURS_REDIGERBAR_MAP = Map.of(
         Ressurs.AVKLARTE_FAKTA, b -> !b.erArtikkel16MedSendtAnmodningOmUnntak(),
@@ -37,6 +37,11 @@ class RedigerbarKontroll {
         }
 
         sjekkRessursRedigerbar(behandling, ressurs);
+    }
+
+    public boolean erBehandlingRedigerbarOgTilordnetSaksbehandler(Behandling behandling, String saksbehandler) {
+        return behandling.erRedigerbar()
+            && oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, behandling.getFagsak().getSaksnummer());
     }
 
     public void sjekkRessursRedigerbar(Behandling behandling, Ressurs ressurs) {

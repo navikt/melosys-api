@@ -10,7 +10,6 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -262,7 +261,7 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void avsluttBehandling() throws Exception {
+    void avsluttBehandling() {
         Behandling behandling = new Behandling();
         when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
@@ -292,48 +291,6 @@ class BehandlingServiceTest {
         behandlingService.endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
 
         verify(behandlingRepo, never()).save(any());
-    }
-
-    @Test
-    void erBehandlingRedigerbarOgTilordnetSaksbehandler() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("12345678901");
-        Behandling behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
-
-        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder().setTilordnetRessurs(SAKSBEHANDLER);
-
-        when(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(SAKSBEHANDLER, behandling.getFagsak().getSaksnummer()))
-            .thenReturn(true);
-
-        behandling.setStatus(Behandlingsstatus.OPPRETTET);
-        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isTrue();
-
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isTrue();
-
-        behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
-        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isFalse();
-
-        behandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
-        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isFalse();
-
-        behandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
-        behandling.setType(Behandlingstyper.SOEKNAD);
-        behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
-        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isTrue();
-        behandling.setType(null);
-
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isFalse();
-
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        oppgaveBuilder.setTilordnetRessurs("noen andre");
-        Oppgave oppgave2 = oppgaveBuilder.build();
-        when(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(SAKSBEHANDLER, behandling.getFagsak().getSaksnummer()))
-            .thenReturn(false);
-        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isFalse();
     }
 
     @Test

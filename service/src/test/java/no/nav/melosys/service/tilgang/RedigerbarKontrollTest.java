@@ -14,8 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -95,4 +94,29 @@ class RedigerbarKontrollTest {
             .isThrownBy(() -> redigerbarKontroll.sjekkRessursRedigerbar(behandling, Ressurs.AVKLARTE_FAKTA))
             .withMessageContaining("Kan ikke endre");
     }
+
+    @Test
+    void erBehandlingRedigerbarOgTilordnetSaksbehandler_behandlingInaktiv_ikkeSann() {
+        behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+        assertThat(redigerbarKontroll.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, "z")).isFalse();
+    }
+
+    @Test
+    void erBehandlingRedigerbarOgTilordnetSaksbehandler_behandlingAktivIkkeTilordnet_ikkeSann() {
+        final var saksbehandler = "Z11111";
+        behandling.setStatus(Behandlingsstatus.OPPRETTET);
+        when(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, saksnummer)).thenReturn(false);
+
+        assertThat(redigerbarKontroll.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling,  saksbehandler)).isFalse();
+    }
+
+    @Test
+    void erBehandlingRedigerbarOgTilordnetSaksbehandler_behandlingAktivIkkeTilordnet_sann() {
+        final var saksbehandler = "Z11111";
+        behandling.setStatus(Behandlingsstatus.OPPRETTET);
+        when(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, saksnummer)).thenReturn(true);
+
+        assertThat(redigerbarKontroll.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, saksbehandler)).isTrue();
+    }
+
 }
