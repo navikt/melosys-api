@@ -13,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
@@ -338,24 +337,7 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void erBehandlingRedigerbarOgTilordnetSaksbehandler_ingenOppgaveFunnet_kasterException() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("12345678901");
-        Behandling behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-        behandling.setStatus(Behandlingsstatus.OPPRETTET);
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
-
-        when(oppgaveService.finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer()))
-            .thenThrow(new TekniskException("Finner ingen oppgave for fagsak"));
-
-        assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(() -> behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER))
-            .withMessage("Finner ingen oppgave for fagsak");
-    }
-
-    @Test
-    void endreBehandlingsfrist_enUkeFrem_fristOppdateres() throws Exception {
+    void endreBehandlingsfrist_enUkeFrem_fristOppdateres() {
         LocalDate nå = LocalDate.now();
         Behandling behandling = new Behandling();
         behandling.setBehandlingsfrist(nå);

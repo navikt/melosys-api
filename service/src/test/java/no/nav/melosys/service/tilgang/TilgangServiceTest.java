@@ -11,7 +11,6 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.sikkerhet.abac.Pep;
 import no.nav.melosys.sikkerhet.abac.PepImpl;
@@ -38,8 +37,6 @@ class TilgangServiceTest {
     private FagsakService fagsakService;
     @Mock
     private BehandlingService behandlingService;
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
 
     private XacmlResponse abacResponse;
     private AbacContext abacContext;
@@ -111,7 +108,7 @@ class TilgangServiceTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> tilgangService.sjekkRedigerbarOgTilgang(123123123))
-            .withMessage("Forsøk på å endre en ikke-redigerbar behandling med id 123123123");
+            .withMessageContaining("Forsøk på å endre en ikke-redigerbar behandling med id");
     }
 
     @Test
