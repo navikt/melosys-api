@@ -184,6 +184,13 @@ public class OppgaveService {
         opprettEllerGjenbrukBehandlingsoppgave(behandling, behandling.getInitierendeJournalpostId(), fagsak.hentAktørID(), tilordnetRessurs, beskrivelse);
     }
 
+    public boolean saksbehandlerErTilordnetOppgaveForSaksnummer(String saksbehandler, String saksnummer) {
+        return finnÅpenOppgaveMedFagsaksnummer(saksnummer)
+            .map(Oppgave::getTilordnetRessurs)
+            .filter(saksbehandler::equals)
+            .isPresent();
+    }
+
     private List<OppgaveDto> oppgaverTilDtoer(Collection<Oppgave> oppgaverFraDomain) {
         return oppgaverFraDomain.stream()
             .map(this::tilOppgaveDtoHåndterException)

@@ -245,13 +245,41 @@ class OppgaveServiceTest {
         when(persondataFasade.harStrengtFortroligAdresse("fnrBruker")).thenReturn(false);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(oppgaveFasade.finnAvsluttetOppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(oppgave1, oppgave2));
-        when(fagsakService.hentFagsak(eq(SAKSNUMMER))).thenReturn(fagsak);
+        when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(fagsak);
 
         oppgaveService.opprettOppgaveForSak(SAKSNUMMER);
 
         verify(oppgaveFasade).opprettOppgave(oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue().getSaksnummer()).isEqualTo(SAKSNUMMER);
         assertThat(oppgaveCaptor.getValue().getTilordnetRessurs()).isEqualTo(oppgave1.getTilordnetRessurs());
+    }
+
+    @Test
+    void saksbehandlerErTilordnetOppgaveForSaksnummer_erTilordnet_erSann() {
+        final var saksnummer = "MEL-0";
+        final var saksbehandler = "Z12111";
+        final var oppgave = new Oppgave.Builder().setTilordnetRessurs(saksbehandler).build();
+
+        when(oppgaveFasade.finnÅpneOppgaverMedSaksnummer(saksnummer)).thenReturn(List.of(oppgave));
+        assertThat(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, saksnummer)).isTrue();
+    }
+
+    @Test
+    void saksbehandlerErTilordnetOppgaveForSaksnummer_erIkkeTilordnet_erIkkeSann() {
+        final var saksnummer = "MEL-0";
+        final var saksbehandler = "Z12111";
+        final var oppgave = new Oppgave.Builder().build();
+
+        when(oppgaveFasade.finnÅpneOppgaverMedSaksnummer(saksnummer)).thenReturn(List.of(oppgave));
+        assertThat(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, saksnummer)).isFalse();
+    }
+
+    @Test
+    void saksbehandlerErTilordnetOppgaveForSaksnummer_finnesIngenOppgaver_erIkkeSann() {
+        final var saksnummer = "MEL-0";
+
+        when(oppgaveFasade.finnÅpneOppgaverMedSaksnummer(saksnummer)).thenReturn(Collections.emptyList());
+        assertThat(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer("Z12111", saksnummer)).isFalse();
     }
 
     private static Behandling lagBehandling() {
