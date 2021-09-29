@@ -10,6 +10,7 @@ import no.nav.melosys.integrasjon.pdl.dto.Endring;
 import no.nav.melosys.integrasjon.pdl.dto.Metadata;
 import no.nav.melosys.integrasjon.pdl.dto.person.*;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Bostedsadresse;
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Matrikkeladresse;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.UtenlandskAdresse;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Vegadresse;
 
@@ -32,8 +33,8 @@ public class PdlObjectFactory {
                 metadata())),
             Set.of(new no.nav.melosys.integrasjon.pdl.dto.person.Folkeregisteridentifikator("IdNr", metadata())),
             Set.of(new Folkeregisterpersonstatus("ikkeBosatt", metadata())),
-            Set.of(new ForelderBarnRelasjon("barnIdent", Familierelasjonsrolle.BARN, Familierelasjonsrolle.MOR),
-                new ForelderBarnRelasjon("forelderIdent", Familierelasjonsrolle.MOR, Familierelasjonsrolle.BARN)),
+            Set.of(new ForelderBarnRelasjon("barnIdent", Familierelasjonsrolle.BARN, Familierelasjonsrolle.MOR, metadata()),
+                new ForelderBarnRelasjon("forelderIdent", Familierelasjonsrolle.MOR, Familierelasjonsrolle.BARN, metadata())),
             Set.of(new Foreldreansvar("felles", metadata())),
             Set.of(new Kjoenn(KjoennType.UKJENT, lagMetadata(LocalDateTime.MIN)), new Kjoenn(KjoennType.UKJENT, lagMetadata(LocalDateTime.MAX))),
             Collections.emptyList(),
@@ -47,6 +48,20 @@ public class PdlObjectFactory {
                     null, lagMetadata(LocalDateTime.MAX))),
             null);
     }
+
+    public static Bostedsadresse lagBostedsadresseMedMatrikkelAdresse() {
+        return new Bostedsadresse(
+            LocalDateTime.parse("2020-01-01T00:00:00"),
+            LocalDateTime.parse("2020-05-05T00:00:00"),
+            null,
+            null,
+            new Matrikkeladresse("tilleggsnavn", "4321"),
+            null,
+            null,
+            metadata()
+        );
+    }
+
 
     public static Bostedsadresse lagNorskBostedsadresse() {
         return new Bostedsadresse(

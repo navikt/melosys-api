@@ -57,7 +57,7 @@
         <cxf.version>3.4.4</cxf.version>
         <commons-collections4.version>4.4</commons-collections4.version>
         <commons-lang.version>3.9</commons-lang.version>
-        <commons-text.version>1.8</commons-text.version>
+        <commons-text.version>1.9</commons-text.version>
         <findbugs.jsr305.version>3.0.2</findbugs.jsr305.version>
         <guava.version>30.1.1-jre</guava.version>
         <graphql-java.version>16.2</graphql-java.version>
@@ -66,11 +66,11 @@
         <hikaricp.version>4.0.3</hikaricp.version>
         <ibmmq.version>9.0.5.0</ibmmq.version>
         <jackson.version>2.12.3</jackson.version>
-        <javax.ws.rs-api.version>2.1</javax.ws.rs-api.version>
+        <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
         <json-smart.version>2.4.7</json-smart.version>
         <jms-api.version>2.0.1</jms-api.version>
         <micrometer-jvm-extras.version>0.2.2</micrometer-jvm-extras.version>
-        <networknt.json-schema-validator.version>1.0.47</networknt.json-schema-validator.version>
+        <networknt.json-schema-validator.version>1.0.60</networknt.json-schema-validator.version>
         <ojdbc.version>18.3.0.0</ojdbc.version>
         <okhttp.version>4.9.1</okhttp.version>
         <oracle.version>18</oracle.version>
@@ -96,7 +96,7 @@
         <objenesis.version>3.2</objenesis.version>
         <osgi.version>6.0.0</osgi.version>
         <woodstox.version>6.2.6</woodstox.version>
-        <xmlsec.version>2.2.2</xmlsec.version>
+        <xmlsec.version>2.2.3</xmlsec.version>
         <medlemskapsunntak-api-v1.version>1.1</medlemskapsunntak-api-v1.version>
         <wiremock-standalone.version>2.27.2</wiremock-standalone.version>
     </properties>

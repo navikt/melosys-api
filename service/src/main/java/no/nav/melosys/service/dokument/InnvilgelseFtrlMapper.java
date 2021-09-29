@@ -3,11 +3,9 @@ package no.nav.melosys.service.dokument;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Stream;
+import javax.transaction.Transactional;
 
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.InnvilgelsesResultat;
-import no.nav.melosys.domain.Medlemskapsperiode;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoNorge;
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoUtland;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
@@ -15,6 +13,7 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avtaleland;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
@@ -29,10 +28,13 @@ import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.representant.RepresentantService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import static java.util.Optional.ofNullable;
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE;
+import static org.springframework.util.StringUtils.hasText;
 
 @Component
 public class InnvilgelseFtrlMapper {
@@ -43,6 +45,7 @@ public class InnvilgelseFtrlMapper {
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
     private final LandvelgerService landvelgerService;
+    private final RepresentantService representantService;
     private final EregFasade eregFasade;
 
     public InnvilgelseFtrlMapper(PersondataFasade persondataFasade,
@@ -51,6 +54,7 @@ public class InnvilgelseFtrlMapper {
                                  AvklarteVirksomheterService avklarteVirksomheterService,
                                  AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService,
                                  LandvelgerService landvelgerService,
+                                 RepresentantService representantService,
                                  @Qualifier("system") EregFasade eregFasade) {
         this.persondataFasade = persondataFasade;
         this.trygdeavgiftsgrunnlagService = trygdeavgiftsgrunnlagService;
@@ -58,9 +62,11 @@ public class InnvilgelseFtrlMapper {
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.avklarteMedfolgendeFamilieService = avklarteMedfolgendeFamilieService;
         this.landvelgerService = landvelgerService;
+        this.representantService = representantService;
         this.eregFasade = eregFasade;
     }
 
+    @Transactional
     public InnvilgelseFtrl map(InnvilgelseBrevbestilling brevbestilling) {
         long behandlingId = brevbestilling.getBehandlingId();
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
@@ -73,10 +79,12 @@ public class InnvilgelseFtrlMapper {
         AvklartVirksomhet norskeArbeidsgivere = avklarteVirksomheterService.hentNorskeArbeidsgivere(brevbestilling.getBehandling()).get(0);
         Landkoder arbeidsland = landvelgerService.hentArbeidsland(behandlingId);
 
+        Collection<Medlemskapsperiode> medlemskapsperioder = medlemAvFolketrygden.getMedlemskapsperioder();
+        FastsattTrygdeavgift fastsattTrygdeavgift = medlemAvFolketrygden.getFastsattTrygdeavgift();
         return new InnvilgelseFtrl(
             brevbestilling,
-            medlemAvFolketrygden.getMedlemskapsperioder().stream().map(Periode::new).toList(),
-            erFullstendigInnvilget(medlemAvFolketrygden.getMedlemskapsperioder()),
+            medlemskapsperioder.stream().map(Periode::new).toList(),
+            erFullstendigInnvilget(medlemskapsperioder),
             hentSaerligBegrunnelse(behandlingsresultat),
             avklarteMedfolgendeEktefelle.finnes(),
             avklarteMedfolgendeBarn.finnes(),
@@ -86,7 +94,7 @@ public class InnvilgelseFtrlMapper {
             norskeArbeidsgivere.navn,
             arbeidsland.getBeskrivelse(),
             harTrygdeavtaleMedArbeidsland(arbeidsland),
-            mapVurderingTrygdeavgift(trygdeavgiftsgrunnlag, medlemAvFolketrygden.getFastsattTrygdeavgift()),
+            mapVurderingTrygdeavgift(trygdeavgiftsgrunnlag, fastsattTrygdeavgift),
             trygdeavgiftsgrunnlag.getLønnsforhold().getKode(),
             hentFullmektigNavnArbeidsgiver(brevbestilling.getBehandling().getFagsak()),
             brevbestilling.getBehandling().getFagsak().finnRepresentant(Representerer.BRUKER).isPresent(),
@@ -104,7 +112,7 @@ public class InnvilgelseFtrlMapper {
     private String hentSaerligBegrunnelse(Behandlingsresultat behandlingsresultat) {
         return behandlingsresultat.getVilkaarsresultater().stream()
             .findFirst()
-            .filter(v -> v.getVilkaar().equals(FTRL_2_8_NÆR_TILKNYTNING_NORGE))
+            .filter(v -> v.getVilkaar() == FTRL_2_8_NÆR_TILKNYTNING_NORGE)
             .map(vilkaarsresultat -> vilkaarsresultat.getBegrunnelser().iterator().next().getKode())
             .orElse(null);
     }
@@ -150,7 +158,7 @@ public class InnvilgelseFtrlMapper {
         if (trygdeavgiftsgrunnlag.getAvgiftsGrunnlagNorge() != null) {
             AvgiftsgrunnlagInfoNorge avgiftsGrunnlagNorge = trygdeavgiftsgrunnlag.getAvgiftsGrunnlagNorge();
             norsk = new TrygdeavgiftInfo(
-                fastsattTrygdeavgift.getAvgiftspliktigNorskInntektMnd(),
+                ofNullable(fastsattTrygdeavgift.getAvgiftspliktigNorskInntektMnd()).orElse(0L),
                 avgiftsGrunnlagNorge.erAvgiftspliktig(),
                 avgiftsGrunnlagNorge.erSkattepliktig(),
                 avgiftsGrunnlagNorge.betalerArbeidsgiverAvgift(),
@@ -160,14 +168,19 @@ public class InnvilgelseFtrlMapper {
         if (trygdeavgiftsgrunnlag.getAvgiftsGrunnlagUtland() != null) {
             AvgiftsgrunnlagInfoUtland avgiftsGrunnlagUtland = trygdeavgiftsgrunnlag.getAvgiftsGrunnlagUtland();
             utenlandsk = new TrygdeavgiftInfo(
-                fastsattTrygdeavgift.getAvgiftspliktigUtenlandskInntektMnd(),
+                ofNullable(fastsattTrygdeavgift.getAvgiftspliktigUtenlandskInntektMnd()).orElse(0L),
                 avgiftsGrunnlagUtland.erAvgiftspliktig(),
                 avgiftsGrunnlagUtland.erSkattepliktig(),
                 avgiftsGrunnlagUtland.betalerArbeidsgiverAvgift(),
                 avgiftsGrunnlagUtland.getSærligAvgiftsgruppe() != null ? avgiftsGrunnlagUtland.getSærligAvgiftsgruppe().getKode() : null
             );
         }
-        return new VurderingTrygdeavgift(norsk, utenlandsk);
+        return new VurderingTrygdeavgift(
+            norsk,
+            utenlandsk,
+            fastsattTrygdeavgift.getBetalesAv().getRolle() == Aktoersroller.BRUKER,
+            hentRepresentantNavn(fastsattTrygdeavgift.getRepresentantNr())
+        );
     }
 
     private boolean harLønnNorgeSkattepliktigNorge(AvgiftsgrunnlagInfoNorge avgiftsgrunnlagInfoNorge) {
@@ -186,5 +199,12 @@ public class InnvilgelseFtrlMapper {
         return fagsak.finnRepresentant(Representerer.ARBEIDSGIVER)
             .map(aktoer -> eregFasade.hentOrganisasjonNavn(aktoer.getOrgnr()))
             .orElse(null);
+    }
+
+    private String hentRepresentantNavn(String representantNr) {
+        if (hasText(representantNr)) {
+            return representantService.hentRepresentant(representantNr).navn();
+        }
+        return null;
     }
 }

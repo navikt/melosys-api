@@ -1,10 +1,15 @@
 package no.nav.melosys.tjenester.gui.dto;
 
+import java.util.List;
+
+import no.nav.melosys.service.dokument.brev.KopiMottaker;
+
 public class FattFtrlVedtakDto extends FattVedtakDto {
     private String fritekstInnledning;
     private String fritekstBegrunnelse;
     private String fritekstEktefelle;
     private String fritekstBarn;
+    private List<KopiMottaker> kopiMottakere;
 
     public String getFritekstInnledning() {
         return fritekstInnledning;
@@ -22,6 +27,10 @@ public class FattFtrlVedtakDto extends FattVedtakDto {
         return fritekstBarn;
     }
 
+    public List<KopiMottaker> getKopiMottakere() {
+        return kopiMottakere;
+    }
+
     public void setFritekstInnledning(String fritekstInnledning) {
         this.fritekstInnledning = fritekstInnledning;
     }
@@ -36,5 +45,9 @@ public class FattFtrlVedtakDto extends FattVedtakDto {
 
     public void setFritekstBarn(String fritekstBarn) {
         this.fritekstBarn = fritekstBarn;
+    }
+
+    public void setKopiMottakere(List<KopiMottaker> kopiMottakere) {
+        this.kopiMottakere = kopiMottakere;
     }
 }

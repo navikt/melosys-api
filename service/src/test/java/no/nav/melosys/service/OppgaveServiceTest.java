@@ -2,6 +2,7 @@ package no.nav.melosys.service;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
@@ -71,10 +72,10 @@ class OppgaveServiceTest {
     @BeforeEach
     public void setUp() {
         this.oppgaveService = new OppgaveService(
-                behandlingService,
-                fagsakService,
+            behandlingService,
+            fagsakService,
             oppgaveFasade,
-                saksopplysningerService,
+            saksopplysningerService,
             behandlingsgrunnlagService, persondataFasade);
 
         oppgave = new Oppgave.Builder()
@@ -155,8 +156,7 @@ class OppgaveServiceTest {
     }
 
     @Test
-    void opprettEllerGjenbrukBehandlingsoppgave_oppgaveOpprettElektroniskSøknad_oppgaveBlirOpprettetMedBeskrvielse()
-        {
+    void opprettEllerGjenbrukBehandlingsoppgave_oppgaveOpprettElektroniskSøknad_oppgaveBlirOpprettetMedBeskrvielse() {
         final String mottattString = "Mottatt elektronisk søknad";
         Behandling behandling = lagBehandling();
         behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
@@ -229,6 +229,29 @@ class OppgaveServiceTest {
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
         verify(oppgaveFasade, never()).opprettOppgave(any(Oppgave.class));
         verify(oppgaveFasade).opprettSensitivOppgave(any(Oppgave.class));
+    }
+
+    @Test
+    void opprettOppgaveForSak_oppretterNyOppgaveForFagsak() {
+        var behandling = lagBehandling();
+        var fagsak = behandling.getFagsak();
+        fagsak.setBehandlinger(List.of(behandling));
+        var oppgave1 = new Oppgave.Builder()
+            .setTilordnetRessurs("tilordnet ressurs 1").setOpprettetTidspunkt(LocalDate.now().atStartOfDay(ZoneId.systemDefault())).setStatus("FERDIGSTILT").build();
+        var oppgave2 = new Oppgave.Builder()
+            .setTilordnetRessurs("tilordnet ressurs 2").setOpprettetTidspunkt(LocalDate.now().minusDays(2).atStartOfDay(ZoneId.systemDefault())).setStatus("FERDIGSTILT").build();
+
+        when(persondataFasade.hentFolkeregisterident("aktørID")).thenReturn("fnrBruker");
+        when(persondataFasade.harStrengtFortroligAdresse("fnrBruker")).thenReturn(false);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(oppgaveFasade.finnAvsluttetOppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(oppgave1, oppgave2));
+        when(fagsakService.hentFagsak(eq(SAKSNUMMER))).thenReturn(fagsak);
+
+        oppgaveService.opprettOppgaveForSak(SAKSNUMMER);
+
+        verify(oppgaveFasade).opprettOppgave(oppgaveCaptor.capture());
+        assertThat(oppgaveCaptor.getValue().getSaksnummer()).isEqualTo(SAKSNUMMER);
+        assertThat(oppgaveCaptor.getValue().getTilordnetRessurs()).isEqualTo(oppgave1.getTilordnetRessurs());
     }
 
     private static Behandling lagBehandling() {

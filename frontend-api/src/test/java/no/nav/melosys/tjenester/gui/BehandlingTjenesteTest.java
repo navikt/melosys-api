@@ -17,11 +17,11 @@ import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtlan
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.EndreBehandlingstemaService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.tilgang.TilgangService;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.tildto.SaksopplysningerTilDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;

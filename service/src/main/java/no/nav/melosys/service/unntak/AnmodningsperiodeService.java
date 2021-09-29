@@ -20,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.springframework.util.StringUtils.hasText;
+
 @Service
 public class AnmodningsperiodeService {
     private final AnmodningsperiodeRepository anmodningsperiodeRepository;
@@ -143,5 +145,17 @@ public class AnmodningsperiodeService {
         if (PeriodeKontroller.feilIPeriode(anmodningsperiodeSvar.getInnvilgetFom(), anmodningsperiodeSvar.getInnvilgetTom())) {
             throw new FunksjonellException("Periode er ikke gyldig");
         }
+    }
+
+    public void oppdaterAnmodetAvForBehandling(long behandlingID, String subjekt) {
+        var anmodningsperiode = hentFørsteAnmodningsperiode(behandlingID);
+        if (hasText(anmodningsperiode.getAnmodetAv())) {
+            throw new FunksjonellException(
+                "Anmodningsperiode for behandling %s er allerede anmodet av %s".formatted(behandlingID, anmodningsperiode.getAnmodetAv())
+            );
+        }
+
+        anmodningsperiode.setAnmodetAv(subjekt);
+        anmodningsperiodeRepository.save(anmodningsperiode);
     }
 }

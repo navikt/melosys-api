@@ -72,7 +72,7 @@ class SedMottakTestIT {
         eessiMeldingConsumer.mottaMelding(new ConsumerRecord<>("", 0 ,0, "", eessiMeldingX007));
 
         await().timeout(Duration.ofSeconds(20)).pollInterval(Duration.ofSeconds(3))
-            .until(() -> prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(List.of(ProsessStatus.FERDIG, ProsessStatus.FEILET), rinaSaksnummer).isEmpty());
+            .until(() -> prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(List.of(ProsessStatus.FERDIG), rinaSaksnummer).isEmpty());
 
         var prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer)
             .stream()

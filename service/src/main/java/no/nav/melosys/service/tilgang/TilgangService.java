@@ -1,6 +1,5 @@
-package no.nav.melosys.service.abac;
+package no.nav.melosys.service.tilgang;
 
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.exception.FunksjonellException;
@@ -26,7 +25,7 @@ public class TilgangService {
 
     public void sjekkRedigerbarOgTilordnetSaksbehandlerOgTilgang(long behandlingsId) {
         String saksbehandler = SubjectHandler.getInstance().getUserID();
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsId);
+        var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsId);
 
         if ( !behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, saksbehandler)){
             throw new FunksjonellException(String.format("Forsøk på å endre behandling med id %s som er ikke-redigerbar eller ikke er tilordnet %s", behandlingsId, saksbehandler));
@@ -36,7 +35,7 @@ public class TilgangService {
     }
 
     public void sjekkRedigerbarOgTilgang(long behandlingsId) {
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsId);
+        var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsId);
 
         if(!behandling.erRedigerbar()) {
             throw new FunksjonellException(String.format("Forsøk på å endre en ikke-redigerbar behandling med id %s", behandlingsId));
@@ -47,14 +46,14 @@ public class TilgangService {
 
     // Behandling
     public void sjekkTilgang(long behandlingsId) {
-        Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsId);
+        var behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingsId);
 
         sjekkTilgang(behandling);
     }
 
     private void sjekkTilgang(Behandling behandling) {
-        Fagsak fagsak = behandling.getFagsak();
-        Aktoer aktør = fagsak.hentBruker();
+        var fagsak = behandling.getFagsak();
+        var aktør = fagsak.hentBruker();
         if (aktør != null) {
             pep.sjekkTilgangTilAktoerId(aktør.getAktørId());
         }
@@ -66,7 +65,7 @@ public class TilgangService {
 
     // Fagsak
     public void sjekkSak(Fagsak fagsak) {
-        Aktoer aktør = fagsak.hentBruker();
+        var aktør = fagsak.hentBruker();
         if (aktør != null) {
             pep.sjekkTilgangTilAktoerId(aktør.getAktørId());
         }

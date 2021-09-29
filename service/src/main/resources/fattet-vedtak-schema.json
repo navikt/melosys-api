@@ -21,7 +21,7 @@
       ]
     },
     "periode": {
-      "type": "object",
+      "type": ["object", "null"],
       "properties": {
         "fom": {
           "type": "string",
@@ -38,7 +38,7 @@
       ]
     },
     "trygdeavgift": {
-      "type": "object",
+      "type": ["object", "null"],
       "properties": {
         "avgiftspliktigInntekt": {
           "type": "integer"
@@ -128,7 +128,7 @@
         },
         "vedtakstype": {
           "type": "string",
-          "enum":[
+          "enum": [
             "FØRSTEGANGSVEDTAK",
             "KORRIGERT_VEDTAK",
             "OMGJØRINGSVEDTAK",
@@ -139,7 +139,7 @@
           "type": "string"
         },
         "kontrollertAvSaksbehandler": {
-          "type": "string"
+          "type": ["string", "null"]
         }
       },
       "required": [
@@ -159,34 +159,41 @@
           "type": "object",
           "properties": {
             "norskArbgUtbetalerLoenn": {
-              "type": "boolean"
+              "type": ["boolean", "null"],
+              "default": true
             },
             "erArbeidstakerAnsattHelePerioden": {
-              "type": "boolean"
+              "type": ["boolean", "null"],
+              "default": true
             },
             "utlArbgUtbetalerLoenn": {
-              "type": "boolean"
+              "type": ["boolean", "null"],
+              "default": false
             },
             "utlArbTilhoererSammeKonsern": {
-              "type": "boolean"
+              "type": ["boolean", "null"],
+              "default": false
             },
             "bruttoLoennPerMnd": {
-              "type": "integer"
+              "type": ["integer", "null"]
             },
             "bruttoLoennUtlandPerMnd": {
-              "type": "integer"
+              "type": ["integer", "null"]
             },
             "mottarNaturalytelser": {
-              "type": "boolean"
+              "type": ["boolean", "null"],
+              "default": false
             },
             "samletVerdiNaturalytelser": {
-              "type": "integer"
+              "type": ["integer", "null"]
             },
             "erArbeidsgiveravgiftHelePerioden": {
-              "type": "boolean"
+              "type": ["boolean", "null"],
+              "default": true
             },
             "erTrukketTrygdeavgift": {
-              "type": "boolean"
+              "type": ["boolean", "null"],
+              "default": true
             }
           },
           "required": [
@@ -206,25 +213,25 @@
           "type": "object",
           "properties": {
             "antallAdmAnsatte": {
-              "type": "integer"
+              "type": ["integer", "null"]
             },
             "antallAnsatte": {
-              "type": "integer"
+              "type": ["integer", "null"]
             },
             "antallUtsendte": {
-              "type": "integer"
+              "type": ["integer", "null"]
             },
             "andelOmsetningINorge": {
-              "type": "integer"
+              "type": ["integer", "null"]
             },
             "andelOppdragINorge": {
-              "type": "integer"
+              "type": ["integer", "null"]
             },
             "andelKontrakterINorge": {
-              "type": "integer"
+              "type": ["integer", "null"]
             },
             "andelRekruttertINorge": {
-              "type": "integer"
+              "type": ["integer", "null"]
             },
             "ekstraArbeidsgivere": {
               "type": "array",
@@ -275,13 +282,10 @@
                   "type": "string"
                 },
                 "mellomnavn": {
-                  "type": "string"
+                  "type": ["string", "null"]
                 },
                 "etternavn": {
                   "type": "string"
-                },
-                "metadata": {
-                  "type": "null"
                 }
               },
               "required": [
@@ -295,9 +299,6 @@
               "properties": {
                 "land": {
                   "type": "string"
-                },
-                "metadata": {
-                  "type": "null"
                 }
               },
               "required": [
@@ -308,17 +309,52 @@
               "type": "null"
             },
             "adresser": {
-              "type": "null"
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "adressetype": {
+                    "type": "string",
+                    "enum": [
+                      "BOSTEDSADRESSE",
+                      "KONTAKTADRESSE",
+                      "POSTADRESSE",
+                      "ANNET"
+                    ]
+                  },
+                  "gatenavn": {
+                    "type": "string"
+                  },
+                  "gatenummer": {
+                    "type": "string"
+                  },
+                  "postnummer": {
+                    "type": "string"
+                  },
+                  "poststed": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "adressetype",
+                  "gatenavn",
+                  "gatenummer",
+                  "postnummer",
+                  "poststed"
+                ]
+              }
             }
           },
           "required": [
             "ident",
             "navn",
-            "statsborgerskap"
+            "statsborgerskap",
+            "adresser"
           ]
         },
         "hentetDato": {
-          "$ref": "#/definitions/dato"
+          "type": ["string", "null"],
+          "format": "date"
         },
         "hentetPeriode": {
           "$ref": "#/definitions/periode"
@@ -331,7 +367,54 @@
       ]
     },
     "avklarteFakta": {
-      "type": "null"
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "VIRKSOMHET",
+                "TIDLIGERE_LOVVALGSPERIODE",
+                "ARBEIDSLAND",
+                "ARBEID_SOKKEL_SKIP",
+                "YRKESGRUPPE",
+                "SOKKEL_ELLER_SKIP",
+                "BOSTEDSLAND",
+                "AARSAK_ENDRING_PERIODE",
+                "VURDERING_UNNTAK_PERIODE",
+                "MARGINALT_ARBEID",
+                "VESENTLIG_AKTIVITET_I_NORGE",
+                "ARBEIDSGIVERS_FORRETNINGSSTED",
+                "INFORMERT_MYNDIGHET",
+                "VURDERING_LOVVALG_BARN",
+                "LØNN_FORHOLD_VIRKSOMHET",
+                "LØNN_NORGE_ARBEIDSGIVERAVGIFT",
+                "LØNN_UTL_ARBEIDSGIVERAVGIFT",
+                "LØNN_NORGE_SKATTEPLIKTIG_NORGE",
+                "LØNN_UTL_SKATTEPLIKTIG_NORGE",
+                "LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE",
+                "LØNN_UTL_SÆRLIG_AVGIFTS_GRUPPE",
+                "VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER"
+              ]
+            },
+            "fakta": {
+              "type": "string"
+            },
+            "begrunnelse": {
+              "type": "string"
+            },
+            "begrunnelseFritekst": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "fakta"
+          ]
+        }
+      ]
     },
     "lovvalgOgMedlemskapsperioder": {
       "type": "array",
@@ -343,10 +426,10 @@
               "type": "string"
             },
             "tilleggsbestemmelse": {
-              "type": "string"
+              "type": ["string", "null"]
             },
             "lovvalgslandKode": {
-              "type": "string"
+              "type": ["string", "null"]
             },
             "periode": {
               "$ref": "#/definitions/periode"
@@ -371,13 +454,13 @@
               ]
             },
             "fastsattTrygdeavgift": {
-              "type": "object",
+              "type": ["object", "null"],
               "properties": {
                 "betalesAv": {
                   "type": "object",
                   "properties": {
                     "orgnr": {
-                      "type": "string"
+                      "type": ["string", "null"]
                     },
                     "rolle": {
                       "type": "string"
@@ -411,7 +494,7 @@
       ]
     },
     "fullmektig": {
-      "type": "object",
+      "type": ["object", "null"],
       "properties": {
         "identifikator": {
           "$ref": "#/definitions/identifikator"

@@ -9,6 +9,9 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,10 +54,12 @@ class VedtakServiceFasadeTest {
     void init() {
         vedtakServiceFasade = new VedtakServiceFasade(mockBehandlingService, mockEosVedtakService, mockEosVedtakSystemService, mockFtrlVedtakService, trygdeavtaleVedtakService);
         behandling = lagBehandling();
+
+        SpringSubjectHandler.set(new TestSubjectHandler());
     }
 
     @Test
-    void fattVedtak_feilBehandlingstype_kasterException() throws Exception {
+    void fattVedtak_feilBehandlingstype_kasterException() {
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         when(mockBehandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
 
@@ -111,7 +116,7 @@ class VedtakServiceFasadeTest {
     }
 
     @Test
-    void endreVedtak_EU_EOS_skalKalleEosVedtakService() throws Exception {
+    void endreVedtak_EU_EOS_skalKalleEosVedtakService() {
         setFagsakPåBehandling(Sakstyper.EU_EOS);
         when(mockBehandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
 
@@ -122,7 +127,7 @@ class VedtakServiceFasadeTest {
     }
 
     @Test
-    void endreVedtak_FTRL_kasterException() throws Exception {
+    void endreVedtak_FTRL_kasterException() {
         setFagsakPåBehandling(Sakstyper.FTRL);
         when(mockBehandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
 
@@ -187,6 +192,7 @@ class VedtakServiceFasadeTest {
             .medBehandlingsresultat(FASTSATT_LOVVALGSLAND)
             .medVedtakstype(FØRSTEGANGSVEDTAK)
             .medFritekstBegrunnelse("Begrunnelse")
+            .medBestillersId(SubjectHandler.getInstance().getUserID())
             .build();
     }
 
