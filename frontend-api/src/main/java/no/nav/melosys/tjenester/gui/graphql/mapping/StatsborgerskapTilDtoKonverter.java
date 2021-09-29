@@ -15,18 +15,9 @@ public final class StatsborgerskapTilDtoKonverter {
             statsborgerskap.bekreftelsesdato(),
             statsborgerskap.gyldigFraOgMed(),
             statsborgerskap.gyldigTilOgMed(),
-            mapMaster(statsborgerskap.master()),
+            MasterTilDtoKonverter.tilDto(statsborgerskap.master()),
             statsborgerskap.kilde(),
             statsborgerskap.erHistorisk()
         );
-    }
-
-    private static String mapMaster(String master) {
-        final String PDL = "PDL";
-        final String NAV_PDL = "NAV (PDL)";
-
-        if (PDL.equals(master)) return NAV_PDL;
-
-        return master;
     }
 }
