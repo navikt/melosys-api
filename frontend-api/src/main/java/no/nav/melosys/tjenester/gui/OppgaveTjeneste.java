@@ -110,7 +110,7 @@ public class OppgaveTjeneste {
         value = "Søk etter oppgaver knyttet til et fødselsnummer eller d-nummer",
         response = no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto.class,
         responseContainer = "List")
-    public ResponseEntity søkOppgaverMedBrukerID(@RequestParam("fnr") String fnr) {
+    public ResponseEntity<List<no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto>> søkOppgaverMedBrukerID(@RequestParam("fnr") String fnr) {
         if (fnr == null) {
             throw new FunksjonellException("Fødselsnummer eller D-nummer mangler.");
         }

@@ -11,7 +11,7 @@ import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeGetDto;
 import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodePostDto;
@@ -34,7 +34,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
+class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
     private static final Logger logger = LoggerFactory.getLogger(AnmodningsperiodeTjenesteTest.class);
     private static final String ANMODNINGSPERIODER_GET_SCHEMA = "anmodningsperioder-schema.json";
     private static final String ANMODNINGSPERIODER_POST_SCHEMA = "anmodningsperioder-post-schema.json";
@@ -45,7 +45,7 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
-    private TilgangService tilgangService;
+    private Aksesskontroll aksesskontroll;
 
     private AnmodningsperiodeTjeneste anmodningsperiodeTjeneste;
 
@@ -55,7 +55,7 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
 
     @BeforeEach
     public void setUp() {
-        anmodningsperiodeTjeneste = new AnmodningsperiodeTjeneste(anmodningsperiodeService, lovvalgsperiodeService, tilgangService);
+        anmodningsperiodeTjeneste = new AnmodningsperiodeTjeneste(anmodningsperiodeService, lovvalgsperiodeService, aksesskontroll);
     }
 
     @Test
@@ -78,7 +78,7 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
         AnmodningsperiodeGetDto anmodningsperiodeGetDto =
             anmodningsperiodeTjeneste.lagreAnmodningsperioder(1L, AnmodningsperiodePostDto.av(mockAnmodninger));
 
-        verify(tilgangService).sjekkRedigerbarOgTilgang(anyLong());
+        verify(aksesskontroll).autoriserSkriv(anyLong());
         verify(anmodningsperiodeService).lagreAnmodningsperioder(anyLong(), anyCollection());
         valider(postDto, ANMODNINGSPERIODER_POST_SCHEMA, logger);
         valider(anmodningsperiodeGetDto, ANMODNINGSPERIODER_GET_SCHEMA, logger);
@@ -126,7 +126,7 @@ public class AnmodningsperiodeTjenesteTest extends JsonSchemaTestParent {
         AnmodningsperiodeSvarDto svarDto = anmodningsperiodeTjeneste.lagreAnmodningsperiodeSvar(1L, AnmodningsperiodeSvarDto.tom());
         assertThat(svarDto).isNotNull();
         assertThat(svarDto.anmodningsperiodeSvarType()).isEqualTo(Anmodningsperiodesvartyper.INNVILGELSE.name());
-        verify(tilgangService).sjekkRedigerbarOgTilgang(anyLong());
+        verify(aksesskontroll).autoriserSkriv(anyLong());
         valider(svarDto, ANMODNINGSPERIODER_SVAR_SCHEMA, logger);
     }
 

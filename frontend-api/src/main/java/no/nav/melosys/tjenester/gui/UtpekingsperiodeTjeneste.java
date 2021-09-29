@@ -5,7 +5,7 @@ import java.util.Collection;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Utpekingsperiode;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.utpeking.UtpekingsperioderDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -21,20 +21,20 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class UtpekingsperiodeTjeneste {
 
-    private final TilgangService tilgangService;
     private final UtpekingService utpekingService;
+    private final Aksesskontroll aksesskontroll;
 
     @Autowired
-    public UtpekingsperiodeTjeneste(TilgangService tilgangService, UtpekingService utpekingService) {
-        this.tilgangService = tilgangService;
+    public UtpekingsperiodeTjeneste(UtpekingService utpekingService, Aksesskontroll aksesskontroll) {
         this.utpekingService = utpekingService;
+        this.aksesskontroll = aksesskontroll;
     }
 
     @GetMapping("{behandlingID}")
     @ApiOperation(value = "Henter utpekingsperioder for en gitt behandling", response = UtpekingsperioderDto.class)
     public UtpekingsperioderDto hentUtpekingsperioder(@PathVariable("behandlingID") long behandlingID) {
 
-        tilgangService.sjekkTilgang(behandlingID);
+        aksesskontroll.autoriser(behandlingID);
 
         Collection<Utpekingsperiode> utpekingsperioder = utpekingService.hentUtpekingsperioder(behandlingID);
 
@@ -46,7 +46,7 @@ public class UtpekingsperiodeTjeneste {
     public UtpekingsperioderDto lagreUtpekingsperioder(@PathVariable("behandlingID") long behandlingID,
                                                            @RequestBody UtpekingsperioderDto utpekingsperioderDto) {
 
-        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
+        aksesskontroll.autoriserSkriv(behandlingID);
 
         Collection<Utpekingsperiode> utpekingsperioder = UtpekingsperioderDto.tilDomene(utpekingsperioderDto);
         utpekingsperioder = utpekingService.lagreUtpekingsperioder(behandlingID, utpekingsperioder);

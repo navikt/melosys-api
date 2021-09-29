@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.kodeverk.Vilkaar;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import no.nav.melosys.service.vilkaar.VilkaarDto;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
@@ -29,13 +29,13 @@ class VilkaarTjenesteTest extends JsonSchemaTestParent {
     @Mock
     private InngangsvilkaarService inngangsvilkaarService;
     @Mock
-    private TilgangService tilgangService;
+    private Aksesskontroll aksesskontroll;
 
     private VilkaarTjeneste vilkaarTjeneste;
 
     @BeforeEach
     public void setUp() {
-        vilkaarTjeneste = new VilkaarTjeneste(vilkaarsresultatService, inngangsvilkaarService, tilgangService);
+        vilkaarTjeneste = new VilkaarTjeneste(vilkaarsresultatService, inngangsvilkaarService, aksesskontroll);
     }
 
     @Test

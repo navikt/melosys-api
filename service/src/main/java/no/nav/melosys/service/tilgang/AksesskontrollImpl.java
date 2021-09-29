@@ -1,8 +1,10 @@
 package no.nav.melosys.service.tilgang;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +32,11 @@ public class AksesskontrollImpl implements Aksesskontroll {
 
     @Override
     public void autoriserSakstilgang(String saksnummer) {
-        tilgangService.validerTilgangTilAktørID(fagsakService.hentFagsak(saksnummer).hentAktørID());
+        autoriserSakstilgang(fagsakService.hentFagsak(saksnummer));
+    }
+
+    public void autoriserSakstilgang(Fagsak fagsak) {
+        tilgangService.validerTilgangTilAktørID(fagsak.hentAktørID());
     }
 
     @Override
@@ -40,19 +46,37 @@ public class AksesskontrollImpl implements Aksesskontroll {
 
     @Override
     public void autoriser(long behandlingID, Aksesstype aksesstype) {
-        autoriser(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID), aksesstype, Ressurs.UKJENT);
+        autoriser(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID), aksesstype, Ressurs.UKJENT, false);
+    }
+
+    @Override
+    public void autoriserSkriv(long behandlingID) {
+        autoriser(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID), SKRIV, Ressurs.UKJENT, false);
+    }
+
+    public void autoriserSkrivOgTilordnet(long behandlingID) {
+        autoriser(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID), SKRIV, Ressurs.UKJENT, true);
     }
 
     @Override
     public void autoriserSkrivTilRessurs(long behandlingID, Ressurs ressurs) {
-        autoriser(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID), SKRIV, ressurs);
+        autoriser(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID), SKRIV, ressurs, false);
     }
 
-    private void autoriser(Behandling behandling, Aksesstype aksesstype, Ressurs ressurs) {
+    @Override
+    public void autoriserFolkeregisterIdent(String folkeregisterIdent) {
+        tilgangService.validerTilgangTilFolkeregisterIdent(folkeregisterIdent);
+    }
+
+    private void autoriser(Behandling behandling, Aksesstype aksesstype, Ressurs ressurs, boolean validerTilordnet) {
         tilgangService.validerTilgangTilAktørID(behandling.getFagsak().hentAktørID());
 
         if (aksesstype == SKRIV) {
-            redigerbarKontroll.sjekkRessursRedigerbar(behandling, ressurs);
+            if (validerTilordnet) {
+                redigerbarKontroll.sjekkTilordnetSaksbehandlerOgRedigerbar(behandling, ressurs, SubjectHandler.getInstance().getUserID());
+            } else {
+                redigerbarKontroll.sjekkRessursRedigerbar(behandling, ressurs);
+            }
         }
     }
 }

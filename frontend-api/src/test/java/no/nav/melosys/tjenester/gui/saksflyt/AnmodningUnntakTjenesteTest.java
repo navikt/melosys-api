@@ -3,7 +3,7 @@ package no.nav.melosys.tjenester.gui.saksflyt;
 import java.util.Set;
 
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
 import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.VedleggDto;
@@ -23,13 +23,13 @@ class AnmodningUnntakTjenesteTest extends JsonSchemaTestParent {
     @Mock
     private AnmodningUnntakService anmodningUnntakService;
     @Mock
-    private TilgangService tilgangService;
+    private Aksesskontroll aksesskontroll;
 
     private AnmodningUnntakTjeneste anmodningUnntakTjeneste;
 
     @BeforeEach
     public void setUp() {
-        anmodningUnntakTjeneste = new AnmodningUnntakTjeneste(anmodningUnntakService, tilgangService);
+        anmodningUnntakTjeneste = new AnmodningUnntakTjeneste(anmodningUnntakService, aksesskontroll);
     }
 
     @Test
@@ -45,7 +45,7 @@ class AnmodningUnntakTjenesteTest extends JsonSchemaTestParent {
         dto.setVedlegg(Set.of(vedleggDto));
         anmodningUnntakTjeneste.anmodningOmUnntak(behandlingID, dto);
 
-        verify(tilgangService).sjekkTilgang(behandlingID);
+        verify(aksesskontroll).autoriserSkriv(behandlingID);
         verify(anmodningUnntakService).anmodningOmUnntak(behandlingID, mottakerInstitusjon,
             Set.of(new DokumentReferanse(vedleggDto.journalpostID(), vedleggDto.dokumentID())), fritekstSed);
 

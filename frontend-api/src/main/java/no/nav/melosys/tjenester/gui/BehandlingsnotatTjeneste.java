@@ -9,7 +9,7 @@ import no.nav.melosys.domain.Behandlingsnotat;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.BehandlingsnotatService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsnotatGetDto;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsnotatPostDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -31,12 +31,14 @@ public class BehandlingsnotatTjeneste {
 
     private final BehandlingsnotatService behandlingsnotatService;
     private final SaksbehandlerService saksbehandlerService;
-    private final TilgangService tilgangService;
+    private final Aksesskontroll aksesskontroll;
 
-    public BehandlingsnotatTjeneste(BehandlingsnotatService behandlingsnotatService, SaksbehandlerService saksbehandlerService, TilgangService tilgangService) {
+    public BehandlingsnotatTjeneste(BehandlingsnotatService behandlingsnotatService,
+                                    SaksbehandlerService saksbehandlerService,
+                                    Aksesskontroll aksesskontroll) {
         this.behandlingsnotatService = behandlingsnotatService;
         this.saksbehandlerService = saksbehandlerService;
-        this.tilgangService = tilgangService;
+        this.aksesskontroll = aksesskontroll;
     }
 
     @GetMapping("/{saksnummer}/notater")
@@ -44,7 +46,7 @@ public class BehandlingsnotatTjeneste {
         response = BehandlingsnotatGetDto.class,
         responseContainer = "List")
     public ResponseEntity<Collection<BehandlingsnotatGetDto>> hentBehandlingsnotaterForFagsak(@PathVariable("saksnummer") String saksnummer) {
-        tilgangService.sjekkSak(saksnummer);
+        aksesskontroll.autoriserSakstilgang(saksnummer);
 
         Collection<BehandlingsnotatGetDto> notater = behandlingsnotatService.hentNotatForFagsak(saksnummer)
             .stream()
@@ -59,7 +61,7 @@ public class BehandlingsnotatTjeneste {
         response = BehandlingsnotatGetDto.class)
     public ResponseEntity<BehandlingsnotatGetDto> opprettBehandlingsnotatForFagsak(@PathVariable("saksnummer") String saksnummer,
                                                                                    @RequestBody BehandlingsnotatPostDto behandlingsnotatPostDto) {
-        tilgangService.sjekkSak(saksnummer);
+        aksesskontroll.autoriserSakstilgang(saksnummer);
         Behandlingsnotat behandlingsnotat = behandlingsnotatService.opprettNotat(saksnummer, behandlingsnotatPostDto.tekst());
         return ResponseEntity.ok(
             lagBehandlingsnotatGetDto(behandlingsnotat)
@@ -72,7 +74,7 @@ public class BehandlingsnotatTjeneste {
     public ResponseEntity<BehandlingsnotatGetDto> oppdaterBehandlingsnotat(@PathVariable("saksnummer") String saksnummer,
                                                                            @PathVariable("notatID") Long notatID,
                                                                            @RequestBody BehandlingsnotatPostDto behandlingsnotatPostDto) {
-        tilgangService.sjekkSak(saksnummer);
+        aksesskontroll.autoriserSakstilgang(saksnummer);
         return ResponseEntity.ok(
             lagBehandlingsnotatGetDto(behandlingsnotatService.oppdaterNotat(notatID, behandlingsnotatPostDto.tekst()))
         );
