@@ -10,29 +10,29 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class TilgangServiceTest {
+class BrukertilgangKontrollTest {
 
     @Mock
     private Pep pep;
 
-    private TilgangService tilgangService;
+    private BrukertilgangKontroll brukertilgangKontroll;
 
     @BeforeEach
     void setup() {
-        tilgangService = new TilgangService(pep);
+        brukertilgangKontroll = new BrukertilgangKontroll(pep);
     }
 
     @Test
     void validerTilgangTilAktørID() {
         final var aktørID = "11111";
-        tilgangService.validerTilgangTilAktørID(aktørID);
+        brukertilgangKontroll.validerTilgangTilAktørID(aktørID);
         verify(pep).sjekkTilgangTilAktoerId(aktørID);
     }
 
     @Test
     void validerTilgangTilFolkeregisterIdent() {
         final var folkeregisterIdent = "123321";
-        tilgangService.validerTilgangTilFolkeregisterIdent(folkeregisterIdent);
+        brukertilgangKontroll.validerTilgangTilFolkeregisterIdent(folkeregisterIdent);
         verify(pep).sjekkTilgangTilFnr(folkeregisterIdent);
     }
 

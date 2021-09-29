@@ -17,16 +17,16 @@ public class AksesskontrollImpl implements Aksesskontroll {
 
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
-    private final TilgangService tilgangService;
+    private final BrukertilgangKontroll brukertilgangKontroll;
     private final RedigerbarKontroll redigerbarKontroll;
 
     public AksesskontrollImpl(FagsakService fagsakService,
                               BehandlingService behandlingService,
-                              TilgangService tilgangService,
+                              BrukertilgangKontroll brukertilgangKontroll,
                               RedigerbarKontroll redigerbarKontroll) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
-        this.tilgangService = tilgangService;
+        this.brukertilgangKontroll = brukertilgangKontroll;
         this.redigerbarKontroll = redigerbarKontroll;
     }
 
@@ -36,7 +36,7 @@ public class AksesskontrollImpl implements Aksesskontroll {
     }
 
     public void autoriserSakstilgang(Fagsak fagsak) {
-        tilgangService.validerTilgangTilAktørID(fagsak.hentAktørID());
+        brukertilgangKontroll.validerTilgangTilAktørID(fagsak.hentAktørID());
     }
 
     @Override
@@ -65,11 +65,11 @@ public class AksesskontrollImpl implements Aksesskontroll {
 
     @Override
     public void autoriserFolkeregisterIdent(String folkeregisterIdent) {
-        tilgangService.validerTilgangTilFolkeregisterIdent(folkeregisterIdent);
+        brukertilgangKontroll.validerTilgangTilFolkeregisterIdent(folkeregisterIdent);
     }
 
     private void autoriser(Behandling behandling, Aksesstype aksesstype, Ressurs ressurs, boolean validerTilordnet) {
-        tilgangService.validerTilgangTilAktørID(behandling.getFagsak().hentAktørID());
+        brukertilgangKontroll.validerTilgangTilAktørID(behandling.getFagsak().hentAktørID());
 
         if (aksesstype == SKRIV) {
             if (validerTilordnet) {

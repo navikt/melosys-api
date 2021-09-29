@@ -5,11 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class TilgangService {
+public class BrukertilgangKontroll {
     private final Pep pep;
 
     @Autowired
-    public TilgangService(Pep pep) {
+    public BrukertilgangKontroll(Pep pep) {
         this.pep = pep;
     }
 
