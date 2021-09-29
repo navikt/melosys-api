@@ -78,8 +78,7 @@ public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
         assertThat(responseEntity.getBody()).isInstanceOf(BehandlingsgrunnlagGetDto.class);
 
         String json = objectMapperMedKodeverkServiceStub().writeValueAsString(responseEntity.getBody());
-//        Fjern kommentar etter schema er oppdatert
-//        valider(json, "behandlingsgrunnlag-schema.json", log);
+        valider(json, "behandlingsgrunnlag-schema.json", log);
     }
 
     @Test
@@ -100,7 +99,6 @@ public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
         assertThat(responseEntity.getBody()).isInstanceOf(BehandlingsgrunnlagGetDto.class);
 
         String json = objectMapperMedKodeverkServiceStub().writeValueAsString(responseEntity.getBody());
-//        Fjern kommentar etter schema er oppdatert
-//        valider(json, "behandlingsgrunnlag-schema.json", log);
+        valider(json, "behandlingsgrunnlag-schema.json", log);
     }
 }
