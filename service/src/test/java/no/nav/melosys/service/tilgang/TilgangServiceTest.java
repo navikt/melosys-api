@@ -11,6 +11,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.sikkerhet.abac.Pep;
 import no.nav.melosys.sikkerhet.abac.PepImpl;
@@ -37,6 +38,8 @@ class TilgangServiceTest {
     private FagsakService fagsakService;
     @Mock
     private BehandlingService behandlingService;
+    @Mock
+    private BehandlingsresultatService behandlingsresultatService;
 
     private XacmlResponse abacResponse;
     private AbacContext abacContext;
@@ -59,7 +62,7 @@ class TilgangServiceTest {
         fagsakMocked = mock(Fagsak.class);
         behandlingMocked = mock(Behandling.class);
 
-        tilgangService = new TilgangService(fagsakService, behandlingService, pep);
+        tilgangService = new TilgangService(fagsakService, behandlingService, behandlingsresultatService, pep);
     }
 
     @Test
