@@ -10,8 +10,6 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -109,11 +107,6 @@ public class OppgaveService {
         } else {
             return Optional.empty();
         }
-    }
-
-    public Oppgave hentSisteAvsluttetOppgaveMedFagsaksnummer(String saksnummer) {
-        return finnSisteAvsluttetOppgaveMedFagsaksnummer(saksnummer)
-            .orElseThrow(() -> new IkkeFunnetException("Finner ingen oppgave med saksnummer " + saksnummer));
     }
 
     public Oppgave hentÅpenOppgaveMedFagsaksnummer(String saksnummer) {
