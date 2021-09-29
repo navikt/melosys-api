@@ -3,8 +3,8 @@ package no.nav.melosys.service.vedtak.publisering;
 import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
@@ -40,16 +40,16 @@ public class FattetVedtakService {
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final PersondataFasade persondataFasade;
+    private final Unleash unleash;
 
-    public FattetVedtakService(FattetVedtakProducer fattetVedtakProducer,
-                               BehandlingService behandlingService,
+    public FattetVedtakService(FattetVedtakProducer fattetVedtakProducer, BehandlingService behandlingService,
                                BehandlingsresultatService behandlingsresultatService,
-                               @Qualifier("system") PersondataFasade persondataFasade
-    ) {
+                               @Qualifier("system") PersondataFasade persondataFasade, Unleash unleash) {
         this.fattetVedtakProducer = fattetVedtakProducer;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.persondataFasade = persondataFasade;
+        this.unleash = unleash;
     }
 
     @Transactional
@@ -60,11 +60,12 @@ public class FattetVedtakService {
 
     private FattetVedtak lagMelding(Behandling behandling) throws IkkeFunnetException {
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+        final var persondata = hentPersondata(behandling);
         return new FattetVedtak(
-            lagSak(behandling, behandling.getFagsak(), behandling.hentPersonDokument()),
+            lagSak(behandling, behandling.getFagsak(), persondata),
             lagVedtak(behandlingsresultat.getVedtakMetadata()),
             lagSoeknad(behandling.getBehandlingsgrunnlag()),
-            lagSaksopplysninger(behandling.hentPersonDokument()),
+            lagSaksopplysninger(persondata),
             null,
             lagPerioder(behandlingsresultat),
             lagFullmektig(behandling.getFagsak()),
@@ -72,11 +73,18 @@ public class FattetVedtakService {
         );
     }
 
+    private Persondata hentPersondata(Behandling behandling) {
+        if (unleash.isEnabled("melosys.pdl.vedtaksmelding")) {
+            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID());
+        }
+        return behandling.hentPersonDokument();
+    }
+
     private Sak lagSak(Behandling behandling, Fagsak fagsak, Persondata persondata) {
         return new Sak(persondata.hentFolkeregisterident(),
             behandling.getId(),
             fagsak.getSaksnummer(),
-            fagsak.getType(),
+            fagsak.getType().getKode(),
             ofInstant(fagsak.getRegistrertDato(), ZoneId.of("Europe/Paris"))
         );
     }
@@ -85,7 +93,7 @@ public class FattetVedtakService {
         return new Vedtak(
             ofInstant(vedtakMetadata.getVedtaksdato(), ZoneId.of("Europe/Paris")),
             vedtakMetadata.getVedtakKlagefrist(),
-            vedtakMetadata.getVedtakstype(),
+            vedtakMetadata.getVedtakstype().getKode(),
             vedtakMetadata.getRegistrertAv(),
             null
         );
@@ -168,7 +176,7 @@ public class FattetVedtakService {
                     )).orElse(null)
                 )
             );
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
     private Fullmektig lagFullmektig(Fagsak fagsak) {

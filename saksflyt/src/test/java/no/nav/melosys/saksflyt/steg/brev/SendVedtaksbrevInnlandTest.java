@@ -11,6 +11,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.FastMottaker;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -65,8 +66,11 @@ class SendVedtaksbrevInnlandTest {
 
     private static DokumentSystemService dokService;
 
-    private static SendVedtaksbrevInnland lagStegbehandler(Behandling behandling) throws Exception {
-        String saksbehandler = "Z123456";
+    private static SendVedtaksbrevInnland lagStegbehandler(Behandling behandling) {
+        return lagStegbehandler(behandling, "Z123456");
+    }
+
+    private static SendVedtaksbrevInnland lagStegbehandler(Behandling behandling, String saksbehandler) {
         BrevDataA1 brevdata = new BrevDataA1();
         BrevDataVedlegg brevdataVedlegg = new BrevDataVedlegg(saksbehandler);
         brevdataVedlegg.brevDataA1 = brevdata;
@@ -162,6 +166,7 @@ class SendVedtaksbrevInnlandTest {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGSID_MANGLENDE_OPPL)).thenReturn(behandlingsresultatManglendeOppl);
 
         Behandlingsresultat behandlingsresultatInnvilgetArt16 = lagBehandlingsresultat(periode);
+        behandlingsresultatInnvilgetArt16.getAnmodningsperioder().add(lagAnmodningsperiodeMedSvar());
         when(behandlingsresultatService.hentBehandlingsresultat(ART16_1_INNVILGET_BEHANDLINGSID)).thenReturn(behandlingsresultatInnvilgetArt16);
 
         Behandlingsresultat behandlingsresultatInnvilgetArt16MedUtenlandskKonsern = lagBehandlingsresultat(periode);
@@ -199,6 +204,14 @@ class SendVedtaksbrevInnlandTest {
                 Endretperiode.ENDRINGER_ARBEIDSSITUASJON.getKode()));
         when(behandlingsresultatService.hentBehandlingsresultat(ART12_1_FORKORTET_PERIODE_BEHANDLINGSID)).thenReturn(endretPeriode12_1resultat);
         return behandlingsresultatService;
+    }
+
+    private static Anmodningsperiode lagAnmodningsperiodeMedSvar() {
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
+        anmodningsperiode.setAnmodetAv("Z111111");
+        anmodningsperiode.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
+        anmodningsperiode.getAnmodningsperiodeSvar().setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
+        return anmodningsperiode;
     }
 
     private static Behandling lagBehandling(Fagsak fagsak) {
@@ -307,7 +320,7 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    final void utfør_medFlereLovvalgsperioder_girUnntak() throws Exception {
+    final void utfør_medFlereLovvalgsperioder_girUnntak() {
         Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_MED_FLERE_PERIODER);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         assertThatExceptionOfType(UnsupportedOperationException.class)
@@ -316,7 +329,7 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    final void utfør_avslagManglendeOppl_bestillerAvslagManglendeOppl() throws Exception {
+    final void utfør_avslagManglendeOppl_bestillerAvslagManglendeOppl() {
         Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_MANGLENDE_OPPL);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utfør(prosessinstans);
@@ -325,7 +338,7 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    final void utfør_avslagManglendeOppl_senderIkkeTilSkattOgHelfo() throws Exception {
+    final void utfør_avslagManglendeOppl_senderIkkeTilSkattOgHelfo() {
         Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_MANGLENDE_OPPL);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utfør(prosessinstans);
@@ -334,7 +347,7 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    final void utfør_utenPeriode_feiler() throws Exception {
+    final void utfør_utenPeriode_feiler() {
         Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_UTEN_PERIODER);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         assertThatExceptionOfType(NoSuchElementException.class)
@@ -343,14 +356,14 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    final void utfør_påInnvilgelsesBrevBestemtAv12_1_tilSendSed() throws Exception {
+    final void utfør_påInnvilgelsesBrevBestemtAv12_1_tilSendSed() {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utfør(prosessinstans);
     }
 
     @Test
-    void utfør_innvilgelses12_1_vedtakOgKopiTilSkattSendes() throws Exception {
+    void utfør_innvilgelses12_1_vedtakOgKopiTilSkattSendes() {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
 
@@ -361,7 +374,7 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    final void utfør_innvilgelses11_4_senderIkkeOrienteringTilArbeidsgiver() throws Exception {
+    final void utfør_innvilgelses11_4_senderIkkeOrienteringTilArbeidsgiver() {
         Prosessinstans prosessinstans = lagProsessinstans(ART11_4_INNVILGET_BEHANDLINGSID);
 
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
@@ -372,7 +385,7 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    void utfør_innvilgelses13_1A_vedtakOgKopiTilSkattSendes() throws Exception {
+    void utfør_innvilgelses13_1A_vedtakOgKopiTilSkattSendes() {
         Prosessinstans prosessinstans = lagProsessinstans(ART13_1A_INNVILGET_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
 
@@ -383,7 +396,7 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    void utfør_utpeking_senderOrienteringsbrev() throws Exception {
+    void utfør_utpeking_senderOrienteringsbrev() {
         Prosessinstans prosessinstans = lagProsessinstans(ART13_1B1_UTPEKING_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utfør(prosessinstans);
@@ -392,7 +405,7 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    void utfør_innvilgelses13_1A_senderIkkeInnvilgelseTilArbeidsgiver() throws Exception {
+    void utfør_innvilgelses13_1A_senderIkkeInnvilgelseTilArbeidsgiver() {
         Prosessinstans prosessinstans = lagProsessinstans(ART13_1A_INNVILGET_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
 
@@ -402,7 +415,7 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    void utfør_innvilgelsesMedUtenlandskForetak_senderBrevTilStatligSkatteoppkreving() throws Exception {
+    void utfør_innvilgelsesMedUtenlandskForetak_senderBrevTilStatligSkatteoppkreving() {
         Prosessinstans prosessinstans = lagProsessinstans(ART13_1A_INNVILGET_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         ForetakUtland arbeidsgiverUtland = new ForetakUtland();
@@ -415,7 +428,7 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    void utfør_innvilgelse161MedUtenlandskSelvstendigArbeid_senderIkkeBrevTilStatligSkatteoppkreving() throws Exception {
+    void utfør_innvilgelse161MedUtenlandskSelvstendigArbeid_senderIkkeBrevTilStatligSkatteoppkreving() {
         Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         ForetakUtland utenlandskSelvstendigVirksomhet = new ForetakUtland();
@@ -429,7 +442,22 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    void utfør_innvilgelses12_senderIkkeBrevTilStatligSkatteoppkreving() throws Exception {
+    void utfør_innvilgelse161SaksbehandlerIkkeSatt_brukerSaksbehandlerSomAnmodetOmUnntakVedBrevbestilling() {
+        Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_BEHANDLINGSID);
+        StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling(), null);
+
+        instans.utfør(prosessinstans);
+
+        var dokumentBestillingCaptor = ArgumentCaptor.forClass(DoksysBrevbestilling.class);
+
+        verify(dokService).produserDokument(
+            eq(INNVILGELSE_YRKESAKTIV), eq(Mottaker.av(BRUKER)), eq(ART16_1_INNVILGET_BEHANDLINGSID), dokumentBestillingCaptor.capture()
+        );
+        assertThat(dokumentBestillingCaptor.getValue()).extracting(DoksysBrevbestilling::getAvsenderNavn).isEqualTo("Z111111");
+    }
+
+    @Test
+    void utfør_innvilgelses12_senderIkkeBrevTilStatligSkatteoppkreving() {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
         prosessinstans.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(new ForetakUtland());
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
@@ -439,7 +467,7 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    void utfør_innvilgelses12_senderInnvilgelseTilArbeidsgiver() throws Exception {
+    void utfør_innvilgelses12_senderInnvilgelseTilArbeidsgiver() {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_1_INNVILGET_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
 
@@ -449,14 +477,14 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    final void utfør_avslag12_1_tilOppdaterResultat() throws Exception {
+    final void utfør_avslag12_1_tilOppdaterResultat() {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_1_AVSLÅTT_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utfør(prosessinstans);
     }
 
     @Test
-    final void utfør_avslagMedArbeidsgiver_senderTilArbeidsgiver() throws Exception {
+    final void utfør_avslagMedArbeidsgiver_senderTilArbeidsgiver() {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_1_AVSLÅTT_BEHANDLINGSID);
         Behandling behandling = prosessinstans.getBehandling();
         Aktoer arbeidsgiver = new Aktoer();
@@ -469,7 +497,7 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    final void utfør_avslag12_1_senderTilHelfoOgSkatt() throws Exception {
+    final void utfør_avslag12_1_senderTilHelfoOgSkatt() {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_1_AVSLÅTT_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utfør(prosessinstans);
@@ -478,20 +506,20 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    final void utfør_PåInnvilgelsesBrevBestemtAv12_2_tilSendSed() throws Exception {
+    final void utfør_PåInnvilgelsesBrevBestemtAv12_2_tilSendSed() {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_2_INNVILGET_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         instans.utfør(prosessinstans);
     }
 
     @Test
-    final void utfør_PåInnvilgelsesBrevBestemtAv16_1_tilSendSed() throws Exception {
+    final void utfør_PåInnvilgelsesBrevBestemtAv16_1_tilSendSed() {
         Prosessinstans prosessinstans = lagProsessinstans(ART16_1_INNVILGET_BEHANDLINGSID);
         lagStegbehandler(prosessinstans.getBehandling()).utfør(prosessinstans);
     }
 
     @Test
-    final void utfør_PåFastsattLovvalgINorgeUtenInnvilgetBestemmelseGårTilFeiletMaskinelt() throws Exception {
+    final void utfør_PåFastsattLovvalgINorgeUtenInnvilgetBestemmelseGårTilFeiletMaskinelt() {
         Prosessinstans prosessinstans = lagProsessinstans(BEHANDLINGSID_NORSK_LOVVALG_UTEN_INNVILGET_BESTEMMELSE);
         StegBehandler instans = lagStegbehandler(prosessinstans.getBehandling());
         assertThatExceptionOfType(FunksjonellException.class)
@@ -500,7 +528,7 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    final void utfør_PåInnvilgelsesBrev_medBegrunnelsekode_oppdatererBrevdata() throws Exception {
+    final void utfør_PåInnvilgelsesBrev_medBegrunnelsekode_oppdatererBrevdata() {
         Prosessinstans prosessinstans = lagProsessinstans(ART12_1_FORKORTET_PERIODE_BEHANDLINGSID);
         StegBehandler instans = lagStegbehandler(lagBehandling(ART12_1_FORKORTET_PERIODE_BEHANDLINGSID));
         ArgumentCaptor<DoksysBrevbestilling> captor = ArgumentCaptor.forClass(DoksysBrevbestilling.class);

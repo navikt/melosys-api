@@ -1,18 +1,18 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.Collections;
+
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.service.TrygdeavtaleService;
-import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.tilgang.TilgangService;
 import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeavtaleInfoDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.util.Collections;
 
 @Protected
 @RestController

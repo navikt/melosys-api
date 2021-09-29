@@ -169,4 +169,26 @@ class AnmodningsperiodeServiceTest {
         assertThat(anmodningsperiode.erSendtUtland()).isTrue();
         verify(anmodningsperiodeRepository).save(anmodningsperiode);
     }
+
+    @Test
+    void oppdaterAnmodetAvForBehandling_erIkkeSattFraFør_oppdateres() {
+        final var anmodetAv = "MEG";
+        var anmodningsperiode = new Anmodningsperiode();
+        when(anmodningsperiodeRepository.findByBehandlingsresultatId(anyLong())).thenReturn(Collections.singletonList(anmodningsperiode));
+
+        anmodningsperiodeService.oppdaterAnmodetAvForBehandling(1L, anmodetAv);
+        assertThat(anmodningsperiode.getAnmodetAv()).isEqualTo(anmodetAv);
+        verify(anmodningsperiodeRepository).save(anmodningsperiode);
+    }
+
+    @Test
+    void oppdaterAnmodetAvForBehandling_erSattFraFør_kasterException() {
+        var anmodningsperiode = new Anmodningsperiode();
+        anmodningsperiode.setAnmodetAv("DEG");
+        when(anmodningsperiodeRepository.findByBehandlingsresultatId(anyLong())).thenReturn(Collections.singletonList(anmodningsperiode));
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> anmodningsperiodeService.oppdaterAnmodetAvForBehandling(1L, "MEG"))
+            .withMessageContaining("allerede anmodet av DEG");
+    }
 }

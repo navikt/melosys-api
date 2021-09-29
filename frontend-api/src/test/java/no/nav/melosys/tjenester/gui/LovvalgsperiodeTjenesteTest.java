@@ -11,6 +11,7 @@ import no.nav.melosys.domain.InnvilgelsesResultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -20,7 +21,7 @@ import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.abac.TilgangService;
+import no.nav.melosys.service.tilgang.TilgangService;
 import no.nav.melosys.tjenester.gui.dto.periode.LovvalgsperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 import org.junit.jupiter.api.Test;
@@ -39,7 +40,7 @@ final class LovvalgsperiodeTjenesteTest extends JsonSchemaTestParent {
             Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1,
             Landkoder.SK,
             InnvilgelsesResultat.AVSLAATT,
-            null,
+            Trygdedekninger.FULL_DEKNING_EOSFO,
             Medlemskapstyper.FRIVILLIG,
             "10");
 
@@ -67,7 +68,7 @@ final class LovvalgsperiodeTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentOpprinneligLovvalgsperiode_returnererPeriode() throws Exception {
+    void hentOpprinneligLovvalgsperiode_returnererPeriode() {
         LovvalgsperiodeService lovvalgsperiodeService = spy(lagLovvalgsperiodeService());
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         LocalDate fomDato = LocalDate.of(2018, 12, 12);
@@ -95,15 +96,15 @@ final class LovvalgsperiodeTjenesteTest extends JsonSchemaTestParent {
         LovvalgsperiodeService lovvalgsperiodeService = lagLovvalgsperiodeService();
         TilgangService tilgangService = mock(TilgangService.class);
         doThrow(new SikkerhetsbegrensningException("Computer says no"))
-                .when(tilgangService).sjekkTilgang(eq(BEHANDLING_UTEN_TILGANG));
+                .when(tilgangService).sjekkTilgang(BEHANDLING_UTEN_TILGANG);
         doThrow(new TekniskException("Det har oppstått en..."))
-                .when(tilgangService).sjekkTilgang(eq(BEHANDLING_MED_TEKNISK_FEIL));
+                .when(tilgangService).sjekkTilgang(BEHANDLING_MED_TEKNISK_FEIL);
         LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, tilgangService);
-        ResponseEntity resultat = instans.hentLovvalgsperioder(behandlingsid);
+        ResponseEntity<?> resultat = instans.hentLovvalgsperioder(behandlingsid);
         assertThat(resultat.getStatusCode()).isEqualTo(HttpStatus.OK);
         @SuppressWarnings("unchecked")
         Collection<LovvalgsperiodeDto> resultatliste = (Collection<LovvalgsperiodeDto>) resultat.getBody();
-        assertThat(resultatliste.size()).isEqualTo(forventet.size());
+        assertThat(resultatliste).hasSize(forventet.size());
         validerArray(resultatliste, LOVVALGSPERIODER_SCHEMA);
     }
 
@@ -119,7 +120,7 @@ final class LovvalgsperiodeTjenesteTest extends JsonSchemaTestParent {
         LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, tilgangService);
         validerArray(perioder, LOVVALGSPERIODER_SCHEMA);
         Collection<LovvalgsperiodeDto> resultat = instans.lagreLovvalgsperioder(behandlingsid, perioder);
-        assertThat(resultat.size()).isEqualTo(perioder.size());
+        assertThat(resultat).hasSize(perioder.size());
         if (!perioder.isEmpty()) {
             assertThat(perioder.iterator().next())
                     .usingRecursiveComparison().isEqualTo(resultat.iterator().next());
@@ -135,16 +136,17 @@ final class LovvalgsperiodeTjenesteTest extends JsonSchemaTestParent {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(FORVENTET.periode.getFom());
         lovvalgsperiode.setTom(FORVENTET.periode.getTom());
+        lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
         lovvalgsperiode.setLovvalgsland(Landkoder.valueOf(FORVENTET.lovvalgsland));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.valueOf(FORVENTET.lovvalgsbestemmelse));
         lovvalgsperiode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.valueOf(FORVENTET.tilleggBestemmelse));
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.valueOf(FORVENTET.innvilgelsesResultat));
         lovvalgsperiode.setMedlemskapstype(Medlemskapstyper.valueOf(FORVENTET.medlemskapstype));
         lovvalgsperiode.setMedlPeriodeID(Long.valueOf(FORVENTET.medlemskapsperiodeID));
-        when(behandlingsresultatRepo.findById(eq(42L))).thenReturn(Optional.of(lagBehandlingsresultat()));
+        when(behandlingsresultatRepo.findById(42L)).thenReturn(Optional.of(lagBehandlingsresultat()));
         List<Lovvalgsperiode> ingenPerioder = Collections.emptyList();
         List<Lovvalgsperiode> enPeriode = Collections.singletonList(lovvalgsperiode);
-        when(lovvalgsperiodeRepo.findByBehandlingsresultatId(eq(13L))).thenReturn(enPeriode);
+        when(lovvalgsperiodeRepo.findByBehandlingsresultatId(13L)).thenReturn(enPeriode);
         mockWithGenericVarargsArray(lovvalgsperiodeRepo, ingenPerioder, enPeriode);
         return lovvalgsperiodeService;
     }
@@ -152,7 +154,7 @@ final class LovvalgsperiodeTjenesteTest extends JsonSchemaTestParent {
     @SuppressWarnings("unchecked")
     private static void mockWithGenericVarargsArray(LovvalgsperiodeRepository lovvalgsperiodeRepo,
             List<Lovvalgsperiode> empty, List<Lovvalgsperiode> single) {
-        when(lovvalgsperiodeRepo.findByBehandlingsresultatId(eq(42L))).thenReturn(empty, single);
+        when(lovvalgsperiodeRepo.findByBehandlingsresultatId(42L)).thenReturn(empty, single);
     }
 
     private static Behandlingsresultat lagBehandlingsresultat() {

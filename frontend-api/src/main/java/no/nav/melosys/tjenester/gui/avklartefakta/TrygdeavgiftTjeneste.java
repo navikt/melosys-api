@@ -1,9 +1,9 @@
 package no.nav.melosys.tjenester.gui.avklartefakta;
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.service.abac.TilgangService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
+import no.nav.melosys.service.tilgang.TilgangService;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.AvgiftsgrunnlagDto;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregningsresultatDto;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.OppdaterAvgiftsgrunnlagDto;

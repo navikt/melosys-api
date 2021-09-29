@@ -9,10 +9,12 @@ import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.service.abac.TilgangService;
+import no.nav.melosys.service.tilgang.TilgangService;
 import no.nav.melosys.service.vedtak.FattEosVedtakRequest;
 import no.nav.melosys.service.vedtak.FattFtrlVedtakRequest;
 import no.nav.melosys.service.vedtak.VedtakServiceFasade;
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
+import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
 import no.nav.melosys.tjenester.gui.dto.EndreVedtakDto;
 import no.nav.melosys.tjenester.gui.dto.FattEosVedtakDto;
@@ -51,6 +53,7 @@ class VedtakTjenesteTest extends JsonSchemaTestParent {
     @BeforeEach
     public void setUp() {
         vedtakTjeneste = new VedtakTjeneste(vedtakServiceFasade, tilgangService);
+        SpringSubjectHandler.set(new TestSubjectHandler());
     }
 
     @Test

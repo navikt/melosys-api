@@ -1,7 +1,7 @@
 package no.nav.melosys.tjenester.gui.saksflyt;
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.service.abac.TilgangService;
+import no.nav.melosys.service.tilgang.TilgangService;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.utpeking.UtpekingAvvisDto;
 import no.nav.security.token.support.core.api.Protected;

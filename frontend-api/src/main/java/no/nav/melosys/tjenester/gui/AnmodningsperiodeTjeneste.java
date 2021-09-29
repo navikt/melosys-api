@@ -15,7 +15,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.abac.TilgangService;
+import no.nav.melosys.service.tilgang.TilgangService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeGetDto;
 import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodePostDto;

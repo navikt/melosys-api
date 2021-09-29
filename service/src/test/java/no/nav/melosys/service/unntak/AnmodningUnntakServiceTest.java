@@ -22,6 +22,7 @@ import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.unntak.AnmodningUnntakKontrollService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,6 +70,8 @@ class AnmodningUnntakServiceTest {
         anmodningUnntakService = new AnmodningUnntakService(
             behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService, anmodningsperiodeService,
             lovvalgsperiodeService, landvelgerService, eessiService, anmodningUnntakKontrollService, joarkFasade);
+
+        TestSubjectHandler.set(new TestSubjectHandler());
     }
 
     @Test
@@ -86,6 +89,7 @@ class AnmodningUnntakServiceTest {
         anmodningUnntakService.anmodningOmUnntak(BEHANDLING_ID, MOTTAKER_INSTITUSJON, Set.of(dokumentReferanse), FRITEKST_SED);
 
         verify(anmodningUnntakKontrollService).utførKontroller(BEHANDLING_ID);
+        verify(anmodningsperiodeService).oppdaterAnmodetAvForBehandling(BEHANDLING_ID, "Z990007");
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class),
             anySet(), eq(Set.of(dokumentReferanse)), eq(FRITEKST_SED));
         verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());
@@ -106,6 +110,7 @@ class AnmodningUnntakServiceTest {
         anmodningUnntakService.anmodningOmUnntak(BEHANDLING_ID, null, Collections.emptySet(), FRITEKST_SED);
 
         verify(anmodningUnntakKontrollService).utførKontroller(BEHANDLING_ID);
+        verify(anmodningsperiodeService).oppdaterAnmodetAvForBehandling(BEHANDLING_ID, "Z990007");
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntak(any(Behandling.class), anySet(),
             anySet(), eq(FRITEKST_SED));
         verify(oppgaveService).leggTilbakeOppgaveMedSaksnummer(any());

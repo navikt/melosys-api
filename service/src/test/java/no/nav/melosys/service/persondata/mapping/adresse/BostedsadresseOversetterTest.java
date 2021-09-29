@@ -3,15 +3,16 @@ package no.nav.melosys.service.persondata.mapping.adresse;
 import java.time.LocalDateTime;
 
 import no.nav.melosys.domain.FellesKodeverk;
+import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Bostedsadresse;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.service.persondata.PdlObjectFactory.lagNorskBostedsadresse;
-import static no.nav.melosys.service.persondata.PdlObjectFactory.lagUtenlandskBostedsadresse;
+import static no.nav.melosys.service.persondata.PdlObjectFactory.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -23,7 +24,7 @@ class BostedsadresseOversetterTest {
     @Test
     void oversettVegadresse() {
         var bostedsadressePDL = lagNorskBostedsadresse();
-        when(kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), eq("1234"))).thenReturn("Bergen");
+        when(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, "1234")).thenReturn("Bergen");
 
         final var bostedsadresseOptional = BostedsadresseOversetter.oversett(bostedsadressePDL, kodeverkService);
 
@@ -40,6 +41,24 @@ class BostedsadresseOversetterTest {
         assertThat(bostedsadresse.strukturertAdresse().getLandkode()).isEqualTo("NO");
         assertThat(bostedsadresse.master()).isEqualTo("PDL");
         assertThat(bostedsadresse.kilde()).isEqualTo("Dolly");
+    }
+
+    @Test
+    void oversettMatrikkeladresse() {
+        Bostedsadresse bostedsadresseMedMatrikkelAdresse = lagBostedsadresseMedMatrikkelAdresse();
+        when(kodeverkService.dekod(eq(FellesKodeverk.POSTNUMMER), any())).thenReturn("Asker");
+
+        final var bostedsadresseOptional = BostedsadresseOversetter.oversett(bostedsadresseMedMatrikkelAdresse, kodeverkService);
+
+        assertThat(bostedsadresseOptional).isPresent();
+        final var bostedsadresse = bostedsadresseOptional.get();
+        assertThat(bostedsadresse.strukturertAdresse().getGatenavn()).isNull();
+        assertThat(bostedsadresse.strukturertAdresse().getHusnummerEtasjeLeilighet()).isNull();
+        assertThat(bostedsadresse.strukturertAdresse().getTilleggsnavn()).isEqualTo("tilleggsnavn");
+        assertThat(bostedsadresse.strukturertAdresse().getPostnummer()).isEqualTo("4321");
+        assertThat(bostedsadresse.strukturertAdresse().getPoststed()).isEqualTo("Asker");
+        assertThat(bostedsadresse.strukturertAdresse().getRegion()).isNull();
+        assertThat(bostedsadresse.strukturertAdresse().getLandkode()).isEqualTo("NO");
     }
 
     @Test

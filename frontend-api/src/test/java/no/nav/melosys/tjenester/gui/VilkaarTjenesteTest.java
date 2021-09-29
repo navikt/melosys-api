@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.kodeverk.Vilkaar;
-import no.nav.melosys.service.abac.TilgangService;
+import no.nav.melosys.service.tilgang.TilgangService;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import no.nav.melosys.service.vilkaar.VilkaarDto;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;

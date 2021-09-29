@@ -4,7 +4,7 @@ import java.util.List;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import no.nav.melosys.service.abac.TilgangService;
+import no.nav.melosys.service.tilgang.TilgangService;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import no.nav.melosys.service.vilkaar.VilkaarDto;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
