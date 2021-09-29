@@ -62,7 +62,7 @@ class TilgangServiceTest {
         fagsakMocked = mock(Fagsak.class);
         behandlingMocked = mock(Behandling.class);
 
-        tilgangService = new TilgangService(fagsakService, behandlingService, behandlingsresultatService, pep);
+        tilgangService = new TilgangService(fagsakService, behandlingService, pep);
     }
 
     @Test
