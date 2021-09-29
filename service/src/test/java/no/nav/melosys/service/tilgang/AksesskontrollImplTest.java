@@ -22,7 +22,7 @@ class AksesskontrollImplTest {
     @Mock
     private FagsakService fagsakService;
     @Mock
-    private TilgangService tilgangService;
+    private BrukertilgangKontroll brukertilgangKontroll;
     @Mock
     private RedigerbarKontroll redigerbarKontroll;
 
@@ -43,21 +43,21 @@ class AksesskontrollImplTest {
         aktoer.setAktørId(aktørID);
         fagsak.getAktører().add(aktoer);
 
-        aksesskontroll = new AksesskontrollImpl(fagsakService, behandlingService, tilgangService, redigerbarKontroll);
+        aksesskontroll = new AksesskontrollImpl(fagsakService, behandlingService, brukertilgangKontroll, redigerbarKontroll);
     }
 
     @Test
     void autoriserSakstilgang_sjekkerBruker() {
         when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
         aksesskontroll.autoriserSakstilgang(saksnummer);
-        verify(tilgangService).validerTilgangTilAktørID(aktørID);
+        verify(brukertilgangKontroll).validerTilgangTilAktørID(aktørID);
     }
 
     @Test
     void autoriser_verifiserSjekkLesetilgang() {
         when(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
         aksesskontroll.autoriser(behandlingID);
-        verify(tilgangService).validerTilgangTilAktørID(aktørID);
+        verify(brukertilgangKontroll).validerTilgangTilAktørID(aktørID);
         verify(redigerbarKontroll, never()).sjekkRessursRedigerbar(behandling, Ressurs.UKJENT);
     }
 
@@ -65,7 +65,7 @@ class AksesskontrollImplTest {
     void autoriser_skalSkrive_verifiserRedigerbarBehandling() {
         when(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
         aksesskontroll.autoriser(behandlingID, Aksesstype.SKRIV);
-        verify(tilgangService).validerTilgangTilAktørID(aktørID);
+        verify(brukertilgangKontroll).validerTilgangTilAktørID(aktørID);
         verify(redigerbarKontroll).sjekkRessursRedigerbar(behandling, Ressurs.UKJENT);
     }
 
@@ -74,7 +74,7 @@ class AksesskontrollImplTest {
         final var skrivTilRessurs = Ressurs.AVKLARTE_FAKTA;
         when(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID)).thenReturn(behandling);
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, skrivTilRessurs);
-        verify(tilgangService).validerTilgangTilAktørID(aktørID);
+        verify(brukertilgangKontroll).validerTilgangTilAktørID(aktørID);
         verify(redigerbarKontroll).sjekkRessursRedigerbar(behandling, skrivTilRessurs);
     }
 }
