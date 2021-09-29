@@ -7,4 +7,5 @@ import java.util.List;
 public class OpplysningerOmBrukeren {
     public List<UtenlandskIdent> utenlandskIdent = new ArrayList<>();
     public List<MedfolgendeFamilie> medfolgendeFamilie = new ArrayList<>();
+    public FoedestedOgLand foedestedOgLand;
 }

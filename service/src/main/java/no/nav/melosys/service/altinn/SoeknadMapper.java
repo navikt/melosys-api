@@ -8,6 +8,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.LoennOgGodtgjoerelse;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Utenlandsoppdraget;
@@ -16,7 +17,6 @@ import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.ArbeidPaaLan
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.LuftfartBase;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.*;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Flyvningstyper;
 import no.nav.melosys.domain.kodeverk.Innretningstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
@@ -35,10 +35,7 @@ public final class SoeknadMapper {
         final Soeknad soeknad = new Soeknad();
         soeknad.soeknadsland = hentsoeknadsland(innhold);
         soeknad.periode = lagPeriode(innhold);
-        if (innhold.getArbeidstaker().getUtenlandskIDnummer() != null) {
-            soeknad.personOpplysninger.utenlandskIdent.add(lagUtenlandskIdent(innhold));
-        }
-        soeknad.personOpplysninger.medfolgendeFamilie = hentMedfølgendeBarn(innhold);
+        soeknad.personOpplysninger = lagPersonopplysninger(innhold);
         lagArbeidssteder(innhold, soeknad);
         soeknad.loennOgGodtgjoerelse = lagLoennOgGodtgjoerelse(innhold.getMidlertidigUtsendt());
         final var virksomhetIUtlandet = innhold.getMidlertidigUtsendt().getVirksomhetIUtlandet();
@@ -67,6 +64,19 @@ public final class SoeknadMapper {
         LocalDate periodeFra = xmlCalTilLocalDate(tidsrom.getPeriodeFra());
         LocalDate periodeTil = xmlCalTilLocalDate(tidsrom.getPeriodeTil());
         return new Periode(periodeFra, periodeTil);
+    }
+
+    private static OpplysningerOmBrukeren lagPersonopplysninger(Innhold innhold) {
+        OpplysningerOmBrukeren personopplysninger = new OpplysningerOmBrukeren();
+        if (innhold.getArbeidstaker().getUtenlandskIDnummer() != null) {
+            personopplysninger.utenlandskIdent.add(lagUtenlandskIdent(innhold));
+        }
+        personopplysninger.foedestedOgLand = new FoedestedOgLand(
+            innhold.getArbeidstaker().getFoedested(),
+            innhold.getArbeidstaker().getFoedeland()
+        );
+        personopplysninger.medfolgendeFamilie = hentMedfølgendeBarn(innhold);
+        return personopplysninger;
     }
 
     private static UtenlandskIdent lagUtenlandskIdent(Innhold innhold) {
