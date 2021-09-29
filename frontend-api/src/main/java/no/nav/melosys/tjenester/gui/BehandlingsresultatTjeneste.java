@@ -4,7 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsresultatDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,20 +23,20 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class BehandlingsresultatTjeneste {
 
-    private final TilgangService tilgangService;
-    private BehandlingsresultatService behandlingsresultatService;
+    private final BehandlingsresultatService behandlingsresultatService;
+    private final Aksesskontroll aksesskontroll;
 
     @Autowired
-    public BehandlingsresultatTjeneste(BehandlingsresultatService behandlingsresultatService, TilgangService tilgangService) {
+    public BehandlingsresultatTjeneste(BehandlingsresultatService behandlingsresultatService, Aksesskontroll aksesskontroll) {
         this.behandlingsresultatService = behandlingsresultatService;
-        this.tilgangService = tilgangService;
+        this.aksesskontroll = aksesskontroll;
     }
 
     @GetMapping("{behandlingID}/resultat")
     @ApiOperation(value = "Hent behandlingsresultat knyttet til en behandling",
         response = BehandlingsresultatDto.class)
     public ResponseEntity<BehandlingsresultatDto> hentBehandlingsresultat(@PathVariable("behandlingID") long behandlingID) {
-        tilgangService.sjekkTilgang(behandlingID);
+        aksesskontroll.autoriser(behandlingID);
 
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultatMedKontrollresultat(behandlingID);
         return ResponseEntity.ok(BehandlingsresultatDto.av(resultat));

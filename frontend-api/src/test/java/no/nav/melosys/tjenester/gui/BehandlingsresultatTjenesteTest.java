@@ -10,7 +10,7 @@ import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsresultatDto;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
@@ -30,7 +30,7 @@ import static org.jeasy.random.FieldPredicates.ofType;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class BehandlingsresultatTjenesteTest extends JsonSchemaTestParent {
+class BehandlingsresultatTjenesteTest extends JsonSchemaTestParent {
     private static final Logger log = LoggerFactory.getLogger(BehandlingsresultatTjenesteTest.class);
     private static final String BEHANDLINGSRESULTAT_SCHEMA = "behandlinger-resultat-schema.json";
 
@@ -41,11 +41,11 @@ public class BehandlingsresultatTjenesteTest extends JsonSchemaTestParent {
 
     @BeforeEach
     public void setUp() {
-        behandlingsresultatTjeneste = new BehandlingsresultatTjeneste(behandlingsresultatService, mock(TilgangService.class));
+        behandlingsresultatTjeneste = new BehandlingsresultatTjeneste(behandlingsresultatService, mock(Aksesskontroll.class));
     }
 
     @Test
-    public void validerBehandlingsresultat() throws Exception {
+    void validerBehandlingsresultat() throws Exception {
         EasyRandomParameters easyRandomParameters = defaultEasyRandomParameters()
             .randomize(named("behandlingsresultatTypeKode").and(ofType(String.class)), () -> new EnumRandomizer<>(Behandlingsresultattyper.class).getRandomValue().getKode())
             .randomize(named("vedtakstype").and(ofType(String.class)), () -> new EnumRandomizer<>(Vedtakstyper.class, Vedtakstyper.ENDRINGSVEDTAK).getRandomValue().getKode());
@@ -56,7 +56,7 @@ public class BehandlingsresultatTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void hentBehandlingsresultat_medBehandlingsid_forventerBehandlingsresultatDto() throws IOException {
+    void hentBehandlingsresultat_medBehandlingsid_forventerBehandlingsresultatDto() throws IOException {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(Behandlingsresultattyper.IKKE_FASTSATT);
         behandlingsresultat.setBegrunnelseFritekst("Bruker har fått flyskrekk");

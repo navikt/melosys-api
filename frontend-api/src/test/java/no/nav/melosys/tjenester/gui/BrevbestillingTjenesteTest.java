@@ -24,6 +24,7 @@ import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevbestillingDto;
@@ -60,6 +61,8 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
     private EregFasade mockEregFasade;
     @Mock
     private KontaktopplysningService mockKontaktopplysningService;
+    @Mock
+    private Aksesskontroll aksesskontroll;
     @Captor
     private ArgumentCaptor<BrevbestillingRequest> brevbestillingDtoCaptor;
 
@@ -71,7 +74,7 @@ class BrevbestillingTjenesteTest extends JsonSchemaTestParent {
         BrevbestillingService brevbestillingService = new BrevbestillingService(mockBrevmottakerService,
                 mockDokServiceFasade, mockEregFasade, mock(KodeverkService.class), mockKontaktopplysningService,
                 mockPersondataFasade, new FakeUnleash());
-        brevbestillingTjeneste = new BrevbestillingTjeneste(brevbestillingService, mockBehandlingService, brevmottakerService);
+        brevbestillingTjeneste = new BrevbestillingTjeneste(brevbestillingService, mockBehandlingService, brevmottakerService, aksesskontroll);
     }
 
     @Test

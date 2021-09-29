@@ -9,7 +9,8 @@ import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
+import no.nav.melosys.service.tilgang.Ressurs;
 import no.nav.melosys.tjenester.gui.dto.AvklartefaktaOppsummeringDto;
 import no.nav.melosys.tjenester.gui.dto.LagreMedfolgendeFamilieDto;
 import no.nav.melosys.tjenester.gui.dto.VirksomheterDto;
@@ -29,15 +30,17 @@ public class AvklartefaktaTjeneste {
     private final AvklartefaktaService avklartefaktaService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
-
-    private final TilgangService tilgangService;
+    private final Aksesskontroll aksesskontroll;
 
     @Autowired
-    public AvklartefaktaTjeneste(AvklartefaktaService avklartefaktaService, TilgangService tilgangService, AvklarteVirksomheterService avklarteVirksomheterService, AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService) {
+    public AvklartefaktaTjeneste(AvklartefaktaService avklartefaktaService,
+                                 AvklarteVirksomheterService avklarteVirksomheterService,
+                                 AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService,
+                                 Aksesskontroll aksesskontroll) {
         this.avklartefaktaService = avklartefaktaService;
-        this.tilgangService = tilgangService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.avklarteMedfolgendeFamilieService = avklarteMedfolgendeFamilieService;
+        this.aksesskontroll = aksesskontroll;
     }
 
     @GetMapping("{behandlingID}")
@@ -45,7 +48,7 @@ public class AvklartefaktaTjeneste {
                   response = Avklartefakta.class,
                   responseContainer = "Set")
     public Set<AvklartefaktaDto> hentAvklarteFakta(@PathVariable("behandlingID") long behandlingID) {
-        tilgangService.sjekkTilgang(behandlingID);
+        aksesskontroll.autoriser(behandlingID);
         return avklartefaktaService.hentAlleAvklarteFakta(behandlingID);
     }
 
@@ -53,7 +56,7 @@ public class AvklartefaktaTjeneste {
     @ApiOperation(value = "Lagre avklartefakta")
     public Set<AvklartefaktaDto> lagreAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
                                                     @RequestBody Set<AvklartefaktaDto> avklartefaktaDtoer) {
-        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
+        aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
         avklartefaktaService.lagreAvklarteFakta(behandlingID, avklartefaktaDtoer);
         return avklartefaktaService.hentAlleAvklarteFakta(behandlingID);
@@ -62,7 +65,7 @@ public class AvklartefaktaTjeneste {
     @GetMapping("{behandlingID}/oppsummering")
     @ApiOperation(value = "Henter avklartefakta for en gitt behandling som strukturert objekt", response = AvklartefaktaOppsummeringDto.class)
     public AvklartefaktaOppsummeringDto hentAvklarteFaktaStrukturert(@PathVariable("behandlingID") long behandlingID) {
-        tilgangService.sjekkTilgang(behandlingID);
+        aksesskontroll.autoriser(behandlingID);
 
         return AvklartefaktaOppsummeringDto.av(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
@@ -71,7 +74,7 @@ public class AvklartefaktaTjeneste {
     @ApiOperation(value = "Lagre virksomheter som avklartefakta", response = AvklartefaktaOppsummeringDto.class)
     public AvklartefaktaOppsummeringDto lagreVirksomheterSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
                                                                    @RequestBody VirksomheterDto virksomheter) {
-        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
+        aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(virksomheter.getVirksomhetIDer(), behandlingID);
 
@@ -82,7 +85,7 @@ public class AvklartefaktaTjeneste {
     @ApiOperation(value = "Lagre medfolgendeFamilie som avklartefakta", response = AvklartefaktaOppsummeringDto.class)
     public AvklartefaktaOppsummeringDto lagreMedfolgendeFamilieSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
         @RequestBody LagreMedfolgendeFamilieDto lagreMedfolgendeFamilieDto) {
-        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
+        aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
         avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(behandlingID, lagreMedfolgendeFamilieDto.til());
 

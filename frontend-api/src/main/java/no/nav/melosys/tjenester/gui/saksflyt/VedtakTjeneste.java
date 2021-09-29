@@ -4,7 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.vedtak.*;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.*;
@@ -22,12 +22,12 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class VedtakTjeneste {
     private final VedtakServiceFasade vedtakServiceFasade;
-    private final TilgangService tilgangService;
+    private final Aksesskontroll aksesskontroll;
 
     @Autowired
-    public VedtakTjeneste(VedtakServiceFasade vedtakServiceFasade, TilgangService tilgangService) {
+    public VedtakTjeneste(VedtakServiceFasade vedtakServiceFasade, Aksesskontroll aksesskontroll) {
         this.vedtakServiceFasade = vedtakServiceFasade;
-        this.tilgangService = tilgangService;
+        this.aksesskontroll = aksesskontroll;
     }
 
     @PostMapping("{behandlingID}/fatt")
@@ -37,7 +37,7 @@ public class VedtakTjeneste {
         if (fattVedtakDto == null || fattVedtakDto.getBehandlingsresultatTypeKode() == null || fattVedtakDto.getVedtakstype() == null) {
             throw new FunksjonellException("BehandlingsresultatTypeKode eller vedtakstype mangler.");
         }
-        tilgangService.sjekkTilgang(behandlingID);
+        aksesskontroll.autoriserSkriv(behandlingID);
 
         vedtakServiceFasade.fattVedtak(behandlingID, lagFattVedtakRequest(fattVedtakDto, SubjectHandler.getInstance().getUserID()));
         return ResponseEntity.ok().build();
@@ -50,7 +50,7 @@ public class VedtakTjeneste {
         if (endreVedtakDto.getBegrunnelseKode() == null) {
             throw new FunksjonellException("BegrunnelseKode mangler.");
         }
-        tilgangService.sjekkTilgang(behandlingID);
+        aksesskontroll.autoriserSkriv(behandlingID);
         vedtakServiceFasade.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode(), endreVedtakDto.getFritekst(), endreVedtakDto.getFritekstSed());
         return ResponseEntity.ok().build();
     }

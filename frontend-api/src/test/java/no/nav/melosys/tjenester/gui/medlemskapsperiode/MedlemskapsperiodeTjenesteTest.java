@@ -12,7 +12,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.melosys.service.medlemskapsperiode.OpprettMedlemskapsperiodeService;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
 import no.nav.melosys.tjenester.gui.dto.MedlemskapsperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.MedlemskapsperiodeOppdatering;
@@ -40,7 +40,7 @@ class MedlemskapsperiodeTjenesteTest extends JsonSchemaTestParent {
     @Mock
     private MedlemskapsperiodeService medlemskapsperiodeService;
     @Mock
-    private TilgangService tilgangService;
+    private Aksesskontroll aksesskontroll;
     @Mock
     private OpprettMedlemskapsperiodeService opprettMedlemskapsperiodeService;
 
@@ -50,7 +50,7 @@ class MedlemskapsperiodeTjenesteTest extends JsonSchemaTestParent {
 
     @BeforeEach
     void setup() {
-        medlemskapsperiodeTjeneste = new MedlemskapsperiodeTjeneste(medlemskapsperiodeService, opprettMedlemskapsperiodeService, tilgangService);
+        medlemskapsperiodeTjeneste = new MedlemskapsperiodeTjeneste(medlemskapsperiodeService, opprettMedlemskapsperiodeService, aksesskontroll);
     }
 
     @Test

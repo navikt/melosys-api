@@ -1,7 +1,7 @@
 package no.nav.melosys.tjenester.gui.saksflyt;
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.utpeking.UtpekingAvvisDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -19,19 +19,19 @@ import org.springframework.web.context.WebApplicationContext;
 public class UtpekingTjeneste {
 
     private final UtpekingService utpekingService;
-    private final TilgangService tilgangService;
+    private final Aksesskontroll aksesskontroll;
 
 
     @Autowired
-    public UtpekingTjeneste(UtpekingService utpekingService, TilgangService tilgangService) {
+    public UtpekingTjeneste(UtpekingService utpekingService, Aksesskontroll aksesskontroll) {
         this.utpekingService = utpekingService;
-        this.tilgangService = tilgangService;
+        this.aksesskontroll = aksesskontroll;
     }
 
     @PostMapping("{behandlingID}/avvis")
     public ResponseEntity<Void> avvisUtpeking(@PathVariable("behandlingID") Long behandlingId,
                                               @RequestBody UtpekingAvvisDto utpekingAvvisDto) {
-        tilgangService.sjekkTilgang(behandlingId);
+        aksesskontroll.autoriser(behandlingId);
         utpekingService.avvisUtpeking(behandlingId, utpekingAvvisDto.tilDomene());
         return ResponseEntity.noContent().build();
     }
