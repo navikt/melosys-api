@@ -39,7 +39,7 @@
         <java.version>16</java.version>
 
         <!-- Melosys -->
-        <melosys.jsonschema.version>1.35.143-1baebbda2464b2c752293d736a96d61c02e3f952</melosys.jsonschema.version>
+        <melosys.jsonschema.version>1.35.145</melosys.jsonschema.version>
         <melosys.internt.kodeverk.version>5.15.84</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.82</melosys.brev.version>
 
