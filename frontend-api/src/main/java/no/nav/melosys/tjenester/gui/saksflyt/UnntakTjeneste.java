@@ -31,21 +31,21 @@ public class UnntakTjeneste {
 
     @PostMapping("{behandlingID}/ikkegodkjenn")
     public ResponseEntity<Void> ikkeGodkjennUnntaksperiode(
-        @PathVariable("behandlingID") Long behandlingId,
+        @PathVariable("behandlingID") Long behandlingID,
         @RequestBody IkkeGodkjennUnntaksperiodeDto ikkeGodkjennUnntaksperiodeDto
     ) {
         aksesskontroll.autoriserSkriv(behandlingID);
-        unntaksperiodeService.ikkeGodkjennPeriode(behandlingId, ikkeGodkjennUnntaksperiodeDto.ikkeGodkjentBegrunnelseKoder(), ikkeGodkjennUnntaksperiodeDto.begrunnelseFritekst());
+        unntaksperiodeService.ikkeGodkjennPeriode(behandlingID, ikkeGodkjennUnntaksperiodeDto.ikkeGodkjentBegrunnelseKoder(), ikkeGodkjennUnntaksperiodeDto.begrunnelseFritekst());
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping(value = "/{behandlingID}/godkjenn")
     public ResponseEntity<Void> godkjennUnntaksperiode(
-        @PathVariable("behandlingID") Long behandlingId,
+        @PathVariable("behandlingID") Long behandlingID,
         @RequestBody GodkjennUnntaksperiodeDto godkjennUnntaksperiodeDto
     ) {
         aksesskontroll.autoriserSkriv(behandlingID);
-        unntaksperiodeService.godkjennPeriode(behandlingId, godkjennUnntaksperiodeDto.til());
+        unntaksperiodeService.godkjennPeriode(behandlingID, godkjennUnntaksperiodeDto.til());
         return ResponseEntity.noContent().build();
     }
 }
