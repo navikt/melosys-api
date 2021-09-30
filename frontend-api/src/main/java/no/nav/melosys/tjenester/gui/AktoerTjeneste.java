@@ -11,7 +11,7 @@ import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.aktoer.AktoerService;
 import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.security.token.support.core.api.Protected;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,13 +28,15 @@ import static java.util.stream.Collectors.toList;
 @Api(tags = {"fagsaker"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AktoerTjeneste {
-    private final TilgangService tilgangService;
+    private final Aksesskontroll aksesskontroll;
     private final AktoerService aktoerService;
     private final FagsakService fagsakService;
 
     @Autowired
-    public AktoerTjeneste(TilgangService tilgangService, AktoerService aktoerService, FagsakService fagsakService) {
-        this.tilgangService = tilgangService;
+    public AktoerTjeneste(Aksesskontroll aksesskontroll,
+                          AktoerService aktoerService,
+                          FagsakService fagsakService) {
+        this.aksesskontroll = aksesskontroll;
         this.aktoerService = aktoerService;
         this.fagsakService = fagsakService;
     }
@@ -49,7 +51,7 @@ public class AktoerTjeneste {
                                         @RequestParam(value = "representerer", required = false) String representerer) {
 
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        tilgangService.sjekkSak(fagsak);
+        aksesskontroll.autoriserSakstilgang(saksnummer);
 
         Aktoersroller rolle = null;
         Representerer representantRepresenterer = null;
@@ -72,7 +74,7 @@ public class AktoerTjeneste {
                                                  @RequestBody AktoerDto aktoerDto)
         {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        tilgangService.sjekkSak(fagsak);
+        aksesskontroll.autoriserSakstilgang(fagsak);
         Long databaseId = aktoerService.lagEllerOppdaterAktoer(fagsak, aktoerDto);
         aktoerDto.setDatabaseID(databaseId);
         return ResponseEntity.ok(aktoerDto);

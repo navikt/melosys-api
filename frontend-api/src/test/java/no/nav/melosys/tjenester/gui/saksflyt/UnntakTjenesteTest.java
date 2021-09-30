@@ -5,6 +5,7 @@ import java.time.LocalDate;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.service.unntaksperiode.Unntaksperiode;
 import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
@@ -23,18 +24,20 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-public class UnntakTjenesteTest extends JsonSchemaTestParent {
+class UnntakTjenesteTest extends JsonSchemaTestParent {
     private static final String UNNTAKSPERIODE_GODKJENN_SCHEMA = "saksflyt-unntaksperioder-godkjenn-post-schema.json";
     private static final String UNNTAKSPERIODE_IKKEGODKJENN_SCHEMA = "saksflyt-unntaksperioder-ikkegodkjenn-post-schema.json";
 
     @Mock
     private UnntaksperiodeService unntaksperiodeService;
+    @Mock
+    private Aksesskontroll aksesskontroll;
 
     private UnntakTjeneste unntakTjeneste;
 
     @BeforeEach
     public void setUp() {
-        unntakTjeneste = new UnntakTjeneste(unntaksperiodeService);
+        unntakTjeneste = new UnntakTjeneste(unntaksperiodeService, aksesskontroll);
     }
 
     @Test

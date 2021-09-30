@@ -1,0 +1,106 @@
+package no.nav.melosys.service.tilgang;
+
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import static no.nav.melosys.service.tilgang.Aksesstype.LES;
+import static no.nav.melosys.service.tilgang.Aksesstype.SKRIV;
+
+@Component
+@Transactional(readOnly = true)
+public class AksesskontrollImpl implements Aksesskontroll {
+
+    private final FagsakService fagsakService;
+    private final BehandlingService behandlingService;
+    private final BrukertilgangKontroll brukertilgangKontroll;
+    private final RedigerbarKontroll redigerbarKontroll;
+    private final OppgaveService oppgaveService;
+
+    public AksesskontrollImpl(FagsakService fagsakService,
+                              BehandlingService behandlingService,
+                              BrukertilgangKontroll brukertilgangKontroll,
+                              RedigerbarKontroll redigerbarKontroll,
+                              OppgaveService oppgaveService) {
+        this.fagsakService = fagsakService;
+        this.behandlingService = behandlingService;
+        this.brukertilgangKontroll = brukertilgangKontroll;
+        this.redigerbarKontroll = redigerbarKontroll;
+        this.oppgaveService = oppgaveService;
+    }
+
+    @Override
+    public void autoriserSakstilgang(String saksnummer) {
+        autoriserSakstilgang(fagsakService.hentFagsak(saksnummer));
+    }
+
+    @Override
+    public void autoriserSakstilgang(Fagsak fagsak) {
+        brukertilgangKontroll.validerTilgangTilAktørID(fagsak.hentAktørID());
+    }
+
+    @Override
+    public void autoriser(long behandlingID) {
+        autoriser(behandlingID, LES);
+    }
+
+    @Override
+    public void autoriser(long behandlingID, Aksesstype aksesstype) {
+        autoriser(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID), aksesstype, Ressurs.UKJENT, false);
+    }
+
+    @Override
+    public void autoriserSkriv(long behandlingID) {
+        autoriser(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID), SKRIV, Ressurs.UKJENT, false);
+    }
+
+    public void autoriserSkrivOgTilordnet(long behandlingID) {
+        autoriser(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID), SKRIV, Ressurs.UKJENT, true);
+    }
+
+    @Override
+    public void autoriserSkrivTilRessurs(long behandlingID, Ressurs ressurs) {
+        autoriser(behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID), SKRIV, ressurs, false);
+    }
+
+    @Override
+    public void autoriserFolkeregisterIdent(String folkeregisterIdent) {
+        brukertilgangKontroll.validerTilgangTilFolkeregisterIdent(folkeregisterIdent);
+    }
+
+    @Override
+    public boolean behandlingKanRedigeresAvSaksbehandler(Behandling behandling, String saksbehandler) {
+        return redigerbarKontroll.behandlingErRedigerbar(behandling)
+            && sakErTilordnetSaksbehandler(behandling.getFagsak().getSaksnummer(), saksbehandler);
+    }
+
+    private void autoriser(Behandling behandling, Aksesstype aksesstype, Ressurs ressurs, boolean validerTilordnet) {
+        brukertilgangKontroll.validerTilgangTilAktørID(behandling.getFagsak().hentAktørID());
+
+        if (aksesstype == SKRIV) {
+            if (validerTilordnet) {
+                sjekkTilordnetSaksbehandler(behandling, SubjectHandler.getInstance().getUserID());
+            }
+
+            redigerbarKontroll.sjekkRessursRedigerbar(behandling, ressurs);
+        }
+    }
+
+    private void sjekkTilordnetSaksbehandler(Behandling behandling, String saksbehandler) {
+        if (!sakErTilordnetSaksbehandler(behandling.getFagsak().getSaksnummer(), saksbehandler)) {
+            throw new FunksjonellException(
+                "Forsøk på å endre behandling med id %s som er ikke-redigerbar eller ikke er tilordnet %s".formatted(behandling.getId(), saksbehandler)
+            );
+        }
+    }
+
+    private boolean sakErTilordnetSaksbehandler(String saksnummer, String saksbehandler) {
+        return oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, saksnummer);
+    }
+}

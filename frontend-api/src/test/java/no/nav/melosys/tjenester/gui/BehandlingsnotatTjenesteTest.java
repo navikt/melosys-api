@@ -13,7 +13,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.service.BehandlingsnotatService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsnotatGetDto;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsnotatPostDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,18 +44,18 @@ public class BehandlingsnotatTjenesteTest extends JsonSchemaTestParent {
     @Mock
     private SaksbehandlerService saksbehandlerService;
     @Mock
-    private TilgangService tilgangService;
+    private Aksesskontroll aksesskontroll;
 
     private BehandlingsnotatTjeneste behandlingsnotatTjeneste;
 
     @BeforeEach
     public void setup() {
-        behandlingsnotatTjeneste = new BehandlingsnotatTjeneste(behandlingsnotatService, saksbehandlerService, tilgangService);
+        behandlingsnotatTjeneste = new BehandlingsnotatTjeneste(behandlingsnotatService, saksbehandlerService, aksesskontroll);
         when(saksbehandlerService.finnNavnForIdent(eq(saksbehandler))).thenReturn(Optional.of(saksbehandlerNavn));
     }
 
     @Test
-    public void hentBehandlingsnotaterForFagsak_hentes_validerSchema() throws IOException {
+    void hentBehandlingsnotaterForFagsak_hentes_validerSchema() throws IOException {
 
         final String saksnummer = "MEL-222";
         Behandlingsnotat behandlingsnotat = lagBehandlingsnotat();
@@ -77,7 +77,7 @@ public class BehandlingsnotatTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void oppdaterBehandlingsnotat_blirOppdatert_validerSchema() throws IOException {
+    void oppdaterBehandlingsnotat_blirOppdatert_validerSchema() throws IOException {
 
         BehandlingsnotatPostDto req = new BehandlingsnotatPostDto("teteteksssst");
         valider(req, BEHANDLINGNOTAT_PUT_SCHEMA);
@@ -92,7 +92,7 @@ public class BehandlingsnotatTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void opprettBehandlingsnotat_blirOpprettet_validerSchema() throws IOException {
+    void opprettBehandlingsnotat_blirOpprettet_validerSchema() throws IOException {
 
         BehandlingsnotatPostDto req = new BehandlingsnotatPostDto("teteteksssst");
         valider(req, BEHANDLINGNOTAT_POST_SCHEMA);

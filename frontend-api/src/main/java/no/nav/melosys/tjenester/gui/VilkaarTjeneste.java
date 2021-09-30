@@ -4,7 +4,8 @@ import java.util.List;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
+import no.nav.melosys.service.tilgang.Ressurs;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import no.nav.melosys.service.vilkaar.VilkaarDto;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
@@ -25,46 +26,37 @@ import org.springframework.web.context.WebApplicationContext;
 public class VilkaarTjeneste {
 
     private final VilkaarsresultatService vilkaarsresultatService;
-
     private final InngangsvilkaarService inngangsvilkaarService;
-
-    private final TilgangService tilgangService;
+    private final Aksesskontroll aksesskontroll;
 
     @Autowired
     public VilkaarTjeneste(VilkaarsresultatService vilkaarsresultatService,
                            InngangsvilkaarService inngangsvilkaarService,
-                           TilgangService tilgangService) {
+                           Aksesskontroll aksesskontroll) {
         this.vilkaarsresultatService = vilkaarsresultatService;
         this.inngangsvilkaarService = inngangsvilkaarService;
-        this.tilgangService = tilgangService;
+        this.aksesskontroll = aksesskontroll;
     }
 
     @GetMapping("{behandlingID}")
     public List<VilkaarDto> hentVilkår(@PathVariable("behandlingID") long behandlingID) {
-        List<VilkaarDto> vilkaarDtoListe;
-
-        tilgangService.sjekkTilgang(behandlingID);
-        vilkaarDtoListe = vilkaarsresultatService.hentVilkaar(behandlingID);
-
-        return vilkaarDtoListe;
+        aksesskontroll.autoriser(behandlingID);
+        return vilkaarsresultatService.hentVilkaar(behandlingID);
     }
 
     @PostMapping("{behandlingID}")
     @ApiOperation(value = "Lagre vilkår")
     public List<VilkaarDto> registrerVilkår(@PathVariable("behandlingID") long behandlingID,
             @RequestBody List<VilkaarDto> vilkaarDtoer) {
-        List<VilkaarDto> vilkaarDtoListe;
-        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
+        aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.VILKÅR);
         vilkaarsresultatService.registrerVilkår(behandlingID, vilkaarDtoer);
-        vilkaarDtoListe = vilkaarsresultatService.hentVilkaar(behandlingID);
-
-        return vilkaarDtoListe;
+        return vilkaarsresultatService.hentVilkaar(behandlingID);
     }
 
     @PutMapping("{behandlingID}/inngangsvilkaar/overstyr")
     @ApiOperation(value = "Overstyr vurdering av inngangsvilkår til oppfylt")
     public ResponseEntity<Void> overstyrInngangsvilkårTilOppfylt(@PathVariable("behandlingID") long behandlingID) {
-        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
+        aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.VILKÅR);
         inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(behandlingID);
 
         return ResponseEntity.ok().build();

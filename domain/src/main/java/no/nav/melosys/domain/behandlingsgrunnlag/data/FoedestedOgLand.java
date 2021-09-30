@@ -1,8 +1,10 @@
 package no.nav.melosys.domain.behandlingsgrunnlag.data;
 
 public class FoedestedOgLand {
-    private final String foedested;
-    private final String foedeland;
+    private String foedested;
+    private String foedeland;
+
+    public FoedestedOgLand() {}
 
     public FoedestedOgLand(String foedested, String foedeland) {
         this.foedested = foedested;

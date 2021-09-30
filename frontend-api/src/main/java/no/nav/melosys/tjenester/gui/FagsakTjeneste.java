@@ -20,7 +20,7 @@ import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.HenleggFagsakService;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.sak.VideresendSoknadService;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
@@ -52,20 +52,23 @@ public class FagsakTjeneste {
     private final HenleggFagsakService henleggFagsakService;
     private final SaksopplysningerService saksopplysningerService;
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
-    private final TilgangService tilgangService;
     private final UtpekingService utpekingService;
     private final VideresendSoknadService videresendSoknadService;
+    private final Aksesskontroll aksesskontroll;
 
     @Autowired
     public FagsakTjeneste(FagsakService fagsakService,
-                          HenleggFagsakService henleggFagsakService, SaksopplysningerService saksopplysningerService,
-                          BehandlingsgrunnlagService behandlingsgrunnlagService, TilgangService tilgangService,
-                          UtpekingService utpekingService, VideresendSoknadService videresendSoknadService) {
+                          HenleggFagsakService henleggFagsakService,
+                          SaksopplysningerService saksopplysningerService,
+                          BehandlingsgrunnlagService behandlingsgrunnlagService,
+                          UtpekingService utpekingService,
+                          VideresendSoknadService videresendSoknadService,
+                          Aksesskontroll aksesskontroll) {
         this.fagsakService = fagsakService;
         this.henleggFagsakService = henleggFagsakService;
         this.saksopplysningerService = saksopplysningerService;
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
-        this.tilgangService = tilgangService;
+        this.aksesskontroll = aksesskontroll;
         this.utpekingService = utpekingService;
         this.videresendSoknadService = videresendSoknadService;
     }
@@ -73,9 +76,9 @@ public class FagsakTjeneste {
     @GetMapping("{saksnr}")
     @ApiOperation(value = "Henter en sak med et gitt saksnummer", notes = ("Spesifikke saker kan hentes via saksnummer."))
     public ResponseEntity<FagsakDto> hentFagsak(@PathVariable("saksnr") String saksnummer) {
-        Fagsak sak = fagsakService.hentFagsak(saksnummer);
-        tilgangService.sjekkSak(sak);
-        FagsakDto fagsakDto = tilFagsakDto(sak);
+        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
+        aksesskontroll.autoriserSakstilgang(fagsak);
+        FagsakDto fagsakDto = tilFagsakDto(fagsak);
         log.info("Henting av sak {} ({})", fagsakDto.getSaksnummer(), fagsakDto.getGsakSaksnummer());
         return ResponseEntity.ok(fagsakDto);
     }
@@ -86,7 +89,7 @@ public class FagsakTjeneste {
         if (opprettSakDto.getBrukerID() == null) {
             throw new FunksjonellException("BrukerID trengs for å opprette en sak.");
         }
-        tilgangService.sjekkFnr(opprettSakDto.getBrukerID());
+        aksesskontroll.autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
         fagsakService.bestillNySakOgBehandling(opprettSakDto);
         return ResponseEntity.ok().build();
     }
@@ -100,12 +103,12 @@ public class FagsakTjeneste {
     public List<FagsakOppsummeringDto> hentFagsaker(@RequestBody FagsakSokDto fagsakSokDto) {
 
         if (StringUtils.isNotEmpty(fagsakSokDto.ident())) {
-            tilgangService.sjekkFnr(fagsakSokDto.ident());
+            aksesskontroll.autoriserFolkeregisterIdent(fagsakSokDto.ident());
             return tilFagsakOppsummeringDtoer(fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, fagsakSokDto.ident()));
         } else if (StringUtils.isNotEmpty(fagsakSokDto.saksnummer())) {
             Optional<Fagsak> fagsak = fagsakService.finnFagsakFraSaksnummer(fagsakSokDto.saksnummer());
             if (fagsak.isPresent()) {
-                tilgangService.sjekkSak(fagsak.get());
+                aksesskontroll.autoriserSakstilgang(fagsak.get());
                 return tilFagsakOppsummeringDtoer(Collections.singletonList(fagsak.get()));
             }
         }
@@ -116,7 +119,7 @@ public class FagsakTjeneste {
     @PostMapping("{saksnr}/henlegg")
     @ApiOperation(value = "Henlegger en fagsak")
     public ResponseEntity<Void> henleggFagsak(@PathVariable("saksnr") String saksnummer, @RequestBody HenleggelseDto henleggelseDto) {
-        tilgangService.sjekkSak(saksnummer);
+        aksesskontroll.autoriserSakstilgang(saksnummer);
         henleggFagsakService.henleggFagsak(saksnummer, henleggelseDto.begrunnelseKode(), henleggelseDto.fritekst());
         return ResponseEntity.ok().build();
     }
@@ -125,8 +128,8 @@ public class FagsakTjeneste {
     @ApiOperation(value = "Videresender søknad for en gitt behandling")
     public ResponseEntity<Void> videresend(@PathVariable("saksnr") String saksnummer,
                                      @RequestBody VideresendDto videresendDto) {
-        Fagsak sak = fagsakService.hentFagsak(saksnummer);
-        tilgangService.sjekkSak(sak);
+        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
+        aksesskontroll.autoriserSakstilgang(fagsak);
 
         if (CollectionUtils.isEmpty(videresendDto.getVedlegg())) {
             throw new FunksjonellException("Kan ikke videresende søknad uten vedlegg!");
@@ -146,7 +149,7 @@ public class FagsakTjeneste {
     @ApiOperation(value = "Avslutter en fagsak i Melosys som bortfalt, fordi den ikke skal behandles i Melosys")
     public ResponseEntity<Void> avsluttSakSomBortfalt(@PathVariable("saksnr") String saksnummer) {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        tilgangService.sjekkSak(fagsak);
+        aksesskontroll.autoriserSakstilgang(fagsak);
 
         fagsakService.avsluttSakSomBortfalt(fagsak);
         return ResponseEntity.noContent().build();
@@ -157,7 +160,7 @@ public class FagsakTjeneste {
         "Gyldige behandlingstyper er VURDER_TRYGDETID, ØVRIGE_SED og SOEKNAD_IKKE_YRKESAKTIVE", produces = MediaType.TEXT_PLAIN_VALUE, consumes = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<Void> avsluttSakManuelt(@PathVariable("saksnr") String saksnummer) {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        tilgangService.sjekkSak(fagsak);
+        aksesskontroll.autoriserSakstilgang(fagsak);
         fagsakService.avsluttFagsakOgBehandlingValiderBehandlingstype(fagsak, fagsak.hentAktivBehandling());
 
         return ResponseEntity.noContent().build();
@@ -168,7 +171,7 @@ public class FagsakTjeneste {
     public ResponseEntity<Void> utpekLovvalgsland(@PathVariable("saksnummer") String saksnummer,
                                             @RequestBody UtpekDto utpekDto) {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-        tilgangService.sjekkSak(fagsak);
+        aksesskontroll.autoriserSakstilgang(fagsak);
 
         utpekingService.utpekLovvalgsland(
             fagsak,
@@ -184,7 +187,7 @@ public class FagsakTjeneste {
         "for en sak ved å opprette en ny behandling basert på den siste endrede behandling")
     @PostMapping("/{saksnummer}/revurder")
     public ResponseEntity<RevurderingOpprettetDto> revurderSisteBehandling(@PathVariable("saksnummer") String saksnummer) {
-        tilgangService.sjekkSak(saksnummer);
+        aksesskontroll.autoriserSakstilgang(saksnummer);
 
         long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
         return ResponseEntity.ok(new RevurderingOpprettetDto(behandlingID));

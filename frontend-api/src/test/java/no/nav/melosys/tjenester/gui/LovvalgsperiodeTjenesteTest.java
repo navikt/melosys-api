@@ -21,7 +21,7 @@ import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.periode.LovvalgsperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 import org.junit.jupiter.api.Test;
@@ -76,7 +76,7 @@ final class LovvalgsperiodeTjenesteTest extends JsonSchemaTestParent {
         lovvalgsperiode.setFom(fomDato);
         lovvalgsperiode.setTom(tomDato);
         doReturn(lovvalgsperiode).when(lovvalgsperiodeService).hentOpprinneligLovvalgsperiode(5L);
-        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, mock(TilgangService.class));
+        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, mock(Aksesskontroll.class));
 
         PeriodeDto periodeDto = instans.hentOpprinneligLovvalgsperiode(5L).get("opprinneligLovvalgsperiode");
 
@@ -94,12 +94,12 @@ final class LovvalgsperiodeTjenesteTest extends JsonSchemaTestParent {
 
     private void testHentLovvalgsperioder(long behandlingsid, Collection<LovvalgsperiodeDto> forventet) throws Exception {
         LovvalgsperiodeService lovvalgsperiodeService = lagLovvalgsperiodeService();
-        TilgangService tilgangService = mock(TilgangService.class);
+        Aksesskontroll aksesskontroll = mock(Aksesskontroll.class);
         doThrow(new SikkerhetsbegrensningException("Computer says no"))
-                .when(tilgangService).sjekkTilgang(BEHANDLING_UTEN_TILGANG);
+                .when(aksesskontroll).autoriser(BEHANDLING_UTEN_TILGANG);
         doThrow(new TekniskException("Det har oppstått en..."))
-                .when(tilgangService).sjekkTilgang(BEHANDLING_MED_TEKNISK_FEIL);
-        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, tilgangService);
+                .when(aksesskontroll).autoriser(BEHANDLING_MED_TEKNISK_FEIL);
+        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, aksesskontroll);
         ResponseEntity<?> resultat = instans.hentLovvalgsperioder(behandlingsid);
         assertThat(resultat.getStatusCode()).isEqualTo(HttpStatus.OK);
         @SuppressWarnings("unchecked")
@@ -116,8 +116,8 @@ final class LovvalgsperiodeTjenesteTest extends JsonSchemaTestParent {
     private void testLagreLovvalgsperioder(long behandlingsid,
             Collection<LovvalgsperiodeDto> perioder) throws Exception {
         LovvalgsperiodeService lovvalgsperiodeService = lagLovvalgsperiodeService();
-        TilgangService tilgangService = mock(TilgangService.class);
-        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, tilgangService);
+        Aksesskontroll aksesskontroll = mock(Aksesskontroll.class);
+        LovvalgsperiodeTjeneste instans = new LovvalgsperiodeTjeneste(lovvalgsperiodeService, aksesskontroll);
         validerArray(perioder, LOVVALGSPERIODER_SCHEMA);
         Collection<LovvalgsperiodeDto> resultat = instans.lagreLovvalgsperioder(behandlingsid, perioder);
         assertThat(resultat).hasSize(perioder.size());

@@ -15,7 +15,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -300,21 +299,6 @@ public class BehandlingService {
         behandling.setStatus(behandlingsstatus);
         behandling.setDokumentasjonSvarfristDato(svarfristDato);
         lagre(behandling);
-    }
-
-    public boolean erBehandlingRedigerbarOgTilordnetSaksbehandler(Behandling behandling, String saksbehandler) {
-        if (!behandling.erRedigerbar()) {
-            return false;
-        }
-
-        Optional<Oppgave> oppgaveOptional = oppgaveService.finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
-
-        if (oppgaveOptional.isEmpty()) {
-            return false;
-        } else {
-            String tilordnetRessurs = oppgaveOptional.get().getTilordnetRessurs();
-            return tilordnetRessurs != null && tilordnetRessurs.equalsIgnoreCase(saksbehandler);
-        }
     }
 
     @Transactional

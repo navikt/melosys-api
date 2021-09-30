@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import no.nav.melosys.service.OppfriskSaksopplysningerService;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -21,12 +21,12 @@ import org.springframework.web.context.WebApplicationContext;
 public class SaksopplysningTjeneste {
 
     private final OppfriskSaksopplysningerService oppfriskSaksopplysningerService;
-    private final TilgangService tilgangService;
+    private final Aksesskontroll aksesskontroll;
 
     @Autowired
-    public SaksopplysningTjeneste(OppfriskSaksopplysningerService oppfriskSaksopplysningerService, TilgangService tilgangService) {
+    public SaksopplysningTjeneste(OppfriskSaksopplysningerService oppfriskSaksopplysningerService, Aksesskontroll aksesskontroll) {
         this.oppfriskSaksopplysningerService = oppfriskSaksopplysningerService;
-        this.tilgangService = tilgangService;
+        this.aksesskontroll = aksesskontroll;
     }
 
     @GetMapping("oppfriskning/{behandlingID}")
@@ -37,7 +37,7 @@ public class SaksopplysningTjeneste {
         @ApiResponse(code = 500, message = "Uventet teknisk Feil")
     })
     public ResponseEntity<Void> oppfriskSaksopplysning(@PathVariable("behandlingID") long behandlingID, @RequestParam(required = false) boolean medFamilierelasjoner) {
-        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
+        aksesskontroll.autoriserSkriv(behandlingID);
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandlingID, medFamilierelasjoner);
         return ResponseEntity.noContent().build();
     }

@@ -7,7 +7,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.service.TrygdeavtaleService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,20 +18,20 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class TrygdeavtaleTjenesteTest {
+class TrygdeavtaleTjenesteTest {
 
     @Mock
     private TrygdeavtaleService trygdeavtaleService;
     @Mock
     private BehandlingService behandlingService;
     @Mock
-    private TilgangService tilgangService;
+    private Aksesskontroll aksesskontroll;
 
     private TrygdeavtaleTjeneste trygdeavtaleTjeneste;
 
     @BeforeEach
     void init() {
-        trygdeavtaleTjeneste = new TrygdeavtaleTjeneste(trygdeavtaleService, behandlingService, tilgangService);
+        trygdeavtaleTjeneste = new TrygdeavtaleTjeneste(trygdeavtaleService, behandlingService, aksesskontroll);
     }
 
     @Test
