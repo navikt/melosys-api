@@ -3,7 +3,7 @@ package no.nav.melosys.tjenester.gui.saksflyt;
 import java.util.Set;
 
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
-import no.nav.melosys.service.abac.TilgangService;
+import no.nav.melosys.service.tilgang.TilgangService;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
 import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.VedleggDto;

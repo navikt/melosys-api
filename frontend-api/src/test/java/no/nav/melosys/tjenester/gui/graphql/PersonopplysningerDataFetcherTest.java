@@ -44,20 +44,20 @@ class PersonopplysningerDataFetcherTest {
             persondataFasade);
         final var bostedsadresse_1 = new Bostedsadresse(
             new StrukturertAdresse("gate1", null, null, null, null, null),
-            null, null, null, null, null, false);
+            null, null, null, "PDL", null, false);
         final var bostedsadresse_2 = new Bostedsadresse(
             new StrukturertAdresse("gate2", null, null, null, null, null),
             null, null, null, null, null, true);
 
         final var kontaktadresse_1 = new Kontaktadresse(
-            new StrukturertAdresse("kontakt 1", null, null, null, null, null), null, null, null, null, null, null, null,
+            new StrukturertAdresse("kontakt 1", null, null, null, null, null), null, null, null, null, "PDL", null, null,
             false);
         final var kontaktadresse_2 = new Kontaktadresse(null,
             new SemistrukturertAdresse("kontakt 2", "linje 2", null, null, "1234", "By", "IT"), null, null, null, null,
             null, null, false);
 
         final var oppholdsadresse_1 = new Oppholdsadresse(
-            new StrukturertAdresse("opphold 1", null, null, null, null, null), null, null, null, null, null, null,
+            new StrukturertAdresse("opphold 1", null, null, null, null, null), null, null, null, "PDL", null, null,
             false);
         final var oppholdsadresse_2 = new Oppholdsadresse(
             new StrukturertAdresse("opphold 2", null, null, null, null, null), null, null, null, null, null, null,
@@ -91,14 +91,20 @@ class PersonopplysningerDataFetcherTest {
         final var personopplysninger = personopplysningerDataFetcher.get(dataFetchingEnvironment);
         assertThat(personopplysninger.bostedsadresser()).extracting(BostedsadresseDto::adresse)
             .extracting(StrukturertAdresseformatDto::gatenavn).containsExactlyInAnyOrder("gate1", "gate2");
+        assertThat(personopplysninger.bostedsadresser()).extracting(BostedsadresseDto::master)
+            .containsExactlyInAnyOrder("NAV (PDL)", null);
         assertThat(personopplysninger.folkeregisteridentifikator()).isEqualTo("identNr");
         assertThat(personopplysninger.folkeregisterpersonstatus()).isEqualTo(
             new FolkeregisterpersonstatusDto(Personstatuser.UDEFINERT.getKode(), "ny status fra PDL"));
         assertThat(personopplysninger.kjoenn()).isEqualTo(KjoennType.UKJENT);
         assertThat(personopplysninger.kontaktadresser()).hasSize(2);
+        assertThat(personopplysninger.kontaktadresser()).extracting(KontaktadresseDto::master)
+            .containsExactlyInAnyOrder("NAV (PDL)", null);
         assertThat(personopplysninger.navn()).isEqualTo(new NavnDto("Ola", "Oops", "King"));
         assertThat(personopplysninger.oppholdsadresser()).extracting(OppholdsadresseDto::adresse)
             .extracting(StrukturertAdresseformatDto::gatenavn).containsExactlyInAnyOrder("opphold 1", "opphold 2");
+        assertThat(personopplysninger.oppholdsadresser()).extracting(OppholdsadresseDto::master)
+            .containsExactlyInAnyOrder("NAV (PDL)", null);
         assertThat(personopplysninger.sivilstand()).flatExtracting(SivilstandDto::type,
             SivilstandDto::relatertVedSivilstand, SivilstandDto::gyldigFraOgMed, SivilstandDto::bekreftelsesdato,
             SivilstandDto::master, SivilstandDto::kilde, SivilstandDto::erHistorisk)

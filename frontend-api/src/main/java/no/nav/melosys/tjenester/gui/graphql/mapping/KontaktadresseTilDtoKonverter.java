@@ -15,7 +15,7 @@ public final class KontaktadresseTilDtoKonverter {
             StrukturertAdresseTilDtoKonverter.tilDto(kontaktadresse.strukturertAdresse(), kodeverkService),
             kontaktadresse.gyldigFraOgMed(),
             kontaktadresse.gyldigTilOgMed(),
-            kontaktadresse.master(),
+            MasterTilDtoKonverter.tilDto(kontaktadresse.master()),
             kontaktadresse.kilde(),
             kontaktadresse.erHistorisk()
         );

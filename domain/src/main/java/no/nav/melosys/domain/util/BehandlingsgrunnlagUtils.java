@@ -59,6 +59,6 @@ public final class BehandlingsgrunnlagUtils {
     }
 
     public static Optional<Bostedsland> hentOppgittBostedsland(BehandlingsgrunnlagData grunnlagdata) {
-        return Optional.ofNullable(grunnlagdata.bosted.oppgittAdresse.getLandkode()).map(lk -> new Bostedsland(lk));
+        return Optional.ofNullable(grunnlagdata.bosted.oppgittAdresse.getLandkode()).map(Bostedsland::new);
     }
 }
