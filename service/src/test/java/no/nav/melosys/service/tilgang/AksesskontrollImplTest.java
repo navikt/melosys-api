@@ -4,7 +4,9 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,6 +28,8 @@ class AksesskontrollImplTest {
     private BrukertilgangKontroll brukertilgangKontroll;
     @Mock
     private RedigerbarKontroll redigerbarKontroll;
+    @Mock
+    private OppgaveService oppgaveService;
 
     private Aksesskontroll aksesskontroll;
 
@@ -42,8 +47,9 @@ class AksesskontrollImplTest {
         aktoer.setRolle(Aktoersroller.BRUKER);
         aktoer.setAktørId(aktørID);
         fagsak.getAktører().add(aktoer);
+        fagsak.setSaksnummer(saksnummer);
 
-        aksesskontroll = new AksesskontrollImpl(fagsakService, behandlingService, brukertilgangKontroll, redigerbarKontroll);
+        aksesskontroll = new AksesskontrollImpl(fagsakService, behandlingService, brukertilgangKontroll, redigerbarKontroll, oppgaveService);
     }
 
     @Test
@@ -76,5 +82,27 @@ class AksesskontrollImplTest {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, skrivTilRessurs);
         verify(brukertilgangKontroll).validerTilgangTilAktørID(aktørID);
         verify(redigerbarKontroll).sjekkRessursRedigerbar(behandling, skrivTilRessurs);
+    }
+
+    @Test
+    void behandlingKanRedigeresAvSaksbehandler_behandlingIkkeRedigerbar_ikkeSann() {
+        behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+        assertThat(aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, "Z123")).isFalse();
+    }
+
+    @Test
+    void behandlingKanRedigeresAvSaksbehandler_behandlingRedigerbarOppgaveIkkeTilordnet_ikkeSann() {
+        final var saksbehandler = "Z111111";
+        when(redigerbarKontroll.behandlingErRedigerbar(behandling)).thenReturn(true);
+        when(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, saksnummer)).thenReturn(false);
+        assertThat(aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler)).isFalse();
+    }
+
+    @Test
+    void behandlingKanRedigeresAvSaksbehandler_behandlingRedigerbarOppgaveTilordnet_sann() {
+        final var saksbehandler = "Z111111";
+        when(redigerbarKontroll.behandlingErRedigerbar(behandling)).thenReturn(true);
+        when(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, saksnummer)).thenReturn(true);
+        assertThat(aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler)).isTrue();
     }
 }

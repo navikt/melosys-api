@@ -16,7 +16,6 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.EndreBehandlingstemaService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.service.tilgang.RedigerbarKontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.tildto.SaksopplysningerTilDto;
@@ -43,20 +42,18 @@ public class BehandlingTjeneste {
     private final SaksbehandlerService saksbehandlerService;
     private final EndreBehandlingstemaService endreBehandlingstemaService;
     private final Aksesskontroll aksesskontroll;
-    private final RedigerbarKontroll redigerbarKontroll;
 
     @Autowired
     public BehandlingTjeneste(BehandlingService behandlingService,
                               SaksopplysningerTilDto saksopplysningerTilDto,
                               SaksbehandlerService saksbehandlerService,
                               EndreBehandlingstemaService endreBehandlingstemaService,
-                              Aksesskontroll aksesskontroll, RedigerbarKontroll redigerbarKontroll) {
+                              Aksesskontroll aksesskontroll) {
         this.behandlingService = behandlingService;
         this.saksopplysningerTilDto = saksopplysningerTilDto;
         this.saksbehandlerService = saksbehandlerService;
         this.endreBehandlingstemaService = endreBehandlingstemaService;
         this.aksesskontroll = aksesskontroll;
-        this.redigerbarKontroll = redigerbarKontroll;
     }
 
     @PostMapping("{behandlingID}/status")
@@ -162,7 +159,7 @@ public class BehandlingTjeneste {
     private BehandlingDto tilBehandlingDto(Behandling behandling, String saksbehandler) {
         var behandlingDto = new BehandlingDto();
         behandlingDto.setBehandlingID(behandling.getId());
-        behandlingDto.setRedigerbart(redigerbarKontroll.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, saksbehandler));
+        behandlingDto.setRedigerbart(aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler));
         behandlingDto.setOppsummering(tilOppsummeringDto(behandling));
         var saksopplysningerDto = saksopplysningerTilDto.getSaksopplysningerDto(behandling.getSaksopplysninger(), behandling);
         behandlingDto.setSaksopplysninger(saksopplysningerDto);
