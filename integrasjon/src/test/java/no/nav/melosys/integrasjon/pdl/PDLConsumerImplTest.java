@@ -19,6 +19,7 @@ import no.nav.melosys.integrasjon.pdl.dto.person.*;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.*;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,6 +41,11 @@ class PDLConsumerImplTest {
     static void setupServer() throws IOException {
         mockServer = new MockWebServer();
         mockServer.start();
+    }
+
+    @AfterAll
+    static void tearDown() throws IOException {
+        mockServer.shutdown();
     }
 
     @BeforeEach
@@ -72,6 +78,27 @@ class PDLConsumerImplTest {
         assertThatExceptionOfType(IntegrasjonException.class).isThrownBy(
             () -> pdlConsumer.hentIdenter("123"))
             .withMessageContaining("My error message");
+    }
+
+    @Test
+    void hentFamilerelasjoner() {
+        mockServer.enqueue(
+            new MockResponse()
+                .setBody(lastFil("mock/pdl/hentFamilierelasjoner.json"))
+                .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        );
+
+        var person = pdlConsumer.hentFamilierelasjoner("ident");
+        assertThat(person.folkeregisteridentifikator())
+            .flatExtracting(Folkeregisteridentifikator::identifikasjonsnummer)
+            .containsExactly("5340907334");
+        assertThat(person.forelderBarnRelasjon())
+            .flatExtracting(ForelderBarnRelasjon::relatertPersonsIdent, ForelderBarnRelasjon::relatertPersonsRolle,
+                ForelderBarnRelasjon::minRolleForPerson)
+            .containsExactly("01421474318",Familierelasjonsrolle.BARN, Familierelasjonsrolle.MOR);
+        assertThat(person.sivilstand()).flatExtracting(Sivilstand::type, Sivilstand::relatertVedSivilstand)
+            .containsExactly(Sivilstandstype.UGIFT, null, Sivilstandstype.GIFT, "04507445824");
+        assertThat(person.sivilstand()).extracting(Sivilstand::metadata).extracting(Metadata::historisk).containsExactly(false, true);
     }
 
     @Test
