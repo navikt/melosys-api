@@ -5,7 +5,7 @@ import io.swagger.annotations.Api;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
 import no.nav.melosys.tjenester.gui.dto.GodkjennUnntaksperiodeDto;
-import no.nav.melosys.tjenester.gui.dto.VurderUnntaksperiodeDto;
+import no.nav.melosys.tjenester.gui.dto.IkkeGodkjennUnntaksperiodeDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -30,9 +30,12 @@ public class UnntakTjeneste {
     }
 
     @PostMapping("{behandlingID}/ikkegodkjenn")
-    public ResponseEntity<Void> ikkeGodkjennUnntaksperiode(@PathVariable("behandlingID") Long behandlingID, @RequestBody VurderUnntaksperiodeDto vurderUnntaksperiodeDto) {
+    public ResponseEntity<Void> ikkeGodkjennUnntaksperiode(
+        @PathVariable("behandlingID") Long behandlingID,
+        @RequestBody IkkeGodkjennUnntaksperiodeDto ikkeGodkjennUnntaksperiodeDto
+    ) {
         aksesskontroll.autoriserSkriv(behandlingID);
-        unntaksperiodeService.ikkeGodkjennPeriode(behandlingID, vurderUnntaksperiodeDto.ikkeGodkjentBegrunnelseKoder(), vurderUnntaksperiodeDto.begrunnelseFritekst());
+        unntaksperiodeService.ikkeGodkjennPeriode(behandlingID, ikkeGodkjennUnntaksperiodeDto.ikkeGodkjentBegrunnelseKoder(), ikkeGodkjennUnntaksperiodeDto.begrunnelseFritekst());
         return ResponseEntity.noContent().build();
     }
 
@@ -42,7 +45,7 @@ public class UnntakTjeneste {
         @RequestBody GodkjennUnntaksperiodeDto godkjennUnntaksperiodeDto
     ) {
         aksesskontroll.autoriserSkriv(behandlingID);
-        unntaksperiodeService.godkjennPeriode(behandlingID, godkjennUnntaksperiodeDto.varsleUtland(), godkjennUnntaksperiodeDto.fritekst());
+        unntaksperiodeService.godkjennPeriode(behandlingID, godkjennUnntaksperiodeDto.til());
         return ResponseEntity.noContent().build();
     }
 }

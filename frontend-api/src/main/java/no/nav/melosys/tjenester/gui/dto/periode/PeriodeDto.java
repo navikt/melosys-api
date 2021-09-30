@@ -15,7 +15,7 @@ public class PeriodeDto {
     private LocalDate fom;
     @JsonProperty("tom")
     private LocalDate tom;
-    
+
     public PeriodeDto() {
     }
 
