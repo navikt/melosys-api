@@ -11,6 +11,7 @@ import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucBestillingDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucInformasjonDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucerTilknyttetBehandlingDto;
@@ -34,11 +35,13 @@ public class EessiTjeneste {
 
     private final EessiService eessiService;
     private final BehandlingService behandlingService;
+    private final Aksesskontroll aksesskontroll;
 
     @Autowired
-    public EessiTjeneste(EessiService eessiService, BehandlingService behandlingService) {
+    public EessiTjeneste(EessiService eessiService, BehandlingService behandlingService, Aksesskontroll aksesskontroll) {
         this.eessiService = eessiService;
         this.behandlingService = behandlingService;
+        this.aksesskontroll = aksesskontroll;
     }
 
     @GetMapping("/mottakerinstitusjoner/{bucType}")
@@ -60,6 +63,7 @@ public class EessiTjeneste {
     )
     public ResponseEntity<OpprettBucSvarDto> opprettBuc(@RequestBody BucBestillingDto nyBucDto,
                                                         @PathVariable("behandlingID") long behandlingID) {
+        aksesskontroll.autoriser(behandlingID);
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
         OpprettBucSvarDto opprettBucSvarDto = new OpprettBucSvarDto(
@@ -83,7 +87,7 @@ public class EessiTjeneste {
     )
     public ResponseEntity<BucerTilknyttetBehandlingDto> hentBucer(@PathVariable("behandlingID") long behandlingID,
                                                                   @RequestParam(value = "statuser", required = false) List<String> statuser) {
-
+        aksesskontroll.autoriser(behandlingID);
         Behandling behandling = behandlingService.hentBehandlingUtenSaksopplysninger(behandlingID);
         long gsakSaksnummer = behandling.getFagsak().getGsakSaksnummer();
 

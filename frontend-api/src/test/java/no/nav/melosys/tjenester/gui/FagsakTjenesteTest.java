@@ -31,7 +31,7 @@ import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.HenleggFagsakService;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.sak.VideresendSoknadService;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.VedleggDto;
@@ -64,7 +64,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     private static final String FNR = "12345678901";
     private static FagsakService fagsakService;
     private static HenleggFagsakService henleggFagsakService;
-    private static TilgangService tilgangService;
+    private static Aksesskontroll aksesskontroll;
     private static UtpekingService utpekingService;
 
     private EasyRandom random;
@@ -131,12 +131,12 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentFagsakGir200OkOgDto() throws Exception {
+    void hentFagsakGir200OkOgDto() {
         Fagsak fagsak = lagFagsak();
         testHentFagsak("123", ResponseEntity.status(HttpStatus.OK).body(lagFagsakDto(fagsak)));
     }
 
-    private void testHentFagsak(String saksnr, ResponseEntity<FagsakDto> forventning) throws Exception {
+    private void testHentFagsak(String saksnr, ResponseEntity<FagsakDto> forventning) {
         Fagsak fagsak = lagFagsak();
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
         ResponseEntity<FagsakDto> resultat = instans.hentFagsak(saksnr);
@@ -149,7 +149,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentFagsaker_medFnr_verifiserErMappetKorrekt() throws Exception {
+    void hentFagsaker_medFnr_verifiserErMappetKorrekt() {
         Fagsak fagsak = lagFagsak();
         Behandling behandling = new Behandling();
         behandling.setId(123L);
@@ -165,7 +165,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentFagsaker_medSaksnummer_finnerSakMottarListeMedEttElement() throws Exception {
+    void hentFagsaker_medSaksnummer_finnerSakMottarListeMedEttElement() {
         Fagsak fagsak = lagFagsak();
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
         when(fagsakService.finnFagsakFraSaksnummer("123")).thenReturn(Optional.of(fagsak));
@@ -175,7 +175,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void hentFagsaker_medSaksnummer_finnerIkkeSakMottarTomListe() throws Exception {
+    void hentFagsaker_medSaksnummer_finnerIkkeSakMottarTomListe() {
         Fagsak fagsak = lagFagsak();
         FagsakTjeneste instans = lagFagsakTjeneste(fagsak);
 
@@ -184,7 +184,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void fagsakogbehandling_tilFagsakOppsummeringOgBehandlingOversiktDtoer() throws Exception {
+    void fagsakogbehandling_tilFagsakOppsummeringOgBehandlingOversiktDtoer() {
         Fagsak fagsak = fagsakMedBehandlinger(Behandlingsstatus.UNDER_BEHANDLING,
             Behandlingsstatus.AVSLUTTET,
             Behandlingsstatus.AVSLUTTET);
@@ -221,7 +221,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void opprettSak_utenFnr_badRequestException() throws Exception {
+    void opprettSak_utenFnr_badRequestException() {
         FagsakTjeneste instans = lagFagsakTjeneste(null);
         OpprettSakDto dto = new OpprettSakDto();
         Throwable unntak = catchThrowable(() -> instans.opprettFagsak(dto));
@@ -229,12 +229,12 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    void opprettSak_sjekkerTilgangOgKallerService() throws Exception {
+    void opprettSak_sjekkerTilgangOgKallerService() {
         FagsakTjeneste instans = lagFagsakTjeneste(null);
         OpprettSakDto dto = new OpprettSakDto();
         dto.setBrukerID("brukerID");
         instans.opprettFagsak(dto);
-        verify(tilgangService).sjekkFnr(dto.getBrukerID());
+        verify(aksesskontroll).autoriserFolkeregisterIdent(dto.getBrukerID());
         verify(fagsakService).bestillNySakOgBehandling(dto);
     }
 
@@ -285,7 +285,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
     }
 
     private static FagsakTjeneste lagFagsakTjeneste(Fagsak fagsak) {
-        tilgangService = mock(TilgangService.class);
+        aksesskontroll = mock(Aksesskontroll.class);
         fagsakService = mock(FagsakService.class);
         henleggFagsakService = mock(HenleggFagsakService.class);
         utpekingService = mock(UtpekingService.class);
@@ -302,8 +302,8 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
         ArrayList<Fagsak> fagsaker = new ArrayList<>();
         fagsaker.add(fagsak);
         doReturn(fagsaker).when(fagsakService).hentFagsakerMedAktør(Aktoersroller.BRUKER, FNR);
-        return new FagsakTjeneste(fagsakService, henleggFagsakService, saksopplysningerService, behandlingsgrunnlagService, tilgangService, utpekingService,
-            videresendSoknadService);
+        return new FagsakTjeneste(fagsakService, henleggFagsakService, saksopplysningerService, behandlingsgrunnlagService, utpekingService,
+            videresendSoknadService, aksesskontroll);
     }
 
     private static FagsakOppsummeringDto lagFagsakOppsummeringDto(Behandling behandling) {
@@ -344,7 +344,7 @@ class FagsakTjenesteTest extends JsonSchemaTestParent {
 
         fagsakTjeneste.utpekLovvalgsland(fagsak.getSaksnummer(), utpekDto);
 
-        verify(tilgangService).sjekkSak(fagsak);
+        verify(aksesskontroll).autoriserSakstilgang(fagsak);
         verify(utpekingService).utpekLovvalgsland(fagsak, utpekDto.mottakerinstitusjoner(), utpekDto.fritekstSed(), utpekDto.fritekstBrev());
     }
 }

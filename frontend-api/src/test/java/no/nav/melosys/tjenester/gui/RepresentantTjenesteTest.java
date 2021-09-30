@@ -7,6 +7,7 @@ import no.nav.melosys.domain.folketrygden.ValgtRepresentant;
 import no.nav.melosys.service.representant.RepresentantService;
 import no.nav.melosys.service.representant.dto.RepresentantDataDto;
 import no.nav.melosys.service.representant.dto.RepresentantDto;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.ValgtRepresentantDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,12 +33,14 @@ class RepresentantTjenesteTest extends JsonSchemaTestParent {
 
     @Mock
     private RepresentantService representantService;
+    @Mock
+    private Aksesskontroll aksesskontroll;
 
     private RepresentantTjeneste representantTjeneste;
 
     @BeforeEach
     public void setup() {
-        representantTjeneste = new RepresentantTjeneste(representantService);
+        representantTjeneste = new RepresentantTjeneste(representantService, aksesskontroll);
     }
 
     @Test

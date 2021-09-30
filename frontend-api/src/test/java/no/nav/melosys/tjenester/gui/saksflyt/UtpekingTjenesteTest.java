@@ -3,7 +3,7 @@ package no.nav.melosys.tjenester.gui.saksflyt;
 import java.io.IOException;
 
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
 import no.nav.melosys.tjenester.gui.dto.utpeking.UtpekingAvvisDto;
@@ -18,19 +18,19 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-public class UtpekingTjenesteTest extends JsonSchemaTestParent {
+class UtpekingTjenesteTest extends JsonSchemaTestParent {
 
     private static final String UTPEKING_AVVIS_POST_SCHEMA = "saksflyt-utpeking-avvis-post-schema.json";
 
     @Mock
     private UtpekingService utpekingService;
     @Mock
-    private TilgangService tilgangService;
+    private Aksesskontroll aksesskontroll;
     private UtpekingTjeneste utpekingTjeneste;
 
     @BeforeEach
     public void settOpp() {
-        utpekingTjeneste = new UtpekingTjeneste(utpekingService, tilgangService);
+        utpekingTjeneste = new UtpekingTjeneste(utpekingService, aksesskontroll);
     }
 
     @Test

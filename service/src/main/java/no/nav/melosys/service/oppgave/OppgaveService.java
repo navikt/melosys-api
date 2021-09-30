@@ -10,8 +10,6 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -111,11 +109,6 @@ public class OppgaveService {
         }
     }
 
-    public Oppgave hentSisteAvsluttetOppgaveMedFagsaksnummer(String saksnummer) {
-        return finnSisteAvsluttetOppgaveMedFagsaksnummer(saksnummer)
-            .orElseThrow(() -> new IkkeFunnetException("Finner ingen oppgave med saksnummer " + saksnummer));
-    }
-
     public Oppgave hentÅpenOppgaveMedFagsaksnummer(String saksnummer) {
         return finnÅpenOppgaveMedFagsaksnummer(saksnummer)
             .orElseThrow(() -> new IkkeFunnetException("Finner ingen åpen oppgave med saksnummer " + saksnummer));
@@ -189,6 +182,13 @@ public class OppgaveService {
         String beskrivelse = oppgave.map(Oppgave::getBeskrivelse).orElse(null);
 
         opprettEllerGjenbrukBehandlingsoppgave(behandling, behandling.getInitierendeJournalpostId(), fagsak.hentAktørID(), tilordnetRessurs, beskrivelse);
+    }
+
+    public boolean saksbehandlerErTilordnetOppgaveForSaksnummer(String saksbehandler, String saksnummer) {
+        return finnÅpenOppgaveMedFagsaksnummer(saksnummer)
+            .map(Oppgave::getTilordnetRessurs)
+            .filter(saksbehandler::equals)
+            .isPresent();
     }
 
     private List<OppgaveDto> oppgaverTilDtoer(Collection<Oppgave> oppgaverFraDomain) {

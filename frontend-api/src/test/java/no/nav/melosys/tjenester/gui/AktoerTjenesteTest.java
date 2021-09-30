@@ -10,7 +10,7 @@ import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.aktoer.AktoerService;
 import no.nav.melosys.service.sak.FagsakService;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,13 +23,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class AktoerTjenesteTest extends JsonSchemaTestParent {
+class AktoerTjenesteTest extends JsonSchemaTestParent {
     private static final Logger log = LoggerFactory.getLogger(AktoerTjenesteTest.class);
     private static final String AKTOER_SCHEMA = "fagsaker-aktoerer-schema.json";
     private static final String AKTOER_POST_SCHEMA = "fagsaker-aktoerer-post-schema.json";
 
     @Mock
-    private TilgangService tilgangService;
+    private Aksesskontroll aksesskontroll;
     @Mock
     private AktoerService aktoerService;
     @Mock
@@ -39,11 +39,11 @@ public class AktoerTjenesteTest extends JsonSchemaTestParent {
 
     @BeforeEach
     public void setUp() {
-        aktoerTjeneste = new AktoerTjeneste(tilgangService, aktoerService, fagsakService);
+        aktoerTjeneste = new AktoerTjeneste(aksesskontroll, aktoerService, fagsakService);
     }
 
     @Test
-    public void aktoerSchemaValidering() throws Exception {
+    void aktoerSchemaValidering() throws Exception {
         AktoerDto aktoerDto = new AktoerDto();
         aktoerDto.setAktoerID("1234");
         aktoerDto.setRolleKode("BRUKER");
@@ -57,7 +57,7 @@ public class AktoerTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public final void lagOppdaterAktoer() {
+    void lagOppdaterAktoer() {
         when(fagsakService.hentFagsak("MELTEST-1")).thenReturn(lagFagsak());
 
         Aktoer aktoerBruker = new Aktoer();
@@ -75,7 +75,7 @@ public class AktoerTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public final void hentAktoer_tilAktoerDto() {
+    void hentAktoer_tilAktoerDto() {
         when(fagsakService.hentFagsak("MELTEST-1")).thenReturn(lagFagsak());
 
         Aktoer aktoerRep = new Aktoer();

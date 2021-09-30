@@ -3,7 +3,8 @@ package no.nav.melosys.tjenester.gui.avklartefakta;
 import io.swagger.annotations.Api;
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
+import no.nav.melosys.service.tilgang.Ressurs;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.AvgiftsgrunnlagDto;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregningsresultatDto;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.OppdaterAvgiftsgrunnlagDto;
@@ -20,21 +21,20 @@ public class TrygdeavgiftTjeneste {
 
     private final TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService;
     private final TrygdeavgiftsberegningService trygdeavgiftsberegningService;
-    private final TilgangService tilgangService;
+    private final Aksesskontroll aksesskontroll;
 
     public TrygdeavgiftTjeneste(TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService,
-                                TrygdeavgiftsberegningService trygdeavgiftsberegningService,
-                                TilgangService tilgangService) {
+                                TrygdeavgiftsberegningService trygdeavgiftsberegningService, Aksesskontroll aksesskontroll) {
         this.trygdeavgiftsgrunnlagService = trygdeavgiftsgrunnlagService;
         this.trygdeavgiftsberegningService = trygdeavgiftsberegningService;
-        this.tilgangService = tilgangService;
+        this.aksesskontroll = aksesskontroll;
     }
 
     @PutMapping("/grunnlag")
     public ResponseEntity<AvgiftsgrunnlagDto> oppdaterAvgiftsgrunnlag(@PathVariable("behandlingID") long behandlingID,
                                                                       @RequestBody OppdaterAvgiftsgrunnlagDto oppdaterAvgiftsgrunnlagDto
     ) {
-        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
+        aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
         return ResponseEntity.ok(
             AvgiftsgrunnlagDto.av(
                 trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(
@@ -46,7 +46,7 @@ public class TrygdeavgiftTjeneste {
 
     @GetMapping("/grunnlag")
     public ResponseEntity<AvgiftsgrunnlagDto> hentAvgiftsgrunnlag(@PathVariable("behandlingID") long behandlingID) {
-        tilgangService.sjekkTilgang(behandlingID);
+        aksesskontroll.autoriser(behandlingID);
         return ResponseEntity.ok(
             AvgiftsgrunnlagDto.av(
                 trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(behandlingID)
@@ -57,7 +57,7 @@ public class TrygdeavgiftTjeneste {
     @PutMapping("/beregning")
     public ResponseEntity<BeregningsresultatDto> oppdaterBeregningsgrunnlag(@PathVariable("behandlingID") long behandlingID,
                                                                             @RequestBody OppdaterBeregningsgrunnlagDto oppdaterBeregningsgrunnlagDto) {
-        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
+        aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
         trygdeavgiftsberegningService.oppdaterBeregningsgrunnlag(behandlingID, oppdaterBeregningsgrunnlagDto.til());
 
         return ResponseEntity.ok(
@@ -69,6 +69,7 @@ public class TrygdeavgiftTjeneste {
 
     @GetMapping("/beregning")
     public ResponseEntity<BeregningsresultatDto> hentBeregningsresultat(@PathVariable("behandlingID") long behandlingID) {
+        aksesskontroll.autoriser(behandlingID);
         return ResponseEntity.ok(
             BeregningsresultatDto.av(
                 trygdeavgiftsberegningService.hentBeregningsresultat(behandlingID)

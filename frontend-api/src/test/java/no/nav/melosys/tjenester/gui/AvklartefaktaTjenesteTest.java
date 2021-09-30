@@ -14,7 +14,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.AvklartefaktaOppsummeringDto;
 import no.nav.melosys.tjenester.gui.dto.LagreMedfolgendeFamilieDto;
 import no.nav.melosys.tjenester.gui.dto.MedfolgendeFamilieDto;
@@ -50,7 +50,7 @@ class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
     @Mock
     private AvklartefaktaService avklartefaktaService;
     @Mock
-    private TilgangService tilgangService;
+    private Aksesskontroll aksesskontroll;
     @Mock
     private AvklarteVirksomheterService avklarteVirksomheterService;
     @Mock
@@ -58,7 +58,7 @@ class AvklartefaktaTjenesteTest extends JsonSchemaTestParent {
 
     @BeforeEach
     public void setUp() {
-        avklartefaktaTjeneste = new AvklartefaktaTjeneste(avklartefaktaService, tilgangService, avklarteVirksomheterService, avklarteMedfolgendeFamilieService);
+        avklartefaktaTjeneste = new AvklartefaktaTjeneste(avklartefaktaService, avklarteVirksomheterService, avklarteMedfolgendeFamilieService, aksesskontroll);
     }
 
     @Test

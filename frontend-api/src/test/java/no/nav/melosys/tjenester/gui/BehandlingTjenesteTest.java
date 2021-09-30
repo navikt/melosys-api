@@ -20,8 +20,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.EndreBehandlingstemaService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
-import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.tildto.SaksopplysningerTilDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
@@ -34,7 +33,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 
 import static no.nav.melosys.domain.Behandling.BEHANDLINGSTEMA_SØKNAD;
@@ -64,16 +62,12 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     private SaksbehandlerService saksbehandlerService;
     @Mock
     private EndreBehandlingstemaService endreBehandlingstemaService;
-    @Mock
-    private OppgaveService oppgaveService;
-    @Mock
-    private ApplicationEventPublisher applicationEventPublisher;
 
     private EasyRandom random;
 
     @BeforeEach
     void setUp() {
-        behandlingTjeneste = new BehandlingTjeneste(behandlingService, saksopplysningerTilDto, mock(TilgangService.class), saksbehandlerService, endreBehandlingstemaService, oppgaveService, applicationEventPublisher);
+        behandlingTjeneste = new BehandlingTjeneste(behandlingService, saksopplysningerTilDto, saksbehandlerService, endreBehandlingstemaService, mock(Aksesskontroll.class));
 
         random = new EasyRandom(new EasyRandomParameters()
             .overrideDefaultInitialization(true)

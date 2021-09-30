@@ -14,7 +14,7 @@ import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
 import no.nav.melosys.domain.kodeverk.Flyvningstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.BehandlingsgrunnlagGetDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
@@ -43,7 +43,7 @@ public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
     @Mock
     private BehandlingsgrunnlagService behandlingsgrunnlagService;
     @Mock
-    private TilgangService tilgangService;
+    private Aksesskontroll aksesskontroll;
 
     private BehandlingsgrunnlagTjeneste behandlingsgrunnlagTjeneste;
 
@@ -51,7 +51,7 @@ public class BehandlingsgrunnlagTjenesteTest extends JsonSchemaTestParent {
 
     @BeforeEach
     public void setup() {
-        behandlingsgrunnlagTjeneste = new BehandlingsgrunnlagTjeneste(behandlingsgrunnlagService, tilgangService);
+        behandlingsgrunnlagTjeneste = new BehandlingsgrunnlagTjeneste(behandlingsgrunnlagService, aksesskontroll);
 
         random = new EasyRandom(new EasyRandomParameters()
             .overrideDefaultInitialization(true)

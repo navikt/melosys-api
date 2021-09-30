@@ -12,7 +12,7 @@ import no.nav.melosys.domain.kodeverk.Loenn_forhold;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.JsonSchemaTestParent;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.AvgiftsgrunnlagInfoDto;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.OppdaterAvgiftsgrunnlagDto;
@@ -42,7 +42,7 @@ class TrygdeavgiftTjenesteTest extends JsonSchemaTestParent {
     @Mock
     private TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService;
     @Mock
-    private TilgangService tilgangService;
+    private Aksesskontroll aksesskontroll;
 
     private TrygdeavgiftTjeneste trygdeavgiftTjeneste;
 
@@ -50,7 +50,7 @@ class TrygdeavgiftTjenesteTest extends JsonSchemaTestParent {
 
     @BeforeEach
     public void setup() {
-        trygdeavgiftTjeneste = new TrygdeavgiftTjeneste(trygdeavgiftsgrunnlagService, trygdeavgiftsberegningService, tilgangService);
+        trygdeavgiftTjeneste = new TrygdeavgiftTjeneste(trygdeavgiftsgrunnlagService, trygdeavgiftsberegningService, aksesskontroll);
     }
 
     @Test
