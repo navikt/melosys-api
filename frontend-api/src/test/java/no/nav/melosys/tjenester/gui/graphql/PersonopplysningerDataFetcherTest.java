@@ -80,7 +80,7 @@ class PersonopplysningerDataFetcherTest {
                 Set.of(kontaktadresse_1, kontaktadresse_2), new Navn("Ola", "Oops", "King"),
                 Set.of(oppholdsadresse_1, oppholdsadresse_2), Set.of(
                 new Sivilstand(Sivilstandstype.REGISTRERT_PARTNER, "relatertVedSivilstandID", LocalDate.MIN,
-                    LocalDate.EPOCH, "master", "kilde", false)),
+                    LocalDate.EPOCH, "PDL", "kilde", false)),
                 Set.of(statsborgerskap_1, statsborgerskap_2, statsborgerskap_3))
         );
         when(kodeverkService.dekod(eq(FellesKodeverk.LANDKODER_ISO2), any())).thenReturn("My country");
@@ -108,7 +108,7 @@ class PersonopplysningerDataFetcherTest {
         assertThat(personopplysninger.sivilstand()).flatExtracting(SivilstandDto::type,
             SivilstandDto::relatertVedSivilstand, SivilstandDto::gyldigFraOgMed, SivilstandDto::bekreftelsesdato,
             SivilstandDto::master, SivilstandDto::kilde, SivilstandDto::erHistorisk)
-            .containsExactly("Registrert partner", "relatertVedSivilstandID", LocalDate.MIN, LocalDate.EPOCH, "master",
+            .containsExactly("Registrert partner", "relatertVedSivilstandID", LocalDate.MIN, LocalDate.EPOCH, "NAV (PDL)",
                 "kilde", false);
 
         Consumer<PersonopplysningerDto> statsborgerskapErSortert = personopplysningerDto -> {
