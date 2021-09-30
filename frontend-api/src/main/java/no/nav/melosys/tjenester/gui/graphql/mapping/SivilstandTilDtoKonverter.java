@@ -13,7 +13,7 @@ public final class SivilstandTilDtoKonverter {
             sivilstand.relatertVedSivilstand(),
             sivilstand.gyldigFraOgMed(),
             sivilstand.bekreftelsesdato(),
-            sivilstand.master(),
+            MasterTilDtoKonverter.tilDto(sivilstand.master()),
             sivilstand.kilde(),
             sivilstand.erHistorisk()
         );
