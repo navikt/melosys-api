@@ -1,5 +1,6 @@
 package no.nav.melosys.service.tilgang;
 
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 
 public interface Aksesskontroll {
@@ -12,4 +13,5 @@ public interface Aksesskontroll {
     void autoriserSkrivOgTilordnet(long behandlingID);
     void autoriserSkrivTilRessurs(long behandlingID, Ressurs ressurs);
     void autoriserFolkeregisterIdent(String brukerID);
+    boolean behandlingKanRedigeresAvSaksbehandler(Behandling behandling, String saksbehandler);
 }

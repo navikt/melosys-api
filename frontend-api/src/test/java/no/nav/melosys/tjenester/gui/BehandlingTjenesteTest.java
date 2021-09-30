@@ -21,7 +21,6 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.EndreBehandlingstemaService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.service.tilgang.RedigerbarKontroll;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.tildto.SaksopplysningerTilDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
@@ -63,14 +62,12 @@ class BehandlingTjenesteTest extends JsonSchemaTestParent {
     private SaksbehandlerService saksbehandlerService;
     @Mock
     private EndreBehandlingstemaService endreBehandlingstemaService;
-    @Mock
-    private RedigerbarKontroll redigerbarKontroll;
 
     private EasyRandom random;
 
     @BeforeEach
     void setUp() {
-        behandlingTjeneste = new BehandlingTjeneste(behandlingService, saksopplysningerTilDto, saksbehandlerService, endreBehandlingstemaService, mock(Aksesskontroll.class), redigerbarKontroll);
+        behandlingTjeneste = new BehandlingTjeneste(behandlingService, saksopplysningerTilDto, saksbehandlerService, endreBehandlingstemaService, mock(Aksesskontroll.class));
 
         random = new EasyRandom(new EasyRandomParameters()
             .overrideDefaultInitialization(true)

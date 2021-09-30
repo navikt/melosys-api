@@ -7,14 +7,14 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,8 +25,6 @@ class RedigerbarKontrollTest {
 
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private OppgaveService oppgaveService;
 
     private RedigerbarKontroll redigerbarKontroll;
 
@@ -37,26 +35,7 @@ class RedigerbarKontrollTest {
         behandling.setId(11111L);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer(saksnummer);
-        redigerbarKontroll = new RedigerbarKontroll(behandlingsresultatService, oppgaveService);
-    }
-
-    @Test
-    void sjekkTilordnetSaksbehandlerOgRedigerbar_erTilordnetOgRedigerbar_kasterIkkeFeil() {
-        final var saksbehandler = "Z123";
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        when(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, saksnummer)).thenReturn(true);
-        assertThatNoException()
-            .isThrownBy(() -> redigerbarKontroll.sjekkTilordnetSaksbehandlerOgRedigerbar(behandling, Ressurs.UKJENT, saksbehandler));
-    }
-
-    @Test
-    void sjekkTilordnetSaksbehandlerOgRedigerbar_erIkkeTilordnet_kasterFeil() {
-        final var saksbehandler = "Z123";
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        when(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, saksnummer)).thenReturn(false);
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> redigerbarKontroll.sjekkTilordnetSaksbehandlerOgRedigerbar(behandling, Ressurs.UKJENT, saksbehandler))
-            .withMessageContaining("ikke-redigerbar");
+        redigerbarKontroll = new RedigerbarKontroll(behandlingsresultatService);
     }
 
     @Test
@@ -94,29 +73,4 @@ class RedigerbarKontrollTest {
             .isThrownBy(() -> redigerbarKontroll.sjekkRessursRedigerbar(behandling, Ressurs.AVKLARTE_FAKTA))
             .withMessageContaining("Kan ikke endre");
     }
-
-    @Test
-    void erBehandlingRedigerbarOgTilordnetSaksbehandler_behandlingInaktiv_ikkeSann() {
-        behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
-        assertThat(redigerbarKontroll.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, "z")).isFalse();
-    }
-
-    @Test
-    void erBehandlingRedigerbarOgTilordnetSaksbehandler_behandlingAktivIkkeTilordnet_ikkeSann() {
-        final var saksbehandler = "Z11111";
-        behandling.setStatus(Behandlingsstatus.OPPRETTET);
-        when(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, saksnummer)).thenReturn(false);
-
-        assertThat(redigerbarKontroll.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling,  saksbehandler)).isFalse();
-    }
-
-    @Test
-    void erBehandlingRedigerbarOgTilordnetSaksbehandler_behandlingAktivIkkeTilordnet_sann() {
-        final var saksbehandler = "Z11111";
-        behandling.setStatus(Behandlingsstatus.OPPRETTET);
-        when(oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, saksnummer)).thenReturn(true);
-
-        assertThat(redigerbarKontroll.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, saksbehandler)).isTrue();
-    }
-
 }

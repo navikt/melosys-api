@@ -2,7 +2,9 @@ package no.nav.melosys.service.tilgang;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.stereotype.Component;
@@ -19,15 +21,18 @@ public class AksesskontrollImpl implements Aksesskontroll {
     private final BehandlingService behandlingService;
     private final BrukertilgangKontroll brukertilgangKontroll;
     private final RedigerbarKontroll redigerbarKontroll;
+    private final OppgaveService oppgaveService;
 
     public AksesskontrollImpl(FagsakService fagsakService,
                               BehandlingService behandlingService,
                               BrukertilgangKontroll brukertilgangKontroll,
-                              RedigerbarKontroll redigerbarKontroll) {
+                              RedigerbarKontroll redigerbarKontroll,
+                              OppgaveService oppgaveService) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.brukertilgangKontroll = brukertilgangKontroll;
         this.redigerbarKontroll = redigerbarKontroll;
+        this.oppgaveService = oppgaveService;
     }
 
     @Override
@@ -35,6 +40,7 @@ public class AksesskontrollImpl implements Aksesskontroll {
         autoriserSakstilgang(fagsakService.hentFagsak(saksnummer));
     }
 
+    @Override
     public void autoriserSakstilgang(Fagsak fagsak) {
         brukertilgangKontroll.validerTilgangTilAktørID(fagsak.hentAktørID());
     }
@@ -68,15 +74,33 @@ public class AksesskontrollImpl implements Aksesskontroll {
         brukertilgangKontroll.validerTilgangTilFolkeregisterIdent(folkeregisterIdent);
     }
 
+    @Override
+    public boolean behandlingKanRedigeresAvSaksbehandler(Behandling behandling, String saksbehandler) {
+        return redigerbarKontroll.behandlingErRedigerbar(behandling)
+            && sakErTilordnetSaksbehandler(behandling.getFagsak().getSaksnummer(), saksbehandler);
+    }
+
     private void autoriser(Behandling behandling, Aksesstype aksesstype, Ressurs ressurs, boolean validerTilordnet) {
         brukertilgangKontroll.validerTilgangTilAktørID(behandling.getFagsak().hentAktørID());
 
         if (aksesstype == SKRIV) {
             if (validerTilordnet) {
-                redigerbarKontroll.sjekkTilordnetSaksbehandlerOgRedigerbar(behandling, ressurs, SubjectHandler.getInstance().getUserID());
-            } else {
-                redigerbarKontroll.sjekkRessursRedigerbar(behandling, ressurs);
+                sjekkTilordnetSaksbehandler(behandling, SubjectHandler.getInstance().getUserID());
             }
+
+            redigerbarKontroll.sjekkRessursRedigerbar(behandling, ressurs);
         }
+    }
+
+    private void sjekkTilordnetSaksbehandler(Behandling behandling, String saksbehandler) {
+        if (!sakErTilordnetSaksbehandler(behandling.getFagsak().getSaksnummer(), saksbehandler)) {
+            throw new FunksjonellException(
+                "Forsøk på å endre behandling med id %s som er ikke-redigerbar eller ikke er tilordnet %s".formatted(behandling.getId(), saksbehandler)
+            );
+        }
+    }
+
+    private boolean sakErTilordnetSaksbehandler(String saksnummer, String saksbehandler) {
+        return oppgaveService.saksbehandlerErTilordnetOppgaveForSaksnummer(saksbehandler, saksnummer);
     }
 }
