@@ -5,7 +5,7 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.BehandlingsgrunnlagGetDto;
 import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.BehandlingsgrunnlagPostDto;
 import no.nav.melosys.tjenester.gui.dto.behandlingsgrunnlag.PeriodeOgLandPostDto;
@@ -20,19 +20,19 @@ import org.springframework.web.bind.annotation.*;
 public class BehandlingsgrunnlagTjeneste {
 
     private final BehandlingsgrunnlagService behandlingsgrunnlagService;
-    private final TilgangService tilgangService;
+    private final Aksesskontroll aksesskontroll;
 
-    public BehandlingsgrunnlagTjeneste(BehandlingsgrunnlagService behandlingsgrunnlagService, TilgangService tilgangService) {
+    public BehandlingsgrunnlagTjeneste(BehandlingsgrunnlagService behandlingsgrunnlagService,
+                                       Aksesskontroll aksesskontroll) {
         this.behandlingsgrunnlagService = behandlingsgrunnlagService;
-        this.tilgangService = tilgangService;
+        this.aksesskontroll = aksesskontroll;
     }
 
     @GetMapping("/{behandlingID}")
     public ResponseEntity<BehandlingsgrunnlagGetDto> hentBehandlingsgrunnlag(
         @PathVariable(value = "behandlingID") long behandlingID
     ) {
-
-        tilgangService.sjekkTilgang(behandlingID);
+        aksesskontroll.autoriser(behandlingID);
         Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID);
         return ResponseEntity.ok(new BehandlingsgrunnlagGetDto(behandlingsgrunnlag));
     }
@@ -43,7 +43,7 @@ public class BehandlingsgrunnlagTjeneste {
         @RequestBody BehandlingsgrunnlagPostDto behandlingsgrunnlagPostDto
     ) {
 
-        tilgangService.sjekkRedigerbarOgTilgang(behandlingID);
+        aksesskontroll.autoriserSkriv(behandlingID);
         Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.oppdaterBehandlingsgrunnlag(behandlingID, behandlingsgrunnlagPostDto.getData());
         return ResponseEntity.ok(new BehandlingsgrunnlagGetDto(behandlingsgrunnlag));
     }
@@ -53,7 +53,7 @@ public class BehandlingsgrunnlagTjeneste {
         @PathVariable(value = "behandlingID") long behandlingID,
         @RequestBody PeriodeOgLandPostDto periodeOgLandPostDto
     ) {
-        tilgangService.sjekkTilgang(behandlingID);
+        aksesskontroll.autoriserSkriv(behandlingID);
         behandlingsgrunnlagService.oppdaterBehandlingsgrunnlagPeriodeOgLand(behandlingID,
             new Periode(periodeOgLandPostDto.fom(), periodeOgLandPostDto.tom()),
             new Soeknadsland(periodeOgLandPostDto.land(), false));

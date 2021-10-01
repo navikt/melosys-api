@@ -6,7 +6,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.exception.ValideringException;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.unntak.AnmodningUnntakService;
 import no.nav.melosys.tjenester.gui.dto.saksflyt.anmodningunntak.AnmodningUnntakDto;
 import no.nav.melosys.tjenester.gui.dto.saksflyt.anmodningunntak.AnmodningUnntakSvarDto;
@@ -24,12 +24,12 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AnmodningUnntakTjeneste {
     private final AnmodningUnntakService anmodningUnntakService;
-    private final TilgangService tilgangService;
+    private final Aksesskontroll aksesskontroll;
 
     @Autowired
-    public AnmodningUnntakTjeneste(AnmodningUnntakService anmodningUnntakService, TilgangService tilgangService) {
+    public AnmodningUnntakTjeneste(AnmodningUnntakService anmodningUnntakService, Aksesskontroll aksesskontroll) {
         this.anmodningUnntakService = anmodningUnntakService;
-        this.tilgangService = tilgangService;
+        this.aksesskontroll = aksesskontroll;
     }
 
     @PostMapping("{behandlingID}/bestill")
@@ -37,7 +37,7 @@ public class AnmodningUnntakTjeneste {
     public ResponseEntity<Void> anmodningOmUnntak(@PathVariable("behandlingID") long behandlingID,
                                                   @RequestBody AnmodningUnntakDto anmodningUnntakDto)
         throws ValideringException {
-        tilgangService.sjekkTilgang(behandlingID);
+        aksesskontroll.autoriserSkriv(behandlingID);
         anmodningUnntakService.anmodningOmUnntak(behandlingID,
             anmodningUnntakDto.getMottakerinstitusjon(),
             anmodningUnntakDto.getVedlegg().stream()
@@ -50,7 +50,7 @@ public class AnmodningUnntakTjeneste {
     @PostMapping("{behandlingID}/svar")
     @ApiOperation(value = "Sender et svar på anmodning om unntak basert på AnmodningsperiodeSvar som er registrert på behandlingen")
     public ResponseEntity<Void> svar(@PathVariable("behandlingID") long behandlingID, @RequestBody AnmodningUnntakSvarDto anmodningUnntakSvarDto) {
-        tilgangService.sjekkTilgang(behandlingID);
+        aksesskontroll.autoriserSkriv(behandlingID);
         anmodningUnntakService.anmodningOmUnntakSvar(behandlingID, anmodningUnntakSvarDto.ytterligereInfo());
         return ResponseEntity.ok().build();
     }

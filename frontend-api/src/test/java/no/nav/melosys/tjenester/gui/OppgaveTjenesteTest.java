@@ -33,7 +33,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class OppgaveTjenesteTest extends JsonSchemaTestParent {
+class OppgaveTjenesteTest extends JsonSchemaTestParent {
     private static final Logger logger = LoggerFactory.getLogger(OppgaveTjenesteTest.class);
 
     private static final String OPPGAVER_OVERSIKT_SCHEMA = "oppgaver-oversikt-schema.json";
@@ -55,7 +55,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void mineOppgaver() throws IOException {
+    void mineOppgaver() throws IOException {
         List<OppgaveDto> oppgaver = new ArrayList<>();
         int oppgaveNr = 1 + defaultEasyRandom().nextInt(2);
         for (int i = 0; i < oppgaveNr; i++) {
@@ -64,14 +64,14 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
         }
 
         when(oppgaveService.hentOppgaverMedAnsvarlig(anyString())).thenReturn(oppgaver);
-        ResponseEntity response = oppgaveTjeneste.mineOppgaver();
+        ResponseEntity<?> response = oppgaveTjeneste.mineOppgaver();
 
         OppgaveOversiktDto oppgaveOversikt = (OppgaveOversiktDto) response.getBody();
         valider(oppgaveOversikt, OPPGAVER_OVERSIKT_SCHEMA, logger);
     }
 
     @Test
-    public void plukkOppgave() throws IOException {
+    void plukkOppgave() throws IOException {
         Behandling behandling = new Behandling();
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
@@ -95,7 +95,7 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
 
         valider(innData, OPPGAVER_PLUKK_POST_SCHEMA, logger);
 
-        ResponseEntity response = oppgaveTjeneste.plukkOppgave(innData);
+        ResponseEntity<?> response = oppgaveTjeneste.plukkOppgave(innData);
 
         assertThat(response.getBody()).isExactlyInstanceOf(PlukketOppgaveDto.class);
 
@@ -106,15 +106,15 @@ public class OppgaveTjenesteTest extends JsonSchemaTestParent {
     }
 
     @Test
-    public void søkOppgaverMedBrukerID() throws IOException {
+    void søkOppgaverMedBrukerID() throws IOException {
         List<Oppgave> oppgaver = defaultEasyRandom().objects(Oppgave.class, 3).collect(Collectors.toList());
         when(oppgaveService.finnOppgaverMedBrukerID(anyString())).thenReturn(oppgaver);
 
-        validerArray((List<no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto>) oppgaveTjeneste.søkOppgaverMedBrukerID("").getBody(), OPPGAVER_SOK_SCHEMA, logger);
+        validerArray(oppgaveTjeneste.søkOppgaverMedBrukerID("").getBody(), OPPGAVER_SOK_SCHEMA, logger);
     }
 
     @Test
-    public void tilbakeleggOppgave() throws Exception {
+    void tilbakeleggOppgave() throws Exception {
         TilbakeleggingDto tilbakelegging = defaultEasyRandom().nextObject(TilbakeleggingDto.class);
 
         assertThat(tilbakelegging).isNotNull();

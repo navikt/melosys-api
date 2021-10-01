@@ -10,6 +10,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.unntaksperiode.UnntaksperiodeGodkjenning;
 import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,7 +60,12 @@ class BestemBehandlingsmåteSedTest {
     void utfør_temaRegistreringUnntakIngenTreffIRegister_prosessOpprettes() throws Exception {
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         bestemBehandlingsmåteSed.utfør(prosessinstans);
-        verify(unntaksperiodeService).godkjennPeriode(eq(behandling.getId()), eq(false), eq(null));
+
+        UnntaksperiodeGodkjenning forventetUnntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
+            .varsleUtland(false)
+            .fritekst(null)
+            .build();
+        verify(unntaksperiodeService).godkjennPeriode(eq(behandling.getId()), eq(forventetUnntaksperiodeGodkjenning));
     }
 
     @Test

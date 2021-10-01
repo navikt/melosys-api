@@ -9,7 +9,7 @@ import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.tjenester.gui.dto.utpeking.UtpekingsperioderDto;
 import org.jeasy.random.EasyRandom;
@@ -42,14 +42,14 @@ class UtpekingsperiodeTjenesteTest extends JsonSchemaTestParent {
     ArgumentCaptor<List<Utpekingsperiode>> captor;
 
     @Mock
-    private TilgangService tilgangService;
+    private Aksesskontroll aksesskontroll;
     @Mock
     private UtpekingService utpekingService;
     private UtpekingsperiodeTjeneste utpekingsperiodeTjeneste;
 
     @BeforeEach
     public void settOpp() {
-        utpekingsperiodeTjeneste = new UtpekingsperiodeTjeneste(tilgangService, utpekingService);
+        utpekingsperiodeTjeneste = new UtpekingsperiodeTjeneste(utpekingService, aksesskontroll);
     }
 
     @Test
@@ -61,7 +61,7 @@ class UtpekingsperiodeTjenesteTest extends JsonSchemaTestParent {
         String jsonString = objectMapperMedKodeverkServiceStub().writeValueAsString(utpekingsperioderDto);
         valider(jsonString, UTPEKINGSPERIODER_SCHEMA, log);
 
-        verify(tilgangService).sjekkTilgang(anyLong());
+        verify(aksesskontroll).autoriser(anyLong());
         verify(utpekingService).hentUtpekingsperioder(anyLong());
     }
 
@@ -95,7 +95,7 @@ class UtpekingsperiodeTjenesteTest extends JsonSchemaTestParent {
 
         utpekingsperiodeTjeneste.lagreUtpekingsperioder(123L, utpekingsperioderDto);
 
-        verify(tilgangService).sjekkRedigerbarOgTilgang(anyLong());
+        verify(aksesskontroll).autoriserSkriv(anyLong());
         verify(utpekingService).lagreUtpekingsperioder(eq(123L), captor.capture());
 
         List<Utpekingsperiode> utpekingsperioder = captor.getValue();

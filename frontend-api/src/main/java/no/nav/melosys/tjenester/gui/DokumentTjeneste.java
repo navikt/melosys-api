@@ -14,7 +14,7 @@ import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.SedPdfData;
 import no.nav.melosys.service.dokument.sed.EessiService;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevbestillingDto;
 import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.JournalpostInfoDto;
@@ -39,16 +39,17 @@ public class DokumentTjeneste {
     private final DokumentServiceFasade dokumentServiceFasade;
     private final DokumentHentingService dokumentHentingService;
     private final EessiService eessiService;
-    private final TilgangService tilgangService;
+    private final Aksesskontroll aksesskontroll;
 
     @Autowired
-    public DokumentTjeneste(DokumentServiceFasade dokumentServiceFasade, DokumentHentingService dokumentHentingService,
+    public DokumentTjeneste(DokumentServiceFasade dokumentServiceFasade,
+                            DokumentHentingService dokumentHentingService,
                             EessiService eessiService,
-                            TilgangService tilgangService) {
+                            Aksesskontroll aksesskontroll) {
         this.dokumentServiceFasade = dokumentServiceFasade;
         this.dokumentHentingService = dokumentHentingService;
         this.eessiService = eessiService;
-        this.tilgangService = tilgangService;
+        this.aksesskontroll = aksesskontroll;
     }
 
     @GetMapping(value = "/pdf/{journalpostID}/{dokumentID}", produces = {APPLICATION_PDF, APPLICATION_JSON_UTF8})
@@ -78,7 +79,7 @@ public class DokumentTjeneste {
                                                      @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
                                                      @RequestBody BrevbestillingDto brevBestillingDto) {
         byte[] dokument;
-        tilgangService.sjekkTilgang(behandlingID);
+        aksesskontroll.autoriser(behandlingID);
 
         BrevbestillingRequest brevbestillingRequest = brevBestillingDto.tilRequestBuilder()
             .medProduserbardokument(produserbartDokument)
@@ -94,7 +95,7 @@ public class DokumentTjeneste {
     public ResponseEntity<byte[]> produserUtkastSed(@PathVariable("behandlingID") long behandlingID,
                                                     @PathVariable("sedType") SedType sedType,
                                                     @RequestBody SedPdfData sedPdfData) {
-        tilgangService.sjekkTilgang(behandlingID);
+        aksesskontroll.autoriser(behandlingID);
         byte[] dokument = eessiService.genererSedPdf(behandlingID, sedType, sedPdfData);
         return lagResponseAvDokument(dokument, sedType.name() + "_utkast.pdf");
     }
@@ -108,7 +109,7 @@ public class DokumentTjeneste {
         if (brevBestillingDto.getMottaker() == null) {
             throw new FunksjonellException("Mottaker trengs for å bestille.");
         }
-        tilgangService.sjekkTilgang(behandlingID);
+        aksesskontroll.autoriser(behandlingID);
 
         BrevbestillingRequest brevbestillingRequest = brevBestillingDto.tilRequestBuilder()
             .medProduserbardokument(produserbartDokument)

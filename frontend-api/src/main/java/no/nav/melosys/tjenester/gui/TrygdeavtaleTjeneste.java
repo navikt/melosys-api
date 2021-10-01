@@ -3,10 +3,9 @@ package no.nav.melosys.tjenester.gui;
 import java.util.Collections;
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.service.TrygdeavtaleService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeavtaleInfoDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
@@ -23,12 +22,14 @@ public class TrygdeavtaleTjeneste {
 
     private final TrygdeavtaleService trygdeavtaleService;
     private final BehandlingService behandlingService;
-    private final TilgangService tilgangService;
+    private final Aksesskontroll aksesskontroll;
 
-    public TrygdeavtaleTjeneste(TrygdeavtaleService trygdeavtaleService, BehandlingService behandlingService, TilgangService tilgangService) {
+    public TrygdeavtaleTjeneste(TrygdeavtaleService trygdeavtaleService,
+                                BehandlingService behandlingService,
+                                Aksesskontroll aksesskontroll) {
         this.trygdeavtaleService = trygdeavtaleService;
         this.behandlingService = behandlingService;
-        this.tilgangService = tilgangService;
+        this.aksesskontroll = aksesskontroll;
     }
 
     @GetMapping("{behandlingID}")
@@ -36,8 +37,8 @@ public class TrygdeavtaleTjeneste {
                                                                     @RequestParam(value = "virksomheter", required = false) boolean hentVirksomheter,
                                                                     @RequestParam(value = "barnEktefeller", required = false) boolean hentBarnEktefeller) {
 
-        tilgangService.sjekkTilgang(behandlingId);
-        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        aksesskontroll.autoriserSkriv(behandlingId);
+        var behandling = behandlingService.hentBehandling(behandlingId);
         return ResponseEntity.ok(new TrygdeavtaleInfoDto(
             behandling.getFagsak().hentAktørID(),
             behandling.getTema().getKode(),

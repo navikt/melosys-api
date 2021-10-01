@@ -15,8 +15,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.EndreBehandlingstemaService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
-import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.tilgang.TilgangService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.melosys.tjenester.gui.dto.tildto.SaksopplysningerTilDto;
@@ -24,7 +23,6 @@ import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,23 +39,21 @@ public class BehandlingTjeneste {
 
     private final BehandlingService behandlingService;
     private final SaksopplysningerTilDto saksopplysningerTilDto;
-    private final TilgangService tilgangService;
     private final SaksbehandlerService saksbehandlerService;
     private final EndreBehandlingstemaService endreBehandlingstemaService;
+    private final Aksesskontroll aksesskontroll;
 
     @Autowired
     public BehandlingTjeneste(BehandlingService behandlingService,
                               SaksopplysningerTilDto saksopplysningerTilDto,
-                              TilgangService tilgangService,
                               SaksbehandlerService saksbehandlerService,
                               EndreBehandlingstemaService endreBehandlingstemaService,
-                              OppgaveService oppgaveService,
-                              ApplicationEventPublisher applicationEventPublisher) {
+                              Aksesskontroll aksesskontroll) {
         this.behandlingService = behandlingService;
         this.saksopplysningerTilDto = saksopplysningerTilDto;
-        this.tilgangService = tilgangService;
         this.saksbehandlerService = saksbehandlerService;
         this.endreBehandlingstemaService = endreBehandlingstemaService;
+        this.aksesskontroll = aksesskontroll;
     }
 
     @PostMapping("{behandlingID}/status")
@@ -67,7 +63,7 @@ public class BehandlingTjeneste {
         {
         log.info("Saksbehandler {} ber om å endre status for behandling {} til {}.", SubjectHandler.getInstance().getUserID(),
             behandlingID, status.behandlingsstatus());
-        tilgangService.sjekkTilgang(behandlingID);
+        aksesskontroll.autoriserSkriv(behandlingID);
         behandlingService.brukerOppdaterStatus(behandlingID, Behandlingsstatus.valueOf(status.behandlingsstatus()));
         return ResponseEntity.noContent().build();
     }
@@ -77,7 +73,7 @@ public class BehandlingTjeneste {
     public ResponseEntity<Collection<Behandlingsstatus>> hentMuligeStatuser(@PathVariable("behandlingID") long behandlingID)
         {
         log.info("Saksbehandler {} ber om å hente mulige nye behandlingsstatuser for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
-        tilgangService.sjekkTilgang(behandlingID);
+        aksesskontroll.autoriser(behandlingID);
 
         return ResponseEntity.ok(behandlingService.hentMuligeStatuser(behandlingID));
     }
@@ -89,7 +85,7 @@ public class BehandlingTjeneste {
                                                                             @RequestBody TidligereMedlemsperioderDto tidligereMedlemsperioder)
         {
         log.info("Saksbehandler {} ber om å knytte medlemsperioder for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
-        tilgangService.sjekkTilgang(behandlingID);
+        aksesskontroll.autoriserSkriv(behandlingID);
 
         behandlingService.knyttMedlemsperioder(behandlingID, tidligereMedlemsperioder.periodeIder);
         return ResponseEntity.ok(tidligereMedlemsperioder);
@@ -101,7 +97,7 @@ public class BehandlingTjeneste {
     public ResponseEntity<TidligereMedlemsperioderDto> hentMedlemsperioder(@PathVariable("behandlingID") long behandlingID)
         {
         log.debug("Saksbehandler {} ber om å hente medlemsperioder for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
-        tilgangService.sjekkTilgang(behandlingID);
+        aksesskontroll.autoriser(behandlingID);
 
         TidligereMedlemsperioderDto tidligereMedlemsperioderDto = new TidligereMedlemsperioderDto();
         tidligereMedlemsperioderDto.periodeIder = behandlingService.hentMedlemsperioder(behandlingID);
@@ -115,7 +111,7 @@ public class BehandlingTjeneste {
         {
         String saksbehandler = SubjectHandler.getInstance().getUserID();
         log.debug("Saksbehandler {} ber om å hente behandling {}.", saksbehandler, behandlingID);
-        tilgangService.sjekkTilgang(behandlingID);
+        aksesskontroll.autoriser(behandlingID);
 
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         behandlingService.endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
@@ -129,7 +125,7 @@ public class BehandlingTjeneste {
         {
         log.debug("Saksbehandler {} ber om å hente mulige nye behandlingstema for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingsID);
         try {
-            tilgangService.sjekkRedigerbarOgTilordnetSaksbehandlerOgTilgang(behandlingsID);
+            aksesskontroll.autoriser(behandlingsID);
         } catch (FunksjonellException e) {
             return ResponseEntity.ok(Collections.emptyList());
         }
@@ -143,7 +139,7 @@ public class BehandlingTjeneste {
     public ResponseEntity<Void> endreBehandlingstema(@PathVariable("behandlingID") long behandlingsID, @RequestBody EndreBehandlingstemaDto endreBehandlingstemaDto)
         {
         log.debug("Saksbehandler {} ber om å sette behandlingstema for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingsID, endreBehandlingstemaDto);
-        tilgangService.sjekkRedigerbarOgTilordnetSaksbehandlerOgTilgang(behandlingsID);
+        aksesskontroll.autoriserSkrivOgTilordnet(behandlingsID);
 
         endreBehandlingstemaService.endreBehandlingstemaTilBehandling(behandlingsID, Behandlingstema.valueOf(endreBehandlingstemaDto.behandlingstema()));
         return ResponseEntity.noContent().build();
@@ -153,7 +149,7 @@ public class BehandlingTjeneste {
     @ApiOperation("Endre behandlingsfristen for en gitt behandling samt tilhørende oppgave i Gosys")
     public ResponseEntity<Void> endreBehandlingsfrist(@PathVariable("behandlingID") long behandlingID, @RequestBody EndreBehandlingsfristDto endreBehandlingsfristDto) {
         log.debug("Saksbehandler {} ber om å sette behandlingsfrist for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingID, endreBehandlingsfristDto.behandlingsfrist());
-        tilgangService.sjekkRedigerbarOgTilordnetSaksbehandlerOgTilgang(behandlingID);
+        aksesskontroll.autoriserSkrivOgTilordnet(behandlingID);
 
         behandlingService.endreBehandlingsfrist(behandlingID, endreBehandlingsfristDto.behandlingsfrist());
         return ResponseEntity.noContent().build();
@@ -161,17 +157,17 @@ public class BehandlingTjeneste {
 
 
     private BehandlingDto tilBehandlingDto(Behandling behandling, String saksbehandler) {
-        BehandlingDto behandlingDto = new BehandlingDto();
+        var behandlingDto = new BehandlingDto();
         behandlingDto.setBehandlingID(behandling.getId());
-        behandlingDto.setRedigerbart(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, saksbehandler));
+        behandlingDto.setRedigerbart(aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler));
         behandlingDto.setOppsummering(tilOppsummeringDto(behandling));
-        SaksopplysningerDto saksopplysningerDto = saksopplysningerTilDto.getSaksopplysningerDto(behandling.getSaksopplysninger(), behandling);
+        var saksopplysningerDto = saksopplysningerTilDto.getSaksopplysningerDto(behandling.getSaksopplysninger(), behandling);
         behandlingDto.setSaksopplysninger(saksopplysningerDto);
         return behandlingDto;
     }
 
     private BehandlingOppsummeringDto tilOppsummeringDto(Behandling behandling) {
-        BehandlingOppsummeringDto behandlingOppsummeringDto = new BehandlingOppsummeringDto();
+        var behandlingOppsummeringDto = new BehandlingOppsummeringDto();
         behandlingOppsummeringDto.setBehandlingsstatus(behandling.getStatus());
         behandlingOppsummeringDto.setBehandlingstype(behandling.getType());
         behandlingOppsummeringDto.setBehandlingstema(behandling.getTema());

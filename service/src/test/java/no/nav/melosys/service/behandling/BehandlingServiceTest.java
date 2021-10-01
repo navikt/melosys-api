@@ -10,10 +10,8 @@ import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
@@ -263,7 +261,7 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void avsluttBehandling() throws Exception {
+    void avsluttBehandling() {
         Behandling behandling = new Behandling();
         when(behandlingRepo.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
@@ -296,69 +294,7 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void erBehandlingRedigerbarOgTilordnetSaksbehandler() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("12345678901");
-        Behandling behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
-
-        Oppgave.Builder oppgaveBuilder = new Oppgave.Builder().setTilordnetRessurs(SAKSBEHANDLER);
-
-        when(oppgaveService.finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.of(oppgaveBuilder.build()));
-
-        behandling.setStatus(Behandlingsstatus.OPPRETTET);
-        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isTrue();
-
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isTrue();
-
-        behandling.setStatus(Behandlingsstatus.IVERKSETTER_VEDTAK);
-        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isFalse();
-
-        behandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
-        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isFalse();
-
-        behandling.setStatus(Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
-        behandling.setType(Behandlingstyper.SOEKNAD);
-        behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
-        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isTrue();
-        behandling.setType(null);
-
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isFalse();
-
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        oppgaveBuilder.setTilordnetRessurs("noen andre");
-        Oppgave oppgave2 = oppgaveBuilder.build();
-        when(oppgaveService.finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.ofNullable(oppgave2));
-        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isFalse();
-
-        oppgaveBuilder.setTilordnetRessurs(null);
-        Oppgave oppgave3 = oppgaveBuilder.build();
-        when(oppgaveService.finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())).thenReturn(Optional.ofNullable(oppgave3));
-        assertThat(behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER)).isFalse();
-    }
-
-    @Test
-    void erBehandlingRedigerbarOgTilordnetSaksbehandler_ingenOppgaveFunnet_kasterException() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("12345678901");
-        Behandling behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-        behandling.setStatus(Behandlingsstatus.OPPRETTET);
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
-
-        when(oppgaveService.finnÅpenOppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer()))
-            .thenThrow(new TekniskException("Finner ingen oppgave for fagsak"));
-
-        assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(() -> behandlingService.erBehandlingRedigerbarOgTilordnetSaksbehandler(behandling, SAKSBEHANDLER))
-            .withMessage("Finner ingen oppgave for fagsak");
-    }
-
-    @Test
-    void endreBehandlingsfrist_enUkeFrem_fristOppdateres() throws Exception {
+    void endreBehandlingsfrist_enUkeFrem_fristOppdateres() {
         LocalDate nå = LocalDate.now();
         Behandling behandling = new Behandling();
         behandling.setBehandlingsfrist(nå);

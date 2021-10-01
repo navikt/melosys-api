@@ -6,6 +6,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.KontaktInfoDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +23,12 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class KontaktopplysningTjeneste {
     private final KontaktopplysningService kontaktopplysningService;
+    private final Aksesskontroll aksesskontroll;
 
     @Autowired
-    public KontaktopplysningTjeneste(KontaktopplysningService kontaktopplysningService) {
+    public KontaktopplysningTjeneste(KontaktopplysningService kontaktopplysningService, Aksesskontroll aksesskontroll) {
         this.kontaktopplysningService = kontaktopplysningService;
+        this.aksesskontroll = aksesskontroll;
     }
 
     @GetMapping("/{saksnummer}/kontaktopplysninger/{orgnr}")
@@ -34,6 +37,7 @@ public class KontaktopplysningTjeneste {
         response = Kontaktopplysning.class)
     public ResponseEntity hentKontaktopplysning(@PathVariable("saksnummer") String saksnummer,
                                                 @PathVariable("orgnr") String orgnr) {
+        aksesskontroll.autoriserSakstilgang(saksnummer);
         Optional<Kontaktopplysning> kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(saksnummer, orgnr);
         return kontaktopplysning.map(opp -> ResponseEntity.ok(KontaktInfoDto.av(opp)))
             .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
@@ -46,6 +50,7 @@ public class KontaktopplysningTjeneste {
     public ResponseEntity lagKontaktopplysning(@PathVariable("saksnummer") String saksnummer,
                                          @PathVariable("orgnr") String orgnr,
                                          @RequestBody KontaktInfoDto kontaktInfoDto) {
+        aksesskontroll.autoriserSakstilgang(saksnummer);
         Kontaktopplysning kontaktopplysning = kontaktopplysningService.lagEllerOppdaterKontaktopplysning(saksnummer, orgnr,
             kontaktInfoDto.kontaktorgnr(), kontaktInfoDto.kontaktnavn(), kontaktInfoDto.kontakttelefon());
         return ResponseEntity.ok(kontaktopplysning);
@@ -54,6 +59,7 @@ public class KontaktopplysningTjeneste {
     @DeleteMapping("/{saksnummer}/kontaktopplysninger/{orgnr}")
     @ApiOperation(value = "Sletter kontaktopplysning på en fagsak med gitt orgnummer")
     public ResponseEntity slettKontaktopplysning(@PathVariable("saksnummer") String saksnummer, @PathVariable("orgnr") String orgnr) {
+        aksesskontroll.autoriserSakstilgang(saksnummer);
         kontaktopplysningService.slettKontaktopplysning(saksnummer, orgnr);
         return ResponseEntity.ok().build();
     }

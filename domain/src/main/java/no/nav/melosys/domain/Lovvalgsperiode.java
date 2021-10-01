@@ -144,20 +144,37 @@ public class Lovvalgsperiode implements PeriodeOmLovvalg {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Lovvalgsperiode)) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         Lovvalgsperiode that = (Lovvalgsperiode) o;
-        return Objects.equals(this.behandlingsresultat, that.behandlingsresultat)
-            && Objects.equals(this.fom, that.fom);
+        return Objects.equals(id, that.id) &&
+            Objects.equals(behandlingsresultat, that.behandlingsresultat) &&
+            Objects.equals(fom, that.fom) &&
+            Objects.equals(tom, that.tom) &&
+            lovvalgsland == that.lovvalgsland &&
+            Objects.equals(bestemmelse, that.bestemmelse) &&
+            Objects.equals(tilleggsbestemmelse, that.tilleggsbestemmelse) &&
+            innvilgelsesresultat == that.innvilgelsesresultat &&
+            medlemskapstype == that.medlemskapstype &&
+            dekning == that.dekning &&
+            Objects.equals(medlPeriodeID, that.medlPeriodeID);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(behandlingsresultat, fom);
+        return Objects.hash(
+            id,
+            behandlingsresultat,
+            fom,
+            tom,
+            lovvalgsland,
+            bestemmelse,
+            tilleggsbestemmelse,
+            innvilgelsesresultat,
+            medlemskapstype,
+            dekning,
+            medlPeriodeID
+        );
     }
 
     @Override

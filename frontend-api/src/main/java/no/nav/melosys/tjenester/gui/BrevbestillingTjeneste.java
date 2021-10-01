@@ -17,6 +17,7 @@ import no.nav.melosys.service.brev.BrevbestillingService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.MuligeMottakereDto;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.brev.*;
 import no.nav.security.token.support.core.api.Protected;
@@ -41,17 +42,22 @@ public class BrevbestillingTjeneste {
     private final BrevbestillingService brevbestillingService;
     private final BehandlingService behandlingService;
     private final BrevmottakerService brevmottakerService;
+    private final Aksesskontroll aksesskontroll;
 
     @Autowired
-    public BrevbestillingTjeneste(BrevbestillingService brevbestillingService, BehandlingService behandlingService, BrevmottakerService brevmottakerService) {
+    public BrevbestillingTjeneste(BrevbestillingService brevbestillingService,
+                                  BehandlingService behandlingService,
+                                  BrevmottakerService brevmottakerService, Aksesskontroll aksesskontroll) {
         this.brevbestillingService = brevbestillingService;
         this.behandlingService = behandlingService;
         this.brevmottakerService = brevmottakerService;
+        this.aksesskontroll = aksesskontroll;
     }
 
     @GetMapping(value = "/tilgjengelige-maler/{behandlingID}", produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Henter alle tilgjengelige brevmaler for en behandling", response = BrevmalDto.class, responseContainer = "List")
     public List<BrevmalDto> hentTilgjengeligeMaler(@PathVariable long behandlingID) {
+        aksesskontroll.autoriser(behandlingID);
         return byggBrevmalListe(behandlingID);
     }
 
@@ -59,6 +65,7 @@ public class BrevbestillingTjeneste {
     @ApiOperation(value = "Henter alle mulige mottakere for valgt dokumenttype, og organisasjonsnummer dersom hovedmottaker ikke er bruker")
     public MuligeMottakereDto hentTilgjengeligeMottakere(@PathVariable long behandlingID,
                                                          @RequestBody HentMuligeMottakereRequestDto hentMuligeMottakereRequestDto) {
+        aksesskontroll.autoriser(behandlingID);
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         return brevbestillingService.hentMuligeMottakere(hentMuligeMottakereRequestDto.produserbartdokument(), behandling, hentMuligeMottakereRequestDto.orgnr());
     }
@@ -67,6 +74,7 @@ public class BrevbestillingTjeneste {
     @ApiOperation(value = "Produser utkast")
     public ResponseEntity<byte[]> produserUtkast(@PathVariable long behandlingID,
                                                  @RequestBody BrevbestillingDto brevbestillingDto) {
+        aksesskontroll.autoriser(behandlingID);
         BrevbestillingRequest brevbestillingRequest = brevbestillingDto.tilRequestBuilder()
             .medBestillersId(SubjectHandler.getInstance().getUserID())
             .build();
@@ -78,6 +86,7 @@ public class BrevbestillingTjeneste {
     @ApiOperation(value = "Produser brev gjennom melosys-dokgen")
     public void produserBrev(@PathVariable("behandlingID") long behandlingID,
                              @RequestBody BrevbestillingDto brevbestillingDto) {
+        aksesskontroll.autoriser(behandlingID);
         BrevbestillingRequest brevbestillingRequest = brevbestillingDto.tilRequestBuilder()
             .medBestillersId(SubjectHandler.getInstance().getUserID())
             .build();

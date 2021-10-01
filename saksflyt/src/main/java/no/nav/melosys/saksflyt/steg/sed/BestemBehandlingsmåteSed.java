@@ -9,6 +9,7 @@ import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.unntaksperiode.UnntaksperiodeGodkjenning;
 import no.nav.melosys.service.unntaksperiode.UnntaksperiodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +53,11 @@ public class BestemBehandlingsmåteSed implements StegBehandler {
         if (skalGodkjenneUnntaksperiode(behandling, behandlingsresultat)) {
             log.info("Behandling {} tema {} behandles automatisk", behandlingID, behandling.getTema());
             behandlingsresultatService.oppdaterBehandlingsMaate(behandlingID, Behandlingsmaate.AUTOMATISERT);
-            unntaksperiodeService.godkjennPeriode(behandling.getId(), false, null);
+            UnntaksperiodeGodkjenning unntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
+                .varsleUtland(false)
+                .fritekst(null)
+                .build();
+            unntaksperiodeService.godkjennPeriode(behandling.getId(), unntaksperiodeGodkjenning);
         } else {
             log.info("Oppretter oppgave for behandling {}", behandlingID);
             behandlingsresultatService.oppdaterBehandlingsMaate(behandlingID, Behandlingsmaate.DELVIS_AUTOMATISERT);

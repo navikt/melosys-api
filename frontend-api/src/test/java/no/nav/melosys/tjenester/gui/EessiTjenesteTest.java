@@ -17,6 +17,7 @@ import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedInformasjon;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.VedleggDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucBestillingDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.BucerTilknyttetBehandlingDto;
@@ -51,12 +52,14 @@ class EessiTjenesteTest extends JsonSchemaTestParent {
     private EessiService eessiService;
     @Mock
     private BehandlingService behandlingService;
+    @Mock
+    private Aksesskontroll aksesskontroll;
 
     private EessiTjeneste eessiTjeneste;
 
     @BeforeEach
     void setup() {
-        eessiTjeneste = new EessiTjeneste(eessiService, behandlingService);
+        eessiTjeneste = new EessiTjeneste(eessiService, behandlingService, aksesskontroll);
     }
 
     @Test
