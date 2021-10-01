@@ -17,7 +17,7 @@ final class VedtakKontroller extends AdresseUtlandKontroller {
 
     static Kontrollfeil bostedsadresseForA1(VedtakKontrollData kontrollData) {
         return PersonKontroller.harRegistrertBostedsadresse(kontrollData.getPersonDokument(), kontrollData.getBehandlingsgrunnlagData())
-            ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_BOSTEDSADRESSE);
+            ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
     }
 
     static Kontrollfeil overlappendeMedlemsperiode(VedtakKontrollData kontrollData) {
@@ -50,7 +50,7 @@ final class VedtakKontroller extends AdresseUtlandKontroller {
         return AdresseUtlandKontroller.foretakUtlandManglerFelter(kontrollData.getBehandlingsgrunnlagData());
     }
 
-    static Kontrollfeil adresseRegistrertA1(VedtakKontrollData kontrollData) {
+    static Kontrollfeil adresseRegistrertForA1(VedtakKontrollData kontrollData) {
         return PersonKontroller.harIkkeRegistrertAdresse(kontrollData.getPersonDokument(), kontrollData.getBehandlingsgrunnlagData())
             ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
     }

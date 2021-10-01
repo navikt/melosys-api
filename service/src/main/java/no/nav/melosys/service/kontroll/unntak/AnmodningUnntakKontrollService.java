@@ -78,7 +78,7 @@ public class AnmodningUnntakKontrollService extends AdresseUtlandKontroller {
 
     static Kontrollfeil bostedsadresseForOrienteringAnmodningUnntak(AnmodningUnntakKontrollData kontrollData) {
         return PersonKontroller.harRegistrertBostedsadresse(kontrollData.getPersonDokument(), kontrollData.getBehandlingsgrunnlagData())
-            ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_BOSTEDSADRESSE);
+            ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
     }
 
     static Kontrollfeil anmodningsperiodeManglerSluttdato(AnmodningUnntakKontrollData kontrollData) {

@@ -263,7 +263,7 @@ class A1MapperTest {
     }
 
     @Test
-    void mapTilBrevXML_brukerErStatsløsFraPDL_forventStatløsTekst() {
+    void mapTilBrevXML_brukerErStatsløs_forventStatløsTekst() {
         brevData.person = lagPersonopplysningerStatløs();
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
         assertThat(a1.getPerson().getStatsborgerskap()).isEqualTo(STATSLØS_TEKST);
@@ -271,7 +271,7 @@ class A1MapperTest {
 
 
     @Test
-    void mapTilBrevXML_bostedsadresserFraRegisterPDL_forventBostedsadresse() {
+    void mapTilBrevXML_bostedsadresserFraRegister_forventBostedsadresse() {
         brevData.person = lagPersonopplysninger();
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
         assertThat(a1.getPerson().getBostedsadresse().getGatenavn()).isEqualTo("gatenavnFraBostedsadresse");
@@ -283,14 +283,14 @@ class A1MapperTest {
     }
 
     @Test
-    void mapTilBrevXML_harFlereAdresserRegistrertFraPDL_forventUtfylltMidlertidigAdresseMedNyesteRegistrerteDato() {
+    void mapTilBrevXML_harFlereAdresserRegistrert_forventUtfylltMidlertidigAdresseMedNyesteRegistrerteDato() {
         brevData.person = lagPersonopplysninger();
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
         assertThat(a1.getPerson().getMidlertidigOppholdsadresse().getGatenavn()).isEqualTo("gatenavnOppholdsadresseFreg");
     }
 
     @Test
-    void mapTilBrevXML_harIngenAdresserRegistrertFraPDL_kastIkkeFunnetException() {
+    void mapTilBrevXML_harIngenAdresserRegistrert_kastIkkeFunnetException() {
         brevData.person = lagPersonopplysningerUtenAdresser();
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
         assertThat(a1.getPerson().getBostedsadresse().getGatenavn()).isNull();
