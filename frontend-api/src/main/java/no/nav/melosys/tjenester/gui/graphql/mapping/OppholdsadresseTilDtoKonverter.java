@@ -14,7 +14,7 @@ public final class OppholdsadresseTilDtoKonverter {
             StrukturertAdresseTilDtoKonverter.tilDto(oppholdsadresse.strukturertAdresse(), kodeverkService),
             oppholdsadresse.gyldigFraOgMed(),
             oppholdsadresse.gyldigTilOgMed(),
-            oppholdsadresse.master(),
+            MasterTilDtoKonverter.tilDto(oppholdsadresse.master()),
             oppholdsadresse.kilde(),
             oppholdsadresse.erHistorisk()
         );

@@ -6,7 +6,7 @@ import java.util.List;
 public record Metadata(String master, boolean historisk, List<Endring> endringer) {
     public LocalDateTime datoSistRegistrert() {
         return endringer.stream()
-            .filter(e -> !e.erOpphør())
+            .filter(Endring::erIkkeOpphør)
             .map(Endring::registrert)
             .max(LocalDateTime::compareTo)
             .orElse(LocalDateTime.MIN);
