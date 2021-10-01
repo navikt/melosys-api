@@ -63,7 +63,6 @@ class SedMottakTestIT {
 
     @Test
     void mottaSED_mottar3SED_blirBehandletEtterHverandre() {
-        System.out.println("hello");
         //Periode på 6 år - fører til et kontrolltreff
         var eessiMeldingA009 = melosysEessiMelding(
             BucType.LA_BUC_04, SedType.A009, new Periode(LocalDate.now(), LocalDate.now().plusYears(6)),
