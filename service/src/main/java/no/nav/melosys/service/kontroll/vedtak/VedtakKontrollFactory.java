@@ -25,7 +25,6 @@ class VedtakKontrollFactory {
     private static Set<Function<VedtakKontrollData, Kontrollfeil>> vedtakKontroller() {
         return Set.of(
             VedtakKontroller::adresseRegistrertForA1,
-            VedtakKontroller::bostedsadresseForA1,
             VedtakKontroller::overlappendeMedlemsperiode,
             VedtakKontroller::periodeOver24Mnd,
             VedtakKontroller::periodeManglerSluttdato,

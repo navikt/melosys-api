@@ -15,11 +15,6 @@ final class VedtakKontroller extends AdresseUtlandKontroller {
     private VedtakKontroller() {
     }
 
-    static Kontrollfeil bostedsadresseForA1(VedtakKontrollData kontrollData) {
-        return PersonKontroller.harRegistrertBostedsadresse(kontrollData.getPersonDokument(), kontrollData.getBehandlingsgrunnlagData())
-            ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
-    }
-
     static Kontrollfeil overlappendeMedlemsperiode(VedtakKontrollData kontrollData) {
         MedlemskapDokument medlemskapDokument = kontrollData.getMedlemskapDokument();
         Lovvalgsperiode lovvalgsperiode = kontrollData.getLovvalgsperiode();

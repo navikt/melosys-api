@@ -164,12 +164,4 @@ public record Personopplysninger(
             .map(Postadresse::lagPostadresse)
             .orElseThrow(() -> new IkkeFunnetException("Forventer bostedsadresse"));
     }
-
-    private StrukturertAdresse finnNyesteRegistrerteStrukturAdresse(Oppholdsadresse oppholdsadresse) {
-
-        return finnKontaktadresse()
-            .filter(kontaktadresse -> oppholdsadresse.registrertDato().isAfter(kontaktadresse.registrertDato()))
-            .map(Kontaktadresse::strukturertAdresse)
-            .orElse(oppholdsadresse.strukturertAdresse());
-    }
 }

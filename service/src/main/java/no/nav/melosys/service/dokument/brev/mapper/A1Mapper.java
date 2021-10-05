@@ -96,9 +96,7 @@ class A1Mapper {
     }
 
     private MidlertidigOppholdsadresseType mapMidlertidigOppholdsadresse(Persondata persondata) {
-
         Optional<StrukturertAdresse> strukturertAdresse = hentNyesteRegistrerteStrukturAdresse(persondata);
-
         return lagMidlertidigOppholdsadresse(strukturertAdresse.orElseGet(() -> persondata.finnKontaktadresse()
             .map(Kontaktadresse::strukturertAdresse)
             .orElse(persondata.finnOppholdsadresse()
