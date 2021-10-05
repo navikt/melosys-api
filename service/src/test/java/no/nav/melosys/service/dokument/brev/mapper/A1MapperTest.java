@@ -290,6 +290,20 @@ class A1MapperTest {
     }
 
     @Test
+    void mapTilBrevXML_harIngenOppholdsadresse_forventUtfylltMidlertidigAdresseMedKontaktAdresse() {
+        brevData.person = lagPersoopplysningerUtenOppholdsadresse();
+        A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
+        assertThat(a1.getPerson().getMidlertidigOppholdsadresse().getGatenavn()).isEqualTo("gatenavnKontaktadresseFreg");
+    }
+
+    @Test
+    void mapTilBrevXML_harIngenKontaktadresse_forventUtfylltMidlertidigAdresseMedOppholdsadresse() {
+        brevData.person = lagPersoopplysningerUtenKontaktadresse();
+        A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
+        assertThat(a1.getPerson().getMidlertidigOppholdsadresse().getGatenavn()).isEqualTo("gatenavnOppholdsadresseFreg");
+    }
+
+    @Test
     void mapTilBrevXML_harIngenAdresserRegistrert_kastIkkeFunnetException() {
         brevData.person = lagPersonopplysningerUtenAdresser();
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);

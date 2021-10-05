@@ -99,11 +99,13 @@ class A1Mapper {
         Optional<StrukturertAdresse> strukturertAdresse = hentNyesteRegistrerteStrukturAdresse(persondata);
         return lagMidlertidigOppholdsadresse(strukturertAdresse.orElseGet(() -> persondata.finnKontaktadresse()
             .map(Kontaktadresse::strukturertAdresse)
-            .orElse(persondata.finnOppholdsadresse()
-                .map(Oppholdsadresse::strukturertAdresse)
-                .orElse(new StrukturertAdresse())
-            )
-        ));
+            .orElse(hentOppholdsadresseEllerNy(persondata))));
+    }
+
+    private StrukturertAdresse hentOppholdsadresseEllerNy(Persondata persondata) {
+        return persondata.finnOppholdsadresse()
+            .map(Oppholdsadresse::strukturertAdresse)
+            .orElse(new StrukturertAdresse());
     }
 
     private static String mapStatsborgerskap(Set<Land> statsborgerskap) {
