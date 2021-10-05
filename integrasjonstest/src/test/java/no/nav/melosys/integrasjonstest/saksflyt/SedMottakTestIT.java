@@ -25,7 +25,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,9 +45,16 @@ class SedMottakTestIT {
     private EessiMeldingConsumer eessiMeldingConsumer;
 
     @Autowired
+    @Qualifier("melosysEessiMelding")
+    private KafkaTemplate<String,MelosysEessiMelding> melosysEessiMeldingKafkaTemplate;
+
+    @Autowired
     private ProsessinstansRepository prosessinstansRepository;
 
     private String rinaSaksnummer;
+
+    @Value("${kafka.eessi.topic}")
+    String kafkaTopic;
 
     @BeforeEach
     void setup() {
@@ -67,9 +76,10 @@ class SedMottakTestIT {
             BucType.LA_BUC_04, SedType.X007, null, null, opprettEessiJournalpost(SedType.X007)
         );
 
-        eessiMeldingConsumer.mottaMelding(new ConsumerRecord<>("",0,0, "", eessiMeldingA009));
-        eessiMeldingConsumer.mottaMelding(new ConsumerRecord<>("", 0 ,0, "", eessiMeldingX001));
-        eessiMeldingConsumer.mottaMelding(new ConsumerRecord<>("", 0 ,0, "", eessiMeldingX007));
+        melosysEessiMeldingKafkaTemplate.send(kafkaTopic,eessiMeldingA009);
+        melosysEessiMeldingKafkaTemplate.send(kafkaTopic,eessiMeldingX001);
+        melosysEessiMeldingKafkaTemplate.send(kafkaTopic,eessiMeldingX007);
+
 
         await().timeout(Duration.ofSeconds(20)).pollInterval(Duration.ofSeconds(3))
             .until(() -> prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(List.of(ProsessStatus.FERDIG), rinaSaksnummer).isEmpty());
