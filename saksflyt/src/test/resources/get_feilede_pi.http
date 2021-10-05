@@ -1,6 +1,6 @@
 // @no-cookie-jar
 // @no-log
-GET https://melosys-api.intern.nav.no/admin/prosessinstanser/feilede
+GET https://{{melosys-api-url}}/admin/prosessinstanser/feilede
 Cache-Control: no-cache
 Content-Type: application/json
 Accept: application/json

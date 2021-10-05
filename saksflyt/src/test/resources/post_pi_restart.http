@@ -1,6 +1,6 @@
 // @no-cookie-jar
 // @no-log
-POST https://melosys-api.intern.nav.no/admin/prosessinstanser/restart
+POST https://{{melosys-api-url}}/admin/prosessinstanser/restart
 Cache-Control: no-cache
 Content-Type: application/json
 Accept: application/json
