@@ -4,10 +4,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 
 import no.finn.unleash.FakeUnleash;
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
@@ -16,58 +16,37 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Representerer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
-import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static java.util.Collections.*;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.MYNDIGHET;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
+import static no.nav.melosys.service.dokument.DokgenTestData.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DokgenMalMapperTest {
-    public static final String ADRESSELINJE_1_BRUKER = "Andebygata 1";
     public static final String FORRETNINGSADRESSE_ORG = "Storgata 1";
-    public static final String KONTAKT_NAVN = "Fetter Anton";
-    public static final String NAVN_ORG = "Advokatene AS";
-    public static final String POSTBOKS_ORG = "POSTBOKS 200";
-    public static final String POSTNR_BRUKER = "9999";
-    public static final String POSTNR_ORG = "9990";
-    public static final String SAMMENSATT_NAVN = "Donald Duck";
-
-    @Mock
-    private BehandlingsresultatService mockBehandlingsresultatService;
-    @Mock
-    private EregFasade mockEregFasade;
-    @Mock
-    private KodeverkService mockKodeverkService;
-    @Mock
-    private PersondataFasade mockPersondataFasade;
 
     @Mock
     private InnvilgelseFtrlMapper mockInnvilgelseFtrlMapper;
+
+    @Mock
+    private DokgenMapperUtils mockDokgenMapperUtils;
 
     private final FakeUnleash fakeUnleash = new FakeUnleash();
 
@@ -75,17 +54,16 @@ class DokgenMalMapperTest {
 
     @BeforeEach
     void init() {
-        dokgenMalMapper = new DokgenMalMapper(mockBehandlingsresultatService,
-            mockEregFasade, mockKodeverkService, mockPersondataFasade, fakeUnleash, mockInnvilgelseFtrlMapper);
+        dokgenMalMapper = new DokgenMalMapper(mockDokgenMapperUtils, mockInnvilgelseFtrlMapper);
     }
 
     @Test
     void feilerNårProduserbartDokumentIkkeErStøttet() {
-        when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
+        when(mockDokgenMapperUtils.hentPersondata(any())).thenReturn(lagPersonDokument());
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(ATTEST_A1)
-            .medBehandling(lagBehandling(lagFagsak()))
+            .medBehandling(lagBehandling())
             .build();
 
         assertThatThrownBy(() -> dokgenMalMapper.mapBehandling(brevbestilling))
@@ -95,10 +73,10 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeMedBrukerAdresse() {
-        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
-        when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
+        when(mockDokgenMapperUtils.hentPoststed(any())).thenReturn("Andeby");
+        when(mockDokgenMapperUtils.hentPersondata(any())).thenReturn(lagPersonDokument());
 
-        Behandling behandling = lagBehandling(lagFagsak());
+        Behandling behandling = lagBehandling();
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
@@ -115,8 +93,8 @@ class DokgenMalMapperTest {
                 DokgenDto::getNavnMottaker,
                 DokgenDto::getPostnr
             ).containsExactly(
-                SAMMENSATT_NAVN,
-                SAMMENSATT_NAVN,
+                SAMMENSATT_NAVN_BRUKER,
+                SAMMENSATT_NAVN_BRUKER,
                 POSTNR_BRUKER
             );
         assertThat(dokgenDto.getAdresselinjer()).contains(ADRESSELINJE_1_BRUKER);
@@ -125,10 +103,10 @@ class DokgenMalMapperTest {
     @Test
     void mapping_persondataFraPdl_ok() {
         fakeUnleash.enable("melosys.brev.adresser.pdl");
-        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
-        when(mockPersondataFasade.hentPerson(anyString())).thenReturn((Persondata) lagPersonopplysning().getDokument());
+        when(mockDokgenMapperUtils.hentPoststed(any())).thenReturn("Andeby");
+        when(mockDokgenMapperUtils.hentPersondata(any())).thenReturn(lagPersonDokument());
 
-        Behandling behandling = lagBehandling(lagFagsak());
+        Behandling behandling = lagBehandling();
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
@@ -145,8 +123,8 @@ class DokgenMalMapperTest {
                 DokgenDto::getNavnMottaker,
                 DokgenDto::getPostnr
             ).containsExactly(
-                SAMMENSATT_NAVN,
-                SAMMENSATT_NAVN,
+                SAMMENSATT_NAVN_BRUKER,
+                SAMMENSATT_NAVN_BRUKER,
                 POSTNR_BRUKER
             );
         assertThat(dokgenDto.getAdresselinjer()).contains(ADRESSELINJE_1_BRUKER);
@@ -155,10 +133,10 @@ class DokgenMalMapperTest {
 
     @Test
     void mapping_avsenderMyndighet_ok() {
-        when(mockKodeverkService.dekod(any(), eq("FI"))).thenReturn("Finland");
-        when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
+        when(mockDokgenMapperUtils.hentLandnavn("FI")).thenReturn("Finland");
+        when(mockDokgenMapperUtils.hentPersondata(any())).thenReturn(lagPersonDokument());
 
-        Behandling behandling = lagBehandling(lagFagsak());
+        Behandling behandling = lagBehandling();
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
@@ -185,10 +163,10 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeMedFullmektigAdresse() {
-        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
-        when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
+        when(mockDokgenMapperUtils.hentPoststed(any())).thenReturn("Andeby");
+        when(mockDokgenMapperUtils.hentPersondata(any())).thenReturn(lagPersonDokument());
 
-        Behandling behandling = lagBehandling(lagFagsak());
+        Behandling behandling = lagBehandling();
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
@@ -206,7 +184,7 @@ class DokgenMalMapperTest {
                 DokgenDto::getNavnMottaker,
                 DokgenDto::getPostnr
             ).containsExactly(
-                SAMMENSATT_NAVN,
+                SAMMENSATT_NAVN_BRUKER,
                 NAVN_ORG,
                 POSTNR_ORG
             );
@@ -215,10 +193,10 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeMedFullmektigForretningsAdresse() {
-        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
-        when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
+        when(mockDokgenMapperUtils.hentPoststed(any())).thenReturn("Andeby");
+        when(mockDokgenMapperUtils.hentPersondata(any())).thenReturn(lagPersonDokument());
 
-        Behandling behandling = lagBehandling(lagFagsak());
+        Behandling behandling = lagBehandling();
 
         OrganisasjonDokument org = lagOrg();
         org.getOrganisasjonDetaljer().forretningsadresse = singletonList(lagOrgForretningsadresse());
@@ -240,7 +218,7 @@ class DokgenMalMapperTest {
                 DokgenDto::getNavnMottaker,
                 DokgenDto::getPostnr
             ).containsExactly(
-                SAMMENSATT_NAVN,
+                SAMMENSATT_NAVN_BRUKER,
                 NAVN_ORG,
                 POSTNR_ORG
             );
@@ -249,10 +227,10 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeMedFullmektigMedKontaktpersonAdresse() {
-        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
-        when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
+        when(mockDokgenMapperUtils.hentPoststed(any())).thenReturn("Andeby");
+        when(mockDokgenMapperUtils.hentPersondata(any())).thenReturn(lagPersonDokument());
 
-        Behandling behandling = lagBehandling(lagFagsak());
+        Behandling behandling = lagBehandling();
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
@@ -271,7 +249,7 @@ class DokgenMalMapperTest {
                 DokgenDto::getNavnMottaker,
                 DokgenDto::getPostnr
             ).containsExactly(
-                SAMMENSATT_NAVN,
+                SAMMENSATT_NAVN_BRUKER,
                 NAVN_ORG,
                 POSTNR_ORG
             );
@@ -280,8 +258,8 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeMangelbrevTilBruker() {
-        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
-        when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
+        when(mockDokgenMapperUtils.hentPoststed(any())).thenReturn("Andeby");
+        when(mockDokgenMapperUtils.hentPersondata(any())).thenReturn(lagPersonDokument());
 
         Behandling behandling = lagBehandling(lagFagsak(true));
 
@@ -314,9 +292,9 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeMangelbrevTilArbeidsgiver() {
-        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
-        when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
-        when(mockEregFasade.hentOrganisasjonNavn(any())).thenReturn("Fullmektig AS");
+        when(mockDokgenMapperUtils.hentPoststed(any())).thenReturn("Andeby");
+        when(mockDokgenMapperUtils.hentPersondata(any())).thenReturn(lagPersonDokument());
+        when(mockDokgenMapperUtils.hentFullmektigNavn(any(), eq(Representerer.BRUKER))).thenReturn("Fullmektig AS");
 
         Behandling behandling = lagBehandling(lagFagsak(true));
 
@@ -351,8 +329,8 @@ class DokgenMalMapperTest {
 
     @Test
     void skalMappeInnvilgelsesbrevTilBruker() {
-        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
-        when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
+        when(mockDokgenMapperUtils.hentPoststed(any())).thenReturn("Andeby");
+        when(mockDokgenMapperUtils.hentPersondata(any())).thenReturn(lagPersonDokument());
         when(mockInnvilgelseFtrlMapper.map(any())).thenReturn(lagInnvilgelseFtrl());
 
         Behandling behandling = lagBehandling(lagFagsak(true));
@@ -374,7 +352,7 @@ class DokgenMalMapperTest {
         return new InnvilgelseFtrl(
             new InnvilgelseBrevbestilling.Builder()
                 .medInnledningFritekst("Innledning")
-                .medBehandling(lagBehandling(lagFagsak()))
+                .medBehandling(lagBehandling())
                 .medPersonDokument(lagPersonDokument())
                 .build(),
             null,
@@ -398,97 +376,11 @@ class DokgenMalMapperTest {
         );
     }
 
-    private Fagsak lagFagsak() {
-        return lagFagsak(false);
-    }
-
-    private Fagsak lagFagsak(boolean medRepresentant) {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setRegistrertDato(Instant.now());
-        fagsak.setBehandlinger(lagBehandlinger());
-        fagsak.setType(Sakstyper.EU_EOS);
-        fagsak.setEndretAv("L12345");
-        Aktoer bruker = new Aktoer();
-        bruker.setRolle(BRUKER);
-        bruker.setAktørId("aktørId");
-        fagsak.getAktører().add(bruker);
-        if (medRepresentant) {
-            Aktoer representant = new Aktoer();
-            representant.setRolle(Aktoersroller.REPRESENTANT);
-            representant.setRepresenterer(Representerer.BRUKER);
-            fagsak.getAktører().add(representant);
-        }
-        return fagsak;
-    }
-
-    private Behandling lagBehandling(Fagsak fagsak) {
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setSaksopplysninger(singleton(lagPersonopplysning()));
-        behandling.setFagsak(fagsak);
-        return behandling;
-    }
-
-    private List<Behandling> lagBehandlinger() {
-        Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.SOEKNAD);
-        return singletonList(behandling);
-    }
-
-    private Saksopplysning lagPersonopplysning() {
-        Saksopplysning saksopplysning = new Saksopplysning();
-        saksopplysning.setType(SaksopplysningType.PERSOPL);
-        saksopplysning.setDokument(lagPersonDokument());
-        return saksopplysning;
-    }
-
-    private PersonDokument lagPersonDokument() {
-        PersonDokument personDokument = new PersonDokument();
-        personDokument.setFnr("99887766554");
-        personDokument.setSammensattNavn(SAMMENSATT_NAVN);
-        personDokument.setGjeldendePostadresse(lagAdresse());
-        return personDokument;
-    }
-
-    private UstrukturertAdresse lagAdresse() {
-        UstrukturertAdresse ustrukturertAdresse = new UstrukturertAdresse();
-        ustrukturertAdresse.adresselinje1 = ADRESSELINJE_1_BRUKER;
-        ustrukturertAdresse.postnr = POSTNR_BRUKER;
-        return ustrukturertAdresse;
-    }
-
-    private OrganisasjonDokument lagOrg() {
-        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
-        organisasjonDokument.setNavn(NAVN_ORG);
-        organisasjonDokument.setOrganisasjonDetaljer(lagOrgDetaljer());
-        return organisasjonDokument;
-    }
-
-    private OrganisasjonsDetaljer lagOrgDetaljer() {
-        OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
-        organisasjonsDetaljer.postadresse = singletonList(lagOrgAdresse());
-        return organisasjonsDetaljer;
-    }
-
-    private GeografiskAdresse lagOrgAdresse() {
-        SemistrukturertAdresse semistrukturertAdresse = new SemistrukturertAdresse();
-        semistrukturertAdresse.setAdresselinje1(POSTBOKS_ORG);
-        semistrukturertAdresse.setPostnr(POSTNR_ORG);
-        semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(2), LocalDate.now().plusDays(2)));
-        return semistrukturertAdresse;
-    }
-
     private GeografiskAdresse lagOrgForretningsadresse() {
         SemistrukturertAdresse semistrukturertAdresse = new SemistrukturertAdresse();
         semistrukturertAdresse.setAdresselinje1(FORRETNINGSADRESSE_ORG);
         semistrukturertAdresse.setPostnr(POSTNR_ORG);
         semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(2), LocalDate.now().plusDays(2)));
         return semistrukturertAdresse;
-    }
-
-    private Kontaktopplysning lagKontaktOpplysning() {
-        Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
-        kontaktopplysning.setKontaktNavn(KONTAKT_NAVN);
-        return kontaktopplysning;
     }
 }
