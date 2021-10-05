@@ -77,13 +77,7 @@ class BrevDataByggerA1Test {
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong()))
             .thenReturn(avklarteOrganisasjoner);
 
-        StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
-        oppgittAdresse.setGatenavn("HjemmeGata");
-        oppgittAdresse.setHusnummerEtasjeLeilighet("23B");
-        oppgittAdresse.setPostnummer("0165");
-        oppgittAdresse.setPoststed("Oslo");
-        oppgittAdresse.setLandkode(Landkoder.NO.getKode());
-
+        StrukturertAdresse oppgittAdresse = lagStrukturertAdresse();
         søknad = new Soeknad();
         søknad.bosted.oppgittAdresse = oppgittAdresse;
 

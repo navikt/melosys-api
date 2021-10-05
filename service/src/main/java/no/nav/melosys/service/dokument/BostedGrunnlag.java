@@ -45,10 +45,12 @@ public class BostedGrunnlag {
             || StringUtils.isEmpty(bostedsadresseFraRegister.strukturertAdresse().getLandkode())) {
             return Optional.empty();
         }
+
         final var strukturertAdresse = bostedsadresseFraRegister.strukturertAdresse();
         if (Master.TPS.name().equals(bostedsadresseFraRegister.kilde())) {
             strukturertAdresse.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, strukturertAdresse.getPostnummer()));
         }
+
         return Optional.of(strukturertAdresse);
     }
 }

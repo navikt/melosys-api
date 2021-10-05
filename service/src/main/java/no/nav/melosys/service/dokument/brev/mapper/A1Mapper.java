@@ -1,10 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -20,6 +17,9 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.domain.person.adresse.Bostedsadresse;
+import no.nav.melosys.domain.person.adresse.Kontaktadresse;
+import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 import no.nav.melosys.domain.util.LandkoderUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
@@ -28,7 +28,6 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.IkkeFysiskArbeids
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 
-import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagBostedsadresse;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagPersonnavn;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
@@ -38,6 +37,7 @@ class A1Mapper {
     private static final int ANTALL_PÅKREVDE_FELTER_I_LISTE_5_2 = 13;
     static final int MAKS_ANTALL_TEGN_PER_LINJE_5_2 = 70;
     static final String STATSLØS_TEKST = "Stateless";
+    static final String FLERE_UKJENTE_ELLER_IKKE_OPPGITT_LAND = "Various EEA-countries/Switzerland";
 
     private BrevDataA1 brevData;
 
@@ -82,8 +82,30 @@ class A1Mapper {
             throw new TekniskException("Konverteringsfeil ved konvertering av fødselsdato", e);
         }
 
-        person.setBostedsadresse(lagBostedsadresse(brevData.bostedsadresse));
+        person.setBostedsadresse(mapBostedAdresse(persondata));
+        person.setMidlertidigOppholdsadresse(mapMidlertidigOppholdsadresse(persondata));
+
         return person;
+    }
+
+    private BostedsadresseType mapBostedAdresse(Persondata persondata) {
+        if (persondata.finnBostedsadresse().isPresent()) {
+            return lagBostedsadresse(persondata.finnBostedsadresse().get());
+        }
+        return new BostedsadresseType();
+    }
+
+    private MidlertidigOppholdsadresseType mapMidlertidigOppholdsadresse(Persondata persondata) {
+        Optional<StrukturertAdresse> strukturertAdresse = hentNyesteRegistrerteStrukturAdresse(persondata);
+        return lagMidlertidigOppholdsadresse(strukturertAdresse.orElseGet(() -> persondata.finnKontaktadresse()
+            .map(Kontaktadresse::strukturertAdresse)
+            .orElse(hentOppholdsadresseEllerNy(persondata))));
+    }
+
+    private StrukturertAdresse hentOppholdsadresseEllerNy(Persondata persondata) {
+        return persondata.finnOppholdsadresse()
+            .map(Oppholdsadresse::strukturertAdresse)
+            .orElse(new StrukturertAdresse());
     }
 
     private static String mapStatsborgerskap(Set<Land> statsborgerskap) {
@@ -189,7 +211,7 @@ class A1Mapper {
     }
 
     private static List<String> lagAdresselinjeForUkjentEllerIkkeOppgittArbeidssted() {
-        return brekkTekstTilListe("Various EEA-countries/Switzerland");
+        return brekkTekstTilListe(FLERE_UKJENTE_ELLER_IKKE_OPPGITT_LAND);
     }
 
     private static List<String> brekkTekstTilListe(String tekst) {
@@ -228,6 +250,42 @@ class A1Mapper {
             .filter(a -> !arbeidslandMedArbeidsted.contains(a.getKode()))
             .collect(Collectors.toSet());
     }
+
+    private Optional<StrukturertAdresse> sammenlignRegistrerteDatoer(Kontaktadresse kontaktadresse, Oppholdsadresse oppholdsadresse) {
+        return kontaktadresse.registrertDato().isAfter((oppholdsadresse.registrertDato())) ?
+            Optional.of(kontaktadresse.strukturertAdresse()) : Optional.of(oppholdsadresse.strukturertAdresse());
+    }
+
+    private Optional<StrukturertAdresse> hentNyesteRegistrerteStrukturAdresse(Persondata persondata) {
+        return persondata.finnOppholdsadresse()
+            .map(oppholdsadresse -> persondata.finnKontaktadresse()
+                .map(kontaktadresse -> sammenlignRegistrerteDatoer(kontaktadresse, oppholdsadresse)))
+            .flatMap(strukturertAdresse -> strukturertAdresse.orElse(Optional.empty()));
+    }
+
+    private MidlertidigOppholdsadresseType lagMidlertidigOppholdsadresse(StrukturertAdresse strukturertAdresse) {
+        return MidlertidigOppholdsadresseType.builder()
+            .withGatenavn(strukturertAdresse.getGatenavn())
+            .withHusnummer(strukturertAdresse.getHusnummerEtasjeLeilighet())
+            .withPostnr(strukturertAdresse.getPostnummer())
+            .withPoststed(strukturertAdresse.getPoststed())
+            .withRegion(strukturertAdresse.getRegion())
+            .withLandkode(strukturertAdresse.getLandkode())
+            .build();
+    }
+
+    private BostedsadresseType lagBostedsadresse(Bostedsadresse bosted) {
+        final var strukturertadresse = bosted.strukturertAdresse();
+        return BostedsadresseType.builder()
+            .withGatenavn(StringUtils.isEmpty(strukturertadresse.getGatenavn()) ? " " : strukturertadresse.getGatenavn())
+            .withHusnummer(strukturertadresse.getHusnummerEtasjeLeilighet())
+            .withPostnr(strukturertadresse.getPostnummer())
+            .withPoststed(strukturertadresse.getPoststed())
+            .withRegion(strukturertadresse.getRegion())
+            .withLandkode(strukturertadresse.getLandkode())
+            .build();
+    }
+
 
     private static AdresseType lagTomAdresseType() {
         AdresseType adresseType = new AdresseType();

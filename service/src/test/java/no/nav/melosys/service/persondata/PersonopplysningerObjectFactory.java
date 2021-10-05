@@ -18,22 +18,40 @@ import static java.util.Collections.emptySet;
 
 public class PersonopplysningerObjectFactory {
     public static Personopplysninger lagPersonopplysninger() {
-        return lagPersonopplysninger(false, false);
+        return lagPersonopplysninger(false, false, false, false);
     }
 
     public static Personopplysninger lagPersonopplysningerStatløs() {
-        return lagPersonopplysninger(true, false);
+        return lagPersonopplysninger(true, false, false, false);
     }
 
     public static Personopplysninger lagPersonopplysningerUtenBostedsadresse() {
-        return lagPersonopplysninger(false, true);
+        return lagPersonopplysninger(false, true, false, false);
     }
 
-    private static Personopplysninger lagPersonopplysninger(boolean erStatløs, boolean erUtenBostedsadresse) {
+    public static Personopplysninger lagPersoopplysningerUtenOppholdsadresse() {
+        return lagPersonopplysninger(false, false, true, false);
+
+    }
+
+    public static Personopplysninger lagPersoopplysningerUtenKontaktadresse() {
+        return lagPersonopplysninger(false, false, false, true);
+    }
+
+    private static Personopplysninger lagPersonopplysninger(
+        boolean erStatløs,
+        boolean erUtenBostedsadresse,
+        boolean erUtenOppholdsadresse,
+        boolean erUtenKontaktadresse) {
         return new Personopplysninger(emptyList(), erUtenBostedsadresse ? null : lagBostedsadresse(), null, emptySet(),
-            lagFødesel(), null, lagKjønn(), lagKontaktadresser(), lagNavn(), lagOppholdsadresser(),
+            lagFødesel(), null, lagKjønn(), erUtenKontaktadresse ? emptySet() : lagKontaktadresser(), lagNavn(), erUtenOppholdsadresse ? emptySet() : lagOppholdsadresser(),
             lagStatsborgerskap(erStatløs));
 
+    }
+
+    public static Personopplysninger lagPersonopplysningerUtenAdresser() {
+        return new Personopplysninger(emptyList(), null, null, emptySet(), lagFødesel(), null,
+            lagKjønn(), emptyList(), lagNavn(), emptyList(), lagStatsborgerskap(false));
     }
 
     private static Foedsel lagFødesel() {
@@ -45,7 +63,7 @@ public class PersonopplysningerObjectFactory {
     }
 
     private static Bostedsadresse lagBostedsadresse() {
-        return new Bostedsadresse(new StrukturertAdresse("gatenavnFraBostedsadresse", null, null, null, null, "NO"),
+        return new Bostedsadresse(new StrukturertAdresse("gatenavnFraBostedsadresse", "3", "1234", "Oslo", "Norge", "NO"),
             null, null, null, null, null, false);
     }
 

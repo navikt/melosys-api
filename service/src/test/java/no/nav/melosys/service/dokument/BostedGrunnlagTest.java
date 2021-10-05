@@ -10,6 +10,7 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.mock;
@@ -76,5 +77,21 @@ class BostedGrunnlagTest {
     void finnBostedsadresse_ingenAdresse_forventTomOptional() {
         Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnBostedsadresse();
         assertThat(strukturertAdresse).isEmpty();
+    }
+
+    @Test
+    void finnBostedsadresse_bostedsadresseFraPersonOpplysninger_forventBostedsadresse() {
+        final var personopplysninger = lagPersonopplysninger();
+        final var bostedGrunnlag = new BostedGrunnlag(null, personopplysninger.bostedsadresse(), kodeverkService);
+
+        Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnBostedsadresse();
+
+        assertThat(strukturertAdresse).isPresent();
+        StrukturertAdresse adresse = strukturertAdresse.get();
+        assertThat(adresse.getGatenavn()).isEqualTo("gatenavnFraBostedsadresse");
+        assertThat(adresse.getLandkode()).isEqualTo("NO");
+        assertThat(adresse.getPostnummer()).isEqualTo("1234");
+        assertThat(adresse.getPoststed()).isEqualTo("Oslo");
+        assertThat(adresse.getRegion()).isEqualTo("Norge");
     }
 }
