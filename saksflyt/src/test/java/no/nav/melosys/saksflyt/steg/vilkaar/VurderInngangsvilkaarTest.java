@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -64,12 +65,13 @@ class VurderInngangsvilkaarTest {
         when(inngangsvilkaarService.vurderOgLagreInngangsvilkår(
             eq(behandlingID),
             eq(behandlingsgrunnlagData.soeknadsland.landkoder),
+            eq(false),
             eq(behandlingsgrunnlagData.periode)
         )).thenReturn(true);
 
         vurderInngangsvilkaar.utfør(prosessinstans);
 
-        verify(inngangsvilkaarService).vurderOgLagreInngangsvilkår(anyLong(), any(), any());
+        verify(inngangsvilkaarService).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any());
     }
 
     @Test
@@ -81,7 +83,7 @@ class VurderInngangsvilkaarTest {
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
 
         vurderInngangsvilkaar.utfør(prosessinstans);
-        verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), any());
+        verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any());
     }
 
     @Test
@@ -92,6 +94,6 @@ class VurderInngangsvilkaarTest {
         behandling.getFagsak().setType(Sakstyper.FTRL);
 
         vurderInngangsvilkaar.utfør(prosessinstans);
-        verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), any());
+        verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any());
     }
 }

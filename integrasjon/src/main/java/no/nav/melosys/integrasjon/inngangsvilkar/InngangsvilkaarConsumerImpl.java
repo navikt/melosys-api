@@ -21,9 +21,15 @@ public class InngangsvilkaarConsumerImpl implements InngangsvilkaarConsumer, Jso
 
     public InngangsvilkarResponse vurderInngangsvilkår(Set<Land> brukersStatsborgerskap,
                                                        Set<String> søknadsland,
+                                                       boolean erUkjenteEllerAlleEosLand,
                                                        ErPeriode søknadsperiode) {
-            var request = new VurderInngangsvilkaarRequest(brukersStatsborgerskap.stream().map(Land::getKode).collect(Collectors.toSet()),
-                søknadsland, søknadsperiode);
-            return restTemplate.postForObject("/inngangsvilkaar", new HttpEntity<>(request, getDefaultHeaders()), InngangsvilkarResponse.class);
+        var request = new VurderInngangsvilkaarRequest(
+            brukersStatsborgerskap.stream().map(Land::getKode).collect(Collectors.toSet()),
+            søknadsland,
+            erUkjenteEllerAlleEosLand,
+            søknadsperiode
+        );
+
+        return restTemplate.postForObject("/inngangsvilkaar", new HttpEntity<>(request, getDefaultHeaders()), InngangsvilkarResponse.class);
     }
 }

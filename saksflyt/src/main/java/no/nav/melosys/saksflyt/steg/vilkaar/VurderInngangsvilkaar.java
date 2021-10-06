@@ -37,9 +37,10 @@ public class VurderInngangsvilkaar implements StegBehandler {
 
         if (behandling.getFagsak().getType() == Sakstyper.EU_EOS && behandling.kanResultereIVedtak()) {
             var søknadsland = behandling.finnSøknadsLand();
+            var erUkjenteEllerAlleEosLand = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand;
             var periode = behandling.hentPeriode();
 
-            boolean kvalifisererForEF_883_2004  = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, periode);
+            boolean kvalifisererForEF_883_2004 = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, erUkjenteEllerAlleEosLand, periode);
             log.info("Inngangsvilkår vurdert for behandling {}. kvalifisererForEF_883_2004: {}", behandlingID, kvalifisererForEF_883_2004);
         } else {
             log.info("Inngangsvilkår ikke vurdert for behandling {} med tema {}", behandlingID, behandling.getTema());

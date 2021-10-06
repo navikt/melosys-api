@@ -101,11 +101,11 @@ class OppfriskSaksopplysningerServiceTest {
         behandlingsresultat.getVilkaarsresultater().add(vilkaarsresultat);
 
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(inngangsvilkaarService.vurderOgLagreInngangsvilkår(anyLong(), anyList(), any(Periode.class))).thenReturn(true);
+        when(inngangsvilkaarService.vurderOgLagreInngangsvilkår(anyLong(), anyList(), anyBoolean(), any(Periode.class))).thenReturn(true);
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
 
-        verify(inngangsvilkaarService).vurderOgLagreInngangsvilkår(eq(behandling.getId()), eq(List.of("SE")), any(Periode.class));
+        verify(inngangsvilkaarService).vurderOgLagreInngangsvilkår(eq(behandling.getId()), eq(List.of("SE")), eq(false), any(Periode.class));
     }
 
     @Test
