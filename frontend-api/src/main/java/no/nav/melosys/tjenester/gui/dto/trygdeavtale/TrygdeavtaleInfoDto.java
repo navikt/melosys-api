@@ -30,7 +30,7 @@ public record TrygdeavtaleInfoDto(String aktoerId, String behandlingstema,
     public static List<FamilieDto> filtrerOgMapFamilie(List<MedfolgendeFamilie> familie, Predicate<MedfolgendeFamilie> filterfunksjon) {
         return familie.stream()
             .filter(filterfunksjon)
-            .map(familiemedlem -> new FamilieDto(familiemedlem.uuid, familiemedlem.navn))
+            .map(familiemedlem -> new FamilieDto(familiemedlem.uuid, familiemedlem.fnr, familiemedlem.navn))
             .toList();
     }
 }
