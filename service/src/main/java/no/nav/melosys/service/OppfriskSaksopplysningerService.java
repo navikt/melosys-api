@@ -81,7 +81,12 @@ public class OppfriskSaksopplysningerService {
         if (behandling.kanResultereIVedtak()
             && behandling.getFagsak().getType() == Sakstyper.EU_EOS
             && !inngangsvilkaarService.oppfyllervurderingEF_883_2004(behandlingID)) {
-            inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, behandling.finnSøknadsLand(), periode);
+            inngangsvilkaarService.vurderOgLagreInngangsvilkår(
+                behandlingID,
+                behandling.finnSøknadsLand(),
+                behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand,
+                periode
+            );
         }
     }
 }

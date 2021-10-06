@@ -64,8 +64,9 @@ public class InngangsvilkaarService {
 
     public boolean vurderOgLagreInngangsvilkår(long behandlingID,
                                                Collection<String> søknadsland,
+                                               boolean erUkjenteEllerAlleEosLand,
                                                ErPeriode søknadsperiode) {
-        final InngangsvilkaarVurdering vurderingEF_883_2004 = vurderInngangsvilkår(behandlingID, søknadsland, søknadsperiode);
+        final InngangsvilkaarVurdering vurderingEF_883_2004 = vurderInngangsvilkår(behandlingID, søknadsland, erUkjenteEllerAlleEosLand, søknadsperiode);
         final boolean erEF_883_2004 = vurderingEF_883_2004.isOppfylt();
 
         vilkaarsresultatService.oppdaterVilkaarsresultat(behandlingID, FO_883_2004_INNGANGSVILKAAR,
@@ -76,6 +77,7 @@ public class InngangsvilkaarService {
 
     private InngangsvilkaarVurdering vurderInngangsvilkår(long behandlingID,
                                                           Collection<String> søknadsland,
+                                                          boolean erUkjenteEllerAlleEosLand,
                                                           ErPeriode søknadsperiode) {
         Set<Land> statsborgerskap = hentStatsborgerskapForPerioden(behandlingID, søknadsperiode);
         if (statsborgerskap.isEmpty()) {
@@ -86,7 +88,7 @@ public class InngangsvilkaarService {
         }
 
         var landkoderISO3 = Set.copyOf(tilIso3(søknadsland));
-        InngangsvilkarResponse res = inngangsvilkaarConsumer.vurderInngangsvilkår(statsborgerskap, landkoderISO3, søknadsperiode);
+        InngangsvilkarResponse res = inngangsvilkaarConsumer.vurderInngangsvilkår(statsborgerskap, landkoderISO3, erUkjenteEllerAlleEosLand, søknadsperiode);
 
         List<String> feilmeldinger = res.getFeilmeldinger().stream().map(Feilmelding::getMelding).collect(Collectors.toList());
 

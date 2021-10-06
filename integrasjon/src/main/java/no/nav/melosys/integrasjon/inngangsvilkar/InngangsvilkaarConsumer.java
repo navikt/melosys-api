@@ -7,5 +7,5 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
 
 public interface InngangsvilkaarConsumer {
-    InngangsvilkarResponse vurderInngangsvilkår(Set<Land> brukersStatsborgerskap, Set<String> søknadsland, ErPeriode søknadsperiode);
+    InngangsvilkarResponse vurderInngangsvilkår(Set<Land> brukersStatsborgerskap, Set<String> søknadsland, boolean erUkjenteEllerAlleEosLand, ErPeriode søknadsperiode);
 }
