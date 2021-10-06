@@ -12,9 +12,8 @@ import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoUtland;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.*;
@@ -23,14 +22,10 @@ import no.nav.melosys.domain.person.familie.*;
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrl;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.FamiliemedlemInfo;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.TrygdeavgiftInfo;
-import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.representant.RepresentantService;
 import no.nav.melosys.service.representant.dto.RepresentantDataDto;
 import org.assertj.core.api.Condition;
@@ -48,7 +43,7 @@ import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl.IKKE_SOEKERS_BARN;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.IKKE_TRE_AV_FEM_SISTE_ÅR;
 import static no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.IdentType.FNR;
-import static org.assertj.core.api.Assertions.anyOf;
+import static no.nav.melosys.service.dokument.DokgenTestData.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
@@ -63,22 +58,13 @@ class InnvilgelseFtrlMapperTest {
     public static final String BEGRUNNELSE_FRITEKST = "Begrunnelse fritekst";
     public static final String SAKSBEHANDLER_NAVN = "Fetter Anton";
     public static final String ARBEIDSGIVER_NAVN = "Bang Hansen";
-    public static final String FNR_BRUKER = "05058892382";
     public static final String SAKSNUMMER = "MEL-123";
-    public static final String NAVN_BRUKER = "Donald Duck";
-    public static final String POSTNR_BRUKER = "9999";
-    public static final String POSTSTED_BRUKER = "Andeby";
     public static final String EKTEFELLE_NAVN = "Dolly Duck";
     public static final String BARN1_NAVN = "Doffen Duck";
     public static final String REPRESENTANT_NAVN = "Representant AS";
-    @Mock
-    private PersondataFasade mockPersondataFasade;
 
     @Mock
     private TrygdeavgiftsgrunnlagService mockTrygdeavgiftsgrunnlagService;
-
-    @Mock
-    private BehandlingsresultatService mockBehandlingsresultatService;
 
     @Mock
     private AvklarteVirksomheterService mockAvklarteVirksomheterService;
@@ -87,21 +73,21 @@ class InnvilgelseFtrlMapperTest {
     private AvklarteMedfolgendeFamilieService mockAvklarteMedfolgendeFamilieService;
 
     @Mock
-    private LandvelgerService mockLandvelgerService;
-
-    @Mock
     private RepresentantService mockRepresentantService;
 
     @Mock
-    private EregFasade mockEregFasade;
+    private DokgenMapperUtils mockDokgenMapperUtils;
 
     private InnvilgelseFtrlMapper innvilgelseFtrlMapper;
 
     @BeforeEach
     void setup() {
-        innvilgelseFtrlMapper = new InnvilgelseFtrlMapper(mockPersondataFasade, mockTrygdeavgiftsgrunnlagService,
-            mockBehandlingsresultatService, mockAvklarteVirksomheterService,
-            mockAvklarteMedfolgendeFamilieService, mockLandvelgerService, mockRepresentantService, mockEregFasade);
+        innvilgelseFtrlMapper = new InnvilgelseFtrlMapper(
+            mockTrygdeavgiftsgrunnlagService,
+            mockAvklarteVirksomheterService,
+            mockAvklarteMedfolgendeFamilieService,
+            mockRepresentantService,
+            mockDokgenMapperUtils);
     }
 
     @Test
@@ -155,7 +141,7 @@ class InnvilgelseFtrlMapperTest {
         assertThat(innvilgelseFtrl.getFnr()).isEqualTo(FNR_BRUKER);
         assertThat(innvilgelseFtrl.getSaksnummer()).isEqualTo(SAKSNUMMER);
         assertThat(innvilgelseFtrl.getDagensDato().truncatedTo(ChronoUnit.DAYS)).isEqualTo(Instant.now().truncatedTo(ChronoUnit.DAYS));
-        assertThat(innvilgelseFtrl.getNavnBruker()).isEqualTo(NAVN_BRUKER);
+        assertThat(innvilgelseFtrl.getNavnBruker()).isEqualTo(SAMMENSATT_NAVN_BRUKER);
         assertThat(innvilgelseFtrl.getAdresselinjer().isEmpty()).isFalse();
         assertThat(innvilgelseFtrl.getPostnr()).isEqualTo(POSTNR_BRUKER);
         assertThat(innvilgelseFtrl.getPoststed()).isEqualTo(POSTSTED_BRUKER);
@@ -187,7 +173,9 @@ class InnvilgelseFtrlMapperTest {
     void map_InnvilgetMedUtenlandskInntekt_harTrygdeavtaleMedLand_populererFelter() {
         mockHappyCase();
         when(mockTrygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(anyLong())).thenReturn(lagUtenlandskTrygdeAvgiftsgrunnlag());
-        when(mockLandvelgerService.hentArbeidsland(anyLong())).thenReturn(Landkoder.GB);
+        Behandlingsresultat behandlingsresultat = lagBehandlingsResultat();
+        behandlingsresultat.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland = new Soeknadsland(List.of("GB"), false);
+        when(mockDokgenMapperUtils.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         InnvilgelseFtrl innvilgelseFtrl = innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling());
 
@@ -218,7 +206,7 @@ class InnvilgelseFtrlMapperTest {
         MedlemAvFolketrygden medlemAvFolketrygden = behandlingsresultat.getMedlemAvFolketrygden();
         medlemAvFolketrygden.setMedlemskapsperioder(List.of(medlemAvFolketrygden.getMedlemskapsperioder().iterator().next(), delvisInnvilgetPeriode));
 
-        when(mockBehandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+        when(mockDokgenMapperUtils.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         InnvilgelseFtrl innvilgelseFtrl = innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling());
 
@@ -234,26 +222,6 @@ class InnvilgelseFtrlMapperTest {
             .medBegrunnelseFritekst(BEGRUNNELSE_FRITEKST)
             .medSaksbehandlerNavn(SAKSBEHANDLER_NAVN)
             .build();
-    }
-
-    private PersonDokument lagPersonDokument() {
-        PersonDokument persondata = new PersonDokument();
-        persondata.setFnr(FNR_BRUKER);
-        persondata.setSammensattNavn(NAVN_BRUKER);
-        UstrukturertAdresse gjeldendePostadresse = new UstrukturertAdresse();
-        gjeldendePostadresse.adresselinje1 = "Andebyveien 1";
-        gjeldendePostadresse.postnr = POSTNR_BRUKER;
-        gjeldendePostadresse.poststed = POSTSTED_BRUKER;
-        persondata.setGjeldendePostadresse(gjeldendePostadresse);
-        return persondata;
-    }
-
-    private Behandling lagBehandling() {
-        Behandling behandling = new Behandling();
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(SAKSNUMMER);
-        behandling.setFagsak(fagsak);
-        return behandling;
     }
 
     private Trygdeavgiftsgrunnlag lagNorskTrygdeAvgiftsgrunnlag() {
@@ -283,6 +251,7 @@ class InnvilgelseFtrlMapperTest {
         vilkaarBegrunnelse.setKode(ANSATT_I_NORSK_VIRKSOMHET_IKKE_UTSENDT.getKode());
         vilkaarsresultat.setBegrunnelser(Set.of(vilkaarBegrunnelse));
         behandlingsresultat.setVilkaarsresultater(Set.of(vilkaarsresultat));
+        behandlingsresultat.setBehandling(lagBehandling());
 
         return behandlingsresultat;
     }
@@ -358,13 +327,13 @@ class InnvilgelseFtrlMapperTest {
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagAvklartMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagAvklartMedfølgendeBarn());
         when(mockTrygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(anyLong())).thenReturn(lagNorskTrygdeAvgiftsgrunnlag());
-        when(mockBehandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(lagBehandlingsResultat());
         when(mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(any(Behandling.class))).thenReturn(lagAvklarteVirksomheter());
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(anyLong())).thenReturn(lagMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(anyLong())).thenReturn(lagMedfølgendeBarn());
-        when(mockLandvelgerService.hentArbeidsland(anyLong())).thenReturn(Landkoder.AT);
         when(mockRepresentantService.hentRepresentant(anyString())).thenReturn(new RepresentantDataDto("1234", REPRESENTANT_NAVN, null, null, null));
-        when(mockPersondataFasade.hentSammensattNavn(anyString())).thenAnswer((Answer<String>) invocationOnMock -> {
+        when(mockDokgenMapperUtils.hentBehandlingsresultat(anyLong())).thenReturn(lagBehandlingsResultat());
+        when(mockDokgenMapperUtils.hentLandnavn(anyString())).thenAnswer((Answer<String>) invocationOnMock -> Landkoder.valueOf(invocationOnMock.getArgument(0)).getBeskrivelse());
+        when(mockDokgenMapperUtils.hentSammensattNavn(anyString())).thenAnswer((Answer<String>) invocationOnMock -> {
             String fnr = invocationOnMock.getArgument(0);
             return switch (fnr) {
                 case EKTEFELLE_FNR -> EKTEFELLE_NAVN;

@@ -5,31 +5,29 @@ import java.util.*;
 import java.util.stream.Stream;
 import javax.transaction.Transactional;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.InnvilgelsesResultat;
+import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoNorge;
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoUtland;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
 import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avtaleland;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrl;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.*;
-import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.representant.RepresentantService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import static java.util.Optional.ofNullable;
@@ -39,37 +37,28 @@ import static org.springframework.util.StringUtils.hasText;
 @Component
 public class InnvilgelseFtrlMapper {
 
-    private final PersondataFasade persondataFasade;
     private final TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService;
-    private final BehandlingsresultatService behandlingsresultatService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
-    private final LandvelgerService landvelgerService;
     private final RepresentantService representantService;
-    private final EregFasade eregFasade;
+    private final DokgenMapperUtils dokgenMapperUtils;
 
-    public InnvilgelseFtrlMapper(PersondataFasade persondataFasade,
-                                 TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService,
-                                 BehandlingsresultatService behandlingsresultatService,
+    public InnvilgelseFtrlMapper(TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService,
                                  AvklarteVirksomheterService avklarteVirksomheterService,
                                  AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService,
-                                 LandvelgerService landvelgerService,
                                  RepresentantService representantService,
-                                 @Qualifier("system") EregFasade eregFasade) {
-        this.persondataFasade = persondataFasade;
+                                 DokgenMapperUtils dokgenMapperUtils) {
         this.trygdeavgiftsgrunnlagService = trygdeavgiftsgrunnlagService;
-        this.behandlingsresultatService = behandlingsresultatService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.avklarteMedfolgendeFamilieService = avklarteMedfolgendeFamilieService;
-        this.landvelgerService = landvelgerService;
         this.representantService = representantService;
-        this.eregFasade = eregFasade;
+        this.dokgenMapperUtils = dokgenMapperUtils;
     }
 
     @Transactional
     public InnvilgelseFtrl map(InnvilgelseBrevbestilling brevbestilling) {
         long behandlingId = brevbestilling.getBehandlingId();
-        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
+        var behandlingsresultat = dokgenMapperUtils.hentBehandlingsresultat(behandlingId);
         var medlemAvFolketrygden = behandlingsresultat.getMedlemAvFolketrygden();
         var trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(behandlingId);
         var avklarteMedfolgendeBarn = avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingId);
@@ -77,7 +66,9 @@ public class InnvilgelseFtrlMapper {
 
         //NOTE Henter i første versjon av FTRL kun en norsk arbeidsgiver og forventer ett registert arbeidsland
         AvklartVirksomhet norskeArbeidsgivere = avklarteVirksomheterService.hentNorskeArbeidsgivere(brevbestilling.getBehandling()).get(0);
-        Landkoder arbeidsland = landvelgerService.hentArbeidsland(behandlingId);
+        BehandlingsgrunnlagData behandlingsgrunnlagdata = behandlingsresultat.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        Soeknadsland soeknadsland = behandlingsgrunnlagdata.soeknadsland;
+        String arbeidsland = soeknadsland.landkoder.get(0);
 
         Collection<Medlemskapsperiode> medlemskapsperioder = medlemAvFolketrygden.getMedlemskapsperioder();
         FastsattTrygdeavgift fastsattTrygdeavgift = medlemAvFolketrygden.getFastsattTrygdeavgift();
@@ -92,11 +83,11 @@ public class InnvilgelseFtrlMapper {
             mapIkkeOmfattetBarn(behandlingId, avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd),
             mapIkkeOmfattetEktefelle(behandlingId, avklarteMedfolgendeEktefelle.getFamilieIkkeOmfattetAvNorskTrygd()),
             norskeArbeidsgivere.navn,
-            arbeidsland.getBeskrivelse(),
+            dokgenMapperUtils.hentLandnavn(arbeidsland),
             harTrygdeavtaleMedArbeidsland(arbeidsland),
             mapVurderingTrygdeavgift(trygdeavgiftsgrunnlag, fastsattTrygdeavgift),
             trygdeavgiftsgrunnlag.getLønnsforhold().getKode(),
-            hentFullmektigNavnArbeidsgiver(brevbestilling.getBehandling().getFagsak()),
+            dokgenMapperUtils.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.ARBEIDSGIVER),
             brevbestilling.getBehandling().getFagsak().finnRepresentant(Representerer.BRUKER).isPresent(),
             String.valueOf(LocalDate.now().getYear()),
             harLønnNorgeSkattepliktigNorge(trygdeavgiftsgrunnlag.getAvgiftsGrunnlagNorge()),
@@ -148,7 +139,7 @@ public class InnvilgelseFtrlMapper {
     private FamiliemedlemInfo tilFamiliemedlemInfo(Map<String, MedfolgendeFamilie> avklartMedfolgende, String uuid) {
         MedfolgendeFamilie medfolgendeFamilie = Optional.of(avklartMedfolgende.get(uuid))
             .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
-        String sammensattNavn = medfolgendeFamilie.fnr != null ? persondataFasade.hentSammensattNavn(medfolgendeFamilie.fnr) : medfolgendeFamilie.navn;
+        String sammensattNavn = medfolgendeFamilie.fnr != null ? dokgenMapperUtils.hentSammensattNavn(medfolgendeFamilie.fnr) : medfolgendeFamilie.navn;
         return new FamiliemedlemInfo(sammensattNavn, medfolgendeFamilie.fnr, IdentType.FNR);
     }
 
@@ -191,14 +182,8 @@ public class InnvilgelseFtrlMapper {
         return avgiftsgrunnlagInfoUtland != null && avgiftsgrunnlagInfoUtland.erSkattepliktig();
     }
 
-    private boolean harTrygdeavtaleMedArbeidsland(Landkoder arbeidsland) {
-        return Arrays.stream(Avtaleland.values()).anyMatch(a -> a.name().equals(arbeidsland.name()));
-    }
-
-    private String hentFullmektigNavnArbeidsgiver(Fagsak fagsak) {
-        return fagsak.finnRepresentant(Representerer.ARBEIDSGIVER)
-            .map(aktoer -> eregFasade.hentOrganisasjonNavn(aktoer.getOrgnr()))
-            .orElse(null);
+    private boolean harTrygdeavtaleMedArbeidsland(String arbeidsland) {
+        return Arrays.stream(Avtaleland.values()).anyMatch(a -> a.name().equals(arbeidsland));
     }
 
     private String hentRepresentantNavn(String representantNr) {
