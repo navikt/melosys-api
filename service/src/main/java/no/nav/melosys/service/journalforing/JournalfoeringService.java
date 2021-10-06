@@ -294,8 +294,7 @@ public class JournalfoeringService {
         int antallLand = journalfoeringDto.getFagsak().getLand().getLandkoder().size();
 
         if (Behandling.erBehandlingAvSøknadArbeidIFlereLand(behandlingstemaKode)) {
-            boolean erUkjenteEllerAlleEosLand = journalfoeringDto.getFagsak().getLand().erUkjenteEllerAlleEosLand();
-            if (erUkjenteEllerAlleEosLand && antallLand != 0) {
+            if (journalfoeringDto.getFagsak().getLand().erUkjenteEllerAlleEosLand() && antallLand != 0) {
                 throw new FunksjonellException(String.format("Det kan ikke være noen land for behandlingstema %s om ukjenteEllerAlleEosLand er valgt", behandlingstemaKode));
             } else if (antallLand < 2) {
                 throw new FunksjonellException(String.format("Det er påkrevd med to eller flere land for behandlingstema %s om ikke ukjenteEllerAlleEosLand er valgt", behandlingstemaKode));
