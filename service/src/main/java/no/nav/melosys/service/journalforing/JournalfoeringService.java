@@ -292,11 +292,12 @@ public class JournalfoeringService {
     private void validerAntallLand(JournalfoeringOpprettDto journalfoeringDto) {
         String behandlingstemaKode = journalfoeringDto.getBehandlingstemaKode();
         int antallLand = journalfoeringDto.getFagsak().getLand().getLandkoder().size();
+        boolean erUkjenteEllerAlleEosLand = journalfoeringDto.getFagsak().getLand().erUkjenteEllerAlleEosLand();
 
         if (Behandling.erBehandlingAvSøknadArbeidIFlereLand(behandlingstemaKode)) {
-            if (journalfoeringDto.getFagsak().getLand().erUkjenteEllerAlleEosLand() && antallLand != 0) {
+            if (erUkjenteEllerAlleEosLand && antallLand != 0) {
                 throw new FunksjonellException(String.format("Det kan ikke være noen land for behandlingstema %s om ukjenteEllerAlleEosLand er valgt", behandlingstemaKode));
-            } else if (antallLand < 2) {
+            } else if (!erUkjenteEllerAlleEosLand && antallLand < 2) {
                 throw new FunksjonellException(String.format("Det er påkrevd med to eller flere land for behandlingstema %s om ikke ukjenteEllerAlleEosLand er valgt", behandlingstemaKode));
             }
         } else if (Behandling.erBehandlingAvSøknadUtsendtArbeidstaker(behandlingstemaKode) && antallLand != 1) {
