@@ -17,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_vesentlig_virksomhet;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -26,7 +27,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagArbeidsgiver;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,14 +41,13 @@ import static no.nav.melosys.service.BehandlingsgrunnlagStub.lagBehandlingsgrunn
 import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysninger;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagPersonsaksopplysning;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
-import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class BrevDataByggerAvslagArbeidsgiverTest {
+class BrevDataByggerAvslagArbeidsgiverTest {
     @Mock
     AvklartefaktaService avklartefaktaService;
     @Mock
@@ -60,15 +60,13 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
     VilkaarsresultatRepository vilkaarsresultatRepository;
     @Mock
     LovvalgsperiodeService lovvalgsperiodeService;
-    @Mock
-    private PersondataFasade persondataFasade;
 
     private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     private BrevDataByggerAvslagArbeidsgiver brevDataByggerAvslagArbeidsgiver;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Landkoder.AT);
 
         brevDataByggerAvslagArbeidsgiver = new BrevDataByggerAvslagArbeidsgiver(landvelgerService,
@@ -77,7 +75,7 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
     }
 
     @Test
-    public void lag_avslagArbeidsgiverBrev_harVilkaarBegrunnelser() {
+    void lag_avslagArbeidsgiverBrev_harVilkaarBegrunnelser() {
         fakeUnleash.enable("melosys.pdl.sed-mapping");
 
         Aktoer aktoer = new Aktoer();
@@ -132,7 +130,8 @@ public class BrevDataByggerAvslagArbeidsgiverTest {
 
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), kodeverkService);
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
-        BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondataFasade, fakeUnleash);
+        Persondata persondata = PersonopplysningerObjectFactory.lagPersonopplysninger();
+        BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondata);
         String saksbehandler = "saksbehandler";
         BrevDataAvslagArbeidsgiver brevData = (BrevDataAvslagArbeidsgiver) brevDataByggerAvslagArbeidsgiver.lag(dataGrunnlag, saksbehandler);
         assertThat(brevData.hovedvirksomhet.orgnr).isEqualTo("987654321");
