@@ -41,24 +41,24 @@ public class InnvilgelseFtrlMapper {
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
     private final RepresentantService representantService;
-    private final DokgenMapperUtils dokgenMapperUtils;
+    private final DokgenMapperDatahenter dokgenMapperDatahenter;
 
     public InnvilgelseFtrlMapper(TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService,
                                  AvklarteVirksomheterService avklarteVirksomheterService,
                                  AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService,
                                  RepresentantService representantService,
-                                 DokgenMapperUtils dokgenMapperUtils) {
+                                 DokgenMapperDatahenter dokgenMapperDatahenter) {
         this.trygdeavgiftsgrunnlagService = trygdeavgiftsgrunnlagService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.avklarteMedfolgendeFamilieService = avklarteMedfolgendeFamilieService;
         this.representantService = representantService;
-        this.dokgenMapperUtils = dokgenMapperUtils;
+        this.dokgenMapperDatahenter = dokgenMapperDatahenter;
     }
 
     @Transactional
     public InnvilgelseFtrl map(InnvilgelseBrevbestilling brevbestilling) {
         long behandlingId = brevbestilling.getBehandlingId();
-        var behandlingsresultat = dokgenMapperUtils.hentBehandlingsresultat(behandlingId);
+        var behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(behandlingId);
         var medlemAvFolketrygden = behandlingsresultat.getMedlemAvFolketrygden();
         var trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(behandlingId);
         var avklarteMedfolgendeBarn = avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingId);
@@ -83,11 +83,11 @@ public class InnvilgelseFtrlMapper {
             mapIkkeOmfattetBarn(behandlingId, avklarteMedfolgendeBarn.barnIkkeOmfattetAvNorskTrygd),
             mapIkkeOmfattetEktefelle(behandlingId, avklarteMedfolgendeEktefelle.getFamilieIkkeOmfattetAvNorskTrygd()),
             norskeArbeidsgivere.navn,
-            dokgenMapperUtils.hentLandnavn(arbeidsland),
+            dokgenMapperDatahenter.hentLandnavn(arbeidsland),
             harTrygdeavtaleMedArbeidsland(arbeidsland),
             mapVurderingTrygdeavgift(trygdeavgiftsgrunnlag, fastsattTrygdeavgift),
             trygdeavgiftsgrunnlag.getLønnsforhold().getKode(),
-            dokgenMapperUtils.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.ARBEIDSGIVER),
+            dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.ARBEIDSGIVER),
             brevbestilling.getBehandling().getFagsak().finnRepresentant(Representerer.BRUKER).isPresent(),
             String.valueOf(LocalDate.now().getYear()),
             harLønnNorgeSkattepliktigNorge(trygdeavgiftsgrunnlag.getAvgiftsGrunnlagNorge()),
@@ -139,7 +139,7 @@ public class InnvilgelseFtrlMapper {
     private FamiliemedlemInfo tilFamiliemedlemInfo(Map<String, MedfolgendeFamilie> avklartMedfolgende, String uuid) {
         MedfolgendeFamilie medfolgendeFamilie = Optional.of(avklartMedfolgende.get(uuid))
             .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
-        String sammensattNavn = medfolgendeFamilie.fnr != null ? dokgenMapperUtils.hentSammensattNavn(medfolgendeFamilie.fnr) : medfolgendeFamilie.navn;
+        String sammensattNavn = medfolgendeFamilie.fnr != null ? dokgenMapperDatahenter.hentSammensattNavn(medfolgendeFamilie.fnr) : medfolgendeFamilie.navn;
         return new FamiliemedlemInfo(sammensattNavn, medfolgendeFamilie.fnr, IdentType.FNR);
     }
 

@@ -1,22 +1,15 @@
 package no.nav.melosys.service.dokument;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.List;
 
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
-import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
-import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
-import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.person.Informasjonsbehov;
@@ -41,7 +34,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
@@ -89,12 +81,12 @@ class DokgenServiceTest {
 
     @BeforeEach
     void init() {
-        DokgenMapperUtils dokgenMapperUtils = new DokgenMapperUtils(mockBehandlingsresultatService, mockEregFasade,
+        DokgenMapperDatahenter dokgenMapperDatahenter = new DokgenMapperDatahenter(mockBehandlingsresultatService, mockEregFasade,
             mockPersondataFasade, mockKodeverkService, unleash);
 
         dokgenService = new DokgenService(mockDokgenConsumer, new DokumentproduksjonsInfoMapper(unleash),
             mockJoarkFasade,
-            new DokgenMalMapper(dokgenMapperUtils, mockInnvilgelseFtrlMapper),
+            new DokgenMalMapper(dokgenMapperDatahenter, mockInnvilgelseFtrlMapper),
             mockBehandlingsService, mockEregFasade, mockKontaktOpplysningService,
             mockBrevMottakerService, mockProsessinstansService, mockSaksbehandlerService);
 

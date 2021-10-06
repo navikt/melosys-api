@@ -76,7 +76,7 @@ class InnvilgelseFtrlMapperTest {
     private RepresentantService mockRepresentantService;
 
     @Mock
-    private DokgenMapperUtils mockDokgenMapperUtils;
+    private DokgenMapperDatahenter mockDokgenMapperDatahenter;
 
     private InnvilgelseFtrlMapper innvilgelseFtrlMapper;
 
@@ -87,7 +87,7 @@ class InnvilgelseFtrlMapperTest {
             mockAvklarteVirksomheterService,
             mockAvklarteMedfolgendeFamilieService,
             mockRepresentantService,
-            mockDokgenMapperUtils);
+            mockDokgenMapperDatahenter);
     }
 
     @Test
@@ -175,7 +175,7 @@ class InnvilgelseFtrlMapperTest {
         when(mockTrygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(anyLong())).thenReturn(lagUtenlandskTrygdeAvgiftsgrunnlag());
         Behandlingsresultat behandlingsresultat = lagBehandlingsResultat();
         behandlingsresultat.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland = new Soeknadsland(List.of("GB"), false);
-        when(mockDokgenMapperUtils.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+        when(mockDokgenMapperDatahenter.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         InnvilgelseFtrl innvilgelseFtrl = innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling());
 
@@ -206,7 +206,7 @@ class InnvilgelseFtrlMapperTest {
         MedlemAvFolketrygden medlemAvFolketrygden = behandlingsresultat.getMedlemAvFolketrygden();
         medlemAvFolketrygden.setMedlemskapsperioder(List.of(medlemAvFolketrygden.getMedlemskapsperioder().iterator().next(), delvisInnvilgetPeriode));
 
-        when(mockDokgenMapperUtils.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+        when(mockDokgenMapperDatahenter.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         InnvilgelseFtrl innvilgelseFtrl = innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling());
 
@@ -331,9 +331,9 @@ class InnvilgelseFtrlMapperTest {
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(anyLong())).thenReturn(lagMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(anyLong())).thenReturn(lagMedfølgendeBarn());
         when(mockRepresentantService.hentRepresentant(anyString())).thenReturn(new RepresentantDataDto("1234", REPRESENTANT_NAVN, null, null, null));
-        when(mockDokgenMapperUtils.hentBehandlingsresultat(anyLong())).thenReturn(lagBehandlingsResultat());
-        when(mockDokgenMapperUtils.hentLandnavn(anyString())).thenAnswer((Answer<String>) invocationOnMock -> Landkoder.valueOf(invocationOnMock.getArgument(0)).getBeskrivelse());
-        when(mockDokgenMapperUtils.hentSammensattNavn(anyString())).thenAnswer((Answer<String>) invocationOnMock -> {
+        when(mockDokgenMapperDatahenter.hentBehandlingsresultat(anyLong())).thenReturn(lagBehandlingsResultat());
+        when(mockDokgenMapperDatahenter.hentLandnavn(anyString())).thenAnswer((Answer<String>) invocationOnMock -> Landkoder.valueOf(invocationOnMock.getArgument(0)).getBeskrivelse());
+        when(mockDokgenMapperDatahenter.hentSammensattNavn(anyString())).thenAnswer((Answer<String>) invocationOnMock -> {
             String fnr = invocationOnMock.getArgument(0);
             return switch (fnr) {
                 case EKTEFELLE_FNR -> EKTEFELLE_NAVN;
