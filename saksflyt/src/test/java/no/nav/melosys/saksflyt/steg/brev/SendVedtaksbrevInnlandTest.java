@@ -36,7 +36,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.*;
 import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.bygger.*;
-import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory;
+import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagSystemFactory;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -109,7 +109,7 @@ class SendVedtaksbrevInnlandTest {
         BrevBestiller brevBestiller = new BrevBestiller(dokumentServiceFasade);
 
         BehandlingService behandlingService = mock(BehandlingService.class);
-        when(behandlingService.hentBehandling(eq(behandling.getId()))).thenReturn(behandling);
+        when(behandlingService.hentBehandling(behandling.getId())).thenReturn(behandling);
 
         return new SendVedtaksbrevInnland(brevBestiller, behandlingService, mockBehandlingsresultatService());
     }
@@ -146,7 +146,7 @@ class SendVedtaksbrevInnlandTest {
         BrevmottakerService brevmottakerService = new BrevmottakerService(kontaktopplysningService,
             avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService, mock(TrygdeavgiftsberegningService.class));
         return spy(new DokumentSystemService(behandlingService, brevDataService, dokSysFasade,
-            brevmottakerService, brevDataByggerVelger, mock(BrevdataGrunnlagFactory.class)));
+            brevmottakerService, brevDataByggerVelger, mock(BrevdataGrunnlagSystemFactory.class)));
     }
 
     private static BehandlingsresultatService mockBehandlingsresultatService() {
