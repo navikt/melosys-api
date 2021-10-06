@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 import static org.springframework.util.StringUtils.hasText;
 
 @Component
-public class DokgenMapperUtils {
+public class DokgenMapperDatahenter {
 
     private final BehandlingsresultatService behandlingsresultatService;
     private final EregFasade eregFasade;
@@ -28,11 +28,11 @@ public class DokgenMapperUtils {
     private final PersondataFasade persondataFasade;
     private final Unleash unleash;
 
-    protected DokgenMapperUtils(BehandlingsresultatService behandlingsresultatService,
-                                @Qualifier("system") EregFasade eregFasade,
-                                @Qualifier("system") PersondataFasade persondataFasade,
-                                KodeverkService kodeverkService,
-                                Unleash unleash) {
+    protected DokgenMapperDatahenter(BehandlingsresultatService behandlingsresultatService,
+                                     @Qualifier("system") EregFasade eregFasade,
+                                     @Qualifier("system") PersondataFasade persondataFasade,
+                                     KodeverkService kodeverkService,
+                                     Unleash unleash) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.eregFasade = eregFasade;
         this.kodeverkService = kodeverkService;

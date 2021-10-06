@@ -15,13 +15,13 @@ import static org.springframework.util.StringUtils.hasText;
 @Component
 public class DokgenMalMapper {
 
-    private final DokgenMapperUtils dokgenMapperUtils;
+    private final DokgenMapperDatahenter dokgenMapperDatahenter;
     private final InnvilgelseFtrlMapper innvilgelseFtrlMapper;
 
     @Autowired
-    public DokgenMalMapper(DokgenMapperUtils dokgenMapperUtils,
+    public DokgenMalMapper(DokgenMapperDatahenter dokgenMapperDatahenter,
                            InnvilgelseFtrlMapper innvilgelseFtrlMapper) {
-        this.dokgenMapperUtils = dokgenMapperUtils;
+        this.dokgenMapperDatahenter = dokgenMapperDatahenter;
         this.innvilgelseFtrlMapper = innvilgelseFtrlMapper;
     }
 
@@ -31,33 +31,33 @@ public class DokgenMalMapper {
         DokgenDto dto = lagDokgenDtoFraBestilling(brevbestilling);
 
         if (hasText(dto.getPostnr())) {
-            dto.setPoststed(dokgenMapperUtils.hentPoststed(dto.getPostnr()));
+            dto.setPoststed(dokgenMapperDatahenter.hentPoststed(dto.getPostnr()));
         }
-        dto.setLand(dokgenMapperUtils.hentLandnavn(dto.getLand()));
+        dto.setLand(dokgenMapperDatahenter.hentLandnavn(dto.getLand()));
         return dto;
     }
 
     private DokgenBrevbestilling berikBestillingMedPersondata(DokgenBrevbestilling mottattBrevbestilling) {
-        return mottattBrevbestilling.toBuilder().medPersonDokument(dokgenMapperUtils.hentPersondata(mottattBrevbestilling)).build();
+        return mottattBrevbestilling.toBuilder().medPersonDokument(dokgenMapperDatahenter.hentPersondata(mottattBrevbestilling)).build();
     }
 
     private DokgenDto lagDokgenDtoFraBestilling(DokgenBrevbestilling brevbestilling) {
         return switch (brevbestilling.getProduserbartdokument()) {
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD -> SaksbehandlingstidSoknad.av(
                 brevbestilling.toBuilder()
-                    .medAvsenderLand(dokgenMapperUtils.hentLandnavn(brevbestilling.getAvsenderLand()))
+                    .medAvsenderLand(dokgenMapperDatahenter.hentLandnavn(brevbestilling.getAvsenderLand()))
                     .build()
             );
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> SaksbehandlingstidKlage.av(brevbestilling);
             case MANGELBREV_BRUKER -> MangelbrevBruker.av(
                 ((MangelbrevBrevbestilling) brevbestilling).toBuilder()
-                    .medVedtaksdato(dokgenMapperUtils.hentVedtaksdato(brevbestilling.getBehandling().getId()))
+                    .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId()))
                     .build()
             );
             case MANGELBREV_ARBEIDSGIVER -> MangelbrevArbeidsgiver.av(
                 ((MangelbrevBrevbestilling) brevbestilling).toBuilder()
-                    .medVedtaksdato(dokgenMapperUtils.hentVedtaksdato(brevbestilling.getBehandling().getId()))
-                    .medFullmektigNavn(dokgenMapperUtils.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.BRUKER))
+                    .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId()))
+                    .medFullmektigNavn(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.BRUKER))
                     .build()
             );
             case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> innvilgelseFtrlMapper.map((InnvilgelseBrevbestilling) brevbestilling);
