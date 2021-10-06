@@ -90,7 +90,7 @@ public class JournalfoeringService {
             validerKanOppretteSakFraSed(journalpost);
         }
 
-        if (erBehandlingAvSedForespørsler(journalfoeringDto.getBehandlingstemaKode()) || erBehandlingAvSøknad(journalfoeringDto.getBehandlingstemaKode())){
+        if (erBehandlingAvSedForespørsler(journalfoeringDto.getBehandlingstemaKode()) || erBehandlingAvSøknad(journalfoeringDto.getBehandlingstemaKode())) {
             opprettSakOgJournalfør(journalfoeringDto);
         } else {
             throw new FunksjonellException(
@@ -108,7 +108,7 @@ public class JournalfoeringService {
 
         Optional<Fagsak> tilknyttetFagsak = finnSakTilknyttetSed(melosysEessiMelding);
         if (tilknyttetFagsak.isPresent()) {
-             throw new FunksjonellException(String.format("RINA-sak %s er allerede tilknyttet %s", melosysEessiMelding.getRinaSaksnummer(), tilknyttetFagsak.get().getSaksnummer()));
+            throw new FunksjonellException(String.format("RINA-sak %s er allerede tilknyttet %s", melosysEessiMelding.getRinaSaksnummer(), tilknyttetFagsak.get().getSaksnummer()));
         }
     }
 
@@ -187,7 +187,7 @@ public class JournalfoeringService {
             validerKanTilknytteJournalpostForSedTilSak(journalpost, saksnummer);
         }
 
-        Behandlingstyper behandlingstype =  StringUtils.isNotEmpty(journalfoeringDto.getBehandlingstypeKode())
+        Behandlingstyper behandlingstype = StringUtils.isNotEmpty(journalfoeringDto.getBehandlingstypeKode())
             ? Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode()) : null;
 
         log.info("{} knytter journalpost {} til sak {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
@@ -293,8 +293,14 @@ public class JournalfoeringService {
         String behandlingstemaKode = journalfoeringDto.getBehandlingstemaKode();
         int antallLand = journalfoeringDto.getFagsak().getLand().getLandkoder().size();
 
-        if (Behandling.erBehandlingAvSøknadArbeidIFlereLand(behandlingstemaKode) && antallLand < 2) {
-            throw new FunksjonellException("Det er påkrevd med to eller flere land for behandlingstema " + behandlingstemaKode);
+        if (Behandling.erBehandlingAvSøknadArbeidIFlereLand(behandlingstemaKode)) {
+            boolean erUkjenteEllerAlleEosLand = journalfoeringDto.getFagsak().getLand().erUkjenteEllerAlleEosLand();
+            if (erUkjenteEllerAlleEosLand && antallLand != 0) {
+                throw new FunksjonellException(String.format("Det kan ikke være noen land for behandlingstema %s om ukjenteEllerAlleEosLand er valgt", behandlingstemaKode));
+            }
+            else if (antallLand < 2) {
+                throw new FunksjonellException(String.format("Det er påkrevd med to eller flere land for behandlingstema %s om ikke ukjenteEllerAlleEosLand er valgt", behandlingstemaKode));
+            }
         } else if (Behandling.erBehandlingAvSøknadUtsendtArbeidstaker(behandlingstemaKode) && antallLand != 1) {
             throw new FunksjonellException("Kun ett søknadsland er tillatt for behandlingstema " + behandlingstemaKode);
         }
@@ -311,7 +317,7 @@ public class JournalfoeringService {
 
     private void validerJournalfoerSed(JournalfoeringSedDto journalfoeringSedDto) {
 
-        if(StringUtils.isEmpty(journalfoeringSedDto.getJournalpostID())) {
+        if (StringUtils.isEmpty(journalfoeringSedDto.getJournalpostID())) {
             throw new FunksjonellException("JournalpostID er påkrevd!");
         } else if (StringUtils.isEmpty(journalfoeringSedDto.getBrukerID())) {
             throw new FunksjonellException("BrukerID er påkrevd!");
