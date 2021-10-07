@@ -3,7 +3,6 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.time.LocalDate;
 import java.util.*;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -17,12 +16,12 @@ import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
-import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
@@ -33,6 +32,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagSystemService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
@@ -72,8 +72,6 @@ class BrevDataByggerA001Test {
     private EregFasade ereg;
     @Mock
     private PersondataFasade persondataFasade;
-
-    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     private Behandling behandling;
 
@@ -143,11 +141,7 @@ class BrevDataByggerA001Test {
         aareg.setDokument(arbDokument);
         aareg.setType(SaksopplysningType.ARBFORH);
 
-        Saksopplysning person = new Saksopplysning();
-        PersonDokument personDok = new PersonDokument();
-        person.setDokument(personDok);
-        person.setType(SaksopplysningType.PERSOPL);
-        behandling.setSaksopplysninger(new HashSet<>(Arrays.asList(person, medl, aareg)));
+        behandling.setSaksopplysninger(new HashSet<>(List.of(medl, aareg)));
 
         Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
         behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknad);
@@ -169,13 +163,21 @@ class BrevDataByggerA001Test {
     }
 
     private BrevDataGrunnlag lagBrevDataGrunnlag() {
-        return lagBrevDataGrunnlag(new DoksysBrevbestilling.Builder().medBehandling(behandling).build());
+        return lagBrevDataGrunnlag(PersonopplysningerObjectFactory.lagPersonopplysninger());
+    }
+
+    private BrevDataGrunnlag lagBrevDataGrunnlag(Persondata persondata) {
+        return lagBrevDataGrunnlag(new DoksysBrevbestilling.Builder().medBehandling(behandling).build(), persondata);
     }
 
     private BrevDataGrunnlag lagBrevDataGrunnlag(DoksysBrevbestilling brevbestilling) {
-        RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(ereg, mock(PersondataFasade.class));
+        return lagBrevDataGrunnlag(brevbestilling, PersonopplysningerObjectFactory.lagPersonopplysninger());
+    }
+
+    private BrevDataGrunnlag lagBrevDataGrunnlag(DoksysBrevbestilling brevbestilling, Persondata persondata) {
+        RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(ereg, persondataFasade);
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), mock(KodeverkService.class));
-        return new BrevDataGrunnlag(brevbestilling, mock(KodeverkService.class), avklarteVirksomheterService, avklartefaktaService, persondataFasade, fakeUnleash);
+        return new BrevDataGrunnlag(brevbestilling, mock(KodeverkService.class), avklarteVirksomheterService, avklartefaktaService, persondata);
     }
 
     private void leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) {
@@ -186,7 +188,7 @@ class BrevDataByggerA001Test {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.ORG);
         saksopplysning.setDokument(orgDok);
-        when(ereg.hentOrganisasjon(eq(orgnummer))).thenReturn(saksopplysning);
+        when(ereg.hentOrganisasjon(orgnummer)).thenReturn(saksopplysning);
     }
 
     private Arbeidsforhold lagArbeidsforhold(String orgnr, LocalDate fom, LocalDate tom) {

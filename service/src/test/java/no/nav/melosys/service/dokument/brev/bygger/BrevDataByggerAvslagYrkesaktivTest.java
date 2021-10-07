@@ -2,13 +2,13 @@ package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.util.*;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -17,7 +17,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataAvslagYrkesaktiv;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
@@ -50,10 +50,6 @@ class BrevDataByggerAvslagYrkesaktivTest {
     KodeverkService kodeverkService;
     @Mock
     VilkaarsresultatService vilkaarsresultatService;
-    @Mock
-    private PersondataFasade persondataFasade;
-
-    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     private BrevDataByggerAvslagYrkesaktiv brevDataByggerAvslagYrkesaktiv;
     private AnmodningsperiodeSvar anmodningsperiodeSvar;
@@ -73,7 +69,7 @@ class BrevDataByggerAvslagYrkesaktivTest {
     }
 
     @Test
-    void lag_annmodningUnntakBrev_avklarVirksomhetSomSelvstendigForetak() throws Exception {
+    void lag_annmodningUnntakBrev_avklarVirksomhetSomSelvstendigForetak() {
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.BRUKER);
         aktoer.setAktørId("ident");
@@ -113,7 +109,7 @@ class BrevDataByggerAvslagYrkesaktivTest {
         assertThat(brevData.hovedvirksomhet.orgnr).isEqualTo("999");
         assertThat(brevData.hovedvirksomhet.erSelvstendigForetak()).isTrue();
         assertThat(brevData.arbeidsland).isEqualTo(Landkoder.DE.getBeskrivelse());
-        assertThat(brevData.anmodningsperiodeSvar.get()).isEqualToComparingFieldByField(anmodningsperiodeSvar);
+        assertThat(brevData.anmodningsperiodeSvar).isPresent().get().usingRecursiveComparison().isEqualTo(anmodningsperiodeSvar);
         assertThat(brevData.erArt16UtenArt12).isTrue();
     }
 
@@ -127,6 +123,7 @@ class BrevDataByggerAvslagYrkesaktivTest {
     public BrevDataGrunnlag lagBrevressurser(Behandling behandling) {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), kodeverkService);
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
-        return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondataFasade, fakeUnleash);
+        Persondata persondata = PersonopplysningerObjectFactory.lagPersonopplysninger();
+        return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondata);
     }
 }

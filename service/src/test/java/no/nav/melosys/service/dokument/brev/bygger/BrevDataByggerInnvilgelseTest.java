@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -19,6 +18,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeBarn;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetBarn;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
@@ -35,6 +35,7 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,7 +53,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class BrevDataByggerInnvilgelseTest {
+class BrevDataByggerInnvilgelseTest {
     @Mock
     AvklartefaktaService avklartefaktaService;
     @Mock
@@ -74,8 +75,6 @@ public class BrevDataByggerInnvilgelseTest {
     @Mock
     BehandlingsgrunnlagService behandlingsgrunnlagService;
 
-    private final FakeUnleash fakeUnleash = new FakeUnleash();
-
     private Behandling behandling;
     private BrevbestillingRequest brevbestillingRequest;
 
@@ -83,7 +82,7 @@ public class BrevDataByggerInnvilgelseTest {
     private BrevDataByggerInnvilgelse brevDataByggerInnvilgelse;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.BRUKER);
         aktoer.setAktørId("ident");
@@ -131,13 +130,14 @@ public class BrevDataByggerInnvilgelseTest {
             behandlingsgrunnlagService);
     }
 
-    public BrevDataGrunnlag lagBrevdataGrunnlag() {
+    BrevDataGrunnlag lagBrevdataGrunnlag() {
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
-        return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondataFasade, fakeUnleash);
+        Persondata persondata = PersonopplysningerObjectFactory.lagPersonopplysninger();
+        return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondata);
     }
 
     @Test
-    public void lag_medSokkel_setterMaritimtypeSokkel() {
+    void lag_medSokkel_setterMaritimtypeSokkel() {
         Maritimtyper maritimType = Maritimtyper.SOKKEL;
         when(avklartefaktaService.hentMaritimTyper(anyLong())).thenReturn(Set.of(maritimType));
 
@@ -147,7 +147,7 @@ public class BrevDataByggerInnvilgelseTest {
     }
 
     @Test
-    public void lag_utenMaritimtArbeid_setterMaritimtypeTilNull() {
+    void lag_utenMaritimtArbeid_setterMaritimtypeTilNull() {
         when(avklartefaktaService.hentMaritimTyper(anyLong())).thenReturn(Collections.emptySet());
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
@@ -155,8 +155,8 @@ public class BrevDataByggerInnvilgelseTest {
     }
 
     @Test
-    public void lag_medFtrl2_12_setterTuristSkipTrue() {
-        when(vilkaarsresultatService.oppfyllerVilkaar(eq(behandling.getId()), eq(Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP)))
+    void lag_medFtrl2_12_setterTuristSkipTrue() {
+        when(vilkaarsresultatService.oppfyllerVilkaar(behandling.getId(), Vilkaar.FTRL_2_12_UNNTAK_TURISTSKIP))
             .thenReturn(true);
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
@@ -164,14 +164,15 @@ public class BrevDataByggerInnvilgelseTest {
     }
 
     @Test
-    public void lag_innvilgelsesBrev_harBestillingsinformasjon() {
+    void lag_innvilgelsesBrev_harBestillingsinformasjon() {
         BrevData brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData).isEqualToComparingOnlyGivenFields(brevbestillingRequest, "begrunnelseKode", "fritekst");
+        assertThat(brevData.begrunnelseKode).isEqualTo(brevbestillingRequest.getBegrunnelseKode());
+        assertThat(brevData.fritekst).isEqualTo(brevbestillingRequest.getFritekst());
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
     }
 
     @Test
-    public void lag_medAnmodningsperiode_girAnmodningsperiodeSvar() {
+    void lag_medAnmodningsperiode_girAnmodningsperiodeSvar() {
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
         AnmodningsperiodeSvar anmodningsperiodeSvar = lagAnmodningsperiodeSvarInnvilgelse();
         anmodningsperiode.setSendtUtland(true);
@@ -183,14 +184,14 @@ public class BrevDataByggerInnvilgelseTest {
     }
 
     @Test
-    public void lag_utenAnmodningsperiode_erMulig() {
+    void lag_utenAnmodningsperiode_erMulig() {
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.emptyList());
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
         assertThat(brevData.getAnmodningsperiodesvar()).isNotPresent();
     }
 
     @Test
-    public void lag_erArt12_art16UtenArt12False() {
+    void lag_erArt12_art16UtenArt12False() {
         when(vilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenReturn(true);
         when(vilkaarsresultatService.harVilkaarForArtikkel16(anyLong())).thenReturn(true);
 
@@ -199,7 +200,7 @@ public class BrevDataByggerInnvilgelseTest {
     }
 
     @Test
-    public void lag_erArt16UtenArt12_art16UtenArt12True() {
+    void lag_erArt16UtenArt12_art16UtenArt12True() {
         when(vilkaarsresultatService.harVilkaarForArtikkel12(anyLong())).thenReturn(false);
         when(vilkaarsresultatService.harVilkaarForArtikkel16(anyLong())).thenReturn(true);
 
@@ -208,7 +209,7 @@ public class BrevDataByggerInnvilgelseTest {
     }
 
     @Test
-    public void lag_medfølgendeBarnHarFnr_henterNavnFraTps() {
+    void lag_medfølgendeBarnHarFnr_henterNavnFraTps() {
         MedfolgendeFamilie barn1 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), "fnr1", null, MedfolgendeFamilie.Relasjonsrolle.BARN);
         MedfolgendeFamilie barn2 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), "fnr2", null, MedfolgendeFamilie.Relasjonsrolle.BARN);
         BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
@@ -235,7 +236,7 @@ public class BrevDataByggerInnvilgelseTest {
     }
 
     @Test
-    public void lag_medfølgendeBarnHarUuid_henterNavnFraBehandlingsgrunnlag() {
+    void lag_medfølgendeBarnHarUuid_henterNavnFraBehandlingsgrunnlag() {
         MedfolgendeFamilie barn1 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn1", MedfolgendeFamilie.Relasjonsrolle.BARN);
         MedfolgendeFamilie barn2 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn2", MedfolgendeFamilie.Relasjonsrolle.BARN);
         BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
@@ -258,26 +259,28 @@ public class BrevDataByggerInnvilgelseTest {
     }
 
     @Test
-    public void lag_omfattetBarnIkkeIBehandlingsgrunnlag_kasterException() {
+    void lag_omfattetBarnIkkeIBehandlingsgrunnlag_kasterException() {
         MedfolgendeFamilie barn = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn", MedfolgendeFamilie.Relasjonsrolle.BARN);
+        final BrevDataGrunnlag brevDataGrunnlag = lagBrevdataGrunnlag();
 
         when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(
             Set.of(new OmfattetFamilie(barn.uuid)), Collections.emptySet()));
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler))
+            .isThrownBy(() -> brevDataByggerInnvilgelse.lag(brevDataGrunnlag, saksbehandler))
             .withMessageContaining("finnes ikke i behandlingsgrunnlaget");
     }
 
     @Test
-    public void lag_ikkeOmfattetBarnIkkeIBehandlingsgrunnlag_kasterException() {
+    void lag_ikkeOmfattetBarnIkkeIBehandlingsgrunnlag_kasterException() {
         MedfolgendeFamilie barn = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn", MedfolgendeFamilie.Relasjonsrolle.BARN);
+        final BrevDataGrunnlag brevDataGrunnlag = lagBrevdataGrunnlag();
 
         when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeBarn(
             Collections.emptySet(), Set.of(new IkkeOmfattetBarn(barn.uuid, null, null))));
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler))
+            .isThrownBy(() -> brevDataByggerInnvilgelse.lag(brevDataGrunnlag, saksbehandler))
             .withMessageContaining("finnes ikke i behandlingsgrunnlaget");
     }
 }

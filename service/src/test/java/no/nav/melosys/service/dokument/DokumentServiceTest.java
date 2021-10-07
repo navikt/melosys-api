@@ -30,6 +30,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.doksys.Dokumentbestilling;
@@ -63,6 +64,7 @@ import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevdataGrunnlagFactory
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagSystemService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.utpeking.UtpekingService;
@@ -89,9 +91,8 @@ final class DokumentServiceTest {
     private final DoksysFasade dokSysFasade;
     private final DokumentService instans;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
-    public DokumentServiceTest() throws Exception {
+    public DokumentServiceTest() {
         avklarteVirksomheterService = mock(AvklarteVirksomheterService.class);
         dokSysFasade = mock(DoksysFasade.class);
         behandlingsresultatService = mock(BehandlingsresultatService.class);
@@ -99,7 +100,7 @@ final class DokumentServiceTest {
     }
 
     @Test
-    void produserInnvilgelsesbrev_medFullmektig_senderTilBrukerOgFullmektig() throws Exception {
+    void produserInnvilgelsesbrev_medFullmektig_senderTilBrukerOgFullmektig() {
         DokumentService dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock());
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(INNVILGELSE_YRKESAKTIV).build();
         dokumentServiceMedMockVelger.produserDokument(INNVILGELSE_YRKESAKTIV, Mottaker.av(BRUKER), BEHANDLINGSID, brevbestilling);
@@ -107,7 +108,7 @@ final class DokumentServiceTest {
     }
 
     @Test
-    void produser_avslagArbeidsgiver_funker() throws Exception {
+    void produser_avslagArbeidsgiver_funker() {
         DoksysBrevbestilling brevbestilling = lagBrevbestillingAvslagArbeidsgiver();
         Set<String> arbeidsgivendeOrgnumre = Collections.singleton("987654321");
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any(Behandling.class))).thenReturn(arbeidsgivendeOrgnumre);
@@ -117,7 +118,7 @@ final class DokumentServiceTest {
     }
 
     @Test
-    void produserUtkast_innvilgelsesBrev_funker() throws Exception {
+    void produserUtkast_innvilgelsesBrev_funker() {
         BrevbestillingRequest brevbestilling = lagBrevBestillingDto(INNVILGELSE_YRKESAKTIV, BRUKER);
 
         DokumentService dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock(brevbestilling));
@@ -127,7 +128,7 @@ final class DokumentServiceTest {
     }
 
     @Test
-    void produserUtkast_avslagArbeidsgiver_funker() throws Exception {
+    void produserUtkast_avslagArbeidsgiver_funker() {
         BrevbestillingRequest brevbestilling = lagBrevBestillingDto(AVSLAG_ARBEIDSGIVER, ARBEIDSGIVER);
         Set<String> arbeidsgivendeOrgnumre = Collections.singleton("987654321");
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any(Behandling.class))).thenReturn(arbeidsgivendeOrgnumre);
@@ -209,7 +210,7 @@ final class DokumentServiceTest {
         return sadr;
     }
 
-    private DokumentService lagDokumentService(BrevDataByggerVelger brevdatabyggervelger) throws Exception {
+    private DokumentService lagDokumentService(BrevDataByggerVelger brevdatabyggervelger) {
         Aktoer aktør = lagAktør(BRUKER);
         Behandling behandling = lagBehandling();
         BehandlingService behandlingService = mockBehandlingService(behandling);
@@ -248,7 +249,8 @@ final class DokumentServiceTest {
         RegisterOppslagSystemService registerOppslagService = new RegisterOppslagSystemService(eregFasade, persondataFasade);
         AvklarteVirksomheterSystemService avklarteVirksomheterSystemService = new AvklarteVirksomheterSystemService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), mock(KodeverkService.class));
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(lagBehandling()).build();
-        BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterSystemService, avklartefaktaService, persondataFasade, fakeUnleash);
+        Persondata persondata = PersonopplysningerObjectFactory.lagPersonopplysninger();
+        BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterSystemService, avklartefaktaService, persondata);
         BrevdataGrunnlagFactory brevdataGrunnlagFactory = mock(BrevdataGrunnlagFactory.class);
         when(brevdataGrunnlagFactory.av(any())).thenReturn(dataGrunnlag);
         return brevdataGrunnlagFactory;
@@ -417,8 +419,8 @@ final class DokumentServiceTest {
 
     private static BehandlingService mockBehandlingService(Behandling behandling) {
         BehandlingService behandlingService = mock(BehandlingService.class);
-        when(behandlingService.hentBehandling(eq(BEHANDLINGSID))).thenReturn(behandling);
-        when(behandlingService.hentBehandlingUtenSaksopplysninger(eq(BEHANDLINGSID))).thenReturn(behandling);
+        when(behandlingService.hentBehandling(BEHANDLINGSID)).thenReturn(behandling);
+        when(behandlingService.hentBehandlingUtenSaksopplysninger(BEHANDLINGSID)).thenReturn(behandling);
         when(behandlingService.hentBehandling(not(eq(BEHANDLINGSID)))).thenThrow(new IkkeFunnetException("Behandling finnes ikke."));
         when(behandlingService.hentBehandlingUtenSaksopplysninger(not(eq(BEHANDLINGSID)))).thenThrow(new IkkeFunnetException("Behandling finnes ikke."));
         return behandlingService;

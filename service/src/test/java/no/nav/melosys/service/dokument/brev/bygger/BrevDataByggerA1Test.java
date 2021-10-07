@@ -2,7 +2,6 @@ package no.nav.melosys.service.dokument.brev.bygger;
 
 import java.util.*;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
@@ -23,7 +22,6 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisterOppslagSystemService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,10 +43,6 @@ class BrevDataByggerA1Test {
     private LandvelgerService landvelgerService;
     @Mock
     RegisterOppslagSystemService registerOppslagService;
-    @Mock
-    private PersondataFasade persondataFasade;
-
-    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     private Set<String> avklarteOrganisasjoner;
     private Soeknad søknad;
@@ -105,7 +99,7 @@ class BrevDataByggerA1Test {
             mock(BehandlingService.class),
             kodeverkService);
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
-        dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondataFasade, fakeUnleash);
+        dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, personDok);
         brevDataByggerA1 = new BrevDataByggerA1(avklartefaktaService, landvelgerService);
     }
 

@@ -3,7 +3,6 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.util.Collections;
 import java.util.Set;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
@@ -14,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.SaksopplysningerService;
@@ -24,7 +24,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
-import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,7 +38,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class BrevDataByggerInnvilgelseFlereLandTest {
+class BrevDataByggerInnvilgelseFlereLandTest {
     @Mock
     AvklartefaktaService avklartefaktaService;
     @Mock
@@ -51,10 +51,6 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     SaksopplysningerService saksopplysningerService;
     @Mock
     BrevDataByggerA1 brevDataByggerA1;
-    @Mock
-    private PersondataFasade persondataFasade;
-
-    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     private Behandling behandling;
     private BrevbestillingRequest brevbestillingRequest;
@@ -62,7 +58,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     private BrevDataBygger brevDataByggerInnvilgelse;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.BRUKER);
         aktoer.setAktørId("ident");
@@ -101,7 +97,8 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
 
     private BrevDataGrunnlag lagBrevressurser() {
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
-        return new BrevDataGrunnlag(brevbestilling, null, avklarteVirksomheterService, avklartefaktaService, persondataFasade, fakeUnleash);
+        Persondata persondata = PersonopplysningerObjectFactory.lagPersonopplysninger();
+        return new BrevDataGrunnlag(brevbestilling, null, avklarteVirksomheterService, avklartefaktaService, persondata);
     }
 
     private static Saksopplysning lagPersonsopplysning() {
@@ -110,7 +107,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     }
 
     @Test
-    public void lag_medSokkel_setterMaritimtypeSokkel() {
+    void lag_medSokkel_setterMaritimtypeSokkel() {
         Maritimtyper maritimType = Maritimtyper.SOKKEL;
         when(avklartefaktaService.hentMaritimTyper(anyLong())).thenReturn(Set.of(maritimType));
 
@@ -122,7 +119,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     }
 
     @Test
-    public void lag_utenMaritimtArbeid_setterMaritimtypeTilNull() {
+    void lag_utenMaritimtArbeid_setterMaritimtypeTilNull() {
         when(avklartefaktaService.hentMaritimTyper(anyLong())).thenReturn(Collections.emptySet());
 
         BrevDataGrunnlag brevdataressurser = lagBrevressurser();
@@ -133,7 +130,7 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     }
 
     @Test
-    public void lag_utpekingAnnetLand_setterTrydemyndighetsland() {
+    void lag_utpekingAnnetLand_setterTrydemyndighetsland() {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
         SedDokument sedDokument = new SedDokument();
         sedDokument.setAvsenderLandkode(Landkoder.DE);
@@ -145,10 +142,11 @@ public class BrevDataByggerInnvilgelseFlereLandTest {
     }
 
     @Test
-    public void lag_innvilgelsesBrev_harBestillingsinformasjon() {
+    void lag_innvilgelsesBrev_harBestillingsinformasjon() {
         BrevData brevData = brevDataByggerInnvilgelse.lag(lagBrevressurser(), saksbehandler);
 
-        assertThat(brevData).isEqualToComparingOnlyGivenFields(brevbestillingRequest, "begrunnelseKode", "fritekst");
+        assertThat(brevData.begrunnelseKode).isEqualTo(brevbestillingRequest.getBegrunnelseKode());
+        assertThat(brevData.fritekst).isEqualTo(brevbestillingRequest.getFritekst());
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
     }
 }
