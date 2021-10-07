@@ -213,25 +213,31 @@ public class PersondataService implements PersondataFasade {
         }
     }
 
-    private static Person filtrerPersondataFørDato(Person person, Instant skjæringstidspunkt) {
+    private static Person filtrerPersondataFørDato(Person personPDL, Instant skjæringstidspunkt) {
         final LocalDateTime localDateTime = LocalDateTime.ofInstant(skjæringstidspunkt, ZoneId.systemDefault());
         return new Person(
-            Collections.emptyList(),
-            person.bostedsadresse().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
-            person.doedsfall().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
-            person.foedsel().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
-            person.folkeregisteridentifikator().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
-            person.folkeregisterpersonstatus().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
-            person.forelderBarnRelasjon().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
-            person.foreldreansvar().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
-            person.kjoenn().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
-            person.kontaktadresse().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
-            person.navn().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
-            person.oppholdsadresse().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
-            person.sivilstand().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
-            person.statsborgerskap().stream().filter(x -> x.erGyldigFør(localDateTime)).toList(),
-            Collections.emptyList()
+            Collections.emptySet(),
+            filtrerFørDato(personPDL.bostedsadresse(), localDateTime),
+            filtrerFørDato(personPDL.doedsfall(), localDateTime),
+            filtrerFørDato(personPDL.foedsel(), localDateTime),
+            filtrerFørDato(personPDL.folkeregisteridentifikator(), localDateTime),
+            filtrerFørDato(personPDL.folkeregisterpersonstatus(), localDateTime),
+            filtrerFørDato(personPDL.forelderBarnRelasjon(), localDateTime),
+            filtrerFørDato(personPDL.foreldreansvar(), localDateTime),
+            filtrerFørDato(personPDL.kjoenn(), localDateTime),
+            filtrerFørDato(personPDL.kontaktadresse(), localDateTime),
+            filtrerFørDato(personPDL.navn(), localDateTime),
+            filtrerFørDato(personPDL.oppholdsadresse(), localDateTime),
+            filtrerFørDato(personPDL.sivilstand(), localDateTime),
+            filtrerFørDato(personPDL.statsborgerskap(), localDateTime),
+            Collections.emptySet()
         );
+    }
+
+    private static <T extends HarMetadata> Set<T> filtrerFørDato(Collection<T> pdlOpplysning,
+                                                                 LocalDateTime localDateTime) {
+        return pdlOpplysning == null ? Collections.emptySet()
+            : pdlOpplysning.stream().filter(x -> x.erGyldigFør(localDateTime)).collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
