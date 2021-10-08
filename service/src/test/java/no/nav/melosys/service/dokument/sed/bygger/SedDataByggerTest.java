@@ -22,6 +22,7 @@ import no.nav.melosys.domain.eessi.sed.Virksomhet;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -273,15 +274,14 @@ class SedDataByggerTest {
     }
 
     @Test
-    void lag_bostedsadresseFinnesIkke_kasterException() {
+    void lag_ingenAdressekasterException() {
         behandling.hentPersonDokument().setBostedsadresse(new Bostedsadresse());
         SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad();
         sedDataGrunnlagMedSoknad.getBehandlingsgrunnlagData().bosted = new Bosted();
 
-
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE))
-            .withMessageContaining("Finner ingen bostedsadresse ");
+            .withMessageContaining(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
     }
 
     @Test
@@ -391,17 +391,6 @@ class SedDataByggerTest {
         lagUtkastAssertions(sedData, true);
         assertThat(sedData.getLovvalgsperioder()).isNotEmpty();
         assertThat(sedData.getLovvalgsperioder().get(0).getFom()).isEqualTo(lovvalgsperiode.getFom());
-    }
-
-    @Test
-    void lagUtkast_ingenAdresse_forventTomAdresse() {
-        behandling.hentPersonDokument().setBostedsadresse(new Bostedsadresse());
-        SedDataGrunnlagMedSoknad dataGrunnlag = lagGrunnlagMedSøknad();
-
-        SedDataDto sedData = dataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
-
-        lagUtkastAssertions(sedData, false);
-        assertThat(sedData.getBostedsadresse()).isNull();
     }
 
     @Test
