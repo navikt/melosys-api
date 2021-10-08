@@ -90,8 +90,8 @@ class VedtakKontrollServiceTest {
     @Test
     void utførKontroller_periodeOver24MndArt12MedOverlappendePeriode_returnererCollectionMedToKoder() {
         lovvalgsperiode.setFom(LocalDate.now());
-        lovvalgsperiode.setTom(LocalDate.now().plusYears(2));
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+        lovvalgsperiode.setTom(LocalDate.now().plusYears(3));
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2);
 
         Medlemsperiode medlemsperiode = new Medlemsperiode();
         medlemsperiode.periode = new Periode(LocalDate.now().plusMonths(2), LocalDate.now().plusYears(2));
