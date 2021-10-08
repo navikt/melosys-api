@@ -111,7 +111,10 @@ public class RepresentantService {
 
         var fastsattTrygdeavgift = medlemAvFolketrygden.getFastsattTrygdeavgift();
 
-        if (fastsattTrygdeavgift.getBetalesAv() == null || fastsattTrygdeavgift.getBetalesAv().getRolle() == Aktoersroller.BRUKER) {
+        if (fastsattTrygdeavgift.getBetalesAv() == null) {
+            return new ValgtRepresentant(fastsattTrygdeavgift.getRepresentantNr(), false, null, null);
+        }
+        if (fastsattTrygdeavgift.getBetalesAv().getRolle() == Aktoersroller.BRUKER) {
             return new ValgtRepresentant(fastsattTrygdeavgift.getRepresentantNr(), true, null, null);
         }
 
