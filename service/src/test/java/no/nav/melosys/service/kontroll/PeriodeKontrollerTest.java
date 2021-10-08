@@ -35,8 +35,8 @@ class PeriodeKontrollerTest {
     }
 
     @Test
-    void periodeoOver24Mnd_periode24Mnd_false() {
-        assertThat(PeriodeKontroller.periodeOver24Mnd(LocalDate.now(), LocalDate.now().plusMonths(24))).isFalse();
+    void periodeoOver24Mnd_periode24Mnd_true() {
+        assertThat(PeriodeKontroller.periodeOver24Mnd(LocalDate.now(), LocalDate.now().plusMonths(24))).isTrue();
     }
 
     @Test
