@@ -13,6 +13,7 @@ import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.sed.*;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
@@ -67,15 +68,15 @@ public class SedDataBygger {
                                      Behandlingsresultat behandlingsresultat,
                                      PeriodeType periodeType,
                                      boolean erUtkast) {
+        validerAdresser(dataGrunnlag);
         SedDataDto sedDataDto = lagDataDtoMedPersonopplysninger(dataGrunnlag);
         validerArbeidsstederOgVirksomheter(sedDataDto);
         if (erUtkast) {
-            sedDataDto.setBostedsadresse(lagBostedsadresseHvisFinnes(dataGrunnlag.getBostedGrunnlag()));
             sedDataDto.setLovvalgsperioder(lagLovvalgsperioderHvisFinnes(behandlingsresultat, periodeType));
         } else {
-            sedDataDto.setBostedsadresse(lagBostedsadresse(dataGrunnlag.getBostedGrunnlag(), behandlingsresultat.getId()));
             sedDataDto.setLovvalgsperioder(lagLovvalgsperioder(behandlingsresultat, periodeType));
         }
+        sedDataDto.setBostedsadresse(lagBostedsadresse(dataGrunnlag.getBostedGrunnlag()));
         sedDataDto.setKontaktadresse(lagKontaktadresse(dataGrunnlag.getPersondata()));
         sedDataDto.setOppholdsadresse(lagOppholdsadresse(dataGrunnlag.getPersondata()));
         sedDataDto.setSvarAnmodningUnntak(lagSvarAnmodningUnntak(behandlingsresultat));
@@ -84,15 +85,12 @@ public class SedDataBygger {
         return sedDataDto;
     }
 
-    private VedtakDto lagVedtakDto(Behandlingsresultat behandlingsresultat) {
-        return behandlingsresultat.getBehandling().getFagsak().getBehandlinger()
-            .stream()
-            .filter(behandling -> behandling.harStatus(Behandlingsstatus.AVSLUTTET) && !behandling.getId().equals(behandlingsresultat.getId()))
-            .map(behandling -> behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
-            .filter(Behandlingsresultat::harVedtak)
-            .max(Comparator.comparing(b -> b.getVedtakMetadata().getVedtaksdato()))
-            .map(b -> new VedtakDto(false, b.getVedtakMetadata().getVedtaksdato().atZone(ZoneId.systemDefault()).toLocalDate()))
-            .orElse(new VedtakDto(true, null));
+    private static void validerAdresser(SedDataGrunnlag dataGrunnlag) {
+        if (dataGrunnlag.getBostedGrunnlag().finnBostedsadresse().isEmpty()
+            && dataGrunnlag.getPersondata().finnKontaktadresse().isEmpty()
+            && dataGrunnlag.getPersondata().finnOppholdsadresse().isEmpty()) {
+            throw new FunksjonellException(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
+        }
     }
 
     private SedDataDto lagDataDtoMedPersonopplysninger(SedDataGrunnlag dataGrunnlag) {
@@ -126,7 +124,7 @@ public class SedDataBygger {
             .filter(Familiemedlem::erForelder)
             .map(SedDataBygger::lagForelder).toList());
         sedDataDto.setUtenlandskIdent(grunnlagMedSøknad.getBehandlingsgrunnlagData().personOpplysninger.utenlandskIdent.stream()
-            .map(SedDataBygger::tilUtenlandskIdentDto).collect(Collectors.toList()));
+            .map(SedDataBygger::tilUtenlandskIdentDto).toList());
 
         if (grunnlagMedSøknad.getBehandling().erBehandlingAvSøknad()) {
             sedDataDto.setSøknadsperiode(new Periode(
@@ -140,7 +138,7 @@ public class SedDataBygger {
 
     private List<Arbeidssted> hentArbeidssteder(SedDataGrunnlagMedSoknad dataGrunnlag) {
         List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder().stream()
-            .map(SedDataBygger::mapArbeidssted).collect(Collectors.toList());
+            .map(SedDataBygger::mapArbeidssted).collect(Collectors.toList()); //NOSONAR mutable list
 
         Set<String> arbeidsland = arbeidssteder.stream().map(Arbeidssted::getAdresse).map(Adresse::getLand).collect(Collectors.toSet());
 
@@ -161,7 +159,7 @@ public class SedDataBygger {
 
         return avklarteVirksomheter.stream()
             .map(SedDataBygger::lagVirksomhet)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private static List<Virksomhet> lagSelvstendigeVirksomheter(SedDataGrunnlagMedSoknad dataGrunnlagMedSoknad) {
@@ -171,7 +169,7 @@ public class SedDataBygger {
 
         return avklarteSelvstendigeVirksomheter.stream()
             .map(SedDataBygger::lagVirksomhet)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private static Virksomhet lagVirksomhet(AvklartVirksomhet avklartVirksomhet) {
@@ -179,14 +177,9 @@ public class SedDataBygger {
             fraStrukturertAdresse((StrukturertAdresse) avklartVirksomhet.adresse));
     }
 
-    private static Adresse lagBostedsadresseHvisFinnes(BostedGrunnlag bostedGrunnlag) {
+    private static Adresse lagBostedsadresse(BostedGrunnlag bostedGrunnlag) {
         return bostedGrunnlag.finnBostedsadresse().map(b -> lagAdresse(Adressetype.BOSTEDSADRESSE, b))
             .orElse(null);
-    }
-
-    private static Adresse lagBostedsadresse(BostedGrunnlag bostedGrunnlag, Long behandlingID) {
-        return bostedGrunnlag.finnBostedsadresse().map(b -> lagAdresse(Adressetype.BOSTEDSADRESSE, b))
-            .orElseThrow(() -> new FunksjonellException("Finner ingen bostedsadresse for behandling " + behandlingID));
     }
 
     private static Adresse lagKontaktadresse(Persondata persondata) {
@@ -295,7 +288,18 @@ public class SedDataBygger {
 
         return tidligereLovvalgsperioder.stream()
             .map(SedDataBygger::lagLovvalgsperiodeDto)
-            .collect(Collectors.toList());
+            .toList();
+    }
+
+    private VedtakDto lagVedtakDto(Behandlingsresultat behandlingsresultat) {
+        return behandlingsresultat.getBehandling().getFagsak().getBehandlinger()
+            .stream()
+            .filter(behandling -> behandling.harStatus(Behandlingsstatus.AVSLUTTET) && !behandling.getId().equals(behandlingsresultat.getId()))
+            .map(behandling -> behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
+            .filter(Behandlingsresultat::harVedtak)
+            .max(Comparator.comparing(b -> b.getVedtakMetadata().getVedtaksdato()))
+            .map(b -> new VedtakDto(false, b.getVedtakMetadata().getVedtaksdato().atZone(ZoneId.systemDefault()).toLocalDate()))
+            .orElse(new VedtakDto(true, null));
     }
 
     private static SvarAnmodningUnntak lagSvarAnmodningUnntak(Behandlingsresultat behandlingsresultat) {
