@@ -30,6 +30,8 @@ import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -48,6 +50,8 @@ import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
  */
 @Service
 public class BrevDataService {
+    private static final Logger log = LoggerFactory.getLogger(BrevDataService.class);
+
     static final String MELOSYS_ENHET_ID = "4530";
 
     static final String PLASSHOLDER_TEKST = "-";
@@ -149,6 +153,7 @@ public class BrevDataService {
         Element brevXmlElement;
         try {
             FellesType fellesType = mapFellesType(mottaker, kontaktopplysning, behandling);
+            log.debug("kjører Melosys nav felles mapping");
             MelosysNAVFelles navFelles = mapNAVFelles(mottaker, kontaktopplysning, behandling, brevData);
             String brevXml = BrevDataMapperRuter.brevDataMapper(produserbartDokument).mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData);
 
@@ -182,6 +187,7 @@ public class BrevDataService {
         final MelosysNAVFelles navFelles = new MelosysNAVFelles();
 
         navFelles.setBehandlendeEnhet(lagNavEnhet());
+        log.debug("lager kontaktinfo");
         navFelles.setKontaktinformasjon(BrevDataUtils.lagKontaktInformasjon());
         navFelles.setMottaker(lagMottaker(mottaker, kontaktopplysning, behandling));
         navFelles.setSakspart(lagSakspart(behandling));
