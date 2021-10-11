@@ -22,7 +22,7 @@ import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdConsumer;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdMock;
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.ArbeidsforholdRestConsumer;
-import no.nav.melosys.integrasjon.aareg.arbeidsforhold.KodeOppslag;
+import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.binding.HentArbeidsforholdHistorikkSikkerhetsbegrensning;
 import no.nav.tjeneste.virksomhet.arbeidsforhold.v3.meldinger.HentArbeidsforholdHistorikkRequest;
 import org.assertj.core.api.Assertions;
