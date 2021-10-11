@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.tps.mapper;
 
 import java.util.Optional;
 
+import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
@@ -11,6 +12,7 @@ import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
 import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
+import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.*;
 
 class AdresseMapper {
@@ -26,15 +28,16 @@ class AdresseMapper {
         throw new IllegalStateException("Utility");
     }
 
-    static Bostedsadresse mapTilBostedsadresse(no.nav.tjeneste.virksomhet.person.v3.informasjon.Bostedsadresse bostedsadresse) {
+    static Bostedsadresse mapTilBostedsadresse(no.nav.tjeneste.virksomhet.person.v3.informasjon.Bostedsadresse bostedsadresse, KodeOppslag kodeOppslag) {
         Bostedsadresse b = new Bostedsadresse();
         if (bostedsadresse != null && bostedsadresse.getStrukturertAdresse() != null) {
             if (bostedsadresse.getStrukturertAdresse() instanceof no.nav.tjeneste.virksomhet.person.v3.informasjon.Gateadresse) {
                 b.setGateadresse(mapTilGateadresse((no.nav.tjeneste.virksomhet.person.v3.informasjon.Gateadresse) bostedsadresse.getStrukturertAdresse()));
             }
-            if (bostedsadresse.getStrukturertAdresse() instanceof StedsadresseNorge) {
-                StedsadresseNorge stedsadresseNorge = (StedsadresseNorge) bostedsadresse.getStrukturertAdresse();
-                b.setPostnr(stedsadresseNorge.getPoststed().getValue());
+            if (bostedsadresse.getStrukturertAdresse() instanceof StedsadresseNorge stedsadresseNorge) {
+                final String postnr = stedsadresseNorge.getPoststed().getValue();
+                b.setPostnr(postnr);
+                b.setPoststed(kodeOppslag.getTerm(FellesKodeverk.POSTNUMMER.getNavn(), postnr));
             }
             b.setLand(Land.av(bostedsadresse.getStrukturertAdresse().getLandkode().getValue()));
         }

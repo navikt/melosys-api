@@ -1,10 +1,11 @@
 package no.nav.melosys.integrasjon.tps.mapper;
 
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.person.*;
 import no.nav.melosys.domain.dokument.person.Personstatus;
 import no.nav.melosys.domain.dokument.person.Sivilstand;
+import no.nav.melosys.domain.dokument.person.*;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
+import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.*;
 
 public class PersonMapper {
@@ -13,7 +14,7 @@ public class PersonMapper {
         throw new IllegalStateException("Utility");
     }
 
-    public static PersonDokument mapTilPerson(no.nav.tjeneste.virksomhet.person.v3.informasjon.Person person) {
+    public static PersonDokument mapTilPerson(Person person, KodeOppslag kodeOppslag) {
         PersonDokument dokument = new PersonDokument();
         dokument.setFnr(mapFnr(person.getAktoer()));
         dokument.setSivilstand(mapSivilstand(person.getSivilstand()));
@@ -35,7 +36,7 @@ public class PersonMapper {
         dokument.setDiskresjonskode(mapDiskresjonskode(person.getDiskresjonskode()));
         dokument.setPersonstatus(person.getPersonstatus() == null ? null
             : Personstatus.valueOf(person.getPersonstatus().getPersonstatus().getValue()));
-        dokument.setBostedsadresse(AdresseMapper.mapTilBostedsadresse(person.getBostedsadresse()));
+        dokument.setBostedsadresse(AdresseMapper.mapTilBostedsadresse(person.getBostedsadresse(), kodeOppslag));
         dokument.setPostadresse(AdresseMapper.mapTilPostadresse(person.getPostadresse()));
         if (person instanceof Bruker) {
             dokument.setMidlertidigPostadresse(

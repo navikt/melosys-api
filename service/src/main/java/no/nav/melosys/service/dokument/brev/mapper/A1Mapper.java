@@ -17,10 +17,10 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.person.Persondata;
-import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 import no.nav.melosys.domain.util.LandkoderUtils;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
@@ -49,7 +49,7 @@ class A1Mapper {
 
         a1.setOpprettelsesDato(convertToXMLGregorianCalendarRemoveTimezone(Instant.now()));
 
-        a1.setPerson(mapPerson(brevData.person));
+        a1.setPerson(mapPerson(brevData));
 
         a1.setLovvalgsperiode(mapLovvalgsperiode(resultat.hentValidertLovvalgsperiode()));
 
@@ -69,7 +69,8 @@ class A1Mapper {
         return a1;
     }
 
-    private PersonType mapPerson(Persondata persondata) {
+    private PersonType mapPerson(BrevDataA1 brevDataA1) {
+        final var persondata = brevDataA1.person;
         PersonType person = new PersonType();
         person.setKjoenn(KjoennKode.fromValue(persondata.hentKjønnType().getKode()));
         person.setStatsborgerskap(mapStatsborgerskap(persondata.hentAlleStatsborgerskap()));
@@ -82,17 +83,17 @@ class A1Mapper {
             throw new TekniskException("Konverteringsfeil ved konvertering av fødselsdato", e);
         }
 
-        person.setBostedsadresse(mapBostedAdresse(persondata));
+        person.setBostedsadresse(mapBostedAdresse(brevDataA1.bostedsadresse));
         person.setMidlertidigOppholdsadresse(mapMidlertidigOppholdsadresse(persondata));
 
         return person;
     }
 
-    private BostedsadresseType mapBostedAdresse(Persondata persondata) {
-        if (persondata.finnBostedsadresse().isPresent()) {
-            return lagBostedsadresse(persondata.finnBostedsadresse().get());
+    private BostedsadresseType mapBostedAdresse(StrukturertAdresse bostedsadresse) {
+        if (bostedsadresse == null) {
+            throw new FunksjonellException("Brevmalen fra A1 trenger bostedsadresse"); //FIXME Mal må endres
         }
-        return new BostedsadresseType();
+        return lagBostedsadresse(bostedsadresse);
     }
 
     private MidlertidigOppholdsadresseType mapMidlertidigOppholdsadresse(Persondata persondata) {
@@ -207,7 +208,7 @@ class A1Mapper {
             .map(Arbeidssted::lagAdresselinje)
             .map(adresselinje -> adresselinje.isBlank() ? "" : adresselinje) //uten dette viser ikke brev alle linjene i en A1
             .flatMap(adresselinje -> brekkTekstTilListe(adresselinje).stream())
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private static List<String> lagAdresselinjeForUkjentEllerIkkeOppgittArbeidssted() {
@@ -274,15 +275,14 @@ class A1Mapper {
             .build();
     }
 
-    private BostedsadresseType lagBostedsadresse(Bostedsadresse bosted) {
-        final var strukturertadresse = bosted.strukturertAdresse();
+    private BostedsadresseType lagBostedsadresse(StrukturertAdresse strukturertAdresse) {
         return BostedsadresseType.builder()
-            .withGatenavn(StringUtils.isEmpty(strukturertadresse.getGatenavn()) ? " " : strukturertadresse.getGatenavn())
-            .withHusnummer(strukturertadresse.getHusnummerEtasjeLeilighet())
-            .withPostnr(strukturertadresse.getPostnummer())
-            .withPoststed(strukturertadresse.getPoststed())
-            .withRegion(strukturertadresse.getRegion())
-            .withLandkode(strukturertadresse.getLandkode())
+            .withGatenavn(StringUtils.isEmpty(strukturertAdresse.getGatenavn()) ? " " : strukturertAdresse.getGatenavn())
+            .withHusnummer(strukturertAdresse.getHusnummerEtasjeLeilighet())
+            .withPostnr(strukturertAdresse.getPostnummer())
+            .withPoststed(strukturertAdresse.getPoststed())
+            .withRegion(strukturertAdresse.getRegion())
+            .withLandkode(strukturertAdresse.getLandkode())
             .build();
     }
 
