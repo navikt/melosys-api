@@ -16,7 +16,7 @@ public interface Persondata {
 
     boolean harStrengtAdressebeskyttelse();
 
-    boolean harIkkeRegistrertAdresse();
+    boolean manglerRegistrertAdresse();
 
     boolean manglerBostedsadresse();
 

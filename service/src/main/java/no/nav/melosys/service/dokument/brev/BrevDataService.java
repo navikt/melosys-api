@@ -291,8 +291,8 @@ public class BrevDataService {
 
     private boolean brukerManglerAdresseFraRegister(Behandling behandling) {
         if (unleash.isEnabled("melosys.brev.adresser.pdl")) {
-            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID()).harIkkeRegistrertAdresse();
+            return persondataFasade.hentPerson(behandling.getFagsak().hentAktørID()).manglerRegistrertAdresse();
         }
-        return behandling.hentPersonDokument().harIkkeRegistrertAdresse();
+        return behandling.hentPersonDokument().manglerRegistrertAdresse();
     }
 }

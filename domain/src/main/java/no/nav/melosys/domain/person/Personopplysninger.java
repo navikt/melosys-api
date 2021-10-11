@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.brev.Postadresse;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.person.adresse.Adressebeskyttelse;
@@ -44,7 +43,7 @@ public record Personopplysninger(
     }
 
     @Override
-    public boolean harIkkeRegistrertAdresse() {
+    public boolean manglerRegistrertAdresse() {
         return bostedsadresse == null && kontaktadresser.isEmpty() && oppholdsadresser.isEmpty();
     }
 
