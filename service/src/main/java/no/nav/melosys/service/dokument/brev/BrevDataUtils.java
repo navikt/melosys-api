@@ -10,16 +10,12 @@ import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.person.Persondata;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static no.nav.melosys.domain.adresse.Adresse.sammenslå;
 import static no.nav.melosys.service.dokument.brev.BrevDataService.*;
 import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils.convertToXMLGregorianCalendarRemoveTimezone;
 
 public final class BrevDataUtils {
-    private static final Logger log = LoggerFactory.getLogger(BrevDataUtils.class);
-
     private BrevDataUtils() {
         throw new UnsupportedOperationException("Utility");
     }
@@ -51,23 +47,21 @@ public final class BrevDataUtils {
 
     // Adresse-stubs
     public static Kontaktinformasjon lagKontaktInformasjon() {
-        Kontaktinformasjon kontaktinformasjon = new Kontaktinformasjon();
-        kontaktinformasjon.setBesoksadresse(lagAdresse(new Besoksadresse(), lagNorskPostadresse()));
-        kontaktinformasjon.setPostadresse(lagAdresse(new Postadresse(), lagNorskPostadresse()));
-        //Adressen skal benyttes dersom bruker/mottakerRolle har behov for å kontakte NAV per post.
-        kontaktinformasjon.setReturadresse(lagAdresse(new Returadresse(), lagNorskPostadresse()));
-        log.info("Kontaktinformasjon med postnummer {} og poststed {} laget",kontaktinformasjon.getPostadresse().getAdresse().getPostnummer(), kontaktinformasjon.getPostadresse().getAdresse().getPoststed());
-        return kontaktinformasjon;
+        return Kontaktinformasjon.builder()
+            .withBesoksadresse(lagAdresse(new Besoksadresse(), lagNorskPostadresse()))
+            .withPostadresse(lagAdresse(new Postadresse(), lagNorskPostadresse()))
+            //Adressen skal benyttes dersom bruker/mottakerRolle har behov for å kontakte NAV per post.
+            .withReturadresse(lagAdresse(new Returadresse(), lagNorskPostadresse()))
+            .build();
     }
 
     public static NorskPostadresse lagNorskPostadresse() {
-        NorskPostadresse adresse = new NorskPostadresse();
-        log.info("lager Norsk postadresse med tekst {} og postnumemer {}",PLASSHOLDER_TEKST,PLASSHOLDER_POSTNUMMER);
-        adresse.setAdresselinje1(PLASSHOLDER_TEKST);
-        adresse.setPostnummer(PLASSHOLDER_POSTNUMMER);
-        adresse.setPoststed(PLASSHOLDER_TEKST);
-        adresse.setLand(PLASSHOLDER_TEKST);
-        return adresse;
+        return NorskPostadresse.builder()
+            .withAdresselinje1(PLASSHOLDER_TEKST)
+            .withPostnummer(PLASSHOLDER_POSTNUMMER)
+            .withPoststed(PLASSHOLDER_TEKST)
+            .withLand(PLASSHOLDER_TEKST)
+            .build();
     }
 
     public static UtenlandskPostadresse lagUtendlanskAdresse(UtenlandskMyndighet utenlandskMyndighet) {
