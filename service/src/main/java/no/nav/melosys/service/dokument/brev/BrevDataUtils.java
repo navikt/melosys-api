@@ -56,13 +56,13 @@ public final class BrevDataUtils {
         kontaktinformasjon.setPostadresse(lagAdresse(new Postadresse(), lagNorskPostadresse()));
         //Adressen skal benyttes dersom bruker/mottakerRolle har behov for å kontakte NAV per post.
         kontaktinformasjon.setReturadresse(lagAdresse(new Returadresse(), lagNorskPostadresse()));
-        log.debug("Laget kontaktinformasjon med postnummer {} og poststed {}",kontaktinformasjon.getPostadresse().getAdresse().getPostnummer(), kontaktinformasjon.getPostadresse().getAdresse().getPoststed());
+        log.info("Kontaktinformasjon med postnummer {} og poststed {} laget",kontaktinformasjon.getPostadresse().getAdresse().getPostnummer(), kontaktinformasjon.getPostadresse().getAdresse().getPoststed());
         return kontaktinformasjon;
     }
 
     public static NorskPostadresse lagNorskPostadresse() {
         NorskPostadresse adresse = new NorskPostadresse();
-        log.debug("lager Norsk postadresse med tekst {} og postnumemer {}",PLASSHOLDER_TEKST,PLASSHOLDER_POSTNUMMER);
+        log.info("lager Norsk postadresse med tekst {} og postnumemer {}",PLASSHOLDER_TEKST,PLASSHOLDER_POSTNUMMER);
         adresse.setAdresselinje1(PLASSHOLDER_TEKST);
         adresse.setPostnummer(PLASSHOLDER_POSTNUMMER);
         adresse.setPoststed(PLASSHOLDER_TEKST);

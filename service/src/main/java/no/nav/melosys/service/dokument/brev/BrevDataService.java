@@ -153,7 +153,7 @@ public class BrevDataService {
         Element brevXmlElement;
         try {
             FellesType fellesType = mapFellesType(mottaker, kontaktopplysning, behandling);
-            log.debug("kjører Melosys nav felles mapping");
+            log.info("kjører Melosys nav felles mapping");
             MelosysNAVFelles navFelles = mapNAVFelles(mottaker, kontaktopplysning, behandling, brevData);
             String brevXml = BrevDataMapperRuter.brevDataMapper(produserbartDokument).mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData);
 
@@ -187,7 +187,7 @@ public class BrevDataService {
         final MelosysNAVFelles navFelles = new MelosysNAVFelles();
 
         navFelles.setBehandlendeEnhet(lagNavEnhet());
-        log.debug("lager kontaktinfo");
+        log.info("lager kontaktinfo");
         navFelles.setKontaktinformasjon(BrevDataUtils.lagKontaktInformasjon());
         navFelles.setMottaker(lagMottaker(mottaker, kontaktopplysning, behandling));
         navFelles.setSakspart(lagSakspart(behandling));
