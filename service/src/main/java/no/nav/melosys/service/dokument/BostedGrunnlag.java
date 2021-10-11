@@ -5,7 +5,6 @@ import java.util.Optional;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.person.Master;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.util.BehandlingsgrunnlagUtils;
 import no.nav.melosys.exception.FunksjonellException;
@@ -47,7 +46,7 @@ public class BostedGrunnlag {
         }
 
         final var strukturertAdresse = bostedsadresseFraRegister.strukturertAdresse();
-        if (Master.TPS.name().equals(bostedsadresseFraRegister.kilde())) {
+        if (StringUtils.isEmpty(strukturertAdresse.getPoststed()) && strukturertAdresse.getPostnummer() != null) {
             strukturertAdresse.setPoststed(kodeverkService.dekod(FellesKodeverk.POSTNUMMER, strukturertAdresse.getPostnummer()));
         }
 
