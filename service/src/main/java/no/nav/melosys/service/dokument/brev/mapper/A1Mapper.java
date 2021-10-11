@@ -21,6 +21,7 @@ import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 import no.nav.melosys.domain.util.LandkoderUtils;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
@@ -89,10 +90,11 @@ class A1Mapper {
     }
 
     private BostedsadresseType mapBostedAdresse(Persondata persondata) {
-        if (persondata.finnBostedsadresse().isPresent()) {
-            return lagBostedsadresse(persondata.finnBostedsadresse().get());
+        final Optional<Bostedsadresse> bostedsadresseOptional = persondata.finnBostedsadresse();
+        if (bostedsadresseOptional.isPresent()) {
+            return lagBostedsadresse(bostedsadresseOptional.get());
         }
-        return new BostedsadresseType();
+        throw new FunksjonellException("Brevmalen fra A1 trenger bostedsadresse"); //FIXME Mal må endres
     }
 
     private MidlertidigOppholdsadresseType mapMidlertidigOppholdsadresse(Persondata persondata) {
@@ -207,7 +209,7 @@ class A1Mapper {
             .map(Arbeidssted::lagAdresselinje)
             .map(adresselinje -> adresselinje.isBlank() ? "" : adresselinje) //uten dette viser ikke brev alle linjene i en A1
             .flatMap(adresselinje -> brekkTekstTilListe(adresselinje).stream())
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private static List<String> lagAdresselinjeForUkjentEllerIkkeOppgittArbeidssted() {
