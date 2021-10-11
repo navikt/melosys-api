@@ -105,7 +105,7 @@ public class TpsService implements TpsFasade {
         } catch (JAXBException e) {
             throw new IntegrasjonException(e);
         }
-        PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson());
+        PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson(), kodeOppslag);
         return new PersonMedKilde(dokument, xmlWriter.toString());
     }
 

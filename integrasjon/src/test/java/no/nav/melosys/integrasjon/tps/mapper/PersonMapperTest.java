@@ -14,21 +14,28 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
+import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(MockitoExtension.class)
 class PersonMapperTest {
+    @Mock
+    KodeOppslag kodeOppslag;
 
     @Test
     void mapTilPerson_medDokumentFraXml_girForventetMapping() {
         final String kilde = "mock/person/tps_person_3.0_mock.xml";
         HentPersonResponse response = lagHentPersonResponseFraXml(kilde);
 
-        PersonDokument personDokument = PersonMapper.mapTilPerson(response.getPerson());
+        PersonDokument personDokument = PersonMapper.mapTilPerson(response.getPerson(), kodeOppslag);
         assertThat(personDokument).isNotNull();
         assertThat(personDokument.hentFolkeregisterident()).isEqualTo("11111111111");
         assertThat(personDokument.getSivilstand().getKode()).isEqualTo("UGIF");
@@ -55,7 +62,7 @@ class PersonMapperTest {
         final String kilde = "mock/person/familierelasjoner.xml";
         HentPersonResponse response = lagHentPersonResponseFraXml(kilde);
 
-        PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson());
+        PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson(), kodeOppslag);
         // Verifiser...
         Assertions.assertThat(dokument).isNotNull();
         Assertions.assertThat(dokument.getFamiliemedlemmer()).isNotEmpty();
@@ -66,7 +73,7 @@ class PersonMapperTest {
         final String kilde = "mock/person/midlertidig_postadresse_utland.xml";
         HentPersonResponse response = lagHentPersonResponseFraXml(kilde);
 
-        PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson());
+        PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson(), kodeOppslag);
 
         Assertions.assertThat(dokument).isNotNull();
         Assertions.assertThat(dokument.getPostadresse()).isNotNull();
@@ -79,7 +86,7 @@ class PersonMapperTest {
         final String kilde = "mock/person/midlertidig_postadresse_norge.xml";
         HentPersonResponse response = lagHentPersonResponseFraXml(kilde);
 
-        PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson());
+        PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson(), kodeOppslag);
 
         Assertions.assertThat(dokument).isNotNull();
         Assertions.assertThat(dokument.getMidlertidigPostadresse()).isNotNull();
@@ -94,7 +101,7 @@ class PersonMapperTest {
         final String kilde = "mock/person/midlertidig_postadresse_norge_matrikkel.xml";
         HentPersonResponse response = lagHentPersonResponseFraXml(kilde);
 
-        PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson());
+        PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson(), kodeOppslag);
 
         MidlertidigPostadresseNorge midlertidigPostadresseNorge = (MidlertidigPostadresseNorge) dokument.getMidlertidigPostadresse();
         Assertions.assertThat(midlertidigPostadresseNorge.gateadresse.getGatenavn()).isEqualTo("Bugstadveien 101");
@@ -105,7 +112,7 @@ class PersonMapperTest {
         final String kilde = "mock/person/bostedsadresse.xml";
         HentPersonResponse response = lagHentPersonResponseFraXml(kilde);
 
-        PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson());
+        PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson(), kodeOppslag);
 
         assertNotNull(dokument);
 
@@ -125,7 +132,7 @@ class PersonMapperTest {
         final String kilde = "mock/person/midlertidig_co_adresse.xml";
         HentPersonResponse response = lagHentPersonResponseFraXml(kilde);
 
-        PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson());
+        PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson(), kodeOppslag);
 
         assertNotNull(dokument);
 
