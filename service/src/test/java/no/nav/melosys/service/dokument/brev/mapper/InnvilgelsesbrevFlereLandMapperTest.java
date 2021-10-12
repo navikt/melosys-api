@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Set;
 
 import no.nav.dok.melosysbrev._000108.SakstypeKode;
-import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
-import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
@@ -53,16 +51,28 @@ class InnvilgelsesbrevFlereLandMapperTest {
 
     @Test
     void mapTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
-        testMapTilBrevXml(lagBehandling(lagFagsak()), lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode())));
-    }
-
-    private void testMapTilBrevXml(Behandling behandling, Behandlingsresultat behandlingsresultat) throws Exception {
-        FellesType fellesType = lagFellesType();
-        MelosysNAVFelles navFelles = lagNAVFelles();
-        BrevDataInnvilgelseFlereLand brevdataInnvilgelse = lagBrevdataInnvilgelse();
+        var behandling = lagBehandling(lagFagsak());
+        var behandlingsresultat = lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()));
+        var fellesType = lagFellesType();
+        var navFelles = lagNAVFelles();
+        var brevdataInnvilgelse = lagBrevdataInnvilgelse();
 
         String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse);
         assertThat(resultat).matches("(?s)<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
+    }
+
+    @Test
+    void mapTilBrevXml_ingenArbeidsland_girUkjenteAlleEosLand() throws Exception {
+        var behandling = lagBehandling(lagFagsak());
+        var behandlingsresultat = lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()));
+        var fellesType = lagFellesType();
+        var navFelles = lagNAVFelles();
+        var brevdataInnvilgelse = lagBrevdataInnvilgelse();
+        brevdataInnvilgelse.alleArbeidsland = Collections.emptyList();
+
+        String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse);
+        assertThat(resultat).contains("<ns20:arbeidsland>forskjellige EØS-land/Sveits</ns20:arbeidsland>");
+
     }
 
     private BrevDataInnvilgelseFlereLand lagBrevdataInnvilgelse() {
