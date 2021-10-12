@@ -1,26 +1,28 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.time.LocalDate;
-import java.util.List;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.service.TrygdeavtaleService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
+import no.nav.melosys.tjenester.gui.dto.trygdeavtale.TrygdeAvtaleDataForVedtakDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.lang.reflect.Field;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -33,65 +35,93 @@ class TrygdeavtaleTjenesteTest {
     private BehandlingService behandlingService;
     @Mock
     private Aksesskontroll aksesskontroll;
+    @Mock
+    private BehandlingsgrunnlagService behandlingsgrunnlagService;
 
     private TrygdeavtaleTjeneste trygdeavtaleTjeneste;
 
-    private static final Behandling behandling = lagBehandling();
-
     @BeforeEach
     void init() {
-        trygdeavtaleTjeneste = new TrygdeavtaleTjeneste(trygdeavtaleService, behandlingService, aksesskontroll);
-        when(behandlingService.hentBehandling(1L)).thenReturn(behandling);
+        trygdeavtaleTjeneste = new TrygdeavtaleTjeneste(trygdeavtaleService, behandlingService, aksesskontroll, behandlingsgrunnlagService);
     }
 
     @Test
     void hentTrygdeavtaleInfo_utenVirksomhetOgBarnEktefelle_returnererKorrekt() {
-        var response = trygdeavtaleTjeneste.hentTrygdeavtaleInfo(1L, false, false).getBody();
+        when(behandlingService.hentBehandling(1L)).thenReturn(lagBehandling());
+
+        trygdeavtaleTjeneste.hentTrygdeavtaleInfo(1L, false, false);
 
         verify(trygdeavtaleService, never()).hentVirksomheter(any());
         verify(trygdeavtaleService, never()).hentFamiliemedlemmer(any());
-
-        assertThat(response).isNotNull();
-        assertThat(response.aktoerId()).isEqualTo(behandling.getFagsak().hentAktørID());
-        assertThat(response.behandlingstema()).isEqualTo(behandling.getTema().getKode());
-        var behandlingsgrunnlagdata = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
-        assertThat(response.periodeFom()).isEqualTo(behandlingsgrunnlagdata.periode.getFom());
-        assertThat(response.periodeTom()).isEqualTo(behandlingsgrunnlagdata.periode.getTom());
-        assertThat(response.soeknadsland()).isEqualTo(behandlingsgrunnlagdata.soeknadsland.landkoder);
     }
 
     @Test
     void hentTrygdeavtaleInfo_medVirksomhetOgBarnEktefelle_returnererKorrekt() {
-        var response = trygdeavtaleTjeneste.hentTrygdeavtaleInfo(1L, true, true).getBody();
+        when(behandlingService.hentBehandling(1L)).thenReturn(lagBehandling());
+
+        trygdeavtaleTjeneste.hentTrygdeavtaleInfo(1L, true, true);
 
         verify(trygdeavtaleService).hentVirksomheter(any());
         verify(trygdeavtaleService).hentFamiliemedlemmer(any());
-
-        assertThat(response).isNotNull();
-        assertThat(response.aktoerId()).isEqualTo(behandling.getFagsak().hentAktørID());
-        assertThat(response.behandlingstema()).isEqualTo(behandling.getTema().getKode());
-        var behandlingsgrunnlagdata = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
-        assertThat(response.periodeFom()).isEqualTo(behandlingsgrunnlagdata.periode.getFom());
-        assertThat(response.periodeTom()).isEqualTo(behandlingsgrunnlagdata.periode.getTom());
-        assertThat(response.soeknadsland()).isEqualTo(behandlingsgrunnlagdata.soeknadsland.landkoder);
     }
 
+    @Test
+    void leggInnTrygdeAvtaleDataForOgKunneFatteVetak() throws JsonProcessingException, NoSuchFieldException, IllegalAccessException {
+        String json = """
+            {
+              "fom": "2021-08-01",
+              "tom": "2021-08-02",
+              "land": [
+                "GB"
+              ],
+              "virksomheter": [
+                "11111111111"
+              ],
+              "vedtak": "JA_FATTE_VEDTAK",
+              "innvilgelse" : "JA",
+              "bestemmelse": "UK_ART6_1",
+              "barn" : [ {
+                "uuid" : "de895640-dc80-41ed-a220-75cc76ccc821",
+                "omfattet" : true,
+                "begrunnelseKode" : null,
+                "begrunnelseFritekst" : null
+              } ],
+              "ektefelle" : {
+                "uuid" : "0bad5c70-8a3f-4fc7-9031-d3aebd6b68de",
+                "omfattet" : false,
+                "begrunnelseKode" : "SAMBOER_UTEN_FELLES_BARN",
+                "begrunnelseFritekst" : "fritekst"
+              }
+            }
+            """;
+        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(1L)).thenReturn(lagBehandlingsgrunnlag());
 
-    private static Behandling lagBehandling() {
+        TrygdeAvtaleDataForVedtakDto data = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .readValue(json, TrygdeAvtaleDataForVedtakDto.class);
+
+        trygdeavtaleTjeneste.overforDataForVedtak(1L, data);
+
+        verify(behandlingsgrunnlagService).oppdaterBehandlingsgrunnlag(any());
+    }
+
+    private Behandlingsgrunnlag lagBehandlingsgrunnlag() throws NoSuchFieldException, IllegalAccessException {
+        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
+        Field field = behandlingsgrunnlag.getClass().getDeclaredField("id");
+        field.setAccessible(true);
+        field.set(behandlingsgrunnlag, 1L);
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(new SoeknadFtrl());
+        return behandlingsgrunnlag;
+    }
+
+    private Behandling lagBehandling() {
         var bruker = new Aktoer();
         bruker.setRolle(Aktoersroller.BRUKER);
-        bruker.setAktørId("AktørId");
         var fagsak = new Fagsak();
         fagsak.getAktører().add(bruker);
-        var behandlingsgrunnlagdata = new BehandlingsgrunnlagData();
-        behandlingsgrunnlagdata.periode = new Periode(LocalDate.now(), LocalDate.now().plusDays(1));
-        behandlingsgrunnlagdata.soeknadsland.landkoder.addAll(List.of("land1", "land2"));
-        var behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagdata);
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
         return behandling;
     }
 }
