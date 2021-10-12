@@ -22,6 +22,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
+import java.time.LocalDate;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -67,40 +69,21 @@ class TrygdeavtaleTjenesteTest {
 
     @Test
     void leggInnTrygdeAvtaleDataForOgKunneFatteVetak() throws JsonProcessingException, NoSuchFieldException, IllegalAccessException {
-        String json = """
-            {
-              "fom": "2021-08-01",
-              "tom": "2021-08-02",
-              "land": [
-                "GB"
-              ],
-              "virksomheter": [
-                "11111111111"
-              ],
-              "vedtak": "JA_FATTE_VEDTAK",
-              "innvilgelse" : "JA",
-              "bestemmelse": "UK_ART6_1",
-              "barn" : [ {
-                "uuid" : "de895640-dc80-41ed-a220-75cc76ccc821",
-                "omfattet" : true,
-                "begrunnelseKode" : null,
-                "begrunnelseFritekst" : null
-              } ],
-              "ektefelle" : {
-                "uuid" : "0bad5c70-8a3f-4fc7-9031-d3aebd6b68de",
-                "omfattet" : false,
-                "begrunnelseKode" : "SAMBOER_UTEN_FELLES_BARN",
-                "begrunnelseFritekst" : "fritekst"
-              }
-            }
-            """;
         when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(1L)).thenReturn(lagBehandlingsgrunnlag());
 
-        TrygdeAvtaleDataForVedtakDto data = new ObjectMapper()
-            .registerModule(new JavaTimeModule())
-            .readValue(json, TrygdeAvtaleDataForVedtakDto.class);
+        TrygdeAvtaleDataForVedtakDto trygdeAvtaleDataForVedtakDto = new TrygdeAvtaleDataForVedtakDto.Builder()
+            .fom(LocalDate.of(2021, 1, 1))
+            .tom(LocalDate.of(2021, 2, 1))
+            .land(List.of("GB"))
+            .virksomheter(List.of("11111111111"))
+            .vedtak("JA_FATTE_VEDTAK")
+            .innvilgelse("JA")
+            .bestemmelse("UK_ART6_1")
+            .addBarn("0bad5c70-8a3f-4fc7-9031-d3aebd6b68de", false, null, null)
+            .ektefelle("0bad5c70-8a3f-4fc7-9031-d3aebd6b68de", false,"SAMBOER_UTEN_FELLES_BARN" , "fritekst")
+            .build();
 
-        trygdeavtaleTjeneste.overforDataForVedtak(1L, data);
+        trygdeavtaleTjeneste.overforDataForVedtak(1L, trygdeAvtaleDataForVedtakDto);
 
         verify(behandlingsgrunnlagService).oppdaterBehandlingsgrunnlag(any());
     }
