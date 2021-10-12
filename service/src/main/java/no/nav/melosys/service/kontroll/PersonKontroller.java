@@ -27,4 +27,8 @@ public final class PersonKontroller {
     public static boolean harRegistrertBostedsadresse(Persondata persondata, BehandlingsgrunnlagData behandlingsgrunnlagData) {
         return !persondata.manglerBostedsadresse() || !behandlingsgrunnlagData.bosted.oppgittAdresse.erTom();
     }
+
+    public static boolean harRegistrertAdresse(Persondata persondata, BehandlingsgrunnlagData behandlingsgrunnlagData) {
+        return !persondata.manglerRegistrertAdresse() || !behandlingsgrunnlagData.bosted.oppgittAdresse.erTom();
+    }
 }

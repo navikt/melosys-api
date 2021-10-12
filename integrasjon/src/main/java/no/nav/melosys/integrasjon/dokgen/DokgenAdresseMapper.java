@@ -83,7 +83,7 @@ public final class DokgenAdresseMapper {
             mapMottakerNavn(org, persondata),
             mapAdresselinjer(org, kontaktperson, kontaktopplysning, persondata),
             mapPostnr(org, persondata),
-            mapPoststed(org),
+            mapPoststed(org, persondata),
             mapLandForAdresse(org, persondata)
         );
     }

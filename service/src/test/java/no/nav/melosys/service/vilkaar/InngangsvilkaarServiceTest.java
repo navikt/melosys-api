@@ -70,12 +70,12 @@ class InngangsvilkaarServiceTest {
         InngangsvilkarResponse res = new InngangsvilkarResponse();
         res.setFeilmeldinger(Collections.emptyList());
         res.setKvalifisererForEf883_2004(Boolean.TRUE);
-        when(inngangsvilkaarConsumer.vurderInngangsvilkår(any(), anySet(), any())).thenReturn(res);
+        when(inngangsvilkaarConsumer.vurderInngangsvilkår(any(), anySet(), anyBoolean(), any())).thenReturn(res);
 
-        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, periode);
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode);
 
         verify(inngangsvilkaarConsumer).vurderInngangsvilkår(personDokument.hentAlleStatsborgerskap(),
-            Set.copyOf(tilIso3(landkoder)), periode);
+            Set.copyOf(tilIso3(landkoder)), false, periode);
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR, true, Collections.emptySet());
     }
 
@@ -97,12 +97,12 @@ class InngangsvilkaarServiceTest {
         InngangsvilkarResponse res = new InngangsvilkarResponse();
         res.setFeilmeldinger(Collections.emptyList());
         res.setKvalifisererForEf883_2004(Boolean.TRUE);
-        when(inngangsvilkaarConsumer.vurderInngangsvilkår(any(), anySet(), any())).thenReturn(res);
+        when(inngangsvilkaarConsumer.vurderInngangsvilkår(any(), anySet(), anyBoolean(), any())).thenReturn(res);
 
-        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, søknadsland, periode);
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, søknadsland, false, periode);
 
         verify(inngangsvilkaarConsumer).vurderInngangsvilkår(Set.of(Land.av(FINLAND), Land.av(SVERIGE)),
-            Set.copyOf(tilIso3(søknadsland)), periode);
+            Set.copyOf(tilIso3(søknadsland)), false, periode);
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR, true,
             Collections.emptySet());
     }
@@ -126,7 +126,7 @@ class InngangsvilkaarServiceTest {
         personhistorikkDokument.statsborgerskapListe = Collections.emptyList();
         when(saksopplysningerService.hentPersonhistorikk(anyLong())).thenReturn(personhistorikkDokument);
 
-        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, periode);
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode);
 
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR,
             false, Set.of(Inngangsvilkaar.MANGLER_STATSBORGERSKAP));
@@ -144,12 +144,30 @@ class InngangsvilkaarServiceTest {
         InngangsvilkarResponse res = new InngangsvilkarResponse();
         res.setFeilmeldinger(Collections.emptyList());
         res.setKvalifisererForEf883_2004(Boolean.TRUE);
-        when(inngangsvilkaarConsumer.vurderInngangsvilkår(any(), anySet(), søknadsperiodeCaptor.capture())).thenReturn(res);
+        when(inngangsvilkaarConsumer.vurderInngangsvilkår(any(), anySet(), anyBoolean(), søknadsperiodeCaptor.capture())).thenReturn(res);
 
-        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, periode);
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode);
 
         no.nav.melosys.domain.behandlingsgrunnlag.data.Periode søknadsperiode = søknadsperiodeCaptor.getValue();
         assertThat(søknadsperiode.getTom()).isEqualTo(LocalDate.now().plusYears(2));
+    }
+
+    @Test
+    void vurderOgLagreInngangsvilkår_ukjenteEllerAlleEosLand() {
+        final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
+        PersonDokument personDokument = new PersonDokument();
+        personDokument.setStatsborgerskap(Land.av(FINLAND));
+        when(saksopplysningerService.hentPersonOpplysninger(anyLong())).thenReturn(personDokument);
+        InngangsvilkarResponse res = new InngangsvilkarResponse();
+        res.setFeilmeldinger(Collections.emptyList());
+        res.setKvalifisererForEf883_2004(Boolean.TRUE);
+        when(inngangsvilkaarConsumer.vurderInngangsvilkår(any(), anySet(), anyBoolean(), any())).thenReturn(res);
+
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, Collections.emptyList(), true, periode);
+
+        verify(inngangsvilkaarConsumer).vurderInngangsvilkår(personDokument.hentAlleStatsborgerskap(),
+            Collections.emptySet(), true, periode);
+        verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR, true, Collections.emptySet());
     }
 
     @Test
@@ -165,12 +183,12 @@ class InngangsvilkaarServiceTest {
         feilmelding.setMelding("FEIL!!!");
         res.setFeilmeldinger(Collections.singletonList(feilmelding));
         res.setKvalifisererForEf883_2004(Boolean.FALSE);
-        when(inngangsvilkaarConsumer.vurderInngangsvilkår(any(), anySet(), any())).thenReturn(res);
+        when(inngangsvilkaarConsumer.vurderInngangsvilkår(any(), anySet(), anyBoolean(), any())).thenReturn(res);
 
-        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, periode);
+        inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode);
 
         verify(inngangsvilkaarConsumer).vurderInngangsvilkår(personDokument.hentAlleStatsborgerskap(),
-            Set.copyOf(tilIso3(landkoder)), periode);
+            Set.copyOf(tilIso3(landkoder)), false, periode);
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(1L, Vilkaar.FO_883_2004_INNGANGSVILKAAR,
             false, Set.of(Inngangsvilkaar.TEKNISK_FEIL));
     }

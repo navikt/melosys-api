@@ -43,7 +43,7 @@ public record Personopplysninger(
     }
 
     @Override
-    public boolean harIkkeRegistrertAdresse() {
+    public boolean manglerRegistrertAdresse() {
         return bostedsadresse == null && kontaktadresser.isEmpty() && oppholdsadresser.isEmpty();
     }
 

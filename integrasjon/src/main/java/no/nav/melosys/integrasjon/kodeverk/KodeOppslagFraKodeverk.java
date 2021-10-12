@@ -1,13 +1,10 @@
-package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
-
-import no.nav.melosys.integrasjon.kodeverk.Kode;
-import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
-import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Component;
+package no.nav.melosys.integrasjon.kodeverk;
 
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Component;
 
 @Component
 public class KodeOppslagFraKodeverk implements KodeOppslag {

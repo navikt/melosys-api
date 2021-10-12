@@ -297,8 +297,13 @@ class RepresentantServiceTest {
 
     @Test
     void hentValgtRepresentant_selvbetalende_hentesKorrekt() {
+        var fagsak = lagFagsak();
+        var aktoer = new Aktoer();
+        aktoer.setRolle(Aktoersroller.BRUKER);
+        aktoer.setFagsak(fagsak);
         var fastsattTrygdeavgift = new FastsattTrygdeavgift();
         fastsattTrygdeavgift.setRepresentantNr("repnr");
+        fastsattTrygdeavgift.setBetalesAv(aktoer);
         var medlemAvFolketrygden = new MedlemAvFolketrygden();
         medlemAvFolketrygden.setFastsattTrygdeavgift(fastsattTrygdeavgift);
         when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(anyLong())).thenReturn(java.util.Optional.of(medlemAvFolketrygden));
@@ -360,6 +365,19 @@ class RepresentantServiceTest {
         assertThat(response.isSelvbetalende()).isFalse();
         assertThat(response.getOrgnr()).isEqualTo("orgnr");
         assertThat(response.getKontaktperson()).isNull();
+    }
+
+    @Test
+    void hentValgtRepresentant_betalesAvErNull_returnererIkkeSelvbetalendeRepresentant() {
+        var fastsattTrygdeavgift = new FastsattTrygdeavgift();
+        fastsattTrygdeavgift.setBetalesAv(null);
+        var medlemAvFolketrygden = new MedlemAvFolketrygden();
+        medlemAvFolketrygden.setFastsattTrygdeavgift(fastsattTrygdeavgift);
+        when(medlemAvFolketrygdenRepository.findByBehandlingsresultatId(anyLong())).thenReturn(java.util.Optional.of(medlemAvFolketrygden));
+
+        var response = representantService.hentValgtRepresentant(1L);
+
+        assertThat(response.isSelvbetalende()).isFalse();
     }
 
     private Aktoer lagAktoer(Aktoersroller rolle, long id) {

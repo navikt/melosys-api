@@ -1,0 +1,11 @@
+// @no-cookie-jar
+// @no-log
+POST https://{{melosys-api-url}}/admin/oppgaver/opprett/
+Cache-Control: no-cache
+Content-Type: application/json
+Accept: application/json
+X-MELOSYS-ADMIN-APIKEY: {{melosys-admin-api-key}}
+
+{}
+
+###

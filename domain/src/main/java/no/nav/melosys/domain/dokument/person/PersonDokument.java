@@ -57,7 +57,7 @@ public class PersonDokument implements Persondata, SaksopplysningDokument {
     }
 
     @Override
-    public boolean harIkkeRegistrertAdresse() {
+    public boolean manglerRegistrertAdresse() {
         return bostedsadresse.erTom() &&
             postadresse.erTom() &&
             midlertidigPostadresse.land == null;

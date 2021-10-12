@@ -1,9 +1,5 @@
 package no.nav.melosys.integrasjon.aareg.arbeidsforhold;
 
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.dokument.arbeidsforhold.*;
-import no.nav.melosys.domain.dokument.felles.Periode;
-
 import java.time.OffsetDateTime;
 import java.time.YearMonth;
 import java.util.Calendar;
@@ -11,6 +7,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
+
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.dokument.arbeidsforhold.*;
+import no.nav.melosys.domain.dokument.felles.Periode;
+import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
 
 public class ArbeidsforholdKonverter {
     private final ArbeidsforholdResponse arbeidsforholdResponse;

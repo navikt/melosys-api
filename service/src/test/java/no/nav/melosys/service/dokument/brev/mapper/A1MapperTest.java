@@ -12,6 +12,7 @@ import no.nav.dok.melosysbrev._000067.AdresseType;
 import no.nav.dok.melosysbrev._000116.BrevdataType;
 import no.nav.dok.melosysbrev._000116.Fag;
 import no.nav.dok.melosysbrev._000116.ObjectFactory;
+import no.nav.dok.melosysbrev.felles.melosys_felles.BostedsadresseType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
@@ -37,19 +38,14 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
 import org.apache.commons.lang3.StringUtils;
 import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.xml.sax.SAXException;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
-import static no.nav.melosys.service.dokument.brev.mapper.A1Mapper.MAKS_ANTALL_TEGN_PER_LINJE_5_2;
-import static no.nav.melosys.service.dokument.brev.mapper.A1Mapper.STATSLØS_TEKST;
-import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger;
-import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysningerStatløs;
+import static no.nav.melosys.service.dokument.brev.mapper.A1Mapper.*;
+import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -253,7 +249,7 @@ class A1MapperTest {
             .filter(StringUtils::isNotEmpty)
             .collect(Collectors.toList());
 
-        assertThat(utfylteAdresselinjer).containsExactly("Various EEA-countries/Switzerland");
+        assertThat(utfylteAdresselinjer).containsExactly(FLERE_UKJENTE_ELLER_IKKE_OPPGITT_LAND);
     }
 
     @Test
@@ -268,6 +264,58 @@ class A1MapperTest {
         brevData.person = lagPersonopplysningerStatløs();
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
         assertThat(a1.getPerson().getStatsborgerskap()).isEqualTo(STATSLØS_TEKST);
+    }
+
+
+    @Disabled("Trenger rydding")
+    @Test
+    void mapTilBrevXML_bostedsadresserFraRegister_forventBostedsadresse() {
+        brevData.person = lagPersonopplysninger();
+        A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
+        assertThat(a1.getPerson().getBostedsadresse().getGatenavn()).isEqualTo("Bogata");
+        assertThat(a1.getPerson().getBostedsadresse().getHusnummer()).isEqualTo("12B");
+        assertThat(a1.getPerson().getBostedsadresse().getPostnr()).isEqualTo("1234");
+        assertThat(a1.getPerson().getBostedsadresse().getPoststed()).isEqualTo("Oslo");
+        assertThat(a1.getPerson().getBostedsadresse().getRegion()).isEqualTo("Norge");
+        assertThat(a1.getPerson().getBostedsadresse().getLandkode()).isEqualTo("NO");
+    }
+
+    @Test
+    void mapTilBrevXML_harFlereAdresserRegistrert_forventUtfylltMidlertidigAdresseMedNyesteRegistrerteDato() {
+        brevData.person = lagPersonopplysninger();
+        A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
+        assertThat(a1.getPerson().getMidlertidigOppholdsadresse().getGatenavn()).isEqualTo("gatenavnOppholdsadresseFreg");
+    }
+
+    @Test
+    void mapTilBrevXML_harIngenOppholdsadresse_forventUtfylltMidlertidigAdresseMedKontaktAdresse() {
+        brevData.person = lagPersoopplysningerUtenOppholdsadresse();
+        A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
+        assertThat(a1.getPerson().getMidlertidigOppholdsadresse().getGatenavn()).isEqualTo("gatenavnKontaktadresseFreg");
+    }
+
+    @Test
+    void mapTilBrevXML_harIngenKontaktadresse_forventUtfylltMidlertidigAdresseMedOppholdsadresse() {
+        brevData.person = lagPersoopplysningerUtenKontaktadresse();
+        A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
+        assertThat(a1.getPerson().getMidlertidigOppholdsadresse().getGatenavn()).isEqualTo("gatenavnOppholdsadresseFreg");
+    }
+
+    @Disabled("Brevmal krever bostedsadresse")
+    @Test
+    void mapTilBrevXML_harIngenAdresserRegistrert() {
+        brevData.person = lagPersonopplysningerUtenAdresser();
+        A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
+        assertThat(a1.getPerson().getBostedsadresse().getGatenavn()).isNull();
+        assertThat(a1.getPerson().getMidlertidigOppholdsadresse().getGatenavn()).isNull();
+    }
+
+    @Disabled("Brevmal krever bostedsadresse")
+    @Test
+    void mapTilBrevXML_harIkkeBostedsAdresseFraPDL_bostedsAdresseErTom() {
+        brevData.person = lagPersonopplysningerUtenBostedsadresse();
+        A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
+        assertThat(a1.getPerson().getBostedsadresse()).isEqualTo(new BostedsadresseType());
     }
 
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException {

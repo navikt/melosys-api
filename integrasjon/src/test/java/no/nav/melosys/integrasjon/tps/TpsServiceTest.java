@@ -9,31 +9,37 @@ import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.person.Informasjonsbehov;
+import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
 import no.nav.tjeneste.virksomhet.person.v3.informasjon.*;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonResponse;
 import no.nav.tjeneste.virksomhet.person.v3.meldinger.HentPersonhistorikkResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class TpsServiceTest {
-    private static final String FNR = "88888888888";
     private static final Long AKTØRID_1 = 1000021552067L;
 
+    @Mock
     private PersonConsumer personConsumer;
+    @Mock
+    private KodeOppslag kodeOppslag;
+
     private TpsService service;
 
     @BeforeEach
-    public void setUp() {
-        personConsumer = mock(PersonConsumer.class);
-
+    void setUp() {
         DokumentFactory dokumentFactory = new DokumentFactory(JaxbConfig.jaxb2Marshaller(), new XsltTemplatesFactory());
 
-        service = new TpsService(personConsumer, dokumentFactory);
+        service = new TpsService(personConsumer, dokumentFactory, kodeOppslag);
     }
 
     @Test

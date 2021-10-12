@@ -19,6 +19,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
+import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
 import no.nav.melosys.integrasjon.tps.mapper.PersonMapper;
 import no.nav.melosys.integrasjon.tps.mapper.PersonMedKilde;
 import no.nav.melosys.integrasjon.tps.person.PersonConsumer;
@@ -45,11 +46,13 @@ public class TpsService implements TpsFasade {
 
     private final PersonConsumer personConsumer;
     private final DokumentFactory dokumentFactory;
+    private final KodeOppslag kodeOppslag;
 
     @Autowired
-    public TpsService(PersonConsumer personConsumer, DokumentFactory dokumentFactory) {
+    public TpsService(PersonConsumer personConsumer, DokumentFactory dokumentFactory, KodeOppslag kodeOppslag) {
         this.personConsumer = personConsumer;
         this.dokumentFactory = dokumentFactory;
+        this.kodeOppslag = kodeOppslag;
     }
 
     @Override
@@ -102,7 +105,7 @@ public class TpsService implements TpsFasade {
         } catch (JAXBException e) {
             throw new IntegrasjonException(e);
         }
-        PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson());
+        PersonDokument dokument = PersonMapper.mapTilPerson(response.getPerson(), kodeOppslag);
         return new PersonMedKilde(dokument, xmlWriter.toString());
     }
 
