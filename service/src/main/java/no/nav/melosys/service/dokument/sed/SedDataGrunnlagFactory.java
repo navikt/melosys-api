@@ -13,11 +13,13 @@ import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagUtenSokna
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.person.Informasjonsbehov.MED_FAMILIERELASJONER;
 
 @Component
+@Primary
 public class SedDataGrunnlagFactory {
     private final AvklartefaktaService avklartefaktaService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
