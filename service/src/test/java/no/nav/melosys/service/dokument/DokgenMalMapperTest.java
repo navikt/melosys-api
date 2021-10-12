@@ -11,6 +11,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
+import no.nav.melosys.domain.brev.storbritannia.AttestStorbritanniaBrevbestilling;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
@@ -368,6 +369,19 @@ class DokgenMalMapperTest {
 
         assertThat(dokgenMalMapper.mapBehandling(brevbestilling))
             .isInstanceOf(InnvilgelseFtrl.class);
+    }
+
+    @Test
+    void skalMappeAttestStorbritannia() {
+        when(mockKodeverkService.dekod(any(), any())).thenReturn("Andeby");
+        when(mockPersondataFasade.hentPersonFraTps(any(), any())).thenReturn(lagPersonopplysning());
+
+        Behandling behandling = lagBehandling(lagFagsak(true));
+
+        DokgenBrevbestilling brevbestilling = new AttestStorbritanniaBrevbestilling.Builder()
+            .medProduserbartdokument(ATTEST_NO_UK_1)
+            .medBehandling(behandling)
+            .build();
     }
 
     private InnvilgelseFtrl lagInnvilgelseFtrl() {

@@ -25,7 +25,7 @@ import static no.nav.melosys.service.dokument.brev.mapper.felles.BrevMapperUtils
 
 public class MangelbrevMapper implements BrevDataMapper {
 
-    private static final String XSD_LOCATION = "melosysbrev/melosys_000074.xsd";
+    private static final String XSD_LOCATION = "melosysbrev/melosys_000XXX.xsd"; // TODO: Oppdater med riktig etter bumping av dokgen
 
     // Frist fra dato for utsendelse av brev, uavhengig av helg, helligdager, osv.
     private static final int FRIST_UKER = 3;

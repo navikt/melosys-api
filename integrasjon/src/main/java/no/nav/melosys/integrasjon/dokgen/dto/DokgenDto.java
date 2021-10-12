@@ -13,6 +13,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 import static no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper.*;
@@ -27,11 +28,12 @@ public abstract class DokgenDto {
     private final Instant dagensDato;
 
     private final String navnBruker;
-    private final String navnMottaker;
-    private final List<String> adresselinjer;
-    private final String postnr;
-    private String poststed;
-    private String land;
+    private final String navnMottaker; // Erstattes av mottaker.navn
+    private final List<String> adresselinjer; // Erstattes av mottaker.adresselinjer
+    private final String postnr; // Erstattes av mottaker.postnr
+    private String poststed; // Erstattes av mottaker.poststed
+    private String land; // Erstattes av mottaker.land
+    private final Mottaker mottaker;
 
     // Saksbehandlingstid er 12 uker fra dato for utsendelse av brev, uavhengig av helg, helligdager, osv.
     protected static final int SAKSBEHANDLINGSTID_DAGER = 12 * 7;
@@ -49,11 +51,11 @@ public abstract class DokgenDto {
         this.dagensDato = Instant.now();
         this.navnBruker = persondata.getSammensattNavn();
         this.navnMottaker = mapMottakerNavn(org, persondata);
-        this.adresselinjer = mapAdresselinjer(org, brevbestilling.getKontaktpersonNavn(), brevbestilling.getKontaktopplysning(),
-            persondata);
+        this.adresselinjer = mapAdresselinjer(org, brevbestilling.getKontaktpersonNavn(), brevbestilling.getKontaktopplysning(), persondata);
         this.postnr = mapPostnr(org, persondata);
         this.poststed = mapPoststed(org, persondata);
         this.land = mapLandForAdresse(org, persondata);
+        this.mottaker = mapMottaker(org, brevbestilling.getKontaktpersonNavn(), brevbestilling.getKontaktopplysning(), persondata);
     }
 
     public String getFnr() {
@@ -98,5 +100,9 @@ public abstract class DokgenDto {
 
     public void setLand(String land) {
         this.land = land;
+    }
+
+    public Mottaker getMottaker() {
+        return mottaker;
     }
 }

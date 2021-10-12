@@ -10,6 +10,7 @@ import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.brev.storbritannia.AttestStorbritanniaBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
@@ -187,7 +188,19 @@ public class DokgenService {
                 .medBegrunnelseFritekst(brevbestillingRequest.getBegrunnelseFritekst())
                 .medEktefelleFritekst(brevbestillingRequest.getEktefelleFritekst())
                 .medBarnFritekst(brevbestillingRequest.getBarnFritekst());
+            case ATTEST_NO_UK_1 -> lagAttestStorbritanniaBrevbestilling(brevbestillingRequest);
             default -> new DokgenBrevbestilling.Builder<>();
         };
+    }
+
+    private AttestStorbritanniaBrevbestilling.Builder lagAttestStorbritanniaBrevbestilling(BrevbestillingRequest brevbestillingRequest) {
+        return new AttestStorbritanniaBrevbestilling.Builder()
+//            TODO: Gjør mapping
+//            .medArbeidstaker()
+//            .medMedfolgendeFamiliemedlemmer()
+//            .medArbeidsgiverNorge()
+//            .medUtsendelse()
+//            .medRepresentantUK()
+              ;
     }
 }
