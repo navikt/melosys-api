@@ -15,7 +15,7 @@ import org.xml.sax.SAXException;
 
 public class AttestStorbritanniaMapper implements BrevDataMapper {
 
-    private static final String XSD_LOCATION = "melosysbrev/melosys_000074.xsd";
+    private static final String XSD_LOCATION = "melosysbrev/melosys_000XXX.xsd"; // TODO: Oppdater med riktig etter bumping av dokgen
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException {

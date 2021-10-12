@@ -21,6 +21,8 @@ public record Arbeidstaker(
     List<String> bostedadresse
 ) {
     public static Arbeidstaker av(no.nav.melosys.domain.brev.storbritannia.Arbeidstaker arbeidstaker) {
+        if (arbeidstaker == null) return null;
+
         return new Arbeidstaker(arbeidstaker.navn(), arbeidstaker.foedselsdato(), arbeidstaker.fnr(), arbeidstaker.bostedsadresse());
     }
 }

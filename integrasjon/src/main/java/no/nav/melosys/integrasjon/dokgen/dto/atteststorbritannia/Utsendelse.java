@@ -24,6 +24,8 @@ public record Utsendelse(
     Instant sluttdato
 ) {
     public static Utsendelse av(no.nav.melosys.domain.brev.storbritannia.Utsendelse utsendelse) {
+        if (utsendelse == null) return null;
+
         return new Utsendelse(
             utsendelse.artikkel6_1(),
             utsendelse.artikkel7_3(),

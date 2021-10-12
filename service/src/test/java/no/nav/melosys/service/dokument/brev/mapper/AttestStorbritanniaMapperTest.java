@@ -1,0 +1,79 @@
+package no.nav.melosys.service.dokument.brev.mapper;
+
+import java.time.Instant;
+
+import no.nav.dok.melosysbrev._000074.Fag;
+import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
+import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
+import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
+import org.jeasy.random.EasyRandom;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
+import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagKontaktInformasjon;
+import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadresse;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
+class AttestStorbritanniaMapperTest {
+
+    private AttestStorbritanniaMapper mapper;
+
+    private EasyRandom easyRandom;
+
+    @BeforeEach
+    public void setUp() {
+        mapper = new AttestStorbritanniaMapper();
+        easyRandom = EasyRandomConfigurer.randomForDokProd();
+    }
+
+    @Disabled("Disabled inntil dokgen er bumpet")
+    @Test
+    void mapTilBrevXML() throws Exception {
+        FellesType fellesType = new FellesType();
+        fellesType.setFagsaksnummer("MELTEST-1");
+
+        MelosysNAVFelles navFelles = easyRandom.nextObject(MelosysNAVFelles.class);
+        navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
+        navFelles.setKontaktinformasjon(lagKontaktInformasjon());
+
+        Behandling behandling = new Behandling();
+        behandling.setTema(Behandlingstema.TRYGDEAVTALE_UK);
+
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
+        brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
+
+        brevData.fritekst = "Test";
+
+        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, null, brevData);
+
+        assertThat(xml).isNotNull();
+    }
+
+    @Disabled("Disabled inntil dokgen er bumpet")
+    @Test
+    void mapFag() {
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
+        brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
+        brevData.fritekst = "Test";
+
+        Behandling behandling = new Behandling();
+        behandling.setTema(Behandlingstema.TRYGDEAVTALE_UK);
+
+        Fag fag = mapper.mapFag(brevData, behandling);
+
+        assertThat(fag).isNotNull();
+        assertThat(fag.getDatoMottatt()).isNotNull();
+        assertThat(fag.getAvsender()).isNotNull();
+
+        assertThat(fag.getManglendeOpplysninger()).isNotNull();
+        assertThat(fag.getManglendeOpplysninger().getFristDato()).isNotNull();
+        assertThat(fag.getManglendeOpplysninger().getManglendeOpplysningerFritekst()).isNotNull();
+    }
+}

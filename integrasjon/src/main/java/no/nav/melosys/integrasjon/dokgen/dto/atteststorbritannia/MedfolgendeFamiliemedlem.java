@@ -18,6 +18,8 @@ public record MedfolgendeFamiliemedlem(
     String fnr
 ) {
     public static MedfolgendeFamiliemedlem av(no.nav.melosys.domain.brev.storbritannia.MedfolgendeFamiliemedlem medfolgendeFamiliemedlem) {
+        if (medfolgendeFamiliemedlem == null) return null;
+
         return new MedfolgendeFamiliemedlem(medfolgendeFamiliemedlem.navn(), medfolgendeFamiliemedlem.foedselsdato(), medfolgendeFamiliemedlem.fnr());
     }
 }
