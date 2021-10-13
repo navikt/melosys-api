@@ -59,9 +59,7 @@ public class LandvelgerService {
 
     public boolean erUkjenteEllerAlleEosLand(long behandlingID) {
         BehandlingsgrunnlagData grunnlagData = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID).getBehandlingsgrunnlagdata();
-        Soeknadsland soeknadsland = hentSøknadsland(grunnlagData);
-        if (soeknadsland == null) return false;
-        return soeknadsland.erUkjenteEllerAlleEosLand;
+        return hentSøknadsland(grunnlagData).erUkjenteEllerAlleEosLand;
     }
 
     public Collection<Landkoder> hentAlleArbeidslandUtenMarginaltArbeid(long behandlingID) {
