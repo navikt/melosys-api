@@ -54,7 +54,7 @@ class FamiliemedlemmerDataFetcherTest {
     private Familiemedlem lagRelatertVedsivilstand() {
         return new Familiemedlem(new Folkeregisteridentifikator("fnr"), new Navn("fornavn", null, "etternavn"),
             Familierelasjon.RELATERT_VED_SIVILSTAND, new Foedsel(LocalDate.MIN, null, null, null), null, "ukjent",
-            new Sivilstand(Sivilstandstype.GIFT, "relatertVedSivilstandID", LocalDate.MIN, null, "Dolly", "PDL",
+            new Sivilstand(Sivilstandstype.GIFT, null, "relatertVedSivilstandID", LocalDate.MIN, null, "Dolly", "PDL",
                 false));
     }
 }

@@ -9,7 +9,7 @@ public final class SivilstandTilDtoKonverter {
 
     public static SivilstandDto tilDto(Sivilstand sivilstand) {
         return new SivilstandDto(
-            sivilstand.type().toString(),
+            sivilstand.type().erUdefinert() ? sivilstand.tekstHvisTypeErUdefinert() : sivilstand.type().toString(),
             sivilstand.relatertVedSivilstand(),
             sivilstand.gyldigFraOgMed(),
             sivilstand.bekreftelsesdato(),

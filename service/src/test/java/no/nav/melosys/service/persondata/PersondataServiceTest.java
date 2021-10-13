@@ -54,7 +54,7 @@ class PersondataServiceTest {
 
     @BeforeEach
     public void setup() {
-        persondataService = new PersondataService(behandlingService, behandlingsresultatService, kodeverkService, pdlConsumer, tpsService, fakeUnleash);
+        persondataService = new PersondataService(behandlingService, behandlingsresultatService, kodeverkService, pdlConsumer, null, tpsService, fakeUnleash);
     }
 
     @Test

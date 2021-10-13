@@ -25,6 +25,7 @@ import no.nav.melosys.integrasjon.pdl.dto.person.ForelderBarnRelasjon;
 import no.nav.melosys.integrasjon.pdl.dto.person.Person;
 import no.nav.melosys.integrasjon.pdl.dto.person.Sivilstand;
 import no.nav.melosys.integrasjon.tps.TpsService;
+import no.nav.melosys.service.SaksopplysningerService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -44,6 +45,7 @@ public class PersondataService implements PersondataFasade {
     private final BehandlingsresultatService behandlingsresultatService;
     private final KodeverkService kodeverkService;
     private final PDLConsumer pdlConsumer;
+    private final SaksopplysningerService saksopplysningerService;
     private final TpsService tpsService;
     private final Unleash unleash;
 
@@ -54,12 +56,14 @@ public class PersondataService implements PersondataFasade {
                              BehandlingsresultatService behandlingsresultatService,
                              KodeverkService kodeverkService,
                              @Qualifier("saksbehandler") PDLConsumer pdlConsumer,
+                             SaksopplysningerService saksopplysningerService,
                              TpsService tpsService,
                              Unleash unleash) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.kodeverkService = kodeverkService;
         this.pdlConsumer = pdlConsumer;
+        this.saksopplysningerService = saksopplysningerService;
         this.tpsService = tpsService;
         this.unleash = unleash;
     }
@@ -199,7 +203,7 @@ public class PersondataService implements PersondataFasade {
         }
 
         if (LocalDate.ofInstant(behandling.getRegistrertDato(), ZoneId.systemDefault()).isBefore(PDL_STARTDATO)) {
-            throw new TekniskException("Henting av TPS data for behandlinger opprettet før PDL mangler.");
+            return PersonMedHistorikkOversetter.lagHistorikkFraTpsData(saksopplysningerService.hentTpsPersonopplysninger(behandlingID), kodeverkService);
         }
 
         final Instant skjæringstidspunkt = avgjørSkjæringstidspunktTilInnsyn(behandling);

@@ -3,6 +3,7 @@ package no.nav.melosys.domain.person;
 import java.time.LocalDate;
 
 public record Sivilstand(Sivilstandstype type,
+                         String tekstHvisTypeErUdefinert,
                          String relatertVedSivilstand,
                          LocalDate gyldigFraOgMed,
                          LocalDate bekreftelsesdato,
