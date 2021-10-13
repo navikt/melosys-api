@@ -10,6 +10,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 public final class BrevDataInnvilgelseFlereLand extends BrevData {
     public Collection<AvklartVirksomhet> arbeidsgivere;
     public List<String> alleArbeidsland;
+    public boolean erUkjenteEllerAlleEosLand;
     public Lovvalgsperiode lovvalgsperiode;
     public boolean harAvklartMaritimTypeSokkel;
     public boolean harAvklartMaritimTypeSkip;

@@ -12,6 +12,7 @@ import com.google.common.collect.Streams;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.exception.FunksjonellException;
@@ -21,8 +22,7 @@ import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentOppgittBostedsland;
-import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentSøknadslandkoder;
+import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.*;
 
 @Service
 public class LandvelgerService {
@@ -55,6 +55,13 @@ public class LandvelgerService {
         }
 
         return alleArbeidsland;
+    }
+
+    public boolean erUkjenteEllerAlleEosLand(long behandlingID) {
+        BehandlingsgrunnlagData grunnlagData = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID).getBehandlingsgrunnlagdata();
+        Soeknadsland soeknadsland = hentSøknadsland(grunnlagData);
+        if (soeknadsland == null) return false;
+        return soeknadsland.erUkjenteEllerAlleEosLand;
     }
 
     public Collection<Landkoder> hentAlleArbeidslandUtenMarginaltArbeid(long behandlingID) {

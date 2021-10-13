@@ -61,7 +61,7 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
         // AntallArbeidsland avgjør om brevet bruker arbeidsland eller arbeidslandListe
         int antallArbeidsland = brevdata.alleArbeidsland.size();
         fag.setAntallArbeidsland(BigInteger.valueOf(antallArbeidsland));
-        if (antallArbeidsland == 0) {
+        if (brevdata.erUkjenteEllerAlleEosLand) {
             fag.setArbeidsland(UKJENTE_ALLE_LAND);
         } else if (antallArbeidsland == 1) {
             String arbeidsland = brevdata.alleArbeidsland.iterator().next();

@@ -68,7 +68,7 @@ class InnvilgelsesbrevFlereLandMapperTest {
         var fellesType = lagFellesType();
         var navFelles = lagNAVFelles();
         var brevdataInnvilgelse = lagBrevdataInnvilgelse();
-        brevdataInnvilgelse.alleArbeidsland = Collections.emptyList();
+        brevdataInnvilgelse.erUkjenteEllerAlleEosLand = true;
 
         String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse);
         assertThat(resultat).contains("<ns20:arbeidsland>forskjellige EØS-land/Sveits</ns20:arbeidsland>");
