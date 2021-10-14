@@ -90,7 +90,7 @@ public class InngangsvilkaarService {
         var landkoderISO3 = Set.copyOf(tilIso3(søknadsland));
         InngangsvilkarResponse res = inngangsvilkaarConsumer.vurderInngangsvilkår(statsborgerskap, landkoderISO3, erUkjenteEllerAlleEosLand, søknadsperiode);
 
-        List<String> feilmeldinger = res.getFeilmeldinger().stream().map(Feilmelding::getMelding).collect(Collectors.toList());
+        List<String> feilmeldinger = res.getFeilmeldinger().stream().map(Feilmelding::getMelding).toList();
 
         if (!feilmeldinger.isEmpty()) {
             if (log.isErrorEnabled()) {
@@ -133,7 +133,7 @@ public class InngangsvilkaarService {
             return avgjørStatsborgerskapPåStartDato(
                 saksopplysningerService.hentPersonhistorikk(behandlingID).statsborgerskapListe, periode.getFom());
         } else {
-            return saksopplysningerService.hentPersonOpplysninger(behandlingID).hentAlleStatsborgerskap().stream()
+            return saksopplysningerService.hentTpsPersonopplysninger(behandlingID).hentAlleStatsborgerskap().stream()
                 .findFirst().orElse(null);
         }
     }
@@ -144,7 +144,7 @@ public class InngangsvilkaarService {
         }
         List<StatsborgerskapPeriode> gyldigeStasborgerskap = statsborgerskapListe.stream()
             .filter(p -> p.getPeriode().inkluderer(startDato))
-            .collect(Collectors.toList());
+            .toList();
         if (gyldigeStasborgerskap.isEmpty()) {
             return null;
         } else if (gyldigeStasborgerskap.size() == 1) {
@@ -171,7 +171,7 @@ public class InngangsvilkaarService {
             .collect(Collectors.toSet());
 
         final Set<Kodeverk> begrunnelseKoder = Stream.concat(
-            Set.of(Inngangsvilkaar.OVERSTYRT_AV_SAKSBEHANDLER).stream(),
+            Stream.of(Inngangsvilkaar.OVERSTYRT_AV_SAKSBEHANDLER),
             inngangsvilkaarBegrunnelseKoder.stream()
         ).collect(Collectors.toSet());
 
