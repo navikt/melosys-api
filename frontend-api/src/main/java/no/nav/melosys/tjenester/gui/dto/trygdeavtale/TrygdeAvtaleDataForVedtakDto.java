@@ -17,6 +17,7 @@ public record TrygdeAvtaleDataForVedtakDto(
     List<MedfolgendeFamilieDto> barn,
     MedfolgendeFamilieDto ektefelle
 ) {
+    // Mulig å bytte ut med https://github.com/Randgalt/record-builder
     static public class Builder {
         private LocalDate fom;
         private LocalDate tom;

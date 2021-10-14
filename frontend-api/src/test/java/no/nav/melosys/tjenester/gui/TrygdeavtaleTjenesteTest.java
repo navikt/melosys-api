@@ -1,16 +1,17 @@
 package no.nav.melosys.tjenester.gui;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
 import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
+import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.service.TrygdeavtaleService;
+import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
+import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -39,12 +40,22 @@ class TrygdeavtaleTjenesteTest {
     private Aksesskontroll aksesskontroll;
     @Mock
     private BehandlingsgrunnlagService behandlingsgrunnlagService;
+    @Mock
+    private AvklartefaktaService avklartefaktaService;
+    @Mock
+    private AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
 
     private TrygdeavtaleTjeneste trygdeavtaleTjeneste;
 
     @BeforeEach
     void init() {
-        trygdeavtaleTjeneste = new TrygdeavtaleTjeneste(trygdeavtaleService, behandlingService, aksesskontroll, behandlingsgrunnlagService);
+        trygdeavtaleTjeneste = new TrygdeavtaleTjeneste(
+            trygdeavtaleService,
+            behandlingService,
+            aksesskontroll,
+            behandlingsgrunnlagService,
+            avklartefaktaService,
+            avklarteMedfolgendeFamilieService);
     }
 
     @Test
@@ -80,12 +91,13 @@ class TrygdeavtaleTjenesteTest {
             .innvilgelse("JA")
             .bestemmelse("UK_ART6_1")
             .addBarn("0bad5c70-8a3f-4fc7-9031-d3aebd6b68de", false, null, null)
-            .ektefelle("0bad5c70-8a3f-4fc7-9031-d3aebd6b68de", false,"SAMBOER_UTEN_FELLES_BARN" , "fritekst")
+            .ektefelle("0bad5c70-8a3f-4fc7-9031-d3aebd6b68de", false, "SAMBOER_UTEN_FELLES_BARN", "fritekst")
             .build();
 
         trygdeavtaleTjeneste.overforDataForVedtak(1L, trygdeAvtaleDataForVedtakDto);
 
         verify(behandlingsgrunnlagService).oppdaterBehandlingsgrunnlag(any());
+        verify(avklarteMedfolgendeFamilieService).lagreMedfolgendeFamilieSomAvklartefakta(anyLong(), any());
     }
 
     private Behandlingsgrunnlag lagBehandlingsgrunnlag() throws NoSuchFieldException, IllegalAccessException {
@@ -93,7 +105,10 @@ class TrygdeavtaleTjenesteTest {
         Field field = behandlingsgrunnlag.getClass().getDeclaredField("id");
         field.setAccessible(true);
         field.set(behandlingsgrunnlag, 1L);
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(new SoeknadFtrl());
+        SoeknadFtrl behandlingsgrunnlagdata = new SoeknadFtrl();
+        behandlingsgrunnlagdata.soeknadsland.landkoder.add("GB");
+        behandlingsgrunnlagdata.periode = new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 2, 1));
+        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagdata);
         return behandlingsgrunnlag;
     }
 
